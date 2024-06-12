@@ -24,9 +24,6 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   @query('.toggle-button')
   private accessor _toggleButton!: HTMLElement;
 
@@ -34,6 +31,9 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
   private accessor _showPopper = false;
 
   private _abortController: AbortController | null = null;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _closeZoomMenu() {
     if (this._abortController && !this._abortController.signal.aborted) {

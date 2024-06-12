@@ -19,6 +19,10 @@ export type BlockOptions = {
 };
 
 export class Block {
+  private _byPassProxy: boolean = false;
+
+  private readonly _stashed = new Set<string | number>();
+
   blockViewType: BlockViewType = BlockViewType.Display;
 
   readonly model: BlockModel;
@@ -30,10 +34,6 @@ export class Block {
   readonly version: number;
 
   readonly yChildren: Y.Array<string[]>;
-
-  private _byPassProxy: boolean = false;
-
-  private readonly _stashed = new Set<string | number>();
 
   constructor(
     readonly schema: Schema,
@@ -96,18 +96,6 @@ export class Block {
       this.model.doc = doc;
     }
   }
-
-  stash = (prop: string) => {
-    if (this._stashed.has(prop)) return;
-
-    this._stashed.add(prop);
-    this._stashProp(prop);
-  };
-
-  pop = (prop: string) => {
-    if (!this._stashed.has(prop)) return;
-    this._popProp(prop);
-  };
 
   private _stashProp(prop: string) {
     (this.model as BlockModel<Record<string, unknown>>)[prop] = y2Native(
@@ -304,4 +292,16 @@ export class Block {
       },
     });
   }
+
+  stash = (prop: string) => {
+    if (this._stashed.has(prop)) return;
+
+    this._stashed.add(prop);
+    this._stashProp(prop);
+  };
+
+  pop = (prop: string) => {
+    if (!this._stashed.has(prop)) return;
+    this._popProp(prop);
+  };
 }

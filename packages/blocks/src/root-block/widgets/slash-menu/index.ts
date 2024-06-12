@@ -103,16 +103,6 @@ export class AffineSlashMenuWidget extends WidgetElement {
 
   config = AffineSlashMenuWidget.DEFAULT_CONFIG;
 
-  override connectedCallback() {
-    super.connectedCallback();
-
-    if (this.config.triggerKeys.some(key => key.length === 0)) {
-      throw new Error('Trigger key of slash menu should not be empty string');
-    }
-
-    this.handleEvent('keyDown', this._onKeyDown);
-  }
-
   private _getTriggerKey = (event: KeyboardEvent) => {
     if (isControlledKeyboardEvent(event) || event.shiftKey) return undefined;
 
@@ -191,6 +181,16 @@ export class AffineSlashMenuWidget extends WidgetElement {
       });
     });
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    if (this.config.triggerKeys.some(key => key.length === 0)) {
+      throw new Error('Trigger key of slash menu should not be empty string');
+    }
+
+    this.handleEvent('keyDown', this._onKeyDown);
+  }
 }
 
 declare global {

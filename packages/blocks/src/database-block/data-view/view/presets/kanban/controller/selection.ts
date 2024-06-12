@@ -15,29 +15,8 @@ import type {
 } from '../types.js';
 
 export class KanbanSelectionController implements ReactiveController {
-  constructor(private host: DataViewKanban) {
-    this.host.addController(this);
-  }
-
-  _selection?: KanbanViewSelectionWithType;
-
   get view() {
     return this.host.view;
-  }
-
-  hostConnected() {
-    this.host.disposables.add(
-      this.host.selectionUpdated.on(selection => {
-        const old = this._selection;
-        if (old) {
-          this.blur(old);
-        }
-        this._selection = selection;
-        if (selection) {
-          this.focus(selection);
-        }
-      })
-    );
   }
 
   get selection(): KanbanViewSelectionWithType | undefined {
@@ -70,6 +49,27 @@ export class KanbanSelectionController implements ReactiveController {
     } else {
       this.host.setSelection(selection);
     }
+  }
+
+  _selection?: KanbanViewSelectionWithType;
+
+  constructor(private host: DataViewKanban) {
+    this.host.addController(this);
+  }
+
+  hostConnected() {
+    this.host.disposables.add(
+      this.host.selectionUpdated.on(selection => {
+        const old = this._selection;
+        if (old) {
+          this.blur(old);
+        }
+        this._selection = selection;
+        if (selection) {
+          this.focus(selection);
+        }
+      })
+    );
   }
 
   shiftClickCard = (event: MouseEvent) => {

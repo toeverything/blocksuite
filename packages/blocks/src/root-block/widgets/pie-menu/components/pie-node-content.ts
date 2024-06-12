@@ -24,6 +24,9 @@ const styles = css`
 export class PieNodeContent extends LitElement {
   static override styles = styles;
 
+  @query('.node-content')
+  private accessor _nodeContentElement!: HTMLDivElement;
+
   @property({ attribute: false })
   accessor node!: PieNode;
 
@@ -32,32 +35,6 @@ export class PieNodeContent extends LitElement {
 
   @property({ attribute: false })
   accessor hoveredNode!: PieNode | null;
-
-  @query('.node-content')
-  private accessor _nodeContentElement!: HTMLDivElement;
-
-  protected override updated(changedProperties: PropertyValues): void {
-    super.updated(changedProperties);
-
-    if (
-      !changedProperties.has('hoveredNode') ||
-      !this._nodeContentElement ||
-      !this.isActive
-    )
-      return;
-    const fadeIn = [
-      {
-        opacity: 0,
-      },
-      { opacity: 1 },
-    ];
-
-    this._nodeContentElement.animate(fadeIn, {
-      duration: 250,
-      easing: 'cubic-bezier(0.775, 1.325, 0.535, 1)',
-      fill: 'forwards' as const,
-    });
-  }
 
   private _renderCenterNodeContent() {
     if (isSubmenuNode(this.node.model) && !this.isActive) {
@@ -96,6 +73,29 @@ export class PieNodeContent extends LitElement {
 
   private _renderChildNodeContent() {
     return this.node.icon;
+  }
+
+  protected override updated(changedProperties: PropertyValues): void {
+    super.updated(changedProperties);
+
+    if (
+      !changedProperties.has('hoveredNode') ||
+      !this._nodeContentElement ||
+      !this.isActive
+    )
+      return;
+    const fadeIn = [
+      {
+        opacity: 0,
+      },
+      { opacity: 1 },
+    ];
+
+    this._nodeContentElement.animate(fadeIn, {
+      duration: 250,
+      easing: 'cubic-bezier(0.775, 1.325, 0.535, 1)',
+      fill: 'forwards' as const,
+    });
   }
 
   protected override render() {

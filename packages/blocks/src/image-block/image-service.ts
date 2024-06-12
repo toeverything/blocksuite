@@ -42,7 +42,7 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
     return rootElement;
   }
 
-  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
+  static setImageProxyURL = setImageProxyMiddlewareURL;
 
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
@@ -67,8 +67,6 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
       return true;
     },
   };
-
-  fileDropManager!: FileDropManager;
 
   private _dragHandleOption: DragHandleOption = {
     flavour: ImageBlockSchema.model.flavour,
@@ -155,6 +153,10 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
     },
   };
 
+  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
+
+  fileDropManager!: FileDropManager;
+
   override mounted(): void {
     super.mounted();
 
@@ -166,6 +168,4 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
   }
-
-  static setImageProxyURL = setImageProxyMiddlewareURL;
 }

@@ -22,8 +22,6 @@ import type { ShapeName } from './shape-tool-element.js';
 
 @customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends EdgelessToolbarToolMixin(LitElement) {
-  override type: EdgelessTool['type'] = 'shape';
-
   static override styles = css`
     :host {
       display: flex;
@@ -50,6 +48,8 @@ export class EdgelessShapeMenu extends EdgelessToolbarToolMixin(LitElement) {
       margin: 0 9px;
     }
   `;
+
+  override type: EdgelessTool['type'] = 'shape';
 
   @property({ attribute: false })
   accessor shapeType!: ShapeName;

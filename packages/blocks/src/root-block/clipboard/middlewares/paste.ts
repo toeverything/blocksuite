@@ -99,18 +99,6 @@ class PasteTr {
       this.firstSnapshot.props.type === 'text';
   }
 
-  canMerge = () => {
-    const firstTextSnapshot = this._textFromSnapshot(this.firstSnapshot);
-    const lastTextSnapshot = this._textFromSnapshot(this.lastSnapshot);
-    return (
-      firstTextSnapshot &&
-      lastTextSnapshot &&
-      ((this.fromPointState.text.length > 0 &&
-        this.endPointState.text.length > 0) ||
-        this.firstSnapshotIsPlainText)
-    );
-  };
-
   private _textFromSnapshot = (snapshot: BlockSnapshot) => {
     return snapshot.props.text as Record<'delta', DeltaOperation[]>;
   };
@@ -211,6 +199,18 @@ class PasteTr {
 
     firstTextSnapshot.delta = [...fromDelta, ...firstDelta];
     lastTextSnapshot.delta = [...lastDelta, ...toDelta];
+  };
+
+  canMerge = () => {
+    const firstTextSnapshot = this._textFromSnapshot(this.firstSnapshot);
+    const lastTextSnapshot = this._textFromSnapshot(this.lastSnapshot);
+    return (
+      firstTextSnapshot &&
+      lastTextSnapshot &&
+      ((this.fromPointState.text.length > 0 &&
+        this.endPointState.text.length > 0) ||
+        this.firstSnapshotIsPlainText)
+    );
   };
 
   pasted = () => {

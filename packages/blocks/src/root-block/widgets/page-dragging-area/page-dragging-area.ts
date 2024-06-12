@@ -31,33 +31,6 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
   RootBlockModel,
   PageRootBlockComponent
 > {
-  @state()
-  accessor rect: Rect | null = null;
-
-  private _rafID = 0;
-
-  static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
-
-  private _lastPointerState: PointerEventState | null = null;
-
-  private _dragging = false;
-
-  private _initialScrollOffset: {
-    top: number;
-    left: number;
-  } = {
-    top: 0,
-    left: 0,
-  };
-
-  private _initialContainerOffset: {
-    x: number;
-    y: number;
-  } = {
-    x: 0,
-    y: 0,
-  };
-
   private get _viewportElement() {
     const rootElement = this.blockElement;
     assertExists(rootElement);
@@ -108,6 +81,33 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
       };
     });
   }
+
+  static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
+
+  private _rafID = 0;
+
+  private _lastPointerState: PointerEventState | null = null;
+
+  private _dragging = false;
+
+  private _initialScrollOffset: {
+    top: number;
+    left: number;
+  } = {
+    top: 0,
+    left: 0,
+  };
+
+  private _initialContainerOffset: {
+    x: number;
+    y: number;
+  } = {
+    x: 0,
+    y: 0,
+  };
+
+  @state()
+  accessor rect: Rect | null = null;
 
   private _selectBlocksByRect(userRect: Rect) {
     const selections = getSelectingBlockPaths(

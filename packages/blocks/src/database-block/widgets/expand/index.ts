@@ -79,13 +79,6 @@ export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
 
 @customElement('expand-database-block-modal')
 export class ExpandDatabaseBlockModal extends WidgetBase {
-  expandDatabase = () => {
-    const database = this.closest('affine-database');
-    if (database) {
-      showDatabasePreviewModal(database);
-    }
-  };
-
   get database() {
     return this.closest('affine-database');
   }
@@ -105,6 +98,13 @@ export class ExpandDatabaseBlockModal extends WidgetBase {
       ${ExpandWideIcon}
     </div>`;
   }
+
+  expandDatabase = () => {
+    const database = this.closest('affine-database');
+    if (database) {
+      showDatabasePreviewModal(database);
+    }
+  };
 }
 
 @customElement('database-block-modal-preview')
@@ -125,6 +125,34 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   @property({ attribute: false })
   accessor database!: DatabaseBlockComponent;
 
+  selectionUpdated = new Slot<DataViewSelection | undefined>();
+
+  protected override firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    requestAnimationFrame(() => {
+      this.querySelector('affine-data-view-renderer')?.focusFirstCell();
+    });
+  }
+
+  protected override render(): unknown {
+    const config: DataViewRendererConfig = {
+      bindHotkey: this.bindHotkey,
+      handleEvent: this.handleEvent,
+      getFlag: this.database.getFlag,
+      selectionUpdated: this.selectionUpdated,
+      setSelection: this.setSelection,
+      dataSource: this.database.dataSource,
+      viewSource: this.database.viewSource,
+      headerWidget: this.database.headerWidget,
+      std: this.database.std,
+    };
+    return html`
+      <affine-data-view-renderer
+        .config="${config}"
+      ></affine-data-view-renderer>
+    `;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this.database.selection.slots.changed.on(selections => {
@@ -138,15 +166,6 @@ export class DatabaseBlockModalPreview extends WithDisposable(
       }
     });
   }
-
-  protected override firstUpdated(_changedProperties: PropertyValues) {
-    super.firstUpdated(_changedProperties);
-    requestAnimationFrame(() => {
-      this.querySelector('affine-data-view-renderer')?.focusFirstCell();
-    });
-  }
-
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
 
   setSelection: (selection?: DataViewSelection) => void = selection => {
     this.database.host.selection.set(
@@ -180,23 +199,4 @@ export class DatabaseBlockModalPreview extends WithDisposable(
       }),
     };
   };
-
-  protected override render(): unknown {
-    const config: DataViewRendererConfig = {
-      bindHotkey: this.bindHotkey,
-      handleEvent: this.handleEvent,
-      getFlag: this.database.getFlag,
-      selectionUpdated: this.selectionUpdated,
-      setSelection: this.setSelection,
-      dataSource: this.database.dataSource,
-      viewSource: this.database.viewSource,
-      headerWidget: this.database.headerWidget,
-      std: this.database.std,
-    };
-    return html`
-      <affine-data-view-renderer
-        .config="${config}"
-      ></affine-data-view-renderer>
-    `;
-  }
 }

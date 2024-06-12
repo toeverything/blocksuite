@@ -108,12 +108,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   @state()
   private accessor _curIndex = -1;
 
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor frames!: FrameBlockModel[];
-
   @query('.edgeless-frame-order-items-container')
   private accessor _container!: HTMLDivElement;
 
@@ -123,9 +117,11 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   @query('.clone')
   private accessor _clone!: HTMLDivElement;
 
-  override firstUpdated() {
-    this._bindEvent();
-  }
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor frames!: FrameBlockModel[];
 
   private _bindEvent() {
     const { _disposables } = this;
@@ -212,6 +208,10 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
         this._bindEvent();
       });
     });
+  }
+
+  override firstUpdated() {
+    this._bindEvent();
   }
 
   override render() {

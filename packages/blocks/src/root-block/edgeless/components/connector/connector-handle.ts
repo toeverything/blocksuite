@@ -40,12 +40,6 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor connector!: ConnectorElementModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   @query('.line-start')
   private accessor _startHandler!: HTMLDivElement;
 
@@ -54,20 +48,11 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
 
   private _lastZoom = 1;
 
-  override firstUpdated() {
-    const { edgeless } = this;
-    const { viewport } = edgeless.service;
+  @property({ attribute: false })
+  accessor connector!: ConnectorElementModel;
 
-    this._lastZoom = viewport.zoom;
-    edgeless.service.viewport.viewportUpdated.on(() => {
-      if (viewport.zoom !== this._lastZoom) {
-        this._lastZoom = viewport.zoom;
-        this.requestUpdate();
-      }
-    });
-
-    this._bindEvent();
-  }
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _capPointerDown(e: PointerEvent, connection: 'target' | 'source') {
     const { edgeless, connector, _disposables } = this;
@@ -109,6 +94,21 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     this._disposables.add(() => {
       edgeless.surface.overlays.connector.clear();
     });
+  }
+
+  override firstUpdated() {
+    const { edgeless } = this;
+    const { viewport } = edgeless.service;
+
+    this._lastZoom = viewport.zoom;
+    edgeless.service.viewport.viewportUpdated.on(() => {
+      if (viewport.zoom !== this._lastZoom) {
+        this._lastZoom = viewport.zoom;
+        this.requestUpdate();
+      }
+    });
+
+    this._bindEvent();
   }
 
   override render() {

@@ -95,6 +95,17 @@ export class DataDefine<Data extends DataTypeShape = Record<string, unknown>> {
     private dataMap: Map<string, DataDefine>
   ) {}
 
+  private isByName(name: string): boolean {
+    return name === this.config.name;
+  }
+
+  private isSubOfByName(superType: string): boolean {
+    if (this.isByName(superType)) {
+      return true;
+    }
+    return this.config.supers.some(sup => sup.isSubOfByName(superType));
+  }
+
   create(data?: Data): TDataType<Data> {
     return {
       type: 'data',
@@ -110,22 +121,11 @@ export class DataDefine<Data extends DataTypeShape = Record<string, unknown>> {
     return data.name === this.config.name;
   }
 
-  private isByName(name: string): boolean {
-    return name === this.config.name;
-  }
-
   isSubOf(superType: TDataType): boolean {
     if (this.is(superType)) {
       return true;
     }
     return this.config.supers.some(sup => sup.isSubOf(superType));
-  }
-
-  private isSubOfByName(superType: string): boolean {
-    if (this.isByName(superType)) {
-      return true;
-    }
-    return this.config.supers.some(sup => sup.isSubOfByName(superType));
   }
 
   isSuperOf(subType: TDataType): boolean {

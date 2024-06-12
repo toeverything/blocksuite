@@ -107,20 +107,20 @@ function getMostCommonShapeStyle(elements: ShapeElementModel[]): ShapeStyle {
 
 @customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
+  get service() {
+    return this.edgeless.service;
+  }
+
   static override styles = [lineSizeButtonStyles];
+
+  @query('edgeless-shape-panel')
+  private accessor _shapePanel!: EdgelessShapePanel;
 
   @property({ attribute: false })
   accessor elements: ShapeElementModel[] = [];
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
-
-  @query('edgeless-shape-panel')
-  private accessor _shapePanel!: EdgelessShapePanel;
-
-  get service() {
-    return this.edgeless.service;
-  }
 
   private _getTextColor(fillColor: CssVariableName) {
     // When the shape is filled with black color, the text color should be white.

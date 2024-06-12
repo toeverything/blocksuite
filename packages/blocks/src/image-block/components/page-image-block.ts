@@ -11,6 +11,18 @@ import { ImageSelectedRect } from './image-selected-rect.js';
 
 @customElement('affine-page-image')
 export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
+  private get _host() {
+    return this.block.host;
+  }
+
+  private get _doc() {
+    return this.block.doc;
+  }
+
+  private get _model() {
+    return this.block.model;
+  }
+
   static override styles = css`
     affine-page-image {
       display: flex;
@@ -33,6 +45,8 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private _isDragging = false;
+
   @property({ attribute: false })
   accessor block!: ImageBlockComponent;
 
@@ -41,49 +55,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
 
   @query('.resizable-img')
   accessor resizeImg!: HTMLElement;
-
-  private _isDragging = false;
-
-  private get _host() {
-    return this.block.host;
-  }
-
-  private get _doc() {
-    return this.block.doc;
-  }
-
-  private get _model() {
-    return this.block.model;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this._bindKeyMap();
-
-    this._observeDrag();
-  }
-
-  override firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-
-    this._handleSelection();
-
-    // The embed block can not be focused,
-    // so the active element will be the last activated element.
-    // If the active element is the title textarea,
-    // any event will dispatch from it and be ignored. (Most events will ignore title)
-    // so we need to blur it.
-    // See also https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
-    this.addEventListener('click', () => {
-      if (
-        document.activeElement &&
-        document.activeElement instanceof HTMLElement
-      ) {
-        document.activeElement.blur();
-      }
-    });
-  }
 
   private _bindKeyMap() {
     const selection = this._host.selection;
@@ -265,6 +236,35 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     return {
       width: `${width}px`,
     };
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._bindKeyMap();
+
+    this._observeDrag();
+  }
+
+  override firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+
+    this._handleSelection();
+
+    // The embed block can not be focused,
+    // so the active element will be the last activated element.
+    // If the active element is the title textarea,
+    // any event will dispatch from it and be ignored. (Most events will ignore title)
+    // so we need to blur it.
+    // See also https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+    this.addEventListener('click', () => {
+      if (
+        document.activeElement &&
+        document.activeElement instanceof HTMLElement
+      ) {
+        document.activeElement.blur();
+      }
+    });
   }
 
   override render() {

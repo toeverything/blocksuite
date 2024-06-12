@@ -11,63 +11,23 @@ import { transformInput } from '../utils/transform-input.js';
 import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
 export class EventService<TextAttributes extends BaseTextAttributes> {
-  private _isComposing = false;
-
   get isComposing() {
     return this._isComposing;
   }
-
-  private _previousAnchor: NativePoint | null = null;
-
-  private _previousFocus: NativePoint | null = null;
-
-  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
   get inlineRangeProvider() {
     return this.editor.inlineRangeProvider;
   }
 
-  mount = () => {
-    const eventSource = this.editor.eventSource;
-    const rootElement = this.editor.rootElement;
+  private _isComposing = false;
 
-    if (!this.inlineRangeProvider) {
-      this.editor.disposables.addFromEvent(
-        document,
-        'selectionchange',
-        this._onSelectionChange
-      );
-    }
+  private _previousAnchor: NativePoint | null = null;
 
-    this.editor.disposables.addFromEvent(
-      eventSource,
-      'beforeinput',
-      this._onBeforeInput
-    );
-    this.editor.disposables.addFromEvent(
-      eventSource,
-      'compositionstart',
-      this._onCompositionStart
-    );
-    this.editor.disposables.addFromEvent(
-      eventSource,
-      'compositionupdate',
-      this._onCompositionUpdate
-    );
-    this.editor.disposables.addFromEvent(
-      eventSource,
-      'compositionend',
-      (event: CompositionEvent) => {
-        this._onCompositionEnd(event).catch(console.error);
-      }
-    );
-    this.editor.disposables.addFromEvent(
-      eventSource,
-      'keydown',
-      this._onKeyDown
-    );
-    this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
-  };
+  private _previousFocus: NativePoint | null = null;
+
+  private _compositionInlineRange: InlineRange | null = null;
+
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
   private _isRangeCompletelyInRoot = (range: Range) => {
     const rootElement = this.editor.rootElement;
@@ -151,8 +111,6 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
       this.editor.syncInlineRange();
     }
   };
-
-  private _compositionInlineRange: InlineRange | null = null;
 
   private _onCompositionStart = () => {
     this._isComposing = true;
@@ -390,5 +348,47 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
         }
       }
     }
+  };
+
+  mount = () => {
+    const eventSource = this.editor.eventSource;
+    const rootElement = this.editor.rootElement;
+
+    if (!this.inlineRangeProvider) {
+      this.editor.disposables.addFromEvent(
+        document,
+        'selectionchange',
+        this._onSelectionChange
+      );
+    }
+
+    this.editor.disposables.addFromEvent(
+      eventSource,
+      'beforeinput',
+      this._onBeforeInput
+    );
+    this.editor.disposables.addFromEvent(
+      eventSource,
+      'compositionstart',
+      this._onCompositionStart
+    );
+    this.editor.disposables.addFromEvent(
+      eventSource,
+      'compositionupdate',
+      this._onCompositionUpdate
+    );
+    this.editor.disposables.addFromEvent(
+      eventSource,
+      'compositionend',
+      (event: CompositionEvent) => {
+        this._onCompositionEnd(event).catch(console.error);
+      }
+    );
+    this.editor.disposables.addFromEvent(
+      eventSource,
+      'keydown',
+      this._onKeyDown
+    );
+    this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
 }

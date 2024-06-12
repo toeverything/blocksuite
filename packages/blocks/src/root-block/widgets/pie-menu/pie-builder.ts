@@ -47,6 +47,35 @@ export class PieMenuBuilder {
     this._stack.push(this._schema.root);
   }
 
+  private _computeAngles(node: PieNodeModel) {
+    if (
+      !isNodeWithChildren(node) ||
+      !node.children ||
+      node.children.length === 0
+    ) {
+      return;
+    }
+    const parentAngle =
+      node.angle == undefined ? undefined : (node.angle + 180) % 360;
+    const angles = calcNodeAngles(node.children, parentAngle);
+    const wedges = calcNodeWedges(angles, parentAngle);
+
+    for (let i = 0; i < node.children.length; ++i) {
+      const child = node.children[i];
+      child.angle = angles[i];
+      child.startAngle = wedges[i].start;
+      child.endAngle = wedges[i].end;
+
+      this._computeAngles(child);
+    }
+  }
+
+  private _currentNode(): PieNodeModel {
+    const node = this._stack[this._stack.length - 1];
+    assertExists(node, 'No node active');
+    return node;
+  }
+
   command(node: Omit<PieCommandNodeModel, 'type'>) {
     const curNode = this._currentNode();
     const actionNode: PieCommandNodeModel = { ...node, type: 'command' };
@@ -145,29 +174,6 @@ export class PieMenuBuilder {
     this._stack.push(this._schema.root);
   }
 
-  private _computeAngles(node: PieNodeModel) {
-    if (
-      !isNodeWithChildren(node) ||
-      !node.children ||
-      node.children.length === 0
-    ) {
-      return;
-    }
-    const parentAngle =
-      node.angle == undefined ? undefined : (node.angle + 180) % 360;
-    const angles = calcNodeAngles(node.children, parentAngle);
-    const wedges = calcNodeWedges(angles, parentAngle);
-
-    for (let i = 0; i < node.children.length; ++i) {
-      const child = node.children[i];
-      child.angle = angles[i];
-      child.startAngle = wedges[i].start;
-      child.endAngle = wedges[i].end;
-
-      this._computeAngles(child);
-    }
-  }
-
   build() {
     const schema = this._schema;
     assertExists(schema);
@@ -176,11 +182,5 @@ export class PieMenuBuilder {
     this._schema = null;
     this._stack = [];
     return schema;
-  }
-
-  private _currentNode(): PieNodeModel {
-    const node = this._stack[this._stack.length - 1];
-    assertExists(node, 'No node active');
-    return node;
   }
 }

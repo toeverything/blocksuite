@@ -20,14 +20,14 @@ export declare abstract class ToolbarButtonWithMenuClass<
   protected _states: States;
 
   protected _menu: MenuPopper<Menu> | null;
-  protected updateMenu(): void;
-  protected initLastPropsSlot(): void;
 
   edgeless: EdgelessRootBlockComponent;
 
   active: boolean;
 
   surface: SurfaceBlockComponent;
+  protected updateMenu(): void;
+  protected initLastPropsSlot(): void;
 }
 
 export const ToolbarButtonWithMenuMixin = <
@@ -47,11 +47,11 @@ export const ToolbarButtonWithMenuMixin = <
       return this.edgeless.surface;
     }
 
-    abstract _type: Type;
-
     protected _states!: States;
 
     protected _menu: MenuPopper<Menu> | null = null;
+
+    abstract _type: Type;
 
     protected updateMenu() {
       this._states.forEach(key => {
@@ -60,6 +60,29 @@ export const ToolbarButtonWithMenuMixin = <
           this._menu.element[key] = this[key];
         }
       });
+    }
+
+    protected initLastPropsSlot() {
+      this._disposables.add(
+        this.edgeless.service.editPropsStore.slots.lastPropsUpdated.on(
+          ({ type, props }) => {
+            if (type !== this._type) return;
+            const updates = this._states
+              .filter(_key => {
+                const key = _key as string;
+                return (
+                  props[key] !== (this as Record<string, unknown>)[key] &&
+                  props[key] != undefined
+                );
+              })
+              .reduce(
+                (acc, key) => ({ ...acc, [key]: props[key as string] }),
+                {}
+              );
+            Object.keys(updates).length && Object.assign(this, updates);
+          }
+        )
+      );
     }
 
     override connectedCallback() {
@@ -87,29 +110,6 @@ export const ToolbarButtonWithMenuMixin = <
           },
         },
         { global: true }
-      );
-    }
-
-    protected initLastPropsSlot() {
-      this._disposables.add(
-        this.edgeless.service.editPropsStore.slots.lastPropsUpdated.on(
-          ({ type, props }) => {
-            if (type !== this._type) return;
-            const updates = this._states
-              .filter(_key => {
-                const key = _key as string;
-                return (
-                  props[key] !== (this as Record<string, unknown>)[key] &&
-                  props[key] != undefined
-                );
-              })
-              .reduce(
-                (acc, key) => ({ ...acc, [key]: props[key as string] }),
-                {}
-              );
-            Object.keys(updates).length && Object.assign(this, updates);
-          }
-        )
       );
     }
   }

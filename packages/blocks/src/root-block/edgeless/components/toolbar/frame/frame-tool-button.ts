@@ -15,8 +15,6 @@ import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
 @customElement('edgeless-frame-tool-button')
 export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
-  override type: EdgelessTool['type'] = 'frame';
-
   static override styles = css`
     :host {
       display: flex;
@@ -29,6 +27,8 @@ export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
       font-size: 0;
     }
   `;
+
+  override type: EdgelessTool['type'] = 'frame';
 
   private _toggleFrameMenu() {
     if (this.tryDisposePopper()) return;

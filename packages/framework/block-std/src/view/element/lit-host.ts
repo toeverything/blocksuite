@@ -27,6 +27,26 @@ import { ShadowlessElement } from './shadowless-element.js';
 
 @customElement('editor-host')
 export class EditorHost extends WithDisposable(ShadowlessElement) {
+  get command(): CommandManager {
+    return this.std.command;
+  }
+
+  get event(): UIEventDispatcher {
+    return this.std.event;
+  }
+
+  get selection(): SelectionManager {
+    return this.std.selection;
+  }
+
+  get view(): ViewStore {
+    return this.std.view;
+  }
+
+  get spec(): SpecStore {
+    return this.std.spec;
+  }
+
   static override styles = css`
     editor-host {
       outline: none;
@@ -53,25 +73,41 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     unmounted: new Slot(),
   };
 
-  get command(): CommandManager {
-    return this.std.command;
-  }
+  private _renderModel = (model: BlockModel): TemplateResult => {
+    const { flavour } = model;
+    const block = this.doc.getBlock(model.id);
+    const schema = this.doc.schema.flavourSchemaMap.get(flavour);
+    const view = this.std.spec.getView(flavour);
+    if (!schema || !block || !view) {
+      console.warn(`Cannot find render flavour ${flavour}.`);
+      return html`${nothing}`;
+    }
 
-  get event(): UIEventDispatcher {
-    return this.std.event;
-  }
+    const tag = view.component;
+    const widgets: Record<string, TemplateResult> = view.widgets
+      ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
+          const template = html`<${tag}
+            ${unsafeStatic(this.widgetIdAttr)}=${key}
+            .host=${this}
+            .model=${model}
+            .doc=${this.doc}></${tag}>`;
 
-  get selection(): SelectionManager {
-    return this.std.selection;
-  }
+          return {
+            ...mapping,
+            [key]: template,
+          };
+        }, {})
+      : {};
 
-  get view(): ViewStore {
-    return this.std.view;
-  }
-
-  get spec(): SpecStore {
-    return this.std.spec;
-  }
+    return html`<${tag}
+      ${unsafeStatic(this.blockIdAttr)}=${model.id}
+      .host=${this}
+      .doc=${this.doc}
+      .model=${model}
+      .widgets=${widgets}
+      .viewType=${block.blockViewType}
+    ></${tag}>`;
+  };
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('specs')) {
@@ -142,42 +178,6 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
     return this._renderModel(root);
   }
-
-  private _renderModel = (model: BlockModel): TemplateResult => {
-    const { flavour } = model;
-    const block = this.doc.getBlock(model.id);
-    const schema = this.doc.schema.flavourSchemaMap.get(flavour);
-    const view = this.std.spec.getView(flavour);
-    if (!schema || !block || !view) {
-      console.warn(`Cannot find render flavour ${flavour}.`);
-      return html`${nothing}`;
-    }
-
-    const tag = view.component;
-    const widgets: Record<string, TemplateResult> = view.widgets
-      ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
-          const template = html`<${tag}
-            ${unsafeStatic(this.widgetIdAttr)}=${key}
-            .host=${this}
-            .model=${model}
-            .doc=${this.doc}></${tag}>`;
-
-          return {
-            ...mapping,
-            [key]: template,
-          };
-        }, {})
-      : {};
-
-    return html`<${tag}
-      ${unsafeStatic(this.blockIdAttr)}=${model.id}
-      .host=${this}
-      .doc=${this.doc}
-      .model=${model}
-      .widgets=${widgets}
-      .viewType=${block.blockViewType}
-    ></${tag}>`;
-  };
 
   /**
    * @deprecated

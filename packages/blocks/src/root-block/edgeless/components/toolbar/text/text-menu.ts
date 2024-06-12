@@ -11,8 +11,6 @@ import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 @customElement('edgeless-text-menu')
 export class EdgelessTextMenu extends EdgelessToolbarToolMixin(LitElement) {
-  override type: EdgelessTool['type'] = 'text';
-
   static override styles = css`
     :host {
       display: flex;
@@ -20,6 +18,8 @@ export class EdgelessTextMenu extends EdgelessToolbarToolMixin(LitElement) {
       z-index: -1;
     }
   `;
+
+  override type: EdgelessTool['type'] = 'text';
 
   @property({ attribute: false })
   accessor color!: string;

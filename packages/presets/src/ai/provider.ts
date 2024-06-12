@@ -35,12 +35,41 @@ export type ActionEventType =
  * todo: breakdown into different parts?
  */
 export class AIProvider {
+  static get slots() {
+    return AIProvider.instance.slots;
+  }
+
+  static get actions() {
+    return AIProvider.instance.actions;
+  }
+
+  static get userInfo() {
+    return AIProvider.instance.userInfoFn();
+  }
+
+  static get photoEngine() {
+    return AIProvider.instance.photoEngine;
+  }
+
+  static get histories() {
+    return AIProvider.instance.histories;
+  }
+
+  static get actionHistory() {
+    return AIProvider.instance.actionHistory;
+  }
+
+  static get toggleGeneralAIOnboarding() {
+    return AIProvider.instance.toggleGeneralAIOnboarding;
+  }
+
   private static readonly instance = new AIProvider();
 
-  private readonly actions: Partial<BlockSuitePresets.AIActions> = {};
+  static LAST_ACTION_SESSIONID = '';
 
-  private userInfoFn: () => AIUserInfo | Promise<AIUserInfo> | null = () =>
-    null;
+  static MAX_LOCAL_HISTORY = 10;
+
+  private readonly actions: Partial<BlockSuitePresets.AIActions> = {};
 
   private photoEngine: BlockSuitePresets.AIPhotoEngineService | null = null;
 
@@ -67,59 +96,14 @@ export class AIProvider {
     // add more if needed
   };
 
-  static LAST_ACTION_SESSIONID = '';
-
-  static MAX_LOCAL_HISTORY = 10;
-
   // track the history of triggered actions (in memory only)
   private readonly actionHistory: {
     action: keyof BlockSuitePresets.AIActions;
     options: BlockSuitePresets.AITextActionOptions;
   }[] = [];
 
-  static provide(
-    id: 'userInfo',
-    fn: () => AIUserInfo | Promise<AIUserInfo> | null
-  ): void;
-
-  static provide(
-    id: 'histories',
-    service: BlockSuitePresets.AIHistoryService
-  ): void;
-
-  static provide(
-    id: 'photoEngine',
-    engine: BlockSuitePresets.AIPhotoEngineService
-  ): void;
-
-  static provide(id: 'onboarding', fn: (value: boolean) => void): void;
-
-  // actions:
-  static provide<T extends keyof BlockSuitePresets.AIActions>(
-    id: T,
-    action: (
-      ...options: Parameters<BlockSuitePresets.AIActions[T]>
-    ) => ReturnType<BlockSuitePresets.AIActions[T]>
-  ): void;
-
-  static provide(id: unknown, action: unknown) {
-    if (id === 'userInfo') {
-      AIProvider.instance.userInfoFn = action as () => AIUserInfo;
-    } else if (id === 'histories') {
-      AIProvider.instance.histories =
-        action as BlockSuitePresets.AIHistoryService;
-    } else if (id === 'photoEngine') {
-      AIProvider.instance.photoEngine =
-        action as BlockSuitePresets.AIPhotoEngineService;
-    } else if (id === 'onboarding') {
-      AIProvider.instance.toggleGeneralAIOnboarding = action as (
-        value: boolean
-      ) => void;
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      AIProvider.instance.provideAction(id as any, action as any);
-    }
-  }
+  private userInfoFn: () => AIUserInfo | Promise<AIUserInfo> | null = () =>
+    null;
 
   private provideAction<T extends keyof BlockSuitePresets.AIActions>(
     id: T,
@@ -221,31 +205,47 @@ export class AIProvider {
     };
   }
 
-  static get slots() {
-    return AIProvider.instance.slots;
-  }
+  static provide(
+    id: 'userInfo',
+    fn: () => AIUserInfo | Promise<AIUserInfo> | null
+  ): void;
 
-  static get actions() {
-    return AIProvider.instance.actions;
-  }
+  static provide(
+    id: 'histories',
+    service: BlockSuitePresets.AIHistoryService
+  ): void;
 
-  static get userInfo() {
-    return AIProvider.instance.userInfoFn();
-  }
+  static provide(
+    id: 'photoEngine',
+    engine: BlockSuitePresets.AIPhotoEngineService
+  ): void;
 
-  static get photoEngine() {
-    return AIProvider.instance.photoEngine;
-  }
+  static provide(id: 'onboarding', fn: (value: boolean) => void): void;
 
-  static get histories() {
-    return AIProvider.instance.histories;
-  }
+  // actions:
+  static provide<T extends keyof BlockSuitePresets.AIActions>(
+    id: T,
+    action: (
+      ...options: Parameters<BlockSuitePresets.AIActions[T]>
+    ) => ReturnType<BlockSuitePresets.AIActions[T]>
+  ): void;
 
-  static get actionHistory() {
-    return AIProvider.instance.actionHistory;
-  }
-
-  static get toggleGeneralAIOnboarding() {
-    return AIProvider.instance.toggleGeneralAIOnboarding;
+  static provide(id: unknown, action: unknown) {
+    if (id === 'userInfo') {
+      AIProvider.instance.userInfoFn = action as () => AIUserInfo;
+    } else if (id === 'histories') {
+      AIProvider.instance.histories =
+        action as BlockSuitePresets.AIHistoryService;
+    } else if (id === 'photoEngine') {
+      AIProvider.instance.photoEngine =
+        action as BlockSuitePresets.AIPhotoEngineService;
+    } else if (id === 'onboarding') {
+      AIProvider.instance.toggleGeneralAIOnboarding = action as (
+        value: boolean
+      ) => void;
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      AIProvider.instance.provideAction(id as any, action as any);
+    }
   }
 }

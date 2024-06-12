@@ -216,78 +216,6 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor cleanupHistories!: () => Promise<void>;
 
-  send = async () => {
-    const { status, markdown } = this.chatContextValue;
-    if (status === 'loading' || status === 'transmitting') return;
-
-    const text = this.textarea.value;
-    const { images } = this.chatContextValue;
-    if (!text && images.length === 0) {
-      return;
-    }
-    const { doc } = this.host;
-    this.textarea.value = '';
-    this.isInputEmpty = true;
-    this.updateContext({
-      images: [],
-      status: 'loading',
-      error: null,
-      quote: '',
-      markdown: '',
-    });
-
-    const attachments = await Promise.all(
-      images?.map(image => readBlobAsURL(image))
-    );
-
-    const content = (markdown ? `${markdown}\n` : '') + text;
-
-    this.updateContext({
-      items: [
-        ...this.chatContextValue.items,
-        {
-          role: 'user',
-          content: content,
-          createdAt: new Date().toISOString(),
-          attachments,
-        },
-        { role: 'assistant', content: '', createdAt: new Date().toISOString() },
-      ],
-    });
-
-    try {
-      const abortController = new AbortController();
-      const stream = AIProvider.actions.chat?.({
-        input: content,
-        docId: doc.id,
-        attachments: images,
-        workspaceId: doc.collection.id,
-        host: this.host,
-        stream: true,
-        signal: abortController.signal,
-        where: 'chat-panel',
-        control: 'chat-send',
-      });
-
-      if (stream) {
-        this.updateContext({ abortController });
-
-        for await (const text of stream) {
-          const items = [...this.chatContextValue.items];
-          const last = items[items.length - 1] as ChatMessage;
-          last.content += text;
-          this.updateContext({ items, status: 'transmitting' });
-        }
-
-        this.updateContext({ status: 'success' });
-      }
-    } catch (error) {
-      this.updateContext({ status: 'error', error: error as AIError });
-    } finally {
-      this.updateContext({ abortController: null });
-    }
-  };
-
   private _addImages(images: File[]) {
     const oldImages = this.chatContextValue.images;
     this.updateContext({
@@ -452,6 +380,78 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
         </div>
       </div>`;
   }
+
+  send = async () => {
+    const { status, markdown } = this.chatContextValue;
+    if (status === 'loading' || status === 'transmitting') return;
+
+    const text = this.textarea.value;
+    const { images } = this.chatContextValue;
+    if (!text && images.length === 0) {
+      return;
+    }
+    const { doc } = this.host;
+    this.textarea.value = '';
+    this.isInputEmpty = true;
+    this.updateContext({
+      images: [],
+      status: 'loading',
+      error: null,
+      quote: '',
+      markdown: '',
+    });
+
+    const attachments = await Promise.all(
+      images?.map(image => readBlobAsURL(image))
+    );
+
+    const content = (markdown ? `${markdown}\n` : '') + text;
+
+    this.updateContext({
+      items: [
+        ...this.chatContextValue.items,
+        {
+          role: 'user',
+          content: content,
+          createdAt: new Date().toISOString(),
+          attachments,
+        },
+        { role: 'assistant', content: '', createdAt: new Date().toISOString() },
+      ],
+    });
+
+    try {
+      const abortController = new AbortController();
+      const stream = AIProvider.actions.chat?.({
+        input: content,
+        docId: doc.id,
+        attachments: images,
+        workspaceId: doc.collection.id,
+        host: this.host,
+        stream: true,
+        signal: abortController.signal,
+        where: 'chat-panel',
+        control: 'chat-send',
+      });
+
+      if (stream) {
+        this.updateContext({ abortController });
+
+        for await (const text of stream) {
+          const items = [...this.chatContextValue.items];
+          const last = items[items.length - 1] as ChatMessage;
+          last.content += text;
+          this.updateContext({ items, status: 'transmitting' });
+        }
+
+        this.updateContext({ status: 'success' });
+      }
+    } catch (error) {
+      this.updateContext({ status: 'error', error: error as AIError });
+    } finally {
+      this.updateContext({ abortController: null });
+    }
+  };
 }
 
 declare global {

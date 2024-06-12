@@ -28,10 +28,6 @@ class EraserOverlay extends Overlay {
 }
 
 export class EraserToolController extends EdgelessToolController<EraserTool> {
-  override readonly tool: EraserTool = {
-    type: 'eraser',
-  };
-
   private _overlay = new EraserOverlay();
 
   private _timestamp = 0;
@@ -47,6 +43,10 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   private _erasables = new Set<BlockSuite.EdgelessModelType>();
 
   private _eraseTargets = new Set<BlockSuite.EdgelessModelType>();
+
+  override readonly tool: EraserTool = {
+    type: 'eraser',
+  };
 
   private _loop = () => {
     const now = Date.now();
@@ -83,12 +83,19 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._timer = requestAnimationFrame(this._loop);
   };
 
-  onContainerPointerDown(): void {
-    noop();
-  }
-
   private toModelCoord(p: IPoint): IVec {
     return this._service.viewport.toModelCoord(p.x, p.y);
+  }
+
+  private _reset() {
+    cancelAnimationFrame(this._timer);
+    this._edgeless.surface.renderer.removeOverlay(this._overlay);
+    this._erasables.clear();
+    this._eraseTargets.clear();
+  }
+
+  onContainerPointerDown(): void {
+    noop();
   }
 
   override onContainerDragStart(e: PointerEventState): void {
@@ -151,13 +158,6 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       }
     });
     this._reset();
-  }
-
-  private _reset() {
-    cancelAnimationFrame(this._timer);
-    this._edgeless.surface.renderer.removeOverlay(this._overlay);
-    this._erasables.clear();
-    this._eraseTargets.clear();
   }
 
   override onContainerDragEnd(): void {

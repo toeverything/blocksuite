@@ -57,6 +57,14 @@ const styles = css`
 
 @customElement('affine-data-view-record-detail')
 export class RecordDetail extends WithDisposable(ShadowlessElement) {
+  private get readonly() {
+    return this.view.readonly;
+  }
+
+  private get columns() {
+    return this.view.detailColumns.map(id => this.view.columnGet(id));
+  }
+
   static override styles = styles;
 
   @property({ attribute: false })
@@ -67,8 +75,33 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   selection = new DetailSelection(this);
 
-  private get readonly() {
-    return this.view.readonly;
+  @query('.add-property')
+  accessor addPropertyButton!: HTMLElement;
+
+  detailSlots?: DetailSlots;
+
+  private renderHeader() {
+    const header = this.detailSlots?.header;
+    if (header) {
+      const props: DetailSlotProps = {
+        view: this.view,
+        rowId: this.rowId,
+      };
+      return renderUniLit(header, props);
+    }
+    return undefined;
+  }
+
+  private renderNote() {
+    const note = this.detailSlots?.note;
+    if (note) {
+      const props: DetailSlotProps = {
+        view: this.view,
+        rowId: this.rowId,
+      };
+      return renderUniLit(note, props);
+    }
+    return undefined;
   }
 
   override connectedCallback() {
@@ -89,9 +122,6 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
     this.detailSlots = this.view.detailSlots;
   }
 
-  @query('.add-property')
-  accessor addPropertyButton!: HTMLElement;
-
   _clickAddProperty = () => {
     popFilterableSimpleMenu(
       this.addPropertyButton,
@@ -109,10 +139,6 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
       })
     );
   };
-
-  private get columns() {
-    return this.view.detailColumns.map(id => this.view.columnGet(id));
-  }
 
   override render() {
     const columns = this.columns;
@@ -139,32 +165,6 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
         : nothing}
       ${this.renderNote()}
     `;
-  }
-
-  detailSlots?: DetailSlots;
-
-  private renderHeader() {
-    const header = this.detailSlots?.header;
-    if (header) {
-      const props: DetailSlotProps = {
-        view: this.view,
-        rowId: this.rowId,
-      };
-      return renderUniLit(header, props);
-    }
-    return undefined;
-  }
-
-  private renderNote() {
-    const note = this.detailSlots?.note;
-    if (note) {
-      const props: DetailSlotProps = {
-        view: this.view,
-        rowId: this.rowId,
-      };
-      return renderUniLit(note, props);
-    }
-    return undefined;
   }
 }
 

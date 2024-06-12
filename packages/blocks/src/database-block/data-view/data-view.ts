@@ -48,6 +48,10 @@ export type DataViewRendererConfig = {
 
 @customElement('affine-data-view-renderer')
 export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
+  get expose() {
+    return this._view.value;
+  }
+
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-data-view-renderer'))}
     affine-data-view-renderer {
@@ -56,46 +60,15 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor config!: DataViewRendererConfig;
-
-  get expose() {
-    return this._view.value;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.config.selectionUpdated.on(selection => {
-        Object.entries(this.viewMap).forEach(([id, v]) => {
-          if (!selection || selection.viewId !== id) {
-            v.selectionUpdated.emit(undefined);
-            return;
-          }
-          v.selectionUpdated.emit(selection);
-        });
-      })
-    );
-    this.disposables.add(
-      this.config.viewSource.updateSlot.on(() => {
-        this.requestUpdate();
-        this.config.viewSource.views.forEach(v => {
-          v.updateSlot.emit();
-        });
-      })
-    );
-  }
-
-  @state()
-  accessor currentView: string | undefined = undefined;
-
   private _view = createRef<DataViewExpose>();
 
   private viewMap: Record<string, ViewProps> = {};
 
-  focusFirstCell = () => {
-    this._view.value?.focusFirstCell();
-  };
+  @property({ attribute: false })
+  accessor config!: DataViewRendererConfig;
+
+  @state()
+  accessor currentView: string | undefined = undefined;
 
   private getView(id: string): ViewProps {
     if (!this.viewMap[id]) {
@@ -136,20 +109,6 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     return this.viewMap[id];
   }
 
-  openDetailPanel = (ops: {
-    view: DataViewManager;
-    rowId: string;
-    onClose?: () => void;
-  }) => {
-    popSideDetail({
-      attachTo: this.closest('editor-host')?.parentElement as HTMLElement,
-      target: this.config.detailPanelConfig?.target?.() ?? document.body,
-      view: ops.view,
-      rowId: ops.rowId,
-      onClose: ops.onClose,
-    });
-  };
-
   private renderView(viewData?: ViewProps) {
     if (!viewData) {
       return;
@@ -177,6 +136,47 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
       )
     );
   }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.config.selectionUpdated.on(selection => {
+        Object.entries(this.viewMap).forEach(([id, v]) => {
+          if (!selection || selection.viewId !== id) {
+            v.selectionUpdated.emit(undefined);
+            return;
+          }
+          v.selectionUpdated.emit(selection);
+        });
+      })
+    );
+    this.disposables.add(
+      this.config.viewSource.updateSlot.on(() => {
+        this.requestUpdate();
+        this.config.viewSource.views.forEach(v => {
+          v.updateSlot.emit();
+        });
+      })
+    );
+  }
+
+  focusFirstCell = () => {
+    this._view.value?.focusFirstCell();
+  };
+
+  openDetailPanel = (ops: {
+    view: DataViewManager;
+    rowId: string;
+    onClose?: () => void;
+  }) => {
+    popSideDetail({
+      attachTo: this.closest('editor-host')?.parentElement as HTMLElement,
+      target: this.config.detailPanelConfig?.target?.() ?? document.body,
+      view: ops.view,
+      rowId: ops.rowId,
+      onClose: ops.onClose,
+    });
+  };
 
   override render() {
     const views = this.config.viewSource.views;

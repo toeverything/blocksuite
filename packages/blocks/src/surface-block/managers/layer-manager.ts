@@ -66,24 +66,6 @@ export type Layer = BlockLayer | CanvasLayer;
 export class LayerManager {
   static INITAL_INDEX = 'a0';
 
-  static create(doc: Doc, surface: SurfaceBlockModel) {
-    const layerManager = new LayerManager(
-      (
-        doc
-          .getBlocks()
-          .filter(
-            model =>
-              model instanceof EdgelessBlockModel &&
-              renderableInEdgeless(doc, surface, model)
-          ) as BlockSuite.EdgelessModelType[]
-      ).concat(surface.elementModels)
-    );
-
-    layerManager.listen(doc, surface);
-
-    return layerManager;
-  }
-
   private _disposables = new DisposableGroup();
 
   slots = {
@@ -874,5 +856,23 @@ export class LayerManager {
   dispose() {
     this.slots.layerUpdated.dispose();
     this._disposables.dispose();
+  }
+
+  static create(doc: Doc, surface: SurfaceBlockModel) {
+    const layerManager = new LayerManager(
+      (
+        doc
+          .getBlocks()
+          .filter(
+            model =>
+              model instanceof EdgelessBlockModel &&
+              renderableInEdgeless(doc, surface, model)
+          ) as BlockSuite.EdgelessModelType[]
+      ).concat(surface.elementModels)
+    );
+
+    layerManager.listen(doc, surface);
+
+    return layerManager;
   }
 }

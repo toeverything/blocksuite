@@ -222,36 +222,6 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    this.addEventListener('keydown', stopPropagation, false);
-    this._disposables.add(() => {
-      if (this._currentCategory) {
-        this.edgeless.service.editPropsStore.setItem(
-          'templateCache',
-          this._currentCategory
-        );
-      }
-    });
-  }
-
-  override firstUpdated() {
-    requestConnectedFrame(() => {
-      this._disposables.addFromEvent(document, 'click', evt => {
-        if (this.contains(evt.target as HTMLElement)) {
-          return;
-        }
-
-        this._closePanel();
-      });
-    }, this);
-    this._disposables.addFromEvent(this, 'click', stopPropagation);
-    this._disposables.addFromEvent(this, 'wheel', stopPropagation);
-
-    this._initCategory().catch(() => {});
-  }
-
   private async _initCategory() {
     try {
       this._categories = await EdgelessTemplatePanel.templates.categories();
@@ -396,6 +366,36 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   private _updateSearchKeyword(inputEvt: InputEvent) {
     this._searchKeyword = (inputEvt.target as HTMLInputElement).value;
     this._updateTemplates();
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    this.addEventListener('keydown', stopPropagation, false);
+    this._disposables.add(() => {
+      if (this._currentCategory) {
+        this.edgeless.service.editPropsStore.setItem(
+          'templateCache',
+          this._currentCategory
+        );
+      }
+    });
+  }
+
+  override firstUpdated() {
+    requestConnectedFrame(() => {
+      this._disposables.addFromEvent(document, 'click', evt => {
+        if (this.contains(evt.target as HTMLElement)) {
+          return;
+        }
+
+        this._closePanel();
+      });
+    }, this);
+    this._disposables.addFromEvent(this, 'click', stopPropagation);
+    this._disposables.addFromEvent(this, 'wheel', stopPropagation);
+
+    this._initCategory().catch(() => {});
   }
 
   override render() {

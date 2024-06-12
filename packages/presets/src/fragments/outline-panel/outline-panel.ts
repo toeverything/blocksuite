@@ -57,28 +57,6 @@ const styles = css`
   }
 `;
 export class OutlinePanel extends WithDisposable(LitElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-
-  @property({ attribute: false })
-  accessor fitPadding!: number[];
-
-  @state()
-  private accessor _showPreviewIcon = false;
-
-  @state()
-  private accessor _enableNotesSorting = false;
-
-  @state()
-  private accessor _noticeVisible = false;
-
-  private _settings: OutlineSettingsDataType = {
-    showIcons: false,
-    enableSorting: false,
-  };
-
   get doc() {
     return this.editor.doc;
   }
@@ -94,6 +72,30 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   get mode() {
     return this.editor.mode;
   }
+
+  static override styles = styles;
+
+  @state()
+  private accessor _showPreviewIcon = false;
+
+  @state()
+  private accessor _enableNotesSorting = false;
+
+  @state()
+  private accessor _noticeVisible = false;
+
+  private _settings: OutlineSettingsDataType = {
+    showIcons: false,
+    enableSorting: false,
+  };
+
+  private _editorDisposables: DisposableGroup | null = null;
+
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
+
+  @property({ attribute: false })
+  accessor fitPadding!: number[];
 
   private _loadSettingsFromLocalStorage() {
     const settings = localStorage.getItem(outlineSettingsKey);
@@ -128,8 +130,6 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   private _setNoticeVisibility = (visibility: boolean) => {
     this._noticeVisible = visibility;
   };
-
-  private _editorDisposables: DisposableGroup | null = null;
 
   private _clearEditorDisposables() {
     this._editorDisposables?.dispose();

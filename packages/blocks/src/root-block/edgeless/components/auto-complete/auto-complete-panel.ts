@@ -106,6 +106,13 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     }
   `;
 
+  private _overlay:
+    | AutoCompleteShapeOverlay
+    | AutoCompleteNoteOverlay
+    | AutoCompleteFrameOverlay
+    | AutoCompleteTextOverlay
+    | null = null;
+
   @property({ attribute: false })
   accessor edgeless: EdgelessRootBlockComponent;
 
@@ -118,12 +125,18 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor connector: ConnectorElementModel;
 
-  private _overlay:
-    | AutoCompleteShapeOverlay
-    | AutoCompleteNoteOverlay
-    | AutoCompleteFrameOverlay
-    | AutoCompleteTextOverlay
-    | null = null;
+  constructor(
+    position: [number, number],
+    edgeless: EdgelessRootBlockComponent,
+    currentSource: ShapeElementModel | NoteBlockModel,
+    connector: ConnectorElementModel
+  ) {
+    super();
+    this.position = position;
+    this.edgeless = edgeless;
+    this.currentSource = currentSource;
+    this.connector = connector;
+  }
 
   private _generateTarget(connector: ConnectorElementModel) {
     const { currentSource } = this;
@@ -543,19 +556,6 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       style: 'General',
       type: 'note',
     };
-  }
-
-  constructor(
-    position: [number, number],
-    edgeless: EdgelessRootBlockComponent,
-    currentSource: ShapeElementModel | NoteBlockModel,
-    connector: ConnectorElementModel
-  ) {
-    super();
-    this.position = position;
-    this.edgeless = edgeless;
-    this.currentSource = currentSource;
-    this.connector = connector;
   }
 
   override connectedCallback() {

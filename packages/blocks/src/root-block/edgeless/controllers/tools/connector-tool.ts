@@ -22,10 +22,6 @@ enum ConnectorToolMode {
 }
 
 export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {
-  readonly tool = {
-    type: 'connector',
-  } as ConnectorTool;
-
   private _mode: ConnectorToolMode = ConnectorToolMode.Dragging;
 
   private _connector: ConnectorElementModel | null = null;
@@ -38,6 +34,10 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
   // Likes pressing `ESC`
   private _allowCancel = false;
+
+  readonly tool = {
+    type: 'connector',
+  } as ConnectorTool;
 
   private _createConnector() {
     assertExists(this._source);

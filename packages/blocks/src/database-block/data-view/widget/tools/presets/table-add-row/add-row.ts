@@ -32,14 +32,37 @@ const styles = css`
 
 @customElement('data-view-header-tools-add-row')
 export class DataViewHeaderToolsAddRow extends WidgetBase {
+  private get readonly() {
+    return this.view.readonly;
+  }
+
   static override styles = styles;
 
   @state()
   accessor showToolBar = false;
 
-  private get readonly() {
-    return this.view.readonly;
-  }
+  private _onAddNewRecord = () => {
+    if (this.readonly) return;
+    const selection = this.viewMethods.getSelection?.();
+    if (!selection) {
+      this.addRow('start');
+    } else if (selection.type === 'table') {
+      const { rowsSelection, columnsSelection, focus } = selection;
+      let index = 0;
+      if (rowsSelection && !columnsSelection) {
+        // rows
+        index = rowsSelection.end;
+      } else if (rowsSelection && columnsSelection) {
+        // multiple cells
+        index = rowsSelection.end;
+      } else if (!rowsSelection && !columnsSelection && focus) {
+        // single cell
+        index = focus.rowIndex;
+      }
+
+      this.addRow(index + 1);
+    }
+  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -127,29 +150,6 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
 
   addRow = (position: InsertToPosition | number) => {
     this.viewMethods.addRow?.(position);
-  };
-
-  private _onAddNewRecord = () => {
-    if (this.readonly) return;
-    const selection = this.viewMethods.getSelection?.();
-    if (!selection) {
-      this.addRow('start');
-    } else if (selection.type === 'table') {
-      const { rowsSelection, columnsSelection, focus } = selection;
-      let index = 0;
-      if (rowsSelection && !columnsSelection) {
-        // rows
-        index = rowsSelection.end;
-      } else if (rowsSelection && columnsSelection) {
-        // multiple cells
-        index = rowsSelection.end;
-      } else if (!rowsSelection && !columnsSelection && focus) {
-        // single cell
-        index = focus.rowIndex;
-      }
-
-      this.addRow(index + 1);
-    }
   };
 
   override render() {

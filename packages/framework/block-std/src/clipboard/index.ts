@@ -20,35 +20,15 @@ type AdapterMap = Map<
 >;
 
 export class Clipboard {
+  get configs() {
+    return this._getJob().adapterConfigs;
+  }
+
   private _jobMiddlewares: JobMiddleware[] = [];
 
   private _adapterMap: AdapterMap = new Map();
 
   constructor(public std: BlockSuite.Std) {}
-
-  use = (middleware: JobMiddleware) => {
-    this._jobMiddlewares.push(middleware);
-  };
-
-  unuse = (middleware: JobMiddleware) => {
-    this._jobMiddlewares = this._jobMiddlewares.filter(m => m !== middleware);
-  };
-
-  registerAdapter = <T extends BaseAdapter>(
-    mimeType: string,
-    adapter: AdapterConstructor<T>,
-    priority = 0
-  ) => {
-    this._adapterMap.set(mimeType, { adapter, priority });
-  };
-
-  unregisterAdapter = (mimeType: string) => {
-    this._adapterMap.delete(mimeType);
-  };
-
-  get configs() {
-    return this._getJob().adapterConfigs;
-  }
 
   private _getJob() {
     return new Job({
@@ -139,6 +119,26 @@ export class Clipboard {
       }
     }
     return null;
+  };
+
+  use = (middleware: JobMiddleware) => {
+    this._jobMiddlewares.push(middleware);
+  };
+
+  unuse = (middleware: JobMiddleware) => {
+    this._jobMiddlewares = this._jobMiddlewares.filter(m => m !== middleware);
+  };
+
+  registerAdapter = <T extends BaseAdapter>(
+    mimeType: string,
+    adapter: AdapterConstructor<T>,
+    priority = 0
+  ) => {
+    this._adapterMap.set(mimeType, { adapter, priority });
+  };
+
+  unregisterAdapter = (mimeType: string) => {
+    this._adapterMap.delete(mimeType);
   };
 
   copy = async (slice: Slice) => {

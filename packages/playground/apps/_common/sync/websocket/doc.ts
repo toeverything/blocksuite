@@ -22,6 +22,36 @@ export class WebSocketDocSource implements DocSource {
     );
   }
 
+  private _onMessage = (event: MessageEvent<string>) => {
+    const data = JSON.parse(event.data) as WebSocketMessage;
+
+    if (data.channel !== 'doc') return;
+
+    if (data.payload.type === 'init') {
+      for (const [docId, data] of this.docMap) {
+        this.ws.send(
+          JSON.stringify({
+            channel: 'doc',
+            payload: {
+              type: 'update',
+              docId,
+              updates: Array.from(data),
+            },
+          } satisfies WebSocketMessage)
+        );
+      }
+      return;
+    }
+
+    const { docId, updates } = data.payload;
+    const update = this.docMap.get(docId);
+    if (update) {
+      this.docMap.set(docId, mergeUpdates([update, new Uint8Array(updates)]));
+    } else {
+      this.docMap.set(docId, new Uint8Array(updates));
+    }
+  };
+
   pull(docId: string, state: Uint8Array) {
     const update = this.docMap.get(docId);
     if (!update) return null;
@@ -70,34 +100,4 @@ export class WebSocketDocSource implements DocSource {
       abortController.abort();
     };
   }
-
-  private _onMessage = (event: MessageEvent<string>) => {
-    const data = JSON.parse(event.data) as WebSocketMessage;
-
-    if (data.channel !== 'doc') return;
-
-    if (data.payload.type === 'init') {
-      for (const [docId, data] of this.docMap) {
-        this.ws.send(
-          JSON.stringify({
-            channel: 'doc',
-            payload: {
-              type: 'update',
-              docId,
-              updates: Array.from(data),
-            },
-          } satisfies WebSocketMessage)
-        );
-      }
-      return;
-    }
-
-    const { docId, updates } = data.payload;
-    const update = this.docMap.get(docId);
-    if (update) {
-      this.docMap.set(docId, mergeUpdates([update, new Uint8Array(updates)]));
-    } else {
-      this.docMap.set(docId, new Uint8Array(updates));
-    }
-  };
 }

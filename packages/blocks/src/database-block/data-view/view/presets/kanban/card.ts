@@ -137,44 +137,6 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   @state()
   accessor isFocus = false;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    if (this.view.readonly) {
-      return;
-    }
-    this._disposables.addFromEvent(this, 'contextmenu', e => {
-      this.contextMenu(e);
-    });
-    this._disposables.addFromEvent(this, 'click', e => {
-      if (e.shiftKey) {
-        this.getSelection()?.shiftClickCard(e);
-        return;
-      }
-      const selection = this.getSelection();
-      const preSelection = selection?.selection;
-
-      if (preSelection?.selectionType !== 'card') return;
-
-      if (selection) {
-        selection.selection = undefined;
-      }
-      this.dataViewEle.openDetailPanel({
-        view: this.view,
-        rowId: this.cardId,
-        onClose: () => {
-          if (selection) {
-            selection.selection = preSelection;
-          }
-        },
-      });
-    });
-  }
-
   private renderTitle() {
     const title = this.view.getHeaderTitle(this.cardId);
     if (!title) {
@@ -238,19 +200,6 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
         }
       )}
     </div>`;
-  }
-
-  override render() {
-    const columns = this.view.columnManagerList.filter(
-      v => !this.view.isInHeader(v.id)
-    );
-    this.style.border = this.isFocus
-      ? '1px solid var(--affine-primary-color)'
-      : '';
-    return html`
-      ${this.renderHeader(columns)} ${this.renderBody(columns)}
-      ${this.renderOps()}
-    `;
   }
 
   private renderOps() {
@@ -319,6 +268,57 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       );
     }
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+    if (this.view.readonly) {
+      return;
+    }
+    this._disposables.addFromEvent(this, 'contextmenu', e => {
+      this.contextMenu(e);
+    });
+    this._disposables.addFromEvent(this, 'click', e => {
+      if (e.shiftKey) {
+        this.getSelection()?.shiftClickCard(e);
+        return;
+      }
+      const selection = this.getSelection();
+      const preSelection = selection?.selection;
+
+      if (preSelection?.selectionType !== 'card') return;
+
+      if (selection) {
+        selection.selection = undefined;
+      }
+      this.dataViewEle.openDetailPanel({
+        view: this.view,
+        rowId: this.cardId,
+        onClose: () => {
+          if (selection) {
+            selection.selection = preSelection;
+          }
+        },
+      });
+    });
+  }
+
+  override render() {
+    const columns = this.view.columnManagerList.filter(
+      v => !this.view.isInHeader(v.id)
+    );
+    this.style.border = this.isFocus
+      ? '1px solid var(--affine-primary-color)'
+      : '';
+    return html`
+      ${this.renderHeader(columns)} ${this.renderBody(columns)}
+      ${this.renderOps()}
+    `;
+  }
 }
 
 declare global {

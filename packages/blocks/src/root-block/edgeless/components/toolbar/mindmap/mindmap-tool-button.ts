@@ -25,9 +25,29 @@ import { basketIconDark, basketIconLight, textIcon } from './icons.js';
 export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
-  override type: EdgelessTool['type'][] = ['mindmap', 'text'];
+  get mindmaps() {
+    return getMindMaps(this.theme);
+  }
 
-  override enableActiveBackground = true;
+  get draggableTools(): DraggableTool[] {
+    const mindmap = this.mindmaps.find(m => m.style === this.activeStyle)!;
+    return [
+      {
+        name: 'text',
+        icon: textIcon,
+        config: textConfig,
+        standardWidth: 100,
+        render: textRender,
+      },
+      {
+        name: 'mindmap',
+        icon: mindmap.icon,
+        config: mindmapConfig,
+        standardWidth: 350,
+        render: getMindmapRender(this.activeStyle),
+      },
+    ];
+  }
 
   static override styles = css`
     :host {
@@ -120,6 +140,10 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
     }
   `;
 
+  override type: EdgelessTool['type'][] = ['mindmap', 'text'];
+
+  override enableActiveBackground = true;
+
   draggableController!: EdgelessDraggableElementController<DraggableTool>;
 
   @property({ type: Boolean })
@@ -141,30 +165,6 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
         this.activeStyle = style;
       },
     });
-  }
-
-  get mindmaps() {
-    return getMindMaps(this.theme);
-  }
-
-  get draggableTools(): DraggableTool[] {
-    const mindmap = this.mindmaps.find(m => m.style === this.activeStyle)!;
-    return [
-      {
-        name: 'text',
-        icon: textIcon,
-        config: textConfig,
-        standardWidth: 100,
-        render: textRender,
-      },
-      {
-        name: 'mindmap',
-        icon: mindmap.icon,
-        config: mindmapConfig,
-        standardWidth: 350,
-        render: getMindmapRender(this.activeStyle),
-      },
-    ];
   }
 
   initDragController() {

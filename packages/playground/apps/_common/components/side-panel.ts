@@ -18,6 +18,10 @@ export class SidePanel extends ShadowlessElement {
 
   currentContent: HTMLElement | null = null;
 
+  protected override render(): unknown {
+    return html``;
+  }
+
   showContent(ele: HTMLElement) {
     if (this.currentContent) {
       this.currentContent.remove();
@@ -33,10 +37,6 @@ export class SidePanel extends ShadowlessElement {
       this.currentContent.remove();
       this.currentContent = null;
     }
-  }
-
-  protected override render(): unknown {
-    return html``;
   }
 
   toggle(ele: HTMLElement) {

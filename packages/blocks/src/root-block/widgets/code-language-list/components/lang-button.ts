@@ -46,29 +46,24 @@ export class LanguageListButton extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor blockElement!: CodeBlockComponent;
-
   @state()
   private accessor _currentLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
 
   @query('.lang-button')
   private accessor _langButton!: HTMLElement;
 
+  private _abortController?: AbortController;
+
+  @property({ attribute: false })
+  accessor blockElement!: CodeBlockComponent;
+
   @property({ attribute: false })
   accessor onActiveStatusChange: (active: boolean) => void = noop;
-
-  private _abortController?: AbortController;
 
   private _updateLanguage() {
     this._currentLanguage =
       getStandardLanguage(this.blockElement.model.language) ??
       PLAIN_TEXT_LANG_INFO;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._updateLanguage();
   }
 
   private _clickLangBtn = () => {
@@ -112,6 +107,11 @@ export class LanguageListButton extends LitElement {
       abortController: this._abortController,
     });
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._updateLanguage();
+  }
 
   override render() {
     return html`<icon-button

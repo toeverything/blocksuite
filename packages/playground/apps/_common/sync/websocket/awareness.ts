@@ -15,26 +15,6 @@ export class WebSocketAwarenessSource implements AwarenessSource {
 
   constructor(readonly ws: WebSocket) {}
 
-  connect(awareness: Awareness): void {
-    this.awareness = awareness;
-    awareness.on('update', this._onAwareness);
-
-    this.ws.addEventListener('message', this._onWebSocket);
-    this.ws.send(
-      JSON.stringify({
-        channel: 'awareness',
-        payload: {
-          type: 'connect',
-        },
-      } satisfies WebSocketMessage)
-    );
-  }
-
-  disconnect(): void {
-    this.awareness?.off('update', this._onAwareness);
-    this.ws.close();
-  }
-
   private _onAwareness = (changes: AwarenessChanges, origin: unknown) => {
     if (origin === 'remote') return;
 
@@ -82,4 +62,24 @@ export class WebSocketAwarenessSource implements AwarenessSource {
       );
     }
   };
+
+  connect(awareness: Awareness): void {
+    this.awareness = awareness;
+    awareness.on('update', this._onAwareness);
+
+    this.ws.addEventListener('message', this._onWebSocket);
+    this.ws.send(
+      JSON.stringify({
+        channel: 'awareness',
+        payload: {
+          type: 'connect',
+        },
+      } satisfies WebSocketMessage)
+    );
+  }
+
+  disconnect(): void {
+    this.awareness?.off('update', this._onAwareness);
+    this.ws.close();
+  }
 }

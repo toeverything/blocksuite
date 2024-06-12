@@ -133,14 +133,6 @@ export class SearchIndexer {
     }, REINDEX_TIMEOUT);
   };
 
-  search(query: QueryContent) {
-    return new Map(
-      this._search(query).flatMap(({ result }) =>
-        result.map(r => [r.id, { space: r.doc.space, content: r.doc.content }])
-      )
-    );
-  }
-
   private _search(query: QueryContent): SearchResults[] {
     if (typeof query === 'object') {
       return this._indexer.search({
@@ -152,13 +144,6 @@ export class SearchIndexer {
         enrich: true,
       }) as unknown as SearchResults[];
     }
-  }
-
-  refreshDocIndex(docId: string, doc: Doc) {
-    const yBlocks = doc.getMap('blocks') as YBlocks;
-    yBlocks.forEach((_, key) => {
-      this._refreshIndex(docId, key, 'add', yBlocks.get(key));
-    });
   }
 
   private _handleDocIndexing(docId: string, doc: Doc) {
@@ -234,5 +219,20 @@ export class SearchIndexer {
     } catch (_) {
       return undefined;
     }
+  }
+
+  search(query: QueryContent) {
+    return new Map(
+      this._search(query).flatMap(({ result }) =>
+        result.map(r => [r.id, { space: r.doc.space, content: r.doc.content }])
+      )
+    );
+  }
+
+  refreshDocIndex(docId: string, doc: Doc) {
+    const yBlocks = doc.getMap('blocks') as YBlocks;
+    yBlocks.forEach((_, key) => {
+      this._refreshIndex(docId, key, 'add', yBlocks.get(key));
+    });
   }
 }

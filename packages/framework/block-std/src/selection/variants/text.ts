@@ -33,6 +33,14 @@ const TextSelectionSchema = z.object({
 });
 
 export class TextSelection extends BaseSelection {
+  get start(): TextRangePoint {
+    return this.reverse ? this.to ?? this.from : this.from;
+  }
+
+  get end(): TextRangePoint {
+    return this.reverse ? this.from : this.to ?? this.from;
+  }
+
   static override type = 'text';
 
   static override group = 'note';
@@ -54,18 +62,6 @@ export class TextSelection extends BaseSelection {
     this.reverse = !!reverse;
   }
 
-  get start(): TextRangePoint {
-    return this.reverse ? this.to ?? this.from : this.from;
-  }
-
-  get end(): TextRangePoint {
-    return this.reverse ? this.from : this.to ?? this.from;
-  }
-
-  empty(): boolean {
-    return !!this.to;
-  }
-
   private _equalPoint(
     a: TextRangePoint | null,
     b: TextRangePoint | null
@@ -77,6 +73,10 @@ export class TextSelection extends BaseSelection {
     }
 
     return a === b;
+  }
+
+  empty(): boolean {
+    return !!this.to;
   }
 
   override equals(other: BaseSelection): boolean {
@@ -99,6 +99,14 @@ export class TextSelection extends BaseSelection {
     };
   }
 
+  isCollapsed(): boolean {
+    return this.to === null && this.from.length === 0;
+  }
+
+  isInSameBlock(): boolean {
+    return this.to === null || this.from.blockId === this.to.blockId;
+  }
+
   static override fromJSON(json: Record<string, unknown>): TextSelection {
     TextSelectionSchema.parse(json);
     return new TextSelection({
@@ -106,14 +114,6 @@ export class TextSelection extends BaseSelection {
       to: json.to as TextRangePoint | null,
       reverse: !!json.reverse,
     });
-  }
-
-  isCollapsed(): boolean {
-    return this.to === null && this.from.length === 0;
-  }
-
-  isInSameBlock(): boolean {
-    return this.to === null || this.from.blockId === this.to.blockId;
   }
 }
 

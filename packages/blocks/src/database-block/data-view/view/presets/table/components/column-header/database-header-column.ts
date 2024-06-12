@@ -41,6 +41,10 @@ import {
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
+  private get readonly() {
+    return this.tableViewManager.readonly;
+  }
+
   static override styles = css`
     affine-database-header-column {
       display: flex;
@@ -51,6 +55,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private widthDragBar = createRef();
+
+  private drawWidthDragBarTask = 0;
+
   @property({ attribute: false })
   accessor tableViewManager!: DataViewTableManager;
 
@@ -59,39 +67,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
-
-  private widthDragBar = createRef();
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.tableViewManager.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    const table = this.closest('affine-database-table');
-    if (table) {
-      this.disposables.add(
-        table.handleEvent('dragStart', context => {
-          const event = context.get('pointerState').raw;
-          const target = event.target;
-          if (target instanceof Element) {
-            if (this.widthDragBar.value?.contains(target)) {
-              event.preventDefault();
-              this.widthDragStart(event);
-              return true;
-            }
-            if (this.contains(target)) {
-              event.preventDefault();
-              this.moveColumn(event);
-              return true;
-            }
-          }
-          return false;
-        })
-      );
-    }
-  }
 
   private _columnsOffset = (header: Element, _scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
@@ -262,14 +237,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         dragPreview.remove();
       },
     });
-  };
-
-  private get readonly() {
-    return this.tableViewManager.readonly;
-  }
-
-  editTitle = () => {
-    this._clickColumn();
   };
 
   private _clickColumn = () => {
@@ -467,8 +434,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private drawWidthDragBarTask = 0;
-
   private drawWidthDragBar = () => {
     const tableContainer = getTableContainer(this);
     const tableRect = tableContainer.getBoundingClientRect();
@@ -494,6 +459,50 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     cancelAnimationFrame(this.drawWidthDragBarTask);
     this.drawWidthDragBarTask = 0;
     getVerticalIndicator().remove();
+  };
+
+  private widthDragStart(event: PointerEvent) {
+    startDragWidthAdjustmentBar(
+      event,
+      getTableContainer(this),
+      this.getBoundingClientRect().width,
+      this.column
+    );
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.tableViewManager.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+    const table = this.closest('affine-database-table');
+    if (table) {
+      this.disposables.add(
+        table.handleEvent('dragStart', context => {
+          const event = context.get('pointerState').raw;
+          const target = event.target;
+          if (target instanceof Element) {
+            if (this.widthDragBar.value?.contains(target)) {
+              event.preventDefault();
+              this.widthDragStart(event);
+              return true;
+            }
+            if (this.contains(target)) {
+              event.preventDefault();
+              this.moveColumn(event);
+              return true;
+            }
+          }
+          return false;
+        })
+      );
+    }
+  }
+
+  editTitle = () => {
+    this._clickColumn();
   };
 
   override render() {
@@ -541,15 +550,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         <div style="width: 8px;height: 100%;margin-left: -4px;"></div>
       </div>
     `;
-  }
-
-  private widthDragStart(event: PointerEvent) {
-    startDragWidthAdjustmentBar(
-      event,
-      getTableContainer(this),
-      this.getBoundingClientRect().width,
-      this.column
-    );
   }
 }
 

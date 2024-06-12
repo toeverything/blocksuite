@@ -27,6 +27,42 @@ import {
 
 @customElement('doc-meta-tags')
 export class DocMetaTags extends WithDisposable(LitElement) {
+  get pageRoot() {
+    const pageViewport = this.closest('.affine-page-viewport');
+    assertExists(pageViewport);
+    const pageRoot = pageViewport.querySelector('affine-page-root');
+    assertExists(pageRoot);
+    return pageRoot;
+  }
+
+  get meta() {
+    return this.doc.collection.meta;
+  }
+
+  get options() {
+    return this.meta.properties.tags?.options ?? [];
+  }
+
+  set options(tags: SelectTag[]) {
+    this.tags = this.tags.filter(v => tags.find(x => x.id === v));
+    this.doc.collection.meta.setProperties({
+      ...this.meta.properties,
+      tags: {
+        ...this.meta.properties.tags,
+        options: tags,
+      },
+    });
+  }
+
+  get tags() {
+    return this.doc.meta?.tags ?? [];
+  }
+
+  set tags(tags: string[]) {
+    assertExists(this.doc.meta);
+    this.doc.meta.tags = tags;
+  }
+
   static override styles = css`
     .doc-meta-container {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
@@ -275,42 +311,6 @@ export class DocMetaTags extends WithDisposable(LitElement) {
   @state()
   accessor expanded = false;
 
-  get pageRoot() {
-    const pageViewport = this.closest('.affine-page-viewport');
-    assertExists(pageViewport);
-    const pageRoot = pageViewport.querySelector('affine-page-root');
-    assertExists(pageRoot);
-    return pageRoot;
-  }
-
-  get meta() {
-    return this.doc.collection.meta;
-  }
-
-  get options() {
-    return this.meta.properties.tags?.options ?? [];
-  }
-
-  set options(tags: SelectTag[]) {
-    this.tags = this.tags.filter(v => tags.find(x => x.id === v));
-    this.doc.collection.meta.setProperties({
-      ...this.meta.properties,
-      tags: {
-        ...this.meta.properties.tags,
-        options: tags,
-      },
-    });
-  }
-
-  get tags() {
-    return this.doc.meta?.tags ?? [];
-  }
-
-  set tags(tags: string[]) {
-    assertExists(this.doc.meta);
-    this.doc.meta.tags = tags;
-  }
-
   private _listenBacklinkList = () => {
     const metaMap = Object.fromEntries(
       this.doc.collection.meta.docMetas.map(v => [v.id, v])
@@ -353,18 +353,6 @@ export class DocMetaTags extends WithDisposable(LitElement) {
       })
     );
   };
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this._listenBacklinkList();
-
-    this._disposables.add(
-      this.meta.docMetaUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
 
   private _toggle = () => {
     this.expanded = !this.expanded;
@@ -470,6 +458,18 @@ export class DocMetaTags extends WithDisposable(LitElement) {
       </div>
     </div>`;
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._listenBacklinkList();
+
+    this._disposables.add(
+      this.meta.docMetaUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   override render() {
     if (!this.expanded) {

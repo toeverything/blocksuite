@@ -26,10 +26,10 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
-
   @state()
   private accessor _isSelected = false;
+
+  override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
 
   @property({ attribute: false })
   accessor loading = false;

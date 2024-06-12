@@ -14,7 +14,26 @@ import { ConfigRenderer, MoreMenuRenderer } from '../utils.js';
 
 @customElement('affine-image-toolbar')
 export class AffineImageToolbar extends LitElement {
+  get _items() {
+    return ConfigRenderer(
+      this.blockElement,
+      this.abortController,
+      this.config,
+      this.closeCurrentMenu
+    );
+  }
+
   static override styles = styles;
+
+  @query('.image-toolbar-button.more')
+  private accessor _moreButton!: HTMLElement;
+
+  @state()
+  private accessor _moreMenuOpen = false;
+
+  private _popMenuAbortController: AbortController | null = null;
+
+  private _currentOpenMenu: AbortController | null = null;
 
   @property({ attribute: false })
   accessor blockElement!: ImageBlockComponent;
@@ -30,32 +49,6 @@ export class AffineImageToolbar extends LitElement {
 
   @property({ attribute: false })
   accessor onActiveStatusChange: (active: boolean) => void = noop;
-
-  @query('.image-toolbar-button.more')
-  private accessor _moreButton!: HTMLElement;
-
-  @state()
-  private accessor _moreMenuOpen = false;
-
-  get _items() {
-    return ConfigRenderer(
-      this.blockElement,
-      this.abortController,
-      this.config,
-      this.closeCurrentMenu
-    );
-  }
-
-  private _popMenuAbortController: AbortController | null = null;
-
-  private _currentOpenMenu: AbortController | null = null;
-
-  closeCurrentMenu = () => {
-    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
-      this._currentOpenMenu.abort();
-      this._currentOpenMenu = null;
-    }
-  };
 
   private _clearPopMenu() {
     if (this._popMenuAbortController) {
@@ -109,6 +102,13 @@ export class AffineImageToolbar extends LitElement {
     });
     this._moreMenuOpen = true;
   }
+
+  closeCurrentMenu = () => {
+    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
+      this._currentOpenMenu.abort();
+      this._currentOpenMenu = null;
+    }
+  };
 
   override disconnectedCallback() {
     super.disconnectedCallback();

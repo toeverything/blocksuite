@@ -18,13 +18,19 @@ import { styles } from './styles.js';
 
 @customElement('affine-linked-doc-popover')
 export class LinkedDocPopover extends WithDisposable(LitElement) {
+  private get _flattenActionList() {
+    return this._actionGroup
+      .map(group =>
+        group.items.map(item => ({ ...item, groupName: group.name }))
+      )
+      .flat();
+  }
+
+  private get _doc() {
+    return this.editorHost.doc;
+  }
+
   static override styles = styles;
-
-  @property({ attribute: false })
-  accessor options!: LinkedDocOptions;
-
-  @property({ attribute: false })
-  accessor triggerKey!: string;
 
   @state()
   private accessor _position: {
@@ -41,12 +47,21 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   private _actionGroup: LinkedDocGroup[] = [];
 
-  private get _flattenActionList() {
-    return this._actionGroup
-      .map(group =>
-        group.items.map(item => ({ ...item, groupName: group.name }))
-      )
-      .flat();
+  @property({ attribute: false })
+  accessor options!: LinkedDocOptions;
+
+  @property({ attribute: false })
+  accessor triggerKey!: string;
+
+  @query('.linked-doc-popover')
+  accessor linkedDocElement: Element | null = null;
+
+  constructor(
+    private editorHost: EditorHost,
+    private inlineEditor: AffineInlineEditor,
+    private abortController = new AbortController()
+  ) {
+    super();
   }
 
   private _updateActionList() {
@@ -56,21 +71,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       inlineEditor: this.inlineEditor,
       docMetas: this._doc.collection.meta.docMetas,
     });
-  }
-
-  @query('.linked-doc-popover')
-  accessor linkedDocElement: Element | null = null;
-
-  private get _doc() {
-    return this.editorHost.doc;
-  }
-
-  constructor(
-    private editorHost: EditorHost,
-    private inlineEditor: AffineInlineEditor,
-    private abortController = new AbortController()
-  ) {
-    super();
   }
 
   override connectedCallback() {

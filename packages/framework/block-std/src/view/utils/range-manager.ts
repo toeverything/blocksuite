@@ -10,6 +10,13 @@ import { RangeBinding } from './range-binding.js';
  * CRUD for Range and TextSelection
  */
 export class RangeManager {
+  get value() {
+    const selection = document.getSelection();
+    assertExists(selection);
+    if (selection.rangeCount === 0) return null;
+    return selection.getRangeAt(0);
+  }
+
   /**
    * Used to mark certain elements so that they are excluded when synchronizing the native range and text selection (such as database block).
    */
@@ -24,11 +31,8 @@ export class RangeManager {
 
   constructor(public host: EditorHost) {}
 
-  get value() {
-    const selection = document.getSelection();
-    assertExists(selection);
-    if (selection.rangeCount === 0) return null;
-    return selection.getRangeAt(0);
+  private _isRangeSyncExcluded(el: Element) {
+    return !!el.closest(`[${RangeManager.rangeSyncExcludeAttr}="true"]`);
   }
 
   clear() {
@@ -250,9 +254,5 @@ export class RangeManager {
     if (this._isRangeSyncExcluded(inlineRoot)) return null;
 
     return inlineRoot.inlineEditor;
-  }
-
-  private _isRangeSyncExcluded(el: Element) {
-    return !!el.closest(`[${RangeManager.rangeSyncExcludeAttr}="true"]`);
   }
 }

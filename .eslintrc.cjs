@@ -90,6 +90,32 @@ module.exports = {
             ignoreRestSiblings: true,
           },
         ],
+        '@typescript-eslint/member-ordering': [
+          'error',
+          {
+            default: [
+              'private-static-field',
+              'protected-static-field',
+              'public-static-field',
+
+              'private-instance-field',
+              'protected-instance-field',
+              'public-instance-field',
+
+              'private-constructor',
+              'protected-constructor',
+              'public-constructor',
+
+              'private-instance-method',
+              'protected-instance-method',
+              'public-instance-method',
+
+              'private-static-method',
+              'protected-static-method',
+              'public-static-method',
+            ],
+          },
+        ],
         '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'error',
         'no-return-await': 'off',
         '@typescript-eslint/return-await': 'error',

@@ -9,6 +9,14 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 @customElement('docs-panel')
 export class DocsPanel extends WithDisposable(ShadowlessElement) {
+  private get collection() {
+    return this.editor.doc.collection;
+  }
+
+  private get docs() {
+    return [...this.collection.docs.values()];
+  }
+
   static override styles = css`
     docs-panel {
       display: flex;
@@ -54,27 +62,6 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor editor!: AffineEditorContainer;
-
-  private get collection() {
-    return this.editor.doc.collection;
-  }
-
-  private get docs() {
-    return [...this.collection.docs.values()];
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.editor.doc.collection.slots.docUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
-  createDoc = () => {
-    createDocBlock(this.editor.doc.collection);
-  };
 
   protected override render(): unknown {
     const { docs, collection } = this;
@@ -123,6 +110,19 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
       )}
     `;
   }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.editor.doc.collection.slots.docUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
+  createDoc = () => {
+    createDocBlock(this.editor.doc.collection);
+  };
 }
 
 function createDocBlock(collection: DocCollection) {

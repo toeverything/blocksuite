@@ -28,6 +28,10 @@ const getPortalTag = (model: BlockModel) => {
 
 @customElement('surface-ref-portal')
 export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
+  get surfaceService() {
+    return this.host.std.spec.getService('affine:surface');
+  }
+
   static override styles = css`
     .surface-blocks-portal {
       pointer-events: none;
@@ -68,16 +72,6 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
 
   @query('.stacking-canvas')
   accessor canvasSlot!: HTMLDivElement;
-
-  get surfaceService() {
-    return this.host.std.spec.getService('affine:surface');
-  }
-
-  setStackingCanvas(canvases: HTMLCanvasElement[]) {
-    if (this.canvasSlot) {
-      this.canvasSlot.replaceChildren(...canvases);
-    }
-  }
 
   private _getBlocksInFrame(model: FrameBlockModel): EdgelessBlockModel[] {
     const bound = model.elementBound;
@@ -133,6 +127,12 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
         ></${tag}>`;
       }
     );
+  }
+
+  setStackingCanvas(canvases: HTMLCanvasElement[]) {
+    if (this.canvasSlot) {
+      this.canvasSlot.replaceChildren(...canvases);
+    }
   }
 
   setViewport = (viewport: {

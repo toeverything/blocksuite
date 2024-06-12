@@ -98,26 +98,6 @@ const abortHoverPortal = ({
 };
 
 export class HoverController implements ReactiveController {
-  protected _disposables = new DisposableGroup();
-
-  host: ReactiveControllerHost;
-
-  static globalAbortController?: AbortController;
-
-  private _abortController?: AbortController;
-
-  private _setReference?: (element?: Element | undefined) => void;
-
-  private _portal?: HTMLDivElement;
-
-  private readonly _onHover: (
-    options: OptionsParams
-  ) => HoverPortalOptions | null;
-
-  private readonly _hoverOptions: HoverOptions;
-
-  private _isHovering = false;
-
   /**
    * Whether the host is currently hovering.
    *
@@ -138,12 +118,25 @@ export class HoverController implements ReactiveController {
     return this._portal;
   }
 
-  /**
-   * Callback when the portal needs to be aborted.
-   */
-  onAbort = () => {
-    this.abort();
-  };
+  static globalAbortController?: AbortController;
+
+  private _abortController?: AbortController;
+
+  private _setReference?: (element?: Element | undefined) => void;
+
+  private _portal?: HTMLDivElement;
+
+  private readonly _onHover: (
+    options: OptionsParams
+  ) => HoverPortalOptions | null;
+
+  private readonly _hoverOptions: HoverOptions;
+
+  private _isHovering = false;
+
+  protected _disposables = new DisposableGroup();
+
+  host: ReactiveControllerHost;
 
   constructor(
     host: ReactiveControllerHost,
@@ -154,6 +147,13 @@ export class HoverController implements ReactiveController {
     (this.host = host).addController(this);
     this._onHover = onHover;
   }
+
+  /**
+   * Callback when the portal needs to be aborted.
+   */
+  onAbort = () => {
+    this.abort();
+  };
 
   hostConnected() {
     if (this._disposables.disposed) {

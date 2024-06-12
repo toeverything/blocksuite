@@ -28,6 +28,10 @@ import { popAddNewFilter } from './condition.js';
 
 @customElement('filter-group-view')
 export class FilterGroupView extends WithDisposable(ShadowlessElement) {
+  private get isMaxDepth() {
+    return this.depth === 3;
+  }
+
   static override styles = css`
     filter-group-view {
       border-radius: 4px;
@@ -153,6 +157,11 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private opMap = {
+    and: 'And',
+    or: 'Or',
+  };
+
   @property({ attribute: false })
   accessor depth = 1;
 
@@ -165,10 +174,13 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor setData!: (filter: FilterGroup) => void;
 
-  private opMap = {
-    and: 'And',
-    or: 'Or',
-  };
+  @state()
+  accessor containerClass:
+    | {
+        index: number;
+        class: string;
+      }
+    | undefined = undefined;
 
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
@@ -218,14 +230,6 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       },
     ]);
   };
-
-  @state()
-  accessor containerClass:
-    | {
-        index: number;
-        class: string;
-      }
-    | undefined = undefined;
 
   private _clickConditionOps(target: ReferenceElement, i: number) {
     const filter = this.data.conditions[i];
@@ -289,10 +293,6 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
         ],
       },
     ]);
-  }
-
-  private get isMaxDepth() {
-    return this.depth === 3;
   }
 
   override render() {

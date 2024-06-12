@@ -175,6 +175,30 @@ function getDarkModeConfig(): boolean {
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
+  get mode() {
+    return this.editor.mode;
+  }
+
+  set mode(value: 'page' | 'edgeless') {
+    this.editor.mode = value;
+  }
+
+  get host() {
+    return this.editor.host;
+  }
+
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get rootService() {
+    return this.host.spec.getService('affine:page');
+  }
+
+  get command() {
+    return this.host.command;
+  }
+
   static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
@@ -185,6 +209,22 @@ export class DebugMenu extends ShadowlessElement {
       z-index: 1001 !important;
     }
   `;
+
+  @state()
+  private accessor _canUndo = false;
+
+  @state()
+  private accessor _canRedo = false;
+
+  @state()
+  private accessor _hasOffset = false;
+
+  private _styleMenu!: Pane;
+
+  private _showStyleDebugMenu = false;
+
+  @state()
+  private accessor _dark = getDarkModeConfig();
 
   @property({ attribute: false })
   accessor collection!: DocCollection;
@@ -216,92 +256,11 @@ export class DebugMenu extends ShadowlessElement {
   @property({ attribute: false })
   accessor docsPanel!: DocsPanel;
 
-  @state()
-  private accessor _canUndo = false;
-
-  @state()
-  private accessor _canRedo = false;
-
   @property({ attribute: false })
   accessor readonly = false;
 
-  @state()
-  private accessor _hasOffset = false;
-
   @query('#block-type-dropdown')
   accessor blockTypeDropdown!: SlDropdown;
-
-  private _styleMenu!: Pane;
-
-  private _showStyleDebugMenu = false;
-
-  get mode() {
-    return this.editor.mode;
-  }
-
-  set mode(value: 'page' | 'edgeless') {
-    this.editor.mode = value;
-  }
-
-  @state()
-  private accessor _dark = getDarkModeConfig();
-
-  get host() {
-    return this.editor.host;
-  }
-
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get rootService() {
-    return this.host.spec.getService('affine:page');
-  }
-
-  get command() {
-    return this.host.command;
-  }
-
-  override createRenderRoot() {
-    this._setThemeMode(this._dark);
-
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    matchMedia.addEventListener('change', this._darkModeChange);
-
-    return this;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    const readSelectionFromURL = async () => {
-      const editorHost = this.editor.host;
-      if (!editorHost) {
-        await new Promise(resolve => {
-          setTimeout(resolve, 500);
-        });
-        readSelectionFromURL().catch(console.error);
-        return;
-      }
-      const url = new URL(window.location.toString());
-      const sel = url.searchParams.get('sel');
-      if (!sel) return;
-      try {
-        const json = JSON.parse(lz.decompressFromEncodedURIComponent(sel));
-        editorHost.std.selection.fromJSON(json);
-      } catch {
-        return;
-      }
-    };
-    readSelectionFromURL().catch(console.error);
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    matchMedia.removeEventListener('change', this._darkModeChange);
-  }
 
   private _switchEditorMode() {
     this.mode = this.mode === 'page' ? 'edgeless' : 'page';
@@ -566,6 +525,47 @@ export class DebugMenu extends ShadowlessElement {
   private _darkModeChange = (e: MediaQueryListEvent) => {
     this._setThemeMode(!!e.matches);
   };
+
+  override createRenderRoot() {
+    this._setThemeMode(this._dark);
+
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    matchMedia.addEventListener('change', this._darkModeChange);
+
+    return this;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    const readSelectionFromURL = async () => {
+      const editorHost = this.editor.host;
+      if (!editorHost) {
+        await new Promise(resolve => {
+          setTimeout(resolve, 500);
+        });
+        readSelectionFromURL().catch(console.error);
+        return;
+      }
+      const url = new URL(window.location.toString());
+      const sel = url.searchParams.get('sel');
+      if (!sel) return;
+      try {
+        const json = JSON.parse(lz.decompressFromEncodedURIComponent(sel));
+        editorHost.std.selection.fromJSON(json);
+      } catch {
+        return;
+      }
+    };
+    readSelectionFromURL().catch(console.error);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    matchMedia.removeEventListener('change', this._darkModeChange);
+  }
 
   override firstUpdated() {
     this.doc.slots.historyUpdated.on(() => {

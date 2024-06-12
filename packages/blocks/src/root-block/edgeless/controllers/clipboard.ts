@@ -99,10 +99,6 @@ interface CanvasExportOptions {
 }
 
 export class EdgelessClipboardController extends PageClipboard {
-  constructor(public override host: EdgelessRootBlockComponent) {
-    super(host);
-  }
-
   private get std() {
     return this.host.std;
   }
@@ -135,12 +131,8 @@ export class EdgelessClipboardController extends PageClipboard {
     return this._rootService.exportManager;
   }
 
-  override hostConnected() {
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
-    this._init();
-    this._initEdgelessClipboard();
+  constructor(public override host: EdgelessRootBlockComponent) {
+    super(host);
   }
 
   private _initEdgelessClipboard = () => {
@@ -173,15 +165,6 @@ export class EdgelessClipboardController extends PageClipboard {
       { global: true }
     );
   };
-
-  copy() {
-    document.dispatchEvent(
-      new Event('copy', {
-        bubbles: true,
-        cancelable: true,
-      })
-    );
-  }
 
   private _onCopy = (
     _context: UIEventStateContext,
@@ -817,6 +800,330 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
+  private _updatePastedElementsIndex(
+    elements: BlockSuite.EdgelessModelType[],
+    originalIndexes: Map<string, string>
+  ) {
+    function compare(
+      a: BlockSuite.EdgelessModelType,
+      b: BlockSuite.EdgelessModelType
+    ) {
+      if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
+        return -1;
+      } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
+        return 1;
+      } else {
+        const aGroups = a.groups;
+        const bGroups = b.groups;
+        const minGroups = Math.min(aGroups.length, bGroups.length);
+
+        for (let i = 0; i < minGroups; ++i) {
+          if (aGroups[i] !== bGroups[i]) {
+            const aGroup = aGroups[i] ?? a;
+            const bGroup = bGroups[i] ?? b;
+
+            return aGroup.index === bGroup.index
+              ? 0
+              : aGroup.index < bGroup.index
+                ? -1
+                : 1;
+          }
+        }
+
+        if (originalIndexes.get(a.id)! < originalIndexes.get(b.id)!) return -1;
+        else if (originalIndexes.get(a.id)! > originalIndexes.get(b.id)!)
+          return 1;
+        return 0;
+      }
+    }
+
+    const idxGenerator = this.edgeless.service.layer.createIndexGenerator(true);
+    const sortedElements = elements.sort(compare);
+    sortedElements.forEach(ele => {
+      this.edgeless.service.updateElement(ele.id, {
+        index: idxGenerator(isTopLevelBlock(ele) ? ele.flavour : ele.type),
+      });
+    });
+  }
+
+  private _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
+    const edgeless = this.host;
+    const { lastMousePos } = this.toolManager;
+    const [x, y] = edgeless.service.viewport.toModelCoord(
+      lastMousePos.x,
+      lastMousePos.y
+    );
+
+    const noteProps = {
+      xywh: new Bound(
+        x,
+        y,
+        DEFAULT_NOTE_WIDTH,
+        DEFAULT_NOTE_HEIGHT
+      ).serialize(),
+    };
+
+    const noteId = edgeless.service.addBlock(
+      'affine:note',
+      noteProps,
+      this.doc.root!.id
+    );
+
+    if (typeof content === 'string') {
+      splitIntoLines(content).forEach((line, idx) => {
+        edgeless.service.addBlock(
+          'affine:paragraph',
+          { text: new DocCollection.Y.Text(line) },
+          noteId,
+          idx
+        );
+      });
+    } else {
+      content.forEach((child, idx) => {
+        this.onBlockSnapshotPaste(child, this.doc, noteId, idx);
+      });
+    }
+
+    edgeless.service.selection.set({
+      elements: [noteId],
+      editing: false,
+    });
+    edgeless.tools.setEdgelessTool({ type: 'default' });
+  }
+
+  private async _pasteShapesAndBlocks(
+    elementsRawData: Record<string, unknown>[]
+  ) {
+    const [elements, blocks] =
+      await this.createElementsFromClipboardData(elementsRawData);
+    this._emitSelectionChangeAfterPaste(
+      elements.map(ele => ele.id),
+      blocks.map(block => block.id)
+    );
+  }
+
+  private async _replaceRichTextWithSvgElement(element: HTMLElement) {
+    const richList = Array.from(element.querySelectorAll('.inline-editor'));
+    await Promise.all(
+      richList.map(rich => {
+        const svgEle = this._elementToSvgElement(
+          rich.cloneNode(true) as HTMLElement,
+          rich.clientWidth,
+          rich.clientHeight + 1
+        );
+        rich.parentElement?.append(svgEle);
+        rich.remove();
+      })
+    );
+  }
+
+  private _elementToSvgElement(
+    node: HTMLElement,
+    width: number,
+    height: number
+  ) {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(xmlns, 'svg');
+    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
+
+    svg.setAttribute('width', `${width}`);
+    svg.setAttribute('height', `${height}`);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+    foreignObject.setAttribute('width', '100%');
+    foreignObject.setAttribute('height', '100%');
+    foreignObject.setAttribute('x', '0');
+    foreignObject.setAttribute('y', '0');
+    foreignObject.setAttribute('externalResourcesRequired', 'true');
+
+    svg.append(foreignObject);
+    foreignObject.append(node);
+    return svg;
+  }
+
+  private async _edgelessToCanvas(
+    edgeless: EdgelessRootBlockComponent,
+    bound: IBound,
+    nodes?: BlockSuite.EdgelessBlockModelType[],
+    canvasElements: BlockSuite.SurfaceModelType[] = [],
+    {
+      background,
+      padding = IMAGE_PADDING,
+      dpr = window.devicePixelRatio || 1,
+    }: CanvasExportOptions = {}
+  ): Promise<HTMLCanvasElement | undefined> {
+    const host = edgeless.host;
+    const rootModel = this.doc.root;
+    if (!rootModel) return;
+
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
+    const pathname = location.pathname;
+    const editorMode = isInsidePageEditor(host);
+
+    const rootElement = getRootByEditorHost(host);
+    assertExists(rootElement);
+
+    const container = rootElement.querySelector(
+      '.affine-block-children-container'
+    );
+    if (!container) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = (bound.w + padding * 2) * dpr;
+    canvas.height = (bound.h + padding * 2) * dpr;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    if (background) {
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.scale(dpr, dpr);
+
+    const replaceImgSrcWithSvg = this._exportManager.replaceImgSrcWithSvg;
+    const replaceRichTextWithSvgElementFunc =
+      this._replaceRichTextWithSvgElement.bind(this);
+
+    const imageProxy = host.std.clipboard.configs.get('imageProxy');
+    const html2canvasOption = {
+      ignoreElements: function (element: Element) {
+        if (
+          CANVAS_EXPORT_IGNORE_TAGS.includes(element.tagName) ||
+          element.classList.contains('dg')
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+
+      onclone: async function (documentClone: Document, element: HTMLElement) {
+        // html2canvas can't support transform feature
+        element.style.setProperty('transform', 'none');
+        const layer = documentClone.querySelector('.affine-edgeless-layer');
+        if (layer && layer instanceof HTMLElement) {
+          layer.style.setProperty('transform', 'none');
+        }
+
+        const boxShadowElements = documentClone.querySelectorAll(
+          "[style*='box-shadow']"
+        );
+        boxShadowElements.forEach(function (element) {
+          if (element instanceof HTMLElement) {
+            element.style.setProperty('box-shadow', 'none');
+          }
+        });
+        await replaceImgSrcWithSvg(element);
+        await replaceRichTextWithSvgElementFunc(element);
+      },
+      backgroundColor: 'transparent',
+      useCORS: imageProxy ? false : true,
+      proxy: imageProxy,
+    };
+
+    const _drawTopLevelBlock = async (
+      block: BlockSuite.EdgelessBlockModelType,
+      isInFrame = false
+    ) => {
+      let blockElement = blockElementGetter(
+        block,
+        this.std.view
+      )?.parentElement;
+      const blockPortalSelector = block.flavour.replace(
+        'affine:',
+        '.edgeless-block-portal-'
+      );
+      blockElement = blockElement?.closest(blockPortalSelector);
+      if (!blockElement) {
+        throw new Error('Could not find edgeless block portal.');
+      }
+
+      const blockBound = Bound.deserialize(block.xywh);
+      const canvasData = await html2canvas(
+        blockElement as HTMLElement,
+        html2canvasOption
+      );
+      ctx.drawImage(
+        canvasData,
+        blockBound.x - bound.x + padding,
+        blockBound.y - bound.y + padding,
+        blockBound.w,
+        isInFrame
+          ? (blockBound.w / canvasData.width) * canvasData.height
+          : blockBound.h
+      );
+    };
+
+    const nodeElements =
+      nodes ??
+      (edgeless.service.pickElementsByBound(
+        bound,
+        'blocks'
+      ) as BlockSuite.EdgelessBlockModelType[]);
+    for (const nodeElement of nodeElements) {
+      await _drawTopLevelBlock(nodeElement);
+
+      if (matchFlavours(nodeElement, ['affine:frame'])) {
+        const blocksInsideFrame: BlockSuite.EdgelessBlockModelType[] = [];
+        this.edgeless.service.frame
+          .getElementsInFrame(nodeElement, false)
+          .forEach(ele => {
+            if (isTopLevelBlock(ele)) {
+              blocksInsideFrame.push(ele as BlockSuite.EdgelessBlockModelType);
+            } else {
+              canvasElements.push(ele as BlockSuite.SurfaceModelType);
+            }
+          });
+
+        for (let i = 0; i < blocksInsideFrame.length; i++) {
+          const element = blocksInsideFrame[i];
+          await _drawTopLevelBlock(element, true);
+        }
+      }
+
+      this._checkCanContinueToCanvas(host, pathname, editorMode);
+    }
+
+    const surfaceCanvas = edgeless.surface.renderer.getCanvasByBound(
+      bound,
+      canvasElements
+    );
+    ctx.drawImage(surfaceCanvas, padding, padding, bound.w, bound.h);
+
+    return canvas;
+  }
+
+  private _checkCanContinueToCanvas(
+    host: EditorHost,
+    pathName: string,
+    editorMode: boolean
+  ) {
+    if (
+      location.pathname !== pathName ||
+      isInsidePageEditor(host) !== editorMode
+    ) {
+      throw new Error('Unable to export content to canvas');
+    }
+  }
+
+  override hostConnected() {
+    if (this._disposables.disposed) {
+      this._disposables = new DisposableGroup();
+    }
+    this._init();
+    this._initEdgelessClipboard();
+  }
+
+  copy() {
+    document.dispatchEvent(
+      new Event('copy', {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+  }
+
   async createElementsFromClipboardData(
     elementsRawData: Record<string, unknown>[],
     pasteCenter?: IVec
@@ -1044,108 +1351,6 @@ export class EdgelessClipboardController extends PageClipboard {
     return [elements, blocks] as const;
   }
 
-  private _updatePastedElementsIndex(
-    elements: BlockSuite.EdgelessModelType[],
-    originalIndexes: Map<string, string>
-  ) {
-    function compare(
-      a: BlockSuite.EdgelessModelType,
-      b: BlockSuite.EdgelessModelType
-    ) {
-      if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
-        return -1;
-      } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
-        return 1;
-      } else {
-        const aGroups = a.groups;
-        const bGroups = b.groups;
-        const minGroups = Math.min(aGroups.length, bGroups.length);
-
-        for (let i = 0; i < minGroups; ++i) {
-          if (aGroups[i] !== bGroups[i]) {
-            const aGroup = aGroups[i] ?? a;
-            const bGroup = bGroups[i] ?? b;
-
-            return aGroup.index === bGroup.index
-              ? 0
-              : aGroup.index < bGroup.index
-                ? -1
-                : 1;
-          }
-        }
-
-        if (originalIndexes.get(a.id)! < originalIndexes.get(b.id)!) return -1;
-        else if (originalIndexes.get(a.id)! > originalIndexes.get(b.id)!)
-          return 1;
-        return 0;
-      }
-    }
-
-    const idxGenerator = this.edgeless.service.layer.createIndexGenerator(true);
-    const sortedElements = elements.sort(compare);
-    sortedElements.forEach(ele => {
-      this.edgeless.service.updateElement(ele.id, {
-        index: idxGenerator(isTopLevelBlock(ele) ? ele.flavour : ele.type),
-      });
-    });
-  }
-
-  private _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
-    const edgeless = this.host;
-    const { lastMousePos } = this.toolManager;
-    const [x, y] = edgeless.service.viewport.toModelCoord(
-      lastMousePos.x,
-      lastMousePos.y
-    );
-
-    const noteProps = {
-      xywh: new Bound(
-        x,
-        y,
-        DEFAULT_NOTE_WIDTH,
-        DEFAULT_NOTE_HEIGHT
-      ).serialize(),
-    };
-
-    const noteId = edgeless.service.addBlock(
-      'affine:note',
-      noteProps,
-      this.doc.root!.id
-    );
-
-    if (typeof content === 'string') {
-      splitIntoLines(content).forEach((line, idx) => {
-        edgeless.service.addBlock(
-          'affine:paragraph',
-          { text: new DocCollection.Y.Text(line) },
-          noteId,
-          idx
-        );
-      });
-    } else {
-      content.forEach((child, idx) => {
-        this.onBlockSnapshotPaste(child, this.doc, noteId, idx);
-      });
-    }
-
-    edgeless.service.selection.set({
-      elements: [noteId],
-      editing: false,
-    });
-    edgeless.tools.setEdgelessTool({ type: 'default' });
-  }
-
-  private async _pasteShapesAndBlocks(
-    elementsRawData: Record<string, unknown>[]
-  ) {
-    const [elements, blocks] =
-      await this.createElementsFromClipboardData(elementsRawData);
-    this._emitSelectionChangeAfterPaste(
-      elements.map(ele => ele.id),
-      blocks.map(block => block.id)
-    );
-  }
-
   async toCanvas(
     blocks: BlockSuite.EdgelessBlockModelType[],
     shapes: BlockSuite.SurfaceModelType[],
@@ -1207,211 +1412,6 @@ export class EdgelessClipboardController extends PageClipboard {
           };
         })
         .catch(console.error);
-    }
-  }
-
-  private async _replaceRichTextWithSvgElement(element: HTMLElement) {
-    const richList = Array.from(element.querySelectorAll('.inline-editor'));
-    await Promise.all(
-      richList.map(rich => {
-        const svgEle = this._elementToSvgElement(
-          rich.cloneNode(true) as HTMLElement,
-          rich.clientWidth,
-          rich.clientHeight + 1
-        );
-        rich.parentElement?.append(svgEle);
-        rich.remove();
-      })
-    );
-  }
-
-  private _elementToSvgElement(
-    node: HTMLElement,
-    width: number,
-    height: number
-  ) {
-    const xmlns = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(xmlns, 'svg');
-    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
-
-    svg.setAttribute('width', `${width}`);
-    svg.setAttribute('height', `${height}`);
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-
-    foreignObject.setAttribute('width', '100%');
-    foreignObject.setAttribute('height', '100%');
-    foreignObject.setAttribute('x', '0');
-    foreignObject.setAttribute('y', '0');
-    foreignObject.setAttribute('externalResourcesRequired', 'true');
-
-    svg.append(foreignObject);
-    foreignObject.append(node);
-    return svg;
-  }
-
-  private async _edgelessToCanvas(
-    edgeless: EdgelessRootBlockComponent,
-    bound: IBound,
-    nodes?: BlockSuite.EdgelessBlockModelType[],
-    canvasElements: BlockSuite.SurfaceModelType[] = [],
-    {
-      background,
-      padding = IMAGE_PADDING,
-      dpr = window.devicePixelRatio || 1,
-    }: CanvasExportOptions = {}
-  ): Promise<HTMLCanvasElement | undefined> {
-    const host = edgeless.host;
-    const rootModel = this.doc.root;
-    if (!rootModel) return;
-
-    const html2canvas = (await import('html2canvas')).default;
-    if (!(html2canvas instanceof Function)) return;
-
-    const pathname = location.pathname;
-    const editorMode = isInsidePageEditor(host);
-
-    const rootElement = getRootByEditorHost(host);
-    assertExists(rootElement);
-
-    const container = rootElement.querySelector(
-      '.affine-block-children-container'
-    );
-    if (!container) return;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = (bound.w + padding * 2) * dpr;
-    canvas.height = (bound.h + padding * 2) * dpr;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    if (background) {
-      ctx.fillStyle = background;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    ctx.scale(dpr, dpr);
-
-    const replaceImgSrcWithSvg = this._exportManager.replaceImgSrcWithSvg;
-    const replaceRichTextWithSvgElementFunc =
-      this._replaceRichTextWithSvgElement.bind(this);
-
-    const imageProxy = host.std.clipboard.configs.get('imageProxy');
-    const html2canvasOption = {
-      ignoreElements: function (element: Element) {
-        if (
-          CANVAS_EXPORT_IGNORE_TAGS.includes(element.tagName) ||
-          element.classList.contains('dg')
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      },
-
-      onclone: async function (documentClone: Document, element: HTMLElement) {
-        // html2canvas can't support transform feature
-        element.style.setProperty('transform', 'none');
-        const layer = documentClone.querySelector('.affine-edgeless-layer');
-        if (layer && layer instanceof HTMLElement) {
-          layer.style.setProperty('transform', 'none');
-        }
-
-        const boxShadowElements = documentClone.querySelectorAll(
-          "[style*='box-shadow']"
-        );
-        boxShadowElements.forEach(function (element) {
-          if (element instanceof HTMLElement) {
-            element.style.setProperty('box-shadow', 'none');
-          }
-        });
-        await replaceImgSrcWithSvg(element);
-        await replaceRichTextWithSvgElementFunc(element);
-      },
-      backgroundColor: 'transparent',
-      useCORS: imageProxy ? false : true,
-      proxy: imageProxy,
-    };
-
-    const _drawTopLevelBlock = async (
-      block: BlockSuite.EdgelessBlockModelType,
-      isInFrame = false
-    ) => {
-      let blockElement = blockElementGetter(
-        block,
-        this.std.view
-      )?.parentElement;
-      const blockPortalSelector = block.flavour.replace(
-        'affine:',
-        '.edgeless-block-portal-'
-      );
-      blockElement = blockElement?.closest(blockPortalSelector);
-      if (!blockElement) {
-        throw new Error('Could not find edgeless block portal.');
-      }
-
-      const blockBound = Bound.deserialize(block.xywh);
-      const canvasData = await html2canvas(
-        blockElement as HTMLElement,
-        html2canvasOption
-      );
-      ctx.drawImage(
-        canvasData,
-        blockBound.x - bound.x + padding,
-        blockBound.y - bound.y + padding,
-        blockBound.w,
-        isInFrame
-          ? (blockBound.w / canvasData.width) * canvasData.height
-          : blockBound.h
-      );
-    };
-
-    const nodeElements =
-      nodes ??
-      (edgeless.service.pickElementsByBound(
-        bound,
-        'blocks'
-      ) as BlockSuite.EdgelessBlockModelType[]);
-    for (const nodeElement of nodeElements) {
-      await _drawTopLevelBlock(nodeElement);
-
-      if (matchFlavours(nodeElement, ['affine:frame'])) {
-        const blocksInsideFrame: BlockSuite.EdgelessBlockModelType[] = [];
-        this.edgeless.service.frame
-          .getElementsInFrame(nodeElement, false)
-          .forEach(ele => {
-            if (isTopLevelBlock(ele)) {
-              blocksInsideFrame.push(ele as BlockSuite.EdgelessBlockModelType);
-            } else {
-              canvasElements.push(ele as BlockSuite.SurfaceModelType);
-            }
-          });
-
-        for (let i = 0; i < blocksInsideFrame.length; i++) {
-          const element = blocksInsideFrame[i];
-          await _drawTopLevelBlock(element, true);
-        }
-      }
-
-      this._checkCanContinueToCanvas(host, pathname, editorMode);
-    }
-
-    const surfaceCanvas = edgeless.surface.renderer.getCanvasByBound(
-      bound,
-      canvasElements
-    );
-    ctx.drawImage(surfaceCanvas, padding, padding, bound.w, bound.h);
-
-    return canvas;
-  }
-
-  private _checkCanContinueToCanvas(
-    host: EditorHost,
-    pathName: string,
-    editorMode: boolean
-  ) {
-    if (
-      location.pathname !== pathName ||
-      isInsidePageEditor(host) !== editorMode
-    ) {
-      throw new Error('Unable to export content to canvas');
     }
   }
 }

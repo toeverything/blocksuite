@@ -54,6 +54,10 @@ const styles = css`
 
 @customElement('affine-data-view-table-group')
 export class TableGroup extends WithDisposable(ShadowlessElement) {
+  get rows() {
+    return this.group?.rows ?? this.view.rows;
+  }
+
   static override styles = styles;
 
   @property({ attribute: false })
@@ -67,17 +71,6 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor group: GroupData | undefined = undefined;
-
-  get rows() {
-    return this.group?.rows ?? this.view.rows;
-  }
-
-  protected override updated(_changedProperties: PropertyValues) {
-    super.updated(_changedProperties);
-    this.querySelectorAll('data-view-table-row').forEach(ele => {
-      ele.requestUpdate();
-    });
-  }
 
   private clickAddRow = () => {
     this.view.rowAdd('end', this.group?.key);
@@ -184,6 +177,13 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
           `
         : null}
     `;
+  }
+
+  protected override updated(_changedProperties: PropertyValues) {
+    super.updated(_changedProperties);
+    this.querySelectorAll('data-view-table-row').forEach(ele => {
+      ele.requestUpdate();
+    });
   }
 
   override render() {

@@ -56,13 +56,6 @@ export type ChatReactiveData = {
 };
 
 export class AIChatLogic {
-  constructor(
-    private logic: AILogic,
-    private getHost: () => EditorHost
-  ) {
-    this.logic;
-  }
-
   get loading() {
     return this.reactiveData.currentRequest != null;
   }
@@ -71,292 +64,13 @@ export class AIChatLogic {
     return this.getHost();
   }
 
-  reactiveData!: ChatReactiveData;
-
-  private requestId = 0;
-
-  async startRequest<T>(p: () => Promise<T>): Promise<T> {
-    const id = this.requestId++;
-    this.reactiveData.currentRequest = id;
-    try {
-      const result = await p();
-      if (id === this.reactiveData.currentRequest) {
-        return result;
-      }
-    } finally {
-      this.reactiveData.currentRequest = undefined;
-    }
-    return new Promise(() => {});
-  }
-
-  getSelectedText = async () => {
-    const text = await getSelectedTextContent(this.host);
-    return text;
-  };
-
-  selectTextForBackground = async () => {
-    const text = await this.getSelectedText();
-    if (!text) return;
-    this.reactiveData.history.push({
-      role: 'user',
-      content: [
-        {
-          type: 'text',
-          text,
-        },
-      ],
-    });
-  };
-
-  selectShapesForBackground = async () => {
-    const canvas = await selectedToCanvas(this.host);
-    if (!canvas) {
-      alert('Please select some shapes first');
-      return;
-    }
-    const url = canvas.toDataURL();
-    this.reactiveData.history.push({
-      role: 'user',
-      content: [
-        {
-          type: 'image_url',
-          image_url: {
-            url,
-          },
-        },
-      ],
-    });
-  };
-
-  splitDoc = async (doc: Doc): Promise<string[]> => {
-    const markdown = await docToMarkdown(doc);
-    return splitText(markdown);
-  };
-
-  embeddingDocs = async (docList: Doc[]): Promise<EmbeddedDoc[]> => {
-    const result: Record<string, EmbeddedDoc> = {};
-    const list = (
-      await Promise.all(
-        docList.map(async doc =>
-          (await this.splitDoc(doc)).map(v => ({ id: doc.id, text: v }))
-        )
-      )
-    ).flat();
-    const vectors = await copilotConfig
-      .getService('chat with workspace', EmbeddingServiceKind)
-      .generateEmbeddings(list.map(v => v.text));
-    list.forEach((v, i) => {
-      const doc = result[v.id] ?? (result[v.id] = { id: v.id, sections: [] });
-      doc.sections.push({ vector: vectors[i], text: v.text });
-    });
-    return Object.values(result);
-  };
-
-  syncWorkspace = async () => {
-    this.reactiveData.syncedDocs = await this.embeddingDocs(
-      [...this.host.doc.collection.docs.values()].map(v => v.getDoc())
-    );
-  };
-
   get docs() {
     return [...this.host.doc.collection.docs.values()];
   }
 
-  async docBackground(): Promise<ChatMessage[]> {
-    return [
-      {
-        role: 'system',
-        content: `the background is:\n${await Promise.all(this.docs.map(v => docToMarkdown(v.getDoc()))).then(list => list.join('\n'))}`,
-      },
-    ];
-  }
+  private requestId = 0;
 
-  genAnswer = async (text: string) => {
-    if (this.loading) {
-      return;
-    }
-    this.reactiveData.history = [
-      ...this.reactiveData.history,
-      {
-        role: 'user',
-        content: [{ text: text, type: 'text' }],
-      },
-    ];
-    const background = await this.getBackground();
-    this.reactiveData.value = '';
-    const r = await this.startRequest(async () => {
-      const iter = getChatService().chat([
-        ...(await this.docBackground()),
-        ...background.messages,
-        ...this.reactiveData.history,
-      ]);
-      let result = '';
-      for await (const item of iter) {
-        result += item;
-        this.reactiveData.tempMessage = result;
-      }
-      this.reactiveData.tempMessage = undefined;
-      return result;
-    });
-    this.reactiveData.history = [
-      ...this.reactiveData.history,
-      {
-        role: 'assistant',
-        content: r ?? '',
-        sources: background.sources,
-      },
-    ];
-  };
-
-  async getBackground(): Promise<{
-    messages: ChatMessage[];
-    sources: BackgroundSource[];
-  }> {
-    if (this.reactiveData.syncedDocs.length === 0) {
-      return {
-        messages: [],
-        sources: [],
-      };
-    }
-    const [result] = await copilotConfig
-      .getService('chat with workspace', EmbeddingServiceKind)
-      .generateEmbeddings([this.reactiveData.value]);
-    const list = this.reactiveData.syncedDocs
-      .flatMap(doc => {
-        return doc.sections.map(section => ({
-          id: doc.id,
-          distance: distance(result, section.vector),
-          text: section.text,
-        }));
-      })
-      .sort((a, b) => a.distance - b.distance)
-      .filter(v => v.distance < 0.7)
-      .slice(0, 3);
-    const sources = new Map<string, string[]>();
-    list.forEach(v => {
-      let source = sources.get(v.id);
-      if (!source) {
-        source = [];
-        sources.set(v.id, source);
-      }
-      source.push(v.text);
-    });
-    return {
-      messages: [
-        {
-          role: 'system',
-          content: `the background is:\n${list.map(v => v.text).join('\n')}`,
-        },
-      ],
-      sources: [...sources.entries()].map(([id, textList]) => ({
-        id,
-        slice: textList,
-      })),
-    };
-  }
-
-  async replaceSelectedContent(text: string) {
-    if (!text) return;
-    const selectedBlocks = getRootService(this.host).selectedBlocks;
-    if (!selectedBlocks.length) return;
-
-    const firstBlock = selectedBlocks[0];
-    const parentBlock = firstBlock.parentBlockElement;
-
-    // update selected block
-    const firstIndex = parentBlock.model.children.findIndex(
-      child => child.id === firstBlock.model.id
-    ) as number;
-    selectedBlocks.forEach(block => {
-      this.host.doc.deleteBlock(block.model);
-    });
-
-    const models = await insertFromMarkdown(
-      this.host,
-      text,
-      parentBlock.model.id,
-      firstIndex
-    );
-    setTimeout(() => {
-      const selections = models
-        .map(model => model.id)
-        .map(blockId => this.host.selection.create('block', { blockId }));
-      this.host.selection.setGroup('note', selections);
-    }, 0);
-  }
-
-  async insertBelowSelectedContent(text: string) {
-    if (!text) return;
-
-    const selectedBlocks = getRootService(this.host).selectedBlocks;
-    const blockLength = selectedBlocks.length;
-    if (!blockLength) return;
-
-    const lastBlock = selectedBlocks[blockLength - 1];
-    const parentBlock = lastBlock.parentBlockElement;
-
-    const lastIndex = parentBlock.model.children.findIndex(
-      child => child.id === lastBlock.model.id
-    ) as number;
-
-    const models = await insertFromMarkdown(
-      this.host,
-      text,
-      parentBlock.model.id,
-      lastIndex + 1
-    );
-
-    setTimeout(() => {
-      const selections = models
-        .map(model => model.id)
-        .map(blockId => this.host.selection.create('block', { blockId }));
-      this.host.selection.setGroup('note', selections);
-    }, 0);
-  }
-
-  createAction(
-    name: string,
-    action: (
-      input: string,
-      background: ChatMessage[]
-    ) => Promise<AsyncIterable<string>> | AsyncIterable<string>
-  ) {
-    return async (text?: string): Promise<void> => {
-      const input = text ? text : await this.getSelectedText();
-      if (!input) {
-        return;
-      }
-      this.reactiveData.history = [
-        ...this.reactiveData.history,
-        {
-          role: 'user',
-          content: [{ text: input, type: 'text' }],
-        },
-        {
-          role: 'user',
-          content: [{ text: name, type: 'text' }],
-        },
-      ];
-      const result = await this.startRequest(async () => {
-        const strings = await action(input, await this.docBackground());
-        let r = '';
-        for await (const item of strings) {
-          r += item;
-          this.reactiveData.tempMessage = r;
-        }
-        this.reactiveData.tempMessage = undefined;
-        return r;
-      });
-      this.reactiveData.history = [
-        ...this.reactiveData.history,
-        {
-          role: 'assistant',
-          content: result,
-          sources: [],
-        },
-      ];
-    };
-  }
+  reactiveData!: ChatReactiveData;
 
   docSelectionActionList: AllAction[] = [
     {
@@ -580,6 +294,292 @@ export class AIChatLogic {
       },
     },
   ];
+
+  constructor(
+    private logic: AILogic,
+    private getHost: () => EditorHost
+  ) {
+    this.logic;
+  }
+
+  async startRequest<T>(p: () => Promise<T>): Promise<T> {
+    const id = this.requestId++;
+    this.reactiveData.currentRequest = id;
+    try {
+      const result = await p();
+      if (id === this.reactiveData.currentRequest) {
+        return result;
+      }
+    } finally {
+      this.reactiveData.currentRequest = undefined;
+    }
+    return new Promise(() => {});
+  }
+
+  getSelectedText = async () => {
+    const text = await getSelectedTextContent(this.host);
+    return text;
+  };
+
+  selectTextForBackground = async () => {
+    const text = await this.getSelectedText();
+    if (!text) return;
+    this.reactiveData.history.push({
+      role: 'user',
+      content: [
+        {
+          type: 'text',
+          text,
+        },
+      ],
+    });
+  };
+
+  selectShapesForBackground = async () => {
+    const canvas = await selectedToCanvas(this.host);
+    if (!canvas) {
+      alert('Please select some shapes first');
+      return;
+    }
+    const url = canvas.toDataURL();
+    this.reactiveData.history.push({
+      role: 'user',
+      content: [
+        {
+          type: 'image_url',
+          image_url: {
+            url,
+          },
+        },
+      ],
+    });
+  };
+
+  splitDoc = async (doc: Doc): Promise<string[]> => {
+    const markdown = await docToMarkdown(doc);
+    return splitText(markdown);
+  };
+
+  embeddingDocs = async (docList: Doc[]): Promise<EmbeddedDoc[]> => {
+    const result: Record<string, EmbeddedDoc> = {};
+    const list = (
+      await Promise.all(
+        docList.map(async doc =>
+          (await this.splitDoc(doc)).map(v => ({ id: doc.id, text: v }))
+        )
+      )
+    ).flat();
+    const vectors = await copilotConfig
+      .getService('chat with workspace', EmbeddingServiceKind)
+      .generateEmbeddings(list.map(v => v.text));
+    list.forEach((v, i) => {
+      const doc = result[v.id] ?? (result[v.id] = { id: v.id, sections: [] });
+      doc.sections.push({ vector: vectors[i], text: v.text });
+    });
+    return Object.values(result);
+  };
+
+  syncWorkspace = async () => {
+    this.reactiveData.syncedDocs = await this.embeddingDocs(
+      [...this.host.doc.collection.docs.values()].map(v => v.getDoc())
+    );
+  };
+
+  async docBackground(): Promise<ChatMessage[]> {
+    return [
+      {
+        role: 'system',
+        content: `the background is:\n${await Promise.all(this.docs.map(v => docToMarkdown(v.getDoc()))).then(list => list.join('\n'))}`,
+      },
+    ];
+  }
+
+  genAnswer = async (text: string) => {
+    if (this.loading) {
+      return;
+    }
+    this.reactiveData.history = [
+      ...this.reactiveData.history,
+      {
+        role: 'user',
+        content: [{ text: text, type: 'text' }],
+      },
+    ];
+    const background = await this.getBackground();
+    this.reactiveData.value = '';
+    const r = await this.startRequest(async () => {
+      const iter = getChatService().chat([
+        ...(await this.docBackground()),
+        ...background.messages,
+        ...this.reactiveData.history,
+      ]);
+      let result = '';
+      for await (const item of iter) {
+        result += item;
+        this.reactiveData.tempMessage = result;
+      }
+      this.reactiveData.tempMessage = undefined;
+      return result;
+    });
+    this.reactiveData.history = [
+      ...this.reactiveData.history,
+      {
+        role: 'assistant',
+        content: r ?? '',
+        sources: background.sources,
+      },
+    ];
+  };
+
+  async getBackground(): Promise<{
+    messages: ChatMessage[];
+    sources: BackgroundSource[];
+  }> {
+    if (this.reactiveData.syncedDocs.length === 0) {
+      return {
+        messages: [],
+        sources: [],
+      };
+    }
+    const [result] = await copilotConfig
+      .getService('chat with workspace', EmbeddingServiceKind)
+      .generateEmbeddings([this.reactiveData.value]);
+    const list = this.reactiveData.syncedDocs
+      .flatMap(doc => {
+        return doc.sections.map(section => ({
+          id: doc.id,
+          distance: distance(result, section.vector),
+          text: section.text,
+        }));
+      })
+      .sort((a, b) => a.distance - b.distance)
+      .filter(v => v.distance < 0.7)
+      .slice(0, 3);
+    const sources = new Map<string, string[]>();
+    list.forEach(v => {
+      let source = sources.get(v.id);
+      if (!source) {
+        source = [];
+        sources.set(v.id, source);
+      }
+      source.push(v.text);
+    });
+    return {
+      messages: [
+        {
+          role: 'system',
+          content: `the background is:\n${list.map(v => v.text).join('\n')}`,
+        },
+      ],
+      sources: [...sources.entries()].map(([id, textList]) => ({
+        id,
+        slice: textList,
+      })),
+    };
+  }
+
+  async replaceSelectedContent(text: string) {
+    if (!text) return;
+    const selectedBlocks = getRootService(this.host).selectedBlocks;
+    if (!selectedBlocks.length) return;
+
+    const firstBlock = selectedBlocks[0];
+    const parentBlock = firstBlock.parentBlockElement;
+
+    // update selected block
+    const firstIndex = parentBlock.model.children.findIndex(
+      child => child.id === firstBlock.model.id
+    ) as number;
+    selectedBlocks.forEach(block => {
+      this.host.doc.deleteBlock(block.model);
+    });
+
+    const models = await insertFromMarkdown(
+      this.host,
+      text,
+      parentBlock.model.id,
+      firstIndex
+    );
+    setTimeout(() => {
+      const selections = models
+        .map(model => model.id)
+        .map(blockId => this.host.selection.create('block', { blockId }));
+      this.host.selection.setGroup('note', selections);
+    }, 0);
+  }
+
+  async insertBelowSelectedContent(text: string) {
+    if (!text) return;
+
+    const selectedBlocks = getRootService(this.host).selectedBlocks;
+    const blockLength = selectedBlocks.length;
+    if (!blockLength) return;
+
+    const lastBlock = selectedBlocks[blockLength - 1];
+    const parentBlock = lastBlock.parentBlockElement;
+
+    const lastIndex = parentBlock.model.children.findIndex(
+      child => child.id === lastBlock.model.id
+    ) as number;
+
+    const models = await insertFromMarkdown(
+      this.host,
+      text,
+      parentBlock.model.id,
+      lastIndex + 1
+    );
+
+    setTimeout(() => {
+      const selections = models
+        .map(model => model.id)
+        .map(blockId => this.host.selection.create('block', { blockId }));
+      this.host.selection.setGroup('note', selections);
+    }, 0);
+  }
+
+  createAction(
+    name: string,
+    action: (
+      input: string,
+      background: ChatMessage[]
+    ) => Promise<AsyncIterable<string>> | AsyncIterable<string>
+  ) {
+    return async (text?: string): Promise<void> => {
+      const input = text ? text : await this.getSelectedText();
+      if (!input) {
+        return;
+      }
+      this.reactiveData.history = [
+        ...this.reactiveData.history,
+        {
+          role: 'user',
+          content: [{ text: input, type: 'text' }],
+        },
+        {
+          role: 'user',
+          content: [{ text: name, type: 'text' }],
+        },
+      ];
+      const result = await this.startRequest(async () => {
+        const strings = await action(input, await this.docBackground());
+        let r = '';
+        for await (const item of strings) {
+          r += item;
+          this.reactiveData.tempMessage = r;
+        }
+        this.reactiveData.tempMessage = undefined;
+        return r;
+      });
+      this.reactiveData.history = [
+        ...this.reactiveData.history,
+        {
+          role: 'assistant',
+          content: result,
+          sources: [],
+        },
+      ];
+    };
+  }
 }
 
 type Action = {

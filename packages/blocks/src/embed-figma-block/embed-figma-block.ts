@@ -18,8 +18,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
-
   @state()
   private accessor _isSelected = false;
 
@@ -29,6 +27,8 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   private _isDragging = false;
 
   private _isResizing = false;
+
+  override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
 
   private _selectBlock() {
     const selectionManager = this.host.selection;

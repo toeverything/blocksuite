@@ -15,52 +15,6 @@ import {
 } from './xywh.js';
 
 export class Bound implements IBound {
-  x: number;
-
-  y: number;
-
-  w: number;
-
-  h: number;
-
-  constructor(x = 0, y = 0, w = 0, h = 0) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-  }
-
-  static deserialize(s: string) {
-    const [x, y, w, h] = deserializeXYWH(s);
-    return new Bound(x, y, w, h);
-  }
-
-  static serialize(bound: IBound) {
-    return serializeXYWH(bound.x, bound.y, bound.w, bound.h);
-  }
-
-  static fromXYWH(xywh: XYWH) {
-    return new Bound(xywh[0], xywh[1], xywh[2], xywh[3]);
-  }
-
-  static from(arg1: IBound) {
-    return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
-  }
-
-  static fromDOMRect({ left, top, width, height }: DOMRect) {
-    return new Bound(left, top, width, height);
-  }
-
-  static fromPoints(points: IVec[]) {
-    const { minX, minY, maxX, maxY } = getBoundsFromPoints(points);
-    return new Bound(minX, minY, maxX - minX, maxY - minY);
-  }
-
-  static fromCenter(center: IVec, width: number, height: number) {
-    const [x, y] = center;
-    return new Bound(x - width / 2, y - height / 2, width, height);
-  }
-
   get points(): IVec[] {
     return [
       [this.x, this.y],
@@ -161,6 +115,21 @@ export class Bound implements IBound {
       [this.x + this.w, this.y],
       [this.x + this.w, this.y + this.h],
     ];
+  }
+
+  x: number;
+
+  y: number;
+
+  w: number;
+
+  h: number;
+
+  constructor(x = 0, y = 0, w = 0, h = 0) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
   }
 
   containsPoint([x, y]: IVec): boolean {
@@ -298,6 +267,37 @@ export class Bound implements IBound {
 
   toXYWH(): XYWH {
     return [this.x, this.y, this.w, this.h];
+  }
+
+  static deserialize(s: string) {
+    const [x, y, w, h] = deserializeXYWH(s);
+    return new Bound(x, y, w, h);
+  }
+
+  static serialize(bound: IBound) {
+    return serializeXYWH(bound.x, bound.y, bound.w, bound.h);
+  }
+
+  static fromXYWH(xywh: XYWH) {
+    return new Bound(xywh[0], xywh[1], xywh[2], xywh[3]);
+  }
+
+  static from(arg1: IBound) {
+    return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
+  }
+
+  static fromDOMRect({ left, top, width, height }: DOMRect) {
+    return new Bound(left, top, width, height);
+  }
+
+  static fromPoints(points: IVec[]) {
+    const { minX, minY, maxX, maxY } = getBoundsFromPoints(points);
+    return new Bound(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  static fromCenter(center: IVec, width: number, height: number) {
+    const [x, y] = center;
+    return new Bound(x - width / 2, y - height / 2, width, height);
   }
 }
 

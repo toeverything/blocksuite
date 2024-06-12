@@ -78,13 +78,35 @@ export enum DefaultModeDragType {
 }
 
 export class DefaultToolController extends EdgelessToolController<DefaultTool> {
-  readonly tool = {
-    type: 'default',
-  } as DefaultTool;
+  override get draggingArea() {
+    if (this.dragType === DefaultModeDragType.Selecting) {
+      const [startX, startY] = this._service.viewport.toViewCoord(
+        this._dragStartModelCoord[0],
+        this._dragStartModelCoord[1]
+      );
+      const [endX, endY] = this._service.viewport.toViewCoord(
+        this._dragLastModelCoord[0],
+        this._dragLastModelCoord[1]
+      );
+      return {
+        start: new DOMPoint(startX, startY),
+        end: new DOMPoint(endX, endY),
+      };
+    }
+    return null;
+  }
 
-  override enableHover = true;
+  get edgelessSelectionManager() {
+    return this._edgeless.service.selection;
+  }
 
-  dragType = DefaultModeDragType.None;
+  get zoom() {
+    return this._edgeless.service.viewport.zoom;
+  }
+
+  get readonly() {
+    return this._edgeless.doc.readonly;
+  }
 
   private _dragStartPos: IVec = [0, 0];
 
@@ -142,217 +164,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     detach?: boolean;
   } = null;
 
-  override get draggingArea() {
-    if (this.dragType === DefaultModeDragType.Selecting) {
-      const [startX, startY] = this._service.viewport.toViewCoord(
-        this._dragStartModelCoord[0],
-        this._dragStartModelCoord[1]
-      );
-      const [endX, endY] = this._service.viewport.toViewCoord(
-        this._dragLastModelCoord[0],
-        this._dragLastModelCoord[1]
-      );
-      return {
-        start: new DOMPoint(startX, startY),
-        end: new DOMPoint(endX, endY),
-      };
-    }
-    return null;
-  }
+  readonly tool = {
+    type: 'default',
+  } as DefaultTool;
 
-  get edgelessSelectionManager() {
-    return this._edgeless.service.selection;
-  }
+  override enableHover = true;
 
-  get zoom() {
-    return this._edgeless.service.viewport.zoom;
-  }
-
-  get readonly() {
-    return this._edgeless.doc.readonly;
-  }
-
-  onContainerPointerDown(): void {
-    noop();
-  }
-
-  onContainerClick(e: PointerEventState) {
-    if (this.readonly) return;
-
-    const selected = this._pick(e.x, e.y, {
-      ignoreTransparent: true,
-    });
-    if (selected) {
-      const { selectedIds, surfaceSelections } = this.edgelessSelectionManager;
-      const editing = surfaceSelections[0]?.editing ?? false;
-
-      // click active canvas text, edgeless text block and note block
-      if (
-        selectedIds.length === 1 &&
-        selectedIds[0] === selected.id &&
-        editing
-      ) {
-        // edgeless text block and note block
-        if (
-          (isNoteBlock(selected) || isEdgelessTextBlock(selected)) &&
-          selected.children.length === 0
-        ) {
-          this._addEmptyParagraphBlock(selected);
-        }
-        // canvas text
-        return;
-      }
-
-      // click non-active edgeless text block and note block
-      if (
-        !e.keys.shift &&
-        selectedIds.length === 1 &&
-        (isNoteBlock(selected) || isEdgelessTextBlock(selected)) &&
-        ((selectedIds[0] === selected.id && !editing) ||
-          (editing && selectedIds[0] !== selected.id))
-      ) {
-        // issue #1809
-        // If the previously selected element is a noteBlock and is in an active state,
-        // then the currently clicked noteBlock should also be in an active state when selected.
-        this.edgelessSelectionManager.set({
-          elements: [selected.id],
-          editing: true,
-        });
-        this._edgeless.updateComplete
-          .then(() => {
-            // check if block has children blocks, if not, add a paragraph block and focus on it
-            if (selected.children.length === 0) {
-              this._addEmptyParagraphBlock(selected);
-            } else {
-              const blockElement = this._edgeless.host.view.viewFromPath(
-                'block',
-                buildPath(selected)
-              );
-              if (blockElement) {
-                const rect = blockElement.getBoundingClientRect();
-                const offsetY = 16 * this.zoom;
-                const offsetX = 2 * this.zoom;
-                const x = clamp(
-                  e.raw.clientX,
-                  rect.left + offsetX,
-                  rect.right - offsetX
-                );
-                const y = clamp(
-                  e.raw.clientY,
-                  rect.top + offsetY,
-                  rect.bottom - offsetY
-                );
-                handleNativeRangeAtPoint(x, y);
-              } else {
-                handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
-              }
-            }
-          })
-          .catch(console.error);
-        return;
-      }
-
-      this.edgelessSelectionManager.set({
-        // hold shift key to multi select or de-select element
-        elements: e.keys.shift
-          ? this.edgelessSelectionManager.has(selected.id)
-            ? selectedIds.filter(id => id !== selected.id)
-            : [...selectedIds, selected.id]
-          : [selected.id],
-        editing: false,
-      });
-    } else if (!e.keys.shift) {
-      this.edgelessSelectionManager.clear();
-      resetNativeSelection(null);
-    }
-
-    this._isDoubleClickedOnMask = false;
-  }
-
-  onContainerContextMenu() {
-    // repairContextMenuRange(e);
-    noop();
-  }
-
-  onContainerDblClick(e: PointerEventState) {
-    if (this._doc.readonly) {
-      const viewport = this._service.viewport;
-      if (viewport.zoom === 1) {
-        // Fit to Screen
-        const { centerX, centerY, zoom } =
-          this._edgeless.service.getFitToScreenData();
-        viewport.setViewport(zoom, [centerX, centerY], true);
-      } else {
-        // Zoom to 100% and Center
-        const [x, y] = viewport.toModelCoord(e.x, e.y);
-        viewport.setViewport(1, [x, y], true);
-      }
-      return;
-    }
-
-    const selected = this._pick(e.x, e.y, {
-      expand: 10,
-    });
-    if (!selected) {
-      const textFlag = this._edgeless.doc.awarenessStore.getFlag(
-        'enable_edgeless_text'
-      );
-
-      if (textFlag) {
-        const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
-        const textService = this._edgeless.host.spec.getService(
-          'affine:edgeless-text'
-        );
-        textService.initEdgelessTextBlock({
-          edgeless: this._edgeless,
-          x,
-          y,
-        });
-      } else {
-        addText(this._edgeless, e);
-      }
-      return;
-    } else {
-      const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
-      if (selected instanceof TextElementModel) {
-        mountTextElementEditor(selected, this._edgeless, {
-          x,
-          y,
-        });
-        return;
-      }
-      if (selected instanceof ShapeElementModel) {
-        mountShapeTextEditor(selected, this._edgeless);
-        return;
-      }
-      if (selected instanceof ConnectorElementModel) {
-        mountConnectorLabelEditor(selected, this._edgeless, [x, y]);
-        return;
-      }
-      if (isFrameBlock(selected)) {
-        mountFrameTitleEditor(selected, this._edgeless);
-        return;
-      }
-      if (selected instanceof GroupElementModel) {
-        mountGroupTitleEditor(selected, this._edgeless);
-        return;
-      }
-    }
-
-    if (
-      e.raw.target &&
-      e.raw.target instanceof HTMLElement &&
-      e.raw.target.classList.contains('affine-note-mask')
-    ) {
-      this.onContainerClick(e);
-      this._isDoubleClickedOnMask = true;
-      return;
-    }
-  }
-
-  onContainerTripleClick() {
-    if (this._isDoubleClickedOnMask) return;
-  }
+  dragType = DefaultModeDragType.None;
 
   private _pick(x: number, y: number, options?: IHitTestOptions) {
     const service = this._service;
@@ -596,67 +414,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._moveSelectionStartPos = [0, 0];
   };
 
-  async onContainerDragStart(e: PointerEventState) {
-    if (this.edgelessSelectionManager.editing) return;
-    // Determine the drag type based on the current state and event
-    let dragType = this._determineDragType(e);
-
-    const elements = this.edgelessSelectionManager.selectedElements;
-    const toBeMoved = new Set(elements);
-    elements.forEach(element => {
-      if (isFrameBlock(element)) {
-        this._edgeless.service.frame
-          .getElementsInFrame(element)
-          .forEach(ele => toBeMoved.add(ele));
-      } else if (
-        element.group instanceof MindmapElementModel &&
-        elements.length > 1
-      ) {
-        element.group.descendants().forEach(ele => toBeMoved.add(ele));
-      } else if (element instanceof SurfaceGroupLikeModel) {
-        element.descendants().forEach(ele => toBeMoved.add(ele));
-      }
-    });
-    this._toBeMoved = Array.from(toBeMoved);
-
-    // If alt key is pressed and content is moving, clone the content
-    if (e.keys.alt && dragType === DefaultModeDragType.ContentMoving) {
-      dragType = DefaultModeDragType.AltCloning;
-      await this._cloneContent();
-    }
-    this._filterConnectedConnector();
-
-    // Connector needs to be updated first
-    this._toBeMoved.sort((a, _) =>
-      a instanceof ConnectorElementModel ? -1 : 1
-    );
-
-    // Set up drag state
-    this.initializeDragState(e, dragType);
-
-    // stash the state
-    if (
-      this._toBeMoved.length === 1 &&
-      this._toBeMoved[0].group instanceof MindmapElementModel
-    ) {
-      const mindmap = this._toBeMoved[0].group as MindmapElementModel;
-      this._draggingSingleMindmap = {
-        mindmap,
-        node: mindmap.getNode(this._toBeMoved[0].id)!,
-        clear: mindmap.stashTree(this._toBeMoved[0].id),
-        startElementBound: mindmap.elementBound,
-      };
-    } else {
-      this._toBeMoved.forEach(ele => {
-        ele.stash('xywh');
-
-        if (ele instanceof ConnectorElementModel) {
-          ele.stash('labelXYWH');
-        }
-      });
-    }
-  }
-
   private _filterConnectedConnector() {
     this._toBeMoved = this._toBeMoved.filter(ele => {
       if (
@@ -895,6 +652,249 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         distance,
       },
     });
+  }
+
+  onContainerPointerDown(): void {
+    noop();
+  }
+
+  onContainerClick(e: PointerEventState) {
+    if (this.readonly) return;
+
+    const selected = this._pick(e.x, e.y, {
+      ignoreTransparent: true,
+    });
+    if (selected) {
+      const { selectedIds, surfaceSelections } = this.edgelessSelectionManager;
+      const editing = surfaceSelections[0]?.editing ?? false;
+
+      // click active canvas text, edgeless text block and note block
+      if (
+        selectedIds.length === 1 &&
+        selectedIds[0] === selected.id &&
+        editing
+      ) {
+        // edgeless text block and note block
+        if (
+          (isNoteBlock(selected) || isEdgelessTextBlock(selected)) &&
+          selected.children.length === 0
+        ) {
+          this._addEmptyParagraphBlock(selected);
+        }
+        // canvas text
+        return;
+      }
+
+      // click non-active edgeless text block and note block
+      if (
+        !e.keys.shift &&
+        selectedIds.length === 1 &&
+        (isNoteBlock(selected) || isEdgelessTextBlock(selected)) &&
+        ((selectedIds[0] === selected.id && !editing) ||
+          (editing && selectedIds[0] !== selected.id))
+      ) {
+        // issue #1809
+        // If the previously selected element is a noteBlock and is in an active state,
+        // then the currently clicked noteBlock should also be in an active state when selected.
+        this.edgelessSelectionManager.set({
+          elements: [selected.id],
+          editing: true,
+        });
+        this._edgeless.updateComplete
+          .then(() => {
+            // check if block has children blocks, if not, add a paragraph block and focus on it
+            if (selected.children.length === 0) {
+              this._addEmptyParagraphBlock(selected);
+            } else {
+              const blockElement = this._edgeless.host.view.viewFromPath(
+                'block',
+                buildPath(selected)
+              );
+              if (blockElement) {
+                const rect = blockElement.getBoundingClientRect();
+                const offsetY = 16 * this.zoom;
+                const offsetX = 2 * this.zoom;
+                const x = clamp(
+                  e.raw.clientX,
+                  rect.left + offsetX,
+                  rect.right - offsetX
+                );
+                const y = clamp(
+                  e.raw.clientY,
+                  rect.top + offsetY,
+                  rect.bottom - offsetY
+                );
+                handleNativeRangeAtPoint(x, y);
+              } else {
+                handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
+              }
+            }
+          })
+          .catch(console.error);
+        return;
+      }
+
+      this.edgelessSelectionManager.set({
+        // hold shift key to multi select or de-select element
+        elements: e.keys.shift
+          ? this.edgelessSelectionManager.has(selected.id)
+            ? selectedIds.filter(id => id !== selected.id)
+            : [...selectedIds, selected.id]
+          : [selected.id],
+        editing: false,
+      });
+    } else if (!e.keys.shift) {
+      this.edgelessSelectionManager.clear();
+      resetNativeSelection(null);
+    }
+
+    this._isDoubleClickedOnMask = false;
+  }
+
+  onContainerContextMenu() {
+    // repairContextMenuRange(e);
+    noop();
+  }
+
+  onContainerDblClick(e: PointerEventState) {
+    if (this._doc.readonly) {
+      const viewport = this._service.viewport;
+      if (viewport.zoom === 1) {
+        // Fit to Screen
+        const { centerX, centerY, zoom } =
+          this._edgeless.service.getFitToScreenData();
+        viewport.setViewport(zoom, [centerX, centerY], true);
+      } else {
+        // Zoom to 100% and Center
+        const [x, y] = viewport.toModelCoord(e.x, e.y);
+        viewport.setViewport(1, [x, y], true);
+      }
+      return;
+    }
+
+    const selected = this._pick(e.x, e.y, {
+      expand: 10,
+    });
+    if (!selected) {
+      const textFlag = this._edgeless.doc.awarenessStore.getFlag(
+        'enable_edgeless_text'
+      );
+
+      if (textFlag) {
+        const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
+        const textService = this._edgeless.host.spec.getService(
+          'affine:edgeless-text'
+        );
+        textService.initEdgelessTextBlock({
+          edgeless: this._edgeless,
+          x,
+          y,
+        });
+      } else {
+        addText(this._edgeless, e);
+      }
+      return;
+    } else {
+      const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
+      if (selected instanceof TextElementModel) {
+        mountTextElementEditor(selected, this._edgeless, {
+          x,
+          y,
+        });
+        return;
+      }
+      if (selected instanceof ShapeElementModel) {
+        mountShapeTextEditor(selected, this._edgeless);
+        return;
+      }
+      if (selected instanceof ConnectorElementModel) {
+        mountConnectorLabelEditor(selected, this._edgeless, [x, y]);
+        return;
+      }
+      if (isFrameBlock(selected)) {
+        mountFrameTitleEditor(selected, this._edgeless);
+        return;
+      }
+      if (selected instanceof GroupElementModel) {
+        mountGroupTitleEditor(selected, this._edgeless);
+        return;
+      }
+    }
+
+    if (
+      e.raw.target &&
+      e.raw.target instanceof HTMLElement &&
+      e.raw.target.classList.contains('affine-note-mask')
+    ) {
+      this.onContainerClick(e);
+      this._isDoubleClickedOnMask = true;
+      return;
+    }
+  }
+
+  onContainerTripleClick() {
+    if (this._isDoubleClickedOnMask) return;
+  }
+
+  async onContainerDragStart(e: PointerEventState) {
+    if (this.edgelessSelectionManager.editing) return;
+    // Determine the drag type based on the current state and event
+    let dragType = this._determineDragType(e);
+
+    const elements = this.edgelessSelectionManager.selectedElements;
+    const toBeMoved = new Set(elements);
+    elements.forEach(element => {
+      if (isFrameBlock(element)) {
+        this._edgeless.service.frame
+          .getElementsInFrame(element)
+          .forEach(ele => toBeMoved.add(ele));
+      } else if (
+        element.group instanceof MindmapElementModel &&
+        elements.length > 1
+      ) {
+        element.group.descendants().forEach(ele => toBeMoved.add(ele));
+      } else if (element instanceof SurfaceGroupLikeModel) {
+        element.descendants().forEach(ele => toBeMoved.add(ele));
+      }
+    });
+    this._toBeMoved = Array.from(toBeMoved);
+
+    // If alt key is pressed and content is moving, clone the content
+    if (e.keys.alt && dragType === DefaultModeDragType.ContentMoving) {
+      dragType = DefaultModeDragType.AltCloning;
+      await this._cloneContent();
+    }
+    this._filterConnectedConnector();
+
+    // Connector needs to be updated first
+    this._toBeMoved.sort((a, _) =>
+      a instanceof ConnectorElementModel ? -1 : 1
+    );
+
+    // Set up drag state
+    this.initializeDragState(e, dragType);
+
+    // stash the state
+    if (
+      this._toBeMoved.length === 1 &&
+      this._toBeMoved[0].group instanceof MindmapElementModel
+    ) {
+      const mindmap = this._toBeMoved[0].group as MindmapElementModel;
+      this._draggingSingleMindmap = {
+        mindmap,
+        node: mindmap.getNode(this._toBeMoved[0].id)!,
+        clear: mindmap.stashTree(this._toBeMoved[0].id),
+        startElementBound: mindmap.elementBound,
+      };
+    } else {
+      this._toBeMoved.forEach(ele => {
+        ele.stash('xywh');
+
+        if (ele instanceof ConnectorElementModel) {
+          ele.stash('labelXYWH');
+        }
+      });
+    }
   }
 
   onContainerDragMove(e: PointerEventState) {

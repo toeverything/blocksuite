@@ -70,35 +70,11 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor shape!: Shape;
-
-  @property({ attribute: false })
-  accessor order!: number;
-
-  @property({ attribute: false })
-  accessor getContainerRect!: () => DOMRect;
-
-  @property({ attribute: false })
-  accessor handleClick!: () => void;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   @query('#shape-tool-element')
   private accessor _shapeElement!: HTMLElement;
 
   @query('#backup-shape-element')
   private accessor _backupShapeElement!: HTMLElement;
-
-  @property({ attribute: false })
-  accessor shapeType!: ShapeName;
-
-  @property({ attribute: false })
-  accessor shapeStyle!: ShapeStyle;
-
-  @property({ attribute: false })
-  accessor radius!: number;
 
   private _transformMap: TransformMap = {
     z1: { x: 0, y: 5, scale: 1.1, origin: '50% 100%' },
@@ -115,6 +91,30 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
 
   @state()
   private accessor _isOutside: boolean = false;
+
+  @property({ attribute: false })
+  accessor shape!: Shape;
+
+  @property({ attribute: false })
+  accessor order!: number;
+
+  @property({ attribute: false })
+  accessor getContainerRect!: () => DOMRect;
+
+  @property({ attribute: false })
+  accessor handleClick!: () => void;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor shapeType!: ShapeName;
+
+  @property({ attribute: false })
+  accessor shapeStyle!: ShapeStyle;
+
+  @property({ attribute: false })
+  accessor radius!: number;
 
   private _onDragStart = (coord: Coord) => {
     this._startCoord = { x: coord.x, y: coord.y };

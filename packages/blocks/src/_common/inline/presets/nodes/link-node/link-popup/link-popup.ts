@@ -30,127 +30,6 @@ import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')
 export class LinkPopup extends WithDisposable(LitElement) {
-  static override styles = linkPopupStyle;
-
-  @property()
-  accessor type: 'create' | 'edit' | 'view' = 'create';
-
-  @property({ attribute: false })
-  accessor inlineEditor!: AffineInlineEditor;
-
-  @property({ attribute: false })
-  accessor targetInlineRange!: InlineRange;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  @query('#text-input')
-  accessor textInput: HTMLInputElement | null = null;
-
-  @query('#link-input')
-  accessor linkInput: HTMLInputElement | null = null;
-
-  @query('.affine-link-popover-container')
-  accessor popupContainer!: HTMLDivElement;
-
-  @query('.mock-selection-container')
-  accessor mockSelectionContainer!: HTMLDivElement;
-
-  @query('.affine-confirm-button')
-  accessor confirmButton: IconButton | null = null;
-
-  private _bodyOverflowStyle = '';
-
-  private _moreMenuAbortController: AbortController | null = null;
-
-  private _embedOptions: EmbedOptions | null = null;
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    if (this.targetInlineRange.length === 0) {
-      throw new Error('Cannot toggle link popup on empty range');
-    }
-
-    if (this.type === 'edit' || this.type === 'create') {
-      // disable body scroll
-      this._bodyOverflowStyle = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      this.disposables.add({
-        dispose: () => {
-          document.body.style.overflow = this._bodyOverflowStyle;
-        },
-      });
-    }
-
-    const parent = this.blockElement.doc.getParent(this.blockElement.model);
-    assertExists(parent);
-    this.disposables.add(
-      parent.childrenUpdated.on(() => {
-        const children = parent.children;
-        if (children.includes(this.blockElement.model)) return;
-        this.abortController.abort();
-      })
-    );
-  }
-
-  protected override firstUpdated() {
-    if (!this.linkInput) return;
-
-    this._disposables.addFromEvent(this.linkInput, 'copy', e => {
-      e.stopPropagation();
-    });
-    this._disposables.addFromEvent(this.linkInput, 'cut', e => {
-      e.stopPropagation();
-    });
-    this._disposables.addFromEvent(this.linkInput, 'paste', e => {
-      e.stopPropagation();
-    });
-  }
-
-  override updated() {
-    assertExists(this.popupContainer);
-    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
-    assertExists(range);
-
-    if (this.type !== 'view') {
-      const domRects = range.getClientRects();
-
-      Object.values(domRects).forEach(domRect => {
-        const mockSelection = document.createElement('div');
-        mockSelection.classList.add('mock-selection');
-        mockSelection.style.left = `${domRect.left}px`;
-        mockSelection.style.top = `${domRect.top}px`;
-        mockSelection.style.width = `${domRect.width}px`;
-        mockSelection.style.height = `${domRect.height}px`;
-
-        assertExists(this.mockSelectionContainer);
-        this.mockSelectionContainer.append(mockSelection);
-      });
-    }
-
-    const visualElement = {
-      getBoundingClientRect: () => range.getBoundingClientRect(),
-      getClientRects: () => range.getClientRects(),
-    };
-    computePosition(visualElement, this.popupContainer, {
-      middleware: [
-        offset(10),
-        inline(),
-        shift({
-          padding: 6,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        const popupContainer = this.popupContainer;
-        if (!popupContainer) return;
-        popupContainer.style.left = `${x}px`;
-        popupContainer.style.top = `${y}px`;
-      })
-      .catch(console.error);
-  }
-
   private get _rootService() {
     return this.std.spec.getService('affine:page');
   }
@@ -206,6 +85,41 @@ export class LinkPopup extends WithDisposable(LitElement) {
   private get _canConvertToEmbedView() {
     return this._embedOptions?.viewType === 'embed';
   }
+
+  static override styles = linkPopupStyle;
+
+  private _bodyOverflowStyle = '';
+
+  private _moreMenuAbortController: AbortController | null = null;
+
+  private _embedOptions: EmbedOptions | null = null;
+
+  @property()
+  accessor type: 'create' | 'edit' | 'view' = 'create';
+
+  @property({ attribute: false })
+  accessor inlineEditor!: AffineInlineEditor;
+
+  @property({ attribute: false })
+  accessor targetInlineRange!: InlineRange;
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @query('#text-input')
+  accessor textInput: HTMLInputElement | null = null;
+
+  @query('#link-input')
+  accessor linkInput: HTMLInputElement | null = null;
+
+  @query('.affine-link-popover-container')
+  accessor popupContainer!: HTMLDivElement;
+
+  @query('.mock-selection-container')
+  accessor mockSelectionContainer!: HTMLDivElement;
+
+  @query('.affine-confirm-button')
+  accessor confirmButton: IconButton | null = null;
 
   private _onConfirm() {
     if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) return;
@@ -524,6 +438,92 @@ export class LinkPopup extends WithDisposable(LitElement) {
         ${this._confirmBtnTemplate()}
       </div>
     `;
+  }
+
+  protected override firstUpdated() {
+    if (!this.linkInput) return;
+
+    this._disposables.addFromEvent(this.linkInput, 'copy', e => {
+      e.stopPropagation();
+    });
+    this._disposables.addFromEvent(this.linkInput, 'cut', e => {
+      e.stopPropagation();
+    });
+    this._disposables.addFromEvent(this.linkInput, 'paste', e => {
+      e.stopPropagation();
+    });
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    if (this.targetInlineRange.length === 0) {
+      throw new Error('Cannot toggle link popup on empty range');
+    }
+
+    if (this.type === 'edit' || this.type === 'create') {
+      // disable body scroll
+      this._bodyOverflowStyle = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      this.disposables.add({
+        dispose: () => {
+          document.body.style.overflow = this._bodyOverflowStyle;
+        },
+      });
+    }
+
+    const parent = this.blockElement.doc.getParent(this.blockElement.model);
+    assertExists(parent);
+    this.disposables.add(
+      parent.childrenUpdated.on(() => {
+        const children = parent.children;
+        if (children.includes(this.blockElement.model)) return;
+        this.abortController.abort();
+      })
+    );
+  }
+
+  override updated() {
+    assertExists(this.popupContainer);
+    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
+    assertExists(range);
+
+    if (this.type !== 'view') {
+      const domRects = range.getClientRects();
+
+      Object.values(domRects).forEach(domRect => {
+        const mockSelection = document.createElement('div');
+        mockSelection.classList.add('mock-selection');
+        mockSelection.style.left = `${domRect.left}px`;
+        mockSelection.style.top = `${domRect.top}px`;
+        mockSelection.style.width = `${domRect.width}px`;
+        mockSelection.style.height = `${domRect.height}px`;
+
+        assertExists(this.mockSelectionContainer);
+        this.mockSelectionContainer.append(mockSelection);
+      });
+    }
+
+    const visualElement = {
+      getBoundingClientRect: () => range.getBoundingClientRect(),
+      getClientRects: () => range.getClientRects(),
+    };
+    computePosition(visualElement, this.popupContainer, {
+      middleware: [
+        offset(10),
+        inline(),
+        shift({
+          padding: 6,
+        }),
+      ],
+    })
+      .then(({ x, y }) => {
+        const popupContainer = this.popupContainer;
+        if (!popupContainer) return;
+        popupContainer.style.left = `${x}px`;
+        popupContainer.style.top = `${y}px`;
+      })
+      .catch(console.error);
   }
 
   override render() {

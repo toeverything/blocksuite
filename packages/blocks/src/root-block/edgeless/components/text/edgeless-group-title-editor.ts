@@ -17,6 +17,15 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 export class EdgelessGroupTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
   @query('rich-text')
   accessor richText!: RichText;
 
@@ -26,13 +35,15 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
+  private _unmount() {
+    // dispose in advance to avoid execute `this.remove()` twice
+    this.disposables.dispose();
+    this.group.showTitle = true;
+    this.edgeless.service.selection.set({
+      elements: [this.group.id],
+      editing: false,
+    });
+    this.remove();
   }
 
   override connectedCallback() {
@@ -90,17 +101,6 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
         );
       })
       .catch(console.error);
-  }
-
-  private _unmount() {
-    // dispose in advance to avoid execute `this.remove()` twice
-    this.disposables.dispose();
-    this.group.showTitle = true;
-    this.edgeless.service.selection.set({
-      elements: [this.group.id],
-      editing: false,
-    });
-    this.remove();
   }
 
   override render() {

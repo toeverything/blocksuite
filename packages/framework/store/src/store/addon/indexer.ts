@@ -22,10 +22,6 @@ export const indexer = addOnFactory<keyof IndexerAddon>(
     class extends originalClass {
       indexer: Indexer;
 
-      search(query: QueryContent) {
-        return this.indexer.search.search(query);
-      }
-
       constructor(storeOptions: DocCollectionOptions) {
         super(storeOptions);
         const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
@@ -33,6 +29,10 @@ export const indexer = addOnFactory<keyof IndexerAddon>(
           search: new SearchIndexer(this.doc),
           backlink: new BacklinkIndexer(blockIndexer),
         };
+      }
+
+      search(query: QueryContent) {
+        return this.indexer.search.search(query);
       }
     }
 );

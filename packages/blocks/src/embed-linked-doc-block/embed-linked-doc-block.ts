@@ -27,7 +27,35 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   EmbedLinkedDocModel,
   EmbedLinkedDocBlockService
 > {
+  get editorMode() {
+    return this._editorMode;
+  }
+
+  get linkedDoc() {
+    const doc = this.std.collection.getDoc(this.model.pageId);
+    return doc;
+  }
+
+  get docTitle() {
+    return this.linkedDoc?.meta?.title.length
+      ? this.linkedDoc.meta.title
+      : 'Untitled';
+  }
+
+  private get _rootService() {
+    return this.std.spec.getService('affine:page');
+  }
+
   static override styles = styles;
+
+  @state()
+  private accessor _editorMode: 'page' | 'edgeless' = 'page';
+
+  @state()
+  private accessor _docUpdatedAt: Date = new Date();
+
+  @state()
+  private accessor _loading = false;
 
   override _cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
 
@@ -50,39 +78,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   @property({ attribute: false })
   accessor surfaceRefRenderer: SurfaceRefRenderer | undefined = undefined;
 
-  @state()
-  private accessor _editorMode: 'page' | 'edgeless' = 'page';
-
-  @state()
-  private accessor _docUpdatedAt: Date = new Date();
-
-  @state()
-  private accessor _loading = false;
-
   @queryAsync('.affine-embed-linked-doc-banner.render')
   accessor bannerContainer!: Promise<HTMLDivElement>;
 
   @queryAsync('.affine-embed-linked-doc-content-note.render')
   accessor noteContainer!: Promise<HTMLDivElement>;
-
-  get editorMode() {
-    return this._editorMode;
-  }
-
-  get linkedDoc() {
-    const doc = this.std.collection.getDoc(this.model.pageId);
-    return doc;
-  }
-
-  get docTitle() {
-    return this.linkedDoc?.meta?.title.length
-      ? this.linkedDoc.meta.title
-      : 'Untitled';
-  }
-
-  private get _rootService() {
-    return this.std.spec.getService('affine:page');
-  }
 
   private async _load() {
     this._loading = true;

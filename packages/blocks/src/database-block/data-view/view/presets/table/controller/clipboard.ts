@@ -12,10 +12,6 @@ const BLOCKSUITE_DATABASE = 'blocksuite/database';
 const TEXT = 'text/plain';
 
 export class TableClipboardController implements ReactiveController {
-  constructor(public host: DataViewTable) {
-    host.addController(this);
-  }
-
   private get readonly() {
     return this.host.view.readonly;
   }
@@ -24,35 +20,8 @@ export class TableClipboardController implements ReactiveController {
     return this.host.std;
   }
 
-  hostConnected() {
-    this.host.disposables.add(
-      this.host.handleEvent('copy', ctx => {
-        const tableSelection = this.host.selectionController.selection;
-        if (!tableSelection) return false;
-
-        this._onCopy(ctx, tableSelection);
-        return true;
-      })
-    );
-
-    this.host.disposables.add(
-      this.host.handleEvent('cut', ctx => {
-        const tableSelection = this.host.selectionController.selection;
-        if (!tableSelection) return false;
-
-        this._onCut(ctx, tableSelection);
-        return true;
-      })
-    );
-
-    this.host.disposables.add(
-      this.host.handleEvent('paste', ctx => {
-        if (this.readonly) return false;
-
-        this._onPaste(ctx).catch(console.error);
-        return true;
-      })
-    );
+  constructor(public host: DataViewTable) {
+    host.addController(this);
   }
 
   private _onCopy = (
@@ -140,6 +109,37 @@ export class TableClipboardController implements ReactiveController {
 
     return true;
   };
+
+  hostConnected() {
+    this.host.disposables.add(
+      this.host.handleEvent('copy', ctx => {
+        const tableSelection = this.host.selectionController.selection;
+        if (!tableSelection) return false;
+
+        this._onCopy(ctx, tableSelection);
+        return true;
+      })
+    );
+
+    this.host.disposables.add(
+      this.host.handleEvent('cut', ctx => {
+        const tableSelection = this.host.selectionController.selection;
+        if (!tableSelection) return false;
+
+        this._onCut(ctx, tableSelection);
+        return true;
+      })
+    );
+
+    this.host.disposables.add(
+      this.host.handleEvent('paste', ctx => {
+        if (this.readonly) return false;
+
+        this._onPaste(ctx).catch(console.error);
+        return true;
+      })
+    );
+  }
 }
 
 function getColumnValue(container: DatabaseCellContainer | undefined) {

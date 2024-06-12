@@ -66,189 +66,6 @@ type HtmlToSliceSnapshotPayload = {
 };
 
 export class HtmlAdapter extends BaseAdapter<Html> {
-  override async fromDocSnapshot(
-    payload: FromDocSnapshotPayload
-  ): Promise<FromDocSnapshotResult<string>> {
-    const { file, assetsIds } = await this.fromBlockSnapshot({
-      snapshot: payload.snapshot.blocks,
-      assets: payload.assets,
-    });
-    return {
-      file: file.replace(
-        '<!--BlockSuiteDocTitlePlaceholder-->',
-        `<h1>${payload.snapshot.meta.title}</h1>`
-      ),
-      assetsIds,
-    };
-  }
-
-  override async fromBlockSnapshot(
-    payload: FromBlockSnapshotPayload
-  ): Promise<FromBlockSnapshotResult<string>> {
-    const root: Root = {
-      type: 'root',
-      children: [
-        {
-          type: 'doctype',
-        },
-      ],
-    };
-    const { ast, assetsIds } = await this._traverseSnapshot(
-      payload.snapshot,
-      root,
-      payload.assets
-    );
-    return {
-      file: this._astToHtml(ast),
-      assetsIds,
-    };
-  }
-
-  override async fromSliceSnapshot(
-    payload: FromSliceSnapshotPayload
-  ): Promise<FromSliceSnapshotResult<string>> {
-    let buffer = '';
-    const sliceAssetsIds: string[] = [];
-    for (const contentSlice of payload.snapshot.content) {
-      const root: Root = {
-        type: 'root',
-        children: [],
-      };
-      const { ast, assetsIds } = await this._traverseSnapshot(
-        contentSlice,
-        root,
-        payload.assets
-      );
-      sliceAssetsIds.push(...assetsIds);
-      buffer += this._astToHtml(ast);
-    }
-    const html = buffer;
-    return {
-      file: html,
-      assetsIds: sliceAssetsIds,
-    };
-  }
-
-  override async toDocSnapshot(
-    payload: ToDocSnapshotPayload<string>
-  ): Promise<DocSnapshot> {
-    const htmlAst = this._htmlToAst(payload.file);
-    const titleAst = hastQuerySelector(htmlAst, 'title');
-    const blockSnapshotRoot = {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [],
-    };
-    return {
-      type: 'page',
-      meta: {
-        id: nanoid(),
-        title: hastGetTextContent(titleAst, 'Untitled'),
-        createDate: Date.now(),
-        tags: [],
-      },
-      blocks: {
-        type: 'block',
-        id: nanoid(),
-        flavour: 'affine:page',
-        props: {
-          title: {
-            '$blocksuite:internal:text$': true,
-            delta: this._hastToDelta(
-              titleAst ?? {
-                type: 'text',
-                value: 'Untitled',
-              }
-            ),
-          },
-        },
-        children: [
-          {
-            type: 'block',
-            id: nanoid(),
-            flavour: 'affine:surface',
-            props: {
-              elements: {},
-            },
-            children: [],
-          },
-          await this._traverseHtml(
-            htmlAst,
-            blockSnapshotRoot as BlockSnapshot,
-            payload.assets
-          ),
-        ],
-      },
-    };
-  }
-
-  override toBlockSnapshot(
-    payload: ToBlockSnapshotPayload<string>
-  ): Promise<BlockSnapshot> {
-    const htmlAst = this._htmlToAst(payload.file);
-    const blockSnapshotRoot = {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [],
-    };
-    return this._traverseHtml(
-      htmlAst,
-      blockSnapshotRoot as BlockSnapshot,
-      payload.assets
-    );
-  }
-
-  override async toSliceSnapshot(
-    payload: HtmlToSliceSnapshotPayload
-  ): Promise<SliceSnapshot | null> {
-    const htmlAst = this._htmlToAst(payload.file);
-    const blockSnapshotRoot = {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [],
-    };
-    const contentSlice = (await this._traverseHtml(
-      htmlAst,
-      blockSnapshotRoot as BlockSnapshot,
-      payload.assets
-    )) as BlockSnapshot;
-    if (contentSlice.children.length === 0) {
-      return null;
-    }
-    return {
-      type: 'slice',
-      content: [contentSlice],
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
-      workspaceId: payload.workspaceId,
-      pageId: payload.pageId,
-    };
-  }
-
   private _astToHtml = (ast: Root) => {
     return unified().use(rehypeStringify).stringify(ast);
   };
@@ -1365,4 +1182,187 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       return mergeDeltas(acc, cur);
     }, [] as DeltaInsert<object>[]);
   };
+
+  override async fromDocSnapshot(
+    payload: FromDocSnapshotPayload
+  ): Promise<FromDocSnapshotResult<string>> {
+    const { file, assetsIds } = await this.fromBlockSnapshot({
+      snapshot: payload.snapshot.blocks,
+      assets: payload.assets,
+    });
+    return {
+      file: file.replace(
+        '<!--BlockSuiteDocTitlePlaceholder-->',
+        `<h1>${payload.snapshot.meta.title}</h1>`
+      ),
+      assetsIds,
+    };
+  }
+
+  override async fromBlockSnapshot(
+    payload: FromBlockSnapshotPayload
+  ): Promise<FromBlockSnapshotResult<string>> {
+    const root: Root = {
+      type: 'root',
+      children: [
+        {
+          type: 'doctype',
+        },
+      ],
+    };
+    const { ast, assetsIds } = await this._traverseSnapshot(
+      payload.snapshot,
+      root,
+      payload.assets
+    );
+    return {
+      file: this._astToHtml(ast),
+      assetsIds,
+    };
+  }
+
+  override async fromSliceSnapshot(
+    payload: FromSliceSnapshotPayload
+  ): Promise<FromSliceSnapshotResult<string>> {
+    let buffer = '';
+    const sliceAssetsIds: string[] = [];
+    for (const contentSlice of payload.snapshot.content) {
+      const root: Root = {
+        type: 'root',
+        children: [],
+      };
+      const { ast, assetsIds } = await this._traverseSnapshot(
+        contentSlice,
+        root,
+        payload.assets
+      );
+      sliceAssetsIds.push(...assetsIds);
+      buffer += this._astToHtml(ast);
+    }
+    const html = buffer;
+    return {
+      file: html,
+      assetsIds: sliceAssetsIds,
+    };
+  }
+
+  override async toDocSnapshot(
+    payload: ToDocSnapshotPayload<string>
+  ): Promise<DocSnapshot> {
+    const htmlAst = this._htmlToAst(payload.file);
+    const titleAst = hastQuerySelector(htmlAst, 'title');
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid(),
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [],
+    };
+    return {
+      type: 'page',
+      meta: {
+        id: nanoid(),
+        title: hastGetTextContent(titleAst, 'Untitled'),
+        createDate: Date.now(),
+        tags: [],
+      },
+      blocks: {
+        type: 'block',
+        id: nanoid(),
+        flavour: 'affine:page',
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: this._hastToDelta(
+              titleAst ?? {
+                type: 'text',
+                value: 'Untitled',
+              }
+            ),
+          },
+        },
+        children: [
+          {
+            type: 'block',
+            id: nanoid(),
+            flavour: 'affine:surface',
+            props: {
+              elements: {},
+            },
+            children: [],
+          },
+          await this._traverseHtml(
+            htmlAst,
+            blockSnapshotRoot as BlockSnapshot,
+            payload.assets
+          ),
+        ],
+      },
+    };
+  }
+
+  override toBlockSnapshot(
+    payload: ToBlockSnapshotPayload<string>
+  ): Promise<BlockSnapshot> {
+    const htmlAst = this._htmlToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid(),
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [],
+    };
+    return this._traverseHtml(
+      htmlAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
+    );
+  }
+
+  override async toSliceSnapshot(
+    payload: HtmlToSliceSnapshotPayload
+  ): Promise<SliceSnapshot | null> {
+    const htmlAst = this._htmlToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid(),
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [],
+    };
+    const contentSlice = (await this._traverseHtml(
+      htmlAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
+    )) as BlockSnapshot;
+    if (contentSlice.children.length === 0) {
+      return null;
+    }
+    return {
+      type: 'slice',
+      content: [contentSlice],
+      pageVersion: payload.pageVersion,
+      workspaceVersion: payload.workspaceVersion,
+      workspaceId: payload.workspaceId,
+      pageId: payload.pageId,
+    };
+  }
 }

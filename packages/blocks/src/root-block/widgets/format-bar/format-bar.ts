@@ -41,36 +41,17 @@ export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
-  static override styles = formatBarStyle;
-
-  @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
-  accessor formatBarElement: HTMLElement | null = null;
-
-  @state()
-  accessor configItems: FormatBarConfigItem[] = [];
-
-  @state()
-  private accessor _dragging = false;
-
   private get _selectionManager() {
     return this.host.selection;
   }
-
-  @state()
-  private accessor _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
 
   get displayType() {
     return this._displayType;
   }
 
-  @state()
-  private accessor _selectedBlockElements: BlockElement[] = [];
-
   get selectedBlockElements() {
     return this._selectedBlockElements;
   }
-
-  private _lastCursor: CursorSelection | undefined = undefined;
 
   get nativeRange() {
     const sl = document.getSelection();
@@ -78,11 +59,30 @@ export class AffineFormatBarWidget extends WidgetElement {
     return sl.getRangeAt(0);
   }
 
+  static override styles = formatBarStyle;
+
+  @state()
+  private accessor _dragging = false;
+
+  @state()
+  private accessor _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
+
+  @state()
+  private accessor _selectedBlockElements: BlockElement[] = [];
+
+  private _lastCursor: CursorSelection | undefined = undefined;
+
   private _abortController = new AbortController();
 
   private _placement: Placement = 'top';
 
   private _floatDisposables: DisposableGroup | null = null;
+
+  @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
+  accessor formatBarElement: HTMLElement | null = null;
+
+  @state()
+  accessor configItems: FormatBarConfigItem[] = [];
 
   private _reset() {
     this._displayType = 'none';

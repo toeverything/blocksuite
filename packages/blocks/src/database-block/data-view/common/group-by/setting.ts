@@ -60,18 +60,6 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
   @query('.group-sort-setting')
   accessor groupContainer!: HTMLElement;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    this._disposables.addFromEvent(this, 'pointerdown', e => {
-      e.stopPropagation();
-    });
-  }
-
   protected override firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     const sortable = new Sortable(this.groupContainer, {
@@ -144,6 +132,18 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
         )}
       </div>
     `;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+    this._disposables.addFromEvent(this, 'pointerdown', e => {
+      e.stopPropagation();
+    });
   }
 }
 export const selectGroupByProperty = (

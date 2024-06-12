@@ -34,6 +34,8 @@ import { customElement, property } from 'lit/decorators.js';
  */
 @customElement('blocksuite-portal')
 export class Portal extends LitElement {
+  private _portalRoot: HTMLElement | null = null;
+
   @property({ attribute: false })
   accessor container = document.body;
 
@@ -42,8 +44,6 @@ export class Portal extends LitElement {
 
   @property({ attribute: false })
   accessor shadowDom: boolean | ShadowRootInit = true;
-
-  private _portalRoot: HTMLElement | null = null;
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();

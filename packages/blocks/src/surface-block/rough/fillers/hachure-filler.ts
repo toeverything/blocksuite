@@ -10,10 +10,6 @@ export class HachureFiller implements PatternFiller {
     this.helper = helper;
   }
 
-  fillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet {
-    return this._fillPolygons(polygonList, o);
-  }
-
   protected _fillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet {
     const lines = polygonHachureLines(polygonList, o);
     const ops = this.renderLines(lines, o);
@@ -34,5 +30,9 @@ export class HachureFiller implements PatternFiller {
       );
     }
     return ops;
+  }
+
+  fillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet {
+    return this._fillPolygons(polygonList, o);
   }
 }

@@ -11,16 +11,6 @@ export class Point {
     this.y = y;
   }
 
-  static from(point: IPoint | number[] | number, y?: number) {
-    if (Array.isArray(point)) {
-      return new Point(point[0], point[1]);
-    }
-    if (typeof point === 'number') {
-      return new Point(point, y ?? point);
-    }
-    return new Point(point.x, point.y);
-  }
-
   set(x: number, y: number) {
     this.x = x;
     this.y = y;
@@ -62,6 +52,16 @@ export class Point {
 
   toArray() {
     return [this.x, this.y];
+  }
+
+  static from(point: IPoint | number[] | number, y?: number) {
+    if (Array.isArray(point)) {
+      return new Point(point[0], point[1]);
+    }
+    if (typeof point === 'number') {
+      return new Point(point, y ?? point);
+    }
+    return new Point(point.x, point.y);
   }
 
   /**

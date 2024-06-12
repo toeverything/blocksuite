@@ -87,68 +87,6 @@ export class AffineDragHandleWidget extends WidgetElement<
   RootBlockModel,
   EdgelessRootBlockComponent | PageRootBlockComponent
 > {
-  static override styles = styles;
-
-  static staticOptionRunner = new DragHandleOptionsRunner();
-
-  static registerOption(option: DragHandleOption) {
-    return AffineDragHandleWidget.staticOptionRunner.register(option);
-  }
-
-  @query('.affine-drag-handle-container')
-  private accessor _dragHandleContainer!: HTMLDivElement;
-
-  @query('.affine-drag-handle-grabber')
-  private accessor _dragHandleGrabber!: HTMLDivElement;
-
-  draggingElements: BlockElement[] = [];
-
-  dropBlockId = '';
-
-  dropType: DropType | null = null;
-
-  dragging = false;
-
-  dragPreview: DragPreview | null = null;
-
-  dropIndicator: DropIndicator | null = null;
-
-  lastDragPointerState: PointerEventState | null = null;
-
-  scale = 1;
-
-  noteScale = 1;
-
-  cumulativeParentScale = 1;
-
-  center: IVec = [0, 0];
-
-  rafID = 0;
-
-  @state()
-  private accessor _dragHoverRect: {
-    width: number;
-    height: number;
-    left: number;
-    top: number;
-  } | null = null;
-
-  private _lastHoveredBlockPath: string | null = null;
-
-  private _lastShowedBlock: { path: string; el: BlockElement } | null = null;
-
-  private _isHoverDragHandleVisible = false;
-
-  private _isDragHandleHovered = false;
-
-  private _isTopLevelDragHandleVisible = false;
-
-  private _anchorBlockId = '';
-
-  private _anchorBlockPath: string | null = null;
-
-  private _anchorModelDisposables: DisposableGroup | null = null;
-
   get optionRunner() {
     return AffineDragHandleWidget.staticOptionRunner;
   }
@@ -177,6 +115,125 @@ export class AffineDragHandleWidget extends WidgetElement<
     const edgelessElement = service.getElementById(this._anchorBlockId);
     return isTopLevelBlock(edgelessElement) ? edgelessElement : null;
   }
+
+  private get _viewportOffset() {
+    const rootElement = this.blockElement;
+    return {
+      left: rootElement.viewport.scrollLeft - rootElement.viewport.left,
+      top: rootElement.viewport.scrollTop - rootElement.viewport.top,
+    };
+  }
+
+  private get _rangeManager() {
+    assertExists(this.host.rangeManager);
+    return this.host.rangeManager;
+  }
+
+  static override styles = styles;
+
+  static staticOptionRunner = new DragHandleOptionsRunner();
+
+  @query('.affine-drag-handle-container')
+  private accessor _dragHandleContainer!: HTMLDivElement;
+
+  @query('.affine-drag-handle-grabber')
+  private accessor _dragHandleGrabber!: HTMLDivElement;
+
+  @state()
+  private accessor _dragHoverRect: {
+    width: number;
+    height: number;
+    left: number;
+    top: number;
+  } | null = null;
+
+  private _lastHoveredBlockPath: string | null = null;
+
+  private _lastShowedBlock: { path: string; el: BlockElement } | null = null;
+
+  private _isHoverDragHandleVisible = false;
+
+  private _isDragHandleHovered = false;
+
+  private _isTopLevelDragHandleVisible = false;
+
+  private _anchorBlockId = '';
+
+  private _anchorBlockPath: string | null = null;
+
+  private _anchorModelDisposables: DisposableGroup | null = null;
+
+  private _throttledPointerMoveHandler = throttle<UIEventHandler>(ctx => {
+    if (this.doc.readonly || this.dragging || !this.isConnected) {
+      this._hide();
+      return;
+    }
+    if (this._isTopLevelDragHandleVisible) return;
+
+    const state = ctx.get('pointerState');
+    const { target } = state.raw;
+    const element = captureEventTarget(target);
+    // When pointer not on block or on dragging, should do nothing
+    if (!element) return;
+
+    // When pointer on drag handle, should do nothing
+    if (element.closest('.affine-drag-handle-container')) return;
+
+    // TODO: need to optimize
+    // When pointer out of note block hover area or inside database, should hide drag handle
+    const point = new Point(state.raw.x, state.raw.y);
+
+    const closestNoteBlock = getClosestNoteBlock(
+      this.host,
+      this.rootElement,
+      point
+    ) as NoteBlockComponent | null;
+
+    this.noteScale = isInsidePageEditor(this.host)
+      ? 1
+      : closestNoteBlock?.model.edgeless.scale ?? 1;
+
+    if (
+      closestNoteBlock &&
+      this._canEditing(closestNoteBlock) &&
+      !isOutOfNoteBlock(
+        this.host,
+        closestNoteBlock,
+        point,
+        this.scale * this.noteScale
+      )
+    ) {
+      this._pointerMoveOnBlock(state);
+      return true;
+    }
+
+    this._hide();
+    return false;
+  }, 1000 / 60);
+
+  draggingElements: BlockElement[] = [];
+
+  dropBlockId = '';
+
+  dropType: DropType | null = null;
+
+  dragging = false;
+
+  dragPreview: DragPreview | null = null;
+
+  dropIndicator: DropIndicator | null = null;
+
+  lastDragPointerState: PointerEventState | null = null;
+
+  scale = 1;
+
+  noteScale = 1;
+
+  cumulativeParentScale = 1;
+
+  center: IVec = [0, 0];
+
+  rafID = 0;
 
   private _clearRaf() {
     if (this.rafID) {
@@ -609,14 +666,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     return this.host.view.getBlock(path);
   };
 
-  private get _viewportOffset() {
-    const rootElement = this.blockElement;
-    return {
-      left: rootElement.viewport.scrollLeft - rootElement.viewport.left,
-      top: rootElement.viewport.scrollTop - rootElement.viewport.top,
-    };
-  }
-
   // Need to consider block padding and scale
   private _getTopWithBlockElement = (blockElement: BlockElement) => {
     const computedStyle = getComputedStyle(blockElement);
@@ -910,11 +959,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     selection.set(selections);
   };
 
-  private get _rangeManager() {
-    assertExists(this.host.rangeManager);
-    return this.host.rangeManager;
-  }
-
   private _canEditing = (noteBlock: BlockElement) => {
     if (noteBlock.doc.id !== this.doc.id) return false;
 
@@ -1008,59 +1052,6 @@ export class AffineDragHandleWidget extends WidgetElement<
       this._lastHoveredBlockPath = this._anchorBlockPath;
     }
   };
-
-  private _pointerMoveHandler: UIEventHandler = ctx => {
-    if (this.doc.readonly || this.dragging || !this.isConnected) {
-      this._hide();
-      return;
-    }
-    if (this._isTopLevelDragHandleVisible) return;
-
-    const state = ctx.get('pointerState');
-    const { target } = state.raw;
-    const element = captureEventTarget(target);
-    // When pointer not on block or on dragging, should do nothing
-    if (!element) return;
-
-    // When pointer on drag handle, should do nothing
-    if (element.closest('.affine-drag-handle-container')) return;
-
-    // TODO: need to optimize
-    // When pointer out of note block hover area or inside database, should hide drag handle
-    const point = new Point(state.raw.x, state.raw.y);
-
-    const closestNoteBlock = getClosestNoteBlock(
-      this.host,
-      this.rootElement,
-      point
-    ) as NoteBlockComponent | null;
-
-    this.noteScale = isInsidePageEditor(this.host)
-      ? 1
-      : closestNoteBlock?.model.edgeless.scale ?? 1;
-
-    if (
-      closestNoteBlock &&
-      this._canEditing(closestNoteBlock) &&
-      !isOutOfNoteBlock(
-        this.host,
-        closestNoteBlock,
-        point,
-        this.scale * this.noteScale
-      )
-    ) {
-      this._pointerMoveOnBlock(state);
-      return true;
-    }
-
-    this._hide();
-    return false;
-  };
-
-  private _throttledPointerMoveHandler = throttle(
-    this._pointerMoveHandler,
-    1000 / 60
-  );
 
   /**
    * When click on drag handle
@@ -1716,6 +1707,10 @@ export class AffineDragHandleWidget extends WidgetElement<
         <div class="affine-drag-hover-rect" style=${hoverRectStyle}></div>
       </div>
     `;
+  }
+
+  static registerOption(option: DragHandleOption) {
+    return AffineDragHandleWidget.staticOptionRunner.register(option);
   }
 }
 

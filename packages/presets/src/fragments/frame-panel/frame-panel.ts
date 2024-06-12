@@ -69,14 +69,6 @@ const styles = css`
 `;
 
 export class FramePanel extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-
-  @property({ attribute: false })
-  accessor fitPadding: number[] = [50, 380, 50, 50];
-
   get doc() {
     return this.editor.doc;
   }
@@ -89,7 +81,15 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
     return this.editor.querySelector('affine-edgeless-root');
   }
 
+  static override styles = styles;
+
   private _editorDisposables: DisposableGroup | null = null;
+
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
+
+  @property({ attribute: false })
+  accessor fitPadding: number[] = [50, 380, 50, 50];
 
   private _clearEditorDisposables() {
     this._editorDisposables?.dispose();

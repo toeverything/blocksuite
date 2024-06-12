@@ -23,11 +23,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
-
-  @property({ attribute: false })
-  accessor loading = false;
-
   @state()
   private accessor _isSelected = false;
 
@@ -40,6 +35,11 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   private _isDragging = false;
 
   private _isResizing = false;
+
+  override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
+
+  @property({ attribute: false })
+  accessor loading = false;
 
   private _selectBlock() {
     const selectionManager = this.host.selection;

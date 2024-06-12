@@ -33,38 +33,6 @@ export class AttachmentBlockComponent extends BlockComponent<
   AttachmentBlockModel,
   AttachmentBlockService
 > {
-  override accessor useCaptionEditor = true;
-
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor loading = false;
-
-  @property({ attribute: false })
-  accessor error = false;
-
-  @property({ attribute: false })
-  accessor downloading = false;
-
-  @property({ attribute: false })
-  accessor blobUrl: string | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor allowEmbed = false;
-
-  @state()
-  private accessor _showOverlay = true;
-
-  private _isSelected = false;
-
-  private _isDragging = false;
-
-  private _isResizing = false;
-
-  private readonly _themeObserver = new ThemeObserver();
-
-  private _isInSurface = false;
-
   get isInSurface() {
     return this._isInSurface;
   }
@@ -80,6 +48,21 @@ export class AttachmentBlockComponent extends BlockComponent<
     if (this.isInSurface || !this.model.embed || !this.blobUrl) return;
     return renderEmbedView(this.model, this.blobUrl, this.service.maxFileSize);
   }
+
+  static override styles = styles;
+
+  @state()
+  private accessor _showOverlay = true;
+
+  private _isSelected = false;
+
+  private _isDragging = false;
+
+  private _isResizing = false;
+
+  private readonly _themeObserver = new ThemeObserver();
+
+  private _isInSurface = false;
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
     const selection = this.host.selection;
@@ -116,6 +99,23 @@ export class AttachmentBlockComponent extends BlockComponent<
       },
     };
   });
+
+  override accessor useCaptionEditor = true;
+
+  @property({ attribute: false })
+  accessor loading = false;
+
+  @property({ attribute: false })
+  accessor error = false;
+
+  @property({ attribute: false })
+  accessor downloading = false;
+
+  @property({ attribute: false })
+  accessor blobUrl: string | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor allowEmbed = false;
 
   private _selectBlock() {
     const selectionManager = this.host.selection;

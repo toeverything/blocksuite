@@ -13,6 +13,11 @@ import { styles } from '../styles.js';
 export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
+  @state()
+  private accessor _isSelected = false;
+
+  private readonly _themeObserver = new ThemeObserver();
+
   @property({ attribute: false })
   accessor bookmark!: BookmarkBlockComponent;
 
@@ -21,11 +26,6 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor error!: boolean;
-
-  @state()
-  private accessor _isSelected = false;
-
-  private readonly _themeObserver = new ThemeObserver();
 
   private _selectBlock() {
     const selectionManager = this.bookmark.host.selection;

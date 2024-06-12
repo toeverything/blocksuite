@@ -25,12 +25,6 @@ export class ListBlockComponent extends BlockComponent<
   ListBlockModel,
   ListBlockService
 > {
-  static override styles = listBlockStyles;
-
-  override accessor blockContainerStyles = {
-    margin: '10px 0',
-  };
-
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
     assertExists(inlineManager);
@@ -53,8 +47,29 @@ export class ListBlockComponent extends BlockComponent<
     return this.inlineManager.embedChecker;
   }
 
+  override get topContenteditableElement() {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
+      const el = this.closest<BlockElement>(
+        'affine-note, affine-edgeless-text'
+      );
+      return el;
+    }
+    return this.rootElement;
+  }
+
+  static override styles = listBlockStyles;
+
   @state()
   private accessor _isCollapsedWhenReadOnly = !!this.model?.collapsed;
+
+  @query('rich-text')
+  private accessor _richTextElement: RichText | null = null;
+
+  private _inlineRangeProvider: InlineRangeProvider | null = null;
+
+  override accessor blockContainerStyles = {
+    margin: '10px 0',
+  };
 
   private _select() {
     const selection = this.host.selection;
@@ -85,27 +100,6 @@ export class ListBlockComponent extends BlockComponent<
     this._select();
   };
 
-  @query('rich-text')
-  private accessor _richTextElement: RichText | null = null;
-
-  private _inlineRangeProvider: InlineRangeProvider | null = null;
-
-  override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockElement>(
-        'affine-note, affine-edgeless-text'
-      );
-      return el;
-    }
-    return this.rootElement;
-  }
-
-  override async getUpdateComplete() {
-    const result = await super.getUpdateComplete();
-    await this._richTextElement?.updateComplete;
-    return result;
-  }
-
   private _updateFollowingListSiblings() {
     this.updateComplete
       .then(() => {
@@ -118,31 +112,6 @@ export class ListBlockComponent extends BlockComponent<
         }
       })
       .catch(console.error);
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    bindContainerHotkey(this);
-
-    this._inlineRangeProvider = getInlineRangeProvider(this);
-
-    this._updateFollowingListSiblings();
-    this.disposables.add(
-      this.model.childrenUpdated.on(() => {
-        this._updateFollowingListSiblings();
-      })
-    );
-    this.disposables.add(
-      this.host.std.doc.slots.blockUpdated.on(e => {
-        if (e.type !== 'delete') return;
-        const deletedBlock = this.std.view.getBlock(e.id);
-        if (!deletedBlock) return;
-        if (this !== deletedBlock.nextElementSibling) return;
-        this._updateFollowingListSiblings();
-        return;
-      })
-    );
   }
 
   private _toggleChildren() {
@@ -179,6 +148,37 @@ export class ListBlockComponent extends BlockComponent<
     </div>`;
 
     return isCollapsed ? toggleRightTemplate : toggleDownTemplate;
+  }
+
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await this._richTextElement?.updateComplete;
+    return result;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    bindContainerHotkey(this);
+
+    this._inlineRangeProvider = getInlineRangeProvider(this);
+
+    this._updateFollowingListSiblings();
+    this.disposables.add(
+      this.model.childrenUpdated.on(() => {
+        this._updateFollowingListSiblings();
+      })
+    );
+    this.disposables.add(
+      this.host.std.doc.slots.blockUpdated.on(e => {
+        if (e.type !== 'delete') return;
+        const deletedBlock = this.std.view.getBlock(e.id);
+        if (!deletedBlock) return;
+        if (this !== deletedBlock.nextElementSibling) return;
+        this._updateFollowingListSiblings();
+        return;
+      })
+    );
   }
 
   override renderBlock(): TemplateResult<1> {

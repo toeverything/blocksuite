@@ -13,10 +13,6 @@ import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 export class EdgelessEraserToolButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
-  override type: EdgelessTool['type'] = 'eraser';
-
-  override enableActiveBackground = true;
-
   static override styles = css`
     :host {
       height: 100%;
@@ -39,6 +35,10 @@ export class EdgelessEraserToolButton extends EdgelessToolbarToolMixin(
       transform: translateY(0);
     }
   `;
+
+  override type: EdgelessTool['type'] = 'eraser';
+
+  override enableActiveBackground = true;
 
   override firstUpdated() {
     this.edgeless.bindHotKey(

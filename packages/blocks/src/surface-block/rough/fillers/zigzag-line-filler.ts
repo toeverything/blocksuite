@@ -11,14 +11,6 @@ export class ZigZagLineFiller implements PatternFiller {
     this.helper = helper;
   }
 
-  fillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet {
-    const gap = o.hachureGap < 0 ? o.strokeWidth * 4 : o.hachureGap;
-    const zo = o.zigzagOffset < 0 ? gap : o.zigzagOffset;
-    o = Object.assign({}, o, { hachureGap: gap + zo });
-    const lines = polygonHachureLines(polygonList, o);
-    return { type: 'fillSketch', ops: this.zigzagLines(lines, zo, o) };
-  }
-
   private zigzagLines(lines: Line[], zo: number, o: ResolvedOptions): Op[] {
     const ops: Op[] = [];
     lines.forEach(line => {
@@ -60,5 +52,13 @@ export class ZigZagLineFiller implements PatternFiller {
       }
     });
     return ops;
+  }
+
+  fillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet {
+    const gap = o.hachureGap < 0 ? o.strokeWidth * 4 : o.hachureGap;
+    const zo = o.zigzagOffset < 0 ? gap : o.zigzagOffset;
+    o = Object.assign({}, o, { hachureGap: gap + zo });
+    const lines = polygonHachureLines(polygonList, o);
+    return { type: 'fillSketch', ops: this.zigzagLines(lines, zo, o) };
   }
 }

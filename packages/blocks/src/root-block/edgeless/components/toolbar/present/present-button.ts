@@ -10,8 +10,6 @@ import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 export class EdgelessPresentButton extends QuickToolMixin(
   EdgelessToolbarToolMixin(LitElement)
 ) {
-  override type: EdgelessTool['type'] = 'frameNavigator';
-
   static override styles = css`
     :host {
       display: flex;
@@ -27,6 +25,8 @@ export class EdgelessPresentButton extends QuickToolMixin(
       font-size: 0;
     }
   `;
+
+  override type: EdgelessTool['type'] = 'frameNavigator';
 
   override render() {
     return html`<edgeless-tool-icon-button

@@ -12,17 +12,9 @@ import { EdgelessToolController } from './index.js';
 export class BrushToolController extends EdgelessToolController<BrushTool> {
   static BRUSH_POP_GAP = 20;
 
-  readonly tool = {
-    type: 'brush',
-  } as BrushTool;
-
   private _draggingElement: BrushElementModel | null = null;
 
   private _draggingElementId: string | null = null;
-
-  protected _draggingPathPoints: number[][] | null = null;
-
-  protected _draggingPathPressures: number[] | null = null;
 
   private _lastPoint: IVec | null = null;
 
@@ -31,6 +23,52 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   private _pressureSupportedPointerIds = new Set<number>();
 
   private _lastPopLength = 0;
+
+  protected _draggingPathPoints: number[][] | null = null;
+
+  protected _draggingPathPressures: number[] | null = null;
+
+  readonly tool = {
+    type: 'brush',
+  } as BrushTool;
+
+  private _getStraightLineType(currentPoint: IVec) {
+    const lastPoint = this._lastPoint;
+    if (!lastPoint) return null;
+
+    // check angle to determine if the line is horizontal or vertical
+    const dx = currentPoint[0] - lastPoint[0];
+    const dy = currentPoint[1] - lastPoint[1];
+    const absAngleRadius = Math.abs(Math.atan2(dy, dx));
+    return absAngleRadius < Math.PI / 4 || absAngleRadius > 3 * (Math.PI / 4)
+      ? 'horizontal'
+      : 'vertical';
+  }
+
+  private _tryGetPressurePoints(e: PointerEventState) {
+    assertExists(this._draggingPathPressures);
+    const pressures = [...this._draggingPathPressures, e.pressure];
+    this._draggingPathPressures = pressures;
+
+    // we do not use the `e.raw.pointerType` to detect because it is not reliable,
+    // such as some digital pens do not support pressure even thought the `e.raw.pointerType` is equal to `'pen'`
+    const pointerId = e.raw.pointerId;
+    const pressureChanged = pressures.some(
+      pressure => pressure !== pressures[0]
+    );
+
+    if (pressureChanged) {
+      this._pressureSupportedPointerIds.add(pointerId);
+    }
+
+    assertExists(this._draggingPathPoints);
+    const points = this._draggingPathPoints;
+    if (this._pressureSupportedPointerIds.has(pointerId)) {
+      return points.map(([x, y], i) => [x, y, pressures[i]]);
+    } else {
+      return points;
+    }
+  }
 
   onContainerPointerDown(): void {
     noop();
@@ -168,43 +206,5 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
   afterModeSwitch() {
     noop();
-  }
-
-  private _getStraightLineType(currentPoint: IVec) {
-    const lastPoint = this._lastPoint;
-    if (!lastPoint) return null;
-
-    // check angle to determine if the line is horizontal or vertical
-    const dx = currentPoint[0] - lastPoint[0];
-    const dy = currentPoint[1] - lastPoint[1];
-    const absAngleRadius = Math.abs(Math.atan2(dy, dx));
-    return absAngleRadius < Math.PI / 4 || absAngleRadius > 3 * (Math.PI / 4)
-      ? 'horizontal'
-      : 'vertical';
-  }
-
-  private _tryGetPressurePoints(e: PointerEventState) {
-    assertExists(this._draggingPathPressures);
-    const pressures = [...this._draggingPathPressures, e.pressure];
-    this._draggingPathPressures = pressures;
-
-    // we do not use the `e.raw.pointerType` to detect because it is not reliable,
-    // such as some digital pens do not support pressure even thought the `e.raw.pointerType` is equal to `'pen'`
-    const pointerId = e.raw.pointerId;
-    const pressureChanged = pressures.some(
-      pressure => pressure !== pressures[0]
-    );
-
-    if (pressureChanged) {
-      this._pressureSupportedPointerIds.add(pointerId);
-    }
-
-    assertExists(this._draggingPathPoints);
-    const points = this._draggingPathPoints;
-    if (this._pressureSupportedPointerIds.has(pointerId)) {
-      return points.map(([x, y], i) => [x, y, pressures[i]]);
-    } else {
-      return points;
-    }
   }
 }

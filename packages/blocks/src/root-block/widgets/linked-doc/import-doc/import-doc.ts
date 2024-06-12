@@ -214,12 +214,6 @@ export class ImportDoc extends WithDisposable(LitElement) {
     this._onMouseMove = this._onMouseMove.bind(this);
   }
 
-  override updated(changedProps: PropertyValues) {
-    if (changedProps.has('x') || changedProps.has('y')) {
-      this.containerEl.style.transform = `translate(${this.x}px, ${this.y}px)`;
-    }
-  }
-
   private _onMouseDown(event: MouseEvent) {
     this._startX = event.clientX - this.x;
     this._startY = event.clientY - this.y;
@@ -345,6 +339,12 @@ export class ImportDoc extends WithDisposable(LitElement) {
       'https://affine.pro/blog/import-your-data-from-notion-into-affine',
       '_blank'
     );
+  }
+
+  override updated(changedProps: PropertyValues) {
+    if (changedProps.has('x') || changedProps.has('y')) {
+      this.containerEl.style.transform = `translate(${this.x}px, ${this.y}px)`;
+    }
   }
 
   override render() {

@@ -10,11 +10,11 @@ import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 export class EdgelessImageToolButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
-  // There is no 'image' type, just use 'default' here, since image has no active state
-  override type: EdgelessTool['type'] = 'default';
-
   @state()
   private accessor _imageLoading = false;
+
+  // There is no 'image' type, just use 'default' here, since image has no active state
+  override type: EdgelessTool['type'] = 'default';
 
   private async _addImages() {
     this._imageLoading = true;

@@ -26,8 +26,15 @@ interface Distance {
 const ALIGN_THRESHOLD = 5;
 
 export class EdgelessSnapManager extends Overlay {
-  constructor(private _rootService: EdgelessRootService) {
-    super();
+  private get _surface() {
+    const surfaceModel = this._rootService.doc.getBlockByFlavour(
+      'affine:surface'
+    )[0] as SurfaceBlockModel;
+
+    return this._rootService.std.view.viewFromPath(
+      'block',
+      buildPath(surfaceModel)
+    ) as SurfaceBlockComponent;
   }
 
   private _alignableBounds: Bound[] = [];
@@ -50,103 +57,16 @@ export class EdgelessSnapManager extends Overlay {
    */
   private _distributedAlignLines: [Point, Point][] = [];
 
+  constructor(private _rootService: EdgelessRootService) {
+    super();
+  }
+
   private _getBoundsWithRotationByAlignable(
     alignable: BlockSuite.EdgelessModelType
   ) {
     const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
     const [x, y, w, h] = deserializeXYWH(alignable.xywh);
     return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
-  }
-
-  private get _surface() {
-    const surfaceModel = this._rootService.doc.getBlockByFlavour(
-      'affine:surface'
-    )[0] as SurfaceBlockModel;
-
-    return this._rootService.std.view.viewFromPath(
-      'block',
-      buildPath(surfaceModel)
-    ) as SurfaceBlockComponent;
-  }
-
-  setupAlignables(alignables: BlockSuite.EdgelessModelType[]): Bound {
-    if (alignables.length === 0) return new Bound();
-
-    const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
-      const connectors = this._rootService.getConnectors(el);
-
-      if (connectors.length > 0) {
-        prev = prev.concat(connectors);
-      }
-
-      return prev;
-    }, [] as ConnectorElementModel[]);
-
-    const { viewport } = this._rootService;
-    const viewportBounds = Bound.from(viewport.viewportBounds);
-    this._surface.renderer.addOverlay(this);
-    const canvasElements = this._rootService.elements;
-    const excludes = [...alignables, ...connectors];
-    this._alignableBounds = [];
-    (
-      [
-        ...this._rootService.blocks,
-        ...canvasElements,
-      ] as BlockSuite.EdgelessModelType[]
-    ).forEach(alignable => {
-      const bounds = this._getBoundsWithRotationByAlignable(alignable);
-      if (
-        viewportBounds.isOverlapWithBound(bounds) &&
-        !excludes.includes(alignable)
-      ) {
-        this._alignableBounds.push(bounds);
-      }
-    });
-
-    return alignables.reduce((prev, element) => {
-      const bounds = this._getBoundsWithRotationByAlignable(element);
-      return prev.unite(bounds);
-    }, Bound.deserialize(alignables[0].xywh));
-  }
-
-  cleanupAlignables() {
-    this._alignableBounds = [];
-    this._intraGraphicAlignLines = [];
-    this._distributedAlignLines = [];
-    this._surface.renderer.removeOverlay(this);
-  }
-
-  align(bound: Bound): { dx: number; dy: number } {
-    const rst = { dx: 0, dy: 0 };
-    const threshold = ALIGN_THRESHOLD;
-
-    const { viewport } = this._rootService;
-
-    this._intraGraphicAlignLines = [];
-    this._distributedAlignLines = [];
-
-    for (const other of this._alignableBounds) {
-      const closestDistances = this._calculateClosestDistances(bound, other);
-
-      if (closestDistances.absXDistance < threshold) {
-        this._updateXAlignPoint(rst, bound, other, closestDistances);
-      }
-
-      if (closestDistances.absYDistance < threshold) {
-        this._updateYAlignPoint(rst, bound, other, closestDistances);
-      }
-    }
-
-    // point align prority is higher than distribute align
-    if (rst.dx === 0) {
-      this._alignDistributeHorizontally(rst, bound, threshold, viewport);
-    }
-
-    if (rst.dy === 0) {
-      this._alignDistributeVertically(rst, bound, threshold, viewport);
-    }
-    this._draw();
-    return rst;
   }
 
   private _calculateClosestDistances(bound: Bound, other: Bound): Distance {
@@ -408,6 +328,86 @@ export class EdgelessSnapManager extends Overlay {
 
   private _draw() {
     this._surface.refresh();
+  }
+
+  setupAlignables(alignables: BlockSuite.EdgelessModelType[]): Bound {
+    if (alignables.length === 0) return new Bound();
+
+    const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
+      const connectors = this._rootService.getConnectors(el);
+
+      if (connectors.length > 0) {
+        prev = prev.concat(connectors);
+      }
+
+      return prev;
+    }, [] as ConnectorElementModel[]);
+
+    const { viewport } = this._rootService;
+    const viewportBounds = Bound.from(viewport.viewportBounds);
+    this._surface.renderer.addOverlay(this);
+    const canvasElements = this._rootService.elements;
+    const excludes = [...alignables, ...connectors];
+    this._alignableBounds = [];
+    (
+      [
+        ...this._rootService.blocks,
+        ...canvasElements,
+      ] as BlockSuite.EdgelessModelType[]
+    ).forEach(alignable => {
+      const bounds = this._getBoundsWithRotationByAlignable(alignable);
+      if (
+        viewportBounds.isOverlapWithBound(bounds) &&
+        !excludes.includes(alignable)
+      ) {
+        this._alignableBounds.push(bounds);
+      }
+    });
+
+    return alignables.reduce((prev, element) => {
+      const bounds = this._getBoundsWithRotationByAlignable(element);
+      return prev.unite(bounds);
+    }, Bound.deserialize(alignables[0].xywh));
+  }
+
+  cleanupAlignables() {
+    this._alignableBounds = [];
+    this._intraGraphicAlignLines = [];
+    this._distributedAlignLines = [];
+    this._surface.renderer.removeOverlay(this);
+  }
+
+  align(bound: Bound): { dx: number; dy: number } {
+    const rst = { dx: 0, dy: 0 };
+    const threshold = ALIGN_THRESHOLD;
+
+    const { viewport } = this._rootService;
+
+    this._intraGraphicAlignLines = [];
+    this._distributedAlignLines = [];
+
+    for (const other of this._alignableBounds) {
+      const closestDistances = this._calculateClosestDistances(bound, other);
+
+      if (closestDistances.absXDistance < threshold) {
+        this._updateXAlignPoint(rst, bound, other, closestDistances);
+      }
+
+      if (closestDistances.absYDistance < threshold) {
+        this._updateYAlignPoint(rst, bound, other, closestDistances);
+      }
+    }
+
+    // point align prority is higher than distribute align
+    if (rst.dx === 0) {
+      this._alignDistributeHorizontally(rst, bound, threshold, viewport);
+    }
+
+    if (rst.dy === 0) {
+      this._alignDistributeVertically(rst, bound, threshold, viewport);
+    }
+    this._draw();
+    return rst;
   }
 
   override render(ctx: CanvasRenderingContext2D) {

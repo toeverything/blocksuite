@@ -54,6 +54,47 @@ export class DatabaseBlockComponent extends BlockComponent<
   DatabaseBlockModel,
   DatabaseBlockService
 > {
+  override get topContenteditableElement() {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
+      const note = this.closest<NoteBlockComponent>('affine-note');
+      return note;
+    }
+    return this.rootElement;
+  }
+
+  get view() {
+    return this.dataView.expose;
+  }
+
+  get dataSource(): DatabaseBlockDataSource {
+    if (!this._dataSource) {
+      this._dataSource = new DatabaseBlockDataSource(this.host, {
+        pageId: this.host.doc.id,
+        blockId: this.model.id,
+      });
+    }
+    return this._dataSource;
+  }
+
+  get viewSource(): ViewSource {
+    if (!this._viewSource) {
+      this._viewSource = new DatabaseBlockViewSource(this.model);
+    }
+    return this._viewSource;
+  }
+
+  get getFlag() {
+    return this.host.doc.awarenessStore.getFlag.bind(
+      this.host.doc.awarenessStore
+    );
+  }
+
+  get innerModalWidget() {
+    return this.rootElement!.widgetElements[
+      AFFINE_INNER_MODAL_WIDGET
+    ] as AffineInnerModalWidget;
+  }
+
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}
     affine-database {
@@ -88,44 +129,52 @@ export class DatabaseBlockComponent extends BlockComponent<
     }
   `;
 
+  private dataView = new DataView();
+
+  private _dataSource?: DatabaseBlockDataSource;
+
+  private _viewSource?: ViewSource;
+
   indicator = new DragIndicator();
 
-  onDrag = (evt: MouseEvent, id: string): (() => void) => {
-    const result = getDropResult(evt);
-    if (result && result.rect) {
-      document.body.append(this.indicator);
-      this.indicator.rect = Rect.fromLWTH(
-        result.rect.left,
-        result.rect.width,
-        result.rect.top,
-        result.rect.height
-      );
-      return () => {
-        this.indicator.remove();
-        const model = this.doc.getBlockById(id);
-        const target = this.doc.getBlockById(result.dropBlockId);
-        let parent = this.doc.getParent(result.dropBlockId);
-        const shouldInsertIn = result.dropType === 'in';
-        if (shouldInsertIn) {
-          parent = target;
-        }
-        if (model && target && parent) {
-          if (shouldInsertIn) {
-            this.doc.moveBlocks([model], parent);
-          } else {
-            this.doc.moveBlocks(
-              [model],
-              parent,
-              target,
-              result.dropType === 'before'
-            );
-          }
-        }
-      };
+  toolsWidget: DataViewWidget = widgetPresets.createTools({
+    table: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+      widgetPresets.tools.tableAddRow,
+    ],
+    kanban: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+    ],
+  });
+
+  headerWidget: DataViewWidget = defineUniComponent(
+    (props: DataViewWidgetProps) => {
+      return html`
+        <div style="margin-bottom: 16px;display:flex;flex-direction: column">
+          <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
+            ${this.renderTitle(props.viewMethods)} ${this.renderDatabaseOps()}
+          </div>
+          <div
+            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
+          >
+            <div style="flex:1">
+              ${renderUniLit(widgetPresets.viewBar, props)}
+            </div>
+            ${renderUniLit(this.toolsWidget, props)}
+          </div>
+          ${renderUniLit(widgetPresets.filterBar, props)}
+        </div>
+      `;
     }
-    this.indicator.remove();
-    return () => {};
-  };
+  );
+
+  selectionUpdated = new Slot<DataViewSelection | undefined>();
 
   private _clickDatabaseOps = (e: MouseEvent) => {
     popMenu(e.currentTarget as HTMLElement, {
@@ -186,13 +235,52 @@ export class DatabaseBlockComponent extends BlockComponent<
     </div>`;
   }
 
-  override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>('affine-note');
-      return note;
+  private renderTitle = (dataViewMethod: DataViewExpose) => {
+    const addRow = () => dataViewMethod.addRow?.('start');
+    return html` <affine-database-title
+      style="overflow: hidden"
+      .titleText="${this.model.title}"
+      .readonly="${this.doc.readonly}"
+      .onPressEnterKey="${addRow}"
+    ></affine-database-title>`;
+  };
+
+  onDrag = (evt: MouseEvent, id: string): (() => void) => {
+    const result = getDropResult(evt);
+    if (result && result.rect) {
+      document.body.append(this.indicator);
+      this.indicator.rect = Rect.fromLWTH(
+        result.rect.left,
+        result.rect.width,
+        result.rect.top,
+        result.rect.height
+      );
+      return () => {
+        this.indicator.remove();
+        const model = this.doc.getBlockById(id);
+        const target = this.doc.getBlockById(result.dropBlockId);
+        let parent = this.doc.getParent(result.dropBlockId);
+        const shouldInsertIn = result.dropType === 'in';
+        if (shouldInsertIn) {
+          parent = target;
+        }
+        if (model && target && parent) {
+          if (shouldInsertIn) {
+            this.doc.moveBlocks([model], parent);
+          } else {
+            this.doc.moveBlocks(
+              [model],
+              parent,
+              target,
+              result.dropType === 'before'
+            );
+          }
+        }
+      };
     }
-    return this.rootElement;
-  }
+    this.indicator.remove();
+    return () => {};
+  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -262,80 +350,6 @@ export class DatabaseBlockComponent extends BlockComponent<
     );
   }
 
-  private dataView = new DataView();
-
-  get view() {
-    return this.dataView.expose;
-  }
-
-  private _dataSource?: DatabaseBlockDataSource;
-
-  get dataSource(): DatabaseBlockDataSource {
-    if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDataSource(this.host, {
-        pageId: this.host.doc.id,
-        blockId: this.model.id,
-      });
-    }
-    return this._dataSource;
-  }
-
-  private renderTitle = (dataViewMethod: DataViewExpose) => {
-    const addRow = () => dataViewMethod.addRow?.('start');
-    return html` <affine-database-title
-      style="overflow: hidden"
-      .titleText="${this.model.title}"
-      .readonly="${this.doc.readonly}"
-      .onPressEnterKey="${addRow}"
-    ></affine-database-title>`;
-  };
-
-  toolsWidget: DataViewWidget = widgetPresets.createTools({
-    table: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-      widgetPresets.tools.tableAddRow,
-    ],
-    kanban: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-    ],
-  });
-
-  headerWidget: DataViewWidget = defineUniComponent(
-    (props: DataViewWidgetProps) => {
-      return html`
-        <div style="margin-bottom: 16px;display:flex;flex-direction: column">
-          <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
-            ${this.renderTitle(props.viewMethods)} ${this.renderDatabaseOps()}
-          </div>
-          <div
-            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
-          >
-            <div style="flex:1">
-              ${renderUniLit(widgetPresets.viewBar, props)}
-            </div>
-            ${renderUniLit(this.toolsWidget, props)}
-          </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
-        </div>
-      `;
-    }
-  );
-
-  private _viewSource?: ViewSource;
-
-  get viewSource(): ViewSource {
-    if (!this._viewSource) {
-      this._viewSource = new DatabaseBlockViewSource(this.model);
-    }
-    return this._viewSource;
-  }
-
   setSelection = (selection: DataViewSelection | undefined) => {
     this.selection.setGroup(
       'note',
@@ -349,14 +363,6 @@ export class DatabaseBlockComponent extends BlockComponent<
         : []
     );
   };
-
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
-
-  get getFlag() {
-    return this.host.doc.awarenessStore.getFlag.bind(
-      this.host.doc.awarenessStore
-    );
-  }
 
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
@@ -373,12 +379,6 @@ export class DatabaseBlockComponent extends BlockComponent<
       }),
     };
   };
-
-  get innerModalWidget() {
-    return this.rootElement!.widgetElements[
-      AFFINE_INNER_MODAL_WIDGET
-    ] as AffineInnerModalWidget;
-  }
 
   override renderBlock() {
     return html`

@@ -137,6 +137,15 @@ export class AIAnswerText extends WithDisposable(LitElement) {
     ${customHeadingStyles}
   `;
 
+  @query('.ai-answer-text-container')
+  private accessor _container!: HTMLDivElement;
+
+  private _doc!: Doc;
+
+  private _answers: string[] = [];
+
+  private _timer?: ReturnType<typeof setInterval> | null = null;
+
   @property({ attribute: false })
   accessor host!: EditorHost;
 
@@ -149,21 +158,12 @@ export class AIAnswerText extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor state: AffineAIPanelState | undefined = undefined;
 
-  @query('.ai-answer-text-container')
-  private accessor _container!: HTMLDivElement;
-
   private _onWheel(e: MouseEvent) {
     e.stopPropagation();
     if (this.state === 'generating') {
       e.preventDefault();
     }
   }
-
-  private _doc!: Doc;
-
-  private _answers: string[] = [];
-
-  private _timer?: ReturnType<typeof setInterval> | null = null;
 
   private _clearTimer = () => {
     if (this._timer) {

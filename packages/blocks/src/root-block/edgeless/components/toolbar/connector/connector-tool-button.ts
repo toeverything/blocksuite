@@ -41,6 +41,12 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
     }
   `;
 
+  protected override readonly _states = [
+    'mode',
+    'stroke',
+    'strokeWidth',
+  ] as const;
+
   @state()
   accessor mode: ConnectorMode = ConnectorMode.Curve;
 
@@ -53,12 +59,6 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
   override type = 'connector' as const;
 
   override _type = 'connector' as const;
-
-  protected override readonly _states = [
-    'mode',
-    'stroke',
-    'strokeWidth',
-  ] as const;
 
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;

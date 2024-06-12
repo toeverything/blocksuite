@@ -21,8 +21,6 @@ export interface DetailSlots {
 export interface DataSource {
   addPropertyConfigList: ColumnConfig[];
 
-  getPropertyMeta(type: string): ColumnMeta;
-
   properties: string[];
   rows: string[];
   cellGetValue: (rowId: string, propertyId: string) => unknown;
@@ -63,20 +61,36 @@ export interface DataSource {
 
   detailSlots: DetailSlots;
 
+  getPropertyMeta(type: string): ColumnMeta;
+
   rowMove(rowId: string, position: InsertToPosition): void;
 
   getContext<T>(key: DataViewContextKey<T>): T | undefined;
 }
 
 export abstract class BaseDataSource implements DataSource {
+  get detailSlots(): DetailSlots {
+    return {};
+  }
+
   context = new Map<DataViewContextKey<unknown>, unknown>();
 
-  getContext<T>(key: DataViewContextKey<T>): T | undefined {
-    return this.context.get(key) as T;
-  }
+  abstract properties: string[];
+
+  abstract rows: string[];
+
+  abstract slots: {
+    update: Slot;
+  };
+
+  abstract addPropertyConfigList: ColumnConfig[];
 
   protected setContext<T>(key: DataViewContextKey<T>, value: T): void {
     this.context.set(key, value);
+  }
+
+  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+    return this.context.get(key) as T;
   }
 
   abstract cellChangeValue(
@@ -102,8 +116,6 @@ export abstract class BaseDataSource implements DataSource {
   }
 
   abstract cellGetValue(rowId: string, propertyId: string): unknown;
-
-  abstract properties: string[];
 
   abstract propertyAdd(
     insertToPosition: InsertToPosition,
@@ -153,19 +165,7 @@ export abstract class BaseDataSource implements DataSource {
 
   abstract rowDelete(ids: string[]): void;
 
-  abstract rows: string[];
-
-  abstract slots: {
-    update: Slot;
-  };
-
-  abstract addPropertyConfigList: ColumnConfig[];
-
   abstract getPropertyMeta(type: string): ColumnMeta;
-
-  get detailSlots(): DetailSlots {
-    return {};
-  }
 
   abstract rowMove(rowId: string, position: InsertToPosition): void;
 }

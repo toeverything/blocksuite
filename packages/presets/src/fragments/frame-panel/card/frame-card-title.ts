@@ -57,6 +57,8 @@ const styles = css`
 export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
+  private _titleDisposables: DisposableGroup | null = null;
+
   @property({ attribute: false })
   accessor frame!: FrameBlockModel;
 
@@ -71,8 +73,6 @@ export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
 
   @query('.frame-card-title-container .card-title')
   accessor titleContentElement!: HTMLElement;
-
-  private _titleDisposables: DisposableGroup | null = null;
 
   private _updateElement = () => {
     this.requestUpdate();

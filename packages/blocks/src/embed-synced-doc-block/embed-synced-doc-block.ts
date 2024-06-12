@@ -31,44 +31,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   EmbedSyncedDocModel,
   EmbedSyncedDocBlockService
 > {
-  override accessor useCaptionEditor = false;
-
-  static override styles = blockStyles;
-
-  @state()
-  private accessor _editorMode: 'page' | 'edgeless' = 'page';
-
-  @state()
-  private accessor _docUpdatedAt: Date = new Date();
-
-  @state()
-  private accessor _loading = false;
-
-  @state()
-  private accessor _error = false;
-
-  @state()
-  private accessor _deleted = false;
-
-  @state()
-  private accessor _cycle = false;
-
-  @state()
-  private accessor _editing = false;
-
-  @state()
-  private accessor _empty = false;
-
-  @query(
-    ':scope > .affine-block-component > .embed-block-container > affine-embed-synced-doc-card'
-  )
-  accessor syncedDocCard: EmbedSyncedDocCard | null = null;
-
-  @query(
-    ':scope > .affine-block-component > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > div > editor-host'
-  )
-  accessor syncedDocEditorHost: EditorHost | null = null;
-
   get syncedDoc() {
     return this.std.collection.getDoc(this.model.pageId, {
       readonly: true,
@@ -103,6 +65,44 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   private get _rootService() {
     return this.std.spec.getService('affine:page');
   }
+
+  static override styles = blockStyles;
+
+  @state()
+  private accessor _editorMode: 'page' | 'edgeless' = 'page';
+
+  @state()
+  private accessor _docUpdatedAt: Date = new Date();
+
+  @state()
+  private accessor _loading = false;
+
+  @state()
+  private accessor _error = false;
+
+  @state()
+  private accessor _deleted = false;
+
+  @state()
+  private accessor _cycle = false;
+
+  @state()
+  private accessor _editing = false;
+
+  @state()
+  private accessor _empty = false;
+
+  override accessor useCaptionEditor = false;
+
+  @query(
+    ':scope > .affine-block-component > .embed-block-container > affine-embed-synced-doc-card'
+  )
+  accessor syncedDocCard: EmbedSyncedDocCard | null = null;
+
+  @query(
+    ':scope > .affine-block-component > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > div > editor-host'
+  )
+  accessor syncedDocEditorHost: EditorHost | null = null;
 
   private _checkCycle() {
     let editorHost: EditorHost | null = this.host;
@@ -223,93 +223,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     event.stopPropagation();
   };
 
-  open = () => {
-    const syncedDocId = this.model.pageId;
-    if (syncedDocId === this.doc.id) return;
-
-    const rootElement = this.std.view.viewFromPath('block', [
-      this.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
-    assertExists(rootElement);
-
-    rootElement.slots.docLinkClicked.emit({ docId: syncedDocId });
-  };
-
-  covertToInline = () => {
-    const { doc, pageId } = this.model;
-    const parent = doc.getParent(this.model);
-    assertExists(parent);
-    const index = parent.children.indexOf(this.model);
-
-    const yText = new DocCollection.Y.Text();
-    yText.insert(0, REFERENCE_NODE);
-    yText.format(0, REFERENCE_NODE.length, {
-      reference: { type: 'LinkedPage', pageId },
-    });
-    const text = new doc.Text(yText);
-
-    doc.addBlock(
-      'affine:paragraph',
-      {
-        text,
-      },
-      parent,
-      index
-    );
-
-    doc.deleteBlock(this.model);
-  };
-
-  convertToCard = () => {
-    const { id, doc, pageId, caption, xywh } = this.model;
-
-    if (this.isInSurface) {
-      const style = 'vertical';
-      const bound = Bound.deserialize(xywh);
-      bound.w = EMBED_CARD_WIDTH[style];
-      bound.h = EMBED_CARD_HEIGHT[style];
-
-      const edgeless = this.edgeless;
-      assertExists(edgeless);
-      const newId = edgeless.service.addBlock(
-        'affine:embed-linked-doc',
-        { pageId, xywh: bound.serialize(), style, caption },
-        edgeless.surface.model
-      );
-
-      this.std.command.exec('reassociateConnectors', {
-        oldId: id,
-        newId,
-      });
-
-      edgeless.service.selection.set({
-        editing: false,
-        elements: [newId],
-      });
-    } else {
-      const parent = doc.getParent(this.model);
-      assertExists(parent);
-      const index = parent.children.indexOf(this.model);
-
-      doc.addBlock(
-        'affine:embed-linked-doc',
-        { pageId, caption },
-        parent,
-        index
-      );
-
-      this.std.selection.setGroup('note', []);
-    }
-    doc.deleteBlock(this.model);
-  };
-
-  refreshData = () => {
-    this._load().catch(e => {
-      console.error(e);
-      this._error = true;
-    });
-  };
-
   private _isClickAtBorder(
     event: MouseEvent,
     element: HTMLElement,
@@ -335,63 +248,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this._load().catch(e => {
-      console.error(e);
-      this._error = true;
-    });
-
-    this.contentEditable = 'false';
-
-    this.model.propsUpdated.on(({ key }) => {
-      if (key === 'pageId' || key === 'style') {
-        this._load().catch(e => {
-          console.error(e);
-          this._error = true;
-        });
-      }
-    });
-
-    if (this.isInSurface) {
-      const surface = this.surface;
-      assertExists(surface);
-
-      this.disposables.add(
-        this.model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-    }
-  }
-
-  override firstUpdated() {
-    this.disposables.addFromEvent(this, 'click', e => {
-      e.stopPropagation();
-      if (this._isClickAtBorder(e, this)) {
-        e.preventDefault();
-        this._selectBlock();
-      }
-    });
-
-    // Forward docLinkClicked event from the synced doc
-    const syncedDocRootService =
-      this.syncedDocEditorHost?.std.spec.getService('affine:page');
-    if (syncedDocRootService) {
-      this.disposables.add(
-        syncedDocRootService.slots.docLinkClicked.on(({ docId }) => {
-          this._rootService.slots.docLinkClicked.emit({ docId });
-        })
-      );
-    }
-  }
-
-  override updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
-    this.syncedDocCard?.requestUpdate();
   }
 
   private _renderSyncedView = () => {
@@ -498,6 +354,150 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       `
     );
   };
+
+  open = () => {
+    const syncedDocId = this.model.pageId;
+    if (syncedDocId === this.doc.id) return;
+
+    const rootElement = this.std.view.viewFromPath('block', [
+      this.doc.root?.id ?? '',
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
+
+    rootElement.slots.docLinkClicked.emit({ docId: syncedDocId });
+  };
+
+  covertToInline = () => {
+    const { doc, pageId } = this.model;
+    const parent = doc.getParent(this.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(this.model);
+
+    const yText = new DocCollection.Y.Text();
+    yText.insert(0, REFERENCE_NODE);
+    yText.format(0, REFERENCE_NODE.length, {
+      reference: { type: 'LinkedPage', pageId },
+    });
+    const text = new doc.Text(yText);
+
+    doc.addBlock(
+      'affine:paragraph',
+      {
+        text,
+      },
+      parent,
+      index
+    );
+
+    doc.deleteBlock(this.model);
+  };
+
+  convertToCard = () => {
+    const { id, doc, pageId, caption, xywh } = this.model;
+
+    if (this.isInSurface) {
+      const style = 'vertical';
+      const bound = Bound.deserialize(xywh);
+      bound.w = EMBED_CARD_WIDTH[style];
+      bound.h = EMBED_CARD_HEIGHT[style];
+
+      const edgeless = this.edgeless;
+      assertExists(edgeless);
+      const newId = edgeless.service.addBlock(
+        'affine:embed-linked-doc',
+        { pageId, xywh: bound.serialize(), style, caption },
+        edgeless.surface.model
+      );
+
+      this.std.command.exec('reassociateConnectors', {
+        oldId: id,
+        newId,
+      });
+
+      edgeless.service.selection.set({
+        editing: false,
+        elements: [newId],
+      });
+    } else {
+      const parent = doc.getParent(this.model);
+      assertExists(parent);
+      const index = parent.children.indexOf(this.model);
+
+      doc.addBlock(
+        'affine:embed-linked-doc',
+        { pageId, caption },
+        parent,
+        index
+      );
+
+      this.std.selection.setGroup('note', []);
+    }
+    doc.deleteBlock(this.model);
+  };
+
+  refreshData = () => {
+    this._load().catch(e => {
+      console.error(e);
+      this._error = true;
+    });
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._load().catch(e => {
+      console.error(e);
+      this._error = true;
+    });
+
+    this.contentEditable = 'false';
+
+    this.model.propsUpdated.on(({ key }) => {
+      if (key === 'pageId' || key === 'style') {
+        this._load().catch(e => {
+          console.error(e);
+          this._error = true;
+        });
+      }
+    });
+
+    if (this.isInSurface) {
+      const surface = this.surface;
+      assertExists(surface);
+
+      this.disposables.add(
+        this.model.propsUpdated.on(() => {
+          this.requestUpdate();
+        })
+      );
+    }
+  }
+
+  override firstUpdated() {
+    this.disposables.addFromEvent(this, 'click', e => {
+      e.stopPropagation();
+      if (this._isClickAtBorder(e, this)) {
+        e.preventDefault();
+        this._selectBlock();
+      }
+    });
+
+    // Forward docLinkClicked event from the synced doc
+    const syncedDocRootService =
+      this.syncedDocEditorHost?.std.spec.getService('affine:page');
+    if (syncedDocRootService) {
+      this.disposables.add(
+        syncedDocRootService.slots.docLinkClicked.on(({ docId }) => {
+          this._rootService.slots.docLinkClicked.emit({ docId });
+        })
+      );
+    }
+  }
+
+  override updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+    this.syncedDocCard?.requestUpdate();
+  }
 
   override renderBlock() {
     delete this.dataset.nestedEditor;

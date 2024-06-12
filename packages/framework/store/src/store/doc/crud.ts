@@ -7,11 +7,6 @@ import { internalPrimitives, type Schema } from '../../schema/index.js';
 import type { YBlock } from './index.js';
 
 export class DocCRUD {
-  constructor(
-    private readonly _yBlocks: Y.Map<YBlock>,
-    private readonly _schema: Schema
-  ) {}
-
   get root(): string | null {
     let rootId: string | null = null;
     this._yBlocks.forEach(yBlock => {
@@ -24,6 +19,27 @@ export class DocCRUD {
       }
     });
     return rootId;
+  }
+
+  constructor(
+    private readonly _yBlocks: Y.Map<YBlock>,
+    private readonly _schema: Schema
+  ) {}
+
+  private _getSiblings<T>(
+    id: string,
+    fn: (index: number, parent: YBlock) => T
+  ) {
+    const parentId = this.getParent(id);
+    if (!parentId) return null;
+    const parent = this._yBlocks.get(parentId);
+    if (!parent) return null;
+
+    const children = parent.get('sys:children');
+    const index = children.toArray().indexOf(id);
+    if (index === -1) return null;
+
+    return fn(index, parent);
   }
 
   getParent(targetId: string): string | null {
@@ -285,22 +301,6 @@ export class DocCRUD {
         targetParentChildren.insert(insertIndex, blocksToMove);
       }
     );
-  }
-
-  private _getSiblings<T>(
-    id: string,
-    fn: (index: number, parent: YBlock) => T
-  ) {
-    const parentId = this.getParent(id);
-    if (!parentId) return null;
-    const parent = this._yBlocks.get(parentId);
-    if (!parent) return null;
-
-    const children = parent.get('sys:children');
-    const index = children.toArray().indexOf(id);
-    if (index === -1) return null;
-
-    return fn(index, parent);
   }
 
   getNext(id: string) {

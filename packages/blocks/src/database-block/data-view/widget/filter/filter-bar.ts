@@ -57,6 +57,8 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor setData!: (filter: FilterGroup) => void;
 
+  updateMoreFilterPanel?: () => void;
+
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
       ...this.data,
@@ -65,10 +67,6 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       ),
     });
   };
-
-  override updated() {
-    this.updateMoreFilterPanel?.();
-  }
 
   private addFilter = (e: MouseEvent) => {
     const position = eventToVRect(e);
@@ -106,6 +104,17 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     });
   };
 
+  private deleteFilter(i: number) {
+    this.setData({
+      ...this.data,
+      conditions: this.data.conditions.filter((_, index) => index !== i),
+    });
+  }
+
+  override updated() {
+    this.updateMoreFilterPanel?.();
+  }
+
   renderMoreFilter = (count: number): TemplateResult => {
     return html` <div
       class="dv-shadow-2 dv-round-8"
@@ -122,8 +131,6 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       ${this.renderAddFilter()}
     </div>`;
   };
-
-  updateMoreFilterPanel?: () => void;
 
   showMoreFilter = (e: MouseEvent, count: number) => {
     const ins = renderTemplate(() => this.renderMoreFilter(count));
@@ -222,13 +229,6 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
         .renderMore="${this.renderMore}"
       ></component-overflow>
     `;
-  }
-
-  private deleteFilter(i: number) {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.filter((_, index) => index !== i),
-    });
   }
 }
 

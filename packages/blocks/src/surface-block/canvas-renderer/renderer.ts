@@ -40,6 +40,18 @@ type RendererOptions = {
 };
 
 export class Renderer extends Viewport {
+  get stackingCanvas() {
+    return this._stackingCanvas;
+  }
+
+  private _stackingCanvas: HTMLCanvasElement[] = [];
+
+  private _overlays = new Set<Overlay>();
+
+  private _shouldUpdate = false;
+
+  private _disposables = new DisposableGroup();
+
   canvas: HTMLCanvasElement;
 
   ctx: CanvasRenderingContext2D;
@@ -51,18 +63,6 @@ export class Renderer extends Viewport {
   provider: Partial<EnvProvider>;
 
   stackingCanvasUpdated = new Slot<HTMLCanvasElement[]>();
-
-  private _stackingCanvas: HTMLCanvasElement[] = [];
-
-  private _overlays = new Set<Overlay>();
-
-  private _shouldUpdate = false;
-
-  private _disposables = new DisposableGroup();
-
-  get stackingCanvas() {
-    return this._stackingCanvas;
-  }
 
   constructor(options: RendererOptions) {
     super();
@@ -147,26 +147,6 @@ export class Renderer extends Viewport {
     );
 
     updateStackingCanvas();
-  }
-
-  getVariableColor(val: string) {
-    return this.provider.getVariableColor?.(val) ?? val;
-  }
-
-  refresh() {
-    this._shouldUpdate = true;
-  }
-
-  /**
-   * Used to attach main canvas, main canvas will always exist
-   * @param container
-   */
-  attach(container: HTMLElement) {
-    this.setContainer(container);
-    container.append(this.canvas);
-
-    this._resetSize();
-    this._loop();
   }
 
   /**
@@ -300,6 +280,26 @@ export class Renderer extends Viewport {
     }
 
     ctx.restore();
+  }
+
+  getVariableColor(val: string) {
+    return this.provider.getVariableColor?.(val) ?? val;
+  }
+
+  refresh() {
+    this._shouldUpdate = true;
+  }
+
+  /**
+   * Used to attach main canvas, main canvas will always exist
+   * @param container
+   */
+  attach(container: HTMLElement) {
+    this.setContainer(container);
+    container.append(this.canvas);
+
+    this._resetSize();
+    this._loop();
   }
 
   getCanvasByBound(

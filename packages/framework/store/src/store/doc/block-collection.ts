@@ -39,82 +39,6 @@ export type GetDocOptions = {
 };
 
 export class BlockCollection extends Space<FlatBlockMap> {
-  private readonly _collection: DocCollection;
-
-  private readonly _idGenerator: IdGenerator;
-
-  private readonly _docCRUD: DocCRUD;
-
-  private _history!: Y.UndoManager;
-
-  /** Indicate whether the block tree is ready */
-  private _ready = false;
-
-  private _shouldTransact = true;
-
-  private _docMap = {
-    undefined: new WeakMap<BlockSelector, Doc>(),
-    true: new WeakMap<BlockSelector, Doc>(),
-    false: new WeakMap<BlockSelector, Doc>(),
-  };
-
-  readonly slots = {
-    historyUpdated: new Slot(),
-    yBlockUpdated: new Slot<
-      | {
-          type: 'add';
-          id: string;
-        }
-      | {
-          type: 'delete';
-          id: string;
-        }
-    >(),
-  };
-
-  constructor({
-    id,
-    collection,
-    doc,
-    awarenessStore,
-    idGenerator = uuidv4,
-  }: DocOptions) {
-    super(id, doc, awarenessStore);
-    this._collection = collection;
-    this._idGenerator = idGenerator;
-    this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
-  }
-
-  private _getReadonlyKey(readonly?: boolean): 'true' | 'false' | 'undefined' {
-    return (readonly?.toString() as 'true' | 'false') ?? 'undefined';
-  }
-
-  getDoc({ selector = defaultBlockSelector, readonly }: GetDocOptions = {}) {
-    const readonlyKey = this._getReadonlyKey(readonly);
-
-    if (this._docMap[readonlyKey].has(selector)) {
-      return this._docMap[readonlyKey].get(selector)!;
-    }
-
-    const doc = new Doc({
-      blockCollection: this,
-      crud: this._docCRUD,
-      schema: this.collection.schema,
-      selector,
-      readonly,
-    });
-
-    this._docMap[readonlyKey].set(selector, doc);
-
-    return doc;
-  }
-
-  clearSelector(selector: BlockSelector, readonly?: boolean) {
-    const readonlyKey = this._getReadonlyKey(readonly);
-
-    this._docMap[readonlyKey].delete(selector);
-  }
-
   get readonly() {
     return this.awarenessStore.isReadonly(this);
   }
@@ -175,6 +99,148 @@ export class BlockCollection extends Space<FlatBlockMap> {
 
   get Text() {
     return Text;
+  }
+
+  private readonly _collection: DocCollection;
+
+  private readonly _idGenerator: IdGenerator;
+
+  private readonly _docCRUD: DocCRUD;
+
+  private _history!: Y.UndoManager;
+
+  /** Indicate whether the block tree is ready */
+  private _ready = false;
+
+  private _shouldTransact = true;
+
+  private _docMap = {
+    undefined: new WeakMap<BlockSelector, Doc>(),
+    true: new WeakMap<BlockSelector, Doc>(),
+    false: new WeakMap<BlockSelector, Doc>(),
+  };
+
+  readonly slots = {
+    historyUpdated: new Slot(),
+    yBlockUpdated: new Slot<
+      | {
+          type: 'add';
+          id: string;
+        }
+      | {
+          type: 'delete';
+          id: string;
+        }
+    >(),
+  };
+
+  constructor({
+    id,
+    collection,
+    doc,
+    awarenessStore,
+    idGenerator = uuidv4,
+  }: DocOptions) {
+    super(id, doc, awarenessStore);
+    this._collection = collection;
+    this._idGenerator = idGenerator;
+    this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
+  }
+
+  private _getReadonlyKey(readonly?: boolean): 'true' | 'false' | 'undefined' {
+    return (readonly?.toString() as 'true' | 'false') ?? 'undefined';
+  }
+
+  private _initYBlocks() {
+    const { _yBlocks } = this;
+    _yBlocks.observeDeep(this._handleYEvents);
+    this._history = new Y.UndoManager([_yBlocks], {
+      trackedOrigins: new Set([this._ySpaceDoc.clientID]),
+    });
+
+    this._history.on('stack-cleared', this._historyObserver);
+    this._history.on('stack-item-added', this._historyObserver);
+    this._history.on('stack-item-popped', this._historyObserver);
+    this._history.on('stack-item-updated', this._historyObserver);
+  }
+
+  private _historyObserver = () => {
+    this.slots.historyUpdated.emit();
+  };
+
+  private _handleYBlockAdd(id: string) {
+    this.slots.yBlockUpdated.emit({ type: 'add', id });
+  }
+
+  private _handleYBlockDelete(id: string) {
+    this.slots.yBlockUpdated.emit({ type: 'delete', id });
+  }
+
+  private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
+    // event on top-level block store
+    if (event.target !== this._yBlocks) {
+      return;
+    }
+    event.keys.forEach((value, id) => {
+      try {
+        if (value.action === 'add') {
+          this._handleYBlockAdd(id);
+          return;
+        }
+        if (value.action === 'delete') {
+          this._handleYBlockDelete(id);
+          return;
+        }
+      } catch (e) {
+        console.error('An error occurred while handling Yjs event:');
+        console.error(e);
+      }
+    });
+  }
+
+  // Handle all the events that happen at _any_ level (potentially deep inside the structure).
+  // So, we apply a listener at the top level for the flat structure of the current
+  // doc/space container.
+  private _handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
+    events.forEach(event => this._handleYEvent(event));
+  };
+
+  private _handleVersion() {
+    // Initialization from empty yDoc, indicating that the document is new.
+    if (!this.collection.meta.hasVersion) {
+      this.collection.meta.writeVersion(this.collection);
+    } else {
+      // Initialization from existing yDoc, indicating that the document is loaded from storage.
+      if (this.awarenessStore.getFlag('enable_legacy_validation')) {
+        this.collection.meta.validateVersion(this.collection);
+      }
+    }
+  }
+
+  getDoc({ selector = defaultBlockSelector, readonly }: GetDocOptions = {}) {
+    const readonlyKey = this._getReadonlyKey(readonly);
+
+    if (this._docMap[readonlyKey].has(selector)) {
+      return this._docMap[readonlyKey].get(selector)!;
+    }
+
+    const doc = new Doc({
+      blockCollection: this,
+      crud: this._docCRUD,
+      schema: this.collection.schema,
+      selector,
+      readonly,
+    });
+
+    this._docMap[readonlyKey].set(selector, doc);
+
+    return doc;
+  }
+
+  clearSelector(selector: BlockSelector, readonly?: boolean) {
+    const readonlyKey = this._getReadonlyKey(readonly);
+
+    this._docMap[readonlyKey].delete(selector);
   }
 
   withoutTransact(callback: () => void) {
@@ -249,72 +315,6 @@ export class BlockCollection extends Space<FlatBlockMap> {
     if (this.ready) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
       this._yBlocks.clear();
-    }
-  }
-
-  private _initYBlocks() {
-    const { _yBlocks } = this;
-    _yBlocks.observeDeep(this._handleYEvents);
-    this._history = new Y.UndoManager([_yBlocks], {
-      trackedOrigins: new Set([this._ySpaceDoc.clientID]),
-    });
-
-    this._history.on('stack-cleared', this._historyObserver);
-    this._history.on('stack-item-added', this._historyObserver);
-    this._history.on('stack-item-popped', this._historyObserver);
-    this._history.on('stack-item-updated', this._historyObserver);
-  }
-
-  private _historyObserver = () => {
-    this.slots.historyUpdated.emit();
-  };
-
-  private _handleYBlockAdd(id: string) {
-    this.slots.yBlockUpdated.emit({ type: 'add', id });
-  }
-
-  private _handleYBlockDelete(id: string) {
-    this.slots.yBlockUpdated.emit({ type: 'delete', id });
-  }
-
-  private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
-    // event on top-level block store
-    if (event.target !== this._yBlocks) {
-      return;
-    }
-    event.keys.forEach((value, id) => {
-      try {
-        if (value.action === 'add') {
-          this._handleYBlockAdd(id);
-          return;
-        }
-        if (value.action === 'delete') {
-          this._handleYBlockDelete(id);
-          return;
-        }
-      } catch (e) {
-        console.error('An error occurred while handling Yjs event:');
-        console.error(e);
-      }
-    });
-  }
-
-  // Handle all the events that happen at _any_ level (potentially deep inside the structure).
-  // So, we apply a listener at the top level for the flat structure of the current
-  // doc/space container.
-  private _handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
-    events.forEach(event => this._handleYEvent(event));
-  };
-
-  private _handleVersion() {
-    // Initialization from empty yDoc, indicating that the document is new.
-    if (!this.collection.meta.hasVersion) {
-      this.collection.meta.writeVersion(this.collection);
-    } else {
-      // Initialization from existing yDoc, indicating that the document is loaded from storage.
-      if (this.awarenessStore.getFlag('enable_legacy_validation')) {
-        this.collection.meta.validateVersion(this.collection);
-      }
     }
   }
 }

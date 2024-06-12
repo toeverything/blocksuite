@@ -16,8 +16,6 @@ import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 export class EdgelessDefaultToolButton extends QuickToolMixin(
   WithDisposable(LitElement)
 ) {
-  override type = 'lasso' as const;
-
   static override styles = css`
     .current-icon {
       transition: 100ms;
@@ -35,6 +33,8 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
     }
   `;
 
+  override type = 'lasso' as const;
+
   @query('.current-icon')
   accessor currentIcon!: HTMLInputElement;
 
@@ -49,20 +49,6 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
   private _fadeIn() {
     this.currentIcon.style.opacity = '1';
     this.currentIcon.style.transform = `translateY(0px)`;
-  }
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    this.disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(tool => {
-        if (tool.type === 'lasso') {
-          const { mode } = tool;
-          this.curMode = mode;
-          // this.edgeless.service.editPropsStore.record(this.type, { mode });
-        }
-      })
-    );
   }
 
   private _changeTool = () => {
@@ -80,6 +66,20 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
       this._fadeIn();
     }, 100);
   };
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    this.disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(tool => {
+        if (tool.type === 'lasso') {
+          const { mode } = tool;
+          this.curMode = mode;
+          // this.edgeless.service.editPropsStore.record(this.type, { mode });
+        }
+      })
+    );
+  }
 
   override render() {
     const type = this.edgelessTool?.type;

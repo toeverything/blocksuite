@@ -26,6 +26,18 @@ export const AFFINE_DOC_REMOTE_SELECTION_WIDGET =
 
 @customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET)
 export class AffineDocRemoteSelectionWidget extends WidgetElement {
+  private get _selectionManager() {
+    return this.host.selection;
+  }
+
+  private get _container() {
+    return this.offsetParent;
+  }
+
+  private get _containerRect() {
+    return this.offsetParent?.getBoundingClientRect();
+  }
+
   // avoid being unable to select text by mouse click or drag
   static override styles = css`
     :host {
@@ -41,61 +53,11 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     user?: UserInfo;
   }> = [];
 
-  private get _selectionManager() {
-    return this.host.selection;
-  }
-
-  private get _container() {
-    return this.offsetParent;
-  }
-
-  private get _containerRect() {
-    return this.offsetParent?.getBoundingClientRect();
-  }
-
   private _resizeObserver: ResizeObserver = new ResizeObserver(() => {
     this.requestUpdate();
   });
 
   private _abortController = new AbortController();
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this.disposables.add(
-      this._selectionManager.slots.remoteChanged.on(
-        throttle((remoteSelections: Map<number, BaseSelection[]>) => {
-          const status = this.doc.awarenessStore.getStates();
-          this._remoteSelections = [...remoteSelections.entries()].map(
-            ([id, selections]) => {
-              return {
-                id,
-                selections,
-                user: status.get(id)?.user,
-              };
-            }
-          );
-
-          this.requestUpdate();
-        }, 100)
-      )
-    );
-    this.handleEvent('wheel', () => {
-      this.requestUpdate();
-    });
-
-    this.disposables.addFromEvent(window, 'resize', () => {
-      this.requestUpdate();
-    });
-
-    this._remoteColorManager = new RemoteColorManager(this.host);
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._resizeObserver.disconnect();
-    this._abortController.abort();
-  }
 
   private _getSelectionRect(selections: BaseSelection[]): SelectionRect[] {
     if (!isRootElement(this.blockElement)) {
@@ -234,6 +196,44 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     }
 
     return null;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.disposables.add(
+      this._selectionManager.slots.remoteChanged.on(
+        throttle((remoteSelections: Map<number, BaseSelection[]>) => {
+          const status = this.doc.awarenessStore.getStates();
+          this._remoteSelections = [...remoteSelections.entries()].map(
+            ([id, selections]) => {
+              return {
+                id,
+                selections,
+                user: status.get(id)?.user,
+              };
+            }
+          );
+
+          this.requestUpdate();
+        }, 100)
+      )
+    );
+    this.handleEvent('wheel', () => {
+      this.requestUpdate();
+    });
+
+    this.disposables.addFromEvent(window, 'resize', () => {
+      this.requestUpdate();
+    });
+
+    this._remoteColorManager = new RemoteColorManager(this.host);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._resizeObserver.disconnect();
+    this._abortController.abort();
   }
 
   override render() {

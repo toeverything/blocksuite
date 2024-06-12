@@ -77,20 +77,12 @@ const ALIGNMENT_LIST = [
 
 @customElement('edgeless-align-button')
 export class EdgelessAlignButton extends WithDisposable(LitElement) {
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   private get elements() {
     return this.edgeless.service.selection.selectedElements;
   }
 
-  override firstUpdated() {
-    this._disposables.add(
-      this.edgeless.service.selection.slots.updated.on(() =>
-        this.requestUpdate()
-      )
-    );
-  }
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _updateXYWH(ele: BlockSuite.EdgelessModelType, bound: Bound) {
     if (ele instanceof ConnectorElementModel) {
@@ -264,6 +256,14 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
         this._alignDistributeVertically();
         break;
     }
+  }
+
+  override firstUpdated() {
+    this._disposables.add(
+      this.edgeless.service.selection.slots.updated.on(() =>
+        this.requestUpdate()
+      )
+    );
   }
 
   override render() {

@@ -33,9 +33,19 @@ export interface DataViewManager {
 
   get filterVisible(): boolean;
 
-  filterSetVisible(visible: boolean): void;
-
   get vars(): Variable[];
+
+  get allColumnConfig(): ColumnConfig[];
+
+  get isDeleted(): boolean;
+
+  get detailSlots(): DetailSlots;
+
+  slots: {
+    update: Slot;
+  };
+
+  filterSetVisible(visible: boolean): void;
 
   updateFilter(filter: FilterGroup): void;
 
@@ -103,13 +113,7 @@ export interface DataViewManager {
 
   columnUpdateData(columnId: string, data: Record<string, unknown>): void;
 
-  get allColumnConfig(): ColumnConfig[];
-
   getIcon(type: string): UniComponent | undefined;
-
-  slots: {
-    update: Slot;
-  };
 
   onCellUpdate(
     rowId: string,
@@ -122,10 +126,6 @@ export interface DataViewManager {
 
   duplicateView(): void;
   deleteView(): void;
-
-  get isDeleted(): boolean;
-
-  get detailSlots(): DetailSlots;
 
   getContext<T>(key: DataViewContextKey<T>): T | undefined;
 }
@@ -190,10 +190,6 @@ export interface DataViewColumnManager<
 export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
   implements DataViewManager
 {
-  getContext<T>(key: DataViewContextKey<T>): T | undefined {
-    return this.dataSource.getContext(key);
-  }
-
   protected get dataSource(): DataSource {
     assertExists(this._dataSource, 'data source is not set');
     return this._dataSource;
@@ -204,6 +200,59 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     return this._viewSource;
   }
 
+  get rows(): string[] {
+    return this.filteredRows(this.searchString);
+  }
+
+  get columnManagerList(): ReturnType<this['columnGet']>[] {
+    return this.columns.map(
+      id => this.columnGet(id) as ReturnType<this['columnGet']>
+    );
+  }
+
+  get readonly(): boolean {
+    return false;
+  }
+
+  abstract get columns(): string[];
+
+  abstract get detailColumns(): string[];
+
+  abstract get columnsWithoutFilter(): string[];
+
+  abstract get id(): string;
+
+  abstract get type(): string;
+
+  get allColumnConfig(): ColumnConfig[] {
+    return this.dataSource.addPropertyConfigList;
+  }
+
+  abstract get isDeleted(): boolean;
+
+  get detailSlots(): DetailSlots {
+    return this.dataSource.detailSlots;
+  }
+
+  abstract get filter(): FilterGroup;
+
+  get vars(): Variable[] {
+    return this.columnsWithoutFilter.map(id => {
+      const v = this.columnGet(id);
+      const propertyMeta = this.dataSource.getPropertyMeta(v.type);
+      return {
+        id: v.id,
+        name: v.name,
+        type: propertyMeta.model.dataType(v.data),
+        icon: v.icon,
+      };
+    });
+  }
+
+  get filterVisible(): boolean {
+    return this._filterVisible ?? this.filter.conditions.length > 0;
+  }
+
   private _viewSource?: SingleViewSource<ViewData>;
 
   private _dataSource?: DataSource;
@@ -212,23 +261,9 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
 
   private _filterVisible?: boolean;
 
-  get rows(): string[] {
-    return this.filteredRows(this.searchString);
-  }
-
-  init(dataSource: DataSource, viewSource: SingleViewSource<ViewData>) {
-    this._dataSource = dataSource;
-    this._viewSource = viewSource;
-    this._dataSource.slots.update.pipe(this.slots.update);
-    this._viewSource.updateSlot.pipe(this.slots.update);
-  }
-
-  setSearch(str: string): void {
-    this.searchString = str;
-    this.slots.update.emit();
-  }
-
-  abstract isShow(rowId: string): boolean;
+  slots = {
+    update: new Slot(),
+  };
 
   private filteredRows(searchString: string) {
     return this.dataSource.rows.filter(id => {
@@ -246,19 +281,23 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     });
   }
 
-  get columnManagerList(): ReturnType<this['columnGet']>[] {
-    return this.columns.map(
-      id => this.columnGet(id) as ReturnType<this['columnGet']>
-    );
+  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+    return this.dataSource.getContext(key);
   }
 
-  get readonly(): boolean {
-    return false;
+  init(dataSource: DataSource, viewSource: SingleViewSource<ViewData>) {
+    this._dataSource = dataSource;
+    this._viewSource = viewSource;
+    this._dataSource.slots.update.pipe(this.slots.update);
+    this._viewSource.updateSlot.pipe(this.slots.update);
   }
 
-  slots = {
-    update: new Slot(),
-  };
+  setSearch(str: string): void {
+    this.searchString = str;
+    this.slots.update.emit();
+  }
+
+  abstract isShow(rowId: string): boolean;
 
   onCellUpdate(
     rowId: string,
@@ -403,26 +442,12 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     this.dataSource.propertyChangeType(columnId, type);
   }
 
-  abstract get columns(): string[];
-
-  abstract get detailColumns(): string[];
-
-  abstract get columnsWithoutFilter(): string[];
-
   rowAdd(insertPosition: InsertToPosition | number): string {
     return this.dataSource.rowAdd(insertPosition);
   }
 
   rowDelete(ids: string[]): void {
     this.dataSource.rowDelete(ids);
-  }
-
-  abstract get id(): string;
-
-  abstract get type(): string;
-
-  get allColumnConfig(): ColumnConfig[] {
-    return this.dataSource.addPropertyConfigList;
   }
 
   getIcon(type: string): UniComponent | undefined {
@@ -433,36 +458,11 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
 
   abstract deleteView(): void;
 
-  abstract get isDeleted(): boolean;
-
-  get detailSlots(): DetailSlots {
-    return this.dataSource.detailSlots;
-  }
-
-  abstract get filter(): FilterGroup;
-
   abstract updateFilter(filter: FilterGroup): void;
-
-  get vars(): Variable[] {
-    return this.columnsWithoutFilter.map(id => {
-      const v = this.columnGet(id);
-      const propertyMeta = this.dataSource.getPropertyMeta(v.type);
-      return {
-        id: v.id,
-        name: v.name,
-        type: propertyMeta.model.dataType(v.data),
-        icon: v.icon,
-      };
-    });
-  }
 
   filterSetVisible(visible: boolean): void {
     this._filterVisible = visible;
     this.slots.update.emit();
-  }
-
-  get filterVisible(): boolean {
-    return this._filterVisible ?? this.filter.conditions.length > 0;
   }
 
   rowMove(rowId: string, position: InsertToPosition): void {

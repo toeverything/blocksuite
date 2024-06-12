@@ -21,10 +21,6 @@ import type { EdgelessTemplatePanel } from './template-panel.js';
 export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
-  override type: EdgelessTool['type'] = 'template';
-
-  override enableActiveBackground = true;
-
   static override styles = css`
     :host {
       position: relative;
@@ -124,6 +120,10 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
   private _cleanup: (() => void) | null = null;
 
   private _prevTool: EdgelessTool | null = null;
+
+  override type: EdgelessTool['type'] = 'template';
+
+  override enableActiveBackground = true;
 
   private _togglePanel() {
     if (this._openedPanel) {

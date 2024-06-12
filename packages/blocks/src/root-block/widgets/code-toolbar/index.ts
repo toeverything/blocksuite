@@ -18,42 +18,13 @@ export class AffineCodeToolbarWidget extends WidgetElement<
   CodeBlockModel,
   CodeBlockComponent
 > {
-  items: CodeToolbarItem[] = [];
-
-  moreItems: CodeToolbarMoreItem[] = [];
-
-  clearConfig() {
-    this.items = [];
-    this.moreItems = [];
-    return this;
-  }
-
-  addItems(items: CodeToolbarItem[], index?: number) {
-    if (index === undefined) {
-      this.items.push(...items);
-    } else {
-      this.items.splice(index, 0, ...items);
-    }
-    return this;
-  }
-
-  addMoreItems(menuItemsBuilder: CodeToolbarMoreItem[], index?: number) {
-    if (index === undefined) {
-      this.moreItems.push(...menuItemsBuilder);
-    } else {
-      this.moreItems.splice(index, 0, ...menuItemsBuilder);
-    }
-    return this;
-  }
-
-  setupDefaultConfig() {
-    this.clearConfig().addItems(defaultItems).addMoreItems(defaultMoreItems);
-    return this;
-  }
-
   private _hoverController: HoverController | null = null;
 
   private _isActivated = false;
+
+  items: CodeToolbarItem[] = [];
+
+  moreItems: CodeToolbarMoreItem[] = [];
 
   private _setHoverController = () => {
     this._hoverController = null;
@@ -123,6 +94,35 @@ export class AffineCodeToolbarWidget extends WidgetElement<
       return;
     };
   };
+
+  clearConfig() {
+    this.items = [];
+    this.moreItems = [];
+    return this;
+  }
+
+  addItems(items: CodeToolbarItem[], index?: number) {
+    if (index === undefined) {
+      this.items.push(...items);
+    } else {
+      this.items.splice(index, 0, ...items);
+    }
+    return this;
+  }
+
+  addMoreItems(menuItemsBuilder: CodeToolbarMoreItem[], index?: number) {
+    if (index === undefined) {
+      this.moreItems.push(...menuItemsBuilder);
+    } else {
+      this.moreItems.splice(index, 0, ...menuItemsBuilder);
+    }
+    return this;
+  }
+
+  setupDefaultConfig() {
+    this.clearConfig().addItems(defaultItems).addMoreItems(defaultMoreItems);
+    return this;
+  }
 
   override firstUpdated() {
     if (!this.items.length || !this.moreItems.length) {

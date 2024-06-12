@@ -6,31 +6,18 @@ import { HtmlAdapter, PlainTextAdapter } from '../../_common/adapters/index.js';
 import { pasteMiddleware } from '../../root-block/clipboard/middlewares/index.js';
 
 export class CodeClipboardController {
-  protected _disposables = new DisposableGroup();
-
-  host: BlockElement;
-
   private get _std() {
     return this.host.std;
   }
 
   private _clipboard!: Clipboard;
 
+  protected _disposables = new DisposableGroup();
+
+  host: BlockElement;
+
   constructor(host: BlockElement) {
     this.host = host;
-  }
-
-  hostConnected() {
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
-    this._clipboard = new Clipboard(this._std);
-    this.host.handleEvent('paste', this.onPagePaste);
-    this._init();
-  }
-
-  hostDisconnected() {
-    this._disposables.dispose();
   }
 
   protected _init = () => {
@@ -47,6 +34,19 @@ export class CodeClipboardController {
       },
     });
   };
+
+  hostConnected() {
+    if (this._disposables.disposed) {
+      this._disposables = new DisposableGroup();
+    }
+    this._clipboard = new Clipboard(this._std);
+    this.host.handleEvent('paste', this.onPagePaste);
+    this._init();
+  }
+
+  hostDisconnected() {
+    this._disposables.dispose();
+  }
 
   onPagePaste: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;

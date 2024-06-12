@@ -90,6 +90,12 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
     }
   `;
 
+  @query('.menu-container')
+  private accessor _menuContainer!: HTMLDivElement;
+
+  @query('.slide-menu-content')
+  private accessor _slideMenuContent!: HTMLDivElement;
+
   @consume({ context: edgelessToolbarSlotsContext })
   accessor toolbarSlots!: EdgelessToolbarSlots;
 
@@ -102,12 +108,6 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor height = '40px';
 
-  @query('.menu-container')
-  private accessor _menuContainer!: HTMLDivElement;
-
-  @query('.slide-menu-content')
-  private accessor _slideMenuContent!: HTMLDivElement;
-
   private _toggleSlideButton() {
     const scrollLeft = this._menuContainer.scrollLeft;
     const menuWidth = this._menuContainer.clientWidth;
@@ -116,16 +116,6 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
     const leftMax = this._slideMenuContent.clientWidth - menuWidth + 2; // border is 2
     this.showPrevious = scrollLeft > leftMin;
     this.showNext = scrollLeft < leftMax;
-  }
-
-  override firstUpdated() {
-    setTimeout(this._toggleSlideButton.bind(this), 0);
-    this._disposables.addFromEvent(this._menuContainer, 'scrollend', () => {
-      this._toggleSlideButton();
-    });
-    this._disposables.add(
-      this.toolbarSlots.resize.on(() => this._toggleSlideButton())
-    );
   }
 
   private _handleWheel(event: WheelEvent) {
@@ -142,6 +132,16 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       left: Math.max(0, Math.min(newLeft, totalWidth)),
       behavior: 'smooth',
     });
+  }
+
+  override firstUpdated() {
+    setTimeout(this._toggleSlideButton.bind(this), 0);
+    this._disposables.addFromEvent(this._menuContainer, 'scrollend', () => {
+      this._toggleSlideButton();
+    });
+    this._disposables.add(
+      this.toolbarSlots.resize.on(() => this._toggleSlideButton())
+    );
   }
 
   override render() {

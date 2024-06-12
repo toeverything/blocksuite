@@ -39,18 +39,6 @@ function notEqual<K extends keyof BrushProps>(key: K, value: BrushProps[K]) {
 
 @customElement('edgeless-change-brush-button')
 export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
-  @property({ attribute: false })
-  accessor elements: BrushElementModel[] = [];
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @state()
-  private accessor _selectedColor: string | null = null;
-
-  @state()
-  private accessor _selectedSize: LineWidth | null = null;
-
   get surface() {
     return this.edgeless.surface;
   }
@@ -62,6 +50,26 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   get service() {
     return this.surface.edgeless.service;
   }
+
+  get selectedColor() {
+    return this._selectedColor ?? getMostCommonColor(this.elements);
+  }
+
+  get selectedSize() {
+    return this._selectedSize ?? getMostCommonSize(this.elements);
+  }
+
+  @state()
+  private accessor _selectedColor: string | null = null;
+
+  @state()
+  private accessor _selectedSize: LineWidth | null = null;
+
+  @property({ attribute: false })
+  accessor elements: BrushElementModel[] = [];
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _setBrushProp<K extends keyof BrushProps>(
     key: K,
@@ -84,14 +92,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this._setBrushProp('color', color);
     this._selectedColor = color;
   };
-
-  get selectedColor() {
-    return this._selectedColor ?? getMostCommonColor(this.elements);
-  }
-
-  get selectedSize() {
-    return this._selectedSize ?? getMostCommonSize(this.elements);
-  }
 
   override render() {
     const { selectedSize, selectedColor } = this;

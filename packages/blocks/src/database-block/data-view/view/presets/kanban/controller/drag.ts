@@ -10,10 +10,6 @@ import { KanbanGroup } from '../group.js';
 import type { DataViewKanban } from '../kanban-view.js';
 
 export class KanbanDragController implements ReactiveController {
-  constructor(private host: DataViewKanban) {
-    this.host.addController(this);
-  }
-
   get scrollContainer() {
     const scrollContainer = this.host.querySelector(
       '.affine-data-view-kanban-groups'
@@ -23,6 +19,10 @@ export class KanbanDragController implements ReactiveController {
   }
 
   dropPreview = createDropPreview();
+
+  constructor(private host: DataViewKanban) {
+    this.host.addController(this);
+  }
 
   getInsertPosition = (
     evt: MouseEvent

@@ -21,12 +21,6 @@ export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
   'brush',
   readonly ['color', 'lineWidth']
 >(LitElement) {
-  override type = 'brush' as const;
-
-  override _type = 'brush' as const;
-
-  override enableActiveBackground = true;
-
   static styles = css`
     :host {
       display: flex;
@@ -53,13 +47,19 @@ export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
     }
   `;
 
+  protected override readonly _states = ['color', 'lineWidth'] as const;
+
+  override type = 'brush' as const;
+
+  override _type = 'brush' as const;
+
+  override enableActiveBackground = true;
+
   @state()
   accessor color: string = DEFAULT_BRUSH_COLOR;
 
   @state()
   accessor lineWidth = LineWidth.Four;
-
-  protected override readonly _states = ['color', 'lineWidth'] as const;
 
   private _toggleBrushMenu() {
     if (this.tryDisposePopper()) return;

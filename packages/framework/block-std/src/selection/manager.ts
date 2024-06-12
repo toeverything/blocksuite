@@ -10,17 +10,50 @@ import {
 } from './variants/index.js';
 
 interface SelectionConstructor {
+  type: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   new (...args: any[]): BaseSelection;
-
-  type: string;
   fromJSON(json: Record<string, unknown>): BaseSelection;
 }
 
 export class SelectionManager {
-  disposables = new DisposableGroup();
+  private get _store() {
+    return this.std.collection.awarenessStore;
+  }
+
+  get value() {
+    return this._store
+      .getLocalSelection(this.std.doc.blockCollection)
+      .map(json => {
+        return this._jsonToSelection(json);
+      });
+  }
+
+  get remoteSelections() {
+    const map = new Map<number, BaseSelection[]>();
+    this._store.getStates().forEach((state, id) => {
+      if (id === this._store.awareness.clientID) return;
+      const selection = Object.entries(state.selectionV2)
+        .filter(([key]) => key === this.std.doc.id)
+        .flatMap(([_, selection]) => selection);
+      const selections = selection
+        .map(json => {
+          try {
+            return this._jsonToSelection(json);
+          } catch (error) {
+            console.error('Parse remote selection failed:', id, json, error);
+            return null;
+          }
+        })
+        .filter((sel): sel is BaseSelection => !!sel);
+      map.set(id, selections);
+    });
+    return map;
+  }
 
   private _selectionConstructors: Record<string, SelectionConstructor> = {};
+
+  disposables = new DisposableGroup();
 
   slots = {
     changed: new Slot<BaseSelection[]>(),
@@ -29,17 +62,6 @@ export class SelectionManager {
 
   constructor(public std: BlockSuite.Std) {
     this._setupDefaultSelections();
-  }
-
-  register(ctor: SelectionConstructor | SelectionConstructor[]) {
-    [ctor].flat().forEach(ctor => {
-      this._selectionConstructors[ctor.type] = ctor;
-    });
-    return this;
-  }
-
-  private get _store() {
-    return this.std.collection.awarenessStore;
   }
 
   private _setupDefaultSelections() {
@@ -59,6 +81,24 @@ export class SelectionManager {
     return ctor.fromJSON(json);
   };
 
+  private _itemAdded = (event: { stackItem: StackItem }) => {
+    event.stackItem.meta.set('selection-state', this.value);
+  };
+
+  private _itemPopped = (event: { stackItem: StackItem }) => {
+    const selection = event.stackItem.meta.get('selection-state');
+    if (selection) {
+      this.set(selection as BaseSelection[]);
+    }
+  };
+
+  register(ctor: SelectionConstructor | SelectionConstructor[]) {
+    [ctor].flat().forEach(ctor => {
+      this._selectionConstructors[ctor.type] = ctor;
+    });
+    return this;
+  }
+
   create<T extends BlockSuite.SelectionType>(
     type: T,
     ...args: ConstructorParameters<BlockSuite.Selection[T]>
@@ -68,14 +108,6 @@ export class SelectionManager {
       throw new Error(`Unknown selection type: ${type}`);
     }
     return new ctor(...args) as BlockSuite.SelectionInstance[T];
-  }
-
-  get value() {
-    return this._store
-      .getLocalSelection(this.std.doc.blockCollection)
-      .map(json => {
-        return this._jsonToSelection(json);
-      });
   }
 
   fromJSON(json: Record<string, unknown>[]) {
@@ -129,39 +161,6 @@ export class SelectionManager {
       sel.is(type)
     );
   }
-
-  get remoteSelections() {
-    const map = new Map<number, BaseSelection[]>();
-    this._store.getStates().forEach((state, id) => {
-      if (id === this._store.awareness.clientID) return;
-      const selection = Object.entries(state.selectionV2)
-        .filter(([key]) => key === this.std.doc.id)
-        .flatMap(([_, selection]) => selection);
-      const selections = selection
-        .map(json => {
-          try {
-            return this._jsonToSelection(json);
-          } catch (error) {
-            console.error('Parse remote selection failed:', id, json, error);
-            return null;
-          }
-        })
-        .filter((sel): sel is BaseSelection => !!sel);
-      map.set(id, selections);
-    });
-    return map;
-  }
-
-  private _itemAdded = (event: { stackItem: StackItem }) => {
-    event.stackItem.meta.set('selection-state', this.value);
-  };
-
-  private _itemPopped = (event: { stackItem: StackItem }) => {
-    const selection = event.stackItem.meta.get('selection-state');
-    if (selection) {
-      this.set(selection as BaseSelection[]);
-    }
-  };
 
   mount() {
     if (this.disposables.disposed) {

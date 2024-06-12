@@ -28,6 +28,19 @@ interface RichTextStackItem {
 
 @customElement('rich-text')
 export class RichText extends WithDisposable(ShadowlessElement) {
+  get inlineEditorContainer() {
+    assertExists(this._inlineEditorContainer);
+    return this._inlineEditorContainer;
+  }
+
+  get inlineEditor() {
+    return this._inlineEditor;
+  }
+
+  private get _yText() {
+    return this.yText instanceof Text ? this.yText.yText : this.yText;
+  }
+
   static override styles = css`
     rich-text {
       display: block;
@@ -64,10 +77,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @query('.inline-editor')
   private accessor _inlineEditorContainer!: HTMLDivElement;
 
-  get inlineEditorContainer() {
-    assertExists(this._inlineEditorContainer);
-    return this._inlineEditorContainer;
-  }
+  private _inlineEditor: AffineInlineEditor | null = null;
 
   @property({ attribute: false })
   accessor yText!: Y.Text | Text;
@@ -88,13 +98,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
         undoManager: Y.UndoManager
       ) => boolean)
     | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor embedChecker: <
-    TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-  >(
-    delta: DeltaInsert<TextAttributes>
-  ) => boolean = () => false;
 
   @property({ attribute: false })
   accessor readonly = false;
@@ -132,12 +135,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     | undefined = undefined;
 
   #verticalScrollContainer: HTMLElement | null = null;
-
-  private _inlineEditor: AffineInlineEditor | null = null;
-
-  get inlineEditor() {
-    return this._inlineEditor;
-  }
 
   private _init() {
     if (this._inlineEditor) {
@@ -297,10 +294,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     e.stopPropagation();
   };
 
-  private get _yText() {
-    return this.yText instanceof Text ? this.yText.yText : this.yText;
-  }
-
   private _onPaste = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor);
@@ -329,6 +322,13 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
     this._inlineEditor = null;
   }
+
+  @property({ attribute: false })
+  accessor embedChecker: <
+    TextAttributes extends AffineTextAttributes = AffineTextAttributes,
+  >(
+    delta: DeltaInsert<TextAttributes>
+  ) => boolean = () => false;
 
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();

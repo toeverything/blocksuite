@@ -44,27 +44,6 @@ export class PieManager {
     open: new Slot<PieMenuSchema>(),
   };
 
-  static add(schema: PieMenuSchema) {
-    return this.schemas.add(schema);
-  }
-
-  static remove(schema: PieMenuSchema) {
-    return this.schemas.delete(schema);
-  }
-
-  static setup({ rootElement }: { rootElement: EdgelessRootBlockComponent }) {
-    this.schemas.forEach(schema => this._register(schema));
-    this._setupTriggers(rootElement);
-  }
-
-  static dispose() {
-    this.registeredSchemas = {};
-  }
-
-  static open(id: PieMenuId) {
-    this.slots.open.emit(this._getSchema(id));
-  }
-
   private static _setupTriggers(rootElement: EdgelessRootBlockComponent) {
     Object.values(this.registeredSchemas).forEach(schema => {
       const { trigger } = schema;
@@ -98,5 +77,26 @@ export class PieManager {
     const schema = this.registeredSchemas[id];
     assertExists(schema);
     return schema;
+  }
+
+  static add(schema: PieMenuSchema) {
+    return this.schemas.add(schema);
+  }
+
+  static remove(schema: PieMenuSchema) {
+    return this.schemas.delete(schema);
+  }
+
+  static setup({ rootElement }: { rootElement: EdgelessRootBlockComponent }) {
+    this.schemas.forEach(schema => this._register(schema));
+    this._setupTriggers(rootElement);
+  }
+
+  static dispose() {
+    this.registeredSchemas = {};
+  }
+
+  static open(id: PieMenuId) {
+    this.slots.open.emit(this._getSchema(id));
   }
 }

@@ -137,19 +137,11 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
   @query('.affine-database-link-editing')
   private accessor _container!: HTMLInputElement;
 
-  override firstUpdated() {
-    this._focusEnd();
-  }
-
   private _focusEnd = () => {
     const end = this._container.value.length;
     this._container.focus();
     this._container.setSelectionRange(end, end);
   };
-
-  override onExitEditMode() {
-    this._setValue();
-  }
 
   private _setValue = (value: string = this._container.value) => {
     let url = value;
@@ -169,6 +161,14 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
       });
     }
   };
+
+  override firstUpdated() {
+    this._focusEnd();
+  }
+
+  override onExitEditMode() {
+    this._setValue();
+  }
 
   override render() {
     const linkText = this.value ?? '';

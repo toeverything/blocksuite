@@ -33,6 +33,14 @@ export type ExportOptions = {
   imageProxyEndpoint: string;
 };
 export class ExportManager {
+  get doc(): Doc {
+    return this._blockService.std.doc;
+  }
+
+  get editorHost(): EditorHost {
+    return this._blockService.std.host as EditorHost;
+  }
+
   private _exportOptions: ExportOptions;
 
   private _blockService: BlockService;
@@ -40,14 +48,6 @@ export class ExportManager {
   constructor(blockService: BlockService, options: ExportOptions) {
     this._exportOptions = options;
     this._blockService = blockService;
-  }
-
-  get doc(): Doc {
-    return this._blockService.std.doc;
-  }
-
-  get editorHost(): EditorHost {
-    return this._blockService.std.host as EditorHost;
   }
 
   private async _checkReady() {
@@ -188,143 +188,6 @@ export class ExportManager {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     return { canvas, ctx };
-  }
-
-  // TODO: refactor of this part
-  async edgelessToCanvas(
-    surfaceRenderer: Renderer,
-    bound: IBound,
-    blockElementGetter: (model: BlockModel) => Element | null = () => null,
-    edgeless?: EdgelessRootBlockComponent,
-    nodes?: EdgelessBlockModel[],
-    surfaces?: BlockSuite.SurfaceElementModelType[],
-    edgelessBackground?: {
-      zoom: number;
-    }
-  ): Promise<HTMLCanvasElement | undefined> {
-    const rootModel = this.doc.root;
-    if (!rootModel) return;
-
-    const pathname = location.pathname;
-    const editorMode = isInsidePageEditor(this.editorHost);
-    const rootElement = getRootByEditorHost(this.editorHost);
-    assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement;
-
-    const containerComputedStyle = window.getComputedStyle(viewportElement);
-
-    const html2canvas = (element: HTMLElement) =>
-      this._html2canvas(element, {
-        backgroundColor: containerComputedStyle.backgroundColor,
-      });
-    const container = rootElement.querySelector(
-      '.affine-block-children-container'
-    );
-
-    if (!container) return;
-
-    const { ctx, canvas } = this._createCanvas(
-      bound,
-      window.getComputedStyle(container).backgroundColor
-    );
-
-    if (edgelessBackground) {
-      await this._drawEdgelessBackground(ctx, {
-        backgroundColor: containerComputedStyle.getPropertyValue(
-          '--affine-background-primary-color'
-        ),
-        size: getBackgroundGrid(edgelessBackground.zoom, true).gap,
-        gridColor: containerComputedStyle.getPropertyValue(
-          '--affine-edgeless-grid-color'
-        ),
-      });
-    }
-
-    const blocks =
-      nodes ?? edgeless?.service.pickElementsByBound(bound, 'blocks') ?? [];
-    for (const block of blocks) {
-      if (matchFlavours(block, ['affine:image'])) {
-        if (!block.sourceId) return;
-
-        const blob = await block.doc.blobSync.get(block.sourceId);
-        if (!blob) return;
-
-        const blobToImage = (blob: Blob) =>
-          new Promise<HTMLImageElement>((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = reject;
-            img.src = URL.createObjectURL(blob);
-          });
-        const blockBound = xywhArrayToObject(block);
-        ctx.drawImage(
-          await blobToImage(blob),
-          blockBound.x - bound.x,
-          blockBound.y - bound.y,
-          blockBound.w,
-          blockBound.h
-        );
-      }
-      let blockElement = blockElementGetter(block)?.parentElement;
-      if (matchFlavours(block, ['affine:note'])) {
-        blockElement = blockElement?.closest('.edgeless-block-portal-note');
-      }
-
-      if (blockElement) {
-        const blockBound = xywhArrayToObject(block);
-        const canvasData = await this._html2canvas(blockElement as HTMLElement);
-        ctx.drawImage(
-          canvasData,
-          blockBound.x - bound.x + 50,
-          blockBound.y - bound.y + 50,
-          blockBound.w,
-          blockBound.h
-        );
-      }
-
-      if (matchFlavours(block, ['affine:frame'])) {
-        const blocksInsideFrame = getBlocksInFrame(this.doc, block, false);
-        const frameBound = Bound.deserialize(block.xywh);
-
-        for (let i = 0; i < blocksInsideFrame.length; i++) {
-          const element = blocksInsideFrame[i];
-          const htmlElement = blockElementGetter(element);
-          const blockBound = xywhArrayToObject(element);
-          const canvasData = await html2canvas(htmlElement as HTMLElement);
-
-          ctx.drawImage(
-            canvasData,
-            blockBound.x - bound.x + 50,
-            blockBound.y - bound.y + 50,
-            blockBound.w,
-            (blockBound.w / canvasData.width) * canvasData.height
-          );
-        }
-        const surfaceCanvas = surfaceRenderer.getCanvasByBound(frameBound);
-
-        ctx.drawImage(surfaceCanvas, 50, 50, frameBound.w, frameBound.h);
-      }
-
-      this._checkCanContinueToCanvas(pathname, editorMode);
-    }
-
-    if (surfaces?.length) {
-      const surfaceElements = surfaces.flatMap(element =>
-        element instanceof GroupElementModel
-          ? (element.childElements.filter(
-              el => el instanceof SurfaceElementModel
-            ) as SurfaceElementModel[])
-          : element
-      );
-      const surfaceCanvas = surfaceRenderer.getCanvasByBound(
-        bound,
-        surfaceElements
-      );
-
-      ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
-    }
-
-    return canvas;
   }
 
   private async _docToCanvas(): Promise<HTMLCanvasElement | void> {
@@ -475,6 +338,143 @@ export class ExportManager {
         edgeless
       );
     }
+  }
+
+  // TODO: refactor of this part
+  async edgelessToCanvas(
+    surfaceRenderer: Renderer,
+    bound: IBound,
+    blockElementGetter: (model: BlockModel) => Element | null = () => null,
+    edgeless?: EdgelessRootBlockComponent,
+    nodes?: EdgelessBlockModel[],
+    surfaces?: BlockSuite.SurfaceElementModelType[],
+    edgelessBackground?: {
+      zoom: number;
+    }
+  ): Promise<HTMLCanvasElement | undefined> {
+    const rootModel = this.doc.root;
+    if (!rootModel) return;
+
+    const pathname = location.pathname;
+    const editorMode = isInsidePageEditor(this.editorHost);
+    const rootElement = getRootByEditorHost(this.editorHost);
+    assertExists(rootElement);
+    const viewportElement = rootElement.viewportElement;
+
+    const containerComputedStyle = window.getComputedStyle(viewportElement);
+
+    const html2canvas = (element: HTMLElement) =>
+      this._html2canvas(element, {
+        backgroundColor: containerComputedStyle.backgroundColor,
+      });
+    const container = rootElement.querySelector(
+      '.affine-block-children-container'
+    );
+
+    if (!container) return;
+
+    const { ctx, canvas } = this._createCanvas(
+      bound,
+      window.getComputedStyle(container).backgroundColor
+    );
+
+    if (edgelessBackground) {
+      await this._drawEdgelessBackground(ctx, {
+        backgroundColor: containerComputedStyle.getPropertyValue(
+          '--affine-background-primary-color'
+        ),
+        size: getBackgroundGrid(edgelessBackground.zoom, true).gap,
+        gridColor: containerComputedStyle.getPropertyValue(
+          '--affine-edgeless-grid-color'
+        ),
+      });
+    }
+
+    const blocks =
+      nodes ?? edgeless?.service.pickElementsByBound(bound, 'blocks') ?? [];
+    for (const block of blocks) {
+      if (matchFlavours(block, ['affine:image'])) {
+        if (!block.sourceId) return;
+
+        const blob = await block.doc.blobSync.get(block.sourceId);
+        if (!blob) return;
+
+        const blobToImage = (blob: Blob) =>
+          new Promise<HTMLImageElement>((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = URL.createObjectURL(blob);
+          });
+        const blockBound = xywhArrayToObject(block);
+        ctx.drawImage(
+          await blobToImage(blob),
+          blockBound.x - bound.x,
+          blockBound.y - bound.y,
+          blockBound.w,
+          blockBound.h
+        );
+      }
+      let blockElement = blockElementGetter(block)?.parentElement;
+      if (matchFlavours(block, ['affine:note'])) {
+        blockElement = blockElement?.closest('.edgeless-block-portal-note');
+      }
+
+      if (blockElement) {
+        const blockBound = xywhArrayToObject(block);
+        const canvasData = await this._html2canvas(blockElement as HTMLElement);
+        ctx.drawImage(
+          canvasData,
+          blockBound.x - bound.x + 50,
+          blockBound.y - bound.y + 50,
+          blockBound.w,
+          blockBound.h
+        );
+      }
+
+      if (matchFlavours(block, ['affine:frame'])) {
+        const blocksInsideFrame = getBlocksInFrame(this.doc, block, false);
+        const frameBound = Bound.deserialize(block.xywh);
+
+        for (let i = 0; i < blocksInsideFrame.length; i++) {
+          const element = blocksInsideFrame[i];
+          const htmlElement = blockElementGetter(element);
+          const blockBound = xywhArrayToObject(element);
+          const canvasData = await html2canvas(htmlElement as HTMLElement);
+
+          ctx.drawImage(
+            canvasData,
+            blockBound.x - bound.x + 50,
+            blockBound.y - bound.y + 50,
+            blockBound.w,
+            (blockBound.w / canvasData.width) * canvasData.height
+          );
+        }
+        const surfaceCanvas = surfaceRenderer.getCanvasByBound(frameBound);
+
+        ctx.drawImage(surfaceCanvas, 50, 50, frameBound.w, frameBound.h);
+      }
+
+      this._checkCanContinueToCanvas(pathname, editorMode);
+    }
+
+    if (surfaces?.length) {
+      const surfaceElements = surfaces.flatMap(element =>
+        element instanceof GroupElementModel
+          ? (element.childElements.filter(
+              el => el instanceof SurfaceElementModel
+            ) as SurfaceElementModel[])
+          : element
+      );
+      const surfaceCanvas = surfaceRenderer.getCanvasByBound(
+        bound,
+        surfaceElements
+      );
+
+      ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+    }
+
+    return canvas;
   }
 
   async exportPng() {

@@ -12,6 +12,14 @@ export type DeltaOperation = {
 } & OptionalAttributes;
 
 export class Text {
+  get length() {
+    return this._yText.length;
+  }
+
+  get yText() {
+    return this._yText;
+  }
+
   private readonly _yText: Y.Text;
 
   constructor(input?: Y.Text | string | DeltaInsert[]) {
@@ -32,20 +40,6 @@ export class Text {
     } else {
       this._yText = new Y.Text();
     }
-  }
-
-  static fromDelta(delta: DeltaOperation[]) {
-    const result = new Y.Text();
-    result.applyDelta(delta);
-    return new Text(result);
-  }
-
-  get length() {
-    return this._yText.length;
-  }
-
-  get yText() {
-    return this._yText;
   }
 
   private _transact(callback: () => void) {
@@ -294,5 +288,11 @@ export class Text {
 
   toString() {
     return this._yText?.toString() || '';
+  }
+
+  static fromDelta(delta: DeltaOperation[]) {
+    const result = new Y.Text();
+    result.applyDelta(delta);
+    return new Text(result);
   }
 }

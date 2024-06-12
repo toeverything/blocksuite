@@ -30,7 +30,17 @@ import { editImage, jpegBase64ToFile } from './edit-image.js';
 import { genHtml } from './gen-html.js';
 
 export class AIEdgelessLogic {
-  fromFrame: string = '';
+  get autoGen() {
+    return this.unsub !== undefined;
+  }
+
+  get collection(): DocCollection {
+    return this.host.doc.collection;
+  }
+
+  get host() {
+    return this.getHost();
+  }
 
   private targets: Record<
     string,
@@ -40,11 +50,11 @@ export class AIEdgelessLogic {
     }
   > = {};
 
-  get autoGen() {
-    return this.unsub !== undefined;
-  }
-
   private unsub?: () => void;
+
+  fromFrame: string = '';
+
+  constructor(private getHost: () => EditorHost) {}
 
   toggleAutoGen = () => {
     if (this.unsub) {
@@ -57,16 +67,6 @@ export class AIEdgelessLogic {
       this.createImageFromFrame().catch(console.error);
     }).dispose;
   };
-
-  get collection(): DocCollection {
-    return this.host.doc.collection;
-  }
-
-  constructor(private getHost: () => EditorHost) {}
-
-  get host() {
-    return this.getHost();
-  }
 
   makeItReal = async () => {
     const png = await selectedToPng(this.host);

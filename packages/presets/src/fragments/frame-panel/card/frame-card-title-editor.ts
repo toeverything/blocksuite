@@ -16,7 +16,18 @@ const styles = css`
 `;
 
 export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
+  get inlineEditor(): AffineInlineEditor {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
   static override styles = styles;
+
+  private _isComposing = false;
 
   @query('rich-text')
   accessor richText!: RichText;
@@ -33,15 +44,11 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor maxWidth!: number;
 
-  private _isComposing = false;
-
-  get inlineEditor(): AffineInlineEditor {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
+  private _unmount() {
+    // dispose in advance to avoid execute `this.remove()` twice
+    this.disposables.dispose();
+    this.remove();
+    this.titleContentElement.style.display = 'block';
   }
 
   override async getUpdateComplete(): Promise<boolean> {
@@ -95,13 +102,6 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
         );
       })
       .catch(console.error);
-  }
-
-  private _unmount() {
-    // dispose in advance to avoid execute `this.remove()` twice
-    this.disposables.dispose();
-    this.remove();
-    this.titleContentElement.style.display = 'block';
   }
 
   override render() {

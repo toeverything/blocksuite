@@ -16,19 +16,6 @@ export class BookmarkBlockComponent extends BlockComponent<
   BookmarkBlockModel,
   BookmarkBlockService
 > {
-  override accessor useCaptionEditor = true;
-
-  @property({ attribute: false })
-  accessor loading = false;
-
-  @property({ attribute: false })
-  accessor error = false;
-
-  @query('bookmark-card')
-  accessor bookmarkCard!: HTMLElement;
-
-  private _isInSurface = false;
-
   get isInSurface() {
     return this._isInSurface;
   }
@@ -39,6 +26,19 @@ export class BookmarkBlockComponent extends BlockComponent<
     }
     return this.host.querySelector('affine-edgeless-root');
   }
+
+  private _isInSurface = false;
+
+  override accessor useCaptionEditor = true;
+
+  @property({ attribute: false })
+  accessor loading = false;
+
+  @property({ attribute: false })
+  accessor error = false;
+
+  @query('bookmark-card')
+  accessor bookmarkCard!: HTMLElement;
 
   open = () => {
     let link = this.model.url;

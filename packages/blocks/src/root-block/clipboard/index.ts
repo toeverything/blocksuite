@@ -18,31 +18,25 @@ import { ClipboardAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
 export class PageClipboard {
-  protected _disposables = new DisposableGroup();
-
-  host: BlockElement;
-
   private get _std() {
     return this.host.std;
   }
+
+  protected _disposables = new DisposableGroup();
+
+  host: BlockElement;
 
   constructor(host: BlockElement) {
     this.host = host;
   }
 
-  hostConnected() {
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
-    this.host.handleEvent('copy', this.onPageCopy);
-    this.host.handleEvent('paste', this.onPagePaste);
-    this.host.handleEvent('cut', this.onPageCut);
-    this._init();
-  }
-
-  hostDisconnected() {
-    this._disposables.dispose();
-  }
+  private _copySelected = (onCopy?: () => void) => {
+    return this._std.command
+      .chain()
+      .with({ onCopy })
+      .getSelectedModels()
+      .copySelectedModels();
+  };
 
   protected _init = () => {
     this._std.clipboard.registerAdapter(
@@ -94,13 +88,19 @@ export class PageClipboard {
     });
   };
 
-  private _copySelected = (onCopy?: () => void) => {
-    return this._std.command
-      .chain()
-      .with({ onCopy })
-      .getSelectedModels()
-      .copySelectedModels();
-  };
+  hostConnected() {
+    if (this._disposables.disposed) {
+      this._disposables = new DisposableGroup();
+    }
+    this.host.handleEvent('copy', this.onPageCopy);
+    this.host.handleEvent('paste', this.onPagePaste);
+    this.host.handleEvent('cut', this.onPageCut);
+    this._init();
+  }
+
+  hostDisconnected() {
+    this._disposables.dispose();
+  }
 
   onPageCopy: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;

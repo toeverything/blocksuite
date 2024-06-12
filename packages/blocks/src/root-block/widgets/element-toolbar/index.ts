@@ -106,6 +106,22 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
+  get edgeless() {
+    return this.blockElement as EdgelessRootBlockComponent;
+  }
+
+  get selection() {
+    return this.edgeless.service.selection;
+  }
+
+  get slots() {
+    return this.edgeless.slots;
+  }
+
+  get surface() {
+    return this.edgeless.surface;
+  }
+
   static override styles = css`
     :host {
       position: absolute;
@@ -153,12 +169,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     }
   `;
 
-  @property({ attribute: false })
-  accessor enableNoteSlicer!: boolean;
-
-  @state()
-  accessor toolbarVisible = false;
-
   @state()
   private accessor _dragging = false;
 
@@ -167,6 +177,12 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
     when: (model: BlockSuite.EdgelessModelType[]) => boolean;
   }[] = [];
+
+  @property({ attribute: false })
+  accessor enableNoteSlicer!: boolean;
+
+  @state()
+  accessor toolbarVisible = false;
 
   @state({
     hasChanged: (value: string[], oldValue: string[]) => {
@@ -178,22 +194,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     },
   })
   accessor selectedIds: string[] = [];
-
-  get edgeless() {
-    return this.blockElement as EdgelessRootBlockComponent;
-  }
-
-  get selection() {
-    return this.edgeless.service.selection;
-  }
-
-  get slots() {
-    return this.edgeless.slots;
-  }
-
-  get surface() {
-    return this.edgeless.surface;
-  }
 
   private _groupSelected(): CategorizedElements {
     const result = groupBy(this.selection.selectedElements, model => {
@@ -224,6 +224,78 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       this.requestUpdate();
     }
   };
+
+  private _recalculatePosition() {
+    const { selection, viewport } = this.edgeless.service;
+    const elements = selection.selectedElements;
+
+    if (elements.length === 0) {
+      this.style.transform = 'translate3d(0, 0, 0)';
+      return;
+    }
+
+    const bound = edgelessElementsBound(selection.selectedElements);
+
+    const { width, height } = viewport;
+    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
+
+    let left, top;
+    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
+      left = x;
+      top = y;
+
+      this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+      return;
+    }
+
+    let offset = 70;
+    if (this.selection.selectedElements.some(ele => isFrameBlock(ele))) {
+      offset += 10;
+    }
+
+    top = y - offset;
+    top < 0 && (top = y + bound.h * viewport.zoom + offset);
+
+    left = clamp(x, 10, width - 10);
+    top = clamp(top, 10, height - 150);
+
+    this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+    this.selectedIds = selection.selectedIds;
+  }
+
+  private _quickConnect = ({ x, y }: MouseEvent) => {
+    const element = this.selection.selectedElements[0];
+    const point = this.edgeless.service.viewport.toViewCoordFromClientCoord([
+      x,
+      y,
+    ]);
+    this.edgeless.doc.captureSync();
+    this.edgeless.tools.setEdgelessTool({
+      type: 'connector',
+      mode: ConnectorMode.Curve,
+    });
+
+    const ctc = this.edgeless.tools.controllers[
+      'connector'
+    ] as ConnectorToolController;
+    ctc.quickConnect(point, element);
+  };
+
+  private _renderQuickConnectButton() {
+    return [
+      html`
+        <edgeless-tool-icon-button
+          aria-label="Draw connector"
+          .tooltip=${'Draw connector'}
+          .activeMode=${'background'}
+          @click=${this._quickConnect}
+        >
+          ${ConnectorCWithArrowIcon}
+        </edgeless-tool-icon-button>
+      `,
+    ];
+  }
 
   protected override firstUpdated() {
     const { _disposables, edgeless } = this;
@@ -283,80 +355,8 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     );
   }
 
-  private _recalculatePosition() {
-    const { selection, viewport } = this.edgeless.service;
-    const elements = selection.selectedElements;
-
-    if (elements.length === 0) {
-      this.style.transform = 'translate3d(0, 0, 0)';
-      return;
-    }
-
-    const bound = edgelessElementsBound(selection.selectedElements);
-
-    const { width, height } = viewport;
-    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
-
-    let left, top;
-    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
-      left = x;
-      top = y;
-
-      this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-      return;
-    }
-
-    let offset = 70;
-    if (this.selection.selectedElements.some(ele => isFrameBlock(ele))) {
-      offset += 10;
-    }
-
-    top = y - offset;
-    top < 0 && (top = y + bound.h * viewport.zoom + offset);
-
-    left = clamp(x, 10, width - 10);
-    top = clamp(top, 10, height - 150);
-
-    this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-    this.selectedIds = selection.selectedIds;
-  }
-
   registerEntry(entry: CustomEntry) {
     this._registeredEntries.push(entry);
-  }
-
-  private _quickConnect = ({ x, y }: MouseEvent) => {
-    const element = this.selection.selectedElements[0];
-    const point = this.edgeless.service.viewport.toViewCoordFromClientCoord([
-      x,
-      y,
-    ]);
-    this.edgeless.doc.captureSync();
-    this.edgeless.tools.setEdgelessTool({
-      type: 'connector',
-      mode: ConnectorMode.Curve,
-    });
-
-    const ctc = this.edgeless.tools.controllers[
-      'connector'
-    ] as ConnectorToolController;
-    ctc.quickConnect(point, element);
-  };
-
-  private _renderQuickConnectButton() {
-    return [
-      html`
-        <edgeless-tool-icon-button
-          aria-label="Draw connector"
-          .tooltip=${'Draw connector'}
-          .activeMode=${'background'}
-          @click=${this._quickConnect}
-        >
-          ${ConnectorCWithArrowIcon}
-        </edgeless-tool-icon-button>
-      `,
-    ];
   }
 
   override render() {

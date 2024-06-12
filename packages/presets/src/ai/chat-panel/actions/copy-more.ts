@@ -74,6 +74,17 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
     }
   `;
 
+  @state()
+  private accessor _showMoreMenu = false;
+
+  @query('.more-button')
+  private accessor _moreButton!: HTMLDivElement;
+
+  @query('.more-menu')
+  private accessor _moreMenu!: HTMLDivElement;
+
+  private _morePopper: ReturnType<typeof createButtonPopper> | null = null;
+
   @property({ attribute: false })
   accessor host!: EditorHost;
 
@@ -95,34 +106,8 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor updateContext!: (context: Partial<ChatContextValue>) => void;
 
-  @state()
-  private accessor _showMoreMenu = false;
-
-  @query('.more-button')
-  private accessor _moreButton!: HTMLDivElement;
-
-  @query('.more-menu')
-  private accessor _moreMenu!: HTMLDivElement;
-
-  private _morePopper: ReturnType<typeof createButtonPopper> | null = null;
-
   private _toggle() {
     this._morePopper?.toggle();
-  }
-
-  protected override updated(changed: PropertyValues): void {
-    if (changed.has('isLast')) {
-      if (this.isLast) {
-        this._morePopper?.dispose();
-        this._morePopper = null;
-      } else if (!this._morePopper) {
-        this._morePopper = createButtonPopper(
-          this._moreButton,
-          this._moreMenu,
-          ({ display }) => (this._showMoreMenu = display === 'show')
-        );
-      }
-    }
   }
 
   private async _retry() {
@@ -164,6 +149,21 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
       this.updateContext({ status: 'error', error: error as AIError });
     } finally {
       this.updateContext({ abortController: null });
+    }
+  }
+
+  protected override updated(changed: PropertyValues): void {
+    if (changed.has('isLast')) {
+      if (this.isLast) {
+        this._morePopper?.dispose();
+        this._morePopper = null;
+      } else if (!this._morePopper) {
+        this._morePopper = createButtonPopper(
+          this._moreButton,
+          this._moreMenu,
+          ({ display }) => (this._showMoreMenu = display === 'show')
+        );
+      }
     }
   }
 

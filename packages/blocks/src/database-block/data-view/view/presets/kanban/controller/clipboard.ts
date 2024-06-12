@@ -5,13 +5,26 @@ import type { DataViewKanban } from '../kanban-view.js';
 import type { KanbanViewSelectionWithType } from '../types.js';
 
 export class KanbanClipboardController implements ReactiveController {
+  private get readonly() {
+    return this.host.view.readonly;
+  }
+
   constructor(public host: DataViewKanban) {
     host.addController(this);
   }
 
-  private get readonly() {
-    return this.host.view.readonly;
-  }
+  private _onCopy = (
+    _context: UIEventStateContext,
+    _kanbanSelection: KanbanViewSelectionWithType
+  ) => {
+    // todo
+    return true;
+  };
+
+  private _onPaste = (_context: UIEventStateContext) => {
+    // todo
+    return true;
+  };
 
   hostConnected() {
     this.host.disposables.add(
@@ -33,17 +46,4 @@ export class KanbanClipboardController implements ReactiveController {
       })
     );
   }
-
-  private _onCopy = (
-    _context: UIEventStateContext,
-    _kanbanSelection: KanbanViewSelectionWithType
-  ) => {
-    // todo
-    return true;
-  };
-
-  private _onPaste = (_context: UIEventStateContext) => {
-    // todo
-    return true;
-  };
 }
