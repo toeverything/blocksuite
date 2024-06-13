@@ -6,11 +6,9 @@ import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { ArrowUpIcon, NoteIcon } from '../../../../../_common/icons/index.js';
-import type {
-  EdgelessTool,
-  NoteTool,
-} from '../../../../../_common/utils/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
+import type { NoteTool } from '../../../controllers/tools/note-tool.js';
+import type { EdgelessTool } from '../../../types.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 import type { EdgelessNoteMenu } from './note-menu.js';

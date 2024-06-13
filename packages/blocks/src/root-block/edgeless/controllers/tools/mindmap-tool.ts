@@ -1,17 +1,15 @@
 import { noop } from '@blocksuite/global/utils';
 
-import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
-type FrameNavigatorTool = {
-  type: 'frameNavigator';
-  mode?: NavigatorMode;
+type MindmapTool = {
+  type: 'mindmap';
 };
 
-export class PresentToolController extends EdgelessToolController<FrameNavigatorTool> {
+export class MindmapToolController extends EdgelessToolController<MindmapTool> {
   readonly tool = {
-    type: 'frameNavigator',
-  } as FrameNavigatorTool;
+    type: 'mindmap',
+  } as MindmapTool;
 
   override onContainerPointerDown(): void {
     noop();
@@ -73,7 +71,7 @@ export class PresentToolController extends EdgelessToolController<FrameNavigator
 declare global {
   namespace BlockSuite {
     interface EdgelessToolMap {
-      'frame-navigator': PresentToolController;
+      mindmap: MindmapToolController;
     }
   }
 }

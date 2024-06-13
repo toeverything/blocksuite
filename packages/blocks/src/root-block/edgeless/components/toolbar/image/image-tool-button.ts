@@ -2,8 +2,8 @@ import { html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { EdgelessImageIcon } from '../../../../../_common/icons/edgeless.js';
-import type { EdgelessTool } from '../../../../../_common/types.js';
 import { getImageFilesFromLocal } from '../../../../../_common/utils/filesys.js';
+import type { EdgelessTool } from '../../../types.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 @customElement('edgeless-image-tool-button')

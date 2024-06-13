@@ -1,12 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
-import {
-  type EdgelessTool,
-  type IPoint,
-  LassoMode,
-  type LassoTool,
-} from '../../../../_common/types.js';
+import { type IPoint, LassoMode } from '../../../../_common/types.js';
 import { Bound } from '../../../../surface-block/index.js';
 import {
   getBoundFromPoints,
@@ -21,7 +16,8 @@ import {
   pointInPolygon,
   rotatePoints,
 } from '../../../../surface-block/utils/math-utils.js';
-import { EdgelessToolController } from './index.js';
+import type { EdgelessTool } from '../../types.js';
+import { EdgelessToolController } from './edgeless-tool.js';
 
 class LassoOverlay extends Overlay {
   d = '';
@@ -57,6 +53,11 @@ class LassoOverlay extends Overlay {
     ctx.restore();
   }
 }
+
+export type LassoTool = {
+  type: 'lasso';
+  mode: LassoMode;
+};
 
 export class LassoToolController extends EdgelessToolController<LassoTool> {
   get selection() {
@@ -335,5 +336,13 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   override onPressSpaceBar(): void {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      lasso: LassoToolController;
+    }
   }
 }

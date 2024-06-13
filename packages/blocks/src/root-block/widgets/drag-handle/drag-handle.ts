@@ -20,7 +20,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  type EdgelessTool,
   getBlockElementsExcludeSubtrees,
   getCurrentNativeRange,
   getModelByBlockComponent,
@@ -45,6 +44,7 @@ import { autoScroll } from '../../../root-block/text-selection/utils.js';
 import { SpecProvider } from '../../../specs/utils/spec-provider.js';
 import { Bound, type IVec } from '../../../surface-block/index.js';
 import type { EdgelessBlockModel } from '../../edgeless/edgeless-block-model.js';
+import type { EdgelessTool } from '../../edgeless/types.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';

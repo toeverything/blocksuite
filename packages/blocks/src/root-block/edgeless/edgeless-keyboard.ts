@@ -5,7 +5,7 @@ import {
   isElementOutsideViewport,
   isSelectSingleMindMap,
 } from '../../_common/edgeless/mindmap/index.js';
-import { type EdgelessTool, LassoMode } from '../../_common/types.js';
+import { LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
@@ -23,6 +23,7 @@ import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
 import { EdgelessBlockModel } from './edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
+import type { EdgelessTool } from './types.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,

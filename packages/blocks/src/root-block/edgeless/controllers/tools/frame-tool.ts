@@ -2,10 +2,14 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import type { FrameTool, IPoint } from '../../../../_common/utils/index.js';
+import type { IPoint } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
+
+type FrameTool = {
+  type: 'frame';
+};
 
 export class FrameToolController extends EdgelessToolController<FrameTool> {
   private _startPoint: IVec | null = null;
@@ -111,5 +115,13 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
 
   override afterModeSwitch(): void {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      frame: FrameToolController;
+    }
   }
 }

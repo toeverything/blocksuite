@@ -9,14 +9,16 @@ import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isTransparent } from '../../../../../_common/theme/css-variables.js';
-import type { ShapeTool } from '../../../../../_common/types.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
   ShapeType,
 } from '../../../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
-import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
+import {
+  type ShapeTool,
+  ShapeToolController,
+} from '../../../controllers/tools/shape-tool.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { ToolbarButtonWithMenuMixin } from '../mixins/toolbar-button-with-menu.mixin.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';

@@ -7,13 +7,13 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { AttachmentIcon, LinkIcon } from '../../../../../_common/icons/text.js';
 import {
-  type EdgelessTool,
   getImageFilesFromLocal,
   type NoteChildrenFlavour,
-  type NoteTool,
   openFileOrFiles,
 } from '../../../../../_common/utils/index.js';
 import { ImageIcon } from '../../../../../image-block/styles.js';
+import type { NoteTool } from '../../../controllers/tools/note-tool.js';
+import type { EdgelessTool } from '../../../types.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { NOTE_MENU_ITEMS } from './note-menu-config.js';

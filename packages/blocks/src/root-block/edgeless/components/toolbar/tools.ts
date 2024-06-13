@@ -17,8 +17,8 @@ import './link/link-tool-button.js';
 import { html, type TemplateResult } from 'lit';
 
 import type { Menu } from '../../../../_common/components/index.js';
-import type { EdgelessTool } from '../../../../_common/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { EdgelessTool } from '../../types.js';
 import { buildConnectorDenseMenu } from './connector/connector-dense-menu.js';
 import { buildFrameDenseMenu } from './frame/frame-dense-menu.js';
 import { buildLinkDenseMenu } from './link/link-dense-menu.js';

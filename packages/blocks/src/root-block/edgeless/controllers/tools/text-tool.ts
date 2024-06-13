@@ -1,9 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
-import type { TextTool } from '../../../../_common/utils/index.js';
 import { addText } from '../../utils/text.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
+
+export type TextTool = {
+  type: 'text';
+};
 
 export class TextToolController extends EdgelessToolController<TextTool> {
   readonly tool = {
@@ -83,5 +86,13 @@ export class TextToolController extends EdgelessToolController<TextTool> {
 
   afterModeSwitch() {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      text: TextToolController;
+    }
   }
 }

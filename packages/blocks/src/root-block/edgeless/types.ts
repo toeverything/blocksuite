@@ -1,5 +1,7 @@
 import type { EdgelessBlockModel } from './edgeless-block-model.js';
 
+export type EdgelessTool = BlockSuite.EdgelessToolType;
+
 declare global {
   namespace BlockSuite {
     interface EdgelessBlockModelMap {}
@@ -14,5 +16,11 @@ declare global {
     interface EdgelessTextModelMap {}
     type EdgelessTextModelKeyType = keyof EdgelessTextModelMap;
     type EdgelessTextModelType = EdgelessTextModelMap[EdgelessTextModelKeyType];
+
+    interface EdgelessToolControllerMap {}
+    type EdgelessToolControllerKeyType = keyof EdgelessToolMap;
+    type EdgelessToolControllerType =
+      EdgelessToolMap[EdgelessToolControllerKeyType];
+    type EdgelessToolType = EdgelessToolControllerType['tool'];
   }
 }

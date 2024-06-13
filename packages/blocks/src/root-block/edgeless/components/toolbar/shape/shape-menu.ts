@@ -9,8 +9,8 @@ import {
   ScribbledStyleIcon,
 } from '../../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
-import type { EdgelessTool } from '../../../../../_common/types.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
+import type { EdgelessTool } from '../../../types.js';
 import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import {

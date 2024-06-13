@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type { ConnectorTool } from '../../../../_common/utils/index.js';
+import type { ConnectorMode } from '../../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
@@ -12,7 +12,7 @@ import {
   type IVec,
 } from '../../../../surface-block/index.js';
 import { calculateNearestLocation } from '../../../../surface-block/managers/connector-manager.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
 
 enum ConnectorToolMode {
   // Dragging connect
@@ -20,6 +20,11 @@ enum ConnectorToolMode {
   // Quick connect
   Quick,
 }
+
+export type ConnectorTool = {
+  type: 'connector';
+  mode: ConnectorMode;
+};
 
 export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {
   private _mode: ConnectorToolMode = ConnectorToolMode.Dragging;
@@ -155,10 +160,11 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
   onContainerMouseMove(e: PointerEventState) {
     if (this._mode === ConnectorToolMode.Dragging) return;
-    const sourceId = this._connector?.source.id;
 
     assertExists(this._sourceBounds);
     assertExists(this._connector);
+
+    const sourceId = this._connector.source.id;
     assertExists(sourceId);
 
     const point = this._service.viewport.toModelCoord(e.x, e.y);
@@ -206,5 +212,13 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
   afterModeSwitch() {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      connector: ConnectorToolController;
+    }
   }
 }

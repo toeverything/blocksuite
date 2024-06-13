@@ -1,13 +1,16 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type { BrushTool } from '../../../../_common/utils/index.js';
 import type { BrushElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   type IVec,
 } from '../../../../surface-block/index.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
+
+type BrushTool = {
+  type: 'brush';
+};
 
 export class BrushToolController extends EdgelessToolController<BrushTool> {
   static BRUSH_POP_GAP = 20;
@@ -206,5 +209,13 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
   afterModeSwitch() {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      brush: BrushToolController;
+    }
   }
 }

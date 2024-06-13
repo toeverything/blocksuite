@@ -5,7 +5,7 @@ import '../common/slide-menu.js';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../_common/types.js';
+import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 

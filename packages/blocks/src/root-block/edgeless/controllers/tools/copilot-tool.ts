@@ -1,18 +1,31 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/store';
 
-import type {
-  CopilotSelectionTool,
-  EdgelessTool,
-} from '../../../../_common/utils/index.js';
 import { Bound, getElementsBound } from '../../../../surface-block/index.js';
 import {
   AFFINE_AI_PANEL_WIDGET,
   type AffineAIPanelWidget,
 } from '../../../widgets/ai-panel/ai-panel.js';
-import { EdgelessToolController } from './index.js';
+import type { EdgelessTool } from '../../types.js';
+import { EdgelessToolController } from './edgeless-tool.js';
+
+type CopilotSelectionTool = {
+  type: 'copilot';
+};
 
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
+  private _dragging = false;
+
+  readonly tool = {
+    type: 'copilot',
+  } as CopilotSelectionTool;
+
+  dragStartPoint: [number, number] = [0, 0];
+
+  dragLastPoint: [number, number] = [0, 0];
+
+  draggingAreaUpdated = new Slot<boolean | void>();
+
   get selection() {
     return this._edgeless.service.selection;
   }
@@ -41,18 +54,6 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     ) as AffineAIPanelWidget;
     return aiPanel && aiPanel.state !== 'hidden';
   }
-
-  private _dragging = false;
-
-  readonly tool = {
-    type: 'copilot',
-  } as CopilotSelectionTool;
-
-  dragStartPoint: [number, number] = [0, 0];
-
-  dragLastPoint: [number, number] = [0, 0];
-
-  draggingAreaUpdated = new Slot<boolean | void>();
 
   private _initDragState(e: PointerEventState) {
     this.dragStartPoint = this._service.viewport.toModelCoord(e.x, e.y);
@@ -165,4 +166,12 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   afterModeSwitch(): void {}
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      'copilot-selection': CopilotSelectionController;
+    }
+  }
 }

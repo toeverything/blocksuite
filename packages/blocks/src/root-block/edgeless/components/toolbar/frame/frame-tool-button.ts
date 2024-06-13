@@ -9,8 +9,8 @@ import {
   ArrowUpIcon,
   LargeFrameIcon,
 } from '../../../../../_common/icons/index.js';
-import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
+import type { EdgelessTool } from '../../../types.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
 @customElement('edgeless-frame-tool-button')

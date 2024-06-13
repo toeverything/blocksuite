@@ -4,10 +4,8 @@ import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import {
   asyncFocusRichText,
   buildPath,
-  type EdgelessTool,
 } from '../../../../_common/utils/index.js';
 import {
-  type DefaultTool,
   handleNativeRangeAtPoint,
   resetNativeSelection,
 } from '../../../../_common/utils/index.js';
@@ -41,6 +39,7 @@ import {
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import { intersects } from '../../../../surface-block/utils/math-utils.js';
+import type { EdgelessTool } from '../../types.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { prepareCloneData } from '../../utils/clone-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
@@ -58,7 +57,7 @@ import {
   mountShapeTextEditor,
   mountTextElementEditor,
 } from '../../utils/text.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
 
 export enum DefaultModeDragType {
   /** Moving selected contents */
@@ -77,37 +76,11 @@ export enum DefaultModeDragType {
   ConnectorLabelMoving = 'connector-label-moving',
 }
 
+type DefaultTool = {
+  type: 'default';
+};
+
 export class DefaultToolController extends EdgelessToolController<DefaultTool> {
-  override get draggingArea() {
-    if (this.dragType === DefaultModeDragType.Selecting) {
-      const [startX, startY] = this._service.viewport.toViewCoord(
-        this._dragStartModelCoord[0],
-        this._dragStartModelCoord[1]
-      );
-      const [endX, endY] = this._service.viewport.toViewCoord(
-        this._dragLastModelCoord[0],
-        this._dragLastModelCoord[1]
-      );
-      return {
-        start: new DOMPoint(startX, startY),
-        end: new DOMPoint(endX, endY),
-      };
-    }
-    return null;
-  }
-
-  get edgelessSelectionManager() {
-    return this._edgeless.service.selection;
-  }
-
-  get zoom() {
-    return this._edgeless.service.viewport.zoom;
-  }
-
-  get readonly() {
-    return this._edgeless.doc.readonly;
-  }
-
   private _dragStartPos: IVec = [0, 0];
 
   private _dragLastPos: IVec = [0, 0];
@@ -171,6 +144,36 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   override enableHover = true;
 
   dragType = DefaultModeDragType.None;
+
+  override get draggingArea() {
+    if (this.dragType === DefaultModeDragType.Selecting) {
+      const [startX, startY] = this._service.viewport.toViewCoord(
+        this._dragStartModelCoord[0],
+        this._dragStartModelCoord[1]
+      );
+      const [endX, endY] = this._service.viewport.toViewCoord(
+        this._dragLastModelCoord[0],
+        this._dragLastModelCoord[1]
+      );
+      return {
+        start: new DOMPoint(startX, startY),
+        end: new DOMPoint(endX, endY),
+      };
+    }
+    return null;
+  }
+
+  get edgelessSelectionManager() {
+    return this._edgeless.service.selection;
+  }
+
+  get zoom() {
+    return this._edgeless.service.viewport.zoom;
+  }
+
+  get readonly() {
+    return this._edgeless.doc.readonly;
+  }
 
   private _pick(x: number, y: number, options?: IHitTestOptions) {
     const service = this._service;
@@ -1066,5 +1069,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   afterModeSwitch() {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      default: DefaultToolController;
+    }
   }
 }

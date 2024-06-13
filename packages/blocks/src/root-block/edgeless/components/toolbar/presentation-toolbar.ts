@@ -11,10 +11,10 @@ import {
   NavigatorExitFullScreenIcon,
   NavigatorFullScreenIcon,
 } from '../../../../_common/icons/edgeless.js';
-import type { EdgelessTool } from '../../../../_common/types.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { EdgelessTool } from '../../types.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
 import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';

@@ -23,10 +23,10 @@ import {
   MoreHorizontalIcon,
 } from '../../../../_common/icons/index.js';
 import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
-import type { EdgelessTool } from '../../../../_common/types.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getThemeMode } from '../../../../_common/utils/query.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { EdgelessTool } from '../../types.js';
 import {
   type EdgelessToolbarSlots,
   edgelessToolbarSlotsContext,

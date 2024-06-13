@@ -6,8 +6,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessTool } from '../../../../../_common/types.js';
 import { MindmapStyle } from '../../../../../surface-block/index.js';
+import type { EdgelessTool } from '../../../types.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { getMindMaps } from './assets.js';

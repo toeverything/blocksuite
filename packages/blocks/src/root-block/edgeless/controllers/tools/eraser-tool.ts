@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
 import type { IPoint } from '../../../../_common/utils/index.js';
-import { buildPath, type EraserTool } from '../../../../_common/utils/index.js';
+import { buildPath } from '../../../../_common/utils/index.js';
 import {
   Bound,
   getStroke,
@@ -14,7 +14,7 @@ import {
 import type { IVec2 } from '../../../../surface-block/utils/vec.js';
 import { deleteElements } from '../../utils/crud.js';
 import { isTopLevelBlock } from '../../utils/query.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
 
 class EraserOverlay extends Overlay {
   d = '';
@@ -26,6 +26,10 @@ class EraserOverlay extends Overlay {
     ctx.fill(path);
   }
 }
+
+type EraserTool = {
+  type: 'eraser';
+};
 
 export class EraserToolController extends EdgelessToolController<EraserTool> {
   private _overlay = new EraserOverlay();
@@ -200,5 +204,13 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
 
   override afterModeSwitch(_newMode: EraserTool): void {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      eraser: EraserToolController;
+    }
   }
 }

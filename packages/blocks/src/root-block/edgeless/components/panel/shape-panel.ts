@@ -5,8 +5,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { ShapeTool } from '../../../../_common/utils/index.js';
 import { ShapeStyle } from '../../../../surface-block/index.js';
+import type { ShapeTool } from '../../controllers/tools/shape-tool.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 
 @customElement('edgeless-shape-panel')
