@@ -195,7 +195,11 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         '@': () => {
           const std = this.rootElement.std;
-          if (std.selection.getGroup('note').length > 0) {
+          if (
+            std.selection.getGroup('note').length > 0 ||
+            // eslint-disable-next-line unicorn/prefer-array-some
+            std.selection.find('text')
+          ) {
             return;
           }
           std.command.exec('insertLinkByQuickSearch');
