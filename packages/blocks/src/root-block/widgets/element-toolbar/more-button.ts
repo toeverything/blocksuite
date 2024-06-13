@@ -6,8 +6,9 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { isPeekable, peek } from '../../../_common/components/peekable.js';
@@ -81,28 +82,27 @@ type RefreshableBlockComponent =
   | AttachmentBlockComponent
   | BookmarkBlockComponent;
 
-type Action =
-  | {
-      icon: TemplateResult<1>;
-      name: string;
-      type:
-        | 'delete'
-        | 'copy-as-png'
-        | 'create-frame'
-        | 'create-group'
-        | 'turn-into-linked-doc'
-        | 'create-linked-doc'
-        | 'copy'
-        | 'duplicate'
-        | 'reload'
-        | 'open'
-        | 'center-peek'
-        | ReorderingType;
-      disabled?: boolean;
-    }
-  | {
-      type: 'divider';
-    };
+type Action = {
+  icon: TemplateResult<1>;
+  name: string;
+  type:
+    | 'delete'
+    | 'copy-as-png'
+    | 'create-frame'
+    | 'create-group'
+    | 'turn-into-linked-doc'
+    | 'create-linked-doc'
+    | 'copy'
+    | 'duplicate'
+    | 'reload'
+    | 'open'
+    | 'center-peek'
+    | ReorderingType;
+  disabled?: boolean;
+};
+
+// Group Actions
+type FatActions = (Action | typeof nothing)[][];
 
 const OPEN_ACTION: Action = {
   icon: OpenIcon,
@@ -164,36 +164,37 @@ const CREATE_LINKED_DOC_ACTION: Action = {
   type: 'create-linked-doc',
 };
 
-const ACTION_DIVIDER: Action = { type: 'divider' };
-
 function Actions(
-  actions: Action[],
+  fatActions: FatActions,
   onClick: (action: Action) => Promise<void> | void
 ) {
-  return repeat(
-    actions,
-    action => action.type,
-    action => {
-      if (action.type === 'divider') {
-        return html`
-          <edgeless-menu-divider
-            data-orientation="horizontal"
-            style="--height: 8px"
-          ></edgeless-menu-divider>
-        `;
-      }
-
-      return html`
-        <div
-          aria-label=${action.name}
-          class="action-item ${action.type}"
-          @click=${() => onClick(action)}
-          ?data-disabled=${action.disabled}
-        >
-          ${action.icon}${action.name}
-        </div>
-      `;
-    }
+  return join(
+    fatActions
+      .filter(g => g.length)
+      .map(g => g.filter(a => a !== nothing) as Action[])
+      .filter(g => g.length)
+      .map(actions =>
+        repeat(
+          actions,
+          action => action.type,
+          action => html`
+            <div
+              aria-label=${action.name}
+              class="action-item ${action.type}"
+              @click=${() => onClick(action)}
+              ?data-disabled=${action.disabled}
+            >
+              ${action.icon}${action.name}
+            </div>
+          `
+        )
+      ),
+    () => html`
+      <edgeless-menu-divider
+        data-orientation="horizontal"
+        style="--height: 8px"
+      ></edgeless-menu-divider>
+    `
   );
 }
 
@@ -281,32 +282,23 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     return blockElement;
   }
 
-  get _Actions(): Action[] {
-    const actions: Action[] = [
-      FRAME_ACTION,
-      GROUP_ACTION,
-      ACTION_DIVIDER,
-      ...REORDER_ACTIONS,
-      ACTION_DIVIDER,
-      ...this.getOpenActions(),
-      ACTION_DIVIDER,
-      ...COPY_ACTIONS,
-      ...this.getRefreshAction(),
-      ...this.getLinkedDocAction(),
-      ACTION_DIVIDER,
-      DELETE_ACTION,
+  get _Actions(): FatActions {
+    return [
+      [FRAME_ACTION, GROUP_ACTION],
+      REORDER_ACTIONS,
+      this.getOpenActions(),
+      [...COPY_ACTIONS, this.getRefreshAction()],
+      [this.getLinkedDocAction()],
+      [DELETE_ACTION],
     ];
-    return actions;
   }
 
-  get _FrameActions(): Action[] {
+  get _FrameActions(): FatActions {
     return [
-      FRAME_ACTION,
-      ACTION_DIVIDER,
-      ...COPY_ACTIONS,
-      ...this.getLinkedDocAction(),
-      ACTION_DIVIDER,
-      DELETE_ACTION,
+      [FRAME_ACTION],
+      COPY_ACTIONS,
+      [this.getLinkedDocAction()],
+      [DELETE_ACTION],
     ];
   }
 
@@ -334,11 +326,11 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     return result;
   }
 
-  private getRefreshAction(): Action[] {
+  private getRefreshAction() {
     const refreshable = this.selection.selectedElements.every(ele =>
       this._refreshable(ele as BlockModel)
     );
-    return refreshable ? [RELOAD_ACTION] : [];
+    return refreshable ? RELOAD_ACTION : nothing;
   }
 
   private getLinkedDocAction() {
@@ -349,14 +341,14 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       (isEmbedLinkedDocBlock(firstElement) ||
         isEmbedSyncedDocBlock(firstElement))
     ) {
-      return [];
+      return nothing;
     }
 
     if (isSingleSelect && isNoteBlock(firstElement)) {
-      return [ACTION_DIVIDER, TURN_INTO_LINKED_DOC_ACTION];
+      return TURN_INTO_LINKED_DOC_ACTION;
     }
 
-    return [ACTION_DIVIDER, CREATE_LINKED_DOC_ACTION];
+    return CREATE_LINKED_DOC_ACTION;
   }
 
   private _turnIntoLinkedDoc = (title?: string) => {
