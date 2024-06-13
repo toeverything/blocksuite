@@ -691,7 +691,8 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                 <div @mouseenter=${mouseEnter}>${menu.render}</div>
               `;
             }
-            const itemClass = menu.class ?? '';
+
+            const itemClass = menu.class || 'affine-menu-item';
             const classes = classMap({
               'affine-menu-action': true,
               selected: menu.type === 'select' && this._selectedIndex === i,
