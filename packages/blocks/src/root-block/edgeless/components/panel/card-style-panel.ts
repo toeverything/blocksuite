@@ -21,6 +21,7 @@ export class CardStylePanel extends WithDisposable(LitElement) {
 
     icon-button {
       padding: var(--1, 0px);
+      justify-content: center;
     }
 
     icon-button.selected {
@@ -29,7 +30,7 @@ export class CardStylePanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  accessor value!: string;
+  accessor value!: EmbedCardStyle;
 
   @property({ attribute: false })
   accessor options!: {
@@ -43,23 +44,27 @@ export class CardStylePanel extends WithDisposable(LitElement) {
 
   override render() {
     const options = this.options;
-    if (!options || !options.length) return nothing;
+    if (!options?.length) return nothing;
 
     return repeat(
       options,
       options => options.style,
-      ({ style, Icon, tooltip }) =>
-        html`<icon-button
+      ({ style, Icon, tooltip }) => html`
+        <icon-button
           width="76px"
           height="76px"
           class=${classMap({
             selected: this.value === style,
           })}
-          @click=${() => this.onSelect(style)}
+          @click=${() => {
+            this.onSelect(style);
+            this.value = style;
+          }}
         >
           ${Icon}
           <affine-tooltip .offset=${4}>${tooltip}</affine-tooltip>
-        </icon-button>`
+        </icon-button>
+      `
     );
   }
 }

@@ -74,17 +74,17 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     ];
   }
 
-  private _showCaption() {
+  private _showCaption = () => {
     this._blockElement?.captionEditor.show();
-  }
+  };
 
-  private _setCardStyle(style: EmbedCardStyle) {
+  private _setCardStyle = (style: EmbedCardStyle) => {
     const bounds = Bound.deserialize(this.model.xywh);
     bounds.w = EMBED_CARD_WIDTH[style];
     bounds.h = EMBED_CARD_HEIGHT[style];
     const xywh = bounds.serialize();
     this.model.doc.updateBlock(this.model, { style, xywh });
-  }
+  };
 
   override render() {
     return html`
@@ -103,7 +103,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
           slot
           .value=${this.model.style}
           .options=${this._getCardStyleOptions}
-          .onSelect=${(value: EmbedCardStyle) => this._setCardStyle(value)}
+          .onSelect=${this._setCardStyle}
         >
         </card-style-panel>
       </edgeless-menu-button>
@@ -115,7 +115,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
         .tooltip=${'Add caption'}
         class="change-attachment-button caption"
         ?disabled=${this._doc.readonly}
-        @click=${() => this._showCaption()}
+        @click=${this._showCaption}
       >
         ${CaptionIcon}
       </edgeless-tool-icon-button>
