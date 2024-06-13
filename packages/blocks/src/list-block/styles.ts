@@ -79,7 +79,6 @@ export const listBlockStyles = css`
   .affine-list-rich-text-wrapper {
     position: relative;
     display: flex;
-    position: relative;
   }
   .affine-list-rich-text-wrapper rich-text {
     flex: 1;
