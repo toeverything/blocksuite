@@ -62,6 +62,13 @@ export enum ConnectorMode {
   Orthogonal,
   Curve,
 }
+export const getConnectorModeName = (mode: ConnectorMode) => {
+  return {
+    [ConnectorMode.Straight]: 'Straight',
+    [ConnectorMode.Orthogonal]: 'Orthogonal',
+    [ConnectorMode.Curve]: 'Curve',
+  }[mode];
+};
 
 export enum ConnectorLabelOffsetAnchor {
   Top = 'top',

@@ -3,6 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { MindmapStyle } from '../../../../../surface-block/index.js';
+import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { getMindMaps, type ToolbarMindmapItem } from './assets.js';
@@ -140,6 +141,9 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
           >
             ${textItem.icon}
           </button>
+          <affine-tooltip tip-position="top" .offset=${12}>
+            ${getTooltipWithShortcut('Edgeless Text', 'T')}
+          </affine-tooltip>
         </div>
         <div class="thin-divider"></div>
         <!-- mind map -->
@@ -179,6 +183,9 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
               >
                 ${mindMap.icon}
               </button>
+              <affine-tooltip tip-position="top" .offset=${12}>
+                ${getTooltipWithShortcut('Mind Map', 'M')}
+              </affine-tooltip>
             </div>
           `;
         })}

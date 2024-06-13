@@ -42,7 +42,7 @@ shapes.push({
   name: ShapeType.Triangle,
   svg: triangleSvg,
   style: {
-    default: { x: 18, y: 15 },
+    default: { x: 18, y: 25 },
     hover: { y: 7, z: 1 },
     next: { y: 64 },
   },

@@ -155,7 +155,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;
 
-    this.setEdgelessTool({ type: 'default' });
+    this.setEdgelessTool({ type: 'mindmap' });
 
     const menu = this.createPopper('edgeless-mindmap-menu', this);
     Object.assign(menu.element, {

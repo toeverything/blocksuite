@@ -27,9 +27,9 @@ export const getMindMaps = (theme: 'dark' | 'light'): ToolbarMindmapItem[] => [
   },
   {
     type: 'mindmap',
-    icon: theme === 'light' ? mindMapStyle2Light : mindMapStyle2Dark,
-    style: MindmapStyle.TWO,
-    render: getMindmapRender(MindmapStyle.TWO),
+    icon: mindMapStyle4,
+    style: MindmapStyle.FOUR,
+    render: getMindmapRender(MindmapStyle.FOUR),
   },
   {
     type: 'mindmap',
@@ -39,8 +39,8 @@ export const getMindMaps = (theme: 'dark' | 'light'): ToolbarMindmapItem[] => [
   },
   {
     type: 'mindmap',
-    icon: mindMapStyle4,
-    style: MindmapStyle.FOUR,
-    render: getMindmapRender(MindmapStyle.FOUR),
+    icon: theme === 'light' ? mindMapStyle2Light : mindMapStyle2Dark,
+    style: MindmapStyle.TWO,
+    render: getMindmapRender(MindmapStyle.TWO),
   },
 ];

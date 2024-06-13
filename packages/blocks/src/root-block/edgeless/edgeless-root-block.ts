@@ -67,6 +67,7 @@ import {
   EraserToolController,
   FrameToolController,
   LassoToolController,
+  MindmapToolController,
   NoteToolController,
   PanToolController,
   PresentToolController,
@@ -404,6 +405,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       CopilotSelectionController,
       LassoToolController,
       TemplateToolController,
+      MindmapToolController,
     ] as EdgelessToolConstructor[];
 
     tools.forEach(tool => {

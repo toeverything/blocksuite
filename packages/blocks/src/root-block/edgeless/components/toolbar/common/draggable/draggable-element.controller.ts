@@ -76,11 +76,19 @@ export class EdgelessDraggableElementController<T>
     const { scopeElement, edgeless } = this.options;
     e.originalEvent.stopPropagation();
     e.originalEvent.preventDefault();
+
+    // Safari compatibility
+    // Cannot get edgeless.host.getBoundingClientRect().width in Safari (Always 0)
+    const edgelessRect = edgeless.host.getBoundingClientRect();
+    if (edgelessRect.width === 0) {
+      edgelessRect.width = edgeless.viewport.clientWidth;
+    }
+
     this.info = {
       startTime: Date.now(),
       startPos: { x: e.x, y: e.y },
       scopeRect: scopeElement.getBoundingClientRect(),
-      edgelessRect: edgeless.host.getBoundingClientRect(),
+      edgelessRect,
       elementRectOriginal: e.el.getBoundingClientRect(),
       element: e.el,
       elementInfo,
@@ -93,8 +101,8 @@ export class EdgelessDraggableElementController<T>
       const onMouseMove = (e: MouseEvent) => {
         this._onDragMove(mouseResolver(e));
       };
-      const onMouseUp = (e: MouseEvent) => {
-        const finished = this._onDragEnd(mouseResolver(e));
+      const onMouseUp = (_: MouseEvent) => {
+        const finished = this._onDragEnd();
         if (finished) {
           edgeless.host.removeEventListener('mousemove', onMouseMove);
           window.removeEventListener('mouseup', onMouseUp);
@@ -107,8 +115,8 @@ export class EdgelessDraggableElementController<T>
       const onTouchMove = (e: TouchEvent) => {
         this._onDragMove(touchResolver(e));
       };
-      const onTouchEnd = (e: TouchEvent) => {
-        const finished = this._onDragEnd(touchResolver(e));
+      const onTouchEnd = (_: TouchEvent) => {
+        const finished = this._onDragEnd();
         if (finished) {
           edgeless.host.removeEventListener('touchmove', onTouchMove);
           window.removeEventListener('touchend', onTouchEnd);
@@ -157,7 +165,7 @@ export class EdgelessDraggableElementController<T>
     this._updateOverlayScale(zoom);
   }
 
-  private _onDragEnd(_: ElementDragEvent) {
+  private _onDragEnd() {
     const { overlay, info, options } = this;
     const { startTime, elementInfo, edgelessRect, moved } = info;
     const { service, clickThreshold = 200 } = options;
