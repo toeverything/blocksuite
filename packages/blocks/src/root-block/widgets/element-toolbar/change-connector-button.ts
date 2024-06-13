@@ -191,11 +191,6 @@ const REAR_ENDPOINT_STYLE_LIST: EndpointStyle[] = [
 
 const MODE_LIST = [
   {
-    name: 'Straight',
-    icon: StraightLineIcon,
-    value: ConnectorMode.Straight,
-  },
-  {
     name: 'Curve',
     icon: CurveLineIcon,
     value: ConnectorMode.Curve,
@@ -205,12 +200,17 @@ const MODE_LIST = [
     icon: ElbowedLineIcon,
     value: ConnectorMode.Orthogonal,
   },
+  {
+    name: 'Straight',
+    icon: StraightLineIcon,
+    value: ConnectorMode.Straight,
+  },
 ] as const;
 
 const MODE_CHOOSE: [ConnectorMode, () => TemplateResult<1>][] = [
-  [ConnectorMode.Straight, () => StraightLineIcon],
   [ConnectorMode.Curve, () => CurveLineIcon],
   [ConnectorMode.Orthogonal, () => ElbowedLineIcon],
+  [ConnectorMode.Straight, () => StraightLineIcon],
 ] as const;
 
 @customElement('edgeless-change-connector-button')

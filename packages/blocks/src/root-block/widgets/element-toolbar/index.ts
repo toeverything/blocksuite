@@ -8,7 +8,7 @@ import { css, html, nothing, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import { ConnectorCWithArrowIcon } from '../../../_common/icons/edgeless.js';
+import { CurveLineIcon } from '../../../_common/icons/edgeless.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import {
   atLeastNMatches,
@@ -291,7 +291,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           .activeMode=${'background'}
           @click=${this._quickConnect}
         >
-          ${ConnectorCWithArrowIcon}
+          ${CurveLineIcon}
         </edgeless-tool-icon-button>
       `,
     ];
