@@ -12,6 +12,48 @@ export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 
 @customElement('affine-edgeless-text')
 export class EdgelessTextBlockComponent extends BlockElement<EdgelessTextBlockModel> {
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.disposables.add(
+      this.model.propsUpdated.on(({ key }) => {
+        this.updateComplete
+          .then(() => {
+            const command = this.host.command;
+            const blockSelections = this.model.children.map(child =>
+              this.host.selection.create('block', {
+                blockId: child.id,
+              })
+            );
+
+            if (key === 'fontStyle') {
+              command.exec('formatBlock', {
+                blockSelections,
+                styles: {
+                  italic: null,
+                },
+              });
+            } else if (key === 'color') {
+              command.exec('formatBlock', {
+                blockSelections,
+                styles: {
+                  color: null,
+                },
+              });
+            } else if (key === 'fontWeight') {
+              command.exec('formatBlock', {
+                blockSelections,
+                styles: {
+                  bold: null,
+                },
+              });
+            }
+          })
+          .catch(console.error);
+      })
+    );
+  }
+
   override renderBlock() {
     const { color, fontFamily, fontStyle, fontWeight, textAlign } = this.model;
 
