@@ -99,37 +99,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             panning: false,
           });
         },
-        m: () => {
-          if (!rootElement.doc.awarenessStore.getFlag('enable_mindmap_entry')) {
-            return;
-          }
-
-          if (this.rootElement.service.locked) return;
-          if (this.rootElement.service.selection.editing) return;
-          const edgelessService = this.rootElement.service;
-          const lastMousePosition = edgelessService.tool.lastMousePos;
-          const [x, y] = edgelessService.viewport.toModelCoord(
-            lastMousePosition.x,
-            lastMousePosition.y
-          );
-          const mindmapId = edgelessService.addElement('mindmap', {}) as string;
-          const mindmap = edgelessService.getElementById(
-            mindmapId
-          ) as MindmapElementModel;
-          const nodeId = mindmap.addNode(null, undefined, undefined, {
-            text: 'Mind Map',
-            xywh: `[${x},${y},150,30]`,
-          });
-
-          requestAnimationFrame(() => {
-            mountShapeTextEditor(
-              this.rootElement.service.getElementById(
-                nodeId
-              )! as ShapeElementModel,
-              this.rootElement
-            );
-          });
-        },
         n: () => {
           this._setEdgelessTool(rootElement, {
             type: 'affine:note',

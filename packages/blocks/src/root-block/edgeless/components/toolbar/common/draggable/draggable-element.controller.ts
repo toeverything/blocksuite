@@ -1,5 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import {
+  type ReactiveController,
+  type ReactiveControllerHost,
+  render,
+} from 'lit';
 
 import { Bound } from '../../../../../../surface-block/index.js';
 import {
@@ -349,5 +353,51 @@ export class EdgelessDraggableElementController<T>
   hostDisconnected() {
     this.removeAllEvents();
     this.reset();
+  }
+
+  /**
+   * A workaround to apply click event manually
+   */
+  clickToDrag(target: HTMLElement, startPos: { x: number; y: number }) {
+    if (!this.options.clickToDrag) {
+      this.options.clickToDrag = true;
+      console.warn(
+        'clickToDrag is not enabled, it will be enabled automatically'
+      );
+    }
+    const targetRect = target.getBoundingClientRect();
+    const targetCenter = {
+      x: targetRect.left + targetRect.width / 2,
+      y: targetRect.top + targetRect.height / 2,
+    };
+
+    const mouseDownEvent = new MouseEvent('mousedown', {
+      clientX: targetCenter.x,
+      clientY: targetCenter.y,
+    });
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      clientX: targetCenter.x,
+      clientY: targetCenter.y,
+    });
+    target.dispatchEvent(mouseDownEvent);
+    window.dispatchEvent(mouseUpEvent);
+
+    const mouseMoveEvent = new MouseEvent('mousemove', {
+      clientX: startPos.x,
+      clientY: startPos.y,
+    });
+
+    this.options.edgeless.host.dispatchEvent(mouseMoveEvent);
+  }
+
+  updateElementInfo(elementInfo: Partial<ElementInfo<T>>) {
+    this.info.elementInfo = {
+      ...this.info.elementInfo,
+      ...elementInfo,
+    };
+
+    if (elementInfo.preview && this.overlay) {
+      render(elementInfo.preview, this.overlay.transitionWrapper);
+    }
   }
 }
