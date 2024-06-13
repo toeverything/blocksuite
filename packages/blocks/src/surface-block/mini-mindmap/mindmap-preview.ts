@@ -148,8 +148,8 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     };
   }
 
-  private _toMindmapNode(answer: string) {
-    return markdownToMindmap(answer, this.doc);
+  private _toMindmapNode(answer: string, doc: Doc) {
+    return markdownToMindmap(answer, doc);
   }
 
   private _switchStyle(style: MindmapStyle) {
@@ -172,7 +172,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     const tempDoc = this._createTemporaryDoc();
-    const mindmapNode = this._toMindmapNode(this.answer);
+    const mindmapNode = this._toMindmapNode(this.answer, tempDoc.doc);
 
     if (!mindmapNode) {
       return;
