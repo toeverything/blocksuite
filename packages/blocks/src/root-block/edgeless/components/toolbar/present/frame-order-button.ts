@@ -57,6 +57,7 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
           if (readonly) return;
           this._edgelessFrameOrderPopper?.toggle();
         }}
+        .iconContainerPadding=${0}
       >
         ${FrameOrderAdjustmentIcon}
       </edgeless-tool-icon-button>
@@ -75,7 +76,8 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
     this._edgelessFrameOrderPopper = createButtonPopper(
       this._edgelessFrameOrderButton,
       this._edgelessFrameOrderMenu,
-      ({ display }) => this.setPopperShow(display === 'show')
+      ({ display }) => this.setPopperShow(display === 'show'),
+      22
     );
   }
 }

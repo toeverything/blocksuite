@@ -598,6 +598,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
                 (this.presentSettingMenuShow = show)}
               .setFrameMenuShow=${(show: boolean) =>
                 (this.presentFrameMenuShow = show)}
+              .containerWidth=${this.containerWidth}
             ></presentation-toolbar>
             ${this.isPresentMode ? nothing : this._renderContent()}
           </div>

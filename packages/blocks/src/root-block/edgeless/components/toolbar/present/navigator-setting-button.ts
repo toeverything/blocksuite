@@ -3,11 +3,12 @@ import '../../buttons/tool-icon-button.js';
 import '../../../../../_common/components/toggle-switch.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { NavigatorSettingsIcon } from '../../../../../_common/icons/edgeless.js';
 import { createButtonPopper } from '../../../../../_common/utils/button-popper.js';
+import type { FrameBlockModel } from '../../../../../frame-block/frame-model.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
 @customElement('edgeless-navigator-setting-button')
@@ -25,24 +26,49 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     }
 
     .navigator-setting-menu[data-show] {
-      display: initial;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .item-container {
-      padding: 0px 12px;
+      padding: 4px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 28px;
-      width: 204px;
+      min-width: 264px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .item-container.header {
+      height: 34px;
     }
 
     .text {
       padding: 0px 4px;
+      line-height: 22px;
+      font-size: var(--affine-font-sm);
+      color: var(--affine-text-primary-color);
     }
 
-    .title {
+    .text.title {
+      font-weight: 500;
+      line-height: 20px;
+      font-size: var(--affine-font-xs);
       color: var(--affine-text-secondary-color);
+    }
+
+    .divider {
+      width: 100%;
+      height: 16px;
+      display: flex;
+      align-items: center;
+    }
+    .divider::before {
+      content: '';
+      width: 100%;
+      height: 1px;
+      background: var(--affine-border-color);
     }
   `;
 
@@ -58,6 +84,12 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
 
   @state()
   accessor blackBackground = true;
+
+  @property({ attribute: false })
+  accessor includeFrameOrder = false;
+
+  @property({ attribute: false })
+  accessor frames!: FrameBlockModel[];
 
   @property({ attribute: false })
   accessor popperShow = false;
@@ -98,7 +130,8 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     this._navigatorSettingPopper = createButtonPopper(
       this._navigatorSettingButton,
       this._navigatorSettingMenu,
-      ({ display }) => this.setPopperShow(display === 'show')
+      ({ display }) => this.setPopperShow(display === 'show'),
+      22
     );
   }
 
@@ -110,6 +143,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
         @click=${() => {
           this._navigatorSettingPopper?.toggle();
         }}
+        .iconContainerPadding=${0}
       >
         ${NavigatorSettingsIcon}
       </edgeless-tool-icon-button>
@@ -120,12 +154,12 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
           e.stopPropagation();
         }}
       >
-        <div class="item-container">
+        <div class="item-container header">
           <div class="text title">Playback Settings</div>
         </div>
 
         <div class="item-container">
-          <div class="text">Dark background</div>
+          <div class="text">Black background</div>
 
           <toggle-switch
             .on=${this.blackBackground}
@@ -145,6 +179,19 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
           >
           </toggle-switch>
         </div>
+
+        ${this.includeFrameOrder
+          ? html` <div class="divider"></div>
+              <div class="item-container header">
+                <div class="text title">Frame Order</div>
+              </div>
+
+              <edgeless-frame-order-menu
+                .edgeless=${this.edgeless}
+                .frames=${this.frames}
+                .embed=${true}
+              ></edgeless-frame-order-menu>`
+          : nothing}
       </div>
     `;
   }
