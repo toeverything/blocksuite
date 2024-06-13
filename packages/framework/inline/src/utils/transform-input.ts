@@ -16,6 +16,25 @@ function handleInsertText<TextAttributes extends BaseTextAttributes>(
   });
 }
 
+function handleInsertReplacementText<TextAttributes extends BaseTextAttributes>(
+  inlineRange: InlineRange,
+  data: string | null,
+  editor: InlineEditor,
+  attributes: TextAttributes
+) {
+  editor.getDeltasByInlineRange(inlineRange).forEach(deltaEntry => {
+    attributes = { ...deltaEntry[0].attributes, ...attributes };
+  });
+  editor.deleteText(inlineRange);
+  if (data) {
+    editor.insertText(inlineRange, data, attributes);
+    editor.setInlineRange({
+      index: inlineRange.index + data.length,
+      length: 0,
+    });
+  }
+}
+
 function handleInsertParagraph(inlineRange: InlineRange, editor: InlineEditor) {
   editor.insertLineBreak(inlineRange);
   editor.setInlineRange({
@@ -50,6 +69,9 @@ export function transformInput<TextAttributes extends BaseTextAttributes>(
     handleInsertParagraph(inlineRange, editor);
   } else if (inputType.startsWith('delete')) {
     handleDelete(inlineRange, editor);
+  } else if (inputType === 'insertReplacementText') {
+    // Spell Checker
+    handleInsertReplacementText(inlineRange, data, editor, attributes);
   } else {
     return;
   }
