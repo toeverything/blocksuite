@@ -29,13 +29,13 @@ export async function duplicate(
   totalBound.x += totalBound.w + offset;
 
   const snapshot = await prepareCloneData(copyElements, edgeless.std);
-  const [canvasElements, blocks] =
+  const { canvasElements, blockModels } =
     await clipboardController.createElementsFromClipboardData(
-      snapshot as Record<string, unknown>[],
+      snapshot,
       totalBound.center
     );
 
-  const newElements = [...canvasElements, ...blocks];
+  const newElements = [...canvasElements, ...blockModels];
 
   edgeless.surface.fitToViewport(totalBound);
 

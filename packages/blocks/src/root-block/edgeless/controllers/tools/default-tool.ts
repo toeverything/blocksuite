@@ -300,13 +300,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const snapshot = await prepareCloneData(this._toBeMoved, _edgeless.std);
 
     const bound = edgelessElementsBound(this._toBeMoved);
-    const [elements, blocks] =
+    const { canvasElements, blockModels } =
       await clipboardController.createElementsFromClipboardData(
-        snapshot as Record<string, unknown>[],
+        snapshot,
         bound.center
       );
 
-    this._toBeMoved = [...elements, ...blocks];
+    this._toBeMoved = [...canvasElements, ...blockModels];
     this.edgelessSelectionManager.set({
       elements: this._toBeMoved.map(e => e.id),
       editing: false,

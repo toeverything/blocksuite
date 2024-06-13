@@ -7,6 +7,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import {
   type BlockSnapshot,
+  BlockSnapshotSchema,
   DocCollection,
   fromJSON,
   Job,
@@ -19,6 +20,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
+import type { EdgelessSelectableProps } from '../../../_common/edgeless/mixin/edgeless-selectable.js';
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
@@ -27,23 +29,13 @@ import {
   isInsidePageEditor,
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
-import type { AttachmentBlockModel } from '../../../attachment-block/index.js';
-import {
-  type BookmarkBlockModel,
-  BookmarkStyles,
-} from '../../../bookmark-block/bookmark-model.js';
-import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedHtmlModel } from '../../../embed-html-block/embed-html-model.js';
-import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.js';
-import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
-import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
-import type { ImageBlockModel } from '../../../image-block/image-model.js';
+import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
-import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
+import {
+  type SerializedElement,
+  SurfaceGroupLikeModel,
+} from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
 import {
@@ -71,18 +63,8 @@ import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
 import { deleteElements } from '../utils/crud.js';
 import {
   isAttachmentBlock,
-  isBookmarkBlock,
   isCanvasElementWithText,
-  isEmbedFigmaBlock,
-  isEmbedGithubBlock,
-  isEmbedHtmlBlock,
-  isEmbedLinkedDocBlock,
-  isEmbedLoomBlock,
-  isEmbedSyncedDocBlock,
-  isEmbedYoutubeBlock,
-  isFrameBlock,
   isImageBlock,
-  isNoteBlock,
   isTopLevelBlock,
 } from '../utils/query.js';
 
@@ -415,7 +397,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _createCanvasElements(
-    elements: Record<string, unknown>[],
+    elements: SerializedElement[],
     idMap: Map<string, string>
   ) {
     const result = groupBy(elements, item => {
@@ -892,13 +874,13 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private async _pasteShapesAndBlocks(
-    elementsRawData: Record<string, unknown>[]
+    elementsRawData: (SerializedElement | BlockSnapshot)[]
   ) {
-    const [elements, blocks] =
+    const { canvasElements, blockModels } =
       await this.createElementsFromClipboardData(elementsRawData);
     this._emitSelectionChangeAfterPaste(
-      elements.map(ele => ele.id),
-      blocks.map(block => block.id)
+      canvasElements.map(ele => ele.id),
+      blockModels.map(block => block.id)
     );
   }
 
@@ -1125,195 +1107,133 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   async createElementsFromClipboardData(
-    elementsRawData: Record<string, unknown>[],
+    elementsRawData: (SerializedElement | BlockSnapshot)[],
     pasteCenter?: IVec
   ) {
     const originalIndexes = new Map<string, string>();
+    const blockRawData: BlockSnapshot[] = [];
+    const surfaceRawData: SerializedElement[] = [];
+
     elementsRawData.forEach(data => {
-      originalIndexes.set(
-        data.id as string,
-        (data.type === 'block'
-          ? (data.props as Record<string, unknown>).index
-          : data.index) as string
-      );
+      const { data: blockSnapshot } = BlockSnapshotSchema.safeParse(data);
+      if (blockSnapshot) {
+        const props = blockSnapshot.props as EdgelessSelectableProps;
+        originalIndexes.set(blockSnapshot.id, props.index);
+
+        blockRawData.push(blockSnapshot);
+      } else {
+        const serializedElement = data as SerializedElement;
+        originalIndexes.set(serializedElement.id, serializedElement.index);
+
+        surfaceRawData.push(serializedElement);
+      }
     });
 
-    const groupedByType = groupBy(elementsRawData, data =>
-      isNoteBlock(data as unknown as BlockSuite.EdgelessModelType)
-        ? 'notes'
-        : isFrameBlock(data as unknown as BlockSuite.EdgelessModelType)
-          ? 'frames'
-          : isImageBlock(data as unknown as BlockSuite.EdgelessModelType)
-            ? 'images'
-            : isAttachmentBlock(data as unknown as BlockSuite.EdgelessModelType)
-              ? 'attachments'
-              : isBookmarkBlock(data as unknown as BlockSuite.EdgelessModelType)
-                ? 'bookmarks'
-                : isEmbedGithubBlock(
-                      data as unknown as BlockSuite.EdgelessModelType
-                    )
-                  ? 'githubEmbeds'
-                  : isEmbedYoutubeBlock(
-                        data as unknown as BlockSuite.EdgelessModelType
-                      )
-                    ? 'youtubeEmbeds'
-                    : isEmbedFigmaBlock(
-                          data as unknown as BlockSuite.EdgelessModelType
-                        )
-                      ? 'figmaEmbeds'
-                      : isEmbedLinkedDocBlock(
-                            data as unknown as BlockSuite.EdgelessModelType
-                          )
-                        ? 'linkedDocEmbeds'
-                        : isEmbedSyncedDocBlock(
-                              data as unknown as BlockSuite.EdgelessModelType
-                            )
-                          ? 'syncedDocEmbeds'
-                          : isEmbedHtmlBlock(
-                                data as unknown as BlockSuite.EdgelessModelType
-                              )
-                            ? 'htmlEmbeds'
-                            : isEmbedLoomBlock(
-                                  data as unknown as BlockSuite.EdgelessModelType
-                                )
-                              ? 'loomEmbeds'
-                              : 'elements'
-    ) as unknown as {
-      frames: BlockSnapshot[];
-      notes?: BlockSnapshot[];
-      images?: BlockSnapshot[];
-      attachments?: BlockSnapshot[];
-      bookmarks?: BlockSnapshot[];
-      githubEmbeds?: BlockSnapshot[];
-      youtubeEmbeds?: BlockSnapshot[];
-      figmaEmbeds?: BlockSnapshot[];
-      linkedDocEmbeds?: BlockSnapshot[];
-      syncedDocEmbeds?: BlockSnapshot[];
-      htmlEmbeds?: BlockSnapshot[];
-      loomEmbeds?: BlockSnapshot[];
-      elements?: { type: BlockSuite.SurfaceModelType['type'] }[];
-    };
+    const noteSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:note'
+    );
+    const imageSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:image'
+    );
+    const frameSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:frame'
+    );
+    const attachmentSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:attachment'
+    );
+    const bookmarkSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:bookmark'
+    );
+    const embedGithubSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:embed-github'
+    );
+    const embedYoutubeSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:embed-youtube'
+    );
+    const embedFigmaSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:embed-figma'
+    );
+    const embedLinkedDocSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:embed-linked-doc'
+    );
+    const embedSyncedDocSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:embed-synced-doc'
+    );
+    const embedHtmlSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:embed-html'
+    );
+    const embedLoomSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:embed-loom'
+    );
+
+    // map old id to new id to rebuild connector's source and target
+    const oldIdToNewIdMap = new Map<string, string>();
+
+    const noteIds = this._createNoteBlocks(noteSnapshots, oldIdToNewIdMap);
+    const imageIds = await this._createImageBlocks(
+      imageSnapshots,
+      oldIdToNewIdMap
+    );
+    const frameIds = this._createFrameBlocks(frameSnapshots);
+    const attachmentIds =
+      await this._createAttachmentBlocks(attachmentSnapshots);
+    const bookmarkIds = this._createBookmarkBlocks(bookmarkSnapshots);
+    const embedGithubIds = this._createGithubEmbedBlocks(embedGithubSnapshots);
+    const embedYoutubeIds = this._createYoutubeEmbedBlocks(
+      embedYoutubeSnapshots
+    );
+    const embedFigmaIds = this._createFigmaEmbedBlocks(embedFigmaSnapshots);
+    const embedLinkedDocIds = this._createLinkedDocEmbedBlocks(
+      embedLinkedDocSnapshots
+    );
+    const embedSyncedDocIds = this._createSyncedDocEmbedBlocks(
+      embedSyncedDocSnapshots
+    );
+    const embedHtmlIds = this._createHtmlEmbedBlocks(embedHtmlSnapshots);
+    const embedLoomIds = this._createLoomEmbedBlocks(embedLoomSnapshots);
+
+    const blockModels = [
+      ...noteIds,
+      ...frameIds,
+      ...imageIds,
+      ...attachmentIds,
+      ...bookmarkIds,
+      ...embedGithubIds,
+      ...embedYoutubeIds,
+      ...embedFigmaIds,
+      ...embedLinkedDocIds,
+      ...embedSyncedDocIds,
+      ...embedHtmlIds,
+      ...embedLoomIds,
+    ].flatMap(
+      id => this.host.doc.getBlock(id)?.model ?? []
+    ) as BlockSuite.EdgelessBlockModelType[];
+    const canvasElements = this._createCanvasElements(
+      surfaceRawData,
+      oldIdToNewIdMap
+    );
+    const allElements = [...blockModels, ...canvasElements];
+
     const { lastMousePos } = this.toolManager;
     pasteCenter =
       pasteCenter ??
       this.host.service.viewport.toModelCoord(lastMousePos.x, lastMousePos.y);
-    // map old id to new id to rebuild connector's source and target
-    const oldIdToNewIdMap = new Map<string, string>();
-
-    // create and add blocks to doc
-    const noteIds = this._createNoteBlocks(
-      groupedByType.notes || [],
-      oldIdToNewIdMap
-    );
-    const frameIds = this._createFrameBlocks(groupedByType.frames ?? []);
-    const imageIds = await this._createImageBlocks(
-      groupedByType.images ?? [],
-      oldIdToNewIdMap
-    );
-    const attachmentIds = await this._createAttachmentBlocks(
-      groupedByType.attachments ?? []
-    );
-    const bookmarkIds = this._createBookmarkBlocks(
-      groupedByType.bookmarks ?? []
-    );
-    const embedGithubIds = this._createGithubEmbedBlocks(
-      groupedByType.githubEmbeds ?? []
-    );
-    const embedYoutubeIds = this._createYoutubeEmbedBlocks(
-      groupedByType.youtubeEmbeds ?? []
-    );
-    const embedFigmaIds = this._createFigmaEmbedBlocks(
-      groupedByType.figmaEmbeds ?? []
-    );
-    const embedLinkedDocIds = this._createLinkedDocEmbedBlocks(
-      groupedByType.linkedDocEmbeds ?? []
-    );
-    const embedSyncedDocIds = this._createSyncedDocEmbedBlocks(
-      groupedByType.syncedDocEmbeds ?? []
-    );
-    const embedHtmlIds = this._createHtmlEmbedBlocks(
-      groupedByType.htmlEmbeds ?? []
-    );
-    const embedLoomIds = this._createLoomEmbedBlocks(
-      groupedByType.loomEmbeds ?? []
-    );
-
-    const notes = noteIds.map(id =>
-      this.doc.getBlockById(id)
-    ) as NoteBlockModel[];
-
-    const frames = frameIds.map(id =>
-      this.doc.getBlockById(id)
-    ) as FrameBlockModel[];
-
-    const images = imageIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as ImageBlockModel[];
-
-    const attachments = attachmentIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as AttachmentBlockModel[];
-
-    const bookmarks = bookmarkIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as BookmarkBlockModel[];
-
-    const githubEmbeds = embedGithubIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as EmbedGithubModel[];
-
-    const youtubeEmbeds = embedYoutubeIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as EmbedYoutubeModel[];
-
-    const figmaEmbeds = embedFigmaIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as EmbedFigmaModel[];
-
-    const linkedDocEmbeds = embedLinkedDocIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as EmbedLinkedDocModel[];
-
-    const syncedDocEmbeds = embedSyncedDocIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as EmbedSyncedDocModel[];
-
-    const htmlEmbeds = embedHtmlIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as EmbedHtmlModel[];
-
-    const loomEmbeds = embedLoomIds.map(id =>
-      this.host.service.getElementById(id)
-    ) as EmbedLoomModel[];
-
-    const elements = this._createCanvasElements(
-      groupedByType.elements || [],
-      oldIdToNewIdMap
-    );
-
     const [modelX, modelY] = pasteCenter;
-    const blocks = [
-      ...notes,
-      ...frames,
-      ...images,
-      ...attachments,
-      ...bookmarks,
-      ...githubEmbeds,
-      ...youtubeEmbeds,
-      ...figmaEmbeds,
-      ...linkedDocEmbeds,
-      ...syncedDocEmbeds,
-      ...htmlEmbeds,
-      ...loomEmbeds,
-    ];
-    const allElements = [...elements, ...blocks];
-
     const oldCommonBound = edgelessElementsBound(allElements);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
 
-    // update canvas elements' position to mouse position
-    elements.forEach(ele => {
+    blockModels.forEach(block => {
+      const bound = Bound.deserialize(block.xywh);
+
+      bound.x += pasteX - oldCommonBound.x;
+      bound.y += pasteY - oldCommonBound.y;
+      this.edgeless.service.updateElement(block.id, {
+        xywh: bound.serialize(),
+      });
+    });
+
+    canvasElements.forEach(ele => {
       const newBound = new Bound(
         pasteX + ele.x - oldCommonBound.x,
         pasteY + ele.y - oldCommonBound.y,
@@ -1329,16 +1249,6 @@ export class EdgelessClipboardController extends PageClipboard {
       }
     });
 
-    blocks.forEach(block => {
-      const bound = Bound.deserialize(block.xywh);
-
-      bound.x += pasteX - oldCommonBound.x;
-      bound.y += pasteY - oldCommonBound.y;
-      this.edgeless.service.updateElement(block.id, {
-        xywh: bound.serialize(),
-      });
-    });
-
     originalIndexes.forEach((index, id) => {
       const newId = oldIdToNewIdMap.get(id);
       if (newId) {
@@ -1348,7 +1258,10 @@ export class EdgelessClipboardController extends PageClipboard {
 
     this._updatePastedElementsIndex(allElements, originalIndexes);
 
-    return [elements, blocks] as const;
+    return {
+      canvasElements,
+      blockModels,
+    };
   }
 
   async toCanvas(
