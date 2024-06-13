@@ -131,6 +131,12 @@ export class AIAnswerText extends WithDisposable(LitElement) {
       rich-text .nowrap-lines v-element span {
         white-space: pre;
       }
+      editor-host:focus-visible {
+        outline: none;
+      }
+      editor-host * {
+        box-sizing: border-box;
+      }
     }
 
     ${textBlockStyles}
