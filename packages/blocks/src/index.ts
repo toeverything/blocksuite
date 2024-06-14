@@ -79,6 +79,7 @@ export {
   isInsideEdgelessEditor,
   isInsidePageEditor,
 } from './_common/utils/query.js';
+export * from './ai-chat-block/index.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';

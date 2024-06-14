@@ -5,6 +5,7 @@ import type {
   Connectable,
   EdgelessTool,
 } from '../../../_common/utils/index.js';
+import type { AIChatBlockModel } from '../../../ai-chat-block/ai-chat-model.js';
 import type { AttachmentBlockModel } from '../../../attachment-block/index.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
@@ -93,6 +94,14 @@ export function isBookmarkBlock(
 ): element is BookmarkBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:bookmark'
+  );
+}
+
+export function isAIChatBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is AIChatBlockModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:ai-chat'
   );
 }
 

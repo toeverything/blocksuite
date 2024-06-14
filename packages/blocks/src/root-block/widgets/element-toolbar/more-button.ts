@@ -36,6 +36,7 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
+import type { AIChatBlockComponent } from '../../../ai-chat-block/ai-chat-block.js';
 import type {
   AttachmentBlockComponent,
   BookmarkBlockComponent,
@@ -275,6 +276,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       | EmbedLinkedDocBlockComponent
       | EmbedSyncedDocBlockComponent
       | EmbedLoomBlockComponent
+      | AIChatBlockComponent
       | null;
     assertExists(blockElement);
 

@@ -401,6 +401,22 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             }
           });
         },
+        o: () => {
+          const { service } = rootElement;
+          let { x, y } = service.viewport.center;
+          x = x - 300 / 2;
+          y = y - 160 / 2;
+          const bound = new Bound(x, y, 300, 160);
+          const aiChatBlockId = service.addBlock(
+            'affine:ai-chat',
+            {
+              xywh: bound.serialize(),
+              items: [],
+            },
+            rootElement.surfaceBlockModel
+          );
+          service.selection.set({ elements: [aiChatBlockId], editing: false });
+        },
       },
       {
         global: true,

@@ -10,5 +10,6 @@ declare type BlockSuiteFlags = {
   enable_mindmap_entry: boolean;
   enable_new_image_actions: boolean;
   enable_edgeless_text: boolean;
+  enable_ai_chat_block: boolean;
   readonly: Record<string, boolean>;
 };

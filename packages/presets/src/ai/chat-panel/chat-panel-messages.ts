@@ -19,8 +19,13 @@ import type {
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { ImageSelection } from '@blocksuite/blocks';
+import type {
+  EdgelessRootBlockComponent,
+  EdgelessRootService,
+  ImageSelection,
+} from '@blocksuite/blocks';
 import {
+  Bound,
   isInsidePageEditor,
   PaymentRequiredError,
   UnauthorizedError,
@@ -33,6 +38,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   AffineAvatarIcon,
   AffineIcon,
+  BlockIcon,
   DownArrowIcon,
 } from '../_common/icons.js';
 import {
@@ -150,6 +156,43 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       align-items: center;
       cursor: pointer;
     }
+
+    .chat-panel-messages {
+      .actions-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .actions-container > div {
+        display: flex;
+        gap: 8px;
+      }
+
+      .action {
+        width: fit-content;
+        height: 32px;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--affine-border-color);
+        background-color: var(--affine-white-10);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--affine-text-primary-color);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .action svg {
+        color: var(--affine-icon-color);
+      }
+    }
   `;
 
   private _selectionValue: BaseSelection[] = [];
@@ -245,13 +288,14 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
                 .host=${this.host}
                 .selectionValue=${this._selectionValue}
               ></chat-cards> `
-          : repeat(filteredItems, (item, index) => {
+          : html`${repeat(filteredItems, (item, index) => {
               const isLast = index === filteredItems.length - 1;
               return html`<div class="message">
                 ${this.renderAvatar(item)}
                 <div class="item-wrapper">${this.renderItem(item, isLast)}</div>
               </div>`;
             })}
+            ${this.ChatBlockAction()} `}
       </div>
       ${this.showDownIndicator
         ? html`<div class="down-indicator" @click=${() => this.scrollToDown()}>
@@ -421,42 +465,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       : EdgelessEditorActions;
 
     return html`
-      <style>
-        .actions-container {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          gap: 8px;
-          margin-top: 8px;
-        }
-
-        .actions-container > div {
-          display: flex;
-          gap: 8px;
-        }
-
-        .action {
-          width: fit-content;
-          height: 32px;
-          padding: 12px;
-          border-radius: 8px;
-          border: 1px solid var(--affine-border-color);
-          background-color: var(--affine-white-10);
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: 4px;
-          font-size: 15px;
-          font-weight: 500;
-          color: var(--affine-text-primary-color);
-          cursor: pointer;
-          user-select: none;
-        }
-
-        .action svg {
-          color: var(--affine-icon-color);
-        }
-      </style>
       <chat-copy-more
         .host=${host}
         .content=${content}
@@ -521,6 +529,59 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         : nothing}
     `;
   }
+
+  ChatBlockAction = () => {
+    const { items } = this.chatContextValue;
+    if (items.length === 0) {
+      return nothing;
+    }
+
+    return html`
+      <div
+        class="action"
+        @click=${() => {
+          const { host } = this;
+          const rootService = host.std.spec.getService('affine:page');
+          console.debug('Save chat to a block: ', items, 'host: ', this.host);
+          if (isInsidePageEditor(host)) {
+            const { notificationService } = rootService;
+            if (notificationService) {
+              notificationService.notify({
+                title: 'Save chat to a block',
+                message:
+                  'This feature is not available in the page editor. Please switch to edgeless mode.',
+                onClose: function (): void {},
+              });
+            }
+          } else {
+            const edgelessRootService = rootService as EdgelessRootService;
+            let { x, y } = edgelessRootService.viewport.center;
+            x = x - 150;
+            y = y - 80;
+            const bound = new Bound(x, y, 300, 160);
+            const edgelessRootBlock = host.view.getBlock(
+              host.doc.root!.id
+            ) as EdgelessRootBlockComponent;
+            const aiChatBlockId = edgelessRootService.addBlock(
+              'affine:ai-chat',
+              {
+                xywh: bound.serialize(),
+                items: items,
+              },
+              edgelessRootBlock.surfaceBlockModel
+            );
+            edgelessRootService.selection.set({
+              elements: [aiChatBlockId],
+              editing: true,
+            });
+          }
+        }}
+      >
+        ${BlockIcon}
+        <div>Save chat to a block</div>
+      </div>
+    `;
+  };
 }
 
 declare global {

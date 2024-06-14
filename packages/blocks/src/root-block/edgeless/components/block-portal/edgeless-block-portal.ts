@@ -1,4 +1,5 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
+import './ai-chat/edgeless-ai-chat.js';
 import './note/edgeless-note.js';
 import './image/edgeless-image.js';
 import './bookmark/edgeless-bookmark.js';
@@ -42,6 +43,7 @@ const portalMap = new Map<BlockSuite.EdgelessModelKeyType | RegExp, string>([
   ['affine:bookmark', 'edgeless-block-portal-bookmark'],
   ['affine:attachment', 'edgeless-block-portal-attachment'],
   ['affine:edgeless-text', 'edgeless-block-portal-edgeless-text'],
+  ['affine:ai-chat', 'edgeless-block-portal-ai-chat'],
   [/affine:embed-*/, 'edgeless-block-portal-embed'],
 ]);
 

@@ -55,6 +55,7 @@ import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
   getSelectableBounds,
   getSelectedRect,
+  isAIChatBlock,
   isAttachmentBlock,
   isBookmarkBlock,
   isCanvasElement,
@@ -610,7 +611,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       isEmbedGithubBlock(element) ||
       isEmbedYoutubeBlock(element) ||
       isEmbedLoomBlock(element) ||
-      isEmbedLinkedDocBlock(element)
+      isEmbedLinkedDocBlock(element) ||
+      isAIChatBlock(element)
     );
   }
 

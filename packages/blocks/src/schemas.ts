@@ -4,6 +4,7 @@
 import type { BlockSchema } from '@blocksuite/store';
 import type { z } from 'zod';
 
+import { AIChatBlockSpec } from './ai-chat-block/ai-chat-spec.js';
 import { AttachmentBlockSchema } from './attachment-block/attachment-model.js';
 import { BookmarkBlockSchema } from './bookmark-block/bookmark-model.js';
 import { CodeBlockSchema } from './code-block/code-model.js';
@@ -51,4 +52,5 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   EmbedSyncedDocBlockSpec.schema,
   EmbedLoomBlockSpec.schema,
   EdgelessTextBlockSpec.schema,
+  AIChatBlockSpec.schema,
 ];
