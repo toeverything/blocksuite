@@ -4,7 +4,11 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  assertInstanceOf,
+  DisposableGroup,
+} from '@blocksuite/global/utils';
 import {
   type BlockSnapshot,
   BlockSnapshotSchema,
@@ -30,6 +34,7 @@ import {
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
+import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
 import {
@@ -497,6 +502,31 @@ export class EdgelessClipboardController extends PageClipboard {
       return noteId;
     });
     return noteIds;
+  }
+
+  private _createEdgelessTextBlocks(
+    edgelessTexts: BlockSnapshot[],
+    oldToNewIdMap: Map<string, string>
+  ) {
+    const { host } = this;
+    const edgelessTextIds = edgelessTexts.map(({ id, props, children }) => {
+      delete props.index;
+      assertExists(props.xywh);
+      const textId = host.service.addBlock(
+        'affine:edgeless-text',
+        props,
+        this.edgeless.surface.model.id
+      );
+      const text = host.service.getElementById(textId);
+      oldToNewIdMap.set(id, textId);
+      assertInstanceOf(text, EdgelessTextBlockModel);
+
+      children.forEach((child, index) => {
+        this.onBlockSnapshotPaste(child, this.doc, text.id, index);
+      });
+      return textId;
+    });
+    return edgelessTextIds;
   }
 
   private _createFrameBlocks(frames: BlockSnapshot[]) {
@@ -1155,6 +1185,9 @@ export class EdgelessClipboardController extends PageClipboard {
     const noteSnapshots = blockRawData.filter(
       data => data.flavour === 'affine:note'
     );
+    const edgelessTextSnapshots = blockRawData.filter(
+      data => data.flavour === 'affine:edgeless-text'
+    );
     const imageSnapshots = blockRawData.filter(
       data => data.flavour === 'affine:image'
     );
@@ -1193,6 +1226,10 @@ export class EdgelessClipboardController extends PageClipboard {
     const oldIdToNewIdMap = new Map<string, string>();
 
     const noteIds = this._createNoteBlocks(noteSnapshots, oldIdToNewIdMap);
+    const edgelessTextIds = this._createEdgelessTextBlocks(
+      edgelessTextSnapshots,
+      oldIdToNewIdMap
+    );
     const imageIds = await this._createImageBlocks(
       imageSnapshots,
       oldIdToNewIdMap
@@ -1217,6 +1254,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const blockModels = [
       ...noteIds,
+      ...edgelessTextIds,
       ...frameIds,
       ...imageIds,
       ...attachmentIds,
