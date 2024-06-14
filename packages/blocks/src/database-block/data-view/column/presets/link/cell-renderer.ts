@@ -121,14 +121,17 @@ export class LinkCell extends BaseCellRenderer<string> {
         .quickSearchService?.searchDoc({
           userInput: this.value,
         });
-      result?.then(res => {
-        if (!res) {
-          return;
-        }
-        if ('docId' in res) {
-          this.docId = res.docId;
-        }
-      });
+      result
+        ?.then(res => {
+          if (res && 'docId' in res) {
+            this.docId = res.docId;
+            return;
+          }
+          this.docId = undefined;
+        })
+        .catch(() => {
+          this.docId = undefined;
+        });
     }
   }
 
