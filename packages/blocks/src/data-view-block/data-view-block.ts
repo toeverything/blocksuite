@@ -234,8 +234,10 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
       })
     );
     this._disposables.add(
-      this.model.propsUpdated.on(() => {
-        this.viewSource.updateSlot.emit();
+      this.model.propsUpdated.on(data => {
+        if (data.key === 'views') {
+          this.viewSource.checkViewDataUpdate();
+        }
       })
     );
   }

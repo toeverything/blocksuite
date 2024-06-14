@@ -301,8 +301,13 @@ export class DatabaseBlockComponent extends BlockComponent<
       })
     );
     this._disposables.add(
-      this.model.propsUpdated.on(() => {
-        this.viewSource.updateSlot.emit();
+      this.model.propsUpdated.on(data => {
+        if (data.key === 'views') {
+          this.viewSource.checkViewDataUpdate();
+        }
+        if (data.key === 'columns') {
+          this.dataSource.slots.update.emit();
+        }
       })
     );
     let canDrop = false;

@@ -23,7 +23,7 @@ import type { DataViewManager } from './view/data-view-manager.js';
 
 type ViewProps = {
   view: DataViewManager;
-  viewUpdated: Slot;
+  viewUpdated: Slot<{ viewId: string }>;
   selectionUpdated: Slot<DataViewSelectionState>;
   setSelection: (selection?: DataViewSelectionState) => void;
   bindHotkey: DataViewBase['bindHotkey'];
@@ -153,9 +153,6 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     this.disposables.add(
       this.config.viewSource.updateSlot.on(() => {
         this.requestUpdate();
-        this.config.viewSource.views.forEach(v => {
-          v.updateSlot.emit();
-        });
       })
     );
   }
