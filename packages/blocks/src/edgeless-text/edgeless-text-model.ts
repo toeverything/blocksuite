@@ -34,7 +34,7 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
   }),
   metadata: {
     version: 1,
-    role: 'content',
+    role: 'hub',
     parent: ['affine:surface'],
     children: [
       'affine:paragraph',
