@@ -40,7 +40,6 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
       'affine:paragraph',
       'affine:list',
       'affine:code',
-      'affine:divider',
       'affine:image',
       'affine:bookmark',
       'affine:attachment',
