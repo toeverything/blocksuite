@@ -70,10 +70,6 @@ export class DatabaseBlockViewSource implements ViewSource {
           self.duplicate(id);
         },
         get view() {
-          const view = getView();
-          if (!view) {
-            throw new Error('view not found');
-          }
           return view;
         },
         updateView: updater => {
