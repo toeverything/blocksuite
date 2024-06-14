@@ -185,16 +185,27 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
           insertedLinkType
             ?.then(type => {
-              rootElement.service.telemetryService?.track(
-                'CanvasElementAdded',
-                {
-                  control: 'shortcut',
-                  page: 'whiteboard editor',
-                  module: 'toolbar',
-                  segment: 'toolbar',
-                  type: type,
+              if (type) {
+                rootElement.service.telemetryService?.track(
+                  'CanvasElementAdded',
+                  {
+                    control: 'shortcut',
+                    page: 'whiteboard editor',
+                    module: 'toolbar',
+                    segment: 'toolbar',
+                    type: type.flavour.split(':')[1],
+                  }
+                );
+                if (type.isNewDoc) {
+                  rootElement.service.telemetryService?.track('DocCreated', {
+                    control: 'shortcut',
+                    page: 'whiteboard editor',
+                    module: 'toolbar',
+                    segment: 'toolbar',
+                    type: type.flavour.split(':')[1],
+                  });
                 }
-              );
+              }
             })
             .catch(console.error);
         },
