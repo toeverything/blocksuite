@@ -40,6 +40,8 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   private _moveWithSpaceShapePosTemp: SelectionArea | null = null;
 
+  private _disableOverlay = false;
+
   protected override _draggingArea: SelectionArea | null = null;
 
   readonly tool = {
@@ -153,8 +155,13 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     this._edgeless.surface.refresh();
   }
 
+  setDisableOverlay(disable: boolean) {
+    this._disableOverlay = disable;
+  }
+
   onContainerClick(e: PointerEventState): void {
     this.clearOverlay();
+    if (this._disableOverlay) return;
 
     this._doc.captureSync();
 
@@ -324,6 +331,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   createOverlay() {
     this.clearOverlay();
+    if (this._disableOverlay) return;
     const options = SHAPE_OVERLAY_OPTIONS;
     const attributes =
       this._edgeless.service.editPropsStore.getLastProps('shape');

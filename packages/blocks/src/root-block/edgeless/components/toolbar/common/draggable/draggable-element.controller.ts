@@ -312,6 +312,16 @@ export class EdgelessDraggableElementController<T>
     this._animateCancelDrop();
   }
 
+  /**
+   * Same as {@link cancel} but without animation
+   */
+  cancelWithoutAnimation() {
+    if (this.states.cancelled) return;
+    this._updateState('cancelled', true);
+    this.reset();
+    this.removeAllEvents();
+  }
+
   reset() {
     if (this.clearTimeout) clearTimeout(this.clearTimeout);
     this.overlay?.mask.remove();

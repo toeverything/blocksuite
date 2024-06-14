@@ -105,9 +105,9 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
   }
 
   private _handleShapeClick(shape: DraggableShape) {
-    if (!this.popper) {
-      this._toggleMenu();
-    }
+    // if (!this.popper) {
+    //   this._toggleMenu();
+    // }
     const name = shape.name;
     if (name !== this.shapeType) {
       const shapeConfig = ShapeComponentConfig.find(s => s.name === name);
