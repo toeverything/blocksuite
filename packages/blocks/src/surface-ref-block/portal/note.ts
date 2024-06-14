@@ -19,7 +19,7 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../_common/consts.js';
-import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
+import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../../_common/types.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { SpecProvider } from '../../specs/utils/spec-provider.js';
@@ -130,7 +130,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       transform: `translate(${modelX}px, ${modelY}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px ${'solid'} var(--affine-black-10)`,
-      background: `var(${background ?? DEFAULT_NOTE_COLOR})`,
+      background: `var(${background ?? DEFAULT_NOTE_BACKGROUND_COLOR})`,
       boxShadow: 'var(--affine-shadow-3)',
       position: 'absolute',
       borderRadius: '8px',

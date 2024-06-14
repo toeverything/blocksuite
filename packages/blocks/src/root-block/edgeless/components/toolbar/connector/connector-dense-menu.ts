@@ -1,8 +1,8 @@
 import {
+  ConnectorCWithArrowIcon,
   ConnectorIcon,
-  CurveLineIcon,
-  ElbowedLineIcon,
-  StraightLineIcon,
+  ConnectorLWithArrowIcon,
+  ConnectorXWithArrowIcon,
 } from '../../../../../_common/icons/edgeless.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { DenseMenuBuilder } from '../common/type.js';
@@ -32,21 +32,21 @@ export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
         {
           type: 'action',
           name: 'Curve',
-          icon: CurveLineIcon,
+          icon: ConnectorCWithArrowIcon,
           select: createSelect(ConnectorMode.Curve),
           isSelected: isSelected && prevMode === ConnectorMode.Curve,
         },
         {
           type: 'action',
           name: 'Elbowed',
-          icon: ElbowedLineIcon,
+          icon: ConnectorXWithArrowIcon,
           select: createSelect(ConnectorMode.Orthogonal),
           isSelected: isSelected && prevMode === ConnectorMode.Orthogonal,
         },
         {
           type: 'action',
           name: 'Straight',
-          icon: StraightLineIcon,
+          icon: ConnectorLWithArrowIcon,
           select: createSelect(ConnectorMode.Straight),
           isSelected: isSelected && prevMode === ConnectorMode.Straight,
         },

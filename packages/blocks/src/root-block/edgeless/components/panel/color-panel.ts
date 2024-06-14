@@ -55,8 +55,12 @@ export function isTransparent(color: CssVariableName) {
 
 function isSameColorWithBackground(color: CssVariableName) {
   return [
+    '--affine-palette-line-black',
     '--affine-palette-line-white',
+    '--affine-palette-shape-black',
     '--affine-palette-shape-white',
+    '--affine-note-background-black',
+    '--affine-note-background-white',
   ].includes(color.toLowerCase());
 }
 

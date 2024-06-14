@@ -745,12 +745,12 @@ test('change note color', async ({ page }) => {
   await assertEdgelessNoteBackground(
     page,
     noteId,
-    '--affine-background-secondary-color'
+    '--affine-note-background-blue'
   );
 
   await selectNoteInEdgeless(page, noteId);
   await triggerComponentToolbarAction(page, 'changeNoteColor');
-  const color = '--affine-tag-blue';
+  const color = '--affine-note-background-green';
   await changeEdgelessNoteBackground(page, color);
   await assertEdgelessNoteBackground(page, noteId, color);
 });

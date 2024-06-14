@@ -239,7 +239,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     if (isShape(this.currentSource)) {
       let tag = this.currentSource.fillColor.split('-').pop();
       if (!tag || tag === 'gray') tag = 'grey';
-      color = `--affine-tag-${tag}`;
+      color = `--affine-note-background-${tag}`;
     } else {
       color = this.currentSource.background;
     }
@@ -368,7 +368,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     if (isShape(this.currentSource)) {
       let tag = this.currentSource.fillColor.split('-').pop();
       if (!tag || tag === 'gray') tag = 'grey';
-      color = `--affine-tag-${tag}`;
+      color = `--affine-note-background-${tag}`;
     } else {
       color = this.currentSource.background;
     }

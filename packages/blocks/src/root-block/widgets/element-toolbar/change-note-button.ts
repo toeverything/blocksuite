@@ -13,7 +13,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
-import type { NOTE_COLORS } from '../../../_common/edgeless/note/consts.js';
+import { NOTE_BACKGROUND_COLORS } from '../../../_common/edgeless/note/consts.js';
 import {
   ExpandIcon,
   LineStyleIcon,
@@ -40,19 +40,6 @@ import {
 } from '../../edgeless/components/panel/line-styles-panel.js';
 import { getTooltipWithShortcut } from '../../edgeless/components/utils.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-
-const NOTE_BACKGROUND: CssVariableName[] = [
-  '--affine-tag-red',
-  '--affine-tag-orange',
-  '--affine-tag-yellow',
-  '--affine-tag-green',
-  '--affine-tag-teal',
-  '--affine-tag-blue',
-  '--affine-tag-purple',
-  '--affine-tag-pink',
-  '--affine-tag-gray',
-  '--affine-palette-transparent',
-] as const;
 
 const SIZE_LIST = [
   {
@@ -105,14 +92,13 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor quickConnectButton!: TemplateResult<1>;
 
-  private _setBackground(color: CssVariableName) {
+  private _setBackground(background: CssVariableName) {
     this.notes.forEach(note => {
-      this.doc.updateBlock(note, { background: color });
+      this.doc.updateBlock(note, { background });
     });
-    // TODO: better solution to handle this case?
     this.edgeless.service.editPropsStore.record('affine:note', {
-      background: color as (typeof NOTE_COLORS)[number],
-    });
+      background,
+    } as Record<string, unknown>);
   }
 
   private _setShadowType(shadowType: string) {
@@ -297,7 +283,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               <edgeless-color-panel
                 slot
                 .value=${background}
-                .options=${NOTE_BACKGROUND}
+                .options=${NOTE_BACKGROUND_COLORS}
                 @select=${(e: ColorEvent) => this._setBackground(e.detail)}
               >
               </edgeless-color-panel>
