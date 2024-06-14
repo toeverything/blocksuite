@@ -91,7 +91,7 @@ export class EdgelessDraggableElementController<T>
     this.info = {
       startTime: Date.now(),
       startPos: { x: e.x, y: e.y },
-      scopeRect: scopeElement.getBoundingClientRect(),
+      scopeRect: scopeElement?.getBoundingClientRect() ?? null,
       edgelessRect,
       elementRectOriginal: e.el.getBoundingClientRect(),
       element: e.el,
@@ -152,6 +152,7 @@ export class EdgelessDraggableElementController<T>
 
     // check if inside scopeElement
     const newDragOut =
+      !scopeRect ||
       y < scopeRect.top ||
       y > scopeRect.bottom ||
       x < scopeRect.left ||
@@ -218,6 +219,7 @@ export class EdgelessDraggableElementController<T>
   private _createOverlay({ x, y }: Pick<ElementDragEvent, 'x' | 'y'>) {
     const { info } = this;
     const { elementInfo, elementRectOriginal, edgelessRect } = info;
+
     this.reset();
     this._updateState('draggingElement', elementInfo);
     this.overlay = createShapeDraggingOverlay(info);
@@ -226,7 +228,7 @@ export class EdgelessDraggableElementController<T>
     // init shape position with 'left' and 'top';
     const left = elementRectOriginal.left - edgelessRect.left;
     const top = elementRectOriginal.top - edgelessRect.top;
-    // make sure the trasnform origin is the same as the mouse position
+    // make sure the transform origin is the same as the mouse position
     const ox = `${(((x - elementRectOriginal.left) / elementRectOriginal.width) * 100).toFixed(0)}%`;
     const oy = `${(((y - elementRectOriginal.top) / elementRectOriginal.height) * 100).toFixed(0)}%`;
     Object.assign(overlay.element.style, {
@@ -272,8 +274,10 @@ export class EdgelessDraggableElementController<T>
     // unlock pointer events
     overlay.mask.style.pointerEvents = 'none';
     // clip bottom
-    overlay.mask.style.height =
-      info.scopeRect.bottom - info.edgelessRect.top + 'px';
+    if (info.scopeRect) {
+      overlay.mask.style.height =
+        info.scopeRect.bottom - info.edgelessRect.top + 'px';
+    }
 
     const { element, elementRectOriginal } = info;
 

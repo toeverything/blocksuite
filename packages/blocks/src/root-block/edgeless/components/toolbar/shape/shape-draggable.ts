@@ -21,13 +21,16 @@ import type { DraggableShape } from './utils.js';
 import { buildVariablesObject } from './utils.js';
 
 const shapes: DraggableShape[] = [];
+// to move shapes together
+const oy = -2;
+const ox = 0;
 shapes.push({
   name: 'roundedRect',
   svg: roundedSvg,
   style: {
-    default: { x: -9, y: 10 },
-    hover: { y: -1, z: 1 },
-    next: { y: 64 },
+    default: { x: -9, y: 6 },
+    hover: { y: -5, z: 1 },
+    next: { y: 60 },
   },
 });
 shapes.push({
@@ -47,6 +50,12 @@ shapes.push({
     hover: { y: 7, z: 1 },
     next: { y: 64 },
   },
+});
+shapes.forEach(s => {
+  Object.values(s.style).forEach(style => {
+    if (style.y) (style.y as number) += oy;
+    if (style.x) (style.x as number) += ox;
+  });
 });
 
 @customElement('edgeless-toolbar-shape-draggable')
@@ -94,6 +103,9 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         scale(var(--default-s, 1));
       z-index: var(--default-z, 0);
       pointer-events: none;
+    }
+    .shape svg {
+      display: block;
     }
     .shape svg path,
     .shape svg circle,
