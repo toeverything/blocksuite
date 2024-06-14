@@ -224,7 +224,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
       },
     });
 
-    this.edgeless.bindHotKey(
+    const dispose = this.edgeless.bindHotKey(
       {
         m: () => {
           const service = this.edgeless.service;
@@ -254,6 +254,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
       },
       { global: true }
     );
+    this.disposables.add(dispose);
   }
 
   override updated(_changedProperties: Map<PropertyKey, unknown>) {

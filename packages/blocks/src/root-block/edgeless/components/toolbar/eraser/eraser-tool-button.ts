@@ -41,15 +41,17 @@ export class EdgelessEraserToolButton extends EdgelessToolbarToolMixin(
   override enableActiveBackground = true;
 
   override firstUpdated() {
-    this.edgeless.bindHotKey(
-      {
-        Escape: () => {
-          if (this.edgelessTool.type === 'eraser') {
-            this.setEdgelessTool({ type: 'default' });
-          }
+    this.disposables.add(
+      this.edgeless.bindHotKey(
+        {
+          Escape: () => {
+            if (this.edgelessTool.type === 'eraser') {
+              this.setEdgelessTool({ type: 'default' });
+            }
+          },
         },
-      },
-      { global: true }
+        { global: true }
+      )
     );
   }
 

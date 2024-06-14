@@ -101,15 +101,17 @@ export const ToolbarButtonWithMenuMixin = <
       this.initLastPropsSlot();
 
       // TODO: move to edgeless root block?
-      edgeless.bindHotKey(
-        {
-          Escape: () => {
-            if (this.edgelessTool.type === this._type) {
-              edgeless.tools.setEdgelessTool({ type: 'default' });
-            }
+      this.disposables.add(
+        edgeless.bindHotKey(
+          {
+            Escape: () => {
+              if (this.edgelessTool.type === this._type) {
+                edgeless.tools.setEdgelessTool({ type: 'default' });
+              }
+            },
           },
-        },
-        { global: true }
+          { global: true }
+        )
       );
     }
   }

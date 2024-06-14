@@ -236,7 +236,9 @@ export class BlockElement<
           : undefined,
       path: options?.global || options?.flavour ? undefined : this.path,
     };
-    this._disposables.add(this.host.event.bindHotkey(keymap, config));
+    const dispose = this.host.event.bindHotkey(keymap, config);
+    this._disposables.add(dispose);
+    return dispose;
   }
 
   renderChildren = (model: BlockModel): TemplateResult => {
