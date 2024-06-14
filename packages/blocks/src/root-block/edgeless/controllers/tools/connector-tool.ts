@@ -55,6 +55,13 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       source: this._source,
       target: { position: this._startPoint },
     });
+    this._edgeless.service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:draw',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: CanvasElementType.CONNECTOR,
+    });
     this._connector = this._edgeless.service.getElementById(
       id
     ) as ConnectorElementModel;

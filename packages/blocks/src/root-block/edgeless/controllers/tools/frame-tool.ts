@@ -49,6 +49,13 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
         },
         this._service.surface
       );
+      this._service.telemetryService?.track('CanvasElementAdded', {
+        control: 'canvas:draw',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: 'frame',
+      });
       this._frame = this._service.getElementById(id) as FrameBlockModel;
       this._frame.stash('xywh');
       return;

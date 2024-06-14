@@ -34,6 +34,13 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     } else {
       addText(this._edgeless, e);
     }
+    this._service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:draw',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'text',
+    });
   }
 
   onContainerContextMenu(): void {

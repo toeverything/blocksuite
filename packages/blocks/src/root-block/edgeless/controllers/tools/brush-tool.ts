@@ -105,6 +105,14 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       points,
     });
 
+    this._service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:draw',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: CanvasElementType.BRUSH,
+    });
+
     const element = this._service.getElementById(id) as BrushElementModel;
 
     element.stash('points');

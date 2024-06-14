@@ -157,6 +157,18 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           xywh,
           radius: shape.name === 'roundedRect' ? 0.1 : 0,
         });
+
+        this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+          control: 'toolbar:dnd',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'shape',
+          other: {
+            shapeType:
+              shape.name === 'roundedRect' ? ShapeType.Rect : shape.name,
+          },
+        });
       },
       onElementClick: el => {
         this.onShapeClick?.(el.data);

@@ -147,6 +147,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           ) {
             const frame = rootElement.service.frame.createFrameOnSelected();
             if (!frame) return;
+            rootElement.service.telemetryService?.track('CanvasElementAdded', {
+              control: 'shortcut',
+              page: 'whiteboard editor',
+              module: 'toolbar',
+              segment: 'toolbar',
+              type: 'frame',
+            });
             rootElement.surface.fitToViewport(Bound.deserialize(frame.xywh));
           } else if (!this.rootElement.service.selection.editing) {
             this._setEdgelessTool(rootElement, { type: 'frame' });
@@ -172,7 +179,24 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           ) {
             return;
           }
-          std.command.exec('insertLinkByQuickSearch');
+          const { insertedLinkType } = std.command.exec(
+            'insertLinkByQuickSearch'
+          );
+
+          insertedLinkType
+            ?.then(type => {
+              rootElement.service.telemetryService?.track(
+                'CanvasElementAdded',
+                {
+                  control: 'shortcut',
+                  page: 'whiteboard editor',
+                  module: 'toolbar',
+                  segment: 'toolbar',
+                  type: type,
+                }
+              );
+            })
+            .catch(console.error);
         },
         'Shift-s': () => {
           if (this.rootElement.service.locked) return;

@@ -1,9 +1,9 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { PageRootService } from '@blocksuite/blocks';
 import {
   type DocMode,
   type DocModeService,
   type NotificationService,
-  type PageRootService,
   type QuickSearchService,
   toast,
 } from '@blocksuite/blocks';
@@ -56,16 +56,19 @@ export function mockQuickSearchService(collection: DocCollection) {
   const quickSearchService: QuickSearchService = {
     async searchDoc({ userInput }) {
       await new Promise(resolve => setTimeout(resolve, 500));
-      const docs = collection.search({
-        query: userInput,
-        limit: 1,
-      });
-      const doc = [...docs].at(0);
-      if (doc) {
-        return {
-          docId: doc[1],
-        };
-      } else if (userInput) {
+      if (userInput) {
+        const path = new URL(userInput).pathname;
+        const item =
+          path.length > 1
+            ? [...collection.docs.values()].find(doc => {
+                return doc.meta?.title === path.slice(1);
+              })
+            : null;
+        if (item) {
+          return {
+            docId: item.id,
+          };
+        }
         return {
           userInput: userInput,
         };

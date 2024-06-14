@@ -132,6 +132,16 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
                 const file = await openFileOrFiles();
                 if (!file) return;
                 await this.edgeless.addAttachments([file]);
+                this.edgeless.service.telemetryService?.track(
+                  'CanvasElementAdded',
+                  {
+                    control: 'toolbar:general',
+                    page: 'whiteboard editor',
+                    module: 'toolbar',
+                    segment: 'toolbar',
+                    type: 'attachment',
+                  }
+                );
               }}
             >
               ${AttachmentIcon}

@@ -26,7 +26,7 @@ import type { ReorderingDirection } from '../../surface-block/managers/layer-man
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { Bound } from '../../surface-block/utils/bound.js';
-import { RootService } from '../root-service.js';
+import { RootService, type TelemetryEvent } from '../root-service.js';
 import { EdgelessBlockModel } from './edgeless-block-model.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -51,6 +51,31 @@ import {
   ZOOM_STEP,
   type ZoomAction,
 } from './utils/viewport.js';
+
+export type ElementCreationSource =
+  | 'shortcut'
+  | 'toolbar:general'
+  | 'toolbar:dnd'
+  | 'canvas:drop'
+  | 'canvas:draw'
+  | 'canvas:dbclick'
+  | 'canvas:paste'
+  | 'context-menu'
+  | 'ai'
+  | 'internal';
+
+declare module '@blocksuite/blocks' {
+  interface ElementCreationEvent extends TelemetryEvent {
+    segment?: 'toolbar';
+    page: 'whiteboard editor';
+    module?: 'toolbar';
+    control?: ElementCreationSource;
+  }
+
+  export interface TelemetryEventMap {
+    CanvasElementAdded: ElementCreationEvent;
+  }
+}
 
 export class EdgelessRootService extends RootService {
   get tool() {

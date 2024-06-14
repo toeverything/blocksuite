@@ -69,6 +69,17 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       radius: attributes.radius,
     });
 
+    this._service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:draw',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: CanvasElementType.SHAPE,
+      other: {
+        shapeType,
+      },
+    });
+
     return id;
   }
 

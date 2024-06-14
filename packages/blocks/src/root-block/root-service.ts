@@ -75,6 +75,24 @@ export interface QuickSearchService {
   }) => Promise<QuickSearchResult>;
 }
 
+export interface TelemetryEvent {
+  page?: string;
+  segment?: string;
+  module?: string;
+  control?: string;
+  type?: string;
+  other?: Record<string, unknown>;
+}
+
+export interface TelemetryEventMap {}
+
+export interface TelemetryService {
+  track<T extends keyof TelemetryEventMap>(
+    eventName: T,
+    props: TelemetryEventMap[T]
+  ): void;
+}
+
 export class RootService extends BlockService<RootBlockModel> {
   get viewportElement() {
     const rootElement = this.std.view.viewFromPath('block', [
@@ -141,13 +159,15 @@ export class RootService extends BlockService<RootBlockModel> {
 
   docModeService: DocModeService = createDocModeService(this.doc);
 
+  quickSearchService: QuickSearchService | null = null;
+
+  telemetryService: TelemetryService | null = null;
+
   transformers = {
     markdown: MarkdownTransformer,
     html: HtmlTransformer,
     zip: ZipTransformer,
   };
-
-  accessor quickSearchService: QuickSearchService | null = null;
 
   private _getDocUpdatedAt: (docId: string) => Date = () => new Date();
 
@@ -384,7 +404,7 @@ export class RootService extends BlockService<RootBlockModel> {
   insertLinkByQuickSearch = async (
     userInput?: string,
     skipSelection?: boolean
-  ) => {
+  ): Promise<'embed-linked-doc' | 'bookmark' | undefined> => {
     if (!this.quickSearchService) return;
 
     const result = await this.quickSearchService.searchDoc({
@@ -397,13 +417,15 @@ export class RootService extends BlockService<RootBlockModel> {
     // add linked doc
     if ('docId' in result) {
       this._insertDoc(result.docId);
-      return;
+      return 'embed-linked-doc';
     }
 
     // add normal link;
     if ('userInput' in result) {
       this._insertLink(result.userInput);
-      return;
+      return 'bookmark';
     }
+
+    return;
   };
 }

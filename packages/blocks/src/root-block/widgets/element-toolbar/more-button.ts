@@ -372,6 +372,13 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         },
         this.surface.model.id
       );
+      this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+        control: 'context-menu',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: 'embed-synced-doc',
+      });
       moveConnectors(element.id, cardId, this.edgeless.service);
       // delete selected elements
       this.doc.transact(() => {
@@ -410,6 +417,13 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       },
       this.surface.model.id
     );
+    this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+      control: 'context-menu',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'embed-linked-doc',
+    });
     // delete selected elements
     this.doc.transact(() => {
       deleteElements(this.surface, elements);
@@ -491,6 +505,13 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         const { service } = this.edgeless;
         const frame = service.frame.createFrameOnSelected();
         if (!frame) break;
+        this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+          control: 'context-menu',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'frame',
+        });
         this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
         break;
       }

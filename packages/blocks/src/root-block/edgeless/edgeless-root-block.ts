@@ -483,7 +483,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       scale = 1,
     } = options;
     const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
-    return this.service.addBlock(
+    const blockId = this.service.addBlock(
       'affine:note',
       {
         xywh: serializeXYWH(
@@ -497,6 +497,16 @@ export class EdgelessRootBlockComponent extends BlockElement<
       parentId,
       noteIndex
     );
+
+    this.service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:draw',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'note',
+    });
+
+    return blockId;
   }
 
   /**

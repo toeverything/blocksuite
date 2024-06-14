@@ -226,6 +226,14 @@ export class EdgelessClipboardController extends PageClipboard {
         await this.host.addAttachments([...files], point);
       }
 
+      this._rootService.telemetryService?.track('CanvasElementAdded', {
+        control: 'canvas:paste',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: attachmentFiles.length === 0 ? 'image' : 'attachment',
+      });
+
       return;
     }
 
@@ -389,6 +397,13 @@ export class EdgelessClipboardController extends PageClipboard {
       clipboardData.type as CanvasElementType,
       clipboardData
     );
+    this.host.service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:paste',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: clipboardData.type as string,
+    });
     const element = this.host.service.getElementById(
       id
     ) as BlockSuite.SurfaceModelType;
@@ -850,6 +865,14 @@ export class EdgelessClipboardController extends PageClipboard {
       noteProps,
       this.doc.root!.id
     );
+
+    edgeless.service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:paste',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'note',
+    });
 
     if (typeof content === 'string') {
       splitIntoLines(content).forEach((line, idx) => {

@@ -796,6 +796,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       } else {
         addText(this._edgeless, e);
       }
+      this._edgeless.service.telemetryService?.track('CanvasElementAdded', {
+        control: 'canvas:dbclick',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: 'text',
+      });
       return;
     } else {
       const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
