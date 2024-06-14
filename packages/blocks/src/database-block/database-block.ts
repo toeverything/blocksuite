@@ -305,6 +305,9 @@ export class DatabaseBlockComponent extends BlockComponent<
         if (data.key === 'views') {
           this.viewSource.checkViewDataUpdate();
         }
+        if (data.key === 'columns') {
+          this.dataSource.slots.update.emit();
+        }
       })
     );
     let canDrop = false;
