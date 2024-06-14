@@ -1,8 +1,7 @@
 import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
 
 import type { ColumnMeta } from '../column/column-config.js';
-import type { ColumnConfig } from '../column/index.js';
-import type { CellRenderer } from '../column/index.js';
+import type { CellRenderer, ColumnConfig } from '../column/index.js';
 import type { FilterGroup, Variable } from '../common/ast.js';
 import type { DataSource, DetailSlots } from '../common/data-source/base.js';
 import type { DataViewContextKey } from '../common/data-source/context.js';
@@ -42,7 +41,9 @@ export interface DataViewManager {
   get detailSlots(): DetailSlots;
 
   slots: {
-    update: Slot;
+    update: Slot<{
+      viewId: string;
+    }>;
   };
 
   filterSetVisible(visible: boolean): void;
@@ -262,7 +263,9 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
   private _filterVisible?: boolean;
 
   slots = {
-    update: new Slot(),
+    update: new Slot<{
+      viewId: string;
+    }>(),
   };
 
   private filteredRows(searchString: string) {
@@ -288,13 +291,15 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
   init(dataSource: DataSource, viewSource: SingleViewSource<ViewData>) {
     this._dataSource = dataSource;
     this._viewSource = viewSource;
-    this._dataSource.slots.update.pipe(this.slots.update);
+    this._dataSource.slots.update
+      .flatMap(() => ({ viewId: this.id }))
+      .pipe(this.slots.update);
     this._viewSource.updateSlot.pipe(this.slots.update);
   }
 
   setSearch(str: string): void {
     this.searchString = str;
-    this.slots.update.emit();
+    this.slots.update.emit({ viewId: this.id });
   }
 
   abstract isShow(rowId: string): boolean;
@@ -462,7 +467,7 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
 
   filterSetVisible(visible: boolean): void {
     this._filterVisible = visible;
-    this.slots.update.emit();
+    this.slots.update.emit({ viewId: this.id });
   }
 
   rowMove(rowId: string, position: InsertToPosition): void {

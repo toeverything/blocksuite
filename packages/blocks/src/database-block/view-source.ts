@@ -32,13 +32,21 @@ export class DatabaseBlockViewSource implements ViewSource {
 
   private currentId?: string;
 
-  updateSlot = new Slot();
+  updateSlot = new Slot<{
+    viewId?: string;
+  }>();
 
   constructor(private model: DatabaseBlockModel) {}
 
+  checkViewDataUpdate(): void {
+    this.model.views.forEach(v => {
+      this.updateSlot.emit({ viewId: v.id });
+    });
+  }
+
   selectView(id: string): void {
     this.currentId = id;
-    this.updateSlot.emit();
+    this.updateSlot.emit({});
   }
 
   viewAdd(viewType: DataViewTypes): string {
@@ -63,13 +71,24 @@ export class DatabaseBlockViewSource implements ViewSource {
       }
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
-      const slot = new Slot();
-      this.updateSlot.pipe(slot);
+      const slot = new Slot<{ viewId: string }>();
+      this.updateSlot
+        .flatMap(data => {
+          if (data.viewId === id) {
+            return { viewId: id };
+          }
+          return [];
+        })
+        .pipe(slot);
       result = {
         duplicate(): void {
           self.duplicate(id);
         },
         get view() {
+          const view = getView();
+          if (!view) {
+            throw new Error('view not found');
+          }
           return view;
         },
         updateView: updater => {
