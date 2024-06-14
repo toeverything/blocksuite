@@ -25,6 +25,24 @@ export class Slot<T = void> implements Disposable {
     return result;
   }
 
+  flatMap<U>(mapper: (v: T) => U[] | U): Slot<U> {
+    const result = new Slot<U>();
+    this._disposables.push({
+      dispose: () => result.dispose(),
+    });
+
+    this.on((v: T) => {
+      const data = mapper(v);
+      if (Array.isArray(data)) {
+        data.forEach(v => result.emit(v));
+      } else {
+        result.emit(data);
+      }
+    });
+
+    return result;
+  }
+
   on(callback: (v: T) => unknown): Disposable {
     if (this._emitting) {
       const newCallback = [...this._callbacks, callback];

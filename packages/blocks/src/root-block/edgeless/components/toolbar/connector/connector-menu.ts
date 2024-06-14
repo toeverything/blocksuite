@@ -5,9 +5,9 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  CurveLineIcon,
-  ElbowedLineIcon,
-  StraightLineIcon,
+  ConnectorCWithArrowIcon,
+  ConnectorLWithArrowIcon,
+  ConnectorXWithArrowIcon,
 } from '../../../../../_common/icons/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessTool } from '../../../types.js';
@@ -32,7 +32,7 @@ function ConnectorModeButtonGroup(
         .tooltip=${'Curve'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Curve })}
       >
-        ${CurveLineIcon}
+        ${ConnectorCWithArrowIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .active=${mode === ConnectorMode.Orthogonal}
@@ -40,7 +40,7 @@ function ConnectorModeButtonGroup(
         .tooltip=${'Elbowed'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Orthogonal })}
       >
-        ${ElbowedLineIcon}
+        ${ConnectorXWithArrowIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .active=${mode === ConnectorMode.Straight}
@@ -48,7 +48,7 @@ function ConnectorModeButtonGroup(
         .tooltip=${'Straight'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Straight })}
       >
-        ${StraightLineIcon}
+        ${ConnectorLWithArrowIcon}
       </edgeless-tool-icon-button>
     </div>
   `;

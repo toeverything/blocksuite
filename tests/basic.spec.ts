@@ -473,15 +473,15 @@ test(scoped`automatic identify url text`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
