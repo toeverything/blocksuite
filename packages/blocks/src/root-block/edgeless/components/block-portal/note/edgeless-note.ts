@@ -9,7 +9,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
-import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
+import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../../../../../_common/types.js';
 import { almostEqual, clamp } from '../../../../../_common/utils/math.js';
@@ -409,7 +409,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       transition: this._editing
         ? 'left 0.3s, top 0.3s, width 0.3s, height 0.3s'
         : 'none',
-      background: `var(${background ?? DEFAULT_NOTE_COLOR})`,
+      background: `var(${background ?? DEFAULT_NOTE_BACKGROUND_COLOR})`,
       border: `${borderSize}px ${
         borderStyle === StrokeStyle.Dash ? 'dashed' : borderStyle
       } var(--affine-black-10)`,

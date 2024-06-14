@@ -160,7 +160,11 @@ test.describe('auto-complete', () => {
         return note?.getAttribute('data-block-id');
       });
       assertExists(noteId);
-      await assertEdgelessNoteBackground(page, noteId, '--affine-tag-green');
+      await assertEdgelessNoteBackground(
+        page,
+        noteId,
+        '--affine-note-background-green'
+      );
 
       const rect = await portalNote.boundingBox();
       assertExists(rect);
@@ -179,7 +183,7 @@ test.describe('auto-complete', () => {
       await waitNextFrame(page);
 
       await triggerComponentToolbarAction(page, 'changeNoteColor');
-      const noteColor = '--affine-tag-red';
+      const noteColor = '--affine-note-background-red';
       await changeEdgelessNoteBackground(page, noteColor);
 
       // move to arrow icon

@@ -133,15 +133,15 @@ test('use markdown syntax can create code block', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-background-secondary-color"
+  prop:background="--affine-note-background-blue"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 8,
+        "borderRadius": 0,
         "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowType": "--affine-note-shadow-box",
+        "borderStyle": "none",
+        "shadowType": "--affine-note-shadow-sticker",
       },
     }
   }
@@ -177,15 +177,15 @@ test('use markdown syntax can create code block', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-background-secondary-color"
+  prop:background="--affine-note-background-blue"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 8,
+        "borderRadius": 0,
         "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowType": "--affine-note-shadow-box",
+        "borderStyle": "none",
+        "shadowType": "--affine-note-shadow-sticker",
       },
     }
   }
@@ -439,15 +439,15 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -493,15 +493,15 @@ test('code block has content, click code block copy menu, copy whole code block'
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -546,15 +546,15 @@ test('code block is empty, click code block copy menu, copy the empty code block
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -647,15 +647,15 @@ test('duplicate code block', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -695,15 +695,15 @@ test('delete code block in more menu', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
