@@ -210,7 +210,10 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
     this._disposables.add(
       this.edgeless.bindHotKey(
         {
-          s: () => {
+          s: ctx => {
+            // `page.keyboard.press('Shift+s')` in playwright will also trigger this 's' key event
+            if (ctx.get('keyboardState').raw.shiftKey) return;
+
             const service = this.edgeless.service;
             if (service.locked || service.selection.editing) return;
 
