@@ -43,7 +43,7 @@ export type OrthogonalConnectorInput = {
   endPoint: PointLocation;
 };
 
-export const ConnectorEndpointLocations = [
+export const ConnectorEndpointLocations: IVec2[] = [
   // At top
   [0.5, 0],
   // At right
@@ -52,13 +52,24 @@ export const ConnectorEndpointLocations = [
   [0.5, 1],
   // At left
   [0, 0.5],
-] as const;
+];
+
+export const ConnectorEndpointLocationsOnTriangle: IVec2[] = [
+  // At top
+  [0.5, 0],
+  // At right
+  [0.75, 0.5],
+  // At bottom
+  [0.5, 1],
+  // At left
+  [0.25, 0.5],
+];
 
 export function calculateNearestLocation(
   point: IVec,
   bounds: IBound,
-  shortestDistance = Number.POSITIVE_INFINITY,
-  locations = ConnectorEndpointLocations
+  locations = ConnectorEndpointLocations,
+  shortestDistance = Number.POSITIVE_INFINITY
 ) {
   const { x, y, w, h } = bounds;
   return locations

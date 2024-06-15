@@ -1,17 +1,26 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type { ConnectorMode } from '../../../../surface-block/index.js';
+import type {
+  ConnectorMode,
+  IBound,
+  IVec2,
+} from '../../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
   type Connection,
   type ConnectorElementModel,
   GroupElementModel,
-  type IBound,
   type IVec,
+  ShapeElementModel,
+  ShapeType,
 } from '../../../../surface-block/index.js';
-import { calculateNearestLocation } from '../../../../surface-block/managers/connector-manager.js';
+import {
+  calculateNearestLocation,
+  ConnectorEndpointLocations,
+  ConnectorEndpointLocationsOnTriangle,
+} from '../../../../surface-block/managers/connector-manager.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 enum ConnectorToolMode {
@@ -34,6 +43,8 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   private _source: Connection | null = null;
 
   private _sourceBounds: IBound | null = null;
+
+  private _sourceLocations: IVec2[] = ConnectorEndpointLocations;
 
   private _startPoint: IVec | null = null;
 
@@ -72,9 +83,19 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._mode = ConnectorToolMode.Quick;
     this._sourceBounds = Bound.deserialize(element.xywh);
     this._sourceBounds.rotate = element.rotate;
+    this._sourceLocations =
+      element instanceof ShapeElementModel &&
+      element.shapeType === ShapeType.Triangle
+        ? ConnectorEndpointLocationsOnTriangle
+        : ConnectorEndpointLocations;
+
     this._source = {
       id: element.id,
-      position: calculateNearestLocation(this._startPoint, this._sourceBounds),
+      position: calculateNearestLocation(
+        this._startPoint,
+        this._sourceBounds,
+        this._sourceLocations
+      ),
     };
     this._allowCancel = true;
 
@@ -182,7 +203,8 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._allowCancel = !target.id;
     this._connector.source.position = calculateNearestLocation(
       point,
-      this._sourceBounds
+      this._sourceBounds,
+      this._sourceLocations
     );
     this._edgeless.service.updateElement(this._connector.id, {
       target,
