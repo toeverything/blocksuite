@@ -306,7 +306,8 @@ export async function setEdgelessTool(
         'shape',
         false
       );
-      await shapeToolButton.click();
+      // Avoid clicking on the shape-element (will trigger dragging mode)
+      await shapeToolButton.click({ position: { x: 5, y: 5 } });
 
       const squareShapeButton = page
         .locator('edgeless-tool-icon-button')
