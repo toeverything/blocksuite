@@ -189,21 +189,11 @@ export class RootService extends BlockService<RootBlockModel> {
     return note;
   }
 
-  private _getMode = () => {
-    const rootId = this.doc.root?.id;
-    if (!rootId) return 'page';
-
-    const root = this.std.view.getBlock(rootId);
-    if (!root) return 'page';
-
-    return root.tagName === 'AFFINE-EDGELESS-ROOT' ? 'edgeless' : 'page';
-  };
-
   private _getParentModelBySelection = (): {
     index: number | undefined;
     model: BlockModel | null;
   } => {
-    const currentMode = this._getMode();
+    const currentMode = this.docModeService.getMode();
     const root = this.doc.root;
     if (!root)
       return {
@@ -249,7 +239,7 @@ export class RootService extends BlockService<RootBlockModel> {
   ) => {
     const host = this.host as EditorHost;
 
-    const mode = this._getMode();
+    const mode = this.docModeService.getMode();
     const { model, index } = this._getParentModelBySelection();
 
     if (mode === 'page') {
@@ -262,9 +252,10 @@ export class RootService extends BlockService<RootBlockModel> {
       ) as EdgelessRootBlockComponent | null;
       if (!edgelessRoot) return;
 
+      edgelessRoot.service.viewport.smoothZoom(1);
       const surface = edgelessRoot.surface;
       const center = Vec.toVec(surface.renderer.center);
-      edgelessRoot.service.addBlock(
+      const cardId = edgelessRoot.service.addBlock(
         flavour,
         {
           ...props,
@@ -277,6 +268,11 @@ export class RootService extends BlockService<RootBlockModel> {
         },
         surface.model
       );
+
+      edgelessRoot.service.selection.set({
+        elements: [cardId],
+        editing: false,
+      });
 
       edgelessRoot.tools.setEdgelessTool({
         type: 'default',
@@ -309,9 +305,6 @@ export class RootService extends BlockService<RootBlockModel> {
 
     this._insertCard(flavour, targetStyle, props);
   };
-
-  accessor getEditorMode: (docId: string) => 'page' | 'edgeless' = docId =>
-    docId.endsWith('edgeless') ? 'edgeless' : 'page';
 
   registerEmbedBlockOptions = (options: EmbedOptions): void => {
     this._embedBlockRegistry.add(options);
