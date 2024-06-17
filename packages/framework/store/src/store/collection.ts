@@ -138,13 +138,12 @@ export class DocCollection extends DocCollectionAddonType {
    * will be created in the doc simultaneously.
    */
   createDoc(options: { id?: string; selector?: BlockSelector } = {}) {
-    // End of migration guide. Remove this in the next major version
-
     const { id: docId = this.idGenerator(), selector } = options;
     if (this._hasDoc(docId)) {
       throw new Error('doc already exists');
     }
 
+    this.meta.initialize();
     this.meta.addDocMeta({
       id: docId,
       title: '',
