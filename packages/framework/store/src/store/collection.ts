@@ -143,7 +143,6 @@ export class DocCollection extends DocCollectionAddonType {
       throw new Error('doc already exists');
     }
 
-    this.meta.initialize();
     this.meta.addDocMeta({
       id: docId,
       title: '',
