@@ -57,6 +57,7 @@ const assets = new AssetsManager({ blob: blobCRUD });
 test('model to snapshot', () => {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
   const doc = collection.createDoc({ id: 'home' });
   doc.load();
   doc.addBlock('page');
@@ -73,6 +74,7 @@ test('model to snapshot', () => {
 test('snapshot to model', async () => {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
   const doc = collection.createDoc({ id: 'home' });
   doc.load();
   doc.addBlock('page');

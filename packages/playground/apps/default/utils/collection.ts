@@ -79,6 +79,7 @@ export async function createDefaultDocCollection() {
     },
   };
   const collection = new DocCollection(options);
+  collection.meta.initialize();
 
   collection.start();
 
@@ -98,6 +99,7 @@ export async function initDefaultDocCollection(collection: DocCollection) {
 
   const shouldInit = collection.docs.size === 0 && !params.get('room');
   if (shouldInit) {
+    collection.meta.initialize();
     const doc = collection.createDoc({ id: 'doc:home' });
     doc.load();
     const rootId = doc.addBlock('affine:page', {

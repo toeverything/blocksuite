@@ -34,6 +34,7 @@ const defaultDocId = 'doc:home';
 function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
   const doc = collection.createDoc({ id: docId });
   doc.load();
   return doc;

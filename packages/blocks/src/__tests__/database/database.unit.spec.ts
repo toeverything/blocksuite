@@ -32,6 +32,7 @@ function createTestOptions() {
 function createTestDoc(docId = 'doc0') {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
   const doc = collection.createDoc({ id: docId });
   doc.load();
   return doc;
