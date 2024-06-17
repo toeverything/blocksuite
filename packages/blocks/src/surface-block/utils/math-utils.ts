@@ -447,9 +447,7 @@ export function rotatePoints<T extends IVec>(
   rotate: number
 ): T[] {
   const rad = toRadian(rotate);
-  return points.map(p =>
-    Vec.add(center, Vec.rot(Vec.sub(p, center), rad))
-  ) as T[];
+  return points.map(p => Vec.rotWith(p, center, rad)) as T[];
 }
 
 export function rotatePoint(
