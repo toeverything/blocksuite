@@ -71,6 +71,7 @@ export function createStarterDocCollection() {
     blobSources,
   };
   const collection = new DocCollection(options);
+  collection.meta.initialize();
 
   collection.start();
 
