@@ -237,22 +237,24 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     const { _disposables, edgeless } = this;
     const { slots } = edgeless;
 
-    edgeless.bindHotKey(
-      {
-        ArrowLeft: () => {
-          const { type } = this.edgelessTool;
-          if (type !== 'frameNavigator') return;
-          this._previousFrame();
+    _disposables.add(
+      edgeless.bindHotKey(
+        {
+          ArrowLeft: () => {
+            const { type } = this.edgelessTool;
+            if (type !== 'frameNavigator') return;
+            this._previousFrame();
+          },
+          ArrowRight: () => {
+            const { type } = this.edgelessTool;
+            if (type !== 'frameNavigator') return;
+            this._nextFrame();
+          },
         },
-        ArrowRight: () => {
-          const { type } = this.edgelessTool;
-          if (type !== 'frameNavigator') return;
-          this._nextFrame();
-        },
-      },
-      {
-        global: true,
-      }
+        {
+          global: true,
+        }
+      )
     );
 
     _disposables.add(
