@@ -64,6 +64,14 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
         const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
         point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
         await edgelessRoot.addAttachments(attachmentFiles, point);
+
+        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
+          control: 'canvas:drop',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'attachment',
+        });
       }
 
       this.slots.onFilesDropped.emit(attachmentFiles);

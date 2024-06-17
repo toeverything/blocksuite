@@ -12,8 +12,8 @@ import {
   SquareIcon,
   TriangleIcon,
 } from '../../../../../_common/icons/index.js';
-import type { ShapeTool } from '../../../../../_common/utils/index.js';
 import { ShapeType } from '../../../../../surface-block/index.js';
+import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
 
 const { Rect, Ellipse, Triangle, Diamond } = ShapeType;
 

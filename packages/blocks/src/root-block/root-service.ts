@@ -8,6 +8,8 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import {
+  createDocModeService,
+  type DocModeService,
   getSelectedPeekableBlocksCommand,
   type NotificationService,
   peekSelectedBlockCommand,
@@ -71,6 +73,24 @@ export interface QuickSearchService {
     userInput?: string;
     skipSelection?: boolean;
   }) => Promise<QuickSearchResult>;
+}
+
+export interface TelemetryEvent {
+  page?: string;
+  segment?: string;
+  module?: string;
+  control?: string;
+  type?: string;
+  other?: Record<string, unknown>;
+}
+
+export interface TelemetryEventMap {}
+
+export interface TelemetryService {
+  track<T extends keyof TelemetryEventMap>(
+    eventName: T,
+    props: TelemetryEventMap[T]
+  ): void;
 }
 
 export class RootService extends BlockService<RootBlockModel> {
@@ -137,13 +157,17 @@ export class RootService extends BlockService<RootBlockModel> {
 
   peekViewService: PeekViewService | null = null;
 
+  docModeService: DocModeService = createDocModeService(this.doc);
+
+  quickSearchService: QuickSearchService | null = null;
+
+  telemetryService: TelemetryService | null = null;
+
   transformers = {
     markdown: MarkdownTransformer,
     html: HtmlTransformer,
     zip: ZipTransformer,
   };
-
-  accessor quickSearchService: QuickSearchService | null = null;
 
   private _getDocUpdatedAt: (docId: string) => Date = () => new Date();
 
@@ -165,21 +189,11 @@ export class RootService extends BlockService<RootBlockModel> {
     return note;
   }
 
-  private _getMode = () => {
-    const rootId = this.doc.root?.id;
-    if (!rootId) return 'page';
-
-    const root = this.std.view.getBlock(rootId);
-    if (!root) return 'page';
-
-    return root.tagName === 'AFFINE-EDGELESS-ROOT' ? 'edgeless' : 'page';
-  };
-
   private _getParentModelBySelection = (): {
     index: number | undefined;
     model: BlockModel | null;
   } => {
-    const currentMode = this._getMode();
+    const currentMode = this.docModeService.getMode();
     const root = this.doc.root;
     if (!root)
       return {
@@ -225,7 +239,7 @@ export class RootService extends BlockService<RootBlockModel> {
   ) => {
     const host = this.host as EditorHost;
 
-    const mode = this._getMode();
+    const mode = this.docModeService.getMode();
     const { model, index } = this._getParentModelBySelection();
 
     if (mode === 'page') {
@@ -238,9 +252,10 @@ export class RootService extends BlockService<RootBlockModel> {
       ) as EdgelessRootBlockComponent | null;
       if (!edgelessRoot) return;
 
+      edgelessRoot.service.viewport.smoothZoom(1);
       const surface = edgelessRoot.surface;
       const center = Vec.toVec(surface.renderer.center);
-      edgelessRoot.service.addBlock(
+      const cardId = edgelessRoot.service.addBlock(
         flavour,
         {
           ...props,
@@ -253,6 +268,11 @@ export class RootService extends BlockService<RootBlockModel> {
         },
         surface.model
       );
+
+      edgelessRoot.service.selection.set({
+        elements: [cardId],
+        editing: false,
+      });
 
       edgelessRoot.tools.setEdgelessTool({
         type: 'default',
@@ -285,9 +305,6 @@ export class RootService extends BlockService<RootBlockModel> {
 
     this._insertCard(flavour, targetStyle, props);
   };
-
-  accessor getEditorMode: (docId: string) => 'page' | 'edgeless' = docId =>
-    docId.endsWith('edgeless') ? 'edgeless' : 'page';
 
   registerEmbedBlockOptions = (options: EmbedOptions): void => {
     this._embedBlockRegistry.add(options);
@@ -380,7 +397,7 @@ export class RootService extends BlockService<RootBlockModel> {
   insertLinkByQuickSearch = async (
     userInput?: string,
     skipSelection?: boolean
-  ) => {
+  ): Promise<'embed-linked-doc' | 'bookmark' | undefined> => {
     if (!this.quickSearchService) return;
 
     const result = await this.quickSearchService.searchDoc({
@@ -393,13 +410,15 @@ export class RootService extends BlockService<RootBlockModel> {
     // add linked doc
     if ('docId' in result) {
       this._insertDoc(result.docId);
-      return;
+      return 'embed-linked-doc';
     }
 
     // add normal link;
     if ('userInput' in result) {
       this._insertLink(result.userInput);
-      return;
+      return 'bookmark';
     }
+
+    return;
   };
 }

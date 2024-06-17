@@ -9,7 +9,6 @@ import './embed/edgeless-embed.js';
 import './edgeless-text/edgeless-edgeless-text.js';
 import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
-import '../../components/auto-connect/edgeless-index-label.js';
 import '../presentation/edgeless-navigator-black-background.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
@@ -359,13 +358,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .edgeless=${edgeless}
         .autoCompleteOff=${this._enableNoteSlicer}
       ></edgeless-selected-rect>
-
-      ${readonly
-        ? nothing
-        : html`<edgeless-index-label
-            .surface=${surface}
-            .edgeless=${edgeless}
-          ></edgeless-index-label>`}
 
       <edgeless-navigator-black-background
         .edgeless=${edgeless}

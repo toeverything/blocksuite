@@ -4,9 +4,9 @@ import { isPlainObject, recursive } from 'merge';
 import { z } from 'zod';
 
 import {
-  DEFAULT_NOTE_COLOR,
-  NOTE_SHADOWS,
-  NoteColorsSchema,
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  DEFAULT_NOTE_SHADOW,
+  NoteBackgroundColorsSchema,
   NoteShadowsSchema,
 } from '../../_common/edgeless/note/consts.js';
 import { LineWidth, NoteDisplayMode } from '../../_common/types.js';
@@ -100,7 +100,7 @@ const LastPropsSchema = z.object({
     fontSize: z.number(),
   }),
   'affine:note': z.object({
-    background: NoteColorsSchema,
+    background: NoteBackgroundColorsSchema,
     displayMode: NoteDisplayModeSchema.optional(),
     edgeless: z.object({
       style: z.object({
@@ -194,14 +194,14 @@ export class EditPropsStore {
       fontSize: 24,
     },
     'affine:note': {
-      background: DEFAULT_NOTE_COLOR,
+      background: DEFAULT_NOTE_BACKGROUND_COLOR,
       displayMode: NoteDisplayMode.DocAndEdgeless,
       edgeless: {
         style: {
-          borderRadius: 8,
+          borderRadius: 0,
           borderSize: 4,
-          borderStyle: StrokeStyle.Solid,
-          shadowType: NOTE_SHADOWS[1],
+          borderStyle: StrokeStyle.None,
+          shadowType: DEFAULT_NOTE_SHADOW,
         },
       },
     },

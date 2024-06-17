@@ -29,6 +29,8 @@ export class BookmarkBlockComponent extends BlockComponent<
 
   private _isInSurface = false;
 
+  private _fetchAbortController?: AbortController;
+
   override accessor useCaptionEditor = true;
 
   @property({ attribute: false })
@@ -49,11 +51,15 @@ export class BookmarkBlockComponent extends BlockComponent<
   };
 
   refreshData = () => {
-    refreshBookmarkUrlData(this).catch(console.error);
+    refreshBookmarkUrlData(this, this._fetchAbortController?.signal).catch(
+      console.error
+    );
   };
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this._fetchAbortController = new AbortController();
 
     this.contentEditable = 'false';
 
@@ -75,6 +81,11 @@ export class BookmarkBlockComponent extends BlockComponent<
         }
       })
     );
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._fetchAbortController?.abort();
   }
 
   override renderBlock() {

@@ -10,6 +10,7 @@ import {
   ConnectorIcon,
 } from '../../../../../_common/icons/index.js';
 import { LineWidth } from '../../../../../_common/utils/index.js';
+import { getConnectorModeName } from '../../../../../surface-block/element-model/connector.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import { DEFAULT_CONNECTOR_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
@@ -83,7 +84,9 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
     const arrowColor = active ? 'currentColor' : 'var(--affine-icon-secondary)';
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._menu ? '' : getTooltipWithShortcut('Straight ', 'C')}
+        .tooltip=${this.popper
+          ? ''
+          : getTooltipWithShortcut(getConnectorModeName(this.mode), 'C')}
         .tooltipOffset=${17}
         .active=${active}
         .iconContainerPadding=${6}

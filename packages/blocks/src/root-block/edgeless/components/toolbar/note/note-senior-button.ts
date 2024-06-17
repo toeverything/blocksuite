@@ -8,7 +8,7 @@ import {
   LinkIcon,
   TextIcon,
 } from '../../../../../_common/icons/text.js';
-import type { NoteTool } from '../../../../../_common/types.js';
+import type { NoteTool } from '../../../controllers/tools/note-tool.js';
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../auto-complete/utils.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';

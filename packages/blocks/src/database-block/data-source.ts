@@ -255,7 +255,12 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     const currentSchema = this._model.getColumn(columnId);
     assertExists(currentSchema);
     const { id: copyId, ...nonIdProps } = currentSchema;
-    const schema = { ...nonIdProps };
+    const names = new Set(this._model.columns.map(v => v.name));
+    let index = 1;
+    while (names.has(`${nonIdProps.name}(${index})`)) {
+      index++;
+    }
+    const schema = { ...nonIdProps, name: `${nonIdProps.name}(${index})` };
     const id = this._model.addColumn(
       {
         before: false,

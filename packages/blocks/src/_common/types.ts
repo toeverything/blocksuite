@@ -1,16 +1,11 @@
 import type { Slot } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import type {
-  ConnectorElementModel,
-  ConnectorMode,
-} from '../surface-block/element-model/connector.js';
+import type { ConnectorElementModel } from '../surface-block/element-model/connector.js';
 import type {
   BrushElementModel,
   GroupElementModel,
-  ShapeType,
 } from '../surface-block/index.js';
-import type { NavigatorMode } from './edgeless/frame/consts.js';
 import type { RefNodeSlots } from './inline/presets/nodes/reference-node/reference-node.js';
 import type { BlockComponent } from './utils/query.js';
 import type { Point } from './utils/rect.js';
@@ -32,15 +27,16 @@ export interface EditingState {
 
 export type CommonSlots = RefNodeSlots;
 
-export type EditorMode = 'page' | 'edgeless';
+export type DocMode = 'page' | 'edgeless';
+
 type EditorSlots = {
-  editorModeSwitched: Slot<EditorMode>;
+  editorModeSwitched: Slot<DocMode>;
   docUpdated: Slot<{ newDocId: string }>;
 };
 
 export type AbstractEditor = {
   doc: Doc;
-  mode: EditorMode;
+  mode: DocMode;
   readonly slots: CommonSlots & EditorSlots;
 } & HTMLElement;
 
@@ -51,15 +47,6 @@ export type Connectable = Exclude<
   BlockSuite.EdgelessModelType,
   ConnectorElementModel | BrushElementModel | GroupElementModel
 >;
-
-export type DefaultTool = {
-  type: 'default';
-};
-
-export type ShapeTool = {
-  type: 'shape';
-  shapeType: ShapeType | 'roundedRect';
-};
 
 export enum LineWidth {
   Two = 2,
@@ -77,45 +64,6 @@ export enum LassoMode {
   Polygonal,
 }
 
-export type TextTool = {
-  type: 'text';
-};
-
-export type BrushTool = {
-  type: 'brush';
-};
-
-export type EraserTool = {
-  type: 'eraser';
-};
-
-export type FrameTool = {
-  type: 'frame';
-};
-
-export type FrameNavigatorTool = {
-  type: 'frameNavigator';
-  mode?: NavigatorMode;
-};
-
-export type PanTool = {
-  type: 'pan';
-  panning: boolean;
-};
-
-export type CopilotSelectionTool = {
-  type: 'copilot';
-};
-
-export type LassoTool = {
-  type: 'lasso';
-  mode: LassoMode;
-};
-
-export type TemplateTool = {
-  type: 'template';
-};
-
 export type NoteChildrenFlavour =
   | 'affine:paragraph'
   | 'affine:list'
@@ -128,43 +76,11 @@ export type NoteChildrenFlavour =
   | 'affine:attachment'
   | 'affine:surface-ref';
 
-export type NoteTool = {
-  type: 'affine:note';
-  childFlavour: NoteChildrenFlavour;
-  childType: string | null;
-  tip: string;
-};
-
 export enum NoteDisplayMode {
   DocAndEdgeless = 'both',
   EdgelessOnly = 'edgeless',
   DocOnly = 'doc',
 }
-
-export type ConnectorTool = {
-  type: 'connector';
-  mode: ConnectorMode;
-};
-
-export type MindmapTool = {
-  type: 'mindmap';
-};
-
-export type EdgelessTool =
-  | DefaultTool
-  | TextTool
-  | ShapeTool
-  | BrushTool
-  | PanTool
-  | NoteTool
-  | ConnectorTool
-  | EraserTool
-  | FrameTool
-  | FrameNavigatorTool
-  | CopilotSelectionTool
-  | LassoTool
-  | TemplateTool
-  | MindmapTool;
 
 export interface Viewport {
   left: number;

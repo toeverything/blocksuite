@@ -96,11 +96,11 @@ export class AIAnswerText extends WithDisposable(LitElement) {
         > .affine-block-children-container {
           > :first-child,
           > :first-child * {
-            margin-top: 0;
+            margin-top: 0 !important;
           }
           > :last-child,
           > :last-child * {
-            margin-bottom: 0;
+            margin-bottom: 0 !important;
           }
         }
       }
@@ -130,6 +130,12 @@ export class AIAnswerText extends WithDisposable(LitElement) {
       rich-text .nowrap-lines v-text span,
       rich-text .nowrap-lines v-element span {
         white-space: pre;
+      }
+      editor-host:focus-visible {
+        outline: none;
+      }
+      editor-host * {
+        box-sizing: border-box;
       }
     }
 

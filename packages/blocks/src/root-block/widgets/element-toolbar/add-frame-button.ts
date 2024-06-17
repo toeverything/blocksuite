@@ -22,6 +22,13 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
   private _createFrame = () => {
     const frame = this.edgeless.service.frame.createFrameOnSelected();
     if (!frame) return;
+    this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+      control: 'context-menu',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'frame',
+    });
     this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
   };
 

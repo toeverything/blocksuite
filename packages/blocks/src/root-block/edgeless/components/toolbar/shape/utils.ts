@@ -1,6 +1,6 @@
 import { render, type TemplateResult } from 'lit';
 
-import type { ShapeTool } from '../../../../../_common/types.js';
+import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
 
 type TransformState = {
   /** horizental offset base on center */

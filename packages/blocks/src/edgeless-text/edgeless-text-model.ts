@@ -34,13 +34,12 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
   }),
   metadata: {
     version: 1,
-    role: 'content',
+    role: 'hub',
     parent: ['affine:surface'],
     children: [
       'affine:paragraph',
       'affine:list',
       'affine:code',
-      'affine:divider',
       'affine:image',
       'affine:bookmark',
       'affine:attachment',
@@ -55,19 +54,3 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
 export class EdgelessTextBlockModel extends selectable<EdgelessTextProps>(
   BlockModel
 ) {}
-
-declare global {
-  namespace BlockSuite {
-    interface BlockModels {
-      'affine:edgeless-text': EdgelessTextBlockModel;
-    }
-
-    interface EdgelessBlockModelMap {
-      'affine:edgeless-text': EdgelessTextBlockModel;
-    }
-
-    interface EdgelessTextModelMap {
-      'edgeless-text': EdgelessTextBlockModel;
-    }
-  }
-}

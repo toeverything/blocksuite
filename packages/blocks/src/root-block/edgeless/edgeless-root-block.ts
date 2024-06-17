@@ -1,6 +1,6 @@
-import './components/toolbar/edgeless-toolbar.js';
 import '../../surface-block/surface-block.js';
 import './components/block-portal/frame/edgeless-frame.js';
+import './components/toolbar/edgeless-toolbar.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
@@ -19,18 +19,15 @@ import {
 } from '../../_common/consts.js';
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import {
-  type EdgelessTool,
+  asyncFocusRichText,
+  handleNativeRangeAtPoint,
   type IPoint,
   isPinchEvent,
   NoteDisplayMode,
+  on,
   Point,
   requestConnectedFrame,
   type Viewport,
-} from '../../_common/utils/index.js';
-import {
-  asyncFocusRichText,
-  handleNativeRangeAtPoint,
-  on,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
 import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
@@ -62,22 +59,26 @@ import type { EdgelessBlockPortalContainer } from './components/block-portal/edg
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { calcBoundByOrigin, readImageSize } from './components/utils.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
-import { BrushToolController } from './controllers/tools/brush-tool.js';
-import { ConnectorToolController } from './controllers/tools/connector-tool.js';
-import { CopilotSelectionController } from './controllers/tools/copilot-tool.js';
-import { DefaultToolController } from './controllers/tools/default-tool.js';
-import { EraserToolController } from './controllers/tools/eraser-tool.js';
-import { PresentToolController } from './controllers/tools/frame-navigator-tool.js';
-import { FrameToolController } from './controllers/tools/frame-tool.js';
-import { LassoToolController } from './controllers/tools/lasso-tool.js';
-import { NoteToolController } from './controllers/tools/note-tool.js';
-import { PanToolController } from './controllers/tools/pan-tool.js';
-import { ShapeToolController } from './controllers/tools/shape-tool.js';
-import { TemplateToolController } from './controllers/tools/template-tool.js';
-import { TextToolController } from './controllers/tools/text-tool.js';
+import {
+  BrushToolController,
+  ConnectorToolController,
+  CopilotSelectionController,
+  DefaultToolController,
+  EraserToolController,
+  FrameToolController,
+  LassoToolController,
+  MindmapToolController,
+  NoteToolController,
+  PanToolController,
+  PresentToolController,
+  ShapeToolController,
+  TemplateToolController,
+  TextToolController,
+} from './controllers/tools/index.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
+import type { EdgelessTool } from './types.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -404,6 +405,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       CopilotSelectionController,
       LassoToolController,
       TemplateToolController,
+      MindmapToolController,
     ] as EdgelessToolConstructor[];
 
     tools.forEach(tool => {
@@ -481,7 +483,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       scale = 1,
     } = options;
     const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
-    return this.service.addBlock(
+    const blockId = this.service.addBlock(
       'affine:note',
       {
         xywh: serializeXYWH(
@@ -495,6 +497,16 @@ export class EdgelessRootBlockComponent extends BlockElement<
       parentId,
       noteIndex
     );
+
+    this.service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:draw',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'note',
+    });
+
+    return blockId;
   }
 
   /**

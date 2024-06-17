@@ -1,18 +1,18 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type {
-  EdgelessTool,
-  ShapeTool,
-} from '../../../../_common/utils/index.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
-import type { ShapeElementModel } from '../../../../surface-block/index.js';
+import type {
+  ShapeElementModel,
+  ShapeType,
+} from '../../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
   type IVec,
 } from '../../../../surface-block/index.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
+import type { EdgelessTool } from '../../types.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   SHAPE_OVERLAY_HEIGHT,
@@ -20,7 +20,12 @@ import {
   SHAPE_OVERLAY_WIDTH,
 } from '../../utils/consts.js';
 import { ShapeOverlay } from '../../utils/tool-overlay.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
+
+export type ShapeTool = {
+  type: 'shape';
+  shapeType: ShapeType | 'roundedRect';
+};
 
 export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   private _draggingElement: ShapeElementModel | null = null;
@@ -62,6 +67,17 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       shapeType: shapeType,
       xywh: bound.serialize(),
       radius: attributes.radius,
+    });
+
+    this._service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:draw',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: CanvasElementType.SHAPE,
+      other: {
+        shapeType,
+      },
     });
 
     return id;
@@ -335,5 +351,13 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       strokeColor: options.stroke,
     });
     this._edgeless.surface.renderer.addOverlay(this._shapeOverlay);
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      shape: ShapeToolController;
+    }
   }
 }

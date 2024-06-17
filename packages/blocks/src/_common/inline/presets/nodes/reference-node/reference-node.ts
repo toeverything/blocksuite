@@ -91,7 +91,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   static override styles = css`
     .affine-reference {
-      white-space: nowrap;
+      white-space: normal;
       word-break: break-word;
       color: var(--affine-text-primary-color);
       fill: var(--affine-icon-color);

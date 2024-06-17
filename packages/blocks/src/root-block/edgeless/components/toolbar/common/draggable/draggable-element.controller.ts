@@ -1,5 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import {
+  type ReactiveController,
+  type ReactiveControllerHost,
+  render,
+} from 'lit';
 
 import { Bound } from '../../../../../../surface-block/index.js';
 import {
@@ -76,11 +80,19 @@ export class EdgelessDraggableElementController<T>
     const { scopeElement, edgeless } = this.options;
     e.originalEvent.stopPropagation();
     e.originalEvent.preventDefault();
+
+    // Safari compatibility
+    // Cannot get edgeless.host.getBoundingClientRect().width in Safari (Always 0)
+    const edgelessRect = edgeless.host.getBoundingClientRect();
+    if (edgelessRect.width === 0) {
+      edgelessRect.width = edgeless.viewport.clientWidth;
+    }
+
     this.info = {
       startTime: Date.now(),
       startPos: { x: e.x, y: e.y },
       scopeRect: scopeElement.getBoundingClientRect(),
-      edgelessRect: edgeless.host.getBoundingClientRect(),
+      edgelessRect,
       elementRectOriginal: e.el.getBoundingClientRect(),
       element: e.el,
       elementInfo,
@@ -93,8 +105,8 @@ export class EdgelessDraggableElementController<T>
       const onMouseMove = (e: MouseEvent) => {
         this._onDragMove(mouseResolver(e));
       };
-      const onMouseUp = (e: MouseEvent) => {
-        const finished = this._onDragEnd(mouseResolver(e));
+      const onMouseUp = (_: MouseEvent) => {
+        const finished = this._onDragEnd();
         if (finished) {
           edgeless.host.removeEventListener('mousemove', onMouseMove);
           window.removeEventListener('mouseup', onMouseUp);
@@ -107,8 +119,8 @@ export class EdgelessDraggableElementController<T>
       const onTouchMove = (e: TouchEvent) => {
         this._onDragMove(touchResolver(e));
       };
-      const onTouchEnd = (e: TouchEvent) => {
-        const finished = this._onDragEnd(touchResolver(e));
+      const onTouchEnd = (_: TouchEvent) => {
+        const finished = this._onDragEnd();
         if (finished) {
           edgeless.host.removeEventListener('touchmove', onTouchMove);
           window.removeEventListener('touchend', onTouchEnd);
@@ -157,7 +169,7 @@ export class EdgelessDraggableElementController<T>
     this._updateOverlayScale(zoom);
   }
 
-  private _onDragEnd(_: ElementDragEvent) {
+  private _onDragEnd() {
     const { overlay, info, options } = this;
     const { startTime, elementInfo, edgelessRect, moved } = info;
     const { service, clickThreshold = 200 } = options;
@@ -341,5 +353,51 @@ export class EdgelessDraggableElementController<T>
   hostDisconnected() {
     this.removeAllEvents();
     this.reset();
+  }
+
+  /**
+   * A workaround to apply click event manually
+   */
+  clickToDrag(target: HTMLElement, startPos: { x: number; y: number }) {
+    if (!this.options.clickToDrag) {
+      this.options.clickToDrag = true;
+      console.warn(
+        'clickToDrag is not enabled, it will be enabled automatically'
+      );
+    }
+    const targetRect = target.getBoundingClientRect();
+    const targetCenter = {
+      x: targetRect.left + targetRect.width / 2,
+      y: targetRect.top + targetRect.height / 2,
+    };
+
+    const mouseDownEvent = new MouseEvent('mousedown', {
+      clientX: targetCenter.x,
+      clientY: targetCenter.y,
+    });
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      clientX: targetCenter.x,
+      clientY: targetCenter.y,
+    });
+    target.dispatchEvent(mouseDownEvent);
+    window.dispatchEvent(mouseUpEvent);
+
+    const mouseMoveEvent = new MouseEvent('mousemove', {
+      clientX: startPos.x,
+      clientY: startPos.y,
+    });
+
+    this.options.edgeless.host.dispatchEvent(mouseMoveEvent);
+  }
+
+  updateElementInfo(elementInfo: Partial<ElementInfo<T>>) {
+    this.info.elementInfo = {
+      ...this.info.elementInfo,
+      ...elementInfo,
+    };
+
+    if (elementInfo.preview && this.overlay) {
+      render(elementInfo.preview, this.overlay.transitionWrapper);
+    }
   }
 }

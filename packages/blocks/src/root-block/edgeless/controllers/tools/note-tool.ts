@@ -2,12 +2,12 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
 import {
-  type EdgelessTool,
   hasClassNameInList,
-  type NoteTool,
+  type NoteChildrenFlavour,
   Point,
 } from '../../../../_common/utils/index.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
+import type { EdgelessTool } from '../../types.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   NOTE_INIT_HEIGHT,
@@ -15,7 +15,14 @@ import {
 } from '../../utils/consts.js';
 import { addNote } from '../../utils/note.js';
 import { DraggingNoteOverlay, NoteOverlay } from '../../utils/tool-overlay.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
+
+export type NoteTool = {
+  type: 'affine:note';
+  childFlavour: NoteChildrenFlavour;
+  childType: string | null;
+  tip: string;
+};
 
 export class NoteToolController extends EdgelessToolController<NoteTool> {
   private _noteOverlay: NoteOverlay | null = null;
@@ -224,5 +231,13 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._noteOverlay = new NoteOverlay(this._edgeless, background);
     this._noteOverlay.text = newTool.tip;
     this._edgeless.surface.renderer.addOverlay(this._noteOverlay);
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      note: NoteToolController;
+    }
   }
 }

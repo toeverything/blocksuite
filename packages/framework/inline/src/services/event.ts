@@ -255,7 +255,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
       inlineEditor: this.editor,
       raw: event,
       inlineRange: inlineRange,
-      data: event.data,
+      data: event.data ?? event.dataTransfer?.getData('text/plain') ?? null,
       attributes: {} as TextAttributes,
     };
     this.editor.hooks.beforeinput?.(ctx);

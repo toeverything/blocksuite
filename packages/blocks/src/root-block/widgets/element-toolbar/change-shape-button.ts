@@ -21,7 +21,7 @@ import {
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
-import { LineWidth, type ShapeTool } from '../../../_common/types.js';
+import { LineWidth } from '../../../_common/types.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import { FontFamily } from '../../../surface-block/consts.js';
 import {
@@ -43,6 +43,7 @@ import {
 } from '../../edgeless/components/panel/color-panel.js';
 import type { LineStyleEvent } from '../../edgeless/components/panel/line-styles-panel.js';
 import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';
+import type { ShapeTool } from '../../edgeless/controllers/tools/shape-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import {
   SHAPE_FILL_COLOR_BLACK,

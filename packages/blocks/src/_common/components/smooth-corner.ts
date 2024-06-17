@@ -163,9 +163,6 @@ export class SmoothCorner extends LitElement {
           transform="translate(${this.borderWidth / 2} ${this.borderWidth / 2})"
         >`
       )}
-      <div class="smooth-corner-content">
-        <slot></slot>
-      </div>
       ${this._getSvg(
         'smooth-corner-border',
         svg`<path 
@@ -175,7 +172,10 @@ export class SmoothCorner extends LitElement {
           stroke-width="${this.borderWidth}"
           transform="translate(${this.borderWidth / 2} ${this.borderWidth / 2})"
         >`
-      )}`;
+      )}
+      <div class="smooth-corner-content">
+        <slot></slot>
+      </div>`;
   }
 }
 

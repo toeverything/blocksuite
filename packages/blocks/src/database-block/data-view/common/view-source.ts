@@ -14,7 +14,7 @@ export interface SingleViewSource<
   readonly view: View;
   readonly updateView: (updater: (view: View) => Partial<View>) => void;
 
-  updateSlot: Slot;
+  updateSlot: Slot<{ viewId: string }>;
 
   delete(): void;
 
@@ -29,7 +29,8 @@ export interface ViewSource {
   allViewMeta: ViewMeta[];
   selectView: (id: string) => void;
   views: SingleViewSource[];
-  updateSlot: Slot;
+  updateSlot: Slot<{ viewId?: string }>;
+  checkViewDataUpdate(): void;
   getViewMeta(type: string): ViewMeta;
   viewGet(id: string): SingleViewSource;
   viewAdd(type: DataViewTypes): string;

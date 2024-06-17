@@ -306,6 +306,15 @@ export const responses: {
       children: data.node,
       style: data.style,
     });
+
+    edgelessService.telemetryService?.track('CanvasElementAdded', {
+      control: 'ai',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'mindmap',
+    });
+
     const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
 
     host.doc.transact(() => {

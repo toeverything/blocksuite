@@ -5,8 +5,8 @@ import { cssVar } from '@toeverything/theme';
 import type { LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../_common/types.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+import type { EdgelessTool } from '../../../types.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import { edgelessToolbarThemeContext } from '../context.js';
 
@@ -110,10 +110,10 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
       this._updateActiveEdgelessTool();
       this._applyActiveStyle();
       this._disposables.add(
-        this.edgeless.slots.edgelessToolUpdated.on(newTool => {
+        this.edgeless.slots.edgelessToolUpdated.on(() => {
           this._updateActiveEdgelessTool();
           this._applyActiveStyle();
-          if (newTool.type !== this.type) {
+          if (!this.active) {
             this.popper?.dispose();
             this.popper = null;
           }

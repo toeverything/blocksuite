@@ -62,6 +62,14 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
         const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
         point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
         await edgelessRoot.addImages(imageFiles, point);
+
+        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
+          control: 'canvas:drop',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'image',
+        });
       }
 
       return true;

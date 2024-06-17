@@ -18,8 +18,16 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
-import type { AffineTextAttributes, SerializedXYWH } from '@blocksuite/blocks';
-import { ColorVariables, extractCssVariables } from '@blocksuite/blocks';
+import type {
+  AffineTextAttributes,
+  DocMode,
+  SerializedXYWH,
+} from '@blocksuite/blocks';
+import {
+  ColorVariables,
+  EdgelessRootService,
+  extractCssVariables,
+} from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import { type DocCollection, Text, Utils } from '@blocksuite/store';
@@ -97,7 +105,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   accessor chatPanel!: CustomChatPanel;
 
   @property({ attribute: false })
-  accessor mode: 'page' | 'edgeless' = 'page';
+  accessor mode: DocMode = 'page';
 
   @property({ attribute: false })
   accessor readonly = false;
@@ -109,16 +117,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   };
 
   private _switchEditorMode() {
-    const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
-    localStorage.setItem('playground:editorMode', mode);
-    this.mode = mode;
+    this.mode = this.rootService.docModeService.toggleMode();
   }
 
   private _restoreMode() {
-    const mode = localStorage.getItem('playground:editorMode');
-    if (mode && (mode === 'edgeless' || mode === 'page')) {
-      this.mode = mode;
-    }
+    this.mode = this.rootService.docModeService.getMode();
   }
 
   private _addNote() {
@@ -542,7 +545,25 @@ export class QuickEdgelessMenu extends ShadowlessElement {
               : nothing}
           </div>
 
-          <div>
+          <div style="display: flex; gap: 12px">
+            <!-- Present button -->
+            ${this.mode === 'edgeless'
+              ? html`<sl-tooltip content="Present" placement="bottom" hoist>
+                  <sl-button
+                    size="small"
+                    circle
+                    @click=${() => {
+                      if (this.rootService instanceof EdgelessRootService) {
+                        this.rootService.tool.setEdgelessTool({
+                          type: 'frameNavigator',
+                        });
+                      }
+                    }}
+                  >
+                    <sl-icon name="easel" label="Present"></sl-icon>
+                  </sl-button>
+                </sl-tooltip>`
+              : nothing}
             <sl-button-group label="Mode" style="margin-right: 12px">
               <!-- switch to page -->
               <sl-tooltip content="Page" placement="bottom" hoist>

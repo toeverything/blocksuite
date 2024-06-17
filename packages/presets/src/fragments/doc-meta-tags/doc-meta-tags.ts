@@ -338,20 +338,22 @@ export class DocMetaTags extends WithDisposable(LitElement) {
 
     const backlinkIndexer = this.doc.collection.indexer.backlink;
 
-    const getList = () => {
-      return backlinkIndexer
-        .getBacklink(this.doc.id)
-        .filter(v => v.type === 'LinkedPage')
-        .map(toData);
-    };
+    if (backlinkIndexer) {
+      const getList = () => {
+        return backlinkIndexer
+          .getBacklink(this.doc.id)
+          .filter(v => v.type === 'LinkedPage')
+          .map(toData);
+      };
 
-    this.backlinkList = getList();
+      this.backlinkList = getList();
 
-    this._disposables.add(
-      backlinkIndexer.slots.indexUpdated.on(() => {
-        this.backlinkList = getList();
-      })
-    );
+      this._disposables.add(
+        backlinkIndexer.slots.indexUpdated.on(() => {
+          this.backlinkList = getList();
+        })
+      );
+    }
   };
 
   private _toggle = () => {

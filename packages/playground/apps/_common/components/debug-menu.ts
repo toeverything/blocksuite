@@ -263,7 +263,8 @@ export class DebugMenu extends ShadowlessElement {
   accessor blockTypeDropdown!: SlDropdown;
 
   private _switchEditorMode() {
-    this.mode = this.mode === 'page' ? 'edgeless' : 'page';
+    const { docModeService } = this.editor.host.spec.getService('affine:page');
+    this.mode = docModeService.toggleMode();
   }
 
   private _toggleOutlinePanel() {

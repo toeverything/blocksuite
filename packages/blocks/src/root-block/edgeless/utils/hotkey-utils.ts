@@ -1,5 +1,5 @@
-import type { ShapeTool } from '../../../_common/types.js';
 import { ShapeType } from '../../../surface-block/index.js';
+import type { ShapeTool } from '../controllers/tools/shape-tool.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 const shapeMap: Record<ShapeTool['shapeType'], number> = {

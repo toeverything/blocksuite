@@ -58,7 +58,7 @@ export interface EdgelessDraggableElementOptions<T> {
   /**
    * when element is clicked - mouse down and up without moving
    */
-  onElementClick?: (e: ElementInfo<T>) => void;
+  onElementClick?: (element: ElementInfo<T>) => void;
   /**
    *  when mouse down and moved, create overlay, customize overlay here
    */

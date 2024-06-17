@@ -1,13 +1,14 @@
 import './mindmap-menu.js';
 
+import { assertExists } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessTool } from '../../../../../_common/types.js';
 import { MindmapStyle } from '../../../../../surface-block/index.js';
+import type { EdgelessTool } from '../../../types.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { getMindMaps } from './assets.js';
@@ -152,10 +153,16 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
   @state()
   accessor activeStyle: MindmapStyle = MindmapStyle.ONE;
 
+  @state()
+  accessor readyToDrop = false;
+
+  @query('.basket-tool-item.mindmap')
+  accessor mindmapElement!: HTMLElement;
+
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;
 
-    this.setEdgelessTool({ type: 'default' });
+    this.setEdgelessTool({ type: 'mindmap' });
 
     const menu = this.createPopper('edgeless-mindmap-menu', this);
     Object.assign(menu.element, {
@@ -175,6 +182,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
       edgeless: this.edgeless,
       scopeElement: this.toolbarContainer,
       standardWidth: 100,
+      clickToDrag: true,
       onOverlayCreated: (overlay, { data }) => {
         const tool = this.draggableTools.find(t => t.name === data.name);
         if (!tool) return;
@@ -203,15 +211,50 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
           overlay.element.style.left = _left + 0 + 'px';
           overlay.element.style.top = _top + 3 + 'px';
         }
+        this.readyToDrop = true;
       },
       onCanceled: overlay => {
         overlay.transitionWrapper.style.transformOrigin = 'unset';
         overlay.transitionWrapper.style.setProperty('--rotate', '0deg');
+        this.readyToDrop = false;
       },
       onDrop: (el, bound) => {
         el.data.render(bound, this.edgeless.service, this.edgeless);
+        this.readyToDrop = false;
       },
     });
+
+    const dispose = this.edgeless.bindHotKey(
+      {
+        m: () => {
+          const service = this.edgeless.service;
+          if (service.locked) return;
+          if (service.selection.editing) return;
+
+          if (this.readyToDrop) {
+            // change the style
+            const activeIndex = this.mindmaps.findIndex(
+              m => m.style === this.activeStyle
+            );
+            const nextIndex = (activeIndex + 1) % this.mindmaps.length;
+            const next = this.mindmaps[nextIndex];
+            this.activeStyle = next.style;
+            const tool = this.draggableTools.find(t => t.name === 'mindmap');
+            assertExists(tool);
+            this.draggableController.updateElementInfo({
+              data: tool,
+              preview: next.icon,
+            });
+            return;
+          }
+          const icon = this.mindmapElement;
+          assertExists(icon);
+          this.draggableController.clickToDrag(icon, service.tool.lastMousePos);
+        },
+      },
+      { global: true }
+    );
+    this.disposables.add(dispose);
   }
 
   override updated(_changedProperties: Map<PropertyKey, unknown>) {

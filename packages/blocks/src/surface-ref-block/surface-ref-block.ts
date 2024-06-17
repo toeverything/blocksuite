@@ -3,7 +3,13 @@ import './surface-ref-portal.js';
 import { PathFinder } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
 import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
-import { css, html, nothing, type TemplateResult } from 'lit';
+import {
+  css,
+  html,
+  nothing,
+  type PropertyDeclaration,
+  type TemplateResult,
+} from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -503,6 +509,16 @@ export class SurfaceRefBlockComponent extends BlockElement<
     </div>`;
   }
 
+  override requestUpdate(
+    name?: PropertyKey | undefined,
+    oldValue?: unknown,
+    options?: PropertyDeclaration<unknown, unknown> | undefined
+  ): void {
+    super.requestUpdate(name, oldValue, options);
+
+    this._surfaceRefRenderer?.surfaceRenderer?.refresh();
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -578,7 +594,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     const pageService = this.std.spec.getService('affine:page');
 
     pageService.editPropsStore.setItem('viewport', viewport);
-    pageService.slots.editorModeSwitch.emit('edgeless');
+    pageService.docModeService.setMode('edgeless');
   }
 
   override render() {

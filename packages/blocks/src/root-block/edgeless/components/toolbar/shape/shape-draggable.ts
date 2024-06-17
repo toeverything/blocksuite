@@ -42,7 +42,7 @@ shapes.push({
   name: ShapeType.Triangle,
   svg: triangleSvg,
   style: {
-    default: { x: 18, y: 15 },
+    default: { x: 18, y: 25 },
     hover: { y: 7, z: 1 },
     next: { y: 64 },
   },
@@ -156,6 +156,18 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           shapeType: shape.name === 'roundedRect' ? ShapeType.Rect : shape.name,
           xywh,
           radius: shape.name === 'roundedRect' ? 0.1 : 0,
+        });
+
+        this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+          control: 'toolbar:dnd',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'shape',
+          other: {
+            shapeType:
+              shape.name === 'roundedRect' ? ShapeType.Rect : shape.name,
+          },
         });
       },
       onElementClick: el => {

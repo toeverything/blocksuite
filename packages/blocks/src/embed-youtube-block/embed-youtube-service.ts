@@ -14,10 +14,14 @@ export class EmbedYoutubeBlockService extends BlockService<EmbedYoutubeModel> {
   static setLinkPreviewEndpoint =
     EmbedYoutubeBlockService.linkPreviewer.setEndpoint;
 
-  queryUrlData = (embedYoutubeModel: EmbedYoutubeModel) => {
+  queryUrlData = (
+    embedYoutubeModel: EmbedYoutubeModel,
+    signal?: AbortSignal
+  ) => {
     return queryEmbedYoutubeData(
       embedYoutubeModel,
-      EmbedYoutubeBlockService.linkPreviewer
+      EmbedYoutubeBlockService.linkPreviewer,
+      signal
     );
   };
 

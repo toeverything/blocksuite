@@ -2,13 +2,14 @@ import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
+  ConnectorCWithArrowIcon,
   ConnectorIcon,
-  CurveLineIcon,
+  ConnectorLWithArrowIcon,
+  ConnectorXWithArrowIcon,
   DiamondIcon,
   EdgelessEraserLightIcon,
   EdgelessGeneralShapeIcon,
   EdgelessPenLightIcon,
-  ElbowedLineIcon,
   EllipseIcon,
   FrameIcon,
   FrameNavigatorIcon,
@@ -21,7 +22,6 @@ import {
   ScribbledTriangleIcon,
   SelectIcon,
   SquareIcon,
-  StraightLineIcon,
   ToolsIcon,
   TriangleIcon,
   ViewBarIcon,
@@ -174,11 +174,11 @@ pie.beginSubmenu({
     if (tool.type === 'connector') {
       switch (tool.mode) {
         case ConnectorMode.Orthogonal:
-          return ElbowedLineIcon;
+          return ConnectorLWithArrowIcon;
         case ConnectorMode.Curve:
-          return CurveLineIcon;
+          return ConnectorCWithArrowIcon;
         case ConnectorMode.Straight:
-          return StraightLineIcon;
+          return ConnectorXWithArrowIcon;
       }
     }
     return ConnectorIcon;
@@ -186,17 +186,8 @@ pie.beginSubmenu({
 });
 
 pie.command({
-  label: 'Straight',
-  icon: StraightLineIcon,
-  action: setEdgelessToolAction({
-    type: 'connector',
-    mode: ConnectorMode.Straight,
-  }),
-});
-
-pie.command({
   label: 'Curved',
-  icon: CurveLineIcon,
+  icon: ConnectorCWithArrowIcon,
   action: setEdgelessToolAction({
     type: 'connector',
     mode: ConnectorMode.Curve,
@@ -205,10 +196,19 @@ pie.command({
 
 pie.command({
   label: 'Elbowed',
-  icon: ElbowedLineIcon,
+  icon: ConnectorXWithArrowIcon,
   action: setEdgelessToolAction({
     type: 'connector',
     mode: ConnectorMode.Orthogonal,
+  }),
+});
+
+pie.command({
+  label: 'Straight',
+  icon: ConnectorLWithArrowIcon,
+  action: setEdgelessToolAction({
+    type: 'connector',
+    mode: ConnectorMode.Straight,
   }),
 });
 

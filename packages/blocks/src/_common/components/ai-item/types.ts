@@ -1,7 +1,7 @@
 import type { Chain, EditorHost, InitCommandCtx } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
-import type { EditorMode } from '../../utils/index.js';
+import type { DocMode } from '../../utils/index.js';
 
 export interface AIItemGroupConfig {
   name?: string;
@@ -13,7 +13,7 @@ export interface AIItemConfig {
   icon: TemplateResult | (() => HTMLElement);
   showWhen?: (
     chain: Chain<InitCommandCtx>,
-    editorMode: EditorMode,
+    editorMode: DocMode,
     host: EditorHost
   ) => boolean;
   subItem?: AISubItemConfig[];

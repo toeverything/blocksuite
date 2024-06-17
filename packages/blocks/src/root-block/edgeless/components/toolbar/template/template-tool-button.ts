@@ -11,8 +11,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { ArrowDownSmallIcon } from '../../../../../_common/icons/text.js';
-import type { EdgelessTool } from '../../../../../_common/types.js';
 import { once } from '../../../../../_common/utils/event.js';
+import type { EdgelessTool } from '../../../types.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { TemplateCard1, TemplateCard2, TemplateCard3 } from './icon.js';
 import type { EdgelessTemplatePanel } from './template-panel.js';

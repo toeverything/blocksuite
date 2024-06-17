@@ -1,7 +1,10 @@
 import { noop } from '@blocksuite/global/utils';
 
-import type { TemplateTool } from '../../../../_common/types.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
+
+export type TemplateTool = {
+  type: 'template';
+};
 
 export class TemplateToolController extends EdgelessToolController<TemplateTool> {
   readonly tool = {
@@ -62,5 +65,13 @@ export class TemplateToolController extends EdgelessToolController<TemplateTool>
 
   afterModeSwitch() {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      template: TemplateToolController;
+    }
   }
 }

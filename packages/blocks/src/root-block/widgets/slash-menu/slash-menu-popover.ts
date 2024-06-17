@@ -370,7 +370,7 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
       text=${customTemplate ?? name}
       subText=${ifDefined(description)}
       data-testid="${name}"
-      ?hover=${hover}
+      hover=${hover}
       @mouseenter=${() => {
         this._activeItem = item;
         this._closeSubMenu();
@@ -406,7 +406,7 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
       text=${name}
       subText=${ifDefined(description)}
       data-testid="${name}"
-      ?hover=${hover}
+      hover=${hover}
       @mouseenter=${() => {
         this._activeItem = item;
         this._openSubMenu(item);

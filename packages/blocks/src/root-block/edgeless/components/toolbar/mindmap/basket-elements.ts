@@ -94,6 +94,15 @@ export const getMindmapRender =
     const mindmapId = edgelessService.addElement('mindmap', {
       style: mindmapStyle,
     }) as string;
+
+    edgelessService.telemetryService?.track('CanvasElementAdded', {
+      control: 'toolbar:dnd', // for now we use toolbar:dnd for all mindmap creation here
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'mindmap',
+    });
+
     const mindmap = edgelessService.getElementById(
       mindmapId
     ) as MindmapElementModel;
@@ -148,6 +157,15 @@ export const textRender: DraggableTool['render'] = (
     xywh: new Bound(bound.x, vCenter - h / 2, w, h).serialize(),
     text: new DocCollection.Y.Text(),
   });
+
+  service.telemetryService?.track('CanvasElementAdded', {
+    control: 'toolbar:dnd',
+    page: 'whiteboard editor',
+    module: 'toolbar',
+    segment: 'toolbar',
+    type: 'text',
+  });
+
   edgeless.doc.captureSync();
   const textElement = edgeless.service.getElementById(id);
   assertExists(textElement);

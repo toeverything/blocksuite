@@ -186,7 +186,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         ...createConversionItem(config),
         showWhen: ({ model }) =>
           model.doc.schema.flavourSchemaMap.has(config.flavour) &&
-          !insideDatabase(model),
+          !insideDatabase(model) &&
+          !insideEdgelessText(model),
       })),
 
     // ---------------------------------------------------------

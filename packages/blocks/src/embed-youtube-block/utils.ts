@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
+import { isAbortError } from '../_common/utils/helper.js';
 import type { EmbedYoutubeBlockComponent } from './embed-youtube-block.js';
 import type {
   EmbedYoutubeBlockUrlData,
@@ -9,13 +10,14 @@ import type {
 
 export async function queryEmbedYoutubeData(
   embedYoutubeModel: EmbedYoutubeModel,
-  linkPreviewer: LinkPreviewer
+  linkPreviewer: LinkPreviewer,
+  signal?: AbortSignal
 ): Promise<Partial<EmbedYoutubeBlockUrlData>> {
   const url = embedYoutubeModel.url;
 
   const [videoOpenGraphData, videoOEmbedData] = await Promise.all([
-    linkPreviewer.query(url),
-    queryYoutubeOEmbedData(url),
+    linkPreviewer.query(url, signal),
+    queryYoutubeOEmbedData(url, signal),
   ]);
 
   const youtubeEmbedData: Partial<EmbedYoutubeBlockUrlData> = {
@@ -25,7 +27,8 @@ export async function queryEmbedYoutubeData(
 
   if (youtubeEmbedData.creatorUrl) {
     const creatorOpenGraphData = await linkPreviewer.query(
-      youtubeEmbedData.creatorUrl
+      youtubeEmbedData.creatorUrl,
+      signal
     );
     youtubeEmbedData.creatorImage = creatorOpenGraphData.image;
   }
@@ -34,13 +37,14 @@ export async function queryEmbedYoutubeData(
 }
 
 export async function queryYoutubeOEmbedData(
-  url: string
+  url: string,
+  signal?: AbortSignal
 ): Promise<Partial<EmbedYoutubeBlockUrlData>> {
   let youtubeOEmbedData: Partial<EmbedYoutubeBlockUrlData> = {};
 
   const oEmbedUrl = `https://youtube.com/oembed?url=${url}&format=json`;
 
-  const oEmbedResponse = await fetch(oEmbedUrl).catch(() => null);
+  const oEmbedResponse = await fetch(oEmbedUrl, { signal }).catch(() => null);
   if (oEmbedResponse && oEmbedResponse.ok) {
     const oEmbedJson = await oEmbedResponse.json();
     const { title, author_name, author_url } = oEmbedJson;
@@ -56,8 +60,9 @@ export async function queryYoutubeOEmbedData(
 }
 
 export async function refreshEmbedYoutubeUrlData(
-  embedYoutubeElement: EmbedYoutubeBlockComponent
-) {
+  embedYoutubeElement: EmbedYoutubeBlockComponent,
+  signal?: AbortSignal
+): Promise<void> {
   let image = null,
     title = null,
     description = null,
@@ -71,7 +76,11 @@ export async function refreshEmbedYoutubeUrlData(
     const queryUrlData = embedYoutubeElement.service?.queryUrlData;
     assertExists(queryUrlData);
 
-    const youtubeUrlData = await queryUrlData(embedYoutubeElement.model);
+    const youtubeUrlData = await queryUrlData(
+      embedYoutubeElement.model,
+      signal
+    );
+
     ({
       image = null,
       title = null,
@@ -80,9 +89,9 @@ export async function refreshEmbedYoutubeUrlData(
       creatorUrl = null,
       creatorImage = null,
     } = youtubeUrlData);
-  } catch (error) {
-    console.error(error);
-  } finally {
+
+    if (signal?.aborted) return;
+
     embedYoutubeElement.doc.updateBlock(embedYoutubeElement.model, {
       image,
       title,
@@ -91,7 +100,10 @@ export async function refreshEmbedYoutubeUrlData(
       creatorUrl,
       creatorImage,
     });
-
+  } catch (error) {
+    if (signal?.aborted || isAbortError(error)) return;
+    throw error;
+  } finally {
     embedYoutubeElement.loading = false;
   }
 }

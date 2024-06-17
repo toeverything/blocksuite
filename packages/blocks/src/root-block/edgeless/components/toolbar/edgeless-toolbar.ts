@@ -12,6 +12,7 @@ import { ContextProvider } from '@lit/context';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { cache } from 'lit/directives/cache.js';
 
 import {
   type MenuHandler,
@@ -23,10 +24,10 @@ import {
   MoreHorizontalIcon,
 } from '../../../../_common/icons/index.js';
 import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
-import type { EdgelessTool } from '../../../../_common/types.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getThemeMode } from '../../../../_common/utils/query.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { EdgelessTool } from '../../types.js';
 import {
   type EdgelessToolbarSlots,
   edgelessToolbarSlotsContext,
@@ -175,11 +176,24 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     return this.scrollSeniorToolIndex === 0;
   }
 
+  private get _seniorPrevTooltip() {
+    if (this._seniorScrollPrevDisabled) return '';
+    const prevTool = this._seniorTools[this.scrollSeniorToolIndex - 1];
+    return prevTool?.name ?? '';
+  }
+
   private get _seniorScrollNextDisabled() {
     return (
       this.scrollSeniorToolIndex + this.scrollSeniorToolSize >=
       this._seniorTools.length
     );
+  }
+
+  private get _seniorNextTooltip() {
+    if (this._seniorScrollNextDisabled) return '';
+    const nextTool =
+      this._seniorTools[this.scrollSeniorToolIndex + this.scrollSeniorToolSize];
+    return nextTool?.name ?? '';
   }
 
   static override styles = css`
@@ -463,6 +477,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
             .some(tool => tool.type === this.edgelessTool?.type)}
         >
           ${MoreHorizontalIcon}
+          <affine-tooltip tip-position="top" .offset=${25}>
+            More Tools
+          </affine-tooltip>
         </icon-button>
       </div>
       <div class="full-divider"></div>
@@ -474,6 +491,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @click=${this._onSeniorNavPrev}
         >
           ${ArrowLeftSmallIcon}
+          ${cache(
+            this._seniorPrevTooltip
+              ? html` <affine-tooltip tip-position="top" .offset=${4}>
+                  ${this._seniorPrevTooltip}
+                </affine-tooltip>`
+              : nothing
+          )}
         </icon-button>
       </div>
       <div class="senior-tools">
@@ -494,6 +518,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @click=${this._onSeniorNavNext}
         >
           ${ArrowRightSmallIcon}
+          ${cache(
+            this._seniorNextTooltip
+              ? html` <affine-tooltip tip-position="top" .offset=${4}>
+                  ${this._seniorNextTooltip}
+                </affine-tooltip>`
+              : nothing
+          )}
         </icon-button>
       </div>
     `;
@@ -598,6 +629,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
                 (this.presentSettingMenuShow = show)}
               .setFrameMenuShow=${(show: boolean) =>
                 (this.presentFrameMenuShow = show)}
+              .containerWidth=${this.containerWidth}
             ></presentation-toolbar>
             ${this.isPresentMode ? nothing : this._renderContent()}
           </div>

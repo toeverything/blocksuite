@@ -28,13 +28,18 @@ function getFirstTwoLines(text: string) {
 export class ChatPanelInput extends WithDisposable(LitElement) {
   static override styles = css`
     .chat-panel-input {
-      margin-top: 12px;
-      position: relative;
-      border-radius: 4px;
       display: flex;
-      gap: 4px;
       flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+      margin-top: 12px;
+      border-radius: 4px;
       padding: 8px;
+      min-height: 94px;
+      box-sizing: border-box;
+      border-width: 1px;
+      border-style: solid;
 
       .chat-selection-quote {
         padding: 4px 0px 8px 0px;
@@ -114,15 +119,17 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
 
     .chat-panel-input {
       textarea {
-        resize: none;
         width: 100%;
-        line-height: 22px;
+        padding: 0;
+        margin: 0;
         border: none;
-        font-size: 14px;
+        line-height: 22px;
+        font-size: var(--affine-font-sm);
         font-weight: 400;
         font-family: var(--affine-font-family);
         color: var(--affine-text-primary-color);
         box-sizing: border-box;
+        resize: none;
         overflow-y: hidden;
       }
 
@@ -140,7 +147,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
 
     .chat-panel-images {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       flex-wrap: wrap;
       position: relative;
 
@@ -192,6 +199,9 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor host!: EditorHost;
 
+  @query('.chat-panel-images')
+  accessor imagesWrapper!: HTMLDivElement;
+
   @query('textarea')
   accessor textarea!: HTMLTextAreaElement;
 
@@ -223,68 +233,76 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     });
   }
 
+  private _renderImages(images: File[]) {
+    return html`
+      <div
+        class="chat-panel-images"
+        @mouseleave=${() => {
+          this.closeWrapper.style.display = 'none';
+          this.curIndex = -1;
+        }}
+      >
+        ${repeat(
+          images,
+          image => image.name,
+          (image, index) =>
+            html`<div
+              class="image-container"
+              @mouseenter=${(evt: MouseEvent) => {
+                const ele = evt.target as HTMLImageElement;
+                const rect = ele.getBoundingClientRect();
+                const parentRect = ele.parentElement!.getBoundingClientRect();
+                const left = Math.abs(rect.right - parentRect.left) - 8;
+                const top = Math.abs(parentRect.top - rect.top) - 8;
+                this.curIndex = index;
+                this.closeWrapper.style.display = 'flex';
+                this.closeWrapper.style.left = left + 'px';
+                this.closeWrapper.style.top = top + 'px';
+              }}
+            >
+              <img src="${URL.createObjectURL(image)}" alt="${image.name}" />
+            </div>`
+        )}
+        <div
+          class="close-wrapper"
+          @click=${() => {
+            if (this.curIndex >= 0 && this.curIndex < images.length) {
+              const newImages = [...images];
+              newImages.splice(this.curIndex, 1);
+              this.updateContext({ images: newImages });
+              this.curIndex = -1;
+              this.closeWrapper.style.display = 'none';
+            }
+          }}
+        >
+          ${CloseIcon}
+        </div>
+      </div>
+    `;
+  }
+
   protected override render() {
     const { images, status } = this.chatContextValue;
+    const hasImages = images.length > 0;
+    const maxHeight = hasImages ? 272 + 2 : 200 + 2;
 
     return html`<style>
         .chat-panel-send svg rect {
-          fill: ${this.isInputEmpty && images.length === 0
+          fill: ${this.isInputEmpty && hasImages
             ? 'var(--affine-text-disable-color)'
             : 'var(--affine-primary-color)'};
         }
 
         .chat-panel-input {
-          border: ${this.focused
-            ? '1px solid var(--affine-primary-color)'
-            : '1px solid var(--affine-border-color)'};
+          border-color: ${this.focused
+            ? 'var(--affine-primary-color)'
+            : 'var(--affine-border-color)'};
           box-shadow: ${this.focused ? 'var(--affine-active-shadow)' : 'none'};
-          max-height: ${images.length > 0 ? '272px' : '200px'};
+          max-height: ${maxHeight}px !important;
         }
       </style>
       <div class="chat-panel-input">
-        <div
-          class="chat-panel-images"
-          @mouseleave=${() => {
-            this.closeWrapper.style.display = 'none';
-            this.curIndex = -1;
-          }}
-        >
-          ${repeat(
-            images,
-            image => image.name,
-            (image, index) =>
-              html`<div
-                class="image-container"
-                @mouseenter=${(evt: MouseEvent) => {
-                  const ele = evt.target as HTMLImageElement;
-                  const rect = ele.getBoundingClientRect();
-                  const parentRect = ele.parentElement!.getBoundingClientRect();
-                  const left = Math.abs(rect.right - parentRect.left) - 8;
-                  const top = Math.abs(parentRect.top - rect.top) - 8;
-                  this.curIndex = index;
-                  this.closeWrapper.style.display = 'flex';
-                  this.closeWrapper.style.left = left + 'px';
-                  this.closeWrapper.style.top = top + 'px';
-                }}
-              >
-                <img src="${URL.createObjectURL(image)}" alt="${image.name}" />
-              </div>`
-          )}
-          <div
-            class="close-wrapper"
-            @click=${() => {
-              if (this.curIndex >= 0 && this.curIndex < images.length) {
-                const newImages = [...images];
-                newImages.splice(this.curIndex, 1);
-                this.updateContext({ images: newImages });
-                this.curIndex = -1;
-                this.closeWrapper.style.display = 'none';
-              }
-            }}
-          >
-            ${CloseIcon}
-          </div>
-        </div>
+        ${hasImages ? this._renderImages(images) : nothing}
         ${this.chatContextValue.quote
           ? html`<div class="chat-selection-quote">
               ${repeat(
@@ -303,14 +321,17 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             </div>`
           : nothing}
         <textarea
+          rows="1"
           placeholder="What are your thoughts?"
           @input=${() => {
-            this.isInputEmpty = !this.textarea.value;
             const { textarea } = this;
+            this.isInputEmpty = !textarea.value.trim();
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
-            if (this.scrollHeight >= 200) {
-              textarea.style.height = '200px';
+            let imagesHeight = this.imagesWrapper?.scrollHeight ?? 0;
+            if (imagesHeight) imagesHeight += 12;
+            if (this.scrollHeight >= 200 + imagesHeight) {
+              textarea.style.height = '148px';
               textarea.style.overflowY = 'scroll';
             }
           }}

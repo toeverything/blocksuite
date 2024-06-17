@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
 import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
+import { isAbortError } from '../_common/utils/helper.js';
 import type { EmbedGithubBlockComponent } from './embed-github-block.js';
 import type {
   EmbedGithubBlockUrlData,
@@ -19,17 +20,19 @@ import {
 
 export async function queryEmbedGithubData(
   embedGithubModel: EmbedGithubModel,
-  linkPreviewer: LinkPreviewer
+  linkPreviewer: LinkPreviewer,
+  signal?: AbortSignal
 ): Promise<Partial<EmbedGithubBlockUrlData>> {
   const [githubApiData, openGraphData] = await Promise.all([
-    queryEmbedGithubApiData(embedGithubModel),
-    linkPreviewer.query(embedGithubModel.url),
+    queryEmbedGithubApiData(embedGithubModel, signal),
+    linkPreviewer.query(embedGithubModel.url, signal),
   ]);
   return { ...githubApiData, ...openGraphData };
 }
 
 export async function queryEmbedGithubApiData(
-  embedGithubModel: EmbedGithubModel
+  embedGithubModel: EmbedGithubModel,
+  signal?: AbortSignal
 ): Promise<Partial<EmbedGithubBlockUrlData>> {
   const { owner, repo, githubType, githubId } = embedGithubModel;
   let githubApiData: Partial<EmbedGithubBlockUrlData> = {};
@@ -39,9 +42,11 @@ export async function queryEmbedGithubApiData(
     githubType === 'issue' ? 'issues' : 'pulls'
   }/${githubId}`;
 
-  const githubApiResponse = await fetch(apiUrl, { cache: 'no-cache' }).catch(
-    () => null
-  );
+  const githubApiResponse = await fetch(apiUrl, {
+    cache: 'no-cache',
+    signal,
+  }).catch(() => null);
+
   if (githubApiResponse && githubApiResponse.ok) {
     const githubApiJson = await githubApiResponse.json();
     const { state, state_reason, draft, merged, created_at, assignees } =
@@ -70,8 +75,9 @@ export async function queryEmbedGithubApiData(
 }
 
 export async function refreshEmbedGithubUrlData(
-  embedGithubElement: EmbedGithubBlockComponent
-) {
+  embedGithubElement: EmbedGithubBlockComponent,
+  signal?: AbortSignal
+): Promise<void> {
   let image = null,
     status = null,
     statusReason = null,
@@ -96,9 +102,9 @@ export async function refreshEmbedGithubUrlData(
       createdAt = null,
       assignees = null,
     } = githubUrlData);
-  } catch (error) {
-    console.error(error);
-  } finally {
+
+    if (signal?.aborted) return;
+
     embedGithubElement.doc.updateBlock(embedGithubElement.model, {
       image,
       status,
@@ -108,19 +114,23 @@ export async function refreshEmbedGithubUrlData(
       createdAt,
       assignees,
     });
-
+  } catch (error) {
+    if (signal?.aborted || isAbortError(error)) return;
+    throw Error;
+  } finally {
     embedGithubElement.loading = false;
   }
 }
 
 export async function refreshEmbedGithubStatus(
-  embedGithubElement: EmbedGithubBlockComponent
+  embedGithubElement: EmbedGithubBlockComponent,
+  signal?: AbortSignal
 ) {
   const queryApiData = embedGithubElement.service?.queryApiData;
   assertExists(queryApiData);
-  const githubApiData = await queryApiData(embedGithubElement.model);
+  const githubApiData = await queryApiData(embedGithubElement.model, signal);
 
-  if (!githubApiData.status) return;
+  if (!githubApiData.status || signal?.aborted) return;
 
   embedGithubElement.doc.updateBlock(embedGithubElement.model, {
     status: githubApiData.status,

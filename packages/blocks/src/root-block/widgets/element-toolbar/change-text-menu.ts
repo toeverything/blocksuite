@@ -2,6 +2,7 @@ import '../../edgeless/components/buttons/menu-button.js';
 import '../../edgeless/components/panel/font-family-panel.js';
 import '../../edgeless/components/panel/size-panel.js';
 import '../../edgeless/components/panel/font-weight-and-style-panel.js';
+import '../../edgeless/components/panel/align-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';

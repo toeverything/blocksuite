@@ -435,6 +435,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     buttons.push(html`
       <edgeless-more-button
+        .elements=${selectedElements}
         .edgeless=${edgeless}
         .vertical=${true}
       ></edgeless-more-button>

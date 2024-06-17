@@ -5,7 +5,7 @@ import {
   isElementOutsideViewport,
   isSelectSingleMindMap,
 } from '../../_common/edgeless/mindmap/index.js';
-import { type EdgelessTool, LassoMode } from '../../_common/types.js';
+import { LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
@@ -23,6 +23,7 @@ import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
 import { EdgelessBlockModel } from './edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
+import type { EdgelessTool } from './types.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
@@ -98,37 +99,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             panning: false,
           });
         },
-        m: () => {
-          if (!rootElement.doc.awarenessStore.getFlag('enable_mindmap_entry')) {
-            return;
-          }
-
-          if (this.rootElement.service.locked) return;
-          if (this.rootElement.service.selection.editing) return;
-          const edgelessService = this.rootElement.service;
-          const lastMousePosition = edgelessService.tool.lastMousePos;
-          const [x, y] = edgelessService.viewport.toModelCoord(
-            lastMousePosition.x,
-            lastMousePosition.y
-          );
-          const mindmapId = edgelessService.addElement('mindmap', {}) as string;
-          const mindmap = edgelessService.getElementById(
-            mindmapId
-          ) as MindmapElementModel;
-          const nodeId = mindmap.addNode(null, undefined, undefined, {
-            text: 'Mind Map',
-            xywh: `[${x},${y},150,30]`,
-          });
-
-          requestAnimationFrame(() => {
-            mountShapeTextEditor(
-              this.rootElement.service.getElementById(
-                nodeId
-              )! as ShapeElementModel,
-              this.rootElement
-            );
-          });
-        },
         n: () => {
           this._setEdgelessTool(rootElement, {
             type: 'affine:note',
@@ -177,6 +147,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           ) {
             const frame = rootElement.service.frame.createFrameOnSelected();
             if (!frame) return;
+            rootElement.service.telemetryService?.track('CanvasElementAdded', {
+              control: 'shortcut',
+              page: 'whiteboard editor',
+              module: 'toolbar',
+              segment: 'toolbar',
+              type: 'frame',
+            });
             rootElement.surface.fitToViewport(Bound.deserialize(frame.xywh));
           } else if (!this.rootElement.service.selection.editing) {
             this._setEdgelessTool(rootElement, { type: 'frame' });
@@ -195,10 +172,31 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         '@': () => {
           const std = this.rootElement.std;
-          if (std.selection.getGroup('note').length > 0) {
+          if (
+            std.selection.getGroup('note').length > 0 ||
+            // eslint-disable-next-line unicorn/prefer-array-some
+            std.selection.find('text')
+          ) {
             return;
           }
-          std.command.exec('insertLinkByQuickSearch');
+          const { insertedLinkType } = std.command.exec(
+            'insertLinkByQuickSearch'
+          );
+
+          insertedLinkType
+            ?.then(type => {
+              rootElement.service.telemetryService?.track(
+                'CanvasElementAdded',
+                {
+                  control: 'shortcut',
+                  page: 'whiteboard editor',
+                  module: 'toolbar',
+                  segment: 'toolbar',
+                  type: type,
+                }
+              );
+            })
+            .catch(console.error);
         },
         'Shift-s': () => {
           if (this.rootElement.service.locked) return;

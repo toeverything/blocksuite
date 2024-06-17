@@ -9,7 +9,6 @@ import { IS_MAC } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
-  type EdgelessTool,
   isMiddleButtonPressed,
   isRightButtonPressed,
   NoteDisplayMode,
@@ -19,6 +18,7 @@ import { CopilotSelectionController } from '../controllers/tools/copilot-tool.js
 import type { EdgelessToolController } from '../controllers/tools/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessRootService } from '../edgeless-root-service.js';
+import type { EdgelessTool } from '../types.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { isNoteBlock } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';

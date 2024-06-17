@@ -1,6 +1,7 @@
 import './present/navigator-setting-button.js';
 
-import { css, html, LitElement, type PropertyValues } from 'lit';
+import { cssVar } from '@toeverything/theme';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { toast } from '../../../../_common/components/toast.js';
@@ -10,11 +11,12 @@ import {
   FrameNavigatorPrevIcon,
   NavigatorExitFullScreenIcon,
   NavigatorFullScreenIcon,
+  StopAIIcon,
 } from '../../../../_common/icons/edgeless.js';
-import type { EdgelessTool } from '../../../../_common/types.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { EdgelessTool } from '../../types.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
 import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';
@@ -40,47 +42,76 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
   static override styles = css`
     :host {
       align-items: inherit;
-    }
-    .short-divider {
-      width: 1px;
-      height: 24px;
-      margin: 0 10px;
-      background-color: var(--affine-border-color);
+      width: 100%;
+      height: 100%;
+      gap: 8px;
+      padding-right: 2px;
     }
     .full-divider {
-      width: 1px;
+      width: 8px;
       height: 100%;
-      margin: 0 12px;
-      background-color: var(--affine-border-color);
-    }
-    .edgeless-frame-navigator {
-      width: 145px;
-      text-align: center;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    .full-divider::after {
+      content: '';
+      width: 1px;
+      height: 100%;
+      background: var(--affine-border-color);
+      transform: scaleX(0.5);
+    }
+    .config-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .edgeless-frame-navigator {
+      width: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .edgeless-frame-navigator.dense {
+      width: auto;
     }
 
     .edgeless-frame-navigator-title {
       display: inline-block;
       cursor: pointer;
-      color: #424149;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      margin-right: 8px;
+      padding-right: 8px;
     }
 
     .edgeless-frame-navigator-count {
-      color: #8e8d91;
+      color: var(--affine-text-secondary-color);
+      white-space: nowrap;
     }
     .edgeless-frame-navigator-stop {
-      background: #eb4335;
-      color: #ffffff;
-      box-shadow: 0px 1px 2px 0px #ffffff40 inset;
-      padding: 4px 10px;
-      border-radius: 8px;
+      border: none;
       cursor: pointer;
+      padding: 4px;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+
+      svg {
+        display: block;
+      }
+    }
+    .edgeless-frame-navigator-stop::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border-radius: inherit;
+    }
+    .edgeless-frame-navigator-stop:hover::before {
+      background: var(--affine-hover-color);
     }
   `;
 
@@ -100,6 +131,9 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
   override type: EdgelessTool['type'] = 'frameNavigator';
 
+  @property({ attribute: false })
+  accessor containerWidth = 1920;
+
   @property({ attribute: true, type: Boolean })
   accessor visible = true;
 
@@ -108,6 +142,10 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
   @property({ type: Boolean })
   accessor frameMenuShow = false;
+
+  get dense() {
+    return this.containerWidth < 554;
+  }
 
   constructor(edgeless: EdgelessRootBlockComponent) {
     super();
@@ -199,22 +237,24 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     const { _disposables, edgeless } = this;
     const { slots } = edgeless;
 
-    edgeless.bindHotKey(
-      {
-        ArrowLeft: () => {
-          const { type } = this.edgelessTool;
-          if (type !== 'frameNavigator') return;
-          this._previousFrame();
+    _disposables.add(
+      edgeless.bindHotKey(
+        {
+          ArrowLeft: () => {
+            const { type } = this.edgelessTool;
+            if (type !== 'frameNavigator') return;
+            this._previousFrame();
+          },
+          ArrowRight: () => {
+            const { type } = this.edgelessTool;
+            if (type !== 'frameNavigator') return;
+            this._nextFrame();
+          },
         },
-        ArrowRight: () => {
-          const { type } = this.edgelessTool;
-          if (type !== 'frameNavigator') return;
-          this._nextFrame();
-        },
-      },
-      {
-        global: true,
-      }
+        {
+          global: true,
+        }
+      )
     );
 
     _disposables.add(
@@ -268,67 +308,80 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
         }
       </style>
       <edgeless-tool-icon-button
+        .iconContainerPadding=${0}
         .tooltip=${'Previous'}
         @click=${() => this._previousFrame()}
       >
         ${FrameNavigatorPrevIcon}
       </edgeless-tool-icon-button>
 
-      <div class="edgeless-frame-navigator">
-        <span
-          class="edgeless-frame-navigator-title"
-          @click=${() =>
-            (this._currentFrameIndex = this._currentFrameIndex + 0)}
-          >${frame?.title ?? 'no frame'}</span
-        >
+      <div class="edgeless-frame-navigator ${this.dense ? 'dense' : ''}">
+        ${this.dense
+          ? nothing
+          : html`<span
+              style="color: ${cssVar('textPrimaryColor')}"
+              class="edgeless-frame-navigator-title"
+              @click=${() => this._moveToCurrentFrame()}
+            >
+              ${frame?.title ?? 'no frame'}
+            </span>`}
 
-        <span class="edgeless-frame-navigator-count"
-          >${frames.length === 0 ? 0 : current + 1}/${frames.length}</span
-        >
+        <span class="edgeless-frame-navigator-count">
+          ${frames.length === 0 ? 0 : current + 1} / ${frames.length}
+        </span>
       </div>
 
       <edgeless-tool-icon-button
         .tooltip=${'Next'}
         @click=${() => this._nextFrame()}
+        .iconContainerPadding=${0}
       >
         ${FrameNavigatorNextIcon}
       </edgeless-tool-icon-button>
 
-      <div class="short-divider"></div>
+      <div class="full-divider"></div>
 
-      <edgeless-frame-order-button
-        .popperShow=${this.frameMenuShow}
-        .setPopperShow=${this.setFrameMenuShow}
-        .frames=${this._frames}
-        .edgeless=${this.edgeless}
-      >
-      </edgeless-frame-order-button>
+      <div class="config-buttons">
+        <edgeless-tool-icon-button
+          .tooltip=${document.fullscreenElement
+            ? 'Exit Full Screen'
+            : 'Enter Full Screen'}
+          @click=${() => this._toggleFullScreen()}
+          .iconContainerPadding=${0}
+          .iconContainerWidth=${'24px'}
+        >
+          ${document.fullscreenElement
+            ? NavigatorExitFullScreenIcon
+            : NavigatorFullScreenIcon}
+        </edgeless-tool-icon-button>
 
-      <edgeless-tool-icon-button
-        .tooltip=${document.fullscreenElement
-          ? 'Exit Full Screen'
-          : 'Enter Full Screen'}
-        @click=${() => this._toggleFullScreen()}
-      >
-        ${document.fullscreenElement
-          ? NavigatorExitFullScreenIcon
-          : NavigatorFullScreenIcon}
-      </edgeless-tool-icon-button>
+        ${this.dense
+          ? nothing
+          : html`<edgeless-frame-order-button
+              .popperShow=${this.frameMenuShow}
+              .setPopperShow=${this.setFrameMenuShow}
+              .frames=${this._frames}
+              .edgeless=${this.edgeless}
+            >
+            </edgeless-frame-order-button>`}
 
-      <edgeless-navigator-setting-button
-        .edgeless=${this.edgeless}
-        .hideToolbar=${this._cachedPresentHideToolbar}
-        .onHideToolbarChange=${(hideToolbar: boolean) => {
-          this._cachedPresentHideToolbar = hideToolbar;
-        }}
-        .popperShow=${this.settingMenuShow}
-        .setPopperShow=${this.setSettingMenuShow}
-      >
-      </edgeless-navigator-setting-button>
+        <edgeless-navigator-setting-button
+          .edgeless=${this.edgeless}
+          .hideToolbar=${this._cachedPresentHideToolbar}
+          .onHideToolbarChange=${(hideToolbar: boolean) => {
+            this._cachedPresentHideToolbar = hideToolbar;
+          }}
+          .popperShow=${this.settingMenuShow}
+          .setPopperShow=${this.setSettingMenuShow}
+          .frames=${this._frames}
+          .includeFrameOrder=${this.dense}
+        >
+        </edgeless-navigator-setting-button>
+      </div>
 
-      <div class="short-divider"></div>
+      <div class="full-divider"></div>
 
-      <div
+      <button
         class="edgeless-frame-navigator-stop"
         @click=${() => {
           this.setEdgelessTool(
@@ -337,9 +390,10 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
           document.fullscreenElement && this._toggleFullScreen();
         }}
+        style="background: ${cssVar('warningColor')}"
       >
-        Stop
-      </div>
+        ${StopAIIcon}
+      </button>
     `;
   }
 }

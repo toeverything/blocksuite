@@ -9,8 +9,8 @@ import {
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
 } from '../../../../../_common/icons/index.js';
-import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
+import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
@@ -27,14 +27,6 @@ function ConnectorModeButtonGroup(
   return html`
     <div class="connector-mode-button-group">
       <edgeless-tool-icon-button
-        .active=${mode === ConnectorMode.Straight}
-        .activeMode=${'background'}
-        .tooltip=${'Straight'}
-        @click=${() => setConnectorMode({ mode: ConnectorMode.Straight })}
-      >
-        ${ConnectorLWithArrowIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
         .active=${mode === ConnectorMode.Curve}
         .activeMode=${'background'}
         .tooltip=${'Curve'}
@@ -49,6 +41,14 @@ function ConnectorModeButtonGroup(
         @click=${() => setConnectorMode({ mode: ConnectorMode.Orthogonal })}
       >
         ${ConnectorXWithArrowIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .active=${mode === ConnectorMode.Straight}
+        .activeMode=${'background'}
+        .tooltip=${'Straight'}
+        @click=${() => setConnectorMode({ mode: ConnectorMode.Straight })}
+      >
+        ${ConnectorLWithArrowIcon}
       </edgeless-tool-icon-button>
     </div>
   `;

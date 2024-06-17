@@ -62,6 +62,8 @@ export interface StoreOptions<
     shadows?: BlobSource[];
   };
   awarenessSources?: AwarenessSource[];
+  disableSearchIndex?: boolean;
+  disableBacklinkIndex?: boolean;
 }
 
 const FLAGS_PRESET = {

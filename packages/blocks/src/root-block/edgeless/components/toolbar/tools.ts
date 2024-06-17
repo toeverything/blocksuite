@@ -17,8 +17,8 @@ import './link/link-tool-button.js';
 import { html, type TemplateResult } from 'lit';
 
 import type { Menu } from '../../../../_common/components/index.js';
-import type { EdgelessTool } from '../../../../_common/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { EdgelessTool } from '../../types.js';
 import { buildConnectorDenseMenu } from './connector/connector-dense-menu.js';
 import { buildFrameDenseMenu } from './frame/frame-dense-menu.js';
 import { buildLinkDenseMenu } from './link/link-dense-menu.js';
@@ -32,6 +32,10 @@ export interface QuickTool {
   menu?: Menu;
 }
 export interface SeniorTool {
+  /**
+   * Used to show in nav-button's tooltip
+   */
+  name: string;
   content: TemplateResult;
 }
 
@@ -128,6 +132,7 @@ export const getSeniorTools = ({
 
   if (!doc.readonly) {
     tools.push({
+      name: 'Note',
       content: html`<edgeless-note-senior-button .edgeless=${edgeless}>
       </edgeless-note-senior-button>`,
     });
@@ -135,6 +140,7 @@ export const getSeniorTools = ({
 
   // Brush / Eraser
   tools.push({
+    name: 'Pen',
     content: html`<div class="brush-and-eraser">
       <edgeless-brush-tool-button
         .edgeless=${edgeless}
@@ -148,6 +154,7 @@ export const getSeniorTools = ({
 
   // Shape
   tools.push({
+    name: 'Shape',
     content: html`<edgeless-shape-tool-button
       .edgeless=${edgeless}
       .toolbarContainer=${toolbarContainer}
@@ -155,6 +162,7 @@ export const getSeniorTools = ({
   });
 
   tools.push({
+    name: 'Mind Map',
     content: html`<edgeless-mindmap-tool-button
       .edgeless=${edgeless}
       .toolbarContainer=${toolbarContainer}
@@ -176,6 +184,7 @@ export const getSeniorTools = ({
 
   // Template
   tools.push({
+    name: 'Template',
     content: html`<edgeless-template-button .edgeless=${edgeless}>
     </edgeless-template-button>`,
   });

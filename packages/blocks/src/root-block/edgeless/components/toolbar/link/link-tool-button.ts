@@ -18,7 +18,20 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
   override type = 'default' as const;
 
   private _onClick() {
-    this.edgeless.service.std.command.exec('insertLinkByQuickSearch');
+    this.edgeless.service
+      .insertLinkByQuickSearch()
+      .then(type => {
+        if (type) {
+          this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+            control: 'toolbar:general',
+            page: 'whiteboard editor',
+            module: 'toolbar',
+            segment: 'toolbar',
+            type,
+          });
+        }
+      })
+      .catch(console.error);
   }
 
   override render() {

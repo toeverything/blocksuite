@@ -182,7 +182,9 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
 
     this._checkCycle();
-    this._editorMode = this._rootService.getEditorMode(this.model.pageId);
+    this._editorMode = this._rootService.docModeService.getMode(
+      this.model.pageId
+    );
     this._docUpdatedAt = this._rootService.getDocUpdatedAt(this.model.pageId);
 
     if (!syncedDoc.loaded) {
@@ -217,10 +219,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     if (this._editing) {
       event.stopPropagation();
     }
-  };
-
-  private _handleOverlayDblClick = (event: MouseEvent) => {
-    event.stopPropagation();
   };
 
   private _isClickAtBorder(
@@ -341,12 +339,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
           </div>
 
           ${isInSurface && !isEditing
-            ? html`
-                <div
-                  class="affine-embed-synced-doc-editor-overlay"
-                  @dblclick=${this._handleOverlayDblClick}
-                ></div>
-              `
+            ? html` <div class="affine-embed-synced-doc-editor-overlay"></div> `
             : nothing}
         </div>
 

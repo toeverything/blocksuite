@@ -8,9 +8,9 @@ import {
   PlusIcon,
   ViewBarIcon,
 } from '../../../_common/icons/edgeless.js';
-import type { EdgelessTool } from '../../../_common/types.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EdgelessTool } from '../../edgeless/types.js';
 import { ZOOM_STEP } from '../../edgeless/utils/viewport.js';
 
 @customElement('edgeless-zoom-toolbar')

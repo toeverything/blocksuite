@@ -6,7 +6,7 @@ import {
   HandIcon,
   SelectIcon,
 } from '../../../../../_common/icons/index.js';
-import type { EdgelessTool } from '../../../../../_common/types.js';
+import type { EdgelessTool } from '../../../types.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 

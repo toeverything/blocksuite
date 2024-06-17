@@ -159,7 +159,7 @@ export function notifyDocCreated(host: EditorHost, doc: Doc) {
     accent: 'info',
     duration: 10 * 1000,
     action: {
-      label: 'undo',
+      label: 'Undo',
       onClick: () => {
         doc.undo();
         clear();
@@ -518,14 +518,14 @@ export function createLinkedDocFromNote(
 }
 
 export function createLinkedDocFromEdgelessElements(
-  doc: Doc,
+  host: EditorHost,
   elements: BlockSuite.EdgelessModelType[],
   docTitle?: string
 ) {
-  const linkedDoc = doc.collection.createDoc({});
+  const linkedDoc = host.doc.collection.createDoc({});
   linkedDoc.load(() => {
     const rootId = linkedDoc.addBlock('affine:page', {
-      title: new doc.Text(docTitle),
+      title: new host.doc.Text(docTitle),
     });
     const surfaceId = linkedDoc.addBlock('affine:surface', {}, rootId);
     const surface = getSurfaceBlock(linkedDoc);
@@ -557,6 +557,7 @@ export function createLinkedDocFromEdgelessElements(
       ids.set(model.id, newId);
     });
   });
-
+  const pageService = host.spec.getService('affine:page');
+  pageService.docModeService.setMode('edgeless', linkedDoc.id);
   return linkedDoc;
 }

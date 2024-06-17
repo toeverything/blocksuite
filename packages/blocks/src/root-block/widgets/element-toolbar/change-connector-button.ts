@@ -13,9 +13,10 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import {
   AddTextIcon,
+  ConnectorCWithArrowIcon,
   ConnectorEndpointNoneIcon,
-  CurveLineIcon,
-  ElbowedLineIcon,
+  ConnectorLWithArrowIcon,
+  ConnectorXWithArrowIcon,
   FlipDirectionIcon,
   FrontEndpointArrowIcon,
   FrontEndpointCircleIcon,
@@ -28,7 +29,6 @@ import {
   RearEndpointTriangleIcon,
   ScribbledStyleIcon,
   SmallArrowDownIcon,
-  StraightLineIcon,
 } from '../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { LineWidth } from '../../../_common/types.js';
@@ -191,26 +191,26 @@ const REAR_ENDPOINT_STYLE_LIST: EndpointStyle[] = [
 
 const MODE_LIST = [
   {
-    name: 'Straight',
-    icon: StraightLineIcon,
-    value: ConnectorMode.Straight,
-  },
-  {
     name: 'Curve',
-    icon: CurveLineIcon,
+    icon: ConnectorCWithArrowIcon,
     value: ConnectorMode.Curve,
   },
   {
     name: 'Elbowed',
-    icon: ElbowedLineIcon,
+    icon: ConnectorXWithArrowIcon,
     value: ConnectorMode.Orthogonal,
+  },
+  {
+    name: 'Straight',
+    icon: ConnectorLWithArrowIcon,
+    value: ConnectorMode.Straight,
   },
 ] as const;
 
 const MODE_CHOOSE: [ConnectorMode, () => TemplateResult<1>][] = [
-  [ConnectorMode.Straight, () => StraightLineIcon],
-  [ConnectorMode.Curve, () => CurveLineIcon],
-  [ConnectorMode.Orthogonal, () => ElbowedLineIcon],
+  [ConnectorMode.Curve, () => ConnectorCWithArrowIcon],
+  [ConnectorMode.Orthogonal, () => ConnectorXWithArrowIcon],
+  [ConnectorMode.Straight, () => ConnectorLWithArrowIcon],
 ] as const;
 
 @customElement('edgeless-change-connector-button')
