@@ -55,8 +55,11 @@ export function mockNotificationService(service: PageRootService) {
 export function mockQuickSearchService(collection: DocCollection) {
   const quickSearchService: QuickSearchService = {
     async searchDoc({ userInput }) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      if (userInput) {
+      if (!userInput) {
+        return null;
+      }
+      if (URL.canParse(userInput)) {
+        await new Promise(resolve => setTimeout(resolve, 500));
         const path = new URL(userInput).pathname;
         const item =
           path.length > 1
@@ -72,14 +75,17 @@ export function mockQuickSearchService(collection: DocCollection) {
         return {
           userInput: userInput,
         };
-      } else {
-        // randomly pick a doc
+      }
+      const doc = [...collection.docs.values()].find(
+        v => v.meta?.title === userInput
+      );
+      if (doc) {
+        await new Promise(resolve => setTimeout(resolve, 500));
         return {
-          docId: [...collection.docs.values()][
-            Math.floor(Math.random() * collection.docs.size)
-          ].id,
+          docId: doc.id,
         };
       }
+      return null;
     },
   };
   return quickSearchService;
