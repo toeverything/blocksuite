@@ -98,6 +98,7 @@ export {
 } from './database-block/data-view/utils/tags/multi-tag-select.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
+export * from './edgeless-text/index.js';
 export * from './embed-figma-block/index.js';
 export * from './embed-github-block/index.js';
 export * from './embed-html-block/index.js';

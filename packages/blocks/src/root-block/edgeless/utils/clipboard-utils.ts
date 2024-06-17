@@ -47,7 +47,7 @@ export async function duplicate(
   }
 }
 export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
-  const { notes, frames, shapes, images, edgelessText } = groupBy(
+  const { notes, frames, shapes, images, edgelessTexts } = groupBy(
     getElementsWithoutGroup(elements),
     element => {
       if (isNoteBlock(element)) {
@@ -57,7 +57,7 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
       } else if (isImageBlock(element)) {
         return 'images';
       } else if (isEdgelessTextBlock(element)) {
-        return 'edgelessText';
+        return 'edgelessTexts';
       }
       return 'shapes';
     }
@@ -66,7 +66,7 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
     shapes: BlockSuite.SurfaceModelType[];
     frames: FrameBlockModel[];
     images: ImageBlockModel[];
-    edgelessText: EdgelessTextBlockModel[];
+    edgelessTexts: EdgelessTextBlockModel[];
   };
 
   return {
@@ -74,6 +74,6 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
     shapes: shapes ?? [],
     frames: frames ?? [],
     images: images ?? [],
-    edgelessText: edgelessText ?? [],
+    edgelessTexts: edgelessTexts ?? [],
   };
 };
