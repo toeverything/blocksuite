@@ -133,7 +133,7 @@ describe('backlink works', () => {
     const doc = createTestDoc();
     const collection = doc.collection;
     const subpage = createTestDoc('doc1', collection);
-    const backlinkIndexer = collection.indexer.backlink;
+    const backlinkIndexer = collection.indexer.backlink!;
 
     const rootId = doc.addBlock('affine:page', {
       title: new doc.Text(''),
@@ -177,7 +177,7 @@ describe('backlink works', () => {
     const doc0 = createTestDoc();
     const collection = doc0.collection;
     const doc1 = createTestDoc('space:doc1', collection);
-    const backlinkIndexer = collection.indexer.backlink;
+    const backlinkIndexer = collection.indexer.backlink!;
 
     const doc0Id = doc0.addBlock('affine:page');
     const note0Id = doc0.addBlock('affine:note', {}, doc0Id);

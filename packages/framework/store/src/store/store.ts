@@ -63,6 +63,7 @@ export interface StoreOptions<
   };
   awarenessSources?: AwarenessSource[];
   disableSearchIndex?: boolean;
+  disableBacklinkIndex?: boolean;
 }
 
 const FLAGS_PRESET = {

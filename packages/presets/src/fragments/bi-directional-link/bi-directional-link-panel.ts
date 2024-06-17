@@ -75,7 +75,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     const { doc } = this;
     const { collection } = doc;
     const backLinks = new Map<string, string[]>();
-    collection.indexer.backlink.getBacklink(doc.id).reduce((map, link) => {
+    collection.indexer.backlink?.getBacklink(doc.id).reduce((map, link) => {
       const { pageId } = link;
       if (map.has(pageId)) {
         map.get(pageId)!.push(link.blockId);
@@ -534,12 +534,14 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     this._inlineManager.registerSpecs(
       getAffineInlineSpecsWithReference(config)
     );
-    const { _disposables } = this;
-    _disposables.add(
-      this.doc.collection.indexer.backlink.slots.indexUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
+    if (this.doc.collection.indexer.backlink) {
+      const { _disposables } = this;
+      _disposables.add(
+        this.doc.collection.indexer.backlink.slots.indexUpdated.on(() => {
+          this.requestUpdate();
+        })
+      );
+    }
 
     this._show =
       !!this._rootService.editPropsStore.getItem('showBidirectional');

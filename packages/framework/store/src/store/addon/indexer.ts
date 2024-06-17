@@ -9,7 +9,7 @@ import { addOnFactory } from './shared.js';
 
 type Indexer = {
   search: SearchIndexer | null;
-  backlink: BacklinkIndexer;
+  backlink: BacklinkIndexer | null;
 };
 
 export interface IndexerAddon {
