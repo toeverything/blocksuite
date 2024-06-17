@@ -63,6 +63,7 @@ function createRoot(doc: Doc) {
 function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
   const doc = collection.createDoc({ id: docId });
   doc.load();
   return doc;
@@ -94,6 +95,7 @@ describe('basic', () => {
   it('can init collection', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
     assert.equal(collection.isEmpty, true);
 
     const doc = collection.createDoc({ id: 'doc:home' });
@@ -140,6 +142,7 @@ describe('basic', () => {
         return String(id++);
       },
     });
+    collection.meta.initialize();
     {
       const doc = collection.createDoc();
       assert.equal(doc.id, '100');
@@ -153,6 +156,7 @@ describe('basic', () => {
   it('doc ready lifecycle', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
     const doc = collection.createDoc({
       id: 'space:0',
     });
@@ -180,6 +184,7 @@ describe('basic', () => {
   it('collection docs with yjs applyUpdate', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
     const collection2 = new DocCollection(options);
     const doc = collection.createDoc({
       id: 'space:0',
@@ -382,6 +387,7 @@ describe('addBlock', () => {
   it('can add and remove multi docs', async () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
 
     const doc0 = collection.createDoc({ id: 'doc:home' });
     const doc1 = collection.createDoc({ id: 'space:doc1' });
@@ -406,6 +412,7 @@ describe('addBlock', () => {
   it('can remove doc that has not been loaded', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
 
     const doc0 = collection.createDoc({ id: 'doc:home' });
 
@@ -416,6 +423,7 @@ describe('addBlock', () => {
   it('can set doc state', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
     collection.createDoc({ id: 'doc:home' });
 
     assert.deepEqual(
@@ -867,6 +875,7 @@ describe('collection.exportJSX works', () => {
   it('collection matches snapshot', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
     const doc = collection.createDoc({ id: 'doc:home' });
 
     doc.addBlock('affine:page', { title: new doc.Text('hello') });
@@ -884,6 +893,7 @@ describe('collection.exportJSX works', () => {
   it('empty collection matches snapshot', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
     collection.createDoc({ id: 'doc:home' });
 
     expect(collection.exportJSX()).toMatchInlineSnapshot('null');
@@ -892,6 +902,7 @@ describe('collection.exportJSX works', () => {
   it('collection with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
     const doc = collection.createDoc({ id: 'doc:home' });
     doc.load(() => {
       const rootId = doc.addBlock('affine:page', {
@@ -925,6 +936,7 @@ describe('collection search', () => {
   it('search doc meta title', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
+    collection.meta.initialize();
     const doc = collection.createDoc({ id: 'doc:home' });
     doc.load(() => {
       const rootId = doc.addBlock('affine:page', {

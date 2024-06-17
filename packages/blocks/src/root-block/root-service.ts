@@ -63,7 +63,7 @@ export type EmbedOptions = {
 };
 
 export type QuickSearchResult =
-  | { docId: string }
+  | { docId: string; isNewDoc?: boolean }
   | { userInput: string }
   | null;
 
@@ -72,6 +72,7 @@ export interface QuickSearchService {
     action?: 'insert';
     userInput?: string;
     skipSelection?: boolean;
+    trigger?: 'edgeless-toolbar' | 'slash-command' | 'shortcut';
   }) => Promise<QuickSearchResult>;
 }
 
@@ -81,10 +82,13 @@ export interface TelemetryEvent {
   module?: string;
   control?: string;
   type?: string;
+  category?: string;
   other?: Record<string, unknown>;
 }
 
-export interface TelemetryEventMap {}
+export interface TelemetryEventMap {
+  DocCreated: TelemetryEvent;
+}
 
 export interface TelemetryService {
   track<T extends keyof TelemetryEventMap>(
@@ -296,6 +300,7 @@ export class RootService extends BlockService<RootBlockModel> {
     }
 
     this._insertCard(flavour, targetStyle, props);
+    return flavour;
   };
 
   private _insertDoc = (docId: string) => {
@@ -304,6 +309,7 @@ export class RootService extends BlockService<RootBlockModel> {
     const props: Record<string, unknown> = { pageId: docId };
 
     this._insertCard(flavour, targetStyle, props);
+    return flavour;
   };
 
   registerEmbedBlockOptions = (options: EmbedOptions): void => {
@@ -397,7 +403,13 @@ export class RootService extends BlockService<RootBlockModel> {
   insertLinkByQuickSearch = async (
     userInput?: string,
     skipSelection?: boolean
-  ): Promise<'embed-linked-doc' | 'bookmark' | undefined> => {
+  ): Promise<
+    | {
+        flavour: string;
+        isNewDoc?: boolean;
+      }
+    | undefined
+  > => {
     if (!this.quickSearchService) return;
 
     const result = await this.quickSearchService.searchDoc({
@@ -410,13 +422,15 @@ export class RootService extends BlockService<RootBlockModel> {
     // add linked doc
     if ('docId' in result) {
       this._insertDoc(result.docId);
-      return 'embed-linked-doc';
+      return { flavour: 'affine:embed-linked-doc', isNewDoc: result.isNewDoc };
     }
 
     // add normal link;
     if ('userInput' in result) {
       this._insertLink(result.userInput);
-      return 'bookmark';
+      return {
+        flavour: 'affine:bookmark',
+      };
     }
 
     return;

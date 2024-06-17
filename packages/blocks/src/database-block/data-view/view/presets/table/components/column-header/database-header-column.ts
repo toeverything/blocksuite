@@ -295,15 +295,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             hide: () => !this.column.duplicate || this.column.type === 'title',
             select: () => {
               this.column.duplicate?.();
-              Promise.resolve()
-                .then(() => {
-                  const next = this.nextElementSibling;
-                  if (next instanceof DatabaseHeaderColumn) {
-                    next.editTitle();
-                    next.scrollIntoView();
-                  }
-                })
-                .catch(console.error);
             },
           },
           {

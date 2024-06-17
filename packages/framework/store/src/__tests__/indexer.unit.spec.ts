@@ -27,6 +27,7 @@ function createTestOptions() {
 function createTestDoc(pageId = 'doc:home', collection?: DocCollection) {
   const options = createTestOptions();
   const _collection = collection || new DocCollection(options);
+  _collection.meta.initialize();
   const doc = _collection.createDoc({ id: pageId });
   doc.load();
   return doc;
@@ -113,6 +114,7 @@ describe('collection.search works', () => {
       schema,
       id: 'test',
     });
+    collection2.meta.initialize();
     const doc2 = collection2.createDoc({
       id: 'doc:home',
     });
