@@ -216,6 +216,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       .getService('affine:page')
       .quickSearchService?.searchDoc({
         userInput: text,
+        skipSelection: true,
       });
     if (result) {
       if ('docId' in result) {
