@@ -393,9 +393,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         other: 'new doc',
       });
       moveConnectors(element.id, cardId, this.edgeless.service);
-      // delete selected elements
+      // delete selected note
       this.doc.transact(() => {
-        deleteElements(this.surface, [element]);
+        this.surface.doc.deleteBlock(element);
       });
       this.edgeless.service.selection.set({
         elements: [cardId],
