@@ -15,6 +15,7 @@ import {
 } from '../utils/actions/edgeless.js';
 import {
   copyByKeyboard,
+  cutByKeyboard,
   edgelessCommonSetup as commonSetup,
   enterPlaygroundRoom,
   expectConsoleMessage,
@@ -347,6 +348,27 @@ test.describe('frame clipboard', () => {
     await waitNextFrame(page, 500);
     const sortedIds = await getAllSortedIds(page);
     expect(sortedIds.length).toBe(10);
+  });
+
+  test('cut frame with shape elements inside', async ({ page }) => {
+    await commonSetup(page);
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+    await createNote(page, [100, -100]);
+    await page.mouse.click(10, 50);
+
+    await selectAllByKeyboard(page);
+    await triggerComponentToolbarAction(page, 'addFrame');
+    const originIds = await getAllSortedIds(page);
+    expect(originIds.length).toBe(3);
+
+    await cutByKeyboard(page);
+    const move = await toViewCoord(page, [250, 250]);
+    await page.mouse.move(move[0], move[1]);
+    await page.mouse.click(move[0], move[1]);
+    await pasteByKeyboard(page, true);
+    await waitNextFrame(page, 500);
+    const sortedIds = await getAllSortedIds(page);
+    expect(sortedIds.length).toBe(3);
   });
 });
 
