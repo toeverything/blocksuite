@@ -9,7 +9,7 @@ import { debounce } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 import { offset } from '@floating-ui/dom';
 import { ContextProvider } from '@lit/context';
-import { baseTheme } from '@toeverything/theme';
+import { baseTheme, cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
@@ -605,11 +605,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .borderWidth=${1}
           .bgColor=${'var(--affine-background-overlay-panel-color)'}
           .borderColor=${'var(--affine-border-color)'}
-          .dropShadow=${
-            /** TODO: use variable */
-            '0px 6px 16px rgba(0, 0, 0, 0.14)'
-          }
-          style="filter: drop-shadow(0px 6px 16px rgba(0, 0, 0, 0.14))"
+          style="filter: drop-shadow(${cssVar('toolbarShadow')})"
         >
           <div
             class="edgeless-toolbar-container"

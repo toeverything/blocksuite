@@ -165,6 +165,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         if (controller instanceof ShapeToolController) {
           controller.clearOverlay();
         }
+        overlay.element.style.filter = `drop-shadow(${this.shapeShadow})`;
         this.readyToDrop = true;
         this.draggingShape = element.data.name;
       },
