@@ -79,8 +79,6 @@ export async function createDefaultDocCollection() {
     },
   };
   const collection = new DocCollection(options);
-  collection.meta.initialize();
-
   collection.start();
 
   // debug info

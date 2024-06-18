@@ -121,7 +121,6 @@ export async function initStarterDocCollection(collection: DocCollection) {
     (await import('../data/index.js')) as Record<string, InitFn>
   ).forEach(fn => functionMap.set(fn.id, fn));
   const init = params.get('init') || 'preset';
-  collection.meta.initialize();
   if (functionMap.has(init)) {
     await functionMap.get(init)?.(collection, 'doc:home');
     const doc = collection.getDoc('doc:home');

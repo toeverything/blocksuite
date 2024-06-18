@@ -1,4 +1,3 @@
-import { buildPath } from '../../../_common/utils/query.js';
 import { Point } from '../../../_common/utils/rect.js';
 import type { SurfaceBlockComponent } from '../../../index.js';
 import type {
@@ -31,9 +30,8 @@ export class EdgelessSnapManager extends Overlay {
       'affine:surface'
     )[0] as SurfaceBlockModel;
 
-    return this._rootService.std.view.viewFromPath(
-      'block',
-      buildPath(surfaceModel)
+    return this._rootService.std.view.getBlock(
+      surfaceModel.id
     ) as SurfaceBlockComponent;
   }
 
