@@ -219,7 +219,7 @@ function renderLabel(
   const cy = h / 2;
   const deltas = wrapTextDeltas(text!, font, w);
   const lines = deltaInsertsToChunks(deltas);
-  const lineHeight = getLineHeight(fontFamily, fontSize);
+  const lineHeight = getLineHeight(fontFamily, fontSize, fontWeight);
   const textHeight = (lines.length - 1) * lineHeight * 0.5;
 
   ctx.setTransform(matrix);

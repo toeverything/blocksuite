@@ -62,34 +62,38 @@ export class AffineLink extends ShadowlessElement {
     }
   `;
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    if (this.blockElement.doc.readonly) {
-      return null;
-    }
+  private _whenHover = new HoverController(
+    this,
+    ({ abortController }) => {
+      if (this.blockElement.doc.readonly) {
+        return null;
+      }
 
-    const selection = this.std.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
-    }
+      const selection = this.std.selection;
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || !!textSelection.from.length)
+      ) {
+        return null;
+      }
 
-    const blockSelections = selection.filter('block');
-    if (blockSelections.length) {
-      return null;
-    }
+      const blockSelections = selection.filter('block');
+      if (blockSelections.length) {
+        return null;
+      }
 
-    return {
-      template: toggleLinkPopup(
-        this.inlineEditor,
-        'view',
-        this.selfInlineRange,
-        abortController
-      ),
-    };
-  });
+      return {
+        template: toggleLinkPopup(
+          this.inlineEditor,
+          'view',
+          this.selfInlineRange,
+          abortController
+        ),
+      };
+    },
+    { enterDelay: 500 }
+  );
 
   @property({ type: Object })
   accessor delta: DeltaInsert<AffineTextAttributes> = {

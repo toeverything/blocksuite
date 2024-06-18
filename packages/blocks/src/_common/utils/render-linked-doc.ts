@@ -30,21 +30,21 @@ import { matchFlavours } from './model.js';
 export const embedNoteContentStyles = css`
   .affine-embed-doc-content-note-blocks affine-divider,
   .affine-embed-doc-content-note-blocks affine-divider > * {
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
     padding-top: 8px;
     padding-bottom: 8px;
   }
   .affine-embed-doc-content-note-blocks affine-paragraph,
   .affine-embed-doc-content-note-blocks affine-list {
-    margin-top: 4px;
-    margin-bottom: 4px;
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
     padding: 0 2px;
   }
   .affine-embed-doc-content-note-blocks affine-paragraph *,
   .affine-embed-doc-content-note-blocks affine-list * {
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
     padding-top: 0;
     padding-bottom: 0;
     line-height: 20px;
@@ -65,8 +65,8 @@ export const embedNoteContentStyles = css`
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h4),
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h5),
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h6) {
-    margin-top: 6px;
-    margin-bottom: 4px;
+    margin-top: 6px !important;
+    margin-bottom: 4px !important;
     padding: 0 2px;
   }
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h1) *,
@@ -75,8 +75,8 @@ export const embedNoteContentStyles = css`
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h4) *,
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h5) *,
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h6) * {
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
     padding-top: 0;
     padding-bottom: 0;
     line-height: 20px;
@@ -87,8 +87,8 @@ export const embedNoteContentStyles = css`
   .affine-embed-linked-doc-block.horizontal {
     affine-paragraph,
     affine-list {
-      margin-top: 0;
-      margin-bottom: 0;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
       max-height: 40px;
       overflow: hidden;
       display: flex;
@@ -100,8 +100,8 @@ export const embedNoteContentStyles = css`
     }
     affine-paragraph .quote::after {
       height: 20px;
-      margin-top: 4px;
-      margin-bottom: 4px;
+      margin-top: 4px !important;
+      margin-bottom: 4px !important;
     }
   }
 `;

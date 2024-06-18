@@ -455,6 +455,7 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
       'keydown',
       event => {
         if (this._currentSubMenu) return;
+        if (event.isComposing) return;
 
         const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
 

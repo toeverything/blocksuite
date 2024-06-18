@@ -1,6 +1,8 @@
 import type { Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
+import type { RootService } from '../../root-block/root-service.js';
+
 export const insertLinkByQuickSearchCommand: Command<
   never,
   'insertedLinkType',
@@ -19,7 +21,7 @@ export const insertLinkByQuickSearchCommand: Command<
 declare global {
   namespace BlockSuite {
     interface CommandContext {
-      insertedLinkType?: Promise<'embed-linked-doc' | 'bookmark' | undefined>;
+      insertedLinkType?: ReturnType<RootService['insertLinkByQuickSearch']>;
     }
 
     interface Commands {

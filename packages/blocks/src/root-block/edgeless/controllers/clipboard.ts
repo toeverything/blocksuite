@@ -256,7 +256,6 @@ export class EdgelessClipboardController extends PageClipboard {
         userInput: url,
         skipSelection: true,
       });
-
       const pageId = doc && 'docId' in doc ? doc.docId : undefined;
 
       const embedOptions = this._rootService.getEmbedBlockOptions(url);
@@ -296,6 +295,21 @@ export class EdgelessClipboardController extends PageClipboard {
         options,
         this.surface.model.id
       );
+
+      this._rootService.telemetryService?.track('CanvasElementAdded', {
+        control: 'canvas:paste',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: flavour.split(':')[1],
+      });
+
+      this._rootService.telemetryService?.track('LinkedDocCreated', {
+        page: 'whiteboard editor',
+        segment: 'whiteboard',
+        category: 'pasted link',
+        other: 'existing doc',
+      });
 
       this.selectionManager.set({
         editing: false,

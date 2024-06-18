@@ -202,6 +202,22 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
           );
           linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
           notifyDocCreated(host, doc);
+          host.spec
+            .getService('affine:page')
+            .telemetryService?.track('DocCreated', {
+              control: 'create linked doc',
+              page: 'doc editor',
+              module: 'format toolbar',
+              type: 'embed-linked-doc',
+            });
+          host.spec
+            .getService('affine:page')
+            .telemetryService?.track('LinkedDocCreated', {
+              control: 'create linked doc',
+              page: 'doc editor',
+              module: 'format toolbar',
+              type: 'embed-linked-doc',
+            });
         });
       },
       showWhen: chain => {

@@ -120,6 +120,7 @@ export class LinkCell extends BaseCellRenderer<string> {
         .getService('affine:page')
         .quickSearchService?.searchDoc({
           userInput: this.value,
+          skipSelection: true,
         });
       result
         ?.then(res => {

@@ -220,6 +220,7 @@ describe('mindmap', () => {
     doc.captureSync();
 
     service.removeElement(mindmap().tree.element);
+    await wait();
     expect(service.surface.elementModels.length).toBe(0);
     doc.captureSync();
     await wait();
@@ -229,6 +230,7 @@ describe('mindmap', () => {
     await wait();
 
     service.removeElement(mindmap().tree.children[2].element);
+    await wait();
     expect(service.surface.elementModels.length).toBe(4);
     await wait();
 

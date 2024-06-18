@@ -81,6 +81,33 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
     this._imageLoading = false;
   }
 
+  private _onHandleLinkButtonClick() {
+    const { insertedLinkType } = this.edgeless.service.std.command.exec(
+      'insertLinkByQuickSearch'
+    );
+
+    insertedLinkType
+      ?.then(type => {
+        if (type) {
+          this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+            control: 'toolbar:general',
+            page: 'whiteboard editor',
+            module: 'toolbar',
+            type: type.flavour.split(':')[1],
+          });
+          if (type.isNewDoc) {
+            this.edgeless.service.telemetryService?.track('DocCreated', {
+              control: 'toolbar:general',
+              page: 'whiteboard editor',
+              module: 'edgeless toolbar',
+              type: type.flavour.split(':')[1],
+            });
+          }
+        }
+      })
+      .catch(console.error);
+  }
+
   override firstUpdated() {
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(tool => {
@@ -117,9 +144,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
               .activeMode=${'background'}
               .tooltip=${getTooltipWithShortcut('Link', '@')}
               @click=${() => {
-                this.edgeless.service.std.command.exec(
-                  'insertLinkByQuickSearch'
-                );
+                this._onHandleLinkButtonClick();
               }}
             >
               ${LinkIcon}

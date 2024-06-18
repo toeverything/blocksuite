@@ -7,6 +7,8 @@ import {
 } from '../../_common/edgeless/mindmap/index.js';
 import { LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
+import { EdgelessTextBlockComponent } from '../../edgeless-text/edgeless-text-block.js';
+import { EdgelessTextBlockModel } from '../../edgeless-text/edgeless-text-model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
 import type { ShapeElementModel } from '../../surface-block/index.js';
@@ -117,14 +119,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'eraser',
           });
         },
-        s: () => {
-          const attributes =
-            rootElement.service.editPropsStore.getLastProps('shape');
-          this._setEdgelessTool(rootElement, {
-            type: 'shape',
-            shapeType: attributes.shapeType,
-          });
-        },
         k: () => {
           if (this.rootElement.service.locked) return;
           const { selection } = rootElement.service;
@@ -185,16 +179,26 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
           insertedLinkType
             ?.then(type => {
-              rootElement.service.telemetryService?.track(
-                'CanvasElementAdded',
-                {
-                  control: 'shortcut',
-                  page: 'whiteboard editor',
-                  module: 'toolbar',
-                  segment: 'toolbar',
-                  type: type,
+              if (type) {
+                rootElement.service.telemetryService?.track(
+                  'CanvasElementAdded',
+                  {
+                    control: 'shortcut',
+                    page: 'whiteboard editor',
+                    module: 'toolbar',
+                    segment: 'toolbar',
+                    type: type.flavour.split(':')[1],
+                  }
+                );
+                if (type.isNewDoc) {
+                  rootElement.service.telemetryService?.track('DocCreated', {
+                    control: 'shortcut',
+                    page: 'whiteboard editor',
+                    segment: 'whiteboard',
+                    type: type.flavour.split(':')[1],
+                  });
                 }
-              );
+              }
             })
             .catch(console.error);
         },
@@ -348,6 +352,23 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const { service } = rootElement;
           const selection = service.selection;
           const elements = selection.selectedElements;
+
+          if (
+            elements.length === 1 &&
+            elements[0] instanceof EdgelessTextBlockModel
+          ) {
+            const id = elements[0].id;
+            selection.set({
+              elements: [id],
+              editing: true,
+            });
+            const textBlock = this.rootElement.host.view.getBlock(id);
+            if (textBlock instanceof EdgelessTextBlockComponent) {
+              textBlock.tryFocusEnd();
+            }
+
+            return;
+          }
 
           if (!isSelectSingleMindMap(elements)) {
             return;
@@ -620,13 +641,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           isElementOutsideViewport(
             edgeless.service.viewport,
             targetNode,
-            [20, 20]
+            [90, 20]
           )
         ) {
           const [dx, dy] = getNearestTranslation(
             edgeless.service.viewport,
             targetNode,
-            [20, 20]
+            [100, 20]
           );
 
           edgeless.service.viewport.smoothTranslate(

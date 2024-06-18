@@ -109,7 +109,7 @@ test.describe('connector clipboard', () => {
     await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
-    await createConnectorElement(page, [50, 50], [250, 50]);
+    await createConnectorElement(page, [60, 50], [240, 50]);
 
     await selectAllByKeyboard(page);
     await copyByKeyboard(page);
@@ -133,7 +133,7 @@ test.describe('connector clipboard', () => {
     await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
-    await createConnectorElement(page, [50, 50], [250, 50]);
+    await createConnectorElement(page, [70, 50], [230, 50]);
 
     await copyByKeyboard(page);
     const move = await toViewCoord(page, [150, -50]);
@@ -155,7 +155,7 @@ test.describe('connector clipboard', () => {
   }) => {
     await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
-    await createConnectorElement(page, [50, 50], [200, 50]);
+    await createConnectorElement(page, [55, 50], [200, 50]);
 
     await selectAllByKeyboard(page);
     await copyByKeyboard(page);

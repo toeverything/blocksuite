@@ -208,6 +208,12 @@ export const AffineCanvasTextFonts: FontConfig[] = [
   },
   {
     font: FontFamily.Poppins,
+    url: 'https://cdn.affine.pro/fonts/Poppins-Medium.woff',
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
+  },
+  {
+    font: FontFamily.Poppins,
     url: 'https://cdn.affine.pro/fonts/Poppins-SemiBold.woff',
     weight: FontWeight.SemiBold,
     style: FontStyle.Normal,
@@ -381,6 +387,12 @@ export const CommunityCanvasTextFonts: FontConfig[] = [
     font: FontFamily.Poppins,
     url: 'https://fonts.cdnfonts.com/s/16009/Poppins-Regular.woff',
     weight: FontWeight.Regular,
+    style: FontStyle.Normal,
+  },
+  {
+    font: FontFamily.Poppins,
+    url: 'https://fonts.cdnfonts.com/s/16009/Poppins-Medium.woff',
+    weight: FontWeight.Medium,
     style: FontStyle.Normal,
   },
   {

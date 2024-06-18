@@ -57,7 +57,9 @@ export async function createDefaultDocCollection() {
   }
 
   const flags: Partial<BlockSuiteFlags> = Object.fromEntries(
-    [...params.entries()].filter(([key]) => key.startsWith('enable_'))
+    [...params.entries()]
+      .filter(([key]) => key.startsWith('enable_'))
+      .map(([k, v]) => [k, v === 'true'])
   );
 
   const options: DocCollectionOptions = {
@@ -73,13 +75,11 @@ export async function createDefaultDocCollection() {
       enable_synced_doc_block: true,
       enable_pie_menu: true,
       enable_lasso_tool: true,
-      enable_mindmap_entry: true,
       enable_edgeless_text: true,
       ...flags,
     },
   };
   const collection = new DocCollection(options);
-
   collection.start();
 
   // debug info
@@ -98,6 +98,7 @@ export async function initDefaultDocCollection(collection: DocCollection) {
 
   const shouldInit = collection.docs.size === 0 && !params.get('room');
   if (shouldInit) {
+    collection.meta.initialize();
     const doc = collection.createDoc({ id: 'doc:home' });
     doc.load();
     const rootId = doc.addBlock('affine:page', {

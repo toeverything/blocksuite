@@ -141,13 +141,13 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   @yfield(false as false | number)
   accessor maxWidth: false | number = false;
 
-  @local()
+  @yfield([SHAPE_TEXT_VERTICAL_PADDING, SHAPE_TEXT_PADDING])
   accessor padding: [number, number] = [
     SHAPE_TEXT_VERTICAL_PADDING,
     SHAPE_TEXT_PADDING,
   ];
 
-  @local()
+  @yfield()
   accessor shadow: {
     blur: number;
     offsetX: number;

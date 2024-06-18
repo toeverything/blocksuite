@@ -5,7 +5,7 @@ import type { ElementInfo, OverlayLayer } from './types.js';
 export type DraggingInfo<T> = {
   startPos: { x: number; y: number };
   startTime: number;
-  scopeRect: DOMRect;
+  scopeRect: DOMRect | null;
   edgelessRect: DOMRect;
   elementRectOriginal: DOMRect;
   element: HTMLElement;
@@ -34,7 +34,8 @@ const addClass = (node: HTMLElement, name: string) =>
 export const createShapeDraggingOverlay = <T>(
   info: DraggingInfo<T>
 ): OverlayLayer => {
-  const { edgelessRect, parentToMount } = info;
+  const { edgelessRect, parentToMount, element: originalElement } = info;
+  const elementStyle = getComputedStyle(originalElement);
   const mask = document.createElement('div');
   addClass(mask, 'mask');
   Object.assign(mask.style, {
@@ -57,6 +58,8 @@ export const createShapeDraggingOverlay = <T>(
   Object.assign(transitionWrapper.style, {
     transition: 'all 0.18s ease',
     transform: 'scale(var(--scale, 1)) rotate(var(--rotate, 0deg))',
+    width: elementStyle.width,
+    height: elementStyle.height,
   });
   transitionWrapper.style.setProperty('--rotate', '0deg');
   transitionWrapper.style.setProperty('--scale', '1');
@@ -75,6 +78,8 @@ export const createShapeDraggingOverlay = <T>(
   styleTag.textContent = `
     .${className('transition-wrapper')} > * {
       display: block;
+      width: 100%;
+      height: 100%;
     }
   `;
   mask.append(styleTag);

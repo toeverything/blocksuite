@@ -449,32 +449,42 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _getMindmapButtons():
     | [Direction, 'child' | 'sibling', LayoutType.LEFT | LayoutType.RIGHT][]
     | null {
-    const mindmap = this.current.group;
+    const mindmap = this.current.group as MindmapElementModel;
     const mindmapDirection =
       this.current instanceof ShapeElementModel &&
       mindmap instanceof MindmapElementModel
         ? mindmap.getLayoutDir(this.current.id)
         : null;
+    const isRoot = mindmap?.tree.id === this.current.id;
+
+    let result: ReturnType<typeof this._getMindmapButtons> = null;
 
     switch (mindmapDirection) {
       case LayoutType.LEFT:
-        return [
-          [Direction.Left, 'child', LayoutType.LEFT],
-          [Direction.Bottom, 'sibling', LayoutType.LEFT],
-        ];
+        result = [[Direction.Left, 'child', LayoutType.LEFT]];
+
+        if (!isRoot) {
+          result.push([Direction.Bottom, 'sibling', mindmapDirection]);
+        }
+        return result;
       case LayoutType.RIGHT:
-        return [
-          [Direction.Right, 'child', LayoutType.RIGHT],
-          [Direction.Bottom, 'sibling', LayoutType.RIGHT],
-        ];
+        result = [[Direction.Right, 'child', LayoutType.RIGHT]];
+
+        if (!isRoot) {
+          result.push([Direction.Bottom, 'sibling', mindmapDirection]);
+        }
+        return result;
       case LayoutType.BALANCE:
-        return [
+        result = [
           [Direction.Right, 'child', LayoutType.RIGHT],
           [Direction.Left, 'child', LayoutType.LEFT],
         ];
+        return result;
       default:
-        return null;
+        result = null;
     }
+
+    return result;
   }
 
   private _renderMindMapButtons() {

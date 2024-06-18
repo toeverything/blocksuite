@@ -66,7 +66,7 @@ export class DocCollectionMeta {
     if (!this._proxy.pages) {
       return [] as DocMeta[];
     }
-    return [...(this._proxy.pages as DocMeta[])];
+    return this._proxy.pages as DocMeta[];
   }
 
   get hasVersion() {
@@ -162,6 +162,12 @@ export class DocCollectionMeta {
     });
   };
 
+  initialize() {
+    if (!this._proxy.pages) {
+      this._proxy.pages = [];
+    }
+  }
+
   setName(name: string) {
     this.doc.transact(() => {
       this._proxy.name = name;
@@ -181,7 +187,7 @@ export class DocCollectionMeta {
   addDocMeta(doc: DocMeta, index?: number) {
     this.doc.transact(() => {
       if (!this.docs) {
-        this._proxy.pages = [];
+        return;
       }
       const docs = this.docs as unknown[];
       if (index === undefined) {
@@ -201,7 +207,7 @@ export class DocCollectionMeta {
 
     this.doc.transact(() => {
       if (!this.docs) {
-        this._proxy.pages = [];
+        return;
       }
       if (index === -1) return;
       assertExists(this.docs);

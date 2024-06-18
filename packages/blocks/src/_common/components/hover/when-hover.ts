@@ -67,10 +67,9 @@ export const whenHover = (
     delayHide(leaveDelay),
   ].filter(v => typeof v !== 'boolean') as HoverMiddleware[];
 
-  let id = 0;
-  let resId = 0;
+  let currentEvent: Event | null = null;
   const onHoverChange = (async (e: Event) => {
-    const curId = id++;
+    currentEvent = e;
     for (const middleware of middlewares) {
       const go = await middleware({
         event: e,
@@ -80,17 +79,9 @@ export const whenHover = (
       if (!go) return;
     }
     // ignore expired event
-    if (curId < resId) return;
-    resId = curId;
-    if (e.type === 'mouseover') {
-      whenHoverChange(true, e);
-      return;
-    }
-    if (e.type === 'mouseleave') {
-      whenHoverChange(false, e);
-      return;
-    }
-    console.error('Unknown event type in whenHover', e);
+    if (e !== currentEvent) return;
+    const isHover = e.type === 'mouseover' ? true : false;
+    whenHoverChange(isHover, e);
   }) as (e: Event) => void;
 
   const addHoverListener = (element?: Element) => {
