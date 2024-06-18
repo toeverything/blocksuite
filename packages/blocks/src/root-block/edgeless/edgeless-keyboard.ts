@@ -117,14 +117,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'eraser',
           });
         },
-        s: () => {
-          const attributes =
-            rootElement.service.editPropsStore.getLastProps('shape');
-          this._setEdgelessTool(rootElement, {
-            type: 'shape',
-            shapeType: attributes.shapeType,
-          });
-        },
         k: () => {
           if (this.rootElement.service.locked) return;
           const { selection } = rootElement.service;
