@@ -1,5 +1,5 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import type { ReactiveController, ReactiveElement } from 'lit';
 import type { StyleInfo } from 'lit/directives/style-map.js';
 
 import type { AdvancedPortalOptions } from '../portal.js';
@@ -136,10 +136,10 @@ export class HoverController implements ReactiveController {
 
   protected _disposables = new DisposableGroup();
 
-  host: ReactiveControllerHost;
+  host: ReactiveElement;
 
   constructor(
-    host: ReactiveControllerHost,
+    host: ReactiveElement,
     onHover: (options: OptionsParams) => HoverPortalOptions | null,
     hoverOptions?: Partial<HoverOptions>
   ) {
@@ -161,6 +161,10 @@ export class HoverController implements ReactiveController {
     }
     // Start a timer when the host is connected
     const { setReference, setFloating, dispose } = whenHover(isHover => {
+      if (!this.host.isConnected) {
+        return;
+      }
+
       this._isHovering = isHover;
       if (!isHover) {
         this.onAbort();

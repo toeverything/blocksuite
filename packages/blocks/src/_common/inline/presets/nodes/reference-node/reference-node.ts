@@ -154,7 +154,8 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
           abortController
         ),
       };
-    }
+    },
+    { enterDelay: 500 }
   );
 
   @property({ type: Object })
