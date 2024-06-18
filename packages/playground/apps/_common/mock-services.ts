@@ -17,7 +17,8 @@ export function mockDocModeService() {
       modeChange.emit(mode);
     },
     getMode: () => {
-      return localStorage.getItem('playground:editorMode') as DocMode;
+      return (localStorage.getItem('playground:editorMode') ??
+        'page') as DocMode;
     },
     toggleMode: () => {
       const mode = docModeService.getMode() === 'page' ? 'edgeless' : 'page';

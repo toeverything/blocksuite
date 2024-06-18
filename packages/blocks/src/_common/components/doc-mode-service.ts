@@ -27,7 +27,7 @@ export function createDocModeService(doc: Doc) {
       modeMap.get(id)?.slot.emit(mode);
     },
     getMode: (id: string = doc.id) => {
-      return modeMap.get(id)?.mode || DEFAULT_MODE;
+      return modeMap.get(id)?.mode ?? DEFAULT_MODE;
     },
     toggleMode: (id: string = doc.id) => {
       const mode = docModeService.getMode(id) === 'page' ? 'edgeless' : 'page';
