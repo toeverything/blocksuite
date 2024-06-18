@@ -7,6 +7,8 @@ import {
 } from '../../_common/edgeless/mindmap/index.js';
 import { LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
+import { EdgelessTextBlockComponent } from '../../edgeless-text/edgeless-text-block.js';
+import { EdgelessTextBlockModel } from '../../edgeless-text/edgeless-text-model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
 import type { ShapeElementModel } from '../../surface-block/index.js';
@@ -350,6 +352,23 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const { service } = rootElement;
           const selection = service.selection;
           const elements = selection.selectedElements;
+
+          if (
+            elements.length === 1 &&
+            elements[0] instanceof EdgelessTextBlockModel
+          ) {
+            const id = elements[0].id;
+            selection.set({
+              elements: [id],
+              editing: true,
+            });
+            const textBlock = this.rootElement.host.view.getBlock(id);
+            if (textBlock instanceof EdgelessTextBlockComponent) {
+              textBlock.tryFocusEnd();
+            }
+
+            return;
+          }
 
           if (!isSelectSingleMindMap(elements)) {
             return;
