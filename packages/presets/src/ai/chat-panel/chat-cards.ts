@@ -215,6 +215,14 @@ export class ChatCards extends WithDisposable(LitElement) {
   @state()
   accessor caption: string = '';
 
+  accessor items: {
+    startWithThisDoc?: boolean;
+    text?: string;
+    markdown?: string;
+    images?: File[];
+    caption?: string;
+  } = [];
+
   private _onEdgelessCopilotAreaUpdated() {
     if (!this.host.closest('edgeless-editor')) return;
     const edgeless = getEdgelessRootFromEditor(this.host);
