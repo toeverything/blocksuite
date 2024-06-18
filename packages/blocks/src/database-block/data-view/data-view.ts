@@ -13,7 +13,7 @@ import { html } from 'lit/static-html.js';
 
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataSource } from './common/data-source/base.js';
-import { popSideDetail } from './common/detail/layout.js';
+import { createRecordDetail, popSideDetail } from './common/detail/layout.js';
 import type { ViewSource } from './common/index.js';
 import type { DataViewSelection, DataViewSelectionState } from './types.js';
 import { renderUniLit } from './utils/uni-component/index.js';
@@ -39,6 +39,7 @@ export type DataViewRendererConfig = {
   dataSource: DataSource;
   viewSource: ViewSource;
   detailPanelConfig?: {
+    openDetailPanel?: (target: HTMLElement) => void;
     target?: () => ReferenceElement;
   };
   headerWidget: DataViewProps['headerWidget'];
@@ -166,13 +167,23 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     rowId: string;
     onClose?: () => void;
   }) => {
-    popSideDetail({
-      attachTo: this.closest('editor-host')?.parentElement as HTMLElement,
-      target: this.config.detailPanelConfig?.target?.() ?? document.body,
-      view: ops.view,
-      rowId: ops.rowId,
-      onClose: ops.onClose,
-    });
+    const openDetailPanel = this.config.detailPanelConfig?.openDetailPanel;
+    if (openDetailPanel) {
+      openDetailPanel(
+        createRecordDetail({
+          view: ops.view,
+          rowId: ops.rowId,
+        })
+      );
+    } else {
+      popSideDetail({
+        attachTo: this.closest('editor-host')?.parentElement as HTMLElement,
+        target: this.config.detailPanelConfig?.target?.() ?? document.body,
+        view: ops.view,
+        rowId: ops.rowId,
+        onClose: ops.onClose,
+      });
+    }
   };
 
   override render() {

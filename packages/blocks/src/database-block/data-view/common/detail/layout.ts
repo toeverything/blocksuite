@@ -135,3 +135,13 @@ export const popSideDetail = (ops: {
   modal.onclick = e => e.target === modal && close();
   modal.append(sideContainer);
 };
+
+export const createRecordDetail = (ops: {
+  view: DataViewManager;
+  rowId: string;
+}) => {
+  const detail = new RecordDetail();
+  detail.view = ops.view;
+  detail.rowId = ops.rowId;
+  return detail;
+};

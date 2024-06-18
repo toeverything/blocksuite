@@ -272,6 +272,10 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
     };
   };
 
+  getRootService = () => {
+    return this.std.spec.getService('affine:page');
+  };
+
   override renderBlock() {
     return html`
       <div contenteditable="false" style="position: relative">
@@ -286,6 +290,8 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
           headerWidget: this.headerWidget,
           std: this.std,
           detailPanelConfig: {
+            openDetailPanel: target =>
+              this.getRootService().peekViewService?.peek(target),
             target: () => this.innerModalWidget.target,
           },
         })}

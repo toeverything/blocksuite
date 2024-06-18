@@ -385,6 +385,10 @@ export class DatabaseBlockComponent extends BlockComponent<
     };
   };
 
+  getRootService = () => {
+    return this.std.spec.getService('affine:page');
+  };
+
   override renderBlock() {
     return html`
       <div contenteditable="false" style="position: relative">
@@ -400,6 +404,11 @@ export class DatabaseBlockComponent extends BlockComponent<
           onDrag: this.onDrag,
           std: this.std,
           detailPanelConfig: {
+            openDetailPanel: target => {
+              target.docId = this.doc.id;
+              target.blockId = this.model.id;
+              this.getRootService().peekViewService?.peek(target);
+            },
             target: () => this.innerModalWidget.target,
           },
         })}
