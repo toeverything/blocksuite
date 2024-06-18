@@ -625,13 +625,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           isElementOutsideViewport(
             edgeless.service.viewport,
             targetNode,
-            [20, 20]
+            [90, 20]
           )
         ) {
           const [dx, dy] = getNearestTranslation(
             edgeless.service.viewport,
             targetNode,
-            [20, 20]
+            [100, 20]
           );
 
           edgeless.service.viewport.smoothTranslate(

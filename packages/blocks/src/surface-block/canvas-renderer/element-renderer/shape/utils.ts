@@ -8,6 +8,7 @@ import {
   getLineHeight,
   getLineWidth,
   getTextWidth,
+  measureTextInDOM,
   type TextDelta,
   wrapText,
   wrapTextDeltas,
@@ -55,7 +56,7 @@ export function drawGeneralShape(
     const { blur, offsetX, offsetY, color } = shapeModel.shadow;
     const scale = ctx.getTransform().a;
 
-    ctx.shadowBlur = blur;
+    ctx.shadowBlur = blur * scale;
     ctx.shadowOffsetX = offsetX * scale;
     ctx.shadowOffsetY = offsetY * scale;
     ctx.shadowColor = renderer.getVariableColor(color);
@@ -63,11 +64,13 @@ export function drawGeneralShape(
 
   ctx.stroke();
   ctx.fill();
+
   if (shapeModel.shadow) {
     ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
   }
+
   ctx.fill();
   ctx.stroke();
 }
@@ -160,7 +163,7 @@ export function verticalOffset(
   verticalPadding: number
 ) {
   return textVerticalAlign === 'center'
-    ? (height - lineHeight * lines.length) / 2
+    ? Math.max((height - lineHeight * lines.length) / 2, verticalPadding)
     : textVerticalAlign === 'top'
       ? verticalPadding
       : height - lineHeight * lines.length - verticalPadding;
@@ -174,7 +177,7 @@ export function normalizeShapeBound(
   const [verticalPadding, horiPadding] = shape.padding;
   const yText = shape.text;
   const { fontFamily, fontSize, fontStyle, fontWeight } = shape;
-  const lineHeight = getLineHeight(fontFamily, fontSize);
+  const lineHeight = getLineHeight(fontFamily, fontSize, fontWeight);
   const font = getFontString({
     fontStyle,
     fontWeight,
@@ -216,7 +219,11 @@ export function fitContent(shape: ShapeElementModel) {
   const lines = deltaInsertsToChunks(
     wrapTextDeltas(shape.text, font, shape.maxWidth || Number.MAX_SAFE_INTEGER)
   );
-  const lineHeight = getLineHeight(font, shape.fontSize);
+  const { lineHeight, lineGap } = measureTextInDOM(
+    shape.fontFamily,
+    shape.fontSize,
+    shape.fontWeight
+  );
   let maxWidth = 0;
   let height = 0;
 
@@ -225,11 +232,11 @@ export function fitContent(shape: ShapeElementModel) {
       const str = delta.insert;
 
       maxWidth = Math.max(maxWidth, getLineWidth(str, font));
-      height += lineHeight;
+      height += lineHeight + lineGap;
     }
   });
 
-  height = Math.max(lineHeight, height);
+  height = Math.max(lineHeight + lineGap, height);
 
   maxWidth += horiPadding * 2;
   height += verticalPadding * 2;
