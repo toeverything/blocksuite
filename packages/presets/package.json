@@ -38,7 +38,7 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       },
-      "./ai": "./dist/index.js",
+      "./ai": "./dist/ai/index.js",
       "./themes/*": "./themes/*"
     }
   },
