@@ -29,8 +29,9 @@ export interface EdgelessDraggableElementOptions<T> {
   service: EdgelessRootService;
   /**
    * In which element that the target should be dragged out
+   * If not provided, recognized as the drag-out whenever dragging
    */
-  scopeElement: HTMLElement;
+  scopeElement?: HTMLElement;
   /**
    * The width of the element when placed to canvas
    * @default 100

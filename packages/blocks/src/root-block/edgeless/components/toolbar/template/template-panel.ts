@@ -26,6 +26,7 @@ import {
   createStickerMiddleware,
   replaceIdMiddleware,
 } from '../../../services/template-middlewares.js';
+import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { builtInTemplates } from './builtin-templates.js';
 import { ArrowIcon, defaultPreview } from './icon.js';
 import type { Template } from './template-type.js';
@@ -141,7 +142,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       color: var(--affine-background-primary-color);
     }
 
-    .template-item:hover::before {
+    /* .template-item:hover::before {
       content: attr(data-hover-text);
       position: absolute;
       display: block;
@@ -158,7 +159,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
       background-color: var(--affine-primary-color);
       color: var(--affine-white);
-    }
+    } */
 
     .template-item:hover::after {
       content: '';
@@ -217,7 +218,12 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   @state()
   private accessor _templates: Template[] = [];
 
+  @state()
+  accessor isDragging = false;
+
   private _fetchJob: null | { cancel: () => void } = null;
+
+  draggableController!: EdgelessDraggableElementController<Template>;
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
@@ -281,7 +287,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     return this.edgeless.service.editPropsStore.getItem('templateCache');
   }
 
-  private _createTemplateJob(type: string) {
+  private _createTemplateJob(type: string, center: { x: number; y: number }) {
     const middlewares: ((job: TemplateJob) => void)[] = [];
     const service = this.edgeless.service;
 
@@ -307,7 +313,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
     if (type === 'sticker') {
       middlewares.push(
-        createStickerMiddleware(service.viewport.center, () =>
+        createStickerMiddleware(center, () =>
           service.layer.generateIndex('affine:image')
         )
       );
@@ -322,12 +328,16 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     });
   }
 
-  private async _insertTemplate(template: Template) {
+  private async _insertTemplate(template: Template, bound: Bound) {
     this._loadingTemplate = template;
 
     template = cloneDeep(template);
 
-    const templateJob = this._createTemplateJob(template.type);
+    const center = {
+      x: bound.x + bound.w / 2,
+      y: bound.y + bound.h / 2,
+    };
+    const templateJob = this._createTemplateJob(template.type, center);
     const service = this.edgeless.service;
 
     try {
@@ -355,11 +365,11 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       }
     } finally {
       this._loadingTemplate = null;
-      this._closePanel();
     }
   }
 
   private _closePanel() {
+    if (this.isDragging) return;
     this.dispatchEvent(new CustomEvent('closepanel'));
   }
 
@@ -368,8 +378,33 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     this._updateTemplates();
   }
 
+  private _initDragController() {
+    if (this.draggableController) return;
+    this.draggableController = new EdgelessDraggableElementController(this, {
+      service: this.edgeless.service,
+      edgeless: this.edgeless,
+      clickToDrag: true,
+      standardWidth: 560,
+      onOverlayCreated: overlay => {
+        this.isDragging = true;
+        overlay.mask.style.color = 'transparent';
+      },
+      onDrop: (el, bound) => {
+        this._insertTemplate(el.data, bound)
+          .finally(() => {
+            this.isDragging = false;
+          })
+          .catch(console.error);
+      },
+      onCanceled: () => {
+        this.isDragging = false;
+      },
+    });
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
+    this._initDragController();
 
     this.addEventListener('keydown', stopPropagation, false);
     this._disposables.add(() => {
@@ -400,9 +435,16 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
   override render() {
     const { _categories, _currentCategory, _templates } = this;
+    const { draggingElement } = this.draggableController?.states || {};
 
     return html`
-      <div class="edgeless-templates-panel">
+      <div
+        class="edgeless-templates-panel"
+        style=${styleMap({
+          opacity: this.isDragging ? '0' : '1',
+          transition: 'opacity 0.2s',
+        })}
+      >
         <div class="search-bar">
           <input
             class="search-input"
@@ -445,22 +487,40 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
                     _templates,
                     template => template.name,
                     template => {
+                      const preview = template.preview
+                        ? template.preview.startsWith('<svg')
+                          ? html`${unsafeSVG(template.preview)}`
+                          : html`<img
+                              src="${template.preview}"
+                              class="template-preview"
+                            />`
+                        : defaultPreview;
+
+                      const isBeingDragged =
+                        draggingElement &&
+                        draggingElement.data.name === template.name;
                       return html`
                         <div
                           class=${`template-item ${
                             template === this._loadingTemplate ? 'loading' : ''
                           }`}
+                          style=${styleMap({
+                            opacity: isBeingDragged ? '0' : '1',
+                          })}
                           data-hover-text="Add"
-                          @click=${() => this._insertTemplate(template)}
+                          @mousedown=${(e: MouseEvent) =>
+                            this.draggableController.onMouseDown(e, {
+                              data: template,
+                              preview,
+                            })}
+                          @touchstart=${(e: TouchEvent) => {
+                            this.draggableController.onTouchStart(e, {
+                              data: template,
+                              preview,
+                            });
+                          }}
                         >
-                          ${template.preview
-                            ? template.preview.startsWith('<svg')
-                              ? html`${unsafeSVG(template.preview)}`
-                              : html`<img
-                                  src="${template.preview}"
-                                  class="template-preview"
-                                />`
-                            : defaultPreview}
+                          ${preview}
                           ${template === this._loadingTemplate
                             ? html`<affine-template-loading></affine-template-loading>`
                             : nothing}
