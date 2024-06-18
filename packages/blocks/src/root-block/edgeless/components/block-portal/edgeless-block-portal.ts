@@ -28,6 +28,7 @@ import { EdgelessBlockModel } from '../../edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
 import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
+import type { EdgelessPortalBase } from './edgeless-portal-base.js';
 
 export type AutoConnectElement =
   | NoteBlockModel
@@ -191,6 +192,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       });
       this.canvasSlot.replaceChildren(...children);
     }
+  }
+
+  getPortalElement(id: string) {
+    return this.querySelector(
+      `[data-portal-block-id="${id}"]`
+    ) as EdgelessPortalBase<BlockSuite.EdgelessBlockModelType> | null;
   }
 
   override connectedCallback(): void {

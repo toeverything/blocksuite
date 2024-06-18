@@ -21,14 +21,15 @@ export class EdgelessTextBlockService extends BlockService<EdgelessTextBlockMode
     x: number;
     y: number;
   }) {
+    const zoom = edgeless.service.zoom;
     const textId = edgeless.service.addBlock(
       'affine:edgeless-text',
       {
         xywh: new Bound(
-          x - EDGELESS_TEXT_BLOCK_MIN_WIDTH / 2,
-          y - EDGELESS_TEXT_BLOCK_MIN_HEIGHT / 2,
-          EDGELESS_TEXT_BLOCK_MIN_WIDTH,
-          EDGELESS_TEXT_BLOCK_MIN_HEIGHT
+          x - (EDGELESS_TEXT_BLOCK_MIN_WIDTH * zoom) / 2,
+          y - (EDGELESS_TEXT_BLOCK_MIN_HEIGHT * zoom) / 2,
+          EDGELESS_TEXT_BLOCK_MIN_WIDTH * zoom,
+          EDGELESS_TEXT_BLOCK_MIN_HEIGHT * zoom
         ).serialize(),
         color: GET_DEFAULT_TEXT_COLOR(),
         fontFamily: FontFamily.Kalam,
