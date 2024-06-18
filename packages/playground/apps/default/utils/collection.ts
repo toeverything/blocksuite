@@ -57,7 +57,9 @@ export async function createDefaultDocCollection() {
   }
 
   const flags: Partial<BlockSuiteFlags> = Object.fromEntries(
-    [...params.entries()].filter(([key]) => key.startsWith('enable_'))
+    [...params.entries()]
+      .filter(([key]) => key.startsWith('enable_'))
+      .map(([k, v]) => [k, v === 'true'])
   );
 
   const options: DocCollectionOptions = {
