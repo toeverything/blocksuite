@@ -83,11 +83,23 @@ export interface TelemetryEvent {
   control?: string;
   type?: string;
   category?: string;
-  other?: Record<string, unknown>;
+  other?: unknown;
+}
+
+interface DocCreatedEvent extends TelemetryEvent {
+  page?: 'doc editor' | 'whiteboard editor';
+  segment?: 'whiteboard' | 'note' | 'doc';
+  module?:
+    | 'slash commands'
+    | 'format toolbar'
+    | 'edgeless toolbar'
+    | 'inline @';
+  category?: 'page' | 'whiteboard';
 }
 
 export interface TelemetryEventMap {
-  DocCreated: TelemetryEvent;
+  DocCreated: DocCreatedEvent;
+  LinkedDocCreated: TelemetryEvent;
 }
 
 export interface TelemetryService {

@@ -34,9 +34,26 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
             this.edgeless.service.telemetryService?.track('DocCreated', {
               control: 'toolbar:general',
               page: 'whiteboard editor',
-              module: 'toolbar',
-              segment: 'toolbar',
+              module: 'edgeless toolbar',
+              segment: 'whiteboard',
               type: type.flavour.split(':')[1],
+            });
+            this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
+              control: 'links',
+              page: 'whiteboard editor',
+              module: 'edgeless toolbar',
+              segment: 'whiteboard',
+              type: type.flavour.split(':')[1],
+              other: 'new doc',
+            });
+          } else {
+            this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
+              control: 'links',
+              page: 'whiteboard editor',
+              module: 'edgeless toolbar',
+              segment: 'whiteboard',
+              type: type.flavour.split(':')[1],
+              other: 'existing doc',
             });
           }
         }

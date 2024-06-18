@@ -362,6 +362,14 @@ class PasteTr {
         });
         const model = std.doc.getBlockById(blockSnapshot.id);
         if (model) {
+          std.spec
+            .getService('affine:page')
+            .telemetryService?.track('LinkedDocCreated', {
+              page: 'doc editor',
+              category: 'pasted link',
+              type: 'doc',
+              other: 'existing doc',
+            });
           std.doc.captureSync();
           std.doc.transact(() => {
             const text = model.text as Text;

@@ -200,8 +200,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                   rootElement.service.telemetryService?.track('DocCreated', {
                     control: 'shortcut',
                     page: 'whiteboard editor',
-                    module: 'toolbar',
-                    segment: 'toolbar',
+                    segment: 'whiteboard',
                     type: type.flavour.split(':')[1],
                   });
                 }

@@ -379,6 +379,19 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         segment: 'toolbar',
         type: 'embed-synced-doc',
       });
+      this.edgeless.service.telemetryService?.track('DocCreated', {
+        control: 'turn into linked doc',
+        page: 'whiteboard editor',
+        module: 'format toolbar',
+        type: 'embed-linked-doc',
+      });
+      this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
+        control: 'turn into linked doc',
+        page: 'whiteboard editor',
+        module: 'format toolbar',
+        type: 'embed-linked-doc',
+        other: 'new doc',
+      });
       moveConnectors(element.id, cardId, this.edgeless.service);
       // delete selected elements
       this.doc.transact(() => {
@@ -423,6 +436,19 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       module: 'toolbar',
       segment: 'toolbar',
       type: 'embed-linked-doc',
+    });
+    this.edgeless.service.telemetryService?.track('DocCreated', {
+      control: 'create linked doc',
+      page: 'whiteboard editor',
+      module: 'format toolbar',
+      type: 'embed-linked-doc',
+    });
+    this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
+      control: 'create linked doc',
+      page: 'whiteboard editor',
+      module: 'format toolbar',
+      type: 'embed-linked-doc',
+      other: 'new doc',
     });
     // delete selected elements
     this.doc.transact(() => {

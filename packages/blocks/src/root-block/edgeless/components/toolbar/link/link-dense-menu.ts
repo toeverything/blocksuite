@@ -23,7 +23,7 @@ export const buildLinkDenseMenu: DenseMenuBuilder = edgeless => ({
             edgeless.service.telemetryService?.track('DocCreated', {
               control: 'toolbar:general',
               page: 'whiteboard editor',
-              module: 'toolbar',
+              module: 'edgeless toolbar',
               type: type.flavour.split(':')[1],
             });
           }
