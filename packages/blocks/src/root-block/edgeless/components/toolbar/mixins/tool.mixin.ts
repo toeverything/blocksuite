@@ -8,7 +8,11 @@ import { property, state } from 'lit/decorators.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../../types.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
-import { edgelessToolbarThemeContext } from '../context.js';
+import {
+  type EdgelessToolbarSlots,
+  edgelessToolbarSlotsContext,
+  edgelessToolbarThemeContext,
+} from '../context.js';
 
 export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
   edgeless: EdgelessRootBlockComponent;
@@ -22,6 +26,8 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
   popper: MenuPopper<HTMLElement> | null;
 
   theme: 'light' | 'dark';
+
+  toolbarSlots: EdgelessToolbarSlots;
 
   enableActiveBackground?: boolean;
 
@@ -65,6 +71,9 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
     @consume({ context: edgelessToolbarThemeContext, subscribe: true })
     accessor theme!: 'light' | 'dark';
 
+    @consume({ context: edgelessToolbarSlotsContext })
+    accessor toolbarSlots!: EdgelessToolbarSlots;
+
     enableActiveBackground = false;
 
     abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
@@ -91,7 +100,7 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
           args[2]?.onDispose?.();
           this.popper = null;
         },
-      });
+      }) as MenuPopper<HTMLElement>;
       return this.popper;
     }
 
@@ -110,8 +119,8 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
       this._updateActiveEdgelessTool();
       this._applyActiveStyle();
       this._disposables.add(
-        this.edgeless.slots.edgelessToolUpdated.on(() => {
-          this._updateActiveEdgelessTool();
+        this.edgeless.slots.edgelessToolUpdated.on(newTool => {
+          this._updateActiveEdgelessTool(newTool);
           this._applyActiveStyle();
           if (!this.active) {
             this.popper?.dispose();

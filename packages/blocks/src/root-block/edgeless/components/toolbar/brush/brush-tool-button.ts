@@ -10,18 +10,20 @@ import {
   EdgelessPenLightIcon,
 } from '../../../../../_common/icons/edgeless.js';
 import { LineWidth } from '../../../../../_common/utils/index.js';
+import type { LastProps } from '../../../../../surface-block/managers/edit-session.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
-import { ToolbarButtonWithMenuMixin } from '../mixins/toolbar-button-with-menu.mixin.js';
-import type { EdgelessBrushMenu } from './brush-menu.js';
+import {
+  applyLastProps,
+  observeLastProps,
+} from '../common/observe-last-props.js';
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 @customElement('edgeless-brush-tool-button')
-export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
-  EdgelessBrushMenu,
-  'brush',
-  readonly ['color', 'lineWidth']
->(LitElement) {
-  static styles = css`
+export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
+  LitElement
+) {
+  static override styles = css`
     :host {
       display: flex;
       height: 100%;
@@ -47,42 +49,60 @@ export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
     }
   `;
 
-  protected override readonly _states = ['color', 'lineWidth'] as const;
-
   override type = 'brush' as const;
-
-  override _type = 'brush' as const;
 
   override enableActiveBackground = true;
 
   @state()
-  accessor color: string = DEFAULT_BRUSH_COLOR;
+  accessor states: LastProps['brush'] = {
+    color: DEFAULT_BRUSH_COLOR,
+    lineWidth: LineWidth.Four,
+  };
 
-  @state()
-  accessor lineWidth = LineWidth.Four;
+  get statesKeys() {
+    return Object.keys(this.states) as (keyof LastProps['brush'])[];
+  }
 
   private _toggleBrushMenu() {
     if (this.tryDisposePopper()) return;
-    !this.active && this.setEdgelessTool({ type: this._type });
-    const menu = this.createPopper('edgeless-brush-menu', this, {
-      onDispose: () => (this._menu = null),
-    });
-    this._menu = menu;
+    !this.active && this.setEdgelessTool({ type: this.type });
+    const menu = this.createPopper('edgeless-brush-menu', this);
     Object.assign(menu.element, {
       edgeless: this.edgeless,
       onChange: (props: Record<string, unknown>) => {
-        this.edgeless.service.editPropsStore.record(this._type, props);
+        this.edgeless.service.editPropsStore.record('brush', props);
       },
     });
     this.updateMenu();
   }
 
+  updateMenu() {
+    const { popper } = this;
+    if (!popper) return;
+    Object.assign(popper.element, this.states);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const { edgeless, states, statesKeys } = this;
+    applyLastProps(edgeless.service, 'brush', statesKeys, states);
+
+    this.disposables.add(
+      observeLastProps(
+        edgeless.service,
+        'brush',
+        statesKeys,
+        states,
+        updates => {
+          this.states = { ...this.states, ...updates };
+        }
+      )
+    );
+  }
+
   override updated(changedProperties: Map<string, unknown>) {
-    if (this._states.some(key => changedProperties.has(key))) {
-      if (this._menu) {
-        this.updateMenu();
-        !this.active && this.setEdgelessTool({ type: this._type });
-      }
+    if (changedProperties.has('states') && this.popper) {
+      this.updateMenu();
     }
   }
 
@@ -93,7 +113,7 @@ export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
     return html`
       <edgeless-toolbar-button
         class="edgeless-brush-button"
-        .tooltip=${this._menu ? '' : getTooltipWithShortcut('Pen', 'P')}
+        .tooltip=${this.popper ? '' : getTooltipWithShortcut('Pen', 'P')}
         .tooltipOffset=${4}
         .active=${active}
         .withHover=${true}
@@ -102,7 +122,7 @@ export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
         }}
       >
         <div
-          style=${styleMap({ color: `var(${this.color})` })}
+          style=${styleMap({ color: `var(${this.states.color})` })}
           class="pen-wrapper"
         >
           ${icon}

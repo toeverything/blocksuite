@@ -12,21 +12,18 @@ import {
 import { LineWidth } from '../../../../../_common/utils/index.js';
 import { getConnectorModeName } from '../../../../../surface-block/element-model/connector.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
+import type { LastProps } from '../../../../../surface-block/managers/edit-session.js';
 import { DEFAULT_CONNECTOR_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+import {
+  applyLastProps,
+  observeLastProps,
+} from '../common/observe-last-props.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
-import { ToolbarButtonWithMenuMixin } from '../mixins/toolbar-button-with-menu.mixin.js';
-import type { EdgelessConnectorMenu } from './connector-menu.js';
 
 @customElement('edgeless-connector-tool-button')
-export class EdgelessConnectorToolButton extends QuickToolMixin(
-  ToolbarButtonWithMenuMixin<
-    EdgelessConnectorMenu,
-    'connector',
-    readonly ['mode', 'stroke', 'strokeWidth']
-  >(LitElement)
-) {
-  static styles = css`
+export class EdgelessConnectorToolButton extends QuickToolMixin(LitElement) {
+  static override styles = css`
     :host {
       display: flex;
     }
@@ -42,41 +39,54 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
     }
   `;
 
-  protected override readonly _states = [
-    'mode',
-    'stroke',
-    'strokeWidth',
-  ] as const;
-
-  @state()
-  accessor mode: ConnectorMode = ConnectorMode.Curve;
-
-  @state()
-  accessor stroke = DEFAULT_CONNECTOR_COLOR;
-
-  @state()
-  accessor strokeWidth = LineWidth.Two;
-
   override type = 'connector' as const;
 
-  override _type = 'connector' as const;
+  @state()
+  accessor states: Partial<LastProps['connector']> = {
+    mode: ConnectorMode.Curve,
+    stroke: DEFAULT_CONNECTOR_COLOR,
+    strokeWidth: LineWidth.Two,
+  };
+
+  get stateKeys() {
+    return Object.keys(this.states) as Array<keyof typeof this.states>;
+  }
 
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;
-    const menu = this.createPopper('edgeless-connector-menu', this, {
-      onDispose: () => (this._menu = null),
-    });
-    this._menu = menu;
+    const menu = this.createPopper('edgeless-connector-menu', this);
     menu.element.edgeless = this.edgeless;
     menu.element.onChange = (props: Record<string, unknown>) => {
-      this.edgeless.service.editPropsStore.record(this._type, props);
+      this.edgeless.service.editPropsStore.record(this.type, props);
       this.updateMenu();
       this.setEdgelessTool({
-        type: this._type,
-        mode: this.mode,
+        type: this.type,
+        mode: this.states.mode!,
       });
     };
     this.updateMenu();
+  }
+
+  updateMenu() {
+    if (!this.popper) return;
+    Object.assign(this.popper.element, this.states);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const { edgeless, states, stateKeys, type } = this;
+
+    applyLastProps(edgeless.service, type, stateKeys, states);
+
+    this.disposables.add(
+      observeLastProps(
+        edgeless.service,
+        type,
+        stateKeys,
+        states,
+        updates => (this.states = { ...this.states, ...updates })
+      )
+    );
   }
 
   override render() {
@@ -86,7 +96,10 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
       <edgeless-tool-icon-button
         .tooltip=${this.popper
           ? ''
-          : getTooltipWithShortcut(getConnectorModeName(this.mode), 'C')}
+          : getTooltipWithShortcut(
+              getConnectorModeName(this.states.mode!),
+              'C'
+            )}
         .tooltipOffset=${17}
         .active=${active}
         .iconContainerPadding=${6}
@@ -94,7 +107,7 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
         @click=${() => {
           this.edgeless.tools.setEdgelessTool({
             type: 'connector',
-            mode: this.mode,
+            mode: this.states.mode!,
           });
           this._toggleMenu();
         }}

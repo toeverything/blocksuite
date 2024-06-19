@@ -100,6 +100,7 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
         if (element.data.type === 'mindmap') {
           this.onActiveStyleChange?.(element.data.style);
         }
+        this.setEdgelessTool({ type: 'default' });
       },
     });
   }

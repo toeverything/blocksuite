@@ -551,6 +551,19 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         this.edgelessTool = tool;
       })
     );
+    this._disposables.add(
+      this.edgeless.bindHotKey(
+        {
+          Escape: () => {
+            if (this.edgeless.service.selection.editing) return;
+            if (this.edgelessTool.type === 'frameNavigator') return;
+            if (this.edgelessTool.type === 'default') return;
+            this.setEdgelessTool({ type: 'default' });
+          },
+        },
+        { global: true }
+      )
+    );
   }
 
   override disconnectedCallback() {

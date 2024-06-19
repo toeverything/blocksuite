@@ -202,6 +202,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           },
         });
 
+        this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
         this._setShapeOverlayLock(false);
         this.readyToDrop = false;
       },

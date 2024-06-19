@@ -26,6 +26,7 @@ import {
   TextVerticalAlign,
 } from '../consts.js';
 import {
+  ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
 } from '../element-model/connector.js';
@@ -169,6 +170,7 @@ export class EditPropsStore {
       strokeStyle: StrokeStyle.Solid,
       strokeWidth: LineWidth.Two,
       rough: false,
+      mode: ConnectorMode.Curve,
     },
     brush: {
       color: GET_DEFAULT_LINE_COLOR(),
