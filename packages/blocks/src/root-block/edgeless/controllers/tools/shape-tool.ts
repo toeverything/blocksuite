@@ -193,6 +193,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragStart(e: PointerEventState) {
+    if (this._disableOverlay) return;
     this.clearOverlay();
 
     this._doc.captureSync();
@@ -211,6 +212,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragMove(e: PointerEventState) {
+    if (this._disableOverlay) return;
     assertExists(this._draggingElementId);
     assertExists(this._draggingArea);
 
@@ -224,6 +226,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragEnd() {
+    if (this._disableOverlay) return;
     if (this._draggingElement) {
       const draggingElement = this._draggingElement;
 
