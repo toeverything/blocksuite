@@ -249,7 +249,10 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
           }
           const icon = this.mindmapElement;
           assertExists(icon);
-          this.draggableController.clickToDrag(icon, service.tool.lastMousePos);
+          const { x, y } = service.tool.lastMousePos;
+          const { left, top } = this.edgeless.viewport;
+          const clientPos = { x: x + left, y: y + top };
+          this.draggableController.clickToDrag(icon, clientPos);
         },
       },
       { global: true }
