@@ -93,6 +93,7 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
       this.edgeless.service.editPropsStore.record('shape', shapeConfig?.value);
       this.updateMenu();
     }
+    if (!this.popper) this._toggleMenu();
   }
 
   updateMenu() {

@@ -315,6 +315,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
                   data: shape,
                   preview: shape.svg,
                 })}
+              @click=${(e: MouseEvent) => e.stopPropagation()}
             >
               ${shape.svg}
             </div>`;
