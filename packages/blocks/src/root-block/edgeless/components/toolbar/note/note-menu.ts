@@ -79,6 +79,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
     const imageFiles = await getImageFilesFromLocal();
     await this.edgeless.addImages(imageFiles);
     this._imageLoading = false;
+    this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
   }
 
   private _onHandleLinkButtonClick() {
@@ -157,6 +158,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
                 const file = await openFileOrFiles();
                 if (!file) return;
                 await this.edgeless.addAttachments([file]);
+                this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
                 this.edgeless.service.telemetryService?.track(
                   'CanvasElementAdded',
                   {

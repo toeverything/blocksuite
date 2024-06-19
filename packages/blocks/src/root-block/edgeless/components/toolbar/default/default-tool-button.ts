@@ -49,6 +49,10 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
   }
 
   private _changeTool() {
+    if (this.toolbar.activePopper) {
+      // click manually always closes the popper
+      this.toolbar.activePopper.dispose();
+    }
     const type = this.edgelessTool?.type;
     if (type !== 'default' && type !== 'pan') {
       if (localStorage.defaultTool === 'default') {

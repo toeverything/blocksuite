@@ -28,6 +28,7 @@ import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getThemeMode } from '../../../../_common/utils/query.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../types.js';
+import type { MenuPopper } from './common/create-popper.js';
 import {
   edgelessToolbarContext,
   type EdgelessToolbarSlots,
@@ -401,6 +402,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   edgeless: EdgelessRootBlockComponent;
 
+  activePopper: MenuPopper<HTMLElement> | null = null;
+
   @query('.edgeless-toolbar-container')
   accessor toolbarContainer!: HTMLElement;
 
@@ -564,7 +567,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           Escape: () => {
             if (this.edgeless.service.selection.editing) return;
             if (this.edgelessTool.type === 'frameNavigator') return;
-            if (this.edgelessTool.type === 'default') return;
+            if (this.edgelessTool.type === 'default') {
+              if (this.activePopper) {
+                this.activePopper.dispose();
+                this.activePopper = null;
+              }
+              return;
+            }
             this.setEdgelessTool({ type: 'default' });
           },
         },

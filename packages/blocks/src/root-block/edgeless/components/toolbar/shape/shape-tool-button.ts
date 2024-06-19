@@ -112,12 +112,11 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
         stateKeys,
         states,
         (updates, props) => {
-          if (props.shapeType) {
-            this.setEdgelessTool({
-              type: 'shape',
-              shapeType: props.shapeType as ShapeName,
-            });
-          }
+          this.setEdgelessTool({
+            type: 'shape',
+            shapeType: (props.shapeType as ShapeName) ?? this.states.shapeType,
+          });
+
           this.states = { ...this.states, ...updates };
         }
       )

@@ -31,6 +31,8 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
 
   toolbarSlots: EdgelessToolbarSlots;
 
+  accessor toolbar: EdgelessToolbar;
+
   enableActiveBackground?: boolean;
 
   abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
@@ -99,6 +101,10 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
 
     // TODO: move to toolbar-tool-with-menu.mixin
     createPopper(...args: Parameters<typeof createPopper>) {
+      if (this.toolbar.activePopper) {
+        this.toolbar.activePopper.dispose();
+        this.toolbar.activePopper = null;
+      }
       this.popper = createPopper(args[0], args[1], {
         ...args[2],
         onDispose: () => {
@@ -106,6 +112,7 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
           this.popper = null;
         },
       }) as MenuPopper<HTMLElement>;
+      this.toolbar.activePopper = this.popper;
       return this.popper;
     }
 
@@ -127,10 +134,6 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
         this.edgeless.slots.edgelessToolUpdated.on(newTool => {
           this._updateActiveEdgelessTool(newTool);
           this._applyActiveStyle();
-          if (!this.active) {
-            this.popper?.dispose();
-            this.popper = null;
-          }
         })
       );
     }
