@@ -117,6 +117,7 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
     }
 
     tryDisposePopper() {
+      if (!this.active) return false;
       if (this.popper) {
         this.popper.dispose();
         this.popper = null;

@@ -105,11 +105,12 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(LitElement) {
         .iconContainerPadding=${6}
         class="edgeless-connector-button"
         @click=${() => {
+          // don't update tool before toggling menu
+          this._toggleMenu();
           this.edgeless.tools.setEdgelessTool({
             type: 'connector',
             mode: this.states.mode!,
           });
-          this._toggleMenu();
         }}
       >
         ${ConnectorIcon}
