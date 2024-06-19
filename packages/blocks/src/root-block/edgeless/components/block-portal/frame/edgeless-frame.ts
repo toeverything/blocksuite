@@ -292,7 +292,7 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
           .updatingSet=${this.edgeless.rootElementContainer.renderingSet}
           .concurrentUpdatingCount=${this.edgeless.rootElementContainer
             .concurrentRendering}
-          style=${`z-index: ${startIndex + index};${visibleFrames.has(frame) ? 'display:block' : ''}`}
+          style=${`pointer-events: none; z-index: ${startIndex + index};${visibleFrames.has(frame) ? 'display:block' : ''}`}
         >
         </edgeless-block-portal-frame>
       `
