@@ -133,7 +133,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     };
 
     const collection = new DocCollection(options);
-
+    collection.meta.initialize();
     collection.start();
 
     const doc = collection.createDoc({ id: 'doc:home' }).load();

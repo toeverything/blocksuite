@@ -75,4 +75,16 @@ export function rect(
       }
     );
   }
+
+  ctx.setTransform(
+    ctx
+      .getTransform()
+      .translateSelf(-cx, -cy)
+      .rotateSelf(-rotate)
+      .translateSelf(cx, cy)
+      .translateSelf(-renderOffset, -renderOffset)
+      .translateSelf(cx, cy)
+      .rotateSelf(rotate)
+      .translateSelf(-cx, -cy)
+  );
 }

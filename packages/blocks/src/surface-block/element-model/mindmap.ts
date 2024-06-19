@@ -165,7 +165,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     instance.buildTree();
   })
   @yfield()
-  accessor layoutType: LayoutType = LayoutType.BALANCE;
+  accessor layoutType: LayoutType = LayoutType.RIGHT;
 
   @watch((_, instance: MindmapElementModel, local) => {
     if (local) {
@@ -743,7 +743,9 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 
     surface.doc.transact(() => {
       remove(this._nodeMap.get(id)!);
-      this.setChildIds(Array.from(this.children.keys()), true);
+    });
+
+    queueMicrotask(() => {
       removedDescendants.forEach(id => surface.removeElement(id));
     });
 

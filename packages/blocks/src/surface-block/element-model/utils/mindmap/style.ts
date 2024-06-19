@@ -66,14 +66,14 @@ export class StyleOne extends MindmapStyleGetter {
     strokeColor: '#84CFFF',
 
     fontFamily: FontFamily.Poppins,
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: FontWeight.SemiBold,
     color: '--affine-black',
 
     filled: true,
     fillColor: '--affine-white',
 
-    padding: [18, 22] as [number, number],
+    padding: [11, 22] as [number, number],
 
     shadow: {
       offsetX: 0,
@@ -108,14 +108,14 @@ export class StyleOne extends MindmapStyleGetter {
         strokeColor: color,
 
         fontFamily: FontFamily.Poppins,
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: FontWeight.Medium,
         color: '--affine-black',
 
         filled: true,
         fillColor: '--affine-white',
 
-        padding: [12, 22] as [number, number],
+        padding: [6, 22] as [number, number],
 
         shadow: {
           offsetX: 0,
@@ -150,7 +150,7 @@ export class StyleTwo extends MindmapStyleGetter {
     filled: true,
     fillColor: '--affine-palette-shape-orange',
 
-    padding: [14, 22] as [number, number],
+    padding: [11, 22] as [number, number],
 
     shadow: {
       blur: 0,
@@ -194,7 +194,7 @@ export class StyleTwo extends MindmapStyleGetter {
         filled: true,
         fillColor: color,
 
-        padding: [9, 22] as [number, number],
+        padding: [6, 22] as [number, number],
 
         shadow: {
           blur: 0,
@@ -229,7 +229,7 @@ export class StyleThree extends MindmapStyleGetter {
     filled: true,
     fillColor: '--affine-palette-shape-yellow',
 
-    padding: [16, 22] as [number, number],
+    padding: [10, 22] as [number, number],
 
     shadow: {
       blur: 12,
@@ -264,7 +264,7 @@ export class StyleThree extends MindmapStyleGetter {
         filled: true,
         fillColor: '--affine-palette-shape-white',
 
-        padding: [12, 22] as [number, number],
+        padding: [6, 22] as [number, number],
 
         shadow: {
           blur: 12,
@@ -309,7 +309,7 @@ export class StyleFour extends MindmapStyleGetter {
     filled: true,
     fillColor: 'transparent',
 
-    padding: [8, 10] as [number, number],
+    padding: [0, 10] as [number, number],
   };
 
   private _getColor(order: number) {
@@ -334,7 +334,7 @@ export class StyleFour extends MindmapStyleGetter {
         ...this.root,
 
         fontSize: 18,
-        padding: [8, 10] as [number, number],
+        padding: [1.5, 10] as [number, number],
       },
     };
   }

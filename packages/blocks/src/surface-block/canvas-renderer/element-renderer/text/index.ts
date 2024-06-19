@@ -41,7 +41,7 @@ export function text(
   });
   const deltas = wrapTextDeltas(model.text, font, w);
   const lines = deltaInsertsToChunks(deltas);
-  const lineHeightPx = getLineHeight(fontFamily, fontSize);
+  const lineHeightPx = getLineHeight(fontFamily, fontSize, fontWeight);
   const horizontalOffset =
     textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
