@@ -9,10 +9,12 @@ import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js
 import type { EdgelessTool } from '../../../types.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import {
+  edgelessToolbarContext,
   type EdgelessToolbarSlots,
   edgelessToolbarSlotsContext,
   edgelessToolbarThemeContext,
 } from '../context.js';
+import type { EdgelessToolbar } from '../edgeless-toolbar.js';
 
 export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
   edgeless: EdgelessRootBlockComponent;
@@ -73,6 +75,9 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
 
     @consume({ context: edgelessToolbarSlotsContext })
     accessor toolbarSlots!: EdgelessToolbarSlots;
+
+    @consume({ context: edgelessToolbarContext })
+    accessor toolbar!: EdgelessToolbar;
 
     enableActiveBackground = false;
 
