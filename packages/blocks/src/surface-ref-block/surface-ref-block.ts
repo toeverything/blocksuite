@@ -517,6 +517,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     super.requestUpdate(name, oldValue, options);
 
     this._surfaceRefRenderer?.surfaceRenderer?.refresh();
+    this.portal?.requestUpdate();
   }
 
   override connectedCallback() {
