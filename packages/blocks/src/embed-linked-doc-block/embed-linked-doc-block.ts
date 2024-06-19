@@ -132,12 +132,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     if (!linkedDoc) {
       return false;
     }
-    return (
-      !!linkedDoc &&
-      !linkedDoc.meta?.title.length &&
-      this.isNoteContentEmpty &&
-      this.isBannerEmpty
-    );
+    return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
   }
 
   private _selectBlock() {
