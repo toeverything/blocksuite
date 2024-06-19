@@ -8,6 +8,7 @@ import { isPeekable, Peekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
+import type { DocMode } from '../_common/types.js';
 import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
 import type { RootBlockComponent } from '../root-block/index.js';
 import { Bound } from '../surface-block/index.js';
@@ -28,7 +29,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   EmbedLinkedDocBlockService
 > {
   get editorMode() {
-    return this._editorMode;
+    return this._linkedDocMode;
   }
 
   get linkedDoc() {
@@ -49,7 +50,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   static override styles = styles;
 
   @state()
-  private accessor _editorMode: 'page' | 'edgeless' = 'page';
+  private accessor _linkedDocMode: DocMode = 'page';
 
   @state()
   private accessor _docUpdatedAt: Date = new Date();
@@ -96,9 +97,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       return;
     }
 
-    this._editorMode = this._rootService.docModeService.getMode(
-      this.model.pageId
-    );
     this._docUpdatedAt = this._rootService.getDocUpdatedAt(this.model.pageId);
 
     if (!linkedDoc.loaded) {
@@ -327,6 +325,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
           });
         })
       );
+
+      this._linkedDocMode = this._rootService.docModeService.getMode(
+        this.model.pageId
+      );
+      this.disposables.add(
+        this._rootService.docModeService.onModeChange(mode => {
+          this._linkedDocMode = mode;
+        }, this.model.pageId)
+      );
     }
 
     this.model.propsUpdated.on(({ key }) => {
@@ -364,7 +371,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const isDeleted = !linkedDoc;
     const isLoading = this._loading;
     const isError = this.isError;
-    const editorMode = this.editorMode;
     const isEmpty = this._isDocEmpty() && this.isBannerEmpty;
 
     const cardClassMap = classMap({
@@ -383,7 +389,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       LinkedDocDeletedIcon,
       LinkedDocDeletedBanner,
       LinkedDocEmptyBanner,
-    } = getEmbedLinkedDocIcons(editorMode, this._cardStyle);
+    } = getEmbedLinkedDocIcons(this._linkedDocMode, this._cardStyle);
 
     const titleIcon = isLoading
       ? LoadingIcon
@@ -394,7 +400,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const titleText = isLoading
       ? 'Loading...'
       : isDeleted
-        ? `Deleted ${this.editorMode}`
+        ? `Deleted ${this._linkedDocMode}`
         : linkedDoc?.meta?.title.length
           ? linkedDoc.meta.title
           : 'Untitled';

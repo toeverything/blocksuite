@@ -14,6 +14,7 @@ import { Peekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
+import type { DocMode } from '../_common/types.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
@@ -49,7 +50,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   }
 
   get editorMode() {
-    return this._editorMode;
+    return this._syncedDocMode;
   }
 
   get docUpdatedAt() {
@@ -69,7 +70,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   static override styles = blockStyles;
 
   @state()
-  private accessor _editorMode: 'page' | 'edgeless' = 'page';
+  private accessor _syncedDocMode: DocMode = 'page';
 
   @state()
   private accessor _docUpdatedAt: Date = new Date();
@@ -161,7 +162,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this.disposables.addFromEvent(syncedDocEditorHost, 'focusout', e => {
       e.stopPropagation();
       this._editing = false;
-      if (this._editorMode === 'page') {
+      if (this._syncedDocMode === 'page') {
         this._checkEmpty();
       }
     });
@@ -182,9 +183,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
 
     this._checkCycle();
-    this._editorMode = this._rootService.docModeService.getMode(
-      this.model.pageId
-    );
     this._docUpdatedAt = this._rootService.getDocUpdatedAt(this.model.pageId);
 
     if (!syncedDoc.loaded) {
@@ -202,7 +200,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       });
     }
 
-    if (this._editorMode === 'page') {
+    if (this._syncedDocMode === 'page') {
       this._checkEmpty();
     }
 
@@ -252,7 +250,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     const syncedDoc = this.syncedDoc;
     const { isEditing, isEmpty } = this.blockState;
     const isInSurface = this.isInSurface;
-    const editorMode = this.editorMode;
+    const editorMode = this._syncedDocMode;
 
     assertExists(syncedDoc);
 
@@ -464,6 +462,15 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         })
       );
     }
+
+    this._syncedDocMode = this._rootService.docModeService.getMode(
+      this.model.pageId
+    );
+    this.disposables.add(
+      this._rootService.docModeService.onModeChange(mode => {
+        this._syncedDocMode = mode;
+      }, this.model.pageId)
+    );
   }
 
   override firstUpdated() {
