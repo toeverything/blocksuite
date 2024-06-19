@@ -1,9 +1,14 @@
 import './database-header-column.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { autoUpdate, computePosition, shift } from '@floating-ui/dom';
-import { nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import {
+  autoUpdate,
+  computePosition,
+  type Middleware,
+  shift,
+} from '@floating-ui/dom';
+import { nothing, type TemplateResult } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -27,10 +32,13 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor tableViewManager!: DataViewTableManager;
 
+  @property({ attribute: false })
+  accessor renderGroupHeader: (() => TemplateResult) | undefined;
+
   addColumnButton = renderTemplate(() => {
     if (this.readonly) return nothing;
 
-    return html`<div
+    return html` <div
       @click="${this._onAddColumn}"
       class="header-add-column-button dv-hover"
     >
@@ -46,6 +54,17 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     });
   };
 
+  getScrollContainer = (ele: HTMLElement) => {
+    let container: HTMLElement | null = ele;
+    while (
+      container &&
+      container.computedStyleMap().get('overflow-y')?.toString() !== 'scroll'
+    ) {
+      container = container.parentElement;
+    }
+    return container;
+  };
+
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
@@ -53,7 +72,26 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
       })
     );
+    const scrollContainer = this.getScrollContainer(
+      this.closest('affine-data-view-renderer')!
+    );
     const group = this.closest('affine-data-view-table-group');
+    if (group) {
+      const cancel = autoUpdate(group, this, () => {
+        if (!scrollContainer) {
+          return;
+        }
+        computePosition(group, this, {
+          middleware: [headerShift(scrollContainer)],
+        })
+          .then(data => {
+            const x = data.middlewareData.headerShift.x;
+            this.style.transform = `translate3d(0,${x / this.getScale()}px,0)`;
+          })
+          .catch(console.error);
+      });
+      this.disposables.add(cancel);
+    }
     if (group) {
       this.disposables.addFromEvent(group, 'mouseenter', () => {
         this.addColumnButton.style.visibility = 'visible';
@@ -122,9 +160,17 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     column.editTitle();
   };
 
+  @query('.scale-div')
+  accessor scaleDiv!: HTMLDivElement;
+
+  getScale() {
+    return this.scaleDiv?.getBoundingClientRect().width ?? 1;
+  }
+
   override render() {
     this.updateAddButton();
     return html`
+      ${this.renderGroupHeader?.()}
       <div class="affine-database-column-header database-row">
         <div class="data-view-table-left-bar"></div>
         ${repeat(
@@ -149,6 +195,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
           style="background-color: var(--affine-border-color);width: 1px;"
         ></div>
         <div style="height: 0;" ${ref(this.addColumnPositionRef)}></div>
+        <div class="scale-div" style="width: 1px;height: 1px;"></div>
       </div>
     `;
   }
@@ -159,3 +206,26 @@ declare global {
     'affine-database-column-header': DatabaseColumnHeader;
   }
 }
+const headerShift = (container: HTMLElement): Middleware => {
+  return {
+    name: 'headerShift',
+    fn({ x, y, elements }) {
+      const referenceRect = elements.reference.getBoundingClientRect();
+      const floatingRect = elements.floating.getBoundingClientRect();
+      const rootRect = container.getBoundingClientRect();
+      let moveX = 0;
+      if (rootRect.top > referenceRect.top) {
+        moveX =
+          Math.min(referenceRect.bottom - floatingRect.height, rootRect.top) -
+          referenceRect.top;
+      }
+      return {
+        x,
+        y,
+        data: {
+          x: moveX,
+        },
+      };
+    },
+  };
+};
