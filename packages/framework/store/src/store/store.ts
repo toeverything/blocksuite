@@ -76,6 +76,7 @@ const FLAGS_PRESET = {
   enable_block_query: false,
   enable_lasso_tool: false,
   enable_edgeless_text: false,
+  enable_ai_onboarding: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

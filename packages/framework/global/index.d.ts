@@ -8,5 +8,6 @@ declare type BlockSuiteFlags = {
   enable_expand_database_block: boolean;
   enable_lasso_tool: boolean;
   enable_edgeless_text: boolean;
+  enable_ai_onboarding: boolean;
   readonly: Record<string, boolean>;
 };
