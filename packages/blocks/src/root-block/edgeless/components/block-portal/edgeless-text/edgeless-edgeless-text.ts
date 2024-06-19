@@ -4,6 +4,7 @@ import { css, html, type PropertyValueMap } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
+import { matchFlavours } from '../../../../../_common/utils/model.js';
 import type { EdgelessTextBlockComponent } from '../../../../../edgeless-text/edgeless-text-block.js';
 import {
   EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
@@ -134,6 +135,54 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
     this._resizeObserver.observe(this._textContainer);
     this.model.deleted.on(() => {
       this._resizeObserver.disconnect();
+    });
+
+    this.disposables.addFromEvent(this._textContainer, 'click', e => {
+      if (!this._editing) return;
+
+      const containerRect = this._textContainer.getBoundingClientRect();
+      const isTop = e.clientY < containerRect.top + containerRect.height / 2;
+
+      let newParagraphId: string | null = null;
+      if (isTop) {
+        const firstChild = this._edgelessText.model.firstChild();
+        if (
+          !firstChild ||
+          !matchFlavours(firstChild, ['affine:list', 'affine:paragraph'])
+        ) {
+          newParagraphId = this.edgeless.doc.addBlock(
+            'affine:paragraph',
+            {},
+            this.model.id,
+            0
+          );
+        }
+      } else {
+        const lastChild = this._edgelessText.model.lastChild();
+        if (
+          !lastChild ||
+          !matchFlavours(lastChild, ['affine:list', 'affine:paragraph'])
+        ) {
+          newParagraphId = this.edgeless.doc.addBlock(
+            'affine:paragraph',
+            {},
+            this.model.id
+          );
+        }
+      }
+
+      if (newParagraphId) {
+        this.edgeless.selection.setGroup('note', [
+          this.edgeless.selection.create('text', {
+            from: {
+              blockId: newParagraphId,
+              index: 0,
+              length: 0,
+            },
+            to: null,
+          }),
+        ]);
+      }
     });
   }
 
