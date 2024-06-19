@@ -329,11 +329,22 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   await page.waitForTimeout(100);
   await expect(selectedRect).toBeHidden();
   // Click to start selection and hold the mouse to trigger auto panning to the right
-  await page.mouse.move(800, 600);
-  await page.mouse.down();
-  await page.mouse.move(950, 200, { steps: 20 });
-  await page.waitForTimeout(600);
-  await page.mouse.up();
+  await dragBetweenCoords(
+    page,
+    {
+      x: 800,
+      y: 600,
+    },
+    {
+      x: 950,
+      y: 200,
+    },
+    {
+      beforeMouseUp: async () => {
+        await page.waitForTimeout(600);
+      },
+    }
+  );
 
   // Expect to select the empty note
   selectedRect = page.locator(selectedRectClass);
@@ -364,11 +375,23 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   await expect(selectedRect).toBeHidden();
 
   // Click to start selection and hold the mouse to trigger auto panning to the right
-  await page.mouse.move(800, 300);
-  await page.mouse.down();
-  await page.mouse.move(820, 1150, { steps: 20 });
-  await page.waitForTimeout(500);
-  await page.mouse.up();
+  await dragBetweenCoords(
+    page,
+    {
+      x: 800,
+      y: 300,
+    },
+    {
+      x: 820,
+      y: 1150,
+    },
+    {
+      click: true,
+      beforeMouseUp: async () => {
+        await page.waitForTimeout(500);
+      },
+    }
+  );
 
   // Expect to select the empty note
   selectedRect = page.locator(selectedRectClass);
