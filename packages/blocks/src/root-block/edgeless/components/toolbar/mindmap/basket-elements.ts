@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
@@ -152,11 +152,26 @@ export const textRender: DraggableTool['render'] = (
   const vCenter = bound.y + bound.h / 2;
   const w = 100;
   const h = 32;
-  // TODO: canvas text has been deprecated
-  const id = service.addElement(CanvasElementType.TEXT, {
-    xywh: new Bound(bound.x, vCenter - h / 2, w, h).serialize(),
-    text: new DocCollection.Y.Text(),
-  });
+
+  const flag = edgeless.doc.awarenessStore.getFlag('enable_edgeless_text');
+  if (flag) {
+    const textService = edgeless.host.spec.getService('affine:edgeless-text');
+    textService.initEdgelessTextBlock({
+      edgeless,
+      x: bound.x,
+      y: vCenter - h / 2,
+    });
+  } else {
+    const id = service.addElement(CanvasElementType.TEXT, {
+      xywh: new Bound(bound.x, vCenter - h / 2, w, h).serialize(),
+      text: new DocCollection.Y.Text(),
+    });
+
+    edgeless.doc.captureSync();
+    const textElement = edgeless.service.getElementById(id);
+    assertInstanceOf(textElement, TextElementModel);
+    mountTextElementEditor(textElement, edgeless);
+  }
 
   service.telemetryService?.track('CanvasElementAdded', {
     control: 'toolbar:dnd',
@@ -165,13 +180,6 @@ export const textRender: DraggableTool['render'] = (
     segment: 'toolbar',
     type: 'text',
   });
-
-  edgeless.doc.captureSync();
-  const textElement = edgeless.service.getElementById(id);
-  assertExists(textElement);
-  if (textElement instanceof TextElementModel) {
-    mountTextElementEditor(textElement, edgeless);
-  }
 };
 
 const toolStyle2StyleObj = (state: ConfigState, style: ConfigStyle = {}) => {
