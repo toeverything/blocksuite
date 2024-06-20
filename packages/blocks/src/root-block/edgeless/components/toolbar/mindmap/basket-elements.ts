@@ -29,7 +29,7 @@ export type DraggableTool = {
     bound: Bound,
     edgelessService: EdgelessRootService,
     edgeless: EdgelessRootBlockComponent
-  ) => void;
+  ) => string;
 };
 
 const unitMap = { x: 'px', y: 'px', r: 'deg', s: '', z: '', o: '' };
@@ -143,6 +143,8 @@ export const getMindmapRender =
         LayoutType.RIGHT
       );
     }
+
+    return mindmapId;
   };
 export const textRender: DraggableTool['render'] = (
   bound,
@@ -154,15 +156,16 @@ export const textRender: DraggableTool['render'] = (
   const h = 32;
 
   const flag = edgeless.doc.awarenessStore.getFlag('enable_edgeless_text');
+  let id: string;
   if (flag) {
     const textService = edgeless.host.spec.getService('affine:edgeless-text');
-    textService.initEdgelessTextBlock({
+    id = textService.initEdgelessTextBlock({
       edgeless,
       x: bound.x,
       y: vCenter - h / 2,
     });
   } else {
-    const id = service.addElement(CanvasElementType.TEXT, {
+    id = service.addElement(CanvasElementType.TEXT, {
       xywh: new Bound(bound.x, vCenter - h / 2, w, h).serialize(),
       text: new DocCollection.Y.Text(),
     });
@@ -180,6 +183,8 @@ export const textRender: DraggableTool['render'] = (
     segment: 'toolbar',
     type: 'text',
   });
+
+  return id;
 };
 
 const toolStyle2StyleObj = (state: ConfigState, style: ConfigStyle = {}) => {

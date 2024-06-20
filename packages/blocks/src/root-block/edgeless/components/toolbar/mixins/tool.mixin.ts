@@ -37,7 +37,7 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
 
   abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
 
-  setEdgelessTool: (tool: EdgelessTool) => void;
+  setEdgelessTool: EdgelessRootBlockComponent['tools']['setEdgelessTool'];
 
   createPopper: typeof createPopper;
 

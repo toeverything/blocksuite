@@ -436,7 +436,11 @@ export class EdgelessToolsManager {
         // (isDefaultType && isLastTypeCopilot) ||
         (isCopilotType && isLastTypeCopilot)
       ) {
-        state = this.selection.surfaceSelections; // selection should remain same when switching between default and lasso tool
+        // if state is provided, override the selection( if state is empty array, clear all selection )
+        if (!state) {
+          // selection should remain same when switching between default and lasso tool
+          state = this.selection.surfaceSelections;
+        }
       } else if (
         ((isDefaultType && !isLastTypeLasso) || isLassoType) &&
         ((isDefaultType && !isLastTypeCopilot) || isCopilotType) &&

@@ -219,9 +219,14 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
         this.readyToDrop = false;
       },
       onDrop: (el, bound) => {
-        el.data.render(bound, this.edgeless.service, this.edgeless);
+        const id = el.data.render(bound, this.edgeless.service, this.edgeless);
         this.readyToDrop = false;
-        this.setEdgelessTool({ type: 'default' });
+        if (el.data.name === 'mindmap') {
+          this.setEdgelessTool(
+            { type: 'default' },
+            { elements: [id], editing: false }
+          );
+        }
       },
     });
 

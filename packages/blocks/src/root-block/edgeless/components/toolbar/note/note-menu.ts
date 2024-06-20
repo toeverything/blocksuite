@@ -77,9 +77,12 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
   private async _addImages() {
     this._imageLoading = true;
     const imageFiles = await getImageFilesFromLocal();
-    await this.edgeless.addImages(imageFiles);
+    const ids = await this.edgeless.addImages(imageFiles);
     this._imageLoading = false;
-    this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
+    this.edgeless.service.tool.setEdgelessTool(
+      { type: 'default' },
+      { elements: ids, editing: false }
+    );
   }
 
   private _onHandleLinkButtonClick() {
