@@ -261,8 +261,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
             </div>
           </div>
         </div>
-
-        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }

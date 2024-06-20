@@ -1,7 +1,6 @@
-import { literal, unsafeStatic } from 'lit/static-html.js';
+import { literal } from 'lit/static-html.js';
 
 import { createEmbedBlock } from '../_common/embed-block-helper/index.js';
-import { EMBED_CARD_TOOLBAR } from '../root-block/widgets/embed-card-toolbar/embed-card-toolbar.js';
 import {
   type EmbedGithubBlockProps,
   EmbedGithubModel,
@@ -36,9 +35,6 @@ export const EmbedGithubBlockSpec = createEmbedBlock({
   },
   view: {
     component: literal`affine-embed-github-block`,
-    widgets: {
-      [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
-    },
   },
   service: EmbedGithubBlockService,
 });

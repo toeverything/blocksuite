@@ -1,6 +1,6 @@
 import './components/bookmark-card.js';
 
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -121,8 +121,6 @@ export class BookmarkBlockComponent extends BlockComponent<
           .error=${this.error}
         ></bookmark-card>
       </div>
-
-      ${this.isInSurface ? nothing : Object.values(this.widgets)}
     `;
   }
 }

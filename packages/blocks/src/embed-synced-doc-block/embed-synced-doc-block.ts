@@ -19,7 +19,7 @@ import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
 import type { RootBlockComponent } from '../root-block/index.js';
-import { SpecProvider } from '../specs/index.js';
+import { SpecProvider } from '../specs/utils/spec-provider.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
 import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
@@ -340,8 +340,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
             ? html` <div class="affine-embed-synced-doc-editor-overlay"></div> `
             : nothing}
         </div>
-
-        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   };

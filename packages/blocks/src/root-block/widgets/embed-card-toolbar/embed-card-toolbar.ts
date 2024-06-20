@@ -18,9 +18,10 @@ import { EmbedCardMoreMenu } from '../../../_common/components/embed-card/embed-
 import { EmbedCardStyleMenu } from '../../../_common/components/embed-card/embed-card-style-popper.js';
 import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
-import type {
-  EmbedToolbarBlockElement,
-  EmbedToolbarModel,
+import {
+  type EmbedToolbarBlockElement,
+  type EmbedToolbarModel,
+  isEmbedCardBlockElement,
 } from '../../../_common/components/embed-card/type.js';
 import { isPeekable, peek } from '../../../_common/components/index.js';
 import { createLitPortal } from '../../../_common/components/portal.js';
@@ -42,6 +43,10 @@ import {
   PaletteIcon,
 } from '../../../_common/icons/text.js';
 import {
+  getBlockComponentByPath,
+  getModelByBlockComponent,
+} from '../../../_common/utils/query.js';
+import {
   type BookmarkBlockModel,
   BookmarkStyles,
 } from '../../../bookmark-block/bookmark-model.js';
@@ -58,9 +63,9 @@ import {
 import type { EmbedOptions } from '../../root-service.js';
 import { embedCardToolbarStyle } from './styles.js';
 
-export const EMBED_CARD_TOOLBAR = 'embed-card-toolbar';
+export const AFFINE_EMBED_CARD_TOOLBAR_WIDGET = 'affine-embed-card-toolbar';
 
-@customElement(EMBED_CARD_TOOLBAR)
+@customElement(AFFINE_EMBED_CARD_TOOLBAR_WIDGET)
 export class EmbedCardToolbar extends WidgetElement<
   EmbedToolbarModel,
   EmbedToolbarBlockElement
@@ -416,14 +421,22 @@ export class EmbedCardToolbar extends WidgetElement<
         }
 
         const blockSelections = this._selection.filter('block');
-        if (
-          !blockSelections ||
-          blockSelections.length !== 1 ||
-          blockSelections[0].blockId !== this.blockElement.blockId
-        ) {
+        if (!blockSelections || blockSelections.length !== 1) {
           this._hide();
           return;
         }
+
+        const block = getBlockComponentByPath(
+          this.host,
+          blockSelections[0].blockId
+        );
+        if (!block || !isEmbedCardBlockElement(block)) {
+          this._hide();
+          return;
+        }
+
+        this.blockElement = block;
+        this.model = getModelByBlockComponent(block) as EmbedToolbarModel;
 
         this._show();
       })
@@ -601,6 +614,6 @@ export class EmbedCardToolbar extends WidgetElement<
 
 declare global {
   interface HTMLElementTagNameMap {
-    [EMBED_CARD_TOOLBAR]: EmbedCardToolbar;
+    [AFFINE_EMBED_CARD_TOOLBAR_WIDGET]: EmbedCardToolbar;
   }
 }

@@ -81,7 +81,7 @@ export function getEmbedCardToolbar(page: Page) {
   const embedButton = createButtonLocator('embed');
   const cardStyleButton = createButtonLocator('card-style');
   const captionButton = createButtonLocator('caption');
-  const moreButton = createButtonLocator('more');
+  const moreButton = createButtonLocator('more-button');
   const cardStyleHorizontalButton = page.locator(
     '.card-style-button-horizontal'
   );

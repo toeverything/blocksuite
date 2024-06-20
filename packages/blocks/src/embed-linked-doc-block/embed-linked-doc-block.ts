@@ -466,8 +466,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
             <div class="affine-embed-linked-doc-block-overlay"></div>
           </div>
         </div>
-
-        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }

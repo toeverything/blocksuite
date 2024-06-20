@@ -1,6 +1,5 @@
 import './utils/declare-test-window.js';
 
-import { sleep } from '@global/utils.js';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { getEmbedCardToolbar } from 'utils/query.js';
@@ -52,9 +51,10 @@ const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await type(page, '/link');
+  await page.waitForTimeout(100);
+  await type(page, '/link', 100);
   await pressEnter(page);
-  await sleep(100);
+  await page.waitForTimeout(100);
   await type(page, inputUrl);
   await pressEnter(page);
 };
