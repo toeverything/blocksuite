@@ -344,7 +344,7 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
         referenceElement: itemElement,
         autoUpdate: true,
         middleware: [
-          offset(22),
+          offset(12),
           autoPlacement({
             allowedPlacements: ['right-start', 'right-end'],
           }),
