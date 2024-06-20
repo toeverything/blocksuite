@@ -59,6 +59,36 @@ test.describe('Embed synced doc', () => {
     await createAndConvertToEmbedSyncedDoc(page);
   });
 
+  test('can change embed synced doc to card view', async ({ page }) => {
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await createAndConvertToEmbedSyncedDoc(page);
+
+    const syncedDoc = page.locator(`affine-embed-synced-doc-block`);
+    const syncedDocBox = await syncedDoc.boundingBox();
+    assertExists(syncedDocBox);
+    await page.mouse.click(
+      syncedDocBox.x + syncedDocBox.width / 2,
+      syncedDocBox.y + syncedDocBox.height / 2
+    );
+
+    await waitNextFrame(page, 200);
+    const toolbar = page.locator('.embed-card-toolbar');
+    await expect(toolbar).toBeVisible();
+
+    const cardBtn = page.locator(
+      '.embed-card-toolbar .embed-card-toolbar-button.card'
+    );
+    await expect(cardBtn).toBeVisible();
+
+    await cardBtn.click();
+    await waitNextFrame(page, 200);
+
+    const embedSyncedBlock = page.locator('affine-embed-linked-doc-block');
+    expect(await embedSyncedBlock.count()).toBe(1);
+  });
+
   // FIXME(mirone/#6534)
   test.skip('drag embed synced doc to whiteboard should fit in height', async ({
     page,
