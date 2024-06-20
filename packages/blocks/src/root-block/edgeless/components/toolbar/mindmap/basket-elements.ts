@@ -167,19 +167,19 @@ export const textRender: DraggableTool['render'] = (
       text: new DocCollection.Y.Text(),
     });
 
-    service.telemetryService?.track('CanvasElementAdded', {
-      control: 'toolbar:dnd',
-      page: 'whiteboard editor',
-      module: 'toolbar',
-      segment: 'toolbar',
-      type: 'text',
-    });
-
     edgeless.doc.captureSync();
     const textElement = edgeless.service.getElementById(id);
     assertInstanceOf(textElement, TextElementModel);
     mountTextElementEditor(textElement, edgeless);
   }
+
+  service.telemetryService?.track('CanvasElementAdded', {
+    control: 'toolbar:dnd',
+    page: 'whiteboard editor',
+    module: 'toolbar',
+    segment: 'toolbar',
+    type: 'text',
+  });
 };
 
 const toolStyle2StyleObj = (state: ConfigState, style: ConfigStyle = {}) => {
