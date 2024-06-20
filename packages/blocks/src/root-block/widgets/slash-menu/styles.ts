@@ -61,6 +61,7 @@ export const styles = css`
     border: 1px solid var(--affine-border-color, #e3e2e4);
     border-radius: 4px;
     color: var(--affine-icon-color);
+    background: var(--affine-background-overlay-panel-color);
 
     display: flex;
     justify-content: center;
@@ -71,11 +72,6 @@ export const styles = css`
     display: block;
   }
 
-  .slash-menu-item.delete:hover {
-    background: var(--affine-background-error-color);
-    color: var(--affine-error-color);
-    fill: var(--affine-error-color);
-  }
   .slash-menu-item.ask-ai {
     color: var(--affine-brand-color);
   }

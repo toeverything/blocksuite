@@ -221,6 +221,35 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashItems.nth(1)).toHaveAttribute('hover', 'false');
   });
 
+  test('should open tooltip when hover on item', async ({ page }) => {
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('icon-button');
+    const tooltip = page.locator('.affine-tooltip');
+
+    await slashItems.nth(0).hover();
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toHaveText(['Text']);
+    await page.mouse.move(0, 0);
+    await expect(tooltip).toBeHidden();
+
+    await slashItems.nth(1).hover();
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toHaveText(['Heading #1']);
+    await page.mouse.move(0, 0);
+    await expect(tooltip).toBeHidden();
+
+    await expect(slashItems.nth(4).locator('.text')).toHaveText([
+      'Other Headings',
+    ]);
+    await slashItems.nth(4).hover();
+    await expect(tooltip).toBeHidden();
+  });
+
   test('press tab should move up and down', async ({ page }) => {
     await initEmptyParagraphState(page);
     const slashMenu = page.locator(`.slash-menu`);
