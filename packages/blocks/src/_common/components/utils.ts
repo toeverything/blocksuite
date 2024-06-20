@@ -261,6 +261,9 @@ export const scrollbarStyle = (container: string) => {
     throw new Error('Invalid container name!');
 
   return css`
+    ${unsafeCSS(container)} {
+      scrollbar-gutter: stable;
+    }
     ${unsafeCSS(container)}::-webkit-scrollbar {
       -webkit-appearance: none;
       width: 4px;

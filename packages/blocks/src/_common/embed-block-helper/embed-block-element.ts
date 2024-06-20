@@ -3,6 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html, render } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
@@ -19,7 +20,12 @@ import { Bound } from '../../surface-block/index.js';
 import { BlockComponent } from '../components/block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
-import { type EmbedCardStyle, matchFlavours } from '../utils/index.js';
+import {
+  type EmbedCardStyle,
+  getThemeMode,
+  matchFlavours,
+} from '../utils/index.js';
+import { styles } from './styles.js';
 
 export class EmbedBlockElement<
   Model extends
@@ -48,6 +54,8 @@ export class EmbedBlockElement<
       (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
     );
   }
+
+  static override styles = styles;
 
   private _isInSurface = false;
 
@@ -157,6 +165,8 @@ export class EmbedBlockElement<
 
   override accessor useCaptionEditor = true;
 
+  override accessor showBlockSelection = false;
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -183,10 +193,17 @@ export class EmbedBlockElement<
   }
 
   renderEmbed = (children: () => TemplateResult) => {
+    const theme = getThemeMode();
+    const isSelected = !!this.selected?.is('block');
+
     if (!this.isInSurface) {
       return html`
         <div
-          class="embed-block-container"
+          class=${classMap({
+            'embed-block-container': true,
+            [theme]: true,
+            selected: isSelected,
+          })}
           style=${styleMap({
             position: 'relative',
             width: '100%',

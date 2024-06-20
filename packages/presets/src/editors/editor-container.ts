@@ -114,7 +114,6 @@ export class AffineEditorContainer
       overflow-y: auto;
       container-name: viewport;
       container-type: inline-size;
-      background: var(--affine-background-primary-color);
       font-family: var(--affine-font-family);
     }
     .affine-page-viewport * {

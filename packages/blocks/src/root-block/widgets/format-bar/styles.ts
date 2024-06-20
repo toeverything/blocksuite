@@ -41,7 +41,7 @@ const paragraphButtonStyle = css`
     box-sizing: border-box;
     position: absolute;
     min-width: 178px;
-    padding: 8px 8px;
+    padding: 8px 4px 8px 8px;
     max-height: 380px;
     overflow-y: auto;
 
