@@ -185,18 +185,29 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     }
 
     const tree = this._tree;
-
-    tree.children.forEach(child => {
-      if (child.detail.preferredDir === LayoutType.LEFT) {
-        tree.left.push(child);
-      } else if (child.detail.preferredDir === LayoutType.RIGHT) {
-        tree.right.push(child);
-      } else {
-        tree.right.length <= tree.left.length
-          ? tree.right.push(child)
-          : tree.left.push(child);
+    const splitPoint = tree.children.findIndex((child, index) => {
+      if (
+        child.detail.preferredDir === LayoutType.LEFT ||
+        (child.detail.preferredDir === LayoutType.RIGHT &&
+          child.children[index + 1]?.detail.preferredDir !== LayoutType.RIGHT)
+      ) {
+        return true;
       }
+
+      return false;
     });
+
+    if (splitPoint === -1) {
+      const mid = Math.ceil(tree.children.length / 2);
+
+      tree.right.push(...tree.children.slice(0, mid));
+      tree.left.push(...tree.children.slice(mid));
+    } else {
+      tree.right.push(...tree.children.slice(0, splitPoint + 1));
+      tree.left.push(...tree.children.slice(splitPoint + 1));
+    }
+
+    tree.left.reverse();
   }
 
   private _isConnectorOutdated(
@@ -465,7 +476,13 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       const parentNode = parent ? this._nodeMap.get(parent)! : null;
 
       if (parentNode) {
-        let index = 'a0';
+        const isBalance =
+          this.layoutType === LayoutType.BALANCE &&
+          this._tree.id === parentNode.id;
+
+        let index = last(parentNode.children)
+          ? generateKeyBetween(last(parentNode.children)!.detail.index, null)
+          : 'a0';
 
         sibling = sibling ?? last(parentNode.children)?.id;
         const siblingNode =
@@ -506,6 +523,15 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
                   parentNode.children[siblingIndex - 1]?.detail.index ?? null,
                   siblingNode.detail.index
                 );
+        } else if (isBalance && direction !== undefined) {
+          const lastNode =
+            direction === LayoutType.LEFT
+              ? this._tree.left[0]
+              : last(this._tree.right);
+
+          if (lastNode) {
+            index = generateKeyBetween(lastNode.detail.index, null);
+          }
         }
 
         const nodeDetail: NodeDetail = {
@@ -513,11 +539,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
           parent: parent!,
         };
 
-        if (
-          direction !== undefined &&
-          this.layoutType === LayoutType.BALANCE &&
-          parentNode.id === this._tree.id
-        ) {
+        if (direction !== undefined && isBalance) {
           nodeDetail.preferredDir = direction;
         }
 
@@ -534,6 +556,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
           ...rootStyle,
         });
 
+        this.children.clear();
         this.children.set(id, {
           index: 'a0',
         });

@@ -264,7 +264,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private get _blockElement() {
     const blockSelection = this.edgeless.service.selection.surfaceSelections;
-    if (blockSelection.length !== 1) {
+    if (
+      blockSelection.length !== 1 ||
+      blockSelection[0].elements.length !== 1
+    ) {
       return;
     }
 
