@@ -1,6 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { BlockElement } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/block-std';
+import { BlockElement, WidgetElement } from '@blocksuite/block-std';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -8,6 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
+import { getScrollContainer } from '../../../_common/utils/scroll-container.js';
 import type { PageRootBlockComponent, RootBlockModel } from '../../index.js';
 import { autoScroll } from '../../text-selection/utils.js';
 
@@ -31,12 +31,6 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
   RootBlockModel,
   PageRootBlockComponent
 > {
-  private get _viewportElement() {
-    const rootElement = this.blockElement;
-    assertExists(rootElement);
-    return rootElement.viewportElement;
-  }
-
   private get _viewport() {
     const rootElement = this.blockElement;
     assertExists(rootElement);
@@ -181,8 +175,8 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
     this._lastPointerState = state;
 
     if (shouldAutoScroll) {
-      const rect = this._viewportElement.getBoundingClientRect();
-      const result = autoScroll(this._viewportElement, state.raw.y - rect.top);
+      const rect = this.scrollContainer.getBoundingClientRect();
+      const result = autoScroll(this.scrollContainer, state.raw.y - rect.top);
       if (!result) {
         this._clearRaf();
         return;
@@ -270,8 +264,12 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
     );
   }
 
+  private get scrollContainer() {
+    return getScrollContainer(this.blockElement);
+  }
+
   override firstUpdated() {
-    this._disposables.addFromEvent(this._viewportElement, 'scroll', () => {
+    this._disposables.addFromEvent(this.scrollContainer, 'scroll', () => {
       if (!this._dragging || !this._lastPointerState) return;
 
       const state = this._lastPointerState;

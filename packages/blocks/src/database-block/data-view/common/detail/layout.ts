@@ -1,5 +1,4 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   computePosition,
@@ -95,15 +94,12 @@ class SideLayoutModal extends ShadowlessElement {
 }
 
 export const popSideDetail = (ops: {
-  attachTo: HTMLElement;
   target: ReferenceElement;
   view: DataViewManager;
   rowId: string;
   onClose?: () => void;
 }) => {
-  const rootElement = ops.attachTo;
-  assertExists(rootElement);
-  const modal = createModal(rootElement);
+  const modal = createModal(document.body);
   // fit to the size of the body element
   const cancel = autoUpdate(ops.target, modal, () => {
     computePosition(ops.target, modal, {
@@ -143,5 +139,8 @@ export const createRecordDetail = (ops: {
   const detail = new RecordDetail();
   detail.view = ops.view;
   detail.rowId = ops.rowId;
-  return detail;
+  return html`<affine-data-view-record-detail
+    .view=${ops.view}
+    .rowId=${ops.rowId}
+  ></affine-data-view-record-detail>`;
 };

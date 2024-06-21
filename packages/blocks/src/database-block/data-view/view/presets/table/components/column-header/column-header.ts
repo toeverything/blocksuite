@@ -15,6 +15,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { AddCursorIcon } from '../../../../../../../_common/icons/index.js';
+import { getScrollContainer } from '../../../../../../../_common/utils/scroll-container.js';
 import { renderTemplate } from '../../../../../utils/uni-component/render-template.js';
 import type { DataViewTableManager } from '../../table-view-manager.js';
 import { styles } from './styles.js';
@@ -54,17 +55,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  getScrollContainer = (ele: HTMLElement) => {
-    let container: HTMLElement | null = ele;
-    while (
-      container &&
-      container.computedStyleMap().get('overflow-y')?.toString() !== 'scroll'
-    ) {
-      container = container.parentElement;
-    }
-    return container;
-  };
-
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
@@ -72,7 +62,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
       })
     );
-    const scrollContainer = this.getScrollContainer(
+    const scrollContainer = getScrollContainer(
       this.closest('affine-data-view-renderer')!
     );
     const group = this.closest('affine-data-view-table-group');

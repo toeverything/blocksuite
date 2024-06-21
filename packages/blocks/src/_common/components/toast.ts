@@ -41,7 +41,7 @@ const createToastContainer = (editorHost: EditorHost) => {
   const rootElement = getRootByEditorHost(editorHost);
   assertExists(rootElement);
   const viewportElement = rootElement.viewportElement;
-  viewportElement.append(element);
+  viewportElement?.append(element);
   return element;
 };
 

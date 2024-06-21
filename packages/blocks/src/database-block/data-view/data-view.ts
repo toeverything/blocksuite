@@ -4,7 +4,7 @@ import type { BlockStdScope } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import type { ReferenceElement } from '@floating-ui/dom';
-import { css, unsafeCSS } from 'lit';
+import { css, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -39,7 +39,10 @@ export type DataViewRendererConfig = {
   dataSource: DataSource;
   viewSource: ViewSource;
   detailPanelConfig?: {
-    openDetailPanel?: (target: HTMLElement) => void;
+    openDetailPanel?: (
+      target: HTMLElement,
+      template: TemplateResult
+    ) => Promise<void>;
     target?: () => ReferenceElement;
   };
   headerWidget: DataViewProps['headerWidget'];
@@ -170,14 +173,16 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     const openDetailPanel = this.config.detailPanelConfig?.openDetailPanel;
     if (openDetailPanel) {
       openDetailPanel(
+        this,
         createRecordDetail({
           view: ops.view,
           rowId: ops.rowId,
         })
-      );
+      )
+        .catch(console.error)
+        .finally(ops.onClose);
     } else {
       popSideDetail({
-        attachTo: this.closest('editor-host')?.parentElement as HTMLElement,
         target: this.config.detailPanelConfig?.target?.() ?? document.body,
         view: ops.view,
         rowId: ops.rowId,
