@@ -2,9 +2,9 @@
 
 import { handleError } from '@blocksuite/global/exceptions';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { BlockModel, Doc } from '@blocksuite/store';
-import { css } from 'lit';
+import { type BlockModel, BlockViewType, type Doc } from '@blocksuite/store';
 import {
+  css,
   LitElement,
   nothing,
   type PropertyValues,
@@ -76,6 +76,9 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   private _renderModel = (model: BlockModel): TemplateResult => {
     const { flavour } = model;
     const block = this.doc.getBlock(model.id);
+    if (block?.blockViewType === BlockViewType.Hidden) {
+      return html``;
+    }
     const schema = this.doc.schema.flavourSchemaMap.get(flavour);
     const view = this.std.spec.getView(flavour);
     if (!schema || !block || !view) {
