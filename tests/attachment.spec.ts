@@ -17,6 +17,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
+  resetHistory,
   waitNextFrame,
 } from './utils/actions/misc.js';
 import {
@@ -56,6 +57,7 @@ function getAttachment(page: Page) {
     const slashMenu = page.locator(`.slash-menu`);
     await waitNextFrame(page);
     await type(page, '/');
+    await resetHistory(page);
     await expect(slashMenu).toBeVisible();
     await type(page, 'file', 100);
     await expect(slashMenu).toBeVisible();
@@ -234,6 +236,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
   prop:index="a0"
 >
   <affine:paragraph
+    prop:text="/"
     prop:type="text"
   />
 </affine:note>`,

@@ -369,8 +369,12 @@ export class EdgelessClipboardController extends PageClipboard {
       return;
     }
 
+    const elements = getCloneElements(
+      this.selectionManager.selectedElements,
+      this.surface.edgeless.service.frame
+    );
     this.doc.transact(() => {
-      deleteElements(this.surface, selectedElements);
+      deleteElements(this.surface, elements);
     });
 
     this.selectionManager.set({

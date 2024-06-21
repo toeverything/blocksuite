@@ -155,6 +155,16 @@ const styles = css`
   note-display-mode-panel {
     position: absolute;
     display: none;
+    background: var(--affine-background-overlay-panel-color);
+    border-radius: 8px;
+    box-shadow: var(--affine-shadow-2);
+    box-sizing: border-box;
+    padding: 8px;
+    font-size: var(--affine-font-sm);
+    color: var(--affine-text-primary-color);
+    line-height: 22px;
+    font-weight: 400;
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
   }
 
   note-display-mode-panel[data-show] {

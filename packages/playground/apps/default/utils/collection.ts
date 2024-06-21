@@ -57,7 +57,9 @@ export async function createDefaultDocCollection() {
   }
 
   const flags: Partial<BlockSuiteFlags> = Object.fromEntries(
-    [...params.entries()].filter(([key]) => key.startsWith('enable_'))
+    [...params.entries()]
+      .filter(([key]) => key.startsWith('enable_'))
+      .map(([k, v]) => [k, v === 'true'])
   );
 
   const options: DocCollectionOptions = {
@@ -73,7 +75,6 @@ export async function createDefaultDocCollection() {
       enable_synced_doc_block: true,
       enable_pie_menu: true,
       enable_lasso_tool: true,
-      enable_mindmap_entry: true,
       enable_edgeless_text: true,
       ...flags,
     },

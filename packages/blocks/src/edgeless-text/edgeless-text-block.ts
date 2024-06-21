@@ -12,6 +12,25 @@ export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 
 @customElement('affine-edgeless-text')
 export class EdgelessTextBlockComponent extends BlockElement<EdgelessTextBlockModel> {
+  tryFocusEnd() {
+    const paragraphOrLists = Array.from(
+      this.querySelectorAll<BlockElement>('affine-paragraph, affine-list')
+    );
+    const last = paragraphOrLists.at(-1);
+    if (last) {
+      this.host.selection.setGroup('note', [
+        this.host.selection.create('text', {
+          from: {
+            blockId: last.blockId,
+            index: last.model.text?.length ?? 0,
+            length: 0,
+          },
+          to: null,
+        }),
+      ]);
+    }
+  }
+
   @query('.affine-block-children-container')
   accessor childrenContainer!: HTMLDivElement;
 

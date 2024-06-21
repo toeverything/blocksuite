@@ -7,8 +7,7 @@ declare type BlockSuiteFlags = {
   enable_legacy_validation: boolean;
   enable_expand_database_block: boolean;
   enable_lasso_tool: boolean;
-  enable_mindmap_entry: boolean;
-  enable_new_image_actions: boolean;
   enable_edgeless_text: boolean;
+  enable_ai_onboarding: boolean;
   readonly: Record<string, boolean>;
 };

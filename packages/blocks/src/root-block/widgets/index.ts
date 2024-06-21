@@ -22,6 +22,10 @@ export {
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EdgelessElementToolbarWidget,
 } from './element-toolbar/index.js';
+export {
+  AFFINE_EMBED_CARD_TOOLBAR_WIDGET,
+  EmbedCardToolbar,
+} from './embed-card-toolbar/embed-card-toolbar.js';
 export { toolbarDefaultConfig } from './format-bar/config.js';
 export {
   AFFINE_FORMAT_BAR_WIDGET,

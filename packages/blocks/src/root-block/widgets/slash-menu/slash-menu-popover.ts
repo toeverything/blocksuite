@@ -36,6 +36,11 @@ import {
   slashItemClassName,
 } from './utils.js';
 
+type InnerSlashMenuContext = SlashMenuContext & {
+  tooltipTimeout: number;
+  onClickItem: (item: SlashMenuActionItem) => void;
+};
+
 @customElement('affine-slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
   get host() {
@@ -53,6 +58,8 @@ export class SlashMenu extends WithDisposable(LitElement) {
     y: string;
     height: number;
   } | null = null;
+
+  private _innerSlashMenuContext!: InnerSlashMenuContext;
 
   private _itemPathMap = new Map<SlashMenuItem, number[]>();
 
@@ -166,6 +173,12 @@ export class SlashMenu extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
 
+    this._innerSlashMenuContext = {
+      ...this.context,
+      onClickItem: this._handleClickItem,
+      tooltipTimeout: this.config.tooltipTimeout,
+    };
+
     this._initItemPathMap();
 
     this._disposables.addFromEvent(this, 'mousedown', e => {
@@ -247,7 +260,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
           ></div>`
         : nothing}
       <inner-slash-menu
-        .context=${this.context}
+        .context=${this._innerSlashMenuContext}
         .menu=${this._queryState === 'off'
           ? this.config.items
           : this._filteredItems}
@@ -271,16 +284,13 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
   private _subMenuAbortController: AbortController | null = null;
 
   @property({ attribute: false })
-  accessor context!: SlashMenuContext;
+  accessor context!: InnerSlashMenuContext;
 
   @property({ attribute: false })
   accessor menu!: SlashMenuStaticItem[];
 
   @property({ attribute: false })
   accessor depth: number = 0;
-
-  @property({ attribute: false })
-  accessor onClickItem!: (item: SlashMenuActionItem) => void;
 
   @property({ attribute: false })
   accessor abortController!: AbortController;
@@ -327,7 +337,6 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
         .menu=${item.subMenu}
         .depth=${this.depth + 1}
         .abortController=${this._subMenuAbortController}
-        .onClickItem=${this.onClickItem}
       >
         ${item.subMenu.map(this._renderItem)}
       </inner-slash-menu>`,
@@ -371,11 +380,11 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
       subText=${ifDefined(description)}
       data-testid="${name}"
       hover=${hover}
-      @mouseenter=${() => {
+      @mousemove=${() => {
         this._activeItem = item;
         this._closeSubMenu();
       }}
-      @click=${() => this.onClickItem(item)}
+      @click=${() => this.context.onClickItem(item)}
     >
       ${icon && html`<div class="slash-menu-item-icon">${icon}</div>`}
       ${tooltip &&
@@ -384,7 +393,7 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
         .offset=${22}
         .tooltipStyle=${slashItemToolTipStyle}
         .hoverOptions=${{
-          enterDelay: 1500,
+          enterDelay: this.context.tooltipTimeout,
           allowMultiple: false,
         }}
       >
@@ -407,7 +416,7 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
       subText=${ifDefined(description)}
       data-testid="${name}"
       hover=${hover}
-      @mouseenter=${() => {
+      @mousemove=${() => {
         this._activeItem = item;
         this._openSubMenu(item);
       }}
@@ -516,7 +525,7 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
           if (isSubMenuItem(this._activeItem)) {
             this._openSubMenu(this._activeItem);
           } else if (isActionItem(this._activeItem)) {
-            this.onClickItem(this._activeItem);
+            this.context.onClickItem(this._activeItem);
           }
 
           event.preventDefault();

@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -180,8 +180,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
             </div>
           </div>
         </div>
-
-        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }

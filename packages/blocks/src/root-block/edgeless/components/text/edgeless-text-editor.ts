@@ -349,7 +349,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       hasMaxWidth,
       w,
     } = this.element;
-    const lineHeight = getLineHeight(fontFamily, fontSize);
+    const lineHeight = getLineHeight(fontFamily, fontSize, fontWeight);
     const rect = getSelectedRect([this.element]);
 
     const { translateX, translateY, zoom } = this.edgeless.service.viewport;

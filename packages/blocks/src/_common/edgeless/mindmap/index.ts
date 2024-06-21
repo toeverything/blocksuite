@@ -52,15 +52,16 @@ export function getNearestTranslation(
   }
 
   if (elementBound.y - padding[0] < viewportBound.y) {
-    dy = viewportBound.y - (elementBound.y - padding[0]);
+    dy = elementBound.y - padding[0] - viewportBound.y;
   } else if (
     elementBound.y + elementBound.h + padding[0] >
     viewportBound.y + viewportBound.h
   ) {
     dy =
-      viewportBound.y +
-      viewportBound.h -
-      (elementBound.y + elementBound.h + padding[0]);
+      elementBound.y +
+      elementBound.h +
+      padding[0] -
+      (viewportBound.y + viewportBound.h);
   }
 
   return [dx, dy];

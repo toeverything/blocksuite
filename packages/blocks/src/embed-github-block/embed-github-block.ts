@@ -285,8 +285,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
             <div class="affine-embed-github-banner">${bannerImage}</div>
           </div>
         </div>
-
-        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }

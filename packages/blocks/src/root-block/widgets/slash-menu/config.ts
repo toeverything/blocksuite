@@ -70,7 +70,8 @@ export type SlashMenuConfig = {
   triggerKeys: string[];
   ignoreBlockTypes: BlockSuite.Flavour[];
   items: SlashMenuItem[];
-  maxHeight: 344;
+  maxHeight: number;
+  tooltipTimeout: number;
 };
 
 export type SlashMenuStaticConfig = Omit<SlashMenuConfig, 'items'> & {
@@ -123,6 +124,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
   triggerKeys: ['/'],
   ignoreBlockTypes: ['affine:code'],
   maxHeight: 344,
+  tooltipTimeout: 800,
   items: [
     // ---------------------------------------------------------
     { groupName: 'Basic' },

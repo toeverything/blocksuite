@@ -24,6 +24,8 @@ export class BlockComponent<
 
   protected accessor useCaptionEditor = false;
 
+  protected accessor showBlockSelection = true;
+
   protected accessor blockContainerStyles: StyleInfo | undefined = undefined;
 
   constructor() {
@@ -42,7 +44,9 @@ export class BlockComponent<
       ${this.useCaptionEditor
         ? html`<block-caption-editor .block=${this}></block-caption-editor>`
         : nothing}
-      <affine-block-selection .block=${this}></affine-block-selection>
+      ${this.showBlockSelection
+        ? html`<affine-block-selection .block=${this}></affine-block-selection>`
+        : nothing}
     </div>`;
   }
 }

@@ -8,6 +8,12 @@ import {
 } from '../../consts.js';
 
 export const styles = css`
+    affine-database-column-header{
+        display: block;
+        background-color: var(--affine-background-primary-color);
+        position: relative;
+        z-index: 1;
+    } 
   .affine-database-column-header {
     position: relative;
     display: flex;
@@ -16,6 +22,7 @@ export const styles = css`
     border-top: 1px solid var(--affine-border-color);
     box-sizing: border-box;
     user-select: none;
+      background-color: var(--affine-background-primary-color);
   }
 
   .affine-database-column {

@@ -444,14 +444,21 @@ export abstract class SurfaceGroupLikeModel<
     });
   }
 
+  hasChild(element: string | BlockSuite.EdgelessModelType) {
+    return (
+      (typeof element === 'string'
+        ? this.children?.has(element)
+        : this.children?.has(element.id)) ?? false
+    );
+  }
+
   /**
    * Check if the group has the given descendant.
    */
   hasDescendant(element: string | BlockSuite.EdgelessModelType) {
-    const groups =
-      typeof element === 'string'
-        ? this.surface.getGroups(element)
-        : this.surface.getGroups(element.id);
+    const groups = this.surface.getGroups(
+      typeof element === 'string' ? element : element.id
+    );
 
     return groups.some(group => group.id === this.id);
   }

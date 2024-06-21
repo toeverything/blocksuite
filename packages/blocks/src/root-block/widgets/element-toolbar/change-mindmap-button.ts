@@ -29,12 +29,12 @@ const MINDMAP_STYLE_LIST = [
     icon: MindmapStyleOne,
   },
   {
-    value: MindmapStyle.THREE,
-    icon: MindmapStyleThree,
-  },
-  {
     value: MindmapStyle.FOUR,
     icon: MindmapStyleFour,
+  },
+  {
+    value: MindmapStyle.THREE,
+    icon: MindmapStyleThree,
   },
   {
     value: MindmapStyle.TWO,

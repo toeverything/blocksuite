@@ -155,11 +155,11 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
             const element = this.element;
             this.mountEditor?.(element, edgeless);
 
-            if (isElementOutsideViewport(service.viewport, element, [20, 20])) {
+            if (isElementOutsideViewport(service.viewport, element, [90, 20])) {
               const [dx, dy] = getNearestTranslation(
                 edgeless.service.viewport,
                 element,
-                [20, 20]
+                [100, 20]
               );
 
               edgeless.service.viewport.smoothTranslate(
@@ -186,11 +186,11 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
             const element = this.element;
             this.mountEditor?.(element, edgeless);
 
-            if (isElementOutsideViewport(service.viewport, element, [20, 20])) {
+            if (isElementOutsideViewport(service.viewport, element, [90, 20])) {
               const [dx, dy] = getNearestTranslation(
                 edgeless.service.viewport,
                 element,
-                [20, 20]
+                [100, 20]
               );
 
               edgeless.service.viewport.smoothTranslate(
@@ -333,7 +333,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       fontSize: this.element.fontSize + 'px',
       fontFamily: wrapFontFamily(this.element.fontFamily),
       fontWeight: this.element.fontWeight,
-      lineHeight: 'initial',
+      lineHeight: 'normal',
       outline: 'none',
       transform: `scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
       transformOrigin: 'top left',

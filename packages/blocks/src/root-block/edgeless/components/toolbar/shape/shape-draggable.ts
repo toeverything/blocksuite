@@ -177,6 +177,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         if (controller instanceof ShapeToolController) {
           controller.clearOverlay();
         }
+        overlay.element.style.filter = `drop-shadow(${this.shapeShadow})`;
         this.readyToDrop = true;
         this.draggingShape = element.data.name;
       },
@@ -244,7 +245,10 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
               `.shape.${this.draggingShape}`
             ) as HTMLElement;
             assertExists(el, 'Edgeless toolbar Shape element not found');
-            this.draggableController.clickToDrag(el, service.tool.lastMousePos);
+            const { x, y } = service.tool.lastMousePos;
+            const { left, top } = this.edgeless.viewport;
+            const clientPos = { x: x + left, y: y + top };
+            this.draggableController.clickToDrag(el, clientPos);
           },
         },
         { global: true }

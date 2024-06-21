@@ -239,7 +239,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       labelConstraints: { hasMaxWidth, maxWidth },
     } = connector;
 
-    const lineHeight = getLineHeight(fontFamily, fontSize);
+    const lineHeight = getLineHeight(fontFamily, fontSize, fontWeight);
     const { translateX, translateY, zoom } = this.edgeless.service.viewport;
     const [x, y] = Vec.mul(connector.getPointByOffsetDistance(distance), zoom);
     const transformOperation = [

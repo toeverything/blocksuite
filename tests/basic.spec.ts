@@ -149,10 +149,10 @@ test(scoped`A first open, B first edit`, async ({ context, page: pageA }) => {
 
   const pageB = await context.newPage();
   await enterPlaygroundRoom(pageB, {
-    flags: {},
     room,
     noInit: true,
   });
+  await pageB.waitForTimeout(500);
   await focusRichText(pageB);
 
   await waitNextFrame(pageA);
