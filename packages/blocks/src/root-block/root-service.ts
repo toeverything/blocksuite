@@ -173,7 +173,7 @@ export class RootService extends BlockService<RootBlockModel> {
 
   peekViewService: PeekViewService | null = null;
 
-  docModeService: DocModeService = createDocModeService(this.doc);
+  docModeService: DocModeService = createDocModeService(this.doc.id);
 
   quickSearchService: QuickSearchService | null = null;
 

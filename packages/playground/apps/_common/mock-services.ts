@@ -9,24 +9,56 @@ import {
 } from '@blocksuite/blocks';
 import { type DocCollection, Slot } from '@blocksuite/store';
 
-const modeChange = new Slot<DocMode>();
-export function mockDocModeService() {
+function getModeFromStorage() {
+  const mapJson = localStorage.getItem('playground:docMode');
+  const mapArray = mapJson ? JSON.parse(mapJson) : [];
+  return new Map<string, DocMode>(mapArray);
+}
+
+function saveModeToStorage(map: Map<string, DocMode>) {
+  const mapArray = Array.from(map);
+  const mapJson = JSON.stringify(mapArray);
+  localStorage.setItem('playground:docMode', mapJson);
+}
+
+export function removeModeFromStorage(docId: string) {
+  const modeMap = getModeFromStorage();
+  modeMap.delete(docId);
+  saveModeToStorage(modeMap);
+}
+
+const DEFAULT_MODE = 'page';
+const slotMap = new Map<string, Slot<DocMode>>();
+export function mockDocModeService(curDocId: string) {
   const docModeService: DocModeService = {
-    setMode: (mode: DocMode) => {
-      localStorage.setItem('playground:editorMode', mode);
-      modeChange.emit(mode);
+    setMode: (mode: DocMode, docId: string = curDocId) => {
+      const modeMap = getModeFromStorage();
+      modeMap.set(docId, mode);
+      saveModeToStorage(modeMap);
+      slotMap.get(docId)?.emit(mode);
     },
-    getMode: () => {
-      return (localStorage.getItem('playground:editorMode') ??
-        'page') as DocMode;
+    getMode: (docId: string = curDocId) => {
+      try {
+        const modeMap = getModeFromStorage();
+        return modeMap.get(docId) ?? DEFAULT_MODE;
+      } catch (_e) {
+        return DEFAULT_MODE;
+      }
     },
-    toggleMode: () => {
-      const mode = docModeService.getMode() === 'page' ? 'edgeless' : 'page';
-      docModeService.setMode(mode);
+    toggleMode: (docId: string = curDocId) => {
+      const mode =
+        docModeService.getMode(docId) === 'page' ? 'edgeless' : 'page';
+      docModeService.setMode(mode, docId);
       return mode;
     },
-    onModeChange: (handler: (mode: DocMode) => void) => {
-      return modeChange.on(handler);
+    onModeChange: (
+      handler: (mode: DocMode) => void,
+      docId: string = curDocId
+    ) => {
+      if (!slotMap.get(docId)) {
+        slotMap.set(docId, new Slot());
+      }
+      return slotMap.get(docId)!.on(handler);
     },
   };
   return docModeService;
