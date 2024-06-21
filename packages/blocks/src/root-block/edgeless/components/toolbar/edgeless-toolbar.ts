@@ -28,7 +28,9 @@ import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getThemeMode } from '../../../../_common/utils/query.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../types.js';
+import type { MenuPopper } from './common/create-popper.js';
 import {
+  edgelessToolbarContext,
   type EdgelessToolbarSlots,
   edgelessToolbarSlotsContext,
   edgelessToolbarThemeContext,
@@ -356,6 +358,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     initialValue: getThemeMode(),
   });
 
+  private _toolbarProvider = new ContextProvider(this, {
+    context: edgelessToolbarContext,
+    initialValue: this,
+  });
+
   private _themeObserver = new ThemeObserver();
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -394,6 +401,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }, 300);
 
   edgeless: EdgelessRootBlockComponent;
+
+  activePopper: MenuPopper<HTMLElement> | null = null;
 
   @query('.edgeless-toolbar-container')
   accessor toolbarContainer!: HTMLElement;
@@ -536,6 +545,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    this._toolbarProvider.setValue(this);
     this._resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width } = entry.contentRect;
@@ -550,6 +560,25 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this.edgeless.slots.edgelessToolUpdated.on(tool => {
         this.edgelessTool = tool;
       })
+    );
+    this._disposables.add(
+      this.edgeless.bindHotKey(
+        {
+          Escape: () => {
+            if (this.edgeless.service.selection.editing) return;
+            if (this.edgelessTool.type === 'frameNavigator') return;
+            if (this.edgelessTool.type === 'default') {
+              if (this.activePopper) {
+                this.activePopper.dispose();
+                this.activePopper = null;
+              }
+              return;
+            }
+            this.setEdgelessTool({ type: 'default' });
+          },
+        },
+        { global: true }
+      )
     );
   }
 

@@ -49,10 +49,9 @@ export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
         .active=${type === 'frame'}
         .iconContainerPadding=${6}
         @click=${() => {
-          this.setEdgelessTool({
-            type: 'frame',
-          });
+          // don't update tool before toggling menu
           this._toggleFrameMenu();
+          this.setEdgelessTool({ type: 'frame' });
         }}
       >
         ${LargeFrameIcon}
