@@ -382,10 +382,12 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
   private _handleLinkClick(e: MouseEvent, docId: string, blockId?: string) {
     if (e.shiftKey && this._rootService.peekViewService) {
-      this._rootService.peekViewService.peek({
-        docId,
-        blockId,
-      });
+      this._rootService.peekViewService
+        .peek({
+          docId,
+          blockId,
+        })
+        .catch(console.error);
     } else {
       this.pageRoot.slots.docLinkClicked.emit({
         docId,
