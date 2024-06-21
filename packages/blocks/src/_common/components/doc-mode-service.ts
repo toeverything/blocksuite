@@ -1,6 +1,5 @@
 import type { Disposable } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
 
 import type { DocMode } from '../types.js';
 
@@ -15,30 +14,28 @@ export interface DocModeService {
 }
 
 const DEFAULT_MODE = 'page';
-const modeMap = new Map<string, { mode: DocMode; slot: Slot<DocMode> }>();
+const modeMap = new Map<string, DocMode>();
+const slotMap = new Map<string, Slot<DocMode>>();
 
-export function createDocModeService(doc: Doc) {
+export function createDocModeService(curDocId: string) {
   const docModeService: DocModeService = {
-    setMode: (mode: DocMode, id: string = doc.id) => {
-      modeMap.set(id, {
-        mode,
-        slot: modeMap.get(id)?.slot || new Slot(),
-      });
-      modeMap.get(id)?.slot.emit(mode);
+    setMode: (mode: DocMode, id: string = curDocId) => {
+      modeMap.set(id, mode);
+      slotMap.get(id)?.emit(mode);
     },
-    getMode: (id: string = doc.id) => {
-      return modeMap.get(id)?.mode ?? DEFAULT_MODE;
+    getMode: (id: string = curDocId) => {
+      return modeMap.get(id) ?? DEFAULT_MODE;
     },
-    toggleMode: (id: string = doc.id) => {
+    toggleMode: (id: string = curDocId) => {
       const mode = docModeService.getMode(id) === 'page' ? 'edgeless' : 'page';
       docModeService.setMode(mode);
       return mode;
     },
-    onModeChange: (handler: (mode: DocMode) => void, id: string = doc.id) => {
-      if (!modeMap.get(id)) {
-        docModeService.setMode(DEFAULT_MODE, id);
+    onModeChange: (handler: (mode: DocMode) => void, id: string = curDocId) => {
+      if (!slotMap.get(id)) {
+        slotMap.set(id, new Slot());
       }
-      return modeMap.get(id)!.slot.on(handler);
+      return slotMap.get(id)!.on(handler);
     },
   };
   return docModeService;

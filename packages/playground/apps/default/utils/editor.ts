@@ -1,5 +1,5 @@
 import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
-import type { DocMode, PageRootService } from '@blocksuite/blocks';
+import type { DocModeService, PageRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BlockCollection } from '@blocksuite/store';
@@ -15,8 +15,14 @@ import {
 } from '../../_common/mock-services.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
-const params = new URLSearchParams(location.search);
-const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
+function setDocModeFromUrlParams(service: DocModeService) {
+  const params = new URLSearchParams(location.search);
+  const paramMode = params.get('mode');
+  if (paramMode) {
+    const docMode = paramMode === 'page' ? 'page' : 'edgeless';
+    service.setMode(docMode);
+  }
+}
 
 export async function mountDefaultDocEditor(collection: DocCollection) {
   const blockCollection = collection.docs.values().next()
@@ -30,6 +36,8 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const app = document.getElementById('app');
   if (!app) return;
 
+  const modeService = mockDocModeService(doc.id);
+  setDocModeFromUrlParams(modeService);
   const editor = new AffineEditorContainer();
   const specs = getExampleSpecs();
   editor.pageSpecs = [...specs.pageModeSpecs].map(spec => {
@@ -49,6 +57,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     return spec;
   });
   editor.doc = doc;
+  editor.mode = modeService.getMode();
   editor.slots.docLinkClicked.on(({ docId }) => {
     const target = collection.getDoc(docId);
     if (!target) {
@@ -56,6 +65,9 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     }
     target.load();
     editor.doc = target;
+  });
+  editor.slots.docUpdated.on(({ newDocId }) => {
+    editor.mode = modeService.getMode(newDocId);
   });
 
   app.append(editor);
@@ -69,14 +81,8 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const quickEdgelessMenu = new QuickEdgelessMenu();
   quickEdgelessMenu.collection = doc.collection;
   quickEdgelessMenu.editor = editor;
-  quickEdgelessMenu.mode = defaultMode;
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
   quickEdgelessMenu.docsPanel = docsPanel;
-
-  function switchQuickEdgelessMenu(mode: DocMode) {
-    if (!mode) return;
-    quickEdgelessMenu.mode = mode;
-  }
 
   document.body.append(leftSidePanel);
   document.body.append(quickEdgelessMenu);
@@ -115,13 +121,9 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
               console.log('peek', target);
             },
           };
-          pageRootService.docModeService = mockDocModeService();
-          pageRootService.docModeService &&
-            disposable.add(
-              pageRootService.docModeService.onModeChange(
-                switchQuickEdgelessMenu
-              )
-            );
+          pageRootService.docModeService = mockDocModeService(
+            pageRootService.doc.id
+          );
         });
       },
     };
