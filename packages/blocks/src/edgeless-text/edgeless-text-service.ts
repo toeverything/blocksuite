@@ -55,7 +55,7 @@ export class EdgelessTextBlockService extends BlockService<EdgelessTextBlockMode
             if (!edgelessText || !paragraph) return;
 
             const abortController = new AbortController();
-            paragraph.addEventListener(
+            edgelessText.addEventListener(
               'focusout',
               () => {
                 if (

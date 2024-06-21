@@ -1,5 +1,8 @@
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
-import type { ViewStore } from '@blocksuite/block-std';
+import type {
+  BlockElement,
+  EditorHost,
+  ViewStore,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
@@ -232,20 +235,11 @@ export function getEditorContainer(editorHost: EditorHost): AbstractEditor {
 }
 
 export function isInsidePageEditor(host: EditorHost) {
-  const hostParentEl = host.parentElement;
-  return (
-    !!hostParentEl &&
-    (hostParentEl.classList.contains('affine-page-viewport') ||
-      hostParentEl.classList.contains('page-editor-container'))
-  );
+  return !!host.querySelector('&>affine-page-root');
 }
 
 export function isInsideEdgelessEditor(host: EditorHost) {
-  const hostParentEl = host.parentElement;
-  return (
-    !!hostParentEl &&
-    hostParentEl.classList.contains('affine-edgeless-viewport')
-  );
+  return !!host.querySelector('&>affine-edgeless-root');
 }
 
 /**

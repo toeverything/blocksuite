@@ -75,6 +75,7 @@ export function createPopper<T extends keyof HTMLElementTagNameMap>(
     pointerEvents: 'auto',
   });
   const remove = () => {
+    clipWrapper.remove();
     menu.remove();
     popMap.get(reference)?.delete(tagName);
     options?.onDispose?.();

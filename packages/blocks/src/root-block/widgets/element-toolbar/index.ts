@@ -378,6 +378,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       attachment,
       image,
       edgelessText,
+      mindmap: mindmaps,
     } = groupedSelected;
     const { selectedElements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -404,6 +405,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       ? generalButtons
       : [
           ...generalButtons,
+          renderMindmapButton(edgeless, mindmaps),
           renderMindmapButton(edgeless, shape),
           renderChangeShapeButton(edgeless, shape),
           renderChangeBrushButton(edgeless, brush),

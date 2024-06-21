@@ -184,7 +184,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
       onDrop: (el, bound) => {
         const xywh = bound.serialize();
         const shape = el.data;
-        this.edgeless.service.addElement(CanvasElementType.SHAPE, {
+        const id = this.edgeless.service.addElement(CanvasElementType.SHAPE, {
           shapeType: shape.name === 'roundedRect' ? ShapeType.Rect : shape.name,
           xywh,
           radius: shape.name === 'roundedRect' ? 0.1 : 0,
@@ -204,6 +204,11 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
 
         this._setShapeOverlayLock(false);
         this.readyToDrop = false;
+
+        this.edgeless.service.tool.setEdgelessTool(
+          { type: 'default' },
+          { elements: [id], editing: false }
+        );
       },
       onCanceled: () => {
         this._setShapeOverlayLock(false);
@@ -314,6 +319,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
                   data: shape,
                   preview: shape.svg,
                 })}
+              @click=${(e: MouseEvent) => e.stopPropagation()}
             >
               ${shape.svg}
             </div>`;

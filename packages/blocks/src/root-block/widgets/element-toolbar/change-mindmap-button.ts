@@ -259,23 +259,32 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
 
 export function renderMindmapButton(
   edgeless: EdgelessRootBlockComponent,
-  elements?: ShapeElementModel[]
+  elements?: (ShapeElementModel | MindmapElementModel)[]
 ) {
   if (!elements?.length) return nothing;
-  if (
-    elements.some(e => {
-      const group = edgeless.service.surface.getGroup(e.id);
-      if (!group) return true;
-      if (group.type !== 'mindmap') return true;
-      return false;
-    })
-  )
+
+  const mindmaps: MindmapElementModel[] = [];
+
+  elements.forEach(e => {
+    if (e.type === 'mindmap') {
+      mindmaps.push(e as MindmapElementModel);
+    }
+
+    const group = edgeless.service.surface.getGroup(e.id);
+
+    if (group?.type === 'mindmap') {
+      mindmaps.push(group as MindmapElementModel);
+    }
+  });
+
+  if (mindmaps.length === 0) {
     return nothing;
+  }
 
   return html`
     <edgeless-change-mindmap-button
-      .elements=${elements.map(e => e.group)}
-      .nodes=${elements}
+      .elements=${mindmaps}
+      .nodes=${elements.filter(e => e.type === 'shape')}
       .edgeless=${edgeless}
     >
     </edgeless-change-mindmap-button>

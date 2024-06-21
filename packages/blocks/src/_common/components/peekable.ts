@@ -6,7 +6,7 @@ import type {
   InitCommandCtx,
 } from '@blocksuite/block-std';
 import { assertExists, type Constructor } from '@blocksuite/global/utils';
-import type { LitElement } from 'lit';
+import type { LitElement, TemplateResult } from 'lit';
 
 export class PeekableController {
   constructor(
@@ -23,15 +23,41 @@ export class PeekableController {
     return !!this.getRootService().peekViewService;
   }
 
-  peek = () => {
-    this.getRootService().peekViewService?.peek(this.target);
+  peek = (template?: TemplateResult) => {
+    return Promise.resolve<void>(
+      this.getRootService().peekViewService?.peek(this.target, template)
+    );
   };
 }
 
 export interface PeekViewService {
-  peek(pageRef: { docId: string; blockId?: string }): void;
-  peek(target: HTMLElement): void;
-  peek<Element extends BlockElement>(target: Element): void;
+  /**
+   * Peek a target element page ref info
+   * @param pageRef The page ref info to peek.
+   * @returns A promise that resolves when the peek view is closed.
+   */
+  peek(pageRef: { docId: string; blockId?: string }): Promise<void>;
+  /**
+   * Peek a target element with a optional template
+   * @param target The target element to peek. There are two use cases:
+   * 1. If the template is not given, peek view content rendering will be delegated to the implementation of peek view service.
+   * 2. To determine the origin of the peek view modal animation
+   * @param template Optional template to render in the peek view modal. If not given, the peek view service will render the content.
+   * @returns A promise that resolves when the peek view is closed.
+   */
+  peek(target: HTMLElement, template?: TemplateResult): Promise<void>;
+  /**
+   * Peek a target element with a optional template
+   * @param target The target element to peek. There are two use cases:
+   * 1. If the template is not given, peek view content rendering will be delegated to the implementation of peek view service.
+   * 2. To determine the origin of the peek view modal animation
+   * @param template Optional template to render in the peek view modal. If not given, the peek view service will render the content.
+   * @returns A promise that resolves when the peek view is closed.
+   */
+  peek<Element extends BlockElement>(
+    target: Element,
+    template?: TemplateResult
+  ): Promise<void>;
 }
 
 type PeekableAction = 'double-click' | 'shift-click';
@@ -52,9 +78,12 @@ export const isPeekable = <Element extends LitElement>(e: Element): boolean => {
   return Reflect.has(e, symbol) && (e as any)[symbol]?.peekable;
 };
 
-export const peek = <Element extends LitElement>(e: Element): void => {
+export const peek = <Element extends LitElement>(
+  e: Element,
+  template?: TemplateResult
+): void => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  isPeekable(e) && (e as any)[symbol]?.peek();
+  isPeekable(e) && (e as any)[symbol]?.peek(template);
 };
 
 // Peekable decorator
@@ -86,7 +115,7 @@ export const Peekable =
           this.disposables.addFromEvent(target, 'dblclick', e => {
             if (this[symbol].peekable) {
               e.stopPropagation();
-              this[symbol].peek();
+              this[symbol].peek().catch(console.error);
             }
           });
         }
@@ -95,7 +124,7 @@ export const Peekable =
             if (e.shiftKey && this[symbol].peekable) {
               e.stopPropagation();
               e.stopImmediatePropagation();
-              this[symbol].peek();
+              this[symbol].peek().catch(console.error);
             }
           });
         }

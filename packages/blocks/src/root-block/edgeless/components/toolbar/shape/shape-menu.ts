@@ -10,9 +10,7 @@ import {
 } from '../../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
-import type { EdgelessTool } from '../../../types.js';
 import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
-import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import {
   LINE_COLOR_PREFIX,
   SHAPE_COLOR_PREFIX,
@@ -21,7 +19,7 @@ import {
 import type { ShapeName } from './shape-tool-element.js';
 
 @customElement('edgeless-shape-menu')
-export class EdgelessShapeMenu extends EdgelessToolbarToolMixin(LitElement) {
+export class EdgelessShapeMenu extends LitElement {
   static override styles = css`
     :host {
       display: flex;
@@ -49,8 +47,6 @@ export class EdgelessShapeMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  override type: EdgelessTool['type'] = 'shape';
-
   @property({ attribute: false })
   accessor shapeType!: ShapeName;
 
@@ -70,8 +66,6 @@ export class EdgelessShapeMenu extends EdgelessToolbarToolMixin(LitElement) {
   accessor onChange!: (props: Record<string, unknown>) => void;
 
   private _setStrokeColor = (strokeColor: CssVariableName) => {
-    if (this.edgelessTool.type !== 'shape') return;
-
     const props: Record<string, unknown> = { strokeColor };
     const fillColor = strokeColor.replace(
       LINE_COLOR_PREFIX,
@@ -84,8 +78,6 @@ export class EdgelessShapeMenu extends EdgelessToolbarToolMixin(LitElement) {
   };
 
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
-    if (this.edgelessTool.type !== 'shape') return;
-
     this.onChange({
       shapeStyle,
     });

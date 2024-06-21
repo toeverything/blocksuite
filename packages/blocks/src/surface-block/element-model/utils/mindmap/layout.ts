@@ -178,24 +178,8 @@ const layoutBalance = (
   path = [0]
 ) => {
   const rootTree = calculateNodeSize(root, true);
-  const leftTree: MindmapNode[] = [];
-  const rightTree: MindmapNode[] = [];
-  let leftCounts = 0;
-  let rightCounts = 0;
-
-  root.children.forEach(childNode => {
-    if (
-      childNode.detail.preferredDir === LayoutType.RIGHT ||
-      (rightCounts <= leftCounts &&
-        childNode.detail.preferredDir !== LayoutType.LEFT)
-    ) {
-      rightTree.push(childNode);
-      rightCounts++;
-    } else {
-      leftTree.push(childNode);
-      leftCounts++;
-    }
-  });
+  const leftTree: MindmapNode[] = (root as MindmapRoot).left;
+  const rightTree: MindmapNode[] = (root as MindmapRoot).right;
 
   {
     const leftTreeSize = calculateNodeSize(root, true, leftTree);

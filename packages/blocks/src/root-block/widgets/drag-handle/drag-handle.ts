@@ -235,6 +235,10 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   rafID = 0;
 
+  private get dragHandleContainerOffsetParent() {
+    return this._dragHandleContainer.parentElement!;
+  }
+
   private _clearRaf() {
     if (this.rafID) {
       cancelAnimationFrame(this.rafID);
@@ -325,16 +329,11 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.dropBlockId = dropResult?.dropBlockId ?? '';
     this.dropType = dropResult?.dropType ?? null;
     if (dropResult?.rect) {
-      const {
-        left: viewportLeft,
-        top: viewportTop,
-        scrollLeft,
-        scrollTop,
-      } = this.rootElement.viewport;
-
+      const offsetParentRect =
+        this.dragHandleContainerOffsetParent.getBoundingClientRect();
       let { left, top } = dropResult.rect;
-      left += scrollLeft - viewportLeft;
-      top += scrollTop - viewportTop;
+      left -= offsetParentRect.left;
+      top -= offsetParentRect.top;
 
       left /= this.cumulativeParentScale;
       top /= this.cumulativeParentScale;
@@ -524,29 +523,15 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _updateDragPreviewPosition = (state: PointerEventState) => {
     if (!this.dragPreview) return;
 
-    const rootElement = this.rootElement;
-    const { left, top, scrollLeft, scrollTop, scrollWidth, scrollHeight } =
-      rootElement.viewport;
+    const offsetParentRect =
+      this.dragHandleContainerOffsetParent.getBoundingClientRect();
 
     const dragPreviewOffset = this.dragPreview.offset;
-    let { width, height } = this.dragPreview.getBoundingClientRect();
-    width /= this.cumulativeParentScale;
-    height /= this.cumulativeParentScale;
 
-    let posX = state.raw.x - dragPreviewOffset.x - left + scrollLeft;
-    if (posX < 0) {
-      posX = 0;
-    } else if (posX + width > scrollWidth) {
-      posX = scrollWidth - width;
-    }
+    let posX = state.raw.x - dragPreviewOffset.x - offsetParentRect.left;
     posX /= this.cumulativeParentScale;
 
-    let posY = state.raw.y - dragPreviewOffset.y - top + scrollTop;
-    if (posY < 0) {
-      posY = 0;
-    } else if (posY + height > scrollHeight) {
-      posY = scrollHeight - height;
-    }
+    let posY = state.raw.y - dragPreviewOffset.y - offsetParentRect.top;
     posY /= this.cumulativeParentScale;
 
     this.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
@@ -873,10 +858,14 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const offsetLeft = getDragHandleLeftPadding(blockElements);
 
-    left += this._viewportOffset.left;
-    right += this._viewportOffset.left;
-    top += this._viewportOffset.top;
-    bottom += this._viewportOffset.top;
+    const offsetParentRect =
+      this.dragHandleContainerOffsetParent.getBoundingClientRect();
+    assertExists(offsetParentRect);
+
+    left -= offsetParentRect.left;
+    right -= offsetParentRect.left;
+    top -= offsetParentRect.top;
+    bottom -= offsetParentRect.top;
 
     left /= this.cumulativeParentScale;
     right /= this.cumulativeParentScale;

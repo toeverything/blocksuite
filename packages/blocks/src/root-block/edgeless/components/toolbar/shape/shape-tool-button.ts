@@ -2,7 +2,6 @@ import '../../buttons/toolbar-button.js';
 import './shape-menu.js';
 import './shape-draggable.js';
 
-import { noop } from '@blocksuite/global/utils';
 import { cssVar } from '@toeverything/theme';
 import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -15,13 +14,14 @@ import {
   ShapeType,
 } from '../../../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
-import {
-  type ShapeTool,
-  ShapeToolController,
-} from '../../../controllers/tools/shape-tool.js';
+import type { LastProps } from '../../../../../surface-block/managers/edit-session.js';
+import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 import { getTooltipWithShortcut } from '../../utils.js';
-import { ToolbarButtonWithMenuMixin } from '../mixins/toolbar-button-with-menu.mixin.js';
-import type { EdgelessShapeMenu } from './shape-menu.js';
+import {
+  applyLastProps,
+  observeLastProps,
+} from '../common/observe-last-props.js';
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { ShapeComponentConfig } from './shape-menu-config.js';
 import type { ShapeName } from './shape-tool-element.js';
 import type { DraggableShape } from './utils.js';
@@ -29,12 +29,10 @@ import type { DraggableShape } from './utils.js';
 const { Rect } = ShapeType;
 
 @customElement('edgeless-shape-tool-button')
-export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
-  EdgelessShapeMenu,
-  'shape',
-  readonly ['shapeStyle', 'shapeType', 'fillColor', 'strokeColor', 'radius']
->(LitElement) {
-  static styles = css`
+export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
+  LitElement
+) {
+  static override styles = css`
     :host {
       display: block;
       width: 100%;
@@ -47,51 +45,39 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
     }
   `;
 
-  protected override _states = [
-    'shapeStyle',
-    'shapeType',
-    'fillColor',
-    'strokeColor',
-    'radius',
-  ] as const;
-
   override type = 'shape' as const;
 
-  override _type = 'shape' as const;
-
-  override enableActiveBackground = true;
-
   @state()
-  accessor shapeStyle: ShapeStyle = ShapeStyle.Scribbled;
+  accessor states: Partial<LastProps['shape']> = {
+    shapeStyle: ShapeStyle.Scribbled,
+    shapeType: Rect,
+    fillColor: DEFAULT_SHAPE_FILL_COLOR,
+    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+    radius: 0,
+  };
 
-  @state()
-  accessor shapeType: ShapeName = Rect;
-
-  @state()
-  accessor fillColor: string = DEFAULT_SHAPE_FILL_COLOR;
-
-  @state()
-  accessor strokeColor: string = DEFAULT_SHAPE_STROKE_COLOR;
-
-  @state()
-  accessor radius = 0;
+  get stateKeys() {
+    return Object.keys(this.states) as Array<keyof typeof this.states>;
+  }
 
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;
     this.setEdgelessTool({
-      type: this._type,
-      shapeType: this.shapeType,
+      type: this.type,
+      shapeType: this.states.shapeType!,
     });
-    const menu = this.createPopper('edgeless-shape-menu', this, {
-      onDispose: () => (this._menu = null),
-    });
-    this._menu = menu;
+    const menu = this.createPopper('edgeless-shape-menu', this);
     Object.assign(menu.element, {
       edgeless: this.edgeless,
       onChange: (props: Record<string, unknown>) => {
-        this.edgeless.service.editPropsStore.record(this._type, props);
+        this.edgeless.service.editPropsStore.record('shape', props);
         this.updateMenu();
         this._updateOverlay();
+
+        this.setEdgelessTool({
+          type: 'shape',
+          shapeType: (props.shapeType as ShapeName) ?? this.states.shapeType,
+        });
       },
     });
     this.updateMenu();
@@ -106,49 +92,46 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
 
   private _handleShapeClick(shape: DraggableShape) {
     const name = shape.name;
-    if (name !== this.shapeType) {
+    if (name !== this.states.shapeType) {
       const shapeConfig = ShapeComponentConfig.find(s => s.name === name);
       if (!shapeConfig) return;
       this.edgeless.service.editPropsStore.record('shape', shapeConfig?.value);
       this.updateMenu();
     }
+    if (!this.popper) this._toggleMenu();
+  }
+
+  updateMenu() {
+    if (!this.popper) return;
+    Object.assign(this.popper.element, this.states);
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
+    const { edgeless, states, stateKeys, type } = this;
+    applyLastProps(edgeless.service, type, stateKeys, states);
+
     this.disposables.add(
-      this.edgeless.service.editPropsStore.slots.lastPropsUpdated.on(
-        ({ type, props }) => {
-          if (type !== 'shape') return;
-          if (props.shapeType) {
-            this.setEdgelessTool({
-              type: 'shape',
-              shapeType: props.shapeType as ShapeTool['shapeType'],
-            });
-          }
-          Object.assign(
-            this,
-            this._states
-              .filter(key => props[key] != undefined)
-              .reduce((acc, key) => ({ ...acc, [key]: props[key] }), {})
-          );
+      observeLastProps(
+        edgeless.service,
+        'shape',
+        stateKeys,
+        states,
+        updates => {
+          this.states = { ...this.states, ...updates };
         }
       )
     );
   }
 
-  // duplicated with connectedCallback, so override it
-  override initLastPropsSlot() {
-    noop();
-  }
-
   override render() {
-    const { active, fillColor, strokeColor } = this;
+    const { active, states } = this;
+    const { fillColor, strokeColor } = states;
 
-    const shapeColor = isTransparent(fillColor)
+    const shapeColor = isTransparent(fillColor!)
       ? cssVar('white60')
       : `var(${fillColor})`;
-    const shapeStroke = isTransparent(strokeColor)
+    const shapeStroke = isTransparent(strokeColor!)
       ? cssVar('black10')
       : `var(${strokeColor})`;
 

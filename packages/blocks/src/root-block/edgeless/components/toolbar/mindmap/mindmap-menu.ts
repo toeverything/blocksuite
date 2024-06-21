@@ -95,10 +95,22 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
       edgeless: this.edgeless,
       scopeElement: this,
       clickToDrag: true,
+      onOverlayCreated: () => {
+        // a workaround to active mindmap, so that menu cannot be closed by `Escape`
+        this.setEdgelessTool({ type: 'mindmap' });
+      },
       onDrop: (element, bound) => {
-        element.data.render(bound, this.edgeless.service, this.edgeless);
+        const id = element.data.render(
+          bound,
+          this.edgeless.service,
+          this.edgeless
+        );
         if (element.data.type === 'mindmap') {
           this.onActiveStyleChange?.(element.data.style);
+          this.setEdgelessTool(
+            { type: 'default' },
+            { elements: [id], editing: false }
+          );
         }
       },
     });
