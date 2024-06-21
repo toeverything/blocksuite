@@ -249,12 +249,6 @@ export class EdgelessRootService extends RootService {
   override unmounted() {
     super.unmounted();
 
-    this.editPropsStore.setItem('viewport', {
-      centerX: this.viewport.centerX,
-      centerY: this.viewport.centerY,
-      zoom: this.viewport.zoom,
-    });
-
     this._layer.dispose();
     this._selection.dispose();
     this.selectionManager.set([]);

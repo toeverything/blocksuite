@@ -278,6 +278,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.service.selection.set(this.service.selection.surfaceSelections);
+      this.service.viewport.onResize();
     });
 
     resizeObserver.observe(this.viewportElement);
@@ -367,19 +368,21 @@ export class EdgelessRootBlockComponent extends BlockElement<
   }
 
   private _initViewport() {
-    this.service.viewport.setContainer(this);
+    const { service } = this;
+
+    service.viewport.setContainer(this);
 
     const run = () => {
       const viewport =
-        this.service.editPropsStore.getItem('viewport') ??
-        this.service.getFitToScreenData();
+        service.editPropsStore.getItem('viewport') ??
+        service.getFitToScreenData();
 
       if ('xywh' in viewport) {
         const bound = Bound.deserialize(viewport.xywh);
-        this.service.viewport.setViewportByBound(bound, viewport.padding);
+        service.viewport.setViewportByBound(bound, viewport.padding);
       } else {
         const { zoom, centerX, centerY } = viewport;
-        this.service.viewport.setViewport(zoom, [centerX, centerY]);
+        service.viewport.setViewport(zoom, [centerX, centerY]);
       }
     };
 
@@ -388,6 +391,14 @@ export class EdgelessRootBlockComponent extends BlockElement<
     } else {
       run();
     }
+
+    this._disposables.add(() => {
+      service.editPropsStore.setItem('viewport', {
+        centerX: service.viewport.centerX,
+        centerY: service.viewport.centerY,
+        zoom: service.viewport.zoom,
+      });
+    });
   }
 
   private _initTools() {
