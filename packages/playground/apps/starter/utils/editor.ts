@@ -1,7 +1,8 @@
 import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
-import type { PageRootService } from '@blocksuite/blocks';
+import type { DocModeService, PageRootService } from '@blocksuite/blocks';
 import {
   AffineFormatBarWidget,
+  createDocModeService,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
   toolbarDefaultConfig,
@@ -24,13 +25,18 @@ import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
 import { SidePanel } from '../../_common/components/side-panel.js';
 import {
-  mockDocModeService,
   mockNotificationService,
   mockQuickSearchService,
 } from '../../_common/mock-services.js';
 
-const params = new URLSearchParams(location.search);
-const defaultMode = params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
+function setDocModeFromUrlParams(service: DocModeService) {
+  const params = new URLSearchParams(location.search);
+  const paramMode = params.get('mode');
+  if (paramMode) {
+    const docMode = paramMode === 'page' ? 'page' : 'edgeless';
+    service.setMode(docMode);
+  }
+}
 
 function configureFormatBar(formatBar: AffineFormatBarWidget) {
   toolbarDefaultConfig(formatBar);
@@ -53,6 +59,8 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const app = document.getElementById('app');
   if (!app) return;
 
+  const modeService = createDocModeService(doc.id);
+  setDocModeFromUrlParams(modeService);
   const editor = new AffineEditorContainer();
   editor.pageSpecs = [...PageEditorBlockSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
@@ -70,7 +78,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     }
     return spec;
   });
-  editor.mode = defaultMode;
+  editor.mode = modeService.getMode();
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ docId }) => {
     const target = collection.getDoc(docId);
@@ -79,6 +87,9 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     }
     target.load();
     editor.doc = target;
+  });
+  editor.slots.docUpdated.on(({ newDocId }) => {
+    editor.mode = modeService.getMode(newDocId);
   });
 
   app.append(editor);
@@ -159,7 +170,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
             mockNotificationService(pageRootService);
           pageRootService.quickSearchService =
             mockQuickSearchService(collection);
-          pageRootService.docModeService = mockDocModeService();
         });
       },
     };

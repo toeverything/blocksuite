@@ -1,6 +1,13 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
+  EdgelessTransformableRegistry,
+  EdgelessTransformController,
+  type TransformControllerContext,
+} from '../../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
+import { normalizeShapeBound } from '../canvas-renderer/element-renderer/shape/utils.js';
+import type { IBound } from '../consts.js';
+import {
   DEFAULT_ROUGHNESS,
   FontFamily,
   FontStyle,
@@ -11,10 +18,10 @@ import {
   type TextStyleProps,
   TextVerticalAlign,
 } from '../consts.js';
-import type { IBound, SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
 import type { PointLocation } from '../utils/point-location.js';
 import type { IVec2 } from '../utils/vec.js';
+import type { SerializedXYWH } from '../utils/xywh.js';
 import {
   type IBaseProps,
   type IHitTestOptions,
@@ -188,6 +195,29 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
     return props;
   }
 }
+
+class ShapeTransformController extends EdgelessTransformController<ShapeElementModel> {
+  override rotatable = true;
+
+  override onTransformStart(): void {}
+
+  override onTransformEnd(): void {}
+
+  override adjust(
+    element: ShapeElementModel,
+    { bound, rect }: TransformControllerContext
+  ): void {
+    bound = normalizeShapeBound(element, bound);
+    rect.edgeless.service.updateElement(element.id, {
+      xywh: bound.serialize(),
+    });
+  }
+}
+
+EdgelessTransformableRegistry.register(
+  ShapeElementModel,
+  new ShapeTransformController()
+);
 
 declare global {
   namespace BlockSuite {

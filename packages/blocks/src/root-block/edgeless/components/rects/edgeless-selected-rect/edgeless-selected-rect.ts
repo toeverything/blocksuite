@@ -1,55 +1,37 @@
-import '../connector/connector-handle.js';
-import '../auto-complete/edgeless-auto-complete.js';
+import '../../connector/connector-handle.js';
+import '../../auto-complete/edgeless-auto-complete.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertType, type Disposable, Slot } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
-import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
-import type { IPoint } from '../../../../_common/types.js';
+import { isMindmapNode } from '../../../../../_common/edgeless/mindmap/index.js';
+import type { IPoint } from '../../../../../_common/types.js';
 import {
   requestThrottledConnectFrame,
   stopPropagation,
-} from '../../../../_common/utils/event.js';
-import { pickValues } from '../../../../_common/utils/iterable.js';
-import { clamp } from '../../../../_common/utils/math.js';
-import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
-import { EDGELESS_TEXT_BLOCK_MIN_WIDTH } from '../../../../edgeless-text/edgeless-text-block.js';
-import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
-import type { EmbedHtmlModel } from '../../../../embed-html-block/embed-html-model.js';
-import {
-  EMBED_HTML_MIN_HEIGHT,
-  EMBED_HTML_MIN_WIDTH,
-} from '../../../../embed-html-block/styles.js';
-import type { EmbedSyncedDocModel } from '../../../../embed-synced-doc-block/embed-synced-doc-model.js';
-import {
-  SYNCED_MIN_HEIGHT,
-  SYNCED_MIN_WIDTH,
-} from '../../../../embed-synced-doc-block/styles.js';
-import { NoteBlockModel } from '../../../../note-block/note-model.js';
-import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { TextElementModel } from '../../../../surface-block/element-model/text.js';
+} from '../../../../../_common/utils/event.js';
+import { pickValues } from '../../../../../_common/utils/iterable.js';
+import { NoteBlockModel } from '../../../../../note-block/note-model.js';
+import { TextElementModel } from '../../../../../surface-block/element-model/text.js';
 import {
   CanvasElementType,
   deserializeXYWH,
   GroupElementModel,
   type PointLocation,
   ShapeElementModel,
-} from '../../../../surface-block/index.js';
+} from '../../../../../surface-block/index.js';
 import {
   Bound,
   ConnectorElementModel,
   type IVec,
   normalizeDegAngle,
-  normalizeShapeBound,
-} from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import { NOTE_MIN_HEIGHT, NOTE_MIN_WIDTH } from '../../utils/consts.js';
-import { getElementsWithoutGroup } from '../../utils/group.js';
+} from '../../../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+import { getElementsWithoutGroup } from '../../../utils/group.js';
 import {
   getSelectableBounds,
   getSelectedRect,
@@ -68,11 +50,10 @@ import {
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-} from '../../utils/query.js';
-import type { EdgelessBlockPortalEdgelessText } from '../block-portal/edgeless-text/edgeless-edgeless-text.js';
-import { HandleDirection } from '../resize/resize-handles.js';
-import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
-import { HandleResizeManager } from '../resize/resize-manager.js';
+} from '../../../utils/query.js';
+import type { HandleDirection } from '../../resize/resize-handles.js';
+import { ResizeHandles, type ResizeMode } from '../../resize/resize-handles.js';
+import { HandleResizeManager } from '../../resize/resize-manager.js';
 import {
   calcAngle,
   calcAngleEdgeWithRotation,
@@ -80,7 +61,8 @@ import {
   generateCursorUrl,
   getResizeLabel,
   rotateResizeCursor,
-} from '../utils.js';
+} from '../../utils.js';
+import { edgelessSelectedRectStyles } from './style.js';
 
 export type SelectedRect = {
   left: number;
@@ -190,321 +172,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   // disable change-in-update warning
   static override enabledWarnings = [];
 
-  static override styles = css`
-    :host {
-      display: block;
-      user-select: none;
-      contain: size layout;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
-
-    .affine-edgeless-selected-rect {
-      position: absolute;
-      top: 0;
-      left: 0;
-      transform-origin: center center;
-      border-radius: 0;
-      pointer-events: none;
-      box-sizing: border-box;
-      z-index: 1;
-      border-color: var(--affine-blue);
-      border-width: var(--affine-border-width);
-      border-style: solid;
-      transform: translate(0, 0) rotate(0);
-    }
-
-    .affine-edgeless-selected-rect .handle {
-      position: absolute;
-      user-select: none;
-      outline: none;
-      pointer-events: auto;
-
-      /**
-       * Fix: pointerEvent stops firing after a short time.
-       * When a gesture is started, the browser intersects the touch-action values of the touched element and its ancestors,
-       * up to the one that implements the gesture (in other words, the first containing scrolling element)
-       * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
-       */
-      touch-action: none;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label^='top-'],
-    .affine-edgeless-selected-rect .handle[aria-label^='bottom-'] {
-      width: 18px;
-      height: 18px;
-      box-sizing: border-box;
-      z-index: 10;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label^='top-'] .resize,
-    .affine-edgeless-selected-rect .handle[aria-label^='bottom-'] .resize {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      box-sizing: border-box;
-      border-radius: 50%;
-      border: 2px var(--affine-blue) solid;
-      background: white;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label^='top-'] .rotate,
-    .affine-edgeless-selected-rect .handle[aria-label^='bottom-'] .rotate {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      box-sizing: border-box;
-      background: transparent;
-    }
-
-    /* -18 + 6.5 */
-    .affine-edgeless-selected-rect .handle[aria-label='top-left'] {
-      left: -12px;
-      top: -12px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='top-left'] .resize {
-      right: 0;
-      bottom: 0;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='top-left'] .rotate {
-      right: 6px;
-      bottom: 6px;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='top-right'] {
-      top: -12px;
-      right: -12px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='top-right'] .resize {
-      left: 0;
-      bottom: 0;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='top-right'] .rotate {
-      left: 6px;
-      bottom: 6px;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] {
-      right: -12px;
-      bottom: -12px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] .resize {
-      left: 0;
-      top: 0;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] .rotate {
-      left: 6px;
-      top: 6px;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] {
-      bottom: -12px;
-      left: -12px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] .resize {
-      right: 0;
-      top: 0;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] .rotate {
-      right: 6px;
-      top: 6px;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='top'],
-    .affine-edgeless-selected-rect .handle[aria-label='bottom'],
-    .affine-edgeless-selected-rect .handle[aria-label='left'],
-    .affine-edgeless-selected-rect .handle[aria-label='right'] {
-      border: 0;
-      background: transparent;
-      border-color: var('--affine-blue');
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='left'],
-    .affine-edgeless-selected-rect .handle[aria-label='right'] {
-      top: 0;
-      bottom: 0;
-      height: 100%;
-      width: 6px;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='top'],
-    .affine-edgeless-selected-rect .handle[aria-label='bottom'] {
-      left: 0;
-      right: 0;
-      width: 100%;
-      height: 6px;
-    }
-
-    /* calc(-1px - (6px - 1px) / 2) = -3.5px */
-    .affine-edgeless-selected-rect .handle[aria-label='left'] {
-      left: -3.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='right'] {
-      right: -3.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='top'] {
-      top: -3.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='bottom'] {
-      bottom: -3.5px;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='top'] .resize,
-    .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize,
-    .affine-edgeless-selected-rect .handle[aria-label='left'] .resize,
-    .affine-edgeless-selected-rect .handle[aria-label='right'] .resize {
-      width: 100%;
-      height: 100%;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='top'] .resize:after,
-    .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize:after,
-    .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after,
-    .affine-edgeless-selected-rect .handle[aria-label='right'] .resize:after {
-      position: absolute;
-      width: 7px;
-      height: 7px;
-      box-sizing: border-box;
-      border-radius: 6px;
-      z-index: 10;
-      content: '';
-      background: white;
-    }
-
-    .affine-edgeless-selected-rect
-      .handle[aria-label='top']
-      .transparent-handle:after,
-    .affine-edgeless-selected-rect
-      .handle[aria-label='bottom']
-      .transparent-handle:after,
-    .affine-edgeless-selected-rect
-      .handle[aria-label='left']
-      .transparent-handle:after,
-    .affine-edgeless-selected-rect
-      .handle[aria-label='right']
-      .transparent-handle:after {
-      opacity: 0;
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after,
-    .affine-edgeless-selected-rect .handle[aria-label='right'] .resize:after {
-      top: calc(50% - 6px);
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='top'] .resize:after,
-    .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize:after {
-      left: calc(50% - 6px);
-    }
-
-    .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after {
-      left: -0.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='right'] .resize:after {
-      right: -0.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='top'] .resize:after {
-      top: -0.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize:after {
-      bottom: -0.5px;
-    }
-
-    .affine-edgeless-selected-rect .handle .resize::before {
-      content: '';
-      display: none;
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background-image: url("data:image/svg+xml,%3Csvg width='26' height='26' viewBox='0 0 26 26' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M23 3H19C10.1634 3 3 10.1634 3 19V23' stroke='black' stroke-opacity='0.3' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-size: contain;
-      background-repeat: no-repeat;
-    }
-    .affine-edgeless-selected-rect[data-mode='scale']
-      .handle[aria-label='top-left']
-      .resize:hover::before,
-    .affine-edgeless-selected-rect[data-scale-direction='top-left'][data-scale-percent]
-      .handle[aria-label='top-left']
-      .resize::before {
-      display: block;
-      top: 0px;
-      left: 0px;
-      transform: translate(-100%, -100%);
-    }
-    .affine-edgeless-selected-rect[data-mode='scale']
-      .handle[aria-label='top-right']
-      .resize:hover::before,
-    .affine-edgeless-selected-rect[data-scale-direction='top-right'][data-scale-percent]
-      .handle[aria-label='top-right']
-      .resize::before {
-      display: block;
-      top: 0px;
-      right: 0px;
-      transform: translate(100%, -100%) rotate(90deg);
-    }
-    .affine-edgeless-selected-rect[data-mode='scale']
-      .handle[aria-label='bottom-right']
-      .resize:hover::before,
-    .affine-edgeless-selected-rect[data-scale-direction='bottom-right'][data-scale-percent]
-      .handle[aria-label='bottom-right']
-      .resize::before {
-      display: block;
-      bottom: 0px;
-      right: 0px;
-      transform: translate(100%, 100%) rotate(180deg);
-    }
-    .affine-edgeless-selected-rect[data-mode='scale']
-      .handle[aria-label='bottom-left']
-      .resize:hover::before,
-    .affine-edgeless-selected-rect[data-scale-direction='bottom-left'][data-scale-percent]
-      .handle[aria-label='bottom-left']
-      .resize::before {
-      display: block;
-      bottom: 0px;
-      left: 0px;
-      transform: translate(-100%, 100%) rotate(-90deg);
-    }
-
-    .affine-edgeless-selected-rect::after {
-      content: attr(data-scale-percent);
-      display: none;
-      position: absolute;
-      color: var(--affine-icon-color);
-      font-feature-settings:
-        'clig' off,
-        'liga' off;
-      font-family: var(--affine-font-family);
-      font-size: 12px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 24px;
-    }
-    .affine-edgeless-selected-rect[data-scale-direction='top-left']::after {
-      display: block;
-      top: -20px;
-      left: -20px;
-      transform: translate(-100%, -100%);
-    }
-    .affine-edgeless-selected-rect[data-scale-direction='top-right']::after {
-      display: block;
-      top: -20px;
-      right: -20px;
-      transform: translate(100%, -100%);
-    }
-    .affine-edgeless-selected-rect[data-scale-direction='bottom-right']::after {
-      display: block;
-      bottom: -20px;
-      right: -20px;
-      transform: translate(100%, 100%);
-    }
-    .affine-edgeless-selected-rect[data-scale-direction='bottom-left']::after {
-      display: block;
-      bottom: -20px;
-      left: -20px;
-      transform: translate(-100%, 100%);
-    }
-  `;
+  static override styles = edgelessSelectedRectStyles;
 
   @state()
   private accessor _selectedRect: SelectedRect = {
@@ -679,48 +347,19 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     newBounds.forEach(({ bound, matrix, path }, id) => {
       const element = edgeless.service.getElementById(id);
       if (!element) return;
-
-      if (isNoteBlock(element)) {
-        this.#adjustNote(element, bound, direction);
-        return;
+      const controller = element.transformController;
+      if (controller) {
+        controller.adjust(element, {
+          bound,
+          matrix,
+          path,
+          rect: this,
+          shiftKey: this._shiftKey,
+          direction,
+        });
+      } else {
+        this.#adjustUseFallback(element, bound, direction);
       }
-
-      if (isEdgelessTextBlock(element)) {
-        this.#adjustEdgelessText(element, bound, direction);
-        return;
-      }
-
-      if (isEmbedSyncedDocBlock(element)) {
-        this.#adjustEmbedSyncedDoc(element, bound, direction);
-        return;
-      }
-
-      if (isEmbedHtmlBlock(element)) {
-        this.#adjustEmbedHtml(element, bound, direction);
-        return;
-      }
-
-      if (this._isProportionalElement(element)) {
-        this.#adjustProportional(element, bound, direction);
-        return;
-      }
-
-      if (element instanceof TextElementModel) {
-        this.#adjustText(element, bound, direction);
-        return;
-      }
-
-      if (element instanceof ShapeElementModel) {
-        this.#adjustShape(element, bound, direction);
-        return;
-      }
-
-      if (element instanceof ConnectorElementModel && matrix && path) {
-        this.#adjustConnector(element, bound, matrix, path);
-        return;
-      }
-
-      this.#adjustUseFallback(element, bound, direction);
     });
   };
 
@@ -735,31 +374,28 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const elements = selection.selectedElements.filter(
       element =>
-        isImageBlock(element) ||
-        isEdgelessTextBlock(element) ||
-        isCanvasElement(element)
+        isCanvasElement(element) || !!element.transformController?.rotatable
     );
 
     getElementsWithoutGroup(elements).forEach(element => {
-      const { id, rotate } = element;
-      const bounds = Bound.deserialize(element.xywh);
-      const originalCenter = bounds.center;
-      const point = new DOMPoint(...originalCenter).matrixTransform(m);
-      bounds.center = [point.x, point.y];
+      const controller = element.transformController;
 
-      if (
-        isCanvasElement(element) &&
-        element instanceof ConnectorElementModel
-      ) {
-        this.#adjustConnector(
-          element,
-          bounds,
-          m,
-          element.absolutePath.map(p => p.clone())
-        );
+      const { id, rotate } = element;
+      const bound = Bound.deserialize(element.xywh);
+      const originalCenter = bound.center;
+      const point = new DOMPoint(...originalCenter).matrixTransform(m);
+      bound.center = [point.x, point.y];
+
+      if (controller?.rotate !== undefined) {
+        controller.rotate(element, {
+          rect: this,
+          shiftKey: this._shiftKey,
+          bound,
+          matrix: m,
+        });
       } else {
         this.edgeless.service.updateElement(id, {
-          xywh: bounds.serialize(),
+          xywh: bound.serialize(),
           rotate: normalizeDegAngle(rotate + delta),
         });
       }
@@ -975,253 +611,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
   }
 
-  #adjustNote(
-    element: NoteBlockModel,
-    bound: Bound,
-    direction: HandleDirection
-  ) {
-    const curBound = Bound.deserialize(element.xywh);
-
-    let scale = element.edgeless.scale ?? 1;
-    let width = curBound.w / scale;
-    let height = curBound.h / scale;
-
-    if (this._shiftKey) {
-      scale = bound.w / width;
-      this._scalePercent = `${Math.round(scale * 100)}%`;
-      this._scaleDirection = direction;
-    } else if (curBound.h !== bound.h) {
-      this.edgeless.doc.updateBlock(element, () => {
-        element.edgeless.collapse = true;
-        element.edgeless.collapsedHeight = bound.h / scale;
-      });
-    }
-
-    width = bound.w / scale;
-    width = clamp(width, NOTE_MIN_WIDTH, Infinity);
-    bound.w = width * scale;
-
-    height = bound.h / scale;
-    height = clamp(height, NOTE_MIN_HEIGHT, Infinity);
-    bound.h = height * scale;
-
-    this._isWidthLimit = width === NOTE_MIN_WIDTH;
-    this._isHeightLimit = height === NOTE_MIN_HEIGHT;
-
-    this.edgeless.service.updateElement(element.id, {
-      edgeless: {
-        ...element.edgeless,
-        scale,
-      },
-      xywh: bound.serialize(),
-    });
-  }
-
-  #adjustEdgelessText(
-    element: EdgelessTextBlockModel,
-    bound: Bound,
-    direction: HandleDirection
-  ) {
-    const oldXYWH = Bound.deserialize(element.xywh);
-    if (
-      direction === HandleDirection.TopLeft ||
-      direction === HandleDirection.TopRight ||
-      direction === HandleDirection.BottomRight ||
-      direction === HandleDirection.BottomLeft
-    ) {
-      const newScale = element.scale * (bound.w / oldXYWH.w);
-      this._scalePercent = `${Math.round(newScale * 100)}%`;
-      this._scaleDirection = direction;
-
-      bound.h = bound.w * (oldXYWH.h / oldXYWH.w);
-      this.edgeless.service.updateElement(element.id, {
-        scale: newScale,
-        xywh: bound.serialize(),
-      });
-    } else if (
-      direction === HandleDirection.Left ||
-      direction === HandleDirection.Right
-    ) {
-      const textPortal = this.edgeless.rootElementContainer.getPortalElement(
-        element.id
-      ) as EdgelessBlockPortalEdgelessText | null;
-      if (!textPortal) return;
-
-      if (!textPortal.checkWidthOverflow(bound.w)) return;
-
-      const newRealWidth = clamp(
-        bound.w / element.scale,
-        EDGELESS_TEXT_BLOCK_MIN_WIDTH,
-        Infinity
-      );
-      bound.w = newRealWidth * element.scale;
-      this.edgeless.service.updateElement(element.id, {
-        xywh: Bound.serialize({
-          ...bound,
-          h: oldXYWH.h,
-        }),
-        hasMaxWidth: true,
-      });
-    }
-  }
-
-  #adjustEmbedSyncedDoc(
-    element: EmbedSyncedDocModel,
-    bound: Bound,
-    direction: HandleDirection
-  ) {
-    const curBound = Bound.deserialize(element.xywh);
-
-    let scale = element.scale ?? 1;
-    let width = curBound.w / scale;
-    let height = curBound.h / scale;
-    if (this._shiftKey) {
-      scale = bound.w / width;
-      this._scalePercent = `${Math.round(scale * 100)}%`;
-      this._scaleDirection = direction;
-    }
-
-    width = bound.w / scale;
-    width = clamp(width, SYNCED_MIN_WIDTH, Infinity);
-    bound.w = width * scale;
-
-    height = bound.h / scale;
-    height = clamp(height, SYNCED_MIN_HEIGHT, Infinity);
-    bound.h = height * scale;
-
-    this._isWidthLimit = width === SYNCED_MIN_WIDTH;
-    this._isHeightLimit = height === SYNCED_MIN_HEIGHT;
-
-    this.edgeless.service.updateElement(element.id, {
-      scale,
-      xywh: bound.serialize(),
-    });
-  }
-
-  #adjustEmbedHtml(
-    element: EmbedHtmlModel,
-    bound: Bound,
-    _direction: HandleDirection
-  ) {
-    bound.w = clamp(bound.w, EMBED_HTML_MIN_WIDTH, Infinity);
-    bound.h = clamp(bound.h, EMBED_HTML_MIN_HEIGHT, Infinity);
-
-    this._isWidthLimit = bound.w === EMBED_HTML_MIN_WIDTH;
-    this._isHeightLimit = bound.h === EMBED_HTML_MIN_HEIGHT;
-
-    this.edgeless.service.updateElement(element.id, {
-      xywh: bound.serialize(),
-    });
-  }
-
-  #adjustProportional(
-    element: BlockSuite.EdgelessModelType,
-    bound: Bound,
-    direction: HandleDirection
-  ) {
-    const curBound = Bound.deserialize(element.xywh);
-
-    if (isImageBlock(element)) {
-      const { height } = element;
-      if (height) {
-        this._scalePercent = `${Math.round((bound.h / height) * 100)}%`;
-        this._scaleDirection = direction;
-      }
-    } else {
-      const cardStyle = (element as BookmarkBlockModel).style;
-      const height = EMBED_CARD_HEIGHT[cardStyle];
-      this._scalePercent = `${Math.round((bound.h / height) * 100)}%`;
-      this._scaleDirection = direction;
-    }
-    if (
-      direction === HandleDirection.Left ||
-      direction === HandleDirection.Right
-    ) {
-      bound.h = (curBound.h / curBound.w) * bound.w;
-    } else if (
-      direction === HandleDirection.Top ||
-      direction === HandleDirection.Bottom
-    ) {
-      bound.w = (curBound.w / curBound.h) * bound.h;
-    }
-
-    this.edgeless.service.updateElement(element.id, {
-      xywh: bound.serialize(),
-    });
-  }
-
-  #adjustText(
-    element: TextElementModel,
-    bound: Bound,
-    direction: HandleDirection
-  ) {
-    let p = 1;
-    if (
-      direction === HandleDirection.Left ||
-      direction === HandleDirection.Right
-    ) {
-      const {
-        text: yText,
-        fontFamily,
-        fontSize,
-        fontStyle,
-        fontWeight,
-        hasMaxWidth,
-      } = element;
-      // If the width of the text element has been changed by dragging,
-      // We need to set hasMaxWidth to true for wrapping the text
-      bound = normalizeTextBound(
-        {
-          yText,
-          fontFamily,
-          fontSize,
-          fontStyle,
-          fontWeight,
-          hasMaxWidth,
-        },
-        bound,
-        true
-      );
-      // If the width of the text element has been changed by dragging,
-      // We need to set hasMaxWidth to true for wrapping the text
-      this.edgeless.service.updateElement(element.id, {
-        xywh: bound.serialize(),
-        fontSize: element.fontSize * p,
-        hasMaxWidth: true,
-      });
-    } else {
-      p = bound.h / element.h;
-      // const newFontsize = element.fontSize * p;
-      // bound = normalizeTextBound(element, bound, false, newFontsize);
-
-      this.edgeless.service.updateElement(element.id, {
-        xywh: bound.serialize(),
-        fontSize: element.fontSize * p,
-      });
-    }
-  }
-
-  #adjustShape(
-    element: ShapeElementModel,
-    bound: Bound,
-    _direction: HandleDirection
-  ) {
-    bound = normalizeShapeBound(element, bound);
-    this.edgeless.service.updateElement(element.id, {
-      xywh: bound.serialize(),
-    });
-  }
-
-  #adjustConnector(
-    element: ConnectorElementModel,
-    bounds: Bound,
-    matrix: DOMMatrix,
-    originalPath: PointLocation[]
-  ) {
-    const props = element.resize(bounds, originalPath, matrix);
-    this.edgeless.service.updateElement(element.id, props);
-  }
-
   #adjustUseFallback(
     element: BlockSuite.EdgelessModelType,
     bound: Bound,
@@ -1230,6 +619,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.edgeless.service.updateElement(element.id, {
       xywh: bound.serialize(),
     });
+  }
+
+  updateScaleDisplay(p: number, direction: HandleDirection) {
+    this._scalePercent = `${Math.round(p * 100)}%`;
+    this._scaleDirection = direction;
+  }
+
+  limit(limitWidth: boolean, limitHeight: boolean) {
+    this._isWidthLimit = limitWidth;
+    this._isHeightLimit = limitHeight;
   }
 
   override firstUpdated() {

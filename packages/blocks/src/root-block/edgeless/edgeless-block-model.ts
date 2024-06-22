@@ -19,6 +19,7 @@ import {
 import { PointLocation } from '../../surface-block/utils/point-location.js';
 import type { IVec } from '../../surface-block/utils/vec.js';
 import type { SerializedXYWH } from '../../surface-block/utils/xywh.js';
+import { EdgelessTransformableRegistry } from './components/rects/edgeless-selected-rect/controllers/transform-controller.js';
 
 export class EdgelessBlockModel<
     Props extends EdgelessSelectableProps = EdgelessSelectableProps,
@@ -26,6 +27,14 @@ export class EdgelessBlockModel<
   extends BlockModel<Props>
   implements IEdgelessElement
 {
+  private _transformController =
+    EdgelessTransformableRegistry.get(this as BlockSuite.EdgelessModelType) ??
+    null;
+
+  get transformController() {
+    return this._transformController;
+  }
+
   get externalXYWH(): SerializedXYWH | undefined {
     return this._externalXYWH;
   }

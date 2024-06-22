@@ -1,3 +1,5 @@
+import './edgeless-transform-controller.js';
+
 import type { EdgelessTextBlockModel } from './edgeless-text-model.js';
 
 export * from './edgeless-text-block.js';

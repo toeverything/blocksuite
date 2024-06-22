@@ -6,7 +6,7 @@ import './attachment/edgeless-attachment.js';
 import './frame/edgeless-frame.js';
 import './embed/edgeless-embed.js';
 import './edgeless-text/edgeless-edgeless-text.js';
-import '../rects/edgeless-selected-rect.js';
+import '../rects/edgeless-selected-rect/index.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../presentation/edgeless-navigator-black-background.js';
 
@@ -27,7 +27,7 @@ import type { SurfaceBlockComponent } from '../../../../surface-block/surface-bl
 import { EdgelessBlockModel } from '../../edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
-import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
+import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect/edgeless-selected-rect.js';
 import type { EdgelessPortalBase } from './edgeless-portal-base.js';
 
 export type AutoConnectElement =

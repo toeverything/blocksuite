@@ -1,3 +1,5 @@
+import './edgeless-transform-controller.js';
+
 import { noop } from '@blocksuite/global/utils';
 
 import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block.js';

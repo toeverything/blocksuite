@@ -19,7 +19,10 @@ import type { DocMode } from '../_common/types.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
-import type { RootBlockComponent } from '../root-block/index.js';
+import type {
+  EdgelessRootService,
+  RootBlockComponent,
+} from '../root-block/index.js';
 import { SpecProvider } from '../specs/utils/spec-provider.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
@@ -344,6 +347,38 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     );
   };
 
+  private _initEdgelessFitEffect = () => {
+    const fitToContent = () => {
+      const { _syncedDocMode } = this;
+
+      if (_syncedDocMode !== 'edgeless') return;
+
+      const service = this.syncedDocEditorHost?.std.spec.getService(
+        'affine:page'
+      ) as EdgelessRootService;
+
+      if (!service) return;
+
+      service.viewport.onResize();
+      service.zoomToFit();
+    };
+
+    const observer = new ResizeObserver(fitToContent);
+    const blockElement = this.embedBlock;
+
+    observer.observe(blockElement);
+
+    this._disposables.add(() => {
+      observer.disconnect();
+    });
+
+    this.syncedDocEditorHost?.updateComplete
+      .then(() => {
+        fitToContent();
+      })
+      .catch(() => {});
+  };
+
   open = () => {
     const syncedDocId = this.model.pageId;
     if (syncedDocId === this.doc.id) return;
@@ -491,6 +526,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         })
       );
     }
+
+    this._initEdgelessFitEffect();
   }
 
   override updated(changedProperties: PropertyValues) {

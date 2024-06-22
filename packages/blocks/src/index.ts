@@ -19,6 +19,7 @@ import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
+export * from './_common/components/doc-mode-service.js';
 export type {
   DocModeService,
   NotificationService,
@@ -35,7 +36,7 @@ export {
 } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
-  createEmbedBlock,
+  createEmbedBlockSchema,
   defineEmbedModel,
   EmbedBlockElement,
 } from './_common/embed-block-helper/index.js';
