@@ -9,6 +9,7 @@ const excludes = new Set([
   'externalXYWH',
   'connector-text',
   'connector-labelXYWH',
+  '_transformController',
 ]);
 
 beforeEach(async () => {

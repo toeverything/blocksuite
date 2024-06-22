@@ -1,6 +1,11 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
+  EdgelessTransformableRegistry,
+  EdgelessTransformController,
+  type TransformControllerContext,
+} from '../../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
+import {
   DEFAULT_ROUGHNESS,
   FontFamily,
   FontStyle,
@@ -584,6 +589,43 @@ export function isConnectorWithLabel(
 ) {
   return model instanceof ConnectorElementModel && model.hasLabel();
 }
+
+class ConnectorTransformController extends EdgelessTransformController<ConnectorElementModel> {
+  override rotatable = true;
+
+  override onTransformStart(): void {}
+
+  override onTransformEnd(): void {}
+
+  override adjust(
+    element: ConnectorElementModel,
+    { matrix, path, bound, rect }: TransformControllerContext
+  ): void {
+    if (!matrix || !path) return;
+
+    const props = element.resize(bound, path, matrix);
+    rect.edgeless.service.updateElement(element.id, props);
+  }
+
+  override rotate = (
+    element: ConnectorElementModel,
+    { rect, bound, matrix }: Omit<TransformControllerContext, 'direction'>
+  ) => {
+    if (!matrix) return;
+
+    const props = element.resize(
+      bound,
+      element.absolutePath.map(p => p.clone()),
+      matrix
+    );
+    rect.edgeless.service.updateElement(element.id, props);
+  };
+}
+
+EdgelessTransformableRegistry.register(
+  ConnectorElementModel,
+  new ConnectorTransformController()
+);
 
 declare global {
   namespace BlockSuite {
