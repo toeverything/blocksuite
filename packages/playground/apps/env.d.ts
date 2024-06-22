@@ -22,6 +22,7 @@ declare global {
     std: typeof std;
     testUtils: TestUtils;
     host: EditorHost;
+    testWorker: Worker;
 
     wsProvider: ReturnType<typeof setupBroadcastProvider>;
     bcProvider: ReturnType<typeof setupBroadcastProvider>;
