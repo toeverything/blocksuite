@@ -1,4 +1,4 @@
-import { sha } from '@blocksuite/global/utils';
+import { assertExists, sha } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type {
   FromBlockSnapshotPayload,
@@ -392,6 +392,45 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context.skipAllChildren();
           break;
         }
+        case 'affine:embed-synced-doc': {
+          const type = this.configs.get('embedSyncedDocExportType');
+
+          // this context is used for nested sync block
+          if (
+            context.getGlobalContext('embed-synced-doc-counter') === undefined
+          ) {
+            context.setGlobalContext('embed-synced-doc-counter', 0);
+          }
+          let counter = context.getGlobalContext(
+            'embed-synced-doc-counter'
+          ) as number;
+          context.setGlobalContext('embed-synced-doc-counter', ++counter);
+
+          if (type === 'content') {
+            assertExists(o.node.props.pageId);
+            const syncedDocId = o.node.props.pageId as string;
+
+            const syncedDoc = this.job.collection.getDoc(syncedDocId);
+            if (!syncedDoc) break;
+
+            if (counter === 1) {
+              const syncedSnapshot = await this.job.docToSnapshot(syncedDoc);
+              await walker.walkONode(syncedSnapshot.blocks);
+            } else {
+              // TODO(@L-Sun) may be use the nested content
+              context
+                .openNode({
+                  type: 'paragraph',
+                  children: [
+                    { type: 'text', value: syncedDoc.meta?.title ?? '' },
+                  ],
+                })
+                .closeNode();
+            }
+          }
+
+          break;
+        }
         case 'affine:embed-loom':
         case 'affine:embed-github':
         case 'affine:embed-youtube':
@@ -463,6 +502,13 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           } else {
             context.closeNode().closeNode();
           }
+          break;
+        }
+        case 'affine:embed-synced-doc': {
+          const counter = context.getGlobalContext(
+            'embed-synced-doc-counter'
+          ) as number;
+          context.setGlobalContext('embed-synced-doc-counter', counter - 1);
           break;
         }
       }
