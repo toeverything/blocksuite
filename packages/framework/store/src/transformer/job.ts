@@ -35,6 +35,10 @@ export type JobConfig = {
 };
 
 export class Job {
+  get collection() {
+    return this._collection;
+  }
+
   get assetsManager() {
     return this._assetsManager;
   }

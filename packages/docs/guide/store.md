@@ -21,12 +21,14 @@ const schema = new Schema();
 schema.register(AffineSchemas);
 
 const collection = new DocCollection({ schema });
+collection.meta.initialize();
 ```
 
 Then multiple `doc`s can be created under the collection:
 
 ```ts
 const collection = new DocCollection({ schema });
+collection.meta.initialize();
 
 // This is an empty doc at this moment
 const doc = collection.createDoc();
@@ -41,6 +43,7 @@ import { Schema, DocCollection } from '@blocksuite/store';
 export function createEmptyDoc() {
   const schema = new Schema().register(AffineSchemas);
   const collection = new DocCollection({ schema });
+  collection.meta.initialize();
   const doc = collection.createDoc();
 
   return {
