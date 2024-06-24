@@ -52,13 +52,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         c: () => {
-          rootElement.service.editPropsStore.record('connector', {
-            mode: ConnectorMode.Straight,
-          });
-          this._setEdgelessTool(rootElement, {
-            type: 'connector',
-            mode: ConnectorMode.Straight,
-          });
+          const mode = ConnectorMode.Curve;
+          rootElement.service.editPropsStore.record('connector', { mode });
+          this._setEdgelessTool(rootElement, { type: 'connector', mode });
         },
         l: () => {
           if (!rootElement.doc.awarenessStore.getFlag('enable_lasso_tool')) {
