@@ -23,7 +23,7 @@ import { SpecProvider } from '../../specs/utils/spec-provider.js';
 import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
-import { NoteDisplayMode } from '../types.js';
+import { type DocMode, NoteDisplayMode } from '../types.js';
 import { getBlockProps } from './block-props.js';
 import { matchFlavours } from './model.js';
 
@@ -187,18 +187,47 @@ export function renderLinkedDocInCard(
   });
 }
 
-function getNotesFromDoc(linkedDoc: Doc) {
-  const note = linkedDoc.root?.children.filter(
+export function getNotesFromDoc(doc: Doc) {
+  const notes = doc.root?.children.filter(
     child =>
       matchFlavours(child, ['affine:note']) &&
       child.displayMode !== NoteDisplayMode.EdgelessOnly
   );
 
-  if (!note || !note.length) {
+  if (!notes || !notes.length) {
     return null;
   }
 
-  return note;
+  return notes;
+}
+
+export function isEmptyDoc(doc: Doc | null, mode: DocMode) {
+  if (!doc) {
+    return true;
+  }
+
+  if (mode === 'page') {
+    const notes = getNotesFromDoc(doc);
+    if (!notes || !notes.length) {
+      return true;
+    }
+    return notes.every(note => isEmptyNote(note));
+  } else {
+    const surface = getSurfaceBlock(doc);
+    if (surface?.elementModels.length || doc.blocks.size > 2) {
+      return false;
+    }
+    return true;
+  }
+}
+
+export function isEmptyNote(note: BlockModel) {
+  return note.children.every(block => {
+    return (
+      block.flavour === 'affine:paragraph' &&
+      (!block.text || block.text.length === 0)
+    );
+  });
 }
 
 function filterTextModel(model: BlockModel) {
