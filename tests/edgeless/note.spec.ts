@@ -92,6 +92,10 @@ test('can drag selected non-active note', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
   await assertNoteXYWH(page, [0, 100, NOTE_WIDTH, 91]);
+
+  await undoByKeyboard(page);
+  await waitNextFrame(page);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 95]);
 });
 
 test('resize note in edgeless mode', async ({ page }) => {
