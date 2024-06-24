@@ -998,7 +998,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._draggingSingleMindmap.clear?.();
     } else {
       this._toBeMoved.forEach(el => {
-        el.pop('xywh');
+        this._doc.transact(() => {
+          el.pop('xywh');
+        });
+
         if (el instanceof ConnectorElementModel) {
           el.pop('labelXYWH');
         }
