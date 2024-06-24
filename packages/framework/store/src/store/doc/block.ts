@@ -269,15 +269,7 @@ export class Block {
           }
 
           const yValue = native2Y(value);
-
-          if (this.doc) {
-            this.doc.transact(() => {
-              this.yBlock.set(`prop:${p}`, yValue);
-            });
-          } else {
-            this.yBlock.set(`prop:${p}`, yValue);
-          }
-
+          this.yBlock.set(`prop:${p}`, yValue);
           const proxy = this._getPropsProxy(p, yValue);
           return Reflect.set(target, p, proxy, receiver);
         }
@@ -293,13 +285,7 @@ export class Block {
           typeof p === 'string' &&
           model.keys.includes(p)
         ) {
-          if (this.doc) {
-            this.doc.transact(() => {
-              this.yBlock.delete(`prop:${p}`);
-            });
-          } else {
-            this.yBlock.delete(`prop:${p}`);
-          }
+          this.yBlock.delete(`prop:${p}`);
         }
 
         return Reflect.deleteProperty(target, p);
