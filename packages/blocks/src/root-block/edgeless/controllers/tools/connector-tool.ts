@@ -52,6 +52,10 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   // Likes pressing `ESC`
   private _allowCancel = false;
 
+  get connector() {
+    return this._connector;
+  }
+
   readonly tool = {
     type: 'connector',
   } as ConnectorTool;
@@ -190,8 +194,8 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   onContainerMouseMove(e: PointerEventState) {
     if (this._mode === ConnectorToolMode.Dragging) return;
 
-    assertExists(this._sourceBounds);
     assertExists(this._connector);
+    assertExists(this._sourceBounds);
 
     const sourceId = this._connector.source.id;
     assertExists(sourceId);
@@ -226,7 +230,9 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   }
 
   beforeModeSwitch(edgelessTool: EdgelessTool) {
-    if (edgelessTool.type === 'connector') return;
+    if (edgelessTool.type === 'connector') {
+      return;
+    }
 
     const id = this._connector?.id;
     if (this._allowCancel && id) {

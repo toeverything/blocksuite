@@ -20,6 +20,7 @@ import {
   ShapeType,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
+import type { ConnectorToolController } from './controllers/tools/connector-tool.js';
 import { CopilotSelectionController } from './controllers/tools/copilot-tool.js';
 import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
@@ -52,7 +53,30 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         c: () => {
-          const mode = ConnectorMode.Curve;
+          const isConnectorTool =
+            rootElement.tools.edgelessTool.type === 'connector';
+          let mode =
+            rootElement.service.editPropsStore.getLastProps('connector').mode ??
+            ConnectorMode.Curve;
+
+          if (isConnectorTool) {
+            const connectorController = rootElement.tools.controllers[
+              'connector'
+            ] as ConnectorToolController;
+            if (connectorController.connector) {
+              return;
+            }
+
+            const modes = [
+              ConnectorMode.Curve,
+              ConnectorMode.Orthogonal,
+              ConnectorMode.Straight,
+            ];
+
+            const nextIndex = modes.findIndex(m => m === mode) + 1;
+            mode = modes[nextIndex % 3];
+          }
+
           rootElement.service.editPropsStore.record('connector', { mode });
           this._setEdgelessTool(rootElement, { type: 'connector', mode });
         },

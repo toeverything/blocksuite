@@ -79,13 +79,10 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(LitElement) {
     applyLastProps(edgeless.service, type, stateKeys, states);
 
     this.disposables.add(
-      observeLastProps(
-        edgeless.service,
-        type,
-        stateKeys,
-        states,
-        updates => (this.states = { ...this.states, ...updates })
-      )
+      observeLastProps(edgeless.service, type, stateKeys, states, updates => {
+        this.states = { ...this.states, ...updates };
+        this.updateMenu();
+      })
     );
   }
 
