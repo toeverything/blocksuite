@@ -21,6 +21,7 @@ import {
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
 } from '../../../../surface-block/managers/connector-manager.js';
+import type { EdgelessTool } from '../../types.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 enum ConnectorToolMode {
@@ -224,7 +225,9 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     noop();
   }
 
-  beforeModeSwitch() {
+  beforeModeSwitch(edgelessTool: EdgelessTool) {
+    if (edgelessTool.type === 'connector') return;
+
     const id = this._connector?.id;
     if (this._allowCancel && id) {
       this._edgeless.service.removeElement(id);
