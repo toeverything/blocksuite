@@ -855,6 +855,7 @@ type Action =
   | 'changeConnectorShape'
   | 'addFrame'
   | 'addGroup'
+  | 'addMindmap'
   | 'createGroupOnMoreOption'
   | 'ungroup'
   | 'releaseFromGroup'
@@ -1023,6 +1024,13 @@ export async function triggerComponentToolbarAction(
         'edgeless-add-group-button'
       );
       await button.click();
+      break;
+    }
+    case 'addMindmap': {
+      const button = page.locator('edgeless-mindmap-tool-button');
+      await button.click();
+      await page.mouse.move(400, 400);
+      await page.mouse.click(400, 400);
       break;
     }
     case 'createGroupOnMoreOption': {

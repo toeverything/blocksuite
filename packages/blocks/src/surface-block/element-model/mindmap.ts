@@ -3,7 +3,7 @@ import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
 
-import { last } from '../../_common/utils/iterable.js';
+import { keys, last, pick } from '../../_common/utils/iterable.js';
 import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
@@ -12,7 +12,11 @@ import {
   type SerializedXYWH,
   type XYWH,
 } from '../utils/xywh.js';
-import { type IBaseProps, SurfaceGroupLikeModel } from './base.js';
+import {
+  type IBaseProps,
+  type SerializedElement,
+  SurfaceGroupLikeModel,
+} from './base.js';
 import { LocalConnectorElementModel } from './connector.js';
 import { convert, observe, watch, yfield } from './decorators.js';
 import type {
@@ -48,8 +52,16 @@ const nodeSchema: z.ZodType<Node> = baseNodeSchema.extend({
 
 type NodeType = z.infer<typeof nodeSchema>;
 
+function isNodeType(node: Record<string, unknown>): node is NodeType {
+  return typeof node.text === 'string' && Array.isArray(node.children);
+}
+
+export type SerializedMindmapElement = SerializedElement & {
+  children: Record<string, NodeDetail>;
+};
+
 type MindmapElementProps = IBaseProps & {
-  nodes: Y.Map<NodeDetail>;
+  children: Y.Map<NodeDetail>;
 };
 
 export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementProps> {
@@ -95,7 +107,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 
       assertType<NodeType>(initialValue);
 
-      const map = new DocCollection.Y.Map() as MindmapElementProps['nodes'];
+      const map: Y.Map<NodeDetail> = new DocCollection.Y.Map();
       const surface = instance.surface;
       const doc = surface.doc;
       const recursive = (
@@ -382,6 +394,11 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 
   override onCreated(): void {
     this.requestBuildTree();
+  }
+
+  override serialize() {
+    const result = super.serialize();
+    return result as SerializedMindmapElement;
   }
 
   getParentNode(id: string) {
@@ -760,7 +777,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
         remove(child);
       });
 
-      this.children.delete(element.id);
+      this.children?.delete(element.id);
       removedDescendants.push(element.id);
     };
 
@@ -853,6 +870,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   applyStyle(fitContent: boolean = false) {
     this.surface.doc.transact(() => {
       const style = this.styleGetter;
+      if (!style) return;
       applyNodeStyle(this._tree, style.root, fitContent);
 
       const walk = (node: MindmapNode, path: number[]) => {
@@ -977,6 +995,28 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     delete subtree.detail.parent;
 
     return subtree;
+  }
+
+  static override propsToY(props: Record<string, unknown>) {
+    if (
+      props.children &&
+      !isNodeType(props.children as Record<string, unknown>) &&
+      !(props.children instanceof DocCollection.Y.Map)
+    ) {
+      const children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
+
+      keys(props.children).forEach(key => {
+        const detail = pick<Record<string, unknown>, keyof NodeDetail>(
+          props.children![key],
+          ['index', 'parent', 'preferredDir']
+        );
+        children.set(key as string, detail as NodeDetail);
+      });
+
+      props.children = children;
+    }
+
+    return props as MindmapElementProps;
   }
 
   static createFromTree(

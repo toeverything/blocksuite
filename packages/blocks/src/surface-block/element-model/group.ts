@@ -16,6 +16,7 @@ type GroupElementProps = IBaseProps & {
 };
 
 export type SerializedGroupElement = SerializedElement & {
+  title: string;
   children: Record<string, boolean>;
 };
 
@@ -79,9 +80,9 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
     return linePolygonIntersects(start, end, bound.points);
   }
 
-  static override propsToY(props: GroupElementProps) {
+  static override propsToY(props: Record<string, unknown>) {
     if (props.title && !(props.title instanceof DocCollection.Y.Text)) {
-      props.title = new DocCollection.Y.Text(props.title);
+      props.title = new DocCollection.Y.Text(props.title as string);
     }
 
     if (props.children && !(props.children instanceof DocCollection.Y.Map)) {
@@ -94,7 +95,7 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
       props.children = children;
     }
 
-    return props;
+    return props as GroupElementProps;
   }
 }
 
