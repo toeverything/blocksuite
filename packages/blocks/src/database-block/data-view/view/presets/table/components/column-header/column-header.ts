@@ -58,7 +58,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     let container: HTMLElement | null = ele;
     while (
       container &&
-      container.computedStyleMap().get('overflow-y')?.toString() !== 'scroll'
+      window.getComputedStyle(container)?.overflowY !== 'scroll'
     ) {
       container = container.parentElement;
     }
