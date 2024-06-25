@@ -91,6 +91,8 @@ type NoteEdgelessProps = {
   scale?: number;
 };
 class NoteBlockTransformController extends EdgelessTransformController<NoteBlockModel> {
+  override autoComplete = true;
+
   override onTransformStart(element: NoteBlockModel): void {
     element.stash('edgeless');
   }

@@ -77,6 +77,8 @@ export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 class ShapeTransformController extends EdgelessTransformController<ShapeElementModel> {
   override rotatable = true;
 
+  override autoComplete = true;
+
   override onTransformStart(): void {}
 
   override onTransformEnd(): void {}

@@ -22,7 +22,6 @@ import {
   deserializeXYWH,
   GroupElementModel,
   type PointLocation,
-  ShapeElementModel,
 } from '../../../../../surface-block/index.js';
 import {
   Bound,
@@ -35,20 +34,11 @@ import { getElementsWithoutGroup } from '../../../utils/group.js';
 import {
   getSelectableBounds,
   getSelectedRect,
-  isAttachmentBlock,
-  isBookmarkBlock,
   isCanvasElement,
   isEdgelessTextBlock,
-  isEmbeddedBlock,
-  isEmbedFigmaBlock,
-  isEmbedGithubBlock,
   isEmbedHtmlBlock,
-  isEmbedLinkedDocBlock,
-  isEmbedLoomBlock,
   isEmbedSyncedDocBlock,
-  isEmbedYoutubeBlock,
   isFrameBlock,
-  isImageBlock,
   isNoteBlock,
 } from '../../../utils/query.js';
 import type { HandleDirection } from '../../resize/resize-handles.js';
@@ -269,16 +259,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _isProportionalElement(element: BlockSuite.EdgelessModelType) {
-    return (
-      isAttachmentBlock(element) ||
-      isImageBlock(element) ||
-      isBookmarkBlock(element) ||
-      isEmbedFigmaBlock(element) ||
-      isEmbedGithubBlock(element) ||
-      isEmbedYoutubeBlock(element) ||
-      isEmbedLoomBlock(element) ||
-      isEmbedLinkedDocBlock(element)
-    );
+    return !!element.transformController?.proportional;
   }
 
   private _shouldRenderSelection(elements?: BlockSuite.EdgelessModelType[]) {
@@ -596,19 +577,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       !this.autoCompleteOff &&
       !this._isResizing &&
       this.selection.selectedElements.length === 1 &&
-      (this.selection.selectedElements[0] instanceof ShapeElementModel ||
-        isNoteBlock(this.selection.selectedElements[0]))
+      !!this.selection.selectedElements[0].transformController?.autoComplete
     );
   }
 
   private _canRotate() {
-    return !this.selection.selectedElements.every(
-      ele =>
-        isNoteBlock(ele) ||
-        isFrameBlock(ele) ||
-        isBookmarkBlock(ele) ||
-        isAttachmentBlock(ele) ||
-        isEmbeddedBlock(ele)
+    return this.selection.selectedElements.some(
+      ele => !!ele.transformController?.rotatable
     );
   }
 
