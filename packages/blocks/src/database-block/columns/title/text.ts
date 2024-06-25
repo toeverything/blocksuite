@@ -141,7 +141,6 @@ export class HeaderAreaTextCell extends BaseTextCell {
     return html`${this.renderIcon()}
       <rich-text
         .yText=${this.value}
-        .inlineEventSource=${this.topContenteditableElement}
         .attributesSchema=${this.attributesSchema}
         .attributeRenderer=${this.attributeRenderer}
         .embedChecker=${this.inlineManager?.embedChecker}
