@@ -469,6 +469,7 @@ export const popTagSelect = (
     onOptionsChange: (options: SelectTag[]) => void;
     onComplete?: () => void;
     minWidth?: number;
+    container?: HTMLElement;
   }
 ) => {
   const component = new MultiTagSelect();
@@ -496,6 +497,7 @@ export const popTagSelect = (
   const remove = createPopup(target, component, {
     onClose: ops.onComplete,
     middleware: [middleware],
+    container: ops.container,
   });
   return remove;
 };

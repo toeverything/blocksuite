@@ -26,8 +26,7 @@ import {
   checkboxChecked,
   checkboxUnchecked,
 } from '../../../list-block/utils/icons.js';
-import { DoneIcon } from '../../icons/index.js';
-import { ArrowRightSmallIcon } from '../../icons/index.js';
+import { ArrowRightSmallIcon, DoneIcon } from '../../icons/index.js';
 import { rangeWrap } from '../../utils/math.js';
 
 type MenuCommon = {
@@ -728,9 +727,16 @@ declare global {
     'affine-menu': MenuComponent<unknown>;
   }
 }
-
+export const getDefaultModalRoot = (ele: HTMLElement) => {
+  const host = ele.closest('editor-host');
+  if (host) {
+    return host;
+  }
+  return document.body;
+};
 export const createModal = (container: HTMLElement = document.body) => {
   const div = document.createElement('div');
+  div.style.pointerEvents = 'auto';
   div.style.position = 'fixed';
   div.style.left = '0';
   div.style.top = '0';

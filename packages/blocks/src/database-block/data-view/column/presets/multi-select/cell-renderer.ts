@@ -4,6 +4,7 @@ import '../../../utils/tags/multi-tag-view.js';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import { getDefaultModalRoot } from '../../../../../_common/components/index.js';
 import {
   popTagSelect,
   type SelectTag,
@@ -53,6 +54,7 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
           onChange: this._onChange,
           onComplete: this._editComplete,
           minWidth: 400,
+          container: getDefaultModalRoot(this),
         }
       ),
     });
