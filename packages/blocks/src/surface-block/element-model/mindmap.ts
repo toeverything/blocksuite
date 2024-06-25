@@ -433,12 +433,14 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     const traverse = (node: MindmapNode, parent: MindmapNode | null) => {
       callback(node, parent);
 
-      node.children.forEach(child => {
+      node?.children.forEach(child => {
         traverse(child, node);
       });
     };
 
-    traverse(this._tree, null);
+    if (this._tree) {
+      traverse(this._tree, null);
+    }
   }
 
   addNode(
