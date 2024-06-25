@@ -1,8 +1,8 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
-  EdgelessTransformableRegistry,
   EdgelessTransformController,
+  Transformable,
   type TransformControllerContext,
 } from '../../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
 import { normalizeShapeBound } from '../canvas-renderer/element-renderer/shape/utils.js';
@@ -74,6 +74,25 @@ export type ShapeProps = IBaseProps & {
 export const SHAPE_TEXT_PADDING = 20;
 export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
+class ShapeTransformController extends EdgelessTransformController<ShapeElementModel> {
+  override rotatable = true;
+
+  override onTransformStart(): void {}
+
+  override onTransformEnd(): void {}
+
+  override adjust(
+    element: ShapeElementModel,
+    { bound, rect }: TransformControllerContext
+  ): void {
+    bound = normalizeShapeBound(element, bound);
+    rect.edgeless.service.updateElement(element.id, {
+      xywh: bound.serialize(),
+    });
+  }
+}
+
+@Transformable(new ShapeTransformController())
 export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   get type() {
     return 'shape';
@@ -195,29 +214,6 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
     return props;
   }
 }
-
-class ShapeTransformController extends EdgelessTransformController<ShapeElementModel> {
-  override rotatable = true;
-
-  override onTransformStart(): void {}
-
-  override onTransformEnd(): void {}
-
-  override adjust(
-    element: ShapeElementModel,
-    { bound, rect }: TransformControllerContext
-  ): void {
-    bound = normalizeShapeBound(element, bound);
-    rect.edgeless.service.updateElement(element.id, {
-      xywh: bound.serialize(),
-    });
-  }
-}
-
-EdgelessTransformableRegistry.register(
-  ShapeElementModel,
-  new ShapeTransformController()
-);
 
 declare global {
   namespace BlockSuite {

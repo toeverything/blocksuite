@@ -1,5 +1,3 @@
-import './edgeless-transform-controller.js';
-
 import { noop } from '@blocksuite/global/utils';
 
 import { EmbedHtmlBlockComponent } from './embed-html-block.js';

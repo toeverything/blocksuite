@@ -1,5 +1,3 @@
-import './edgeless-transform-controller.js';
-
 import type { NoteBlockModel } from './note-model.js';
 import type { NoteBlockService } from './note-service.js';
 

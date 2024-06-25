@@ -348,6 +348,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       const element = edgeless.service.getElementById(id);
       if (!element) return;
       const controller = element.transformController;
+      console.log(controller);
       if (controller) {
         controller.adjust(element, {
           bound,

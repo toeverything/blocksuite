@@ -1,8 +1,8 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
-  EdgelessTransformableRegistry,
   EdgelessTransformController,
+  Transformable,
   type TransformControllerContext,
 } from '../../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
 import { HandleDirection } from '../../root-block/edgeless/components/resize/resize-handles.js';
@@ -32,6 +32,64 @@ export type TextElementProps = IBaseProps & {
 } & Omit<TextStyleProps, 'fontWeight' | 'fontStyle'> &
   Partial<Pick<TextStyleProps, 'fontWeight' | 'fontStyle'>>;
 
+class TextElementTransformController extends EdgelessTransformController<TextElementModel> {
+  override onTransformStart(): void {}
+
+  override onTransformEnd(): void {}
+
+  override adjust(
+    element: TextElementModel,
+    { bound, rect, direction }: TransformControllerContext
+  ): void {
+    let p = 1;
+    const edgeless = rect.edgeless;
+    if (
+      direction === HandleDirection.Left ||
+      direction === HandleDirection.Right
+    ) {
+      const {
+        text: yText,
+        fontFamily,
+        fontSize,
+        fontStyle,
+        fontWeight,
+        hasMaxWidth,
+      } = element;
+      // If the width of the text element has been changed by dragging,
+      // We need to set hasMaxWidth to true for wrapping the text
+      bound = normalizeTextBound(
+        {
+          yText,
+          fontFamily,
+          fontSize,
+          fontStyle,
+          fontWeight,
+          hasMaxWidth,
+        },
+        bound,
+        true
+      );
+      // If the width of the text element has been changed by dragging,
+      // We need to set hasMaxWidth to true for wrapping the text
+      edgeless.service.updateElement(element.id, {
+        xywh: bound.serialize(),
+        fontSize: element.fontSize * p,
+        hasMaxWidth: true,
+      });
+    } else {
+      p = bound.h / element.h;
+      // const newFontsize = element.fontSize * p;
+      // bound = normalizeTextBound(element, bound, false, newFontsize);
+
+      edgeless.service.updateElement(element.id, {
+        xywh: bound.serialize(),
+        fontSize: element.fontSize * p,
+      });
+    }
+  }
+}
+
+@Transformable(new TextElementTransformController())
 export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   get type() {
     return 'text';
@@ -97,68 +155,6 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
     return props;
   }
 }
-
-class TextElementTransformController extends EdgelessTransformController<TextElementModel> {
-  override onTransformStart(): void {}
-
-  override onTransformEnd(): void {}
-
-  override adjust(
-    element: TextElementModel,
-    { bound, rect, direction }: TransformControllerContext
-  ): void {
-    let p = 1;
-    const edgeless = rect.edgeless;
-    if (
-      direction === HandleDirection.Left ||
-      direction === HandleDirection.Right
-    ) {
-      const {
-        text: yText,
-        fontFamily,
-        fontSize,
-        fontStyle,
-        fontWeight,
-        hasMaxWidth,
-      } = element;
-      // If the width of the text element has been changed by dragging,
-      // We need to set hasMaxWidth to true for wrapping the text
-      bound = normalizeTextBound(
-        {
-          yText,
-          fontFamily,
-          fontSize,
-          fontStyle,
-          fontWeight,
-          hasMaxWidth,
-        },
-        bound,
-        true
-      );
-      // If the width of the text element has been changed by dragging,
-      // We need to set hasMaxWidth to true for wrapping the text
-      edgeless.service.updateElement(element.id, {
-        xywh: bound.serialize(),
-        fontSize: element.fontSize * p,
-        hasMaxWidth: true,
-      });
-    } else {
-      p = bound.h / element.h;
-      // const newFontsize = element.fontSize * p;
-      // bound = normalizeTextBound(element, bound, false, newFontsize);
-
-      edgeless.service.updateElement(element.id, {
-        xywh: bound.serialize(),
-        fontSize: element.fontSize * p,
-      });
-    }
-  }
-}
-
-EdgelessTransformableRegistry.register(
-  TextElementModel,
-  new TextElementTransformController()
-);
 
 declare global {
   namespace BlockSuite {
