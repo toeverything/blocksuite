@@ -86,6 +86,12 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     return this.block.doc;
   }
 
+  get _openButtonDisabled() {
+    return (
+      isEmbedLinkedDocBlock(this._model) && this._model.pageId === this._doc.id
+    );
+  }
+
   private _open() {
     this.block.open();
     this.abortController.abort();
@@ -142,6 +148,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
             class="menu-item open"
             text="Open"
             @click=${() => this._open()}
+            ?disabled=${this._openButtonDisabled}
           >
             ${OpenIcon}
           </icon-button>

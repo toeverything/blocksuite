@@ -239,6 +239,23 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return block.docTitle;
   }
 
+  private get _embedViewButtonDisabled() {
+    if (this._doc.readonly) {
+      return true;
+    }
+    return (
+      isEmbedLinkedDocBlock(this.model) &&
+      (!!this._blockElement?.closest('affine-embed-synced-doc-block') ||
+        this.model.pageId === this._doc.id)
+    );
+  }
+
+  get _openButtonDisabled() {
+    return (
+      isEmbedLinkedDocBlock(this.model) && this.model.pageId === this._doc.id
+    );
+  }
+
   static override styles = css`
     .change-embed-card-button {
       width: 24px;
@@ -604,6 +621,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               .tooltip=${'Open this doc'}
               class="change-embed-card-button open"
               @click=${this._open}
+              .disabled=${this._openButtonDisabled}
             >
               ${OpenIcon}
             </edgeless-tool-icon-button>
@@ -663,7 +681,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   })}
                   arai-label="Embed view"
                   .tooltip=${'Embed view'}
-                  ?disabled=${this._doc.readonly}
+                  .disabled=${this._embedViewButtonDisabled}
                   .hover=${false}
                   @click=${this._convertToEmbedView}
                 >

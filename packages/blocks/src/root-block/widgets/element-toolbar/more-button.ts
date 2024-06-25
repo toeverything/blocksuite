@@ -230,6 +230,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
     .action-item[data-disabled] {
       cursor: not-allowed;
+      color: var(--affine-text-disable-color);
     }
   `;
 
@@ -315,7 +316,11 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       (isEmbedLinkedDocBlock(firstElement) ||
         isEmbedSyncedDocBlock(firstElement))
     ) {
-      result.push(OPEN_ACTION);
+      const disabled = firstElement.pageId === this.doc.id;
+      result.push({
+        ...OPEN_ACTION,
+        disabled,
+      });
     }
 
     if (
