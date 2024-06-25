@@ -10,7 +10,7 @@ import {
   type Placement,
   type ReferenceElement,
 } from '@floating-ui/dom';
-import { html, nothing } from 'lit';
+import { html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -60,6 +60,7 @@ import {
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../edgeless/utils/query.js';
+import { RootBlockModel } from '../../root-model.js';
 import type { EmbedOptions } from '../../root-service.js';
 import { embedCardToolbarStyle } from './styles.js';
 
@@ -451,6 +452,20 @@ export class EmbedCardToolbar extends WidgetElement<
         this._show();
       })
     );
+  }
+
+  override willUpdate(changedProperties: PropertyValues<typeof this>) {
+    // avoid no selection change on the first update so that `this.model` will be root block model
+    if (!this.hasUpdated) return;
+
+    // `this.model` is only controlled by selection changed event
+    if (changedProperties.has('model')) {
+      const previousModel = changedProperties.get('model');
+      assertExists(previousModel);
+      if (this.model instanceof RootBlockModel) {
+        this.model = previousModel;
+      }
+    }
   }
 
   override render() {
