@@ -1,11 +1,7 @@
-import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import {
-  eventToVRect,
-  popMenu,
-} from '../../../../../../_common/components/index.js';
+import { popMenu } from '../../../../../../_common/components/index.js';
 import {
   ArrowRightSmallIcon,
   DeleteIcon,
@@ -64,7 +60,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
     }
   }
 
-  openMoreAction = (target: ReferenceElement) => {
+  openMoreAction = (target: HTMLElement) => {
     this.showToolBar(true);
     popViewOptions(target, this.view, () => {
       this.showToolBar(false);
@@ -73,8 +69,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
 
   clickMoreAction = (e: MouseEvent) => {
     e.stopPropagation();
-    const target = eventToVRect(e);
-    this.openMoreAction(target);
+    this.openMoreAction(e.target as HTMLElement);
   };
 
   override render() {
@@ -96,7 +91,7 @@ declare global {
   }
 }
 export const popViewOptions = (
-  target: ReferenceElement,
+  target: HTMLElement,
   view: DataViewTableManager | DataViewKanbanManager,
   onClose?: () => void
 ) => {
