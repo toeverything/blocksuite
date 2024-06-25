@@ -64,7 +64,7 @@ export class HandleResizeManager {
 
   private _onDragEnd: DragEndHandler;
 
-  private _dragDirection: HandleDirection = HandleDirection.Left;
+  private _dragDirection: HandleDirection = HandleDirection.None;
 
   private _dragPos: {
     start: { x: number; y: number };
@@ -665,6 +665,7 @@ export class HandleResizeManager {
 
     const _onPointerUp = (_: PointerEvent) => {
       this._dragging = false;
+      this._dragDirection = HandleDirection.None;
       this._onDragEnd();
 
       const { x, y, width, height } = this._currentRect;

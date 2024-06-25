@@ -1,4 +1,4 @@
-import { html, nothing } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
 
 import type { IVec } from '../../../../surface-block/index.js';
 
@@ -11,6 +11,7 @@ export enum HandleDirection {
   BottomLeft = 'bottom-left',
   TopRight = 'top-right',
   BottomRight = 'bottom-right',
+  None = 'none',
 }
 
 function ResizeHandle(
@@ -96,29 +97,72 @@ export function ResizeHandles(
       target?: HTMLElement;
       point?: IVec;
     }
-  ) => void
+  ) => void,
+  activeHandle?: HandleDirection
 ) {
   const getCornerHandles = () => {
-    const handleTopLeft = ResizeHandle(
-      HandleDirection.TopLeft,
-      onPointerDown,
-      updateCursor
-    );
-    const handleTopRight = ResizeHandle(
-      HandleDirection.TopRight,
-      onPointerDown,
-      updateCursor
-    );
-    const handleBottomLeft = ResizeHandle(
-      HandleDirection.BottomLeft,
-      onPointerDown,
-      updateCursor
-    );
-    const handleBottomRight = ResizeHandle(
-      HandleDirection.BottomRight,
-      onPointerDown,
-      updateCursor
-    );
+    let handleTopLeft: TemplateResult | null = null;
+    let handleTopRight: TemplateResult | null = null;
+    let handleBottomLeft: TemplateResult | null = null;
+    let handleBottomRight: TemplateResult | null = null;
+
+    switch (activeHandle) {
+      case HandleDirection.Left:
+      case HandleDirection.Top:
+      case HandleDirection.Right:
+      case HandleDirection.Bottom:
+        break;
+      case HandleDirection.TopLeft:
+        handleTopLeft = ResizeHandle(
+          HandleDirection.TopLeft,
+          onPointerDown,
+          updateCursor
+        );
+        break;
+      case HandleDirection.TopRight:
+        handleTopRight = ResizeHandle(
+          HandleDirection.TopRight,
+          onPointerDown,
+          updateCursor
+        );
+        break;
+      case HandleDirection.BottomLeft:
+        handleBottomLeft = ResizeHandle(
+          HandleDirection.BottomLeft,
+          onPointerDown,
+          updateCursor
+        );
+        break;
+      case HandleDirection.BottomRight:
+        handleBottomRight = ResizeHandle(
+          HandleDirection.BottomRight,
+          onPointerDown,
+          updateCursor
+        );
+        break;
+      default:
+        handleTopLeft = ResizeHandle(
+          HandleDirection.TopLeft,
+          onPointerDown,
+          updateCursor
+        );
+        handleTopRight = ResizeHandle(
+          HandleDirection.TopRight,
+          onPointerDown,
+          updateCursor
+        );
+        handleBottomLeft = ResizeHandle(
+          HandleDirection.BottomLeft,
+          onPointerDown,
+          updateCursor
+        );
+        handleBottomRight = ResizeHandle(
+          HandleDirection.BottomRight,
+          onPointerDown,
+          updateCursor
+        );
+        break;
+    }
     return {
       handleTopLeft,
       handleTopRight,

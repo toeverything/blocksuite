@@ -1295,7 +1295,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       _updateCursor,
     } = this;
 
-    const hasResizeHandles = !selection.editing && !doc.readonly;
+    const hasResizeHandles =
+      !selection.editing && !doc.readonly && !edgeless.tools.dragging;
     const inoperable = selection.inoperable;
     const handlers = [];
 
@@ -1324,7 +1325,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             ) => {
               if (!this._canRotate() && options?.type === 'rotate') return;
               _updateCursor(dragging, options);
-            }
+            },
+            this.dragDirection
           )
         : nothing;
 
