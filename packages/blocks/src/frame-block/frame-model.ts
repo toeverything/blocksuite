@@ -3,7 +3,8 @@ import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { IHitTestOptions } from '../surface-block/element-model/base.js';
-import { Bound, type SerializedXYWH } from '../surface-block/index.js';
+import { Bound } from '../surface-block/utils/bound.js';
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 type FrameBlockProps = {
   title: Text;

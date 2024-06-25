@@ -1,28 +1,13 @@
+import type { BlockSpec } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-import { createEmbedBlock } from '../_common/embed-block-helper/helper.js';
-import {
-  type EmbedLinkedDocBlockProps,
-  EmbedLinkedDocModel,
-  EmbedLinkedDocStyles,
-} from './embed-linked-doc-model.js';
+import { EmbedLinkedDocBlockSchema } from './embed-linked-doc-schema.js';
 import { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
-const defaultEmbedLinkedDocBlockProps: EmbedLinkedDocBlockProps = {
-  pageId: '',
-  style: EmbedLinkedDocStyles[1],
-  caption: null,
-};
-
-export const EmbedLinkedDocBlockSpec = createEmbedBlock({
-  schema: {
-    name: 'linked-doc',
-    version: 1,
-    toModel: () => new EmbedLinkedDocModel(),
-    props: (): EmbedLinkedDocBlockProps => defaultEmbedLinkedDocBlockProps,
-  },
+export const EmbedLinkedDocBlockSpec: BlockSpec = {
+  schema: EmbedLinkedDocBlockSchema,
   view: {
     component: literal`affine-embed-linked-doc-block`,
   },
   service: EmbedLinkedDocBlockService,
-});
+};

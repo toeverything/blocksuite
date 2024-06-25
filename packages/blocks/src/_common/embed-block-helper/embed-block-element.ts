@@ -3,6 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html, render } from 'lit';
+import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -54,6 +55,9 @@ export class EmbedBlockElement<
       (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
     );
   }
+
+  @query('.embed-block-container')
+  protected accessor embedBlock!: HTMLDivElement;
 
   static override styles = styles;
 

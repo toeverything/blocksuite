@@ -89,6 +89,9 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   @state()
   private accessor _dark = localStorage.getItem('blocksuite:dark') === 'true';
 
+  @state()
+  private accessor _docMode: DocMode = 'page';
+
   @property({ attribute: false })
   accessor collection!: DocCollection;
 
@@ -105,9 +108,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   accessor chatPanel!: CustomChatPanel;
 
   @property({ attribute: false })
-  accessor mode: DocMode = 'page';
-
-  @property({ attribute: false })
   accessor readonly = false;
 
   private _keydown = (e: KeyboardEvent) => {
@@ -117,11 +117,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   };
 
   private _switchEditorMode() {
-    this.mode = this.rootService.docModeService.toggleMode();
-  }
-
-  private _restoreMode() {
-    this.mode = this.rootService.docModeService.getMode();
+    this._docMode = this.rootService.docModeService.toggleMode();
   }
 
   private _addNote() {
@@ -312,8 +308,16 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this._docMode = this.editor.mode;
+    this.rootService.docModeService.onModeChange(mode => {
+      this._docMode = mode;
+    });
+    this.editor.slots.docUpdated.on(() => {
+      this._docMode = this.editor.mode;
+    });
+
     document.body.addEventListener('keydown', this._keydown);
-    this._restoreMode();
   }
 
   override disconnectedCallback() {
@@ -329,15 +333,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       this._canUndo = this.doc.canUndo;
       this._canRedo = this.doc.canRedo;
     });
-  }
-
-  override update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mode')) {
-      const mode = this.mode;
-      this.editor.mode = mode;
-    }
-
-    super.update(changedProperties);
   }
 
   override render() {
@@ -547,7 +542,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
           <div style="display: flex; gap: 12px">
             <!-- Present button -->
-            ${this.mode === 'edgeless'
+            ${this._docMode === 'edgeless'
               ? html`<sl-tooltip content="Present" placement="bottom" hoist>
                   <sl-button
                     size="small"
@@ -571,7 +566,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   pill
                   size="small"
                   content="Page"
-                  .disabled=${this.mode !== 'edgeless'}
+                  .disabled=${this._docMode !== 'edgeless'}
                   @click=${this._switchEditorMode}
                 >
                   <sl-icon name="filetype-doc" label="Page"></sl-icon>
@@ -583,7 +578,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   pill
                   size="small"
                   content="Edgeless"
-                  .disabled=${this.mode !== 'page'}
+                  .disabled=${this._docMode !== 'page'}
                   @click=${this._switchEditorMode}
                 >
                   <sl-icon name="palette" label="Edgeless"></sl-icon>

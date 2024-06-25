@@ -2,9 +2,11 @@ import { expect, type Page } from '@playwright/test';
 
 import {
   addBasicConnectorElement,
+  assertEdgelessConnectorToolMode,
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
   changeConnectorStrokeWidth,
+  ConnectorMode,
   createConnectorElement,
   createShapeElement,
   deleteAllConnectors,
@@ -43,7 +45,9 @@ test('elbow connector without node and width greater than height', async ({
   page,
 }) => {
   await commonSetup(page);
-  await createConnectorElement(page, [0, 0], [200, 100]);
+  await setEdgelessTool(page, 'connector');
+  await assertEdgelessConnectorToolMode(page, ConnectorMode.Curve);
+  await dragBetweenViewCoords(page, [0, 0], [200, 100]);
   await assertConnectorPath(page, [
     [0, 0],
     [100, 0],

@@ -16,10 +16,12 @@ import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-ele
 import { EmbedEdgelessIcon, EmbedPageIcon } from '../_common/icons/text.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import type { DocMode } from '../_common/types.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
-import type { NoteBlockModel } from '../note-block/note-model.js';
-import type { RootBlockComponent } from '../root-block/index.js';
+import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
+import type {
+  EdgelessRootService,
+  RootBlockComponent,
+} from '../root-block/index.js';
 import { SpecProvider } from '../specs/utils/spec-provider.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
@@ -45,7 +47,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       isError: this._error,
       isDeleted: this._deleted,
       isCycle: this._cycle,
-      isEmpty: this._empty,
     };
   }
 
@@ -77,6 +78,9 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   private accessor _syncedDocMode: DocMode = 'page';
 
   @state()
+  private accessor _isEmptySyncedDoc: boolean = true;
+
+  @state()
   private accessor _docUpdatedAt: Date = new Date();
 
   @state()
@@ -90,9 +94,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
   @state()
   private accessor _cycle = false;
-
-  @state()
-  private accessor _empty = false;
 
   override accessor useCaptionEditor = false;
 
@@ -115,49 +116,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
   }
 
-  private _checkEmpty() {
-    const syncedDoc = this.syncedDoc;
-    const rootModel = syncedDoc?.root;
-    if (!syncedDoc || !rootModel) {
-      this._empty = false;
-      return;
-    }
-
-    const noteBlocks = rootModel.children.filter(child =>
-      matchFlavours(child, ['affine:note'])
-    ) as NoteBlockModel[];
-    if (noteBlocks.length === 0) {
-      this._empty = true;
-
-      syncedDoc.withoutTransact(() => {
-        const noteId = syncedDoc.addBlock('affine:note', {}, rootModel.id);
-        syncedDoc.addBlock('affine:paragraph', {}, noteId);
-      });
-
-      return;
-    }
-
-    const contentBlocks = noteBlocks.flatMap(note => note.children);
-    if (contentBlocks.length === 0) {
-      this._empty = true;
-
-      syncedDoc.withoutTransact(() => {
-        syncedDoc.addBlock('affine:paragraph', {}, noteBlocks[0].id);
-      });
-
-      return;
-    }
-
-    this._empty =
-      contentBlocks.length === 1 && contentBlocks[0].text?.length === 0;
-  }
-
   private async _load() {
     this._loading = true;
     this._error = false;
     this._deleted = false;
     this._cycle = false;
-    this._empty = false;
 
     const syncedDoc = this.syncedDoc;
     if (!syncedDoc) {
@@ -182,10 +145,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       await new Promise<void>(resolve => {
         syncedDoc.slots.rootAdded.once(() => resolve());
       });
-    }
-
-    if (this.isPageMode) {
-      this._checkEmpty();
     }
 
     this._loading = false;
@@ -225,7 +184,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
   private _renderSyncedView = () => {
     const syncedDoc = this.syncedDoc;
-    const { isEmpty } = this.blockState;
     const isInSurface = this.isInSurface;
     const editorMode = this._syncedDocMode;
 
@@ -308,8 +266,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
           ?data-scale=${scale}
         >
           <div class="affine-embed-synced-doc-editor">
-            ${guard([editorMode, syncedDoc], renderEditor)}
-            ${isEmpty && editorMode === 'page'
+            ${this.isPageMode && this._isEmptySyncedDoc
               ? html`
                   <div class="affine-embed-synced-doc-editor-empty">
                     <span>
@@ -317,7 +274,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
                     </span>
                   </div>
                 `
-              : nothing}
+              : guard([editorMode, syncedDoc], renderEditor)}
           </div>
           ${isInSurface
             ? nothing
@@ -342,6 +299,38 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         </div>
       `
     );
+  };
+
+  private _initEdgelessFitEffect = () => {
+    const fitToContent = () => {
+      const { _syncedDocMode } = this;
+
+      if (_syncedDocMode !== 'edgeless') return;
+
+      const service = this.syncedDocEditorHost?.std.spec.getService(
+        'affine:page'
+      ) as EdgelessRootService;
+
+      if (!service) return;
+
+      service.viewport.onResize();
+      service.zoomToFit();
+    };
+
+    const observer = new ResizeObserver(fitToContent);
+    const blockElement = this.embedBlock;
+
+    observer.observe(blockElement);
+
+    this._disposables.add(() => {
+      observer.disconnect();
+    });
+
+    this.syncedDocEditorHost?.updateComplete
+      .then(() => {
+        fitToContent();
+      })
+      .catch(() => {});
   };
 
   open = () => {
@@ -465,11 +454,23 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this._syncedDocMode = this._rootService.docModeService.getMode(
       this.model.pageId
     );
+    this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this._syncedDocMode);
     this.disposables.add(
       this._rootService.docModeService.onModeChange(mode => {
         this._syncedDocMode = mode;
+        this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, mode);
       }, this.model.pageId)
     );
+
+    this.syncedDoc &&
+      this.disposables.add(
+        this.syncedDoc.slots.blockUpdated.on(() => {
+          this._isEmptySyncedDoc = isEmptyDoc(
+            this.syncedDoc,
+            this._syncedDocMode
+          );
+        })
+      );
   }
 
   override firstUpdated() {
@@ -491,6 +492,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         })
       );
     }
+
+    this._initEdgelessFitEffect();
   }
 
   override updated(changedProperties: PropertyValues) {

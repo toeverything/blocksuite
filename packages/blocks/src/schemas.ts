@@ -10,14 +10,14 @@ import { CodeBlockSchema } from './code-block/code-model.js';
 import { DataViewBlockSchema } from './data-view-block/data-view-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
-import { EdgelessTextBlockSpec } from './edgeless-text/edgeless-text-spec.js';
-import { EmbedFigmaBlockSpec } from './embed-figma-block/embed-figma-spec.js';
-import { EmbedGithubBlockSpec } from './embed-github-block/embed-github-spec.js';
-import { EmbedHtmlBlockSpec } from './embed-html-block/embed-html-spec.js';
-import { EmbedLinkedDocBlockSpec } from './embed-linked-doc-block/embed-linked-doc-spec.js';
-import { EmbedLoomBlockSpec } from './embed-loom-block/embed-loom-spec.js';
-import { EmbedSyncedDocBlockSpec } from './embed-synced-doc-block/embed-synced-doc-spec.js';
-import { EmbedYoutubeBlockSpec } from './embed-youtube-block/embed-youtube-spec.js';
+import { EdgelessTextBlockSchema } from './edgeless-text/edgeless-text-model.js';
+import { EmbedFigmaBlockSchema } from './embed-figma-block/embed-figma-schema.js';
+import { EmbedGithubBlockSchema } from './embed-github-block/embed-github-schema.js';
+import { EmbedHtmlBlockSchema } from './embed-html-block/embed-html-schema.js';
+import { EmbedLinkedDocBlockSchema } from './embed-linked-doc-block/embed-linked-doc-schema.js';
+import { EmbedLoomBlockSchema } from './embed-loom-block/embed-loom-schema.js';
+import { EmbedSyncedDocBlockSchema } from './embed-synced-doc-block/embed-synced-doc-schema.js';
+import { EmbedYoutubeBlockSchema } from './embed-youtube-block/embed-youtube-schema.js';
 import { FrameBlockSchema } from './frame-block/frame-model.js';
 import { ImageBlockSchema } from './image-block/image-model.js';
 import { ListBlockSchema } from './list-block/list-model.js';
@@ -43,12 +43,12 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   SurfaceRefBlockSchema,
   DataViewBlockSchema,
   AttachmentBlockSchema,
-  EmbedYoutubeBlockSpec.schema,
-  EmbedFigmaBlockSpec.schema,
-  EmbedGithubBlockSpec.schema,
-  EmbedHtmlBlockSpec.schema,
-  EmbedLinkedDocBlockSpec.schema,
-  EmbedSyncedDocBlockSpec.schema,
-  EmbedLoomBlockSpec.schema,
-  EdgelessTextBlockSpec.schema,
+  EmbedYoutubeBlockSchema,
+  EmbedFigmaBlockSchema,
+  EmbedGithubBlockSchema,
+  EmbedHtmlBlockSchema,
+  EmbedLinkedDocBlockSchema,
+  EmbedSyncedDocBlockSchema,
+  EmbedLoomBlockSchema,
+  EdgelessTextBlockSchema,
 ];
