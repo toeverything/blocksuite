@@ -1,5 +1,4 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { ReferenceElement } from '@floating-ui/dom';
 import type { PropertyValues } from 'lit';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -199,7 +198,7 @@ export const selectGroupByProperty = (
   };
 };
 export const popSelectGroupByProperty = (
-  target: ReferenceElement,
+  target: HTMLElement,
   view: DataViewTableManager | DataViewKanbanManager,
   onClose?: () => void
 ) => {
@@ -208,7 +207,7 @@ export const popSelectGroupByProperty = (
   });
 };
 export const popGroupSetting = (
-  target: ReferenceElement,
+  target: HTMLElement,
   view: DataViewTableManager | DataViewKanbanManager,
   onBack: () => void
 ) => {

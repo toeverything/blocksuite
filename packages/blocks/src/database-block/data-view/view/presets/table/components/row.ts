@@ -5,7 +5,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { eventToVRect } from '../../../../../../_common/components/index.js';
 import { NewEditIcon } from '../../../../../../_common/icons/index.js';
 import { MoreHorizontalIcon } from '../../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
@@ -272,7 +271,12 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       },
       isEditing: false,
     };
-    popRowMenu(this.dataViewEle, eventToVRect(e), this.rowId, selection);
+    popRowMenu(
+      this.dataViewEle,
+      e.target as HTMLElement,
+      this.rowId,
+      selection
+    );
   };
 
   override connectedCallback() {

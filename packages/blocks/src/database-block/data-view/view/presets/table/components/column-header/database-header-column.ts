@@ -1,6 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { ReferenceElement } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -8,10 +7,7 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import {
-  popMenu,
-  positionToVRect,
-} from '../../../../../../../_common/components/index.js';
+import { popMenu } from '../../../../../../../_common/components/index.js';
 import {
   DatabaseDuplicate,
   DatabaseInsertLeft,
@@ -248,10 +244,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   private _contextMenu = (e: MouseEvent) => {
     e.preventDefault();
-    this.popMenu(positionToVRect(e.x, e.y));
+    this.popMenu(e.target as HTMLElement);
   };
 
-  private popMenu(ele?: ReferenceElement) {
+  private popMenu(ele?: HTMLElement) {
     popMenu(ele ?? this, {
       options: {
         input: {

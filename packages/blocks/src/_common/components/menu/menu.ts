@@ -3,7 +3,6 @@ import type {
   ClientRectObject,
   Middleware,
   Placement,
-  ReferenceElement,
   VirtualElement,
 } from '@floating-ui/dom';
 import {
@@ -767,7 +766,7 @@ export const eventToVRect = (e: MouseEvent): VirtualElement => {
   return positionToVRect(e.x, e.y);
 };
 export const createPopup = (
-  target: ReferenceElement,
+  target: HTMLElement,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
@@ -776,7 +775,7 @@ export const createPopup = (
     container?: HTMLElement;
   }
 ) => {
-  const modal = createModal(options?.container ?? document.body);
+  const modal = createModal(options?.container ?? getDefaultModalRoot(target));
   autoUpdate(target, content, () => {
     computePosition(target, content, {
       placement: options?.placement,
@@ -815,7 +814,7 @@ export type MenuHandler = {
 };
 
 export const popMenu = <T>(
-  target: ReferenceElement,
+  target: HTMLElement,
   props: {
     options: MenuOptions;
     placement?: Placement;
@@ -842,7 +841,7 @@ export const popMenu = <T>(
   };
 };
 export const popFilterableSimpleMenu = (
-  target: ReferenceElement,
+  target: HTMLElement,
   options: Menu[],
   onClose?: () => void
 ) => {

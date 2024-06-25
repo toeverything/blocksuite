@@ -1,12 +1,8 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import {
-  eventToVRect,
-  popFilterableSimpleMenu,
-} from '../../../../_common/components/index.js';
+import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../_common/icons/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import type { Filter, Variable, VariableOrProperty } from '../ast.js';
@@ -51,7 +47,7 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', e => {
       popFilterableSimpleMenu(
-        eventToVRect(e),
+        e.target as HTMLElement,
         this.vars.map(v => ({
           type: 'action',
           name: v.name,
@@ -107,7 +103,7 @@ declare global {
   }
 }
 export const popCreateFilter = (
-  target: ReferenceElement,
+  target: HTMLElement,
   props: {
     vars: Variable[];
     onSelect: (filter: Filter) => void;

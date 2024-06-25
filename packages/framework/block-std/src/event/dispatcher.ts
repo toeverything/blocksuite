@@ -294,7 +294,7 @@ export class UIEventDispatcher {
       const { fn } = runner;
       const result = fn(context);
       if (result) {
-        context.get('keyboardState').event.stopPropagation();
+        context.get('defaultState').event.stopPropagation();
         return;
       }
     }
