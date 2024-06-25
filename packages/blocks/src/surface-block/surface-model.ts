@@ -136,6 +136,21 @@ const migration = {
       const wrapper = new Boxed(yMap);
       data.elements = wrapper;
     }
+
+    const childrenMap = data.elements.getValue() as Y.Map<Y.Map<unknown>>;
+
+    for (const [id, element] of childrenMap) {
+      if (
+        element.get('type') === 'mindmap' ||
+        element.get('type') === 'group'
+      ) {
+        const children = element.get('children') as Y.Map<Y.Map<unknown>>;
+
+        if (children?.size === 0) {
+          childrenMap.delete(id);
+        }
+      }
+    }
   },
 } satisfies Record<string, MigrationRunner<typeof SurfaceBlockSchema>>;
 
