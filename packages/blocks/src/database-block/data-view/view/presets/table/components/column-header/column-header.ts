@@ -56,12 +56,16 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   getScrollContainer = (ele: HTMLElement) => {
     let container: HTMLElement | null = ele;
-    while (
-      container &&
-      window.getComputedStyle(container)?.overflowY !== 'scroll'
-    ) {
+
+    while (container) {
+      const overflowY = window.getComputedStyle(container).overflowY;
+
+      if (overflowY === 'scroll' || overflowY === 'auto') {
+        break;
+      }
       container = container.parentElement;
     }
+
     return container;
   };
 

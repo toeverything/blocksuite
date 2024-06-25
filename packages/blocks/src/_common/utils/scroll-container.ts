@@ -7,6 +7,6 @@ export const getScrollContainer = (ele: HTMLElement) => {
 };
 
 export const isScrollable = (ele: HTMLElement) => {
-  const value = ele.computedStyleMap().get('overflow-y')?.toString();
+  const value = window.getComputedStyle(ele).overflowY;
   return value === 'scroll' || value === 'auto';
 };
