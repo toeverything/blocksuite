@@ -4,6 +4,7 @@ import type { ElementInfo, OverlayLayer } from './types.js';
 
 export type DraggingInfo<T> = {
   startPos: { x: number; y: number };
+  offsetPos: { x: number; y: number };
   startTime: number;
   scopeRect: DOMRect | null;
   edgelessRect: DOMRect;
@@ -12,10 +13,12 @@ export type DraggingInfo<T> = {
   elementInfo: ElementInfo<T>;
   parentToMount: HTMLElement;
   moved: boolean;
+  validMoved: boolean;
 };
 
 export const defaultInfo = {
   startPos: { x: 0, y: 0 },
+  offsetPos: { x: 0, y: 0 },
   startTime: 0,
   scopeRect: {} as DOMRect,
   edgelessRect: {} as DOMRect,
@@ -24,6 +27,7 @@ export const defaultInfo = {
   elementInfo: null as unknown as ElementInfo<unknown>,
   parentToMount: null as unknown as HTMLElement,
   moved: false,
+  validMoved: false,
 } satisfies DraggingInfo<unknown>;
 
 const className = (name: string) =>

@@ -57,6 +57,11 @@ export interface EdgelessDraggableElementOptions<T> {
   clickToDragScale?: number;
 
   /**
+   * To verify if the move is valid
+   */
+  isValidMove?: (offset: { x: number; y: number }) => boolean;
+
+  /**
    * when element is clicked - mouse down and up without moving
    */
   onElementClick?: (element: ElementInfo<T>) => void;
@@ -88,4 +93,8 @@ export type ElementInfo<T> = {
    * Override the value in {@link EdgelessDraggableElementOptions.standardWidth}
    */
   standardWidth?: number;
+};
+
+export const defaultIsValidMove = (offset: { x: number; y: number }) => {
+  return Math.abs(offset.x) > 50 || Math.abs(offset.y) > 50;
 };
