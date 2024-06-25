@@ -116,9 +116,19 @@ export class EmbedCardToolbar extends WidgetElement<
   }
 
   private get _embedViewButtonDisabled() {
+    if (this.model.doc.readonly) {
+      return true;
+    }
     return (
       isEmbedLinkedDocBlock(this.model) &&
-      !!this.blockElement.closest('affine-embed-synced-doc-block')
+      (!!this.blockElement.closest('affine-embed-synced-doc-block') ||
+        this.model.pageId === this.doc.id)
+    );
+  }
+
+  get _openButtonDisabled() {
+    return (
+      isEmbedLinkedDocBlock(this.model) && this.model.pageId === this.doc.id
     );
   }
 
@@ -497,6 +507,7 @@ export class EmbedCardToolbar extends WidgetElement<
                 size="24px"
                 class="embed-card-toolbar-button doc-info"
                 @click=${() => this.blockElement.open()}
+                ?disabled=${this._openButtonDisabled}
               >
                 ${isEmbedLinkedDocBlock(model)
                   ? nothing
@@ -560,8 +571,7 @@ export class EmbedCardToolbar extends WidgetElement<
                     'current-view': this._isEmbedView,
                   })}
                   .hover=${false}
-                  ?disabled=${model.doc.readonly ||
-                  this._embedViewButtonDisabled}
+                  ?disabled=${this._embedViewButtonDisabled}
                   @click=${() => this._convertToEmbedView()}
                 >
                   ${EmbedWebIcon}

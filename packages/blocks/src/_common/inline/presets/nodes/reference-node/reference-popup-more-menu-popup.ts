@@ -94,6 +94,10 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
     return std;
   }
 
+  get _openButtonDisabled() {
+    return this.referenceDocId === this.blockElement.doc.id;
+  }
+
   private _openDoc() {
     const refDocId = this.referenceDocId;
     const blockElement = this.blockElement;
@@ -124,6 +128,7 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
             class="menu-item open"
             text="Open this doc"
             @click=${() => this._openDoc()}
+            ?disabled=${this._openButtonDisabled}
           >
             ${OpenIcon}
           </icon-button>
