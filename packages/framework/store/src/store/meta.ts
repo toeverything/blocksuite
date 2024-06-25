@@ -118,21 +118,23 @@ export class DocCollectionMeta {
   private _handleDocMetaEvent() {
     const { docMetas, _prevDocs } = this;
 
+    const newDocs = new Set<string>();
+
     docMetas.forEach(docMeta => {
       if (!_prevDocs.has(docMeta.id)) {
         this.docMetaAdded.emit(docMeta.id);
       }
+      newDocs.add(docMeta.id);
     });
 
     _prevDocs.forEach(prevDocId => {
-      const isRemoved = docMetas.every(p => p.id !== prevDocId);
+      const isRemoved = newDocs.has(prevDocId) === false;
       if (isRemoved) {
         this.docMetaRemoved.emit(prevDocId);
       }
     });
 
-    _prevDocs.clear();
-    docMetas.forEach(doc => _prevDocs.add(doc.id));
+    this._prevDocs = newDocs;
 
     this.docMetaUpdated.emit();
   }
