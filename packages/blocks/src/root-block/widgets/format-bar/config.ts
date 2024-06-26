@@ -177,7 +177,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
       action: (chain, formatBar) => {
         const [_, ctx] = chain
           .getSelectedModels({
-            types: ['block'],
+            types: ['block', 'text'],
             mode: 'highest',
           })
           .run();
@@ -223,7 +223,8 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
       showWhen: chain => {
         const [_, ctx] = chain
           .getSelectedModels({
-            types: ['block'],
+            types: ['block', 'text'],
+            mode: 'highest',
           })
           .run();
         const { selectedModels } = ctx;
