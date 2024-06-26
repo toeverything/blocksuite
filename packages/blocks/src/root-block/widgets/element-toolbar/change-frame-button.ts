@@ -1,5 +1,6 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement, nothing } from 'lit';
@@ -7,6 +8,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import { toast } from '../../../_common/components/toast.js';
+import { renderSeparator } from '../../../_common/components/toolbar/separator.js';
 import { NoteIcon, RenameIcon } from '../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
@@ -16,7 +18,6 @@ import {
   deserializeXYWH,
   serializeXYWH,
 } from '../../../surface-block/index.js';
-import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
@@ -105,7 +106,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       [
         onlyOne
           ? html`
-              <edgeless-tool-icon-button
+              <affine-toolbar-icon-button
                 arai-label=${'Insert into Page'}
                 .tooltip=${'Insert into Page'}
                 .iconSize=${'20px'}
@@ -114,13 +115,13 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               >
                 ${NoteIcon}
                 <span class="label">Insert into Page</span>
-              </edgeless-tool-icon-button>
+              </affine-toolbar-icon-button>
             `
           : nothing,
 
         onlyOne
           ? html`
-              <edgeless-tool-icon-button
+              <affine-toolbar-icon-button
                 aria-label="Rename"
                 .tooltip=${'Rename'}
                 .iconSize=${'20px'}
@@ -128,22 +129,22 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
                   mountFrameTitleEditor(this.frames[0], this.edgeless)}
               >
                 ${RenameIcon}
-              </edgeless-tool-icon-button>
+              </affine-toolbar-icon-button>
             `
           : nothing,
 
         html`
-          <edgeless-menu-button
+          <affine-menu-button
             .contentPadding=${'8px'}
             .button=${html`
-              <edgeless-tool-icon-button
+              <affine-toolbar-icon-button
                 aria-label="Background"
                 .tooltip=${'Background'}
               >
                 <edgeless-color-button
                   .color=${background}
                 ></edgeless-color-button>
-              </edgeless-tool-icon-button>
+              </affine-toolbar-icon-button>
             `}
           >
             <edgeless-color-panel
@@ -153,10 +154,10 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               @select=${(e: ColorEvent) => this._setFrameBackground(e.detail)}
             >
             </edgeless-color-panel>
-          </edgeless-menu-button>
+          </affine-menu-button>
         `,
       ].filter(button => button !== nothing),
-      renderMenuDivider
+      renderSeparator
     );
   }
 }

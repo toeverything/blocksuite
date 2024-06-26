@@ -190,7 +190,7 @@ export async function locatorEdgelessToolButton(
       buttonType = 'edgeless-toolbar-button';
       break;
     default:
-      buttonType = 'edgeless-tool-icon-button';
+      buttonType = 'affine-toolbar-icon-button';
   }
   // TODO: quickTool locator is different
   const button = await locatorEdgelessToolButtonSenior(
@@ -203,7 +203,7 @@ export async function locatorEdgelessToolButton(
 
 export async function toggleZoomBarWhenSmallScreenWidth(page: Page) {
   const toggleZoomBarButton = page.locator(
-    '.toggle-button edgeless-tool-icon-button'
+    '.toggle-button affine-toolbar-icon-button'
   );
   const isClosed = (await toggleZoomBarButton.count()) === 1;
   if (isClosed) {
@@ -233,7 +233,7 @@ export async function locatorEdgelessZoomToolButton(
 
   const button = page
     .locator(
-      `.edgeless-zoom-toolbar-container.${zoomBarClass} edgeless-tool-icon-button`
+      `.edgeless-zoom-toolbar-container.${zoomBarClass} affine-toolbar-icon-button`
     )
     .filter({
       hasText: text,
@@ -255,7 +255,7 @@ export function locatorEdgelessComponentToolButton(
     more: 'More',
   }[type];
   const button = page
-    .locator('edgeless-element-toolbar-widget edgeless-tool-icon-button')
+    .locator('edgeless-element-toolbar-widget affine-toolbar-icon-button')
     .filter({
       hasText: text,
     });
@@ -316,7 +316,7 @@ export async function setEdgelessTool(
       await shapeToolButton.click({ position: { x: 5, y: 5 } });
 
       const squareShapeButton = page
-        .locator('edgeless-tool-icon-button')
+        .locator('affine-toolbar-icon-button')
         .filter({ hasText: shape });
       await squareShapeButton.click();
       break;
@@ -1146,7 +1146,7 @@ export async function triggerComponentToolbarAction(
     }
     case 'toCardView': {
       const button = locatorComponentToolbar(page)
-        .locator('edgeless-tool-icon-button')
+        .locator('affine-toolbar-icon-button')
         .filter({
           hasText: 'Card view',
         });
@@ -1155,7 +1155,7 @@ export async function triggerComponentToolbarAction(
     }
     case 'toEmbedView': {
       const button = locatorComponentToolbar(page)
-        .locator('edgeless-tool-icon-button')
+        .locator('affine-toolbar-icon-button')
         .filter({
           hasText: 'Embed view',
         });

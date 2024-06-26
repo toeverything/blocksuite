@@ -26,30 +26,30 @@ function ConnectorModeButtonGroup(
    */
   return html`
     <div class="connector-mode-button-group">
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         .active=${mode === ConnectorMode.Curve}
         .activeMode=${'background'}
         .tooltip=${'Curve'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Curve })}
       >
         ${ConnectorCWithArrowIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
+      </affine-toolbar-icon-button>
+      <affine-toolbar-icon-button
         .active=${mode === ConnectorMode.Orthogonal}
         .activeMode=${'background'}
         .tooltip=${'Elbowed'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Orthogonal })}
       >
         ${ConnectorXWithArrowIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
+      </affine-toolbar-icon-button>
+      <affine-toolbar-icon-button
         .active=${mode === ConnectorMode.Straight}
         .activeMode=${'background'}
         .tooltip=${'Straight'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Straight })}
       >
         ${ConnectorLWithArrowIcon}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     </div>
   `;
 }
@@ -79,7 +79,7 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
       gap: 14px;
     }
 
-    .connector-mode-button-group > edgeless-tool-icon-button svg {
+    .connector-mode-button-group > affine-toolbar-icon-button svg {
       fill: var(--affine-icon-color);
     }
 

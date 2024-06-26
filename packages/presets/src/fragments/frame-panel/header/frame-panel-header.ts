@@ -212,7 +212,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
     return html`<div class="frame-panel-header">
       <div class="all-frames-setting">
         <span class="all-frames-setting-label">All frames</span>
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           class="all-frames-setting-button ${this._settingPopperShow
             ? 'active'
             : ''}"
@@ -223,7 +223,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
           @click=${() => this._framesSettingMenuPopper?.toggle()}
         >
           ${SettingsIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       </div>
       <div class="frames-setting-container">
         <frames-setting-menu

@@ -5,8 +5,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-@customElement('edgeless-tool-icon-button')
-export class EdgelessToolIconButton extends LitElement {
+@customElement('affine-toolbar-icon-button')
+export class AffineToolbarIconButton extends LitElement {
   static override styles = css`
     .icon-container {
       position: relative;
@@ -20,6 +20,7 @@ export class EdgelessToolIconButton extends LitElement {
       box-sizing: border-box;
       width: var(--icon-container-width, unset);
       justify-content: var(--justify, unset);
+      user-select: none;
     }
 
     .icon-container.active-mode-color[active] {
@@ -193,6 +194,6 @@ export class EdgelessToolIconButton extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-tool-icon-button': EdgelessToolIconButton;
+    'affine-toolbar-icon-button': AffineToolbarIconButton;
   }
 }

@@ -1,3 +1,5 @@
+import '../../../../../_common/components/toolbar/icon-button.js';
+
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
@@ -92,7 +94,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
     const type = this.edgelessTool?.type;
     const { active } = this;
     return html`
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         class="edgeless-default-button ${type} ${active ? 'active' : ''}"
         .tooltip=${type === 'pan'
           ? getTooltipWithShortcut('Hand', 'H')
@@ -106,7 +108,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
           ${localStorage.defaultTool === 'default' ? SelectIcon : HandIcon}
         </span>
         <span class="arrow-up-icon">${ArrowUpIcon}</span>
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     `;
   }
 }

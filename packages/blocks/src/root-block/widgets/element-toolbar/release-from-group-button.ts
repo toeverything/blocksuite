@@ -1,4 +1,4 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
@@ -36,14 +36,14 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
 
   protected override render() {
     return html`
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         aria-label="Release from group"
         .tooltip=${'Release from group'}
         .iconSize=${'20px'}
         @click=${() => this._releaseFromGroup()}
       >
         ${ReleaseFromGroupButtonIcon}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     `;
   }
 }

@@ -17,6 +17,17 @@ import {
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
+import {
+  isBookmarkBlock,
+  isEmbeddedBlock,
+  isEmbedFigmaBlock,
+  isEmbedGithubBlock,
+  isEmbedHtmlBlock,
+  isEmbedLinkedDocBlock,
+  isEmbedLoomBlock,
+  isEmbedSyncedDocBlock,
+  isEmbedYoutubeBlock,
+} from '../../../../_common/utils/query.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import { EDGELESS_TEXT_BLOCK_MIN_WIDTH } from '../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
@@ -54,17 +65,8 @@ import {
   getSelectableBounds,
   getSelectedRect,
   isAttachmentBlock,
-  isBookmarkBlock,
   isCanvasElement,
   isEdgelessTextBlock,
-  isEmbeddedBlock,
-  isEmbedFigmaBlock,
-  isEmbedGithubBlock,
-  isEmbedHtmlBlock,
-  isEmbedLinkedDocBlock,
-  isEmbedLoomBlock,
-  isEmbedSyncedDocBlock,
-  isEmbedYoutubeBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,

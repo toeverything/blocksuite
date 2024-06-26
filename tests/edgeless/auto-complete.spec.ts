@@ -36,7 +36,7 @@ import { test } from '../utils/playwright.js';
 function getAutoCompletePanelButton(page: Page, type: string) {
   return page
     .locator('.auto-complete-panel-container')
-    .locator('edgeless-tool-icon-button')
+    .locator('affine-toolbar-icon-button')
     .filter({ hasText: `${type}` });
 }
 

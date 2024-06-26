@@ -1,4 +1,5 @@
 import { groupBy } from '../../../_common/utils/iterable.js';
+import { isEmbedSyncedDocBlock } from '../../../_common/utils/query.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
@@ -10,7 +11,6 @@ import { getCloneElements, prepareCloneData } from './clone-utils.js';
 import { getElementsWithoutGroup } from './group.js';
 import {
   isEdgelessTextBlock,
-  isEmbedSyncedDocBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,

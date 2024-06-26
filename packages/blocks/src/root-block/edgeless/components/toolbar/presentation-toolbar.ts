@@ -1,3 +1,4 @@
+import '../../../../_common/components/toolbar/icon-button.js';
 import './present/navigator-setting-button.js';
 
 import { cssVar } from '@toeverything/theme';
@@ -307,13 +308,13 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
           display: ${this.visible ? 'flex' : 'none'};
         }
       </style>
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         .iconContainerPadding=${0}
         .tooltip=${'Previous'}
         @click=${() => this._previousFrame()}
       >
         ${FrameNavigatorPrevIcon}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
 
       <div class="edgeless-frame-navigator ${this.dense ? 'dense' : ''}">
         ${this.dense
@@ -331,18 +332,18 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
         </span>
       </div>
 
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         .tooltip=${'Next'}
         @click=${() => this._nextFrame()}
         .iconContainerPadding=${0}
       >
         ${FrameNavigatorNextIcon}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
 
       <div class="full-divider"></div>
 
       <div class="config-buttons">
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           .tooltip=${document.fullscreenElement
             ? 'Exit Full Screen'
             : 'Enter Full Screen'}
@@ -353,7 +354,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
           ${document.fullscreenElement
             ? NavigatorExitFullScreenIcon
             : NavigatorFullScreenIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
 
         ${this.dense
           ? nothing

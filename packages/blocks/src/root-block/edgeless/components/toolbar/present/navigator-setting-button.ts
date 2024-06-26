@@ -1,6 +1,6 @@
-import './frame-order-menu.js';
-import '../../buttons/tool-icon-button.js';
+import '../../../../../_common/components/toolbar/icon-button.js';
 import '../../../../../_common/components/toggle-switch.js';
+import './frame-order-menu.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
@@ -137,7 +137,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
 
   override render() {
     return html`
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         class="navigator-setting-button"
         .tooltip=${this.popperShow ? '' : 'Settings'}
         @click=${() => {
@@ -146,7 +146,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
         .iconContainerPadding=${0}
       >
         ${NavigatorSettingsIcon}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
 
       <div
         class="navigator-setting-menu"

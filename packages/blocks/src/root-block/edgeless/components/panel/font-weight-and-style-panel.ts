@@ -1,3 +1,5 @@
+import '../../../../_common/components/toolbar/icon-button.js';
+
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -33,7 +35,7 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
       min-width: 124px;
     }
 
-    edgeless-tool-icon-button {
+    affine-toolbar-icon-button {
       width: 100%;
     }
   `;
@@ -109,7 +111,7 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
               fontFace => {
                 const active = this._isActive(fontFace.weight as FontWeight);
                 return html`
-                  <edgeless-tool-icon-button
+                  <affine-toolbar-icon-button
                     data-weight="${fontFace.weight}"
                     .iconContainerPadding=${[4, 8]}
                     .justify=${'space-between'}
@@ -120,7 +122,7 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
                   >
                     ${choose(fontFace.weight, FONT_WEIGHT_CHOOSE)}
                     ${active ? CheckIcon : nothing}
-                  </edgeless-tool-icon-button>
+                  </affine-toolbar-icon-button>
                 `;
               }
             )
@@ -135,7 +137,7 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
                   FontStyle.Italic
                 );
                 return html`
-                  <edgeless-tool-icon-button
+                  <affine-toolbar-icon-button
                     data-weight="${fontFace.weight} italic"
                     .iconContainerPadding=${[4, 8]}
                     .justify=${'space-between'}
@@ -152,7 +154,7 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
                   >
                     ${choose(fontFace.weight, FONT_WEIGHT_CHOOSE)} Italic
                     ${active ? CheckIcon : nothing}
-                  </edgeless-tool-icon-button>
+                  </affine-toolbar-icon-button>
                 `;
               }
             )

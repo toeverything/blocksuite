@@ -1,3 +1,5 @@
+import '../../../../_common/components/toolbar/icon-button.js';
+
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -56,7 +58,7 @@ export class EdgelessAlignPanel extends LitElement {
       TEXT_ALIGN_LIST,
       item => item.name,
       ({ name, value, icon }) => html`
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           .activeMode=${'background'}
           aria-label=${name}
           .tooltip=${name}
@@ -64,7 +66,7 @@ export class EdgelessAlignPanel extends LitElement {
           @click=${() => this._onSelect(value)}
         >
           ${icon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       `
     );
   }

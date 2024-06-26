@@ -6,10 +6,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  isEmbedLinkedDocBlock,
-  isEmbedSyncedDocBlock,
-} from '../../../root-block/edgeless/utils/query.js';
-import {
   CenterPeekIcon,
   CopyIcon,
   DeleteIcon,
@@ -18,6 +14,10 @@ import {
   RefreshIcon,
 } from '../../icons/text.js';
 import { getBlockProps } from '../../utils/block-props.js';
+import {
+  isEmbedLinkedDocBlock,
+  isEmbedSyncedDocBlock,
+} from '../../utils/query.js';
 import { isPeekable, peek } from '../peekable.js';
 import { toast } from '../toast.js';
 import type { EmbedToolbarBlockElement } from './type.js';

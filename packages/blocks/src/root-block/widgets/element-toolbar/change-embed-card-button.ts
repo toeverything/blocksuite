@@ -1,5 +1,6 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
@@ -21,6 +22,7 @@ import { join } from 'lit/directives/join.js';
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import { isPeekable, peek } from '../../../_common/components/index.js';
 import { toast } from '../../../_common/components/toast.js';
+import { renderSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -42,6 +44,13 @@ import {
   PaletteIcon,
 } from '../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
+import {
+  isBookmarkBlock,
+  isEmbedGithubBlock,
+  isEmbedHtmlBlock,
+  isEmbedLinkedDocBlock,
+  isEmbedSyncedDocBlock,
+} from '../../../_common/utils/query.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import type {
@@ -74,15 +83,7 @@ import type {
   EmbedYoutubeModel,
 } from '../../../embed-youtube-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
-import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import {
-  isBookmarkBlock,
-  isEmbedGithubBlock,
-  isEmbedHtmlBlock,
-  isEmbedLinkedDocBlock,
-  isEmbedSyncedDocBlock,
-} from '../../edgeless/utils/query.js';
 import type { EmbedOptions } from '../../root-service.js';
 
 @customElement('edgeless-change-embed-card-button')
@@ -582,7 +583,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               <span>${model.url}</span>
             </div>
 
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               arai-label="Click to copy link"
               .tooltip=${'Click to copy link'}
               class="change-embed-card-button copy"
@@ -590,9 +591,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               @click=${this._copyUrl}
             >
               ${CopyIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
 
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               arai-label="Edit"
               .tooltip=${'Edit'}
               class="change-embed-card-button edit"
@@ -601,7 +602,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 toggleEmbedCardEditModal(this.std.host as EditorHost, model)}
             >
               ${EditIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           `
         : nothing,
 
@@ -616,7 +617,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
       isEmbedSyncedDocBlock(model) || isEmbedLinkedDocBlock(model)
         ? html`
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               arai-label="Open"
               .tooltip=${'Open this doc'}
               class="change-embed-card-button open"
@@ -624,33 +625,33 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               .disabled=${this._openButtonDisabled}
             >
               ${OpenIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           `
         : nothing,
 
       this._blockElement && isPeekable(this._blockElement)
         ? html`
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               arai-label="Center peek"
               .tooltip=${'Open in center peek'}
               class="change-embed-card-button center-peek"
               @click=${this._peek}
             >
               ${CenterPeekIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           `
         : nothing,
 
       this._canShowFullScreenButton
         ? html`
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               arai-label="Full screen"
               .tooltip=${'Full screen'}
               class="change-embed-card-button expand"
               @click=${this._open}
             >
               ${ExpandFullIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           `
         : nothing,
 
@@ -658,7 +659,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
         ? html`
             <div class="change-embed-card-view-style">
               <div class="change-embed-card-button-view-selector">
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   class=${classMap({
                     'change-embed-card-button': true,
                     card: true,
@@ -671,9 +672,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   @click=${this._convertToCardView}
                 >
                   ${BookmarkIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
 
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   class=${classMap({
                     'change-embed-card-button': true,
                     embed: true,
@@ -686,7 +687,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   @click=${this._convertToEmbedView}
                 >
                   ${EmbedWebIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               </div>
             </div>
           `
@@ -694,15 +695,15 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
       'style' in model && this._canShowCardStylePanel
         ? html`
-            <edgeless-menu-button
+            <affine-menu-button
               .contentPadding=${'8px'}
               .button=${html`
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   aria-label="Card style"
                   .tooltip=${'Card style'}
                 >
                   ${PaletteIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `}
             >
               <card-style-panel
@@ -713,12 +714,12 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   this._setCardStyle(value)}
               >
               </card-style-panel>
-            </edgeless-menu-button>
+            </affine-menu-button>
           `
         : nothing,
 
       html`
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           arai-label="Add caption"
           .tooltip=${'Add caption'}
           class="change-embed-card-button caption"
@@ -726,7 +727,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           @click=${this._showCaption}
         >
           ${CaptionIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       `,
 
       this.quickConnectButton,
@@ -734,10 +735,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       isEmbedHtmlBlock(model)
         ? nothing
         : html`
-            <edgeless-menu-button
+            <affine-menu-button
               .contentPadding=${'8px'}
               .button=${html`
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   aria-label="Scale"
                   .tooltip=${'Scale'}
                   .justify=${'space-between'}
@@ -748,7 +749,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                     ${Math.round(this._embedScale * 100) + '%'}
                   </span>
                   ${SmallArrowDownIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `}
             >
               <edgeless-scale-panel
@@ -757,13 +758,13 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 .scale=${Math.round(this._embedScale * 100)}
                 .onSelect=${(scale: number) => this._setEmbedScale(scale)}
               ></edgeless-scale-panel>
-            </edgeless-menu-button>
+            </affine-menu-button>
           `,
     ];
 
     return join(
       buttons.filter(button => button !== nothing),
-      renderMenuDivider
+      renderSeparator
     );
   }
 }

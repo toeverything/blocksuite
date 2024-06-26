@@ -1,5 +1,6 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
@@ -88,15 +89,15 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
 
   override render() {
     return html`
-      <edgeless-menu-button
+      <affine-menu-button
         .contentPadding=${'8px'}
         .button=${html`
-          <edgeless-tool-icon-button
+          <affine-toolbar-icon-button
             aria-label="Card style"
             .tooltip=${'Card style'}
           >
             ${PaletteIcon}
-          </edgeless-tool-icon-button>
+          </affine-toolbar-icon-button>
         `}
       >
         <card-style-panel
@@ -106,11 +107,11 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
           .onSelect=${this._setCardStyle}
         >
         </card-style-panel>
-      </edgeless-menu-button>
+      </affine-menu-button>
 
-      <edgeless-menu-divider></edgeless-menu-divider>
+      <affine-separator></affine-separator>
 
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         aria-label="Add caption"
         .tooltip=${'Add caption'}
         class="change-attachment-button caption"
@@ -118,7 +119,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
         @click=${this._showCaption}
       >
         ${CaptionIcon}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     `;
   }
 }

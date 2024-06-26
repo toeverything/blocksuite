@@ -1,5 +1,6 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import '../../edgeless/components/panel/stroke-style-panel.js';
 import '../../edgeless/components/panel/color-panel.js';
 import './change-text-menu.js';
@@ -11,6 +12,7 @@ import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { renderSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   AddTextIcon,
   ConnectorCWithArrowIcon,
@@ -46,7 +48,6 @@ import {
   DEFAULT_REAR_END_POINT_STYLE,
   type StrokeStyle,
 } from '../../../surface-block/index.js';
-import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
@@ -331,17 +332,17 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     return join(
       [
         html`
-          <edgeless-menu-button
+          <affine-menu-button
             .contentPadding=${'8px'}
             .button=${html`
-              <edgeless-tool-icon-button
+              <affine-toolbar-icon-button
                 aria-label="Stroke style"
                 .tooltip=${'Stroke style'}
               >
                 <edgeless-color-button
                   .color=${selectedColor}
                 ></edgeless-color-button>
-              </edgeless-tool-icon-button>
+              </affine-toolbar-icon-button>
             `}
           >
             <stroke-style-panel
@@ -355,15 +356,18 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                 this._setConnectorColor(e.detail)}
             >
             </stroke-style-panel>
-          </edgeless-menu-button>
+          </affine-menu-button>
         `,
 
         html`
-          <edgeless-menu-button
+          <affine-menu-button
             .button=${html`
-              <edgeless-tool-icon-button aria-label="Style" .tooltip=${'Style'}>
+              <affine-toolbar-icon-button
+                aria-label="Style"
+                .tooltip=${'Style'}
+              >
                 ${choose(selectedRough, STYLE_CHOOSE)}${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
+              </affine-toolbar-icon-button>
             `}
           >
             <div slot data-orientation="horizontal">
@@ -371,7 +375,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                 STYLE_LIST,
                 item => item.name,
                 ({ name, value, icon }) => html`
-                  <edgeless-tool-icon-button
+                  <affine-toolbar-icon-button
                     aria-label=${name}
                     .tooltip=${name}
                     .active=${selectedRough === value}
@@ -379,17 +383,17 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                     @click=${() => this._setConnectorRough(value)}
                   >
                     ${icon}
-                  </edgeless-tool-icon-button>
+                  </affine-toolbar-icon-button>
                 `
               )}
             </div>
-          </edgeless-menu-button>
+          </affine-menu-button>
         `,
 
         html`
-          <edgeless-menu-button
+          <affine-menu-button
             .button=${html`
-              <edgeless-tool-icon-button
+              <affine-toolbar-icon-button
                 aria-label="Start point style"
                 .tooltip=${'Start point style'}
               >
@@ -397,7 +401,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   FRONT_ENDPOINT_STYLE_LIST,
                   selectedStartPointStyle
                 )}${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
+              </affine-toolbar-icon-button>
             `}
           >
             <div slot data-orientation="horizontal">
@@ -405,7 +409,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                 FRONT_ENDPOINT_STYLE_LIST,
                 item => item.value,
                 ({ value, icon }) => html`
-                  <edgeless-tool-icon-button
+                  <affine-toolbar-icon-button
                     aria-label=${value}
                     .tooltip=${value}
                     .active=${selectedStartPointStyle === value}
@@ -417,13 +421,13 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                       )}
                   >
                     ${icon}
-                  </edgeless-tool-icon-button>
+                  </affine-toolbar-icon-button>
                 `
               )}
             </div>
-          </edgeless-menu-button>
+          </affine-menu-button>
 
-          <edgeless-tool-icon-button
+          <affine-toolbar-icon-button
             aria-label="Flip direction"
             .tooltip=${'Flip direction'}
             .disabled=${false}
@@ -434,11 +438,11 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               )}
           >
             ${FlipDirectionIcon}
-          </edgeless-tool-icon-button>
+          </affine-toolbar-icon-button>
 
-          <edgeless-menu-button
+          <affine-menu-button
             .button=${html`
-              <edgeless-tool-icon-button
+              <affine-toolbar-icon-button
                 aria-label="End point style"
                 .tooltip=${'End point style'}
               >
@@ -446,7 +450,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   REAR_ENDPOINT_STYLE_LIST,
                   selectedEndPointStyle
                 )}${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
+              </affine-toolbar-icon-button>
             `}
           >
             <div slot data-orientation="horizontal">
@@ -454,7 +458,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                 REAR_ENDPOINT_STYLE_LIST,
                 item => item.value,
                 ({ value, icon }) => html`
-                  <edgeless-tool-icon-button
+                  <affine-toolbar-icon-button
                     aria-label=${value}
                     .tooltip=${value}
                     .active=${selectedEndPointStyle === value}
@@ -466,20 +470,20 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                       )}
                   >
                     ${icon}
-                  </edgeless-tool-icon-button>
+                  </affine-toolbar-icon-button>
                 `
               )}
             </div>
-          </edgeless-menu-button>
+          </affine-menu-button>
 
-          <edgeless-menu-button
+          <affine-menu-button
             .button=${html`
-              <edgeless-tool-icon-button
+              <affine-toolbar-icon-button
                 aria-label="Shape"
                 .tooltip=${'Connector shape'}
               >
                 ${choose(selectedMode, MODE_CHOOSE)}${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
+              </affine-toolbar-icon-button>
             `}
           >
             <div slot data-orientation="horizontal">
@@ -487,7 +491,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                 MODE_LIST,
                 item => item.name,
                 ({ name, value, icon }) => html`
-                  <edgeless-tool-icon-button
+                  <affine-toolbar-icon-button
                     aria-label=${name}
                     .tooltip=${name}
                     .active=${selectedMode === value}
@@ -495,11 +499,11 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                     @click=${() => this._setConnectorMode(value)}
                   >
                     ${icon}
-                  </edgeless-tool-icon-button>
+                  </affine-toolbar-icon-button>
                 `
               )}
             </div>
-          </edgeless-menu-button>
+          </affine-menu-button>
         `,
 
         choose<string, TemplateResult<1> | typeof nothing>(
@@ -508,13 +512,13 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
             [
               'button',
               () => html`
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   aria-label="Add text"
                   .tooltip=${'Add text'}
                   @click=${this._addLabel}
                 >
                   ${AddTextIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `,
             ],
             [
@@ -531,7 +535,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
           ]
         ),
       ].filter(button => button !== nothing),
-      renderMenuDivider
+      renderSeparator
     );
   }
 }

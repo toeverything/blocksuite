@@ -1,5 +1,6 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import './more-button.js';
 
 import { WidgetElement } from '@blocksuite/block-std';
@@ -8,6 +9,7 @@ import { css, html, nothing, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
+import { renderSeparator } from '../../../_common/components/toolbar/separator.js';
 import { ConnectorCWithArrowIcon } from '../../../_common/icons/edgeless.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import {
@@ -15,6 +17,10 @@ import {
   groupBy,
   pickValues,
 } from '../../../_common/utils/iterable.js';
+import {
+  isBookmarkBlock,
+  isEmbeddedBlock,
+} from '../../../_common/utils/query.js';
 import type { AttachmentBlockModel } from '../../../attachment-block/attachment-model.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
@@ -40,15 +46,12 @@ import {
   type ShapeElementModel,
   type TextElementModel,
 } from '../../../surface-block/index.js';
-import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   isAttachmentBlock,
-  isBookmarkBlock,
   isEdgelessTextBlock,
-  isEmbeddedBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
@@ -283,14 +286,14 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   private _renderQuickConnectButton() {
     return [
       html`
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           aria-label="Draw connector"
           .tooltip=${'Draw connector'}
           .activeMode=${'background'}
           @click=${this._quickConnect}
         >
           ${ConnectorCWithArrowIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       `,
     ];
   }
@@ -448,7 +451,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       >
         ${join(
           buttons.filter(b => b !== nothing),
-          renderMenuDivider
+          renderSeparator
         )}
       </div>
     `;

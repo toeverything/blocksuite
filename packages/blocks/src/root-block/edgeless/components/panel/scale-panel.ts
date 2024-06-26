@@ -1,4 +1,4 @@
-import '../buttons/tool-icon-button.js';
+import '../../../../_common/components/toolbar/icon-button.js';
 
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -27,7 +27,7 @@ export class EdgelessScalePanel extends LitElement {
       width: 68px;
     }
 
-    edgeless-tool-icon-button {
+    affine-toolbar-icon-button {
       align-self: stretch;
     }
 
@@ -102,14 +102,14 @@ export class EdgelessScalePanel extends LitElement {
         this.scaleList,
         scale => scale,
         scale =>
-          html`<edgeless-tool-icon-button
+          html`<affine-toolbar-icon-button
             .iconContainerPadding=${[4, 8]}
             .activeMode=${'background'}
             .active=${this.scale === scale}
             @click=${() => this._onSelect(scale)}
           >
             ${format(scale)}
-          </edgeless-tool-icon-button>`
+          </affine-toolbar-icon-button>`
       )}
 
       <input

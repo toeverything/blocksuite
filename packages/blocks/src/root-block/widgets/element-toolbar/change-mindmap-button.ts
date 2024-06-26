@@ -1,10 +1,14 @@
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { renderSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   MindmapBalanceLayoutIcon,
   MindmapLeftLayoutIcon,
@@ -139,7 +143,7 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
       MINDMAP_LAYOUT_LIST,
       item => item.value,
       ({ name, value, icon }) => html`
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           aria-label=${name}
           .tooltip=${name}
           .tipPosition=${'top'}
@@ -148,7 +152,7 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
           @click=${() => this.onSelect(value)}
         >
           ${icon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       `
     );
   }
@@ -216,44 +220,53 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`
-      <edgeless-menu-button
-        .contentPadding=${'8px'}
-        .button=${html`
-          <edgeless-tool-icon-button aria-label="Style" .tooltip=${'Style'}>
-            ${MindmapStyleIcon}${SmallArrowDownIcon}
-          </edgeless-tool-icon-button>
-        `}
-      >
-        <edgeless-change-mindmap-style-panel
-          slot
-          .mindmapStyle=${this._getCommonStyle()}
-          .onSelect=${this._updateStyle}
-        >
-        </edgeless-change-mindmap-style-panel>
-      </edgeless-menu-button>
+    return join(
+      [
+        html`
+          <affine-menu-button
+            .contentPadding=${'8px'}
+            .button=${html`
+              <affine-toolbar-icon-button
+                aria-label="Style"
+                .tooltip=${'Style'}
+              >
+                ${MindmapStyleIcon}${SmallArrowDownIcon}
+              </affine-toolbar-icon-button>
+            `}
+          >
+            <edgeless-change-mindmap-style-panel
+              slot
+              .mindmapStyle=${this._getCommonStyle()}
+              .onSelect=${this._updateStyle}
+            >
+            </edgeless-change-mindmap-style-panel>
+          </affine-menu-button>
+        `,
 
-      ${this._isSubnode()
-        ? nothing
-        : html`<edgeless-menu-divider></edgeless-menu-divider>
-            <edgeless-menu-button
-              .button=${html`
-                <edgeless-tool-icon-button
+        this._isSubnode()
+          ? nothing
+          : html`
+              <affine-menu-button
+                .button=${html`
+                <affine-tool-icon-button
                   aria-label="Layout"
                   .tooltip=${'Layout'}
                 >
                   ${this.layout.icon}${SmallArrowDownIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `}
-            >
-              <edgeless-change-mindmap-layout-panel
-                slot
-                .mindmapLayout=${this.layout.value}
-                .onSelect=${this._updateLayoutType}
               >
-              </edgeless-change-mindmap-layout-panel>
-            </edgeless-menu-button>`}
-    `;
+                <edgeless-change-mindmap-layout-panel
+                  slot
+                  .mindmapLayout=${this.layout.value}
+                  .onSelect=${this._updateLayoutType}
+                >
+                </edgeless-change-mindmap-layout-panel>
+              </affine-menu-button>
+            `,
+      ].filter(button => button !== nothing),
+      renderSeparator
+    );
   }
 }
 

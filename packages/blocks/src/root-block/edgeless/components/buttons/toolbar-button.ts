@@ -1,10 +1,10 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { EdgelessToolIconButton } from './tool-icon-button.js';
+import { AffineToolbarIconButton } from './../../../../_common/components/toolbar/icon-button.js';
 
 @customElement('edgeless-toolbar-button')
-export class EdgelessToolbarButton extends EdgelessToolIconButton {
+export class EdgelessToolbarButton extends AffineToolbarIconButton {
   static override styles = css`
     .icon-container {
       position: relative;

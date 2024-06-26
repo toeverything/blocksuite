@@ -1,3 +1,5 @@
+import '../../../../_common/components/toolbar/icon-button.js';
+
 import { html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -77,7 +79,7 @@ export function LineStylesPanel({
       if (active) classes['active'] = true;
 
       return html`
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           class=${classMap(classes)}
           .active=${active}
           .activeMode=${'background'}
@@ -89,7 +91,7 @@ export function LineStylesPanel({
             })}
         >
           ${icon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       `;
     }
   );

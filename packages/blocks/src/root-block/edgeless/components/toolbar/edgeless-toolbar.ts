@@ -1,8 +1,8 @@
-import '../buttons/tool-icon-button.js';
+import '../../../../_common/components/toolbar/icon-button.js';
+import '../../../../_common/components/smooth-corner.js';
 import '../buttons/toolbar-button.js';
 import './present/frame-order-button.js';
 import './presentation-toolbar.js';
-import '../../../../_common/components/smooth-corner.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { debounce } from '@blocksuite/global/utils';

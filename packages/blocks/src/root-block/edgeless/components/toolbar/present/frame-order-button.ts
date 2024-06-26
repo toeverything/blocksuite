@@ -1,5 +1,5 @@
+import '../../../../../_common/components/toolbar/icon-button.js';
 import './frame-order-menu.js';
-import '../../buttons/tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
@@ -50,7 +50,7 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
           color: ${readonly ? 'var(--affine-text-disable-color)' : 'inherit'};
         }
       </style>
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         class="edgeless-frame-order-button"
         .tooltip=${this.popperShow ? '' : 'Frame Order'}
         @click=${() => {
@@ -60,7 +60,7 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
         .iconContainerPadding=${0}
       >
         ${FrameOrderAdjustmentIcon}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
       <edgeless-frame-order-menu
         .edgeless=${this.edgeless}
         .frames=${this.frames}

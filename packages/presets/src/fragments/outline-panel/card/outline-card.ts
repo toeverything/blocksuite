@@ -449,7 +449,7 @@ export class OutlineNoteCard extends WithDisposable(LitElement) {
           <span class="card-divider"></span>
           <div class="display-mode-button-group">
             <span class="display-mode-button-label">Show in</span>
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               .tooltip=${this._showPopper ? '' : 'Display Mode'}
               .tipPosition=${'left-start'}
               .iconContainerPadding=${0}
@@ -463,7 +463,7 @@ export class OutlineNoteCard extends WithDisposable(LitElement) {
                 <span class="current-mode-label">${currentMode}</span>
                 ${SmallArrowDownIcon}
               </div>
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           </div>
           <note-display-mode-panel
             .displayMode=${displayMode}

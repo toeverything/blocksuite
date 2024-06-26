@@ -1,5 +1,6 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/note-shadow-panel.js';
 import '../../edgeless/components/panel/note-display-mode-panel.js';
@@ -13,6 +14,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
+import type { AffineMenuButton } from '../../../_common/components/toolbar/menu-button.js';
+import { renderSeparator } from '../../../_common/components/toolbar/separator.js';
 import { NOTE_BACKGROUND_COLORS } from '../../../_common/edgeless/note/consts.js';
 import {
   ExpandIcon,
@@ -29,10 +32,6 @@ import { matchFlavours } from '../../../_common/utils/model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { StrokeStyle } from '../../../surface-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
-import {
-  type EdgelessMenuButton,
-  renderMenuDivider,
-} from '../../edgeless/components/buttons/menu-button.js';
 import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import {
   type LineStyleEvent,
@@ -76,9 +75,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     return this.edgeless.doc;
   }
 
-  private accessor _scalePanelRef: Ref<EdgelessMenuButton> = createRef();
+  private accessor _scalePanelRef: Ref<AffineMenuButton> = createRef();
 
-  private accessor _cornersPanelRef: Ref<EdgelessMenuButton> = createRef();
+  private accessor _cornersPanelRef: Ref<AffineMenuButton> = createRef();
 
   @property({ attribute: false })
   accessor notes: NoteBlockModel[] = [];
@@ -238,10 +237,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       onlyOne
         ? html`
             <span class="display-mode-button-label">Show in</span>
-            <edgeless-menu-button
+            <affine-menu-button
               .contentPadding=${'8px'}
               .button=${html`
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   aria-label="Mode"
                   .tooltip=${'Display mode'}
                   .justify=${'space-between'}
@@ -250,7 +249,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                 >
                   <span class="label">${currentMode}</span>
                   ${SmallArrowDownIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `}
             >
               <note-display-mode-panel
@@ -260,24 +259,24 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                   this._setDisplayMode(note, newMode)}
               >
               </note-display-mode-panel>
-            </edgeless-menu-button>
+            </affine-menu-button>
           `
         : nothing,
 
       isDocOnly
         ? nothing
         : html`
-            <edgeless-menu-button
+            <affine-menu-button
               .contentPadding=${'8px'}
               .button=${html`
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   aria-label="Background"
                   .tooltip=${'Background'}
                 >
                   <edgeless-color-button
                     .color=${background}
                   ></edgeless-color-button>
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `}
             >
               <edgeless-color-panel
@@ -287,21 +286,21 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                 @select=${(e: ColorEvent) => this._setBackground(e.detail)}
               >
               </edgeless-color-panel>
-            </edgeless-menu-button>
+            </affine-menu-button>
           `,
 
       isDocOnly
         ? nothing
         : html`
-            <edgeless-menu-button
+            <affine-menu-button
               .contentPadding=${'6px'}
               .button=${html`
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   aria-label="Shadow style"
                   .tooltip=${'Shadow style'}
                 >
                   ${NoteShadowIcon}${SmallArrowDownIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `}
             >
               <edgeless-note-shadow-panel
@@ -311,16 +310,16 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                 .onSelect=${(value: string) => this._setShadowType(value)}
               >
               </edgeless-note-shadow-panel>
-            </edgeless-menu-button>
+            </affine-menu-button>
 
-            <edgeless-menu-button
+            <affine-menu-button
               .button=${html`
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   aria-label="Border style"
                   .tooltip=${'Border style'}
                 >
                   ${LineStyleIcon}${SmallArrowDownIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `}
             >
               <div slot data-orientation="horizontal">
@@ -330,18 +329,18 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                   onClick: event => this._setStyles(event),
                 })}
               </div>
-            </edgeless-menu-button>
+            </affine-menu-button>
 
-            <edgeless-menu-button
+            <affine-menu-button
               ${ref(this._cornersPanelRef)}
               .contentPadding=${'8px'}
               .button=${html`
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   aria-label="Corners"
                   .tooltip=${'Corners'}
                 >
                   ${NoteCornerIcon}${SmallArrowDownIcon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `}
             >
               <edgeless-size-panel
@@ -353,38 +352,38 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                 .onPopperCose=${() => this._cornersPanelRef.value?.close()}
               >
               </edgeless-size-panel>
-            </edgeless-menu-button>
+            </affine-menu-button>
           `,
 
       onlyOne
         ? html`
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               aria-label="Slicer"
               .tooltip=${getTooltipWithShortcut('Cutting mode', '-')}
               .active=${this.enableNoteSlicer}
               @click=${() => this._handleNoteSlicerButtonClick()}
             >
               ${ScissorsIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           `
         : nothing,
 
       onlyOne ? this.quickConnectButton : nothing,
 
       html`
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           aria-label="Size"
           .tooltip=${collapse ? 'Auto height' : 'Customized height'}
           @click=${() => this._setCollapse()}
         >
           ${collapse ? ExpandIcon : ShrinkIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
 
-        <edgeless-menu-button
+        <affine-menu-button
           ${ref(this._scalePanelRef)}
           .contentPadding=${'8px'}
           .button=${html`
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               aria-label="Scale"
               .tooltip=${'Scale'}
               .justify=${'space-between'}
@@ -393,7 +392,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             >
               <span class="label">${this._getScaleLabel(scale)}</span
               >${SmallArrowDownIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           `}
         >
           <edgeless-scale-panel
@@ -402,13 +401,13 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             .onSelect=${(scale: number) => this._setNoteScale(scale)}
             .onPopperCose=${() => this._scalePanelRef.value?.close()}
           ></edgeless-scale-panel>
-        </edgeless-menu-button>
+        </affine-menu-button>
       `,
     ];
 
     return join(
       buttons.filter(button => button !== nothing),
-      renderMenuDivider
+      renderSeparator
     );
   }
 }

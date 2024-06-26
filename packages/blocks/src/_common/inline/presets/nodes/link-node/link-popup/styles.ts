@@ -163,29 +163,31 @@ export const linkPopupStyle = css`
     z-index: var(--affine-z-index-popover);
   }
 
-  .affine-link-popover {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    height: 40px;
-
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
-    border-radius: 8px;
-  }
-
   .affine-link-preview {
-    display: flex;
-    width: 180px;
+    display: inline-block;
+    width: 140px;
     padding: var(--1, 0px);
-    align-items: flex-start;
-    gap: 10px;
     border-radius: var(--1, 0px);
     opacity: var(--add, 1);
     user-select: none;
     cursor: pointer;
+
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+
+    color: var(--affine-link-color);
+    font-feature-settings:
+      'clig' off,
+      'liga' off;
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+    font-size: var(--affine-font-sm);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px; /* 157.143% */
+    text-decoration: none;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    overflow: hidden;
   }
 
   .affine-link-popover-input {
@@ -197,25 +199,6 @@ export const linkPopupStyle = css`
   }
   .affine-link-popover-input:focus {
     border: none;
-  }
-
-  .affine-link-preview > span {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-
-    color: var(--affine-link-color);
-    font-feature-settings:
-      'clig' off,
-      'liga' off;
-    font-family: var(--affine-font-family);
-    font-size: 15px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 24px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    opacity: var(--add, 1);
   }
 
   .affine-link-popover-dividing-line {
@@ -238,6 +221,30 @@ export const linkPopupStyle = css`
   }
   .affine-link-popover-view-selector .current-view {
     background: var(--affine-background-overlay-panel-color);
+  }
+
+  .affine-link-popover.create {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+    height: 36px;
+    padding: 0 6px;
+    box-sizing: content-box;
+    border-radius: 4px;
+    border: 0.5px solid var(--affine-border-color);
+    background: var(--affine-background-overlay-panel-color);
+    box-shadow: var(--affine-shadow-4);
+
+    color: var(--affine-icon-color);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+    font-feature-settings:
+      'clig' off,
+      'liga' off;
+    font-size: var(--affine-font-sm);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 22px;
   }
 
   ${editLinkStyle}

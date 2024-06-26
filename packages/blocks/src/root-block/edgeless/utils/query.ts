@@ -1,17 +1,8 @@
 import type { BlockModel } from '@blocksuite/store';
 
-import type { EmbedBlockModel } from '../../../_common/embed-block-helper/embed-block-model.js';
 import type { Connectable } from '../../../_common/utils/index.js';
 import type { AttachmentBlockModel } from '../../../attachment-block/index.js';
-import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
-import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
-import type { EmbedHtmlModel } from '../../../embed-html-block/index.js';
-import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.js';
-import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
-import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
@@ -83,98 +74,6 @@ export function isAttachmentBlock(
 ): element is AttachmentBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:attachment'
-  );
-}
-
-export function isBookmarkBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-): element is BookmarkBlockModel {
-  return (
-    !!element && 'flavour' in element && element.flavour === 'affine:bookmark'
-  );
-}
-
-export function isEmbeddedBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-): element is EmbedBlockModel {
-  return (
-    !!element && 'flavour' in element && /affine:embed-*/.test(element.flavour)
-  );
-}
-
-export function isEmbeddedLinkBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-) {
-  return (
-    isEmbeddedBlock(element) &&
-    !isEmbedSyncedDocBlock(element) &&
-    !isEmbedLinkedDocBlock(element)
-  );
-}
-
-export function isEmbedGithubBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-): element is EmbedGithubModel {
-  return (
-    !!element &&
-    'flavour' in element &&
-    element.flavour === 'affine:embed-github'
-  );
-}
-
-export function isEmbedYoutubeBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-): element is EmbedYoutubeModel {
-  return (
-    !!element &&
-    'flavour' in element &&
-    element.flavour === 'affine:embed-youtube'
-  );
-}
-
-export function isEmbedLoomBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-): element is EmbedLoomModel {
-  return (
-    !!element && 'flavour' in element && element.flavour === 'affine:embed-loom'
-  );
-}
-
-export function isEmbedFigmaBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-): element is EmbedFigmaModel {
-  return (
-    !!element &&
-    'flavour' in element &&
-    element.flavour === 'affine:embed-figma'
-  );
-}
-
-export function isEmbedLinkedDocBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-): element is EmbedLinkedDocModel {
-  return (
-    !!element &&
-    'flavour' in element &&
-    element.flavour === 'affine:embed-linked-doc'
-  );
-}
-
-export function isEmbedSyncedDocBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-): element is EmbedSyncedDocModel {
-  return (
-    !!element &&
-    'flavour' in element &&
-    element.flavour === 'affine:embed-synced-doc'
-  );
-}
-
-export function isEmbedHtmlBlock(
-  element: BlockModel | BlockSuite.EdgelessModelType | null
-): element is EmbedHtmlModel {
-  return (
-    !!element && 'flavour' in element && element.flavour === 'affine:embed-html'
   );
 }
 

@@ -1,4 +1,4 @@
-import '../buttons/tool-icon-button.js';
+import '../../../../_common/components/toolbar/icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
@@ -595,46 +595,46 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const shapeButtons = repeat(
       ShapeComponentConfig,
       ({ name, generalIcon, scribbledIcon, tooltip }) => html`
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           .tooltip=${tooltip}
           @pointerenter=${() => this._showOverlay(name)}
           @pointerleave=${() => this._removeOverlay()}
           @click=${() => this._autoComplete(name)}
         >
           ${currentSourceStyle === 'General' ? generalIcon : scribbledIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       `
     );
 
     return html`<div class="auto-complete-panel-container" style=${style}>
       ${shapeButtons}
 
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         .tooltip=${'Text'}
         @pointerenter=${() => this._showOverlay('text')}
         @pointerleave=${() => this._removeOverlay()}
         @click=${() => this._autoComplete('text')}
       >
         ${FontFamilyIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
+      </affine-toolbar-icon-button>
+      <affine-toolbar-icon-button
         .tooltip=${'Note'}
         @pointerenter=${() => this._showOverlay('note')}
         @pointerleave=${() => this._removeOverlay()}
         @click=${() => this._autoComplete('note')}
       >
         ${SmallNoteIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
+      </affine-toolbar-icon-button>
+      <affine-toolbar-icon-button
         .tooltip=${'Frame'}
         @pointerenter=${() => this._showOverlay('frame')}
         @pointerleave=${() => this._removeOverlay()}
         @click=${() => this._autoComplete('frame')}
       >
         ${FrameIcon}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
 
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         .iconContainerPadding=${0}
         .tooltip=${capitalizeFirstLetter(currentSourceType)}
         @pointerenter=${() => this._showOverlay(currentSourceType)}
@@ -642,7 +642,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         @click=${() => this._autoComplete(currentSourceType)}
       >
         <div class="row-button">Add a same object</div>
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     </div>`;
   }
 }
