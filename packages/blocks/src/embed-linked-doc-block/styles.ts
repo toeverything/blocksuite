@@ -25,11 +25,7 @@ export const styles = css`
     width: 100%;
     height: 100%;
     z-index: 1;
-    cursor: pointer;
     border-radius: 8px;
-  }
-  .affine-embed-linked-doc-block-overlay:hover {
-    background: var(--affine-hover-color);
   }
 
   .affine-embed-linked-doc-content {
