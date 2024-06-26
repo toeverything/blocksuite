@@ -27,6 +27,7 @@ import {
   pressBackspace,
   redoByClick,
   selectAllByKeyboard,
+  SHORT_KEY,
   type,
   undoByClick,
   waitNextFrame,
@@ -656,6 +657,46 @@ test.describe('connector label with straight shape', () => {
 
     [cx, cy] = await getEditorCenter(page);
     assertPointAlmostEqual([cx, cy], [x, y]);
+  });
+
+  test('should enter the label editing state when pressing `Enter`', async ({
+    page,
+  }) => {
+    await commonSetup(page);
+    const start = { x: 100, y: 200 };
+    const end = { x: 300, y: 300 };
+    await addBasicConnectorElement(page, start, end);
+    await page.mouse.click(105, 200);
+
+    await page.keyboard.press('Enter');
+    await type(page, ' a ');
+    await assertEdgelessCanvasText(page, ' a ');
+  });
+
+  test('should exit the label editing state when pressing `Mod-Enter` or `Escape`', async ({
+    page,
+  }) => {
+    await commonSetup(page);
+    const start = { x: 100, y: 200 };
+    const end = { x: 300, y: 300 };
+    await addBasicConnectorElement(page, start, end);
+    await page.mouse.click(105, 200);
+
+    await page.keyboard.press('Enter');
+    await type(page, ' a ');
+    await assertEdgelessCanvasText(page, ' a ');
+
+    await page.keyboard.press(`${SHORT_KEY}+Enter`);
+
+    await page.keyboard.press('Enter');
+    await type(page, 'b');
+    await assertEdgelessCanvasText(page, 'b');
+
+    await page.keyboard.press('Escape');
+
+    await page.keyboard.press('Enter');
+    await type(page, 'c');
+    await assertEdgelessCanvasText(page, 'c');
   });
 });
 

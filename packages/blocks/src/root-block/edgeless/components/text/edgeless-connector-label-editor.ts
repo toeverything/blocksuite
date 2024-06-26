@@ -144,6 +144,27 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
         });
 
         this.disposables.add(
+          dispatcher.add('keyDown', ctx => {
+            const state = ctx.get('keyboardState');
+            const { key, ctrlKey, metaKey, altKey, shiftKey, isComposing } =
+              state.raw;
+            const onlyCmd = (ctrlKey || metaKey) && !altKey && !shiftKey;
+            const isModEnter = onlyCmd && key === 'Enter';
+            const isEscape = key === 'Escape';
+            if (!isComposing && (isModEnter || isEscape)) {
+              this.inlineEditorContainer.blur();
+
+              edgeless.service.selection.set({
+                elements: [connector.id],
+                editing: false,
+              });
+              return true;
+            }
+            return false;
+          })
+        );
+
+        this.disposables.add(
           edgeless.service.surface.elementUpdated.on(({ id }) => {
             if (id === connector.id) this.requestUpdate();
           })
