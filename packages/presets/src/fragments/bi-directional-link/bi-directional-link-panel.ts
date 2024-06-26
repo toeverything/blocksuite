@@ -20,6 +20,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   ArrowJumpIcon,
   ArrowLeftIcon,
+  SmallDeleteIcon,
   SmallLinkedDocIcon,
 } from '../_common/icons.js';
 import { DOC_BLOCK_CHILD_PADDING } from '../doc-meta-tags/utils.js';
@@ -185,6 +186,12 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       border-bottom: 0.5px solid var(--affine-divider-color);
     }
 
+    .link.deleted {
+      color: var(--affine-text-disable-color);
+      text-decoration: line-through;
+      fill: var(--affine-text-disable-color);
+    }
+
     .arrow {
       cursor: pointer;
       transition: transform 0.2s;
@@ -288,15 +295,24 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         id => id,
         id => {
           const doc = collection.getDoc(id);
-          assertExists(doc);
-          const title = doc.meta?.title ? doc.meta.title : 'Untitled';
+
+          const isDeleted = !doc;
+
+          const title = isDeleted
+            ? 'Deleted doc'
+            : !doc.meta
+              ? 'Untitled'
+              : doc.meta.title;
+
+          const icon = isDeleted ? SmallDeleteIcon : SmallLinkedDocIcon;
+
           return html`<div
-            class="link"
+            class=${`link ${isDeleted ? 'deleted' : ''}`}
             @click=${(e: MouseEvent) => {
               this._handleLinkClick(e, id);
             }}
           >
-            ${SmallLinkedDocIcon}
+            ${icon}
             <div>${title}</div>
           </div>`;
         }

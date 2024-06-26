@@ -179,7 +179,9 @@ export const styles = css`
     }
   }
 
-  .affine-embed-linked-doc-block:not(.loading):not(.empty).banner-empty {
+  .affine-embed-linked-doc-block:not(.loading):not(.deleted):not(
+      .empty
+    ).banner-empty {
     .affine-embed-linked-doc-content {
       width: 100%;
       height: 100%;
@@ -284,7 +286,7 @@ export const styles = css`
       height: 170px;
     }
   }
-  .affine-embed-linked-doc-block.vertical:not(.loading):not(
+  .affine-embed-linked-doc-block.vertical:not(.loading):not(.deleted):not(
       .empty
     ).banner-empty {
     .affine-embed-linked-doc-content {

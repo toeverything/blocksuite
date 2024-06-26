@@ -395,7 +395,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const titleText = isLoading
       ? 'Loading...'
       : isDeleted
-        ? `Deleted ${this._linkedDocMode}`
+        ? `Deleted doc`
         : linkedDoc?.meta?.title.length
           ? linkedDoc.meta.title
           : 'Untitled';
