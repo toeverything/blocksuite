@@ -211,12 +211,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       width: 100%;
       pointer-events: none;
     }
-
-    .edgeless-toolbar-toggle-control {
+    .edgeless-toolbar-wrapper {
       width: 100%;
       display: flex;
       justify-content: center;
-      padding-bottom: 28px;
+    }
+    .edgeless-toolbar-toggle-control {
+      pointer-events: auto;
+      padding-bottom: 16px;
+      width: fit-content;
+      max-width: calc(100% - ${unsafeCSS(SAFE_AREA_WIDTH)}px * 2);
     }
     .edgeless-toolbar-toggle-control[data-enable='true'] {
       transition: 0.23s ease;
@@ -229,8 +233,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
 
     .edgeless-toolbar-smooth-corner {
+      display: block;
       width: fit-content;
-      max-width: calc(100% - ${unsafeCSS(SAFE_AREA_WIDTH)}px * 2);
+      max-width: 100%;
     }
     .edgeless-toolbar-container {
       position: relative;
@@ -238,7 +243,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       align-items: center;
       padding: 0 ${unsafeCSS(TOOLBAR_PADDING_X)}px;
       height: ${unsafeCSS(TOOLBAR_HEIGHT)}px;
-      pointer-events: auto;
     }
     :host([disabled]) .edgeless-toolbar-container {
       pointer-events: none;
@@ -623,42 +627,44 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
 
     return html`
-      <div
-        class="edgeless-toolbar-toggle-control"
-        data-enable=${this._enableAutoHide}
-      >
-        <smooth-corner
-          class="edgeless-toolbar-smooth-corner"
-          .borderRadius=${16}
-          .smooth=${0.7}
-          .borderWidth=${1}
-          .bgColor=${'var(--affine-background-overlay-panel-color)'}
-          .borderColor=${'var(--affine-border-color)'}
-          style="filter: drop-shadow(${cssVar('toolbarShadow')})"
+      <div class="edgeless-toolbar-wrapper">
+        <div
+          class="edgeless-toolbar-toggle-control"
+          data-enable=${this._enableAutoHide}
         >
-          <div
-            class="edgeless-toolbar-container"
-            data-dense-quick=${this._denseQuickTools &&
-            this._hiddenQuickTools.length > 0}
-            data-dense-senior=${this._denseSeniorTools}
-            @dblclick=${stopPropagation}
-            @mousedown=${stopPropagation}
-            @pointerdown=${stopPropagation}
+          <smooth-corner
+            class="edgeless-toolbar-smooth-corner"
+            .borderRadius=${16}
+            .smooth=${0.7}
+            .borderWidth=${1}
+            .bgColor=${'var(--affine-background-overlay-panel-color)'}
+            .borderColor=${'var(--affine-border-color)'}
+            style="filter: drop-shadow(${cssVar('toolbarShadow')})"
           >
-            <presentation-toolbar
-              .visible=${this.isPresentMode}
-              .edgeless=${this.edgeless}
-              .settingMenuShow=${this.presentSettingMenuShow}
-              .frameMenuShow=${this.presentFrameMenuShow}
-              .setSettingMenuShow=${(show: boolean) =>
-                (this.presentSettingMenuShow = show)}
-              .setFrameMenuShow=${(show: boolean) =>
-                (this.presentFrameMenuShow = show)}
-              .containerWidth=${this.containerWidth}
-            ></presentation-toolbar>
-            ${this.isPresentMode ? nothing : this._renderContent()}
-          </div>
-        </smooth-corner>
+            <div
+              class="edgeless-toolbar-container"
+              data-dense-quick=${this._denseQuickTools &&
+              this._hiddenQuickTools.length > 0}
+              data-dense-senior=${this._denseSeniorTools}
+              @dblclick=${stopPropagation}
+              @mousedown=${stopPropagation}
+              @pointerdown=${stopPropagation}
+            >
+              <presentation-toolbar
+                .visible=${this.isPresentMode}
+                .edgeless=${this.edgeless}
+                .settingMenuShow=${this.presentSettingMenuShow}
+                .frameMenuShow=${this.presentFrameMenuShow}
+                .setSettingMenuShow=${(show: boolean) =>
+                  (this.presentSettingMenuShow = show)}
+                .setFrameMenuShow=${(show: boolean) =>
+                  (this.presentFrameMenuShow = show)}
+                .containerWidth=${this.containerWidth}
+              ></presentation-toolbar>
+              ${this.isPresentMode ? nothing : this._renderContent()}
+            </div>
+          </smooth-corner>
+        </div>
       </div>
     `;
   }
