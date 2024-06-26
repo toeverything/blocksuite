@@ -1,5 +1,5 @@
 import { HandleDirection } from '../../../root-block/edgeless/components/resize/resize-handles.js';
-import { Bound } from '../../../surface-block/index.js';
+import { Bound } from '../../../surface-block/utils/bound.js';
 import {
   EdgelessTransformController,
   type TransformControllerContext,

@@ -15,7 +15,7 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '../surface-block/consts.js';
-import { Bound } from '../surface-block/index.js';
+import { Bound } from '../surface-block/utils/bound.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 import { EDGELESS_TEXT_BLOCK_MIN_WIDTH } from './edgeless-text-block.js';
 

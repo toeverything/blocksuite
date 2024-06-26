@@ -8,7 +8,7 @@ import {
 import { defineEmbedModel } from '../_common/embed-block-helper/embed-block-model.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 import { clamp } from '../_common/utils/math.js';
-import { Bound } from '../surface-block/index.js';
+import { Bound } from '../surface-block/utils/bound.js';
 import { SYNCED_MIN_HEIGHT, SYNCED_MIN_WIDTH } from './styles.js';
 
 export const EmbedSyncedDocStyles: EmbedCardStyle[] = ['syncedDoc'];

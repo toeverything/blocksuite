@@ -5,7 +5,7 @@ import {
   getProportionalController,
   Transformable,
 } from '../_common/edgeless/transform-controller/index.js';
-import type { SerializedXYWH } from '../surface-block/index.js';
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {

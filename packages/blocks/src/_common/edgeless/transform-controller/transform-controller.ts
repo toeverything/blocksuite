@@ -1,6 +1,7 @@
 import type { EdgelessSelectedRect } from '../../../root-block/edgeless/components/rects/edgeless-selected-rect/edgeless-selected-rect.js';
 import type { HandleDirection } from '../../../root-block/edgeless/components/resize/resize-handles.js';
-import type { Bound, PointLocation } from '../../../surface-block/index.js';
+import type { Bound } from '../../../surface-block/utils/bound.js';
+import type { PointLocation } from '../../../surface-block/utils/point-location.js';
 
 export type TransformControllerContext = {
   direction: HandleDirection;
