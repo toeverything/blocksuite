@@ -151,7 +151,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
 
     this._checkCycle();
-    this._docUpdatedAt = this._rootService.getDocUpdatedAt(this.model.pageId);
 
     if (!syncedDoc.loaded) {
       try {
@@ -169,6 +168,14 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
 
     this._loading = false;
+  }
+
+  private _setDocUpdatedAt() {
+    const meta = this.doc.collection.meta.getDocMeta(this.model.pageId);
+    if (meta) {
+      const date = meta.updatedDate || meta.createDate;
+      this._docUpdatedAt = new Date(date);
+    }
   }
 
   private _isClickAtBorder(
@@ -471,6 +478,13 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         })
       );
     }
+
+    this._setDocUpdatedAt();
+    this.disposables.add(
+      this.doc.collection.meta.docMetaUpdated.on(() => {
+        this._setDocUpdatedAt();
+      })
+    );
 
     this._syncedDocMode = this._rootService.docModeService.getMode(
       this.model.pageId

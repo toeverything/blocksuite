@@ -11,6 +11,7 @@ export interface DocMeta {
   title: string;
   tags: string[];
   createDate: number;
+  updatedDate?: number;
 }
 
 export type Tag = {

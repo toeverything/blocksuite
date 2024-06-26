@@ -97,8 +97,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       return;
     }
 
-    this._docUpdatedAt = this._rootService.getDocUpdatedAt(this.model.pageId);
-
     if (!linkedDoc.loaded) {
       try {
         linkedDoc.load();
@@ -133,6 +131,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       return false;
     }
     return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
+  }
+
+  private _setDocUpdatedAt() {
+    const meta = this.doc.collection.meta.getDocMeta(this.model.pageId);
+    if (meta) {
+      const date = meta.updatedDate || meta.createDate;
+      this._docUpdatedAt = new Date(date);
+    }
   }
 
   private _selectBlock() {
@@ -321,6 +327,13 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
         })
       );
 
+      this._setDocUpdatedAt();
+      this.disposables.add(
+        this.doc.collection.meta.docMetaUpdated.on(() => {
+          this._setDocUpdatedAt();
+        })
+      );
+
       this._linkedDocMode = this._rootService.docModeService.getMode(
         this.model.pageId
       );
@@ -409,7 +422,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
           ? 'Preview of the doc will be displayed here.'
           : '';
 
-    const dateText = this._docUpdatedAt.toLocaleTimeString();
+    const dateText = this._docUpdatedAt.toLocaleString();
 
     const showDefaultBanner = isDeleted || isEmpty;
 
