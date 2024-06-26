@@ -210,7 +210,8 @@ export class Schema {
     const blocks = docData.getMap('blocks') as Y.Map<Y.Map<unknown>>;
     Array.from(blocks.values()).forEach(block => {
       const flavour = block.get('sys:flavour') as string;
-      const currentVersion = oldBlockVersions[flavour] ?? 0;
+      const currentVersion =
+        (block.get('sys:version') as number) ?? oldBlockVersions[flavour] ?? 0;
       assertExists(
         currentVersion,
         `previous version for flavour ${flavour} not found`
