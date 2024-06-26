@@ -1,13 +1,13 @@
 import { BlockModel } from '@blocksuite/store';
 
+import { Transformable } from '../_common/edgeless/transform-controller/decorator.js';
+import {
+  EdgelessTransformController,
+  type TransformControllerContext,
+} from '../_common/edgeless/transform-controller/transform-controller.js';
 import { defineEmbedModel } from '../_common/embed-block-helper/embed-block-model.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 import { clamp } from '../_common/utils/math.js';
-import {
-  EdgelessTransformController,
-  Transformable,
-  type TransformControllerContext,
-} from '../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
 import { Bound } from '../surface-block/index.js';
 import { SYNCED_MIN_HEIGHT, SYNCED_MIN_WIDTH } from './styles.js';
 

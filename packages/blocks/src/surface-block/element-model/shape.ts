@@ -4,7 +4,7 @@ import {
   EdgelessTransformController,
   Transformable,
   type TransformControllerContext,
-} from '../../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
+} from '../../_common/edgeless/transform-controller/index.js';
 import { normalizeShapeBound } from '../canvas-renderer/element-renderer/shape/utils.js';
 import type { IBound } from '../consts.js';
 import {

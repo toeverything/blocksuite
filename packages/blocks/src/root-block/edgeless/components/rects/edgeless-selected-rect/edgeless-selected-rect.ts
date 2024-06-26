@@ -1,5 +1,6 @@
 import '../../connector/connector-handle.js';
 import '../../auto-complete/edgeless-auto-complete.js';
+import '../../../../../_common/edgeless/transform-controller/config.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertType, type Disposable, Slot } from '@blocksuite/global/utils';

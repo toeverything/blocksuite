@@ -2,6 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { BlockModel } from '@blocksuite/store';
 
 import type { EdgelessSelectableProps } from '../../_common/edgeless/mixin/edgeless-selectable.js';
+import { EdgelessTransformableRegistry } from '../../_common/edgeless/transform-controller/transform-controller.js';
 import type {
   IEdgelessElement,
   IHitTestOptions,
@@ -19,7 +20,6 @@ import {
 import { PointLocation } from '../../surface-block/utils/point-location.js';
 import type { IVec } from '../../surface-block/utils/vec.js';
 import type { SerializedXYWH } from '../../surface-block/utils/xywh.js';
-import { EdgelessTransformableRegistry } from './components/rects/edgeless-selected-rect/controllers/transform-controller.js';
 
 export class EdgelessBlockModel<
     Props extends EdgelessSelectableProps = EdgelessSelectableProps,

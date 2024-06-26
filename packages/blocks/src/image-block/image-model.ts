@@ -1,14 +1,10 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-// import {
-//   EdgelessTransformableRegistry,
-//   getProportionalController,
-// } from '../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
 import {
   getProportionalController,
   Transformable,
-} from '../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
+} from '../_common/edgeless/transform-controller/index.js';
 import type { SerializedXYWH } from '../surface-block/index.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 

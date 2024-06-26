@@ -1,10 +1,12 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
+Transformable;
+
 import {
   EdgelessTransformController,
   Transformable,
   type TransformControllerContext,
-} from '../../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
+} from '../../_common/edgeless/transform-controller/index.js';
 import { HandleDirection } from '../../root-block/edgeless/components/resize/resize-handles.js';
 import { normalizeTextBound } from '../canvas-renderer/element-renderer/text/utils.js';
 import {

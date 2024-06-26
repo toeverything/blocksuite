@@ -1,12 +1,12 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import { clamp } from '../_common/utils/math.js';
-import { Transformable } from '../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
 import {
   EdgelessTransformController,
+  Transformable,
   type TransformControllerContext,
-} from '../root-block/edgeless/components/rects/edgeless-selected-rect/controllers/index.js';
+} from '../_common/edgeless/transform-controller/index.js';
+import { clamp } from '../_common/utils/math.js';
 import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';
 import {
   FontFamily,
