@@ -2,7 +2,11 @@ import './components/embed-synced-doc-card.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
+import {
+  type BlockSelector,
+  BlockViewType,
+  DocCollection,
+} from '@blocksuite/store';
 import { html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -15,7 +19,8 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { EmbedEdgelessIcon, EmbedPageIcon } from '../_common/icons/text.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
-import type { DocMode } from '../_common/types.js';
+import { type DocMode, NoteDisplayMode } from '../_common/types.js';
+import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
 import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
 import type {
@@ -36,9 +41,14 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   EmbedSyncedDocBlockService
 > {
   get syncedDoc() {
-    return this.std.collection.getDoc(this.model.pageId, {
-      readonly: true,
-    });
+    return this._syncedDocMode === 'page'
+      ? this.std.collection.getDoc(this.model.pageId, {
+          readonly: true,
+          selector: this._pageFilter,
+        })
+      : this.std.collection.getDoc(this.model.pageId, {
+          readonly: true,
+        });
   }
 
   get blockState() {
@@ -73,6 +83,17 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   }
 
   static override styles = blockStyles;
+
+  private _pageFilter: BlockSelector = block => {
+    if (
+      matchFlavours(block.model, ['affine:note']) &&
+      block.model.displayMode === NoteDisplayMode.EdgelessOnly
+    ) {
+      return BlockViewType.Hidden;
+    }
+
+    return BlockViewType.Display;
+  };
 
   @state()
   private accessor _syncedDocMode: DocMode = 'page';
