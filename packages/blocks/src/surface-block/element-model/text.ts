@@ -1,12 +1,10 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
-Transformable;
-
+import { Transformable } from '../../_common/edgeless/transform-controller/decorator.js';
 import {
   EdgelessTransformController,
-  Transformable,
   type TransformControllerContext,
-} from '../../_common/edgeless/transform-controller/index.js';
+} from '../../_common/edgeless/transform-controller/transform-controller.js';
 import { HandleDirection } from '../../root-block/edgeless/components/resize/resize-handles.js';
 import { normalizeTextBound } from '../canvas-renderer/element-renderer/text/utils.js';
 import {
@@ -16,7 +14,6 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '../consts.js';
-import type { SerializedXYWH } from '../index.js';
 import { Bound } from '../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
@@ -25,6 +22,7 @@ import {
   polygonNearestPoint,
 } from '../utils/math-utils.js';
 import type { IVec2 } from '../utils/vec.js';
+import type { SerializedXYWH } from '../utils/xywh.js';
 import { type IBaseProps, SurfaceElementModel } from './base.js';
 import { yfield } from './decorators.js';
 

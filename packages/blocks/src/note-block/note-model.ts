@@ -6,11 +6,11 @@ import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_SHADOW,
 } from '../_common/edgeless/note/consts.js';
+import { Transformable } from '../_common/edgeless/transform-controller/decorator.js';
 import {
   EdgelessTransformController,
-  Transformable,
   type TransformControllerContext,
-} from '../_common/edgeless/transform-controller/index.js';
+} from '../_common/edgeless/transform-controller/transform-controller.js';
 import { NoteDisplayMode } from '../_common/types.js';
 import { clamp } from '../_common/utils/math.js';
 import {

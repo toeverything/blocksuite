@@ -1,10 +1,10 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
+import { Transformable } from '../../_common/edgeless/transform-controller/decorator.js';
 import {
   EdgelessTransformController,
-  Transformable,
   type TransformControllerContext,
-} from '../../_common/edgeless/transform-controller/index.js';
+} from '../../_common/edgeless/transform-controller/transform-controller.js';
 import {
   DEFAULT_ROUGHNESS,
   FontFamily,

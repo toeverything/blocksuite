@@ -39,7 +39,7 @@ import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
 import { DEFAULT_CONNECTOR_COLOR } from '../panel/color-panel.js';
-import type { SelectedRect } from '../rects/edgeless-selected-rect/index.js';
+import type { SelectedRect } from '../rects/edgeless-selected-rect/edgeless-selected-rect.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
 import {
   createEdgelessElement,
