@@ -4,7 +4,6 @@ import '../../edgeless/components/toolbar/shape/shape-menu.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -42,9 +41,7 @@ import type {
   BookmarkBlockComponent,
   EmbedFigmaBlockComponent,
   EmbedGithubBlockComponent,
-  EmbedLinkedDocBlockComponent,
   EmbedLoomBlockComponent,
-  EmbedSyncedDocBlockComponent,
   EmbedYoutubeBlockComponent,
   ImageBlockComponent,
 } from '../../../index.js';
@@ -272,16 +269,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const blockElement = this.view.getBlock(blockSelection[0].blockId) as
-      | BookmarkBlockComponent
-      | EmbedGithubBlockComponent
-      | EmbedYoutubeBlockComponent
-      | EmbedFigmaBlockComponent
-      | EmbedLinkedDocBlockComponent
-      | EmbedSyncedDocBlockComponent
-      | EmbedLoomBlockComponent
-      | null;
-    assertExists(blockElement);
+    const blockElement = this.view.getBlock(blockSelection[0].blockId);
+    if (!blockElement) {
+      return;
+    }
 
     return blockElement;
   }
@@ -566,7 +557,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         this._reload(this.selection.surfaceSelections);
         break;
       case 'open':
-        if (this._blockElement) {
+        if (
+          this._blockElement &&
+          typeof this._blockElement.open === 'function'
+        ) {
           this._blockElement.open();
         }
         break;
