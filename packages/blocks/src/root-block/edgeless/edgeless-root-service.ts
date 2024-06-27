@@ -265,7 +265,11 @@ export class EdgelessRootService extends RootService {
 
   addElement<T = Record<string, unknown>>(type: string, props: T) {
     // @ts-ignore
-    props['index'] = this.generateIndex(type);
+    if (props['index'] === undefined) {
+      // @ts-ignore
+      props['index'] = this.generateIndex(type);
+    }
+
     // @ts-ignore
     props['type'] = type;
 
