@@ -305,7 +305,7 @@ export class DatabaseBlockComponent extends BlockComponent<
         if (data.key === 'views') {
           this.viewSource.checkViewDataUpdate();
         }
-        if (data.key === 'columns') {
+        if (data.key === 'columns' || data.key === 'cells') {
           this.dataSource.slots.update.emit();
         }
       })
