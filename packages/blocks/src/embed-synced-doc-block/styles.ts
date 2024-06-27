@@ -38,6 +38,10 @@ export const blockStyles = css`
     padding: 0 24px;
   }
 
+  .affine-embed-synced-doc-editor {
+    pointer-events: none;
+  }
+
   .affine-embed-synced-doc-container {
     border-radius: 8px;
     overflow: hidden;
