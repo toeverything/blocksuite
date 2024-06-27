@@ -64,6 +64,11 @@ export class AffineCodeToolbarWidget extends WidgetElement<
               }
             }}
           ></affine-code-toolbar>`,
+          container: this.blockElement,
+          // stacking-context(editor-host)
+          portalStyles: {
+            zIndex: 'var(--affine-z-index-popover)',
+          },
           computePosition: {
             referenceElement: codeBlock,
             placement: 'right-start',
