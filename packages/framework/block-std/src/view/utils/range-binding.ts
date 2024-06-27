@@ -219,7 +219,7 @@ export class RangeBinding {
       },
       to: null,
     });
-    this.selectionManager.set([newSelection]);
+    this.selectionManager.setGroup('note', [newSelection]);
   };
 
   private _onCompositionStart = () => {
@@ -298,7 +298,7 @@ export class RangeBinding {
         },
         to: null,
       });
-      this.host.selection.set([selection]);
+      this.host.selection.setGroup('note', [selection]);
       this.rangeManager.syncTextSelectionToRange(selection);
     };
   };
