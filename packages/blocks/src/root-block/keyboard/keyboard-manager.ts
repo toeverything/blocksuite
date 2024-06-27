@@ -81,7 +81,7 @@ export class PageKeyboardManager {
       );
 
       if (selection) {
-        this._selection.set([
+        this._selection.setGroup('note', [
           this._selection.create('text', {
             from: {
               index: 0,

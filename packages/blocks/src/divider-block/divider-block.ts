@@ -18,7 +18,7 @@ export class DividerBlockComponent extends BlockComponent<DividerBlockModel> {
     this.contentEditable = 'false';
 
     this.handleEvent('click', () => {
-      this.host.selection.set([
+      this.host.selection.setGroup('note', [
         this.host.selection.create('block', {
           blockId: this.blockId,
         }),
