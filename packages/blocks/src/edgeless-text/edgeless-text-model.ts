@@ -43,7 +43,7 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
       'affine:image',
       'affine:bookmark',
       'affine:attachment',
-      'affine:embed-*',
+      'affine:embed-!(synced-doc)',
     ],
   },
   toModel: () => {
