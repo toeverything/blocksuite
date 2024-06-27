@@ -126,10 +126,6 @@ export function insideDatabase(model: BlockModel) {
   return isInsideBlockByFlavour(model.doc, model, 'affine:database');
 }
 
-export function insideDataView(model: BlockModel) {
-  return isInsideBlockByFlavour(model.doc, model, 'affine:data-view');
-}
-
 export function insideEdgelessText(model: BlockModel) {
   return isInsideBlockByFlavour(model.doc, model, 'affine:edgeless-text');
 }

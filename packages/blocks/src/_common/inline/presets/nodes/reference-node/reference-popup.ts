@@ -10,7 +10,6 @@ import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { RootBlockComponent } from '../../../../../root-block/types.js';
-import { insideEdgelessText } from '../../../../../root-block/widgets/slash-menu/utils.js';
 import { isPeekable, peek } from '../../../../components/index.js';
 import { createLitPortal } from '../../../../components/portal.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
@@ -21,6 +20,7 @@ import {
   LinkIcon,
   OpenIcon,
 } from '../../../../icons/text.js';
+import { isInsideBlockByFlavour } from '../../../../utils/model.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 import { ReferencePopupMoreMenu } from './reference-popup-more-menu-popup.js';
 import { styles } from './styles.js';
@@ -57,7 +57,11 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   get _embedViewButtonDisabled() {
     if (
       this.blockElement.doc.readonly ||
-      insideEdgelessText(this.blockElement.model)
+      isInsideBlockByFlavour(
+        this.blockElement.doc,
+        this.blockElement.model,
+        'affine:edgeless-text'
+      )
     ) {
       return true;
     }
