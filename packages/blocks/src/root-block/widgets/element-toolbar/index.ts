@@ -141,10 +141,8 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       gap: 8px;
       background: var(--affine-background-overlay-panel-color);
       border: 0.5px solid var(--affine-border-color);
-      // box-shadow: var(--affine-menu-shadow);
-      box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.14);
+      box-shadow: var(--affine-shadow-4);
       border-radius: 4px;
-      // box-sizing: border-box;
       box-sizing: content-box;
 
       text-align: justify;
