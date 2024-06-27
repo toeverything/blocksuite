@@ -233,13 +233,15 @@ test.describe('slash menu should show and hide correctly', () => {
 
     await slashItems.nth(0).hover();
     await expect(tooltip).toBeVisible();
-    await expect(tooltip).toHaveText(['Text']);
+    await expect(tooltip.locator('.tooltip-caption')).toHaveText(['Text']);
     await page.mouse.move(0, 0);
     await expect(tooltip).toBeHidden();
 
     await slashItems.nth(1).hover();
     await expect(tooltip).toBeVisible();
-    await expect(tooltip).toHaveText(['Heading #1']);
+    await expect(tooltip.locator('.tooltip-caption')).toHaveText([
+      'Heading #1',
+    ]);
     await page.mouse.move(0, 0);
     await expect(tooltip).toBeHidden();
 

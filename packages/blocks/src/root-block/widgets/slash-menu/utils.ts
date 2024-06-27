@@ -15,7 +15,7 @@ import type {
   SlashMenuStaticItem,
   SlashSubMenu,
 } from './config.js';
-import { slashMenuToolTips } from './tooltips.js';
+import { slashMenuToolTips } from './tooltips/index.js';
 
 export function isGroupDivider(
   item: SlashMenuStaticItem
