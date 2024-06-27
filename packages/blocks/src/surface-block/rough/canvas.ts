@@ -91,6 +91,7 @@ export class RoughCanvas {
     const o = drawable.options || this.getDefaultOptions();
     const ctx = this.ctx;
     const precision = drawable.options.fixedDecimalPlaceDigits;
+
     for (const drawing of sets) {
       switch (drawing.type) {
         case 'path':

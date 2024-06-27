@@ -56,8 +56,6 @@ export class Renderer extends Viewport {
 
   ctx: CanvasRenderingContext2D;
 
-  rc: RoughCanvas;
-
   layerManager: LayerManager;
 
   provider: Partial<EnvProvider>;
@@ -71,7 +69,6 @@ export class Renderer extends Viewport {
 
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
-    this.rc = new RoughCanvas(canvas);
     this.layerManager = options.layerManager;
     this.provider = options.provider ?? {};
     this._initViewport();
@@ -197,7 +194,7 @@ export class Renderer extends Viewport {
   }
 
   private _render() {
-    const { ctx, viewportBounds, rc, zoom, cumulativeParentScale } = this;
+    const { ctx, viewportBounds, zoom, cumulativeParentScale } = this;
     const dpr = window.devicePixelRatio;
     const scale = zoom * dpr;
     const matrix = new DOMMatrix()
@@ -218,6 +215,7 @@ export class Renderer extends Viewport {
 
       const canvas = this._stackingCanvas[idx];
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const rc = new RoughCanvas(ctx.canvas);
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
@@ -231,7 +229,14 @@ export class Renderer extends Viewport {
 
     ctx.setTransform(matrix);
 
-    this._renderByBound(ctx, matrix, rc, viewportBounds, fallbackElement, true);
+    this._renderByBound(
+      ctx,
+      matrix,
+      new RoughCanvas(ctx.canvas),
+      viewportBounds,
+      fallbackElement,
+      true
+    );
   }
 
   private _renderByBound(
@@ -264,7 +269,7 @@ export class Renderer extends Viewport {
         const dx = element.x - bound.x;
         const dy = element.y - bound.y;
 
-        renderFn(element, ctx, matrix.translate(dx, dy), this, bound);
+        renderFn(element, ctx, matrix.translate(dx, dy), this, rc, bound);
       }
 
       ctx.restore();
