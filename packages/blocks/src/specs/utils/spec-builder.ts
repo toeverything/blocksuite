@@ -12,16 +12,22 @@ export class SpecBuilder {
     return this._value;
   }
 
-  setup(
-    flavour: BlockSuite.Flavour,
-    setup: (slots: BlockSpecSlots, disposableGroup: DisposableGroup) => void
+  setup<Flavour extends BlockSuite.ServiceKeys>(
+    flavour: Flavour,
+    setup: (
+      slots: BlockSpecSlots<BlockSuite.BlockServices[Flavour]>,
+      disposableGroup: DisposableGroup
+    ) => void
   ) {
     const spec = this._value.find(s => s.schema.model.flavour === flavour);
     assertExists(spec, `BlockSpec not found for ${flavour}`);
     const oldSetup = spec.setup;
     spec.setup = (slots, disposableGroup) => {
       oldSetup?.(slots, disposableGroup);
-      setup(slots, disposableGroup);
+      setup(
+        slots as unknown as BlockSpecSlots<BlockSuite.BlockServices[Flavour]>,
+        disposableGroup
+      );
     };
   }
 }
