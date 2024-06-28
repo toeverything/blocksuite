@@ -142,6 +142,69 @@ test.describe('Embed synced doc', () => {
     expect(EmbedSyncedDocPortalBox.height).toBeCloseTo(height + border, 1);
   });
 
+  test('nested embed synced doc should be rendered as card when depth >=1', async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      const { doc, collection } = window;
+      const rootId = doc.addBlock('affine:page', {
+        title: new doc.Text(),
+      });
+
+      const noteId = doc.addBlock('affine:note', {}, rootId);
+      doc.addBlock('affine:paragraph', {}, noteId);
+
+      const doc2 = collection.createDoc({ id: 'doc2' });
+      doc2.load();
+      const rootId2 = doc2.addBlock('affine:page', {
+        title: new doc.Text('Doc 2'),
+      });
+
+      const noteId2 = doc2.addBlock('affine:note', {}, rootId2);
+      doc2.addBlock(
+        'affine:paragraph',
+        {
+          text: new doc.Text('Hello from Doc 2'),
+        },
+        noteId2
+      );
+
+      const doc3 = collection.createDoc({ id: 'doc3' });
+      doc3.load();
+      const rootId3 = doc3.addBlock('affine:page', {
+        title: new doc.Text('Doc 3'),
+      });
+
+      const noteId3 = doc3.addBlock('affine:note', {}, rootId3);
+      doc3.addBlock(
+        'affine:paragraph',
+        {
+          text: new doc.Text('Hello from Doc 3'),
+        },
+        noteId3
+      );
+
+      doc2.addBlock(
+        'affine:embed-synced-doc',
+        {
+          pageId: 'doc3',
+        },
+        noteId2
+      );
+      doc.addBlock(
+        'affine:embed-synced-doc',
+        {
+          pageId: 'doc2',
+        },
+        noteId
+      );
+    });
+    expect(await page.locator('affine-embed-synced-doc-block').count()).toBe(2);
+    expect(await page.locator('affine-paragraph').count()).toBe(2);
+    expect(await page.locator('affine-embed-synced-doc-card').count()).toBe(1);
+    expect(await page.locator('editor-host').count()).toBe(2);
+  });
+
   test.describe('synced doc should be readonly', () => {
     test('synced doc should be readonly', async ({ page }) => {
       await initEmptyParagraphState(page);

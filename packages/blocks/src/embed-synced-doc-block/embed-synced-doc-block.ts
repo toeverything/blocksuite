@@ -96,6 +96,9 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   };
 
   @state()
+  accessor depth = 0;
+
+  @state()
   private accessor _syncedDocMode: DocMode = 'page';
 
   @state()
@@ -210,6 +213,35 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this._selectBlock();
   }
 
+  private _buildPreviewSpec = (name: 'page:preview' | 'edgeless:preview') => {
+    const nextDepth = this.depth + 1;
+    const previewSpecBuilder = SpecProvider.getInstance().getSpec(name);
+    const currentDisposables = this.disposables;
+
+    previewSpecBuilder.setup(
+      'affine:embed-synced-doc',
+      (slots, disposableGroup) => {
+        disposableGroup.add(
+          slots.viewConnected.on(({ component }) => {
+            const nextComponent = component as EmbedSyncedDocBlockComponent;
+            nextComponent.depth = nextDepth;
+            currentDisposables.add(() => {
+              nextComponent.depth = 0;
+            });
+          })
+        );
+        disposableGroup.add(
+          slots.viewDisconnected.on(({ component }) => {
+            const nextComponent = component as EmbedSyncedDocBlockComponent;
+            nextComponent.depth = 0;
+          })
+        );
+      }
+    );
+
+    return previewSpecBuilder.value;
+  };
+
   private _renderSyncedView = () => {
     const syncedDoc = this.syncedDoc;
     const isInSurface = this.isInSurface;
@@ -258,7 +290,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
             <div class="affine-page-viewport">
               ${this.host.renderSpecPortal(
                 syncedDoc,
-                SpecProvider.getInstance().getSpec('page:preview').value
+                this._buildPreviewSpec('page:preview')
               )}
             </div>
           `,
@@ -269,7 +301,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
             <div class="affine-edgeless-viewport">
               ${this.host.renderSpecPortal(
                 syncedDoc,
-                SpecProvider.getInstance().getSpec('edgeless:preview').value
+                this._buildPreviewSpec('edgeless:preview')
               )}
             </div>
           `,
@@ -550,8 +582,16 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     const syncedDoc = this.syncedDoc;
     const { isLoading, isError, isDeleted, isCycle } = this.blockState;
     const isInSurface = this.isInSurface;
+    const isCardOnly = this.depth >= 1;
 
-    if (isLoading || isError || isDeleted || isCycle || !syncedDoc) {
+    if (
+      isLoading ||
+      isError ||
+      isDeleted ||
+      isCardOnly ||
+      isCycle ||
+      !syncedDoc
+    ) {
       let cardStyleMap = styleMap({
         position: 'relative',
         display: 'block',
