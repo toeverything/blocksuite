@@ -235,11 +235,15 @@ export function getEditorContainer(editorHost: EditorHost): AbstractEditor {
 }
 
 export function isInsidePageEditor(host: EditorHost) {
-  return !!host.querySelector('&>affine-page-root');
+  return Array.from(host.children).some(
+    v => v.tagName.toLowerCase() === 'affine-page-root'
+  );
 }
 
 export function isInsideEdgelessEditor(host: EditorHost) {
-  return !!host.querySelector('&>affine-edgeless-root');
+  return Array.from(host.children).some(
+    v => v.tagName.toLowerCase() === 'affine-edgeless-root'
+  );
 }
 
 /**
