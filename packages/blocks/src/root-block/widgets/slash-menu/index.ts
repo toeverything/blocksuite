@@ -104,7 +104,7 @@ export class AffineSlashMenuWidget extends WidgetElement {
   config = AffineSlashMenuWidget.DEFAULT_CONFIG;
 
   private _getTriggerKey = (event: KeyboardEvent) => {
-    if (isControlledKeyboardEvent(event) || event.shiftKey) return undefined;
+    if (isControlledKeyboardEvent(event)) return undefined;
 
     const { triggerKeys } = this.config;
 
