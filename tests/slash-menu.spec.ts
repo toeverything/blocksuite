@@ -42,6 +42,22 @@ test.describe('slash menu should show and hide correctly', () => {
     await enterPlaygroundRoom(page);
   });
 
+  test("slash menu should show when user input '/'", async ({ page }) => {
+    await initEmptyParagraphState(page);
+    const slashMenu = page.locator(`.slash-menu`);
+    await focusRichText(page);
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+  });
+
+  test("slash menu should show when user input '、'", async ({ page }) => {
+    await initEmptyParagraphState(page);
+    const slashMenu = page.locator(`.slash-menu`);
+    await focusRichText(page);
+    await type(page, '、');
+    await expect(slashMenu).toBeVisible();
+  });
+
   test('slash menu should hide after click away', async ({ page }) => {
     const id = await initEmptyParagraphState(page);
     const paragraphId = id.paragraphId;
