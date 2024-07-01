@@ -113,6 +113,16 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   blockElement.bindHotKey({
+    ArrowUp: () => {
+      const inlineEditor = _getInlineEditor();
+      const inlineRange = inlineEditor.getInlineRange();
+      return !inlineEditor.isFirstLine(inlineRange);
+    },
+    ArrowDown: () => {
+      const inlineEditor = _getInlineEditor();
+      const inlineRange = inlineEditor.getInlineRange();
+      return !inlineEditor.isLastLine(inlineRange);
+    },
     Escape: () => {
       if (blockElement.selected?.is('text')) {
         return _selectBlock();

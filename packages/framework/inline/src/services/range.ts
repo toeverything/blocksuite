@@ -304,7 +304,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     // aaaaaaaa| or aaaaaaaa
     // bb           |bb
     // We have no way to distinguish them and we just assume that the cursor
-    // can not in the first line because if we apply the inline ranage manually the
+    // can not in the first line because if we apply the inline range manually the
     // cursor will jump to the second line.
     const container = range.commonAncestorContainer.parentElement;
     assertExists(container);
@@ -314,13 +314,15 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     // bb           |bb
     const rangeRects = range.getClientRects();
     // We use last rect here to make sure we get the second rect.
-    // (Based on the assumption that the cursor can not in the first line)
+    // (Based on the assumption that the cursor can not be in the first line)
     const rangeRect = rangeRects[rangeRects.length - 1];
-    return rangeRect.bottom === containerRect.bottom;
+
+    const tolerance = 1;
+    return Math.abs(rangeRect.bottom - containerRect.bottom) < tolerance;
   };
 
   /**
-   * the inline ranage is synced to the native selection asynchronically
+   * the inline range is synced to the native selection asynchronously
    * if sync is true, the native selection will be synced immediately
    */
   setInlineRange = (inlineRange: InlineRange | null, sync = true): void => {
