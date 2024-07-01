@@ -182,7 +182,7 @@ export class EdgelessDraggableElementController<T>
   private _onDragEnd() {
     const { overlay, info, options } = this;
     const { startTime, elementInfo, edgelessRect, validMoved } = info;
-    const { service, clickThreshold = 500 } = options;
+    const { service, clickThreshold = 1500 } = options;
     const zoom = service.viewport.zoom;
 
     if (!validMoved) {
