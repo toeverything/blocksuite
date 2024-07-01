@@ -200,7 +200,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
     const containerStyle: StyleInfo = {
       transform: `rotate(${rotate}deg)`,
       transformOrigin: 'center',
-      padding: '10px',
+      padding: '5px 10px',
       border: `1px solid ${this._editing ? 'var(--affine—primary—color, #1e96eb)' : 'transparent'}`,
       borderRadius: '4px',
       boxSizing: 'border-box',
