@@ -272,7 +272,8 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     // We use last rect here to make sure we get the second rect.
     // (Based on the assumption that the cursor can not in the first line)
     const rangeRect = rangeRects[rangeRects.length - 1];
-    return rangeRect.top === containerRect.top;
+    const tolerance = 1;
+    return Math.abs(rangeRect.top - containerRect.top) < tolerance;
   };
 
   /**
