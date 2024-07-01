@@ -237,11 +237,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
    * 2. soft break
    */
   isFirstLine = (inlineRange: InlineRange | null): boolean => {
-    if (!inlineRange) return false;
-
-    if (inlineRange.length > 0) {
-      throw new Error('Inline range should be collapsed');
-    }
+    if (!inlineRange || inlineRange.length > 0) return false;
 
     const range = this.toDomRange(inlineRange);
     if (!range) {
@@ -282,11 +278,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
    * 2. soft break
    */
   isLastLine = (inlineRange: InlineRange | null): boolean => {
-    if (!inlineRange) return false;
-
-    if (inlineRange.length > 0) {
-      throw new Error('Inline range should be collapsed');
-    }
+    if (!inlineRange || inlineRange.length > 0) return false;
 
     // check case 1:
     const afterText = this.editor.yTextString.slice(inlineRange.index);
