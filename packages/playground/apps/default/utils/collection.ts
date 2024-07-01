@@ -75,7 +75,6 @@ export async function createDefaultDocCollection() {
       enable_synced_doc_block: true,
       enable_pie_menu: true,
       enable_lasso_tool: true,
-      enable_edgeless_text: true,
       ...flags,
     },
   };

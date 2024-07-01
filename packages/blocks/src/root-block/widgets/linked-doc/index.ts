@@ -101,6 +101,13 @@ export class AffineLinkedDocWidget extends WidgetElement {
   options = AffineLinkedDocWidget.DEFAULT_OPTIONS;
 
   private getInlineEditor = (evt: KeyboardEvent) => {
+    const text = this.host.selection.value.find(selection =>
+      selection.is('text')
+    );
+    if (!text) return;
+    const model = this.host.doc.getBlockById(text.blockId);
+    if (!model || matchFlavours(model, this.options.ignoreBlockTypes)) return;
+
     if (evt.target instanceof HTMLElement) {
       const editor = (
         evt.target.closest('.inline-editor') as {
@@ -111,17 +118,7 @@ export class AffineLinkedDocWidget extends WidgetElement {
         return editor;
       }
     }
-    const text = this.host.selection.value.find(selection =>
-      selection.is('text')
-    );
-    if (!text) {
-      return;
-    }
-    const model = this.host.doc.getBlockById(text.blockId);
-    if (!model) {
-      return;
-    }
-    if (matchFlavours(model, this.options.ignoreBlockTypes)) return;
+
     return getInlineEditorByModel(this.host, model);
   };
 

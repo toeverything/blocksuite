@@ -18,12 +18,12 @@
 
   onMount(() => {
     appState.subscribe(({ collection, editor }) => {
-      docs = [...collection.docs.values()];
+      docs = [...collection.docs.values()].map(blocks => blocks.getDoc());
       collection.slots.docUpdated.on(() => {
-        docs = [...collection.docs.values()];
+        docs = [...collection.docs.values()].map(blocks => blocks.getDoc());
       });
       editor.slots.docLinkClicked.on(() => {
-        docs = [...collection.docs.values()];
+        docs = [...collection.docs.values()].map(blocks => blocks.getDoc());
       });
     });
   });

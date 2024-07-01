@@ -7,8 +7,9 @@ import { AffineSchemas } from '@blocksuite/blocks';
 export function initEditor() {
   const schema = new Schema().register(AffineSchemas);
   const collection = new DocCollection({ schema });
-  const doc = collection.createDoc({ id: 'page1' });
+  collection.meta.initialize();
 
+  const doc = collection.createDoc({ id: 'page1' });
   doc.load(() => {
     const pageBlockId = doc.addBlock('affine:page', {});
     doc.addBlock('affine:surface', {}, pageBlockId);
