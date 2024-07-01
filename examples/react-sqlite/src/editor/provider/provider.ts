@@ -1,31 +1,43 @@
-import { DocCollection, type Y, Schema, BlobStorage } from '@blocksuite/store';
+import { DocCollection, type Y, Schema } from '@blocksuite/store';
+import { type BlobSource } from '@blocksuite/sync';
 import { Database } from 'sql.js';
 import { client } from './db';
 import { AffineSchemas } from '@blocksuite/blocks';
 
 function createCollection(db: Database, id: string) {
+  class ClientBlobSource implements BlobSource {
+    readonly = false;
+    name = 'client';
+
+    async get(key: string) {
+      return client.getBlob(db, key);
+    }
+
+    async set(key: string, value: Blob) {
+      await client.insertBlob(db, key, value);
+      return key;
+    }
+
+    async delete(key: string) {
+      return client.deleteBlob(db, key);
+    }
+
+    async list() {
+      return client.getAllBlobIds(db);
+    }
+  }
+
   const schema = new Schema().register(AffineSchemas);
 
   const collection = new DocCollection({
     schema,
     id,
-    blobStorages: [() => createBlobStorage(db)],
-  });
-  return collection;
-}
-
-function createBlobStorage(db: Database): BlobStorage {
-  return {
-    crud: {
-      set: async (key: string, value: Blob) => {
-        await client.insertBlob(db, key, value);
-        return key;
-      },
-      get: async (key: string) => client.getBlob(db, key),
-      delete: async (key: string) => client.deleteBlob(db, key),
-      list: async () => client.getAllBlobIds(db),
+    blobSources: {
+      main: new ClientBlobSource(),
     },
-  };
+  });
+  collection.meta.initialize();
+  return collection;
 }
 
 function createFirstDoc(collection: DocCollection) {
