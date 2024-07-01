@@ -5,7 +5,6 @@ import {
   dragBetweenIndices,
   dragOverTitle,
   enterPlaygroundRoom,
-  expectConsoleMessage,
   focusRichText,
   focusTitle,
   initEmptyCodeBlockState,
@@ -1163,16 +1162,14 @@ test('should ctrl+enter create new block', async ({ page }) => {
 test('arrow up and down behavior on multiline text blocks when previous is non-text', async ({
   page,
 }) => {
-  expectConsoleMessage(page, 'Error: Failed to fetch link preview');
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
   await pressEnter(page);
   await pressArrowUp(page);
-  await type(page, '/link');
-  await pressEnter(page);
-  await type(page, 'http://localhost');
+  // add a block without richtext (divider)
+  await type(page, '--- ');
   await pressEnter(page);
 
   await focusRichText(page);
