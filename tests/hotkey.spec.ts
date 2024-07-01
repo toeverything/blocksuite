@@ -19,6 +19,7 @@ import {
   pressArrowUp,
   pressEnter,
   pressForwardDelete,
+  pressShiftEnter,
   pressShiftTab,
   pressTab,
   readClipboardText,
@@ -37,6 +38,7 @@ import {
 } from './utils/actions/index.js';
 import {
   assertBlockChildrenIds,
+  assertBlockSelections,
   assertRichTextInlineRange,
   assertRichTextModelType,
   assertRichTexts,
@@ -1155,6 +1157,31 @@ test('should ctrl+enter create new block', async ({ page }) => {
   await assertRichTexts(page, ['1', '23']);
   await page.keyboard.press(`${SHORT_KEY}+Enter`);
   await assertRichTexts(page, ['1', '23', '']);
+});
+
+test('arrow up and down behavior on multiline text blocks when previous is non-text', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await pressEnter(page);
+  await pressArrowUp(page);
+  await type(page, '--- ');
+  await pressEnter(page);
+
+  await focusRichText(page);
+  await type(page, '124');
+  await pressShiftEnter(page);
+  await type(page, '1234');
+
+  await pressArrowUp(page);
+  await waitNextFrame(page, 100);
+  await assertRichTextInlineRange(page, 0, 3);
+
+  await pressArrowUp(page);
+  await assertBlockSelections(page, ['4']);
 });
 
 test.describe('bracket auto complete', () => {
