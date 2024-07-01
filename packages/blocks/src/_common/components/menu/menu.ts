@@ -727,7 +727,8 @@ declare global {
   }
 }
 export const getDefaultModalRoot = (ele: HTMLElement) => {
-  const host = ele.closest('editor-host');
+  const host: HTMLElement | null =
+    ele.closest('editor-host') ?? ele.closest('.data-view-popup-container');
   if (host) {
     return host;
   }
@@ -736,11 +737,11 @@ export const getDefaultModalRoot = (ele: HTMLElement) => {
 export const createModal = (container: HTMLElement = document.body) => {
   const div = document.createElement('div');
   div.style.pointerEvents = 'auto';
-  div.style.position = 'fixed';
+  div.style.position = 'absolute';
   div.style.left = '0';
   div.style.top = '0';
-  div.style.width = '100vw';
-  div.style.height = '100vh';
+  div.style.width = '100%';
+  div.style.height = '100%';
   div.style.zIndex = '1001';
   div.style.fontFamily = 'var(--affine-font-family)';
   container.append(div);
@@ -761,9 +762,6 @@ export const positionToVRect = (x: number, y: number): VirtualElement => {
       };
     },
   };
-};
-export const eventToVRect = (e: MouseEvent): VirtualElement => {
-  return positionToVRect(e.x, e.y);
 };
 export const createPopup = (
   target: HTMLElement,

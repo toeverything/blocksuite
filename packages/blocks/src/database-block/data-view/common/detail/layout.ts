@@ -136,11 +136,9 @@ export const createRecordDetail = (ops: {
   view: DataViewManager;
   rowId: string;
 }) => {
-  const detail = new RecordDetail();
-  detail.view = ops.view;
-  detail.rowId = ops.rowId;
   return html`<affine-data-view-record-detail
     .view=${ops.view}
     .rowId=${ops.rowId}
+    class="data-view-popup-container"
   ></affine-data-view-record-detail>`;
 };

@@ -23,6 +23,7 @@ const styles = css`
     padding: 20px 36px;
     gap: 12px;
     min-height: 100%;
+    background-color: var(--affine-background-primary-color);
   }
 
   .add-property {
