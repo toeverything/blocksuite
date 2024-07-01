@@ -40,6 +40,14 @@ export class PointLocation extends Array<number> implements IVec {
 
   _out: IVec = [0, 0];
 
+  [0]: number;
+
+  [1]: number;
+
+  override get length() {
+    return super.length as 2;
+  }
+
   constructor(
     point: IVec = [0, 0],
     tangent: IVec = [0, 0],
@@ -65,7 +73,12 @@ export class PointLocation extends Array<number> implements IVec {
   }
 
   clone() {
-    return new PointLocation(this, this._tangent, this._in, this._out);
+    return new PointLocation(
+      this as unknown as IVec,
+      this._tangent,
+      this._in,
+      this._out
+    );
   }
 
   static fromVec(vec: IVec) {

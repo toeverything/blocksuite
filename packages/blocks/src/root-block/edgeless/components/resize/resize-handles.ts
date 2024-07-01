@@ -37,7 +37,7 @@ function ResizeHandle(
 
     const { clientX, clientY } = e;
     const target = e.target as HTMLElement;
-    const point = [clientX, clientY];
+    const point: IVec = [clientX, clientY];
 
     updateCursor(true, { type, point, target });
   };

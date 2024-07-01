@@ -7,11 +7,10 @@ import {
   Bound,
   getStroke,
   getSvgPathFromStroke,
-  type IVec,
   linePolygonIntersects,
   Overlay,
 } from '../../../../surface-block/index.js';
-import type { IVec2 } from '../../../../surface-block/utils/vec.js';
+import type { IVec } from '../../../../surface-block/utils/vec.js';
 import { deleteElements } from '../../utils/crud.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { EdgelessToolController } from './edgeless-tool.js';
@@ -40,9 +39,9 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
 
   private _eraserPoints: IVec[] = [];
 
-  private _prevPoint: IVec = [];
+  private _prevPoint: IVec = [0, 0];
 
-  private _prevEraserPoint: IVec = [];
+  private _prevEraserPoint: IVec = [0, 0];
 
   private _erasables = new Set<BlockSuite.EdgelessModelType>();
 
@@ -136,8 +135,8 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       } else {
         if (
           erasable.intersectWithLine(
-            this._prevPoint as IVec2,
-            currentPoint as IVec2
+            this._prevPoint as IVec,
+            currentPoint as IVec
           )
         ) {
           this._eraseTargets.add(erasable);

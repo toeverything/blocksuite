@@ -11,7 +11,7 @@ import {
   rotatePoints,
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
-import type { IVec2 } from '../../../utils/vec.js';
+import type { IVec } from '../../../utils/vec.js';
 import type { IHitTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 
@@ -83,17 +83,17 @@ export const rect = {
     return points.some(point => bounds.containsPoint(point));
   },
 
-  getNearestPoint(point: IVec2, element: ShapeElementModel) {
+  getNearestPoint(point: IVec, element: ShapeElementModel) {
     const points = getPointsFromBoundsWithRotation(element);
     return polygonNearestPoint(points, point);
   },
 
-  intersectWithLine(start: IVec2, end: IVec2, element: ShapeElementModel) {
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElementModel) {
     const points = getPointsFromBoundsWithRotation(element);
     return linePolygonIntersects(start, end, points);
   },
 
-  getRelativePointLocation(relativePoint: IVec2, element: ShapeElementModel) {
+  getRelativePointLocation(relativePoint: IVec, element: ShapeElementModel) {
     const bound = Bound.deserialize(element.xywh);
     const point = bound.getRelativePoint(relativePoint);
     const rotatePoint = rotatePoints(

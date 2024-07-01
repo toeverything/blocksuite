@@ -5,7 +5,7 @@ import { keys } from '../../_common/utils/iterable.js';
 import { Bound } from '../utils/bound.js';
 import { linePolygonIntersects } from '../utils/math-utils.js';
 import type { PointLocation } from '../utils/point-location.js';
-import type { IVec2 } from '../utils/vec.js';
+import type { IVec } from '../utils/vec.js';
 import type { IBaseProps, SerializedElement } from './base.js';
 import { SurfaceGroupLikeModel } from './base.js';
 import { local, observe, yfield } from './decorators.js';
@@ -75,7 +75,7 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
     return bound.contains(Bound.deserialize(this.xywh));
   }
 
-  override intersectWithLine(start: IVec2, end: IVec2): PointLocation[] | null {
+  override intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
     const bound = Bound.deserialize(this.xywh);
     return linePolygonIntersects(start, end, bound.points);
   }

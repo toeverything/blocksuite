@@ -1,3 +1,4 @@
+import type { Viewport } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import type { EmbedBlockModel } from '../../../_common/embed-block-helper/embed-block-model.js';
@@ -32,7 +33,6 @@ import {
 import type { EdgelessBlockModel } from '../edgeless-block-model.js';
 import type { EdgelessTool } from '../types.js';
 import { getElementsWithoutGroup } from './group.js';
-import type { Viewport } from './viewport.js';
 
 export function isMindmapNode(
   element: EdgelessBlockModel | BlockSuite.EdgelessModelType | null

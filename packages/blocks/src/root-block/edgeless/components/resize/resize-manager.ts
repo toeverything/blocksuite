@@ -7,6 +7,7 @@ import {
   type PointLocation,
   rotatePoints,
 } from '../../../../surface-block/index.js';
+import type { IVec } from '../../../../surface-block/utils/vec.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import type { SelectableProps } from '../../utils/query.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
@@ -268,7 +269,7 @@ export class HandleResizeManager {
         _dragDirection === HandleDirection.Bottom
       ) {
         const dpo = draggingPoint.matrixTransform(m0);
-        const coorPoint = [0, 0];
+        const coorPoint: IVec = [0, 0];
         const [[x1, y1]] = rotatePoints([[dpo.x, dpo.y]], coorPoint, -_rotate);
         const [[x2, y2]] = rotatePoints([[dp.x, dp.y]], coorPoint, -_rotate);
         const point = { x: 0, y: 0 };

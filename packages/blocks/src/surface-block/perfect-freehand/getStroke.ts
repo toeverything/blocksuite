@@ -1,3 +1,4 @@
+import type { IVec, IVec3 } from '../utils/vec.js';
 import { getStrokeOutlinePoints } from './getStrokeOutlinePoints.js';
 import { getStrokePoints } from './getStrokePoints.js';
 import type { StrokeOptions } from './types.js';
@@ -18,8 +19,8 @@ import type { StrokeOptions } from './types.js';
  */
 
 export function getStroke(
-  points: (number[] | { x: number; y: number; pressure?: number })[],
+  points: (IVec | IVec3 | { x: number; y: number; pressure?: number })[],
   options: StrokeOptions = {} as StrokeOptions
-): number[][] {
+) {
   return getStrokeOutlinePoints(getStrokePoints(points, options), options);
 }
