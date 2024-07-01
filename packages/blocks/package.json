@@ -23,7 +23,7 @@
     "@floating-ui/dom": "^1.6.5",
     "@lit/context": "^1.1.1",
     "@sgtpooki/file-type": "1.0.1",
-    "@toeverything/theme": "^0.7.32",
+    "@toeverything/theme": "^0.7.35",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/sortablejs": "^1.15.8",

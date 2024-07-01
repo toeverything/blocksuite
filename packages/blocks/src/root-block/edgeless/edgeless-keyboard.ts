@@ -34,7 +34,10 @@ import {
 import { deleteElements } from './utils/crud.js';
 import { getNextShapeType, updateShapeProps } from './utils/hotkey-utils.js';
 import { isCanvasElement, isNoteBlock } from './utils/query.js';
-import { mountShapeTextEditor } from './utils/text.js';
+import {
+  mountConnectorLabelEditor,
+  mountShapeTextEditor,
+} from './utils/text.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override rootElement: EdgelessRootBlockComponent) {
@@ -52,13 +55,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         c: () => {
-          rootElement.service.editPropsStore.record('connector', {
-            mode: ConnectorMode.Straight,
-          });
-          this._setEdgelessTool(rootElement, {
-            type: 'connector',
-            mode: ConnectorMode.Straight,
-          });
+          const mode = ConnectorMode.Curve;
+          rootElement.service.editPropsStore.record('connector', { mode });
+          this._setEdgelessTool(rootElement, { type: 'connector', mode });
         },
         l: () => {
           if (!rootElement.doc.awarenessStore.getFlag('enable_lasso_tool')) {
@@ -354,22 +353,35 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const { service } = rootElement;
           const selection = service.selection;
           const elements = selection.selectedElements;
+          const onlyOne = elements.length === 1;
 
-          if (
-            elements.length === 1 &&
-            elements[0] instanceof EdgelessTextBlockModel
-          ) {
-            const id = elements[0].id;
-            selection.set({
-              elements: [id],
-              editing: true,
-            });
-            const textBlock = this.rootElement.host.view.getBlock(id);
-            if (textBlock instanceof EdgelessTextBlockComponent) {
-              textBlock.tryFocusEnd();
+          if (onlyOne) {
+            const element = elements[0];
+            const id = element.id;
+
+            if (element instanceof ConnectorElementModel) {
+              selection.set({
+                elements: [id],
+                editing: true,
+              });
+              requestAnimationFrame(() => {
+                mountConnectorLabelEditor(element, rootElement);
+              });
+              return;
             }
 
-            return;
+            if (element instanceof EdgelessTextBlockModel) {
+              selection.set({
+                elements: [id],
+                editing: true,
+              });
+              const textBlock = rootElement.host.view.getBlock(id);
+              if (textBlock instanceof EdgelessTextBlockComponent) {
+                textBlock.tryFocusEnd();
+              }
+
+              return;
+            }
           }
 
           if (!isSelectSingleMindMap(elements)) {

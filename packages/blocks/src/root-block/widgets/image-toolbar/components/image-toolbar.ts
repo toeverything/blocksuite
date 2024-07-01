@@ -90,12 +90,16 @@ export class AffineImageToolbar extends LitElement {
     assertExists(this._moreButton);
     createLitPortal({
       template: moreMenu,
-      container: this._moreButton,
+      container: this.blockElement.host,
+      // stacking-context(editor-host)
+      portalStyles: {
+        zIndex: 'var(--affine-z-index-popover)',
+      },
       computePosition: {
         referenceElement: this._moreButton,
         placement: 'bottom-start',
         middleware: [flip(), offset(4)],
-        autoUpdate: true,
+        autoUpdate: { animationFrame: true },
       },
       abortController: this._popMenuAbortController,
       closeOnClickAway: true,

@@ -1,38 +1,41 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-import type { BaseBlockTransformer } from '@blocksuite/store';
+import type {
+  BaseBlockTransformer,
+  InternalPrimitives,
+} from '@blocksuite/store';
 import { defineBlockSchema } from '@blocksuite/store';
 
 import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
 import { isAbortError } from '../utils/helper.js';
 import type { EmbedBlockModel } from './embed-block-model.js';
 import type {
-  EmbedBlockGeneratorOptions,
   EmbedProps,
   LinkPreviewData,
   LinkPreviewResponseData,
 } from './types.js';
 
-export function createEmbedBlock<
+export function createEmbedBlockSchema<
   Props extends object,
   Model extends EmbedBlockModel<Props>,
-  WidgetName extends string = string,
   Transformer extends BaseBlockTransformer<
     EmbedProps<Props>
   > = BaseBlockTransformer<EmbedProps<Props>>,
 >({
-  schema,
-  service,
-  view,
-}: EmbedBlockGeneratorOptions<
-  Props,
-  Model,
-  WidgetName,
-  Transformer
->): BlockSpec {
-  const blockSchema = defineBlockSchema({
-    flavour: `affine:embed-${schema.name}`,
+  name,
+  version,
+  toModel,
+  props,
+  transformer,
+}: {
+  name: string;
+  version: number;
+  toModel: () => Model;
+  props?: (internalPrimitives: InternalPrimitives) => Props;
+  transformer?: () => Transformer;
+}) {
+  return defineBlockSchema({
+    flavour: `affine:embed-${name}`,
     props: internalPrimitives => {
-      const userProps = schema.props?.(internalPrimitives);
+      const userProps = props?.(internalPrimitives);
 
       return {
         index: 'a0',
@@ -42,18 +45,12 @@ export function createEmbedBlock<
       } as unknown as EmbedProps<Props>;
     },
     metadata: {
-      version: schema.version,
+      version,
       role: 'content',
     },
-    toModel: schema.toModel,
-    transformer: schema.transformer,
+    toModel,
+    transformer,
   });
-
-  return {
-    schema: blockSchema,
-    service,
-    view,
-  };
 }
 
 // ========== Link Preview ==========

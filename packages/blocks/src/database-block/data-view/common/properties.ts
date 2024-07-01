@@ -1,5 +1,4 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -273,7 +272,7 @@ declare global {
 }
 
 export const popPropertiesSetting = (
-  target: ReferenceElement,
+  target: HTMLElement,
   props: {
     view: DataViewManager;
     onClose?: () => void;

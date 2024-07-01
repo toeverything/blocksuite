@@ -137,7 +137,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
       this._resizeObserver.disconnect();
     });
 
-    this.disposables.addFromEvent(this._textContainer, 'click', e => {
+    disposables.addFromEvent(this._textContainer, 'click', e => {
       if (!this._editing) return;
 
       const containerRect = this._textContainer.getBoundingClientRect();
@@ -183,6 +183,12 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
           }),
         ]);
       }
+    });
+
+    disposables.addFromEvent(this._textContainer, 'focusout', () => {
+      if (!this._editing) return;
+
+      this.edgeless.selection.clear();
     });
   }
 

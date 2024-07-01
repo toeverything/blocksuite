@@ -38,6 +38,10 @@ export const blockStyles = css`
     padding: 0 24px;
   }
 
+  .affine-embed-synced-doc-editor {
+    pointer-events: none;
+  }
+
   .affine-embed-synced-doc-container {
     border-radius: 8px;
     overflow: hidden;
@@ -105,14 +109,11 @@ export const blockStyles = css`
   }
 
   .affine-embed-synced-doc-editor-empty {
-    position: absolute;
-    top: 0;
-    left: 24px;
     display: flex;
     align-items: center;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    min-height: 44px;
   }
 
   .affine-embed-synced-doc-container.surface

@@ -50,6 +50,9 @@ export class Viewport {
     return this._zoom;
   }
 
+  /**
+   * @deprecated
+   */
   get cumulativeParentScale() {
     return this._cumulativeParentScale;
   }
@@ -90,6 +93,7 @@ export class Viewport {
 
   get viewportBounds() {
     const { viewportMinXY, viewportMaxXY } = this;
+
     return Bound.from({
       ...viewportMinXY,
       w: (viewportMaxXY.x - viewportMinXY.x) / this._cumulativeParentScale,
@@ -99,6 +103,15 @@ export class Viewport {
 
   get boundingClientRect() {
     return this._el.getBoundingClientRect();
+  }
+
+  /**
+   * Note this is different from the zoom property.
+   * The editor itself may be scaled by outer container which is common in nested editor scenarios.
+   * This property is used to calculate the scale of the editor.
+   */
+  get scale() {
+    return this.boundingClientRect.width / this._el.offsetWidth;
   }
 
   // Does not allow the user to move and zoom the canvas in copilot tool
@@ -149,7 +162,8 @@ export class Viewport {
 
   onResize() {
     const { centerX, centerY, zoom, width: oldWidth, height: oldHeight } = this;
-    const { left, top, width, height } = this._el.getBoundingClientRect();
+    const { left, top } = this._el.getBoundingClientRect();
+    const { offsetWidth: width, offsetHeight: height } = this._el;
 
     this.setRect(left, top, width, height);
     this.setCenter(
@@ -177,13 +191,16 @@ export class Viewport {
   }
 
   toModelCoord(viewX: number, viewY: number): IVec2 {
-    const { viewportX, viewportY, zoom } = this;
-    return [viewportX + viewX / zoom, viewportY + viewY / zoom];
+    const { viewportX, viewportY, zoom, scale } = this;
+    return [viewportX + viewX / zoom / scale, viewportY + viewY / zoom / scale];
   }
 
   toViewCoord(modelX: number, modelY: number): IVec2 {
-    const { viewportX, viewportY, zoom } = this;
-    return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
+    const { viewportX, viewportY, zoom, scale } = this;
+    return [
+      (modelX - viewportX) * zoom * scale,
+      (modelY - viewportY) * zoom * scale,
+    ];
   }
 
   toModelBound(bound: Bound) {
@@ -225,10 +242,6 @@ export class Viewport {
       zoom: this.zoom,
       center: Vec.toVec(this.center) as IVec2,
     });
-  }
-
-  setCumulativeParentScale(scale: number) {
-    this._cumulativeParentScale = scale;
   }
 
   applyDeltaCenter(deltaX: number, deltaY: number) {

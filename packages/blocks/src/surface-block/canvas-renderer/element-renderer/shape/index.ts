@@ -3,6 +3,7 @@ import type {
   ShapeElementModel,
   ShapeType,
 } from '../../../element-model/shape.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import type { Renderer } from '../../renderer.js';
 import {
@@ -25,7 +26,8 @@ const shapeRenderers: {
     model: ShapeElementModel,
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
-    renderer: Renderer
+    renderer: Renderer,
+    rc: RoughCanvas
   ) => void;
 } = {
   diamond,
@@ -38,9 +40,10 @@ export function shape(
   model: ShapeElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer
+  renderer: Renderer,
+  rc: RoughCanvas
 ) {
-  shapeRenderers[model.shapeType](model, ctx, matrix, renderer);
+  shapeRenderers[model.shapeType](model, ctx, matrix, renderer, rc);
 
   if (model.textDisplay) {
     renderText(model, ctx, renderer);

@@ -3,7 +3,6 @@ import type {
   ClientRectObject,
   Middleware,
   Placement,
-  ReferenceElement,
   VirtualElement,
 } from '@floating-ui/dom';
 import {
@@ -26,8 +25,7 @@ import {
   checkboxChecked,
   checkboxUnchecked,
 } from '../../../list-block/utils/icons.js';
-import { DoneIcon } from '../../icons/index.js';
-import { ArrowRightSmallIcon } from '../../icons/index.js';
+import { ArrowRightSmallIcon, DoneIcon } from '../../icons/index.js';
 import { rangeWrap } from '../../utils/math.js';
 
 type MenuCommon = {
@@ -728,9 +726,16 @@ declare global {
     'affine-menu': MenuComponent<unknown>;
   }
 }
-
+export const getDefaultModalRoot = (ele: HTMLElement) => {
+  const host = ele.closest('editor-host');
+  if (host) {
+    return host;
+  }
+  return document.body;
+};
 export const createModal = (container: HTMLElement = document.body) => {
   const div = document.createElement('div');
+  div.style.pointerEvents = 'auto';
   div.style.position = 'fixed';
   div.style.left = '0';
   div.style.top = '0';
@@ -761,7 +766,7 @@ export const eventToVRect = (e: MouseEvent): VirtualElement => {
   return positionToVRect(e.x, e.y);
 };
 export const createPopup = (
-  target: ReferenceElement,
+  target: HTMLElement,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
@@ -770,7 +775,7 @@ export const createPopup = (
     container?: HTMLElement;
   }
 ) => {
-  const modal = createModal(options?.container ?? document.body);
+  const modal = createModal(options?.container ?? getDefaultModalRoot(target));
   autoUpdate(target, content, () => {
     computePosition(target, content, {
       placement: options?.placement,
@@ -809,7 +814,7 @@ export type MenuHandler = {
 };
 
 export const popMenu = <T>(
-  target: ReferenceElement,
+  target: HTMLElement,
   props: {
     options: MenuOptions;
     placement?: Placement;
@@ -836,7 +841,7 @@ export const popMenu = <T>(
   };
 };
 export const popFilterableSimpleMenu = (
-  target: ReferenceElement,
+  target: HTMLElement,
   options: Menu[],
   onClose?: () => void
 ) => {

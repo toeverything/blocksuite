@@ -91,8 +91,6 @@ async function importDocs(collection: DocCollection, imported: Blob) {
   });
   const assetsMap = job.assets;
 
-  job.snapshotToCollectionInfo(info);
-
   await Promise.all(
     assetObjs.map(async fileObj => {
       const nameWithExt = fileObj.name.replace('assets/', '');

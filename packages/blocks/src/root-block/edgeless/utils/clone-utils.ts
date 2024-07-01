@@ -2,12 +2,11 @@ import type { BlockStdScope } from '@blocksuite/block-std';
 import { Job } from '@blocksuite/store';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
-import {
-  type SerializedElement,
-  SurfaceGroupLikeModel,
-} from '../../../surface-block/element-model/base.js';
+import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import type { SerializedConnectorElement } from '../../../surface-block/element-model/connector.js';
 import type { SerializedGroupElement } from '../../../surface-block/element-model/group.js';
+import type { SerializedMindmapElement } from '../../../surface-block/element-model/mindmap.js';
+import type { NodeDetail } from '../../../surface-block/element-model/utils/mindmap/layout.js';
 import {
   ConnectorElementModel,
   GroupElementModel,
@@ -161,11 +160,11 @@ export function mapGroupIds(
  * @returns updated element props
  */
 export function mapMindmapIds(
-  props: SerializedElement,
+  props: SerializedMindmapElement,
   ids: Map<string, string>
 ) {
   if (props.children) {
-    const newMap: Record<string, boolean> = {};
+    const newMap: Record<string, NodeDetail> = {};
     for (const [key, value] of Object.entries(props.children)) {
       const newKey = ids.get(key);
       if (value.parent) {

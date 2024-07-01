@@ -7,11 +7,9 @@ import {
   DEFAULT_NOTE_SHADOW,
 } from '../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../_common/types.js';
-import {
-  Bound,
-  type SerializedXYWH,
-  StrokeStyle,
-} from '../surface-block/index.js';
+import { StrokeStyle } from '../surface-block/consts.js';
+import { Bound } from '../surface-block/utils/bound.js';
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
@@ -42,7 +40,6 @@ export const NoteBlockSchema = defineBlockSchema({
       'affine:database',
       'affine:data-view',
       'affine:image',
-      'affine:note-block-*',
       'affine:bookmark',
       'affine:attachment',
       'affine:surface-ref',

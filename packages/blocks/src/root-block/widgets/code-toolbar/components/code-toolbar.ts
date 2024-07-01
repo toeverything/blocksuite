@@ -15,7 +15,6 @@ import { CodeToolbarItemRenderer, MoreMenuRenderer } from '../utils.js';
 export class AffineCodeToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      z-index: 1;
       position: absolute;
       top: 0;
       right: 0;
@@ -98,12 +97,16 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
     assertExists(this._moreButton);
     createLitPortal({
       template: moreMenu,
-      container: this._moreButton,
+      // should be greater than block-selection z-index as selection and popover wil share the same stacking context(editor-host)
+      portalStyles: {
+        zIndex: 'var(--affine-z-index-popover)',
+      },
+      container: this.blockElement.host,
       computePosition: {
         referenceElement: this._moreButton,
         placement: 'bottom-start',
         middleware: [flip(), offset(4)],
-        autoUpdate: true,
+        autoUpdate: { animationFrame: true },
       },
       abortController: this._popMenuAbortController,
       closeOnClickAway: true,

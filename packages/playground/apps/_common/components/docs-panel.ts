@@ -7,6 +7,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { removeModeFromStorage } from '../mock-services.js';
+
 @customElement('docs-panel')
 export class DocsPanel extends WithDisposable(ShadowlessElement) {
   private get collection() {
@@ -93,6 +95,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
             const isDeleteCurrent = doc.id === this.editor.doc.id;
 
             collection.removeDoc(doc.id);
+            removeModeFromStorage(doc.id);
             // When delete the current doc, we need to set the editor doc to the first remaining doc
             if (isDeleteCurrent) {
               this.editor.doc = this.docs[0].getDoc();

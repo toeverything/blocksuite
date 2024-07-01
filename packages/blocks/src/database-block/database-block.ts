@@ -305,7 +305,7 @@ export class DatabaseBlockComponent extends BlockComponent<
         if (data.key === 'views') {
           this.viewSource.checkViewDataUpdate();
         }
-        if (data.key === 'columns') {
+        if (data.key === 'columns' || data.key === 'cells') {
           this.dataSource.slots.update.emit();
         }
       })
@@ -406,8 +406,7 @@ export class DatabaseBlockComponent extends BlockComponent<
           std: this.std,
           detailPanelConfig: {
             openDetailPanel: peekViewService
-              ? async (target, template) =>
-                  peekViewService.peek(target, template)
+              ? (target, template) => peekViewService.peek(target, template)
               : undefined,
             target: () => this.innerModalWidget.target,
           },

@@ -94,6 +94,7 @@ export class BookmarkBlockComponent extends BlockComponent<
     let containerStyleMap = styleMap({
       position: 'relative',
       width: '100%',
+      minWidth: '450px',
     });
 
     if (this.isInSurface) {

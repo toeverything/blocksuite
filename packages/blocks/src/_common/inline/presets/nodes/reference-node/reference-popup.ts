@@ -20,6 +20,7 @@ import {
   LinkIcon,
   OpenIcon,
 } from '../../../../icons/text.js';
+import { isInsideBlockByFlavour } from '../../../../utils/model.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 import { ReferencePopupMoreMenu } from './reference-popup-more-menu-popup.js';
 import { styles } from './styles.js';
@@ -53,8 +54,25 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     return doc;
   }
 
-  get _isInsideEmbedSyncedDocBlock() {
-    return !!this.blockElement.closest('affine-embed-synced-doc-block');
+  get _embedViewButtonDisabled() {
+    if (
+      this.blockElement.doc.readonly ||
+      isInsideBlockByFlavour(
+        this.blockElement.doc,
+        this.blockElement.model,
+        'affine:edgeless-text'
+      )
+    ) {
+      return true;
+    }
+    return (
+      !!this.blockElement.closest('affine-embed-synced-doc-block') ||
+      this.referenceDocId === this.doc.id
+    );
+  }
+
+  get _openButtonDisabled() {
+    return this.referenceDocId === this.doc.id;
   }
 
   static override styles = styles;
@@ -232,6 +250,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
               size="24px"
               class="affine-reference-popover-open-button"
               @click=${this._openDoc}
+              ?disabled=${this._openButtonDisabled}
             >
               ${OpenIcon}
               <affine-tooltip .offset=${12}>${'Open this doc'}</affine-tooltip>
@@ -278,7 +297,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                       class="affine-reference-popover-view-selector-button embed embed-view"
                       .hover=${false}
                       @click=${() => this._convertToEmbedView()}
-                      ?disabled=${this._isInsideEmbedSyncedDocBlock}
+                      ?disabled=${this._embedViewButtonDisabled}
                     >
                       ${EmbedWebIcon}
                       <affine-tooltip .offset=${12}

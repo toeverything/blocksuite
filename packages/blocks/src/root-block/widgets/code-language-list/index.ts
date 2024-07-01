@@ -61,6 +61,11 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
           }}
         >
         </language-list-button>`,
+        // stacking-context(editor-host)
+        portalStyles: {
+          zIndex: 'var(--affine-z-index-popover)',
+        },
+        container: this.blockElement,
         computePosition: {
           referenceElement: this.blockElement,
           placement: 'left-start',

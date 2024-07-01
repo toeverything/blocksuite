@@ -205,10 +205,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    if (!this.group) {
-      return this.renderRows(this.view.rows);
-    }
-    return this.renderRows(this.group.rows);
+    return this.renderRows(this.rows);
   }
 }
 

@@ -24,9 +24,8 @@ export function affineTextStyles(
       'font-family': 'var(--affine-font-code-family)',
       background: 'var(--affine-background-code-block)',
       border: '1px solid var(--affine-border-color)',
-      'border-radius': '2px',
+      'border-radius': '4px',
       color: 'var(--affine-text-primary-color)',
-      padding: '3px 6px 4px',
       'font-variant-ligatures': 'none',
       'line-height': 'auto',
     };

@@ -200,17 +200,6 @@ export class SurfaceBlockComponent extends BlockElement<
     this.dispatchEvent(evt);
   }
 
-  private _initResizeEffect() {
-    const observer = new ResizeObserver(() => {
-      this._renderer.onResize();
-    });
-
-    observer.observe(this._surfaceContainer);
-    this._disposables.add(() => {
-      observer.disconnect();
-    });
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -227,7 +216,6 @@ export class SurfaceBlockComponent extends BlockElement<
     if (!this._isEdgeless) return;
 
     this._renderer.attach(this._surfaceContainer);
-    this._initResizeEffect();
   }
 
   refresh() {

@@ -249,12 +249,6 @@ export class EdgelessRootService extends RootService {
   override unmounted() {
     super.unmounted();
 
-    this.editPropsStore.setItem('viewport', {
-      centerX: this.viewport.centerX,
-      centerY: this.viewport.centerY,
-      zoom: this.viewport.zoom,
-    });
-
     this._layer.dispose();
     this._selection.dispose();
     this.selectionManager.set([]);
@@ -271,7 +265,11 @@ export class EdgelessRootService extends RootService {
 
   addElement<T = Record<string, unknown>>(type: string, props: T) {
     // @ts-ignore
-    props['index'] = this.generateIndex(type);
+    if (props['index'] === undefined) {
+      // @ts-ignore
+      props['index'] = this.generateIndex(type);
+    }
+
     // @ts-ignore
     props['type'] = type;
 

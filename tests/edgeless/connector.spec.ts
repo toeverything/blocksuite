@@ -2,9 +2,11 @@ import { expect, type Page } from '@playwright/test';
 
 import {
   addBasicConnectorElement,
+  assertEdgelessConnectorToolMode,
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
   changeConnectorStrokeWidth,
+  ConnectorMode,
   createConnectorElement,
   createShapeElement,
   deleteAllConnectors,
@@ -25,6 +27,7 @@ import {
   pressBackspace,
   redoByClick,
   selectAllByKeyboard,
+  SHORT_KEY,
   type,
   undoByClick,
   waitNextFrame,
@@ -43,7 +46,9 @@ test('elbow connector without node and width greater than height', async ({
   page,
 }) => {
   await commonSetup(page);
-  await createConnectorElement(page, [0, 0], [200, 100]);
+  await setEdgelessTool(page, 'connector');
+  await assertEdgelessConnectorToolMode(page, ConnectorMode.Curve);
+  await dragBetweenViewCoords(page, [0, 0], [200, 100]);
   await assertConnectorPath(page, [
     [0, 0],
     [100, 0],
@@ -652,6 +657,46 @@ test.describe('connector label with straight shape', () => {
 
     [cx, cy] = await getEditorCenter(page);
     assertPointAlmostEqual([cx, cy], [x, y]);
+  });
+
+  test('should enter the label editing state when pressing `Enter`', async ({
+    page,
+  }) => {
+    await commonSetup(page);
+    const start = { x: 100, y: 200 };
+    const end = { x: 300, y: 300 };
+    await addBasicConnectorElement(page, start, end);
+    await page.mouse.click(105, 200);
+
+    await page.keyboard.press('Enter');
+    await type(page, ' a ');
+    await assertEdgelessCanvasText(page, ' a ');
+  });
+
+  test('should exit the label editing state when pressing `Mod-Enter` or `Escape`', async ({
+    page,
+  }) => {
+    await commonSetup(page);
+    const start = { x: 100, y: 200 };
+    const end = { x: 300, y: 300 };
+    await addBasicConnectorElement(page, start, end);
+    await page.mouse.click(105, 200);
+
+    await page.keyboard.press('Enter');
+    await type(page, ' a ');
+    await assertEdgelessCanvasText(page, ' a ');
+
+    await page.keyboard.press(`${SHORT_KEY}+Enter`);
+
+    await page.keyboard.press('Enter');
+    await type(page, 'b');
+    await assertEdgelessCanvasText(page, 'b');
+
+    await page.keyboard.press('Escape');
+
+    await page.keyboard.press('Enter');
+    await type(page, 'c');
+    await assertEdgelessCanvasText(page, 'c');
   });
 });
 

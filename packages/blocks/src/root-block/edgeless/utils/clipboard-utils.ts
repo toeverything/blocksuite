@@ -1,5 +1,6 @@
 import { groupBy } from '../../../_common/utils/iterable.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
+import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
@@ -9,6 +10,7 @@ import { getCloneElements, prepareCloneData } from './clone-utils.js';
 import { getElementsWithoutGroup } from './group.js';
 import {
   isEdgelessTextBlock,
+  isEmbedSyncedDocBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
@@ -47,9 +49,8 @@ export async function duplicate(
   }
 }
 export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
-  const { notes, frames, shapes, images, edgelessTexts } = groupBy(
-    getElementsWithoutGroup(elements),
-    element => {
+  const { notes, frames, shapes, images, edgelessTexts, embedSyncedDocs } =
+    groupBy(getElementsWithoutGroup(elements), element => {
       if (isNoteBlock(element)) {
         return 'notes';
       } else if (isFrameBlock(element)) {
@@ -58,16 +59,18 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
         return 'images';
       } else if (isEdgelessTextBlock(element)) {
         return 'edgelessTexts';
+      } else if (isEmbedSyncedDocBlock(element)) {
+        return 'embedSyncedDocs';
       }
       return 'shapes';
-    }
-  ) as {
-    notes: NoteBlockModel[];
-    shapes: BlockSuite.SurfaceModelType[];
-    frames: FrameBlockModel[];
-    images: ImageBlockModel[];
-    edgelessTexts: EdgelessTextBlockModel[];
-  };
+    }) as {
+      notes: NoteBlockModel[];
+      shapes: BlockSuite.SurfaceModelType[];
+      frames: FrameBlockModel[];
+      images: ImageBlockModel[];
+      edgelessTexts: EdgelessTextBlockModel[];
+      embedSyncedDocs: EmbedSyncedDocModel[];
+    };
 
   return {
     notes: notes ?? [],
@@ -75,5 +78,6 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
     frames: frames ?? [],
     images: images ?? [],
     edgelessTexts: edgelessTexts ?? [],
+    embedSyncedDocs: embedSyncedDocs ?? [],
   };
 };

@@ -63,8 +63,15 @@ export interface PeekViewService {
 type PeekableAction = 'double-click' | 'shift-click';
 
 type PeekableOptions = {
-  action: PeekableAction | PeekableAction[] | false; // false means do not bind any action
-  selector?: string; // selector inside of the peekable element to bind the action
+  /**
+   * Action to bind to the peekable element. default to ['double-click', 'shift-click']
+   * false means do not bind any action.
+   */
+  action: PeekableAction | PeekableAction[] | false;
+  /**
+   * Selector inside of the peekable element to bind the action
+   */
+  selector?: string;
 };
 
 const symbol = Symbol('peekable');
@@ -86,7 +93,11 @@ export const peek = <Element extends LitElement>(
   isPeekable(e) && (e as any)[symbol]?.peek(template);
 };
 
-// Peekable decorator
+/**
+ * Mark a class as peekable, which means the class can be peeked by the peek view service.
+ *
+ * Note: This class must be syntactically below the `@customElement` decorator (it will be applied before customElement).
+ */
 export const Peekable =
   <C extends PeekableClass>(
     options: PeekableOptions = {

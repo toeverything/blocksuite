@@ -3,7 +3,6 @@ import '../../../filter/filter-group.js';
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { eventToVRect } from '../../../../../../_common/components/index.js';
 import type { FilterGroup } from '../../../../common/ast.js';
 import { FilterIcon } from '../../../../common/icons/index.js';
 import { popCreateFilter } from '../../../../common/ref/ref.js';
@@ -50,7 +49,7 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
   private addFilter(event: MouseEvent) {
     if (!this._filter.conditions.length && !this.view.filterVisible) {
       this.showToolBar(true);
-      popCreateFilter(eventToVRect(event), {
+      popCreateFilter(event.target as HTMLElement, {
         vars: this.view.vars,
         onSelect: filter => {
           this._filter = {

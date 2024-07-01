@@ -1,7 +1,15 @@
-import { DocCollection, Job, Schema } from '@blocksuite/store';
+import {
+  DocCollection,
+  Job,
+  type JobMiddleware,
+  Schema,
+} from '@blocksuite/store';
 
-export function createJob() {
-  const schema = new Schema();
+import { AffineSchemas } from '../../schemas.js';
+
+export function createJob(middlewares?: JobMiddleware[]) {
+  const schema = new Schema().register(AffineSchemas);
   const docCollection = new DocCollection({ schema });
-  return new Job({ collection: docCollection });
+  docCollection.meta.initialize();
+  return new Job({ collection: docCollection, middlewares });
 }

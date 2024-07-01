@@ -7,6 +7,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { BlockComponent } from '../_common/components/block-component.js';
+import { Peekable } from '../_common/components/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { ImageBlockEdgelessComponent } from './components/edgeless-image-block.js';
 import type { AffineImageCard } from './components/image-card.js';
@@ -22,6 +23,7 @@ import {
 } from './utils.js';
 
 @customElement('affine-image')
+@Peekable()
 export class ImageBlockComponent extends BlockComponent<
   ImageBlockModel,
   ImageBlockService

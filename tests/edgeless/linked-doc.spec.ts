@@ -310,4 +310,30 @@ test.describe('multiple edgeless elements to linked doc', () => {
       elements: ['shape', 'connector'],
     });
   });
+
+  test('multi-select with mindmap, turn it into a linked doc', async ({
+    page,
+  }) => {
+    await edgelessCommonSetup(page);
+    await triggerComponentToolbarAction(page, 'addMindmap');
+
+    await selectAllByKeyboard(page);
+    await triggerComponentToolbarAction(page, 'createLinkedDoc');
+    await waitNextFrame(page, 200);
+    const linkedSyncedBlock = page.locator('affine-linked-synced-doc-block');
+    assertExists(linkedSyncedBlock);
+
+    await triggerComponentToolbarAction(page, 'openLinkedDoc');
+    await waitNextFrame(page, 200);
+    const nodes = await page.evaluate(() => {
+      const container = document.querySelector('affine-edgeless-root');
+      const elements = container!.service.elements.map(s => s.type);
+      const blocks = container!.service.blocks.map(b => b.flavour);
+      return { blocks, elements };
+    });
+    expect(nodes).toEqual({
+      blocks: [],
+      elements: ['mindmap', 'shape', 'shape', 'shape', 'shape'],
+    });
+  });
 });

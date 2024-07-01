@@ -57,6 +57,12 @@ export enum LassoMode {
   Polygonal = 'polygonal',
 }
 
+export enum ConnectorMode {
+  Straight,
+  Orthogonal,
+  Curve,
+}
+
 export async function getNoteRect(page: Page, noteId: string) {
   const xywh: string | null = await page.evaluate(
     ([noteId]) => {
@@ -355,6 +361,23 @@ export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
     return container.edgelessTool.type;
   });
   expect(type).toEqual(mode);
+}
+
+export async function assertEdgelessConnectorToolMode(
+  page: Page,
+  mode: ConnectorMode
+) {
+  const tool = await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-root');
+    if (!container) {
+      throw new Error('Missing edgeless page');
+    }
+    return container.edgelessTool;
+  });
+  if (tool.type !== 'connector') {
+    throw new Error('Expected connector tool');
+  }
+  expect(tool.mode).toEqual(mode);
 }
 
 export async function assertEdgelessLassoToolMode(page: Page, mode: LassoMode) {
@@ -832,6 +855,7 @@ type Action =
   | 'changeConnectorShape'
   | 'addFrame'
   | 'addGroup'
+  | 'addMindmap'
   | 'createGroupOnMoreOption'
   | 'ungroup'
   | 'releaseFromGroup'
@@ -1000,6 +1024,13 @@ export async function triggerComponentToolbarAction(
         'edgeless-add-group-button'
       );
       await button.click();
+      break;
+    }
+    case 'addMindmap': {
+      const button = page.locator('edgeless-mindmap-tool-button');
+      await button.click();
+      await page.mouse.move(400, 400);
+      await page.mouse.click(400, 400);
       break;
     }
     case 'createGroupOnMoreOption': {

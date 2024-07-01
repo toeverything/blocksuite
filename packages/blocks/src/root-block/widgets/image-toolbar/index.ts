@@ -70,6 +70,7 @@ export class AffineImageToolbarWidget extends WidgetElement<
               }
             }}
           ></affine-image-toolbar>`,
+          container: this.blockElement,
           computePosition: {
             referenceElement: imageContainer,
             placement: 'right-start',

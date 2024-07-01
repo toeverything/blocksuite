@@ -142,7 +142,6 @@ export class RichTextCell extends BaseCellRenderer<Text> {
       this.value,
       html`<rich-text
         .yText=${this.value}
-        .inlineEventSource=${this.topContenteditableElement}
         .attributesSchema=${this.attributesSchema}
         .attributeRenderer=${this.attributeRenderer}
         .embedChecker=${this.inlineManager?.embedChecker}

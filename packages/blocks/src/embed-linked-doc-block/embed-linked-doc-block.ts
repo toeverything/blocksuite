@@ -10,6 +10,7 @@ import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import type { DocMode } from '../_common/types.js';
 import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
+import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import type { RootBlockComponent } from '../root-block/index.js';
 import { Bound } from '../surface-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
@@ -97,8 +98,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       return;
     }
 
-    this._docUpdatedAt = this._rootService.getDocUpdatedAt(this.model.pageId);
-
     if (!linkedDoc.loaded) {
       try {
         linkedDoc.load();
@@ -133,6 +132,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       return false;
     }
     return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
+  }
+
+  private _setDocUpdatedAt() {
+    const meta = this.doc.collection.meta.getDocMeta(this.model.pageId);
+    if (meta) {
+      const date = meta.updatedDate || meta.createDate;
+      this._docUpdatedAt = new Date(date);
+    }
   }
 
   private _selectBlock() {
@@ -321,6 +328,13 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
         })
       );
 
+      this._setDocUpdatedAt();
+      this.disposables.add(
+        this.doc.collection.meta.docMetaUpdated.on(() => {
+          this._setDocUpdatedAt();
+        })
+      );
+
       this._linkedDocMode = this._rootService.docModeService.getMode(
         this.model.pageId
       );
@@ -380,44 +394,55 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     const {
       LoadingIcon,
+      ReloadIcon,
       LinkedDocIcon,
       LinkedDocDeletedIcon,
       LinkedDocDeletedBanner,
       LinkedDocEmptyBanner,
+      SyncedDocErrorBanner,
     } = getEmbedLinkedDocIcons(this._linkedDocMode, this._cardStyle);
 
-    const titleIcon = isLoading
-      ? LoadingIcon
-      : isDeleted
-        ? LinkedDocDeletedIcon
-        : LinkedDocIcon;
+    const titleIcon = isError
+      ? SyncedDocErrorIcon
+      : isLoading
+        ? LoadingIcon
+        : isDeleted
+          ? LinkedDocDeletedIcon
+          : LinkedDocIcon;
 
-    const titleText = isLoading
-      ? 'Loading...'
-      : isDeleted
-        ? `Deleted ${this._linkedDocMode}`
-        : linkedDoc?.meta?.title.length
-          ? linkedDoc.meta.title
-          : 'Untitled';
+    const titleText = isError
+      ? linkedDoc?.meta?.title || 'Untitled'
+      : isLoading
+        ? 'Loading...'
+        : isDeleted
+          ? `Deleted doc`
+          : linkedDoc?.meta?.title || 'Untitled';
 
-    const showDefaultNoteContent = isLoading || isDeleted || isEmpty;
-    const defaultNoteContent = isLoading
-      ? ''
-      : isDeleted
-        ? 'This linked doc is deleted.'
-        : isEmpty
-          ? 'Preview of the doc will be displayed here.'
-          : '';
+    const showDefaultNoteContent = isError || isLoading || isDeleted || isEmpty;
+    const defaultNoteContent = isError
+      ? 'This linked doc failed to load.'
+      : isLoading
+        ? ''
+        : isDeleted
+          ? 'This linked doc is deleted.'
+          : isEmpty
+            ? 'Preview of the doc will be displayed here.'
+            : '';
 
-    const dateText = this._docUpdatedAt.toLocaleTimeString();
+    const dateText =
+      this._cardStyle === 'cube'
+        ? this._docUpdatedAt.toLocaleTimeString()
+        : this._docUpdatedAt.toLocaleString();
 
-    const showDefaultBanner = isDeleted || isEmpty;
+    const showDefaultBanner = isError || isLoading || isDeleted || isEmpty;
 
-    const defaultBanner = isLoading
-      ? LinkedDocEmptyBanner
-      : isDeleted
-        ? LinkedDocDeletedBanner
-        : LinkedDocEmptyBanner;
+    const defaultBanner = isError
+      ? SyncedDocErrorBanner
+      : isLoading
+        ? LinkedDocEmptyBanner
+        : isDeleted
+          ? LinkedDocDeletedBanner
+          : LinkedDocEmptyBanner;
 
     return this.renderEmbed(
       () => html`
@@ -446,12 +471,24 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
                     ${defaultNoteContent}
                   </div>`
                 : nothing}
+              ${isError
+                ? html`
+                    <div class="affine-embed-linked-doc-card-content-reload">
+                      <div
+                        class="affine-embed-linked-doc-card-content-reload-button"
+                        @click=${this.refreshData}
+                      >
+                        ${ReloadIcon} <span>Reload</span>
+                      </div>
+                    </div>
+                  `
+                : html`
+                    <div class="affine-embed-linked-doc-content-date">
+                      <span>Updated</span>
 
-              <div class="affine-embed-linked-doc-content-date">
-                <span>Updated</span>
-
-                <span>${dateText}</span>
-              </div>
+                      <span>${dateText}</span>
+                    </div>
+                  `}
             </div>
 
             <div class="affine-embed-linked-doc-banner render"></div>

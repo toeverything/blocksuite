@@ -16,11 +16,12 @@ import {
   defaultInfo,
   type DraggingInfo,
 } from './overlay-factory.js';
-import type {
-  EdgelessDraggableElementHost,
-  EdgelessDraggableElementOptions,
-  ElementInfo,
-  OverlayLayer,
+import {
+  defaultIsValidMove,
+  type EdgelessDraggableElementHost,
+  type EdgelessDraggableElementOptions,
+  type ElementInfo,
+  type OverlayLayer,
 } from './types.js';
 
 interface ReactiveState<T> {
@@ -91,12 +92,14 @@ export class EdgelessDraggableElementController<T>
     this.info = {
       startTime: Date.now(),
       startPos: { x: e.x, y: e.y },
+      offsetPos: { x: 0, y: 0 },
       scopeRect: scopeElement?.getBoundingClientRect() ?? null,
       edgelessRect,
       elementRectOriginal: e.el.getBoundingClientRect(),
       element: e.el,
       elementInfo,
       moved: false,
+      validMoved: false,
       parentToMount: edgeless.host,
     };
 
@@ -149,6 +152,12 @@ export class EdgelessDraggableElementController<T>
     const { startPos, scopeRect } = info;
     const offsetX = x - startPos.x;
     const offsetY = y - startPos.y;
+    info.offsetPos = { x: offsetX, y: offsetY };
+
+    if (!info.validMoved) {
+      const isValidMove = options.isValidMove ?? defaultIsValidMove;
+      info.validMoved = isValidMove(info.offsetPos);
+    }
 
     // check if inside scopeElement
     const newDragOut =
@@ -172,11 +181,11 @@ export class EdgelessDraggableElementController<T>
 
   private _onDragEnd() {
     const { overlay, info, options } = this;
-    const { startTime, elementInfo, edgelessRect, moved } = info;
-    const { service, clickThreshold = 200 } = options;
+    const { startTime, elementInfo, edgelessRect, validMoved } = info;
+    const { service, clickThreshold = 500 } = options;
     const zoom = service.viewport.zoom;
 
-    if (!moved) {
+    if (!validMoved) {
       const duration = Date.now() - startTime;
       if (duration < clickThreshold) {
         options.onElementClick?.(info.elementInfo);
@@ -218,7 +227,7 @@ export class EdgelessDraggableElementController<T>
 
   private _createOverlay({ x, y }: Pick<ElementDragEvent, 'x' | 'y'>) {
     const { info } = this;
-    const { elementInfo, elementRectOriginal, edgelessRect } = info;
+    const { elementInfo, elementRectOriginal, offsetPos, edgelessRect } = info;
 
     this.reset();
     this._updateState('draggingElement', elementInfo);
@@ -226,15 +235,18 @@ export class EdgelessDraggableElementController<T>
 
     const { overlay } = this;
     // init shape position with 'left' and 'top';
-    const left = elementRectOriginal.left - edgelessRect.left;
-    const top = elementRectOriginal.top - edgelessRect.top;
+    const { width, height, left, top } = elementRectOriginal;
+    const relativeX = left - edgelessRect.left;
+    const relativeY = top - edgelessRect.top;
     // make sure the transform origin is the same as the mouse position
-    const ox = `${(((x - elementRectOriginal.left) / elementRectOriginal.width) * 100).toFixed(0)}%`;
-    const oy = `${(((y - elementRectOriginal.top) / elementRectOriginal.height) * 100).toFixed(0)}%`;
+    const ox = `${(((x - left) / width) * 100).toFixed(0)}%`;
+    const oy = `${(((y - top) / height) * 100).toFixed(0)}%`;
     Object.assign(overlay.element.style, {
-      left: `${left}px`,
-      top: `${top}px`,
+      left: `${relativeX}px`,
+      top: `${relativeY}px`,
     });
+    overlay.element.style.setProperty('--translate-x', `${offsetPos.x}px`);
+    overlay.element.style.setProperty('--translate-y', `${offsetPos.y}px`);
     overlay.transitionWrapper.style.transformOrigin = `${ox} ${oy}`;
 
     // lifecycle hook

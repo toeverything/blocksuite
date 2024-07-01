@@ -54,7 +54,7 @@ import { CanvasElementType } from '../../../surface-block/index.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
 import type { RootBlockComponent } from '../../types.js';
 import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
-import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips.js';
+import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips/index.js';
 import {
   createDatabaseBlockInNextLine,
   formatDate,
@@ -388,7 +388,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       name: 'GitHub',
       description: 'Link to a GitHub repository.',
       icon: GithubIcon,
-      tooltip: slashMenuToolTips['GitHub'],
+      tooltip: slashMenuToolTips['Github'],
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:embed-github') &&
         !insideDatabase(model),

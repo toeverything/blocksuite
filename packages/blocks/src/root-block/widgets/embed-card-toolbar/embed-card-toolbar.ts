@@ -10,7 +10,7 @@ import {
   type Placement,
   type ReferenceElement,
 } from '@floating-ui/dom';
-import { html, nothing } from 'lit';
+import { html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -60,6 +60,7 @@ import {
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../edgeless/utils/query.js';
+import { RootBlockModel } from '../../root-model.js';
 import type { EmbedOptions } from '../../root-service.js';
 import { embedCardToolbarStyle } from './styles.js';
 
@@ -116,9 +117,19 @@ export class EmbedCardToolbar extends WidgetElement<
   }
 
   private get _embedViewButtonDisabled() {
+    if (this.model.doc.readonly) {
+      return true;
+    }
     return (
       isEmbedLinkedDocBlock(this.model) &&
-      !!this.blockElement.closest('affine-embed-synced-doc-block')
+      (!!this.blockElement.closest('affine-embed-synced-doc-block') ||
+        this.model.pageId === this.doc.id)
+    );
+  }
+
+  get _openButtonDisabled() {
+    return (
+      isEmbedLinkedDocBlock(this.model) && this.model.pageId === this.doc.id
     );
   }
 
@@ -443,6 +454,20 @@ export class EmbedCardToolbar extends WidgetElement<
     );
   }
 
+  override willUpdate(changedProperties: PropertyValues<typeof this>) {
+    // avoid no selection change on the first update so that `this.model` will be root block model
+    if (!this.hasUpdated) return;
+
+    // `this.model` is only controlled by selection changed event
+    if (changedProperties.has('model')) {
+      const previousModel = changedProperties.get('model');
+      assertExists(previousModel);
+      if (this.model instanceof RootBlockModel) {
+        this.model = previousModel;
+      }
+    }
+  }
+
   override render() {
     if (this.hide) return nothing;
 
@@ -497,6 +522,7 @@ export class EmbedCardToolbar extends WidgetElement<
                 size="24px"
                 class="embed-card-toolbar-button doc-info"
                 @click=${() => this.blockElement.open()}
+                ?disabled=${this._openButtonDisabled}
               >
                 ${isEmbedLinkedDocBlock(model)
                   ? nothing
@@ -560,8 +586,7 @@ export class EmbedCardToolbar extends WidgetElement<
                     'current-view': this._isEmbedView,
                   })}
                   .hover=${false}
-                  ?disabled=${model.doc.readonly ||
-                  this._embedViewButtonDisabled}
+                  ?disabled=${this._embedViewButtonDisabled}
                   @click=${() => this._convertToEmbedView()}
                 >
                   ${EmbedWebIcon}

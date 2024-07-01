@@ -120,14 +120,6 @@ export class RootService extends BlockService<RootBlockModel> {
     return viewportElement;
   }
 
-  get getDocUpdatedAt() {
-    return this._getDocUpdatedAt;
-  }
-
-  set getDocUpdatedAt(value) {
-    this._getDocUpdatedAt = value;
-  }
-
   get selectedBlocks() {
     let result: BlockElement[] = [];
     this.std.command
@@ -173,7 +165,7 @@ export class RootService extends BlockService<RootBlockModel> {
 
   peekViewService: PeekViewService | null = null;
 
-  docModeService: DocModeService = createDocModeService(this.doc);
+  docModeService: DocModeService = createDocModeService(this.doc.id);
 
   quickSearchService: QuickSearchService | null = null;
 
@@ -184,8 +176,6 @@ export class RootService extends BlockService<RootBlockModel> {
     html: HtmlTransformer,
     zip: ZipTransformer,
   };
-
-  private _getDocUpdatedAt: (docId: string) => Date = () => new Date();
 
   private _getLastNoteBlock() {
     const { doc } = this;

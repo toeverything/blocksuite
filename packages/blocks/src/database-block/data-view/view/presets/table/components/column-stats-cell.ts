@@ -3,7 +3,6 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { positionToVRect } from '../../../../../../_common/components/index.js';
 import { ArrowDownIcon } from '../../../../../../_common/icons/index.js';
 import { getRootByElement } from '../../../../../../_common/utils/index.js';
 import {
@@ -123,7 +122,7 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
     const rootElement = getRootByElement(this);
     popColStatOperationMenu(
       rootElement,
-      positionToVRect(ev.x, ev.y),
+      ev.target as HTMLElement,
       this.column,
       this.getColumnType(),
       this.onSelect

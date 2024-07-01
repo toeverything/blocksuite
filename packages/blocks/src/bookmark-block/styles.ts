@@ -8,7 +8,6 @@ export const styles = css`
     box-sizing: border-box;
     display: flex;
     width: 100%;
-    min-width: 450px;
     height: ${EMBED_CARD_HEIGHT.horizontal}px;
 
     border-radius: 8px;

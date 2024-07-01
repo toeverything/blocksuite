@@ -2,6 +2,7 @@ import { css } from 'lit';
 
 export const paragraphBlockStyles = css`
   affine-paragraph {
+    box-sizing: border-box;
     display: block;
     font-size: var(--affine-font-base);
   }
@@ -13,8 +14,10 @@ export const paragraphBlockStyles = css`
   .affine-paragraph-rich-text-wrapper {
     position: relative;
   }
+
   code {
     font-size: calc(var(--affine-font-base) - 3px);
+    padding: 0px 4px 2px;
   }
   .h1 {
     font-size: var(--affine-font-h-1);
@@ -26,6 +29,7 @@ export const paragraphBlockStyles = css`
   }
   .h1 code {
     font-size: calc(var(--affine-font-base) + 10px);
+    padding: 0px 4px;
   }
   .h2 {
     font-size: var(--affine-font-h-2);
@@ -37,6 +41,7 @@ export const paragraphBlockStyles = css`
   }
   .h2 code {
     font-size: calc(var(--affine-font-base) + 8px);
+    padding: 0px 4px;
   }
   .h3 {
     font-size: var(--affine-font-h-3);
@@ -48,6 +53,7 @@ export const paragraphBlockStyles = css`
   }
   .h3 code {
     font-size: calc(var(--affine-font-base) + 6px);
+    padding: 0px 4px;
   }
   .h4 {
     font-size: var(--affine-font-h-4);
@@ -59,6 +65,7 @@ export const paragraphBlockStyles = css`
   }
   .h4 code {
     font-size: calc(var(--affine-font-base) + 4px);
+    padding: 0px 4px;
   }
   .h5 {
     font-size: var(--affine-font-h-5);
@@ -70,6 +77,7 @@ export const paragraphBlockStyles = css`
   }
   .h5 code {
     font-size: calc(var(--affine-font-base) + 2px);
+    padding: 0px 4px;
   }
   .h6 {
     font-size: var(--affine-font-h-6);
@@ -81,6 +89,7 @@ export const paragraphBlockStyles = css`
   }
   .h6 code {
     font-size: var(--affine-font-base);
+    padding: 0px 4px 2px;
   }
   .quote {
     line-height: 26px;

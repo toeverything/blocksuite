@@ -61,6 +61,7 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 
 const schema = new Schema().register(AffineSchemas);
 const collection = new DocCollection({ schema });
+collection.meta.initialize();
 
 // Let's start with an empty doc
 const doc = collection.createDoc();
