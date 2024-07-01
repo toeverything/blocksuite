@@ -1,7 +1,7 @@
 export const getScrollContainer = (ele: HTMLElement) => {
   let container: HTMLElement | null = ele;
-  while (ele && !isScrollable(ele)) {
-    container = ele.parentElement;
+  while (container && !isScrollable(container)) {
+    container = container.parentElement;
   }
   return container ?? document.body;
 };
