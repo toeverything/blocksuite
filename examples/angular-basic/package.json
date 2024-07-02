@@ -40,7 +40,6 @@
     "typescript": "~5.4.5"
   },
   "stackblitz": {
-    "installDependencies": false,
     "startCommand": "pnpm i && pnpm dev"
   }
 }

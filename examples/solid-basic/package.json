@@ -20,7 +20,6 @@
     "vite-plugin-solid": "^2.10.2"
   },
   "stackblitz": {
-    "installDependencies": false,
     "startCommand": "pnpm i && pnpm dev"
   }
 }
