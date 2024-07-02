@@ -56,7 +56,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         c: () => {
           const mode = ConnectorMode.Curve;
-          rootElement.service.editPropsStore.record('connector', { mode });
+          rootElement.service.editPropsStore.recordLastProps('connector', {
+            mode,
+          });
           this._setEdgelessTool(rootElement, { type: 'connector', mode });
         },
         l: () => {

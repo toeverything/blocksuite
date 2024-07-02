@@ -374,7 +374,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
     const run = () => {
       const viewport =
-        service.editPropsStore.getItem('viewport') ??
+        service.editPropsStore.getStorage('viewport') ??
         service.getFitToScreenData();
 
       if ('xywh' in viewport) {
@@ -393,7 +393,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     }
 
     this._disposables.add(() => {
-      service.editPropsStore.setItem('viewport', {
+      service.editPropsStore.setStorage('viewport', {
         centerX: service.viewport.centerX,
         centerY: service.viewport.centerY,
         zoom: service.viewport.zoom,

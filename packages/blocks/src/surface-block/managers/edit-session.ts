@@ -100,6 +100,13 @@ const LastPropsSchema = z.object({
     fontStyle: FontStyleSchema,
     fontSize: z.number(),
   }),
+  'affine:edgeless-text': z.object({
+    color: z.string(),
+    fontFamily: FontFamilySchema,
+    textAlign: TextAlignSchema,
+    fontWeight: FontWeightSchema,
+    fontStyle: FontStyleSchema,
+  }),
   'affine:note': z.object({
     background: NoteBackgroundColorsSchema,
     displayMode: NoteDisplayModeSchema.optional(),
@@ -115,6 +122,7 @@ const LastPropsSchema = z.object({
 });
 
 export type LastProps = z.infer<typeof LastPropsSchema>;
+export type LastPropsKey = keyof LastProps;
 
 const SESSION_PROP_KEY = 'blocksuite:prop:record';
 
@@ -148,6 +156,7 @@ const LocalPropsSchema = z.object({
 type SessionProps = z.infer<typeof SessionPropsSchema>;
 type LocalProps = z.infer<typeof LocalPropsSchema>;
 type StorageProps = SessionProps & LocalProps;
+type StoragePropsKey = keyof StorageProps;
 
 function isLocalProp(key: string): key is keyof LocalProps {
   return key in LocalPropsSchema.shape;
@@ -195,6 +204,13 @@ export class EditPropsStore {
       fontStyle: FontStyle.Normal,
       fontSize: 24,
     },
+    'affine:edgeless-text': {
+      color: GET_DEFAULT_TEXT_COLOR(),
+      fontFamily: FontFamily.Inter,
+      textAlign: TextAlign.Left,
+      fontWeight: FontWeight.Regular,
+      fontStyle: FontStyle.Normal,
+    },
     'affine:note': {
       background: DEFAULT_NOTE_BACKGROUND_COLOR,
       displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -213,12 +229,12 @@ export class EditPropsStore {
 
   slots = {
     lastPropsUpdated: new Slot<{
-      type: keyof LastProps;
+      type: LastPropsKey;
       props: Record<string, unknown>;
     }>(),
-    itemUpdated: new Slot<{
-      key: keyof StorageProps;
-      value: StorageProps[keyof StorageProps];
+    storageUpdated: new Slot<{
+      key: StoragePropsKey;
+      value: StorageProps[StoragePropsKey];
     }>(),
   };
 
@@ -232,7 +248,7 @@ export class EditPropsStore {
     }
   }
 
-  private _getKey<T extends keyof StorageProps>(key: T) {
+  private _getStorageKey<T extends StoragePropsKey>(key: T) {
     const id = this._service.doc.id;
     switch (key) {
       case 'viewport':
@@ -256,17 +272,17 @@ export class EditPropsStore {
     }
   }
 
-  private _getStorage<T extends keyof StorageProps>(key: T) {
+  private _getStorage<T extends StoragePropsKey>(key: T) {
     return isSessionProp(key) ? sessionStorage : localStorage;
   }
 
-  getLastProps<T extends keyof LastProps>(type: T) {
+  getLastProps<T extends LastPropsKey>(type: T) {
     return this._lastProps[type] as LastProps[T];
   }
 
-  record(
+  recordLastProps(
     type: BlockSuite.EdgelessModelKeyType,
-    recordProps: Partial<LastProps[keyof LastProps]>
+    recordProps: Partial<LastProps[LastPropsKey]>
   ) {
     if (!isLastPropType(type)) return;
 
@@ -281,24 +297,30 @@ export class EditPropsStore {
     this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
   }
 
-  apply(type: BlockSuite.EdgelessModelKeyType, props: Record<string, unknown>) {
+  applyLastProps(
+    type: BlockSuite.EdgelessModelKeyType,
+    props: Record<string, unknown>
+  ) {
     if (!isLastPropType(type)) return;
 
     const lastProps = this._lastProps[type];
     deepAssign(props, lastProps);
   }
 
-  setItem<T extends keyof StorageProps>(key: T, value: StorageProps[T]) {
-    const oldValue = this.getItem(key);
-    this._getStorage(key).setItem(this._getKey(key), JSON.stringify(value));
+  setStorage<T extends StoragePropsKey>(key: T, value: StorageProps[T]) {
+    const oldValue = this.getStorage(key);
+    this._getStorage(key).setItem(
+      this._getStorageKey(key),
+      JSON.stringify(value)
+    );
     if (oldValue === value) return;
-    this.slots.itemUpdated.emit({ key, value });
+    this.slots.storageUpdated.emit({ key, value });
   }
 
-  getItem<T extends keyof StorageProps>(key: T) {
+  getStorage<T extends StoragePropsKey>(key: T) {
     try {
       const storage = this._getStorage(key);
-      const value = storage.getItem(this._getKey(key));
+      const value = storage.getItem(this._getStorageKey(key));
       if (!value) return null;
       if (isLocalProp(key)) {
         return LocalPropsSchema.shape[key].parse(

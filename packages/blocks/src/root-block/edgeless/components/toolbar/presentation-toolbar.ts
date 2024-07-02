@@ -24,11 +24,16 @@ import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';
 @customElement('presentation-toolbar')
 export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
   private get _cachedPresentHideToolbar() {
-    return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
+    return !!this.edgeless.service.editPropsStore.getStorage(
+      'presentHideToolbar'
+    );
   }
 
   private set _cachedPresentHideToolbar(value) {
-    this.edgeless.service.editPropsStore.setItem('presentHideToolbar', !!value);
+    this.edgeless.service.editPropsStore.setStorage(
+      'presentHideToolbar',
+      !!value
+    );
   }
 
   private get _frames(): FrameBlockModel[] {
@@ -290,7 +295,8 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     );
 
     this._navigatorMode =
-      this.edgeless.service.editPropsStore.getItem('presentFillScreen') === true
+      this.edgeless.service.editPropsStore.getStorage('presentFillScreen') ===
+      true
         ? 'fill'
         : 'fit';
   }

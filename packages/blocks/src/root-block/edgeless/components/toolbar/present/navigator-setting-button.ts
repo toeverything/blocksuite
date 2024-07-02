@@ -105,7 +105,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   private _tryRestoreSettings() {
-    const blackBackground = this.edgeless.service.editPropsStore.getItem(
+    const blackBackground = this.edgeless.service.editPropsStore.getStorage(
       'presentBlackBackground'
     );
     this.blackBackground = blackBackground ?? true;
