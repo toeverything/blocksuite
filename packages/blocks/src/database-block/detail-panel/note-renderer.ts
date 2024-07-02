@@ -25,6 +25,7 @@ export class NoteRenderer
     database-datasource-note-renderer {
       width: 100%;
       --affine-editor-side-padding: 0;
+      flex: 1;
     }
   `;
 
@@ -51,7 +52,7 @@ export class NoteRenderer
     }
     return html`
       <div
-        style="height: 1px;max-width: var(--affine-editor-width);background-color: var(--affine-border-color);margin: auto"
+        style="height: 1px;max-width: var(--affine-editor-width);background-color: var(--affine-border-color);margin: auto;margin-bottom: 16px"
       ></div>
       ${this.renderNote()}
     `;
@@ -68,7 +69,7 @@ export class NoteRenderer
       return html` <div>
         <div
           @click="${this.addNote}"
-          style="max-width: var(--affine-editor-width);margin: auto;cursor: pointer"
+          style="max-width: var(--affine-editor-width);margin: auto;cursor: pointer;color: var(--affine-text-disable-color)"
         >
           Click to add note
         </div>

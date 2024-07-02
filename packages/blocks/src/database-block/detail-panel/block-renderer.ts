@@ -34,11 +34,11 @@ export class BlockRenderer
 
   static override styles = css`
     database-datasource-block-renderer {
-      padding-bottom: 20px;
+      padding-bottom: 16px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-bottom: 4px;
+      margin-bottom: 12px;
       border-bottom: 1px solid var(--affine-border-color);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
