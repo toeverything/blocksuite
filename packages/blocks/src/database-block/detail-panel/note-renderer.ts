@@ -56,7 +56,14 @@ export class NoteRenderer
     }
     const pageId = this.databaseBlock.notes?.[this.rowId];
     if (!pageId) {
-      return html` <div @click="${this.addNote}">Click to add note</div>`;
+      return html` <div>
+        <div
+          @click="${this.addNote}"
+          style="max-width: var(--affine-editor-width);margin: auto;cursor: pointer"
+        >
+          Click to add note
+        </div>
+      </div>`;
     }
     const page = std.collection.getDoc(pageId);
     if (!page) {

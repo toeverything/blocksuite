@@ -145,25 +145,30 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
     const columns = this.columns;
 
     return html`
-      ${this.renderHeader()}
-      ${repeat(
-        columns,
-        v => v.id,
-        column => {
-          return html` <affine-data-view-record-field
-            .view="${this.view}"
-            .column="${column}"
-            .rowId="${this.rowId}"
-            data-column-id="${column.id}"
-          ></affine-data-view-record-field>`;
-        }
-      )}
-      ${!this.readonly
-        ? html`<div class="add-property" @click="${this._clickAddProperty}">
-            <div class="icon">${PlusIcon}</div>
-            Add Property
-          </div>`
-        : nothing}
+      <div
+        style="max-width: var(--affine-editor-width);display: flex;flex-direction: column;margin: 0 auto"
+      >
+        ${this.renderHeader()}
+        ${repeat(
+          columns,
+          v => v.id,
+          column => {
+            return html` <affine-data-view-record-field
+              .view="${this.view}"
+              .column="${column}"
+              .rowId="${this.rowId}"
+              data-column-id="${column.id}"
+            ></affine-data-view-record-field>`;
+          }
+        )}
+        ${!this.readonly
+          ? html`<div class="add-property" @click="${this._clickAddProperty}">
+              <div class="icon">${PlusIcon}</div>
+              Add Property
+            </div>`
+          : nothing}
+        <div style="width: var(--affine-editor-width)"></div>
+      </div>
       ${this.renderNote()}
     `;
   }
