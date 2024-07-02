@@ -544,6 +544,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     requestAnimationFrame(() => {
       const blockRect = blockElement.getBoundingClientRect();
       const { top, left, width, height } = blockRect;
+      assertExists(rootElement.viewport, 'viewport should exist');
       const {
         top: offsetY,
         left: offsetX,
