@@ -1,4 +1,5 @@
 import '../../../../_common/components/button.js';
+import '../../../../_common/components/toolbar/separator.js';
 import '../../../../_common/components/tooltip/tooltip.js';
 import './color-panel.js';
 
@@ -58,9 +59,7 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
           lineStyles: [StrokeStyle.Solid, StrokeStyle.Dash],
         })}
       </div>
-      <edgeless-menu-divider
-        data-orientation="horizontal"
-      ></edgeless-menu-divider>
+      <affine-separator data-orientation="horizontal"></affine-separator>
       <edgeless-color-panel
         role="listbox"
         aria-label="Border colors"
