@@ -23,6 +23,13 @@ export class EdgelessBlockElement<
       xywh: SerializedXYWH;
       index: string;
     }>;
+
+    if (!xywh || !index) {
+      throw new Error(
+        'Edgeless block should have at least `xywh` and `index` properties.'
+      );
+    }
+
     const [x, y, w, h] = JSON.parse(xywh);
 
     this.style.left = `${x}px`;

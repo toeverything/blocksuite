@@ -1,5 +1,4 @@
-import type { Viewport } from '@blocksuite/block-std';
-
+import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
 import { MindmapElementModel } from '../../../surface-block/index.js';
 
 export function isMindmapNode(el: BlockSuite.EdgelessModelType) {

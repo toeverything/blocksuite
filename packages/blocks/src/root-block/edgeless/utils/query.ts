@@ -1,4 +1,3 @@
-import type { Viewport } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import type { EmbedBlockModel } from '../../../_common/embed-block-helper/embed-block-model.js';
@@ -16,6 +15,7 @@ import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtu
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
+import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
 import type { PointLocation } from '../../../surface-block/index.js';
 import {
   Bound,
