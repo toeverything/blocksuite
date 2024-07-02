@@ -363,7 +363,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (blockElement.doc.readonly) return;
 
         const textSelection = blockElement.selection.find('text');
-        if (!textSelection) return;
+        if (!textSelection || textSelection.isCollapsed()) return;
 
         _preventDefault(ctx);
 
