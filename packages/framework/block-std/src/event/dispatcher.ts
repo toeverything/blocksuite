@@ -71,9 +71,11 @@ export type EventScope = {
   paths: string[][];
 };
 
+let activeInstance: UIEventDispatcher | null;
+
 export class UIEventDispatcher {
   get active() {
-    return this._active;
+    return activeInstance === this;
   }
 
   get host() {
@@ -96,8 +98,6 @@ export class UIEventDispatcher {
 
   private _clipboardControl: ClipboardControl;
 
-  private _active = false;
-
   disposables = new DisposableGroup();
 
   /**
@@ -106,7 +106,6 @@ export class UIEventDispatcher {
    * This property is deprecated and will be removed in the future.
    */
   slots = {
-    parentScaleChanged: new Slot<number>(),
     editorHostPanned: new Slot(),
   };
 
@@ -237,26 +236,24 @@ export class UIEventDispatcher {
     this._clipboardControl.listen();
 
     let _dragging = false;
+    /* eslint-disable @typescript-eslint/no-this-alias */
     this.disposables.addFromEvent(this.host, 'pointerdown', () => {
       _dragging = true;
-      this._active = true;
+      activeInstance = this;
     });
     this.disposables.addFromEvent(this.host, 'pointerup', () => {
       _dragging = false;
     });
-    this.disposables.addFromEvent(this.host, 'click', () => {
-      this._active = true;
-    });
     this.disposables.addFromEvent(this.host, 'focusin', () => {
-      this._active = true;
+      activeInstance = this;
     });
     this.disposables.addFromEvent(this.host, 'focusout', e => {
       if (e.relatedTarget && !this.host.contains(e.relatedTarget as Node)) {
-        this._active = false;
+        activeInstance = null;
       }
     });
     this.disposables.addFromEvent(this.host, 'pointerenter', () => {
-      this._active = true;
+      activeInstance = this;
     });
     this.disposables.addFromEvent(this.host, 'pointerleave', () => {
       if (
@@ -264,9 +261,10 @@ export class UIEventDispatcher {
           !this.host.contains(document.activeElement)) &&
         !_dragging
       ) {
-        this._active = false;
+        activeInstance = null;
       }
     });
+    /* eslint-enable @typescript-eslint/no-this-alias */
   }
 
   mount() {
