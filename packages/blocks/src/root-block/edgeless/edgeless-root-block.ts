@@ -42,7 +42,7 @@ import type {
 import {
   Bound,
   type IBound,
-  type IVec2,
+  type IVec,
   normalizeWheelDeltaY,
   serializeXYWH,
   Vec,
@@ -376,7 +376,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
       const viewport =
         service.editPropsStore.getItem('viewport') ??
         service.getFitToScreenData();
-
       if ('xywh' in viewport) {
         const bound = Bound.deserialize(viewport.xywh);
         service.viewport.setViewportByBound(bound, viewport.padding);
@@ -581,7 +580,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   async addImages(
     files: File[],
-    point?: IVec2,
+    point?: IVec,
     inTopLeft?: boolean
   ): Promise<string[]> {
     const imageFiles = [...files].filter(file =>
@@ -663,7 +662,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     return blockIds;
   }
 
-  async addAttachments(files: File[], point?: IVec2): Promise<string[]> {
+  async addAttachments(files: File[], point?: IVec): Promise<string[]> {
     if (!files.length) return [];
 
     const attachmentService = this.host.spec.getService('affine:attachment');

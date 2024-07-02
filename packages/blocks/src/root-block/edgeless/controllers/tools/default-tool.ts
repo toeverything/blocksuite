@@ -31,12 +31,7 @@ import {
   moveSubtree,
   showMergeIndicator,
 } from '../../../../surface-block/element-model/utils/mindmap/utils.js';
-import {
-  Bound,
-  type IVec,
-  type IVec2,
-  Vec,
-} from '../../../../surface-block/index.js';
+import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import { intersects } from '../../../../surface-block/utils/math-utils.js';
 import type { EdgelessTool } from '../../types.js';
@@ -645,9 +640,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     if (!connector || !bounds) return;
     bounds = bounds.clone();
     const center = connector.getNearestPoint(
-      Vec.add(bounds.center, delta) as IVec2
+      Vec.add(bounds.center, delta) as IVec
     );
-    const distance = connector.getOffsetDistanceByPoint(center as IVec2);
+    const distance = connector.getOffsetDistanceByPoint(center as IVec);
     bounds.center = center;
     this._service.updateElement(connector.id, {
       labelXYWH: bounds.toXYWH(),

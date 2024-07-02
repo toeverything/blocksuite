@@ -11,12 +11,12 @@ import {
   rotatePoints,
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
-import type { IVec2 } from '../../../utils/vec.js';
+import type { IVec } from '../../../utils/vec.js';
 import type { IHitTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 
 export const diamond = {
-  points({ x, y, w, h }: IBound) {
+  points({ x, y, w, h }: IBound): IVec[] {
     return [
       [x, y + h / 2],
       [x + w / 2, y],
@@ -93,24 +93,24 @@ export const diamond = {
     return points.some(point => bounds.containsPoint(point));
   },
 
-  getNearestPoint(point: IVec2, element: ShapeElementModel) {
+  getNearestPoint(point: IVec, element: ShapeElementModel) {
     const points = getPointsFromBoundsWithRotation(element, diamond.points);
     return polygonNearestPoint(points, point);
   },
 
-  intersectWithLine(start: IVec2, end: IVec2, element: ShapeElementModel) {
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElementModel) {
     const points = getPointsFromBoundsWithRotation(element, diamond.points);
     return linePolygonIntersects(start, end, points);
   },
 
-  getRelativePointLocation(position: IVec2, element: ShapeElementModel) {
+  getRelativePointLocation(position: IVec, element: ShapeElementModel) {
     const bound = Bound.deserialize(element.xywh);
     const point = bound.getRelativePoint(position);
     let points = diamond.points(bound);
     points.push(point);
 
     points = rotatePoints(points, bound.center, element.rotate);
-    const rotatePoint = points.pop() as IVec2;
+    const rotatePoint = points.pop() as IVec;
     const tangent = polygonGetPointTangent(points, rotatePoint);
     return new PointLocation(rotatePoint, tangent);
   },

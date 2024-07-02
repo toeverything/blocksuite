@@ -15,7 +15,7 @@ import {
   pointInPolygon,
   polygonNearestPoint,
 } from '../utils/math-utils.js';
-import type { IVec2 } from '../utils/vec.js';
+import type { IVec } from '../utils/vec.js';
 import { type IBaseProps, SurfaceElementModel } from './base.js';
 import { yfield } from './decorators.js';
 
@@ -60,11 +60,11 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   @yfield(false)
   accessor hasMaxWidth: boolean = false;
 
-  override getNearestPoint(point: IVec2): IVec2 {
+  override getNearestPoint(point: IVec): IVec {
     return polygonNearestPoint(
       Bound.deserialize(this.xywh).points,
       point
-    ) as IVec2;
+    ) as IVec;
   }
 
   override containedByBounds(bounds: Bound): boolean {
@@ -72,7 +72,7 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
     return points.some(point => bounds.containsPoint(point));
   }
 
-  override intersectWithLine(start: IVec2, end: IVec2) {
+  override intersectWithLine(start: IVec, end: IVec) {
     const points = getPointsFromBoundsWithRotation(this);
     return linePolygonIntersects(start, end, points);
   }

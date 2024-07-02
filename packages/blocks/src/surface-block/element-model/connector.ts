@@ -23,7 +23,7 @@ import {
 } from '../utils/math-utils.js';
 import { PointLocation } from '../utils/point-location.js';
 import { Polyline } from '../utils/polyline.js';
-import { type IVec2, Vec } from '../utils/vec.js';
+import { type IVec, Vec } from '../utils/vec.js';
 import type { SerializedXYWH, XYWH } from '../utils/xywh.js';
 import {
   type IBaseProps,
@@ -261,7 +261,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
           point.absOut,
         ]
           .map(p => new DOMPoint(...p).matrixTransform(matrix))
-          .map(p => [p.x, p.y]);
+          .map(p => [p.x, p.y] as IVec);
         const ip = Vec.sub(absIn, p);
         const op = Vec.sub(absOut, p);
         return new PointLocation(p, t, ip, op);
@@ -270,7 +270,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
 
     return originalPath.map(point => {
       const { x, y } = new DOMPoint(...point).matrixTransform(matrix);
-      const p = [x, y];
+      const p: IVec = [x, y];
       return PointLocation.fromVec(p);
     });
   }
@@ -341,7 +341,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     return Boolean(!this.lableEditing && this.labelDisplay && this.labelXYWH);
   }
 
-  labelHitTest(point: IVec2) {
+  labelHitTest(point: IVec) {
     return (
       this.hasLabel() && Bound.fromXYWH(this.labelXYWH!).isPointInBound(point)
     );
@@ -352,9 +352,9 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     y: number,
     options?: IHitTestOptions | undefined
   ): boolean {
-    const currentPoint = [x, y];
+    const currentPoint: IVec = [x, y];
 
-    if (this.labelHitTest(currentPoint as IVec2)) {
+    if (this.labelHitTest(currentPoint as IVec)) {
       return true;
     }
 
@@ -381,7 +381,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     );
   }
 
-  override intersectWithLine(start: IVec2, end: IVec2) {
+  override intersectWithLine(start: IVec, end: IVec) {
     const { mode, absolutePath: path } = this;
 
     let intersected = null;
@@ -403,7 +403,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     return intersected;
   }
 
-  override getRelativePointLocation(point: IVec2): PointLocation {
+  override getRelativePointLocation(point: IVec): PointLocation {
     return new PointLocation(
       Bound.deserialize(this.xywh).getRelativePoint(point)
     );
@@ -418,7 +418,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   /**
    * Calculate the closest point on the curve via a point.
    */
-  override getNearestPoint(point: IVec2) {
+  override getNearestPoint(point: IVec): IVec {
     const { mode, absolutePath: path } = this;
 
     if (mode === ConnectorMode.Straight) {
@@ -428,7 +428,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     }
 
     if (mode === ConnectorMode.Orthogonal) {
-      const points = path.map<IVec2>(p => [p[0], p[1]]);
+      const points = path.map<IVec>(p => [p[0], p[1]]);
       return Polyline.nearestPoint(points, point);
     }
 
@@ -446,7 +446,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
    *
    * Returns a point relative to the viewport.
    */
-  getPointByOffsetDistance(offsetDistance = 0.5, bounds?: Bound) {
+  getPointByOffsetDistance(offsetDistance = 0.5, bounds?: Bound): IVec {
     const { mode, absolutePath: path } = this;
 
     if (mode === ConnectorMode.Straight) {
@@ -464,7 +464,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     }
 
     if (mode === ConnectorMode.Orthogonal) {
-      const points = path.map<IVec2>(p => [p[0], p[1]]);
+      const points = path.map<IVec>(p => [p[0], p[1]]);
       const point = Polyline.pointAt(points, offsetDistance);
       if (point) return point;
       return [x + w / 2, y + h / 2];
@@ -481,7 +481,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
    *
    * The point is relative to the viewport.
    */
-  getOffsetDistanceByPoint(point: IVec2, bounds?: Bound) {
+  getOffsetDistanceByPoint(point: IVec, bounds?: Bound) {
     const { mode, absolutePath: path } = this;
 
     let { x, y, w, h } = this;
@@ -504,7 +504,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     }
 
     if (mode === ConnectorMode.Orthogonal) {
-      const points = path.map<IVec2>(p => [p[0], p[1]]);
+      const points = path.map<IVec>(p => [p[0], p[1]]);
       const p = Polyline.nearestPoint(points, point);
       const pl = Polyline.lenAtPoint(points, p);
       const fl = Polyline.len(points);

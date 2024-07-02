@@ -13,7 +13,7 @@ import {
   CanvasElementType,
   type ConnectorElementModel,
   type IModelCoord,
-  type IVec2,
+  type IVec,
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,
@@ -161,7 +161,7 @@ export function addText(
 export function mountConnectorLabelEditor(
   connector: ConnectorElementModel,
   edgeless: EdgelessRootBlockComponent,
-  point?: IVec2
+  point?: IVec
 ) {
   let text = connector.text;
   if (!text) {
@@ -172,7 +172,7 @@ export function mountConnectorLabelEditor(
 
     if (point) {
       const center = connector.getNearestPoint(point);
-      const distance = connector.getOffsetDistanceByPoint(center as IVec2);
+      const distance = connector.getOffsetDistanceByPoint(center as IVec);
       const bounds = Bound.fromXYWH(connector.labelXYWH || [0, 0, 16, 16]);
       bounds.center = center;
       connector.labelOffset.distance = distance;

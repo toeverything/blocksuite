@@ -12,14 +12,14 @@ import {
   matchFlavours,
   Point,
 } from '../../_common/utils/index.js';
-import type { IVec2 } from '../../surface-block/index.js';
+import type { IVec } from '../../surface-block/index.js';
 import type { DragIndicator } from './drag-indicator.js';
 
 export type onDropProps = {
   files: File[];
   targetModel: BlockModel | null;
   place: 'before' | 'after';
-  point: IVec2;
+  point: IVec;
 };
 
 export type FileDropOptions = {

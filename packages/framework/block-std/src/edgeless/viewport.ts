@@ -1,9 +1,9 @@
-import { Slot } from '@blocksuite/store';
+import { Slot } from '@blocksuite/global/utils';
 
-import type { IPoint } from '../../../_common/types.js';
-import { clamp } from '../../../_common/utils/math.js';
-import { Bound } from '../../../surface-block/utils/bound.js';
-import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
+import { clamp } from '../utils/math.js';
+import { Bound } from './bound.js';
+import type { IPoint } from './types.js';
+import { type IVec, Vec } from './vec.js';
 
 function cutoff(value: number, ref: number, sign: number) {
   if (sign > 0 && value > ref) return ref;
@@ -267,7 +267,7 @@ export class Viewport {
       if (cofficient === 1) {
         this.smoothTranslate(newCenter[0], newCenter[1]);
       } else {
-        const center: IVec = [this.centerX, this.centerY];
+        const center = [this.centerX, this.centerY] as IVec;
         const focusPoint = Vec.mul(
           Vec.sub(newCenter, Vec.mul(center, cofficient)),
           1 / (1 - cofficient)
@@ -292,10 +292,10 @@ export class Viewport {
       this.ZOOM_MIN,
       (this.height - (pt + pb)) / bound.h
     );
-    const center: IVec = [
+    const center = [
       bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2,
       bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2,
-    ];
+    ] as IVec;
 
     this.setViewport(zoom, center, smooth);
   }
