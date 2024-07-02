@@ -1,3 +1,5 @@
+import '../../../../../_common/components/toolbar/icon-button.js';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -88,7 +90,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
     const arrowColor =
       type === 'lasso' ? 'currentColor' : 'var(--affine-icon-secondary)';
     return html`
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         class="edgeless-lasso-button ${mode}"
         .tooltip=${getTooltipWithShortcut('Lasso', 'L')}
         .tooltipOffset=${17}
@@ -104,7 +106,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
         <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
           ${ArrowUpIcon}
         </span>
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     `;
   }
 }

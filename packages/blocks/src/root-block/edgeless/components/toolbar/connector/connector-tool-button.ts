@@ -1,4 +1,4 @@
-import '../../buttons/toolbar-button.js';
+import '../../../../../_common/components/toolbar/icon-button.js';
 import './connector-menu.js';
 
 import { css, html, LitElement } from 'lit';
@@ -93,7 +93,7 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(LitElement) {
     const { active } = this;
     const arrowColor = active ? 'currentColor' : 'var(--affine-icon-secondary)';
     return html`
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         .tooltip=${this.popper
           ? ''
           : getTooltipWithShortcut(
@@ -117,7 +117,7 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(LitElement) {
         <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
           ${ArrowUpIcon}
         </span>
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     `;
   }
 }

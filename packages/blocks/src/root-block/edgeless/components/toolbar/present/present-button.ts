@@ -1,3 +1,5 @@
+import '../../../../../_common/components/toolbar/icon-button.js';
+
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -29,7 +31,7 @@ export class EdgelessPresentButton extends QuickToolMixin(
   override type: EdgelessTool['type'] = 'frameNavigator';
 
   override render() {
-    return html`<edgeless-tool-icon-button
+    return html`<affine-toolbar-icon-button
     class="edgeless-frame-navigator-button"
     .tooltip=${'Present'}
     .tooltipOffset=${17}
@@ -41,7 +43,7 @@ export class EdgelessPresentButton extends QuickToolMixin(
     }}
   >
     ${FrameNavigatorIcon}
-    </edgeless-tool-icon-button>
+    </affine-toolbar-icon-button>
   </div>`;
   }
 }

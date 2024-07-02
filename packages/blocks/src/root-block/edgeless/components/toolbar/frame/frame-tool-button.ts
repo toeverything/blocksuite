@@ -1,4 +1,4 @@
-import '../../buttons/tool-icon-button.js';
+import '../../../../../_common/components/toolbar/icon-button.js';
 import './frame-menu.js';
 
 import { css, html, LitElement } from 'lit';
@@ -42,7 +42,7 @@ export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
     const arrowColor =
       type === 'frame' ? 'currentColor' : 'var(--affine-icon-secondary)';
     return html`
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         class="edgeless-frame-button"
         .tooltip=${this.popper ? '' : getTooltipWithShortcut('Frame', 'F')}
         .tooltipOffset=${17}
@@ -58,7 +58,7 @@ export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
         <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
           ${ArrowUpIcon}
         </span>
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     `;
   }
 }

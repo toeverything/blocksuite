@@ -1,4 +1,4 @@
-import '../buttons/tool-icon-button.js';
+import '../../../../_common/components/toolbar/icon-button.js';
 
 import { Slot } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
@@ -45,7 +45,7 @@ export class EdgelessShapePanel extends LitElement {
       ShapeComponentConfig,
       item => item.name,
       ({ name, generalIcon, scribbledIcon, tooltip, disabled }) =>
-        html`<edgeless-tool-icon-button
+        html`<affine-toolbar-icon-button
           .disabled=${disabled}
           .tooltip=${tooltip}
           .active=${this.selectedShape === name}
@@ -58,7 +58,7 @@ export class EdgelessShapePanel extends LitElement {
           ${this.shapeStyle === ShapeStyle.General
             ? generalIcon
             : scribbledIcon}
-        </edgeless-tool-icon-button>`
+        </affine-toolbar-icon-button>`
     );
   }
 }

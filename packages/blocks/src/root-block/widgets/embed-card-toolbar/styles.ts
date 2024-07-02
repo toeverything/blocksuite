@@ -8,26 +8,6 @@ export const embedCardToolbarStyle = css`
     z-index: var(--affine-z-index-popover);
   }
 
-  .embed-card-toolbar {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    gap: 8px;
-    height: 40px;
-
-    border-radius: 8px;
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
-    width: max-content;
-  }
-
-  .embed-card-toolbar .divider {
-    width: 1px;
-    height: 24px;
-    background-color: var(--affine-border-color);
-  }
-
   .embed-card-toolbar-button {
     color: var(--affine-icon-color);
   }
@@ -117,5 +97,9 @@ export const embedCardToolbarStyle = css`
   .embed-card-toolbar-button.view-selector .current-view {
     background: var(--affine-background-overlay-panel-color);
     border-radius: 6px;
+  }
+
+  .card-style-select icon-button.selected {
+    border: 1px solid var(--affine-brand-color);
   }
 `;

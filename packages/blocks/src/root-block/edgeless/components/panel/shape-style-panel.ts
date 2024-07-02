@@ -1,3 +1,5 @@
+import '../../../../_common/components/toolbar/icon-button.js';
+
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -48,7 +50,7 @@ export class EdgelessShapeStylePanel extends LitElement {
       SHAPE_STYLE_LIST,
       item => item.value,
       ({ value, icon }) =>
-        html`<edgeless-tool-icon-button
+        html`<affine-toolbar-icon-button
           .tipPosition=${'top'}
           .activeMode=${'background'}
           aria-label=${value}
@@ -57,7 +59,7 @@ export class EdgelessShapeStylePanel extends LitElement {
           @click=${() => this._onSelect(value)}
         >
           ${icon}
-        </edgeless-tool-icon-button>`
+        </affine-toolbar-icon-button>`
     );
   }
 }

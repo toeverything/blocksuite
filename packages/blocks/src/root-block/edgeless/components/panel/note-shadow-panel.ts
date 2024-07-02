@@ -1,4 +1,4 @@
-import '../buttons/tool-icon-button.js';
+import '../../../../_common/components/toolbar/icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
@@ -102,7 +102,7 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
                   : 'none',
             })}
           >
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               class="item-icon"
               .tooltip=${TOOLTIPS[index]}
               .tipPosition=${'bottom'}
@@ -112,7 +112,7 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
               })}
             >
               ${index === 0 ? NoteNoShadowIcon : NoteShadowSampleIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           </div>`
     );
   }

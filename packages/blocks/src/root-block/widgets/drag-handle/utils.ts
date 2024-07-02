@@ -22,10 +22,10 @@ import {
   Point,
   Rect,
 } from '../../../_common/utils/index.js';
+import { isEmbedSyncedDocBlock } from '../../../_common/utils/query.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   DRAG_HANDLE_CONTAINER_HEIGHT,

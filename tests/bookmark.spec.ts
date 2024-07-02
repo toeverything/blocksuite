@@ -157,7 +157,8 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
   const bookmark = page.locator('affine-bookmark');
   await bookmark.click();
   await page.waitForTimeout(100);
-  await page.click('.embed-card-toolbar-button.link');
+  await page.getByRole('button', { name: 'Switch view' }).click();
+  await page.getByRole('button', { name: 'Inline view' }).click();
   await assertStoreMatchJSX(
     page,
     /*xml*/ `<affine:page>

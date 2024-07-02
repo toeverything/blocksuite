@@ -1,5 +1,6 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/line-width-panel.js';
 
@@ -103,16 +104,16 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       >
       </edgeless-line-width-panel>
 
-      <edgeless-menu-divider></edgeless-menu-divider>
+      <affine-separator></affine-separator>
 
-      <edgeless-menu-button
+      <affine-menu-button
         .contentPadding=${'8px'}
         .button=${html`
-          <edgeless-tool-icon-button aria-label="Color" .tooltip=${'Color'}>
+          <affine-toolbar-icon-button aria-label="Color" .tooltip=${'Color'}>
             <edgeless-color-button
               .color=${selectedColor}
             ></edgeless-color-button>
-          </edgeless-tool-icon-button>
+          </affine-toolbar-icon-button>
         `}
       >
         <edgeless-color-panel
@@ -121,7 +122,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
           @select=${this._setBrushColor}
         >
         </edgeless-color-panel>
-      </edgeless-menu-button>
+      </affine-menu-button>
     `;
   }
 }

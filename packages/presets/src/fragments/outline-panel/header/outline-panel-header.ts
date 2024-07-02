@@ -123,7 +123,7 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
     return html`<div class="outline-panel-header-container">
         <div class="note-setting-container">
           <span class="outline-panel-header-label">Table of Contents</span>
-          <edgeless-tool-icon-button
+          <affine-toolbar-icon-button
             class="note-setting-button ${this._settingPopperShow
               ? 'active'
               : ''}"
@@ -134,9 +134,9 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
             @click=${() => this._notePreviewSettingMenuPopper?.toggle()}
           >
             ${SettingsIcon}
-          </edgeless-tool-icon-button>
+          </affine-toolbar-icon-button>
         </div>
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           class="note-sorting-button ${this.enableNotesSorting ? 'active' : ''}"
           .tooltip=${'Note Sort Options'}
           .tipPosition=${'left'}
@@ -146,7 +146,7 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
           @click=${() => this.toggleNotesSorting()}
         >
           ${SortingIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       </div>
       <div class="note-preview-setting-container">
         <outline-note-preview-setting-menu

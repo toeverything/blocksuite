@@ -456,7 +456,7 @@ test.describe('connector label with straight shape', () => {
     const menu = page.locator('edgeless-connector-menu');
     await expect(menu).toBeVisible();
 
-    const straightBtn = menu.locator('edgeless-tool-icon-button', {
+    const straightBtn = menu.locator('affine-toolbar-icon-button', {
       hasText: 'Straight',
     });
     await expect(straightBtn).toBeVisible();

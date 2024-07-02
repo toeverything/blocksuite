@@ -157,7 +157,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
         @mouseup=${stopPropagation}
         @pointerdown=${stopPropagation}
       >
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           .tooltip=${'Fit to screen'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top-end'}
           .arrow=${!this._isVerticalBar()}
@@ -166,8 +166,8 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .disabled=${locked}
         >
           ${ViewBarIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
+        </affine-toolbar-icon-button>
+        <affine-toolbar-icon-button
           .tooltip=${'Zoom out'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
           .arrow=${!this._isVerticalBar()}
@@ -176,7 +176,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .disabled=${locked}
         >
           ${MinusIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
         <button
           class="zoom-percent"
           @click=${() => this.viewport.smoothZoom(1)}
@@ -184,7 +184,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
         >
           ${formattedZoom}
         </button>
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           .tooltip=${'Zoom in'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
           .arrow=${!this._isVerticalBar()}
@@ -193,7 +193,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .disabled=${locked}
         >
           ${PlusIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       </div>
     `;
   }

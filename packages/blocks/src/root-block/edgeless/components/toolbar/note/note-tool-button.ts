@@ -1,4 +1,4 @@
-import '../../buttons/tool-icon-button.js';
+import '../../../../../_common/components/toolbar/icon-button.js';
 import './note-menu.js';
 
 import { css, html, LitElement } from 'lit';
@@ -107,7 +107,7 @@ export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
     const { active } = this;
     const arrowColor = active ? 'currentColor' : 'var(--affine-icon-secondary)';
     return html`
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         class="edgeless-note-button"
         .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
         .tooltipOffset=${17}
@@ -121,7 +121,7 @@ export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
         <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
           ${ArrowUpIcon}
         </span>
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     `;
   }
 }

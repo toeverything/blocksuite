@@ -14,6 +14,7 @@ export class CardStylePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
+      flex-direction: row !important;
       align-items: center;
       justify-content: conter;
       gap: 8px;

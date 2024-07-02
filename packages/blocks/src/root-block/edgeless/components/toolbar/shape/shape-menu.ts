@@ -1,4 +1,4 @@
-import '../../buttons/tool-icon-button.js';
+import '../../../../../_common/components/toolbar/icon-button.js';
 import '../../panel/one-row-color-panel.js';
 
 import { css, html, LitElement } from 'lit';
@@ -94,7 +94,7 @@ export class EdgelessShapeMenu extends LitElement {
       <edgeless-slide-menu>
         <div class="menu-content">
           <div class="shape-style-container">
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               .tooltip=${'General'}
               .active=${shapeStyle === ShapeStyle.General}
               .activeMode=${'background'}
@@ -103,8 +103,8 @@ export class EdgelessShapeMenu extends LitElement {
               }}
             >
               ${GeneralStyleIcon}
-            </edgeless-tool-icon-button>
-            <edgeless-tool-icon-button
+            </affine-toolbar-icon-button>
+            <affine-toolbar-icon-button
               .tooltip=${'Scribbled'}
               .active=${shapeStyle === ShapeStyle.Scribbled}
               .activeMode=${'background'}
@@ -113,14 +113,14 @@ export class EdgelessShapeMenu extends LitElement {
               }}
             >
               ${ScribbledStyleIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           </div>
           <menu-divider .vertical=${true}></menu-divider>
           <div class="shape-type-container">
             ${ShapeComponentConfig.map(
               ({ name, generalIcon, scribbledIcon, tooltip, value }) => {
                 return html`
-                  <edgeless-tool-icon-button
+                  <affine-toolbar-icon-button
                     .tooltip=${tooltip}
                     .active=${shapeType === name}
                     .activeMode=${'background'}
@@ -129,7 +129,7 @@ export class EdgelessShapeMenu extends LitElement {
                     ${shapeStyle === ShapeStyle.General
                       ? generalIcon
                       : scribbledIcon}
-                  </edgeless-tool-icon-button>
+                  </affine-toolbar-icon-button>
                 `;
               }
             )}

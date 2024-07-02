@@ -1,4 +1,4 @@
-import './tool-icon-button.js';
+import '../../../../_common/components/toolbar/icon-button.js';
 
 import { css, html } from 'lit';
 
@@ -56,7 +56,7 @@ export function LineSizeButton({
   const tooltip =
     tooltipFromProps !== undefined ? tooltipFromProps : getTooltip(size);
 
-  return html`<edgeless-tool-icon-button
+  return html`<affine-toolbar-icon-button
     class=${className ?? ''}
     .active=${active ?? true}
     .activeMode=${'background'}
@@ -66,5 +66,5 @@ export function LineSizeButton({
     <div class=${classnames}>
       <div></div>
     </div>
-  </edgeless-tool-icon-button>`;
+  </affine-toolbar-icon-button>`;
 }

@@ -1,4 +1,4 @@
-import '../buttons/tool-icon-button.js';
+import '../../../../_common/components/toolbar/icon-button.js';
 
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -27,7 +27,7 @@ export class EdgelessSizePanel extends LitElement {
       width: 68px;
     }
 
-    edgeless-tool-icon-button {
+    affine-toolbar-icon-button {
       align-self: stretch;
     }
 
@@ -116,28 +116,28 @@ export class EdgelessSizePanel extends LitElement {
 
   renderItemWithNormal = ({ name, value }: SizeItem) => {
     return html`
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         .iconContainerPadding=${[4, 8]}
         .active=${this.size === value}
         .activeMode=${'background'}
         @click=${() => this._onSelect(value)}
       >
         ${name ?? value}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     `;
   };
 
   renderItemWithCheck = ({ name, value }: SizeItem) => {
     const active = this.size === value;
     return html`
-      <edgeless-tool-icon-button
+      <affine-toolbar-icon-button
         .iconContainerPadding=${[4, 8]}
         .justify=${'space-between'}
         .active=${active}
         @click=${() => this._onSelect(value)}
       >
         ${name ?? value} ${active ? CheckIcon : nothing}
-      </edgeless-tool-icon-button>
+      </affine-toolbar-icon-button>
     `;
   };
 

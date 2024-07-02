@@ -92,7 +92,7 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
 
     return html`
       <div class="toggle-button" @pointerdown=${stopPropagation}>
-        <edgeless-tool-icon-button
+        <affine-toolbar-icon-button
           .tooltip=${'Toggle Zoom Tool Bar'}
           .tipPosition=${'right'}
           .active=${this._showPopper}
@@ -102,7 +102,7 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
           @click=${() => this._toggleZoomMenu()}
         >
           ${MoreIcon}
-        </edgeless-tool-icon-button>
+        </affine-toolbar-icon-button>
       </div>
     `;
   }

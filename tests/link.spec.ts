@@ -484,13 +484,15 @@ test('convert link to card', async ({ page }) => {
 </affine:page>`
   );
 
-  const linkToCardBtn = page.getByTestId('link-to-card');
-  const linkToEmbedBtn = page.getByTestId('link-to-embed');
   const linkLocator = page.locator('affine-link a');
 
   await linkLocator.hover();
   await waitNextFrame(page);
   await expect(linkPopoverLocator).toBeVisible();
+
+  await page.getByRole('button', { name: 'Switch view' }).click();
+  const linkToCardBtn = page.getByTestId('link-to-card');
+  const linkToEmbedBtn = page.getByTestId('link-to-embed');
   await expect(linkToCardBtn).toBeVisible();
   await expect(linkToEmbedBtn).not.toBeVisible();
 

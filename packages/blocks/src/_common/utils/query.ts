@@ -9,13 +9,24 @@ import type { BlockModel } from '@blocksuite/store';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
-import type { RootBlockComponent } from '../../index.js';
+import type {
+  BookmarkBlockModel,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedHtmlModel,
+  EmbedLinkedDocModel,
+  EmbedLoomModel,
+  EmbedSyncedDocModel,
+  EmbedYoutubeModel,
+  RootBlockComponent,
+} from '../../index.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
   BLOCK_ID_ATTR as ATTR,
 } from '../consts.js';
+import type { EmbedBlockModel } from '../embed-block-helper/embed-block-model.js';
 import type { AbstractEditor } from '../types.js';
 import { clamp } from './math.js';
 import { matchFlavours } from './model.js';
@@ -903,4 +914,96 @@ function getCellRect(element: Element, bounds?: DOMRect) {
  */
 export function hasClassNameInList(element: Element, classList: string[]) {
   return classList.some(className => element.classList.contains(className));
+}
+
+export function isBookmarkBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is BookmarkBlockModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:bookmark'
+  );
+}
+
+export function isEmbeddedBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is EmbedBlockModel {
+  return (
+    !!element && 'flavour' in element && /affine:embed-*/.test(element.flavour)
+  );
+}
+
+export function isEmbeddedLinkBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+) {
+  return (
+    isEmbeddedBlock(element) &&
+    !isEmbedSyncedDocBlock(element) &&
+    !isEmbedLinkedDocBlock(element)
+  );
+}
+
+export function isEmbedHtmlBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is EmbedHtmlModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:embed-html'
+  );
+}
+
+export function isEmbedGithubBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is EmbedGithubModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-github'
+  );
+}
+
+export function isEmbedYoutubeBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is EmbedYoutubeModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-youtube'
+  );
+}
+
+export function isEmbedLoomBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is EmbedLoomModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:embed-loom'
+  );
+}
+
+export function isEmbedFigmaBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is EmbedFigmaModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-figma'
+  );
+}
+
+export function isEmbedLinkedDocBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is EmbedLinkedDocModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-linked-doc'
+  );
+}
+
+export function isEmbedSyncedDocBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is EmbedSyncedDocModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-synced-doc'
+  );
 }

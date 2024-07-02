@@ -1,3 +1,5 @@
+import '../../../../../_common/components/toolbar/icon-button.js';
+
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -62,7 +64,7 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
   }
 
   override render() {
-    return html`<edgeless-tool-icon-button
+    return html`<affine-toolbar-icon-button
       .iconContainerPadding="${6}"
       .tooltip="${getTooltipWithShortcut('Link', '@')}"
       .tooltipOffset=${17}
@@ -70,7 +72,7 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
       @click=${this._onClick}
     >
       <span class="link-icon">${LinkIcon}</span>
-    </edgeless-tool-icon-button>`;
+    </affine-toolbar-icon-button>`;
   }
 }
 

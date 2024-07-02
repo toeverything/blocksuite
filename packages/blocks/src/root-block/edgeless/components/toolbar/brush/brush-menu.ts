@@ -1,5 +1,4 @@
 import '../../panel/one-row-color-panel.js';
-import '../../buttons/tool-icon-button.js';
 import '../common/slide-menu.js';
 
 import { css, html, LitElement } from 'lit';

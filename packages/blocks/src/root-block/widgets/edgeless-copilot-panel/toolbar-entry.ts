@@ -52,12 +52,12 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<edgeless-tool-icon-button
+    return html`<affine-toolbar-icon-button
       aria-label="Ask AI"
       class="copilot-icon-button"
       @click=${this._showCopilotPanel}
     >
       ${AIStarIcon} <span class="label medium">Ask AI</span>
-    </edgeless-tool-icon-button>`;
+    </affine-toolbar-icon-button>`;
   }
 }

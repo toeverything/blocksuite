@@ -1,3 +1,5 @@
+import '../../../../_common/components/toolbar/icon-button.js';
+
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -19,7 +21,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
       min-width: 136px;
     }
 
-    edgeless-tool-icon-button {
+    affine-toolbar-icon-button {
       width: 100%;
     }
   `;
@@ -44,7 +46,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
       ([font, name]) => {
         const active = this.value === font;
         return html`
-          <edgeless-tool-icon-button
+          <affine-toolbar-icon-button
             data-font="${name}"
             style="font-family: ${wrapFontFamily(font)}"
             .iconContainerPadding=${[4, 8]}
@@ -53,7 +55,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
             @click=${() => this._onSelect(font)}
           >
             ${name} ${active ? CheckIcon : nothing}
-          </edgeless-tool-icon-button>
+          </affine-toolbar-icon-button>
         `;
       }
     );

@@ -1,4 +1,4 @@
-import '../../buttons/tool-icon-button.js';
+import '../../../../../_common/components/toolbar/icon-button.js';
 import '../common/slide-menu.js';
 
 import { css, html, LitElement } from 'lit';
@@ -135,16 +135,16 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
         <div class="menu-content">
           <!-- add to edgeless -->
           <div class="button-group-container">
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               .activeMode=${'background'}
               .tooltip=${'Image'}
               @click=${this._addImages}
               .disabled=${this._imageLoading}
             >
               ${ImageIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
 
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               .activeMode=${'background'}
               .tooltip=${getTooltipWithShortcut('Link', '@')}
               @click=${() => {
@@ -152,9 +152,9 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
               }}
             >
               ${LinkIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
 
-            <edgeless-tool-icon-button
+            <affine-toolbar-icon-button
               .activeMode=${'background'}
               .tooltip=${'File'}
               @click=${async () => {
@@ -175,7 +175,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
               }}
             >
               ${AttachmentIcon}
-            </edgeless-tool-icon-button>
+            </affine-toolbar-icon-button>
           </div>
 
           <div class="divider"></div>
@@ -186,7 +186,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
               NOTE_MENU_ITEMS,
               item => item.childFlavour,
               item => html`
-                <edgeless-tool-icon-button
+                <affine-toolbar-icon-button
                   .active=${childType === item.childType}
                   .activeMode=${'background'}
                   .tooltip=${item.tooltip}
@@ -198,7 +198,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
                     })}
                 >
                   ${item.icon}
-                </edgeless-tool-icon-button>
+                </affine-toolbar-icon-button>
               `
             )}
           </div>
