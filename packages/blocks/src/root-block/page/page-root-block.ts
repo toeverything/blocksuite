@@ -333,8 +333,8 @@ export class PageRootBlockComponent extends BlockElement<
       );
       const isClickOnBlankArea = testClickOnBlankArea(
         event,
-        this.viewport.left,
-        this.viewport.clientWidth,
+        this.viewport!.left,
+        this.viewport!.clientWidth,
         this.rootElementContainer.clientWidth,
         parseFloat(paddingLeft),
         parseFloat(paddingRight)
