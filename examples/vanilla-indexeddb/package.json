@@ -17,5 +17,8 @@
   "devDependencies": {
     "typescript": "^5.4.5",
     "vite": "^5.2.11"
+  },
+  "stackblitz": {
+    "startCommand": "pnpm i && pnpm dev"
   }
 }
