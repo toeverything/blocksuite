@@ -1,7 +1,9 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import type { SerializedXYWH } from '../surface-block/index.js';
+import { Transformable } from '../_common/edgeless/transform-controller/decorator.js';
+import { getProportionalController } from '../_common/edgeless/transform-controller/proportional-controller.js';
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
@@ -37,6 +39,10 @@ export const ImageBlockSchema = defineBlockSchema({
   toModel: () => new ImageBlockModel(),
 });
 
+const controller = getProportionalController<ImageBlockModel>(el => el.height, {
+  rotatable: true,
+});
+@Transformable(controller)
 export class ImageBlockModel extends selectable<ImageBlockProps>(BlockModel) {}
 
 declare global {

@@ -1,5 +1,10 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
+import { Transformable } from '../../_common/edgeless/transform-controller/decorator.js';
+import {
+  EdgelessTransformController,
+  type TransformControllerContext,
+} from '../../_common/edgeless/transform-controller/transform-controller.js';
 import {
   DEFAULT_ROUGHNESS,
   FontFamily,
@@ -117,7 +122,37 @@ export type ConnectorElementProps = IBaseProps & {
   frontEndpointStyle?: PointStyle;
   rearEndpointStyle?: PointStyle;
 } & ConnectorLabelProps;
+class ConnectorTransformController extends EdgelessTransformController<ConnectorElementModel> {
+  override rotatable = true;
 
+  override onTransformStart(): void {}
+
+  override onTransformEnd(): void {}
+
+  override adjust(
+    element: ConnectorElementModel,
+    { matrix, path, bound, rect }: TransformControllerContext
+  ): void {
+    if (!matrix || !path) return;
+
+    const props = element.resize(bound, path, matrix);
+    rect.edgeless.service.updateElement(element.id, props);
+  }
+
+  override rotate = (
+    element: ConnectorElementModel,
+    { rect, bound, matrix }: Omit<TransformControllerContext, 'direction'>
+  ) => {
+    if (!matrix) return;
+    const props = element.resize(
+      bound,
+      element.absolutePath.map(p => p.clone()),
+      matrix
+    );
+    rect.edgeless.service.updateElement(element.id, props);
+  };
+}
+@Transformable(new ConnectorTransformController())
 export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementProps> {
   get type() {
     return 'connector';

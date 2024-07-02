@@ -6,7 +6,17 @@ import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_SHADOW,
 } from '../_common/edgeless/note/consts.js';
+import { Transformable } from '../_common/edgeless/transform-controller/decorator.js';
+import {
+  EdgelessTransformController,
+  type TransformControllerContext,
+} from '../_common/edgeless/transform-controller/transform-controller.js';
 import { NoteDisplayMode } from '../_common/types.js';
+import { clamp } from '../_common/utils/math.js';
+import {
+  NOTE_MIN_HEIGHT,
+  NOTE_MIN_WIDTH,
+} from '../root-block/edgeless/utils/consts.js';
 import { StrokeStyle } from '../surface-block/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
@@ -79,7 +89,58 @@ type NoteEdgelessProps = {
   collapsedHeight?: number;
   scale?: number;
 };
+class NoteBlockTransformController extends EdgelessTransformController<NoteBlockModel> {
+  override autoComplete = true;
 
+  override onTransformStart(element: NoteBlockModel): void {
+    element.stash('edgeless');
+  }
+
+  override onTransformEnd(element: NoteBlockModel): void {
+    element.pop('edgeless');
+  }
+
+  override adjust(
+    element: NoteBlockModel,
+    { rect, bound, direction, shiftKey }: TransformControllerContext
+  ): void {
+    const curBound = Bound.deserialize(element.xywh);
+
+    let scale = element.edgeless.scale ?? 1;
+    let width = curBound.w / scale;
+    let height = curBound.h / scale;
+
+    if (shiftKey) {
+      scale = bound.w / width;
+      rect.updateScaleDisplay(scale, direction);
+    } else if (curBound.h !== bound.h) {
+      rect.edgeless.doc.updateBlock(element, () => {
+        element.edgeless.collapse = true;
+        element.edgeless.collapsedHeight = bound.h / scale;
+      });
+    }
+
+    width = bound.w / scale;
+    width = clamp(width, NOTE_MIN_WIDTH, Infinity);
+    bound.w = width * scale;
+
+    height = bound.h / scale;
+    height = clamp(height, NOTE_MIN_HEIGHT, Infinity);
+    bound.h = height * scale;
+
+    rect.limit(width === NOTE_MIN_WIDTH, height === NOTE_MIN_HEIGHT);
+
+    rect.edgeless.service.updateElement(element.id, {
+      edgeless: {
+        ...element.edgeless,
+        scale,
+      },
+      xywh: bound.serialize(),
+    });
+  }
+}
+
+@Transformable(new NoteBlockTransformController())
 export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
   private _isSelectable(): boolean {
     return this.displayMode !== NoteDisplayMode.DocOnly;
@@ -102,7 +163,6 @@ export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
     return super.boxSelect(bound);
   }
 }
-
 declare global {
   namespace BlockSuite {
     interface EdgelessBlockModelMap {

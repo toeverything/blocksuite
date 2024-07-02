@@ -2,6 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { BlockModel } from '@blocksuite/store';
 
 import type { EdgelessSelectableProps } from '../../_common/edgeless/mixin/edgeless-selectable.js';
+import { EdgelessTransformableRegistry } from '../../_common/edgeless/transform-controller/transform-controller.js';
 import type {
   IEdgelessElement,
   IHitTestOptions,
@@ -26,6 +27,14 @@ export class EdgelessBlockModel<
   extends BlockModel<Props>
   implements IEdgelessElement
 {
+  private _transformController =
+    EdgelessTransformableRegistry.get(this as BlockSuite.EdgelessModelType) ??
+    null;
+
+  get transformController() {
+    return this._transformController;
+  }
+
   get externalXYWH(): SerializedXYWH | undefined {
     return this._externalXYWH;
   }

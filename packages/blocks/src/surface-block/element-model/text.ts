@@ -1,5 +1,12 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
+import { Transformable } from '../../_common/edgeless/transform-controller/decorator.js';
+import {
+  EdgelessTransformController,
+  type TransformControllerContext,
+} from '../../_common/edgeless/transform-controller/transform-controller.js';
+import { HandleDirection } from '../../root-block/edgeless/components/resize/resize-handles.js';
+import { normalizeTextBound } from '../canvas-renderer/element-renderer/text/utils.js';
 import {
   FontFamily,
   FontStyle,
@@ -7,7 +14,6 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '../consts.js';
-import type { SerializedXYWH } from '../index.js';
 import { Bound } from '../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
@@ -16,6 +22,7 @@ import {
   polygonNearestPoint,
 } from '../utils/math-utils.js';
 import type { IVec2 } from '../utils/vec.js';
+import type { SerializedXYWH } from '../utils/xywh.js';
 import { type IBaseProps, SurfaceElementModel } from './base.js';
 import { yfield } from './decorators.js';
 
@@ -25,6 +32,64 @@ export type TextElementProps = IBaseProps & {
 } & Omit<TextStyleProps, 'fontWeight' | 'fontStyle'> &
   Partial<Pick<TextStyleProps, 'fontWeight' | 'fontStyle'>>;
 
+class TextElementTransformController extends EdgelessTransformController<TextElementModel> {
+  override onTransformStart(): void {}
+
+  override onTransformEnd(): void {}
+
+  override adjust(
+    element: TextElementModel,
+    { bound, rect, direction }: TransformControllerContext
+  ): void {
+    let p = 1;
+    const edgeless = rect.edgeless;
+    if (
+      direction === HandleDirection.Left ||
+      direction === HandleDirection.Right
+    ) {
+      const {
+        text: yText,
+        fontFamily,
+        fontSize,
+        fontStyle,
+        fontWeight,
+        hasMaxWidth,
+      } = element;
+      // If the width of the text element has been changed by dragging,
+      // We need to set hasMaxWidth to true for wrapping the text
+      bound = normalizeTextBound(
+        {
+          yText,
+          fontFamily,
+          fontSize,
+          fontStyle,
+          fontWeight,
+          hasMaxWidth,
+        },
+        bound,
+        true
+      );
+      // If the width of the text element has been changed by dragging,
+      // We need to set hasMaxWidth to true for wrapping the text
+      edgeless.service.updateElement(element.id, {
+        xywh: bound.serialize(),
+        fontSize: element.fontSize * p,
+        hasMaxWidth: true,
+      });
+    } else {
+      p = bound.h / element.h;
+      // const newFontsize = element.fontSize * p;
+      // bound = normalizeTextBound(element, bound, false, newFontsize);
+
+      edgeless.service.updateElement(element.id, {
+        xywh: bound.serialize(),
+        fontSize: element.fontSize * p,
+      });
+    }
+  }
+}
+
+@Transformable(new TextElementTransformController())
 export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   get type() {
     return 'text';
