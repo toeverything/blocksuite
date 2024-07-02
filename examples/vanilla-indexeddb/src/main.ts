@@ -8,6 +8,8 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 
 const schema = new Schema().register(AffineSchemas);
 const collection = new DocCollection({ schema });
+collection.meta.initialize();
+
 const doc = collection.createDoc();
 const editor = new AffineEditorContainer();
 editor.doc = doc;

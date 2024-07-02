@@ -36,7 +36,6 @@ function createCollection(db: Database, id: string) {
       main: new ClientBlobSource(),
     },
   });
-  collection.meta.initialize();
   return collection;
 }
 
@@ -78,6 +77,8 @@ export class CollectionProvider {
     const id = `${Math.random()}`.slice(2, 12);
     provider.collection = createCollection(db, id);
     provider._connectCollection();
+    provider.collection.meta.initialize();
+
     client.insertRoot(db, id);
     createFirstDoc(provider.collection);
     return provider;
@@ -128,3 +129,7 @@ export class CollectionProvider {
     });
   }
 }
+
+export const provider = await CollectionProvider.init();
+// @ts-expect-error dev
+window.provider = provider;

@@ -20,6 +20,7 @@ export class CollectionProvider {
     const id = `${Math.random()}`.slice(2, 12);
     provider.collection = createCollection(id);
     provider._connectCollection();
+    provider.collection.meta.initialize();
 
     await client.insertRoot(id);
     createFirstDoc(provider.collection);
@@ -81,7 +82,6 @@ function createCollection(id: string): DocCollection {
       main: new ClientBlobSource(),
     },
   });
-  collection.meta.initialize();
   return collection;
 }
 
