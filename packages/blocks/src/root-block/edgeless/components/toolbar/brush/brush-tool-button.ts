@@ -70,7 +70,7 @@ export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
     Object.assign(menu.element, {
       edgeless: this.edgeless,
       onChange: (props: Record<string, unknown>) => {
-        this.edgeless.service.editPropsStore.record('brush', props);
+        this.edgeless.service.editPropsStore.recordLastProps('brush', props);
         this.setEdgelessTool({ type: 'brush' });
       },
     });

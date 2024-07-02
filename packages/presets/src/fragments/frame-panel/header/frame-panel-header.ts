@@ -149,7 +149,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode = this.editorHost.spec
       .getService('affine:page')
-      .editPropsStore.getItem('presentFillScreen')
+      .editPropsStore.getStorage('presentFillScreen')
       ? 'fill'
       : 'fit';
   }

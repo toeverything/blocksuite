@@ -56,7 +56,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private get _cachedPresentHideToolbar() {
-    return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
+    return !!this.edgeless.service.editPropsStore.getStorage(
+      'presentHideToolbar'
+    );
   }
 
   /**
@@ -612,11 +614,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     // This state from `editPropsStore` is not reactive,
     // if the value is updated outside of this component, it will not be reflected.
     _disposables.add(
-      this.edgeless.service.editPropsStore.slots.itemUpdated.on(({ key }) => {
-        if (key === 'presentHideToolbar') {
-          this.requestUpdate();
+      this.edgeless.service.editPropsStore.slots.storageUpdated.on(
+        ({ key }) => {
+          if (key === 'presentHideToolbar') {
+            this.requestUpdate();
+          }
         }
-      })
+      )
     );
   }
 

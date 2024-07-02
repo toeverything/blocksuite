@@ -96,7 +96,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.notes.forEach(note => {
       this.doc.updateBlock(note, { background });
     });
-    this.edgeless.service.editPropsStore.record('affine:note', {
+    this.edgeless.service.editPropsStore.recordLastProps('affine:note', {
       background,
     } as Record<string, unknown>);
   }
