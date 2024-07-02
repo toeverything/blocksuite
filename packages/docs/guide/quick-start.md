@@ -18,7 +18,7 @@ BlockSuite works with all common frameworks, you can start from these examples t
   </tr>
   <tr>
     <td><Icon name="TypeScript" />Vanilla</td>
-    <td><a href="https://github.com/toeverything/blocksuite/tree/master/packages/playground/apps" target="_blank">playground-apps</a></td>
+    <td><a href="https://github.com/toeverything/blocksuite/tree/master/examples/vanilla-indexeddb" target="_blank">vanilla-indexeddb</a></td>
     <td>✅</td>
   </tr>
   <tr>
