@@ -34,11 +34,11 @@ export class BlockRenderer
 
   static override styles = css`
     database-datasource-block-renderer {
-      padding-bottom: 20px;
+      padding-bottom: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 4px;
+      gap: 16px;
+      margin-bottom: 12px;
       border-bottom: 1px solid var(--affine-border-color);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
@@ -76,15 +76,17 @@ export class BlockRenderer
     if (!model) {
       return;
     }
-    return html`<rich-text
+    return html`
+      ${this.renderIcon()}
+      <rich-text
         .yText=${model.text}
         .attributesSchema=${this.attributesSchema}
         .attributeRenderer=${this.attributeRenderer}
         .embedChecker=${this.inlineManager.embedChecker}
         .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
         class="inline-editor"
-      ></rich-text
-      >${this.renderIcon()} `;
+      ></rich-text>
+    `;
   }
 
   override connectedCallback() {

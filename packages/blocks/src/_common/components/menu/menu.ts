@@ -729,7 +729,8 @@ declare global {
   }
 }
 export const getDefaultModalRoot = (ele: HTMLElement) => {
-  const host = ele.closest('editor-host');
+  const host: HTMLElement | null =
+    ele.closest('editor-host') ?? ele.closest('.data-view-popup-container');
   if (host) {
     return host;
   }
@@ -763,9 +764,6 @@ export const positionToVRect = (x: number, y: number): VirtualElement => {
       };
     },
   };
-};
-export const eventToVRect = (e: MouseEvent): VirtualElement => {
-  return positionToVRect(e.x, e.y);
 };
 export const createPopup = (
   target: HTMLElement,

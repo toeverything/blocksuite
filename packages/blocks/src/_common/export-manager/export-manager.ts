@@ -1,5 +1,4 @@
-import type { BlockService } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockService, EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
@@ -200,12 +199,13 @@ export class ExportManager {
     const rootElement = getRootByEditorHost(this.editorHost);
     assertExists(rootElement);
     const viewportElement = rootElement.viewportElement;
-
+    assertExists(viewportElement);
     const pageContainer = viewportElement.querySelector(
       '.affine-page-root-block-container'
     );
     const rect = pageContainer?.getBoundingClientRect();
     const { viewport } = rootElement;
+    assertExists(viewport);
     const pageWidth = rect?.width;
     const pageLeft = rect?.left ?? 0;
     const viewportHeight = viewportElement?.scrollHeight;
@@ -360,7 +360,7 @@ export class ExportManager {
     const rootElement = getRootByEditorHost(this.editorHost);
     assertExists(rootElement);
     const viewportElement = rootElement.viewportElement;
-
+    assertExists(viewportElement);
     const containerComputedStyle = window.getComputedStyle(viewportElement);
 
     const html2canvas = (element: HTMLElement) =>

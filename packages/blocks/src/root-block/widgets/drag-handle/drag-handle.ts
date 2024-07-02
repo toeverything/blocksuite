@@ -29,6 +29,7 @@ import {
   Point,
   Rect,
 } from '../../../_common/utils/index.js';
+import { getScrollContainer } from '../../../_common/utils/scroll-container.js';
 import type {
   NoteBlockComponent,
   NoteBlockModel,
@@ -114,14 +115,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     const { service } = this.rootElement as EdgelessRootBlockComponent;
     const edgelessElement = service.getElementById(this._anchorBlockId);
     return isTopLevelBlock(edgelessElement) ? edgelessElement : null;
-  }
-
-  private get _viewportOffset() {
-    const rootElement = this.blockElement;
-    return {
-      left: rootElement.viewport.scrollLeft - rootElement.viewport.left,
-      top: rootElement.viewport.scrollTop - rootElement.viewport.top,
-    };
   }
 
   private get _rangeManager() {
@@ -237,6 +230,10 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   private get dragHandleContainerOffsetParent() {
     return this._dragHandleContainer.parentElement!;
+  }
+
+  private get scrollContainer() {
+    return getScrollContainer(this.rootElement!);
   }
 
   private _clearRaf() {
@@ -386,7 +383,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (this.rootElement instanceof PageRootBlockComponent) {
       if (!shouldAutoScroll) return;
 
-      const result = autoScroll(this.rootElement.viewportElement, state.raw.y);
+      const result = autoScroll(this.scrollContainer, state.raw.y);
       if (!result) {
         this._clearRaf();
         return;
@@ -657,7 +654,10 @@ export class AffineDragHandleWidget extends WidgetElement<
     const { top } = blockElement.getBoundingClientRect();
     const paddingTop = parseInt(computedStyle.paddingTop) * this.scale;
     return (
-      (top + paddingTop + this._viewportOffset.top) / this.cumulativeParentScale
+      (top +
+        paddingTop +
+        this.dragHandleContainerOffsetParent.getBoundingClientRect().top) /
+      this.cumulativeParentScale
     );
   };
 
@@ -1595,10 +1595,8 @@ export class AffineDragHandleWidget extends WidgetElement<
         })
       );
 
-      const viewportElement = pageRoot.viewportElement;
-      assertExists(viewportElement);
       this._disposables.addFromEvent(
-        viewportElement,
+        this.scrollContainer,
         'scrollend',
         this._updateDropIndicatorOnScroll
       );

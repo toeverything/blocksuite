@@ -25,6 +25,7 @@ export class NoteRenderer
     database-datasource-note-renderer {
       width: 100%;
       --affine-editor-side-padding: 0;
+      flex: 1;
     }
   `;
 
@@ -49,6 +50,15 @@ export class NoteRenderer
     ) {
       return null;
     }
+    return html`
+      <div
+        style="height: 1px;max-width: var(--affine-editor-width);background-color: var(--affine-border-color);margin: auto;margin-bottom: 16px"
+      ></div>
+      ${this.renderNote()}
+    `;
+  }
+
+  renderNote() {
     const host = this.host;
     const std = host?.std;
     if (!std || !host) {
@@ -56,7 +66,14 @@ export class NoteRenderer
     }
     const pageId = this.databaseBlock.notes?.[this.rowId];
     if (!pageId) {
-      return html` <div @click="${this.addNote}">Click to add note</div>`;
+      return html` <div>
+        <div
+          @click="${this.addNote}"
+          style="max-width: var(--affine-editor-width);margin: auto;cursor: pointer;color: var(--affine-text-disable-color)"
+        >
+          Click to add note
+        </div>
+      </div>`;
     }
     const page = std.collection.getDoc(pageId);
     if (!page) {
