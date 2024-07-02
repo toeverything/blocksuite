@@ -1,5 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -331,10 +332,11 @@ export class PageRootBlockComponent extends BlockElement<
       const { paddingLeft, paddingRight } = window.getComputedStyle(
         this.rootElementContainer
       );
+      assertExists(this.viewport, 'viewport should exist');
       const isClickOnBlankArea = testClickOnBlankArea(
         event,
-        this.viewport!.left,
-        this.viewport!.clientWidth,
+        this.viewport.left,
+        this.viewport.clientWidth,
         this.rootElementContainer.clientWidth,
         parseFloat(paddingLeft),
         parseFloat(paddingRight)

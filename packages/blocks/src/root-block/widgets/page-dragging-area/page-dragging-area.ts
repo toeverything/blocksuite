@@ -38,7 +38,8 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
   }
 
   private get _allBlocksWithRect(): BlockInfo[] {
-    const { scrollLeft, scrollTop } = this._viewport!;
+    assertExists(this._viewport, 'viewport should exist');
+    const { scrollLeft, scrollTop } = this._viewport;
 
     const getAllNodeFromTree = (): BlockElement[] => {
       const blockElement: BlockElement[] = [];
@@ -131,13 +132,13 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
     const { x: startX, y: startY } = state.start;
 
     const { left: initScrollX, top: initScrollY } = this._initialScrollOffset;
-    const { scrollLeft, scrollTop, scrollWidth, scrollHeight } =
-      this._viewport!;
+    assertExists(this._viewport, 'viewport should exist');
+    const { scrollLeft, scrollTop, scrollWidth, scrollHeight } = this._viewport;
 
     const { x: initConX, y: initConY } = this._initialContainerOffset;
     const { x: conX, y: conY } = state.containerOffset;
 
-    const { left: viewportLeft, top: viewportTop } = this._viewport!;
+    const { left: viewportLeft, top: viewportTop } = this._viewport;
     let left = Math.min(
       startX + initScrollX + initConX - viewportLeft,
       x + scrollLeft + conX - viewportLeft
@@ -193,10 +194,10 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
         const state = ctx.get('pointerState');
         const { button } = state.raw;
         if (button !== 0) return;
-
         if (isDragArea(state)) {
+          assertExists(this._viewport, 'viewport should exist');
           this._dragging = true;
-          const { scrollLeft, scrollTop } = this._viewport!;
+          const { scrollLeft, scrollTop } = this._viewport;
           this._initialScrollOffset = {
             left: scrollLeft,
             top: scrollTop,
