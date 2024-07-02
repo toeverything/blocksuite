@@ -129,7 +129,3 @@ export class CollectionProvider {
     });
   }
 }
-
-export const provider = await CollectionProvider.init();
-// @ts-expect-error dev
-window.provider = provider;
