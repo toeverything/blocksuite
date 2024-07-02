@@ -565,7 +565,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     this.initTime = Date.now();
     const input = this.inputRef.value;
     if (input) {
-      this.focusInput();
+      requestAnimationFrame(() => {
+        this.focusInput();
+      });
       const length = input.value.length;
       input.setSelectionRange(length, length);
       this._disposables.addFromEvent(input, 'keydown', e => {

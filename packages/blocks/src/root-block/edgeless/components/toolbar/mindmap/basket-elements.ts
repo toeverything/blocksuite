@@ -176,6 +176,8 @@ export const textRender: DraggableTool['render'] = (
     mountTextElementEditor(textElement, edgeless);
   }
 
+  edgeless.tools.setEdgelessTool({ type: 'default' });
+
   service.telemetryService?.track('CanvasElementAdded', {
     control: 'toolbar:dnd',
     page: 'whiteboard editor',
