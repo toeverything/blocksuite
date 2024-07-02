@@ -20,9 +20,12 @@ import { AppState } from './EditorProvider.vue';
 import { Doc } from '@blocksuite/store';
 
 const { editor, collection } = inject<AppState>('appState')!;
-const docs = ref<Doc[]>([...collection.docs.values()]);
+const docs = ref<Doc[]>(
+  [...collection.docs.values()].map(blocks => blocks.getDoc())
+);
 
-const updateDocs = () => (docs.value = [...collection.docs.values()]);
+const updateDocs = () =>
+  (docs.value = [...collection.docs.values()].map(blocks => blocks.getDoc()));
 
 collection.slots.docUpdated.on(updateDocs);
 editor.slots.docLinkClicked.on(updateDocs);

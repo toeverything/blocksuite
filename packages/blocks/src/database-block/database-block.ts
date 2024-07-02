@@ -392,7 +392,10 @@ export class DatabaseBlockComponent extends BlockComponent<
   override renderBlock() {
     const peekViewService = this.getRootService().peekViewService;
     return html`
-      <div contenteditable="false" style="position: relative">
+      <div
+        contenteditable="false"
+        style="position: relative;background-color: var(--affine-background-primary-color);border-radius: 4px"
+      >
         ${this.dataView.render({
           bindHotkey: this._bindHotkey,
           handleEvent: this._handleEvent,

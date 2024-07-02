@@ -255,7 +255,6 @@ async function renderNoteContent(
   if (!notes) {
     return;
   }
-  card.isNoteContentEmpty = false;
 
   const noteChildren = notes.flatMap(note =>
     note.children.filter(filterTextModel)
@@ -264,6 +263,8 @@ async function renderNoteContent(
   if (!noteChildren.length) {
     return;
   }
+
+  card.isNoteContentEmpty = false;
 
   const cardStyle = card.model.style;
 

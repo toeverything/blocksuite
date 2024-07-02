@@ -16,6 +16,7 @@ export class EditorProviderService {
   constructor() {
     const schema = new Schema().register(AffineSchemas);
     this.collection = new DocCollection({ schema });
+    this.collection.meta.initialize();
     const doc = this.collection.createDoc({ id: 'page1' });
 
     doc.load(() => {
@@ -37,7 +38,9 @@ export class EditorProviderService {
   }
 
   private updateDocs() {
-    const docs = [...this.collection.docs.values()];
+    const docs = [...this.collection.docs.values()].map(blocks =>
+      blocks.getDoc()
+    );
     this.docUpdatedSubject.next(docs);
   }
 
