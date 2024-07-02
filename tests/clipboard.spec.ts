@@ -346,7 +346,7 @@ test(scoped`split block when paste`, async ({ page }) => {
     .locator('[data-block-id="2"] .inline-editor')
     .boundingBox();
   const bottomRight789 = await getEditorLocator(page)
-    .locator('[data-block-id="5"] .inline-editor')
+    .locator('[data-block-id="4"] .inline-editor')
     .boundingBox();
   assertExists(topLeft123);
   assertExists(bottomRight789);

@@ -865,6 +865,9 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           ) {
             if (
               o.node.properties.className.includes(
+                'affine-paragraph-block-container'
+              ) ||
+              o.node.properties.className.includes(
                 'affine-block-children-container'
               ) ||
               o.node.properties.className.includes('indented')
