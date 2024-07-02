@@ -976,8 +976,6 @@ export class ConnectionOverlay extends Overlay {
       }
     }
 
-    console.log(target, this.targetBounds);
-
     if (target instanceof GroupElementModel) {
       this.targetBounds = Bound.deserialize(target.xywh);
     } else {
