@@ -49,6 +49,15 @@ export class NoteRenderer
     ) {
       return null;
     }
+    return html`
+      <div
+        style="height: 1px;max-width: var(--affine-editor-width);background-color: var(--affine-border-color);margin: auto"
+      ></div>
+      ${this.renderNote()}
+    `;
+  }
+
+  renderNote() {
     const host = this.host;
     const std = host?.std;
     if (!std || !host) {

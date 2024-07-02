@@ -26,6 +26,7 @@ type ColumnOps<
   defaultData: () => Data;
   type: (data: Data) => TType;
   formatValue?: (value: unknown, colData: Data) => Value;
+  isEmpty: (value?: Value) => boolean;
   cellToString: (data: Value, colData: Data) => string;
   cellFromString: (
     data: string,

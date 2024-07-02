@@ -34,10 +34,12 @@ const styles = css`
     font-style: normal;
     font-weight: 400;
     line-height: var(--data-view-cell-text-line-height);
-    color: var(--affine-text-secondary-color);
+    color: var(--affine-text-disable-color);
     border-radius: 4px;
-    padding: 4px;
+    padding: 6px 8px 6px 4px;
     cursor: pointer;
+    margin-top: 8px;
+    width: max-content;
   }
 
   .add-property:hover {

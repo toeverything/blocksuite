@@ -20,13 +20,12 @@ class SideLayoutModal extends ShadowlessElement {
       display: flex;
       flex-direction: column;
       position: absolute;
-      right: 0;
       top: 0;
       bottom: 0;
-      width: 500px;
+      width: 1200px;
       background-color: var(--affine-background-overlay-panel-color);
       border-left: 0.5px solid var(--affine-border-color);
-      box-shadow: -5px 0px 10px 0px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
     }
 
     .side-modal-content {

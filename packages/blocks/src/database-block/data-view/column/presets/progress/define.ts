@@ -23,6 +23,7 @@ export const progressColumnModelConfig = progressColumnType.modelConfig<number>(
       };
     },
     cellToJson: data => data ?? null,
+    isEmpty: () => false,
   }
 );
 

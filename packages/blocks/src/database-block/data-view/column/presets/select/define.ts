@@ -64,6 +64,7 @@ export const selectColumnModelConfig = selectColumnType.modelConfig<
     };
   },
   cellToJson: data => data ?? null,
+  isEmpty: data => data == null,
 });
 
 selectColumnModelConfig.addConvert('multi-select', (column, cells) => ({
