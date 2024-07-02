@@ -1,3 +1,4 @@
+import { PointLocation } from '../edgeless/point-location.js';
 import type { IBound } from '../edgeless/types.js';
 import { type IVec, Vec } from '../edgeless/vec.js';
 
@@ -167,4 +168,70 @@ export function almostEqual(a: number, b: number, epsilon = 0.0001) {
 
 export function clamp(n: number, min: number, max?: number): number {
   return Math.max(min, max !== undefined ? Math.min(n, max) : n);
+}
+
+export function rotatePoints<T extends IVec>(
+  points: T[],
+  center: IVec,
+  rotate: number
+): T[] {
+  const rad = toRadian(rotate);
+  return points.map(p => Vec.rotWith(p, center, rad)) as T[];
+}
+
+export function rotatePoint(
+  point: [number, number],
+  center: IVec,
+  rotate: number
+): [number, number] {
+  const rad = toRadian(rotate);
+  return Vec.add(center, Vec.rot(Vec.sub(point, center), rad)) as [
+    number,
+    number,
+  ];
+}
+
+export function toRadian(angle: number) {
+  return (angle * Math.PI) / 180;
+}
+
+export function isPointOnLineSegment(point: IVec, line: IVec[]) {
+  const [sp, ep] = line;
+  const v1 = Vec.sub(point, sp);
+  const v2 = Vec.sub(point, ep);
+  return almostEqual(Vec.cpr(v1, v2), 0, 0.01) && Vec.dpr(v1, v2) <= 0;
+}
+
+export function polygonGetPointTangent(points: IVec[], point: IVec): IVec {
+  const len = points.length;
+  for (let i = 0; i < len; i++) {
+    const p = points[i];
+    const p2 = points[(i + 1) % len];
+    if (isPointOnLineSegment(point, [p, p2])) {
+      return Vec.normalize(Vec.sub(p2, p));
+    }
+  }
+  return [0, 0];
+}
+
+export function linePolygonIntersects(
+  sp: IVec,
+  ep: IVec,
+  points: IVec[]
+): PointLocation[] | null {
+  const result: PointLocation[] = [];
+  const len = points.length;
+
+  for (let i = 0; i < len; i++) {
+    const p = points[i];
+    const p2 = points[(i + 1) % len];
+    const rst = lineIntersects(sp, ep, p, p2);
+    if (rst) {
+      const v = new PointLocation(rst);
+      v.tangent = Vec.normalize(Vec.sub(p2, p));
+      result.push(v);
+    }
+  }
+
+  return result.length ? result : null;
 }
