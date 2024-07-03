@@ -64,7 +64,7 @@ export function MoreMenuRenderer(
 ) {
   return config
     .filter(item => {
-      return item.type === 'divider' || item.showWhen(blockElement);
+      return item.showWhen(blockElement);
     })
     .map(item => {
       let template: TemplateResult | null = null;
