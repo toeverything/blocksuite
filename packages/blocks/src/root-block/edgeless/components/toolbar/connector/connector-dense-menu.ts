@@ -18,7 +18,8 @@ export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
     (mode: ConnectorMode, record = true) =>
     () => {
       edgeless.tools.setEdgelessTool({ type: 'connector', mode });
-      record && edgeless.service.editPropsStore.record('connector', { mode });
+      record &&
+        edgeless.service.editPropsStore.recordLastProps('connector', { mode });
     };
 
   return {

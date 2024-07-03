@@ -1,9 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 
 import { asyncFocusRichText } from '../_common/utils/selection.js';
-import { GET_DEFAULT_TEXT_COLOR } from '../root-block/edgeless/components/panel/color-panel.js';
 import type { EdgelessRootBlockComponent } from '../root-block/index.js';
-import { FontFamily } from '../surface-block/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import {
   EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
@@ -31,8 +29,6 @@ export class EdgelessTextBlockService extends BlockService<EdgelessTextBlockMode
           EDGELESS_TEXT_BLOCK_MIN_WIDTH * zoom,
           EDGELESS_TEXT_BLOCK_MIN_HEIGHT * zoom
         ).serialize(),
-        color: GET_DEFAULT_TEXT_COLOR(),
-        fontFamily: FontFamily.Kalam,
       },
       edgeless.surface.blockId
     );
