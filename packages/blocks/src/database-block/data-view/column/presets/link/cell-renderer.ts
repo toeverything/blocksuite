@@ -112,7 +112,7 @@ export class LinkCell extends BaseCellRenderer<string> {
     if (this.value !== this.preValue) {
       const std = this.std;
       this.preValue = this.value;
-      if (!this.value) {
+      if (!this.value || !isValidUrl(this.value)) {
         this.docId = undefined;
         return;
       }
