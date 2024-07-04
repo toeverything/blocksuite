@@ -12,6 +12,10 @@ import {
 } from '../../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../../edgeless-text/edgeless-text-model.js';
 import { Bound } from '../../../../../surface-block/utils/bound.js';
+import {
+  DefaultModeDragType,
+  DefaultToolController,
+} from '../../../controllers/tools/default-tool.js';
 import { HandleDirection } from '../../resize/resize-handles.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
@@ -72,6 +76,14 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
     this.edgeless.doc.updateBlock(this.model, {
       xywh: bound.serialize(),
     });
+  }
+
+  get dragMoving() {
+    const controller = this.edgeless.tools.currentController;
+    return (
+      controller instanceof DefaultToolController &&
+      controller.dragType === DefaultModeDragType.ContentMoving
+    );
   }
 
   checkWidthOverflow(width: number) {
@@ -222,6 +234,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
           top: `${bound.y}px`,
           transform: `scale(${scale})`,
           transformOrigin: '0 0',
+          width: this.dragMoving ? `${bound.w}px` : undefined,
         })}
         data-scale="${scale}"
       >
