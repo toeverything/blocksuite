@@ -2,6 +2,7 @@ import { assertEquals } from '@blocksuite/global/utils';
 
 import type { SelectTag } from '../utils/tags/multi-tag-select.js';
 import type { DataViewColumnManager } from '../view/data-view-manager.js';
+import type { GroupData } from './group-by/helper.js';
 
 /**
  * Class for computing statistics on a DataViewColumnManager column.
@@ -30,20 +31,21 @@ export class ColumnDataStats<
     );
   }
 
-  private _getEmptyCellCount() {
+  private _getEmptyCellCount(group?: GroupData) {
     let empty = 0;
-
-    for (const rId of this.dataViewManager.rows) {
+    const rows = group?.rows ?? this.dataViewManager.rows;
+    for (const rId of rows) {
       const colVal = this.column.getStringValue(rId).trim();
       if (colVal === '') empty++;
     }
     return empty;
   }
 
-  private _getNonEmptyCellCount() {
+  private _getNonEmptyCellCount(group?: GroupData) {
     let notEmpty = 0;
 
-    for (const rId of this.dataViewManager.rows) {
+    const rows = group?.rows ?? this.dataViewManager.rows;
+    for (const rId of rows) {
       const colVal = this.column.getStringValue(rId).trim();
       if (colVal !== '') notEmpty++;
     }
@@ -51,11 +53,11 @@ export class ColumnDataStats<
   }
 
   // this functions also splits the individual values inside the multiselect
-  private _getAllValuesAsString() {
+  private _getAllValuesAsString(group?: GroupData) {
     const colType = this.column.type;
     const colValues: string[] = [];
 
-    for (const rId of this.dataViewManager.rows) {
+    for (const rId of group?.rows ?? this.dataViewManager.rows) {
       switch (colType) {
         case 'multi-select': {
           const options = (this.column.data.options ?? []) as SelectTag[];
@@ -79,31 +81,31 @@ export class ColumnDataStats<
   }
 
   // gets the count of non-empty values in the column with separated out multiselect items
-  private _getColumnValueCounts() {
-    return this._getAllValuesAsString().length;
+  private _getColumnValueCounts(group?: GroupData) {
+    return this._getAllValuesAsString(group).length;
   }
 
   // @ts-ignore
-  private _getColValuesAsString(noEmpty = false) {
-    const val = this.dataViewManager.rows.map(rId => {
+  private _getColValuesAsString(group?: GroupData, noEmpty: boolean = false) {
+    const val = (group?.rows ?? this.dataViewManager.rows).map(rId => {
       return this.column.getStringValue(rId);
     });
     return noEmpty ? val.filter(v => v.trim() !== '') : val;
   }
 
-  private _getColValuesAsNumber() {
+  private _getColValuesAsNumber(group?: GroupData) {
     this._assertColumnType('number');
     const values: number[] = [];
-    for (const rId of this.dataViewManager.rows) {
+    for (const rId of group?.rows ?? this.dataViewManager.rows) {
       const value = this.column.getValue(rId) as number | undefined;
       if (value !== undefined) values.push(value);
     }
     return values;
   }
 
-  private _getCheckBoxColValues() {
+  private _getCheckBoxColValues(group?: GroupData) {
     this._assertColumnType('checkbox');
-    const val = this.dataViewManager.rows.map(rId => {
+    const val = (group?.rows ?? this.dataViewManager.rows).map(rId => {
       return this.column.getValue(rId);
     });
     return val as (boolean | undefined)[];
@@ -112,50 +114,50 @@ export class ColumnDataStats<
   /**
    * Returns the number of cells in the column.
    */
-  countAll() {
-    return this.dataViewManager.rows.length;
+  countAll(group?: GroupData) {
+    return group?.rows.length ?? this.dataViewManager.rows.length;
   }
 
   /**
    * Returns the number of cells in the column with a value in it.
    */
-  countValues() {
-    return this._getColumnValueCounts();
+  countValues(group?: GroupData) {
+    return this._getColumnValueCounts(group);
   }
 
   /**
    * Returns the number of unique values in the column.
    */
-  countUniqueValues() {
-    return [...new Set(this._getAllValuesAsString())].length;
+  countUniqueValues(group?: GroupData) {
+    return [...new Set(this._getAllValuesAsString(group))].length;
   }
 
   /**
    * Returns the number of cells in the column which are *empty*.
    */
-  countEmpty() {
-    return this._getEmptyCellCount();
+  countEmpty(group?: GroupData) {
+    return this._getEmptyCellCount(group);
   }
 
   /**
    * Returns the number of cells in the column which are *not empty*.
    */
-  countNonEmpty() {
-    return this._getNonEmptyCellCount();
+  countNonEmpty(group?: GroupData) {
+    return this._getNonEmptyCellCount(group);
   }
 
   /**
    * Returns the percent of cells in the column which are empty.
    */
-  percentEmpty() {
-    return this._getEmptyCellCount() / this.countAll();
+  percentEmpty(group?: GroupData) {
+    return this._getEmptyCellCount(group) / this.countAll(group);
   }
 
   /**
    * Returns the percent of cells in the column which are not empty.
    */
-  percentNonEmpty() {
-    return 1.0 - this.percentEmpty();
+  percentNonEmpty(group?: GroupData) {
+    return 1.0 - this.percentEmpty(group);
   }
 
   // Math Ops
@@ -163,8 +165,8 @@ export class ColumnDataStats<
   /**
    * Returns the sum of all values in the column.
    */
-  sum() {
-    const values = this._getColValuesAsNumber();
+  sum(group?: GroupData) {
+    const values = this._getColValuesAsNumber(group);
     let sum = 0;
     for (const val of values) sum += val;
     return sum;
@@ -173,8 +175,8 @@ export class ColumnDataStats<
   /**
    * Returns the average of values in the column.
    */
-  mean() {
-    const values = this._getColValuesAsNumber();
+  mean(group?: GroupData) {
+    const values = this._getColValuesAsNumber(group);
     let sum = 0;
     for (const val of values) sum += val;
     return sum / values.length;
@@ -183,8 +185,8 @@ export class ColumnDataStats<
   /**
    * Returns the median of the column.
    */
-  median() {
-    const values = this._getColValuesAsNumber().sort((a, b) => a - b);
+  median(group?: GroupData) {
+    const values = this._getColValuesAsNumber(group).sort((a, b) => a - b);
     const n = values.length;
     const mid = Math.floor(n / 2);
 
@@ -198,8 +200,8 @@ export class ColumnDataStats<
   /**
    * Returns the mode of the column.
    */
-  mode() {
-    const values = this._getColValuesAsNumber();
+  mode(group?: GroupData) {
+    const values = this._getColValuesAsNumber(group);
 
     const frequencyMap = new Map<number, number>();
 
@@ -226,8 +228,8 @@ export class ColumnDataStats<
   /**
    * Returns the maximum value in the column.
    */
-  max() {
-    const values = this._getColValuesAsNumber();
+  max(group?: GroupData) {
+    const values = this._getColValuesAsNumber(group);
 
     return Math.max(...values);
   }
@@ -235,8 +237,8 @@ export class ColumnDataStats<
   /**
    * Returns the minimum value in the column.
    */
-  min() {
-    const values = this._getColValuesAsNumber();
+  min(group?: GroupData) {
+    const values = this._getColValuesAsNumber(group);
 
     return Math.min(...values);
   }
@@ -244,8 +246,8 @@ export class ColumnDataStats<
   /**
    * Returns the range of the value in the column (max - min).
    */
-  range() {
-    return this.max() - this.min();
+  range(group?: GroupData) {
+    return this.max(group) - this.min(group);
   }
 
   // Checkbox
@@ -253,9 +255,9 @@ export class ColumnDataStats<
   /**
    * Returns the number of checked checkboxes.
    */
-  checked() {
+  checked(group?: GroupData) {
     let checked = 0;
-    const values = this._getCheckBoxColValues();
+    const values = this._getCheckBoxColValues(group);
     for (const value of values) {
       if (value) checked++;
     }
@@ -265,9 +267,9 @@ export class ColumnDataStats<
   /**
    * Returns the number of unchecked checkboxes.
    */
-  notChecked() {
+  notChecked(group?: GroupData) {
     let notChecked = 0;
-    const values = this._getCheckBoxColValues();
+    const values = this._getCheckBoxColValues(group);
     for (const value of values) {
       if (!value) notChecked++;
     }
@@ -277,16 +279,16 @@ export class ColumnDataStats<
   /**
    * Returns the percent of checked checkboxes.
    */
-  percentChecked() {
+  percentChecked(group?: GroupData) {
     this._assertColumnType('checkbox');
-    return this.checked() / this.countAll();
+    return this.checked(group) / this.countAll(group);
   }
 
   /**
    * Returns the percent of unchecked checkboxes.
    */
-  percentNotChecked() {
+  percentNotChecked(group?: GroupData) {
     this._assertColumnType('checkbox');
-    return 1.0 - this.percentChecked();
+    return 1.0 - this.percentChecked(group);
   }
 }

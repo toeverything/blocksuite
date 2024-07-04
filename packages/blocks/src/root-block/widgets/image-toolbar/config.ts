@@ -80,7 +80,7 @@ export const moreMenuConfig: MoreMenuConfigItem[] = [
     name: 'Duplicate',
     icon: DuplicateIcon,
     tooltip: 'Duplicate',
-    showWhen: () => true,
+    showWhen: blockElement => !blockElement.doc.readonly,
     action: (
       blockElement: ImageBlockComponent,
       abortController: AbortController
@@ -91,6 +91,7 @@ export const moreMenuConfig: MoreMenuConfigItem[] = [
   },
   {
     type: 'divider',
+    showWhen: blockElement => !blockElement.doc.readonly,
   },
   {
     name: 'Delete',

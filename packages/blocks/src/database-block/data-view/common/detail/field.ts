@@ -40,15 +40,15 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     }
 
     .field-left {
-      padding: 4px 6px 4px 4px;
+      padding: 6px;
       display: flex;
       height: max-content;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       font-size: var(--data-view-cell-text-size);
       line-height: var(--data-view-cell-text-line-height);
       color: var(--affine-text-secondary-color);
-      width: 116px;
+      width: 160px;
       border-radius: 4px;
       cursor: pointer;
       user-select: none;
@@ -78,7 +78,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     }
 
     .field-content {
-      padding: 4px 6px;
+      padding: 6px 8px;
       border-radius: 4px;
       flex: 1;
       cursor: pointer;
@@ -102,6 +102,12 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
 
     .field-content.is-focus {
       border: 1px solid var(--affine-primary-color);
+    }
+    .field-content.empty::before {
+      content: 'Empty';
+      color: var(--affine-text-disable-color);
+      font-size: 14px;
+      line-height: 22px;
     }
   `;
 
@@ -264,15 +270,18 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     const { view, edit } = this.column.renderer;
     const contentClass = classMap({
       'field-content': true,
+      empty: !this.editing && this.column.isEmpty(this.rowId),
       'is-editing': this.editing,
       'is-focus': this.isFocus,
     });
     return html`
-      <div class="field-left" @click="${this._clickLeft}">
-        <div class="icon">
-          <uni-lit .uni="${this.column.icon}"></uni-lit>
+      <div>
+        <div class="field-left" @click="${this._clickLeft}">
+          <div class="icon">
+            <uni-lit .uni="${this.column.icon}"></uni-lit>
+          </div>
+          <div class="filed-name">${column.name}</div>
         </div>
-        <div class="filed-name">${column.name}</div>
       </div>
       <div @click="${this._click}" class="${contentClass}">
         ${renderUniLit(this.editing && edit ? edit : view, props, {

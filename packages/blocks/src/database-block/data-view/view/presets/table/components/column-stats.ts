@@ -3,6 +3,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { GroupData } from '../../../../common/group-by/helper.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 
 const styles = css`
@@ -20,6 +21,9 @@ export class DataBaseColumnStats extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor view!: DataViewTableManager;
 
+  @property({ attribute: false })
+  accessor group: GroupData | undefined = undefined;
+
   protected override render() {
     const cols = this.view.columnManagerList;
 
@@ -30,7 +34,8 @@ export class DataBaseColumnStats extends WithDisposable(LitElement) {
           col => col.id,
           col => {
             return html`<affine-database-column-stats-cell
-              .column="${col}"
+              .column=${col}
+              .group=${this.group}
             ></affine-database-column-stats-cell>`;
           }
         )}

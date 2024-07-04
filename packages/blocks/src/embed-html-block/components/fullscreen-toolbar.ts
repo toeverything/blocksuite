@@ -12,14 +12,14 @@ import { DoneIcon } from './../../_common/icons/index.js';
 export class EmbedHtmlFullscreenToolbar extends LitElement {
   private get autoHideToolbar() {
     return (
-      this.embedHtml.edgeless?.service.editPropsStore.getItem(
+      this.embedHtml.edgeless?.service.editPropsStore.getStorage(
         'autoHideEmbedHTMLFullScreenToolbar'
       ) ?? false
     );
   }
 
   private set autoHideToolbar(val: boolean) {
-    this.embedHtml.edgeless?.service.editPropsStore.setItem(
+    this.embedHtml.edgeless?.service.editPropsStore.setStorage(
       'autoHideEmbedHTMLFullScreenToolbar',
       val
     );

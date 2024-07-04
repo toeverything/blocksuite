@@ -272,7 +272,12 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
     };
   };
 
+  getRootService = () => {
+    return this.std.spec.getService('affine:page');
+  };
+
   override renderBlock() {
+    const peekViewService = this.getRootService().peekViewService;
     return html`
       <div contenteditable="false" style="position: relative">
         ${this.dataView.render({
@@ -286,6 +291,10 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
           headerWidget: this.headerWidget,
           std: this.std,
           detailPanelConfig: {
+            openDetailPanel: peekViewService
+              ? async (target, template) =>
+                  peekViewService.peek(target, template)
+              : undefined,
             target: () => this.innerModalWidget.target,
           },
         })}
