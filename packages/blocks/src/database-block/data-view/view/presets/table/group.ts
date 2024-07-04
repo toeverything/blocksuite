@@ -190,7 +190,10 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
           </div>`}
       ${this.dataViewEle.config.getFlag?.('enable_database_statistics')
         ? html`
-            <affine-database-column-stats .view="${this.view}">
+            <affine-database-column-stats
+              .view="${this.view}"
+              .group=${this.group}
+            >
             </affine-database-column-stats>
           `
         : null}

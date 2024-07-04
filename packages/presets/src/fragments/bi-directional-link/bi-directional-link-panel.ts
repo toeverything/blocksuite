@@ -282,7 +282,10 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
   private _toggleShow() {
     this._show = !this._show;
-    this._rootService.editPropsStore.setItem('showBidirectional', this._show);
+    this._rootService.editPropsStore.setStorage(
+      'showBidirectional',
+      this._show
+    );
   }
 
   private _renderLinks(ids: string[]) {
@@ -562,7 +565,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     }
 
     this._show =
-      !!this._rootService.editPropsStore.getItem('showBidirectional');
+      !!this._rootService.editPropsStore.getStorage('showBidirectional');
   }
 }
 

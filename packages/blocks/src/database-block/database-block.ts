@@ -385,7 +385,12 @@ export class DatabaseBlockComponent extends BlockComponent<
     };
   };
 
+  getRootService = () => {
+    return this.std.spec.getService('affine:page');
+  };
+
   override renderBlock() {
+    const peekViewService = this.getRootService().peekViewService;
     return html`
       <div
         contenteditable="false"
@@ -403,6 +408,9 @@ export class DatabaseBlockComponent extends BlockComponent<
           onDrag: this.onDrag,
           std: this.std,
           detailPanelConfig: {
+            openDetailPanel: peekViewService
+              ? (target, template) => peekViewService.peek(target, template)
+              : undefined,
             target: () => this.innerModalWidget.target,
           },
         })}

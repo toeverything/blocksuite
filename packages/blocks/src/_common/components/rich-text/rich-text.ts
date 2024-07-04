@@ -351,7 +351,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     if (this.enableUndoRedo) {
       this.disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
         if (e.ctrlKey || e.metaKey) {
-          if (e.key === 'z') {
+          if (e.key === 'z' || e.key === 'Z') {
             if (e.shiftKey) {
               this.undoManager.redo();
             } else {

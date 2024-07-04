@@ -1,5 +1,4 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   computePosition,
@@ -21,13 +20,12 @@ class SideLayoutModal extends ShadowlessElement {
       display: flex;
       flex-direction: column;
       position: absolute;
-      right: 0;
       top: 0;
       bottom: 0;
-      width: 500px;
+      width: 1200px;
       background-color: var(--affine-background-overlay-panel-color);
       border-left: 0.5px solid var(--affine-border-color);
-      box-shadow: -5px 0px 10px 0px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
     }
 
     .side-modal-content {
@@ -95,15 +93,12 @@ class SideLayoutModal extends ShadowlessElement {
 }
 
 export const popSideDetail = (ops: {
-  attachTo: HTMLElement;
   target: ReferenceElement;
   view: DataViewManager;
   rowId: string;
   onClose?: () => void;
 }) => {
-  const rootElement = ops.attachTo;
-  assertExists(rootElement);
-  const modal = createModal(rootElement);
+  const modal = createModal(document.body);
   // fit to the size of the body element
   const cancel = autoUpdate(ops.target, modal, () => {
     computePosition(ops.target, modal, {
@@ -134,4 +129,15 @@ export const popSideDetail = (ops: {
   sideContainer.close = close;
   modal.onclick = e => e.target === modal && close();
   modal.append(sideContainer);
+};
+
+export const createRecordDetail = (ops: {
+  view: DataViewManager;
+  rowId: string;
+}) => {
+  return html`<affine-data-view-record-detail
+    .view=${ops.view}
+    .rowId=${ops.rowId}
+    class="data-view-popup-container"
+  ></affine-data-view-record-detail>`;
 };

@@ -21,7 +21,6 @@
     "vue-tsc": "^2.0.17"
   },
   "stackblitz": {
-    "installDependencies": false,
     "startCommand": "pnpm i && pnpm dev"
   }
 }

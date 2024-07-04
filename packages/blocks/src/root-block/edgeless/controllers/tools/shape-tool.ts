@@ -272,9 +272,10 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   onPressSpaceBar(pressed: boolean): void {
     const { tools } = this._edgeless;
-    assertExists(this._draggingArea);
     if (tools.dragging) {
       if (pressed) {
+        assertExists(this._draggingArea);
+
         const x = this._draggingArea.end.x;
         const y = this._draggingArea.end.y;
         this._moveWithSpaceStartPos = [x, y];

@@ -303,7 +303,10 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const runner = () => {
       // only support auto scroll in page mode now
       if (this._rootElement instanceof PageRootBlockComponent) {
-        const result = autoScroll(this._rootElement.viewportElement, point.y);
+        const result = autoScroll(
+          this._rootElement.rootScrollContainer,
+          point.y
+        );
         if (!result) {
           this._clearRaf();
           return;
