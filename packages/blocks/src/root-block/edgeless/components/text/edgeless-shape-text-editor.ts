@@ -203,19 +203,6 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           (this.ownerDocument.activeElement as HTMLElement).blur();
           break;
         }
-        case 'Escape': {
-          const service = this.edgeless.service;
-          const element = this.element;
-
-          requestAnimationFrame(() => {
-            service.selection.set({
-              elements: [element.id],
-              editing: false,
-            });
-          });
-
-          (this.ownerDocument.activeElement as HTMLElement).blur();
-        }
       }
     });
   }
@@ -279,6 +266,19 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         );
       })
       .catch(console.error);
+
+    this.disposables.addFromEvent(this, 'keydown', evt => {
+      if (evt.key === 'Escape') {
+        requestAnimationFrame(() => {
+          this.edgeless.service.selection.set({
+            elements: [this.element.id],
+            editing: false,
+          });
+        });
+
+        (this.ownerDocument.activeElement as HTMLElement).blur();
+      }
+    });
 
     this._initMindmapKeyBindings();
   }

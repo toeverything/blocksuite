@@ -21,7 +21,10 @@ const TopBar = () => {
           const binary = await upload();
           const provider = await CollectionProvider.init(binary);
           updateProvider(provider);
-          editor.doc = [...provider.collection.docs.values()][0];
+          const docs = [...provider.collection.docs.values()].map(blocks =>
+            blocks.getDoc()
+          );
+          editor.doc = docs[0];
         }}
       >
         Import

@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -23,7 +23,7 @@
     "@floating-ui/dom": "^1.6.5",
     "@lit/context": "^1.1.1",
     "@sgtpooki/file-type": "1.0.1",
-    "@toeverything/theme": "^0.7.33",
+    "@toeverything/theme": "^0.7.35",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/sortablejs": "^1.15.8",

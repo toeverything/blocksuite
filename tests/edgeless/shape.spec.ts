@@ -29,6 +29,7 @@ import {
   focusRichText,
   initEmptyEdgelessState,
   pasteByKeyboard,
+  pressEscape,
   type,
   waitNextFrame,
 } from '../utils/actions/index.js';
@@ -437,6 +438,30 @@ test('dbclick to add text in shape', async ({ page }) => {
 
   await pasteByKeyboard(page);
   await assertEdgelessCanvasText(page, 'hdddello');
+});
+
+test('should show selected rect after exiting editing by pressing Escape', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+
+  await setEdgelessTool(page, 'shape');
+  await waitNextFrame(page, 500);
+
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+  await waitNextFrame(page);
+  await page.mouse.dblclick(150, 150);
+  await waitNextFrame(page);
+
+  await type(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hello');
+
+  await pressEscape(page);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
 
 test('auto wrap text in shape', async ({ page }) => {

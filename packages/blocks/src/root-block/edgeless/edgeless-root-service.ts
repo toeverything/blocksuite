@@ -265,11 +265,15 @@ export class EdgelessRootService extends RootService {
 
   addElement<T = Record<string, unknown>>(type: string, props: T) {
     // @ts-ignore
-    props['index'] = this.generateIndex(type);
+    if (props['index'] === undefined) {
+      // @ts-ignore
+      props['index'] = this.generateIndex(type);
+    }
+
     // @ts-ignore
     props['type'] = type;
 
-    this.editPropsStore.apply(
+    this.editPropsStore.applyLastProps(
       type as CanvasElementType,
       props as Record<string, unknown>
     );
@@ -285,7 +289,7 @@ export class EdgelessRootService extends RootService {
   ) {
     props['index'] = this.generateIndex(flavour);
 
-    this.editPropsStore.apply(
+    this.editPropsStore.applyLastProps(
       flavour as BlockSuite.EdgelessModelKeyType,
       props
     );
@@ -302,7 +306,7 @@ export class EdgelessRootService extends RootService {
   updateElement(id: string, props: Record<string, unknown>) {
     const element = this._surface.getElementById(id);
     if (element) {
-      this.editPropsStore.record(
+      this.editPropsStore.recordLastProps(
         element.type as BlockSuite.EdgelessModelKeyType,
         props
       );
@@ -312,7 +316,7 @@ export class EdgelessRootService extends RootService {
 
     const block = this.doc.getBlockById(id);
     if (block) {
-      this.editPropsStore.record(
+      this.editPropsStore.recordLastProps(
         block.flavour as BlockSuite.EdgelessModelKeyType,
         props
       );

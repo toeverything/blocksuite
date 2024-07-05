@@ -111,6 +111,8 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
             { type: 'default' },
             { elements: [id], editing: false }
           );
+        } else if (element.data.type === 'text') {
+          this.setEdgelessTool({ type: 'default' });
         }
       },
     });

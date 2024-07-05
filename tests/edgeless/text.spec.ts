@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';
 import { getFormatBar } from 'utils/query.js';
 
 import {
@@ -85,6 +86,21 @@ test.describe('edgeless canvas text', () => {
     await pressArrowLeft(page, 5);
     await type(page, 'ddd\n');
     await assertEdgelessCanvasText(page, 'hddd\nhelloello');
+  });
+
+  test('should not trigger linked doc popover in canvas text', async ({
+    page,
+  }) => {
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140);
+    await waitForInlineEditorStateUpdated(page);
+    await waitNextFrame(page);
+
+    await type(page, '@');
+    const { linkedDocPopover } = getLinkedDocPopover(page);
+    await expect(linkedDocPopover).not.toBeVisible();
+    await pressEnter(page);
+    await assertEdgelessCanvasText(page, '@\n');
   });
 
   // it's also a little flaky

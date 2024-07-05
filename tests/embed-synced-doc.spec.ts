@@ -1,3 +1,4 @@
+import type { DatabaseBlockModel } from '@blocks/database-block/index.js';
 import { assertExists } from '@global/utils.js';
 import { expect, type Page } from '@playwright/test';
 import { switchEditorMode, zoomOutByKeyboard } from 'utils/actions/edgeless.js';
@@ -10,7 +11,6 @@ import {
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
-import { assertTitle } from 'utils/asserts.js';
 
 import { test } from './utils/playwright.js';
 
@@ -89,8 +89,7 @@ test.describe('Embed synced doc', () => {
     expect(await embedSyncedBlock.count()).toBe(1);
   });
 
-  // FIXME(mirone/#6534)
-  test.skip('drag embed synced doc to whiteboard should fit in height', async ({
+  test('drag embed synced doc to whiteboard should fit in height', async ({
     page,
   }) => {
     await initEmptyEdgelessState(page);
@@ -143,36 +142,126 @@ test.describe('Embed synced doc', () => {
     expect(EmbedSyncedDocPortalBox.height).toBeCloseTo(height + border, 1);
   });
 
-  // @TODO: if `center peek` feature is already landed in, we can delete it.
-  test.skip('can jump to other docs when click linked doc inside embed synced doc block', async ({
+  test('nested embed synced doc should be rendered as card when depth >=1', async ({
     page,
   }) => {
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
+    await page.evaluate(() => {
+      const { doc, collection } = window;
+      const rootId = doc.addBlock('affine:page', {
+        title: new doc.Text(),
+      });
 
-    await createAndConvertToEmbedSyncedDoc(page);
+      const noteId = doc.addBlock('affine:note', {}, rootId);
+      doc.addBlock('affine:paragraph', {}, noteId);
 
-    // Focus on the embed synced doc
-    const embedSyncedBlock = page.locator('affine-embed-synced-doc-block');
-    const embedSyncedBox = await embedSyncedBlock.boundingBox();
-    assertExists(embedSyncedBox);
-    await page.mouse.click(
-      embedSyncedBox.x + embedSyncedBox.width / 2,
-      embedSyncedBox.y + embedSyncedBox.height / 2
-    );
+      const doc2 = collection.createDoc({ id: 'doc2' });
+      doc2.load();
+      const rootId2 = doc2.addBlock('affine:page', {
+        title: new doc.Text('Doc 2'),
+      });
 
-    // Create a linked doc inside the embed synced doc
-    await type(page, '@');
-    await type(page, 'Linked Doc');
-    await pressEnter(page);
-    const refNode = page.locator(`affine-reference`, {
-      has: page.locator(`.affine-reference-title[data-title="Linked Doc"]`),
+      const noteId2 = doc2.addBlock('affine:note', {}, rootId2);
+      doc2.addBlock(
+        'affine:paragraph',
+        {
+          text: new doc.Text('Hello from Doc 2'),
+        },
+        noteId2
+      );
+
+      const doc3 = collection.createDoc({ id: 'doc3' });
+      doc3.load();
+      const rootId3 = doc3.addBlock('affine:page', {
+        title: new doc.Text('Doc 3'),
+      });
+
+      const noteId3 = doc3.addBlock('affine:note', {}, rootId3);
+      doc3.addBlock(
+        'affine:paragraph',
+        {
+          text: new doc.Text('Hello from Doc 3'),
+        },
+        noteId3
+      );
+
+      doc2.addBlock(
+        'affine:embed-synced-doc',
+        {
+          pageId: 'doc3',
+        },
+        noteId2
+      );
+      doc.addBlock(
+        'affine:embed-synced-doc',
+        {
+          pageId: 'doc2',
+        },
+        noteId
+      );
     });
-    await expect(refNode).toBeVisible();
-    // Click the linked doc inside the embed synced doc to jump to the linked doc
-    await refNode.click();
-    await waitNextFrame(page, 200);
+    expect(await page.locator('affine-embed-synced-doc-block').count()).toBe(2);
+    expect(await page.locator('affine-paragraph').count()).toBe(2);
+    expect(await page.locator('affine-embed-synced-doc-card').count()).toBe(1);
+    expect(await page.locator('editor-host').count()).toBe(2);
+  });
 
-    await assertTitle(page, 'Linked Doc');
+  test.describe('synced doc should be readonly', () => {
+    test('synced doc should be readonly', async ({ page }) => {
+      await initEmptyParagraphState(page);
+      await focusRichText(page);
+      await createAndConvertToEmbedSyncedDoc(page);
+      const locator = page.locator('affine-embed-synced-doc-block');
+      await locator.click();
+      const button = page.locator('.embed-card-toolbar-button.doc-info');
+      await button.click();
+      await page.evaluate(async () => {
+        const { collection } = window;
+        const getDocCollection = () => {
+          for (const [id, doc] of collection.docs.entries()) {
+            if (id === 'doc:home') {
+              continue;
+            }
+            return doc;
+          }
+          return null;
+        };
+
+        const doc2Collection = getDocCollection();
+        const doc2 = doc2Collection!.getDoc();
+        const [noteBlock] = doc2!.getBlocksByFlavour('affine:note');
+        const noteId = noteBlock.id;
+
+        const databaseId = doc2.addBlock(
+          'affine:database',
+          {
+            title: new doc2.Text('Database 1'),
+          },
+          noteId
+        );
+        const model = doc2.getBlockById(databaseId) as DatabaseBlockModel;
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const databaseBlock = document.querySelector('affine-database');
+        const databaseService = databaseBlock?.service;
+        if (databaseService) {
+          databaseService.databaseViewInitEmpty(
+            model,
+            databaseService.viewPresets.tableViewConfig
+          );
+        }
+        model.applyColumnUpdate();
+      });
+      const backLineButton = page.locator('backlink-button');
+      await backLineButton.click();
+      const backLinkPageButton = page.locator('.backlinks .link');
+      await backLinkPageButton.click();
+      const databaseFirstCell = page.locator(
+        '.affine-database-column-header.database-row'
+      );
+      await databaseFirstCell.click({ force: true });
+      const indicatorCount = await page
+        .locator('affine-drag-indicator')
+        .count();
+      expect(indicatorCount).toBe(1);
+    });
   });
 });

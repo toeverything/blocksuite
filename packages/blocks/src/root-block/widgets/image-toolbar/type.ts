@@ -24,6 +24,7 @@ export type MoreItem = DefaultItemConfig & {
 
 export type DividerItem = {
   type: 'divider';
+  showWhen: (blockElement: ImageBlockComponent) => boolean;
 };
 
 export type CustomItem = {

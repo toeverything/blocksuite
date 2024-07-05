@@ -11,11 +11,9 @@ export class VText extends LitElement {
 
   @property({ attribute: false })
   accessor styles: StyleInfo = {
-    'word-break': 'break-word',
-    // In most cases, break-spaces should be used.
-    // When replacing, pay attention to the differences in handling spaces for different keywords.
-    // https://developer.mozilla.org/en-US/docs/Web/CSS/white-space
-    'white-space': 'break-spaces',
+    'word-break': 'break-all',
+    'white-space': 'pre-wrap',
+    'white-space-collapse': 'preserve',
     cursor: 'text',
   };
 

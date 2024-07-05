@@ -1,4 +1,5 @@
-import { DocCollection, type Y, Schema, BlobStorage } from '@blocksuite/store';
+import { DocCollection, type Y, Schema } from '@blocksuite/store';
+import { type BlobSource } from '@blocksuite/sync';
 import { client } from './db';
 import { AffineSchemas } from '@blocksuite/blocks';
 
@@ -19,6 +20,7 @@ export class CollectionProvider {
     const id = `${Math.random()}`.slice(2, 12);
     provider.collection = createCollection(id);
     provider._connectCollection();
+    provider.collection.meta.initialize();
 
     await client.insertRoot(id);
     createFirstDoc(provider.collection);
@@ -76,29 +78,33 @@ function createCollection(id: string): DocCollection {
   const collection = new DocCollection({
     schema,
     id,
-    blobStorages: [createBlobStorage],
+    blobSources: {
+      main: new ClientBlobSource(),
+    },
   });
   return collection;
 }
 
-function createBlobStorage(): BlobStorage {
-  return {
-    crud: {
-      set: async (key: string, value: Blob): Promise<string> => {
-        await client.insertBlob(key, value);
-        return key;
-      },
-      get: async (key: string): Promise<Blob | null> => {
-        return client.getBlob(key);
-      },
-      delete: async (key: string): Promise<void> => {
-        await client.deleteBlob(key);
-      },
-      list: async (): Promise<string[]> => {
-        return client.getAllBlobIds();
-      },
-    },
-  };
+class ClientBlobSource implements BlobSource {
+  readonly = false;
+  name = 'client';
+
+  async get(key: string) {
+    return client.getBlob(key);
+  }
+
+  async set(key: string, value: Blob) {
+    await client.insertBlob(key, value);
+    return key;
+  }
+
+  async delete(key: string) {
+    return client.deleteBlob(key);
+  }
+
+  async list() {
+    return client.getAllBlobIds();
+  }
 }
 
 function createFirstDoc(collection: DocCollection) {

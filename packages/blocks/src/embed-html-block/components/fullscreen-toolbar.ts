@@ -6,19 +6,20 @@ import { popMenu } from '../../_common/components/index.js';
 import { SettingsIcon } from '../../_common/icons/edgeless.js';
 import { CopyIcon, ExpandCloseIcon } from '../../_common/icons/text.js';
 import type { EmbedHtmlBlockComponent } from '../embed-html-block.js';
+import { DoneIcon } from './../../_common/icons/index.js';
 
 @customElement('embed-html-fullscreen-toolbar')
 export class EmbedHtmlFullscreenToolbar extends LitElement {
   private get autoHideToolbar() {
     return (
-      this.embedHtml.edgeless?.service.editPropsStore.getItem(
+      this.embedHtml.edgeless?.service.editPropsStore.getStorage(
         'autoHideEmbedHTMLFullScreenToolbar'
       ) ?? false
     );
   }
 
   private set autoHideToolbar(val: boolean) {
-    this.embedHtml.edgeless?.service.editPropsStore.setItem(
+    this.embedHtml.edgeless?.service.editPropsStore.setStorage(
       'autoHideEmbedHTMLFullScreenToolbar',
       val
     );
@@ -72,20 +73,6 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       background-color: var(--affine-border-color);
       width: 1px;
       height: 36px;
-    }
-
-    .fullscreen-toolbar-container icon-button.copy-button {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 7px;
-      width: 108px;
-      padding: 4px 8px;
-      font-size: var(--affine-font-xs);
-      & svg {
-        width: 16px;
-        height: 16px;
-      }
     }
   `;
 
@@ -171,12 +158,9 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
 
         <div class="short-v-divider"></div>
 
-        <icon-button
-          class="copy-button"
-          text="${this._copied ? 'Copied' : 'Copy Code'}"
-          @click=${this.copyCode}
-          >${CopyIcon}</icon-button
-        >
+        <icon-button class="copy-button" @click=${this.copyCode}
+          >${this._copied ? DoneIcon : CopyIcon}
+        </icon-button>
       </div>
     </div> `;
   }

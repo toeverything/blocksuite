@@ -104,7 +104,12 @@ export class LanguageListButton extends LitElement {
         getLanguagePriority(a.name as BundledLanguage) -
         getLanguagePriority(b.name as BundledLanguage),
       referenceElement: this._langButton,
+      container: this.blockElement.host,
       abortController: this._abortController,
+      // stacking-context(editor-host)
+      portalStyles: {
+        zIndex: 'var(--affine-z-index-popover)',
+      },
     });
   };
 

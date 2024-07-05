@@ -39,4 +39,5 @@ export const titlePureColumnConfig = titleColumnType.modelConfig<Text>({
     }
     return newValue;
   },
+  isEmpty: data => data == null || data.length === 0,
 });

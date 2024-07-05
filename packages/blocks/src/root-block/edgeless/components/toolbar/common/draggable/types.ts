@@ -41,7 +41,7 @@ export interface EdgelessDraggableElementOptions<T> {
   /**
    * the threshold of mousedown and mouseup duration in ms
    * if the duration is less than this value, it will be treated as a click
-   * @default 200
+   * @default 1500
    */
   clickThreshold?: number;
 

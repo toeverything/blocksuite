@@ -28,6 +28,7 @@ export const numberColumnModelConfig = numberColumnType.modelConfig<
     };
   },
   cellToJson: data => data ?? null,
+  isEmpty: data => data == null,
 });
 
 numberColumnModelConfig.addConvert('rich-text', (_column, cells) => ({

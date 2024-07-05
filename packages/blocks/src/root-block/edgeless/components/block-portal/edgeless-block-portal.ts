@@ -23,6 +23,7 @@ import { last } from '../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { GroupElementModel } from '../../../../surface-block/index.js';
+import type { BlockLayer } from '../../../../surface-block/managers/layer-manager.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import { EdgelessBlockModel } from '../../edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -287,6 +288,18 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const lastLayer = last(layers);
     const frameStartIndex =
       lastLayer?.zIndex ?? 1 + (lastLayer?.elements.length ?? 0) + 1;
+    const blocks = layers.reduce(
+      (pre, layer) => {
+        if (layer.type === 'block') {
+          pre = pre.concat(
+            layer.elements.map((block, index) => [block, layer, index])
+          );
+        }
+
+        return pre;
+      },
+      [] as [EdgelessBlockModel, BlockLayer, number][]
+    );
 
     return html`
       <div class="affine-block-children-container edgeless">
@@ -296,49 +309,38 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           data-translate="true"
         >
           <div class="canvas-slot"></div>
-          ${layers
-            .filter(layer => layer.type === 'block')
-            .map(layer => {
-              const elements =
-                layer.elements as BlockSuite.EdgelessBlockModelType[];
+          ${repeat(
+            blocks,
+            block => block[0].id,
+            ([block, layer, index]) => {
+              const target = Array.from(portalMap.entries()).find(([key]) => {
+                if (typeof key === 'string') {
+                  return key === block.flavour;
+                }
+                return key.test(block.flavour);
+              });
+              assertExists(
+                target,
+                `Unknown block flavour for edgeless portal: ${block.flavour}`
+              );
 
-              return repeat(
-                elements,
-                block => block.id,
-                (block, index) => {
-                  const target = Array.from(portalMap.entries()).find(
-                    ([key]) => {
-                      if (typeof key === 'string') {
-                        return key === block.flavour;
-                      }
-                      return key.test(block.flavour);
-                    }
-                  );
-                  assertExists(
-                    target,
-                    `Unknown block flavour for edgeless portal: ${block.flavour}`
-                  );
+              const [_, tagName] = target;
+              const tag = unsafeStatic(tagName);
 
-                  const [_, tagName] = target;
-
-                  const tag = unsafeStatic(tagName);
-                  const zIndex = layer.zIndex + index;
-
-                  return html`<${tag}
+              return html`<${tag}
                       data-index=${block.index}
                       data-portal-block-id=${block.id}
-                      .index=${zIndex}
+                      .index=${layer.zIndex + index}
                       .model=${block}
                       .surface=${surface}
                       .edgeless=${edgeless}
                       .updatingSet=${this.renderingSet}
                       .concurrentUpdatingCount=${this.concurrentRendering}
                       .portalContainer=${this}
-                      style=${`z-index: ${zIndex};${_visibleElements.has(block) ? 'display:block' : ''}`}
+                      style=${`z-index: ${layer.zIndex + index};${_visibleElements.has(block) ? 'display:block' : ''}`}
                     ></${tag}>`;
-                }
-              );
-            })}
+            }
+          )}
           <edgeless-frames-container
             .edgeless=${edgeless}
             .frames=${service.layer.frames}

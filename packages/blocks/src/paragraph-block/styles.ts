@@ -15,10 +15,12 @@ export const paragraphBlockStyles = css`
     position: relative;
   }
 
-  code {
+  affine-paragraph code,
+  a[affine-link] {
     font-size: calc(var(--affine-font-base) - 3px);
     padding: 0px 4px 2px;
   }
+
   .h1 {
     font-size: var(--affine-font-h-1);
     font-weight: 700;
@@ -27,10 +29,13 @@ export const paragraphBlockStyles = css`
     margin-top: 18px;
     margin-bottom: 10px;
   }
-  .h1 code {
+
+  .h1 code,
+  .h1 a[affine-link] {
     font-size: calc(var(--affine-font-base) + 10px);
     padding: 0px 4px;
   }
+
   .h2 {
     font-size: var(--affine-font-h-2);
     font-weight: 600;
@@ -39,10 +44,13 @@ export const paragraphBlockStyles = css`
     margin-top: 14px;
     margin-bottom: 10px;
   }
-  .h2 code {
+
+  .h2 code,
+  .h2 a[affine-link] {
     font-size: calc(var(--affine-font-base) + 8px);
     padding: 0px 4px;
   }
+
   .h3 {
     font-size: var(--affine-font-h-3);
     font-weight: 600;
@@ -51,10 +59,13 @@ export const paragraphBlockStyles = css`
     margin-top: 12px;
     margin-bottom: 10px;
   }
-  .h3 code {
+
+  .h3 code,
+  .h3 a[affine-link] {
     font-size: calc(var(--affine-font-base) + 6px);
     padding: 0px 4px;
   }
+
   .h4 {
     font-size: var(--affine-font-h-4);
     font-weight: 600;
@@ -63,10 +74,12 @@ export const paragraphBlockStyles = css`
     margin-top: 12px;
     margin-bottom: 10px;
   }
-  .h4 code {
+  .h4 code,
+  .h4 a[affine-link] {
     font-size: calc(var(--affine-font-base) + 4px);
     padding: 0px 4px;
   }
+
   .h5 {
     font-size: var(--affine-font-h-5);
     font-weight: 600;
@@ -75,10 +88,12 @@ export const paragraphBlockStyles = css`
     margin-top: 12px;
     margin-bottom: 10px;
   }
-  .h5 code {
+  .h5 code,
+  .h5 a[affine-link] {
     font-size: calc(var(--affine-font-base) + 2px);
     padding: 0px 4px;
   }
+
   .h6 {
     font-size: var(--affine-font-h-6);
     font-weight: 600;
@@ -87,10 +102,13 @@ export const paragraphBlockStyles = css`
     margin-top: 12px;
     margin-bottom: 10px;
   }
-  .h6 code {
+
+  .h6 code,
+  .h6 a[affine-link] {
     font-size: var(--affine-font-base);
     padding: 0px 4px 2px;
   }
+
   .quote {
     line-height: 26px;
     padding-left: 17px;

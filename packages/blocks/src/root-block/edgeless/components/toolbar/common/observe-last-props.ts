@@ -1,7 +1,10 @@
-import type { LastProps } from '../../../../../surface-block/managers/edit-session.js';
+import type {
+  LastProps,
+  LastPropsKey,
+} from '../../../../../surface-block/managers/edit-session.js';
 import type { EdgelessRootService } from '../../../edgeless-root-service.js';
 
-export const observeLastProps = <T extends keyof LastProps>(
+export const observeLastProps = <T extends LastPropsKey>(
   edgelessService: EdgelessRootService,
   toolType: T,
   fields: Array<keyof LastProps[T]>,
@@ -28,7 +31,7 @@ export const observeLastProps = <T extends keyof LastProps>(
   );
 };
 
-export const applyLastProps = <T extends keyof LastProps>(
+export const applyLastProps = <T extends LastPropsKey>(
   service: EdgelessRootService,
   toolType: T,
   fields: Array<keyof LastProps[T]>,

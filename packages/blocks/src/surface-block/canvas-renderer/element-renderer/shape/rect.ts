@@ -1,4 +1,5 @@
 import type { ShapeElementModel } from '../../../element-model/shape.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 import { drawGeneralShape } from './utils.js';
 
@@ -11,7 +12,8 @@ export function rect(
   model: ShapeElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer
+  renderer: Renderer,
+  rc: RoughCanvas
 ) {
   const {
     seed,
@@ -33,7 +35,6 @@ export function rect(
   const cy = renderHeight / 2;
   const realFillColor = renderer.getVariableColor(model.fillColor);
   const realStrokeColor = renderer.getVariableColor(model.strokeColor);
-  const rc = renderer.rc;
 
   ctx.setTransform(
     matrix
@@ -67,7 +68,7 @@ export function rect(
       `,
       {
         seed,
-        roughness: shapeStyle === 'Scribbled' ? roughness : 0,
+        roughness,
         strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
         stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
         strokeWidth,

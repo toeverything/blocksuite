@@ -4,7 +4,7 @@ import type { BlockStdScope } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import type { ReferenceElement } from '@floating-ui/dom';
-import { css, unsafeCSS } from 'lit';
+import { css, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -13,7 +13,7 @@ import { html } from 'lit/static-html.js';
 
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataSource } from './common/data-source/base.js';
-import { popSideDetail } from './common/detail/layout.js';
+import { createRecordDetail, popSideDetail } from './common/detail/layout.js';
 import type { ViewSource } from './common/index.js';
 import type { DataViewSelection, DataViewSelectionState } from './types.js';
 import { renderUniLit } from './utils/uni-component/index.js';
@@ -39,6 +39,10 @@ export type DataViewRendererConfig = {
   dataSource: DataSource;
   viewSource: ViewSource;
   detailPanelConfig?: {
+    openDetailPanel?: (
+      target: HTMLElement,
+      template: TemplateResult
+    ) => Promise<void>;
     target?: () => ReferenceElement;
   };
   headerWidget: DataViewProps['headerWidget'];
@@ -166,13 +170,25 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     rowId: string;
     onClose?: () => void;
   }) => {
-    popSideDetail({
-      attachTo: this.closest('editor-host')?.parentElement as HTMLElement,
-      target: this.config.detailPanelConfig?.target?.() ?? document.body,
-      view: ops.view,
-      rowId: ops.rowId,
-      onClose: ops.onClose,
-    });
+    const openDetailPanel = this.config.detailPanelConfig?.openDetailPanel;
+    if (openDetailPanel) {
+      openDetailPanel(
+        this,
+        createRecordDetail({
+          view: ops.view,
+          rowId: ops.rowId,
+        })
+      )
+        .catch(console.error)
+        .finally(ops.onClose);
+    } else {
+      popSideDetail({
+        target: this.config.detailPanelConfig?.target?.() ?? document.body,
+        view: ops.view,
+        rowId: ops.rowId,
+        onClose: ops.onClose,
+      });
+    }
   };
 
   override render() {

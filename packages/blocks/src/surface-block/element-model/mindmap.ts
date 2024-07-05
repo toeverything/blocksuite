@@ -35,6 +35,7 @@ import {
   mindmapStyleGetters,
 } from './utils/mindmap/style.js';
 
+export { LayoutType } from './utils/mindmap/layout.js';
 export { MindmapStyle } from './utils/mindmap/style.js';
 
 const baseNodeSchema = z.object({
@@ -137,8 +138,12 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
         recursive(initialValue);
       });
 
+      instance.requestBuildTree();
+      instance.requestLayout();
       return map;
     } else {
+      instance.requestBuildTree();
+      instance.requestLayout();
       return initialValue;
     }
   })

@@ -161,8 +161,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
 
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;
-
-    this.setEdgelessTool({ type: 'mindmap' });
+    this.setEdgelessTool({ type: 'default' });
 
     const menu = this.createPopper('edgeless-mindmap-menu', this);
     Object.assign(menu.element, {
@@ -226,6 +225,8 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
             { type: 'default' },
             { elements: [id], editing: false }
           );
+        } else if (el.data.name === 'text') {
+          this.setEdgelessTool({ type: 'default' });
         }
       },
     });
@@ -253,6 +254,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
             });
             return;
           }
+          this.setEdgelessTool({ type: 'mindmap' });
           const icon = this.mindmapElement;
           assertExists(icon);
           const { x, y } = service.tool.lastMousePos;

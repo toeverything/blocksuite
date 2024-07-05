@@ -312,7 +312,9 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   }
 
   protected override firstUpdated() {
-    this._selectInput.focus();
+    requestAnimationFrame(() => {
+      this._selectInput.focus();
+    });
     this._disposables.addFromEvent(this, 'click', () => {
       this._selectInput.focus();
     });

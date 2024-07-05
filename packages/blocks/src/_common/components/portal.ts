@@ -108,6 +108,8 @@ type PortalOptions = {
    * If true, the portalRoot will be added a class `blocksuite-portal`. It's useful for finding the portalRoot.
    */
   identifyWrapper?: boolean;
+
+  portalStyles?: Record<string, string | number | undefined | null>;
 };
 
 /**
@@ -295,6 +297,8 @@ export function createLitPortal({
   portalRoot.style.position = 'fixed';
   portalRoot.style.left = '0';
   portalRoot.style.top = '0';
+
+  Object.assign(portalRoot.style, portalOptions.portalStyles);
 
   const computePositionOptions =
     positionConfigOrFn instanceof Function

@@ -130,6 +130,22 @@ export class RangeBinding {
       return;
     }
 
+    // range is in a non-editable element
+    // ex. placeholder
+    const isRangeOutNotEditable =
+      (range.startContainer instanceof HTMLElement &&
+        range.startContainer.contentEditable === 'false') ||
+      (range.endContainer instanceof HTMLElement &&
+        range.endContainer.contentEditable === 'false');
+    if (isRangeOutNotEditable) {
+      this._prevTextSelection = null;
+      this.selectionManager.clear(['text']);
+
+      // force clear native selection to break inline editor input
+      selection.removeRange(range);
+      return;
+    }
+
     const el =
       range.commonAncestorContainer instanceof Element
         ? range.commonAncestorContainer
@@ -219,7 +235,7 @@ export class RangeBinding {
       },
       to: null,
     });
-    this.selectionManager.set([newSelection]);
+    this.selectionManager.setGroup('note', [newSelection]);
   };
 
   private _onCompositionStart = () => {
@@ -298,7 +314,7 @@ export class RangeBinding {
         },
         to: null,
       });
-      this.host.selection.set([selection]);
+      this.host.selection.setGroup('note', [selection]);
       this.rangeManager.syncTextSelectionToRange(selection);
     };
   };

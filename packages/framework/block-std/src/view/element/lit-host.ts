@@ -50,6 +50,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     editor-host {
       outline: none;
+      isolation: isolate;
     }
   `;
 

@@ -1276,7 +1276,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await assertRichTexts(page, ['123', '45']);
 });
 
-test('should ndent native multi-selection block', async ({ page }) => {
+test('should indent native multi-selection block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);

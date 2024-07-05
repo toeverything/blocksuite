@@ -1,4 +1,4 @@
-import type { IBound, SurfaceElementModel } from '../../index.js';
+import type { IBound, RoughCanvas, SurfaceElementModel } from '../../index.js';
 import type { Renderer } from '../renderer.js';
 import { brush } from './brush/index.js';
 import { connector } from './connector/index.js';
@@ -15,6 +15,7 @@ export type ElementRenderer<
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer,
+  rc: RoughCanvas,
   viewportBound: IBound
 ) => void;
 

@@ -131,6 +131,7 @@ export class AffineLink extends ShadowlessElement {
     return html`<a
       ${ref(this._whenHover.setReference)}
       href=${this.link}
+      affine-link
       rel="noopener noreferrer"
       target="_blank"
       style=${style}

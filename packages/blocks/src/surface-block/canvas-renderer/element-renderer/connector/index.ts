@@ -7,6 +7,7 @@ import {
   ConnectorMode,
   isConnectorWithLabel,
 } from '../../../element-model/connector.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
 import { getBezierParameters } from '../../../utils/curve.js';
 import type { PointLocation } from '../../../utils/point-location.js';
 import type { Renderer } from '../../renderer.js';
@@ -32,7 +33,8 @@ export function connector(
   model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer
+  renderer: Renderer,
+  rc: RoughCanvas
 ) {
   const {
     mode,
@@ -76,12 +78,13 @@ export function connector(
     model,
     ctx,
     renderer,
+    rc,
     points,
     strokeStyle === 'dash',
     mode === ConnectorMode.Curve
   );
-  renderEndpoint(model, points, ctx, renderer, 'Front', frontEndpointStyle);
-  renderEndpoint(model, points, ctx, renderer, 'Rear', rearEndpointStyle);
+  renderEndpoint(model, points, ctx, renderer, rc, 'Front', frontEndpointStyle);
+  renderEndpoint(model, points, ctx, renderer, rc, 'Rear', rearEndpointStyle);
 
   if (hasLabel) {
     ctx.restore();
@@ -99,6 +102,7 @@ function renderPoints(
   model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
+  rc: RoughCanvas,
   points: PointLocation[],
   dash: boolean,
   curve: boolean
@@ -116,12 +120,12 @@ function renderPoints(
     };
     if (curve) {
       const b = getBezierParameters(points);
-      renderer.rc.path(
+      rc.path(
         `M${b[0][0]},${b[0][1]} C${b[1][0]},${b[1][1]} ${b[2][0]},${b[2][1]} ${b[3][0]},${b[3][1]}`,
         options
       );
     } else {
-      renderer.rc.linearPath(points as unknown as [number, number][], options);
+      rc.linearPath(points as unknown as [number, number][], options);
     }
   } else {
     ctx.save();
@@ -167,11 +171,11 @@ function renderEndpoint(
   location: PointLocation[],
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
+  rc: RoughCanvas,
   end: 'Front' | 'Rear',
   style: PointStyle
 ) {
   const arrowOptions = getArrowOptions(end, model, renderer);
-  const rc = renderer.rc;
 
   switch (style) {
     case 'Arrow':

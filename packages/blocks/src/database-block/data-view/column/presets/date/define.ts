@@ -20,4 +20,5 @@ export const dateColumnModelConfig = dateColumnType.modelConfig<number>({
     };
   },
   cellToJson: data => data ?? null,
+  isEmpty: data => data == null,
 });

@@ -161,6 +161,8 @@ export interface DataViewColumnManager<
 
   get isLast(): boolean;
 
+  isEmpty(rowId: string): boolean;
+
   getStringValue(rowId: string): string;
 
   getJsonValue(rowId: string): unknown;
@@ -533,6 +535,12 @@ export abstract class DataViewColumnManagerBase
 
   get dataType(): TType {
     return this.dataViewManager.columnGetDataType(this.id);
+  }
+
+  isEmpty(rowId: string): boolean {
+    return this.dataViewManager
+      .columnGetMeta(this.type)
+      .model.ops.isEmpty(this.getValue(rowId));
   }
 
   getValue(rowId: string): unknown | undefined {

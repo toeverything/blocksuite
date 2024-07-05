@@ -22,6 +22,7 @@ export const checkboxColumnModelConfig =
       };
     },
     cellToJson: data => data ?? null,
+    isEmpty: () => false,
   });
 
 checkboxColumnModelConfig.addConvert('rich-text', (_columns, cells) => {

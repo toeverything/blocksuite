@@ -230,7 +230,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     if (!this.edgeless) return;
 
     this.fillScreen =
-      this.edgeless.service.editPropsStore.getItem('presentFillScreen') ??
+      this.edgeless.service.editPropsStore.getStorage('presentFillScreen') ??
       false;
   }
 

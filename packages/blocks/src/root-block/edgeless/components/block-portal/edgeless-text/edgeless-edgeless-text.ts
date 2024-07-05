@@ -12,6 +12,10 @@ import {
 } from '../../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../../edgeless-text/edgeless-text-model.js';
 import { Bound } from '../../../../../surface-block/utils/bound.js';
+import {
+  DefaultModeDragType,
+  DefaultToolController,
+} from '../../../controllers/tools/default-tool.js';
 import { HandleDirection } from '../../resize/resize-handles.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
@@ -72,6 +76,14 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
     this.edgeless.doc.updateBlock(this.model, {
       xywh: bound.serialize(),
     });
+  }
+
+  get dragMoving() {
+    const controller = this.edgeless.tools.currentController;
+    return (
+      controller instanceof DefaultToolController &&
+      controller.dragType === DefaultModeDragType.ContentMoving
+    );
   }
 
   checkWidthOverflow(width: number) {
@@ -137,7 +149,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
       this._resizeObserver.disconnect();
     });
 
-    this.disposables.addFromEvent(this._textContainer, 'click', e => {
+    disposables.addFromEvent(this._textContainer, 'click', e => {
       if (!this._editing) return;
 
       const containerRect = this._textContainer.getBoundingClientRect();
@@ -184,6 +196,12 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
         ]);
       }
     });
+
+    disposables.addFromEvent(this._textContainer, 'focusout', () => {
+      if (!this._editing) return;
+
+      this.edgeless.selection.clear();
+    });
   }
 
   override render() {
@@ -194,7 +212,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
     const containerStyle: StyleInfo = {
       transform: `rotate(${rotate}deg)`,
       transformOrigin: 'center',
-      padding: '10px',
+      padding: '5px 10px',
       border: `1px solid ${this._editing ? 'var(--affine—primary—color, #1e96eb)' : 'transparent'}`,
       borderRadius: '4px',
       boxSizing: 'border-box',
@@ -216,6 +234,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
           top: `${bound.y}px`,
           transform: `scale(${scale})`,
           transformOrigin: '0 0',
+          width: this.dragMoving ? `${bound.w}px` : undefined,
         })}
         data-scale="${scale}"
       >

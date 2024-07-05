@@ -20,6 +20,7 @@ import {
   LinkIcon,
   OpenIcon,
 } from '../../../../icons/text.js';
+import { isInsideBlockByFlavour } from '../../../../utils/model.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 import { ReferencePopupMoreMenu } from './reference-popup-more-menu-popup.js';
 import { styles } from './styles.js';
@@ -54,7 +55,14 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   get _embedViewButtonDisabled() {
-    if (this.blockElement.doc.readonly) {
+    if (
+      this.blockElement.doc.readonly ||
+      isInsideBlockByFlavour(
+        this.blockElement.doc,
+        this.blockElement.model,
+        'affine:edgeless-text'
+      )
+    ) {
       return true;
     }
     return (

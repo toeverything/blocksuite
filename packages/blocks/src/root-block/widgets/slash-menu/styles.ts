@@ -5,6 +5,7 @@ import { scrollbarStyle } from '../../../_common/components/utils.js';
 
 export const styles = css`
   .overlay-mask {
+    pointer-events: auto;
     position: fixed;
     top: 0;
     left: 0;

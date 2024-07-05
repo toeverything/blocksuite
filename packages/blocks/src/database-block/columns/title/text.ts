@@ -7,6 +7,7 @@ import { html } from 'lit/static-html.js';
 
 import type { RichText } from '../../../_common/components/index.js';
 import { getViewportElement } from '../../../_common/utils/query.js';
+import { isValidUrl } from '../../../_common/utils/url.js';
 import { HostContextKey } from '../../context/host-context.js';
 import { BaseCellRenderer } from '../../data-view/column/index.js';
 import type { DataViewKanbanManager } from '../../data-view/view/presets/kanban/kanban-view-manager.js';
@@ -210,15 +211,15 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     if (!text) return;
     e.preventDefault();
     e.stopPropagation();
-    const std = this.std;
-    const result = await std?.spec
-      .getService('affine:page')
-      .quickSearchService?.searchDoc({
-        userInput: text,
-        skipSelection: true,
-      });
-    if (result) {
-      if ('docId' in result) {
+    if (isValidUrl(text)) {
+      const std = this.std;
+      const result = await std?.spec
+        .getService('affine:page')
+        .quickSearchService?.searchDoc({
+          userInput: text,
+          skipSelection: true,
+        });
+      if (result && 'docId' in result) {
         const text = ' ';
         inlineEditor.insertText(inlineRange, text, {
           reference: {
@@ -230,9 +231,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
           index: inlineRange.index + text.length,
           length: 0,
         });
-      }
-      if ('userInput' in result) {
-        const text = result.userInput;
+      } else {
         inlineEditor.insertText(inlineRange, text, {
           link: text,
         });

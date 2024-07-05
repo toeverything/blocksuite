@@ -1,5 +1,6 @@
 import type { IBound } from '../../consts.js';
 import type { MindmapElementModel } from '../../element-model/mindmap.js';
+import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Renderer } from '../renderer.js';
 import { connector as renderConnector } from './connector/index.js';
 
@@ -8,6 +9,7 @@ export function mindmap(
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer,
+  rc: RoughCanvas,
   bound: IBound
 ) {
   const dx = model.x - bound.x;
@@ -29,7 +31,7 @@ export function mindmap(
           ctx.globalAlpha = connector.opacity;
         }
 
-        renderConnector(connector, ctx, matrix.translate(dx, dy), renderer);
+        renderConnector(connector, ctx, matrix.translate(dx, dy), renderer, rc);
 
         if (shouldSetGlobalAlpha) {
           ctx.globalAlpha = origin;
@@ -42,6 +44,6 @@ export function mindmap(
     const dx = connector.x - bound.x;
     const dy = connector.y - bound.y;
 
-    renderConnector(connector, ctx, matrix.translate(dx, dy), renderer);
+    renderConnector(connector, ctx, matrix.translate(dx, dy), renderer, rc);
   });
 }

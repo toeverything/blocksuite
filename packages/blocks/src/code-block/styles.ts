@@ -3,7 +3,6 @@ import { css } from 'lit';
 export const codeBlockStyles = css`
   affine-code {
     position: relative;
-    z-index: 1;
   }
 
   .affine-code-block-container {

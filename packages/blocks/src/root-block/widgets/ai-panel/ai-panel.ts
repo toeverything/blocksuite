@@ -58,12 +58,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       border-radius: var(--8, 8px);
       border: 1px solid var(--affine-border-color);
       background: var(--affine-background-overlay-panel-color);
-
-      /* light/toolbarShadow */
-      box-shadow: var(
-        --affine-toolbar-shadow,
-        0px 6px 16px 0px rgba(0, 0, 0, 0.14)
-      );
+      box-shadow: var(--affine-shadow-4);
 
       position: absolute;
       width: max-content;
