@@ -32,7 +32,11 @@ export {
 } from './element-model/connector.js';
 export { GroupElementModel } from './element-model/group.js';
 export { CanvasElementType } from './element-model/index.js';
-export { MindmapElementModel, MindmapStyle } from './element-model/mindmap.js';
+export {
+  LayoutType,
+  MindmapElementModel,
+  MindmapStyle,
+} from './element-model/mindmap.js';
 export { ShapeElementModel } from './element-model/shape.js';
 export { TextElementModel } from './element-model/text.js';
 export * from './elements/index.js';
