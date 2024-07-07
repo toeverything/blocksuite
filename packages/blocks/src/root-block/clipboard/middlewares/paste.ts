@@ -257,9 +257,14 @@ class PasteTr {
 
     host.updateComplete
       .then(() => {
-        const target = this.std.host.querySelector<BlockElement>(
+        const target = host.querySelector<BlockElement>(
           `[${host.blockIdAttr}="${lastModel.id}"]`
         );
+        if (!target && host.querySelector(`[data-row-id="${lastModel.id}"]`)) {
+          // when we paste in markdown text that ends with a table,
+          //  do not change focus
+          return
+        }
         assertExists(target);
         if (!lastModel.text) {
           if (matchFlavours(lastModel, ['affine:image'])) {
