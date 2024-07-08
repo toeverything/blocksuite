@@ -271,12 +271,12 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       },
       isEditing: false,
     };
-    popRowMenu(
-      this.dataViewEle,
-      e.target as HTMLElement,
-      this.rowId,
-      selection
-    );
+    const target =
+      cell ??
+      (e.target as HTMLElement).closest('.database-cell') ?? // for last add btn cell
+      (e.target as HTMLElement);
+
+    popRowMenu(this.dataViewEle, target, this.rowId, selection);
   };
 
   override connectedCallback() {
