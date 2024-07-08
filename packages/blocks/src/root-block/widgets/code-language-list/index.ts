@@ -3,6 +3,7 @@ import './components/lang-button.js';
 import { WidgetElement } from '@blocksuite/block-std';
 import { sleep } from '@blocksuite/global/utils';
 import { offset } from '@floating-ui/dom';
+import { computed } from '@lit-labs/preact-signals';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -20,26 +21,34 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
 > {
   private _isActivated = false;
 
+  private _shouldDisplay = computed(() => {
+    const selection = this.host.selection;
+
+    const textSelection = selection.find('text');
+    const hasTextSelection =
+      !!textSelection && (!!textSelection.to || !!textSelection.from.length);
+
+    if (hasTextSelection) {
+      return false;
+    }
+
+    const blockSelections = selection.filter('block');
+    const hasMultipleBlockSelections =
+      blockSelections.length > 1 ||
+      (blockSelections.length === 1 &&
+        blockSelections[0].blockId !== this.blockElement.blockId);
+
+    if (hasMultipleBlockSelections) {
+      return false;
+    }
+
+    return true;
+  });
+
   private _hoverController = new HoverController(
     this,
     () => {
-      const codeBlock = this.blockElement;
-      const selection = this.host.selection;
-
-      const textSelection = selection.find('text');
-      if (
-        !!textSelection &&
-        (!!textSelection.to || !!textSelection.from.length)
-      ) {
-        return null;
-      }
-
-      const blockSelections = selection.filter('block');
-      if (
-        blockSelections.length > 1 ||
-        (blockSelections.length === 1 &&
-          blockSelections[0].blockId !== codeBlock.blockId)
-      ) {
+      if (!this._shouldDisplay.value) {
         return null;
       }
 

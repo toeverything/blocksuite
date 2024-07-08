@@ -1,6 +1,6 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { StackItem } from '@blocksuite/store';
-import { signal } from '@lit-labs/preact-signals';
+import { computed, signal } from '@lit-labs/preact-signals';
 
 import type { BaseSelection } from './base.js';
 import {
@@ -178,15 +178,23 @@ export class SelectionManager {
   }
 
   find<T extends BlockSuite.SelectionType>(type: T) {
-    return this.value.find((sel): sel is BlockSuite.SelectionInstance[T] =>
-      sel.is(type)
+    const computedFind = computed(() =>
+      this.value.find((sel): sel is BlockSuite.SelectionInstance[T] =>
+        sel.is(type)
+      )
     );
+
+    return computedFind.value;
   }
 
   filter<T extends BlockSuite.SelectionType>(type: T) {
-    return this.value.filter((sel): sel is BlockSuite.SelectionInstance[T] =>
-      sel.is(type)
+    const computedFilter = computed(() =>
+      this.value.filter((sel): sel is BlockSuite.SelectionInstance[T] =>
+        sel.is(type)
+      )
     );
+
+    return computedFilter.value;
   }
 
   mount() {
