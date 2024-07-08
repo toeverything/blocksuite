@@ -351,6 +351,10 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
         this._recalculatePosition();
       })
     );
+
+    _disposables.add(
+      edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
+    );
   }
 
   registerEntry(entry: CustomEntry) {
