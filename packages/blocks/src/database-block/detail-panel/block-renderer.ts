@@ -48,6 +48,21 @@ export class BlockRenderer
       display: none;
     }
 
+    database-datasource-block-renderer rich-text {
+      font-size: 15px;
+      line-height: 24px;
+    }
+
+    database-datasource-block-renderer.empty rich-text::before {
+      content: 'Untitled';
+      position: absolute;
+      color: var(--affine-text-disable-color);
+      font-size: 15px;
+      line-height: 24px;
+      user-select: none;
+      pointer-events: none;
+    }
+
     .database-block-detail-header-icon {
       width: 20px;
       height: 20px;
@@ -91,6 +106,21 @@ export class BlockRenderer
 
   override connectedCallback() {
     super.connectedCallback();
+    if (this.model && this.model.text) {
+      const cb = () => {
+        if (this.model?.text?.length == 0) {
+          // eslint-disable-next-line wc/no-self-class
+          this.classList.add('empty');
+        } else {
+          // eslint-disable-next-line wc/no-self-class
+          this.classList.remove('empty');
+        }
+      };
+      this.model.text.yText.observe(cb);
+      this.disposables.add(() => {
+        this.model?.text?.yText.unobserve(cb);
+      });
+    }
     this._disposables.addFromEvent(
       this,
       'keydown',
