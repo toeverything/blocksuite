@@ -376,7 +376,7 @@ describe('addBlock', () => {
     doc.addBlock('affine:paragraph', {}, noteId!);
     assert.equal(root.children[0].flavour, 'affine:note');
     assert.equal(root.children[0].children[0].flavour, 'affine:paragraph');
-    assert.equal(root.childMap.get('1'), 0);
+    assert.equal(root.childMap.value.get('1'), 0);
 
     const serializedChildren = serializCollection(doc.rootDoc).spaces[spaceId]
       .blocks['0']['sys:children'];

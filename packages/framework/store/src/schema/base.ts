@@ -1,4 +1,5 @@
-import { Slot } from '@blocksuite/global/utils';
+import { type Disposable, Slot } from '@blocksuite/global/utils';
+import { computed, signal } from '@preact/signals-core';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
@@ -171,6 +172,12 @@ const modelLabel = Symbol('model_label');
 export class BlockModel<
   Props extends object = object,
 > extends MagicProps()<Props> {
+  private _children = signal<string[]>([]);
+
+  private _onCreated: Disposable;
+
+  private _onDeleted: Disposable;
+
   // This is used to avoid https://stackoverflow.com/questions/55886792/infer-typescript-generic-class-type
   [modelLabel]: Props = 'type_info_label' as never;
 
@@ -206,6 +213,35 @@ export class BlockModel<
 
   childrenUpdated = new Slot();
 
+  childMap = computed(() =>
+    this._children.value.reduce((map, id, index) => {
+      map.set(id, index);
+      return map;
+    }, new Map<string, number>())
+  );
+
+  isEmpty = computed(() => {
+    return this._children.value.length === 0;
+  });
+
+  constructor() {
+    super();
+    this._onCreated = this.created.once(() => {
+      this._children.value = this.yBlock.get('sys:children').toArray();
+      this.yBlock.get('sys:children').observe(event => {
+        this._children.value = event.target.toArray();
+      });
+    });
+    this._onDeleted = this.deleted.once(() => {
+      this._onCreated.dispose();
+    });
+  }
+
+  [Symbol.dispose]() {
+    this._onCreated.dispose();
+    this._onDeleted.dispose();
+  }
+
   get doc() {
     return this.page;
   }
@@ -214,33 +250,15 @@ export class BlockModel<
     this.page = doc;
   }
 
-  get childMap() {
-    return this.children.reduce((map, child, index) => {
-      map.set(child.id, index);
-      return map;
-    }, new Map<string, number>());
-  }
-
   get children() {
-    const block = this.yBlock.get('sys:children') as Y.Array<string>;
-    if (!block) {
-      return [];
-    }
-
-    const children: BlockModel[] = [];
-    block.forEach(id => {
-      const child = this.doc.getBlockById(id);
-      if (!child) {
-        return;
+    const value: BlockModel[] = [];
+    this._children.value.forEach(id => {
+      const block = this.page.getBlock(id);
+      if (block) {
+        value.push(block.model);
       }
-      children.push(child);
     });
-
-    return children;
-  }
-
-  isEmpty() {
-    return this.children.length === 0;
+    return value;
   }
 
   firstChild(): BlockModel | null {

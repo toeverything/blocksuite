@@ -100,20 +100,6 @@ export class ListBlockComponent extends BlockComponent<
     this._select();
   };
 
-  private _updateFollowingListSiblings() {
-    this.updateComplete
-      .then(() => {
-        let current: BlockElement | null = this as BlockElement;
-        while (current?.tagName == 'AFFINE-LIST') {
-          current.requestUpdate();
-          const next = this.std.doc.getNext(current.model);
-          const id = next?.id;
-          current = id ? this.std.view.getBlock(id) : null;
-        }
-      })
-      .catch(console.error);
-  }
-
   private _toggleChildren() {
     if (this.doc.readonly) {
       this._isCollapsedWhenReadOnly = !this._isCollapsedWhenReadOnly;
@@ -162,23 +148,6 @@ export class ListBlockComponent extends BlockComponent<
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
-
-    this._updateFollowingListSiblings();
-    this.disposables.add(
-      this.model.childrenUpdated.on(() => {
-        this._updateFollowingListSiblings();
-      })
-    );
-    this.disposables.add(
-      this.host.std.doc.slots.blockUpdated.on(e => {
-        if (e.type !== 'delete') return;
-        const deletedBlock = this.std.view.getBlock(e.id);
-        if (!deletedBlock) return;
-        if (this !== deletedBlock.nextElementSibling) return;
-        this._updateFollowingListSiblings();
-        return;
-      })
-    );
   }
 
   override renderBlock(): TemplateResult<1> {

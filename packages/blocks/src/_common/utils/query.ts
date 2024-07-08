@@ -822,7 +822,7 @@ export function getDropRectByPoint(
     const table = getDatabaseBlockTableElement(element);
     assertExists(table);
     let bounds = table.getBoundingClientRect();
-    if (model.isEmpty()) {
+    if (model.isEmpty.value) {
       result.flag = DropFlags.EmptyDatabase;
 
       if (point.y < bounds.top) return result;

@@ -420,7 +420,7 @@ export class OutlineNoteCard extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this.note.isEmpty()) return nothing;
+    if (this.note.isEmpty.peek()) return nothing;
 
     const mode = getThemeMode();
     const { children, displayMode } = this.note;

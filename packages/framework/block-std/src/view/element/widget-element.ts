@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -13,7 +14,7 @@ export class WidgetElement<
   Model extends BlockModel = BlockModel,
   B extends BlockElement = BlockElement,
   S extends BlockService = BlockService,
-> extends WithDisposable(LitElement) {
+> extends SignalWatcher(WithDisposable(LitElement)) {
   @property({ attribute: false })
   accessor host!: EditorHost;
 

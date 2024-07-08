@@ -93,7 +93,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
   }
 
   private getModelById(rowId: string): BlockModel | undefined {
-    return this._model.children[this._model.childMap.get(rowId) ?? -1];
+    return this._model.children[this._model.childMap.value.get(rowId) ?? -1];
   }
 
   private newColumnName() {

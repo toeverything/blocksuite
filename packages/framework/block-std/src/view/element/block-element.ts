@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -19,7 +20,7 @@ export class BlockElement<
   Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
-> extends WithDisposable(ShadowlessElement) {
+> extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   get parentBlockElement(): BlockElement {
     const el = this.parentElement;
     // TODO(mirone/#6534): find a better way to get block element from a node
@@ -263,12 +264,6 @@ export class BlockElement<
 
     this._disposables.add(
       this.model.propsUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    this._disposables.add(
-      this.model.childrenUpdated.on(() => {
         this.requestUpdate();
       })
     );

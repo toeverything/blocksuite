@@ -18,6 +18,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/sync": "workspace:*",
+    "@preact/signals-core": "^1.6.1",
     "@types/flexsearch": "^0.7.6",
     "flexsearch": "0.7.43",
     "lib0": "^0.2.94",

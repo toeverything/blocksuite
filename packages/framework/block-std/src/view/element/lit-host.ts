@@ -3,6 +3,7 @@
 import { handleError } from '@blocksuite/global/exceptions';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Doc } from '@blocksuite/store';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import {
   css,
   LitElement,
@@ -26,7 +27,9 @@ import type { ViewStore } from '../view-store.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
 @customElement('editor-host')
-export class EditorHost extends WithDisposable(ShadowlessElement) {
+export class EditorHost extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   get command(): CommandManager {
     return this.std.command;
   }
@@ -77,12 +80,12 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   private _renderModel = (model: BlockModel): TemplateResult => {
     const { flavour } = model;
     const block = this.doc.getBlock(model.id);
-    if (block?.blockViewType === BlockViewType.Hidden) {
-      return html``;
+    if (!block || block.blockViewType === BlockViewType.Hidden) {
+      return html`${nothing}`;
     }
     const schema = this.doc.schema.flavourSchemaMap.get(flavour);
     const view = this.std.spec.getView(flavour);
-    if (!schema || !block || !view) {
+    if (!schema || !view) {
       console.warn(`Cannot find render flavour ${flavour}.`);
       return html`${nothing}`;
     }
