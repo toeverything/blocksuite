@@ -307,7 +307,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
           this.topContenteditableElement?.host
             ? getViewportElement(this.topContenteditableElement.host)
             : null}
-        class="data-view-header-area-rich-text"
+        class="data-view-header-area-rich-text can-link-doc"
       ></rich-text>`;
   }
 }
