@@ -4,8 +4,9 @@ import {
   TextSelection,
 } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
-import { assertExists, throttle } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { UserInfo } from '@blocksuite/store';
+import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -47,11 +48,18 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
 
   private _remoteColorManager: RemoteColorManager | null = null;
 
-  private _remoteSelections: Array<{
-    id: number;
-    selections: BaseSelection[];
-    user?: UserInfo;
-  }> = [];
+  private _remoteSelections = computed(() => {
+    const status = this.doc.awarenessStore.getStates();
+    return [...this.std.selection.remoteSelections.entries()].map(
+      ([id, selections]) => {
+        return {
+          id,
+          selections,
+          user: status.get(id)?.user,
+        };
+      }
+    );
+  });
 
   private _resizeObserver: ResizeObserver = new ResizeObserver(() => {
     this.requestUpdate();
@@ -201,24 +209,6 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.disposables.add(
-      this._selectionManager.slots.remoteChanged.on(
-        throttle((remoteSelections: Map<number, BaseSelection[]>) => {
-          const status = this.doc.awarenessStore.getStates();
-          this._remoteSelections = [...remoteSelections.entries()].map(
-            ([id, selections]) => {
-              return {
-                id,
-                selections,
-                user: status.get(id)?.user,
-              };
-            }
-          );
-
-          this.requestUpdate();
-        }, 100)
-      )
-    );
     this.handleEvent('wheel', () => {
       this.requestUpdate();
     });
@@ -237,7 +227,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   }
 
   override render() {
-    if (this._remoteSelections.length === 0) {
+    if (this._remoteSelections.value.length === 0) {
       return nothing;
     }
 
@@ -247,7 +237,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
       selections: BaseSelection[];
       rects: SelectionRect[];
       user?: UserInfo;
-    }> = this._remoteSelections.flatMap(({ selections, id, user }) => {
+    }> = this._remoteSelections.value.flatMap(({ selections, id, user }) => {
       if (remoteUsers.has(id)) {
         return [];
       } else {
