@@ -1,9 +1,10 @@
 import '../_common/components/rich-text/rich-text.js';
 
-import type { BlockElement, TextSelection } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRangeProvider } from '@blocksuite/inline';
+import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
@@ -73,35 +74,9 @@ export class ParagraphBlockComponent extends BlockComponent<
   @query('.affine-paragraph-placeholder')
   private accessor _placeholderContainer: HTMLElement | null = null;
 
-  private _currentTextSelection: TextSelection | undefined = undefined;
+  private _displayPlaceholder!: ReadonlySignal<boolean>;
 
   override accessor blockContainerStyles = { margin: '10px 0' };
-
-  //TODO(@Flrande) wrap placeholder in `rich-text` or inline-editor to make it more developer-friendly
-  private _updatePlaceholder = () => {
-    if (
-      !this._placeholderContainer ||
-      !this._richTextElement ||
-      !this.inlineEditor
-    )
-      return;
-
-    const selection = this._currentTextSelection;
-    const isCollapsed = selection?.isCollapsed() ?? false;
-
-    if (
-      this.doc.readonly ||
-      this.inlineEditor.yTextLength > 0 ||
-      this.inlineEditor.isComposing ||
-      !this.selected ||
-      !isCollapsed ||
-      this._isInDatabase()
-    ) {
-      this._placeholderContainer.classList.remove('visible');
-    } else {
-      this._placeholderContainer.classList.add('visible');
-    }
-  };
 
   private _isInDatabase = () => {
     let parent = this.parentElement;
@@ -125,39 +100,29 @@ export class ParagraphBlockComponent extends BlockComponent<
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
-  }
+    this._displayPlaceholder = computed(() => {
+      const textSelection = this.host.selection.find('text');
+      const isCollapsed = textSelection?.isCollapsed() ?? false;
+      if (
+        !this._placeholderContainer ||
+        !this._richTextElement ||
+        !this.inlineEditor
+      )
+        return false;
 
-  override firstUpdated() {
-    this._disposables.add(this.model.propsUpdated.on(this._updatePlaceholder));
-    this._disposables.add(
-      this.host.selection.slots.changed.on(() => {
-        const selection = this.host.selection.find('text');
-
-        if (
-          selection === this._currentTextSelection ||
-          (this._currentTextSelection &&
-            selection &&
-            selection.equals(this._currentTextSelection))
-        ) {
-          return;
-        }
-
-        this._currentTextSelection = selection;
-        this._updatePlaceholder();
-      })
-    );
-
-    this.updateComplete
-      .then(() => {
-        this._updatePlaceholder();
-
-        const inlineEditor = this.inlineEditor;
-        if (!inlineEditor) return;
-        this.disposables.add(
-          inlineEditor.slots.inputting.on(this._updatePlaceholder)
-        );
-      })
-      .catch(console.error);
+      if (
+        this.doc.readonly ||
+        this.inlineEditor.yTextLength > 0 ||
+        this.inlineEditor.isComposing ||
+        !this.selected ||
+        !isCollapsed ||
+        this._isInDatabase()
+      ) {
+        this._placeholderContainer.classList.remove('visible');
+        return false;
+      }
+      return true;
+    });
   }
 
   override renderBlock(): TemplateResult<1> {
@@ -192,7 +157,10 @@ export class ParagraphBlockComponent extends BlockComponent<
             : html`
                 <div
                   contenteditable="false"
-                  class="affine-paragraph-placeholder"
+                  class="affine-paragraph-placeholder ${this._displayPlaceholder
+                    .value
+                    ? 'visible'
+                    : ''}"
                 >
                   ${this.service.placeholderGenerator(this.model)}
                 </div>

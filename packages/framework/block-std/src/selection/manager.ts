@@ -177,24 +177,28 @@ export class SelectionManager {
     }
   }
 
-  find<T extends BlockSuite.SelectionType>(type: T) {
-    const computedFind = computed(() =>
+  find$<T extends BlockSuite.SelectionType>(type: T) {
+    return computed(() =>
       this.value.find((sel): sel is BlockSuite.SelectionInstance[T] =>
         sel.is(type)
       )
     );
-
-    return computedFind.value;
   }
 
-  filter<T extends BlockSuite.SelectionType>(type: T) {
-    const computedFilter = computed(() =>
+  find<T extends BlockSuite.SelectionType>(type: T) {
+    return this.find$(type).value;
+  }
+
+  filter$<T extends BlockSuite.SelectionType>(type: T) {
+    return computed(() =>
       this.value.filter((sel): sel is BlockSuite.SelectionInstance[T] =>
         sel.is(type)
       )
     );
+  }
 
-    return computedFilter.value;
+  filter<T extends BlockSuite.SelectionType>(type: T) {
+    return this.filter$(type).value;
   }
 
   mount() {
