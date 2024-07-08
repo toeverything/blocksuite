@@ -72,8 +72,6 @@ export function createStarterDocCollection() {
     blobSources,
   };
   const collection = new DocCollection(options);
-  collection.meta.initialize();
-
   collection.start();
 
   // debug info
@@ -123,6 +121,7 @@ export async function initStarterDocCollection(collection: DocCollection) {
   ).forEach(fn => functionMap.set(fn.id, fn));
   const init = params.get('init') || 'preset';
   if (functionMap.has(init)) {
+    collection.meta.initialize();
     await functionMap.get(init)?.(collection, 'doc:home');
     const doc = collection.getDoc('doc:home');
     if (!doc?.loaded) {

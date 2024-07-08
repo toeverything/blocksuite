@@ -56,6 +56,7 @@ import type { RootBlockComponent } from '../../types.js';
 import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips/index.js';
 import {
+  createConversionItem,
   createDatabaseBlockInNextLine,
   formatDate,
   formatTime,
@@ -64,7 +65,6 @@ import {
   insideEdgelessText,
   tryRemoveEmptyLine,
 } from './utils.js';
-import { createConversionItem } from './utils.js';
 
 export type SlashMenuConfig = {
   triggerKeys: string[];
