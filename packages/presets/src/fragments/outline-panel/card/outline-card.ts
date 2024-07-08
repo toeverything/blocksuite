@@ -9,6 +9,7 @@ import {
 } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { baseTheme } from '@toeverything/theme';
 import {
   css,
@@ -217,7 +218,7 @@ const styles = css`
   }
 `;
 
-export class OutlineNoteCard extends WithDisposable(LitElement) {
+export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
   static override styles = styles;
 
   @state()
@@ -269,11 +270,6 @@ export class OutlineNoteCard extends WithDisposable(LitElement) {
   private _setNoteDisposables() {
     this._clearNoteDisposables();
     this._noteDisposables = new DisposableGroup();
-    this._noteDisposables.add(
-      this.note.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
     this._noteDisposables.add(
       this.note.propsUpdated.on(() => this.requestUpdate())
     );

@@ -565,6 +565,9 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.6.5
         version: 1.6.5
+      '@lit-labs/preact-signals':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@toeverything/theme':
         specifier: ^0.7.35
         version: 0.7.35
