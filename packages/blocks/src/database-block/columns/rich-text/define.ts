@@ -99,7 +99,7 @@ richTextColumnModelConfig.addConvert('multi-select', (_column, cells) => {
 
 richTextColumnModelConfig.addConvert('number', (_column, cells) => {
   return {
-    column: { decimal: 0 },
+    column: { decimal: 0, format: 'number' },
     cells: cells.map(v => {
       const num = v ? parseFloat(v.toString()) : NaN;
       return isNaN(num) ? undefined : num;

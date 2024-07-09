@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { popMenu } from '../../../../../../../_common/components/index.js';
+import { numberFormats } from '../../../../../column/presets/number/utils/formats.js';
 import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
 import {
   DatabaseDuplicate,
@@ -253,6 +254,37 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         input: inputConfig(this.column),
         items: [
           typeConfig(this.column, this.tableViewManager),
+          {
+            type: 'sub-menu',
+            name: 'Number Format',
+            icon: html`<span style="color: var(--affine-icon-color);"
+              >123</span
+            >`,
+            hide: () =>
+              !this.column.updateData || this.column.type !== 'number',
+            options: {
+              input: {
+                search: true,
+              },
+              items: numberFormats.map(format => {
+                return {
+                  type: 'action',
+                  isSelected: this.column.data.format === format.type,
+                  icon: html`<span
+                    style="color: inherit; font-size: var(--affine-font-base); scale: 1.2;"
+                    >${format.symbol}</span
+                  >`,
+                  name: format.label,
+                  select: () => {
+                    if (this.column.data.format === format.type) return;
+                    this.column.updateData(() => ({
+                      format: format.type,
+                    }));
+                  },
+                };
+              }),
+            },
+          },
           {
             type: 'action',
             name: 'Duplicate Column',

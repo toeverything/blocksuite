@@ -8,6 +8,7 @@ import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
 import { numberColumnModelConfig } from './define.js';
+import { formatNumber, type NumberFormat } from './utils/formatter.js';
 
 @customElement('affine-database-number-cell')
 export class NumberCell extends BaseCellRenderer<number> {
@@ -34,9 +35,12 @@ export class NumberCell extends BaseCellRenderer<number> {
   `;
 
   override render() {
-    return html` <div class="affine-database-number number">
-      ${this.value ?? ''}
-    </div>`;
+    const formatMode = (this.column.data.format ?? 'number') as NumberFormat;
+
+    const formatted =
+      this.value !== undefined ? formatNumber(this.value, formatMode) : '';
+
+    return html` <div class="affine-database-number number">${formatted}</div>`;
   }
 }
 
@@ -77,12 +81,17 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
       this.onChange(undefined);
       return;
     }
-    const value = Number.parseFloat(str);
+
+    const formatMode = (this.column.data.format ?? 'number') as NumberFormat;
+    const value = parseFloat(str);
+
+    const formatted = formatNumber(value, formatMode);
+
     if (Object.is(value, NaN)) {
       this._inputEle.value = `${this.value ?? ''}`;
       return;
     }
-    this._inputEle.value = `${this.value ?? ''}`;
+    this._inputEle.value = formatted;
     this.onChange(value);
   };
 
@@ -128,11 +137,15 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   }
 
   override render() {
-    const value = `${this.value ?? ''}`;
+    const formatMode = (this.column.data.format ?? 'number') as NumberFormat;
+
+    const formatted =
+      this.value !== undefined ? formatNumber(this.value, formatMode) : '';
+
     return html`<input
       type="text"
       autocomplete="off"
-      .value="${value}"
+      .value="${formatted}"
       @keydown="${this._keydown}"
       @blur="${this._blur}"
       @focus="${this._focus}"
