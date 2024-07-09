@@ -110,7 +110,7 @@ test(scoped`clipboard copy paste title`, async ({ page }) => {
   await assertTitle(page, 'testtest');
 });
 
-test.skip(scoped`clipboard paste html`, async ({ page }) => {
+test(scoped`clipboard paste html`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -136,7 +136,7 @@ test.skip(scoped`clipboard paste html`, async ({ page }) => {
   await assertText(page, 'aaabbbcccddd');
 });
 
-test.skip(
+test(
   scoped`clipboard paste HTML containing Markdown syntax code and image `,
   async ({ page }) => {
     test.info().annotations.push({
@@ -346,7 +346,7 @@ test(scoped`split block when paste`, async ({ page }) => {
     .locator('[data-block-id="2"] .inline-editor')
     .boundingBox();
   const bottomRight789 = await getEditorLocator(page)
-    .locator('[data-block-id="5"] .inline-editor')
+    .locator('[data-block-id="4"] .inline-editor')
     .boundingBox();
   assertExists(topLeft123);
   assertExists(bottomRight789);
@@ -1373,7 +1373,9 @@ test(scoped`clipboard copy multi selection`, async ({ page }) => {
   await focusRichText(page, 1);
   await pasteByKeyboard(page);
   await waitNextFrame(page);
-  await assertRichTexts(page, ['abc', 'defbc', 'd']);
+  await type(page, 'cursor');
+  await waitNextFrame(page);
+  await assertRichTexts(page, ['abc', 'defbc', 'dcursor']);
 });
 
 test.skip(scoped`clipboard copy nested items`, async ({ page }) => {

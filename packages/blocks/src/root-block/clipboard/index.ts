@@ -156,7 +156,7 @@ export class PageClipboard {
             e,
             this._std.doc,
             ctx.parentBlock.model.id,
-            ctx.blockIndex ? ctx.blockIndex + 1 : undefined
+            ctx.blockIndex ? ctx.blockIndex + 1 : 1
           )
           .catch(console.error);
 

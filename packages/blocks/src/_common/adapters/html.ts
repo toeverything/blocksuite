@@ -657,7 +657,8 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           break;
         }
         case 'body':
-        case 'div': {
+        case 'div':
+        case 'footer': {
           if (
             // Check if it is a paragraph like div
             o.parent?.node.type === 'element' &&
@@ -666,13 +667,18 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               [
                 'span',
                 'strong',
+                'b',
+                'i',
                 'em',
                 'code',
+                'ins',
                 'del',
                 'u',
                 'a',
                 'mark',
                 'br',
+                'bdi',
+                'bdo',
               ].includes(child.tagName)
             ) ||
               o.node.children
@@ -864,6 +870,9 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             Array.isArray(o.node.properties?.className)
           ) {
             if (
+              o.node.properties.className.includes(
+                'affine-paragraph-block-container'
+              ) ||
               o.node.properties.className.includes(
                 'affine-block-children-container'
               ) ||
@@ -1088,12 +1097,16 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           case 'ul': {
             return [];
           }
-          case 'span': {
+          case 'span':
+          case 'bdi':
+          case 'bdo':
+          case 'ins': {
             return ast.children.flatMap(child =>
               this._hastToDeltaSpreaded(child, { trim: false })
             );
           }
-          case 'strong': {
+          case 'strong':
+          case 'b': {
             return ast.children.flatMap(child =>
               this._hastToDeltaSpreaded(child, { trim: false }).map(delta => {
                 delta.attributes = { ...delta.attributes, bold: true };
@@ -1101,6 +1114,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               })
             );
           }
+          case 'i':
           case 'em': {
             return ast.children.flatMap(child =>
               this._hastToDeltaSpreaded(child, { trim: false }).map(delta => {
