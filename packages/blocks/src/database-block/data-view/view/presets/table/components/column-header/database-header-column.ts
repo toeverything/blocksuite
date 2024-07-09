@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { popMenu } from '../../../../../../../_common/components/index.js';
+import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
 import {
   DatabaseDuplicate,
   DatabaseInsertLeft,
@@ -15,7 +16,6 @@ import {
   DatabaseMoveLeft,
   DatabaseMoveRight,
   DeleteIcon,
-  TextIcon,
 } from '../../../../../common/icons/index.js';
 import type { InsertToPosition } from '../../../../../types.js';
 import { startDrag } from '../../../../../utils/drag.js';
@@ -250,40 +250,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   private popMenu(ele?: HTMLElement) {
     popMenu(ele ?? this, {
       options: {
-        input: {
-          initValue: this.column.name,
-          onComplete: text => {
-            this.column.updateName(text);
-          },
-        },
+        input: inputConfig(this.column),
         items: [
-          {
-            type: 'sub-menu',
-            name: 'Column Type',
-            icon: TextIcon,
-            hide: () => !this.column.updateType || this.column.type === 'title',
-            options: {
-              input: {
-                search: true,
-              },
-              items: this.tableViewManager.allColumnConfig.map(config => {
-                return {
-                  type: 'action',
-                  isSelected: config.type === this.column.type,
-                  name: config.name,
-                  icon: html` <uni-lit
-                    .uni="${this.tableViewManager.getIcon(config.type)}"
-                  ></uni-lit>`,
-                  select: () => {
-                    if (this.column.type === config.type) {
-                      return;
-                    }
-                    this.column.updateType?.(config.type);
-                  },
-                };
-              }),
-            },
-          },
+          typeConfig(this.column, this.tableViewManager),
           {
             type: 'action',
             name: 'Duplicate Column',

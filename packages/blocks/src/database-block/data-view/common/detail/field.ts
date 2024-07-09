@@ -15,12 +15,12 @@ import type {
   DataViewColumnManager,
   DataViewManager,
 } from '../../view/data-view-manager.js';
+import { inputConfig, typeConfig } from '../column-menu.js';
 import {
   DatabaseDuplicate,
   DatabaseMoveLeft,
   DatabaseMoveRight,
   DeleteIcon,
-  TextIcon,
 } from '../icons/index.js';
 
 @customElement('affine-data-view-record-field')
@@ -151,38 +151,9 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     const columns = this.view.detailColumns;
     popMenu(ele, {
       options: {
-        input: {
-          initValue: this.column.name,
-          onComplete: text => {
-            this.column.updateName(text);
-          },
-        },
+        input: inputConfig(this.column),
         items: [
-          {
-            type: 'sub-menu',
-            name: 'Column Type',
-            icon: TextIcon,
-            hide: () => !this.column.updateType || this.column.type === 'title',
-            options: {
-              input: {
-                search: true,
-              },
-              items: this.view.allColumnConfig
-                .filter(v => v.type !== this.column.type)
-                .map(config => {
-                  return {
-                    type: 'action',
-                    name: config.name,
-                    icon: html` <uni-lit
-                      .uni="${this.view.getIcon(config.type)}"
-                    ></uni-lit>`,
-                    select: () => {
-                      this.column.updateType?.(config.type);
-                    },
-                  };
-                }),
-            },
-          },
+          typeConfig(this.column, this.view),
           {
             type: 'action',
             name: 'Duplicate Column',
