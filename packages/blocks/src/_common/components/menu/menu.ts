@@ -95,6 +95,8 @@ export type MenuOptions = {
   onClose?: () => void;
   style?: string;
   input?: {
+    icon?: TemplateResult;
+    divider?: boolean;
     search?: boolean;
     placeholder?: string;
     initValue?: string;
@@ -189,7 +191,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       display: flex;
       flex-direction: column;
       user-select: none;
-      min-width: 200px;
+      min-width: 276px;
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       background-color: var(--affine-background-overlay-panel-color);
@@ -208,8 +210,17 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       gap: 4px;
     }
 
+    .affine-menu-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+    }
+
+    .affine-menu-header .icon {
+    }
     .affine-menu-header input {
-      width: 100%;
+      flex: 1;
       border-radius: 4px;
       outline: none;
       font-size: 14px;
@@ -646,8 +657,12 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       opacity: showHeader ? '1' : '0',
       height: showHeader ? undefined : '0',
       overflow: showHeader ? undefined : 'hidden',
+      position: showHeader ? undefined : 'absolute',
     });
-    const showHeaderDivider = this.selectableItems.length > 0 && showHeader;
+    const showHeaderDivider =
+      this.selectableItems.length > 0 &&
+      showHeader &&
+      this.options.input?.divider !== false;
     return html`
       <div
         class="affine-menu"
@@ -660,6 +675,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                 style=${headerStyle}
                 @mouseenter="${this.mouseEnterHeader}"
               >
+                ${this.options.input.icon
+                  ? html`<div class="icon">${this.options.input.icon}</div>`
+                  : nothing}
                 <input
                   autocomplete="off"
                   data-1p-ignore
@@ -670,7 +688,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                   @input="${this._inputText}"
                 />
               </div>
-              ${showHeaderDivider ? html`<menu-divider></menu-divider>` : null}`
+              ${showHeaderDivider
+                ? html`<menu-divider style="width: 100%"></menu-divider>`
+                : null}`
           : null}
         <div class="affine-menu-body">
           ${this.selectableItems.length === 0 && this.isSearchMode
@@ -678,8 +698,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
             : ''}
           ${repeat(this.allItems, (menu, index) => {
             const i = menu.index;
-            const hideDividerWhenHeaderDividerIsShow =
-              i === 0 && showHeaderDivider;
+            const hideDividerWhenHeaderDividerIsShow = i === 0;
             const divider =
               menu.upDivider || this.allItems[index - 1]?.downDivider;
             const mouseEnter = () => {
@@ -687,7 +706,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
             };
             if (menu.type === 'ui') {
               return html`
-                ${divider ? html`<menu-divider></menu-divider>` : null}
+                ${divider
+                  ? html`<menu-divider style="width: 100%"></menu-divider>`
+                  : null}
                 <div @mouseenter=${mouseEnter}>${menu.render}</div>
               `;
             }
@@ -706,7 +727,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
 
             return html`
               ${divider && !hideDividerWhenHeaderDividerIsShow
-                ? html`<menu-divider></menu-divider>`
+                ? html`<menu-divider style="width: 100%"></menu-divider>`
                 : null}
               <div
                 class="${classes}"
