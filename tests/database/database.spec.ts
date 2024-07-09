@@ -142,7 +142,7 @@ test('should the multi-select mode work correctly', async ({ page }) => {
   await pressEscape(page);
   await initDatabaseDynamicRowWithData(page, '2');
   await pressEscape(page);
-  const cell = getFirstColumnCell(page, 'select-selected');
+  const cell = getFirstColumnCell(page, 'tag-container');
   expect(await cell.count()).toBe(2);
   expect(await cell.nth(0).innerText()).toBe('1');
   expect(await cell.nth(1).innerText()).toBe('2');
@@ -517,7 +517,7 @@ test('should title column support quick changing of column type', async ({
   await typeIcon.click();
   await waitNextFrame(page);
   await clickColumnType(page, 'Select');
-  const cell = getFirstColumnCell(page, 'select-selected');
+  const cell = getFirstColumnCell(page, 'tag-container');
   expect(await cell.count()).toBe(1);
 });
 

@@ -60,7 +60,7 @@ test.describe('column operations', () => {
     const { text: title1 } = await getDatabaseHeaderColumn(page, 1);
     expect(title1).toBe('Column 1');
 
-    const selected = getFirstColumnCell(page, 'select-selected');
+    const selected = getFirstColumnCell(page, 'tag-container');
     expect(await selected.innerText()).toBe('123');
 
     await initDatabaseColumn(page, 'abc');
@@ -226,7 +226,7 @@ test.describe('switch column type', () => {
     await pressEscape(page);
     await initDatabaseDynamicRowWithData(page, 'abc');
     await pressEscape(page);
-    const cell = getFirstColumnCell(page, 'select-selected');
+    const cell = getFirstColumnCell(page, 'tag-container');
     expect(await cell.count()).toBe(2);
 
     await switchColumnType(page, 'Select', 1);
@@ -293,7 +293,7 @@ test.describe('switch column type', () => {
 
     await switchColumnType(page, 'Select');
     await initDatabaseDynamicRowWithData(page, 'abc');
-    const selectCell = getFirstColumnCell(page, 'select-selected');
+    const selectCell = getFirstColumnCell(page, 'tag-container');
     expect(await selectCell.innerText()).toBe('abc');
 
     await switchColumnType(page, 'Number');
