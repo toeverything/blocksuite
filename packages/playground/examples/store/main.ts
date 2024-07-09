@@ -10,6 +10,7 @@ function initDoc() {
   const schema = new Schema();
   schema.register(TodoSchema);
   const workspace = new DocCollection({ schema });
+  workspace.meta.initialize();
   const doc = workspace.createDoc({ id: 'doc:home' });
   doc.addBlock('todo:container');
   return doc;
