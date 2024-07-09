@@ -78,11 +78,12 @@ export class IconButton extends LitElement {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
     }
 
     :host .text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
     }
@@ -100,6 +101,7 @@ export class IconButton extends LitElement {
     }
 
     ::slotted(svg) {
+      flex-shrink: 0;
       color: var(--svg-icon-color);
     }
 
