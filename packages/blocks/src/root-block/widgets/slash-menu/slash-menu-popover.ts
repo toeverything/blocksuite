@@ -16,7 +16,10 @@ import {
   getInlineEditorByModel,
   isControlledKeyboardEvent,
 } from '../../../_common/utils/index.js';
-import { isFuzzyMatch } from '../../../_common/utils/string.js';
+import {
+  isFuzzyMatch,
+  substringMatchScore,
+} from '../../../_common/utils/string.js';
 import type {
   SlashMenuActionItem,
   SlashMenuContext,
@@ -135,22 +138,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
       depth++;
     }
 
-    // make items in the same group in order
     this._filteredItems = this._filteredItems.sort((a, b) => {
-      if (a.name.toLowerCase() === searchStr) return -1;
-      if (b.name.toLowerCase() === searchStr) return 1;
-
-      const aPath = this._itemPathMap.get(a);
-      const bPath = this._itemPathMap.get(b);
-
-      assertExists(aPath);
-      assertExists(bPath);
-
-      for (let i = 0; i < Math.min(aPath.length, bPath.length); i++) {
-        if (aPath[i] < bPath[i]) return -1;
-        if (aPath[i] > bPath[i]) return 1;
-      }
-      return aPath.length - bPath.length;
+      return -(
+        substringMatchScore(a.name, searchStr) -
+        substringMatchScore(b.name, searchStr)
+      );
     });
 
     this._query = query;

@@ -542,8 +542,8 @@ test.describe('slash search', () => {
     // search should active the first item
     await type(page, 'co');
     await expect(slashItems).toHaveCount(2);
-    await expect(slashItems.nth(0).locator('.text')).toHaveText(['Code Block']);
-    await expect(slashItems.nth(1).locator('.text')).toHaveText(['Copy']);
+    await expect(slashItems.nth(0).locator('.text')).toHaveText(['Copy']);
+    await expect(slashItems.nth(1).locator('.text')).toHaveText(['Code Block']);
     await expect(slashItems.nth(0)).toHaveAttribute('hover', 'true');
 
     await type(page, 'p');
@@ -553,8 +553,8 @@ test.describe('slash search', () => {
     // assert backspace works
     await pressBackspace(page);
     await expect(slashItems).toHaveCount(2);
-    await expect(slashItems.nth(0).locator('.text')).toHaveText(['Code Block']);
-    await expect(slashItems.nth(1).locator('.text')).toHaveText(['Copy']);
+    await expect(slashItems.nth(0).locator('.text')).toHaveText(['Copy']);
+    await expect(slashItems.nth(1).locator('.text')).toHaveText(['Code Block']);
     await expect(slashItems.nth(0)).toHaveAttribute('hover', 'true');
   });
 
@@ -571,13 +571,13 @@ test.describe('slash search', () => {
 
     await type(page, 'c');
     await expect(slashItems).toHaveCount(7);
-    await expect(slashItems.nth(0).locator('.text')).toHaveText(['Code Block']);
+    await expect(slashItems.nth(0).locator('.text')).toHaveText(['Copy']);
     await expect(slashItems.nth(1).locator('.text')).toHaveText(['Italic']);
     await expect(slashItems.nth(2).locator('.text')).toHaveText(['New Doc']);
-    await expect(slashItems.nth(3).locator('.text')).toHaveText(['Linked Doc']);
-    await expect(slashItems.nth(4).locator('.text')).toHaveText(['Attachment']);
-    await expect(slashItems.nth(5).locator('.text')).toHaveText(['Copy']);
-    await expect(slashItems.nth(6).locator('.text')).toHaveText(['Duplicate']);
+    await expect(slashItems.nth(3).locator('.text')).toHaveText(['Duplicate']);
+    await expect(slashItems.nth(4).locator('.text')).toHaveText(['Code Block']);
+    await expect(slashItems.nth(5).locator('.text')).toHaveText(['Linked Doc']);
+    await expect(slashItems.nth(6).locator('.text')).toHaveText(['Attachment']);
     await type(page, 'b');
     await expect(slashItems.nth(0).locator('.text')).toHaveText(['Code Block']);
   });
