@@ -130,7 +130,7 @@ test.describe('column operations', () => {
     expect(await cells.count()).toBe(2);
 
     const secondCell = cells.nth(1);
-    const selected = secondCell.locator('.select-selected');
+    const selected = secondCell.locator('affine-tag-component');
     expect(await selected.innerText()).toBe('123');
   });
 
