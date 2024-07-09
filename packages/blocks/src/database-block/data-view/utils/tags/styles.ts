@@ -8,7 +8,7 @@ export const styles = css`
     border: 1px solid var(--affine-border-color);
     border-radius: 8px;
     background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-shadow-2);
+    box-shadow: var(--affine-menu-shadow);
     font-family: var(--affine-font-family);
     min-width: 300px;
     max-width: 720px;
@@ -32,7 +32,7 @@ export const styles = css`
     min-height: 44px;
     padding: 10px 8px;
     background: var(--affine-hover-color);
-    border-radius: 8px;
+    border-radius: 8px 8px 0 0;
   }
 
   .select-input {
@@ -143,10 +143,10 @@ export const styles = css`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px;
+    padding: 0 8px;
     border-radius: 4px;
-    margin-bottom: 4px;
     cursor: pointer;
+    height: 34px;
   }
 
   .select-option.selected {

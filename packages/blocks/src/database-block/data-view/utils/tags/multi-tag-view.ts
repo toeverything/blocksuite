@@ -1,8 +1,9 @@
+import './tag.js';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { SelectTag } from './multi-tag-select.js';
@@ -28,7 +29,6 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
       flex-wrap: wrap;
       gap: 6px;
       width: 100%;
-      font-size: var(--affine-font-sm);
     }
 
     .affine-select-cell-container .select-selected {
@@ -36,11 +36,20 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
       font-size: 14px;
       line-height: 22px;
       padding: 0 8px;
-      border-radius: 4px;
       white-space: nowrap;
-      background: var(--affine-tag-white);
       overflow: hidden;
       text-overflow: ellipsis;
+      border: 1px solid var(--affine-border-color);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--affine-background-primary-color);
+    }
+    .select-selected .selected-point {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
     }
   `;
 
@@ -63,12 +72,10 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
           if (!option) {
             return;
           }
-          const style = styleMap({
-            backgroundColor: option.color,
-          });
-          return html`<span class="select-selected" style=${style}
-            >${option.value}</span
-          >`;
+          return html`<affine-tag-component
+            .name="${option.value}"
+            .color="${option.color}"
+          ></affine-tag-component>`;
         })}
       </div>
     `;

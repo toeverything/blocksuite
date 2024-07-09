@@ -31,16 +31,6 @@ export class SelectGroupView extends BaseGroup<
     .data-view-group-title-select-view.readonly {
       cursor: inherit;
     }
-
-    .tag {
-      padding: 0 8px;
-      border-radius: 4px;
-      font-size: var(--data-view-cell-text-size);
-      line-height: var(--data-view-cell-text-line-height);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
   `;
 
   private _click = () => {
@@ -85,16 +75,16 @@ export class SelectGroupView extends BaseGroup<
         Ungroups
       </div>`;
     }
-    const style = styleMap({
-      backgroundColor: tag.color,
-    });
     const classList = classMap({
       'data-view-group-title-select-view': true,
       readonly: this.readonly,
     });
-    return html` <div @click="${this._click}" class="${classList}">
-      <div class="tag" style="${style}">${tag.value}</div>
-    </div>`;
+    return html` <affine-tag-component
+      @click="${this._click}"
+      class="${classList}"
+      .color="${tag.color}"
+      .name="${tag.value}"
+    ></affine-tag-component>`;
   }
 
   updateTag(tag: Partial<SelectTag>) {

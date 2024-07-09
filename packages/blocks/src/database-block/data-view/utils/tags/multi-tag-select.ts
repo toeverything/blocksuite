@@ -1,6 +1,9 @@
+import './tag.js';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { nanoid } from '@blocksuite/store';
 import { autoPlacement, flip, offset } from '@floating-ui/dom';
+import { nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -10,7 +13,6 @@ import { html } from 'lit/static-html.js';
 import { createPopup, popMenu } from '../../../../_common/components/index.js';
 import { rangeWrap } from '../../../../_common/utils/math.js';
 import {
-  DatabaseSearchClose,
   DeleteIcon,
   MoreHorizontalIcon,
   PlusIcon,
@@ -359,17 +361,11 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
             if (!option) {
               return;
             }
-            const style = styleMap({
-              backgroundColor: option.color,
-            });
-            return html` <div class="select-selected" style=${style}>
-              <div class="select-selected-text">${option.value}</div>
-              <span
-                class="close-icon"
-                @click="${() => this._onDeleteSelected(selectedTag, id)}"
-                >${DatabaseSearchClose}</span
-              >
-            </div>`;
+            return html`<affine-tag-component
+              .name="${option.value}"
+              .color="${option.color}"
+              .close="${() => this._onDeleteSelected(selectedTag, id)}"
+            ></affine-tag-component>`;
           })}
           <input
             class="select-input"
@@ -396,9 +392,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
                 'select-option': true,
                 selected: isSelected,
               });
-              const style = styleMap({
-                backgroundColor: select.color,
-              });
               const clickOption = (e: MouseEvent) =>
                 this._clickItemOption(e, select.id);
               return html`
@@ -413,27 +406,22 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
                         </div>`
                       : ''}
                     <div style="display:flex;flex-direction: column">
-                      <div
-                        style="display:flex;align-items:center;margin-bottom: 2px;opacity: 0.5;"
-                      >
-                        ${select.group.map((v, i) => {
-                          const style = styleMap({
-                            backgroundColor: v.color,
-                          });
-                          return html`${i === 0
-                              ? ''
-                              : html`<span style="margin: 0 1px">/</span>`}<span
-                              class="select-option-group-name"
-                              style=${style}
-                              >${v.value}</span
-                            >`;
-                        })}
-                      </div>
-                      <div style="display:flex;">
-                        <div style=${style} class="select-option-name">
-                          ${select.value}
-                        </div>
-                      </div>
+                      ${select.group.length
+                        ? html`<div
+                            style="display:flex;align-items:center;margin-bottom: 2px;opacity: 0.5;gap:6px"
+                          >
+                            ${select.group.map(option => {
+                              return html`<affine-tag-component
+                                .name="${option.value}"
+                                .color="${option.color}"
+                              ></affine-tag-component>`;
+                            })}
+                          </div>`
+                        : nothing}
+                      <affine-tag-component
+                        .name="${select.value}"
+                        .color="${select.color}"
+                      ></affine-tag-component>
                     </div>
                   </div>
                   ${!select.isCreate
