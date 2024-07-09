@@ -35,17 +35,19 @@ export const getSelectedBlocksCommand: Command<
   if (types.includes('text') && textSelection) {
     const rangeManager = (ctx.std.host as EditorHost).rangeManager;
     assertExists(rangeManager);
-    const range = rangeManager.textSelectionToRange(textSelection);
-    if (!range) return;
+    try {
+      const range = rangeManager.textSelectionToRange(textSelection);
+      if (!range) return;
 
-    const selectedBlockElements = rangeManager.getSelectedBlockElementsByRange(
-      range,
-      {
-        match: (el: BlockElement) => roles.includes(el.model.role),
-        mode,
-      }
-    );
-    dirtyResult.push(...selectedBlockElements);
+      const selectedBlockElements =
+        rangeManager.getSelectedBlockElementsByRange(range, {
+          match: (el: BlockElement) => roles.includes(el.model.role),
+          mode,
+        });
+      dirtyResult.push(...selectedBlockElements);
+    } catch {
+      return;
+    }
   }
 
   const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;

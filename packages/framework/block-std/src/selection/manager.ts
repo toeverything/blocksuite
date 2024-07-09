@@ -1,5 +1,6 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { StackItem } from '@blocksuite/store';
+import { computed, signal } from '@lit-labs/preact-signals';
 
 import type { BaseSelection } from './base.js';
 import {
@@ -21,34 +22,16 @@ export class SelectionManager {
     return this.std.collection.awarenessStore;
   }
 
+  private _selections = signal<BaseSelection[]>([]);
+
+  private _remoteSelections = signal<Map<number, BaseSelection[]>>(new Map());
+
   get value() {
-    return this._store
-      .getLocalSelection(this.std.doc.blockCollection)
-      .map(json => {
-        return this._jsonToSelection(json);
-      });
+    return this._selections.value;
   }
 
   get remoteSelections() {
-    const map = new Map<number, BaseSelection[]>();
-    this._store.getStates().forEach((state, id) => {
-      if (id === this._store.awareness.clientID) return;
-      const selection = Object.entries(state.selectionV2)
-        .filter(([key]) => key === this.std.doc.id)
-        .flatMap(([_, selection]) => selection);
-      const selections = selection
-        .map(json => {
-          try {
-            return this._jsonToSelection(json);
-          } catch (error) {
-            console.error('Parse remote selection failed:', id, json, error);
-            return null;
-          }
-        })
-        .filter((sel): sel is BaseSelection => !!sel);
-      map.set(id, selections);
-    });
-    return map;
+    return this._remoteSelections.value;
   }
 
   private _selectionConstructors: Record<string, SelectionConstructor> = {};
@@ -62,6 +45,50 @@ export class SelectionManager {
 
   constructor(public std: BlockSuite.Std) {
     this._setupDefaultSelections();
+    this._store.awareness.on(
+      'change',
+      (change: { updated: number[]; added: number[]; removed: number[] }) => {
+        const all = change.updated.concat(change.added).concat(change.removed);
+        const localClientID = this._store.awareness.clientID;
+        const exceptLocal = all.filter(id => id !== localClientID);
+        const hasLocal = all.includes(localClientID);
+        if (hasLocal) {
+          const localSelection = this._store
+            .getLocalSelection(this.std.doc.blockCollection)
+            .map(json => {
+              return this._jsonToSelection(json);
+            });
+          this._selections.value = localSelection;
+        }
+
+        if (exceptLocal.length > 0) {
+          const map = new Map<number, BaseSelection[]>();
+          this._store.getStates().forEach((state, id) => {
+            if (id === this._store.awareness.clientID) return;
+            const selection = Object.entries(state.selectionV2)
+              .filter(([key]) => key === this.std.doc.id)
+              .flatMap(([_, selection]) => selection);
+            const selections = selection
+              .map(json => {
+                try {
+                  return this._jsonToSelection(json);
+                } catch (error) {
+                  console.error(
+                    'Parse remote selection failed:',
+                    id,
+                    json,
+                    error
+                  );
+                  return null;
+                }
+              })
+              .filter((sel): sel is BaseSelection => !!sel);
+            map.set(id, selections);
+          });
+          this._remoteSelections.value = map;
+        }
+      }
+    );
   }
 
   private _setupDefaultSelections() {
@@ -150,16 +177,28 @@ export class SelectionManager {
     }
   }
 
+  find$<T extends BlockSuite.SelectionType>(type: T) {
+    return computed(() =>
+      this.value.find((sel): sel is BlockSuite.SelectionInstance[T] =>
+        sel.is(type)
+      )
+    );
+  }
+
   find<T extends BlockSuite.SelectionType>(type: T) {
-    return this.value.find((sel): sel is BlockSuite.SelectionInstance[T] =>
-      sel.is(type)
+    return this.find$(type).value;
+  }
+
+  filter$<T extends BlockSuite.SelectionType>(type: T) {
+    return computed(() =>
+      this.value.filter((sel): sel is BlockSuite.SelectionInstance[T] =>
+        sel.is(type)
+      )
     );
   }
 
   filter<T extends BlockSuite.SelectionType>(type: T) {
-    return this.value.filter((sel): sel is BlockSuite.SelectionInstance[T] =>
-      sel.is(type)
-    );
+    return this.filter$(type).value;
   }
 
   mount() {

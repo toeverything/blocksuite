@@ -259,8 +259,9 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   await copyByKeyboard(page);
   await pressArrowRight(page);
   await waitNextFrame(page);
-  await type(page, '/link');
+  await type(page, '/link', 100);
   await pressEnter(page);
+  await page.waitForTimeout(100);
   await waitNextFrame(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await pressEnter(page);
@@ -481,6 +482,7 @@ test('press backspace after bookmark block can select bookmark block', async ({
   await pressArrowUp(page);
   await type(page, '/link');
   await pressEnter(page);
+  await page.waitForTimeout(100);
   await type(page, inputUrl);
   await pressEnter(page);
 

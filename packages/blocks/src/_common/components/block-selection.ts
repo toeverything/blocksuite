@@ -1,4 +1,5 @@
 import type { BlockElement } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, LitElement, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -20,7 +21,7 @@ import { customElement, property } from 'lit/decorators.js';
  * ```
  */
 @customElement('affine-block-selection')
-export class BlockSelection extends LitElement {
+export class BlockSelection extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       position: absolute;
@@ -59,8 +60,6 @@ export class BlockSelection extends LitElement {
       this.style.transform = `translate(-${this.borderWidth}px, -${this.borderWidth}px)`;
     }
     this.style.borderWidth = `${this.borderWidth}px`;
-
-    this.block.host.selection.slots.changed.on(() => this.requestUpdate());
   }
 }
 

@@ -6,12 +6,16 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { isCssVariable } from '../_common/theme/css-variables.js';
 import { wrapFontFamily } from '../surface-block/utils/font.js';
 import type { EdgelessTextBlockModel } from './edgeless-text-model.js';
+import type { EdgelessTextBlockService } from './edgeless-text-service.js';
 
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 
 @customElement('affine-edgeless-text')
-export class EdgelessTextBlockComponent extends BlockElement<EdgelessTextBlockModel> {
+export class EdgelessTextBlockComponent extends BlockElement<
+  EdgelessTextBlockModel,
+  EdgelessTextBlockService
+> {
   tryFocusEnd() {
     const paragraphOrLists = Array.from(
       this.querySelectorAll<BlockElement>('affine-paragraph, affine-list')

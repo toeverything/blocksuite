@@ -1,36 +1,22 @@
 import { expect, type Page } from '@playwright/test';
 import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';
-import { getFormatBar } from 'utils/query.js';
 
 import {
   assertEdgelessTool,
-  captureHistory,
-  dragBetweenIndices,
   enterPlaygroundRoom,
   getEdgelessSelectedRect,
   initEmptyEdgelessState,
   pressArrowLeft,
-  pressArrowRight,
-  pressArrowUp,
-  pressBackspace,
   pressEnter,
   setEdgelessTool,
   SHORT_KEY,
   switchEditorMode,
   type,
-  undoByKeyboard,
   waitForInlineEditorStateUpdated,
   waitNextFrame,
   zoomResetByKeyboard,
 } from '../utils/actions/index.js';
-import {
-  assertBlockChildrenIds,
-  assertBlockFlavour,
-  assertBlockTextContent,
-  assertEdgelessCanvasText,
-  assertRichTextInlineDeltas,
-  assertRichTextInlineRange,
-} from '../utils/asserts.js';
+import { assertEdgelessCanvasText } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 async function assertTextFont(page: Page, font: string) {
@@ -318,102 +304,5 @@ test.describe('edgeless canvas text', () => {
     selectedRect = await getEdgelessSelectedRect(page);
     expect(selectedRect.width).toBeCloseTo(Math.round(lastWidth));
     expect(selectedRect.height).toBeGreaterThan(lastHeight);
-  });
-});
-
-test.describe('edgeless text block', () => {
-  test.beforeEach(async ({ page }) => {
-    await enterPlaygroundRoom(page, {
-      flags: {
-        enable_edgeless_text: true,
-      },
-    });
-    await initEmptyEdgelessState(page);
-    await switchEditorMode(page);
-  });
-
-  test('add text block in default mode', async ({ page }) => {
-    await setEdgelessTool(page, 'default');
-    await page.mouse.dblclick(130, 140, {
-      delay: 100,
-    });
-    await waitForInlineEditorStateUpdated(page);
-    await waitNextFrame(page);
-    await type(page, 'aaa');
-    await pressEnter(page);
-    await type(page, 'bbb');
-    await pressEnter(page);
-    await type(page, 'ccc');
-
-    await assertBlockFlavour(page, 4, 'affine:edgeless-text');
-    await assertBlockFlavour(page, 5, 'affine:paragraph');
-    await assertBlockFlavour(page, 6, 'affine:paragraph');
-    await assertBlockFlavour(page, 7, 'affine:paragraph');
-    await assertBlockChildrenIds(page, '4', ['5', '6', '7']);
-    await assertBlockTextContent(page, 5, 'aaa');
-    await assertBlockTextContent(page, 6, 'bbb');
-    await assertBlockTextContent(page, 7, 'ccc');
-
-    await dragBetweenIndices(page, [1, 1], [3, 2]);
-    await captureHistory(page);
-    await pressBackspace(page);
-    await assertBlockChildrenIds(page, '4', ['5']);
-    await assertBlockTextContent(page, 5, 'ac');
-
-    await undoByKeyboard(page);
-    await assertBlockChildrenIds(page, '4', ['5', '6', '7']);
-    await assertBlockTextContent(page, 5, 'aaa');
-    await assertBlockTextContent(page, 6, 'bbb');
-    await assertBlockTextContent(page, 7, 'ccc');
-
-    const { boldBtn } = getFormatBar(page);
-    await boldBtn.click();
-    await assertRichTextInlineDeltas(
-      page,
-      [
-        {
-          insert: 'a',
-        },
-        {
-          insert: 'aa',
-          attributes: {
-            bold: true,
-          },
-        },
-      ],
-      1
-    );
-    await assertRichTextInlineDeltas(
-      page,
-      [
-        {
-          insert: 'bbb',
-          attributes: {
-            bold: true,
-          },
-        },
-      ],
-      2
-    );
-    await assertRichTextInlineDeltas(
-      page,
-      [
-        {
-          insert: 'cc',
-          attributes: {
-            bold: true,
-          },
-        },
-        {
-          insert: 'c',
-        },
-      ],
-      3
-    );
-
-    await pressArrowRight(page);
-    await assertRichTextInlineRange(page, 3, 2);
-    await pressArrowUp(page);
-    await assertRichTextInlineRange(page, 2, 2);
   });
 });

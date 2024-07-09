@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
-import { SignalWatcher } from '@lit-labs/preact-signals';
+import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -9,7 +9,6 @@ import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
 import type { EventName, UIEventHandler } from '../../event/index.js';
-import type { BaseSelection } from '../../selection/index.js';
 import type { BlockService } from '../../service/index.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import type { EditorHost } from './lit-host.js';
@@ -132,16 +131,20 @@ export class BlockElement<
   @property({ attribute: false })
   accessor dirty = false;
 
-  @state({
-    hasChanged(value: BaseSelection | null, oldValue: BaseSelection | null) {
-      if (!value || !oldValue) {
-        return value !== oldValue;
+  get selected() {
+    const selectedSignal = computed(() => {
+      const selection = this.std.selection.value.find(selection => {
+        return selection.blockId === this.blockId;
+      });
+
+      if (!selection) {
+        return null;
       }
 
-      return !value?.equals(oldValue);
-    },
-  })
-  accessor selected: BaseSelection | null = null;
+      return selection;
+    });
+    return selectedSignal.value;
+  }
 
   service!: Service;
 
@@ -265,21 +268,6 @@ export class BlockElement<
     this._disposables.add(
       this.model.propsUpdated.on(() => {
         this.requestUpdate();
-      })
-    );
-
-    this._disposables.add(
-      this.host.selection.slots.changed.on(selections => {
-        const selection = selections.find(selection => {
-          return selection.blockId === this.blockId;
-        });
-
-        if (!selection) {
-          this.selected = null;
-          return;
-        }
-
-        this.selected = selection;
       })
     );
 
