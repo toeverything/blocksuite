@@ -157,6 +157,7 @@ export const styles = css`
     width: 100%;
     overflow: hidden;
     display: flex;
+    align-items: center;
   }
 
   .select-option-group-name {
