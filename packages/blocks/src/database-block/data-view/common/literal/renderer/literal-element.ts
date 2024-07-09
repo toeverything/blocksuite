@@ -40,7 +40,7 @@ export class NumberLiteral extends LiteralElement<number> {
 
   override render() {
     return (
-      this.value?.toString() ?? html`<span class="dv-color-2">Empty</span>`
+      this.value?.toString() ?? html`<span class="dv-color-2">Value</span>`
     );
   }
 }
@@ -59,7 +59,7 @@ export class StringLiteral extends LiteralElement<string> {
 
   override render() {
     return (
-      this.value?.toString() ?? html`<span class="dv-color-2">Empty</span>`
+      this.value?.toString() ?? html`<span class="dv-color-2">Value</span>`
     );
   }
 }
