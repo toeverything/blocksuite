@@ -29,7 +29,6 @@ export interface GeneralShapeOptions {
 }
 
 export const FILL_COLORS = [
-  '--affine-palette-transparent',
   '--affine-palette-shape-yellow',
   '--affine-palette-shape-orange',
   '--affine-palette-shape-red',
@@ -43,12 +42,11 @@ export const FILL_COLORS = [
   '--affine-palette-shape-white',
 ] as const;
 
-export const DEFAULT_SHAPE_FILL_COLOR = FILL_COLORS[1];
+export const DEFAULT_SHAPE_FILL_COLOR = FILL_COLORS[0];
 
 export const FillColorsSchema = createZodUnion(FILL_COLORS);
 
 export const STROKE_COLORS = [
-  '--affine-palette-transparent',
   '--affine-palette-line-yellow',
   '--affine-palette-line-orange',
   '--affine-palette-line-red',
@@ -62,8 +60,8 @@ export const STROKE_COLORS = [
   '--affine-palette-line-white',
 ] as const;
 
-export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[1];
+export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[0];
 
-export const DEFAULT_SHAPE_TEXT_COLOR = STROKE_COLORS[9];
+export const DEFAULT_SHAPE_TEXT_COLOR = STROKE_COLORS[8];
 
 export const StrokeColorsSchema = createZodUnion(STROKE_COLORS);

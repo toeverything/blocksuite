@@ -110,8 +110,8 @@ export function createButtonPopper(
       .catch(console.error);
   }
 
-  const show = () => {
-    if (display === 'show') return;
+  const show = (force = false) => {
+    if (!force && display === 'show') return;
     popperElement.setAttribute(ATTR_SHOW, '');
     display = 'show';
     stateUpdated({ display });

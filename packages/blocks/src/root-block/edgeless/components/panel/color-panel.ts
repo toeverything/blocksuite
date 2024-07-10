@@ -26,7 +26,6 @@ export class ColorEvent extends Event {
 }
 
 export const LINE_COLORS = [
-  '--affine-palette-transparent',
   '--affine-palette-line-yellow',
   '--affine-palette-line-orange',
   '--affine-palette-line-red',
@@ -43,12 +42,12 @@ export const LINE_COLORS = [
 export const LineColorsSchema = createZodUnion(LINE_COLORS);
 
 export const GET_DEFAULT_LINE_COLOR = () =>
-  getThemeMode() === 'dark' ? LINE_COLORS[11] : LINE_COLORS[9];
+  getThemeMode() === 'dark' ? LINE_COLORS[10] : LINE_COLORS[8];
 
-export const GET_DEFAULT_TEXT_COLOR = () => LINE_COLORS[6];
+export const GET_DEFAULT_TEXT_COLOR = () => LINE_COLORS[5];
 
 export const DEFAULT_BRUSH_COLOR = '--affine-palette-line-blue';
-export const DEFAULT_CONNECTOR_COLOR = LINE_COLORS[10];
+export const DEFAULT_CONNECTOR_COLOR = LINE_COLORS[9];
 
 export function isTransparent(color: CssVariableName) {
   return color.toLowerCase() === '--affine-palette-transparent';
@@ -275,26 +274,29 @@ export class EdgelessColorPanel extends LitElement {
   }
 
   override render() {
-    return repeat(
-      this.options,
-      color => color,
-      color => {
-        const unit = ColorUnit(color, {
-          hollowCircle: this.hollowCircle,
-          letter: this.showLetterMark,
-        });
+    return html`
+      ${repeat(
+        this.options,
+        color => color,
+        color => {
+          const unit = ColorUnit(color, {
+            hollowCircle: this.hollowCircle,
+            letter: this.showLetterMark,
+          });
 
-        return html`
-          <div
-            class="color-container"
-            ?active=${color === this.value}
-            @click=${() => this.onSelect(color)}
-          >
-            ${unit}
-          </div>
-        `;
-      }
-    );
+          return html`
+            <div
+              class="color-container"
+              ?active=${color === this.value}
+              @click=${() => this.onSelect(color)}
+            >
+              ${unit}
+            </div>
+          `;
+        }
+      )}
+      <slot name="custom" class="color-container"></slot>
+    `;
   }
 
   @property({ attribute: false })

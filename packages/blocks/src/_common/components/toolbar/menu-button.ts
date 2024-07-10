@@ -1,5 +1,11 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, type TemplateResult, css, html } from 'lit';
+import {
+  LitElement,
+  type PropertyValues,
+  type TemplateResult,
+  css,
+  html,
+} from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { EditorIconButton } from './icon-button.js';
@@ -21,16 +27,9 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
     }
   `;
 
-  close() {
-    this._popper?.hide();
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     this.tabIndex = 0;
-    if (this.contentPadding) {
-      this.style.setProperty('--content-padding', this.contentPadding);
-    }
   }
 
   override firstUpdated() {
@@ -39,6 +38,14 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       this._content,
       ({ display }) => {
         this._trigger.showTooltip = display === 'hidden';
+
+        this.dispatchEvent(
+          new ToggleEvent('toggle', {
+            newState: display,
+            bubbles: false,
+            cancelable: false,
+          })
+        );
       },
       {
         mainAxis: 12,
@@ -60,6 +67,10 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
     this._disposables.add(this._popper);
   }
 
+  hide() {
+    this._popper?.hide();
+  }
+
   override render() {
     return html`
       ${this.button}
@@ -67,6 +78,16 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
         <slot></slot>
       </editor-menu-content>
     `;
+  }
+
+  show(force = false) {
+    this._popper?.show(force);
+  }
+
+  override willUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('contentPadding')) {
+      this.style.setProperty('--content-padding', this.contentPadding ?? '');
+    }
   }
 
   @query('editor-menu-content')

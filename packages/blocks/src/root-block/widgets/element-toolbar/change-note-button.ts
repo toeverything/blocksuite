@@ -29,14 +29,19 @@ import {
 import { NoteDisplayMode } from '../../../_common/types.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { Bound } from '../../../surface-block/index.js';
+import '../../edgeless/components/color-picker/index.js';
 import '../../edgeless/components/panel/color-panel.js';
 import {
   type LineStyleEvent,
   LineStylesPanel,
 } from '../../edgeless/components/panel/line-styles-panel.js';
 import '../../edgeless/components/panel/note-display-mode-panel.js';
+import '../../edgeless/components/panel/note-display-mode-panel.js';
+import '../../edgeless/components/panel/note-shadow-panel.js';
 import '../../edgeless/components/panel/note-shadow-panel.js';
 import '../../edgeless/components/panel/scale-panel.js';
+import '../../edgeless/components/panel/scale-panel.js';
+import '../../edgeless/components/panel/size-panel.js';
 import '../../edgeless/components/panel/size-panel.js';
 import { getTooltipWithShortcut } from '../../edgeless/components/utils.js';
 
@@ -249,6 +254,17 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       isDocOnly
         ? nothing
         : html`
+            <edgeless-color-picker-button
+              .label="${'Background'}"
+              .color=${background}
+              .colors=${NOTE_BACKGROUND_COLORS}
+            >
+            </edgeless-color-picker-button>
+          `,
+
+      isDocOnly
+        ? nothing
+        : html`
             <editor-menu-button
               .contentPadding=${'8px'}
               .button=${html`
@@ -328,7 +344,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                 .sizeList=${SIZE_LIST}
                 .minSize=${0}
                 .onSelect=${(size: number) => this._setBorderRadius(size)}
-                .onPopperCose=${() => this._cornersPanelRef.value?.close()}
+                .onPopperCose=${() => this._cornersPanelRef.value?.hide()}
               >
               </edgeless-size-panel>
             </editor-menu-button>
@@ -377,7 +393,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
           <edgeless-scale-panel
             .scale=${Math.round(scale * 100)}
             .onSelect=${(scale: number) => this._setNoteScale(scale)}
-            .onPopperCose=${() => this._scalePanelRef.value?.close()}
+            .onPopperCose=${() => this._scalePanelRef.value?.hide()}
           ></edgeless-scale-panel>
         </editor-menu-button>
       `,
