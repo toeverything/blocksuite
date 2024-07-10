@@ -57,10 +57,13 @@ import {
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import {
+  isAttachmentBlock,
   isBookmarkBlock,
+  isEmbeddedLinkBlock,
   isEmbedGithubBlock,
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
+  isImageBlock,
 } from '../../edgeless/utils/query.js';
 import { RootBlockModel } from '../../root-model.js';
 import type { EmbedOptions } from '../../root-service.js';
@@ -398,7 +401,6 @@ export class EmbedCardToolbar extends WidgetElement<
           <editor-icon-button
             aria-label="Open"
             .justify=${'space-between'}
-            .withHover=${true}
             .labelHeight=${'20px'}
           >
             ${OpenIcon}${SmallArrowDownIcon}
@@ -479,7 +481,7 @@ export class EmbedCardToolbar extends WidgetElement<
     );
   }
 
-  private _cardStyleActions() {
+  private _cardStyleMenuButton() {
     if (this._canShowCardStylePanel(this.blockElement.model)) {
       const { EmbedCardHorizontalIcon, EmbedCardListIcon } =
         getEmbedCardIcons();
@@ -501,25 +503,51 @@ export class EmbedCardToolbar extends WidgetElement<
         icon: TemplateResult<1>;
       }[];
 
-      return repeat(
-        buttons,
-        button => button.type,
-        ({ type, name, icon }) => html`
-          <icon-button
-            width="76px"
-            height="76px"
-            aria-label=${name}
-            class=${classMap({ selected: this.model.style === type })}
-            @click=${() => this._setEmbedCardStyle(type)}
-          >
-            ${icon}
-            <affine-tooltip .offset=${4}>${name}</affine-tooltip>
-          </icon-button>
-        `
-      );
+      return html`
+        <editor-menu-button
+          class="card-style-select"
+          .contentPadding=${'8px'}
+          .button=${html`
+            <editor-icon-button
+              aria-label="Card style"
+              .tooltip=${'Card style'}
+            >
+              ${PaletteIcon}
+            </editor-icon-button>
+          `}
+        >
+          <div slot>
+            ${repeat(
+              buttons,
+              button => button.type,
+              ({ type, name, icon }) => html`
+                <icon-button
+                  width="76px"
+                  height="76px"
+                  aria-label=${name}
+                  class=${classMap({ selected: this.model.style === type })}
+                  @click=${() => this._setEmbedCardStyle(type)}
+                >
+                  ${icon}
+                  <affine-tooltip .offset=${4}>${name}</affine-tooltip>
+                </icon-button>
+              `
+            )}
+          </div>
+        </editor-menu-button>
+      `;
     }
 
     return nothing;
+  }
+
+  private _refreshable(ele: BlockModel) {
+    return (
+      isImageBlock(ele) ||
+      isBookmarkBlock(ele) ||
+      isAttachmentBlock(ele) ||
+      isEmbeddedLinkBlock(ele)
+    );
   }
 
   private _moreActions() {
@@ -542,15 +570,15 @@ export class EmbedCardToolbar extends WidgetElement<
           handler: () => this._duplicateBlock(),
         },
 
-        isEmbedLinkedDocBlock(this.model) || isEmbedSyncedDocBlock(this.model)
-          ? nothing
-          : {
+        this._refreshable(this.model)
+          ? {
               type: 'reload',
               name: 'Reload',
               icon: RefreshIcon,
               disabled: this.doc.readonly,
               handler: () => this._refreshData(),
-            },
+            }
+          : nothing,
       ],
       [
         {
@@ -661,7 +689,6 @@ export class EmbedCardToolbar extends WidgetElement<
             <editor-icon-button
               aria-label="Switch view"
               .justify=${'space-between'}
-              .withHover=${true}
               .labelHeight=${'20px'}
               .iconContainerWidth=${'110px'}
             >
@@ -681,22 +708,7 @@ export class EmbedCardToolbar extends WidgetElement<
         </editor-menu-button>
       `,
 
-      html`
-        <editor-menu-button
-          class="card-style-select"
-          .contentPadding=${'8px'}
-          .button=${html`
-            <editor-icon-button
-              aria-label="Card style"
-              .tooltip=${'Card style'}
-            >
-              ${PaletteIcon}
-            </editor-icon-button>
-          `}
-        >
-          <div slot>${this._cardStyleActions()}</div>
-        </editor-menu-button>
-      `,
+      this._cardStyleMenuButton(),
 
       html`
         <editor-icon-button

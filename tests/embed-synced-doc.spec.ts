@@ -33,9 +33,10 @@ test.describe('Embed synced doc', () => {
     const referencePopup = page.locator('.affine-reference-popover-container');
     await expect(referencePopup).toBeVisible();
 
-    const embedSyncedDocBtn = page.locator(
-      '.affine-reference-popover-view-selector-button.embed-view'
-    );
+    const switchButton = page.getByRole('button', { name: 'Switch view' });
+    await switchButton.click();
+
+    const embedSyncedDocBtn = page.getByRole('button', { name: 'Embed view' });
     await expect(embedSyncedDocBtn).toBeVisible();
 
     await embedSyncedDocBtn.click();

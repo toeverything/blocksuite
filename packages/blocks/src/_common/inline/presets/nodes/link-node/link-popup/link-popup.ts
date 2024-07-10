@@ -378,7 +378,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
           <editor-icon-button
             aria-label="Switch view"
             .justify=${'space-between'}
-            .withHover=${true}
             .labelHeight=${'20px'}
             .iconContainerWidth=${'110px'}
           >

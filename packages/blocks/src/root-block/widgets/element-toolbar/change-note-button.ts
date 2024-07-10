@@ -244,7 +244,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                   aria-label="Mode"
                   .tooltip=${'Display mode'}
                   .justify=${'space-between'}
-                  .withHover=${true}
                   .labelHeight=${'20px'}
                 >
                   <span class="label">${currentMode}</span>

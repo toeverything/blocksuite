@@ -43,7 +43,7 @@ test.describe('note to linked doc', () => {
     const embedSyncedBlock = page.locator('affine-embed-synced-doc-block');
     assertExists(embedSyncedBlock);
 
-    await triggerComponentToolbarAction(page, 'linkedDocInfo');
+    await triggerComponentToolbarAction(page, 'openLinkedDoc');
     await waitNextFrame(page, 200);
     const noteBlock = page.locator('affine-note');
     assertExists(noteBlock);

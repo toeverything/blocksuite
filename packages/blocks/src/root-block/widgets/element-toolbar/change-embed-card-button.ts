@@ -6,43 +6,30 @@ import '../../edgeless/components/panel/card-style-panel.js';
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { baseTheme } from '@toeverything/theme';
-import {
-  css,
-  html,
-  LitElement,
-  nothing,
-  type TemplateResult,
-  unsafeCSS,
-} from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
 import { join } from 'lit/directives/join.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import { isPeekable, peek } from '../../../_common/components/index.js';
 import { toast } from '../../../_common/components/toast.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
+import type { Action } from '../../../_common/components/toolbar/utils.js';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
 import {
-  BookmarkIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/edgeless.js';
-import {
   CaptionIcon,
   CenterPeekIcon,
   CopyIcon,
   EditIcon,
-  EmbedEdgelessIcon,
-  EmbedPageIcon,
-  EmbedWebIcon,
-  ExpandFullIcon,
+  ExpandFullSmallIcon,
   OpenIcon,
   PaletteIcon,
-} from '../../../_common/icons/text.js';
+  SmallArrowDownIcon,
+} from '../../../_common/icons/index.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
 import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
@@ -88,6 +75,40 @@ import type { EmbedOptions } from '../../root-service.js';
 
 @customElement('edgeless-change-embed-card-button')
 export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
+  static override styles = css`
+    .affine-link-preview {
+      display: flex;
+      justify-content: flex-start;
+      width: 140px;
+      padding: var(--1, 0px);
+      border-radius: var(--1, 0px);
+      opacity: var(--add, 1);
+      user-select: none;
+      cursor: pointer;
+
+      color: var(--affine-link-color);
+      font-feature-settings:
+        'clig' off,
+        'liga' off;
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-sm);
+      font-style: normal;
+      font-weight: 400;
+      text-decoration: none;
+      text-wrap: nowrap;
+    }
+
+    .affine-link-preview > span {
+      display: inline-block;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+
+      text-overflow: ellipsis;
+      overflow: hidden;
+      opacity: var(--add, 1);
+    }
+  `;
+
   private get _doc() {
     return this.model.doc;
   }
@@ -213,33 +234,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     ];
   }
 
-  private get _pageIcon() {
-    if (
-      !isEmbedLinkedDocBlock(this.model) &&
-      !isEmbedSyncedDocBlock(this.model)
-    ) {
-      return nothing;
-    }
-    const block = this._blockElement as
-      | EmbedLinkedDocBlockComponent
-      | EmbedSyncedDocBlockComponent;
-
-    return block.editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon;
-  }
-
-  private get _docTitle() {
-    if (
-      !isEmbedLinkedDocBlock(this.model) &&
-      !isEmbedSyncedDocBlock(this.model)
-    ) {
-      return '';
-    }
-    const block = this._blockElement as
-      | EmbedLinkedDocBlockComponent
-      | EmbedSyncedDocBlockComponent;
-    return block.docTitle;
-  }
-
   private get _embedViewButtonDisabled() {
     if (this._doc.readonly) {
       return true;
@@ -256,129 +250,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       isEmbedLinkedDocBlock(this.model) && this.model.pageId === this._doc.id
     );
   }
-
-  static override styles = css`
-    .change-embed-card-button {
-      width: 24px;
-      height: 24px;
-      border-radius: 4px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .change-embed-card-button svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .change-embed-card-button.url {
-      display: flex;
-      width: 180px;
-      padding: var(--1, 0px);
-      align-items: flex-start;
-      gap: 10px;
-      border-radius: var(--1, 0px);
-      opacity: var(--add, 1);
-      margin-right: 6px;
-      user-select: none;
-      cursor: pointer;
-    }
-
-    .change-embed-card-button.url > span {
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-
-      color: var(--affine-link-color);
-      font-feature-settings:
-        'clig' off,
-        'liga' off;
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      font-size: 15px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 24px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      opacity: var(--add, 1);
-    }
-
-    .change-embed-card-button.doc-info {
-      display: flex;
-      align-items: center;
-      width: max-content;
-      max-width: 180px;
-      padding: var(--1, 0px);
-
-      gap: 4px;
-      border-radius: var(--1, 0px);
-      opacity: var(--add, 1);
-      user-select: none;
-      cursor: pointer;
-    }
-
-    .change-embed-card-button.doc-info > svg {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-
-    .change-embed-card-button.doc-info > span {
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-
-      color: var(--affine-text-primary-color);
-      font-feature-settings:
-        'clig' off,
-        'liga' off;
-      word-break: break-all;
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      font-size: 14px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 22px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      opacity: var(--add, 1);
-    }
-
-    .change-embed-card-view-style {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .change-embed-card-button-view-selector {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 2px;
-      border-radius: 6px;
-      background: var(--affine-hover-color);
-    }
-    .change-embed-card-button-view-selector .change-embed-card-button {
-      width: 24px;
-      height: 24px;
-    }
-    .change-embed-card-button-view-selector > icon-button {
-      padding: 0px;
-    }
-    .change-embed-card-button-view-selector .current-view {
-      background: var(--affine-background-overlay-panel-color);
-      border-radius: 6px;
-    }
-
-    .embed-scale-button {
-      display: flex;
-      align-items: center;
-      border-radius: 4px;
-      background-color: var(--affine-hover-color);
-      gap: 2px;
-      line-height: 24px;
-    }
-  `;
 
   @state()
   private accessor _embedScale = 1;
@@ -563,6 +434,149 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._embedScale = scale;
   }
 
+  private _openMenuButton() {
+    const buttons: Action[] = [];
+
+    if (
+      isEmbedLinkedDocBlock(this.model) ||
+      isEmbedSyncedDocBlock(this.model)
+    ) {
+      buttons.push({
+        name: 'Open this doc',
+        icon: ExpandFullSmallIcon,
+        handler: this._open,
+        disabled: this._openButtonDisabled,
+      });
+    } else if (this._canShowFullScreenButton) {
+      buttons.push({
+        name: 'Open this doc',
+        icon: ExpandFullSmallIcon,
+        handler: this._open,
+      });
+    }
+
+    // open in new tab
+
+    if (this._blockElement && isPeekable(this._blockElement)) {
+      buttons.push({
+        name: 'Open in center peek',
+        icon: CenterPeekIcon,
+        handler: () => this._peek(),
+      });
+    }
+
+    // open in split view
+
+    if (buttons.length === 0) {
+      return nothing;
+    }
+
+    return html`
+      <editor-menu-button
+        .contentPadding=${'8px'}
+        .button=${html`
+          <editor-icon-button
+            aria-label="Open"
+            .justify=${'space-between'}
+            .labelHeight=${'20px'}
+          >
+            ${OpenIcon}${SmallArrowDownIcon}
+          </editor-icon-button>
+        `}
+      >
+        <div slot data-size="large" data-orientation="vertical">
+          ${repeat(
+            buttons,
+            button => button.name,
+            ({ name, icon, handler, disabled }) => html`
+              <editor-menu-action
+                aria-label=${name}
+                ?disabled=${disabled}
+                @click=${handler}
+              >
+                ${icon}<span class="label">${name}</span>
+              </editor-menu-action>
+            `
+          )}
+        </div>
+      </editor-menu-button>
+    `;
+  }
+
+  private get _viewType(): 'inline' | 'embed' | 'card' {
+    if (this._isCardView) {
+      return 'card';
+    }
+
+    if (this._isEmbedView) {
+      return 'embed';
+    }
+
+    // unreachable
+    return 'inline';
+  }
+
+  private _viewMenuButton() {
+    if (this._canConvertToEmbedView || this._isEmbedView) {
+      const buttons = [
+        {
+          type: 'embed',
+          name: 'Embed view',
+          handler: () => this._convertToEmbedView(),
+          disabled: this.model.doc.readonly && this._embedViewButtonDisabled,
+        },
+        {
+          type: 'card',
+          name: 'Card view',
+          handler: () => this._convertToCardView(),
+          disabled: this.model.doc.readonly,
+        },
+      ];
+
+      return html`
+        <editor-menu-button
+          .contentPadding=${'8px'}
+          .button=${html`
+            <editor-icon-button
+              aria-label="Switch view"
+              .justify=${'space-between'}
+              .labelHeight=${'20px'}
+              .iconContainerWidth=${'110px'}
+            >
+              <div class="label">
+                <span style="text-transform: capitalize"
+                  >${this._viewType}</span
+                >
+                view
+              </div>
+              ${SmallArrowDownIcon}
+            </editor-icon-button>
+          `}
+        >
+          <div slot data-size="small" data-orientation="vertical">
+            ${repeat(
+              buttons,
+              button => button.type,
+              ({ type, name, handler, disabled }) => html`
+                <editor-menu-action
+                  aria-label=${name}
+                  data-testid=${`link-to-${type}`}
+                  ?data-selected=${this._viewType === type}
+                  ?disabled=${disabled}
+                  @click=${handler}
+                >
+                  ${name}
+                </editor-menu-action>
+              `
+            )}
+          </div>
+        </editor-menu-button>
+      `;
+    }
+
+    return nothing;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._embedScale = this._getScale();
@@ -579,9 +593,14 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     const buttons = [
       this._canShowUrlOptions && 'url' in model
         ? html`
-            <div class="change-embed-card-button url" @click=${this._copyUrl}>
+            <a
+              class="affine-link-preview"
+              href=${model.url}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
               <span>${getHostName(model.url)}</span>
-            </div>
+            </a>
 
             <editor-icon-button
               arai-label="Click to copy link"
@@ -606,92 +625,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           `
         : nothing,
 
-      isEmbedSyncedDocBlock(model)
-        ? html`
-            <div class="change-embed-card-button doc-info" @click=${this._open}>
-              ${this._pageIcon}
-              <span>${this._docTitle}</span>
-            </div>
-          `
-        : nothing,
+      this._openMenuButton(),
 
-      isEmbedSyncedDocBlock(model) || isEmbedLinkedDocBlock(model)
-        ? html`
-            <editor-icon-button
-              arai-label="Open"
-              .tooltip=${'Open this doc'}
-              class="change-embed-card-button open"
-              @click=${this._open}
-              .disabled=${this._openButtonDisabled}
-            >
-              ${OpenIcon}
-            </editor-icon-button>
-          `
-        : nothing,
-
-      this._blockElement && isPeekable(this._blockElement)
-        ? html`
-            <editor-icon-button
-              arai-label="Center peek"
-              .tooltip=${'Open in center peek'}
-              class="change-embed-card-button center-peek"
-              @click=${this._peek}
-            >
-              ${CenterPeekIcon}
-            </editor-icon-button>
-          `
-        : nothing,
-
-      this._canShowFullScreenButton
-        ? html`
-            <editor-icon-button
-              arai-label="Full screen"
-              .tooltip=${'Full screen'}
-              class="change-embed-card-button expand"
-              @click=${this._open}
-            >
-              ${ExpandFullIcon}
-            </editor-icon-button>
-          `
-        : nothing,
-
-      this._canConvertToEmbedView || this._isEmbedView
-        ? html`
-            <div class="change-embed-card-view-style">
-              <div class="change-embed-card-button-view-selector">
-                <editor-icon-button
-                  class=${classMap({
-                    'change-embed-card-button': true,
-                    card: true,
-                    'current-view': this._isCardView,
-                  })}
-                  arai-label="Card view"
-                  .tooltip=${'Card view'}
-                  ?disabled=${this._doc.readonly}
-                  .hover=${false}
-                  @click=${this._convertToCardView}
-                >
-                  ${BookmarkIcon}
-                </editor-icon-button>
-
-                <editor-icon-button
-                  class=${classMap({
-                    'change-embed-card-button': true,
-                    embed: true,
-                    'current-view': this._isEmbedView,
-                  })}
-                  arai-label="Embed view"
-                  .tooltip=${'Embed view'}
-                  .disabled=${this._embedViewButtonDisabled}
-                  .hover=${false}
-                  @click=${this._convertToEmbedView}
-                >
-                  ${EmbedWebIcon}
-                </editor-icon-button>
-              </div>
-            </div>
-          `
-        : nothing,
+      this._viewMenuButton(),
 
       'style' in model && this._canShowCardStylePanel
         ? html`
