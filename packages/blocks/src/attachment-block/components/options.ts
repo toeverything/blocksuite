@@ -6,7 +6,6 @@ import '../../_common/components/toolbar/toolbar.js';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { join } from 'lit/directives/join.js';
-import { createRef, ref, type RefOrCallback } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { createLitPortal } from '../../_common/components/portal.js';
@@ -39,7 +38,6 @@ export function AttachmentOptionsTemplate({
   download,
   refresh,
   abortController,
-  ref: refOrCallback = createRef<HTMLDivElement>(),
 }: {
   anchor: AttachmentBlockComponent;
   model: AttachmentBlockModel;
@@ -48,24 +46,7 @@ export function AttachmentOptionsTemplate({
   refresh: () => void;
   showCaption: () => void;
   abortController: AbortController;
-  ref?: RefOrCallback;
 }) {
-  // let containerEl: Element | undefined;
-  const refCallback = (el: Element | undefined) => {
-    // containerEl = el;
-
-    if (!refCallback) return;
-    // See also https://github.com/lit/lit/blob/c134604f178e36444261d83eabe9e578c1ed90c4/packages/lit-html/src/directives/ref.ts
-    typeof refOrCallback === 'function'
-      ? refOrCallback(el)
-      : ((
-          refOrCallback as {
-            // RefInternal
-            value: Element | undefined;
-          }
-        ).value = el);
-  };
-
   const disableEmbed = !allowEmbed(model, anchor.service.maxFileSize);
   const readonly = model.doc.readonly;
   const viewType = model.embed ? 'embed' : 'card';
@@ -260,10 +241,7 @@ export function AttachmentOptionsTemplate({
     <style>
       ${styles}
     </style>
-    <editor-toolbar
-      class="affine-attachment-toolbar"
-      ${ref(refCallback)}
-    >
+    <editor-toolbar class="affine-attachment-toolbar">
       ${join(
         buttons.filter(button => button !== nothing),
         renderToolbarSeparator

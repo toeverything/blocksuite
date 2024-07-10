@@ -191,27 +191,5 @@ export const linkPopupStyle = css`
     box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
   }
 
-  .affine-link-popover-dividing-line {
-    margin: 0 6px;
-    width: 1px;
-    height: 20px;
-    background-color: var(--affine-border-color);
-  }
-
-  .affine-link-popover-view-selector {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 2px;
-    border-radius: 6px;
-    background: var(--affine-hover-color);
-  }
-  .affine-link-popover-view-selector > icon-button {
-    padding: 0px;
-  }
-  .affine-link-popover-view-selector .current-view {
-    background: var(--affine-background-overlay-panel-color);
-  }
-
   ${editLinkStyle}
 `;

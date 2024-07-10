@@ -339,6 +339,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
       [
         {
+          type: 'delete',
           name: 'Delete',
           icon: DeleteIcon,
           handler: this._delete,
