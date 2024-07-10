@@ -1,7 +1,6 @@
-import { baseTheme } from '@toeverything/theme';
-import { css, unsafeCSS } from 'lit';
+import { css } from 'lit';
 
-import { PANEL_BASE } from '../../../../../styles.js';
+import { INPUT_FONT_BASE, PANEL_BASE } from '../../../../../styles.js';
 
 const editLinkStyle = css`
   .affine-link-edit-popover {
@@ -21,19 +20,18 @@ const editLinkStyle = css`
   }
 
   .affine-link-edit-popover label {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-sm);
     box-sizing: border-box;
     color: var(--affine-icon-color);
+    ${INPUT_FONT_BASE}
+    font-weight: 400;
   }
 
   .affine-link-edit-popover input {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-base);
-    box-sizing: border-box;
     color: inherit;
+    padding: 0;
     border: none;
     background: transparent;
+    ${INPUT_FONT_BASE}
   }
   .affine-link-edit-popover input::placeholder {
     color: var(--affine-placeholder-color);
@@ -57,11 +55,9 @@ const editLinkStyle = css`
     user-select: none;
     box-sizing: border-box;
 
-    font-size: var(--affine-font-xs);
-    font-weight: 400;
-    line-height: 20px;
-
     border: 1px solid var(--affine-border-color);
+    box-sizing: border-box;
+
     outline: none;
     border-radius: 4px;
     background: transparent;
@@ -104,11 +100,6 @@ export const linkPopupStyle = css`
   }
 
   .affine-link-popover-container {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-base);
-    font-style: normal;
-    line-height: 24px;
-    color: var(--affine-text-primary-color);
     z-index: var(--affine-z-index-popover);
     animation: affine-popover-fade-in 0.2s ease;
     position: absolute;
@@ -170,6 +161,8 @@ export const linkPopupStyle = css`
     ${PANEL_BASE}
     gap: 12px;
     padding: 12px;
+
+    color: var(--affine-text-primary-color);
   }
 
   .affine-link-popover-input {
@@ -182,6 +175,7 @@ export const linkPopupStyle = css`
     border-width: 1px;
     border-style: solid;
     border-color: transparent;
+    ${INPUT_FONT_BASE}
   }
   .affine-link-popover-input::placeholder {
     color: var(--affine-placeholder-color);

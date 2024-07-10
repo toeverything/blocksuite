@@ -27,3 +27,14 @@ export const PANEL_BASE = css`
 
   ${PANEL_BASE_COLORS}
 `;
+
+export const INPUT_FONT_BASE = css`
+  font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+  font-feature-settings:
+    'clig' off,
+    'liga' off;
+  font-size: var(--affine-font-xs);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+`;

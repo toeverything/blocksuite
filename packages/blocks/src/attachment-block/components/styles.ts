@@ -1,6 +1,6 @@
 import { css } from 'lit';
 
-import { PANEL_BASE } from '../../_common/styles.js';
+import { INPUT_FONT_BASE, PANEL_BASE } from '../../_common/styles.js';
 
 export const renameStyles = css`
   .affine-attachment-rename-container {
@@ -35,6 +35,7 @@ export const renameStyles = css`
     border: none;
     outline: none;
     background: transparent;
+    ${INPUT_FONT_BASE}
   }
 
   .affine-attachment-rename-input-wrapper input::placeholder {

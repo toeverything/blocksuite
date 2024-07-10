@@ -152,16 +152,20 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
     return html`<div class="embed-card-modal">
       <div class="embed-card-modal-mask" @click=${this._onCancel}></div>
       <div class="embed-card-modal-wrapper">
-        <div class="embed-card-modal-title">${this.titleText}</div>
+        <div class="embed-card-modal-row">
+          <div class="embed-card-modal-title">${this.titleText}</div>
+        </div>
 
-        <div class="embed-card-modal-content">
-          <div class="embed-card-modal-content-text">
+        <div class="embed-card-modal-row">
+          <div class="embed-card-modal-description">
             ${this.descriptionText}
           </div>
+        </div>
 
+        <div class="embed-card-modal-row">
           <input
             class="embed-card-modal-input link"
-            tabindex="0"
+            id="card-description"
             type="text"
             placeholder="Input in https://..."
             value=${this._linkInputValue}
@@ -169,19 +173,11 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
           />
         </div>
 
-        <div class="embed-card-modal-action">
-          <div
-            class="embed-card-modal-button cancel"
-            tabindex="0"
-            @click=${() => this.remove()}
-          >
-            Cancel
-          </div>
-
+        <div class="embed-card-modal-row">
           <div
             class=${classMap({
               'embed-card-modal-button': true,
-              confirm: true,
+              save: true,
               disabled: !isValidUrl(this._linkInputValue),
             })}
             tabindex="0"
