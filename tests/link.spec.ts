@@ -328,9 +328,13 @@ test('should keyboard work in link popover', async ({ page }) => {
   const editLinkPopover = page.locator('.affine-link-edit-popover');
   await expect(editLinkPopover).toBeVisible();
 
-  const editTextInput = editLinkPopover.locator('.affine-edit-text-input');
+  const editTextInput = editLinkPopover.locator(
+    '.affine-edit-area.text .affine-edit-input'
+  );
   await assertKeyboardWorkInInput(page, editTextInput);
-  const editLinkInput = editLinkPopover.locator('.affine-edit-link-input');
+  const editLinkInput = editLinkPopover.locator(
+    '.affine-edit-area.link .affine-edit-input'
+  );
   await assertKeyboardWorkInInput(page, editLinkInput);
 });
 

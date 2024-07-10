@@ -410,60 +410,60 @@ export class LinkPopup extends WithDisposable(LitElement) {
       this.currentLink
     );
 
-    const buttons = join(
-      [
-        html`
-          <a
-            class="affine-link-preview"
-            href=${this.currentLink}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <span>${getHostName(this.currentLink)}</span>
-          </a>
+    const buttons = [
+      html`
+        <a
+          class="affine-link-preview"
+          href=${this.currentLink}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <span>${getHostName(this.currentLink)}</span>
+        </a>
 
-          <editor-icon-button
-            aria-label="Copy"
-            data-testid="copy-link"
-            .tooltip=${'Click to copy link'}
-            @click=${this._copyUrl}
-          >
-            ${CopyIcon}
-          </editor-icon-button>
+        <editor-icon-button
+          aria-label="Copy"
+          data-testid="copy-link"
+          .tooltip=${'Click to copy link'}
+          @click=${this._copyUrl}
+        >
+          ${CopyIcon}
+        </editor-icon-button>
 
-          <editor-icon-button
-            aria-label="Edit"
-            data-testid="edit"
-            .tooltip=${'Edit'}
-            @click=${this._edit}
-          >
-            ${EditIcon}
-          </editor-icon-button>
-        `,
+        <editor-icon-button
+          aria-label="Edit"
+          data-testid="edit"
+          .tooltip=${'Edit'}
+          @click=${this._edit}
+        >
+          ${EditIcon}
+        </editor-icon-button>
+      `,
 
-        this._viewMenuButton(),
+      this._viewMenuButton(),
 
-        html`
-          <editor-menu-button
-            .contentPadding=${'8px'}
-            .button=${html`
-              <editor-icon-button aria-label="More" .tooltip=${'More'}>
-                ${MoreVerticalIcon}
-              </editor-icon-button>
-            `}
-          >
-            <div slot data-size="large" data-orientation="vertical">
-              ${this._moreActions()}
-            </div>
-          </editor-menu-button>
-        `,
-      ].filter(button => button !== nothing),
-      renderToolbarSeparator
-    );
+      html`
+        <editor-menu-button
+          .contentPadding=${'8px'}
+          .button=${html`
+            <editor-icon-button aria-label="More" .tooltip=${'More'}>
+              ${MoreVerticalIcon}
+            </editor-icon-button>
+          `}
+        >
+          <div slot data-size="large" data-orientation="vertical">
+            ${this._moreActions()}
+          </div>
+        </editor-menu-button>
+      `,
+    ];
 
     return html`
       <editor-toolbar class="affine-link-popover view">
-        ${buttons}
+        ${join(
+          buttons.filter(button => button !== nothing),
+          renderToolbarSeparator
+        )}
       </editor-toolbar>
     `;
   };
@@ -484,28 +484,26 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
     return html`
       <div class="affine-link-edit-popover">
-        <div class="affine-edit-text-area">
+        <div class="affine-edit-area text">
           <input
-            class="affine-edit-text-input"
+            class="affine-edit-input"
             id="text-input"
             type="text"
             placeholder="Enter text"
             @input=${this._updateConfirmBtn}
           />
-          <span class="affine-link-popover-dividing-line"></span>
-          <label class="affine-edit-text-text" for="text-input">Text</label>
+          <label class="affine-edit-label" for="text-input">Text</label>
         </div>
-        <div class="affine-edit-link-area">
+        <div class="affine-edit-area link">
           <input
             id="link-input"
-            class="affine-edit-link-input"
+            class="affine-edit-input"
             type="text"
             spellcheck="false"
             placeholder="Paste or type a link"
             @input=${this._updateConfirmBtn}
           />
-          <span class="affine-link-popover-dividing-line"></span>
-          <label class="affine-edit-link-text" for="link-input">Link</label>
+          <label class="affine-edit-label" for="link-input">Link</label>
         </div>
         ${this._confirmBtnTemplate()}
       </div>

@@ -5,31 +5,25 @@ import { PANEL_BASE } from '../../../../../styles.js';
 
 const editLinkStyle = css`
   .affine-link-edit-popover {
-    box-sizing: border-box;
-    width: 404px;
-    height: 112px;
-    padding: 12px;
-    box-shadow: var(--affine-shadow-2);
-    background: var(--affine-background-overlay-panel-color);
-    border-radius: 8px;
+    ${PANEL_BASE}
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: auto auto;
     grid-template-rows: repeat(2, 1fr);
-    gap: 12px;
     grid-template-areas:
       'text-area .'
       'link-area btn';
     justify-items: center;
     align-items: center;
-    /* breaks 'basic link' test in chromium */
-    /* user-select: none; */
+    width: 320px;
+    gap: 8px 12px;
+    padding: 12px;
+    box-sizing: content-box;
   }
 
   .affine-link-edit-popover label {
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
-    padding: 6px 0 6px 12px;
     color: var(--affine-icon-color);
   }
 
@@ -37,9 +31,6 @@ const editLinkStyle = css`
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-base);
     box-sizing: border-box;
-    padding: 6px 12px 6px 0;
-    width: 260px;
-    height: 34px;
     color: inherit;
     border: none;
     background: transparent;
@@ -55,67 +46,45 @@ const editLinkStyle = css`
     color: var(--affine-primary-color);
   }
 
-  .affine-edit-text-area {
-    grid-area: text-area;
-    width: 338px;
+  .affine-edit-area {
+    width: 280px;
+    padding: 4px 10px;
     display: grid;
-    gap: 6px;
-    grid-template-columns: auto auto auto;
+    gap: 8px;
+    grid-template-columns: 26px auto;
     grid-template-rows: repeat(1, 1fr);
-    grid-template-areas: 'text span text-input';
-    justify-items: center;
-    align-items: center;
+    grid-template-areas: 'label input';
     user-select: none;
-  }
-  .affine-edit-text-area {
+    box-sizing: border-box;
+
+    font-size: var(--affine-font-xs);
+    font-weight: 400;
+    line-height: 20px;
+
     border: 1px solid var(--affine-border-color);
     outline: none;
-    border-radius: 10px;
+    border-radius: 4px;
     background: transparent;
   }
-
-  .affine-edit-text-area:focus-within {
-    border: 1px solid var(--affine-primary-color);
+  .affine-edit-area:focus-within {
+    border: 1px solid var(--affine-blue-700);
+    box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
   }
 
-  .affine-edit-link-area {
+  .affine-edit-area.text {
+    grid-area: text-area;
+  }
+
+  .affine-edit-area.link {
     grid-area: link-area;
-    width: 338px;
-    display: grid;
-    gap: 6px;
-    grid-template-columns: auto auto auto;
-    grid-template-rows: repeat(1, 1fr);
-    grid-template-areas: 'link span link-input';
-    justify-items: center;
-    align-items: center;
-  }
-  .affine-edit-link-area {
-    border: 1px solid var(--affine-border-color);
-    outline: none;
-    border-radius: 10px;
-    background: transparent;
-  }
-  .affine-edit-link-area:focus-within {
-    border: 1px solid var(--affine-primary-color);
   }
 
-  .affine-link-popover-dividing-line {
-    grid-area: span;
-  }
-  .affine-edit-text-text {
-    grid-area: text;
+  .affine-edit-label {
+    grid-area: label;
   }
 
-  .affine-edit-text-input {
-    grid-area: text-input;
-  }
-
-  .affine-edit-link-text {
-    grid-area: link;
-  }
-
-  .affine-edit-link-input {
-    grid-area: link-input;
+  .affine-edit-input {
+    grid-area: input;
   }
 
   .affine-confirm-button {
