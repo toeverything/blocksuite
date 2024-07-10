@@ -14,6 +14,7 @@ export class DataViewBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
 > extends BlockService<DataViewBlockModel> {
   readonly inlineManager = new InlineManager<TextAttributes>();
+
   readonly referenceNodeConfig = new ReferenceNodeConfig();
 
   override mounted(): void {

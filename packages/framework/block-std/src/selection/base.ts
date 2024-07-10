@@ -1,7 +1,7 @@
 type SelectionConstructor<T = unknown> = {
-  new (...args: unknown[]): T;
   type: string;
   group: string;
+  new (...args: unknown[]): T;
 };
 
 export type BaseSelectionOptions = {
@@ -10,7 +10,9 @@ export type BaseSelectionOptions = {
 
 export abstract class BaseSelection {
   static readonly type: string;
+
   static readonly group: string;
+
   readonly blockId: string;
 
   constructor({ blockId }: BaseSelectionOptions) {

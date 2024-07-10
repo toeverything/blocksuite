@@ -188,12 +188,12 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       : isLoading
         ? ''
         : isDeleted
-          ? 'This linked page is deleted.'
+          ? 'This linked doc is deleted.'
           : isEmpty
             ? 'Preview of the page will be displayed here.'
             : '';
 
-    const dateText = this.block.docUpdatedAt.toLocaleTimeString();
+    const dateText = this.block.docUpdatedAt.toLocaleString();
 
     const showDefaultBanner = isLoading || error || isDeleted || isEmpty;
 

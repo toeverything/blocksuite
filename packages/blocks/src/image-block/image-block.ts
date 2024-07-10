@@ -7,11 +7,12 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { BlockComponent } from '../_common/components/block-component.js';
+import { Peekable } from '../_common/components/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { ImageBlockEdgelessComponent } from './components/edgeless-image-block.js';
 import type { AffineImageCard } from './components/image-card.js';
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
-import { type ImageBlockModel } from './image-model.js';
+import type { ImageBlockModel } from './image-model.js';
 import type { ImageBlockService } from './image-service.js';
 import {
   copyImageBlob,
@@ -22,44 +23,11 @@ import {
 } from './utils.js';
 
 @customElement('affine-image')
+@Peekable()
 export class ImageBlockComponent extends BlockComponent<
   ImageBlockModel,
   ImageBlockService
 > {
-  override accessor useCaptionEditor = true;
-
-  @property({ attribute: false })
-  accessor loading = false;
-
-  @property({ attribute: false })
-  accessor error = false;
-
-  @property({ attribute: false })
-  accessor downloading = false;
-
-  @property({ attribute: false })
-  accessor retryCount = 0;
-
-  @property({ attribute: false })
-  accessor blob: Blob | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor blobUrl: string | undefined = undefined;
-
-  @state()
-  accessor lastSourceId!: string;
-
-  @query('affine-image-block-card')
-  private accessor _imageCard: AffineImageCard | null = null;
-
-  @query('affine-page-image')
-  private accessor _pageImage: ImageBlockPageComponent | null = null;
-
-  @query('affine-edgeless-image')
-  private accessor _edgelessImage: ImageBlockEdgelessComponent | null = null;
-
-  private _isInSurface = false;
-
   get isInSurface() {
     return this._isInSurface;
   }
@@ -86,6 +54,40 @@ export class ImageBlockComponent extends BlockComponent<
     return this._imageCard;
   }
 
+  @query('affine-image-block-card')
+  private accessor _imageCard: AffineImageCard | null = null;
+
+  @query('affine-page-image')
+  private accessor _pageImage: ImageBlockPageComponent | null = null;
+
+  @query('affine-edgeless-image')
+  private accessor _edgelessImage: ImageBlockEdgelessComponent | null = null;
+
+  private _isInSurface = false;
+
+  override accessor useCaptionEditor = true;
+
+  @property({ attribute: false })
+  accessor loading = false;
+
+  @property({ attribute: false })
+  accessor error = false;
+
+  @property({ attribute: false })
+  accessor downloading = false;
+
+  @property({ attribute: false })
+  accessor retryCount = 0;
+
+  @property({ attribute: false })
+  accessor blob: Blob | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor blobUrl: string | undefined = undefined;
+
+  @state()
+  accessor lastSourceId!: string;
+
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
@@ -95,6 +97,9 @@ export class ImageBlockComponent extends BlockComponent<
   }
 
   private _handleClick(event: MouseEvent) {
+    // the peek view need handle shift + click
+    if (event.shiftKey) return;
+
     event.stopPropagation();
     if (!this.isInSurface) {
       this._selectBlock();

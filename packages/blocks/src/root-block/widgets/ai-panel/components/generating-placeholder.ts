@@ -102,15 +102,6 @@ class GeneratingPlaceholder extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor showHeader!: boolean;
 
-  override willUpdate(changed: PropertyValues) {
-    if (changed.has('loadingProgress')) {
-      this.loadingProgress = Math.max(
-        1,
-        Math.min(this.loadingProgress, this.stages.length)
-      );
-    }
-  }
-
   protected override render() {
     const theme = getThemeMode();
     const loadingText = this.stages[this.loadingProgress - 1] || '';
@@ -134,6 +125,15 @@ class GeneratingPlaceholder extends WithDisposable(LitElement) {
           </div>
         </div>
       </div>`;
+  }
+
+  override willUpdate(changed: PropertyValues) {
+    if (changed.has('loadingProgress')) {
+      this.loadingProgress = Math.max(
+        1,
+        Math.min(this.loadingProgress, this.stages.length)
+      );
+    }
   }
 }
 

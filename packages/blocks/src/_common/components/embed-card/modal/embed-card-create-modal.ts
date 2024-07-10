@@ -7,7 +7,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless/edgeless-root-block.js';
-import type { EdgelessElementType } from '../../../../root-block/edgeless/edgeless-types.js';
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { Vec } from '../../../../surface-block/utils/vec.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
@@ -20,6 +19,9 @@ import { embedCardModalStyles } from './styles.js';
 @customElement('embed-card-create-modal')
 export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
+
+  @state()
+  private accessor _linkInputValue = '';
 
   @property({ attribute: false })
   accessor host!: EditorHost;
@@ -46,22 +48,6 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
 
   @query('input')
   accessor input!: HTMLInputElement;
-
-  @state()
-  private accessor _linkInputValue = '';
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this.updateComplete
-      .then(() => {
-        requestAnimationFrame(() => {
-          this.input.focus();
-        });
-      })
-      .catch(console.error);
-    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
-  }
 
   private _handleInput(e: InputEvent) {
     const target = e.target as HTMLInputElement;
@@ -124,7 +110,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       const surface = edgelessRoot.surface;
       const center = Vec.toVec(surface.renderer.center);
       edgelessRoot.service.addBlock(
-        flavour as EdgelessElementType,
+        flavour,
         {
           url,
           xywh: Bound.fromCenter(
@@ -149,20 +135,37 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
     this.remove();
   };
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.updateComplete
+      .then(() => {
+        requestAnimationFrame(() => {
+          this.input.focus();
+        });
+      })
+      .catch(console.error);
+    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
+  }
+
   override render() {
-    return html`<div class="embed-card-modal blocksuite-overlay">
+    return html`<div class="embed-card-modal">
       <div class="embed-card-modal-mask" @click=${this._onCancel}></div>
       <div class="embed-card-modal-wrapper">
-        <div class="embed-card-modal-title">${this.titleText}</div>
+        <div class="embed-card-modal-row">
+          <div class="embed-card-modal-title">${this.titleText}</div>
+        </div>
 
-        <div class="embed-card-modal-content">
-          <div class="embed-card-modal-content-text">
+        <div class="embed-card-modal-row">
+          <div class="embed-card-modal-description">
             ${this.descriptionText}
           </div>
+        </div>
 
+        <div class="embed-card-modal-row">
           <input
             class="embed-card-modal-input link"
-            tabindex="0"
+            id="card-description"
             type="text"
             placeholder="Input in https://..."
             value=${this._linkInputValue}
@@ -170,19 +173,11 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
           />
         </div>
 
-        <div class="embed-card-modal-action">
-          <div
-            class="embed-card-modal-button cancel"
-            tabindex="0"
-            @click=${() => this.remove()}
-          >
-            Cancel
-          </div>
-
+        <div class="embed-card-modal-row">
           <div
             class=${classMap({
               'embed-card-modal-button': true,
-              confirm: true,
+              save: true,
               disabled: !isValidUrl(this._linkInputValue),
             })}
             tabindex="0"

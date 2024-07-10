@@ -19,4 +19,5 @@ export const imageColumnModelConfig = imageColumnType.modelConfig<string>({
     };
   },
   cellToJson: data => data ?? null,
+  isEmpty: data => data == null,
 });

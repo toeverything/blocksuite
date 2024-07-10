@@ -9,8 +9,14 @@ import { RoughGenerator } from './generator.js';
 import type { Point } from './geometry.js';
 
 export class RoughCanvas {
+  get generator(): RoughGenerator {
+    return this.gen;
+  }
+
   private gen: RoughGenerator;
+
   private canvas: HTMLCanvasElement;
+
   private ctx: CanvasRenderingContext2D;
 
   constructor(canvas: HTMLCanvasElement, config?: Config) {
@@ -18,46 +24,6 @@ export class RoughCanvas {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.ctx = this.canvas.getContext('2d')!;
     this.gen = new RoughGenerator(config);
-  }
-
-  draw(drawable: Drawable): void {
-    const sets = drawable.sets || [];
-    const o = drawable.options || this.getDefaultOptions();
-    const ctx = this.ctx;
-    const precision = drawable.options.fixedDecimalPlaceDigits;
-    for (const drawing of sets) {
-      switch (drawing.type) {
-        case 'path':
-          ctx.save();
-          ctx.strokeStyle = o.stroke === 'none' ? 'transparent' : o.stroke;
-          ctx.lineWidth = o.strokeWidth;
-          if (o.strokeLineDash) {
-            ctx.setLineDash(o.strokeLineDash);
-          }
-          if (o.strokeLineDashOffset) {
-            ctx.lineDashOffset = o.strokeLineDashOffset;
-          }
-          this._drawToContext(ctx, drawing, precision);
-          ctx.restore();
-          break;
-        case 'fillPath': {
-          ctx.save();
-          ctx.fillStyle = o.fill || '';
-          const fillRule: CanvasFillRule =
-            drawable.shape === 'curve' ||
-            drawable.shape === 'polygon' ||
-            drawable.shape === 'path'
-              ? 'evenodd'
-              : 'nonzero';
-          this._drawToContext(ctx, drawing, precision, fillRule);
-          ctx.restore();
-          break;
-        }
-        case 'fillSketch':
-          this.fillSketch(ctx, drawing, o);
-          break;
-      }
-    }
   }
 
   private fillSketch(
@@ -120,8 +86,45 @@ export class RoughCanvas {
     }
   }
 
-  get generator(): RoughGenerator {
-    return this.gen;
+  draw(drawable: Drawable): void {
+    const sets = drawable.sets || [];
+    const o = drawable.options || this.getDefaultOptions();
+    const ctx = this.ctx;
+    const precision = drawable.options.fixedDecimalPlaceDigits;
+
+    for (const drawing of sets) {
+      switch (drawing.type) {
+        case 'path':
+          ctx.save();
+          ctx.strokeStyle = o.stroke === 'none' ? 'transparent' : o.stroke;
+          ctx.lineWidth = o.strokeWidth;
+          if (o.strokeLineDash) {
+            ctx.setLineDash(o.strokeLineDash);
+          }
+          if (o.strokeLineDashOffset) {
+            ctx.lineDashOffset = o.strokeLineDashOffset;
+          }
+          this._drawToContext(ctx, drawing, precision);
+          ctx.restore();
+          break;
+        case 'fillPath': {
+          ctx.save();
+          ctx.fillStyle = o.fill || '';
+          const fillRule: CanvasFillRule =
+            drawable.shape === 'curve' ||
+            drawable.shape === 'polygon' ||
+            drawable.shape === 'path'
+              ? 'evenodd'
+              : 'nonzero';
+          this._drawToContext(ctx, drawing, precision, fillRule);
+          ctx.restore();
+          break;
+        }
+        case 'fillSketch':
+          this.fillSketch(ctx, drawing, o);
+          break;
+      }
+    }
   }
 
   getDefaultOptions(): ResolvedOptions {

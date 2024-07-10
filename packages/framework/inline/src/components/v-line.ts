@@ -10,9 +10,6 @@ import { EmbedGap } from './embed-gap.js';
 
 @customElement('v-line')
 export class VLine extends LitElement {
-  @property({ attribute: false })
-  accessor elements: [TemplateResult<1>, DeltaInsert][] = [];
-
   get inlineEditor() {
     const rootElement = this.closest(
       `[${INLINE_ROOT_ATTR}]`
@@ -45,12 +42,8 @@ export class VLine extends LitElement {
     return this.vElements.reduce((acc, el) => acc + el.delta.insert, '');
   }
 
-  override async getUpdateComplete() {
-    const result = await super.getUpdateComplete();
-    await Promise.all(this.vElements.map(el => el.updateComplete));
-    await Promise.all(this.vTexts.map(el => el.updateComplete));
-    return result;
-  }
+  @property({ attribute: false })
+  accessor elements: [TemplateResult<1>, DeltaInsert][] = [];
 
   protected override firstUpdated(): void {
     this.style.display = 'block';
@@ -67,6 +60,13 @@ export class VLine extends LitElement {
         selection.addRange(range);
       }
     });
+  }
+
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await Promise.all(this.vElements.map(el => el.updateComplete));
+    await Promise.all(this.vTexts.map(el => el.updateComplete));
+    return result;
   }
 
   override render() {

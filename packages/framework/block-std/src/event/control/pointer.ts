@@ -7,37 +7,25 @@ import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 import { isFarEnough } from '../utils.js';
 
 export class PointerControl {
-  private _lastPointerDownEvent: PointerEvent | null = null;
-  private _startDragState: PointerEventState | null = null;
-  private _lastDragState: PointerEventState | null = null;
-  private _pointerDownCount = 0;
-  private _dragging = false;
-  private _startX = -Infinity;
-  private _startY = -Infinity;
-
-  constructor(private _dispatcher: UIEventDispatcher) {}
-
-  listen() {
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'pointerdown',
-      this._down
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'pointermove',
-      this._moveOn
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'pointerout',
-      this._out
-    );
-  }
-
   private get _rect() {
     return this._dispatcher.host.getBoundingClientRect();
   }
+
+  private _lastPointerDownEvent: PointerEvent | null = null;
+
+  private _startDragState: PointerEventState | null = null;
+
+  private _lastDragState: PointerEventState | null = null;
+
+  private _pointerDownCount = 0;
+
+  private _dragging = false;
+
+  private _startX = -Infinity;
+
+  private _startY = -Infinity;
+
+  constructor(private _dispatcher: UIEventDispatcher) {}
 
   private _reset = () => {
     this._startX = -Infinity;
@@ -176,4 +164,22 @@ export class PointerControl {
 
     this._dispatcher.run('pointerOut', this._createContext(event, state));
   };
+
+  listen() {
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'pointerdown',
+      this._down
+    );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'pointermove',
+      this._moveOn
+    );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'pointerout',
+      this._out
+    );
+  }
 }

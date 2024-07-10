@@ -3,40 +3,53 @@ import { Slot } from '@blocksuite/global/utils';
 import type { SingleViewSource, ViewSource } from './data-view/common/index.js';
 import type { InsertToPosition } from './data-view/types.js';
 import type { DataViewTypes, ViewMeta } from './data-view/view/data-view.js';
-import { type DatabaseBlockModel } from './database-model.js';
+import type { DatabaseBlockModel } from './database-model.js';
 import { databaseViewAddView } from './utils.js';
 import { databaseBlockViewMap, databaseBlockViews } from './views/index.js';
 
 export class DatabaseBlockViewSource implements ViewSource {
-  constructor(private model: DatabaseBlockModel) {}
-
   get currentViewId(): string {
     return this.currentId ?? this.model.views[0].id;
   }
 
-  private viewMap = new Map<string, SingleViewSource>();
-  private currentId?: string;
-
-  public selectView(id: string): void {
-    this.currentId = id;
-    this.updateSlot.emit();
-  }
-
-  public updateSlot = new Slot();
-
-  public get views(): SingleViewSource[] {
+  get views(): SingleViewSource[] {
     return this.model.views.map(v => this.viewGet(v.id));
   }
 
-  public get currentView(): SingleViewSource {
+  get currentView(): SingleViewSource {
     return this.viewGet(this.currentViewId);
   }
 
-  public get readonly(): boolean {
+  get readonly(): boolean {
     return this.model.doc.readonly;
   }
 
-  public viewAdd(viewType: DataViewTypes): string {
+  get allViewMeta(): ViewMeta[] {
+    return databaseBlockViews;
+  }
+
+  private viewMap = new Map<string, SingleViewSource>();
+
+  private currentId?: string;
+
+  updateSlot = new Slot<{
+    viewId?: string;
+  }>();
+
+  constructor(private model: DatabaseBlockModel) {}
+
+  checkViewDataUpdate(): void {
+    this.model.views.forEach(v => {
+      this.updateSlot.emit({ viewId: v.id });
+    });
+  }
+
+  selectView(id: string): void {
+    this.currentId = id;
+    this.updateSlot.emit({});
+  }
+
+  viewAdd(viewType: DataViewTypes): string {
     this.model.doc.captureSync();
     const view = databaseViewAddView(
       this.model,
@@ -46,7 +59,7 @@ export class DatabaseBlockViewSource implements ViewSource {
     return view.id;
   }
 
-  public viewGet(id: string): SingleViewSource {
+  viewGet(id: string): SingleViewSource {
     let result = this.viewMap.get(id);
     if (!result) {
       const getView = () => {
@@ -58,8 +71,15 @@ export class DatabaseBlockViewSource implements ViewSource {
       }
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
-      const slot = new Slot();
-      this.updateSlot.pipe(slot);
+      const slot = new Slot<{ viewId: string }>();
+      this.updateSlot
+        .flatMap(data => {
+          if (data.viewId === id) {
+            return { viewId: id };
+          }
+          return [];
+        })
+        .pipe(slot);
       result = {
         duplicate(): void {
           self.duplicate(id);
@@ -99,20 +119,16 @@ export class DatabaseBlockViewSource implements ViewSource {
     return result;
   }
 
-  public duplicate(id: string): void {
+  duplicate(id: string): void {
     const newId = this.model.duplicateView(id);
     this.selectView(newId);
   }
 
-  public moveTo(id: string, position: InsertToPosition): void {
+  moveTo(id: string, position: InsertToPosition): void {
     this.model.moveViewTo(id, position);
   }
 
-  public get allViewMeta(): ViewMeta[] {
-    return databaseBlockViews;
-  }
-
-  public getViewMeta(type: string): ViewMeta {
+  getViewMeta(type: string): ViewMeta {
     return databaseBlockViewMap[type];
   }
 }

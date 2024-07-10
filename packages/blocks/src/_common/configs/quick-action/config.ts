@@ -12,7 +12,12 @@ import {
   DatabaseTableViewIcon20,
   FontLinkedDocIcon,
 } from '../../icons/index.js';
-import { convertSelectedBlocksToLinkedDoc } from '../../utils/render-linked-doc.js';
+import {
+  convertSelectedBlocksToLinkedDoc,
+  getTitleFromSelectedModels,
+  notifyDocCreated,
+  promptDocTitle,
+} from '../../utils/render-linked-doc.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {
@@ -134,9 +139,20 @@ export const quickActionConfig: QuickActionConfig[] = [
       host.selection.clear();
 
       const doc = host.doc;
-      const linkedDoc = convertSelectedBlocksToLinkedDoc(doc, selectedModels);
-      const linkedDocService = host.spec.getService('affine:embed-linked-doc');
-      linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+      const autofill = getTitleFromSelectedModels(selectedModels);
+      void promptDocTitle(host, autofill).then(title => {
+        if (title === null) return;
+        const linkedDoc = convertSelectedBlocksToLinkedDoc(
+          doc,
+          selectedModels,
+          title
+        );
+        const linkedDocService = host.spec.getService(
+          'affine:embed-linked-doc'
+        );
+        linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+        notifyDocCreated(host, doc);
+      });
     },
   },
 ];

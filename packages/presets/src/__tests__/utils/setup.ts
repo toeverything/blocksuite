@@ -68,6 +68,7 @@ async function createEditor(
 
 export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
   const collection = new DocCollection(createCollectionOptions());
+  collection.meta.initialize();
 
   window.collection = collection;
 

@@ -3,14 +3,14 @@ import '../declare-test-window.js';
 
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
-import {
-  type DatabaseBlockModel,
-  type ListType,
-  type RichText,
-  type ThemeObserver,
+import type {
+  DatabaseBlockModel,
+  ListType,
+  RichText,
+  ThemeObserver,
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
-import { type InlineRange, type InlineRootElement } from '@inline/index.js';
+import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
@@ -1409,4 +1409,33 @@ export async function scrollToBottom(page: Page) {
       ) < 10
     );
   });
+}
+
+export async function mockQuickSearch(
+  page: Page,
+  mapping: Record<string, string> // query -> docId
+) {
+  // mock quick search service
+  await page.evaluate(mapping => {
+    window.host.std.spec.getService('affine:page').quickSearchService = {
+      searchDoc(options) {
+        return new Promise(resolve => {
+          if (!options.userInput) {
+            return resolve(null);
+          }
+
+          const docId = mapping[options.userInput];
+          if (!docId) {
+            return resolve({
+              userInput: options.userInput,
+            });
+          } else {
+            return resolve({
+              docId,
+            });
+          }
+        });
+      },
+    };
+  }, mapping);
 }

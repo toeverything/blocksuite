@@ -9,39 +9,26 @@ import type {
 import { Job } from '@blocksuite/store';
 import * as lz from 'lz-string';
 
+type AdapterConstructor<T extends BaseAdapter> = new (job: Job) => T;
+
 type AdapterMap = Map<
   string,
   {
-    adapter: BaseAdapter;
+    adapter: AdapterConstructor<BaseAdapter>;
     priority: number;
   }
 >;
 
 export class Clipboard {
-  private _jobMiddlewares: JobMiddleware[] = [];
-  private _adapterMap: AdapterMap = new Map();
-
-  constructor(public std: BlockSuite.Std) {}
-
-  use = (middleware: JobMiddleware) => {
-    this._jobMiddlewares.push(middleware);
-  };
-
-  unuse = (middleware: JobMiddleware) => {
-    this._jobMiddlewares = this._jobMiddlewares.filter(m => m !== middleware);
-  };
-
-  registerAdapter = (mimeType: string, adapter: BaseAdapter, priority = 0) => {
-    this._adapterMap.set(mimeType, { adapter, priority });
-  };
-
-  unregisterAdapter = (mimeType: string) => {
-    this._adapterMap.delete(mimeType);
-  };
-
   get configs() {
     return this._getJob().adapterConfigs;
   }
+
+  private _jobMiddlewares: JobMiddleware[] = [];
+
+  private _adapterMap: AdapterMap = new Map();
+
+  constructor(public std: BlockSuite.Std) {}
 
   private _getJob() {
     return new Job({
@@ -79,11 +66,9 @@ export class Clipboard {
     const adapterItem = this._adapterMap.get(type);
     assertExists(adapterItem);
     const { adapter } = adapterItem;
-    const snapshot = await job.sliceToSnapshot(slice);
-    adapter.applyConfigs(job.adapterConfigs);
-    return (
-      await adapter.fromSliceSnapshot({ snapshot, assets: job.assetsManager })
-    ).file;
+    const adapterInstance = new adapter(job);
+    const { file } = await adapterInstance.fromSlice(slice);
+    return file;
   }
 
   private _getSnapshotByPriority = async (
@@ -112,7 +97,7 @@ export class Clipboard {
       }
       if (item) {
         const job = this._getJob();
-        adapter.applyConfigs(job.adapterConfigs);
+        const adapterInstance = new adapter(job);
         const payload = {
           file: item,
           assets: job.assetsManager,
@@ -122,13 +107,38 @@ export class Clipboard {
           workspaceId: doc.collection.id,
           pageId: doc.id,
         };
-        const sliceSnapshot = await adapter.toSliceSnapshot(payload);
-        if (sliceSnapshot) {
-          return job.snapshotToSlice(sliceSnapshot, doc, parent, index);
+        const result = await adapterInstance.toSlice(
+          payload,
+          doc,
+          parent,
+          index
+        );
+        if (result) {
+          return result;
         }
       }
     }
     return null;
+  };
+
+  use = (middleware: JobMiddleware) => {
+    this._jobMiddlewares.push(middleware);
+  };
+
+  unuse = (middleware: JobMiddleware) => {
+    this._jobMiddlewares = this._jobMiddlewares.filter(m => m !== middleware);
+  };
+
+  registerAdapter = <T extends BaseAdapter>(
+    mimeType: string,
+    adapter: AdapterConstructor<T>,
+    priority = 0
+  ) => {
+    this._adapterMap.set(mimeType, { adapter, priority });
+  };
+
+  unregisterAdapter = (mimeType: string) => {
+    this._adapterMap.delete(mimeType);
   };
 
   copy = async (slice: Slice) => {

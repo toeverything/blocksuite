@@ -15,14 +15,18 @@ export class LeftSidePanel extends ShadowlessElement {
       display: none;
     }
   `;
+
   currentContent: HTMLElement | null = null;
+
+  protected override render(): unknown {
+    return html``;
+  }
 
   showContent(ele: HTMLElement) {
     if (this.currentContent) {
       this.currentContent.remove();
     }
     this.style.display = 'block';
-    ele.classList.add('blocksuite-overlay');
     this.currentContent = ele;
     this.append(ele);
   }
@@ -41,10 +45,6 @@ export class LeftSidePanel extends ShadowlessElement {
     } else {
       this.hideContent();
     }
-  }
-
-  protected override render(): unknown {
-    return html``;
   }
 }
 

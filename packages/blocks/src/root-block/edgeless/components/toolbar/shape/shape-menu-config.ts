@@ -12,8 +12,8 @@ import {
   SquareIcon,
   TriangleIcon,
 } from '../../../../../_common/icons/index.js';
-import type { ShapeTool } from '../../../../../_common/utils/index.js';
 import { ShapeType } from '../../../../../surface-block/index.js';
+import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
 
 const { Rect, Ellipse, Triangle, Diamond } = ShapeType;
 
@@ -23,6 +23,7 @@ type Config = {
   scribbledIcon: TemplateResult<1>;
   tooltip: string;
   disabled: boolean;
+  value: Record<string, unknown>;
 };
 
 export const ShapeComponentConfig: Config[] = [
@@ -32,6 +33,10 @@ export const ShapeComponentConfig: Config[] = [
     scribbledIcon: ScribbledSquareIcon,
     tooltip: 'Square',
     disabled: false,
+    value: {
+      shapeType: Rect,
+      radius: 0,
+    },
   },
   {
     name: Ellipse,
@@ -39,6 +44,9 @@ export const ShapeComponentConfig: Config[] = [
     scribbledIcon: ScribbledEllipseIcon,
     tooltip: 'Ellipse',
     disabled: false,
+    value: {
+      shapeType: Ellipse,
+    },
   },
   {
     name: Diamond,
@@ -46,6 +54,9 @@ export const ShapeComponentConfig: Config[] = [
     scribbledIcon: ScribbledDiamondIcon,
     tooltip: 'Diamond',
     disabled: false,
+    value: {
+      shapeType: Diamond,
+    },
   },
   {
     name: Triangle,
@@ -53,6 +64,9 @@ export const ShapeComponentConfig: Config[] = [
     scribbledIcon: ScribbledTriangleIcon,
     tooltip: 'Triangle',
     disabled: false,
+    value: {
+      shapeType: Triangle,
+    },
   },
   {
     name: 'roundedRect',
@@ -60,8 +74,12 @@ export const ShapeComponentConfig: Config[] = [
     scribbledIcon: ScribbledRoundedRectangleIcon,
     tooltip: 'Rounded rectangle',
     disabled: false,
+    value: {
+      shapeType: Rect,
+      radius: 0.1,
+    },
   },
-] as const;
+];
 
 export const ShapeComponentConfigMap = ShapeComponentConfig.reduce(
   (acc, config) => {
@@ -71,6 +89,5 @@ export const ShapeComponentConfigMap = ShapeComponentConfig.reduce(
   {} as Record<Config['name'], Config>
 );
 
-export const SHAPE_SUBMENU_WIDTH = 464;
 export const SHAPE_COLOR_PREFIX = '--affine-palette-shape-';
 export const LINE_COLOR_PREFIX = '--affine-palette-line-';

@@ -68,7 +68,51 @@ const styles = css`
 
 @customElement('frame-preview')
 export class FramePreview extends WithDisposable(ShadowlessElement) {
+  get surfaceRenderer() {
+    return this._surfaceRefRenderer.surfaceRenderer;
+  }
+
+  private get _surfaceService() {
+    return this.host?.std.spec.getService('affine:surface');
+  }
+
+  private get _surfaceRefService() {
+    return this.host.spec.getService('affine:surface-ref');
+  }
+
   static override styles = styles;
+
+  @state()
+  private accessor _surfaceModel: SurfaceBlockModel | null = null;
+
+  private _surfaceRefRendererId: string = nanoid();
+
+  private _surfaceRefRenderer!: SurfaceRefRenderer;
+
+  private _edgelessDisposables: DisposableGroup | null = null;
+
+  private _docDisposables: DisposableGroup | null = null;
+
+  private _frameDisposables: DisposableGroup | null = null;
+
+  private _debounceHandleElementUpdated = debounce(
+    (data: ElementUpdatedData) => {
+      const { id, oldValues, props } = data;
+      if (!props.xywh) return;
+      // if element is moved in frame, refresh viewport
+      if (this._overlapWithFrame(id)) {
+        this._refreshViewport();
+      } else if (oldValues.xywh) {
+        // if element is moved out of frame, refresh viewport
+        const oldBound = Bound.deserialize(oldValues.xywh as string);
+        const frameBound = Bound.deserialize(this.frame.xywh);
+        if (oldBound.isOverlapWithBound(frameBound)) {
+          this._refreshViewport();
+        }
+      }
+    },
+    1000 / 30
+  );
 
   @property({ attribute: false })
   accessor edgeless: EdgelessRootBlockComponent | null = null;
@@ -91,25 +135,11 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   @state()
   accessor fillScreen = false;
 
-  @state()
-  private accessor _surfaceModel: SurfaceBlockModel | null = null;
-
-  private _surfaceRefRendererId: string = nanoid();
-  private _surfaceRefRenderer!: SurfaceRefRenderer;
-
-  private _edgelessDisposables: DisposableGroup | null = null;
-  private _docDisposables: DisposableGroup | null = null;
-  private _frameDisposables: DisposableGroup | null = null;
-
   @query('.frame-preview-surface-canvas-container')
   accessor container!: HTMLDivElement;
 
   @query('.frame-preview-surface-container surface-ref-portal')
   accessor blocksPortal!: SurfaceRefPortal;
-
-  get surfaceRenderer() {
-    return this._surfaceRefRenderer.surfaceRenderer;
-  }
 
   private _attachRenderer() {
     if (
@@ -133,14 +163,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
         this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
       );
     }
-  }
-
-  private get _surfaceService() {
-    return this.host?.std.spec.getService('affine:surface');
-  }
-
-  private get _surfaceRefService() {
-    return this.host.spec.getService('affine:surface-ref');
   }
 
   private _setupSurfaceRefRenderer() {
@@ -208,7 +230,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     if (!this.edgeless) return;
 
     this.fillScreen =
-      this.edgeless.service.editPropsStore.getItem('presentFillScreen') ??
+      this.edgeless.service.editPropsStore.getStorage('presentFillScreen') ??
       false;
   }
 
@@ -236,27 +258,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     const eleBound = Bound.deserialize(ele.xywh);
     return frameBound.isOverlapWithBound(eleBound);
   };
-
-  private _handleElementUpdated = (data: ElementUpdatedData) => {
-    const { id, oldValues, props } = data;
-    if (!props.xywh) return;
-    // if element is moved in frame, refresh viewport
-    if (this._overlapWithFrame(id)) {
-      this._refreshViewport();
-    } else if (oldValues.xywh) {
-      // if element is moved out of frame, refresh viewport
-      const oldBound = Bound.deserialize(oldValues.xywh as string);
-      const frameBound = Bound.deserialize(this.frame.xywh);
-      if (oldBound.isOverlapWithBound(frameBound)) {
-        this._refreshViewport();
-      }
-    }
-  };
-
-  private _debounceHandleElementUpdated = debounce(
-    this._handleElementUpdated,
-    1000 / 30
-  );
 
   private _clearEdgelessDisposables = () => {
     this._edgelessDisposables?.dispose();

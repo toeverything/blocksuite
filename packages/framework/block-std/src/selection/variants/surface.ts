@@ -10,10 +10,13 @@ const SurfaceSelectionSchema = z.object({
 
 export class SurfaceSelection extends BaseSelection {
   static override type = 'surface';
+
   static override group = 'edgeless';
 
   readonly elements: string[];
+
   readonly editing: boolean;
+
   readonly inoperable: boolean;
 
   constructor(

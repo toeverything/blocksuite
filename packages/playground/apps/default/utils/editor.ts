@@ -1,17 +1,28 @@
 import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
-import { type PageRootService, toast } from '@blocksuite/blocks';
+import type { DocModeService, PageRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BlockCollection } from '@blocksuite/store';
-import { type DocCollection } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
 import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.js';
+import {
+  mockDocModeService,
+  mockNotificationService,
+  mockQuickSearchService,
+} from '../../_common/mock-services.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
-const params = new URLSearchParams(location.search);
-const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
+function setDocModeFromUrlParams(service: DocModeService) {
+  const params = new URLSearchParams(location.search);
+  const paramMode = params.get('mode');
+  if (paramMode) {
+    const docMode = paramMode === 'page' ? 'page' : 'edgeless';
+    service.setMode(docMode);
+  }
+}
 
 export async function mountDefaultDocEditor(collection: DocCollection) {
   const blockCollection = collection.docs.values().next()
@@ -25,6 +36,8 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const app = document.getElementById('app');
   if (!app) return;
 
+  const modeService = mockDocModeService(doc.id);
+  setDocModeFromUrlParams(modeService);
   const editor = new AffineEditorContainer();
   const specs = getExampleSpecs();
   editor.pageSpecs = [...specs.pageModeSpecs].map(spec => {
@@ -44,6 +57,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     return spec;
   });
   editor.doc = doc;
+  editor.mode = modeService.getMode();
   editor.slots.docLinkClicked.on(({ docId }) => {
     const target = collection.getDoc(docId);
     if (!target) {
@@ -51,6 +65,9 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     }
     target.load();
     editor.doc = target;
+  });
+  editor.slots.docUpdated.on(({ newDocId }) => {
+    editor.mode = modeService.getMode(newDocId);
   });
 
   app.append(editor);
@@ -64,13 +81,8 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const quickEdgelessMenu = new QuickEdgelessMenu();
   quickEdgelessMenu.collection = doc.collection;
   quickEdgelessMenu.editor = editor;
-  quickEdgelessMenu.mode = defaultMode;
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
   quickEdgelessMenu.docsPanel = docsPanel;
-
-  function switchQuickEdgelessMenu(mode: typeof defaultMode) {
-    quickEdgelessMenu.mode = mode;
-  }
 
   document.body.append(leftSidePanel);
   document.body.append(quickEdgelessMenu);
@@ -99,56 +111,20 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
         setup?.(slots, disposable);
         slots.mounted.once(({ service }) => {
           const pageRootService = service as PageRootService;
-          disposable.add(
-            pageRootService.slots.editorModeSwitch.on(switchQuickEdgelessMenu)
-          );
-          pageRootService.notificationService = {
-            toast: (message, options) => {
-              toast(service.host as EditorHost, message, options?.duration);
-            },
-            confirm: notification => {
-              return Promise.resolve(confirm(notification.title.toString()));
-            },
-            prompt: notification => {
-              return Promise.resolve(prompt(notification.title.toString()));
-            },
-            notify: notification => {
-              // todo: implement in playground
-              console.log(notification);
-            },
-          };
-          pageRootService.quickSearchService = {
-            async searchDoc({ userInput }) {
-              await new Promise(resolve => setTimeout(resolve, 500));
-              const docs = collection.search({
-                query: userInput,
-                limit: 1,
-              });
-              const doc = [...docs].at(0);
-              if (doc) {
-                return {
-                  docId: doc[1],
-                };
-              } else if (userInput) {
-                return {
-                  userInput: userInput,
-                };
-              } else {
-                // randomly create a doc
-                const newDoc = collection.createDoc();
-                return {
-                  docId: newDoc.id,
-                };
-              }
-            },
-          };
-
+          pageRootService.notificationService =
+            mockNotificationService(pageRootService);
+          pageRootService.quickSearchService =
+            mockQuickSearchService(collection);
           pageRootService.peekViewService = {
             peek(target: unknown) {
               alert('Peek view not implemented in playground');
               console.log('peek', target);
+              return Promise.resolve();
             },
           };
+          pageRootService.docModeService = mockDocModeService(
+            pageRootService.doc.id
+          );
         });
       },
     };

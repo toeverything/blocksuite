@@ -4,7 +4,7 @@ import type { Bound } from './bound.js';
 import { Graph } from './graph.js';
 import { almostEqual } from './math-utils.js';
 import { PriorityQueue } from './priority-queue.js';
-import { type IVec } from './vec.js';
+import type { IVec } from './vec.js';
 
 function cost(point: IVec, point2: IVec) {
   return Math.abs(point[0] - point2[0]) + Math.abs(point[1] - point2[1]);
@@ -36,16 +36,22 @@ function pointAlmostEqual(a: IVec, b: IVec): boolean {
 
 export class AStarRunner {
   private _cameFrom = new Map<IVec, { from: IVec[]; indexs: number[] }>();
+
   private _frontier!: PriorityQueue<
     IVec,
     [diagonalCount: number, pointPriority: number, distCost: number]
   >;
 
   private _graph: Graph;
+
   private _costSoFar = new Map<IVec, number[]>();
+
   private _diagonalCount = new Map<IVec, number[]>();
+
   private _pointPriority = new Map<IVec, number[]>();
+
   private _current: IVec | null = null;
+
   private _complete = false;
 
   constructor(
@@ -63,6 +69,7 @@ export class AStarRunner {
     this._graph = new Graph([...points], blocks, expandBlocks);
     this._init();
   }
+
   private _init() {
     this._cameFrom.set(this._sp, { from: [this._originalSp], indexs: [-1] });
     this._cameFrom.set(this._originalSp, { from: [], indexs: [] });
@@ -92,7 +99,7 @@ export class AStarRunner {
     return neighbors;
   }
 
-  public step() {
+  step() {
     if (this._complete) return;
     this._current = this._frontier.dequeue();
     const current = this._current;
@@ -209,7 +216,7 @@ export class AStarRunner {
     }
   }
 
-  public reset() {
+  reset() {
     this._cameFrom.clear();
     this._costSoFar.clear();
     this._diagonalCount.clear();
@@ -218,7 +225,7 @@ export class AStarRunner {
     this._init();
   }
 
-  public run() {
+  run() {
     while (!this._complete) {
       this.step();
     }

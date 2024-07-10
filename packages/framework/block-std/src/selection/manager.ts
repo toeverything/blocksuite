@@ -1,5 +1,6 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { StackItem } from '@blocksuite/store';
+import { computed, signal } from '@lit-labs/preact-signals';
 
 import type { BaseSelection } from './base.js';
 import {
@@ -10,16 +11,32 @@ import {
 } from './variants/index.js';
 
 interface SelectionConstructor {
+  type: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   new (...args: any[]): BaseSelection;
-
-  type: string;
   fromJSON(json: Record<string, unknown>): BaseSelection;
 }
 
 export class SelectionManager {
-  disposables = new DisposableGroup();
+  private get _store() {
+    return this.std.collection.awarenessStore;
+  }
+
+  private _selections = signal<BaseSelection[]>([]);
+
+  private _remoteSelections = signal<Map<number, BaseSelection[]>>(new Map());
+
+  get value() {
+    return this._selections.value;
+  }
+
+  get remoteSelections() {
+    return this._remoteSelections.value;
+  }
+
   private _selectionConstructors: Record<string, SelectionConstructor> = {};
+
+  disposables = new DisposableGroup();
 
   slots = {
     changed: new Slot<BaseSelection[]>(),
@@ -28,17 +45,50 @@ export class SelectionManager {
 
   constructor(public std: BlockSuite.Std) {
     this._setupDefaultSelections();
-  }
+    this._store.awareness.on(
+      'change',
+      (change: { updated: number[]; added: number[]; removed: number[] }) => {
+        const all = change.updated.concat(change.added).concat(change.removed);
+        const localClientID = this._store.awareness.clientID;
+        const exceptLocal = all.filter(id => id !== localClientID);
+        const hasLocal = all.includes(localClientID);
+        if (hasLocal) {
+          const localSelection = this._store
+            .getLocalSelection(this.std.doc.blockCollection)
+            .map(json => {
+              return this._jsonToSelection(json);
+            });
+          this._selections.value = localSelection;
+        }
 
-  register(ctor: SelectionConstructor | SelectionConstructor[]) {
-    [ctor].flat().forEach(ctor => {
-      this._selectionConstructors[ctor.type] = ctor;
-    });
-    return this;
-  }
-
-  private get _store() {
-    return this.std.collection.awarenessStore;
+        if (exceptLocal.length > 0) {
+          const map = new Map<number, BaseSelection[]>();
+          this._store.getStates().forEach((state, id) => {
+            if (id === this._store.awareness.clientID) return;
+            const selection = Object.entries(state.selectionV2)
+              .filter(([key]) => key === this.std.doc.id)
+              .flatMap(([_, selection]) => selection);
+            const selections = selection
+              .map(json => {
+                try {
+                  return this._jsonToSelection(json);
+                } catch (error) {
+                  console.error(
+                    'Parse remote selection failed:',
+                    id,
+                    json,
+                    error
+                  );
+                  return null;
+                }
+              })
+              .filter((sel): sel is BaseSelection => !!sel);
+            map.set(id, selections);
+          });
+          this._remoteSelections.value = map;
+        }
+      }
+    );
   }
 
   private _setupDefaultSelections() {
@@ -58,6 +108,24 @@ export class SelectionManager {
     return ctor.fromJSON(json);
   };
 
+  private _itemAdded = (event: { stackItem: StackItem }) => {
+    event.stackItem.meta.set('selection-state', this.value);
+  };
+
+  private _itemPopped = (event: { stackItem: StackItem }) => {
+    const selection = event.stackItem.meta.get('selection-state');
+    if (selection) {
+      this.set(selection as BaseSelection[]);
+    }
+  };
+
+  register(ctor: SelectionConstructor | SelectionConstructor[]) {
+    [ctor].flat().forEach(ctor => {
+      this._selectionConstructors[ctor.type] = ctor;
+    });
+    return this;
+  }
+
   create<T extends BlockSuite.SelectionType>(
     type: T,
     ...args: ConstructorParameters<BlockSuite.Selection[T]>
@@ -67,14 +135,6 @@ export class SelectionManager {
       throw new Error(`Unknown selection type: ${type}`);
     }
     return new ctor(...args) as BlockSuite.SelectionInstance[T];
-  }
-
-  get value() {
-    return this._store
-      .getLocalSelection(this.std.doc.blockCollection)
-      .map(json => {
-        return this._jsonToSelection(json);
-      });
   }
 
   fromJSON(json: Record<string, unknown>[]) {
@@ -117,50 +177,29 @@ export class SelectionManager {
     }
   }
 
+  find$<T extends BlockSuite.SelectionType>(type: T) {
+    return computed(() =>
+      this.value.find((sel): sel is BlockSuite.SelectionInstance[T] =>
+        sel.is(type)
+      )
+    );
+  }
+
   find<T extends BlockSuite.SelectionType>(type: T) {
-    return this.value.find((sel): sel is BlockSuite.SelectionInstance[T] =>
-      sel.is(type)
+    return this.find$(type).value;
+  }
+
+  filter$<T extends BlockSuite.SelectionType>(type: T) {
+    return computed(() =>
+      this.value.filter((sel): sel is BlockSuite.SelectionInstance[T] =>
+        sel.is(type)
+      )
     );
   }
 
   filter<T extends BlockSuite.SelectionType>(type: T) {
-    return this.value.filter((sel): sel is BlockSuite.SelectionInstance[T] =>
-      sel.is(type)
-    );
+    return this.filter$(type).value;
   }
-
-  get remoteSelections() {
-    const map = new Map<number, BaseSelection[]>();
-    this._store.getStates().forEach((state, id) => {
-      if (id === this._store.awareness.clientID) return;
-      const selection = Object.entries(state.selectionV2)
-        .filter(([key]) => key === this.std.doc.id)
-        .flatMap(([_, selection]) => selection);
-      const selections = selection
-        .map(json => {
-          try {
-            return this._jsonToSelection(json);
-          } catch (error) {
-            console.error('Parse remote selection failed:', id, json, error);
-            return null;
-          }
-        })
-        .filter((sel): sel is BaseSelection => !!sel);
-      map.set(id, selections);
-    });
-    return map;
-  }
-
-  private _itemAdded = (event: { stackItem: StackItem }) => {
-    event.stackItem.meta.set('selection-state', this.value);
-  };
-
-  private _itemPopped = (event: { stackItem: StackItem }) => {
-    const selection = event.stackItem.meta.get('selection-state');
-    if (selection) {
-      this.set(selection as BaseSelection[]);
-    }
-  };
 
   mount() {
     if (this.disposables.disposed) {

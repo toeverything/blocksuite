@@ -1,5 +1,5 @@
 import { BlockElement, type BlockService } from '@blocksuite/block-std';
-import { type BlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { query } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -11,24 +11,26 @@ export class BlockComponent<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
-  protected accessor useCaptionEditor = false;
-
-  protected accessor blockContainerStyles: StyleInfo | undefined = undefined;
-
-  @query('.affine-block-component > block-caption-editor')
-  private accessor _captionEditor!: BlockCaptionEditor | null;
-
-  constructor() {
-    super();
-    this.addRenderer(this._renderWithWidget);
-  }
-
   get captionEditor() {
     if (!this.useCaptionEditor || !this._captionEditor)
       throw new Error(
         'Oops! Please enable useCaptionEditor before accessing captionEditor'
       );
     return this._captionEditor;
+  }
+
+  @query('.affine-block-component > block-caption-editor')
+  private accessor _captionEditor!: BlockCaptionEditor | null;
+
+  protected accessor useCaptionEditor = false;
+
+  protected accessor showBlockSelection = true;
+
+  protected accessor blockContainerStyles: StyleInfo | undefined = undefined;
+
+  constructor() {
+    super();
+    this.addRenderer(this._renderWithWidget);
   }
 
   private _renderWithWidget(content: unknown) {
@@ -42,7 +44,9 @@ export class BlockComponent<
       ${this.useCaptionEditor
         ? html`<block-caption-editor .block=${this}></block-caption-editor>`
         : nothing}
-      <affine-block-selection .block=${this}></affine-block-selection>
+      ${this.showBlockSelection
+        ? html`<affine-block-selection .block=${this}></affine-block-selection>`
+        : nothing}
     </div>`;
   }
 }

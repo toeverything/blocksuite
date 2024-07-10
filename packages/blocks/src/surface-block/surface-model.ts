@@ -27,7 +27,6 @@ import {
   groupRelationMiddleware,
   groupSizeMiddleware,
 } from './middlewares/group.js';
-import { mindmapMiddleware } from './middlewares/mindmap.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 import { generateElementId } from './utils/index.js';
 
@@ -137,6 +136,21 @@ const migration = {
       const wrapper = new Boxed(yMap);
       data.elements = wrapper;
     }
+
+    const childrenMap = data.elements.getValue() as Y.Map<Y.Map<unknown>>;
+
+    for (const [id, element] of childrenMap) {
+      if (
+        element.get('type') === 'mindmap' ||
+        element.get('type') === 'group'
+      ) {
+        const children = element.get('children') as Y.Map<Y.Map<unknown>>;
+
+        if (children?.size === 0) {
+          childrenMap.delete(id);
+        }
+      }
+    }
   },
 } satisfies Record<string, MigrationRunner<typeof SurfaceBlockSchema>>;
 
@@ -155,6 +169,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
       'affine:bookmark',
       'affine:attachment',
       'affine:embed-*',
+      'affine:edgeless-text',
     ],
   },
   onUpgrade: (data, previousVersion, version) => {
@@ -175,23 +190,28 @@ export type SurfaceMiddleware = (
 ) => () => void;
 
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
-  private _elementModels: Map<
+  private _elementModels = new Map<
     string,
     {
       mount: () => void;
       unmount: () => void;
       model: BlockSuite.SurfaceElementModelType;
     }
-  > = new Map();
+  >();
+
   private _disposables: DisposableGroup = new DisposableGroup();
-  private _groupToElements: Map<string, string[]> = new Map();
-  private _elementToGroup: Map<string, string> = new Map();
-  private _connectorToElements: Map<string, string[]> = new Map();
-  private _elementToConnector: Map<string, string[]> = new Map();
+
+  private _groupToElements = new Map<string, string[]>();
+
+  private _elementToGroup = new Map<string, string>();
+
+  private _connectorToElements = new Map<string, string[]>();
+
+  private _elementToConnector = new Map<string, string[]>();
 
   /**
    * Hooks is used to attach extra logic when calling `addElement`、`updateElement`(or assign property directly) and `removeElement`.
-   * It's usefull when dealing with relation between different model.
+   * It's useful when dealing with relation between different model.
    */
   protected hooks = {
     update: new Slot<Omit<ElementUpdatedData, 'local'>>(),
@@ -203,7 +223,9 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   };
 
   elementUpdated = new Slot<ElementUpdatedData>();
+
   elementAdded = new Slot<{ id: string; local: boolean }>();
+
   elementRemoved = new Slot<{
     id: string;
     type: string;
@@ -234,7 +256,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       connectorMiddleware(this, this.hooks),
       groupRelationMiddleware(this, this.hooks),
       groupSizeMiddleware(this, this.hooks),
-      mindmapMiddleware(this, this.hooks),
     ].forEach(disposable => this._disposables.add(disposable));
   }
 
@@ -395,7 +416,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
             const group = this.getGroup(id);
 
             if (group) {
-              group.removeDescendant(id);
+              // eslint-disable-next-line unicorn/prefer-dom-node-remove
+              group.removeChild(id);
             }
           }
         }
@@ -606,7 +628,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       }
 
       if (group) {
-        group.removeDescendant(id);
+        // eslint-disable-next-line unicorn/prefer-dom-node-remove
+        group.removeChild(id);
       }
 
       this.elements.getValue()!.delete(id);

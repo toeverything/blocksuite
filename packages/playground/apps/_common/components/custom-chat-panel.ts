@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { type AffineEditorContainer } from '@blocksuite/presets';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -19,39 +19,38 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
       z-index: 1;
     }
   `;
+
   @state()
   private accessor _show = false;
 
   @property({ attribute: false })
   accessor editor!: AffineEditorContainer;
 
-  public toggleDisplay() {
+  toggleDisplay() {
     this._show = !this._show;
   }
 
-  public show() {
+  show() {
     this._show = true;
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
     const { editor } = this;
-
+    const { docModeService } = editor.host.spec.getService('affine:page');
     this.disposables.add(
-      editor.host.spec
-        .getService('affine:page')
-        .slots.editorModeSwitch.on(() => {
-          this.editor.updateComplete
-            .then(() => this.requestUpdate())
-            .catch(console.error);
-        })
+      docModeService.onModeChange(() => {
+        this.editor.updateComplete
+          .then(() => this.requestUpdate())
+          .catch(console.error);
+      })
     );
   }
 
   override render() {
     return html`
       ${this._show
-        ? html`<div class="custom-chat-container blocksuite-overlay">
+        ? html`<div class="custom-chat-container">
             <chat-panel
               .host=${this.editor.host}
               .doc=${this.editor.doc}

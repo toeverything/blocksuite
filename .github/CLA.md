@@ -126,3 +126,5 @@ Example:
 - GambleMeow, @GambleMeow, 2024/04/10
 - Shcherbakov Sergey, @F4lkr4m, 2024/04/24
 - Kirill T., @shvixxl, 2024/05/03
+- Eugene Olisevich, @@EugeneOlisevich, 2024/06/05
+- Zheng Pan, @pzppzz, 2024/06/24

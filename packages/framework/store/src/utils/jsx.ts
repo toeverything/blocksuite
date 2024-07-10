@@ -128,7 +128,7 @@ function serializeYMap(map: Y.Map<unknown>) {
 
 type DeltaText = {
   insert: string;
-  attributes?: { [format: string]: unknown };
+  attributes?: Record<string, unknown>;
 }[];
 
 function serializeYText(text: Y.Text): DeltaText {

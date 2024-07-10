@@ -33,6 +33,47 @@ type PlainTextToSliceSnapshotPayload = {
 };
 
 export class PlainTextAdapter extends BaseAdapter<PlainText> {
+  private async _traverseSnapshot(
+    snapshot: BlockSnapshot
+  ): Promise<{ plaintext: string }> {
+    let buffer = '';
+    const walker = new ASTWalker<BlockSnapshot, never>();
+    walker.setONodeTypeGuard(
+      (node): node is BlockSnapshot =>
+        BlockSnapshotSchema.safeParse(node).success
+    );
+    walker.setEnter(o => {
+      const text = (o.node.props.text ?? { delta: [] }) as {
+        delta: DeltaInsert[];
+      };
+      switch (o.node.flavour) {
+        case 'affine:code': {
+          buffer += text.delta.map(delta => delta.insert).join('');
+          buffer += '\n';
+          break;
+        }
+        case 'affine:paragraph': {
+          buffer += text.delta.map(delta => delta.insert).join('');
+          buffer += '\n';
+          break;
+        }
+        case 'affine:list': {
+          buffer += text.delta.map(delta => delta.insert).join('');
+          buffer += '\n';
+          break;
+        }
+        case 'affine:divider': {
+          buffer += '---\n';
+          break;
+        }
+      }
+    });
+    await walker.walkONode(snapshot);
+    return {
+      plaintext: buffer,
+    };
+  }
+
   async fromDocSnapshot({
     snapshot,
     assets,
@@ -229,47 +270,6 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
-    };
-  }
-
-  private async _traverseSnapshot(
-    snapshot: BlockSnapshot
-  ): Promise<{ plaintext: string }> {
-    let buffer = '';
-    const walker = new ASTWalker<BlockSnapshot, never>();
-    walker.setONodeTypeGuard(
-      (node): node is BlockSnapshot =>
-        BlockSnapshotSchema.safeParse(node).success
-    );
-    walker.setEnter(o => {
-      const text = (o.node.props.text ?? { delta: [] }) as {
-        delta: DeltaInsert[];
-      };
-      switch (o.node.flavour) {
-        case 'affine:code': {
-          buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
-          break;
-        }
-        case 'affine:paragraph': {
-          buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
-          break;
-        }
-        case 'affine:list': {
-          buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
-          break;
-        }
-        case 'affine:divider': {
-          buffer += '---\n';
-          break;
-        }
-      }
-    });
-    await walker.walkONode(snapshot);
-    return {
-      plaintext: buffer,
     };
   }
 }

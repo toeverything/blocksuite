@@ -11,11 +11,6 @@ export class DashedFiller implements PatternFiller {
     this.helper = helper;
   }
 
-  fillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet {
-    const lines = polygonHachureLines(polygonList, o);
-    return { type: 'fillSketch', ops: this.dashedLine(lines, o) };
-  }
-
   private dashedLine(lines: Line[], o: ResolvedOptions): Op[] {
     const offset =
       o.dashOffset < 0
@@ -58,5 +53,10 @@ export class DashedFiller implements PatternFiller {
       }
     });
     return ops;
+  }
+
+  fillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet {
+    const lines = polygonHachureLines(polygonList, o);
+    return { type: 'fillSketch', ops: this.dashedLine(lines, o) };
   }
 }

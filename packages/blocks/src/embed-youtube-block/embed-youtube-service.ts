@@ -11,10 +11,17 @@ import { queryEmbedYoutubeData } from './utils.js';
 export class EmbedYoutubeBlockService extends BlockService<EmbedYoutubeModel> {
   private static readonly linkPreviewer = new LinkPreviewer();
 
-  queryUrlData = (embedYoutubeModel: EmbedYoutubeModel) => {
+  static setLinkPreviewEndpoint =
+    EmbedYoutubeBlockService.linkPreviewer.setEndpoint;
+
+  queryUrlData = (
+    embedYoutubeModel: EmbedYoutubeModel,
+    signal?: AbortSignal
+  ) => {
     return queryEmbedYoutubeData(
       embedYoutubeModel,
-      EmbedYoutubeBlockService.linkPreviewer
+      EmbedYoutubeBlockService.linkPreviewer,
+      signal
     );
   };
 
@@ -31,7 +38,4 @@ export class EmbedYoutubeBlockService extends BlockService<EmbedYoutubeModel> {
       });
     });
   }
-
-  static setLinkPreviewEndpoint =
-    EmbedYoutubeBlockService.linkPreviewer.setEndpoint;
 }

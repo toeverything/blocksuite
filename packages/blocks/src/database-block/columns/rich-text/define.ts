@@ -37,6 +37,7 @@ export const richTextColumnModelConfig =
         },
       };
     },
+    isEmpty: data => data == null || data.length === 0,
   });
 
 richTextColumnModelConfig.addConvert('select', (_column, cells) => {

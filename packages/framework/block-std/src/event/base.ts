@@ -14,14 +14,6 @@ export class UIEventState {
 export class UIEventStateContext {
   private _map: Record<string, UIEventState> = {};
 
-  static from(...states: UIEventState[]) {
-    const context = new UIEventStateContext();
-    states.forEach(state => {
-      context.add(state);
-    });
-    return context;
-  }
-
   add = <State extends UIEventState = UIEventState>(state: State) => {
     const name = state.type;
     if (this._map[name]) {
@@ -42,6 +34,14 @@ export class UIEventStateContext {
     assertExists(state, `UIEventStateContext: state ${type} not found`);
     return state as MatchEvent<Type>;
   };
+
+  static from(...states: UIEventState[]) {
+    const context = new UIEventStateContext();
+    states.forEach(state => {
+      context.add(state);
+    });
+    return context;
+  }
 }
 
 export type UIEventHandler = (

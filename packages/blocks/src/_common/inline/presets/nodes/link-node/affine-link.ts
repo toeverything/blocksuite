@@ -20,11 +20,6 @@ import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';
 
 @customElement('affine-link')
 export class AffineLink extends ShadowlessElement {
-  @property({ type: Object })
-  accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
-  };
-
   get link() {
     const link = this.delta.attributes?.link;
     if (!link) {
@@ -67,34 +62,43 @@ export class AffineLink extends ShadowlessElement {
     }
   `;
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    if (this.blockElement.doc.readonly) {
-      return null;
-    }
+  private _whenHover = new HoverController(
+    this,
+    ({ abortController }) => {
+      if (this.blockElement.doc.readonly) {
+        return null;
+      }
 
-    const selection = this.std.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
-    }
+      const selection = this.std.selection;
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || !!textSelection.from.length)
+      ) {
+        return null;
+      }
 
-    const blockSelections = selection.filter('block');
-    if (blockSelections.length) {
-      return null;
-    }
+      const blockSelections = selection.filter('block');
+      if (blockSelections.length) {
+        return null;
+      }
 
-    return {
-      template: toggleLinkPopup(
-        this.inlineEditor,
-        'view',
-        this.selfInlineRange,
-        abortController
-      ),
-    };
-  });
+      return {
+        template: toggleLinkPopup(
+          this.inlineEditor,
+          'view',
+          this.selfInlineRange,
+          abortController
+        ),
+      };
+    },
+    { enterDelay: 500 }
+  );
+
+  @property({ type: Object })
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
 
   // Workaround for links not working in contenteditable div
   // see also https://stackoverflow.com/questions/12059211/how-to-make-clickable-anchor-in-contenteditable-div
@@ -127,6 +131,7 @@ export class AffineLink extends ShadowlessElement {
     return html`<a
       ${ref(this._whenHover.setReference)}
       href=${this.link}
+      affine-link
       rel="noopener noreferrer"
       target="_blank"
       style=${style}

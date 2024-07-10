@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -7,7 +7,7 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import type { EmbedFigmaStyles } from './embed-figma-model.js';
-import { type EmbedFigmaModel } from './embed-figma-model.js';
+import type { EmbedFigmaModel } from './embed-figma-model.js';
 import type { EmbedFigmaBlockService } from './embed-figma-service.js';
 import { FigmaIcon, styles } from './styles.js';
 
@@ -18,8 +18,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
-
   @state()
   private accessor _isSelected = false;
 
@@ -29,6 +27,8 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   private _isDragging = false;
 
   private _isResizing = false;
+
+  override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
 
   private _selectBlock() {
     const selectionManager = this.host.selection;
@@ -180,8 +180,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
             </div>
           </div>
         </div>
-
-        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }

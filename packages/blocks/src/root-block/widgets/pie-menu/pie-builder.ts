@@ -2,14 +2,14 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { ColorUnit } from '../../edgeless/components/panel/color-panel.js';
-import {
-  type ActionFunction,
-  type PieColorNodeModel,
-  type PieCommandNodeModel,
-  type PieMenuContext,
-  type PieMenuSchema,
-  type PieNodeModel,
-  type PieSubmenuNodeModel,
+import type {
+  ActionFunction,
+  PieColorNodeModel,
+  PieCommandNodeModel,
+  PieMenuContext,
+  PieMenuSchema,
+  PieNodeModel,
+  PieSubmenuNodeModel,
 } from './base.js';
 import { PieManager } from './pie-manager.js';
 import { calcNodeAngles, calcNodeWedges, isNodeWithChildren } from './utils.js';
@@ -30,6 +30,7 @@ type PieBuilderConstructorProps = Omit<
 
 export class PieMenuBuilder {
   private _schema: PieMenuSchema | null = null;
+
   private _stack: PieNodeModel[] = [];
 
   constructor(base: PieBuilderConstructorProps) {
@@ -44,6 +45,35 @@ export class PieMenuBuilder {
       },
     };
     this._stack.push(this._schema.root);
+  }
+
+  private _computeAngles(node: PieNodeModel) {
+    if (
+      !isNodeWithChildren(node) ||
+      !node.children ||
+      node.children.length === 0
+    ) {
+      return;
+    }
+    const parentAngle =
+      node.angle == undefined ? undefined : (node.angle + 180) % 360;
+    const angles = calcNodeAngles(node.children, parentAngle);
+    const wedges = calcNodeWedges(angles, parentAngle);
+
+    for (let i = 0; i < node.children.length; ++i) {
+      const child = node.children[i];
+      child.angle = angles[i];
+      child.startAngle = wedges[i].start;
+      child.endAngle = wedges[i].end;
+
+      this._computeAngles(child);
+    }
+  }
+
+  private _currentNode(): PieNodeModel {
+    const node = this._stack[this._stack.length - 1];
+    assertExists(node, 'No node active');
+    return node;
   }
 
   command(node: Omit<PieCommandNodeModel, 'type'>) {
@@ -144,29 +174,6 @@ export class PieMenuBuilder {
     this._stack.push(this._schema.root);
   }
 
-  private _computeAngles(node: PieNodeModel) {
-    if (
-      !isNodeWithChildren(node) ||
-      !node.children ||
-      node.children.length === 0
-    ) {
-      return;
-    }
-    const parentAngle =
-      node.angle == undefined ? undefined : (node.angle + 180) % 360;
-    const angles = calcNodeAngles(node.children, parentAngle);
-    const wedges = calcNodeWedges(angles, parentAngle);
-
-    for (let i = 0; i < node.children.length; ++i) {
-      const child = node.children[i];
-      child.angle = angles[i];
-      child.startAngle = wedges[i].start;
-      child.endAngle = wedges[i].end;
-
-      this._computeAngles(child);
-    }
-  }
-
   build() {
     const schema = this._schema;
     assertExists(schema);
@@ -175,11 +182,5 @@ export class PieMenuBuilder {
     this._schema = null;
     this._stack = [];
     return schema;
-  }
-
-  private _currentNode(): PieNodeModel {
-    const node = this._stack[this._stack.length - 1];
-    assertExists(node, 'No node active');
-    return node;
   }
 }

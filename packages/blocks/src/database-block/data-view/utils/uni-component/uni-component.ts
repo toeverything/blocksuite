@@ -39,24 +39,26 @@ export class UniLit<
   Props,
   Expose extends NonNullable<unknown> = NonNullable<unknown>,
 > extends ShadowlessElement {
+  get expose(): Expose | undefined {
+    return this.uniReturn?.expose;
+  }
+
   static override styles = css`
     uni-lit {
       display: contents;
     }
   `;
+
   @property({ attribute: false })
   accessor uni: UniComponent<Props, Expose> | undefined = undefined;
 
   @property({ attribute: false })
   accessor props!: Props;
+
   @property({ attribute: false })
   accessor ref: Ref<Expose> | undefined = undefined;
 
   uniReturn?: UniComponentReturn<Props, Expose>;
-
-  get expose(): Expose | undefined {
-    return this.uniReturn?.expose;
-  }
 
   private mount() {
     this.uniReturn = this.uni?.(this, this.props);
@@ -68,16 +70,6 @@ export class UniLit<
 
   private unmount() {
     this.uniReturn?.unmount();
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.mount();
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.unmount();
   }
 
   protected override updated(_changedProperties: PropertyValues) {
@@ -92,6 +84,16 @@ export class UniLit<
 
   protected override render(): unknown {
     return html``;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.mount();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.unmount();
   }
 }
 
@@ -124,8 +126,10 @@ class UniAnyRender<
 > extends ShadowlessElement {
   @property({ attribute: false })
   accessor props!: T;
+
   @property({ attribute: false })
   accessor expose!: Expose;
+
   @property({ attribute: false })
   accessor renderTemplate!: (props: T, expose: Expose) => TemplateResult;
 

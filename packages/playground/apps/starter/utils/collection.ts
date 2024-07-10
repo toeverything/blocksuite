@@ -50,6 +50,12 @@ export function createStarterDocCollection() {
     blobSources.shadows.push(new IndexedDBBlobSource(collectionId));
   }
 
+  const flags: Partial<BlockSuiteFlags> = Object.fromEntries(
+    [...params.entries()]
+      .filter(([key]) => key.startsWith('enable_'))
+      .map(([k, v]) => [k, v === 'true'])
+  );
+
   const options: DocCollectionOptions = {
     id: collectionId,
     schema,
@@ -58,14 +64,14 @@ export function createStarterDocCollection() {
       enable_synced_doc_block: true,
       enable_pie_menu: true,
       enable_lasso_tool: true,
-      enable_mindmap_entry: true,
+      enable_edgeless_text: true,
+      ...flags,
     },
     awarenessSources: [new BroadcastChannelAwarenessSource(id)],
     docSources,
     blobSources,
   };
   const collection = new DocCollection(options);
-
   collection.start();
 
   // debug info
@@ -115,6 +121,7 @@ export async function initStarterDocCollection(collection: DocCollection) {
   ).forEach(fn => functionMap.set(fn.id, fn));
   const init = params.get('init') || 'preset';
   if (functionMap.has(init)) {
+    collection.meta.initialize();
     await functionMap.get(init)?.(collection, 'doc:home');
     const doc = collection.getDoc('doc:home');
     if (!doc?.loaded) {

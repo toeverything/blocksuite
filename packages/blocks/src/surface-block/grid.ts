@@ -45,22 +45,28 @@ function rangeFromElementExternal<T extends BlockSuite.EdgelessModelType>(
 }
 
 export class GridManager<T extends BlockSuite.EdgelessModelType> {
-  private _grids: Map<string, Set<T>> = new Map();
-  private _elementToGrids: Map<T, Set<Set<T>>> = new Map();
+  get isEmpty() {
+    return this._grids.size === 0;
+  }
 
-  private _externalGrids: Map<string, Set<T>> = new Map();
-  private _externalElementToGrids: Map<T, Set<Set<T>>> = new Map();
+  private _grids = new Map<string, Set<T>>();
+
+  private _elementToGrids = new Map<T, Set<Set<T>>>();
+
+  private _externalGrids = new Map<string, Set<T>>();
+
+  private _externalElementToGrids = new Map<T, Set<Set<T>>>();
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements: Set<T> = new Set();
+    const elements = new Set<T>();
     this._grids.set(id, elements);
     return elements;
   }
 
   private _createExternalGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements: Set<T> = new Set();
+    const elements = new Set<T>();
     this._externalGrids.set(id, elements);
     return elements;
   }
@@ -73,10 +79,6 @@ export class GridManager<T extends BlockSuite.EdgelessModelType> {
   private _getExternalGrid(row: number, col: number) {
     const id = row + '|' + col;
     return this._externalGrids.get(id);
-  }
-
-  get isEmpty() {
-    return this._grids.size === 0;
   }
 
   private _addToExternalGrids(element: T) {
@@ -110,6 +112,33 @@ export class GridManager<T extends BlockSuite.EdgelessModelType> {
         grid.delete(element);
       }
     }
+  }
+
+  private _searchExternal(bound: IBound, strict = false): Set<T> {
+    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
+    const results = new Set<T>();
+    const b = Bound.from(bound);
+
+    for (let i = minRow; i <= maxRow; i++) {
+      for (let j = minCol; j <= maxCol; j++) {
+        const gridElements = this._getExternalGrid(i, j);
+        if (!gridElements) continue;
+
+        for (const element of gridElements) {
+          const externalBound = element.externalBound;
+          if (
+            externalBound &&
+            (strict
+              ? b.contains(externalBound)
+              : intersects(externalBound, bound))
+          ) {
+            results.add(element);
+          }
+        }
+      }
+    }
+
+    return results;
   }
 
   update(element: T) {
@@ -156,33 +185,6 @@ export class GridManager<T extends BlockSuite.EdgelessModelType> {
       minCol !== minCol2 ||
       maxCol !== maxCol2
     );
-  }
-
-  private _searchExternal(bound: IBound, strict = false): Set<T> {
-    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
-    const results: Set<T> = new Set();
-    const b = Bound.from(bound);
-
-    for (let i = minRow; i <= maxRow; i++) {
-      for (let j = minCol; j <= maxCol; j++) {
-        const gridElements = this._getExternalGrid(i, j);
-        if (!gridElements) continue;
-
-        for (const element of gridElements) {
-          const externalBound = element.externalBound;
-          if (
-            externalBound &&
-            (strict
-              ? b.contains(externalBound)
-              : intersects(externalBound, bound))
-          ) {
-            results.add(element);
-          }
-        }
-      }
-    }
-
-    return results;
   }
 
   search(bound: IBound, strict?: boolean, getSet?: false): T[];

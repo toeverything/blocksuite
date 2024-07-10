@@ -1,37 +1,41 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-import type { BaseBlockTransformer } from '@blocksuite/store';
+import type {
+  BaseBlockTransformer,
+  InternalPrimitives,
+} from '@blocksuite/store';
 import { defineBlockSchema } from '@blocksuite/store';
 
 import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
+import { isAbortError } from '../utils/helper.js';
 import type { EmbedBlockModel } from './embed-block-model.js';
 import type {
-  EmbedBlockGeneratorOptions,
   EmbedProps,
   LinkPreviewData,
   LinkPreviewResponseData,
 } from './types.js';
 
-export function createEmbedBlock<
+export function createEmbedBlockSchema<
   Props extends object,
   Model extends EmbedBlockModel<Props>,
-  WidgetName extends string = string,
   Transformer extends BaseBlockTransformer<
     EmbedProps<Props>
   > = BaseBlockTransformer<EmbedProps<Props>>,
 >({
-  schema,
-  service,
-  view,
-}: EmbedBlockGeneratorOptions<
-  Props,
-  Model,
-  WidgetName,
-  Transformer
->): BlockSpec {
-  const blockSchema = defineBlockSchema({
-    flavour: `affine:embed-${schema.name}`,
+  name,
+  version,
+  toModel,
+  props,
+  transformer,
+}: {
+  name: string;
+  version: number;
+  toModel: () => Model;
+  props?: (internalPrimitives: InternalPrimitives) => Props;
+  transformer?: () => Transformer;
+}) {
+  return defineBlockSchema({
+    flavour: `affine:embed-${name}`,
     props: internalPrimitives => {
-      const userProps = schema.props?.(internalPrimitives);
+      const userProps = props?.(internalPrimitives);
 
       return {
         index: 'a0',
@@ -41,18 +45,12 @@ export function createEmbedBlock<
       } as unknown as EmbedProps<Props>;
     },
     metadata: {
-      version: schema.version,
+      version,
       role: 'content',
     },
-    toModel: schema.toModel,
-    transformer: schema.transformer,
+    toModel,
+    transformer,
   });
-
-  return {
-    schema: blockSchema,
-    service,
-    view,
-  };
 }
 
 // ========== Link Preview ==========
@@ -60,11 +58,20 @@ export function createEmbedBlock<
 export class LinkPreviewer {
   private _endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
 
+  private _getStringFromHTML(html: string) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent;
+  }
+
   setEndpoint = (endpoint: string) => {
     this._endpoint = endpoint;
   };
 
-  query = async (url: string): Promise<Partial<LinkPreviewData>> => {
+  query = async (
+    url: string,
+    signal?: AbortSignal
+  ): Promise<Partial<LinkPreviewData>> => {
     if (
       (url.startsWith('https://x.com/') ||
         url.startsWith('https://www.x.com/') ||
@@ -76,7 +83,7 @@ export class LinkPreviewer {
       url =
         'https://api.fxtwitter.com/status/' + /\/status\/(.*)/.exec(url)?.[1];
       try {
-        const { tweet } = await fetch(url).then(res => res.json());
+        const { tweet } = await fetch(url, { signal }).then(res => res.json());
         return {
           title: tweet.author.name,
           icon: tweet.author.avatar_url,
@@ -95,6 +102,7 @@ export class LinkPreviewer {
         body: JSON.stringify({
           url,
         }),
+        signal,
       })
         .then(r => {
           if (!r || !r.ok) {
@@ -102,9 +110,12 @@ export class LinkPreviewer {
           }
           return r;
         })
-        .catch(_ => {
+        .catch(err => {
+          if (isAbortError(err)) return null;
           throw new Error('Failed to fetch link preview');
         });
+
+      if (!response) return {};
 
       const data: LinkPreviewResponseData = await response.json();
       return {
@@ -117,10 +128,4 @@ export class LinkPreviewer {
       };
     }
   };
-
-  private _getStringFromHTML(html: string) {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.textContent;
-  }
 }

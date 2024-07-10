@@ -1,5 +1,4 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { ReferenceElement } from '@floating-ui/dom';
 import type { PropertyValues } from 'lit';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -53,22 +52,12 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
       background-color: #c0bfc1;
     }
   `;
+
   @property({ attribute: false })
   accessor view!: DataViewTableManager | DataViewKanbanManager;
+
   @query('.group-sort-setting')
   accessor groupContainer!: HTMLElement;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    this._disposables.addFromEvent(this, 'pointerdown', e => {
-      e.stopPropagation();
-    });
-  }
 
   protected override firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -143,6 +132,18 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+    this._disposables.addFromEvent(this, 'pointerdown', e => {
+      e.stopPropagation();
+    });
+  }
 }
 export const selectGroupByProperty = (
   view: DataViewTableManager | DataViewKanbanManager,
@@ -197,7 +198,7 @@ export const selectGroupByProperty = (
   };
 };
 export const popSelectGroupByProperty = (
-  target: ReferenceElement,
+  target: HTMLElement,
   view: DataViewTableManager | DataViewKanbanManager,
   onClose?: () => void
 ) => {
@@ -206,7 +207,7 @@ export const popSelectGroupByProperty = (
   });
 };
 export const popGroupSetting = (
-  target: ReferenceElement,
+  target: HTMLElement,
   view: DataViewTableManager | DataViewKanbanManager,
   onBack: () => void
 ) => {

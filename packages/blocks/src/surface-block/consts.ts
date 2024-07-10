@@ -51,7 +51,6 @@ export enum TextVerticalAlign {
 export enum TextResizing {
   AUTO_WIDTH,
   AUTO_HEIGHT,
-  FIXED_SIZE,
 }
 
 export type TextStyleProps = {
@@ -66,7 +65,9 @@ export type TextStyleProps = {
 export enum FontWeight {
   Light = '300',
   Regular = '400',
+  Medium = '500',
   SemiBold = '600',
+  Bold = '700',
 }
 
 export enum FontStyle {
@@ -203,6 +204,12 @@ export const AffineCanvasTextFonts: FontConfig[] = [
     font: FontFamily.Poppins,
     url: 'https://cdn.affine.pro/fonts/Poppins-Regular.woff',
     weight: FontWeight.Regular,
+    style: FontStyle.Normal,
+  },
+  {
+    font: FontFamily.Poppins,
+    url: 'https://cdn.affine.pro/fonts/Poppins-Medium.woff',
+    weight: FontWeight.Medium,
     style: FontStyle.Normal,
   },
   {
@@ -380,6 +387,12 @@ export const CommunityCanvasTextFonts: FontConfig[] = [
     font: FontFamily.Poppins,
     url: 'https://fonts.cdnfonts.com/s/16009/Poppins-Regular.woff',
     weight: FontWeight.Regular,
+    style: FontStyle.Normal,
+  },
+  {
+    font: FontFamily.Poppins,
+    url: 'https://fonts.cdnfonts.com/s/16009/Poppins-Medium.woff',
+    weight: FontWeight.Medium,
     style: FontStyle.Normal,
   },
   {

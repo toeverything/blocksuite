@@ -2,6 +2,7 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import {
   assertExists,
+  debounce,
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
@@ -10,7 +11,6 @@ import { customElement } from 'lit/decorators.js';
 import {
   getCurrentNativeRange,
   getInlineEditorByModel,
-  isControlledKeyboardEvent,
   matchFlavours,
 } from '../../../_common/utils/index.js';
 import { isRootElement } from '../../utils/guard.js';
@@ -37,55 +37,62 @@ export type AffineSlashMenuGroupDivider = SlashMenuGroupDivider;
 
 let globalAbortController = new AbortController();
 
-function showSlashMenu({
-  context,
-  range,
-  container = document.body,
-  abortController = new AbortController(),
-  config,
-  triggerKey,
-}: {
-  context: SlashMenuContext;
-  range: Range;
-  container?: HTMLElement;
-  abortController?: AbortController;
-  config: SlashMenuStaticConfig;
-  triggerKey: string;
-}) {
-  // Abort previous format quick bar
+function closeSlashMenu() {
   globalAbortController.abort();
-  globalAbortController = abortController;
-  const disposables = new DisposableGroup();
-  abortController.signal.addEventListener('abort', () => disposables.dispose());
-
-  const slashMenu = new SlashMenu();
-  disposables.add(() => slashMenu.remove());
-  slashMenu.context = context;
-  slashMenu.abortController = abortController;
-  slashMenu.config = config;
-  slashMenu.triggerKey = triggerKey;
-
-  // Handle position
-  const updatePosition = throttle(() => {
-    const slashMenuElement = slashMenu.slashMenuElement;
-    assertExists(
-      slashMenuElement,
-      'You should render the slash menu node even if no position'
-    );
-    const position = getPopperPosition(slashMenuElement, range);
-    slashMenu.updatePosition(position);
-  }, 10);
-
-  disposables.addFromEvent(window, 'resize', updatePosition);
-
-  // FIXME(Flrande): It is not a best practice,
-  // but merely a temporary measure for reusing previous components.
-  // Mount
-  container.append(slashMenu);
-  // Wait for the Node to be mounted
-  setTimeout(updatePosition);
-  return slashMenu;
 }
+
+const showSlashMenu = debounce(
+  ({
+    context,
+    range,
+    container = document.body,
+    abortController = new AbortController(),
+    config,
+    triggerKey,
+  }: {
+    context: SlashMenuContext;
+    range: Range;
+    container?: HTMLElement;
+    abortController?: AbortController;
+    config: SlashMenuStaticConfig;
+    triggerKey: string;
+  }) => {
+    globalAbortController = abortController;
+    const disposables = new DisposableGroup();
+    abortController.signal.addEventListener('abort', () =>
+      disposables.dispose()
+    );
+
+    const slashMenu = new SlashMenu();
+    disposables.add(() => slashMenu.remove());
+    slashMenu.context = context;
+    slashMenu.abortController = abortController;
+    slashMenu.config = config;
+    slashMenu.triggerKey = triggerKey;
+
+    // Handle position
+    const updatePosition = throttle(() => {
+      const slashMenuElement = slashMenu.slashMenuElement;
+      assertExists(
+        slashMenuElement,
+        'You should render the slash menu node even if no position'
+      );
+      const position = getPopperPosition(slashMenuElement, range);
+      slashMenu.updatePosition(position);
+    }, 10);
+
+    disposables.addFromEvent(window, 'resize', updatePosition);
+
+    // FIXME(Flrande): It is not a best practice,
+    // but merely a temporary measure for reusing previous components.
+    // Mount
+    container.append(slashMenu);
+    // Wait for the Node to be mounted
+    setTimeout(updatePosition);
+    return slashMenu;
+  },
+  100
+);
 
 export const AFFINE_SLASH_MENU_WIDGET = 'affine-slash-menu-widget';
 
@@ -95,51 +102,12 @@ export class AffineSlashMenuWidget extends WidgetElement {
 
   config = AffineSlashMenuWidget.DEFAULT_CONFIG;
 
-  override connectedCallback() {
-    super.connectedCallback();
+  private _onBeforeInput = (ctx: UIEventStateContext) => {
+    const eventState = ctx.get('defaultState');
+    const event = eventState.event as InputEvent;
 
-    if (this.config.triggerKeys.some(key => key.length === 0)) {
-      throw new Error('Trigger key of slash menu should not be empty string');
-    }
-
-    this.handleEvent('keyDown', this._onKeyDown);
-  }
-
-  private _getTriggerKey = (event: KeyboardEvent) => {
-    if (isControlledKeyboardEvent(event) || event.shiftKey) return undefined;
-
-    const { triggerKeys } = this.config;
-
-    /** The case of IME input
-     * 1. under IME mode
-     * 2. Before IME start input
-     * 3. press a key
-     * 4. the pressed key in `triggerKeys`
-     */
-    let currTriggerKey: string | undefined;
-
-    if (
-      event.key === 'Process' &&
-      !event.isComposing &&
-      event.code === 'Slash' && // TODO may be not slash
-      triggerKeys.includes('/')
-    ) {
-      currTriggerKey = '/';
-    }
-    // The normal case
-    else {
-      currTriggerKey = triggerKeys.find(key => key === event.key);
-    }
-
-    return currTriggerKey;
-  };
-
-  private _onKeyDown = (ctx: UIEventStateContext) => {
-    const eventState = ctx.get('keyboardState');
-    const event = eventState.raw;
-
-    const triggerKey = this._getTriggerKey(event);
-    if (!triggerKey) return;
+    const triggerKey = event.data;
+    if (!triggerKey || !this.config.triggerKeys.includes(triggerKey)) return;
 
     const textSelection = this.host.selection.find('text');
     if (!textSelection) return;
@@ -172,6 +140,8 @@ export class AffineSlashMenuWidget extends WidgetElement {
       requestAnimationFrame(() => {
         const curRange = getCurrentNativeRange();
         if (!curRange) return;
+
+        closeSlashMenu();
         showSlashMenu({
           context: { model, rootElement },
           range: curRange,
@@ -181,6 +151,16 @@ export class AffineSlashMenuWidget extends WidgetElement {
       });
     });
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    if (this.config.triggerKeys.some(key => key.length === 0)) {
+      throw new Error('Trigger key of slash menu should not be empty string');
+    }
+
+    this.handleEvent('beforeInput', this._onBeforeInput);
+  }
 }
 
 declare global {

@@ -144,7 +144,7 @@ export function parseTokens(text: string): string[] {
 }
 
 export const charWidth = (() => {
-  const cachedCharWidth: { [key: string]: Array<number> } = {};
+  const cachedCharWidth: Record<string, Array<number>> = {};
 
   const calculate = (char: string, font: string) => {
     const ascii = char.charCodeAt(0);

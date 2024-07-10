@@ -3,7 +3,13 @@ import './surface-ref-portal.js';
 import { PathFinder } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
 import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
-import { css, html, nothing, type TemplateResult } from 'lit';
+import {
+  css,
+  html,
+  nothing,
+  type PropertyDeclaration,
+  type TemplateResult,
+} from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -53,6 +59,26 @@ export class SurfaceRefBlockComponent extends BlockElement<
   SurfaceRefBlockModel,
   SurfaceRefBlockService
 > {
+  get isInSurface() {
+    return this._isInSurface;
+  }
+
+  private get _shouldRender() {
+    return (
+      this.isConnected &&
+      this.parentElement &&
+      !this.parentBlockElement.closest('affine-surface-ref')
+    );
+  }
+
+  get surfaceRenderer() {
+    return this._surfaceRefRenderer.surfaceRenderer;
+  }
+
+  get referenceModel() {
+    return this._referencedModel;
+  }
+
   static override styles = css`
     .affine-surface-ref {
       position: relative;
@@ -217,6 +243,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
       line-height: 20px;
     }
   `;
+
   @state()
   private accessor _surfaceModel: SurfaceBlockModel | null = null;
 
@@ -227,6 +254,8 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
   private _referencedModel: RefElementModel | null = null;
 
+  private _isInSurface = false;
+
   @query('.ref-canvas-container')
   accessor container!: HTMLDivElement;
 
@@ -235,93 +264,6 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
   @query('affine-surface-ref > block-caption-editor')
   accessor captionElement!: BlockCaptionEditor;
-
-  private _isInSurface = false;
-
-  get isInSurface() {
-    return this._isInSurface;
-  }
-
-  private get _shouldRender() {
-    return (
-      this.isConnected &&
-      this.parentElement &&
-      !this.parentBlockElement.closest('affine-surface-ref')
-    );
-  }
-
-  get surfaceRenderer() {
-    return this._surfaceRefRenderer.surfaceRenderer;
-  }
-
-  get referenceModel() {
-    return this._referencedModel;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this.contentEditable = 'false';
-
-    const parent = this.host.doc.getParent(this.model);
-    this._isInSurface = parent?.flavour === 'affine:surface';
-
-    if (!this._shouldRender) return;
-
-    const service = this.service;
-    assertExists(service, `Surface ref block must run with its service.`);
-    this._surfaceRefRenderer = service.getRenderer(
-      PathFinder.id(this.path),
-      this.doc,
-      true
-    );
-    this._disposables.add(() => {
-      this.service?.removeRenderer(this._surfaceRefRenderer.id);
-    });
-    this._disposables.add(
-      this._surfaceRefRenderer.slots.surfaceModelChanged.on(model => {
-        this._surfaceModel = model;
-      })
-    );
-    this._disposables.add(
-      this._surfaceRefRenderer.slots.surfaceRendererRefresh.on(() => {
-        this.requestUpdate();
-      })
-    );
-    this._disposables.add(
-      this._surfaceRefRenderer.slots.surfaceRendererInit.on(() => {
-        let lastWidth = 0;
-        const observer = new ResizeObserver(entries => {
-          if (entries[0].contentRect.width !== lastWidth) {
-            lastWidth = entries[0].contentRect.width;
-            this._refreshViewport();
-          }
-        });
-        observer.observe(this);
-
-        this._disposables.add(() => observer.disconnect());
-      })
-    );
-    this._disposables.add(
-      this._surfaceRefRenderer.surfaceService.layer.slots.layerUpdated.on(
-        () => {
-          this.portal.setStackingCanvas(
-            this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
-          );
-        }
-      )
-    );
-    this._surfaceRefRenderer.mount();
-    this._initHotkey();
-    this._initReferencedModel();
-    this._initSelection();
-  }
-
-  override updated() {
-    if (!this._shouldRender) return;
-
-    this._attachRenderer();
-  }
 
   private _attachRenderer() {
     if (
@@ -486,19 +428,6 @@ export class SurfaceRefBlockComponent extends BlockElement<
     });
   }
 
-  viewInEdgeless() {
-    if (!this._referencedModel) return;
-
-    const viewport = {
-      xywh: this._referencedModel.xywh,
-      padding: [60, 20, 20, 20] as [number, number, number, number],
-    };
-    const pageService = this.std.spec.getService('affine:page');
-
-    pageService.editPropsStore.setItem('viewport', viewport);
-    pageService.slots.editorModeSwitch.emit('edgeless');
-  }
-
   private _renderMask(referencedModel: RefElementModel, flavourOrType: string) {
     const title = 'title' in referencedModel ? referencedModel.title : '';
 
@@ -578,6 +507,95 @@ export class SurfaceRefBlockComponent extends BlockElement<
       </div>
       ${this._renderMask(referencedModel, flavourOrType)}
     </div>`;
+  }
+
+  override requestUpdate(
+    name?: PropertyKey | undefined,
+    oldValue?: unknown,
+    options?: PropertyDeclaration<unknown, unknown> | undefined
+  ): void {
+    super.requestUpdate(name, oldValue, options);
+
+    this._surfaceRefRenderer?.surfaceRenderer?.refresh();
+    this.portal?.requestUpdate();
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.contentEditable = 'false';
+
+    const parent = this.host.doc.getParent(this.model);
+    this._isInSurface = parent?.flavour === 'affine:surface';
+
+    if (!this._shouldRender) return;
+
+    const service = this.service;
+    assertExists(service, `Surface ref block must run with its service.`);
+    this._surfaceRefRenderer = service.getRenderer(
+      PathFinder.id(this.path),
+      this.doc,
+      true
+    );
+    this._disposables.add(() => {
+      this.service?.removeRenderer(this._surfaceRefRenderer.id);
+    });
+    this._disposables.add(
+      this._surfaceRefRenderer.slots.surfaceModelChanged.on(model => {
+        this._surfaceModel = model;
+      })
+    );
+    this._disposables.add(
+      this._surfaceRefRenderer.slots.surfaceRendererRefresh.on(() => {
+        this.requestUpdate();
+      })
+    );
+    this._disposables.add(
+      this._surfaceRefRenderer.slots.surfaceRendererInit.on(() => {
+        let lastWidth = 0;
+        const observer = new ResizeObserver(entries => {
+          if (entries[0].contentRect.width !== lastWidth) {
+            lastWidth = entries[0].contentRect.width;
+            this._refreshViewport();
+          }
+        });
+        observer.observe(this);
+
+        this._disposables.add(() => observer.disconnect());
+      })
+    );
+    this._disposables.add(
+      this._surfaceRefRenderer.surfaceService.layer.slots.layerUpdated.on(
+        () => {
+          this.portal.setStackingCanvas(
+            this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+          );
+        }
+      )
+    );
+    this._surfaceRefRenderer.mount();
+    this._initHotkey();
+    this._initReferencedModel();
+    this._initSelection();
+  }
+
+  override updated() {
+    if (!this._shouldRender) return;
+
+    this._attachRenderer();
+  }
+
+  viewInEdgeless() {
+    if (!this._referencedModel) return;
+
+    const viewport = {
+      xywh: this._referencedModel.xywh,
+      padding: [60, 20, 20, 20] as [number, number, number, number],
+    };
+    const pageService = this.std.spec.getService('affine:page');
+
+    pageService.editPropsStore.setStorage('viewport', viewport);
+    pageService.docModeService.setMode('edgeless');
   }
 
   override render() {

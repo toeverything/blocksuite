@@ -33,8 +33,6 @@ jobs:
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
-        with:
-          version: 9
       - name: Use Node.js LTS
         uses: actions/setup-node@v3
         with:

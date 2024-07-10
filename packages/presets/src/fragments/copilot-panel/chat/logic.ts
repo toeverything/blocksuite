@@ -56,13 +56,6 @@ export type ChatReactiveData = {
 };
 
 export class AIChatLogic {
-  constructor(
-    private logic: AILogic,
-    private getHost: () => EditorHost
-  ) {
-    this.logic;
-  }
-
   get loading() {
     return this.reactiveData.currentRequest != null;
   }
@@ -71,8 +64,243 @@ export class AIChatLogic {
     return this.getHost();
   }
 
-  reactiveData!: ChatReactiveData;
+  get docs() {
+    return [...this.host.doc.collection.docs.values()];
+  }
+
   private requestId = 0;
+
+  reactiveData!: ChatReactiveData;
+
+  docSelectionActionList: AllAction[] = [
+    {
+      type: 'group',
+      name: 'Translate',
+      children: LANGUAGE.map(language => ({
+        type: 'action',
+        name: language,
+        action: this.createAction(`Translate to ${language}`, input =>
+          runTranslateAction({ input, language })
+        ),
+      })),
+    },
+    {
+      type: 'group',
+      name: 'Change tone',
+      children: TONE.map(tone => ({
+        type: 'action',
+        name: tone,
+        action: this.createAction(`Make more ${tone}`, input =>
+          runChangeToneAction({ input, tone })
+        ),
+      })),
+    },
+    {
+      type: 'action',
+      name: 'Refine',
+      action: this.createAction('Refine', input => runRefineAction({ input })),
+    },
+    {
+      type: 'action',
+      name: 'Generate',
+      action: this.createAction('Generate', input =>
+        runGenerateAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Summary',
+      action: this.createAction('Summary', input =>
+        runSummaryAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Improve writing',
+      action: this.createAction('Improve writing', input =>
+        runImproveWritingAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Fix spelling',
+      action: this.createAction('Fix spelling', input =>
+        runFixSpellingAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Make shorter',
+      action: this.createAction('Make shorter', input =>
+        runMakeShorterAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Make longer',
+      action: this.createAction('Make longer', input =>
+        runMakeLongerAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Simplify language',
+      action: this.createAction('Simplify language', input =>
+        runSimplifyWritingAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Create mind-map',
+      action: this.createAction('Create mind-map', (input, background) => {
+        const service = getEdgelessService(this.host);
+        const [x, y] = [service.viewport.centerX, service.viewport.centerY];
+        const reactiveData = this.reactiveData;
+        const build = mindMapBuilder(this.host, x, y);
+        return (async function* () {
+          const strings = runAnalysisAction({ input, background });
+          let text = '';
+          for await (const item of strings) {
+            yield item;
+            text += item;
+            if (text) {
+              await build(text);
+            }
+            reactiveData.tempMessage = text;
+          }
+        })();
+      }),
+    },
+    {
+      type: 'action',
+      name: 'Create presentation',
+      action: this.createAction('Create mind-map', (input, background) => {
+        const reactiveData = this.reactiveData;
+        const build = pptBuilder(this.host);
+        return (async function* () {
+          const strings = runPPTGenerateAction({ input, background });
+          let text = '';
+          for await (const item of strings) {
+            yield item;
+            text += item;
+            if (text) {
+              await build.process(text);
+            }
+            reactiveData.tempMessage = text;
+          }
+          await build.done(text);
+        })();
+      }),
+    },
+    {
+      type: 'action',
+      name: 'Insert into Chat',
+      action: async () => {
+        const input = await this.getSelectedText();
+        if (!input) {
+          return;
+        }
+        this.reactiveData.history = [
+          ...this.reactiveData.history,
+          {
+            role: 'user',
+            content: [{ text: input, type: 'text' }],
+          },
+        ];
+      },
+    },
+  ];
+
+  edgelessSelectionActionList: AllAction[] = [
+    {
+      type: 'action',
+      name: 'Create mind-map',
+      hide: () => {
+        const service = getEdgelessService(this.host);
+        const ele = service.selection.selectedElements[0];
+        return !SurfaceBlockComponent.isShape(ele);
+      },
+      action: async () => {
+        const reactiveData = this.reactiveData;
+        const service = getEdgelessService(this.host);
+        const ele = service.selection.selectedElements[0];
+        if (!SurfaceBlockComponent.isShape(ele)) {
+          return;
+        }
+        const text = ele.text?.toString();
+        if (!text) {
+          return;
+        }
+        const pathIds = getConnectorPath(ele.id, service);
+        const rootId = [...pathIds, ele.id][0];
+        const rootEle = service.getElementById(rootId) as ShapeElementModel;
+        const path = pathIds.map(id => {
+          const ele = service.getElementById(id);
+          if (ele && SurfaceBlockComponent.isShape(ele)) {
+            return ele.text?.toString() ?? '';
+          }
+          return '';
+        });
+        const oldTree = findTree(rootId, service);
+        const target = findLeaf(oldTree, ele.id);
+        assertExists(target);
+        const build = mindMapBuilder(
+          this.host,
+          rootEle.x,
+          rootEle.y,
+          ele.id,
+          tree => {
+            target.children = tree.children;
+            return oldTree;
+          }
+        );
+        await this.createAction('Part analysis', (input, background) => {
+          return (async function* () {
+            const strings = runPartAnalysisAction({ input, path, background });
+            let text = '';
+            for await (const item of strings) {
+              yield item;
+              text += item;
+              if (text) {
+                await build(text);
+              }
+              reactiveData.tempMessage = text;
+            }
+          })();
+        })(text);
+      },
+    },
+    {
+      type: 'action',
+      name: 'Make it real',
+      hide: () => {
+        const service = getEdgelessService(this.host);
+        const elements = service.selection.selectedElements;
+        return elements.length === 0;
+      },
+      action: async () => {
+        const img = await selectedToPng(this.host);
+        if (!img) return;
+
+        const html = await genHtml(img);
+        if (!html) return;
+
+        const edgelessRoot = getEdgelessRootFromEditor(this.host);
+        edgelessRoot.doc.addBlock(
+          EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
+          { html, design: img, xywh: '[0, 400, 400, 200]' },
+          edgelessRoot.surface.model.id
+        );
+      },
+    },
+  ];
+
+  constructor(
+    private logic: AILogic,
+    private getHost: () => EditorHost
+  ) {
+    this.logic;
+  }
 
   async startRequest<T>(p: () => Promise<T>): Promise<T> {
     const id = this.requestId++;
@@ -156,10 +384,6 @@ export class AIChatLogic {
       [...this.host.doc.collection.docs.values()].map(v => v.getDoc())
     );
   };
-
-  get docs() {
-    return [...this.host.doc.collection.docs.values()];
-  }
 
   async docBackground(): Promise<ChatMessage[]> {
     return [
@@ -356,228 +580,6 @@ export class AIChatLogic {
       ];
     };
   }
-
-  docSelectionActionList: AllAction[] = [
-    {
-      type: 'group',
-      name: 'Translate',
-      children: LANGUAGE.map(language => ({
-        type: 'action',
-        name: language,
-        action: this.createAction(`Translate to ${language}`, input =>
-          runTranslateAction({ input, language })
-        ),
-      })),
-    },
-    {
-      type: 'group',
-      name: 'Change tone',
-      children: TONE.map(tone => ({
-        type: 'action',
-        name: tone,
-        action: this.createAction(`Make more ${tone}`, input =>
-          runChangeToneAction({ input, tone })
-        ),
-      })),
-    },
-    {
-      type: 'action',
-      name: 'Refine',
-      action: this.createAction('Refine', input => runRefineAction({ input })),
-    },
-    {
-      type: 'action',
-      name: 'Generate',
-      action: this.createAction('Generate', input =>
-        runGenerateAction({ input })
-      ),
-    },
-    {
-      type: 'action',
-      name: 'Summary',
-      action: this.createAction('Summary', input =>
-        runSummaryAction({ input })
-      ),
-    },
-    {
-      type: 'action',
-      name: 'Improve writing',
-      action: this.createAction('Improve writing', input =>
-        runImproveWritingAction({ input })
-      ),
-    },
-    {
-      type: 'action',
-      name: 'Fix spelling',
-      action: this.createAction('Fix spelling', input =>
-        runFixSpellingAction({ input })
-      ),
-    },
-    {
-      type: 'action',
-      name: 'Make shorter',
-      action: this.createAction('Make shorter', input =>
-        runMakeShorterAction({ input })
-      ),
-    },
-    {
-      type: 'action',
-      name: 'Make longer',
-      action: this.createAction('Make longer', input =>
-        runMakeLongerAction({ input })
-      ),
-    },
-    {
-      type: 'action',
-      name: 'Simplify language',
-      action: this.createAction('Simplify language', input =>
-        runSimplifyWritingAction({ input })
-      ),
-    },
-    {
-      type: 'action',
-      name: 'Create mind-map',
-      action: this.createAction('Create mind-map', (input, background) => {
-        const service = getEdgelessService(this.host);
-        const [x, y] = [service.viewport.centerX, service.viewport.centerY];
-        const reactiveData = this.reactiveData;
-        const build = mindMapBuilder(this.host, x, y);
-        return (async function* () {
-          const strings = runAnalysisAction({ input, background });
-          let text = '';
-          for await (const item of strings) {
-            yield item;
-            text += item;
-            if (text) {
-              await build(text);
-            }
-            reactiveData.tempMessage = text;
-          }
-        })();
-      }),
-    },
-    {
-      type: 'action',
-      name: 'Create presentation',
-      action: this.createAction('Create mind-map', (input, background) => {
-        const reactiveData = this.reactiveData;
-        const build = pptBuilder(this.host);
-        return (async function* () {
-          const strings = runPPTGenerateAction({ input, background });
-          let text = '';
-          for await (const item of strings) {
-            yield item;
-            text += item;
-            if (text) {
-              await build.process(text);
-            }
-            reactiveData.tempMessage = text;
-          }
-          await build.done(text);
-        })();
-      }),
-    },
-    {
-      type: 'action',
-      name: 'Insert into Chat',
-      action: async () => {
-        const input = await this.getSelectedText();
-        if (!input) {
-          return;
-        }
-        this.reactiveData.history = [
-          ...this.reactiveData.history,
-          {
-            role: 'user',
-            content: [{ text: input, type: 'text' }],
-          },
-        ];
-      },
-    },
-  ];
-  edgelessSelectionActionList: AllAction[] = [
-    {
-      type: 'action',
-      name: 'Create mind-map',
-      hide: () => {
-        const service = getEdgelessService(this.host);
-        const ele = service.selection.elements[0];
-        return !SurfaceBlockComponent.isShape(ele);
-      },
-      action: async () => {
-        const reactiveData = this.reactiveData;
-        const service = getEdgelessService(this.host);
-        const ele = service.selection.elements[0];
-        if (!SurfaceBlockComponent.isShape(ele)) {
-          return;
-        }
-        const text = ele.text?.toString();
-        if (!text) {
-          return;
-        }
-        const pathIds = getConnectorPath(ele.id, service);
-        const rootId = [...pathIds, ele.id][0];
-        const rootEle = service.getElementById(rootId) as ShapeElementModel;
-        const path = pathIds.map(id => {
-          const ele = service.getElementById(id);
-          if (ele && SurfaceBlockComponent.isShape(ele)) {
-            return ele.text?.toString() ?? '';
-          }
-          return '';
-        });
-        const oldTree = findTree(rootId, service);
-        const target = findLeaf(oldTree, ele.id);
-        assertExists(target);
-        const build = mindMapBuilder(
-          this.host,
-          rootEle.x,
-          rootEle.y,
-          ele.id,
-          tree => {
-            target.children = tree.children;
-            return oldTree;
-          }
-        );
-        await this.createAction('Part analysis', (input, background) => {
-          return (async function* () {
-            const strings = runPartAnalysisAction({ input, path, background });
-            let text = '';
-            for await (const item of strings) {
-              yield item;
-              text += item;
-              if (text) {
-                await build(text);
-              }
-              reactiveData.tempMessage = text;
-            }
-          })();
-        })(text);
-      },
-    },
-    {
-      type: 'action',
-      name: 'Make it real',
-      hide: () => {
-        const service = getEdgelessService(this.host);
-        const elements = service.selection.elements;
-        return elements.length === 0;
-      },
-      action: async () => {
-        const img = await selectedToPng(this.host);
-        if (!img) return;
-
-        const html = await genHtml(img);
-        if (!html) return;
-
-        const edgelessRoot = getEdgelessRootFromEditor(this.host);
-        edgelessRoot.doc.addBlock(
-          EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
-          { html, design: img, xywh: '[0, 400, 400, 200]' },
-          edgelessRoot.surface.model.id
-        );
-      },
-    },
-  ];
 }
 
 type Action = {
@@ -625,11 +627,8 @@ export type ChatMessage =
 
 const docToMarkdown = async (doc: Doc) => {
   const job = new Job({ collection: doc.collection });
-  const snapshot = await job.docToSnapshot(doc);
-  const result = await new MarkdownAdapter().fromDocSnapshot({
-    snapshot,
-    assets: job.assetsManager,
-  });
+  const markdownAdapter = new MarkdownAdapter(job);
+  const result = await markdownAdapter.fromDoc(doc);
   return result.file;
 };
 const distance = (a: number[], b: number[]) => {

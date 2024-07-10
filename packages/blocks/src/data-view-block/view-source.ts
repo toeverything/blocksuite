@@ -12,33 +12,31 @@ import type { DataViewBlockModel } from './data-view-model.js';
 import { blockQueryViewMap, blockQueryViews } from './views/index.js';
 
 export class BlockQueryViewSource implements ViewSource {
-  constructor(private model: DataViewBlockModel) {}
-
   get currentViewId(): string {
     return this.currentId ?? this.model.views[0].id;
   }
 
-  private viewMap = new Map<string, SingleViewSource>();
-  private currentId?: string;
-
-  public selectView(id: string): void {
-    this.currentId = id;
-    this.updateSlot.emit();
-  }
-
-  public updateSlot = new Slot();
-
-  public get views(): SingleViewSource[] {
+  get views(): SingleViewSource[] {
     return this.model.views.map(v => this.viewGet(v.id));
   }
 
-  public get currentView(): SingleViewSource {
+  get currentView(): SingleViewSource {
     return this.viewGet(this.currentViewId);
   }
 
-  public get readonly(): boolean {
+  get readonly(): boolean {
     return this.model.doc.readonly;
   }
+
+  get allViewMeta(): ViewMeta[] {
+    return blockQueryViews;
+  }
+
+  private viewMap = new Map<string, SingleViewSource>();
+
+  private currentId?: string;
+
+  updateSlot = new Slot<{ viewId?: string }>();
 
   viewInit: Record<
     (typeof blockQueryViews)[number]['type'],
@@ -76,7 +74,20 @@ export class BlockQueryViewSource implements ViewSource {
     },
   };
 
-  public viewAdd(viewType: DataViewTypes): string {
+  constructor(private model: DataViewBlockModel) {}
+
+  checkViewDataUpdate(): void {
+    this.model.views.forEach(v => {
+      this.updateSlot.emit({ viewId: v.id });
+    });
+  }
+
+  selectView(id: string): void {
+    this.currentId = id;
+    this.updateSlot.emit({});
+  }
+
+  viewAdd(viewType: DataViewTypes): string {
     this.model.doc.captureSync();
     const view = this.viewInit[viewType]();
     this.model.doc.transact(() => {
@@ -86,7 +97,7 @@ export class BlockQueryViewSource implements ViewSource {
     return view.id;
   }
 
-  public viewGet(id: string): SingleViewSource {
+  viewGet(id: string): SingleViewSource {
     let result = this.viewMap.get(id);
     if (!result) {
       const getView = () => {
@@ -98,8 +109,15 @@ export class BlockQueryViewSource implements ViewSource {
       }
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
-      const slot = new Slot();
-      this.updateSlot.pipe(slot);
+      const slot = new Slot<{ viewId: string }>();
+      this.updateSlot
+        .flatMap(data => {
+          if (data.viewId === id) {
+            return { viewId: id };
+          }
+          return [];
+        })
+        .pipe(slot);
       result = {
         duplicate(): void {
           self.duplicate(id);
@@ -139,20 +157,16 @@ export class BlockQueryViewSource implements ViewSource {
     return result;
   }
 
-  public duplicate(id: string): void {
+  duplicate(id: string): void {
     const newId = this.model.duplicateView(id);
     this.selectView(newId);
   }
 
-  public moveTo(id: string, position: InsertToPosition): void {
+  moveTo(id: string, position: InsertToPosition): void {
     this.model.moveViewTo(id, position);
   }
 
-  public get allViewMeta(): ViewMeta[] {
-    return blockQueryViews;
-  }
-
-  public getViewMeta(type: string): ViewMeta {
+  getViewMeta(type: string): ViewMeta {
     return blockQueryViewMap[type];
   }
 }

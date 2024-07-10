@@ -35,6 +35,7 @@ function createTestOptions() {
 test('trigger props updated', () => {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
 
   const doc = collection.createDoc({ id: 'home' });
   doc.load();
@@ -94,6 +95,7 @@ test('trigger props updated', () => {
 test('stash and pop', () => {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
 
   const doc = collection.createDoc({ id: 'home' });
   doc.load();
@@ -163,6 +165,7 @@ test('stash and pop', () => {
 test('always get latest value in onChange', () => {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
 
   const doc = collection.createDoc({ id: 'home' });
   doc.load();
@@ -209,6 +212,7 @@ test('always get latest value in onChange', () => {
 test('selector', () => {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
   const doc1 = collection.createDoc({ id: 'home' });
   doc1.load();
   const doc2 = collection.getDoc('home');
@@ -241,6 +245,7 @@ test('selector', () => {
 test('local readonly', () => {
   const options = createTestOptions();
   const collection = new DocCollection(options);
+  collection.meta.initialize();
   const doc1 = collection.createDoc({ id: 'home' });
   doc1.load();
   const doc2 = collection.getDoc('home', { readonly: true });

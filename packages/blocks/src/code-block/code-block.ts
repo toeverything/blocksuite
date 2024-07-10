@@ -1,6 +1,6 @@
 import '../_common/components/rich-text/rich-text.js';
-import './components/lang-list.js';
 
+import type { BlockElement } from '@blocksuite/block-std';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -10,25 +10,22 @@ import {
 } from '@blocksuite/inline';
 import { Slice } from '@blocksuite/store';
 import { html, nothing, render, type TemplateResult } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { type BundledLanguage, type Highlighter } from 'shiki';
+import type { BundledLanguage, Highlighter } from 'shiki';
 import { z } from 'zod';
 
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { toast } from '../_common/components/toast.js';
-import { ArrowDownIcon } from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { getViewportElement } from '../_common/utils/query.js';
-import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { BlockComponent } from './../_common/components/block-component.js';
 import { CodeClipboardController } from './clipboard/index.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
-import { createLangList } from './components/lang-list.js';
 import { codeBlockStyles } from './styles.js';
 import { getStandardLanguage, isPlaintext } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
@@ -43,51 +40,33 @@ import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
-  static override styles = codeBlockStyles;
-
-  override accessor useCaptionEditor = true;
-
-  override accessor blockContainerStyles = {
-    margin: '24px 0',
-  };
-
-  @query('.lang-button')
-  private accessor _langButton!: HTMLButtonElement;
-
-  @state()
-  private accessor _langListAbortController: AbortController | undefined =
-    undefined;
-
-  private readonly _themeObserver = new ThemeObserver();
-
-  clipboardController = new CodeClipboardController(this);
-
-  private get _showLangList() {
-    return !!this._langListAbortController;
-  }
-
   get readonly() {
     return this.doc.readonly;
   }
 
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>('affine-note');
-      return note;
+      const el = this.closest<BlockElement>(
+        'affine-note, affine-edgeless-text'
+      );
+      return el;
     }
     return this.rootElement;
   }
 
-  highlightOptionsGetter: HighlightOptionsGetter | null = null;
+  get inlineEditor() {
+    const inlineRoot = this.querySelector<InlineRootElement>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    if (!inlineRoot) {
+      throw new Error('Inline editor root not found');
+    }
+    return inlineRoot.inlineEditor;
+  }
 
-  readonly attributesSchema = z.object({});
-  readonly getAttributeRenderer = () =>
-    getCodeLineRenderer(() => ({
-      lang:
-        getStandardLanguage(this.model.language.toLowerCase())?.id ??
-        'plaintext',
-      highlighter: this._highlighter,
-    }));
+  static override styles = codeBlockStyles;
+
+  private readonly _themeObserver = new ThemeObserver();
 
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
@@ -106,7 +85,26 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
    * See {@link updated}
    */
   private _previousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
+
   private _highlighter: Highlighter | null = null;
+
+  private _inlineRangeProvider: InlineRangeProvider | null = null;
+
+  @query('rich-text')
+  private accessor _richTextElement: RichText | null = null;
+
+  override accessor useCaptionEditor = true;
+
+  override accessor blockContainerStyles = {
+    margin: '24px 0',
+  };
+
+  clipboardController = new CodeClipboardController(this);
+
+  highlightOptionsGetter: HighlightOptionsGetter | null = null;
+
+  readonly attributesSchema = z.object({});
+
   private async _startHighlight(lang: StrictLanguageInfo) {
     if (this._highlighter) {
       const loadedLangs = this._highlighter.getLoadedLanguages();
@@ -140,20 +138,28 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
     }
   }
 
-  private _inlineRangeProvider: InlineRangeProvider | null = null;
+  private _updateLineNumbers() {
+    const lineNumbersContainer =
+      this.querySelector<HTMLElement>('#line-numbers');
+    assertExists(lineNumbersContainer);
 
-  get inlineEditor() {
-    const inlineRoot = this.querySelector<InlineRootElement>(
-      `[${INLINE_ROOT_ATTR}]`
+    const next = this.model.wrap
+      ? generateLineNumberRender()
+      : lineNumberRender;
+
+    render(
+      repeat(Array.from(this.querySelectorAll('v-line')), next),
+      lineNumbersContainer
     );
-    if (!inlineRoot) {
-      throw new Error('Inline editor root not found');
-    }
-    return inlineRoot.inlineEditor;
   }
 
-  @query('rich-text')
-  private accessor _richTextElement: RichText | null = null;
+  readonly getAttributeRenderer = () =>
+    getCodeLineRenderer(() => ({
+      lang:
+        getStandardLanguage(this.model.language.toLowerCase())?.id ??
+        'plaintext',
+      highlighter: this._highlighter,
+    }));
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
@@ -393,64 +399,6 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
     this.doc.updateBlock(this.model, { wrap });
   }
 
-  private _onClickLangBtn() {
-    if (this.readonly) return;
-    if (this._langListAbortController) return;
-    const abortController = new AbortController();
-    this._langListAbortController = abortController;
-    abortController.signal.addEventListener('abort', () => {
-      this._langListAbortController = undefined;
-    });
-
-    createLangList({
-      abortController,
-      currentLanguage: this._previousLanguage,
-      onSelectLanguage: lang => {
-        this.setLang(lang ? lang.id : null);
-        abortController.abort();
-      },
-      referenceElement: this._langButton,
-    });
-  }
-
-  private _curLanguageButtonTemplate() {
-    const curLanguage =
-      getStandardLanguage(this.model.language) ?? PLAIN_TEXT_LANG_INFO;
-    const curLanguageDisplayName = curLanguage.name ?? curLanguage.id;
-    return html`<div
-      contenteditable="false"
-      class="lang-list-wrapper caret-ignore"
-      style="${this._showLangList ? 'visibility: visible;' : ''}"
-    >
-      <icon-button
-        class="lang-button"
-        data-testid="lang-button"
-        width="auto"
-        height="24px"
-        ?hover=${this._showLangList}
-        ?disabled=${this.readonly}
-        @click=${this._onClickLangBtn}
-      >
-        ${curLanguageDisplayName} ${!this.readonly ? ArrowDownIcon : nothing}
-      </icon-button>
-    </div>`;
-  }
-
-  private _updateLineNumbers() {
-    const lineNumbersContainer =
-      this.querySelector<HTMLElement>('#line-numbers');
-    assertExists(lineNumbersContainer);
-
-    const next = this.model.wrap
-      ? generateLineNumberRender()
-      : lineNumberRender;
-
-    render(
-      repeat(Array.from(this.querySelectorAll('v-line')), next),
-      lineNumbersContainer
-    );
-  }
-
   override renderBlock(): TemplateResult<1> {
     return html`
       <div
@@ -459,8 +407,6 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
           wrap: this.model.wrap,
         })}
       >
-        ${this._curLanguageButtonTemplate()}
-
         <div class="rich-text-container">
           <div contenteditable="false" id="line-numbers"></div>
           <rich-text

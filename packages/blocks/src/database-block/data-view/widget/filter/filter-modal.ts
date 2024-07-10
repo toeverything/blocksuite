@@ -2,7 +2,6 @@ import './filter-group.js';
 import './filter-root.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -66,8 +65,10 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-hover-color);
     }
   `;
+
   @property({ attribute: false })
   accessor isRoot = false;
+
   @property({ attribute: false })
   accessor data!: FilterGroup;
 
@@ -76,8 +77,10 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor setData!: (filter: FilterGroup) => void;
+
   @property({ attribute: false })
   accessor onDelete!: () => void;
+
   @property({ attribute: false })
   accessor onBack!: () => void;
 
@@ -139,7 +142,7 @@ declare global {
   }
 }
 export const popFilterModal = (
-  target: ReferenceElement,
+  target: HTMLElement,
   props: {
     isRoot: boolean;
     vars: Variable[];

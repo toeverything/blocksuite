@@ -5,7 +5,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { eventToVRect } from '../../../../../../_common/components/index.js';
 import { NewEditIcon } from '../../../../../../_common/icons/index.js';
 import { MoreHorizontalIcon } from '../../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
@@ -16,6 +15,14 @@ import { openDetail, popRowMenu } from './menu.js';
 
 @customElement('data-view-table-row')
 export class TableRow extends WithDisposable(ShadowlessElement) {
+  get selectionController() {
+    return this.closest('affine-database-table')?.selectionController;
+  }
+
+  get groupKey() {
+    return this.closest('affine-data-view-table-group')?.group?.key;
+  }
+
   static override styles = css`
     .data-view-table-row {
       width: 100%;
@@ -92,57 +99,19 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       height: 16px;
     }
   `;
-  get selectionController() {
-    return this.closest('affine-database-table')?.selectionController;
-  }
+
   @property({ attribute: false })
   accessor dataViewEle!: DataViewRenderer;
+
   @property({ attribute: false })
   accessor view!: DataViewTableManager;
+
   @property({ attribute: false })
   accessor rowIndex!: number;
+
   @property({ attribute: false })
   accessor rowId!: string;
 
-  public get groupKey() {
-    return this.closest('affine-data-view-table-group')?.group?.key;
-  }
-
-  setSelection = (selection?: Omit<TableViewSelection, 'viewId' | 'type'>) => {
-    if (this.selectionController) {
-      this.selectionController.selection = selection;
-    }
-  };
-  contextMenu = (e: MouseEvent) => {
-    const selection = this.selectionController;
-    if (!selection) {
-      return;
-    }
-    e.preventDefault();
-    const ele = e.target as HTMLElement;
-    const cell = ele.closest('affine-database-cell-container');
-    const columnIndex = cell?.columnIndex ?? 0;
-    selection.selection = {
-      groupKey: this.groupKey,
-      rowsSelection: {
-        start: this.rowIndex,
-        end: this.rowIndex,
-      },
-      focus: {
-        rowIndex: this.rowIndex,
-        columnIndex: columnIndex,
-      },
-      isEditing: false,
-    };
-    popRowMenu(this.dataViewEle, eventToVRect(e), this.rowId, selection);
-  };
-
-  public override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
-    // eslint-disable-next-line wc/no-self-class
-    this.classList.add('affine-database-block-row', 'database-row');
-  }
   private _clickDragHandler = () => {
     const selectionController = this.selectionController;
     if (selectionController) {
@@ -170,6 +139,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       }
     }
   };
+
   protected override render(): unknown {
     const view = this.view;
     return html`
@@ -272,6 +242,48 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       )}
       <div class="database-cell add-column-button"></div>
     `;
+  }
+
+  setSelection = (selection?: Omit<TableViewSelection, 'viewId' | 'type'>) => {
+    if (this.selectionController) {
+      this.selectionController.selection = selection;
+    }
+  };
+
+  contextMenu = (e: MouseEvent) => {
+    const selection = this.selectionController;
+    if (!selection) {
+      return;
+    }
+    e.preventDefault();
+    const ele = e.target as HTMLElement;
+    const cell = ele.closest('affine-database-cell-container');
+    const columnIndex = cell?.columnIndex ?? 0;
+    selection.selection = {
+      groupKey: this.groupKey,
+      rowsSelection: {
+        start: this.rowIndex,
+        end: this.rowIndex,
+      },
+      focus: {
+        rowIndex: this.rowIndex,
+        columnIndex: columnIndex,
+      },
+      isEditing: false,
+    };
+    const target =
+      cell ??
+      (e.target as HTMLElement).closest('.database-cell') ?? // for last add btn cell
+      (e.target as HTMLElement);
+
+    popRowMenu(this.dataViewEle, target, this.rowId, selection);
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
+    // eslint-disable-next-line wc/no-self-class
+    this.classList.add('affine-database-block-row', 'database-row');
   }
 }
 

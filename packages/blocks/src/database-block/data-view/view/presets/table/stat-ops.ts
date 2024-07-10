@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import type { GroupData } from '../../../common/group-by/helper.js';
 import type { DataViewTableColumnManager } from './table-view-manager.js';
 import type { StatCalcOpType } from './types.js';
 
@@ -7,7 +8,10 @@ export interface StatCalcOp {
   type: StatCalcOpType;
   label: string;
   display: string;
-  calculate: (column: DataViewTableColumnManager) => StatOpResult;
+  calculate: (
+    column: DataViewTableColumnManager,
+    group?: GroupData
+  ) => StatOpResult;
 }
 
 export type ColumnDataType = 'number' | 'checkbox' | 'other';
@@ -34,9 +38,9 @@ export const commonCalcOps: StatCalcOp[] = [
     type: 'count-all',
     label: 'Count All',
     display: 'Count',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.countAll(),
+        value: c.stats.countAll(g),
         displayFormat: 'x10',
       };
     },
@@ -46,9 +50,9 @@ export const commonCalcOps: StatCalcOp[] = [
     type: 'count-values',
     label: 'Count Values',
     display: 'Values',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.countValues(),
+        value: c.stats.countValues(g),
         displayFormat: 'x10',
       };
     },
@@ -58,9 +62,9 @@ export const commonCalcOps: StatCalcOp[] = [
     type: 'count-uni-values',
     label: 'Count Unique Values',
     display: 'Unique',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.countUniqueValues(),
+        value: c.stats.countUniqueValues(g),
         displayFormat: 'x10',
       };
     },
@@ -70,9 +74,9 @@ export const commonCalcOps: StatCalcOp[] = [
     type: 'count-empty',
     label: 'Count Empty',
     display: 'Empty',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.countEmpty(),
+        value: c.stats.countEmpty(g),
         displayFormat: 'x10',
       };
     },
@@ -82,9 +86,9 @@ export const commonCalcOps: StatCalcOp[] = [
     type: 'count-not-empty',
     label: 'Count Not Empty',
     display: 'Not Empty',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.countNonEmpty(),
+        value: c.stats.countNonEmpty(g),
         displayFormat: 'x10',
       };
     },
@@ -94,9 +98,9 @@ export const commonCalcOps: StatCalcOp[] = [
     type: 'percent-empty',
     label: 'Percent Empty',
     display: 'Empty',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.percentEmpty(),
+        value: c.stats.percentEmpty(g),
         displayFormat: '%',
       };
     },
@@ -106,9 +110,9 @@ export const commonCalcOps: StatCalcOp[] = [
     type: 'percent-not-empty',
     label: 'Percent Not Empty',
     display: 'Not Empty',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.percentNonEmpty(),
+        value: c.stats.percentNonEmpty(g),
         displayFormat: '%',
       };
     },
@@ -121,9 +125,9 @@ export const numberColCalcOps: StatCalcOp[] = [
     type: 'sum',
     label: 'Sum',
     display: 'Sum',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.sum(),
+        value: c.stats.sum(g),
         displayFormat: 'x10',
       };
     },
@@ -132,9 +136,9 @@ export const numberColCalcOps: StatCalcOp[] = [
     type: 'avg',
     label: 'Average',
     display: 'Avg',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.mean(),
+        value: c.stats.mean(g),
         displayFormat: 'x10',
       };
     },
@@ -144,9 +148,9 @@ export const numberColCalcOps: StatCalcOp[] = [
     type: 'median',
     label: 'Median',
     display: 'Median',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.median(),
+        value: c.stats.median(g),
         displayFormat: 'x10',
       };
     },
@@ -156,9 +160,9 @@ export const numberColCalcOps: StatCalcOp[] = [
     type: 'mode',
     label: 'Mode',
     display: 'Mode',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.mode(),
+        value: c.stats.mode(g),
         displayFormat: 'x10',
       };
     },
@@ -168,9 +172,9 @@ export const numberColCalcOps: StatCalcOp[] = [
     type: 'min',
     label: 'Min',
     display: 'Min',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.min(),
+        value: c.stats.min(g),
         displayFormat: 'x10',
       };
     },
@@ -179,9 +183,9 @@ export const numberColCalcOps: StatCalcOp[] = [
     type: 'max',
     label: 'Max',
     display: 'Max',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.max(),
+        value: c.stats.max(g),
         displayFormat: 'x10',
       };
     },
@@ -191,9 +195,9 @@ export const numberColCalcOps: StatCalcOp[] = [
     type: 'range',
     label: 'Range',
     display: 'Range',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.range(),
+        value: c.stats.range(g),
         displayFormat: 'x10',
       };
     },
@@ -206,9 +210,9 @@ export const checkboxCalcOps: StatCalcOp[] = [
     type: 'checked',
     label: 'Checked',
     display: 'Checked',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.checked(),
+        value: c.stats.checked(g),
         displayFormat: 'x10',
       };
     },
@@ -217,9 +221,9 @@ export const checkboxCalcOps: StatCalcOp[] = [
     type: 'not-checked',
     label: 'Not Checked',
     display: 'Not Checked',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.notChecked(),
+        value: c.stats.notChecked(g),
         displayFormat: 'x10',
       };
     },
@@ -228,9 +232,9 @@ export const checkboxCalcOps: StatCalcOp[] = [
     type: 'percent-checked',
     label: 'Percent Checked',
     display: 'Checked',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.percentChecked(),
+        value: c.stats.percentChecked(g),
         displayFormat: '%',
       };
     },
@@ -239,9 +243,9 @@ export const checkboxCalcOps: StatCalcOp[] = [
     type: 'percent-not-checked',
     label: 'Percent Not Checked',
     display: 'Not Checked',
-    calculate: c => {
+    calculate: (c, g) => {
       return {
-        value: c.stats.percentNotChecked(),
+        value: c.stats.percentNotChecked(g),
         displayFormat: '%',
       };
     },

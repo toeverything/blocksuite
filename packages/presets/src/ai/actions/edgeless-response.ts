@@ -207,7 +207,7 @@ const imageHandler = (host: EditorHost) => {
       const [x, y] = edgelessRoot.service.viewport.toViewCoord(minX, minY);
 
       host.doc.transact(() => {
-        edgelessRoot.addImages([img], { x, y }, true).catch(console.error);
+        edgelessRoot.addImages([img], [x, y], true).catch(console.error);
       });
     })
     .catch(console.error);
@@ -306,6 +306,15 @@ export const responses: {
       children: data.node,
       style: data.style,
     });
+
+    edgelessService.telemetryService?.track('CanvasElementAdded', {
+      control: 'ai',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'mindmap',
+    });
+
     const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
 
     host.doc.transact(() => {

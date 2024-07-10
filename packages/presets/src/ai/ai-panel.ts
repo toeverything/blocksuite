@@ -4,7 +4,11 @@ import {
   AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
   type AIItemConfig,
+  Bound,
   ImageBlockModel,
+  isInsideEdgelessEditor,
+  matchFlavours,
+  NoteDisplayMode,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { TemplateResult } from 'lit';
@@ -13,6 +17,7 @@ import {
   AIPenIcon,
   AIStarIconWithAnimation,
   ChatWithAIIcon,
+  CreateIcon,
   DiscardIcon,
   InsertBelowIcon,
   InsertTopIcon,
@@ -23,12 +28,14 @@ import { INSERT_ABOVE_ACTIONS } from './actions/consts.js';
 import { createTextRenderer } from './messages/text.js';
 import { AIProvider } from './provider.js';
 import { reportResponse } from './utils/action-reporter.js';
+import { findNoteBlockModel, getService } from './utils/edgeless.js';
 import {
   copyTextAnswer,
   insertAbove,
   insertBelow,
   replace,
 } from './utils/editor-actions.js';
+import { insertFromMarkdown } from './utils/markdown-utils.js';
 import { getSelections } from './utils/selection-utils.js';
 
 function getSelection(host: EditorHost) {
@@ -72,6 +79,69 @@ function useAsCaption<T extends keyof BlockSuitePresets.AIActions>(
       if (!(imageBlock instanceof ImageBlockModel)) return;
 
       host.doc.updateBlock(imageBlock, { caption });
+      panel.hide();
+    },
+  };
+}
+
+function createNewNote(host: EditorHost): AIItemConfig {
+  return {
+    name: 'Create new note',
+    icon: CreateIcon,
+    showWhen: () => {
+      const panel = getAIPanel(host);
+      return !!panel.answer && isInsideEdgelessEditor(host);
+    },
+    handler: () => {
+      reportResponse('result:add-note');
+      // get the note block
+      const { selectedBlocks } = getSelections(host);
+      if (!selectedBlocks || !selectedBlocks.length) return;
+      const firstBlock = selectedBlocks[0];
+      const noteModel = findNoteBlockModel(firstBlock);
+      if (!noteModel) return;
+
+      // create a new note block at the left of the current note block
+      const bound = Bound.deserialize(noteModel.xywh);
+      const newBound = new Bound(bound.x - bound.w - 20, bound.y, bound.w, 72);
+      const doc = host.doc;
+      const panel = getAIPanel(host);
+      const service = getService(host);
+      doc.transact(() => {
+        const noteBlockId = doc.addBlock(
+          'affine:note',
+          {
+            xywh: newBound.serialize(),
+            displayMode: NoteDisplayMode.EdgelessOnly,
+            index: service.generateIndex('affine:note'),
+          },
+          doc.root!.id
+        );
+
+        insertFromMarkdown(host, panel.answer!, noteBlockId)
+          .then(() => {
+            service.selection.set({
+              elements: [noteBlockId],
+              editing: false,
+            });
+
+            // set the viewport to show the new note block and original note block
+            const newNote = doc.getBlock(noteBlockId)?.model;
+            if (!newNote || !matchFlavours(newNote, ['affine:note'])) return;
+            const newNoteBound = Bound.deserialize(newNote.xywh);
+
+            const bounds = [bound, newNoteBound];
+            const { zoom, centerX, centerY } = service.getFitToScreenData(
+              [20, 20, 20, 20],
+              bounds
+            );
+            service.viewport.setViewport(zoom, [centerX, centerY]);
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      });
+      // hide the panel
       panel.hide();
     },
   };
@@ -153,6 +223,7 @@ export function buildTextResponseConfig<
             _replace().catch(console.error);
           },
         },
+        createNewNote(host),
       ],
     },
     {
@@ -263,6 +334,7 @@ export function buildErrorResponseConfig<
           },
         },
         useAsCaption(host, id),
+        createNewNote(host),
       ],
     },
     {

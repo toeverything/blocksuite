@@ -8,12 +8,13 @@ import {
   StrokeStyle,
   TextAlign,
   TextResizing,
+  type TextStyleProps,
   TextVerticalAlign,
 } from '../consts.js';
 import type { IBound, SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
 import type { PointLocation } from '../utils/point-location.js';
-import { type IVec2 } from '../utils/vec.js';
+import type { IVec2 } from '../utils/vec.js';
 import {
   type IBaseProps,
   type IHitTestOptions,
@@ -57,27 +58,16 @@ export type ShapeProps = IBaseProps & {
   roughness?: number;
 
   text?: Y.Text;
-  color?: string;
-  fontSize?: number;
-  fontFamily?: string;
-  fontWeight?: FontWeight;
-  fontStyle?: FontStyle;
-  textAlign?: TextAlign;
   textHorizontalAlign?: TextAlign;
   textVerticalAlign?: TextVerticalAlign;
   textResizing?: TextResizing;
   maxWidth?: false | number;
-};
+} & Partial<TextStyleProps>;
+
+export const SHAPE_TEXT_PADDING = 20;
+export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
 export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
-  static override propsToY(props: ShapeProps) {
-    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
-      props.text = new DocCollection.Y.Text(props.text);
-    }
-
-    return props;
-  }
-
   get type() {
     return 'shape';
   }
@@ -151,6 +141,20 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   @yfield(false as false | number)
   accessor maxWidth: false | number = false;
 
+  @yfield([SHAPE_TEXT_VERTICAL_PADDING, SHAPE_TEXT_PADDING])
+  accessor padding: [number, number] = [
+    SHAPE_TEXT_VERTICAL_PADDING,
+    SHAPE_TEXT_PADDING,
+  ];
+
+  @yfield()
+  accessor shadow: {
+    blur: number;
+    offsetX: number;
+    offsetY: number;
+    color: string;
+  } | null = null;
+
   textBound: IBound | null = null;
 
   override hitTest(x: number, y: number, options: IHitTestOptions) {
@@ -175,11 +179,23 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   override getRelativePointLocation(point: IVec2): PointLocation {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
   }
+
+  static override propsToY(props: ShapeProps) {
+    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
+      props.text = new DocCollection.Y.Text(props.text);
+    }
+
+    return props;
+  }
 }
 
 declare global {
   namespace BlockSuite {
     interface SurfaceElementModelMap {
+      shape: ShapeElementModel;
+    }
+
+    interface EdgelessTextModelMap {
       shape: ShapeElementModel;
     }
   }

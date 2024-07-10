@@ -1,5 +1,5 @@
 import type { CanvasElementType } from '../element-model/index.js';
-import { type SerializedXYWH } from '../utils/xywh.js';
+import type { SerializedXYWH } from '../utils/xywh.js';
 
 export interface ISurfaceElement {
   id: string;

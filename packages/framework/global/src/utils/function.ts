@@ -37,6 +37,12 @@ export function noop(_?: unknown) {
  * throttledLog("Hello, world!");
  * ```
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function throttle<T extends (...args: any[]) => any>(
+  fn: T,
+  limit: number,
+  options?: { leading?: boolean; trailing?: boolean }
+): T;
 export function throttle<
   Args extends unknown[],
   T extends (...args: Args) => void,

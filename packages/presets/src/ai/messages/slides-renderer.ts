@@ -52,6 +52,13 @@ export const createSlidesRenderer: (
 export class AISlidesRenderer extends WithDisposable(LitElement) {
   static override styles = css``;
 
+  private _editorContainer: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
+
+  private _doc!: Doc;
+
+  @query('editor-host')
+  private accessor _editorHost!: EditorHost;
+
   @property({ attribute: false })
   accessor text!: string;
 
@@ -65,29 +72,6 @@ export class AISlidesRenderer extends WithDisposable(LitElement) {
         set(data: Record<string, unknown>): void;
       }
     | undefined = undefined;
-
-  private _editorContainer: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
-  private _doc!: Doc;
-
-  @query('editor-host')
-  private accessor _editorHost!: EditorHost;
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    const schema = new Schema().register(AffineSchemas);
-    const collection = new DocCollection({ schema, id: 'SLIDES_PREVIEW' });
-    collection.start();
-    const doc = collection.createDoc();
-
-    doc.load(() => {
-      const pageBlockId = doc.addBlock('affine:page', {});
-      doc.addBlock('affine:surface', {}, pageBlockId);
-    });
-
-    doc.resetHistory();
-    this._doc = doc;
-  }
 
   protected override firstUpdated() {
     requestAnimationFrame(() => {
@@ -222,6 +206,24 @@ export class AISlidesRenderer extends WithDisposable(LitElement) {
         </div>
         <div class="mask"></div>
       </div>`;
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    const schema = new Schema().register(AffineSchemas);
+    const collection = new DocCollection({ schema, id: 'SLIDES_PREVIEW' });
+    collection.meta.initialize();
+    collection.start();
+    const doc = collection.createDoc();
+
+    doc.load(() => {
+      const pageBlockId = doc.addBlock('affine:page', {});
+      doc.addBlock('affine:surface', {}, pageBlockId);
+    });
+
+    doc.resetHistory();
+    this._doc = doc;
   }
 }
 

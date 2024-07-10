@@ -96,11 +96,11 @@ export class AIAnswerText extends WithDisposable(LitElement) {
         > .affine-block-children-container {
           > :first-child,
           > :first-child * {
-            margin-top: 0;
+            margin-top: 0 !important;
           }
           > :last-child,
           > :last-child * {
-            margin-bottom: 0;
+            margin-bottom: 0 !important;
           }
         }
       }
@@ -131,11 +131,26 @@ export class AIAnswerText extends WithDisposable(LitElement) {
       rich-text .nowrap-lines v-element span {
         white-space: pre;
       }
+      editor-host:focus-visible {
+        outline: none;
+      }
+      editor-host * {
+        box-sizing: border-box;
+      }
     }
 
     ${textBlockStyles}
     ${customHeadingStyles}
   `;
+
+  @query('.ai-answer-text-container')
+  private accessor _container!: HTMLDivElement;
+
+  private _doc!: Doc;
+
+  private _answers: string[] = [];
+
+  private _timer?: ReturnType<typeof setInterval> | null = null;
 
   @property({ attribute: false })
   accessor host!: EditorHost;
@@ -149,19 +164,12 @@ export class AIAnswerText extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor state: AffineAIPanelState | undefined = undefined;
 
-  @query('.ai-answer-text-container')
-  private accessor _container!: HTMLDivElement;
-
   private _onWheel(e: MouseEvent) {
     e.stopPropagation();
     if (this.state === 'generating') {
       e.preventDefault();
     }
   }
-
-  private _doc!: Doc;
-  private _answers: string[] = [];
-  private _timer?: ReturnType<typeof setInterval> | null = null;
 
   private _clearTimer = () => {
     if (this._timer) {

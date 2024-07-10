@@ -7,7 +7,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import { positionToVRect } from '../../../../../_common/components/index.js';
 import { NewEditIcon } from '../../../../../_common/icons/index.js';
 import { MoreHorizontalIcon } from '../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../data-view.js';
@@ -124,52 +123,18 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor dataViewEle!: DataViewRenderer;
+
   @property({ attribute: false })
   accessor view!: DataViewKanbanManager;
+
   @property({ attribute: false })
   accessor groupKey!: string;
+
   @property({ attribute: false })
   accessor cardId!: string;
+
   @state()
   accessor isFocus = false;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    if (this.view.readonly) {
-      return;
-    }
-    this._disposables.addFromEvent(this, 'contextmenu', e => {
-      this.contextMenu(e);
-    });
-    this._disposables.addFromEvent(this, 'click', e => {
-      if (e.shiftKey) {
-        this.getSelection()?.shiftClickCard(e);
-        return;
-      }
-      const selection = this.getSelection();
-      const preSelection = selection?.selection;
-
-      if (preSelection?.selectionType !== 'card') return;
-
-      if (selection) {
-        selection.selection = undefined;
-      }
-      this.dataViewEle.openDetailPanel({
-        view: this.view,
-        rowId: this.cardId,
-        onClose: () => {
-          if (selection) {
-            selection.selection = preSelection;
-          }
-        },
-      });
-    });
-  }
 
   private renderTitle() {
     const title = this.view.getHeaderTitle(this.cardId);
@@ -236,19 +201,6 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     </div>`;
   }
 
-  override render() {
-    const columns = this.view.columnManagerList.filter(
-      v => !this.view.isInHeader(v.id)
-    );
-    this.style.border = this.isFocus
-      ? '1px solid var(--affine-primary-color)'
-      : '';
-    return html`
-      ${this.renderHeader(columns)} ${this.renderBody(columns)}
-      ${this.renderOps()}
-    `;
-  }
-
   private renderOps() {
     if (this.view.readonly) {
       return;
@@ -292,6 +244,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       popCardMenu(this.dataViewEle, ele, this.cardId, selection);
     }
   };
+
   private contextMenu = (e: MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -308,12 +261,63 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       };
       popCardMenu(
         this.dataViewEle,
-        positionToVRect(e.x, e.y),
+        e.target as HTMLElement,
         this.cardId,
         selection
       );
     }
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+    if (this.view.readonly) {
+      return;
+    }
+    this._disposables.addFromEvent(this, 'contextmenu', e => {
+      this.contextMenu(e);
+    });
+    this._disposables.addFromEvent(this, 'click', e => {
+      if (e.shiftKey) {
+        this.getSelection()?.shiftClickCard(e);
+        return;
+      }
+      const selection = this.getSelection();
+      const preSelection = selection?.selection;
+
+      if (preSelection?.selectionType !== 'card') return;
+
+      if (selection) {
+        selection.selection = undefined;
+      }
+      this.dataViewEle.openDetailPanel({
+        view: this.view,
+        rowId: this.cardId,
+        onClose: () => {
+          if (selection) {
+            selection.selection = preSelection;
+          }
+        },
+      });
+    });
+  }
+
+  override render() {
+    const columns = this.view.columnManagerList.filter(
+      v => !this.view.isInHeader(v.id)
+    );
+    this.style.border = this.isFocus
+      ? '1px solid var(--affine-primary-color)'
+      : '';
+    return html`
+      ${this.renderHeader(columns)} ${this.renderBody(columns)}
+      ${this.renderOps()}
+    `;
+  }
 }
 
 declare global {

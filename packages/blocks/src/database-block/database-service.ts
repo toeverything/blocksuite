@@ -19,7 +19,12 @@ export class DatabaseBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
 > extends BlockService<DatabaseBlockModel> {
   readonly inlineManager = new InlineManager<TextAttributes>();
+
   readonly referenceNodeConfig = new ReferenceNodeConfig();
+
+  databaseViewInitEmpty = databaseViewInitEmpty;
+
+  viewPresets = viewPresets;
 
   override mounted(): void {
     super.mounted();
@@ -33,8 +38,6 @@ export class DatabaseBlockService<
     this.inlineManager.registerSpecs(inlineSpecs);
     this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
   }
-  databaseViewInitEmpty = databaseViewInitEmpty;
-  viewPresets = viewPresets;
 
   initDatabaseBlock(
     doc: Doc,

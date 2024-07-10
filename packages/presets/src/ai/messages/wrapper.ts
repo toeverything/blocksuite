@@ -1,5 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { type AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
+import type { AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 

@@ -23,6 +23,9 @@ type EmbedCardModel =
 export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
+  @state()
+  private accessor _titleInputValue = '';
+
   @property({ attribute: false })
   accessor model!: EmbedCardModel;
 
@@ -34,24 +37,6 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
 
   @query('.embed-card-modal-input.description')
   accessor descInput!: HTMLTextAreaElement;
-
-  @state()
-  private accessor _titleInputValue = '';
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this.updateComplete
-      .then(() => {
-        this.titleInput.focus();
-        this.titleInput.setSelectionRange(0, this.titleInput.value.length);
-      })
-      .catch(console.error);
-
-    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
-
-    this._titleInputValue = this.model.title ?? '';
-  }
 
   private _handleInput(e: InputEvent) {
     const target = e.target as HTMLInputElement;
@@ -82,40 +67,47 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
     this.remove();
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.updateComplete
+      .then(() => {
+        this.titleInput.focus();
+        this.titleInput.setSelectionRange(0, this.titleInput.value.length);
+      })
+      .catch(console.error);
+
+    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
+
+    this._titleInputValue = this.model.title ?? '';
+  }
+
   override render() {
     return html`
-      <div class="embed-card-modal blocksuite-overlay">
+      <div class="embed-card-modal">
         <div class="embed-card-modal-mask" @click=${() => this.remove()}></div>
         <div class="embed-card-modal-wrapper">
-          <div class="embed-card-modal-title">Edit Link</div>
-
-          <div class="embed-card-modal-content">
+          <div class="embed-card-modal-row">
+            <label for="card-title">Text</label>
             <input
               class="embed-card-modal-input title"
+              id="card-title"
               type="text"
               placeholder="Title"
               value=${this._titleInputValue}
               @input=${this._handleInput}
-              tabindex="0"
             />
-
+          </div>
+          <div class="embed-card-modal-row">
+            <label for="card-description">Description</label>
             <textarea
               class="embed-card-modal-input description"
-              placeholder="Description"
+              id="card-description"
+              placeholder="Write a description..."
               .value=${this.model.description ?? ''}
-              tabindex="0"
             ></textarea>
           </div>
-
-          <div class="embed-card-modal-action">
-            <div
-              class="embed-card-modal-button cancel"
-              tabindex="0"
-              @click=${() => this.remove()}
-            >
-              Cancel
-            </div>
-
+          <div class="embed-card-modal-row">
             <div
               class=${classMap({
                 'embed-card-modal-button': true,

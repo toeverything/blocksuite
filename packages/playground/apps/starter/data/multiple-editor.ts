@@ -1,7 +1,7 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { type DocCollection, Text } from '@blocksuite/store';
 
-import { type InitFn } from './utils.js';
+import type { InitFn } from './utils.js';
 
 export const multiEditor: InitFn = (collection: DocCollection, id: string) => {
   const doc = collection.createDoc({ id });

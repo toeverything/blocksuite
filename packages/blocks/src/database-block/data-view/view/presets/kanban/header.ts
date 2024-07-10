@@ -32,6 +32,7 @@ export class KanbanHeader extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor view!: DataViewKanbanManager;
+
   private clickGroup = (e: MouseEvent) => {
     popMenu(e.target as HTMLElement, {
       options: {

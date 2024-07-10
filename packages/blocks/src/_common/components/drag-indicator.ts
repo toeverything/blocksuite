@@ -35,10 +35,7 @@ export class DragIndicator extends LitElement {
       height: `${height}px`,
       transform: `translate(${left}px, ${top}px)`,
     });
-    return html`<div
-      class="affine-drag-indicator blocksuite-overlay"
-      style=${style}
-    ></div>`;
+    return html`<div class="affine-drag-indicator" style=${style}></div>`;
   }
 }
 

@@ -1,4 +1,3 @@
-import type { ReferenceElement } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
@@ -30,7 +29,7 @@ export const openDetail = (
 
 export const popCardMenu = (
   dataViewEle: DataViewRenderer,
-  ele: ReferenceElement,
+  ele: HTMLElement,
   rowId: string,
   selection: KanbanSelectionController
 ) => {

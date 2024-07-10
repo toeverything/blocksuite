@@ -2,7 +2,6 @@ import '../../common/ref/ref.js';
 import '../../common/literal/define.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -86,6 +85,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
       align-items: center;
     }
   `;
+
   @property({ attribute: false })
   accessor data!: SingleFilter;
 
@@ -212,7 +212,7 @@ declare global {
   }
 }
 export const popAddNewFilter = (
-  target: ReferenceElement,
+  target: HTMLElement,
   props: {
     value: FilterGroup;
     onChange: (value: FilterGroup) => void;

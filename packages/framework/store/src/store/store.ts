@@ -23,11 +23,7 @@ import { AwarenessStore, type RawAwarenessState } from '../yjs/awareness.js';
 import { BlockSuiteDoc } from '../yjs/index.js';
 import type { Space } from './space.js';
 
-export interface SerializedStore {
-  [key: string]: {
-    [key: string]: unknown;
-  };
-}
+export type SerializedStore = Record<string, Record<string, unknown>>;
 
 export enum Generator {
   /**
@@ -66,6 +62,8 @@ export interface StoreOptions<
     shadows?: BlobSource[];
   };
   awarenessSources?: AwarenessSource[];
+  disableSearchIndex?: boolean;
+  disableBacklinkIndex?: boolean;
 }
 
 const FLAGS_PRESET = {
@@ -77,20 +75,26 @@ const FLAGS_PRESET = {
   enable_expand_database_block: false,
   enable_block_query: false,
   enable_lasso_tool: false,
-  enable_mindmap_entry: false,
-  enable_new_image_actions: false,
+  enable_edgeless_text: true,
+  enable_ai_onboarding: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 
 export class Store {
   readonly id: string;
+
   readonly doc: BlockSuiteDoc;
+
   readonly spaces = new Map<string, Space>();
+
   readonly awarenessStore: AwarenessStore;
+
   readonly idGenerator: IdGenerator;
 
   readonly docSync: DocEngine;
+
   readonly awarenessSync: AwarenessEngine;
+
   readonly blobSync: BlobEngine;
 
   constructor(

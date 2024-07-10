@@ -1,4 +1,4 @@
-import { assertExists, type Disposable } from '@blocksuite/global/utils';
+import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
 
 import type { BlockModel, Schema } from '../../schema/index.js';
 import { syncBlockProps } from '../../utils/utils.js';
@@ -24,53 +24,6 @@ type DocOptions = {
 };
 
 export class Doc {
-  protected readonly _schema: Schema;
-  protected readonly _blocks: Map<string, Block> = new Map();
-  protected readonly _blockCollection: BlockCollection;
-  protected readonly _crud: DocCRUD;
-  protected readonly _selector: BlockSelector;
-  protected readonly _disposeBlockUpdated: Disposable;
-  protected readonly _readonly?: boolean;
-
-  constructor({
-    schema,
-    blockCollection,
-    crud,
-    selector,
-    readonly,
-  }: DocOptions) {
-    this._blockCollection = blockCollection;
-    this._crud = crud;
-    this._schema = schema;
-    this._selector = selector;
-    this._readonly = readonly;
-
-    this._yBlocks.forEach((_, id) => {
-      if (!this._blocks.has(id)) {
-        this._onBlockAdded(id, true);
-      }
-    });
-
-    this._disposeBlockUpdated = this._blockCollection.slots.yBlockUpdated.on(
-      ({ type, id }) => {
-        switch (type) {
-          case 'add': {
-            this._onBlockAdded(id);
-            return;
-          }
-          case 'delete': {
-            this._onBlockRemoved(id);
-            return;
-          }
-        }
-      }
-    );
-  }
-
-  dispose() {
-    this._disposeBlockUpdated.dispose();
-  }
-
   get blockCollection() {
     return this._blockCollection;
   }
@@ -156,10 +109,6 @@ export class Doc {
     return this._blockCollection.rootDoc;
   }
 
-  get slots() {
-    return this._blockCollection.slots;
-  }
-
   get awarenessStore() {
     return this._blockCollection.awarenessStore;
   }
@@ -192,12 +141,216 @@ export class Doc {
     return this._blockCollection.clear.bind(this._blockCollection);
   }
 
+  get blocks() {
+    return this._blocks;
+  }
+
+  private get _yBlocks() {
+    return this._blockCollection.yBlocks;
+  }
+
+  protected readonly _schema: Schema;
+
+  protected readonly _blocks = new Map<string, Block>();
+
+  protected readonly _blockCollection: BlockCollection;
+
+  protected readonly _crud: DocCRUD;
+
+  protected readonly _selector: BlockSelector;
+
+  protected readonly _disposeBlockUpdated: Disposable;
+
+  protected readonly _readonly?: boolean;
+
+  // @ts-ignore
+  readonly slots: BlockCollection['slots'] & {
+    /** This is always triggered after `doc.load` is called. */
+    ready: Slot;
+    /**
+     * This fires when the root block is added via API call or has just been initialized from existing ydoc.
+     * useful for internal block UI components to start subscribing following up events.
+     * Note that at this moment, the whole block tree may not be fully initialized yet.
+     */
+    rootAdded: Slot<string>;
+    rootDeleted: Slot<string>;
+    blockUpdated: Slot<
+      | {
+          type: 'add';
+          id: string;
+          init: boolean;
+          flavour: string;
+          model: BlockModel;
+        }
+      | {
+          type: 'delete';
+          id: string;
+          flavour: string;
+          parent: string;
+          model: BlockModel;
+        }
+      | {
+          type: 'update';
+          id: string;
+          flavour: string;
+          props: { key: string };
+        }
+    >;
+  } = {
+    ready: new Slot(),
+    rootAdded: new Slot(),
+    rootDeleted: new Slot(),
+    blockUpdated: new Slot(),
+  };
+
+  constructor({
+    schema,
+    blockCollection,
+    crud,
+    selector,
+    readonly,
+  }: DocOptions) {
+    this._blockCollection = blockCollection;
+    this._crud = crud;
+    this._schema = schema;
+    this._selector = selector;
+    this._readonly = readonly;
+
+    this._yBlocks.forEach((_, id) => {
+      if (!this._blocks.has(id)) {
+        this._onBlockAdded(id, true);
+      }
+    });
+
+    this._disposeBlockUpdated = this._blockCollection.slots.yBlockUpdated.on(
+      ({ type, id }) => {
+        switch (type) {
+          case 'add': {
+            this._onBlockAdded(id);
+            return;
+          }
+          case 'delete': {
+            this._onBlockRemoved(id);
+            return;
+          }
+        }
+      }
+    );
+
+    this.slots = {
+      ...this.slots,
+      historyUpdated: this._blockCollection.slots.historyUpdated,
+      yBlockUpdated: this._blockCollection.slots.yBlockUpdated,
+    };
+  }
+
+  private _getSiblings<T>(
+    block: BlockModel | string,
+    fn: (parent: BlockModel, index: number) => T
+  ) {
+    const parent = this.getParent(block);
+    if (!parent) return null;
+
+    const blockModel =
+      typeof block === 'string' ? this.getBlock(block)?.model : block;
+    if (!blockModel) return null;
+
+    const index = parent.children.indexOf(blockModel);
+    if (index === -1) return null;
+
+    return fn(parent, index);
+  }
+
+  private _onBlockAdded(id: string, init = false) {
+    try {
+      if (this._blocks.has(id)) {
+        return;
+      }
+      const yBlock = this._yBlocks.get(id);
+      if (!yBlock) {
+        console.warn(`Could not find block with id ${id}`);
+        return;
+      }
+
+      const options: BlockOptions = {
+        onChange: (block, key) => {
+          if (key) {
+            block.model.propsUpdated.emit({ key });
+          }
+
+          this.slots.blockUpdated.emit({
+            type: 'update',
+            id,
+            flavour: block.flavour,
+            props: { key },
+          });
+        },
+      };
+      const block = new Block(this._schema, yBlock, this, options);
+
+      block.blockViewType = this._selector(block, this);
+
+      this._blocks.set(id, block);
+      block.model.created.emit();
+
+      if (block.model.role === 'root') {
+        this.slots.rootAdded.emit(id);
+      }
+
+      this.slots.blockUpdated.emit({
+        type: 'add',
+        id,
+        init,
+        flavour: block.model.flavour,
+        model: block.model,
+      });
+    } catch (e) {
+      console.error('An error occurred while adding block:');
+      console.error(e);
+    }
+  }
+
+  private _onBlockRemoved(id: string) {
+    try {
+      const block = this.getBlock(id);
+      if (!block) return;
+
+      if (block.model.role === 'root') {
+        this.slots.rootDeleted.emit(id);
+      }
+
+      this.slots.blockUpdated.emit({
+        type: 'delete',
+        id,
+        flavour: block.model.flavour,
+        parent: this.getParent(block.model)?.id ?? '',
+        model: block.model,
+      });
+
+      this._blocks.delete(id);
+      block.model.deleted.emit();
+      block.model.dispose();
+    } catch (e) {
+      console.error('An error occurred while removing block:');
+      console.error(e);
+    }
+  }
+
+  dispose() {
+    this._disposeBlockUpdated.dispose();
+    this.slots.ready.dispose();
+    this.slots.blockUpdated.dispose();
+    this.slots.rootAdded.dispose();
+    this.slots.rootDeleted.dispose();
+  }
+
   getSchemaByFlavour(flavour: BlockSuite.Flavour) {
     return this._schema.flavourSchemaMap.get(flavour);
   }
 
   load(initFn?: () => void) {
     this._blockCollection.load(initFn);
+    this.slots.ready.emit();
     return this;
   }
 
@@ -287,106 +440,6 @@ export class Doc {
 
   getBlocks() {
     return Array.from(this._blocks.values()).map(block => block.model);
-  }
-
-  get blocks() {
-    return this._blocks;
-  }
-
-  private get _yBlocks() {
-    return this._blockCollection.yBlocks;
-  }
-
-  private _getSiblings<T>(
-    block: BlockModel | string,
-    fn: (parent: BlockModel, index: number) => T
-  ) {
-    const parent = this.getParent(block);
-    if (!parent) return null;
-
-    const blockModel =
-      typeof block === 'string' ? this.getBlock(block)?.model : block;
-    if (!blockModel) return null;
-
-    const index = parent.children.indexOf(blockModel);
-    if (index === -1) return null;
-
-    return fn(parent, index);
-  }
-
-  private _onBlockAdded(id: string, init = false) {
-    try {
-      if (this._blocks.has(id)) {
-        return;
-      }
-      const yBlock = this._yBlocks.get(id);
-      if (!yBlock) {
-        console.warn(`Could not find block with id ${id}`);
-        return;
-      }
-
-      const options: BlockOptions = {
-        onChange: (block, key) => {
-          if (key) {
-            block.model.propsUpdated.emit({ key });
-          }
-
-          this._blockCollection.slots.blockUpdated.emit({
-            type: 'update',
-            id,
-            flavour: block.flavour,
-            props: { key },
-          });
-        },
-      };
-      const block = new Block(this._schema, yBlock, this, options);
-
-      block.blockViewType = this._selector(block, this);
-
-      this._blocks.set(id, block);
-      block.model.created.emit();
-
-      if (block.model.role === 'root') {
-        this._blockCollection.slots.rootAdded.emit(id);
-      }
-
-      this.slots.blockUpdated.emit({
-        type: 'add',
-        id,
-        init,
-        flavour: block.model.flavour,
-        model: block.model,
-      });
-    } catch (e) {
-      console.error('An error occurred while adding block:');
-      console.error(e);
-    }
-  }
-
-  private _onBlockRemoved(id: string) {
-    try {
-      const block = this.getBlock(id);
-      if (!block) return;
-
-      if (block.model.role === 'root') {
-        this._blockCollection.slots.rootDeleted.emit(id);
-      }
-
-      this.slots.blockUpdated.emit({
-        type: 'delete',
-        id,
-        flavour: block.model.flavour,
-        parent: this.getParent(block.model)?.id ?? '',
-        model: block.model,
-      });
-
-      block.model.dispose();
-      this._blocks.delete(id);
-      block.model.deleted.emit();
-    } catch (e) {
-      console.error('An error occurred while removing block:');
-      console.error(e);
-    }
   }
 
   addBlocks(

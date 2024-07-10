@@ -1,7 +1,14 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
-import { type EdgelessTool, LassoMode } from '../../_common/types.js';
+import {
+  getNearestTranslation,
+  isElementOutsideViewport,
+  isSelectSingleMindMap,
+} from '../../_common/edgeless/mindmap/index.js';
+import { LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
+import { EdgelessTextBlockComponent } from '../../edgeless-text/edgeless-text-block.js';
+import { EdgelessTextBlockModel } from '../../edgeless-text/edgeless-text-model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
 import type { ShapeElementModel } from '../../surface-block/index.js';
@@ -12,12 +19,13 @@ import {
   GroupElementModel,
   ShapeType,
 } from '../../surface-block/index.js';
-import { EdgelessBlockModel } from '../edgeless/type.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import { CopilotSelectionController } from './controllers/tools/copilot-tool.js';
 import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
+import { EdgelessBlockModel } from './edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
+import type { EdgelessTool } from './types.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
@@ -26,7 +34,10 @@ import {
 import { deleteElements } from './utils/crud.js';
 import { getNextShapeType, updateShapeProps } from './utils/hotkey-utils.js';
 import { isCanvasElement, isNoteBlock } from './utils/query.js';
-import { mountShapeTextEditor } from './utils/text.js';
+import {
+  mountConnectorLabelEditor,
+  mountShapeTextEditor,
+} from './utils/text.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override rootElement: EdgelessRootBlockComponent) {
@@ -44,13 +55,11 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         c: () => {
-          rootElement.service.editPropsStore.record('connector', {
-            mode: ConnectorMode.Straight,
+          const mode = ConnectorMode.Curve;
+          rootElement.service.editPropsStore.recordLastProps('connector', {
+            mode,
           });
-          this._setEdgelessTool(rootElement, {
-            type: 'connector',
-            mode: ConnectorMode.Straight,
-          });
+          this._setEdgelessTool(rootElement, { type: 'connector', mode });
         },
         l: () => {
           if (!rootElement.doc.awarenessStore.getFlag('enable_lasso_tool')) {
@@ -93,37 +102,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             panning: false,
           });
         },
-        m: () => {
-          if (!rootElement.doc.awarenessStore.getFlag('enable_mindmap_entry')) {
-            return;
-          }
-
-          if (this.rootElement.service.locked) return;
-          if (this.rootElement.service.selection.editing) return;
-          const edgelessService = this.rootElement.service;
-          const lastMousePosition = edgelessService.tool.lastMousePos;
-          const [x, y] = edgelessService.viewport.toModelCoord(
-            lastMousePosition.x,
-            lastMousePosition.y
-          );
-          const mindmapId = edgelessService.addElement('mindmap', {}) as string;
-          const mindmap = edgelessService.getElementById(
-            mindmapId
-          ) as MindmapElementModel;
-          const nodeId = mindmap.addNode(null, 'shape', undefined, undefined, {
-            text: 'Mind Map',
-            xywh: `[${x},${y},150,30]`,
-          });
-
-          requestAnimationFrame(() => {
-            mountShapeTextEditor(
-              this.rootElement.service.getElementById(
-                nodeId
-              )! as ShapeElementModel,
-              this.rootElement
-            );
-          });
-        },
         n: () => {
           this._setEdgelessTool(rootElement, {
             type: 'affine:note',
@@ -142,20 +120,12 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'eraser',
           });
         },
-        s: () => {
-          const attributes =
-            rootElement.service.editPropsStore.getLastProps('shape');
-          this._setEdgelessTool(rootElement, {
-            type: 'shape',
-            shapeType: attributes.shapeType,
-          });
-        },
         k: () => {
           if (this.rootElement.service.locked) return;
           const { selection } = rootElement.service;
 
           if (
-            selection.elements.length === 1 &&
+            selection.selectedElements.length === 1 &&
             selection.firstElement instanceof EdgelessBlockModel &&
             matchFlavours(selection.firstElement as EdgelessBlockModel, [
               'affine:note',
@@ -167,10 +137,18 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         f: () => {
           if (this.rootElement.service.locked) return;
           if (
-            this.rootElement.service.selection.elements.length !== 0 &&
+            this.rootElement.service.selection.selectedElements.length !== 0 &&
             !this.rootElement.service.selection.editing
           ) {
             const frame = rootElement.service.frame.createFrameOnSelected();
+            if (!frame) return;
+            rootElement.service.telemetryService?.track('CanvasElementAdded', {
+              control: 'shortcut',
+              page: 'whiteboard editor',
+              module: 'toolbar',
+              segment: 'toolbar',
+              type: 'frame',
+            });
             rootElement.surface.fitToViewport(Bound.deserialize(frame.xywh));
           } else if (!this.rootElement.service.selection.editing) {
             this._setEdgelessTool(rootElement, { type: 'frame' });
@@ -178,7 +156,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         '-': () => {
           if (this.rootElement.service.locked) return;
-          const { elements } = rootElement.service.selection;
+          const { selectedElements: elements } = rootElement.service.selection;
           if (
             !rootElement.service.selection.editing &&
             elements.length === 1 &&
@@ -189,10 +167,43 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         '@': () => {
           const std = this.rootElement.std;
-          if (std.selection.getGroup('note').length > 0) {
+          if (
+            std.selection.getGroup('note').length > 0 ||
+            // eslint-disable-next-line unicorn/prefer-array-some
+            std.selection.find('text') ||
+            // eslint-disable-next-line unicorn/prefer-array-some
+            Boolean(std.selection.find('surface')?.editing)
+          ) {
             return;
           }
-          std.command.exec('insertLinkByQuickSearch');
+          const { insertedLinkType } = std.command.exec(
+            'insertLinkByQuickSearch'
+          );
+
+          insertedLinkType
+            ?.then(type => {
+              if (type) {
+                rootElement.service.telemetryService?.track(
+                  'CanvasElementAdded',
+                  {
+                    control: 'shortcut',
+                    page: 'whiteboard editor',
+                    module: 'toolbar',
+                    segment: 'toolbar',
+                    type: type.flavour.split(':')[1],
+                  }
+                );
+                if (type.isNewDoc) {
+                  rootElement.service.telemetryService?.track('DocCreated', {
+                    control: 'shortcut',
+                    page: 'whiteboard editor',
+                    segment: 'whiteboard',
+                    type: type.flavour.split(':')[1],
+                  });
+                }
+              }
+            })
+            .catch(console.error);
         },
         'Shift-s': () => {
           if (this.rootElement.service.locked) return;
@@ -227,7 +238,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         'Mod-g': ctx => {
           if (this.rootElement.service.locked) return;
           if (
-            this.rootElement.service.selection.elements.length > 1 &&
+            this.rootElement.service.selection.selectedElements.length > 1 &&
             !this.rootElement.service.selection.editing
           ) {
             ctx.get('keyboardState').event.preventDefault();
@@ -238,7 +249,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           if (this.rootElement.service.locked) return;
           const { selection } = this.rootElement.service;
           if (
-            selection.elements.length === 1 &&
+            selection.selectedElements.length === 1 &&
             selection.firstElement instanceof GroupElementModel
           ) {
             ctx.get('keyboardState').event.preventDefault();
@@ -338,6 +349,92 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
         'Shift-ArrowRight': () => {
           this._move('ArrowRight', true);
+        },
+
+        Enter: () => {
+          const { service } = rootElement;
+          const selection = service.selection;
+          const elements = selection.selectedElements;
+          const onlyOne = elements.length === 1;
+
+          if (onlyOne) {
+            const element = elements[0];
+            const id = element.id;
+
+            if (element instanceof ConnectorElementModel) {
+              selection.set({
+                elements: [id],
+                editing: true,
+              });
+              requestAnimationFrame(() => {
+                mountConnectorLabelEditor(element, rootElement);
+              });
+              return;
+            }
+
+            if (element instanceof EdgelessTextBlockModel) {
+              selection.set({
+                elements: [id],
+                editing: true,
+              });
+              const textBlock = rootElement.host.view.getBlock(id);
+              if (textBlock instanceof EdgelessTextBlockComponent) {
+                textBlock.tryFocusEnd();
+              }
+
+              return;
+            }
+          }
+
+          if (!isSelectSingleMindMap(elements)) {
+            return;
+          }
+
+          const mindmap = elements[0].group as MindmapElementModel;
+          const node = mindmap.getNode(elements[0].id)!;
+          const parent = mindmap.getParentNode(node.id) ?? node;
+          const id = mindmap.addNode(parent.id);
+          const target = service.getElementById(id) as ShapeElementModel;
+
+          requestAnimationFrame(() => {
+            mountShapeTextEditor(target, rootElement);
+
+            if (isElementOutsideViewport(service.viewport, target, [20, 20])) {
+              const { elementBound } = target;
+
+              service.viewport.smoothTranslate(
+                elementBound.x + elementBound.w / 2,
+                elementBound.y + elementBound.h / 2
+              );
+            }
+          });
+        },
+        Tab: () => {
+          const { service } = rootElement;
+          const selection = service.selection;
+          const elements = selection.selectedElements;
+
+          if (!isSelectSingleMindMap(elements)) {
+            return;
+          }
+
+          const mindmap = elements[0].group as MindmapElementModel;
+          const node = mindmap.getNode(elements[0].id)!;
+          const id = mindmap.addNode(node.id);
+          const target = service.getElementById(id) as ShapeElementModel;
+
+          requestAnimationFrame(() => {
+            mountShapeTextEditor(target, rootElement);
+
+            if (isElementOutsideViewport(service.viewport, target, [20, 20])) {
+              const { elementBound } = target;
+
+              service.viewport.smoothTranslate(
+                elementBound.x + elementBound.w / 2,
+                elementBound.y + elementBound.h / 2
+              );
+            }
+          });
         },
       },
       {
@@ -463,10 +560,15 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    deleteElements(edgeless.surface, edgeless.service.selection.elements);
+    deleteElements(
+      edgeless.surface,
+      edgeless.service.selection.selectedElements
+    );
 
     edgeless.service.selection.clear();
-    edgeless.service.selection.set(edgeless.service.selection.selections);
+    edgeless.service.selection.set(
+      edgeless.service.selection.surfaceSelections
+    );
   }
 
   private _setEdgelessTool(
@@ -487,9 +589,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     if (edgeless.service.locked) return;
     if (edgeless.service.selection.editing) return;
 
-    const { elements } = edgeless.service.selection;
+    const { selectedElements } = edgeless.service.selection;
     const inc = shift ? 10 : 1;
-    const mindmapNodes = elements.filter(
+    const mindmapNodes = selectedElements.filter(
       el => el.group instanceof MindmapElementModel
     );
 
@@ -502,29 +604,30 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       switch (key) {
         case 'ArrowUp':
         case 'ArrowDown':
-          targetNode = mindmap.getSiblingNode(
-            node.id,
-            key === 'ArrowDown' ? 'next' : 'prev',
-            nodeDirection === LayoutType.RIGHT
-              ? 'right'
-              : nodeDirection === LayoutType.LEFT
-                ? 'left'
-                : undefined
-          );
+          targetNode =
+            mindmap.getSiblingNode(
+              node.id,
+              key === 'ArrowDown' ? 'next' : 'prev',
+              nodeDirection === LayoutType.RIGHT
+                ? 'right'
+                : nodeDirection === LayoutType.LEFT
+                  ? 'left'
+                  : undefined
+            )?.element ?? null;
           break;
         case 'ArrowLeft':
           targetNode =
             nodeDirection === LayoutType.RIGHT
-              ? mindmap.getParentNode(node.id)
-              : mindmap.getChildNodes(node.id, 'left')[0] ?? null;
+              ? mindmap.getParentNode(node.id)?.element ?? null
+              : mindmap.getChildNodes(node.id, 'left')[0]?.element ?? null;
 
           break;
         case 'ArrowRight':
           targetNode =
             nodeDirection === LayoutType.RIGHT ||
             nodeDirection === LayoutType.BALANCE
-              ? mindmap.getChildNodes(node.id, 'right')[0] ?? null
-              : mindmap.getParentNode(node.id);
+              ? mindmap.getChildNodes(node.id, 'right')[0]?.element ?? null
+              : mindmap.getParentNode(node.id)?.element ?? null;
           break;
       }
 
@@ -533,12 +636,31 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           elements: [targetNode.id],
           editing: false,
         });
+
+        if (
+          isElementOutsideViewport(
+            edgeless.service.viewport,
+            targetNode,
+            [90, 20]
+          )
+        ) {
+          const [dx, dy] = getNearestTranslation(
+            edgeless.service.viewport,
+            targetNode,
+            [100, 20]
+          );
+
+          edgeless.service.viewport.smoothTranslate(
+            edgeless.service.viewport.centerX - dx,
+            edgeless.service.viewport.centerY + dy
+          );
+        }
       }
 
       return;
     }
 
-    elements.forEach(element => {
+    selectedElements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
 
       switch (key) {

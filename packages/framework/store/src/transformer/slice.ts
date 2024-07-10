@@ -12,22 +12,6 @@ type SliceData = {
 };
 
 export class Slice {
-  static fromModels(doc: Doc, models: DraftModel[]) {
-    const meta = doc.collection.meta;
-    const { pageVersion, workspaceVersion } = meta;
-    assertExists(pageVersion);
-    assertExists(workspaceVersion);
-    return new Slice({
-      content: models,
-      workspaceId: doc.collection.id,
-      pageId: doc.id,
-      pageVersion,
-      workspaceVersion,
-    });
-  }
-
-  constructor(public readonly data: SliceData) {}
-
   get content() {
     return this.data.content;
   }
@@ -46,5 +30,21 @@ export class Slice {
 
   get docId() {
     return this.data.pageId;
+  }
+
+  constructor(readonly data: SliceData) {}
+
+  static fromModels(doc: Doc, models: DraftModel[]) {
+    const meta = doc.collection.meta;
+    const { pageVersion, workspaceVersion } = meta;
+    assertExists(pageVersion);
+    assertExists(workspaceVersion);
+    return new Slice({
+      content: models,
+      workspaceId: doc.collection.id,
+      pageId: doc.id,
+      pageVersion,
+      workspaceVersion,
+    });
   }
 }

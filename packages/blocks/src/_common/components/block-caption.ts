@@ -34,6 +34,8 @@ export class BlockCaptionEditor<
     }
   `;
 
+  private _focus = false;
+
   @property({ attribute: false })
   accessor block!: BlockElement<Model> & { isInSurface?: boolean };
 
@@ -45,8 +47,6 @@ export class BlockCaptionEditor<
 
   @query('.block-caption-editor')
   accessor input!: HTMLInputElement;
-
-  private _focus = false;
 
   private _onInputChange(e: InputEvent) {
     const target = e.target as HTMLInputElement;

@@ -97,22 +97,6 @@ const styles = css`
 `;
 @customElement('note-slicer')
 export class NoteSlicer extends WithDisposable(LitElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor anchorNote: NoteBlockModel | null = null;
-
-  @state()
-  private accessor _activeSlicerIndex = 0;
-
-  private _hidden = false;
-  private _divingLinePositions: Point[] = [];
-  private _noteBlockIds: string[] = [];
-  private _noteDisposables: DisposableGroup | null = null;
-
   get _editorHost() {
     return this.edgeless.host;
   }
@@ -145,6 +129,25 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   get _zoom() {
     return this.edgeless.service.viewport.zoom;
   }
+
+  static override styles = styles;
+
+  @state()
+  private accessor _activeSlicerIndex = 0;
+
+  private _hidden = false;
+
+  private _divingLinePositions: Point[] = [];
+
+  private _noteBlockIds: string[] = [];
+
+  private _noteDisposables: DisposableGroup | null = null;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor anchorNote: NoteBlockModel | null = null;
 
   private _updateDivingLineAndBlockIds() {
     if (!this.anchorNote || !this._notePortalElement) {
@@ -202,85 +205,6 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._activeSlicerIndex = index;
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    if (!this.edgeless.service) return;
-    this._updateDivingLineAndBlockIds();
-    const { disposables } = this;
-
-    disposables.add(
-      this.edgeless.service.uiEventDispatcher.add('pointerMove', ctx => {
-        if (this._hidden) this._hidden = false;
-
-        const state = ctx.get('pointerState');
-        const pos = new Point(state.x, state.y);
-        this._updateActiveSlicerIndex(pos);
-      })
-    );
-
-    disposables.add(
-      this.edgeless.service.viewport.viewportUpdated.on(() => {
-        this._hidden = true;
-        this.requestUpdate();
-      })
-    );
-
-    const { surface } = this.edgeless;
-    requestAnimationFrame(() => {
-      if (surface.isConnected && surface.edgeless.dispatcher) {
-        disposables.add(
-          surface.edgeless.dispatcher.add('click', ctx => {
-            const event = ctx.get('pointerState');
-            const { raw } = event;
-            const target = raw.target as HTMLElement;
-            if (!target) return false;
-            if (target.closest('note-slicer')) {
-              this._sliceNote();
-              return true;
-            }
-            return false;
-          })
-        );
-      }
-    });
-  }
-
-  protected override updated(_changedProperties: PropertyValues) {
-    super.updated(_changedProperties);
-    if (_changedProperties.has('anchorNote')) {
-      this._noteDisposables?.dispose();
-      this._noteDisposables = null;
-      if (this.anchorNote) {
-        this._noteDisposables = new DisposableGroup();
-        this._noteDisposables.add(
-          this.anchorNote.propsUpdated.on(({ key }) => {
-            if (key === 'children' || key === 'xywh') {
-              this.requestUpdate();
-            }
-          })
-        );
-      }
-    }
-  }
-
-  override firstUpdated() {
-    if (!this.edgeless.service) return;
-    this.disposables.add(
-      this.edgeless.service.uiEventDispatcher.add('wheel', () => {
-        this._hidden = true;
-        this.requestUpdate();
-      })
-    );
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this.disposables.dispose();
-    this._noteDisposables?.dispose();
-    this._noteDisposables = null;
-  }
-
   private _sliceNote() {
     if (!this.anchorNote || !this._noteBlockIds.length) return;
     const doc = this.edgeless.doc;
@@ -327,6 +251,85 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       elements: [newNoteId],
       editing: false,
     });
+  }
+
+  protected override updated(_changedProperties: PropertyValues) {
+    super.updated(_changedProperties);
+    if (_changedProperties.has('anchorNote')) {
+      this._noteDisposables?.dispose();
+      this._noteDisposables = null;
+      if (this.anchorNote) {
+        this._noteDisposables = new DisposableGroup();
+        this._noteDisposables.add(
+          this.anchorNote.propsUpdated.on(({ key }) => {
+            if (key === 'children' || key === 'xywh') {
+              this.requestUpdate();
+            }
+          })
+        );
+      }
+    }
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    if (!this.edgeless.service) return;
+    this._updateDivingLineAndBlockIds();
+    const { disposables } = this;
+
+    disposables.add(
+      this.edgeless.service.uiEventDispatcher.add('pointerMove', ctx => {
+        if (this._hidden) this._hidden = false;
+
+        const state = ctx.get('pointerState');
+        const pos = new Point(state.x, state.y);
+        this._updateActiveSlicerIndex(pos);
+      })
+    );
+
+    disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
+        this._hidden = true;
+        this.requestUpdate();
+      })
+    );
+
+    const { surface } = this.edgeless;
+    requestAnimationFrame(() => {
+      if (surface.isConnected && surface.edgeless.dispatcher) {
+        disposables.add(
+          surface.edgeless.dispatcher.add('click', ctx => {
+            const event = ctx.get('pointerState');
+            const { raw } = event;
+            const target = raw.target as HTMLElement;
+            if (!target) return false;
+            if (target.closest('note-slicer')) {
+              this._sliceNote();
+              return true;
+            }
+            return false;
+          })
+        );
+      }
+    });
+  }
+
+  override firstUpdated() {
+    if (!this.edgeless.service) return;
+    this.disposables.add(
+      this.edgeless.service.uiEventDispatcher.add('wheel', () => {
+        this._hidden = true;
+        this.requestUpdate();
+      })
+    );
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.disposables.dispose();
+    this._noteDisposables?.dispose();
+    this._noteDisposables = null;
   }
 
   override render() {

@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { BlockElement } from '@blocksuite/block-std';
-import type {
-  EdgelessRootBlockComponent,
-  NoteBlockModel,
+import {
+  type EdgelessRootBlockComponent,
+  generateKeyBetween,
+  type NoteBlockModel,
 } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -209,7 +210,7 @@ test('layer zindex should update correctly when elements changed', async () => {
   service.doc.captureSync();
 
   service.updateElement(noteId, {
-    index: service.layer.getReorderedIndex(note, 'front'),
+    index: service.layer.getReorderedIndex(note!, 'front'),
   });
   await wait();
   service.doc.captureSync();
@@ -224,7 +225,7 @@ test('layer zindex should update correctly when elements changed', async () => {
   assert2StepState();
 
   service.updateElement(topShapeId, {
-    index: service.layer.getReorderedIndex(topShape, 'front'),
+    index: service.layer.getReorderedIndex(topShape!, 'front'),
   });
   await wait();
   service.doc.captureSync();
@@ -239,6 +240,50 @@ test('layer zindex should update correctly when elements changed', async () => {
   service.doc.undo();
   await wait();
   assertInitialState();
+});
+
+test('blocks should rerender when their z-index changed', async () => {
+  const blocks = [
+    addNote(doc, {
+      index: service.layer.generateIndex('affine:note'),
+    }),
+    addNote(doc, {
+      index: service.layer.generateIndex('affine:note'),
+    }),
+    addNote(doc, {
+      index: service.layer.generateIndex('affine:note'),
+    }),
+    addNote(doc, {
+      index: service.layer.generateIndex('affine:note'),
+    }),
+  ];
+  const assertBlockElementsContent = () => {
+    const blockElements = Array.from(
+      document.querySelectorAll(
+        '.affine-edgeless-layer > edgeless-block-portal-note'
+      )
+    );
+
+    expect(blockElements.length).toBe(4);
+
+    blockElements.forEach(element => {
+      expect(element.children.length).toBeGreaterThan(0);
+    });
+  };
+
+  await wait();
+  assertBlockElementsContent();
+
+  service.addElement('shape', {
+    shapeType: 'rect',
+    index: generateKeyBetween(
+      service.getElementById(blocks[1])!.index,
+      service.getElementById(blocks[2])!.index
+    ),
+  });
+
+  await wait();
+  assertBlockElementsContent();
 });
 
 describe('layer reorder functionality', () => {

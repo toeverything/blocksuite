@@ -42,6 +42,22 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
     return this.value ?? [];
   }
 
+  private popTagSelect = () => {
+    this._disposables.add({
+      dispose: popTagSelect(
+        this.querySelector('affine-multi-tag-view') ?? this,
+        {
+          options: this._options,
+          onOptionsChange: this._onOptionsChange,
+          value: this._value,
+          onChange: this._onChange,
+          onComplete: this._editComplete,
+          minWidth: 400,
+        }
+      ),
+    });
+  };
+
   _onChange = (ids: string[]) => {
     this.onChange(ids);
   };
@@ -62,22 +78,6 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
   override firstUpdated() {
     this.popTagSelect();
   }
-
-  private popTagSelect = () => {
-    this._disposables.add({
-      dispose: popTagSelect(
-        this.querySelector('affine-multi-tag-view') ?? this,
-        {
-          options: this._options,
-          onOptionsChange: this._onOptionsChange,
-          value: this._value,
-          onChange: this._onChange,
-          onComplete: this._editComplete,
-          minWidth: 400,
-        }
-      ),
-    });
-  };
 
   override render() {
     return html`

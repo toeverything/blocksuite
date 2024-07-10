@@ -1,26 +1,29 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/store';
 
-import type {
-  CopilotSelectionTool,
-  EdgelessTool,
-} from '../../../../_common/utils/index.js';
 import { Bound, getElementsBound } from '../../../../surface-block/index.js';
 import {
   AFFINE_AI_PANEL_WIDGET,
   type AffineAIPanelWidget,
 } from '../../../widgets/ai-panel/ai-panel.js';
-import { EdgelessToolController } from './index.js';
+import type { EdgelessTool } from '../../types.js';
+import { EdgelessToolController } from './edgeless-tool.js';
+
+type CopilotSelectionTool = {
+  type: 'copilot';
+};
 
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
-  readonly tool = <CopilotSelectionTool>{
-    type: 'copilot',
-  };
-
   private _dragging = false;
 
+  readonly tool = {
+    type: 'copilot',
+  } as CopilotSelectionTool;
+
   dragStartPoint: [number, number] = [0, 0];
+
   dragLastPoint: [number, number] = [0, 0];
+
   draggingAreaUpdated = new Slot<boolean | void>();
 
   get selection() {
@@ -28,7 +31,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   get selectedElements() {
-    return this.selection.elements;
+    return this.selection.selectedElements;
   }
 
   get area() {
@@ -50,6 +53,11 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
       this._edgeless.doc.root!.id
     ) as AffineAIPanelWidget;
     return aiPanel && aiPanel.state !== 'hidden';
+  }
+
+  private _initDragState(e: PointerEventState) {
+    this.dragStartPoint = this._service.viewport.toModelCoord(e.x, e.y);
+    this.dragLastPoint = this.dragStartPoint;
   }
 
   abort() {
@@ -88,11 +96,6 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     });
 
     this.draggingAreaUpdated.emit(true);
-  }
-
-  private _initDragState(e: PointerEventState) {
-    this.dragStartPoint = this._service.viewport.toModelCoord(e.x, e.y);
-    this.dragLastPoint = this.dragStartPoint;
   }
 
   override onContainerDragStart(e: PointerEventState): void {
@@ -163,4 +166,12 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   afterModeSwitch(): void {}
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      'copilot-selection': CopilotSelectionController;
+    }
+  }
 }

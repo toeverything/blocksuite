@@ -1,6 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type DocMeta } from '@blocksuite/store';
+import type { DocMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { toast } from '../../../_common/components/toast.js';
@@ -88,11 +88,20 @@ export const getMenus: (ctx: {
         key: doc.id,
         name: doc.title || DEFAULT_DOC_NAME,
         icon: DocIcon,
-        action: () =>
+        action: () => {
           insertLinkedNode({
             inlineEditor,
             docId: doc.id,
-          }),
+          });
+          editorHost.spec
+            .getService('affine:page')
+            .telemetryService?.track('LinkedDocCreated', {
+              control: 'linked doc',
+              module: 'inline @',
+              type: 'doc',
+              other: 'existing doc',
+            });
+        },
       })),
     },
     {
@@ -110,6 +119,19 @@ export const getMenus: (ctx: {
             insertLinkedNode({
               inlineEditor,
               docId: newDoc.id,
+            });
+            const telemetryService =
+              editorHost.spec.getService('affine:page').telemetryService;
+            telemetryService?.track('LinkedDocCreated', {
+              control: 'new doc',
+              module: 'inline @',
+              type: 'doc',
+              other: 'new doc',
+            });
+            telemetryService?.track('DocCreated', {
+              control: 'new doc',
+              module: 'inline @',
+              type: 'doc',
             });
           },
         },

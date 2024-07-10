@@ -1,7 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import {
   BlocksUtils,
-  type EdgelessBlock,
   EdgelessRootService,
   type FrameBlockModel,
   type ImageBlockModel,
@@ -36,7 +35,7 @@ export function getEdgelessService(editor: EditorHost) {
 export async function selectedToCanvas(editor: EditorHost) {
   const edgelessRoot = getEdgelessRootFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
-    edgelessRoot.service.selection.elements
+    edgelessRoot.service.selection.selectedElements
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
     return;
@@ -110,7 +109,7 @@ export const getFirstImageInFrame = (
   const elements = edgelessRoot.service.frame.getElementsInFrame(frame, false);
   const image = elements.find(ele => {
     if (!BlocksUtils.isCanvasElement(ele)) {
-      return (ele as EdgelessBlock).flavour === 'affine:image';
+      return ele.flavour === 'affine:image';
     }
     return false;
   }) as ImageBlockModel | undefined;

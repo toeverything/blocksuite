@@ -22,6 +22,8 @@ async function main() {
   const collection = createStarterDocCollection();
 
   if (isE2E) {
+    collection.meta.initialize();
+
     Object.defineProperty(window, '$blocksuite', {
       value: Object.freeze({
         store,
@@ -30,6 +32,15 @@ async function main() {
         editor,
       }),
     });
+
+    // test if blocksuite can run in a web worker, SEE: tests/worker.spec.ts
+    window.testWorker = new Worker(
+      new URL('./utils/test-worker.ts', import.meta.url),
+      {
+        type: 'module',
+      }
+    );
+
     return;
   }
 

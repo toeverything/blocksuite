@@ -1,5 +1,6 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
@@ -11,9 +12,14 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import { CaptionIcon, PaletteIcon } from '../../../_common/icons/text.js';
+import {
+  CaptionIcon,
+  DownloadIcon,
+  PaletteIcon,
+} from '../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
+import { downloadAttachmentBlob } from '../../../attachment-block/utils.js';
 import type {
   AttachmentBlockComponent,
   AttachmentBlockModel,
@@ -38,9 +44,10 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   }
 
   private get _blockElement() {
-    const blockSelection = this.edgeless.service.selection.selections.filter(
-      sel => sel.elements.includes(this.model.id)
-    );
+    const blockSelection =
+      this.edgeless.service.selection.surfaceSelections.filter(sel =>
+        sel.elements.includes(this.model.id)
+      );
     if (blockSelection.length !== 1) {
       return;
     }
@@ -73,53 +80,64 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     ];
   }
 
-  private _showCaption() {
+  private _showCaption = () => {
     this._blockElement?.captionEditor.show();
-  }
+  };
 
-  private _setCardStyle(style: EmbedCardStyle) {
+  private _setCardStyle = (style: EmbedCardStyle) => {
     const bounds = Bound.deserialize(this.model.xywh);
     bounds.w = EMBED_CARD_WIDTH[style];
     bounds.h = EMBED_CARD_HEIGHT[style];
     const xywh = bounds.serialize();
     this.model.doc.updateBlock(this.model, { style, xywh });
-  }
+  };
+
+  private _download = () => {
+    if (!this._blockElement) return;
+    downloadAttachmentBlob(this._blockElement);
+  };
 
   override render() {
-    const model = this.model;
-
     return html`
-      <edgeless-menu-button
+      <editor-menu-button
         .contentPadding=${'8px'}
         .button=${html`
-          <edgeless-tool-icon-button
-            aria-label="Card style"
-            .tooltip=${'Card style'}
-          >
+          <editor-icon-button aria-label="Card style" .tooltip=${'Card style'}>
             ${PaletteIcon}
-          </edgeless-tool-icon-button>
+          </editor-icon-button>
         `}
       >
         <card-style-panel
           slot
-          .value=${model.style}
+          .value=${this.model.style}
           .options=${this._getCardStyleOptions}
-          .onSelect=${(value: EmbedCardStyle) => this._setCardStyle(value)}
+          .onSelect=${this._setCardStyle}
         >
         </card-style-panel>
-      </edgeless-menu-button>
+      </editor-menu-button>
 
-      <edgeless-menu-divider></edgeless-menu-divider>
+      <editor-toolbar-separator></editor-toolbar-separator>
 
-      <edgeless-tool-icon-button
+      <editor-icon-button
+        aria-label="Download"
+        .tooltip=${'Download'}
+        ?disabled=${this._doc.readonly}
+        @click=${this._download}
+      >
+        ${DownloadIcon}
+      </editor-icon-button>
+
+      <editor-toolbar-separator></editor-toolbar-separator>
+
+      <editor-icon-button
         aria-label="Add caption"
         .tooltip=${'Add caption'}
         class="change-attachment-button caption"
         ?disabled=${this._doc.readonly}
-        @click=${() => this._showCaption()}
+        @click=${this._showCaption}
       >
         ${CaptionIcon}
-      </edgeless-tool-icon-button>
+      </editor-icon-button>
     `;
   }
 }

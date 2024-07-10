@@ -26,61 +26,24 @@ export const allVendor: Vendor<any>[] = [openaiVendor, falVendor, llama2Vendor];
 
 @customElement('create-new-service')
 export class CreateNewService extends WithDisposable(ShadowlessElement) {
-  @property({ attribute: false })
-  accessor type!: string;
-  @property({ attribute: false })
-  accessor onSave!: (config: VendorConfig) => void;
-  @state()
-  accessor key = '';
-  @state()
-  accessor name = '';
-  @state()
-  accessor data: unknown | undefined = undefined;
-
-  changeKeyByEvent(e: Event) {
-    const select = e.target as HTMLSelectElement;
-    this.changeKey(select.value);
-  }
-
   get serviceKind() {
     return allKindService.find(v => v.type === this.type);
   }
 
-  changeKey(key: string) {
-    this.key = key;
-    this.data = allVendor.find(v => v.key === key)?.initData();
-  }
+  @property({ attribute: false })
+  accessor type!: string;
 
-  changeName(e: Event) {
-    const input = e.target as HTMLInputElement;
-    this.name = input.value;
-  }
+  @property({ attribute: false })
+  accessor onSave!: (config: VendorConfig) => void;
 
-  save() {
-    if (!this.data) {
-      return;
-    }
-    this.onSave({
-      id: nanoid(),
-      vendorKey: this.key,
-      name: this.name,
-      data: this.data,
-    });
-  }
+  @state()
+  accessor key = '';
 
-  close() {
-    this.remove();
-  }
+  @state()
+  accessor name = '';
 
-  list() {
-    const set = new Set<Vendor<unknown>>();
-    allKindService
-      .find(v => v.type === this.type)
-      ?.implList.forEach(v => {
-        set.add(v.vendor);
-      });
-    return [...set];
-  }
+  @state()
+  accessor data: unknown | undefined = undefined;
 
   protected override render(): unknown {
     const list = this.list();
@@ -138,6 +101,47 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  changeKeyByEvent(e: Event) {
+    const select = e.target as HTMLSelectElement;
+    this.changeKey(select.value);
+  }
+
+  changeKey(key: string) {
+    this.key = key;
+    this.data = allVendor.find(v => v.key === key)?.initData();
+  }
+
+  changeName(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.name = input.value;
+  }
+
+  save() {
+    if (!this.data) {
+      return;
+    }
+    this.onSave({
+      id: nanoid(),
+      vendorKey: this.key,
+      name: this.name,
+      data: this.data,
+    });
+  }
+
+  close() {
+    this.remove();
+  }
+
+  list() {
+    const set = new Set<Vendor<unknown>>();
+    allKindService
+      .find(v => v.type === this.type)
+      ?.implList.forEach(v => {
+        set.add(v.vendor);
+      });
+    return [...set];
+  }
 }
 
 @customElement('vendor-service-select')
@@ -155,29 +159,12 @@ export class VendorServiceSelect extends WithDisposable(ShadowlessElement) {
       cursor: pointer;
     }
   `;
+
   @property({ attribute: false })
   accessor featureKey!: string;
+
   @property({ attribute: false })
   accessor service!: AllServiceKind;
-
-  changeService(e: Event) {
-    const options = new VendorServiceOptions();
-    options.featureKey = this.featureKey;
-    options.service = this.service;
-    options.close = () => {
-      this.requestUpdate();
-    };
-    const target = e.target as HTMLElement;
-    document.body.append(options);
-    computePosition(target, options)
-      .then(pos => {
-        options.style.left = `${pos.x}px`;
-        options.style.top = `${pos.y}px`;
-      })
-      .catch(() => {
-        options.remove();
-      });
-  }
 
   protected override render(): unknown {
     const list = copilotConfig.getVendorsByService(this.service);
@@ -203,6 +190,25 @@ export class VendorServiceSelect extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  changeService(e: Event) {
+    const options = new VendorServiceOptions();
+    options.featureKey = this.featureKey;
+    options.service = this.service;
+    options.close = () => {
+      this.requestUpdate();
+    };
+    const target = e.target as HTMLElement;
+    document.body.append(options);
+    computePosition(target, options)
+      .then(pos => {
+        options.style.left = `${pos.x}px`;
+        options.style.top = `${pos.y}px`;
+      })
+      .catch(() => {
+        options.remove();
+      });
+  }
 }
 
 @customElement('vendor-service-options')
@@ -225,23 +231,15 @@ export class VendorServiceOptions extends WithDisposable(ShadowlessElement) {
       cursor: pointer;
     }
   `;
+
   @property({ attribute: false })
   accessor featureKey!: string;
+
   @property({ attribute: false })
   accessor service!: AllServiceKind;
+
   @property({ attribute: false })
   accessor close!: () => void;
-
-  select(vendor: VendorConfig, impl: ServiceImpl<unknown, unknown>) {
-    copilotConfig.changeService(
-      this.featureKey,
-      this.service.type,
-      vendor.id,
-      impl.name
-    );
-    this.remove();
-    this.close();
-  }
 
   protected override render(): unknown {
     const list = copilotConfig.getVendorsByService(this.service);
@@ -266,5 +264,16 @@ export class VendorServiceOptions extends WithDisposable(ShadowlessElement) {
         })}
       </div>
     `;
+  }
+
+  select(vendor: VendorConfig, impl: ServiceImpl<unknown, unknown>) {
+    copilotConfig.changeService(
+      this.featureKey,
+      this.service.type,
+      vendor.id,
+      impl.name
+    );
+    this.remove();
+    this.close();
   }
 }

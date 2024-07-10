@@ -15,28 +15,8 @@ import type {
 } from '../types.js';
 
 export class KanbanSelectionController implements ReactiveController {
-  constructor(private host: DataViewKanban) {
-    this.host.addController(this);
-  }
-  _selection?: KanbanViewSelectionWithType;
-
   get view() {
     return this.host.view;
-  }
-
-  public hostConnected() {
-    this.host.disposables.add(
-      this.host.selectionUpdated.on(selection => {
-        const old = this._selection;
-        if (old) {
-          this.blur(old);
-        }
-        this._selection = selection;
-        if (selection) {
-          this.focus(selection);
-        }
-      })
-    );
   }
 
   get selection(): KanbanViewSelectionWithType | undefined {
@@ -71,7 +51,28 @@ export class KanbanSelectionController implements ReactiveController {
     }
   }
 
-  public shiftClickCard = (event: MouseEvent) => {
+  _selection?: KanbanViewSelectionWithType;
+
+  constructor(private host: DataViewKanban) {
+    this.host.addController(this);
+  }
+
+  hostConnected() {
+    this.host.disposables.add(
+      this.host.selectionUpdated.on(selection => {
+        const old = this._selection;
+        if (old) {
+          this.blur(old);
+        }
+        this._selection = selection;
+        if (selection) {
+          this.focus(selection);
+        }
+      })
+    );
+  }
+
+  shiftClickCard = (event: MouseEvent) => {
     event.preventDefault();
 
     const selection = this.selection;
@@ -307,7 +308,7 @@ export class KanbanSelectionController implements ReactiveController {
     );
   }
 
-  public focusNext(position: 'up' | 'down' | 'left' | 'right') {
+  focusNext(position: 'up' | 'down' | 'left' | 'right') {
     const selection = this.selection;
     if (!selection) {
       return;
@@ -357,7 +358,7 @@ export class KanbanSelectionController implements ReactiveController {
     }
   }
 
-  public focusOut() {
+  focusOut() {
     const selection = this.selection;
     if (selection?.selectionType === 'card') {
       if (atLeastOne(selection.cards)) {
@@ -392,7 +393,7 @@ export class KanbanSelectionController implements ReactiveController {
     }
   }
 
-  public focusIn() {
+  focusIn() {
     const selection = this.selection;
     if (!selection) return;
     if (selection.selectionType === 'cell' && selection.isEditing) return;
@@ -421,7 +422,7 @@ export class KanbanSelectionController implements ReactiveController {
     }
   }
 
-  public deleteCard() {
+  deleteCard() {
     const selection = this.selection;
     if (!selection || selection.selectionType === 'cell') {
       return;
@@ -447,7 +448,7 @@ export class KanbanSelectionController implements ReactiveController {
     }
   }
 
-  public insertRowBefore() {
+  insertRowBefore() {
     const selection = this.selection;
     if (selection?.selectionType !== 'card') {
       return;
@@ -480,7 +481,7 @@ export class KanbanSelectionController implements ReactiveController {
     });
   }
 
-  public insertRowAfter() {
+  insertRowAfter() {
     const selection = this.selection;
     if (selection?.selectionType !== 'card') {
       return;
@@ -513,7 +514,7 @@ export class KanbanSelectionController implements ReactiveController {
     });
   }
 
-  public moveCard(rowId: string, key: string) {
+  moveCard(rowId: string, key: string) {
     const selection = this.selection;
     if (selection?.selectionType !== 'card') {
       return;

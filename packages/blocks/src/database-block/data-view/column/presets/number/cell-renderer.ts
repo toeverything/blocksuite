@@ -72,16 +72,6 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   @query('input')
   private accessor _inputEle!: HTMLInputElement;
 
-  focusEnd = () => {
-    const end = this._inputEle.value.length;
-    this._inputEle.focus();
-    this._inputEle.setSelectionRange(end, end);
-  };
-
-  override onExitEditMode() {
-    this._setValue();
-  }
-
   private _setValue = (str: string = this._inputEle.value) => {
     if (!str) {
       this.onChange(undefined);
@@ -111,6 +101,16 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
     }
   };
 
+  focusEnd = () => {
+    const end = this._inputEle.value.length;
+    this._inputEle.focus();
+    this._inputEle.setSelectionRange(end, end);
+  };
+
+  override onExitEditMode() {
+    this._setValue();
+  }
+
   override firstUpdated() {
     requestAnimationFrame(() => {
       this.focusEnd();
@@ -120,6 +120,7 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   _blur() {
     this.selectCurrentCell(false);
   }
+
   _focus() {
     if (!this.isEditing) {
       this.selectCurrentCell(true);

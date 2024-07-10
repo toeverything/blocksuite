@@ -17,28 +17,72 @@ export class NoteRenderer
   extends WithDisposable(ShadowlessElement)
   implements DetailSlotProps
 {
-  static override styles = css`
-    database-datasource-note-renderer {
-      width: 100%;
-      --affine-editor-side-padding: 0;
-    }
-  `;
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
-  @property({ attribute: false })
-  accessor rowId!: string;
-  @property({ attribute: false })
-  accessor model!: DatabaseBlockModel;
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-  @query('editor-host')
-  accessor subHost!: EditorHost;
-
   get databaseBlock(): DatabaseBlockModel {
     return this.model;
   }
 
-  public override connectedCallback() {
+  static override styles = css`
+    database-datasource-note-renderer {
+      width: 100%;
+      --affine-editor-side-padding: 0;
+      flex: 1;
+    }
+  `;
+
+  @property({ attribute: false })
+  accessor view!: DataViewManager;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  @property({ attribute: false })
+  accessor model!: DatabaseBlockModel;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @query('editor-host')
+  accessor subHost!: EditorHost;
+
+  protected override render(): unknown {
+    if (
+      !this.model.doc.awarenessStore.getFlag('enable_database_attachment_note')
+    ) {
+      return null;
+    }
+    return html`
+      <div
+        style="height: 1px;max-width: var(--affine-editor-width);background-color: var(--affine-border-color);margin: auto;margin-bottom: 16px"
+      ></div>
+      ${this.renderNote()}
+    `;
+  }
+
+  renderNote() {
+    const host = this.host;
+    const std = host?.std;
+    if (!std || !host) {
+      return;
+    }
+    const pageId = this.databaseBlock.notes?.[this.rowId];
+    if (!pageId) {
+      return html` <div>
+        <div
+          @click="${this.addNote}"
+          style="max-width: var(--affine-editor-width);margin: auto;cursor: pointer;color: var(--affine-text-disable-color)"
+        >
+          Click to add note
+        </div>
+      </div>`;
+    }
+    const page = std.collection.getDoc(pageId);
+    if (!page) {
+      return;
+    }
+    return html`${host.renderSpecPortal(page, host.specs)} `;
+  }
+
+  override connectedCallback() {
     super.connectedCallback();
     this.databaseBlock.propsUpdated.on(({ key }) => {
       if (key === 'notes') {
@@ -47,7 +91,7 @@ export class NoteRenderer
     });
   }
 
-  public addNote() {
+  addNote() {
     const collection = this.host?.std.collection;
     if (!collection) {
       return;
@@ -74,27 +118,5 @@ export class NoteRenderer
         }
       });
     }
-  }
-
-  protected override render(): unknown {
-    if (
-      !this.model.doc.awarenessStore.getFlag('enable_database_attachment_note')
-    ) {
-      return null;
-    }
-    const host = this.host;
-    const std = host?.std;
-    if (!std || !host) {
-      return;
-    }
-    const pageId = this.databaseBlock.notes?.[this.rowId];
-    if (!pageId) {
-      return html` <div @click="${this.addNote}">Click to add note</div>`;
-    }
-    const page = std.collection.getDoc(pageId);
-    if (!page) {
-      return;
-    }
-    return html`${host.renderSpecPortal(page, host.specs)} `;
   }
 }

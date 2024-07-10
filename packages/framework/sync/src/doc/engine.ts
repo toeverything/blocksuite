@@ -5,7 +5,7 @@ import { SharedPriorityTarget } from '../utils/async-queue.js';
 import { MANUALLY_STOP, throwIfAborted } from '../utils/throw-if-aborted.js';
 import { DocEngineStep, DocPeerStep } from './consts.js';
 import { type DocPeerStatus, SyncPeer } from './peer.js';
-import { type DocSource } from './source.js';
+import type { DocSource } from './source.js';
 
 export interface DocEngineStatus {
   step: DocEngineStep;
@@ -48,20 +48,17 @@ export class DocEngine {
     return this.rootDoc.guid;
   }
 
-  readonly onStatusChange = new Slot<DocEngineStatus>();
-  readonly priorityTarget = new SharedPriorityTarget();
-
-  private _status: DocEngineStatus;
-  private setStatus(s: DocEngineStatus) {
-    this.logger.debug(`syne-engine:${this.rootDocId} status change`, s);
-    this._status = s;
-    this.onStatusChange.emit(s);
-  }
   get status() {
     return this._status;
   }
 
+  private _status: DocEngineStatus;
+
   private _abort = new AbortController();
+
+  readonly onStatusChange = new Slot<DocEngineStatus>();
+
+  readonly priorityTarget = new SharedPriorityTarget();
 
   constructor(
     readonly rootDoc: Doc,
@@ -76,6 +73,12 @@ export class DocEngine {
       retrying: false,
     };
     this.logger.debug(`syne-engine:${this.rootDocId} status init`, this.status);
+  }
+
+  private setStatus(s: DocEngineStatus) {
+    this.logger.debug(`syne-engine:${this.rootDocId} status change`, s);
+    this._status = s;
+    this.onStatusChange.emit(s);
   }
 
   start() {

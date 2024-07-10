@@ -49,6 +49,17 @@ import { styles } from './../styles.js';
 
 @customElement('affine-block-hub')
 export class BlockHub extends WithDisposable(ShadowlessElement) {
+  private get _rootElement() {
+    const rootElement = isInsidePageEditor(this._editorHost)
+      ? (getPageRootByEditorHost(this._editorHost) as PageRootBlockComponent)
+      : (getEdgelessRootByEditorHost(
+          this._editorHost
+        ) as EdgelessRootBlockComponent);
+    return rootElement;
+  }
+
+  static override styles = styles;
+
   /**
    * A function that returns all blocks that are allowed to be moved to
    */
@@ -86,127 +97,28 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private accessor _blockHubMenuEntry!: HTMLElement;
 
   private _currentClientX = 0;
-  private _currentClientY = 0;
-  private _isCardListVisible = false;
-  private _indicator!: DragIndicator;
-  private _lastDroppingTarget: EditingState | null = null;
-  private _lastDroppingType: DroppingType = 'none';
-  private _lastDraggingFlavour: string | null = null;
-  private _timer: number | null = null;
-  private _rafID: number = 0;
-  private _editorHost: EditorHost;
 
-  static override styles = styles;
+  private _currentClientY = 0;
+
+  private _isCardListVisible = false;
+
+  private _indicator!: DragIndicator;
+
+  private _lastDroppingTarget: EditingState | null = null;
+
+  private _lastDroppingType: DroppingType = 'none';
+
+  private _lastDraggingFlavour: string | null = null;
+
+  private _timer: number | null = null;
+
+  private _rafID: number = 0;
+
+  private _editorHost: EditorHost;
 
   constructor(host: EditorHost) {
     super();
     this._editorHost = host;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    const disposables = this._disposables;
-    disposables.addFromEvent(this, 'dragstart', this._onDragStart);
-    disposables.addFromEvent(this, 'drag', this._onDrag);
-    disposables.addFromEvent(this, 'dragend', this._onDragEnd);
-    disposables.addFromEvent(this._editorHost, 'dragover', this._onDragOver);
-    disposables.addFromEvent(this._editorHost, 'drop', (e: DragEvent) => {
-      this._onDrop(e).catch(console.error);
-    });
-    disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
-
-    if (IS_FIREFOX) {
-      disposables.addFromEvent(
-        this._editorHost,
-        'dragover',
-        this._onDragOverDocument
-      );
-    }
-
-    this._onResize();
-  }
-
-  override firstUpdated() {
-    const disposables = this._disposables;
-    this._blockHubCards.forEach((card: HTMLElement) => {
-      disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
-      disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
-      disposables.addFromEvent(card, 'click', e => {
-        this._onClickCard(e, card).catch(console.error);
-      });
-    });
-
-    for (const blockHubMenu of this._blockHubMenus) {
-      disposables.addFromEvent(
-        blockHubMenu,
-        'mouseover',
-        this._onBlockHubMenuMouseOver
-      );
-      if (blockHubMenu.getAttribute('type') === 'blank') {
-        disposables.addFromEvent(
-          blockHubMenu,
-          'mousedown',
-          this._onBlankMenuMouseDown
-        );
-        disposables.addFromEvent(
-          blockHubMenu,
-          'mouseup',
-          this._onBlankMenuMouseUp
-        );
-      }
-    }
-
-    disposables.addFromEvent(
-      this._blockHubMenuEntry,
-      'mouseover',
-      this._onBlockHubEntryMouseOver
-    );
-    disposables.addFromEvent(document, 'click', this._onClickOutside);
-    disposables.addFromEvent(
-      this._blockHubButton,
-      'click',
-      this._onBlockHubButtonClick
-    );
-    disposables.addFromEvent(this._blockHubButton, 'mousedown', e => {
-      // Prevent input from losing focus
-      e.preventDefault();
-    });
-    disposables.addFromEvent(
-      this._blockHubIconsContainer,
-      'transitionstart',
-      this._onTransitionStart
-    );
-    disposables.addFromEvent(window, 'resize', this._onResize);
-
-    this._indicator = <DragIndicator>(
-      document.querySelector('affine-drag-indicator')
-    );
-    if (!this._indicator) {
-      this._indicator = <DragIndicator>(
-        document.createElement('affine-drag-indicator')
-      );
-      document.body.append(this._indicator);
-    }
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
-  }
-
-  public toggleMenu() {
-    this._expanded = !this._expanded;
-    if (!this._expanded) this._hideCardList();
-  }
-
-  private get _rootElement() {
-    const rootElement = isInsidePageEditor(this._editorHost)
-      ? (getPageRootByEditorHost(this._editorHost) as PageRootBlockComponent)
-      : (getEdgelessRootByEditorHost(
-          this._editorHost
-        ) as EdgelessRootBlockComponent);
-    return rootElement;
   }
 
   private _getHoveringNoteState = (point: Point) => {
@@ -391,7 +303,10 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const runner = () => {
       // only support auto scroll in page mode now
       if (this._rootElement instanceof PageRootBlockComponent) {
-        const result = autoScroll(this._rootElement.viewportElement, point.y);
+        const result = autoScroll(
+          this._rootElement.rootScrollContainer,
+          point.y
+        );
         if (!result) {
           this._clearRaf();
           return;
@@ -671,6 +586,103 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._maxHeight = boundingClientRect.height - TOP_DISTANCE - BOTTOM_OFFSET;
   };
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    const disposables = this._disposables;
+    disposables.addFromEvent(this, 'dragstart', this._onDragStart);
+    disposables.addFromEvent(this, 'drag', this._onDrag);
+    disposables.addFromEvent(this, 'dragend', this._onDragEnd);
+    disposables.addFromEvent(this._editorHost, 'dragover', this._onDragOver);
+    disposables.addFromEvent(this._editorHost, 'drop', (e: DragEvent) => {
+      this._onDrop(e).catch(console.error);
+    });
+    disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
+
+    if (IS_FIREFOX) {
+      disposables.addFromEvent(
+        this._editorHost,
+        'dragover',
+        this._onDragOverDocument
+      );
+    }
+
+    this._onResize();
+  }
+
+  override firstUpdated() {
+    const disposables = this._disposables;
+    this._blockHubCards.forEach((card: HTMLElement) => {
+      disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
+      disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
+      disposables.addFromEvent(card, 'click', e => {
+        this._onClickCard(e, card).catch(console.error);
+      });
+    });
+
+    for (const blockHubMenu of this._blockHubMenus) {
+      disposables.addFromEvent(
+        blockHubMenu,
+        'mouseover',
+        this._onBlockHubMenuMouseOver
+      );
+      if (blockHubMenu.getAttribute('type') === 'blank') {
+        disposables.addFromEvent(
+          blockHubMenu,
+          'mousedown',
+          this._onBlankMenuMouseDown
+        );
+        disposables.addFromEvent(
+          blockHubMenu,
+          'mouseup',
+          this._onBlankMenuMouseUp
+        );
+      }
+    }
+
+    disposables.addFromEvent(
+      this._blockHubMenuEntry,
+      'mouseover',
+      this._onBlockHubEntryMouseOver
+    );
+    disposables.addFromEvent(document, 'click', this._onClickOutside);
+    disposables.addFromEvent(
+      this._blockHubButton,
+      'click',
+      this._onBlockHubButtonClick
+    );
+    disposables.addFromEvent(this._blockHubButton, 'mousedown', e => {
+      // Prevent input from losing focus
+      e.preventDefault();
+    });
+    disposables.addFromEvent(
+      this._blockHubIconsContainer,
+      'transitionstart',
+      this._onTransitionStart
+    );
+    disposables.addFromEvent(window, 'resize', this._onResize);
+
+    this._indicator = document.querySelector(
+      'affine-drag-indicator'
+    ) as DragIndicator;
+    if (!this._indicator) {
+      this._indicator = document.createElement(
+        'affine-drag-indicator'
+      ) as DragIndicator;
+      document.body.append(this._indicator);
+    }
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposables.dispose();
+  }
+
+  toggleMenu() {
+    this._expanded = !this._expanded;
+    if (!this._expanded) this._hideCardList();
+  }
+
   override render() {
     const blockHubMenu = BlockHubMenu(
       this._expanded,
@@ -690,7 +702,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     return html`
       <div
-        class="block-hub-menu-container blocksuite-overlay"
+        class="block-hub-menu-container"
         @pointerdown=${stopPropagation}
         ?expanded=${this._expanded}
         style="bottom: ${BOTTOM_OFFSET}px; right: ${RIGHT_OFFSET}px;"

@@ -7,6 +7,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../../_common/consts.js';
 import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
   type BlockComponent,
@@ -25,10 +26,8 @@ import {
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessBlockType } from '../../edgeless/edgeless-types.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   DRAG_HANDLE_CONTAINER_HEIGHT,
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT,
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST,
@@ -39,7 +38,7 @@ import {
   type OnDragEndProps,
 } from './config.js';
 
-const heightMap: { [key: string]: number } = {
+const heightMap: Record<string, number> = {
   text: 23,
   h1: 40,
   h2: 36,
@@ -428,7 +427,7 @@ export function convertDragPreviewDocToEdgeless({
   const blockProps = getBlockProps(blockModel);
 
   const blockId = edgelessRoot.service.addBlock(
-    blockComponent.flavour as EdgelessBlockType,
+    blockComponent.flavour,
     {
       ...blockProps,
       xywh: newBound.serialize(),

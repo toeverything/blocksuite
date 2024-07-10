@@ -20,20 +20,20 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override _cardStyle: (typeof EmbedHtmlStyles)[number] = 'html';
-
   @state()
   private accessor _isSelected = false;
 
   @state()
   private accessor _showOverlay = true;
 
-  @query('.embed-html-block-iframe-wrapper')
-  accessor iframeWrapper!: HTMLDivElement;
-
   private _isDragging = false;
 
   private _isResizing = false;
+
+  override _cardStyle: (typeof EmbedHtmlStyles)[number] = 'html';
+
+  @query('.embed-html-block-iframe-wrapper')
+  accessor iframeWrapper!: HTMLDivElement;
 
   private _selectBlock() {
     const selectionManager = this.host.selection;

@@ -100,30 +100,10 @@ export class AffineLinkedDocWidget extends WidgetElement {
 
   options = AffineLinkedDocWidget.DEFAULT_OPTIONS;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.handleEvent('keyDown', this._onKeyDown);
-  }
-
-  public showLinkedDoc = (
-    inlineEditor: AffineInlineEditor,
-    triggerKey: string
-  ) => {
-    const curRange = getCurrentNativeRange();
-    if (!curRange) return;
-    showLinkedDocPopover({
-      editorHost: this.host,
-      inlineEditor,
-      range: curRange,
-      options: this.options,
-      triggerKey,
-    });
-  };
-
   private getInlineEditor = (evt: KeyboardEvent) => {
     if (evt.target instanceof HTMLElement) {
       const editor = (
-        evt.target.closest('.inline-editor') as {
+        evt.target.closest('.can-link-doc > .inline-editor') as {
           inlineEditor?: AffineInlineEditor;
         }
       )?.inlineEditor;
@@ -131,17 +111,14 @@ export class AffineLinkedDocWidget extends WidgetElement {
         return editor;
       }
     }
+
     const text = this.host.selection.value.find(selection =>
       selection.is('text')
     );
-    if (!text) {
-      return;
-    }
+    if (!text) return;
     const model = this.host.doc.getBlockById(text.blockId);
-    if (!model) {
-      return;
-    }
-    if (matchFlavours(model, this.options.ignoreBlockTypes)) return;
+    if (!model || matchFlavours(model, this.options.ignoreBlockTypes)) return;
+
     return getInlineEditorByModel(this.host, model);
   };
 
@@ -197,6 +174,23 @@ export class AffineLinkedDocWidget extends WidgetElement {
         return;
       }
       this.showLinkedDoc(inlineEditor, matchedKey);
+    });
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.handleEvent('keyDown', this._onKeyDown);
+  }
+
+  showLinkedDoc = (inlineEditor: AffineInlineEditor, triggerKey: string) => {
+    const curRange = getCurrentNativeRange();
+    if (!curRange) return;
+    showLinkedDocPopover({
+      editorHost: this.host,
+      inlineEditor,
+      range: curRange,
+      options: this.options,
+      triggerKey,
     });
   };
 }

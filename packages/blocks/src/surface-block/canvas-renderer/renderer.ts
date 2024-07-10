@@ -2,7 +2,7 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { requestConnectedFrame } from '../../_common/utils/event.js';
 import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import { type IBound } from '../consts.js';
+import type { IBound } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 import { RoughCanvas } from '../rough/canvas.js';
@@ -40,23 +40,27 @@ type RendererOptions = {
 };
 
 export class Renderer extends Viewport {
+  get stackingCanvas() {
+    return this._stackingCanvas;
+  }
+
+  private _stackingCanvas: HTMLCanvasElement[] = [];
+
+  private _overlays = new Set<Overlay>();
+
+  private _shouldUpdate = false;
+
+  private _disposables = new DisposableGroup();
+
   canvas: HTMLCanvasElement;
+
   ctx: CanvasRenderingContext2D;
-  rc: RoughCanvas;
+
   layerManager: LayerManager;
 
   provider: Partial<EnvProvider>;
 
   stackingCanvasUpdated = new Slot<HTMLCanvasElement[]>();
-
-  private _stackingCanvas: HTMLCanvasElement[] = [];
-  private _overlays: Set<Overlay> = new Set();
-  private _shouldUpdate = false;
-  private _disposables = new DisposableGroup();
-
-  get stackingCanvas() {
-    return this._stackingCanvas;
-  }
 
   constructor(options: RendererOptions) {
     super();
@@ -65,7 +69,6 @@ export class Renderer extends Viewport {
 
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
-    this.rc = new RoughCanvas(canvas);
     this.layerManager = options.layerManager;
     this.provider = options.provider ?? {};
     this._initViewport();
@@ -80,22 +83,16 @@ export class Renderer extends Viewport {
     let sizeUpdatedRafId: number | null = null;
 
     this.viewportUpdated.on(() => {
-      if (sizeUpdatedRafId) {
-        this._resetSize();
-        this._render();
-        this._shouldUpdate = false;
-        return;
-      }
       this._shouldUpdate = true;
     });
 
     this.sizeUpdated.on(() => {
       if (sizeUpdatedRafId) return;
-      this._resetSize();
-      this._render();
-      this._shouldUpdate = false;
       sizeUpdatedRafId = requestConnectedFrame(() => {
         sizeUpdatedRafId = null;
+        this._resetSize();
+        this._render();
+        this._shouldUpdate = false;
       }, this._el);
     });
   }
@@ -105,20 +102,9 @@ export class Renderer extends Viewport {
     const updateStackingCanvasSize = (canvases: HTMLCanvasElement[]) => {
       this._stackingCanvas = canvases;
 
-      const dpr = window.devicePixelRatio;
-      const width = Math.ceil(this._width * dpr);
-      const height = Math.ceil(this._height * dpr);
+      const sizeUpdater = this._canvasSizeUpdater();
 
-      canvases.forEach(canvas => {
-        if (canvas.width === width && canvas.height === height) {
-          return;
-        }
-
-        canvas.style.setProperty('width', `${this._width}px`);
-        canvas.style.setProperty('height', `${this._height}px`);
-        canvas.width = width;
-        canvas.height = height;
-      });
+      canvases.filter(sizeUpdater.filter).forEach(sizeUpdater.update);
     };
     const updateStackingCanvas = () => {
       /**
@@ -141,13 +127,14 @@ export class Renderer extends Viewport {
         }
 
         canvas.dataset.layerId = `[${layer.indexes[0]}--${layer.indexes[1]}]`;
-        canvas.style.setProperty('z-index', layer.zIndex.toString());
+        canvas.style.zIndex = layer.zIndex.toString();
         canvases.push(canvas);
       }
 
       this._stackingCanvas = canvases;
       updateStackingCanvasSize(canvases);
       this.stackingCanvasUpdated.emit(canvases);
+      this.refresh();
     };
 
     this._disposables.add(
@@ -157,6 +144,147 @@ export class Renderer extends Viewport {
     );
 
     updateStackingCanvas();
+  }
+
+  /**
+   * Specifying the actual size gives better results and more consistent behavior across browsers.
+   *
+   * Make sure the main canvas and the offscreen canvas or layer canvas are the same size.
+   *
+   * It is not recommended to set width and height to 100%.
+   */
+  private _canvasSizeUpdater(dpr = window.devicePixelRatio) {
+    const { _width, _height } = this;
+    const width = `${_width}px`;
+    const height = `${_height}px`;
+    const actualWidth = Math.ceil(_width * dpr);
+    const actualHeight = Math.ceil(_height * dpr);
+
+    return {
+      filter({ width, height }: HTMLCanvasElement) {
+        return width !== actualWidth || height !== actualHeight;
+      },
+      update(canvas: HTMLCanvasElement) {
+        canvas.style.width = width;
+        canvas.style.height = height;
+        canvas.width = actualWidth;
+        canvas.height = actualHeight;
+      },
+    };
+  }
+
+  private _resetSize() {
+    const sizeUpdater = this._canvasSizeUpdater();
+
+    sizeUpdater.update(this.canvas);
+
+    this._stackingCanvas.forEach(sizeUpdater.update);
+
+    this._shouldUpdate = true;
+  }
+
+  private _loop() {
+    requestConnectedFrame(() => {
+      if (this._shouldUpdate) {
+        this._shouldUpdate = false;
+        this._render();
+      }
+      this._loop();
+    }, this._el);
+  }
+
+  private _render() {
+    const { ctx, viewportBounds, zoom, cumulativeParentScale } = this;
+    const dpr = window.devicePixelRatio;
+    const scale = zoom * dpr;
+    const matrix = new DOMMatrix()
+      .scaleSelf(scale)
+      .scaleSelf(cumulativeParentScale);
+    /**
+     * if a layer does not have a corresponding canvas
+     * its element will be add to this array and drawing on the
+     * main canvas
+     */
+    let fallbackElement: SurfaceElementModel[] = [];
+
+    this.layerManager.getCanvasLayers().forEach((layer, idx) => {
+      if (!this._stackingCanvas[idx]) {
+        fallbackElement = fallbackElement.concat(layer.elements);
+        return;
+      }
+
+      const canvas = this._stackingCanvas[idx];
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const rc = new RoughCanvas(ctx.canvas);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.setTransform(matrix);
+
+      this._renderByBound(ctx, matrix, rc, viewportBounds, layer.elements);
+    });
+
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.save();
+
+    ctx.setTransform(matrix);
+
+    this._renderByBound(
+      ctx,
+      matrix,
+      new RoughCanvas(ctx.canvas),
+      viewportBounds,
+      fallbackElement,
+      true
+    );
+  }
+
+  private _renderByBound(
+    ctx: CanvasRenderingContext2D | null,
+    matrix: DOMMatrix,
+    rc: RoughCanvas,
+    bound: IBound,
+    surfaceElements?: SurfaceElementModel[],
+    overLay: boolean = false
+  ) {
+    if (!ctx) return;
+
+    const elements =
+      surfaceElements ?? this.layerManager.canvasGrid.search(bound);
+    for (const element of elements) {
+      ctx.save();
+
+      const display = element.display ?? true;
+      if (display && intersects(getBoundsWithRotation(element), bound)) {
+        const renderFn =
+          modelRenderer[element.type as keyof typeof modelRenderer];
+
+        if (!renderFn) {
+          console.warn(`Cannot find renderer for ${element.type}`);
+          ctx.restore();
+          continue;
+        }
+
+        ctx.globalAlpha = element.opacity ?? 1;
+        const dx = element.x - bound.x;
+        const dy = element.y - bound.y;
+
+        renderFn(element, ctx, matrix.translate(dx, dy), this, rc, bound);
+      }
+
+      ctx.restore();
+    }
+
+    if (overLay) {
+      for (const overlay of this._overlays) {
+        ctx.save();
+        ctx.translate(-bound.x, -bound.y);
+        overlay.render(ctx, rc);
+        ctx.restore();
+      }
+    }
+
+    ctx.restore();
   }
 
   getVariableColor(val: string) {
@@ -179,129 +307,7 @@ export class Renderer extends Viewport {
     this._loop();
   }
 
-  private _resetSize() {
-    const { canvas } = this;
-    const dpr = window.devicePixelRatio;
-
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-
-    const bbox = canvas.getBoundingClientRect();
-    const actualWidth = Math.ceil(bbox.width * dpr);
-    const actualHeight = Math.ceil(bbox.height * dpr);
-
-    canvas.width = actualWidth;
-    canvas.height = actualHeight;
-
-    this._stackingCanvas.forEach(canvas => {
-      canvas.width = actualWidth;
-      canvas.height = actualHeight;
-
-      canvas.style.width = `${bbox.width}px`;
-      canvas.style.height = `${bbox.height}px`;
-    });
-
-    this._shouldUpdate = true;
-  }
-
-  private _loop() {
-    requestConnectedFrame(() => {
-      if (this._shouldUpdate) {
-        this._render();
-      }
-      this._shouldUpdate = false;
-      this._loop();
-    }, this._el);
-  }
-
-  private _render() {
-    const { ctx, viewportBounds, rc, zoom, cumulativeParentScale } = this;
-    const dpr = window.devicePixelRatio;
-    const scale = zoom * dpr;
-    const matrix = new DOMMatrix()
-      .scaleSelf(scale)
-      .scaleSelf(cumulativeParentScale);
-    /**
-     * if a layer does not have a corresponding canvas
-     * its element will be add to this array and drawing on the
-     * main canvas
-     */
-    let fallbackElement: SurfaceElementModel[] = [];
-
-    this.layerManager.getCanvasLayers().forEach((layer, idx) => {
-      if (!this._stackingCanvas[idx]) {
-        fallbackElement = fallbackElement.concat(layer.elements);
-        return;
-      }
-
-      const canvas = this._stackingCanvas[idx];
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.save();
-      ctx.setTransform(matrix);
-
-      this._renderByBound(ctx, matrix, rc, viewportBounds, layer.elements);
-    });
-
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    ctx.save();
-
-    ctx.setTransform(matrix);
-
-    this._renderByBound(ctx, matrix, rc, viewportBounds, fallbackElement, true);
-  }
-
-  private _renderByBound(
-    ctx: CanvasRenderingContext2D | null,
-    matrix: DOMMatrix,
-    rc: RoughCanvas,
-    bound: IBound,
-    surfaceElements?: SurfaceElementModel[],
-    overLay: boolean = false
-  ) {
-    if (!ctx) return;
-
-    const elements =
-      surfaceElements ?? this.layerManager.canvasGrid.search(bound);
-    for (const element of elements) {
-      ctx.save();
-
-      const display = element.display ?? true;
-      const opacity = element.opacity ?? 1;
-      if (intersects(getBoundsWithRotation(element), bound) && display) {
-        ctx.globalAlpha = opacity;
-        const dx = element.x - bound.x;
-        const dy = element.y - bound.y;
-
-        const renderFn =
-          modelRenderer[element.type as keyof typeof modelRenderer];
-
-        if (!renderFn) {
-          console.warn(`Cannot find renderer for ${element.type}`);
-          ctx.restore();
-          continue;
-        }
-
-        renderFn(element, ctx, matrix.translate(dx, dy), this, bound);
-      }
-
-      ctx.restore();
-    }
-
-    if (overLay) {
-      for (const overlay of this._overlays) {
-        ctx.save();
-        ctx.translate(-bound.x, -bound.y);
-        overlay.render(ctx, rc);
-        ctx.restore();
-      }
-    }
-
-    ctx.restore();
-  }
-
-  public getCanvasByBound(
+  getCanvasByBound(
     bound: IBound = this.viewportBounds,
     surfaceElements?: SurfaceElementModel[],
     canvas?: HTMLCanvasElement,
@@ -329,13 +335,13 @@ export class Renderer extends Viewport {
     return canvas;
   }
 
-  public addOverlay(overlay: Overlay) {
+  addOverlay(overlay: Overlay) {
     overlay.setRenderer(this);
     this._overlays.add(overlay);
     this._shouldUpdate = true;
   }
 
-  public removeOverlay(overlay: Overlay) {
+  removeOverlay(overlay: Overlay) {
     if (!this._overlays.has(overlay)) {
       return;
     }

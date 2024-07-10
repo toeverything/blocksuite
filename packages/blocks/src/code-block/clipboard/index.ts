@@ -6,20 +6,34 @@ import { HtmlAdapter, PlainTextAdapter } from '../../_common/adapters/index.js';
 import { pasteMiddleware } from '../../root-block/clipboard/middlewares/index.js';
 
 export class CodeClipboardController {
-  protected _disposables = new DisposableGroup();
-  host: BlockElement;
-
   private get _std() {
     return this.host.std;
   }
 
   private _clipboard!: Clipboard;
-  private _plaintextAdapter = new PlainTextAdapter();
-  private _htmlAdapter = new HtmlAdapter();
+
+  protected _disposables = new DisposableGroup();
+
+  host: BlockElement;
 
   constructor(host: BlockElement) {
     this.host = host;
   }
+
+  protected _init = () => {
+    this._clipboard.registerAdapter('text/plain', PlainTextAdapter, 90);
+    this._clipboard.registerAdapter('text/html', HtmlAdapter, 80);
+    const paste = pasteMiddleware(this._std);
+    this._clipboard.use(paste);
+
+    this._disposables.add({
+      dispose: () => {
+        this._clipboard.unregisterAdapter('text/plain');
+        this._clipboard.unregisterAdapter('text/html');
+        this._clipboard.unuse(paste);
+      },
+    });
+  };
 
   hostConnected() {
     if (this._disposables.disposed) {
@@ -34,22 +48,7 @@ export class CodeClipboardController {
     this._disposables.dispose();
   }
 
-  protected _init = () => {
-    this._clipboard.registerAdapter('text/plain', this._plaintextAdapter, 90);
-    this._clipboard.registerAdapter('text/html', this._htmlAdapter, 80);
-    const paste = pasteMiddleware(this._std);
-    this._clipboard.use(paste);
-
-    this._disposables.add({
-      dispose: () => {
-        this._clipboard.unregisterAdapter('text/plain');
-        this._clipboard.unregisterAdapter('text/html');
-        this._clipboard.unuse(paste);
-      },
-    });
-  };
-
-  public onPagePaste: UIEventHandler = ctx => {
+  onPagePaste: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 

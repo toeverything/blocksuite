@@ -54,26 +54,23 @@ const styles = css`
 
 @customElement('affine-data-view-table-group')
 export class TableGroup extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor dataViewEle!: DataViewRenderer;
-  @property({ attribute: false })
-  accessor view!: DataViewTableManager;
-  @property({ attribute: false })
-  accessor viewEle!: DataViewTable;
-  @property({ attribute: false })
-  accessor group: GroupData | undefined = undefined;
   get rows() {
     return this.group?.rows ?? this.view.rows;
   }
 
-  protected override updated(_changedProperties: PropertyValues) {
-    super.updated(_changedProperties);
-    this.querySelectorAll('data-view-table-row').forEach(ele => {
-      ele.requestUpdate();
-    });
-  }
+  static override styles = styles;
+
+  @property({ attribute: false })
+  accessor dataViewEle!: DataViewRenderer;
+
+  @property({ attribute: false })
+  accessor view!: DataViewTableManager;
+
+  @property({ attribute: false })
+  accessor viewEle!: DataViewTable;
+
+  @property({ attribute: false })
+  accessor group: GroupData | undefined = undefined;
 
   private clickAddRow = () => {
     this.view.rowAdd('end', this.group?.key);
@@ -92,6 +89,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       };
     });
   };
+
   private clickAddRowInStart = () => {
     this.view.rowAdd('start', this.group?.key);
     requestAnimationFrame(() => {
@@ -109,6 +107,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       };
     });
   };
+
   private clickGroupOptions = (e: MouseEvent) => {
     const group = this.group;
     if (!group) {
@@ -136,9 +135,27 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
     ]);
   };
 
+  private renderGroupHeader = () => {
+    if (!this.group) {
+      return null;
+    }
+    return html`
+      <div
+        style="position: sticky;left: 0;width: max-content;padding: 6px 0;margin-bottom: 4px;display:flex;align-items:center;gap: 12px;max-width: 400px"
+      >
+        ${GroupTitle(this.group, {
+          readonly: this.view.readonly,
+          clickAdd: this.clickAddRowInStart,
+          clickOps: this.clickGroupOptions,
+        })}
+      </div>
+    `;
+  };
+
   private renderRows(ids: string[]) {
     return html`
       <affine-database-column-header
+        .renderGroupHeader="${this.renderGroupHeader}"
         .tableViewManager="${this.view}"
       ></affine-database-column-header>
       <div class="affine-database-block-rows">
@@ -173,29 +190,25 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
           </div>`}
       ${this.dataViewEle.config.getFlag?.('enable_database_statistics')
         ? html`
-            <affine-database-column-stats .view="${this.view}">
+            <affine-database-column-stats
+              .view="${this.view}"
+              .group=${this.group}
+            >
             </affine-database-column-stats>
           `
         : null}
     `;
   }
 
+  protected override updated(_changedProperties: PropertyValues) {
+    super.updated(_changedProperties);
+    this.querySelectorAll('data-view-table-row').forEach(ele => {
+      ele.requestUpdate();
+    });
+  }
+
   override render() {
-    if (!this.group) {
-      return this.renderRows(this.view.rows);
-    }
-    return html`
-      <div
-        style="position: sticky;left: 0;width: max-content;padding: 6px 0;margin-bottom: 4px;display:flex;align-items:center;gap: 12px;max-width: 400px"
-      >
-        ${GroupTitle(this.group, {
-          readonly: this.view.readonly,
-          clickAdd: this.clickAddRowInStart,
-          clickOps: this.clickGroupOptions,
-        })}
-      </div>
-      ${this.renderRows(this.group.rows)}
-    `;
+    return this.renderRows(this.rows);
   }
 }
 

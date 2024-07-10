@@ -1,7 +1,7 @@
 import { MarkdownTransformer } from '@blocksuite/blocks';
 import { type DocCollection, Text } from '@blocksuite/store';
 
-import { type InitFn } from './utils.js';
+import type { InitFn } from './utils.js';
 
 const presetMarkdown = `Click the 🔁 button to switch between editors dynamically - they are fully compatible!`;
 

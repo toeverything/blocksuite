@@ -9,9 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/blocks": "0.14.0-canary-202405100201-e591bb8",
-    "@blocksuite/presets": "0.14.0-canary-202405100201-e591bb8",
-    "@blocksuite/store": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/blocks": "0.15.0-canary-202406291027-8aed732",
+    "@blocksuite/presets": "0.15.0-canary-202406291027-8aed732",
+    "@blocksuite/store": "0.15.0-canary-202406291027-8aed732",
     "solid-js": "^1.8.17"
   },
   "devDependencies": {
@@ -20,7 +20,6 @@
     "vite-plugin-solid": "^2.10.2"
   },
   "stackblitz": {
-    "installDependencies": false,
     "startCommand": "pnpm i && pnpm dev"
   }
 }

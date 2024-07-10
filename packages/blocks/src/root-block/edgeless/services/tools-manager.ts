@@ -9,7 +9,6 @@ import { IS_MAC } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
-  type EdgelessTool,
   isMiddleButtonPressed,
   isRightButtonPressed,
   NoteDisplayMode,
@@ -19,6 +18,7 @@ import { CopilotSelectionController } from '../controllers/tools/copilot-tool.js
 import type { EdgelessToolController } from '../controllers/tools/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessRootService } from '../edgeless-root-service.js';
+import type { EdgelessTool } from '../types.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { isNoteBlock } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
@@ -43,40 +43,6 @@ export interface SelectionArea {
 }
 
 export class EdgelessToolsManager {
-  static create(
-    service: EdgelessRootService,
-    controllers: AbstractClassConstructor<EdgelessToolController>[]
-  ) {
-    const manager = new EdgelessToolsManager(service);
-
-    controllers.forEach(controller => {
-      manager.register(controller);
-    });
-
-    return manager;
-  }
-
-  private _edgelessTool: EdgelessTool = this._getToolFromLocalStorage();
-
-  private _container!: EdgelessRootBlockComponent;
-  private _service!: EdgelessRootService;
-  private _controllers: Record<
-    EdgelessTool['type'] | string,
-    EdgelessToolController
-  > = {};
-
-  private _mounted = false;
-
-  /** Latest mouse position in view coords */
-  private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
-
-  // pressed shift key
-  private _shiftKey = false;
-
-  private _spaceBar = false;
-
-  private _dragging = false;
-
   get dragging() {
     return this._dragging;
   }
@@ -152,31 +118,33 @@ export class EdgelessToolsManager {
     return this.container.dispatcher;
   }
 
+  private _edgelessTool: EdgelessTool = this._getToolFromLocalStorage();
+
+  private _container!: EdgelessRootBlockComponent;
+
+  private _service!: EdgelessRootService;
+
+  private _controllers: Record<
+    EdgelessTool['type'] | string,
+    EdgelessToolController
+  > = {};
+
+  private _mounted = false;
+
+  /** Latest mouse position in view coords */
+  private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
+
+  // pressed shift key
+  private _shiftKey = false;
+
+  private _spaceBar = false;
+
+  private _dragging = false;
+
   protected readonly _disposables = new DisposableGroup();
 
   constructor(service: EdgelessRootService) {
     this._service = service;
-  }
-
-  mount(container: EdgelessRootBlockComponent) {
-    this._container = container;
-    this._mounted = true;
-
-    Object.values(this._controllers).forEach(controller => {
-      controller.mount(container);
-    });
-
-    this._initMouseAndWheelEvents();
-  }
-
-  register(Tool: EdgelessToolConstructor) {
-    const tool = new Tool(this.service);
-
-    this._controllers[tool.tool.type] = tool;
-
-    if (this._mounted) {
-      tool.mount(this.container);
-    }
   }
 
   private _updateLastMousePos(e: PointerEventState) {
@@ -375,6 +343,27 @@ export class EdgelessToolsManager {
     );
   }
 
+  mount(container: EdgelessRootBlockComponent) {
+    this._container = container;
+    this._mounted = true;
+
+    Object.values(this._controllers).forEach(controller => {
+      controller.mount(container);
+    });
+
+    this._initMouseAndWheelEvents();
+  }
+
+  register(Tool: EdgelessToolConstructor) {
+    const tool = new Tool(this.service);
+
+    this._controllers[tool.tool.type] = tool;
+
+    if (this._mounted) {
+      tool.mount(this.container);
+    }
+  }
+
   getHoverState(): EdgelessHoverState | null {
     if (!this.currentController.enableHover) {
       return null;
@@ -430,12 +419,12 @@ export class EdgelessToolsManager {
       const isEmptyState = Array.isArray(state)
         ? this.selection.isEmpty(state)
         : state.elements.length === 0;
-      const hasLastState = !!this.selection.lastState;
+      const hasLastState = !!this.selection.lastSurfaceSelections;
       const isNotSingleDocOnlyNote = !(
-        this.selection.lastState &&
-        this.selection.lastState[0] &&
-        this.selection.lastState[0].elements.length === 1 &&
-        this._isDocOnlyNote(this.selection.lastState[0].elements[0])
+        this.selection.lastSurfaceSelections &&
+        this.selection.lastSurfaceSelections[0] &&
+        this.selection.lastSurfaceSelections[0].elements.length === 1 &&
+        this._isDocOnlyNote(this.selection.lastSurfaceSelections[0].elements[0])
       );
 
       if (
@@ -447,7 +436,11 @@ export class EdgelessToolsManager {
         // (isDefaultType && isLastTypeCopilot) ||
         (isCopilotType && isLastTypeCopilot)
       ) {
-        state = this.selection.selections; // selection should remain same when switching between default and lasso tool
+        // if state is provided, override the selection( if state is empty array, clear all selection )
+        if (!state) {
+          // selection should remain same when switching between default and lasso tool
+          state = this.selection.surfaceSelections;
+        }
       } else if (
         ((isDefaultType && !isLastTypeLasso) || isLassoType) &&
         ((isDefaultType && !isLastTypeCopilot) || isCopilotType) &&
@@ -456,7 +449,7 @@ export class EdgelessToolsManager {
         isNotSingleDocOnlyNote &&
         restoreToLastSelection
       ) {
-        state = this.selection.lastState; // for getting the selection back after going to another tools
+        state = this.selection.lastSurfaceSelections; // for getting the selection back after going to another tools
       }
     }
 
@@ -476,5 +469,18 @@ export class EdgelessToolsManager {
 
   dispose() {
     this._disposables.dispose();
+  }
+
+  static create(
+    service: EdgelessRootService,
+    controllers: AbstractClassConstructor<EdgelessToolController>[]
+  ) {
+    const manager = new EdgelessToolsManager(service);
+
+    controllers.forEach(controller => {
+      manager.register(controller);
+    });
+
+    return manager;
   }
 }

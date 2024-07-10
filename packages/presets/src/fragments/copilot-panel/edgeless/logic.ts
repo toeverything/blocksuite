@@ -30,7 +30,18 @@ import { editImage, jpegBase64ToFile } from './edit-image.js';
 import { genHtml } from './gen-html.js';
 
 export class AIEdgelessLogic {
-  public fromFrame: string = '';
+  get autoGen() {
+    return this.unsub !== undefined;
+  }
+
+  get collection(): DocCollection {
+    return this.host.doc.collection;
+  }
+
+  get host() {
+    return this.getHost();
+  }
+
   private targets: Record<
     string,
     {
@@ -39,12 +50,13 @@ export class AIEdgelessLogic {
     }
   > = {};
 
-  public get autoGen() {
-    return this.unsub !== undefined;
-  }
-
   private unsub?: () => void;
-  public toggleAutoGen = () => {
+
+  fromFrame: string = '';
+
+  constructor(private getHost: () => EditorHost) {}
+
+  toggleAutoGen = () => {
     if (this.unsub) {
       this.unsub();
       this.unsub = undefined;
@@ -56,16 +68,6 @@ export class AIEdgelessLogic {
     }).dispose;
   };
 
-  get collection(): DocCollection {
-    return this.host.doc.collection;
-  }
-
-  constructor(private getHost: () => EditorHost) {}
-
-  get host() {
-    return this.getHost();
-  }
-
   makeItReal = async () => {
     const png = await selectedToPng(this.host);
     if (!png) {
@@ -74,7 +76,7 @@ export class AIEdgelessLogic {
     }
     const edgelessRoot = getEdgelessRootFromEditor(this.host);
     const { notes } = BlocksUtils.splitElements(
-      edgelessRoot.service.selection.elements
+      edgelessRoot.service.selection.selectedElements
     );
     // @ts-ignore
     const htmlBlock: {
@@ -156,6 +158,7 @@ export class AIEdgelessLogic {
       await edgelessRoot.addImages([file]);
     }
   };
+
   createImageFromFrame = async () => {
     const from = this.host.doc.getBlockById(
       this.fromFrame ?? ''

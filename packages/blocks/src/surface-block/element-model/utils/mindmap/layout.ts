@@ -1,10 +1,10 @@
 import type { SerializedXYWH } from '../../../index.js';
 import { Bound } from '../../../utils/bound.js';
 import type { MindmapElementModel } from '../../mindmap.js';
-import { applyNodeStyle } from './style.js';
 
-export const NODE_VERTICAL_SPACING = 50;
-export const NODE_HORIZONTAL_SPACING = 120;
+export const NODE_VERTICAL_SPACING = 45;
+export const NODE_HORIZONTAL_SPACING = 110;
+export const NODE_FIRST_LEVEL_HORIZONTAL_SPACING = 200;
 
 export type NodeDetail = {
   /**
@@ -14,10 +14,10 @@ export type NodeDetail = {
   parent?: string;
 
   /**
-   * The prefered layout direction of the node, it only works when the layout type is BALANCE
+   * The preferred layout direction of the node, it only works when the layout type is BALANCE
    * and the node is on the first level
    */
-  preferedDir?: LayoutType;
+  preferredDir?: LayoutType;
 };
 
 export type MindmapNode = {
@@ -26,6 +26,12 @@ export type MindmapNode = {
 
   element: BlockSuite.SurfaceElementModelType;
   children: MindmapNode[];
+
+  /**
+   * This property override the preferredDir or default layout direction.
+   * It is used during dragging that would temporary change the layout direction
+   */
+  overriddenDir?: LayoutType;
 };
 
 export type MindmapRoot = MindmapNode & {
@@ -56,12 +62,18 @@ type TreeSize = {
   children: TreeSize[];
 };
 
-const calculateNodeSize = (root: MindmapNode) => {
+const calculateNodeSize = (
+  root: MindmapNode,
+  firstLevel = false,
+  rootChildren?: MindmapNode[]
+) => {
   const bound = root.element.elementBound;
   const children: TreeSize[] = [];
 
-  if (root.children) {
-    const childrenBound = root.children.reduce(
+  rootChildren = rootChildren ?? root.children;
+
+  if (rootChildren) {
+    const childrenBound = rootChildren.reduce(
       (pre, node) => {
         const childSize = calculateNodeSize(node);
 
@@ -78,7 +90,11 @@ const calculateNodeSize = (root: MindmapNode) => {
       new Bound(0, 0, 0, 0)
     );
 
-    bound.w += childrenBound.w + NODE_HORIZONTAL_SPACING;
+    bound.w +=
+      childrenBound.w +
+      (firstLevel
+        ? NODE_FIRST_LEVEL_HORIZONTAL_SPACING
+        : NODE_HORIZONTAL_SPACING);
     bound.h = Math.max(bound.h, childrenBound.h);
   }
 
@@ -96,12 +112,26 @@ const layoutTree = (
   path: number[] = [0],
   children?: TreeSize[]
 ) => {
+  const firstLevel = path.length === 1;
   const treeHeight = tree.bound.h;
   const currentX =
     layoutType === LayoutType.RIGHT
-      ? tree.root.element.x + tree.root.element.w + NODE_HORIZONTAL_SPACING
-      : tree.root.element.x - NODE_HORIZONTAL_SPACING;
+      ? tree.root.element.x +
+        tree.root.element.w +
+        (firstLevel
+          ? NODE_FIRST_LEVEL_HORIZONTAL_SPACING
+          : NODE_HORIZONTAL_SPACING)
+      : tree.root.element.x -
+        (firstLevel
+          ? NODE_FIRST_LEVEL_HORIZONTAL_SPACING
+          : NODE_HORIZONTAL_SPACING);
   let currentY = tree.root.element.y + (tree.root.element.h - treeHeight) / 2;
+
+  if (tree.root.element.h >= treeHeight && tree.children.length) {
+    const onlyChild = tree.children[0];
+
+    currentY += (tree.root.element.h - onlyChild.root.element.h) / 2;
+  }
 
   tree.children.forEach((subtree, idx) => {
     const subtreeRootEl = subtree.root.element;
@@ -113,109 +143,81 @@ const layoutTree = (
     idx = children ? children.indexOf(subtree) : idx;
 
     const currentNodePath = [...path, idx];
-    const style = mindmap.styleGetter.getNodeStyle(
-      subtree.root,
-      currentNodePath
-    );
 
     subtreeRootEl.xywh = xywh;
 
-    mindmap['addConnector'](
-      tree.root,
-      subtree.root,
-      layoutType,
-      style.connector
-    );
-    applyNodeStyle(subtree.root, style.node);
     layoutTree(subtree, layoutType, mindmap, currentNodePath);
 
     currentY += subtreeHeight + NODE_VERTICAL_SPACING;
   });
 };
 
-const layoutRight = (root: MindmapNode, mindmap: MindmapElementModel) => {
-  const rootTree = calculateNodeSize(root);
+const layoutRight = (
+  root: MindmapNode,
+  mindmap: MindmapElementModel,
+  path = [0]
+) => {
+  const rootTree = calculateNodeSize(root, true);
 
-  applyNodeStyle(root, mindmap.styleGetter.root);
-  layoutTree(rootTree, LayoutType.RIGHT, mindmap);
+  layoutTree(rootTree, LayoutType.RIGHT, mindmap, path);
 };
 
-const layoutLeft = (root: MindmapNode, mindmap: MindmapElementModel) => {
-  const rootTree = calculateNodeSize(root);
+const layoutLeft = (
+  root: MindmapNode,
+  mindmap: MindmapElementModel,
+  path = [0]
+) => {
+  const rootTree = calculateNodeSize(root, true);
 
-  applyNodeStyle(root, mindmap.styleGetter.root);
-  layoutTree(rootTree, LayoutType.LEFT, mindmap);
+  layoutTree(rootTree, LayoutType.LEFT, mindmap, path);
 };
 
-const layoutBalance = (root: MindmapNode, mindmap: MindmapElementModel) => {
-  applyNodeStyle(root, mindmap.styleGetter.root);
-
-  const rootTree = calculateNodeSize(root);
-  const leftTree: TreeSize[] = [];
-  const rightTree: TreeSize[] = [];
-  let leftCounts = 0;
-  let rightCounts = 0;
-
-  rootTree.children.forEach(childTree => {
-    if (
-      childTree.root.detail.preferedDir === LayoutType.RIGHT ||
-      (rightCounts <= leftCounts &&
-        childTree.root.detail.preferedDir !== LayoutType.LEFT)
-    ) {
-      rightTree.push(childTree);
-      rightCounts++;
-    } else {
-      leftTree.push(childTree);
-      leftCounts++;
-    }
-  });
+const layoutBalance = (
+  root: MindmapNode,
+  mindmap: MindmapElementModel,
+  path = [0]
+) => {
+  const rootTree = calculateNodeSize(root, true);
+  const leftTree: MindmapNode[] = (root as MindmapRoot).left;
+  const rightTree: MindmapNode[] = (root as MindmapRoot).right;
 
   {
+    const leftTreeSize = calculateNodeSize(root, true, leftTree);
     const mockRoot = {
       root: rootTree.root,
-      bound: leftTree.reduce(
-        (pre, cur) => {
-          pre.w = Math.max(pre.w, cur.bound.w);
-          pre.h +=
-            pre.h > 0 ? NODE_VERTICAL_SPACING + cur.bound.h : cur.bound.h;
-
-          return pre;
-        },
-        new Bound(0, 0, 0, 0)
-      ),
-      children: leftTree,
+      bound: leftTreeSize.bound,
+      children: leftTreeSize.children,
     };
 
-    layoutTree(mockRoot, LayoutType.LEFT, mindmap, [0], rootTree.children);
+    layoutTree(mockRoot, LayoutType.LEFT, mindmap, path, mockRoot.children);
   }
 
   {
+    const rightTreeSize = calculateNodeSize(root, true, rightTree);
     const mockRoot = {
       root: rootTree.root,
-      bound: rightTree.reduce(
-        (pre, cur) => {
-          pre.w = Math.max(pre.w, cur.bound.w);
-          pre.h +=
-            pre.h > 0 ? NODE_VERTICAL_SPACING + cur.bound.h : cur.bound.h;
-
-          return pre;
-        },
-        new Bound(0, 0, 0, 0)
-      ),
-      children: rightTree,
+      bound: rightTreeSize.bound,
+      children: rightTreeSize.children,
     };
 
-    layoutTree(mockRoot, LayoutType.RIGHT, mindmap, [0], rootTree.children);
+    layoutTree(mockRoot, LayoutType.RIGHT, mindmap, [0], mockRoot.children);
   }
 };
 
-export const layout = (root: MindmapNode, mindmap: MindmapElementModel) => {
-  switch (mindmap.layoutType) {
+export const layout = (
+  root: MindmapNode,
+  mindmap: MindmapElementModel,
+  layoutDir: LayoutType | null,
+  path: number[]
+) => {
+  layoutDir = layoutDir ?? mindmap.layoutType;
+
+  switch (layoutDir) {
     case LayoutType.RIGHT:
-      return layoutRight(root, mindmap);
+      return layoutRight(root, mindmap, path);
     case LayoutType.LEFT:
-      return layoutLeft(root, mindmap);
+      return layoutLeft(root, mindmap, path);
     case LayoutType.BALANCE:
-      return layoutBalance(root, mindmap);
+      return layoutBalance(root, mindmap, path);
   }
 };

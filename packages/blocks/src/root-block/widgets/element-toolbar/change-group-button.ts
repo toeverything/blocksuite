@@ -1,5 +1,5 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/separator.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement, nothing } from 'lit';
@@ -7,6 +7,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import { toast } from '../../../_common/components/toast.js';
+import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   NoteIcon,
   RenameIcon,
@@ -19,7 +20,6 @@ import {
   deserializeXYWH,
   serializeXYWH,
 } from '../../../surface-block/index.js';
-import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
 import { mountGroupTitleEditor } from '../../edgeless/utils/text.js';
@@ -83,7 +83,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
       [
         onlyOne
           ? html`
-              <edgeless-tool-icon-button
+              <edgeless-icon-button
                 aria-label="Insert into Page"
                 .tooltip=${'Insert into Page'}
                 .iconSize=${'20px'}
@@ -92,13 +92,13 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
               >
                 ${NoteIcon}
                 <span class="label">Insert into Page</span>
-              </edgeless-tool-icon-button>
+              </edgeless-icon-button>
             `
           : nothing,
 
         onlyOne
           ? html`
-              <edgeless-tool-icon-button
+              <edgeless-icon-button
                 class=${'edgeless-component-toolbar-group-rename-button'}
                 aria-label="Rename"
                 .tooltip=${'Rename'}
@@ -106,12 +106,12 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
                 @click=${() => mountGroupTitleEditor(groups[0], this.edgeless)}
               >
                 ${RenameIcon}
-              </edgeless-tool-icon-button>
+              </edgeless-icon-button>
             `
           : nothing,
 
         html`
-          <edgeless-tool-icon-button
+          <edgeless-icon-button
             class=${'edgeless-component-toolbar-ungroup-button'}
             aria-label="Ungroup"
             .tooltip=${'Ungroup'}
@@ -120,10 +120,10 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
               groups.forEach(group => this.edgeless.service.ungroup(group))}
           >
             ${UngroupButtonIcon}
-          </edgeless-tool-icon-button>
+          </edgeless-icon-button>
         `,
-      ],
-      renderMenuDivider
+      ].filter(button => button !== nothing),
+      renderToolbarSeparator
     );
   }
 

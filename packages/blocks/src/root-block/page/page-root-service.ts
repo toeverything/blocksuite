@@ -13,6 +13,5 @@ export class PageRootService extends RootService {
       tagId: string;
     }>(),
     viewportUpdated: new Slot<Viewport>(),
-    editorModeSwitch: new Slot<'edgeless' | 'page'>(),
   };
 }

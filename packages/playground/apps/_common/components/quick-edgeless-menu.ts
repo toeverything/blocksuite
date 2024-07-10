@@ -18,8 +18,16 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
-import type { AffineTextAttributes, SerializedXYWH } from '@blocksuite/blocks';
-import { ColorVariables, extractCssVariables } from '@blocksuite/blocks';
+import type {
+  AffineTextAttributes,
+  DocMode,
+  SerializedXYWH,
+} from '@blocksuite/blocks';
+import {
+  ColorVariables,
+  EdgelessRootService,
+  extractCssVariables,
+} from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import { type DocCollection, Text, Utils } from '@blocksuite/store';
@@ -46,6 +54,14 @@ setBasePath(basePath);
 
 @customElement('quick-edgeless-menu')
 export class QuickEdgelessMenu extends ShadowlessElement {
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get rootService() {
+    return this.editor.host.spec.getService('affine:page');
+  }
+
   static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
@@ -64,62 +80,35 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor collection!: DocCollection;
-
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-  @property({ attribute: false })
-  accessor leftSidePanel!: LeftSidePanel;
-  @property({ attribute: false })
-  accessor docsPanel!: DocsPanel;
-  @property({ attribute: false })
-  accessor chatPanel!: CustomChatPanel;
-
   @state()
   private accessor _canUndo = false;
 
   @state()
   private accessor _canRedo = false;
 
-  @property({ attribute: false })
-  accessor mode: 'page' | 'edgeless' = 'page';
-
-  @property({ attribute: false })
-  accessor readonly = false;
-
   @state()
   private accessor _dark = localStorage.getItem('blocksuite:dark') === 'true';
 
-  get doc() {
-    return this.editor.doc;
-  }
+  @state()
+  private accessor _docMode: DocMode = 'page';
 
-  get rootService() {
-    return this.editor.host.spec.getService('affine:page');
-  }
+  @property({ attribute: false })
+  accessor collection!: DocCollection;
 
-  override createRenderRoot() {
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    this._setThemeMode(this._dark && matchMedia.matches);
-    matchMedia.addEventListener('change', this._darkModeChange);
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
 
-    return this;
-  }
+  @property({ attribute: false })
+  accessor leftSidePanel!: LeftSidePanel;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    document.body.addEventListener('keydown', this._keydown);
-    this._restoreMode();
-  }
+  @property({ attribute: false })
+  accessor docsPanel!: DocsPanel;
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
+  @property({ attribute: false })
+  accessor chatPanel!: CustomChatPanel;
 
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    matchMedia.removeEventListener('change', this._darkModeChange);
-    document.body.removeEventListener('keydown', this._keydown);
-  }
+  @property({ attribute: false })
+  accessor readonly = false;
 
   private _keydown = (e: KeyboardEvent) => {
     if (e.key === 'F1') {
@@ -128,16 +117,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   };
 
   private _switchEditorMode() {
-    const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
-    localStorage.setItem('playground:editorMode', mode);
-    this.mode = mode;
-  }
-
-  private _restoreMode() {
-    const mode = localStorage.getItem('playground:editorMode');
-    if (mode && (mode === 'edgeless' || mode === 'page')) {
-      this.mode = mode;
-    }
+    this._docMode = this.rootService.docModeService.toggleMode();
   }
 
   private _addNote() {
@@ -313,8 +293,39 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     url.search = params.toString();
     location.href = url.href;
   };
+
   private _toggleDocsPanel() {
     this.leftSidePanel.toggle(this.docsPanel);
+  }
+
+  override createRenderRoot() {
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    this._setThemeMode(this._dark && matchMedia.matches);
+    matchMedia.addEventListener('change', this._darkModeChange);
+
+    return this;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._docMode = this.editor.mode;
+    this.rootService.docModeService.onModeChange(mode => {
+      this._docMode = mode;
+    });
+    this.editor.slots.docUpdated.on(() => {
+      this._docMode = this.editor.mode;
+    });
+
+    document.body.addEventListener('keydown', this._keydown);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    matchMedia.removeEventListener('change', this._darkModeChange);
+    document.body.removeEventListener('keydown', this._keydown);
   }
 
   override firstUpdated() {
@@ -322,15 +333,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       this._canUndo = this.doc.canUndo;
       this._canRedo = this.doc.canRedo;
     });
-  }
-
-  override update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mode')) {
-      const mode = this.mode;
-      this.editor.mode = mode;
-    }
-
-    super.update(changedProperties);
   }
 
   override render() {
@@ -388,7 +390,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
           margin-right: 4px;
         }
       </style>
-      <div class="quick-edgeless-menu default blocksuite-overlay">
+      <div class="quick-edgeless-menu default">
         <div class="default-toolbar">
           <div class="top-container">
             <sl-dropdown placement="bottom" hoist>
@@ -538,7 +540,25 @@ export class QuickEdgelessMenu extends ShadowlessElement {
               : nothing}
           </div>
 
-          <div>
+          <div style="display: flex; gap: 12px">
+            <!-- Present button -->
+            ${this._docMode === 'edgeless'
+              ? html`<sl-tooltip content="Present" placement="bottom" hoist>
+                  <sl-button
+                    size="small"
+                    circle
+                    @click=${() => {
+                      if (this.rootService instanceof EdgelessRootService) {
+                        this.rootService.tool.setEdgelessTool({
+                          type: 'frameNavigator',
+                        });
+                      }
+                    }}
+                  >
+                    <sl-icon name="easel" label="Present"></sl-icon>
+                  </sl-button>
+                </sl-tooltip>`
+              : nothing}
             <sl-button-group label="Mode" style="margin-right: 12px">
               <!-- switch to page -->
               <sl-tooltip content="Page" placement="bottom" hoist>
@@ -546,7 +566,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   pill
                   size="small"
                   content="Page"
-                  .disabled=${this.mode !== 'edgeless'}
+                  .disabled=${this._docMode !== 'edgeless'}
                   @click=${this._switchEditorMode}
                 >
                   <sl-icon name="filetype-doc" label="Page"></sl-icon>
@@ -558,7 +578,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   pill
                   size="small"
                   content="Edgeless"
-                  .disabled=${this.mode !== 'page'}
+                  .disabled=${this._docMode !== 'page'}
                   @click=${this._switchEditorMode}
                 >
                   <sl-icon name="palette" label="Edgeless"></sl-icon>

@@ -19,44 +19,13 @@ export class AffineImageToolbarWidget extends WidgetElement<
   ImageBlockModel,
   ImageBlockComponent
 > {
+  private _hoverController: HoverController | null = null;
+
+  private _isActivated = false;
+
   config: ImageConfigItem[] = [];
 
   moreMenuConfig: MoreMenuConfigItem[] = [];
-
-  clearConfig = () => {
-    this.config = [];
-    this.moreMenuConfig = [];
-    return this;
-  };
-
-  addConfigItems = (item: ImageConfigItem[], index?: number) => {
-    if (index === undefined) {
-      this.config.push(...item);
-      return this;
-    }
-
-    this.config.splice(index, 0, ...item);
-    return this;
-  };
-
-  addMoreMenuItems = (item: MoreMenuConfigItem[], index?: number) => {
-    if (index === undefined) {
-      this.moreMenuConfig.push(...item);
-      return this;
-    }
-
-    this.moreMenuConfig.splice(index, 0, ...item);
-    return this;
-  };
-
-  buildDefaultConfig = () => {
-    this.clearConfig()
-      .addConfigItems(commonConfig)
-      .addMoreMenuItems(moreMenuConfig);
-    return this;
-  };
-
-  private _hoverController: HoverController | null = null;
 
   private _setHoverController = () => {
     this._hoverController = null;
@@ -94,7 +63,14 @@ export class AffineImageToolbarWidget extends WidgetElement<
             .abortController=${abortController}
             .config=${this.config}
             .moreMenuConfig=${this.moreMenuConfig}
+            .onActiveStatusChange=${(active: boolean) => {
+              this._isActivated = active;
+              if (!active && !this._hoverController?.isHovering) {
+                this._hoverController?.abort();
+              }
+            }}
           ></affine-image-toolbar>`,
+          container: this.blockElement,
           computePosition: {
             referenceElement: imageContainer,
             placement: 'right-start',
@@ -118,6 +94,45 @@ export class AffineImageToolbarWidget extends WidgetElement<
 
     const imageBlock = this.blockElement;
     this._hoverController.setReference(imageBlock);
+    this._hoverController.onAbort = () => {
+      // If the more menu is opened, don't close it.
+      if (this._isActivated) return;
+      this._hoverController?.abort();
+      return;
+    };
+  };
+
+  clearConfig = () => {
+    this.config = [];
+    this.moreMenuConfig = [];
+    return this;
+  };
+
+  addConfigItems = (item: ImageConfigItem[], index?: number) => {
+    if (index === undefined) {
+      this.config.push(...item);
+      return this;
+    }
+
+    this.config.splice(index, 0, ...item);
+    return this;
+  };
+
+  addMoreMenuItems = (item: MoreMenuConfigItem[], index?: number) => {
+    if (index === undefined) {
+      this.moreMenuConfig.push(...item);
+      return this;
+    }
+
+    this.moreMenuConfig.splice(index, 0, ...item);
+    return this;
+  };
+
+  buildDefaultConfig = () => {
+    this.clearConfig()
+      .addConfigItems(commonConfig)
+      .addMoreMenuItems(moreMenuConfig);
+    return this;
   };
 
   override firstUpdated() {

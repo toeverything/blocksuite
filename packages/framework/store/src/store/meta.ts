@@ -11,6 +11,7 @@ export interface DocMeta {
   title: string;
   tags: string[];
   createDate: number;
+  updatedDate?: number;
 }
 
 export type Tag = {
@@ -34,28 +35,6 @@ export type DocCollectionMetaState = {
 };
 
 export class DocCollectionMeta {
-  readonly id: string = 'meta';
-  readonly doc: BlockSuiteDoc;
-
-  private _prevDocs = new Set<string>();
-
-  docMetaAdded = new Slot<string>();
-  docMetaRemoved = new Slot<string>();
-  docMetaUpdated = new Slot();
-  commonFieldsUpdated = new Slot();
-
-  protected readonly _yMap: Y.Map<
-    DocCollectionMetaState[keyof DocCollectionMetaState]
-  >;
-  protected readonly _proxy: DocCollectionMetaState;
-
-  constructor(doc: BlockSuiteDoc) {
-    this.doc = doc;
-    this._yMap = doc.getMap(this.id);
-    this._proxy = doc.getMapProxy<string, DocCollectionMetaState>(this.id);
-    this._yMap.observeDeep(this._handleDocCollectionMetaEvents);
-  }
-
   get yDocs() {
     return this._yMap.get('pages') as unknown as Y.Array<unknown>;
   }
@@ -84,6 +63,114 @@ export class DocCollectionMeta {
     return this._proxy.pageVersion;
   }
 
+  get docMetas() {
+    if (!this._proxy.pages) {
+      return [] as DocMeta[];
+    }
+    return this._proxy.pages as DocMeta[];
+  }
+
+  get hasVersion() {
+    if (!this.blockVersions || !this.pageVersion || !this.workspaceVersion) {
+      return false;
+    }
+    return Object.keys(this.blockVersions).length > 0;
+  }
+
+  get properties(): DocsPropertiesMeta {
+    const meta = this._proxy.properties;
+    if (!meta) {
+      return {
+        tags: {
+          options: [],
+        },
+      };
+    }
+    return meta;
+  }
+
+  private _prevDocs = new Set<string>();
+
+  protected readonly _yMap: Y.Map<
+    DocCollectionMetaState[keyof DocCollectionMetaState]
+  >;
+
+  protected readonly _proxy: DocCollectionMetaState;
+
+  readonly id: string = 'meta';
+
+  readonly doc: BlockSuiteDoc;
+
+  docMetaAdded = new Slot<string>();
+
+  docMetaRemoved = new Slot<string>();
+
+  docMetaUpdated = new Slot();
+
+  commonFieldsUpdated = new Slot();
+
+  constructor(doc: BlockSuiteDoc) {
+    this.doc = doc;
+    this._yMap = doc.getMap(this.id);
+    this._proxy = doc.getMapProxy<string, DocCollectionMetaState>(this.id);
+    this._yMap.observeDeep(this._handleDocCollectionMetaEvents);
+  }
+
+  private _handleDocMetaEvent() {
+    const { docMetas, _prevDocs } = this;
+
+    const newDocs = new Set<string>();
+
+    docMetas.forEach(docMeta => {
+      if (!_prevDocs.has(docMeta.id)) {
+        this.docMetaAdded.emit(docMeta.id);
+      }
+      newDocs.add(docMeta.id);
+    });
+
+    _prevDocs.forEach(prevDocId => {
+      const isRemoved = newDocs.has(prevDocId) === false;
+      if (isRemoved) {
+        this.docMetaRemoved.emit(prevDocId);
+      }
+    });
+
+    this._prevDocs = newDocs;
+
+    this.docMetaUpdated.emit();
+  }
+
+  private _handleCommonFieldsEvent() {
+    this.commonFieldsUpdated.emit();
+  }
+
+  private _handleDocCollectionMetaEvents = (
+    events: Y.YEvent<Y.Array<unknown> | Y.Text | Y.Map<unknown>>[]
+  ) => {
+    events.forEach(e => {
+      const hasKey = (k: string) =>
+        e.target === this._yMap && e.changes.keys.has(k);
+
+      if (
+        e.target === this.yDocs ||
+        e.target.parent === this.yDocs ||
+        hasKey('pages')
+      ) {
+        this._handleDocMetaEvent();
+      }
+
+      if (hasKey('name') || hasKey('avatar')) {
+        this._handleCommonFieldsEvent();
+      }
+    });
+  };
+
+  initialize() {
+    if (!this._proxy.pages) {
+      this._proxy.pages = [];
+    }
+  }
+
   setName(name: string) {
     this.doc.transact(() => {
       this._proxy.name = name;
@@ -96,13 +183,6 @@ export class DocCollectionMeta {
     }, this.doc.clientID);
   }
 
-  get docMetas() {
-    if (!this._proxy.pages) {
-      return [] as DocMeta[];
-    }
-    return [...(this._proxy.pages as DocMeta[])];
-  }
-
   getDocMeta(id: string) {
     return this.docMetas.find(doc => doc.id === id);
   }
@@ -110,7 +190,7 @@ export class DocCollectionMeta {
   addDocMeta(doc: DocMeta, index?: number) {
     this.doc.transact(() => {
       if (!this.docs) {
-        this._proxy.pages = [];
+        return;
       }
       const docs = this.docs as unknown[];
       if (index === undefined) {
@@ -130,7 +210,7 @@ export class DocCollectionMeta {
 
     this.doc.transact(() => {
       if (!this.docs) {
-        this._proxy.pages = [];
+        return;
       }
       if (index === -1) return;
       assertExists(this.docs);
@@ -154,13 +234,6 @@ export class DocCollectionMeta {
       assertExists(this.docs);
       this.docs.splice(index, 1);
     }, this.doc.clientID);
-  }
-
-  get hasVersion() {
-    if (!this.blockVersions || !this.pageVersion || !this.workspaceVersion) {
-      return false;
-    }
-    return Object.keys(this.blockVersions).length > 0;
   }
 
   /**
@@ -263,65 +336,6 @@ export class DocCollectionMeta {
         );
       }
     });
-  }
-
-  private _handleDocMetaEvent() {
-    const { docMetas, _prevDocs } = this;
-
-    docMetas.forEach(docMeta => {
-      if (!_prevDocs.has(docMeta.id)) {
-        this.docMetaAdded.emit(docMeta.id);
-      }
-    });
-
-    _prevDocs.forEach(prevDocId => {
-      const isRemoved = docMetas.every(p => p.id !== prevDocId);
-      if (isRemoved) {
-        this.docMetaRemoved.emit(prevDocId);
-      }
-    });
-
-    _prevDocs.clear();
-    docMetas.forEach(doc => _prevDocs.add(doc.id));
-
-    this.docMetaUpdated.emit();
-  }
-
-  private _handleCommonFieldsEvent() {
-    this.commonFieldsUpdated.emit();
-  }
-
-  private _handleDocCollectionMetaEvents = (
-    events: Y.YEvent<Y.Array<unknown> | Y.Text | Y.Map<unknown>>[]
-  ) => {
-    events.forEach(e => {
-      const hasKey = (k: string) =>
-        e.target === this._yMap && e.changes.keys.has(k);
-
-      if (
-        e.target === this.yDocs ||
-        e.target.parent === this.yDocs ||
-        hasKey('pages')
-      ) {
-        this._handleDocMetaEvent();
-      }
-
-      if (hasKey('name') || hasKey('avatar')) {
-        this._handleCommonFieldsEvent();
-      }
-    });
-  };
-
-  get properties(): DocsPropertiesMeta {
-    const meta = this._proxy.properties;
-    if (!meta) {
-      return {
-        tags: {
-          options: [],
-        },
-      };
-    }
-    return meta;
   }
 
   setProperties(meta: DocsPropertiesMeta) {

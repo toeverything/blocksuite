@@ -178,8 +178,7 @@ describe('basic', () => {
 
     const switchEditor = vi.fn(() => {});
     const pageService = editor.host.std.spec.getService('affine:page');
-
-    pageService.slots.editorModeSwitch.once(switchEditor);
+    pageService.docModeService.onModeChange(switchEditor);
 
     expect(surfaceRef).instanceOf(Element);
     (surfaceRef as SurfaceRefBlockComponent).viewInEdgeless();

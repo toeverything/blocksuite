@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
+import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -8,7 +9,6 @@ import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
 import type { EventName, UIEventHandler } from '../../event/index.js';
-import type { BaseSelection } from '../../selection/index.js';
 import type { BlockService } from '../../service/index.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import type { EditorHost } from './lit-host.js';
@@ -19,62 +19,7 @@ export class BlockElement<
   Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
-> extends WithDisposable(ShadowlessElement) {
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor model!: Model;
-
-  @property({ attribute: false })
-  accessor content: TemplateResult | null = null;
-
-  @property({ attribute: false })
-  accessor viewType: BlockViewType = BlockViewType.Display;
-
-  @property({
-    attribute: false,
-    hasChanged(value, oldValue) {
-      if (!value || !oldValue) {
-        return value !== oldValue;
-      }
-      // Is empty object
-      if (!Object.keys(value).length && !Object.keys(oldValue).length) {
-        return false;
-      }
-      return value !== oldValue;
-    },
-  })
-  accessor widgets!: Record<WidgetName, TemplateResult>;
-
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @property({ attribute: false })
-  accessor dirty = false;
-
-  @state({
-    hasChanged(value: BaseSelection | null, oldValue: BaseSelection | null) {
-      if (!value || !oldValue) {
-        return value !== oldValue;
-      }
-
-      return !value?.equals(oldValue);
-    },
-  })
-  accessor selected: BaseSelection | null = null;
-
-  service!: Service;
-
-  path!: string[];
-
-  @state()
-  protected accessor _renderers: Array<(content: unknown) => unknown> = [
-    this.renderBlock,
-    this._renderMismatchBlock,
-    this._renderViewType,
-  ];
-
+> extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   get parentBlockElement(): BlockElement {
     const el = this.parentElement;
     // TODO(mirone/#6534): find a better way to get block element from a node
@@ -146,6 +91,125 @@ export class BlockElement<
     return false;
   }
 
+  @state()
+  protected accessor _renderers: Array<(content: unknown) => unknown> = [
+    this.renderBlock,
+    this._renderMismatchBlock,
+    this._renderViewType,
+  ];
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor model!: Model;
+
+  @property({ attribute: false })
+  accessor content: TemplateResult | null = null;
+
+  @property({ attribute: false })
+  accessor viewType: BlockViewType = BlockViewType.Display;
+
+  @property({
+    attribute: false,
+    hasChanged(value, oldValue) {
+      if (!value || !oldValue) {
+        return value !== oldValue;
+      }
+      // Is empty object
+      if (!Object.keys(value).length && !Object.keys(oldValue).length) {
+        return false;
+      }
+      return value !== oldValue;
+    },
+  })
+  accessor widgets!: Record<WidgetName, TemplateResult>;
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @property({ attribute: false })
+  accessor dirty = false;
+
+  get selected() {
+    const selectedSignal = computed(() => {
+      const selection = this.std.selection.value.find(selection => {
+        return selection.blockId === this.blockId;
+      });
+
+      if (!selection) {
+        return null;
+      }
+
+      return selection;
+    });
+    return selectedSignal.value;
+  }
+
+  service!: Service;
+
+  path!: string[];
+
+  private _renderViewType(content: unknown) {
+    return choose(this.viewType, [
+      [BlockViewType.Display, () => content],
+      [BlockViewType.Hidden, () => nothing],
+      [BlockViewType.Bypass, () => this.renderChildren(this.model)],
+    ]);
+  }
+
+  private _renderMismatchBlock(content: unknown) {
+    return when(
+      this.isVersionMismatch,
+      () => {
+        const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
+        assertExists(
+          schema,
+          `Cannot find schema for flavour ${this.model.flavour}`
+        );
+        const expectedVersion = schema.version;
+        const actualVersion = this.model.version;
+        return this.renderVersionMismatch(expectedVersion, actualVersion);
+      },
+      () => content
+    );
+  }
+
+  protected override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await Promise.all(this.childBlockElements.map(el => el.updateComplete));
+    return result;
+  }
+
+  protected override update(changedProperties: PropertyValues): void {
+    // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
+    // We can restore this state through the `dirty` property.
+    if (this.dirty) {
+      // Here we made some hacks by referring to the source code of Lit.
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/lit-element/src/lit-element.ts#L162-L163
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1586-L1589
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1509-L1512
+      //@ts-ignore
+      this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>
+        //@ts-ignore
+        this.__propertyToAttribute(p, this[p as keyof this])
+      ) as undefined;
+      //@ts-ignore
+      this._$changedProperties = new Map();
+      this.isUpdatePending = false;
+      //@ts-ignore
+      this.__childPart = render(nothing, this.renderRoot);
+
+      this.updateComplete
+        .then(() => {
+          this.dirty = false;
+        })
+        .catch(console.error);
+    } else {
+      super.update(changedProperties);
+    }
+  }
+
   handleEvent = (
     name: EventName,
     handler: UIEventHandler,
@@ -176,46 +240,14 @@ export class BlockElement<
           : undefined,
       path: options?.global || options?.flavour ? undefined : this.path,
     };
-    this._disposables.add(this.host.event.bindHotkey(keymap, config));
+    const dispose = this.host.event.bindHotkey(keymap, config);
+    this._disposables.add(dispose);
+    return dispose;
   }
 
   renderChildren = (model: BlockModel): TemplateResult => {
     return this.host.renderChildren(model);
   };
-
-  protected override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    await Promise.all(this.childBlockElements.map(el => el.updateComplete));
-    return result;
-  }
-  protected override update(changedProperties: PropertyValues): void {
-    // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
-    // We can restore this state through the `dirty` property.
-    if (this.dirty) {
-      // Here we made some hacks by referring to the source code of Lit.
-      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/lit-element/src/lit-element.ts#L162-L163
-      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1586-L1589
-      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1509-L1512
-      //@ts-ignore
-      this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>
-        //@ts-ignore
-        this.__propertyToAttribute(p, this[p as keyof this])
-      ) as undefined;
-      //@ts-ignore
-      this._$changedProperties = new Map();
-      this.isUpdatePending = false;
-      //@ts-ignore
-      this.__childPart = render(nothing, this.renderRoot);
-
-      this.updateComplete
-        .then(() => {
-          this.dirty = false;
-        })
-        .catch(console.error);
-    } else {
-      super.update(changedProperties);
-    }
-  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -236,27 +268,6 @@ export class BlockElement<
     this._disposables.add(
       this.model.propsUpdated.on(() => {
         this.requestUpdate();
-      })
-    );
-
-    this._disposables.add(
-      this.model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    this._disposables.add(
-      this.host.selection.slots.changed.on(selections => {
-        const selection = selections.find(selection => {
-          return selection.blockId === this.blockId;
-        });
-
-        if (!selection) {
-          this.selected = null;
-          return;
-        }
-
-        this.selected = selection;
       })
     );
 
@@ -302,31 +313,6 @@ export class BlockElement<
 
   addRenderer(renderer: (content: unknown) => unknown) {
     this._renderers.push(renderer);
-  }
-
-  private _renderViewType(content: unknown) {
-    return choose(this.viewType, [
-      [BlockViewType.Display, () => content],
-      [BlockViewType.Hidden, () => nothing],
-      [BlockViewType.Bypass, () => this.renderChildren(this.model)],
-    ]);
-  }
-
-  private _renderMismatchBlock(content: unknown) {
-    return when(
-      this.isVersionMismatch,
-      () => {
-        const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
-        assertExists(
-          schema,
-          `Cannot find schema for flavour ${this.model.flavour}`
-        );
-        const expectedVersion = schema.version;
-        const actualVersion = this.model.version;
-        return this.renderVersionMismatch(expectedVersion, actualVersion);
-      },
-      () => content
-    );
   }
 
   override render() {

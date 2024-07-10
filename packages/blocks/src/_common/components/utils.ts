@@ -253,14 +253,13 @@ export const scrollbarStyle = (container: string) => {
     );
 
   // sanitize container name
-  if (
-    container.length > 50 ||
-    container.includes('{') ||
-    container.includes('}')
-  )
+  if (container.includes('{') || container.includes('}'))
     throw new Error('Invalid container name!');
 
   return css`
+    ${unsafeCSS(container)} {
+      scrollbar-gutter: stable;
+    }
     ${unsafeCSS(container)}::-webkit-scrollbar {
       -webkit-appearance: none;
       width: 4px;

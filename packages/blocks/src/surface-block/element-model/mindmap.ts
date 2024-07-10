@@ -3,15 +3,20 @@ import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
 
-import { last } from '../../_common/utils/iterable.js';
+import { keys, last, pick } from '../../_common/utils/iterable.js';
 import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
+import type { SurfaceBlockModel } from '../surface-model.js';
 import {
   deserializeXYWH,
   type SerializedXYWH,
   type XYWH,
 } from '../utils/xywh.js';
-import { type IBaseProps, SurfaceGroupLikeModel } from './base.js';
+import {
+  type IBaseProps,
+  type SerializedElement,
+  SurfaceGroupLikeModel,
+} from './base.js';
 import { LocalConnectorElementModel } from './connector.js';
 import { convert, observe, watch, yfield } from './decorators.js';
 import type {
@@ -25,12 +30,12 @@ import type {
   MindmapStyleGetter,
 } from './utils/mindmap/style.js';
 import {
-  applyConnectorStyle,
   applyNodeStyle,
   MindmapStyle,
   mindmapStyleGetters,
 } from './utils/mindmap/style.js';
 
+export { LayoutType } from './utils/mindmap/layout.js';
 export { MindmapStyle } from './utils/mindmap/style.js';
 
 const baseNodeSchema = z.object({
@@ -48,8 +53,16 @@ const nodeSchema: z.ZodType<Node> = baseNodeSchema.extend({
 
 type NodeType = z.infer<typeof nodeSchema>;
 
+function isNodeType(node: Record<string, unknown>): node is NodeType {
+  return typeof node.text === 'string' && Array.isArray(node.children);
+}
+
+export type SerializedMindmapElement = SerializedElement & {
+  children: Record<string, NodeDetail>;
+};
+
 type MindmapElementProps = IBaseProps & {
-  nodes: Y.Map<NodeDetail>;
+  children: Y.Map<NodeDetail>;
 };
 
 export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementProps> {
@@ -57,10 +70,31 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     return 'mindmap';
   }
 
-  override onCreated(): void {
-    this.buildTree();
-    this.layout();
+  get tree() {
+    return this._tree;
   }
+
+  get nodeMap() {
+    return this._nodeMap;
+  }
+
+  override get rotate() {
+    return 0;
+  }
+
+  override set rotate(_: number) {}
+
+  get styleGetter(): MindmapStyleGetter {
+    return mindmapStyleGetters[this.style];
+  }
+
+  private _tree!: MindmapRoot;
+
+  private _nodeMap = new Map<string, MindmapNode>();
+
+  private _queueBuildTree = false;
+
+  private _queued = false;
 
   pathGenerator: ConnectorPathGenerator = new ConnectorPathGenerator({
     getElementById: (id: string) =>
@@ -68,13 +102,13 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       (this.surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType),
   });
 
-  @convert((initalValue, instance) => {
-    if (!(initalValue instanceof DocCollection.Y.Map)) {
-      nodeSchema.parse(initalValue);
+  @convert((initialValue, instance) => {
+    if (!(initialValue instanceof DocCollection.Y.Map)) {
+      nodeSchema.parse(initialValue);
 
-      assertType<NodeType>(initalValue);
+      assertType<NodeType>(initialValue);
 
-      const map = new DocCollection.Y.Map() as MindmapElementProps['nodes'];
+      const map: Y.Map<NodeDetail> = new DocCollection.Y.Map();
       const surface = instance.surface;
       const doc = surface.doc;
       const recursive = (
@@ -101,12 +135,16 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       };
 
       doc.transact(() => {
-        recursive(initalValue);
+        recursive(initialValue);
       });
 
+      instance.requestBuildTree();
+      instance.requestLayout();
       return map;
     } else {
-      return initalValue;
+      instance.requestBuildTree();
+      instance.requestLayout();
+      return initialValue;
     }
   })
   @observe(
@@ -115,6 +153,9 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
         Array.from(instance.children.keys()),
         transaction?.local ?? true
       );
+
+      instance.buildTree();
+      instance.connectors.clear();
     }
   )
   @yfield()
@@ -136,49 +177,103 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
           parent: child.detail.parent,
         });
       });
-
-      instance.buildTree();
-      instance.layout();
     });
+
+    instance.buildTree();
   })
   @yfield()
-  accessor layoutType: LayoutType = LayoutType.BALANCE;
+  accessor layoutType: LayoutType = LayoutType.RIGHT;
 
   @watch((_, instance: MindmapElementModel, local) => {
     if (local) {
-      instance.applyStyle();
+      instance.layout();
     }
   })
   @yfield()
-  accessor style: MindmapStyle = MindmapStyle.FOUR;
+  accessor style: MindmapStyle = MindmapStyle.ONE;
 
-  connectors: Map<string, LocalConnectorElementModel> = new Map();
+  connectors = new Map<string, LocalConnectorElementModel>();
 
-  private _tree!: MindmapRoot;
+  extraConnectors = new Map<string, LocalConnectorElementModel>();
 
-  private _nodeMap = new Map<string, MindmapNode>();
+  private _cfgBalanceLayoutDir() {
+    if (this.layoutType !== LayoutType.BALANCE) {
+      return;
+    }
 
-  get tree() {
-    return this._tree;
+    const tree = this._tree;
+    const splitPoint = tree.children.findIndex((child, index) => {
+      if (
+        child.detail.preferredDir === LayoutType.LEFT ||
+        (child.detail.preferredDir === LayoutType.RIGHT &&
+          child.children[index + 1]?.detail.preferredDir !== LayoutType.RIGHT)
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (splitPoint === -1) {
+      const mid = Math.ceil(tree.children.length / 2);
+
+      tree.right.push(...tree.children.slice(0, mid));
+      tree.left.push(...tree.children.slice(mid));
+    } else {
+      tree.right.push(...tree.children.slice(0, splitPoint + 1));
+      tree.left.push(...tree.children.slice(splitPoint + 1));
+    }
+
+    tree.left.reverse();
   }
 
-  get nodeMap() {
-    return this._nodeMap;
+  private _isConnectorOutdated(
+    options: {
+      connector: LocalConnectorElementModel;
+      from: MindmapNode;
+      to: MindmapNode;
+      layout: LayoutType;
+    },
+    updateKey: boolean = true
+  ) {
+    const { connector, from, to, layout } = options;
+    const cacheKey = `${from.element.xywh}-${to.element.xywh}-${layout}-${this.style}`;
+
+    // @ts-ignore
+    if (connector['MINDMAP_CONNECTOR'] === cacheKey) {
+      return { outdated: false, cacheKey };
+    } else if (updateKey) {
+      // @ts-ignore
+      connector['MINDMAP_CONNECTOR'] = cacheKey;
+    }
+
+    return { outdated: true, cacheKey };
   }
 
-  override get rotate() {
-    return 0;
-  }
+  protected requestBuildTree() {
+    if (this._queueBuildTree) {
+      return;
+    }
 
-  override set rotate(_: number) {}
-
-  get styleGetter(): MindmapStyleGetter {
-    return mindmapStyleGetters[this.style];
+    this._queueBuildTree = true;
+    queueMicrotask(() => {
+      this.buildTree();
+      this._queueBuildTree = false;
+    });
   }
 
   protected buildTree() {
     const mindmapNodeMap = new Map<string, MindmapNode>();
     const nodesMap = this.children;
+
+    // The element may be removed
+    if (!nodesMap) {
+      this._nodeMap = mindmapNodeMap;
+      // @ts-ignore
+      this._tree = null;
+      return;
+    }
+
     let rootNode: MindmapRoot | undefined;
 
     nodesMap.forEach((val, id) => {
@@ -193,9 +288,11 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
             children: [],
           } as MindmapNode);
 
-      if (mindmapNodeMap.has(id)) {
+      if (!node.detail) {
         node.detail = val;
-      } else {
+      }
+
+      if (!mindmapNodeMap.has(id)) {
         mindmapNodeMap.set(id, node);
       }
 
@@ -218,7 +315,11 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 
     mindmapNodeMap.forEach(node => {
       node.children.sort((a, b) =>
-        a.detail.index.localeCompare(b.detail.index)
+        a.detail.index === b.detail.index
+          ? 0
+          : a.detail.index > b.detail.index
+            ? 1
+            : -1
       );
     });
 
@@ -237,30 +338,78 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     }
   }
 
-  private _cfgBalanceLayoutDir() {
-    if (this.layoutType !== LayoutType.BALANCE) {
-      return;
+  protected addConnector(
+    from: MindmapNode,
+    to: MindmapNode,
+    layout: LayoutType,
+    connectorStyle: ConnectorStyle,
+    extra: boolean = false
+  ) {
+    const id = `#${from.id}-${to.id}`;
+
+    if (extra) {
+      this.extraConnectors.set(id, new LocalConnectorElementModel());
+    } else if (this.connectors.has(id)) {
+      const connector = this.connectors.get(id)!;
+      const { outdated } = this._isConnectorOutdated({
+        connector,
+        from,
+        to,
+        layout,
+      });
+
+      if (!outdated) {
+        return connector;
+      }
+    } else {
+      const connector = new LocalConnectorElementModel();
+      // update cache key
+      this._isConnectorOutdated({
+        connector,
+        from,
+        to,
+        layout,
+      });
+      this.connectors.set(id, connector);
     }
 
-    const tree = this._tree;
+    const connector = extra
+      ? this.extraConnectors.get(id)!
+      : this.connectors.get(id)!;
 
-    tree.children.forEach(child => {
-      if (child.detail.preferedDir === LayoutType.LEFT) {
-        tree.left.push(child);
-      } else if (child.detail.preferedDir === LayoutType.RIGHT) {
-        tree.right.push(child);
-      } else {
-        tree.right.length <= tree.left.length
-          ? tree.right.push(child)
-          : tree.left.push(child);
-      }
+    connector.id = id;
+    connector.source = {
+      id: from.id,
+      position: layout === LayoutType.RIGHT ? [1, 0.5] : [0, 0.5],
+    };
+    connector.target = {
+      id: to.id,
+      position: layout === LayoutType.RIGHT ? [0, 0.5] : [1, 0.5],
+    };
+
+    Object.entries(connectorStyle).forEach(([key, value]) => {
+      // @ts-ignore
+      connector[key as unknown] = value;
     });
+
+    this.pathGenerator.updatePath(connector);
+
+    return connector;
+  }
+
+  override onCreated(): void {
+    this.requestBuildTree();
+  }
+
+  override serialize() {
+    const result = super.serialize();
+    return result as SerializedMindmapElement;
   }
 
   getParentNode(id: string) {
     const node = this.children.get(id);
 
-    return node?.parent ? this.surface.getElementById(node.parent) : null;
+    return node?.parent ? this._nodeMap.get(node.parent) ?? null : null;
   }
 
   getNode(id: string) {
@@ -279,7 +428,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
    * // [0, 1, 2]
    * ```
    */
-  private _getPath(element: string | MindmapNode) {
+  getPath(element: string | MindmapNode) {
     let node = this._nodeMap.get(
       typeof element === 'string' ? element : element.id
     );
@@ -302,13 +451,26 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     return path;
   }
 
+  traverse(callback: (node: MindmapNode, parent: MindmapNode | null) => void) {
+    const traverse = (node: MindmapNode, parent: MindmapNode | null) => {
+      callback(node, parent);
+
+      node?.children.forEach(child => {
+        traverse(child, node);
+      });
+    };
+
+    if (this._tree) {
+      traverse(this._tree, null);
+    }
+  }
+
   addNode(
     /**
      * The parent node id of the new node. If it's null, the node will be the root node
      */
-    parent: string | null,
-    type: 'shape',
-    sibling?: string,
+    parent: string | MindmapNode | null,
+    sibling?: string | number,
     position: 'before' | 'after' = 'after',
     props: Record<string, unknown> = {},
 
@@ -318,6 +480,12 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
      */
     direction?: LayoutType.LEFT | LayoutType.RIGHT
   ) {
+    if (parent && typeof parent !== 'string') {
+      parent = parent.id;
+    }
+
+    assertType<string | null>(parent);
+
     if (parent && !this._nodeMap.has(parent)) {
       throw new Error(`Parent node ${parent} not found`);
     }
@@ -326,18 +494,30 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       (props['text'] as string) ?? 'New node'
     );
 
+    const type = (props.type as string) ?? 'shape';
     let id: string;
     this.surface.doc.transact(() => {
       const parentNode = parent ? this._nodeMap.get(parent)! : null;
 
       if (parentNode) {
-        let index = 'a0';
+        const isBalance =
+          this.layoutType === LayoutType.BALANCE &&
+          this._tree.id === parentNode.id;
+
+        let index = last(parentNode.children)
+          ? generateKeyBetween(last(parentNode.children)!.detail.index, null)
+          : 'a0';
 
         sibling = sibling ?? last(parentNode.children)?.id;
-        const siblingNode = sibling ? this._nodeMap.get(sibling) : undefined;
+        const siblingNode =
+          typeof sibling === 'number'
+            ? parentNode.children[sibling]
+            : sibling
+              ? this._nodeMap.get(sibling)
+              : undefined;
         const path = siblingNode
-          ? this._getPath(siblingNode)
-          : this._getPath(parentNode).concat([0]);
+          ? this.getPath(siblingNode)
+          : this.getPath(parentNode).concat([0]);
         const style = this.styleGetter.getNodeStyle(
           siblingNode ?? parentNode,
           path
@@ -347,7 +527,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
           type,
           xywh: '[0,0,100,30]',
           textResizing: TextResizing.AUTO_WIDTH,
-          maxWidth: 400,
+          maxWidth: false,
           ...props,
           ...style.node,
         });
@@ -367,6 +547,15 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
                   parentNode.children[siblingIndex - 1]?.detail.index ?? null,
                   siblingNode.detail.index
                 );
+        } else if (isBalance && direction !== undefined) {
+          const lastNode =
+            direction === LayoutType.LEFT
+              ? this._tree.left[0]
+              : last(this._tree.right);
+
+          if (lastNode) {
+            index = generateKeyBetween(lastNode.detail.index, null);
+          }
         }
 
         const nodeDetail: NodeDetail = {
@@ -374,12 +563,8 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
           parent: parent!,
         };
 
-        if (
-          direction !== undefined &&
-          this.layoutType === LayoutType.BALANCE &&
-          parentNode.id === this._tree.id
-        ) {
-          nodeDetail.preferedDir = direction;
+        if (direction !== undefined && isBalance) {
+          nodeDetail.preferredDir = direction;
         }
 
         this.children.set(id, nodeDetail);
@@ -388,34 +573,132 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 
         id = this.surface.addElement({
           type,
-          xywh: '[0,0,100,30]',
+          xywh: '[0,0,113,41]',
           textResizing: TextResizing.AUTO_WIDTH,
           maxWidth: 400,
           ...props,
           ...rootStyle,
         });
 
+        this.children.clear();
         this.children.set(id, {
           index: 'a0',
         });
       }
-
-      this.buildTree();
-      this.layout();
     });
+    this.layout();
 
     return id!;
   }
 
-  addTree(parent: string | null, tree: NodeType, sibling?: string) {
+  moveTree(
+    tree: MindmapNode,
+    parent: string | MindmapNode,
+    siblingIndex: number,
+    layout?: LayoutType
+  ) {
+    parent = this._nodeMap.get(
+      typeof parent === 'string' ? parent : parent.id
+    )!;
+
+    if (!parent || !this._nodeMap.has(tree.id)) {
+      return;
+    }
+
+    assertType<MindmapNode>(parent);
+
+    if (layout === LayoutType.BALANCE || parent !== this._tree) {
+      layout = undefined;
+    }
+
+    const sibling = parent.children[siblingIndex];
+    const preSibling = parent.children[siblingIndex - 1];
+    const index =
+      sibling || preSibling
+        ? generateKeyBetween(
+            preSibling?.detail.index ?? null,
+            sibling?.detail.index ?? null
+          )
+        : tree.detail.index ?? undefined;
+
+    this.surface.doc.transact(() => {
+      const val: NodeDetail =
+        layout !== undefined
+          ? {
+              ...tree.detail,
+              index,
+              parent: parent.id,
+              preferredDir: layout,
+            }
+          : {
+              ...tree.detail,
+              index,
+              parent: parent.id,
+            };
+
+      this.children.set(tree.id, val);
+    });
+
+    this.layout();
+
+    return this._nodeMap.get(tree.id);
+  }
+
+  addTree(
+    parent: string | MindmapNode,
+    tree: NodeType | MindmapNode,
+    /**
+     * `sibling` indicates where to insert a subtree among peer elements.
+     * If it's a string, it represents a peer element's ID;
+     * if it's a number, it represents its index.
+     * The subtree will be inserted before the sibling element.
+     */
+    sibling?: string | number,
+
+    /**
+     * Preferred layout direction, only works when parent is root and layout type is BALANCE
+     */
+    layout?: LayoutType
+  ) {
+    parent = typeof parent === 'string' ? parent : parent.id;
+
+    if (!this._nodeMap.has(parent) || !parent) {
+      return null;
+    }
+
+    assertType<string>(parent);
+
+    if (
+      layout === LayoutType.BALANCE ||
+      this._nodeMap.get(parent) !== this._tree
+    ) {
+      layout = undefined;
+    }
+
     const traverse = (
-      node: NodeType,
-      parent: string | null,
-      sibling?: string
+      node: NodeType | MindmapNode,
+      parent: string,
+      sibling?: string | number,
+      layout?: LayoutType.LEFT | LayoutType.RIGHT
     ) => {
-      const nodeId = this.addNode(parent, 'shape', sibling, 'after', {
-        text: node.text,
-      });
+      let nodeId: string;
+      if ('text' in node) {
+        nodeId = this.addNode(
+          parent,
+          sibling,
+          'before',
+          {
+            text: node.text,
+          },
+          layout
+        );
+      } else {
+        this.children.set(node.id, {
+          ...node.detail,
+          parent,
+        });
+        nodeId = node.id;
+      }
 
       node.children?.forEach(child => {
         traverse(child, nodeId);
@@ -424,10 +707,72 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       return nodeId;
     };
 
-    return traverse(tree, parent, sibling);
+    if (!('text' in tree)) {
+      // Modify the children ymap directly hence need transaction
+      this.surface.doc.transact(() => {
+        traverse(tree, parent, sibling, layout);
+      });
+
+      this.applyStyle();
+      this.layout();
+
+      return this._nodeMap.get(tree.id);
+    } else {
+      const nodeId = traverse(tree, parent, sibling, layout);
+
+      this.layout();
+
+      return this._nodeMap.get(nodeId);
+    }
   }
 
-  removeDescendant(id: string) {
+  stashTree(node: MindmapNode | string) {
+    const mindNode = typeof node === 'string' ? this.getNode(node) : node;
+
+    if (!mindNode) {
+      return;
+    }
+
+    const stashed = new Set<
+      BlockSuite.SurfaceElementModelType | LocalConnectorElementModel
+    >();
+    const traverse = (node: MindmapNode, parent: MindmapNode | null) => {
+      node.element.stash('xywh');
+      node.element.opacity = 0.3;
+      stashed.add(node.element);
+
+      if (parent) {
+        const connectorId = `#${parent.element.id}-${node.element.id}`;
+        const connector = this.connectors.get(connectorId);
+
+        if (connector) {
+          connector.opacity = 0.3;
+          stashed.add(connector);
+        }
+      }
+
+      if (node.children.length) {
+        node.children.forEach(child => traverse(child, node));
+      }
+    };
+
+    const parent = this.getParentNode(mindNode.element.id);
+    const parentNode = parent ? this.getNode(parent.id) : null;
+
+    traverse(mindNode, parentNode);
+
+    return () => {
+      stashed.forEach(el => {
+        if ('pop' in el) {
+          el.pop('xywh');
+        }
+
+        el.opacity = 1;
+      });
+    };
+  }
+
+  removeChild(id: string) {
     if (!this._nodeMap.has(id)) {
       return;
     }
@@ -439,114 +784,84 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
         remove(child);
       });
 
-      this.children.delete(element.id);
+      this.children?.delete(element.id);
       removedDescendants.push(element.id);
     };
 
     surface.doc.transact(() => {
       remove(this._nodeMap.get(id)!);
-      this.setChildIds(Array.from(this.children.keys()), true);
+    });
+
+    queueMicrotask(() => {
       removedDescendants.forEach(id => surface.removeElement(id));
     });
+
+    // This transaction may not end
+    // force to build the elements
+    this.buildTree();
+    this.requestLayout();
   }
 
-  layout() {
-    if (!this.tree) return;
-    this.connectors = new Map();
-    this.surface.doc.transact(() => {
-      layout(this._tree, this);
-    });
-  }
-
-  calcConnection() {
-    this.connectors = new Map();
-    const walk = (
-      node: MindmapNode,
-      layoutDir: LayoutType.LEFT | LayoutType.RIGHT,
-      path: number[],
-      children: MindmapNode[] = node.children
-    ) => {
-      children.forEach((child, idx) => {
-        idx = node.children === children ? idx : node.children.indexOf(child);
-
-        const currentPath = [...path, idx];
-
-        this.addConnector(
-          node,
-          child,
-          layoutDir,
-          this.styleGetter.getNodeStyle(child, currentPath).connector
-        );
-
-        walk(child, layoutDir, currentPath);
-      });
-    };
-
-    walk(this._tree, LayoutType.LEFT, [0], this._tree.left);
-    walk(this._tree, LayoutType.RIGHT, [0], this._tree.right);
-  }
-
-  protected addConnector(
-    from: MindmapNode,
-    to: MindmapNode,
-    layout: LayoutType,
-    connectorStyle: ConnectorStyle
+  layout(
+    tree: MindmapNode | MindmapRoot = this.tree,
+    applyStyle = true,
+    layoutType?: LayoutType
   ) {
-    const id = `#${from.id}-${to.id}`;
+    if (!tree || !tree.element) return;
 
-    if (!this.connectors.has(id)) {
-      const connector = new LocalConnectorElementModel();
-      this.connectors.set(id, connector);
+    if (applyStyle) {
+      this.applyStyle(true);
     }
 
-    const connector = this.connectors.get(id)!;
-
-    connector.id = id;
-    connector.source = {
-      id: from.id,
-      position: layout === LayoutType.RIGHT ? [1, 0.5] : [0, 0.5],
-    };
-    connector.target = {
-      id: to.id,
-      position: layout === LayoutType.RIGHT ? [0, 0.5] : [1, 0.5],
-    };
-
-    Object.entries(connectorStyle).forEach(([key, value]) => {
-      // @ts-ignore
-      connector[key as unknown] = value;
+    this.surface.doc.transact(() => {
+      const path = this.getPath(tree.id);
+      layout(tree, this, layoutType ?? this.getLayoutDir(tree.id), path);
     });
-
-    this.pathGenerator.updatePath(connector);
   }
 
-  getLayoutDir(
-    element: string | BlockSuite.EdgelessModelType
-  ): LayoutType | null {
-    if (this.layoutType !== LayoutType.BALANCE) {
-      return this.layoutType;
-    }
-
-    const id = typeof element === 'string' ? element : element.id;
-
-    if (!this._nodeMap.has(id)) {
+  getConnector(from: MindmapNode, to: MindmapNode) {
+    if (!this._nodeMap.has(from.id) || !this._nodeMap.has(to.id)) {
       return null;
     }
 
-    let node = this._nodeMap.get(id)!;
-    const root = this._tree;
-
-    while (node?.detail.parent && node.detail.parent !== root.id) {
-      node = this._nodeMap.get(node.detail.parent)!;
-    }
-
-    return root.left.includes(node)
-      ? LayoutType.LEFT
-      : root.right.includes(node)
-        ? LayoutType.RIGHT
-        : this.layoutType;
+    return this.addConnector(
+      from,
+      to,
+      this.getLayoutDir(to)!,
+      this.styleGetter.getNodeStyle(to, this.getPath(to)).connector
+    );
   }
 
-  private _queued = false;
+  getLayoutDir(node: string | MindmapNode): LayoutType | null {
+    node = typeof node === 'string' ? this._nodeMap.get(node)! : node;
+
+    assertType<MindmapNode>(node);
+
+    let current: MindmapNode | null = node;
+    const root = this._tree;
+
+    while (current) {
+      if (current.overriddenDir !== undefined) {
+        return current.overriddenDir;
+      }
+
+      const parent: MindmapNode | null = current.detail.parent
+        ? this._nodeMap.get(current.detail.parent) ?? null
+        : null;
+
+      if (parent === root) {
+        return root.left.includes(current)
+          ? LayoutType.LEFT
+          : root.right.includes(current)
+            ? LayoutType.RIGHT
+            : this.layoutType;
+      }
+
+      current = parent;
+    }
+
+    return this.layoutType;
+  }
 
   requestLayout() {
     if (!this._queued) {
@@ -559,25 +874,18 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     }
   }
 
-  applyStyle() {
+  applyStyle(fitContent: boolean = false) {
     this.surface.doc.transact(() => {
       const style = this.styleGetter;
-      applyNodeStyle(this._tree, style.root);
+      if (!style) return;
+      applyNodeStyle(this._tree, style.root, fitContent);
 
       const walk = (node: MindmapNode, path: number[]) => {
         node.children.forEach((child, idx) => {
           const currentPath = [...path, idx];
           const nodeStyle = style.getNodeStyle(child, currentPath);
-          const connectorId = `#${node.id}-${child.id}`;
 
-          applyNodeStyle(child, nodeStyle.node);
-
-          if (this.connectors.has(connectorId)) {
-            applyConnectorStyle(
-              this.connectors.get(connectorId)!,
-              nodeStyle.connector
-            );
-          }
+          applyNodeStyle(child, nodeStyle.node, fitContent);
 
           walk(child, currentPath);
         });
@@ -607,6 +915,10 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   getSiblingNode(
     id: string,
     direction: 'prev' | 'next' = 'next',
+    /**
+     * The subtree of which that the sibling node belongs to,
+     * this is used when the layout type is BALANCED.
+     */
     subtree?: 'left' | 'right'
   ) {
     const node = this._nodeMap.get(id);
@@ -629,12 +941,17 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     if (idx === -1) {
       return null;
     }
+    const siblingIndex = direction === 'next' ? idx + 1 : idx - 1;
+    const sibling = childrenTree[siblingIndex] ?? null;
 
-    return (
-      childrenTree[direction === 'next' ? idx + 1 : idx - 1]?.element ?? null
-    );
+    return sibling;
   }
 
+  /**
+   *
+   * @param subtree The subtree of root, this only take effects when the layout type is BALANCED.
+   * @returns
+   */
   getChildNodes(id: string, subtree?: 'left' | 'right') {
     const node = this._nodeMap.get(id);
 
@@ -643,10 +960,107 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     }
 
     if (subtree && id === this._tree.id) {
-      return this._tree[subtree].map(child => child.element);
+      return this._tree[subtree];
     }
 
-    return node.children.map(child => child.element);
+    return node.children;
+  }
+
+  /**
+   * Detach a mindmap. It is similar to `removeChild` but
+   * it does not delete the node.
+   *
+   * So the node can be used to create a new mind map or merge into other mind map
+   */
+  detach(subtree: string | MindmapNode) {
+    subtree =
+      typeof subtree === 'string' ? this._nodeMap.get(subtree)! : subtree;
+
+    assertType<MindmapNode>(subtree);
+
+    if (!subtree) {
+      return;
+    }
+
+    const traverse = (subtree: MindmapNode) => {
+      this.children.delete(subtree.id);
+
+      // cut the reference inside the ymap
+      subtree.detail = {
+        ...subtree.detail,
+      };
+
+      subtree.children.forEach(child => traverse(child));
+    };
+
+    this.surface.doc.transact(() => {
+      traverse(subtree);
+    });
+
+    this.layout();
+
+    delete subtree.detail.parent;
+
+    return subtree;
+  }
+
+  static override propsToY(props: Record<string, unknown>) {
+    if (
+      props.children &&
+      !isNodeType(props.children as Record<string, unknown>) &&
+      !(props.children instanceof DocCollection.Y.Map)
+    ) {
+      const children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
+
+      keys(props.children).forEach(key => {
+        const detail = pick<Record<string, unknown>, keyof NodeDetail>(
+          props.children![key],
+          ['index', 'parent', 'preferredDir']
+        );
+        children.set(key as string, detail as NodeDetail);
+      });
+
+      props.children = children;
+    }
+
+    return props as MindmapElementProps;
+  }
+
+  static createFromTree(
+    tree: MindmapNode,
+    style: MindmapStyle,
+    layoutType: LayoutType,
+    surface: SurfaceBlockModel
+  ) {
+    const children = new DocCollection.Y.Map();
+    const traverse = (subtree: MindmapNode, parent?: string) => {
+      const value: NodeDetail = {
+        ...subtree.detail,
+        parent,
+      };
+
+      if (!parent) {
+        delete value.parent;
+      }
+
+      children.set(subtree.id, value);
+
+      subtree.children.forEach(child => traverse(child, subtree.id));
+    };
+
+    traverse(tree);
+
+    const mindmapId = surface.addElement({
+      type: 'mindmap',
+      children,
+      layoutType,
+      style,
+    });
+    const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
+
+    mindmap.layout();
+
+    return mindmap;
   }
 }
 

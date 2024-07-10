@@ -1,8 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { type Y } from '@blocksuite/store';
+import type { Y } from '@blocksuite/store';
 
-import type { EdgelessBlockModel } from '../../root-block/edgeless/type.js';
+import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import { randomSeed } from '../rough/math.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { Bound } from '../utils/bound.js';
@@ -107,54 +107,7 @@ export type SerializedElement = Record<string, unknown> & {
 export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
   implements IEdgelessElement
 {
-  static propsToY(props: Record<string, unknown>) {
-    return props;
-  }
-
-  /**
-   * When the ymap is not connected to the doc, its value cannot be read.
-   * But we need to use those value during the creation, so the yfied decorated field's value will
-   * be stored in this map too during the creation.
-   *
-   * After the ymap is connected to the doc, this map will be cleared.
-   */
-  protected _preserved: Map<string, unknown> = new Map();
-  protected _stashed: Map<keyof Props | string, unknown>;
-  protected _local: Map<string | symbol, unknown> = new Map();
-  protected _onChange: (payload: {
-    props: Record<string, unknown>;
-    oldValues: Record<string, unknown>;
-    local: boolean;
-  }) => void;
-  protected _disposable = new DisposableGroup();
-  protected _id: string;
-
-  yMap: Y.Map<unknown>;
-  surface!: SurfaceBlockModel;
-
-  abstract rotate: number;
-
-  abstract xywh: SerializedXYWH;
-
   abstract get type(): string;
-
-  @yfield()
-  accessor index!: string;
-
-  @yfield()
-  accessor seed!: number;
-
-  @local()
-  accessor display: boolean = true;
-
-  @local()
-  accessor opacity: number = 1;
-
-  @watch((_, instance) => {
-    instance['_local'].delete('externalBound');
-  })
-  @local()
-  accessor externalXYWH: SerializedXYWH | undefined = undefined;
 
   get externalBound(): Bound | null {
     if (!this._local.has('externalBound')) {
@@ -168,36 +121,9 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
     return this._local.get('externalBound') as Bound | null;
   }
 
-  constructor(options: {
-    id: string;
-    yMap: Y.Map<unknown>;
-    model: SurfaceBlockModel;
-    stashedStore: Map<unknown, unknown>;
-    onChange: (payload: {
-      props: Record<string, unknown>;
-      oldValues: Record<string, unknown>;
-      local: boolean;
-    }) => void;
-  }) {
-    const { id, yMap, model, stashedStore, onChange } = options;
-
-    this._id = id;
-    this.yMap = yMap;
-    this.surface = model;
-    this._stashed = stashedStore as Map<keyof Props, unknown>;
-    this._onChange = onChange;
-
-    // class properties is initialized before yMap has been set
-    // so we need to manually assign the default value here
-    this.index = 'a0';
-    this.seed = randomSeed();
-  }
-
   get connectable() {
     return true;
   }
-
-  private _lastXYWH: SerializedXYWH = '[0,0,0,0]';
 
   get deserializedXYWH() {
     if (this.xywh !== this._lastXYWH) {
@@ -247,6 +173,82 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
 
   get isConnected() {
     return this.surface.hasElementById(this.id);
+  }
+
+  private _lastXYWH: SerializedXYWH = '[0,0,0,0]';
+
+  /**
+   * When the ymap is not connected to the doc, its value cannot be read.
+   * But we need to use those value during the creation, so the yfield decorated field's value will
+   * be stored in this map too during the creation.
+   *
+   * After the ymap is connected to the doc, this map will be cleared.
+   */
+  protected _preserved = new Map<string, unknown>();
+
+  protected _stashed: Map<keyof Props | string, unknown>;
+
+  protected _local = new Map<string | symbol, unknown>();
+
+  protected _onChange: (payload: {
+    props: Record<string, unknown>;
+    oldValues: Record<string, unknown>;
+    local: boolean;
+  }) => void;
+
+  protected _disposable = new DisposableGroup();
+
+  protected _id: string;
+
+  yMap: Y.Map<unknown>;
+
+  surface!: SurfaceBlockModel;
+
+  abstract rotate: number;
+
+  abstract xywh: SerializedXYWH;
+
+  @yfield()
+  accessor index!: string;
+
+  @yfield()
+  accessor seed!: number;
+
+  @local()
+  accessor display: boolean = true;
+
+  @local()
+  accessor opacity: number = 1;
+
+  @watch((_, instance) => {
+    instance['_local'].delete('externalBound');
+  })
+  @local()
+  accessor externalXYWH: SerializedXYWH | undefined = undefined;
+
+  constructor(options: {
+    id: string;
+    yMap: Y.Map<unknown>;
+    model: SurfaceBlockModel;
+    stashedStore: Map<unknown, unknown>;
+    onChange: (payload: {
+      props: Record<string, unknown>;
+      oldValues: Record<string, unknown>;
+      local: boolean;
+    }) => void;
+  }) {
+    const { id, yMap, model, stashedStore, onChange } = options;
+
+    this._id = id;
+    this.yMap = yMap;
+    this.surface = model;
+    this._stashed = stashedStore as Map<keyof Props, unknown>;
+    this._onChange = onChange;
+
+    // class properties is initialized before yMap has been set
+    // so we need to manually assign the default value here
+    this.index = 'a0';
+    this.seed = randomSeed();
   }
 
   stash(prop: keyof Props | string) {
@@ -369,17 +371,15 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
    * element is created in local rather than remote peers
    */
   onCreated() {}
+
+  static propsToY(props: Record<string, unknown>) {
+    return props;
+  }
 }
 
 export abstract class SurfaceGroupLikeModel<
   Props extends IBaseProps = IBaseProps,
 > extends SurfaceElementModel<Props> {
-  /**
-   * The actual field that stores the children of the group.
-   * It could be any type you want and this field should be decorated with `@yfield`.
-   */
-  abstract children: unknown;
-
   /**
    * The ids of the children. Its role is to provide a unique way to access the children.
    * You should update this field through `setChildIds` when the children are added or removed.
@@ -387,12 +387,37 @@ export abstract class SurfaceGroupLikeModel<
   get childIds() {
     return this._childIds;
   }
+
+  get childElements() {
+    const elements: BlockSuite.EdgelessModelType[] = [];
+
+    for (const key of this.childIds) {
+      const element =
+        this.surface.getElementById(key) ||
+        (this.surface.doc.getBlockById(key) as EdgelessBlockModel);
+
+      element && elements.push(element);
+    }
+
+    return elements;
+  }
+
   private _childIds: string[] = [];
+
+  /**
+   * The actual field that stores the children of the group.
+   * It should be a ymap decorated with `@yfield`.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  abstract children: Y.Map<any>;
+
+  @local<SerializedXYWH, SurfaceGroupLikeModel>()
+  accessor xywh: SerializedXYWH = '[0,0,0,0]';
 
   /**
    * Set the new value of the childIds
    * @param value the new value of the childIds
-   * @param fromLocal if true, the change is happend in the local
+   * @param fromLocal if true, the change is happened in the local
    */
   protected setChildIds(value: string[], fromLocal: boolean) {
     const oldChildIds = this.childIds;
@@ -419,43 +444,33 @@ export abstract class SurfaceGroupLikeModel<
     });
   }
 
-  get childElements() {
-    const elements: BlockSuite.EdgelessModelType[] = [];
-
-    for (const key of this.childIds) {
-      const element =
-        this.surface.getElementById(key) ||
-        (this.surface.doc.getBlockById(key) as EdgelessBlockModel);
-
-      element && elements.push(element);
-    }
-
-    return elements;
+  hasChild(element: string | BlockSuite.EdgelessModelType) {
+    return (
+      (typeof element === 'string'
+        ? this.children?.has(element)
+        : this.children?.has(element.id)) ?? false
+    );
   }
-
-  @local<SerializedXYWH, SurfaceGroupLikeModel>()
-  accessor xywh: SerializedXYWH = '[0,0,0,0]';
 
   /**
    * Check if the group has the given descendant.
    */
   hasDescendant(element: string | BlockSuite.EdgelessModelType) {
-    const groups =
-      typeof element === 'string'
-        ? this.surface.getGroups(element)
-        : this.surface.getGroups(element.id);
+    const groups = this.surface.getGroups(
+      typeof element === 'string' ? element : element.id
+    );
 
     return groups.some(group => group.id === this.id);
   }
 
   /**
-   * Get all decendants of this group
+   * Get all descendants of this group
    * @param withoutGroup if true, will not include group element
    */
-  decendants(withoutGroup = true) {
+  descendants(withoutGroup = true) {
     return this.childElements.reduce((prev, child) => {
       if (child instanceof SurfaceGroupLikeModel) {
-        prev = prev.concat(child.decendants());
+        prev = prev.concat(child.descendants());
 
         !withoutGroup && prev.push(child);
       } else {
@@ -467,20 +482,12 @@ export abstract class SurfaceGroupLikeModel<
   }
 
   /**
-   * Remove the descendant from the group
+   * Remove the child from the group
    */
-  abstract removeDescendant(id: string): void;
+  abstract removeChild(id: string): void;
 }
 
 export abstract class SurfaceLocalModel {
-  protected _local: Map<string | symbol, unknown> = new Map();
-
-  abstract rotate: number;
-
-  abstract xywh: SerializedXYWH;
-
-  private _lastXYWH: SerializedXYWH = '[0,0,-1,-1]';
-
   get deserializedXYWH() {
     if (this.xywh !== this._lastXYWH) {
       const xywh = this.xywh;
@@ -506,26 +513,42 @@ export abstract class SurfaceLocalModel {
   get h() {
     return this.deserializedXYWH[3];
   }
+
+  private _lastXYWH: SerializedXYWH = '[0,0,-1,-1]';
+
+  protected _local = new Map<string | symbol, unknown>();
+
+  abstract rotate: number;
+
+  abstract xywh: SerializedXYWH;
+
+  opacity: number = 1;
 }
 
 declare global {
   namespace BlockSuite {
     interface SurfaceElementModelMap {}
+    type SurfaceElementModelKeyType = keyof SurfaceElementModelMap;
     type SurfaceElementModelType =
-      | SurfaceElementModelMap[keyof SurfaceElementModelMap]
+      | SurfaceElementModelMap[SurfaceElementModelKeyType]
       | SurfaceElementModel;
 
     interface SurfaceGroupLikeModelMap {}
+    type SurfaceGroupLikeModelKeyType = keyof SurfaceGroupLikeModelMap;
     type SurfaceGroupLikeModelType =
-      | SurfaceGroupLikeModelMap[keyof SurfaceGroupLikeModelMap]
+      | SurfaceGroupLikeModelMap[SurfaceGroupLikeModelKeyType]
       | SurfaceGroupLikeModel;
 
     interface SurfaceLocalModelMap {}
+    type SurfaceLocalModelKeyType = keyof SurfaceLocalModelMap;
     type SurfaceLocalModelType =
-      | SurfaceLocalModelMap[keyof SurfaceLocalModelMap]
+      | SurfaceLocalModelMap[SurfaceLocalModelKeyType]
       | SurfaceLocalModel;
 
     // not include local model
     type SurfaceModelType = SurfaceElementModelType | SurfaceGroupLikeModelType;
+    type SurfaceModelKeyType =
+      | SurfaceElementModelKeyType
+      | SurfaceGroupLikeModelKeyType;
   }
 }

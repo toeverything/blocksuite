@@ -82,7 +82,7 @@ export function createElementModel(
     );
     elementModel['_preserved'].clear();
     mounted = true;
-    options.newCreate && elementModel.onCreated();
+    elementModel.onCreated();
   };
 
   return {

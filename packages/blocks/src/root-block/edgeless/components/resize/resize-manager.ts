@@ -4,9 +4,11 @@ import type { IPoint } from '../../../../_common/types.js';
 import {
   Bound,
   getQuadBoundsWithRotation,
+  type PointLocation,
   rotatePoints,
 } from '../../../../surface-block/index.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
+import type { SelectableProps } from '../../utils/query.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
 // 15deg
@@ -20,6 +22,8 @@ type ResizeMoveHandler = (
     string,
     {
       bound: Bound;
+      path?: PointLocation[];
+      matrix?: DOMMatrix;
     }
   >,
   direction: HandleDirection
@@ -28,63 +32,8 @@ type ResizeMoveHandler = (
 type RotateMoveHandler = (point: IPoint, rotate: number) => void;
 
 export class HandleResizeManager {
-  private _onDragStart: DragStartHandler;
-  private _onResizeMove: ResizeMoveHandler;
-  private _onRotateMove: RotateMoveHandler;
-  private _onDragEnd: DragEndHandler;
-  private _dragDirection: HandleDirection = HandleDirection.Left;
-  private _dragPos: {
-    start: { x: number; y: number };
-    end: { x: number; y: number };
-  } = {
-    start: { x: 0, y: 0 },
-    end: { x: 0, y: 0 },
-  };
-
-  private _rotate = 0;
-
-  /**
-   * Record inital rect of selected elements
-   */
-  private _originalRect = new DOMRect();
-
-  /**
-   * Current rect of selected elements, it may change during resizing or moving
-   */
-  private _currentRect = new DOMRect();
-
-  private _origin: { x: number; y: number } = { x: 0, y: 0 };
-  private _resizeMode: ResizeMode = 'none';
-  private _zoom = 1;
-
-  private _bounds = new Map<
-    string,
-    {
-      bound: Bound;
-      rotate: number;
-    }
-  >();
-
-  private _aspectRatio = 1;
-  private _locked = false;
-  private _proportion = false;
-  private _shiftKey = false;
-  private _proportional = false;
-  private _rotation = false;
-  private _target: HTMLElement | null = null;
-
-  private _dragging = false;
-
-  constructor(
-    onDragStart: DragStartHandler,
-    onResizeMove: ResizeMoveHandler,
-    onRotateMove: RotateMoveHandler,
-    onDragEnd: DragEndHandler
-  ) {
-    this._onDragStart = onDragStart;
-    this._onResizeMove = onResizeMove;
-    this._onRotateMove = onRotateMove;
-    this._onDragEnd = onDragEnd;
+  get dragDirection() {
+    return this._dragDirection;
   }
 
   get dragging() {
@@ -107,52 +56,76 @@ export class HandleResizeManager {
     return this._bounds;
   }
 
-  updateState(
-    resizeMode: ResizeMode,
-    rotate: number,
-    zoom: number,
-    position?: { x: number; y: number },
-    originalRect?: DOMRect,
-    proportion = false
-  ) {
-    this._resizeMode = resizeMode;
-    this._rotate = rotate;
-    this._zoom = zoom;
-    this._proportion = proportion;
+  private _onDragStart: DragStartHandler;
 
-    if (position) {
-      this._currentRect.x = position.x;
-      this._currentRect.y = position.y;
-      this._originalRect.x = this._currentRect.x;
-      this._originalRect.y = this._currentRect.y;
+  private _onResizeMove: ResizeMoveHandler;
+
+  private _onRotateMove: RotateMoveHandler;
+
+  private _onDragEnd: DragEndHandler;
+
+  private _dragDirection: HandleDirection = HandleDirection.Left;
+
+  private _dragPos: {
+    start: { x: number; y: number };
+    end: { x: number; y: number };
+  } = {
+    start: { x: 0, y: 0 },
+    end: { x: 0, y: 0 },
+  };
+
+  private _rotate = 0;
+
+  /**
+   * Record inital rect of selected elements
+   */
+  private _originalRect = new DOMRect();
+
+  /**
+   * Current rect of selected elements, it may change during resizing or moving
+   */
+  private _currentRect = new DOMRect();
+
+  private _origin: { x: number; y: number } = { x: 0, y: 0 };
+
+  private _resizeMode: ResizeMode = 'none';
+
+  private _zoom = 1;
+
+  private _bounds = new Map<
+    string,
+    {
+      bound: Bound;
+      rotate: number;
     }
+  >();
 
-    if (originalRect) {
-      this._originalRect = originalRect;
-      this._aspectRatio = originalRect.width / originalRect.height;
-      this._currentRect = DOMRect.fromRect(originalRect);
-    }
-  }
+  private _aspectRatio = 1;
 
-  updateRectPosition(delta: { x: number; y: number }) {
-    this._currentRect.x += delta.x;
-    this._currentRect.y += delta.y;
-    this._originalRect.x = this._currentRect.x;
-    this._originalRect.y = this._currentRect.y;
+  private _locked = false;
 
-    return this._originalRect;
-  }
+  private _proportion = false;
 
-  updateBounds(
-    bounds: Map<
-      string,
-      {
-        bound: Bound;
-        rotate: number;
-      }
-    >
+  private _shiftKey = false;
+
+  private _proportional = false;
+
+  private _rotation = false;
+
+  private _target: HTMLElement | null = null;
+
+  private _dragging = false;
+
+  constructor(
+    onDragStart: DragStartHandler,
+    onResizeMove: ResizeMoveHandler,
+    onRotateMove: RotateMoveHandler,
+    onDragEnd: DragEndHandler
   ) {
-    this._bounds = bounds;
+    this._onDragStart = onDragStart;
+    this._onResizeMove = onResizeMove;
+    this._onRotateMove = onRotateMove;
+    this._onDragEnd = onDragEnd;
   }
 
   private _onResize(proportion: boolean) {
@@ -446,10 +419,12 @@ export class HandleResizeManager {
       string,
       {
         bound: Bound;
+        path?: PointLocation[];
+        matrix?: DOMMatrix;
       }
     >();
 
-    let process: (value: { bound: Bound; rotate: number }, key: string) => void;
+    let process: (value: SelectableProps, key: string) => void;
 
     if (isCorner || isAll || isEdgeAndCorner) {
       if (this._bounds.size === 1) {
@@ -470,7 +445,7 @@ export class HandleResizeManager {
           .translateSelf(-fp.x, -fp.y);
 
         // TODO: on same rotate
-        process = ({ bound: { x, y, w, h } }, id) => {
+        process = ({ bound: { x, y, w, h }, path }, id) => {
           const cx = x + w / 2;
           const cy = y + h / 2;
           const center = new DOMPoint(cx, cy).matrixTransform(m2);
@@ -484,6 +459,8 @@ export class HandleResizeManager {
               newWidth,
               newHeight
             ),
+            matrix: m2,
+            path,
           });
         };
       }
@@ -497,7 +474,7 @@ export class HandleResizeManager {
         fixedPoint.y,
         0
       );
-      process = ({ bound: { x, y, w, h }, rotate = 0 }, id) => {
+      process = ({ bound: { x, y, w, h }, rotate = 0, path }, id) => {
         const cx = x + w / 2;
         const cy = y + h / 2;
 
@@ -539,6 +516,8 @@ export class HandleResizeManager {
             newWidth,
             newHeight
           ),
+          matrix: m2,
+          path,
         });
       };
     }
@@ -595,6 +574,46 @@ export class HandleResizeManager {
 
     this._dragPos.start = { x, y };
     this._rotate += delta;
+  }
+
+  updateState(
+    resizeMode: ResizeMode,
+    rotate: number,
+    zoom: number,
+    position?: { x: number; y: number },
+    originalRect?: DOMRect,
+    proportion = false
+  ) {
+    this._resizeMode = resizeMode;
+    this._rotate = rotate;
+    this._zoom = zoom;
+    this._proportion = proportion;
+
+    if (position) {
+      this._currentRect.x = position.x;
+      this._currentRect.y = position.y;
+      this._originalRect.x = this._currentRect.x;
+      this._originalRect.y = this._currentRect.y;
+    }
+
+    if (originalRect) {
+      this._originalRect = originalRect;
+      this._aspectRatio = originalRect.width / originalRect.height;
+      this._currentRect = DOMRect.fromRect(originalRect);
+    }
+  }
+
+  updateRectPosition(delta: { x: number; y: number }) {
+    this._currentRect.x += delta.x;
+    this._currentRect.y += delta.y;
+    this._originalRect.x = this._currentRect.x;
+    this._originalRect.y = this._currentRect.y;
+
+    return this._originalRect;
+  }
+
+  updateBounds(bounds: Map<string, SelectableProps>) {
+    this._bounds = bounds;
   }
 
   onPointerDown = (

@@ -3,7 +3,6 @@ import '../../../filter/filter-group.js';
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { eventToVRect } from '../../../../../../_common/components/index.js';
 import type { FilterGroup } from '../../../../common/ast.js';
 import { FilterIcon } from '../../../../common/icons/index.js';
 import { popCreateFilter } from '../../../../common/ref/ref.js';
@@ -33,19 +32,8 @@ const styles = css`
 
 @customElement('data-view-header-tools-filter')
 export class DataViewHeaderToolsFilter extends WidgetBase {
-  static override styles = styles;
-
   private get readonly() {
     return this.view.readonly;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
   }
 
   private get _filter() {
@@ -56,17 +44,12 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     this.view.updateFilter(filter);
   }
 
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
-  }
+  static override styles = styles;
 
   private addFilter(event: MouseEvent) {
     if (!this._filter.conditions.length && !this.view.filterVisible) {
       this.showToolBar(true);
-      popCreateFilter(eventToVRect(event), {
+      popCreateFilter(event.target as HTMLElement, {
         vars: this.view.vars,
         onSelect: filter => {
           this._filter = {
@@ -82,6 +65,22 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
       return;
     }
     this.view.filterSetVisible(!this.view.filterVisible);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
+  showToolBar(show: boolean) {
+    const tools = this.closest('data-view-header-tools');
+    if (tools) {
+      tools.showToolBar = show;
+    }
   }
 
   override render() {

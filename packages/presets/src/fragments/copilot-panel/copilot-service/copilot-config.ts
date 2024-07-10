@@ -149,12 +149,12 @@ export class CopilotConfig {
     this.save();
   }
 
-  public addVendor(config: VendorConfig) {
+  addVendor(config: VendorConfig) {
     this._config?.vendors.push(config);
     this.save();
   }
 
-  public getVendor<T extends AllServiceKind>(
+  getVendor<T extends AllServiceKind>(
     featureKey: string,
     serviceKind: T
   ): VendorPack<T> | undefined {
@@ -174,7 +174,7 @@ export class CopilotConfig {
     }
   }
 
-  public getService<T extends AllServiceKind>(
+  getService<T extends AllServiceKind>(
     featureKey: string,
     serviceKind: T
   ): GetMethod<T> {

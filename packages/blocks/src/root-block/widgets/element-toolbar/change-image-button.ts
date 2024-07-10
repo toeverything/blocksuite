@@ -1,13 +1,15 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/separator.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { CaptionIcon } from '../../../_common/icons/text.js';
+import { CaptionIcon, DownloadIcon } from '../../../_common/icons/text.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
+import { downloadImageBlob } from '../../../image-block/utils.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-change-image-button')
@@ -23,9 +25,10 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
   }
 
   private get _blockElement() {
-    const blockSelection = this.edgeless.service.selection.selections.filter(
-      sel => sel.elements.includes(this.model.id)
-    );
+    const blockSelection =
+      this.edgeless.service.selection.surfaceSelections.filter(sel =>
+        sel.elements.includes(this.model.id)
+      );
     if (blockSelection.length !== 1) {
       return;
     }
@@ -38,21 +41,37 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
     return blockElement;
   }
 
-  private _showCaption() {
+  private _showCaption = () => {
     this._blockElement?.captionEditor.show();
-  }
+  };
+
+  private _download = () => {
+    if (!this._blockElement) return;
+    downloadImageBlob(this._blockElement).catch(console.error);
+  };
 
   override render() {
     return html`
-      <edgeless-tool-icon-button
+      <editor-icon-button
+        aria-label="Download"
+        .tooltip=${'Download'}
+        ?disabled=${this._doc.readonly}
+        @click=${this._download}
+      >
+        ${DownloadIcon}
+      </editor-icon-button>
+
+      <editor-toolbar-separator></editor-toolbar-separator>
+
+      <editor-icon-button
         aria-label="Add caption"
         .tooltip=${'Add caption'}
         class="change-image-button caption"
         ?disabled=${this._doc.readonly}
-        @click=${() => this._showCaption()}
+        @click=${this._showCaption}
       >
         ${CaptionIcon}
-      </edgeless-tool-icon-button>
+      </editor-icon-button>
     `;
   }
 }

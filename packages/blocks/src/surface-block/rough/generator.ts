@@ -59,10 +59,6 @@ export class RoughGenerator {
     }
   }
 
-  static newSeed(): number {
-    return randomSeed();
-  }
-
   private _o(options?: Options): ResolvedOptions {
     return options
       ? Object.assign({}, this.defaultOptions, options)
@@ -71,6 +67,19 @@ export class RoughGenerator {
 
   private _d(shape: string, sets: OpSet[], options: ResolvedOptions): Drawable {
     return { shape, sets: sets || [], options: options || this.defaultOptions };
+  }
+
+  private fillSketch(drawing: OpSet, o: ResolvedOptions): PathInfo {
+    let fweight = o.fillWeight;
+    if (fweight < 0) {
+      fweight = o.strokeWidth / 2;
+    }
+    return {
+      d: this.opsToPath(drawing),
+      stroke: o.fill || NOS,
+      strokeWidth: fweight,
+      fill: NOS,
+    };
   }
 
   line(
@@ -326,16 +335,7 @@ export class RoughGenerator {
     return paths;
   }
 
-  private fillSketch(drawing: OpSet, o: ResolvedOptions): PathInfo {
-    let fweight = o.fillWeight;
-    if (fweight < 0) {
-      fweight = o.strokeWidth / 2;
-    }
-    return {
-      d: this.opsToPath(drawing),
-      stroke: o.fill || NOS,
-      strokeWidth: fweight,
-      fill: NOS,
-    };
+  static newSeed(): number {
+    return randomSeed();
   }
 }

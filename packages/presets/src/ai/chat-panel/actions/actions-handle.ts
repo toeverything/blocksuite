@@ -139,7 +139,7 @@ export const EdgelessEditorActions = [
       reportResponse('result:add-note');
       const { doc } = host;
       const service = host.spec.getService<EdgelessRootService>('affine:page');
-      const elements = service.selection.elements;
+      const elements = service.selection.selectedElements;
 
       const props: { displayMode: NoteDisplayMode; xywh?: SerializedXYWH } = {
         displayMode: NoteDisplayMode.EdgelessOnly,

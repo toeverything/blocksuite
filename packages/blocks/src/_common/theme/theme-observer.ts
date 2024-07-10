@@ -26,6 +26,7 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
   private _observer?: MutationObserver;
 
   private _mode = '';
+
   private _cssVariables: CssVariablesMap | null = null;
 
   get cssVariables() {

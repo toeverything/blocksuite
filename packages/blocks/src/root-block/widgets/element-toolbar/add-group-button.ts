@@ -1,4 +1,4 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
@@ -22,16 +22,20 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
+  private _createGroup = () => {
+    this.edgeless.service.createGroupFromSelected();
+  };
+
   protected override render() {
     return html`
-      <edgeless-tool-icon-button
+      <editor-icon-button
         aria-label="Group"
         .tooltip=${'Group'}
         .labelHeight=${'20px'}
-        @click=${() => this.edgeless.service.createGroupFromSelected()}
+        @click=${this._createGroup}
       >
         ${GroupIcon}<span class="label medium">Group</span>
-      </edgeless-tool-icon-button>
+      </editor-icon-button>
     `;
   }
 }

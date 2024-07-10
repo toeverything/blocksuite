@@ -25,6 +25,7 @@ export const richTextColumnModelConfig =
       };
     },
     cellToJson: data => data?.toString() ?? null,
+    isEmpty: data => data == null || data.length === 0,
   });
 richTextColumnModelConfig.addConvert('select', (_column, cells) => {
   const options: Record<string, SelectTag> = {};

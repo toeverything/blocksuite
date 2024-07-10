@@ -35,15 +35,6 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor frame!: FrameBlockModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor zoom!: number;
-
   @state()
   private accessor _editing = false;
 
@@ -63,7 +54,44 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
   private accessor _xywh: SerializedXYWH | null = null;
 
   private _cachedWidth = 0;
+
   private _cachedHeight = 0;
+
+  @property({ attribute: false })
+  accessor frame!: FrameBlockModel;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor zoom!: number;
+
+  private _updateFrameTitleSize() {
+    const { _nestedFrame, zoom } = this;
+    const { elementBound } = this.frame;
+    const width = this._cachedWidth / zoom;
+    const height = this._cachedHeight / zoom;
+
+    if (width && height) {
+      this.frame.externalXYWH = `[${
+        elementBound.x + (_nestedFrame ? NESTED_FRAME_OFFSET / zoom : 0)
+      },${
+        elementBound.y +
+        (_nestedFrame
+          ? NESTED_FRAME_OFFSET / zoom
+          : -(height + NESTED_FRAME_OFFSET / zoom))
+      },${width},${height}]`;
+    }
+  }
+
+  private _isInsideFrame() {
+    return this.edgeless.service.layer.framesGrid.has(
+      this.frame.elementBound,
+      true,
+      true,
+      new Set([this.frame])
+    );
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -76,9 +104,11 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     _disposables.add(
       edgeless.doc.slots.blockUpdated.on(payload => {
         if (
-          payload.type === 'update' &&
-          payload.props.key === 'xywh' &&
-          edgeless.doc.getBlock(payload.id)?.model instanceof FrameBlockModel
+          (payload.type === 'update' &&
+            payload.props.key === 'xywh' &&
+            edgeless.doc.getBlock(payload.id)?.model instanceof
+              FrameBlockModel) ||
+          (payload.type === 'add' && payload.flavour === 'affine:frame')
         ) {
           this._nestedFrame = this._isInsideFrame();
         }
@@ -141,33 +171,6 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  private _updateFrameTitleSize() {
-    const { _nestedFrame, zoom } = this;
-    const { elementBound } = this.frame;
-    const width = this._cachedWidth / zoom;
-    const height = this._cachedHeight / zoom;
-
-    if (width && height) {
-      this.frame.externalXYWH = `[${
-        elementBound.x + (_nestedFrame ? NESTED_FRAME_OFFSET / zoom : 0)
-      },${
-        elementBound.y +
-        (_nestedFrame
-          ? NESTED_FRAME_OFFSET / zoom
-          : -(height + NESTED_FRAME_OFFSET / zoom))
-      },${width},${height}]`;
-    }
-  }
-
-  private _isInsideFrame() {
-    return this.edgeless.service.layer.framesGrid.has(
-      this.frame.elementBound,
-      true,
-      true,
-      new Set([this.frame])
-    );
-  }
-
   override render() {
     const model = this.frame;
     const bound = Bound.deserialize(model.xywh);
@@ -197,6 +200,7 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
                 display: hidden ? 'none' : 'initial',
                 transform: transformOperation.join(' '),
                 maxWidth: maxWidth + 'px',
+                transformOrigin: nestedFrame ? 'top left' : 'bottom left',
                 background: nestedFrame
                   ? 'var(--affine-white)'
                   : 'var(--affine-text-primary-color)',
@@ -263,17 +267,6 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor visibleFrames!: Set<FrameBlockModel>;
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    this._disposables.add(
-      this.edgeless.service.viewport.viewportUpdated.on(() => {
-        // if zoom changed we need to re-render the frame titles
-        this.requestUpdate();
-      })
-    );
-  }
-
   protected override render() {
     const { visibleFrames, edgeless, startIndex } = this;
     const zoom = edgeless.service.viewport.zoom;
@@ -299,10 +292,21 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
           .updatingSet=${this.edgeless.rootElementContainer.renderingSet}
           .concurrentUpdatingCount=${this.edgeless.rootElementContainer
             .concurrentRendering}
-          style=${`z-index: ${startIndex + index};${visibleFrames.has(frame) ? 'display:block' : ''}`}
+          style=${`pointer-events: none; z-index: ${startIndex + index};${visibleFrames.has(frame) ? 'display:block' : ''}`}
         >
         </edgeless-block-portal-frame>
       `
+    );
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    this._disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
+        // if zoom changed we need to re-render the frame titles
+        this.requestUpdate();
+      })
     );
   }
 }

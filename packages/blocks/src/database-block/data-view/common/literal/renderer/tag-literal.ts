@@ -19,6 +19,7 @@ export class TagLiteral extends LiteralElement<
       white-space: nowrap;
     }
   `;
+
   tags() {
     const tags = this.type.data?.tags;
     if (!tags) {
@@ -29,11 +30,11 @@ export class TagLiteral extends LiteralElement<
 
   override render() {
     if (!this.value) {
-      return html`<span class="dv-color-2">Empty</span>`;
+      return html`<span class="dv-color-2">Value</span>`;
     }
     return (
       this.tags().find(v => v.id === this.value)?.value ??
-      html`<span class="dv-color-2">Empty</span>`
+      html`<span class="dv-color-2">Value</span>`
     );
   }
 }
@@ -67,7 +68,7 @@ export class MultiTagLiteral extends LiteralElement<
 
   override render() {
     if (!this.value?.length) {
-      return html`<span class="dv-color-2">Empty</span>`;
+      return html`<span class="dv-color-2">Value</span>`;
     }
     const tagMap = new Map(this.tags().map(v => [v.id, v.value]));
     return html`${this.value.map(id => tagMap.get(id)).join(',')}`;

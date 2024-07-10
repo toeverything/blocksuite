@@ -109,7 +109,7 @@ function toggleStyle(
     Object.entries(attrs).map(([k, v]) => {
       if (
         typeof v === 'boolean' &&
-        v === (oldAttributes as { [k: string]: unknown })[k]
+        v === (oldAttributes as Record<string, unknown>)[k]
       ) {
         return [k, null];
       } else {
@@ -395,8 +395,11 @@ export class TestPage extends ShadowlessElement {
   `;
 
   private _editorA: InlineEditor | null = null;
+
   private _editorB: InlineEditor | null = null;
+
   private _undoManagerA: Y.UndoManager | null = null;
+
   private _undoManagerB: Y.UndoManager | null = null;
 
   override firstUpdated() {

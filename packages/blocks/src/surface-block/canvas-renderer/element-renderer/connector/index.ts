@@ -1,12 +1,15 @@
-import {
-  type ConnectorElementModel,
-  isConnectorWithLabel,
-  type LocalConnectorElementModel,
-  type PointStyle,
+import type {
+  ConnectorElementModel,
+  LocalConnectorElementModel,
+  PointStyle,
 } from '../../../element-model/connector.js';
-import { ConnectorMode } from '../../../element-model/connector.js';
-import type { PointLocation } from '../../../index.js';
+import {
+  ConnectorMode,
+  isConnectorWithLabel,
+} from '../../../element-model/connector.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
 import { getBezierParameters } from '../../../utils/curve.js';
+import type { PointLocation } from '../../../utils/point-location.js';
 import type { Renderer } from '../../renderer.js';
 import {
   deltaInsertsToChunks,
@@ -30,7 +33,8 @@ export function connector(
   model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer
+  renderer: Renderer,
+  rc: RoughCanvas
 ) {
   const {
     mode,
@@ -65,7 +69,7 @@ export function connector(
     dy = ly - y;
 
     const path = new Path2D();
-    path.rect(0 - offset / 2, 0 - offset / 2, w + offset, h + offset);
+    path.rect(-offset / 2, -offset / 2, w + offset, h + offset);
     path.rect(dx - 3 - 0.5, dy - 3 - 0.5, lw + 6 + 1, lh + 6 + 1);
     ctx.clip(path, 'evenodd');
   }
@@ -74,12 +78,13 @@ export function connector(
     model,
     ctx,
     renderer,
+    rc,
     points,
     strokeStyle === 'dash',
     mode === ConnectorMode.Curve
   );
-  renderEndpoint(model, points, ctx, renderer, 'Front', frontEndpointStyle);
-  renderEndpoint(model, points, ctx, renderer, 'Rear', rearEndpointStyle);
+  renderEndpoint(model, points, ctx, renderer, rc, 'Front', frontEndpointStyle);
+  renderEndpoint(model, points, ctx, renderer, rc, 'Rear', rearEndpointStyle);
 
   if (hasLabel) {
     ctx.restore();
@@ -97,6 +102,7 @@ function renderPoints(
   model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
+  rc: RoughCanvas,
   points: PointLocation[],
   dash: boolean,
   curve: boolean
@@ -114,18 +120,19 @@ function renderPoints(
     };
     if (curve) {
       const b = getBezierParameters(points);
-      renderer.rc.path(
+      rc.path(
         `M${b[0][0]},${b[0][1]} C${b[1][0]},${b[1][1]} ${b[2][0]},${b[2][1]} ${b[3][0]},${b[3][1]}`,
         options
       );
     } else {
-      renderer.rc.linearPath(points as unknown as [number, number][], options);
+      rc.linearPath(points as unknown as [number, number][], options);
     }
   } else {
     ctx.save();
     ctx.strokeStyle = realStrokeColor;
     ctx.lineWidth = strokeWidth;
     ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
     dash && ctx.setLineDash([12, 12]);
     ctx.beginPath();
     if (curve) {
@@ -164,11 +171,11 @@ function renderEndpoint(
   location: PointLocation[],
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
+  rc: RoughCanvas,
   end: 'Front' | 'Rear',
   style: PointStyle
 ) {
   const arrowOptions = getArrowOptions(end, model, renderer);
-  const rc = renderer.rc;
 
   switch (style) {
     case 'Arrow':
@@ -212,11 +219,11 @@ function renderLabel(
     fontFamily,
   });
   const [, , w, h] = labelXYWH!;
-  const hw = w / 2;
-  const hh = h / 2;
+  const cx = w / 2;
+  const cy = h / 2;
   const deltas = wrapTextDeltas(text!, font, w);
   const lines = deltaInsertsToChunks(deltas);
-  const lineHeight = getLineHeight(fontFamily, fontSize);
+  const lineHeight = getLineHeight(fontFamily, fontSize, fontWeight);
   const textHeight = (lines.length - 1) * lineHeight * 0.5;
 
   ctx.setTransform(matrix);
@@ -255,7 +262,7 @@ function renderLabel(
             : rtl
               ? 0.5
               : -0.5);
-      ctx.fillText(str, x + hw, index * lineHeight - textHeight + hh);
+      ctx.fillText(str, x + cx, index * lineHeight - textHeight + cy);
 
       if (shouldTemporarilyAttach) {
         ctx.canvas.remove();

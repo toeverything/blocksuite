@@ -12,7 +12,7 @@ function number2letter(n: number) {
 
 // Derive from https://gist.github.com/imilu/00f32c61e50b7ca296f91e9d96d8e976
 export function number2roman(num: number) {
-  const lookup: { [key: string]: number } = {
+  const lookup: Record<string, number> = {
     M: 1000,
     CM: 900,
     D: 500,

@@ -23,10 +23,9 @@ export function createPopper<T extends keyof HTMLElementTagNameMap>(
   tagName: T,
   reference: HTMLElement,
   options?: {
-    x?: number;
-    y?: number;
     /** transition duration in ms */
     duration?: number;
+    onDispose?: () => void;
   }
 ) {
   const duration = options?.duration ?? 230;
@@ -43,27 +42,43 @@ export function createPopper<T extends keyof HTMLElementTagNameMap>(
     return popper as MenuPopper<HTMLElementTagNameMap[T]>;
   }
 
+  const clipWrapper = document.createElement('div');
   const menu = document.createElement(tagName);
   assertExists(reference.shadowRoot);
-  reference.shadowRoot.append(menu);
+  clipWrapper.append(menu);
+  reference.shadowRoot.append(clipWrapper);
 
   // apply enter transition
-  menu.style.transition = `transform ${duration}ms ease`;
+  menu.style.transition = `all ${duration}ms ease`;
   animateLeave(menu);
   requestAnimationFrame(() => animateEnter(menu));
 
-  // TODO - calculate x and y automatically
-  const x = options?.x ?? 0;
-  const y = options?.y ?? 0;
-
-  Object.assign(menu.style, {
-    left: `${x}px`,
-    top: `${y}px`,
+  Object.assign(clipWrapper.style, {
+    height: '100px',
+    pointerEvents: 'none',
+    position: 'absolute',
+    overflow: 'hidden',
+    width: '100%',
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+    left: '0px',
+    bottom: '100%',
+    display: 'flex',
+    alignItems: 'end',
   });
 
+  Object.assign(menu.style, {
+    width: '100%',
+    marginLeft: '30px',
+    maxWidth: 'calc(100% - 60px)',
+    bottom: '0%',
+    pointerEvents: 'auto',
+  });
   const remove = () => {
+    clipWrapper.remove();
     menu.remove();
     popMap.get(reference)?.delete(tagName);
+    options?.onDispose?.();
   };
 
   const popper: MenuPopper<HTMLElementTagNameMap[T]> = {

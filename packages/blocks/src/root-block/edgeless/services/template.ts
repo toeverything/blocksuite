@@ -58,20 +58,14 @@ export type TemplateJobConfig = {
 };
 
 export class TemplateJob {
-  static create(options: {
-    model: SurfaceBlockModel;
-    type: string;
-    middlewares: ((job: TemplateJob) => void)[];
-  }) {
-    return new TemplateJob(options);
-  }
-
   static middlewares: ((job: TemplateJob) => void)[] = [];
 
   private _template: DocSnapshot | null = null;
 
   job: Job;
+
   model: SurfaceBlockModel;
+
   type: TemplateType;
 
   slots = {
@@ -94,22 +88,6 @@ export class TemplateJob {
 
     middlewares.forEach(middleware => middleware(this));
     TemplateJob.middlewares.forEach(middleware => middleware(this));
-  }
-
-  walk(callback: (block: BlockSnapshot, template: DocSnapshot) => void) {
-    if (!this._template) {
-      throw new Error('Template not loaded, please call insertTemplate first');
-    }
-
-    const iterate = (block: BlockSnapshot, template: DocSnapshot) => {
-      callback(block, template);
-
-      if (block.children) {
-        block.children.forEach(child => iterate(child, template));
-      }
-    };
-
-    iterate(this._template.blocks, this._template);
   }
 
   private _mergeSurfaceElements(
@@ -337,6 +315,22 @@ export class TemplateJob {
     deferInserting.forEach(data => insert(data, false));
   }
 
+  walk(callback: (block: BlockSnapshot, template: DocSnapshot) => void) {
+    if (!this._template) {
+      throw new Error('Template not loaded, please call insertTemplate first');
+    }
+
+    const iterate = (block: BlockSnapshot, template: DocSnapshot) => {
+      callback(block, template);
+
+      if (block.children) {
+        block.children.forEach(child => iterate(child, template));
+      }
+    };
+
+    iterate(this._template.blocks, this._template);
+  }
+
   async insertTemplate(template: unknown) {
     DocSnapshotSchema.parse(template);
 
@@ -357,5 +351,13 @@ export class TemplateJob {
     this._insertToDoc(modelDataList);
 
     return templateBound;
+  }
+
+  static create(options: {
+    model: SurfaceBlockModel;
+    type: string;
+    middlewares: ((job: TemplateJob) => void)[];
+  }) {
+    return new TemplateJob(options);
   }
 }

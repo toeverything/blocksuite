@@ -4,7 +4,9 @@ import { type Disposable, flattenDisposables } from './disposable.js';
 // https://github.com/vincentdchan/blocky-editor
 export class Slot<T = void> implements Disposable {
   private _emitting = false;
+
   private _callbacks: ((v: T) => unknown)[] = [];
+
   private _disposables: Disposable[] = [];
 
   filter(testFun: (v: T) => boolean): Slot<T> {
@@ -17,6 +19,24 @@ export class Slot<T = void> implements Disposable {
     this.on((v: T) => {
       if (testFun(v)) {
         result.emit(v);
+      }
+    });
+
+    return result;
+  }
+
+  flatMap<U>(mapper: (v: T) => U[] | U): Slot<U> {
+    const result = new Slot<U>();
+    this._disposables.push({
+      dispose: () => result.dispose(),
+    });
+
+    this.on((v: T) => {
+      const data = mapper(v);
+      if (Array.isArray(data)) {
+        data.forEach(v => result.emit(v));
+      } else {
+        result.emit(data);
       }
     });
 

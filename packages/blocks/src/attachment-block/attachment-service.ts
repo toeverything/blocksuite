@@ -42,12 +42,6 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
     return rootElement;
   }
 
-  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
-
-  slots = {
-    onFilesDropped: new Slot<File[]>(),
-  };
-
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
     onDrop: async ({ files, targetModel, place, point }) => {
@@ -68,16 +62,22 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
         );
       } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
         const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
-        point = edgelessRoot.service.viewport.toViewPointFromClientPoint(point);
+        point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
         await edgelessRoot.addAttachments(attachmentFiles, point);
+
+        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
+          control: 'canvas:drop',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'attachment',
+        });
       }
 
       this.slots.onFilesDropped.emit(attachmentFiles);
       return true;
     },
   };
-
-  fileDropManager!: FileDropManager;
 
   private _dragHandleOption: DragHandleOption = {
     flavour: AttachmentBlockSchema.model.flavour,
@@ -177,6 +177,14 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
       return false;
     },
   };
+
+  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
+
+  slots = {
+    onFilesDropped: new Slot<File[]>(),
+  };
+
+  fileDropManager!: FileDropManager;
 
   override mounted(): void {
     super.mounted();

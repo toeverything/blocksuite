@@ -18,6 +18,7 @@ export class ReactiveYArray extends BaseReactiveYData<
   YArray<unknown>
 > {
   protected readonly _proxy: unknown[];
+
   constructor(
     protected readonly _source: unknown[],
     protected readonly _ySource: YArray<unknown>,
@@ -29,15 +30,34 @@ export class ReactiveYArray extends BaseReactiveYData<
     _ySource.observe(this._observer);
   }
 
-  stash(prop: number) {
-    this._stashed.add(prop);
-  }
+  private _observer = (event: YArrayEvent<unknown>) => {
+    this._onObserve(event, () => {
+      let retain = 0;
+      event.changes.delta.forEach(change => {
+        if (change.retain) {
+          retain += change.retain;
+          return;
+        }
+        if (change.delete) {
+          this._updateWithSkip(() => {
+            this._source.splice(retain, change.delete);
+          });
+          return;
+        }
+        if (change.insert) {
+          const _arr = [change.insert].flat();
 
-  pop(prop: number) {
-    const value = this._source[prop];
-    this._stashed.delete(prop);
-    this._proxy[prop] = value;
-  }
+          const proxyList = _arr.map(value => createYProxy(value));
+
+          this._updateWithSkip(() => {
+            this._source.splice(retain, 0, ...proxyList);
+          });
+
+          retain += change.insert.length;
+        }
+      });
+    });
+  };
 
   protected _getProxy = () => {
     return new Proxy(this._source, {
@@ -101,38 +121,20 @@ export class ReactiveYArray extends BaseReactiveYData<
     });
   };
 
-  private _observer = (event: YArrayEvent<unknown>) => {
-    this._onObserve(event, () => {
-      let retain = 0;
-      event.changes.delta.forEach(change => {
-        if (change.retain) {
-          retain += change.retain;
-          return;
-        }
-        if (change.delete) {
-          this._updateWithSkip(() => {
-            this._source.splice(retain, change.delete);
-          });
-          return;
-        }
-        if (change.insert) {
-          const _arr = [change.insert].flat();
+  stash(prop: number) {
+    this._stashed.add(prop);
+  }
 
-          const proxyList = _arr.map(value => createYProxy(value));
-
-          this._updateWithSkip(() => {
-            this._source.splice(retain, 0, ...proxyList);
-          });
-
-          retain += change.insert.length;
-        }
-      });
-    });
-  };
+  pop(prop: number) {
+    const value = this._source[prop];
+    this._stashed.delete(prop);
+    this._proxy[prop] = value;
+  }
 }
 
 export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
   protected readonly _proxy: UnRecord;
+
   constructor(
     protected readonly _source: UnRecord,
     protected readonly _ySource: YMap<unknown>,
@@ -144,15 +146,28 @@ export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
     _ySource.observe(this._observer);
   }
 
-  stash(prop: string) {
-    this._stashed.add(prop);
-  }
-
-  pop(prop: string) {
-    const value = this._source[prop];
-    this._stashed.delete(prop);
-    this._proxy[prop] = value;
-  }
+  private _observer = (event: YMapEvent<unknown>) => {
+    this._onObserve(event, () => {
+      event.keysChanged.forEach(key => {
+        const type = event.changes.keys.get(key);
+        if (!type) {
+          return;
+        }
+        if (type.action === 'delete') {
+          this._updateWithSkip(() => {
+            delete this._source[key];
+          });
+        } else if (type.action === 'add' || type.action === 'update') {
+          const current = this._ySource.get(key);
+          this._updateWithSkip(() => {
+            this._source[key] = proxies.has(current)
+              ? proxies.get(current)
+              : createYProxy(current, this._options);
+          });
+        }
+      });
+    });
+  };
 
   protected _getProxy = () => {
     return new Proxy(this._source, {
@@ -210,28 +225,15 @@ export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
     });
   };
 
-  private _observer = (event: YMapEvent<unknown>) => {
-    this._onObserve(event, () => {
-      event.keysChanged.forEach(key => {
-        const type = event.changes.keys.get(key);
-        if (!type) {
-          return;
-        }
-        if (type.action === 'delete') {
-          this._updateWithSkip(() => {
-            delete this._source[key];
-          });
-        } else if (type.action === 'add' || type.action === 'update') {
-          const current = this._ySource.get(key);
-          this._updateWithSkip(() => {
-            this._source[key] = proxies.has(current)
-              ? proxies.get(current)
-              : createYProxy(current, this._options);
-          });
-        }
-      });
-    });
-  };
+  stash(prop: string) {
+    this._stashed.add(prop);
+  }
+
+  pop(prop: string) {
+    const value = this._source[prop];
+    this._stashed.delete(prop);
+    this._proxy[prop] = value;
+  }
 }
 
 export function createYProxy<Data>(

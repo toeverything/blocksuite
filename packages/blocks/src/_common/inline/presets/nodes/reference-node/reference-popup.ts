@@ -1,100 +1,48 @@
+import '../../../../components/toolbar/icon-button.js';
+import '../../../../components/toolbar/menu-button.js';
+import '../../../../components/toolbar/separator.js';
+import '../../../../components/toolbar/toolbar.js';
 import '../../../../components/tooltip/tooltip.js';
-import '../../../../components/button.js';
 
 import type { BlockElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline';
-import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
+import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { join } from 'lit/directives/join.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import type { RootBlockComponent } from '../../../../../root-block/types.js';
-import { createLitPortal } from '../../../../components/portal.js';
+import { isPeekable, peek } from '../../../../components/index.js';
+import { renderToolbarSeparator } from '../../../../components/toolbar/separator.js';
+import {
+  type Action,
+  renderActions,
+} from '../../../../components/toolbar/utils.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
-import { BookmarkIcon, MoreVerticalIcon } from '../../../../icons/index.js';
-import { EmbedWebIcon, LinkIcon, OpenIcon } from '../../../../icons/text.js';
+import {
+  CenterPeekIcon,
+  DeleteIcon,
+  ExpandFullSmallIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  SmallArrowDownIcon,
+} from '../../../../icons/index.js';
+import { isInsideBlockByFlavour } from '../../../../utils/model.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
-import { ReferencePopupMoreMenu } from './reference-popup-more-menu-popup.js';
 import { styles } from './styles.js';
 
 @customElement('reference-popup')
 export class ReferencePopup extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor target!: LitElement;
-
-  @property({ attribute: false })
-  accessor inlineEditor!: AffineInlineEditor;
-
-  @property({ attribute: false })
-  accessor targetInlineRange!: InlineRange;
-
-  @property({ attribute: false })
-  accessor docTitle!: string;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  @query('.affine-reference-popover-container')
-  accessor popupContainer!: HTMLDivElement;
-
   get referenceDocId() {
     const docId = this.inlineEditor.getFormat(this.targetInlineRange).reference
       ?.pageId;
     assertExists(docId);
     return docId;
-  }
-
-  private _moreMenuAbortController: AbortController | null = null;
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    if (this.targetInlineRange.length === 0) {
-      throw new Error('Cannot toggle reference popup on empty range');
-    }
-
-    const parent = this.blockElement.host.doc.getParent(
-      this.blockElement.model
-    );
-    assertExists(parent);
-
-    this.disposables.add(
-      parent.childrenUpdated.on(() => {
-        const children = parent.children;
-        if (children.includes(this.blockElement.model)) return;
-        this.abortController.abort();
-      })
-    );
-  }
-
-  override updated() {
-    assertExists(this.popupContainer);
-    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
-    assertExists(range);
-
-    const visualElement = {
-      getBoundingClientRect: () => range.getBoundingClientRect(),
-      getClientRects: () => range.getClientRects(),
-    };
-    computePosition(visualElement, this.popupContainer, {
-      middleware: [
-        offset(10),
-        inline(),
-        shift({
-          padding: 6,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        const popupContainer = this.popupContainer;
-        if (!popupContainer) return;
-        popupContainer.style.left = `${x}px`;
-        popupContainer.style.top = `${y}px`;
-      })
-      .catch(console.error);
   }
 
   get blockElement() {
@@ -117,9 +65,44 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     return doc;
   }
 
-  get _isInsideEmbedSyncedDocBlock() {
-    return !!this.blockElement.closest('affine-embed-synced-doc-block');
+  get _embedViewButtonDisabled() {
+    if (
+      this.blockElement.doc.readonly ||
+      isInsideBlockByFlavour(
+        this.blockElement.doc,
+        this.blockElement.model,
+        'affine:edgeless-text'
+      )
+    ) {
+      return true;
+    }
+    return (
+      !!this.blockElement.closest('affine-embed-synced-doc-block') ||
+      this.referenceDocId === this.doc.id
+    );
   }
+
+  get _openButtonDisabled() {
+    return this.referenceDocId === this.doc.id;
+  }
+
+  @property({ attribute: false })
+  accessor target!: LitElement;
+
+  @property({ attribute: false })
+  accessor inlineEditor!: AffineInlineEditor;
+
+  @property({ attribute: false })
+  accessor targetInlineRange!: InlineRange;
+
+  @property({ attribute: false })
+  accessor docTitle!: string;
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @query('.affine-reference-popover-container')
+  accessor popupContainer!: HTMLDivElement;
 
   private _openDoc() {
     const refDocId = this.referenceDocId;
@@ -186,100 +169,228 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _toggleMoreMenu() {
-    if (this._moreMenuAbortController) {
-      this._moreMenuAbortController.abort();
-      this._moreMenuAbortController = null;
-      return;
+  private _delete() {
+    if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
+      this.inlineEditor.deleteText(this.targetInlineRange);
     }
-    this._moreMenuAbortController = new AbortController();
-    const referencePopupMoreMenu = new ReferencePopupMoreMenu();
-    referencePopupMoreMenu.target = this.target;
-    referencePopupMoreMenu.abortController = this.abortController;
-    referencePopupMoreMenu.inlineEditor = this.inlineEditor;
-    referencePopupMoreMenu.targetInlineRange = this.targetInlineRange;
-
-    createLitPortal({
-      template: referencePopupMoreMenu,
-      container: this.popupContainer,
-      computePosition: {
-        referenceElement: this.popupContainer,
-        placement: 'top-end',
-        middleware: [flip()],
-        autoUpdate: true,
-      },
-      abortController: this._moreMenuAbortController,
-    });
+    this.abortController.abort();
   }
 
-  override render() {
+  private _openMenuButton() {
+    const buttons: Action[] = [
+      {
+        name: 'Open this doc',
+        icon: ExpandFullSmallIcon,
+        handler: () => this._openDoc(),
+        disabled: this._openButtonDisabled,
+      },
+    ];
+
+    // open in new tab
+
+    if (isPeekable(this.target)) {
+      buttons.push({
+        name: 'Open in center peek',
+        icon: CenterPeekIcon,
+        handler: () => peek(this.target),
+      });
+    }
+
+    // open in split view
+
+    if (buttons.length === 0) {
+      return nothing;
+    }
+
+    return html`
+      <editor-menu-button
+        .contentPadding=${'8px'}
+        .button=${html`
+          <editor-icon-button
+            aria-label="Open doc"
+            .justify=${'space-between'}
+            .labelHeight=${'20px'}
+          >
+            ${OpenIcon}${SmallArrowDownIcon}
+          </editor-icon-button>
+        `}
+      >
+        <div slot data-size="large" data-orientation="vertical">
+          ${repeat(
+            buttons,
+            button => button.name,
+            ({ name, icon, handler, disabled }) => html`
+              <editor-menu-action
+                aria-label=${name}
+                ?disabled=${disabled}
+                @click=${handler}
+              >
+                ${icon}<span class="label">${name}</span>
+              </editor-menu-action>
+            `
+          )}
+        </div>
+      </editor-menu-button>
+    `;
+  }
+
+  private _viewMenuButton() {
     // synced doc entry controlled by awareness flag
     const isSyncedDocEnabled = this.doc.awarenessStore.getFlag(
       'enable_synced_doc_block'
     );
 
+    const buttons = [];
+
+    buttons.push({
+      type: 'inline',
+      name: 'Inline view',
+    });
+
+    buttons.push({
+      type: 'card',
+      name: 'Card view',
+      handler: () => this._convertToCardView(),
+    });
+
+    if (isSyncedDocEnabled) {
+      buttons.push({
+        type: 'embed',
+        name: 'Embed view',
+        handler: () => this._convertToEmbedView(),
+        disabled: this._embedViewButtonDisabled,
+      });
+    }
+
     return html`
-      <div class="overlay-root blocksuite-overlay">
-        <div class="affine-reference-popover-container">
-          <div class="affine-reference-popover view">
-            <icon-button
-              size="24px"
-              class="affine-reference-popover-open-button"
-              @click=${this._openDoc}
-            >
-              ${OpenIcon}
-              <affine-tooltip .offset=${12}
-                >${'Click to open doc'}</affine-tooltip
+      <editor-menu-button
+        .contentPadding=${'8px'}
+        .button=${html`
+          <editor-icon-button
+            aria-label="Switch view"
+            .justify=${'space-between'}
+            .labelHeight=${'20px'}
+            .iconContainerWidth=${'110px'}
+          >
+            <span class="label">Inline view</span>
+            ${SmallArrowDownIcon}
+          </editor-icon-button>
+        `}
+      >
+        <div slot data-size="small" data-orientation="vertical">
+          ${repeat(
+            buttons,
+            button => button.type,
+            ({ type, name, handler, disabled }) => html`
+              <editor-menu-action
+                aria-label=${name}
+                data-testid=${`link-to-${type}`}
+                ?data-selected=${type === 'inline'}
+                ?disabled=${disabled}
+                @click=${handler}
               >
-            </icon-button>
+                ${name}
+              </editor-menu-action>
+            `
+          )}
+        </div>
+      </editor-menu-button>
+    `;
+  }
 
-            <span class="affine-reference-popover-dividing-line"></span>
+  private _moreActions() {
+    return renderActions([
+      [
+        {
+          type: 'delete',
+          name: 'Delete',
+          icon: DeleteIcon,
+          disabled: this.doc.readonly,
+          handler: () => this._delete(),
+        },
+      ],
+    ]);
+  }
 
-            <div class="affine-reference-popover-view-selector">
-              <icon-button
-                size="24px"
-                class="affine-reference-popover-view-selector-button link current-view"
-                .hover=${false}
-              >
-                ${LinkIcon}
-                <affine-tooltip .offset=${12}>${'Inline view'}</affine-tooltip>
-              </icon-button>
+  override connectedCallback() {
+    super.connectedCallback();
 
-              <icon-button
-                size="24px"
-                class="affine-reference-popover-view-selector-button embed card-view"
-                .hover=${false}
-                @click=${() => this._convertToCardView()}
-              >
-                ${BookmarkIcon}
-                <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
-              </icon-button>
+    if (this.targetInlineRange.length === 0) {
+      throw new Error('Cannot toggle reference popup on empty range');
+    }
 
-              ${isSyncedDocEnabled
-                ? html`
-                    <icon-button
-                      size="24px"
-                      class="affine-reference-popover-view-selector-button embed embed-view"
-                      .hover=${false}
-                      @click=${() => this._convertToEmbedView()}
-                      ?disabled=${this._isInsideEmbedSyncedDocBlock}
-                    >
-                      ${EmbedWebIcon}
-                      <affine-tooltip .offset=${12}
-                        >${'Embed view'}</affine-tooltip
-                      >
-                    </icon-button>
-                  `
-                : nothing}
-            </div>
+    const parent = this.blockElement.host.doc.getParent(
+      this.blockElement.model
+    );
+    assertExists(parent);
 
-            <span class="affine-reference-popover-dividing-line"></span>
+    this.disposables.add(
+      parent.childrenUpdated.on(() => {
+        const children = parent.children;
+        if (children.includes(this.blockElement.model)) return;
+        this.abortController.abort();
+      })
+    );
+  }
 
-            <icon-button size="24px" @click=${() => this._toggleMoreMenu()}>
+  override updated() {
+    assertExists(this.popupContainer);
+    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
+    assertExists(range);
+
+    const visualElement = {
+      getBoundingClientRect: () => range.getBoundingClientRect(),
+      getClientRects: () => range.getClientRects(),
+    };
+    computePosition(visualElement, this.popupContainer, {
+      middleware: [
+        offset(10),
+        inline(),
+        shift({
+          padding: 6,
+        }),
+      ],
+    })
+      .then(({ x, y }) => {
+        const popupContainer = this.popupContainer;
+        if (!popupContainer) return;
+        popupContainer.style.left = `${x}px`;
+        popupContainer.style.top = `${y}px`;
+      })
+      .catch(console.error);
+  }
+
+  override render() {
+    const buttons = [
+      this._openMenuButton(),
+
+      this._viewMenuButton(),
+
+      html`
+        <editor-menu-button
+          .contentPadding=${'8px'}
+          .button=${html`
+            <editor-icon-button aria-label="More" .tooltip=${'More'}>
               ${MoreVerticalIcon}
-              <affine-tooltip .offset=${12}>More</affine-tooltip>
-            </icon-button>
+            </editor-icon-button>
+          `}
+        >
+          <div slot data-size="large" data-orientation="vertical">
+            ${this._moreActions()}
           </div>
+        </editor-menu-button>
+      `,
+    ];
+
+    return html`
+      <div class="overlay-root">
+        <div class="affine-reference-popover-container">
+          <editor-toolbar class="affine-reference-popover view">
+            ${join(
+              buttons.filter(button => button !== nothing),
+              renderToolbarSeparator
+            )}
+          </editor-toolbar>
         </div>
       </div>
     `;

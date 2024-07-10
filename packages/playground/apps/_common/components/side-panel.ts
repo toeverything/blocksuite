@@ -15,26 +15,28 @@ export class SidePanel extends ShadowlessElement {
       display: none;
     }
   `;
+
   currentContent: HTMLElement | null = null;
+
+  protected override render(): unknown {
+    return html``;
+  }
+
   showContent(ele: HTMLElement) {
     if (this.currentContent) {
       this.currentContent.remove();
     }
     this.style.display = 'block';
-    ele.classList.add('blocksuite-overlay');
     this.currentContent = ele;
     this.append(ele);
   }
+
   hideContent() {
     if (this.currentContent) {
       this.style.display = 'none';
       this.currentContent.remove();
       this.currentContent = null;
     }
-  }
-
-  protected override render(): unknown {
-    return html``;
   }
 
   toggle(ele: HTMLElement) {

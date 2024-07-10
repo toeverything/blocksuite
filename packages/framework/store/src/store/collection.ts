@@ -16,29 +16,6 @@ export type DocCollectionOptions = StoreOptions & {
 @indexer
 @test
 export class DocCollection extends DocCollectionAddonType {
-  static Y = Y;
-  protected _store: Store;
-
-  protected readonly _schema: Schema;
-
-  meta: DocCollectionMeta;
-
-  slots = {
-    docAdded: new Slot<string>(),
-    docUpdated: new Slot(),
-    docRemoved: new Slot<string>(),
-  };
-
-  constructor(options: DocCollectionOptions) {
-    super();
-    this._schema = options.schema;
-
-    this._store = new Store(options);
-
-    this.meta = new DocCollectionMeta(this.doc);
-    this._bindDocMetaEvents();
-  }
-
   get id() {
     return this._store.id;
   }
@@ -93,18 +70,32 @@ export class DocCollection extends DocCollectionAddonType {
     return this.store.blobSync;
   }
 
+  static Y = Y;
+
+  protected _store: Store;
+
+  protected readonly _schema: Schema;
+
+  meta: DocCollectionMeta;
+
+  slots = {
+    docAdded: new Slot<string>(),
+    docUpdated: new Slot(),
+    docRemoved: new Slot<string>(),
+  };
+
+  constructor(options: DocCollectionOptions) {
+    super();
+    this._schema = options.schema;
+
+    this._store = new Store(options);
+
+    this.meta = new DocCollectionMeta(this.doc);
+    this._bindDocMetaEvents();
+  }
+
   private _hasDoc(docId: string) {
     return this.docs.has(docId);
-  }
-
-  getDoc(docId: string, options?: GetDocOptions): Doc | null {
-    const collection = this.getBlockCollection(docId);
-    return collection?.getDoc(options) ?? null;
-  }
-
-  getBlockCollection(docId: string): BlockCollection | null {
-    const space = this.docs.get(docId) as BlockCollection | undefined;
-    return space ?? null;
   }
 
   private _bindDocMetaEvents() {
@@ -131,14 +122,22 @@ export class DocCollection extends DocCollectionAddonType {
     });
   }
 
+  getDoc(docId: string, options?: GetDocOptions): Doc | null {
+    const collection = this.getBlockCollection(docId);
+    return collection?.getDoc(options) ?? null;
+  }
+
+  getBlockCollection(docId: string): BlockCollection | null {
+    const space = this.docs.get(docId) as BlockCollection | undefined;
+    return space ?? null;
+  }
+
   /**
    * By default, only an empty doc will be created.
    * If the `init` parameter is passed, a `surface`, `note`, and `paragraph` block
    * will be created in the doc simultaneously.
    */
   createDoc(options: { id?: string; selector?: BlockSelector } = {}) {
-    // End of migration guide. Remove this in the next major version
-
     const { id: docId = this.idGenerator(), selector } = options;
     if (this._hasDoc(docId)) {
       throw new Error('doc already exists');

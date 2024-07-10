@@ -16,6 +16,34 @@ export type GroupData = {
 };
 
 export class GroupHelper {
+  get dataType() {
+    return this.viewManager.columnGetDataType(this.groupBy.columnId);
+  }
+
+  get column() {
+    return this.viewManager.columnGet(this.groupBy.columnId);
+  }
+
+  get columnId() {
+    return this.groupBy.columnId;
+  }
+
+  get type() {
+    return this.viewManager.columnGetType(this.columnId);
+  }
+
+  get data() {
+    return this.viewManager.columnGetData(this.columnId);
+  }
+
+  get addGroup() {
+    return this.viewManager.columnGetMeta(this.column.type).model.ops.addGroup;
+  }
+
+  readonly groups: GroupData[];
+
+  readonly groupMap: Record<string, GroupData>;
+
   constructor(
     private groupBy: GroupBy,
     config: GroupByConfig,
@@ -69,26 +97,6 @@ export class GroupHelper {
     this.groups = sortedGroup.map(key => this.groupMap[key]);
   }
 
-  get dataType() {
-    return this.viewManager.columnGetDataType(this.groupBy.columnId);
-  }
-
-  get column() {
-    return this.viewManager.columnGet(this.groupBy.columnId);
-  }
-
-  get columnId() {
-    return this.groupBy.columnId;
-  }
-
-  get type() {
-    return this.viewManager.columnGetType(this.columnId);
-  }
-
-  get data() {
-    return this.viewManager.columnGetData(this.columnId);
-  }
-
   updateData = (data: NonNullable<unknown>) => {
     this.viewManager.columnUpdateData(this.columnId, data);
   };
@@ -98,9 +106,6 @@ export class GroupHelper {
       this.viewManager.cellUpdateValue(id, this.columnId, value);
     });
   }
-
-  public readonly groups: GroupData[];
-  public readonly groupMap: Record<string, GroupData>;
 
   groupConfig() {
     return groupByMatcher.findData(v => v.name === this.groupBy.name);
@@ -146,7 +151,7 @@ export class GroupHelper {
     this.ops.changeGroupSort(keys);
   }
 
-  public moveGroupTo(groupKey: string, position: InsertToPosition) {
+  moveGroupTo(groupKey: string, position: InsertToPosition) {
     const keys = this.groups.map(v => v.key);
     keys.splice(
       keys.findIndex(key => key === groupKey),
@@ -183,9 +188,6 @@ export class GroupHelper {
     const index = insertPositionToIndex(position, rows, id => id);
     rows.splice(index, 0, rowId);
     this.changeCardSort(toGroupKey, rows);
-  }
-  get addGroup() {
-    return this.viewManager.columnGetMeta(this.column.type).model.ops.addGroup;
   }
 }
 export const sortByManually = <T>(

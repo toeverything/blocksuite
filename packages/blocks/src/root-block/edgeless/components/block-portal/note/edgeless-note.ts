@@ -9,7 +9,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
-import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
+import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../../../../../_common/types.js';
 import { almostEqual, clamp } from '../../../../../_common/utils/math.js';
@@ -17,10 +17,10 @@ import { matchFlavours } from '../../../../../_common/utils/model.js';
 import { getClosestBlockElementByPoint } from '../../../../../_common/utils/query.js';
 import { Point } from '../../../../../_common/utils/rect.js';
 import { handleNativeRangeAtPoint } from '../../../../../_common/utils/selection.js';
-import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
+import type { NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
-import type { EdgelessBlockModel } from '../../../type.js';
+import type { EdgelessBlockModel } from '../../../edgeless-block-model.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const ACTIVE_NOTE_EXTRA_PADDING = 20;
@@ -323,7 +323,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
-        if (selection.elements.includes(this.model as EdgelessBlockModel)) {
+        if (
+          selection.selectedElements.includes(this.model as EdgelessBlockModel)
+        ) {
           this._isResizing = true;
         }
       })
@@ -407,7 +409,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       transition: this._editing
         ? 'left 0.3s, top 0.3s, width 0.3s, height 0.3s'
         : 'none',
-      background: `var(${background ?? DEFAULT_NOTE_COLOR})`,
+      background: `var(${background ?? DEFAULT_NOTE_BACKGROUND_COLOR})`,
       border: `${borderSize}px ${
         borderStyle === StrokeStyle.Dash ? 'dashed' : borderStyle
       } var(--affine-black-10)`,
@@ -429,7 +431,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     return html`
       <div
-        class="edgeless-block-portal-note blocksuite-overlay"
+        class="edgeless-block-portal-note"
         style=${styleMap(style)}
         data-model-height="${bound.h}"
         @mouseleave=${this._leaved}

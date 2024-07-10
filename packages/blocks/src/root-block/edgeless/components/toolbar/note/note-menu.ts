@@ -1,28 +1,25 @@
 import '../../buttons/tool-icon-button.js';
 import '../common/slide-menu.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { css, html, LitElement } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { toggleEmbedCardCreateModal } from '../../../../../_common/components/embed-card/modal/index.js';
-import { BookmarkIcon } from '../../../../../_common/icons/edgeless.js';
-import { AttachmentIcon } from '../../../../../_common/icons/text.js';
+import { AttachmentIcon, LinkIcon } from '../../../../../_common/icons/text.js';
 import {
+  getImageFilesFromLocal,
   type NoteChildrenFlavour,
-  type NoteTool,
   openFileOrFiles,
 } from '../../../../../_common/utils/index.js';
-import { FigmaIcon } from '../../../../../embed-figma-block/styles.js';
-import { GithubIcon } from '../../../../../embed-github-block/styles.js';
-import { LoomIcon } from '../../../../../embed-loom-block/styles.js';
-import { YoutubeIcon } from '../../../../../embed-youtube-block/styles.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import { NOTE_MENU_ITEMS, NOTE_MENU_WIDTH } from './note-menu-config.js';
+import { ImageIcon } from '../../../../../image-block/styles.js';
+import type { NoteTool } from '../../../controllers/tools/note-tool.js';
+import type { EdgelessTool } from '../../../types.js';
+import { getTooltipWithShortcut } from '../../utils.js';
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
+import { NOTE_MENU_ITEMS } from './note-menu-config.js';
 
 @customElement('edgeless-note-menu')
-export class EdgelessNoteMenu extends WithDisposable(LitElement) {
+export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
   static override styles = css`
     :host {
       position: absolute;
@@ -34,19 +31,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
     }
-    .button-group-label {
-      font-family: 'Inter';
-      font-size: 12px;
-      font-weight: 400;
-      font-style: normal;
-      display: flex;
-      text-align: center;
-      color: var(--light-text-color-text-secondary-color, #8e8d91);
-      width: 38px;
-      height: 20px;
-      line-height: 20px;
-      margin-right: 16px;
-    }
     .button-group-container {
       display: flex;
       justify-content: center;
@@ -54,13 +38,23 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
       gap: 14px;
       fill: var(--affine-icon-color);
     }
-    .github-icon {
-      color: var(--affine-black);
+    .button-group-container svg {
+      width: 20px;
+      height: 20px;
+    }
+    .divider {
+      width: 1px;
+      height: 24px;
+      background: var(--affine-border-color);
+      transform: scaleX(0.5);
+      margin: 0 14px;
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
+  @state()
+  private accessor _imageLoading = false;
+
+  override type: EdgelessTool['type'] = 'affine:note';
 
   @property({ attribute: false })
   accessor childFlavour!: NoteChildrenFlavour;
@@ -80,6 +74,44 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
     }>
   ) => void;
 
+  private async _addImages() {
+    this._imageLoading = true;
+    const imageFiles = await getImageFilesFromLocal();
+    const ids = await this.edgeless.addImages(imageFiles);
+    this._imageLoading = false;
+    this.edgeless.service.tool.setEdgelessTool(
+      { type: 'default' },
+      { elements: ids, editing: false }
+    );
+  }
+
+  private _onHandleLinkButtonClick() {
+    const { insertedLinkType } = this.edgeless.service.std.command.exec(
+      'insertLinkByQuickSearch'
+    );
+
+    insertedLinkType
+      ?.then(type => {
+        if (type) {
+          this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+            control: 'toolbar:general',
+            page: 'whiteboard editor',
+            module: 'toolbar',
+            type: type.flavour.split(':')[1],
+          });
+          if (type.isNewDoc) {
+            this.edgeless.service.telemetryService?.track('DocCreated', {
+              control: 'toolbar:general',
+              page: 'whiteboard editor',
+              module: 'edgeless toolbar',
+              type: type.flavour.split(':')[1],
+            });
+          }
+        }
+      })
+      .catch(console.error);
+  }
+
   override firstUpdated() {
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(tool => {
@@ -93,18 +125,62 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.disposables.dispose();
   }
 
   override render() {
-    if (this.edgeless.edgelessTool.type !== 'affine:note') return nothing;
-
     const { childType } = this;
 
     return html`
-      <edgeless-slide-menu .menuWidth=${NOTE_MENU_WIDTH}>
+      <edgeless-slide-menu>
         <div class="menu-content">
-          <div class="button-group-label">Blocks</div>
+          <!-- add to edgeless -->
+          <div class="button-group-container">
+            <edgeless-tool-icon-button
+              .activeMode=${'background'}
+              .tooltip=${'Image'}
+              @click=${this._addImages}
+              .disabled=${this._imageLoading}
+            >
+              ${ImageIcon}
+            </edgeless-tool-icon-button>
+
+            <edgeless-tool-icon-button
+              .activeMode=${'background'}
+              .tooltip=${getTooltipWithShortcut('Link', '@')}
+              @click=${() => {
+                this._onHandleLinkButtonClick();
+              }}
+            >
+              ${LinkIcon}
+            </edgeless-tool-icon-button>
+
+            <edgeless-tool-icon-button
+              .activeMode=${'background'}
+              .tooltip=${'File'}
+              @click=${async () => {
+                const file = await openFileOrFiles();
+                if (!file) return;
+                await this.edgeless.addAttachments([file]);
+                this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
+                this.edgeless.service.telemetryService?.track(
+                  'CanvasElementAdded',
+                  {
+                    control: 'toolbar:general',
+                    page: 'whiteboard editor',
+                    module: 'toolbar',
+                    segment: 'toolbar',
+                    type: 'attachment',
+                  }
+                );
+              }}
+            >
+              ${AttachmentIcon}
+            </edgeless-tool-icon-button>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- add to note -->
           <div class="button-group-container">
             ${repeat(
               NOTE_MENU_ITEMS,
@@ -125,98 +201,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                 </edgeless-tool-icon-button>
               `
             )}
-
-            <edgeless-tool-icon-button
-              .activeMode=${'background'}
-              .tooltip=${'Links'}
-              @click=${() =>
-                toggleEmbedCardCreateModal(
-                  this.edgeless.host,
-                  'Links',
-                  'The added link will be displayed as a card view.',
-                  {
-                    mode: 'edgeless',
-                  }
-                )}
-            >
-              ${BookmarkIcon}
-            </edgeless-tool-icon-button>
-
-            <edgeless-tool-icon-button
-              .activeMode=${'background'}
-              .tooltip=${'File'}
-              @click=${async () => {
-                const file = await openFileOrFiles();
-                if (!file) return;
-                await this.edgeless.addAttachments([file]);
-              }}
-            >
-              ${AttachmentIcon}
-            </edgeless-tool-icon-button>
-
-            <edgeless-tool-icon-button
-              .activeMode=${'background'}
-              .tooltip=${'YouTube'}
-              @click=${() =>
-                toggleEmbedCardCreateModal(
-                  this.edgeless.host,
-                  'YouTube',
-                  'The added YouTube video link will be displayed as an embed view.',
-                  {
-                    mode: 'edgeless',
-                  }
-                )}
-            >
-              ${YoutubeIcon}
-            </edgeless-tool-icon-button>
-
-            <edgeless-tool-icon-button
-              .activeMode=${'background'}
-              .tooltip=${'Figma'}
-              @click=${() =>
-                toggleEmbedCardCreateModal(
-                  this.edgeless.host,
-                  'Figma',
-                  'The added Figma link will be displayed as an embed view.',
-                  {
-                    mode: 'edgeless',
-                  }
-                )}
-            >
-              ${FigmaIcon}
-            </edgeless-tool-icon-button>
-
-            <edgeless-tool-icon-button
-              .activeMode=${'background'}
-              .tooltip=${'GitHub'}
-              @click=${() =>
-                toggleEmbedCardCreateModal(
-                  this.edgeless.host,
-                  'GitHub',
-                  'The added GitHub issue or pull request link will be displayed as a card view.',
-                  {
-                    mode: 'edgeless',
-                  }
-                )}
-            >
-              ${GithubIcon}
-            </edgeless-tool-icon-button>
-
-            <edgeless-tool-icon-button
-              .activeMode=${'background'}
-              .tooltip=${'Loom'}
-              @click=${() =>
-                toggleEmbedCardCreateModal(
-                  this.edgeless.host,
-                  'Loom',
-                  'The added Loom video link will be displayed as an embed view.',
-                  {
-                    mode: 'edgeless',
-                  }
-                )}
-            >
-              ${LoomIcon}
-            </edgeless-tool-icon-button>
           </div>
         </div>
       </edgeless-slide-menu>

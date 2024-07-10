@@ -6,6 +6,7 @@ import {
   type EdgelessRootBlockComponent,
   NoteDisplayMode,
 } from '@blocksuite/blocks';
+import { LayoutType } from '@blocksuite/blocks';
 import { DocCollection } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -213,12 +214,14 @@ describe('mindmap', () => {
       ],
     };
     const mindmapId = service.addElement('mindmap', { children: tree });
-    const mindmap = service.getElementById(mindmapId) as MindmapElementModel;
+    const mindmap = () =>
+      service.getElementById(mindmapId) as MindmapElementModel;
 
     expect(service.surface.elementModels.length).toBe(6);
     doc.captureSync();
 
-    service.removeElement(mindmap.tree.element);
+    service.removeElement(mindmap().tree.element);
+    await wait();
     expect(service.surface.elementModels.length).toBe(0);
     doc.captureSync();
     await wait();
@@ -227,13 +230,57 @@ describe('mindmap', () => {
     expect(service.surface.elementModels.length).toBe(6);
     await wait();
 
-    service.removeElement(mindmap.tree.children[2].element);
+    service.removeElement(mindmap().tree.children[2].element);
+    await wait();
     expect(service.surface.elementModels.length).toBe(4);
-    doc.captureSync();
     await wait();
 
     doc.undo();
     await wait();
     expect(service.surface.elementModels.length).toBe(6);
+  });
+
+  test('mindmap should layout automatically when creating', async () => {
+    const tree = {
+      text: 'root',
+      children: [
+        {
+          text: 'leaf1',
+        },
+        {
+          text: 'leaf2',
+        },
+        {
+          text: 'leaf3',
+          children: [
+            {
+              text: 'leaf4',
+            },
+          ],
+        },
+      ],
+    };
+    const mindmapId = service.addElement('mindmap', {
+      type: LayoutType.RIGHT,
+      children: tree,
+    });
+    const mindmap = () =>
+      service.getElementById(mindmapId) as MindmapElementModel;
+
+    doc.captureSync();
+    await wait();
+
+    const root = mindmap().tree.element;
+    const children = mindmap().tree.children.map(child => child.element);
+    const leaf4 = mindmap().tree.children[2].children[0].element;
+
+    expect(children[0].x).greaterThan(root.x + root.w);
+    expect(children[1].x).greaterThan(root.x + root.w);
+    expect(children[2].x).greaterThan(root.x + root.w);
+
+    expect(children[1].y).greaterThan(children[0].y + children[0].h);
+    expect(children[2].y).greaterThan(children[1].y + children[1].h);
+
+    expect(leaf4.x).greaterThan(children[2].x + children[2].w);
   });
 });

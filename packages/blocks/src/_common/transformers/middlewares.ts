@@ -197,3 +197,9 @@ export const setImageProxyMiddlewareURL = defaultImageProxyMiddlewarBuilder.set;
 
 export const defaultImageProxyMiddleware =
   defaultImageProxyMiddlewarBuilder.get();
+
+export const embedSyncedDocMiddleware =
+  (type: 'content'): JobMiddleware =>
+  ({ adapterConfigs }) => {
+    adapterConfigs.set('embedSyncedDocExportType', type);
+  };

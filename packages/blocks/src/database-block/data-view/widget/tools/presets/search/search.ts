@@ -95,8 +95,6 @@ const styles = css`
 
 @customElement('data-view-header-tools-search')
 export class DataViewHeaderToolsSearch extends WidgetBase {
-  public override accessor view!: DataViewTableManager | DataViewKanbanManager;
-
   get showSearch(): boolean {
     return this._showSearch;
   }
@@ -117,12 +115,16 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
   @state()
   private accessor _showSearch = false;
 
+  public override accessor view!: DataViewTableManager | DataViewKanbanManager;
+
+  preventBlur = false;
+
   private _onSearch = (event: InputEvent) => {
     const el = event.target as HTMLInputElement;
     const inputValue = el.value.trim();
     this.view.setSearch(inputValue);
   };
-  preventBlur = false;
+
   private _onSearchBlur = () => {
     if (this._searchInput.value || this.preventBlur) {
       return;

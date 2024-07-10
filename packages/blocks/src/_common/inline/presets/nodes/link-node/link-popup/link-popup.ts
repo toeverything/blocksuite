@@ -1,155 +1,47 @@
-import '../../../../../components/button.js';
+import '../../../../../components/toolbar/icon-button.js';
+import '../../../../../components/toolbar/menu-button.js';
+import '../../../../../components/toolbar/separator.js';
+import '../../../../../components/toolbar/toolbar.js';
 import '../../../../../components/tooltip/tooltip.js';
 
 import type { BlockElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline/types';
-import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
+import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
+import { join } from 'lit/directives/join.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import type { EmbedOptions } from '../../../../../../root-block/root-service.js';
-import type { IconButton } from '../../../../../components/button.js';
-import { createLitPortal } from '../../../../../components/portal.js';
 import { toast } from '../../../../../components/toast.js';
+import type { EditorIconButton } from '../../../../../components/toolbar/icon-button.js';
+import { renderToolbarSeparator } from '../../../../../components/toolbar/separator.js';
+import { renderActions } from '../../../../../components/toolbar/utils.js';
 import { BLOCK_ID_ATTR } from '../../../../../consts.js';
-import { BookmarkIcon, MoreVerticalIcon } from '../../../../../icons/index.js';
 import {
   ConfirmIcon,
   CopyIcon,
+  DeleteIcon,
   EditIcon,
-  EmbedWebIcon,
-  LinkIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  SmallArrowDownIcon,
   UnlinkIcon,
-} from '../../../../../icons/text.js';
-import { isValidUrl, normalizeUrl } from '../../../../../utils/url.js';
+} from '../../../../../icons/index.js';
+import {
+  getHostName,
+  isValidUrl,
+  normalizeUrl,
+} from '../../../../../utils/url.js';
 import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
-import { LinkPopupMoreMenu } from './link-popup-more-menu-popup.js';
 import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')
 export class LinkPopup extends WithDisposable(LitElement) {
   static override styles = linkPopupStyle;
-
-  @property()
-  accessor type: 'create' | 'edit' | 'view' = 'create';
-
-  @property({ attribute: false })
-  accessor inlineEditor!: AffineInlineEditor;
-
-  @property({ attribute: false })
-  accessor targetInlineRange!: InlineRange;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  @query('#text-input')
-  accessor textInput: HTMLInputElement | null = null;
-
-  @query('#link-input')
-  accessor linkInput: HTMLInputElement | null = null;
-
-  @query('.affine-link-popover-container')
-  accessor popupContainer!: HTMLDivElement;
-
-  @query('.mock-selection-container')
-  accessor mockSelectionContainer!: HTMLDivElement;
-
-  @query('.affine-confirm-button')
-  accessor confirmButton: IconButton | null = null;
-
-  private _bodyOverflowStyle = '';
-
-  private _moreMenuAbortController: AbortController | null = null;
-
-  private _embedOptions: EmbedOptions | null = null;
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    if (this.targetInlineRange.length === 0) {
-      throw new Error('Cannot toggle link popup on empty range');
-    }
-
-    if (this.type === 'edit' || this.type === 'create') {
-      // disable body scroll
-      this._bodyOverflowStyle = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      this.disposables.add({
-        dispose: () => {
-          document.body.style.overflow = this._bodyOverflowStyle;
-        },
-      });
-    }
-
-    const parent = this.blockElement.doc.getParent(this.blockElement.model);
-    assertExists(parent);
-    this.disposables.add(
-      parent.childrenUpdated.on(() => {
-        const children = parent.children;
-        if (children.includes(this.blockElement.model)) return;
-        this.abortController.abort();
-      })
-    );
-  }
-
-  protected override firstUpdated() {
-    if (!this.linkInput) return;
-
-    this._disposables.addFromEvent(this.linkInput, 'copy', e => {
-      e.stopPropagation();
-    });
-    this._disposables.addFromEvent(this.linkInput, 'cut', e => {
-      e.stopPropagation();
-    });
-    this._disposables.addFromEvent(this.linkInput, 'paste', e => {
-      e.stopPropagation();
-    });
-  }
-
-  override updated() {
-    assertExists(this.popupContainer);
-    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
-    assertExists(range);
-
-    if (this.type !== 'view') {
-      const domRects = range.getClientRects();
-
-      Object.values(domRects).forEach(domRect => {
-        const mockSelection = document.createElement('div');
-        mockSelection.classList.add('mock-selection', 'blocksuite-overlay');
-        mockSelection.style.left = `${domRect.left}px`;
-        mockSelection.style.top = `${domRect.top}px`;
-        mockSelection.style.width = `${domRect.width}px`;
-        mockSelection.style.height = `${domRect.height}px`;
-
-        assertExists(this.mockSelectionContainer);
-        this.mockSelectionContainer.append(mockSelection);
-      });
-    }
-
-    const visualElement = {
-      getBoundingClientRect: () => range.getBoundingClientRect(),
-      getClientRects: () => range.getClientRects(),
-    };
-    computePosition(visualElement, this.popupContainer, {
-      middleware: [
-        offset(10),
-        inline(),
-        shift({
-          padding: 6,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        const popupContainer = this.popupContainer;
-        if (!popupContainer) return;
-        popupContainer.style.left = `${x}px`;
-        popupContainer.style.top = `${y}px`;
-      })
-      .catch(console.error);
-  }
 
   private get _rootService() {
     return this.std.spec.getService('affine:page');
@@ -207,6 +99,37 @@ export class LinkPopup extends WithDisposable(LitElement) {
     return this._embedOptions?.viewType === 'embed';
   }
 
+  private _bodyOverflowStyle = '';
+
+  private _embedOptions: EmbedOptions | null = null;
+
+  @property()
+  accessor type: 'create' | 'edit' | 'view' = 'create';
+
+  @property({ attribute: false })
+  accessor inlineEditor!: AffineInlineEditor;
+
+  @property({ attribute: false })
+  accessor targetInlineRange!: InlineRange;
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @query('#text-input')
+  accessor textInput: HTMLInputElement | null = null;
+
+  @query('#link-input')
+  accessor linkInput: HTMLInputElement | null = null;
+
+  @query('.affine-link-popover-container')
+  accessor popupContainer!: HTMLDivElement;
+
+  @query('.mock-selection-container')
+  accessor mockSelectionContainer!: HTMLDivElement;
+
+  @query('.affine-confirm-button')
+  accessor confirmButton: EditorIconButton | null = null;
+
   private _onConfirm() {
     if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) return;
 
@@ -248,6 +171,35 @@ export class LinkPopup extends WithDisposable(LitElement) {
     toast(this.host, 'Copied link to clipboard');
     this.abortController.abort();
   }
+
+  private _edit = () => {
+    this.type = 'edit';
+  };
+
+  private _openLink = () => {
+    let link = this.currentLink;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+    this.abortController.abort();
+  };
+
+  private _removeLink = () => {
+    if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
+      this.inlineEditor.formatText(this.targetInlineRange, {
+        link: null,
+      });
+    }
+    this.abortController.abort();
+  };
+
+  private _delete = () => {
+    if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
+      this.inlineEditor.deleteText(this.targetInlineRange);
+    }
+    this.abortController.abort();
+  };
 
   private _convertToCardView() {
     if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
@@ -311,15 +263,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _removeLink() {
-    if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
-      this.inlineEditor.formatText(this.targetInlineRange, {
-        link: null,
-      });
-    }
-    this.abortController.abort();
-  }
-
   private _onKeydown(e: KeyboardEvent) {
     e.stopPropagation();
     if (e.key === 'Enter' && !e.isComposing) {
@@ -330,20 +273,25 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   private _updateConfirmBtn() {
     assertExists(this.confirmButton);
-    const link = this.linkInput?.value;
+    const link = this.linkInput?.value.trim();
     this.confirmButton.disabled = !(link && isValidUrl(link));
     this.confirmButton.requestUpdate();
   }
 
   private _confirmBtnTemplate() {
-    return html`<icon-button
-      class="affine-confirm-button"
-      @click=${this._onConfirm}
-      >${ConfirmIcon}</icon-button
-    >`;
+    return html`
+      <editor-icon-button
+        class="affine-confirm-button"
+        .iconSize=${'24px'}
+        .disabled=${true}
+        @click=${this._onConfirm}
+      >
+        ${ConfirmIcon}
+      </editor-icon-button>
+    `;
   }
 
-  private _createTemplate() {
+  private _createTemplate = () => {
     this.updateComplete
       .then(() => {
         this.linkInput?.focus();
@@ -362,127 +310,166 @@ export class LinkPopup extends WithDisposable(LitElement) {
           placeholder="Paste or type a link"
           @input=${this._updateConfirmBtn}
         />
-        <span class="affine-link-popover-dividing-line"></span>
         ${this._confirmBtnTemplate()}
       </div>
     `;
+  };
+
+  private _moreActions() {
+    return renderActions([
+      [
+        {
+          name: 'Open',
+          icon: OpenIcon,
+          handler: this._openLink,
+        },
+
+        {
+          name: 'Copy',
+          icon: CopyIcon,
+          handler: this._copyUrl,
+        },
+
+        {
+          name: 'Remove link',
+          icon: UnlinkIcon,
+          handler: this._removeLink,
+        },
+      ],
+
+      [
+        {
+          type: 'delete',
+          name: 'Delete',
+          icon: DeleteIcon,
+          handler: this._delete,
+        },
+      ],
+    ]);
   }
 
-  private _toggleMoreMenu() {
-    if (this._moreMenuAbortController) {
-      this._moreMenuAbortController.abort();
-      this._moreMenuAbortController = null;
-      return;
-    }
-    this._moreMenuAbortController = new AbortController();
-    const linkPopupMoreMenu = new LinkPopupMoreMenu();
-    linkPopupMoreMenu.abortController = this.abortController;
-    linkPopupMoreMenu.inlineEditor = this.inlineEditor;
-    linkPopupMoreMenu.targetInlineRange = this.targetInlineRange;
-    linkPopupMoreMenu.host = this.blockElement.host;
+  private _viewMenuButton() {
+    if (!this._isBookmarkAllowed) return nothing;
 
-    createLitPortal({
-      template: linkPopupMoreMenu,
-      container: this.popupContainer,
-      computePosition: {
-        referenceElement: this.popupContainer,
-        placement: 'top-end',
-        middleware: [flip()],
-        autoUpdate: true,
-      },
-      abortController: this._moreMenuAbortController,
+    const buttons = [];
+
+    buttons.push({
+      type: 'inline',
+      name: 'Inline view',
     });
+
+    buttons.push({
+      type: 'card',
+      name: 'Card view',
+      handler: () => this._convertToCardView(),
+    });
+
+    if (this._canConvertToEmbedView) {
+      buttons.push({
+        type: 'embed',
+        name: 'Embed view',
+        handler: () => this._convertToEmbedView(),
+      });
+    }
+
+    return html`
+      <editor-menu-button
+        .contentPadding=${'8px'}
+        .button=${html`
+          <editor-icon-button
+            aria-label="Switch view"
+            .justify=${'space-between'}
+            .labelHeight=${'20px'}
+            .iconContainerWidth=${'110px'}
+          >
+            <div class="label">Inline view</div>
+            ${SmallArrowDownIcon}
+          </editor-icon-button>
+        `}
+      >
+        <div slot data-size="small" data-orientation="vertical">
+          ${repeat(
+            buttons,
+            button => button.type,
+            ({ type, name, handler }) => html`
+              <editor-menu-action
+                data-testid=${`link-to-${type}`}
+                ?data-selected=${type === 'inline'}
+                @click=${handler}
+              >
+                ${name}
+              </editor-menu-action>
+            `
+          )}
+        </div>
+      </editor-menu-button>
+    `;
   }
 
-  private _viewTemplate() {
+  private _viewTemplate = () => {
     this._embedOptions = this._rootService.getEmbedBlockOptions(
       this.currentLink
     );
 
-    return html`
-      <div class="affine-link-popover view">
-        <div class="affine-link-preview" @click=${() => this._copyUrl()}>
-          <span>${this.currentLink}</span>
-        </div>
+    const buttons = [
+      html`
+        <a
+          class="affine-link-preview"
+          href=${this.currentLink}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <span>${getHostName(this.currentLink)}</span>
+        </a>
 
-        <icon-button size="32px" @click=${() => this._copyUrl()}>
+        <editor-icon-button
+          aria-label="Copy"
+          data-testid="copy-link"
+          .tooltip=${'Click to copy link'}
+          @click=${this._copyUrl}
+        >
           ${CopyIcon}
-          <affine-tooltip .offset=${12}>${'Click to copy link'}</affine-tooltip>
-        </icon-button>
+        </editor-icon-button>
 
-        <icon-button
-          size="32px"
+        <editor-icon-button
+          aria-label="Edit"
           data-testid="edit"
-          @click=${() => {
-            this.type = 'edit';
-          }}
+          .tooltip=${'Edit'}
+          @click=${this._edit}
         >
           ${EditIcon}
-          <affine-tooltip .offset=${12}>Edit</affine-tooltip>
-        </icon-button>
+        </editor-icon-button>
+      `,
 
-        <span class="affine-link-popover-dividing-line"></span>
+      this._viewMenuButton(),
 
-        ${this._isBookmarkAllowed
-          ? html`
-              <div class="affine-link-popover-view-selector">
-                <icon-button
-                  size="24px"
-                  class="affine-link-popover-view-selector-button link current-view"
-                  hover="false"
-                >
-                  ${LinkIcon}
-                  <affine-tooltip .offset=${12}
-                    >${'Inline view'}</affine-tooltip
-                  >
-                </icon-button>
+      html`
+        <editor-menu-button
+          .contentPadding=${'8px'}
+          .button=${html`
+            <editor-icon-button aria-label="More" .tooltip=${'More'}>
+              ${MoreVerticalIcon}
+            </editor-icon-button>
+          `}
+        >
+          <div slot data-size="large" data-orientation="vertical">
+            ${this._moreActions()}
+          </div>
+        </editor-menu-button>
+      `,
+    ];
 
-                <icon-button
-                  size="24px"
-                  data-testid="link-to-card"
-                  class="affine-link-popover-view-selector-button card"
-                  hover="false"
-                  @click=${() => this._convertToCardView()}
-                >
-                  ${BookmarkIcon}
-                  <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
-                </icon-button>
-
-                ${this._canConvertToEmbedView
-                  ? html` <icon-button
-                      size="24px"
-                      class="affine-link-popover-view-selector-button embed"
-                      hover="false"
-                      @click=${() => this._convertToEmbedView()}
-                    >
-                      ${EmbedWebIcon}
-                      <affine-tooltip .offset=${12}
-                        >${'Embed view'}</affine-tooltip
-                      >
-                    </icon-button>`
-                  : nothing}
-              </div>
-
-              <span class="affine-link-popover-dividing-line"></span>
-            `
-          : nothing}
-
-        <icon-button data-testid="unlink" @click=${() => this._removeLink()}>
-          ${UnlinkIcon}
-          <affine-tooltip .offset=${12}>Remove</affine-tooltip>
-        </icon-button>
-
-        <span class="affine-link-popover-dividing-line"></span>
-
-        <icon-button size="24px" @click=${() => this._toggleMoreMenu()}>
-          ${MoreVerticalIcon}
-          <affine-tooltip .offset=${12}>More</affine-tooltip>
-        </icon-button>
-      </div>
+    return html`
+      <editor-toolbar class="affine-link-popover view">
+        ${join(
+          buttons.filter(button => button !== nothing),
+          renderToolbarSeparator
+        )}
+      </editor-toolbar>
     `;
-  }
+  };
 
-  private _editTemplate() {
+  private _editTemplate = () => {
     this.updateComplete
       .then(() => {
         assertExists(this.textInput);
@@ -498,58 +485,138 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
     return html`
       <div class="affine-link-edit-popover">
-        <div class="affine-edit-text-area">
+        <div class="affine-edit-area text">
           <input
-            class="affine-edit-text-input"
+            class="affine-edit-input"
             id="text-input"
             type="text"
             placeholder="Enter text"
             @input=${this._updateConfirmBtn}
           />
-          <span class="affine-link-popover-dividing-line"></span>
-          <label class="affine-edit-text-text" for="text-input">Text</label>
+          <label class="affine-edit-label" for="text-input">Text</label>
         </div>
-        <div class="affine-edit-link-area">
+        <div class="affine-edit-area link">
           <input
             id="link-input"
-            class="affine-edit-link-input"
+            class="affine-edit-input"
             type="text"
             spellcheck="false"
             placeholder="Paste or type a link"
             @input=${this._updateConfirmBtn}
           />
-          <span class="affine-link-popover-dividing-line"></span>
-          <label class="affine-edit-link-text" for="link-input">Link</label>
+          <label class="affine-edit-label" for="link-input">Link</label>
         </div>
         ${this._confirmBtnTemplate()}
       </div>
     `;
+  };
+
+  protected override firstUpdated() {
+    if (!this.linkInput) return;
+
+    this._disposables.addFromEvent(this.linkInput, 'copy', e => {
+      e.stopPropagation();
+    });
+    this._disposables.addFromEvent(this.linkInput, 'cut', e => {
+      e.stopPropagation();
+    });
+    this._disposables.addFromEvent(this.linkInput, 'paste', e => {
+      e.stopPropagation();
+    });
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    if (this.targetInlineRange.length === 0) {
+      throw new Error('Cannot toggle link popup on empty range');
+    }
+
+    if (this.type === 'edit' || this.type === 'create') {
+      // disable body scroll
+      this._bodyOverflowStyle = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      this.disposables.add({
+        dispose: () => {
+          document.body.style.overflow = this._bodyOverflowStyle;
+        },
+      });
+    }
+
+    const parent = this.blockElement.doc.getParent(this.blockElement.model);
+    assertExists(parent);
+    this.disposables.add(
+      parent.childrenUpdated.on(() => {
+        const children = parent.children;
+        if (children.includes(this.blockElement.model)) return;
+        this.abortController.abort();
+      })
+    );
+  }
+
+  override updated() {
+    assertExists(this.popupContainer);
+    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
+    assertExists(range);
+
+    if (this.type !== 'view') {
+      const domRects = range.getClientRects();
+
+      Object.values(domRects).forEach(domRect => {
+        const mockSelection = document.createElement('div');
+        mockSelection.classList.add('mock-selection');
+        mockSelection.style.left = `${domRect.left}px`;
+        mockSelection.style.top = `${domRect.top}px`;
+        mockSelection.style.width = `${domRect.width}px`;
+        mockSelection.style.height = `${domRect.height}px`;
+
+        assertExists(this.mockSelectionContainer);
+        this.mockSelectionContainer.append(mockSelection);
+      });
+    }
+
+    const visualElement = {
+      getBoundingClientRect: () => range.getBoundingClientRect(),
+      getClientRects: () => range.getClientRects(),
+    };
+    computePosition(visualElement, this.popupContainer, {
+      middleware: [
+        offset(10),
+        inline(),
+        shift({
+          padding: 6,
+        }),
+      ],
+    })
+      .then(({ x, y }) => {
+        const popupContainer = this.popupContainer;
+        if (!popupContainer) return;
+        popupContainer.style.left = `${x}px`;
+        popupContainer.style.top = `${y}px`;
+      })
+      .catch(console.error);
   }
 
   override render() {
-    const mask =
-      this.type === 'edit' || this.type === 'create'
-        ? html`<div
-            class="affine-link-popover-overlay-mask"
-            @click=${() => {
-              this.abortController.abort();
-              this.host.selection.clear();
-            }}
-          ></div>`
-        : nothing;
-
-    const popover =
-      this.type === 'create'
-        ? this._createTemplate()
-        : this.type === 'view'
-          ? this._viewTemplate()
-          : this._editTemplate();
-
     return html`
-      <div class="overlay-root blocksuite-overlay">
-        ${mask}
+      <div class="overlay-root">
+        ${this.type === 'view'
+          ? nothing
+          : html`
+              <div
+                class="affine-link-popover-overlay-mask"
+                @click=${() => {
+                  this.abortController.abort();
+                  this.host.selection.clear();
+                }}
+              ></div>
+            `}
         <div class="affine-link-popover-container" @keydown=${this._onKeydown}>
-          ${popover}
+          ${choose(this.type, [
+            ['create', this._createTemplate],
+            ['edit', this._editTemplate],
+            ['view', this._viewTemplate],
+          ])}
         </div>
         <div class="mock-selection-container"></div>
       </div>

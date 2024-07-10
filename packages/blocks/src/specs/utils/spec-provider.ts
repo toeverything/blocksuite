@@ -6,16 +6,9 @@ import { SpecBuilder } from './spec-builder.js';
 export class SpecProvider {
   static instance: SpecProvider;
 
-  private specMap: Map<string, BlockSpec[]> = new Map();
+  private specMap = new Map<string, BlockSpec[]>();
 
   private constructor() {}
-
-  static getInstance() {
-    if (!SpecProvider.instance) {
-      SpecProvider.instance = new SpecProvider();
-    }
-    return SpecProvider.instance;
-  }
 
   addSpec(id: string, spec: BlockSpec[]) {
     if (!this.specMap.has(id)) {
@@ -35,5 +28,12 @@ export class SpecProvider {
 
   clearSpec(id: string) {
     this.specMap.delete(id);
+  }
+
+  static getInstance() {
+    if (!SpecProvider.instance) {
+      SpecProvider.instance = new SpecProvider();
+    }
+    return SpecProvider.instance;
   }
 }

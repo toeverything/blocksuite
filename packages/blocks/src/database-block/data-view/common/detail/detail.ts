@@ -23,6 +23,7 @@ const styles = css`
     padding: 20px 36px;
     gap: 12px;
     min-height: 100%;
+    background-color: var(--affine-background-primary-color);
   }
 
   .add-property {
@@ -33,10 +34,12 @@ const styles = css`
     font-style: normal;
     font-weight: 400;
     line-height: var(--data-view-cell-text-line-height);
-    color: var(--affine-text-secondary-color);
+    color: var(--affine-text-disable-color);
     border-radius: 4px;
-    padding: 4px;
+    padding: 6px 8px 6px 4px;
     cursor: pointer;
+    margin-top: 8px;
+    width: max-content;
   }
 
   .add-property:hover {
@@ -57,16 +60,51 @@ const styles = css`
 
 @customElement('affine-data-view-record-detail')
 export class RecordDetail extends WithDisposable(ShadowlessElement) {
+  private get readonly() {
+    return this.view.readonly;
+  }
+
+  private get columns() {
+    return this.view.detailColumns.map(id => this.view.columnGet(id));
+  }
+
   static override styles = styles;
 
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor rowId!: string;
+
   selection = new DetailSelection(this);
 
-  private get readonly() {
-    return this.view.readonly;
+  @query('.add-property')
+  accessor addPropertyButton!: HTMLElement;
+
+  detailSlots?: DetailSlots;
+
+  private renderHeader() {
+    const header = this.detailSlots?.header;
+    if (header) {
+      const props: DetailSlotProps = {
+        view: this.view,
+        rowId: this.rowId,
+      };
+      return renderUniLit(header, props);
+    }
+    return undefined;
+  }
+
+  private renderNote() {
+    const note = this.detailSlots?.note;
+    if (note) {
+      const props: DetailSlotProps = {
+        view: this.view,
+        rowId: this.rowId,
+      };
+      return renderUniLit(note, props);
+    }
+    return undefined;
   }
 
   override connectedCallback() {
@@ -87,8 +125,6 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
     this.detailSlots = this.view.detailSlots;
   }
 
-  @query('.add-property')
-  accessor addPropertyButton!: HTMLElement;
   _clickAddProperty = () => {
     popFilterableSimpleMenu(
       this.addPropertyButton,
@@ -107,58 +143,36 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
     );
   };
 
-  private get columns() {
-    return this.view.detailColumns.map(id => this.view.columnGet(id));
-  }
-
   override render() {
     const columns = this.columns;
 
     return html`
-      ${this.renderHeader()}
-      ${repeat(
-        columns,
-        v => v.id,
-        column => {
-          return html` <affine-data-view-record-field
-            .view="${this.view}"
-            .column="${column}"
-            .rowId="${this.rowId}"
-            data-column-id="${column.id}"
-          ></affine-data-view-record-field>`;
-        }
-      )}
-      ${!this.readonly
-        ? html`<div class="add-property" @click="${this._clickAddProperty}">
-            <div class="icon">${PlusIcon}</div>
-            Add Property
-          </div>`
-        : nothing}
+      <div
+        style="max-width: var(--affine-editor-width);display: flex;flex-direction: column;margin: 0 auto"
+      >
+        ${this.renderHeader()}
+        ${repeat(
+          columns,
+          v => v.id,
+          column => {
+            return html` <affine-data-view-record-field
+              .view="${this.view}"
+              .column="${column}"
+              .rowId="${this.rowId}"
+              data-column-id="${column.id}"
+            ></affine-data-view-record-field>`;
+          }
+        )}
+        ${!this.readonly
+          ? html`<div class="add-property" @click="${this._clickAddProperty}">
+              <div class="icon">${PlusIcon}</div>
+              Add Property
+            </div>`
+          : nothing}
+        <div style="width: var(--affine-editor-width)"></div>
+      </div>
       ${this.renderNote()}
     `;
-  }
-  detailSlots?: DetailSlots;
-  private renderHeader() {
-    const header = this.detailSlots?.header;
-    if (header) {
-      const props: DetailSlotProps = {
-        view: this.view,
-        rowId: this.rowId,
-      };
-      return renderUniLit(header, props);
-    }
-    return undefined;
-  }
-  private renderNote() {
-    const note = this.detailSlots?.note;
-    if (note) {
-      const props: DetailSlotProps = {
-        view: this.view,
-        rowId: this.rowId,
-      };
-      return renderUniLit(note, props);
-    }
-    return undefined;
   }
 }
 

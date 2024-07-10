@@ -12,9 +12,17 @@ export class Space<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   State extends Record<string, unknown> = Record<string, any>,
 > {
-  readonly id: string;
-  readonly rootDoc: BlockSuiteDoc;
-  readonly awarenessStore: AwarenessStore;
+  get yBlocks() {
+    return this._yBlocks;
+  }
+
+  get loaded() {
+    return this._loaded;
+  }
+
+  get spaceDoc() {
+    return this._ySpaceDoc;
+  }
 
   private _loaded!: boolean;
 
@@ -25,7 +33,14 @@ export class Space<
    * can be used interchangeably with ySpace
    */
   protected readonly _ySpaceDoc: Y.Doc;
+
   protected readonly _yBlocks: Y.Map<State[keyof State]>;
+
+  readonly id: string;
+
+  readonly rootDoc: BlockSuiteDoc;
+
+  readonly awarenessStore: AwarenessStore;
 
   constructor(
     id: string,
@@ -39,39 +54,6 @@ export class Space<
     this._ySpaceDoc = this._initSubDoc();
 
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
-  }
-
-  get yBlocks() {
-    return this._yBlocks;
-  }
-
-  get loaded() {
-    return this._loaded;
-  }
-
-  get spaceDoc() {
-    return this._ySpaceDoc;
-  }
-
-  load() {
-    this._ySpaceDoc.load();
-
-    return this;
-  }
-
-  remove() {
-    this.destroy();
-    this.rootDoc.spaces.delete(this.id);
-  }
-
-  destroy() {
-    this._ySpaceDoc.destroy();
-    this._onLoadSlot.dispose();
-    this._loaded = false;
-  }
-
-  clear() {
-    this._yBlocks.clear();
   }
 
   private _initSubDoc = () => {
@@ -102,6 +84,27 @@ export class Space<
     this._loaded = true;
     this._onLoadSlot.emit();
   };
+
+  load() {
+    this._ySpaceDoc.load();
+
+    return this;
+  }
+
+  remove() {
+    this.destroy();
+    this.rootDoc.spaces.delete(this.id);
+  }
+
+  destroy() {
+    this._ySpaceDoc.destroy();
+    this._onLoadSlot.dispose();
+    this._loaded = false;
+  }
+
+  clear() {
+    this._yBlocks.clear();
+  }
 
   /**
    * If `shouldTransact` is `false`, the transaction will not be push to the history stack.

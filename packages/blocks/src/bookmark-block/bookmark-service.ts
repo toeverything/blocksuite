@@ -24,10 +24,6 @@ import {
 export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
   private static readonly linkPreviewer = new LinkPreviewer();
 
-  queryUrlData = (url: string) => {
-    return BookmarkBlockService.linkPreviewer.query(url);
-  };
-
   static setLinkPreviewEndpoint =
     BookmarkBlockService.linkPreviewer.setEndpoint;
 
@@ -121,6 +117,10 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
 
       return false;
     },
+  };
+
+  queryUrlData = (url: string, signal?: AbortSignal) => {
+    return BookmarkBlockService.linkPreviewer.query(url, signal);
   };
 
   override mounted(): void {

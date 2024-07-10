@@ -19,9 +19,9 @@
     "@angular/platform-browser": "^17.3.8",
     "@angular/platform-browser-dynamic": "^17.3.8",
     "@angular/router": "^17.3.8",
-    "@blocksuite/blocks": "0.14.0-canary-202405100201-e591bb8",
-    "@blocksuite/presets": "0.14.0-canary-202405100201-e591bb8",
-    "@blocksuite/store": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/blocks": "0.15.0-canary-202406291027-8aed732",
+    "@blocksuite/presets": "0.15.0-canary-202406291027-8aed732",
+    "@blocksuite/store": "0.15.0-canary-202406291027-8aed732",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.2",
     "zone.js": "~0.14.5"
@@ -40,7 +40,6 @@
     "typescript": "~5.4.5"
   },
   "stackblitz": {
-    "installDependencies": false,
     "startCommand": "pnpm i && pnpm dev"
   }
 }

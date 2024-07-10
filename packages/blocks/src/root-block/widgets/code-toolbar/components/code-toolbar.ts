@@ -1,49 +1,54 @@
-import { WithDisposable } from '@blocksuite/block-std';
-import { autoPlacement, offset, shift } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import '../../../../_common/components/toolbar/icon-button.js';
+import '../../../../_common/components/toolbar/toolbar.js';
+import '../../../../_common/components/toolbar/menu-button.js';
 
-import { popMenu } from '../../../../_common/components/index.js';
+import { WithDisposable } from '@blocksuite/block-std';
+import { assertExists, noop } from '@blocksuite/global/utils';
+import { flip, offset } from '@floating-ui/dom';
+import { css, html, LitElement } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import { createLitPortal } from '../../../../_common/components/index.js';
+import type { EditorIconButton } from '../../../../_common/components/toolbar/icon-button.js';
 import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
 import type { CodeToolbarItem, CodeToolbarMoreItem } from '../types.js';
-import {
-  CodeToolbarItemRenderer,
-  CodeToolbarMoreMenuBuilder,
-} from '../utils.js';
+import { CodeToolbarItemRenderer, MoreMenuRenderer } from '../utils.js';
 
 @customElement('affine-code-toolbar')
 export class AffineCodeToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      transform: translateX(-100%);
+      position: absolute;
+      top: 0;
+      right: 0;
     }
 
     .code-toolbar-container {
-      visibility: hidden;
-      display: flex;
+      height: 24px;
       gap: 4px;
-      box-sizing: border-box;
-    }
-
-    .code-toolbar-container[data-visible='true'] {
-      visibility: visible;
+      padding: 4px;
+      margin: 0;
     }
 
     .code-toolbar-button {
-      background-color: var(--affine-background-primary-color);
       color: var(--affine-icon-color);
+      background-color: var(--affine-background-primary-color);
       box-shadow: var(--affine-shadow-1);
-    }
-
-    .code-toolbar-button:hover {
-      background: var(--affine-hover-color-filled);
-    }
-
-    .code-toolbar-button[hover] {
-      background: var(--affine-hover-color-filled);
+      border-radius: 4px;
     }
   `;
+
+  @state()
+  private accessor _moreMenuOpen = false;
+
+  @query('.code-toolbar-button.more')
+  private accessor _moreButton!: EditorIconButton;
+
+  private _popMenuAbortController: AbortController | null = null;
+
+  private _currentOpenMenu: AbortController | null = null;
 
   @property({ attribute: false })
   accessor blockElement!: CodeBlockComponent;
@@ -54,89 +59,103 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor moreItems!: CodeToolbarMoreItem[];
 
-  @state()
-  private accessor _popperVisible = false;
+  @property({ attribute: false })
+  accessor onActiveStatusChange: (active: boolean) => void = noop;
 
-  @state()
-  private accessor _toolbarVisible = false;
-
-  private get _showToolbar() {
-    const imageBlock = this.blockElement;
-    const selection = this.blockElement.host.selection;
-
-    const textSelection = selection.find('text');
+  private _toggleMoreMenu() {
     if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
+      this._currentOpenMenu &&
+      !this._currentOpenMenu.signal.aborted &&
+      this._currentOpenMenu === this._popMenuAbortController
     ) {
-      return false;
+      this.closeCurrentMenu();
+      this._moreMenuOpen = false;
+      return;
     }
 
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 &&
-        blockSelections[0].blockId !== imageBlock.blockId)
-    ) {
-      return false;
-    }
-    return this._popperVisible || this._toolbarVisible;
+    this.closeCurrentMenu();
+    this._popMenuAbortController = new AbortController();
+    this._popMenuAbortController.signal.addEventListener('abort', () => {
+      this._moreMenuOpen = false;
+      this.onActiveStatusChange(false);
+    });
+    this.onActiveStatusChange(true);
+
+    this._currentOpenMenu = this._popMenuAbortController;
+
+    assertExists(this._moreButton);
+    createLitPortal({
+      template: html`
+        <editor-menu-content
+          data-show
+          class="more-popup-menu"
+          style=${styleMap({
+            '--content-padding': '8px',
+            '--packed-height': '4px',
+          })}
+        >
+          <div slot data-size="small" data-orientation="vertical">
+            ${MoreMenuRenderer(
+              this.blockElement,
+              this._popMenuAbortController,
+              this.moreItems
+            )}
+          </div>
+        </editor-menu-content>
+      `,
+      // should be greater than block-selection z-index as selection and popover wil share the same stacking context(editor-host)
+      portalStyles: {
+        zIndex: 'var(--affine-z-index-popover)',
+      },
+      container: this.blockElement.host,
+      computePosition: {
+        referenceElement: this._moreButton,
+        placement: 'bottom-start',
+        middleware: [flip(), offset(4)],
+        autoUpdate: { animationFrame: true },
+      },
+      abortController: this._popMenuAbortController,
+      closeOnClickAway: true,
+    });
+    this._moreMenuOpen = true;
   }
 
-  private popMore = (e: MouseEvent) => {
-    if (this.blockElement.readonly) return;
-    if (!this.moreItems.length) return;
-    this._popperVisible = true;
-
-    const items = CodeToolbarMoreMenuBuilder(this.moreItems, this.blockElement);
-
-    popMenu(e.currentTarget as HTMLElement, {
-      placement: 'bottom-end',
-      middleware: [
-        offset(5),
-        shift({ crossAxis: true }),
-        autoPlacement({
-          allowedPlacements: ['bottom-start', 'bottom-end'],
-        }),
-      ],
-      options: {
-        items,
-        onClose: () => {
-          this._popperVisible = false;
-        },
-      },
-    });
+  closeCurrentMenu = () => {
+    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
+      this._currentOpenMenu.abort();
+      this._currentOpenMenu = null;
+    }
   };
-  override connectedCallback(): void {
-    super.connectedCallback();
-    this.disposables.addFromEvent(this.blockElement, 'mouseover', () => {
-      if (this._toolbarVisible) return;
-      this._toolbarVisible = true;
-    });
 
-    this.disposables.addFromEvent(this.blockElement, 'mouseleave', () => {
-      this._toolbarVisible = false;
-    });
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.closeCurrentMenu();
   }
 
   override render() {
-    const items = CodeToolbarItemRenderer(this.items, this.blockElement);
+    const items = CodeToolbarItemRenderer(
+      this.items,
+      this.blockElement,
+      this.closeCurrentMenu
+    );
 
-    const visible = this._showToolbar;
-    return html`<div data-visible="${visible}" class="code-toolbar-container">
-      ${items}
-      <icon-button
-        class="code-toolbar-button"
-        data-testid="more-button"
-        size="24px"
-        ?disabled=${this.blockElement.readonly}
-        ?hover=${this._popperVisible}
-        @click=${this.popMore}
-      >
-        ${MoreVerticalIcon}
-        <affine-tooltip tip-position="top" .offset=${5}>More</affine-tooltip>
-      </icon-button>
-    </div>`;
+    return html`
+      <editor-toolbar class="code-toolbar-container" data-without-bg>
+        ${items}
+        <editor-icon-button
+          class="code-toolbar-button more"
+          data-testid="more"
+          aria-label="More"
+          .tooltip=${'More'}
+          .tooltipOffset=${4}
+          .showTooltip=${!this._moreMenuOpen}
+          ?disabled=${this.blockElement.readonly}
+          @click=${() => this._toggleMoreMenu()}
+        >
+          ${MoreVerticalIcon}
+        </editor-icon-button>
+      </editor-toolbar>
+    `;
   }
 }
 

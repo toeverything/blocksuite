@@ -36,6 +36,46 @@ import { BlockQueryViewSource } from './view-source.js';
 
 @customElement('affine-data-view')
 export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
+  override get topContenteditableElement() {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
+      const note = this.closest<NoteBlockComponent>('affine-note');
+      return note;
+    }
+    return this.rootElement;
+  }
+
+  get view() {
+    return this.dataView.expose;
+  }
+
+  get dataSource(): DataSource {
+    if (!this._dataSource) {
+      this._dataSource = new BlockQueryDataSource(this.host, this.model, {
+        type: 'todo',
+      });
+    }
+    return this._dataSource;
+  }
+
+  get viewSource(): ViewSource {
+    if (!this._viewSource) {
+      this._viewSource = new BlockQueryViewSource(this.model);
+    }
+    return this._viewSource;
+  }
+
+  get getFlag() {
+    return this.host.doc.awarenessStore.getFlag.bind(
+      this.host.doc.awarenessStore
+    );
+  }
+
+  get innerModalWidget() {
+    return this.rootElement?.widgetElements[
+      AFFINE_INNER_MODAL_WIDGET
+    ] as AffineInnerModalWidget;
+  }
+
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}
     affine-database {
@@ -69,6 +109,53 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
       background-color: var(--affine-hover-color);
     }
   `;
+
+  private dataView = new DataView();
+
+  private _dataSource?: DataSource;
+
+  private _viewSource?: ViewSource;
+
+  toolsWidget: DataViewWidget = widgetPresets.createTools({
+    table: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+      widgetPresets.tools.tableAddRow,
+    ],
+    kanban: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+    ],
+  });
+
+  headerWidget: DataViewWidget = defineUniComponent(
+    (props: DataViewWidgetProps) => {
+      return html`
+        <div style="margin-bottom: 16px;display:flex;flex-direction: column">
+          <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
+            <div>${this.model.title}</div>
+            ${this.renderDatabaseOps()}
+          </div>
+          <div
+            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
+          >
+            <div style="flex:1">
+              ${renderUniLit(widgetPresets.viewBar, props)}
+            </div>
+            ${renderUniLit(this.toolsWidget, props)}
+          </div>
+          ${renderUniLit(widgetPresets.filterBar, props)}
+        </div>
+      `;
+    }
+  );
+
+  selectionUpdated = new Slot<DataViewSelection | undefined>();
+
   private _clickDatabaseOps = (e: MouseEvent) => {
     popMenu(e.currentTarget as HTMLElement, {
       options: {
@@ -128,14 +215,6 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
     </div>`;
   }
 
-  override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>('affine-note');
-      return note;
-    }
-    return this.rootElement;
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -155,72 +234,12 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
       })
     );
     this._disposables.add(
-      this.model.propsUpdated.on(() => {
-        this.viewSource.updateSlot.emit();
+      this.model.propsUpdated.on(data => {
+        if (data.key === 'views') {
+          this.viewSource.checkViewDataUpdate();
+        }
       })
     );
-  }
-
-  private dataView = new DataView();
-
-  get view() {
-    return this.dataView.expose;
-  }
-
-  private _dataSource?: DataSource;
-  public get dataSource(): DataSource {
-    if (!this._dataSource) {
-      this._dataSource = new BlockQueryDataSource(this.host, this.model, {
-        type: 'todo',
-      });
-    }
-    return this._dataSource;
-  }
-
-  toolsWidget: DataViewWidget = widgetPresets.createTools({
-    table: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-      widgetPresets.tools.tableAddRow,
-    ],
-    kanban: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-    ],
-  });
-
-  headerWidget: DataViewWidget = defineUniComponent(
-    (props: DataViewWidgetProps) => {
-      return html`
-        <div style="margin-bottom: 16px;display:flex;flex-direction: column">
-          <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
-            <div>${this.model.title}</div>
-            ${this.renderDatabaseOps()}
-          </div>
-          <div
-            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
-          >
-            <div style="flex:1">
-              ${renderUniLit(widgetPresets.viewBar, props)}
-            </div>
-            ${renderUniLit(this.toolsWidget, props)}
-          </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
-        </div>
-      `;
-    }
-  );
-
-  private _viewSource?: ViewSource;
-  public get viewSource(): ViewSource {
-    if (!this._viewSource) {
-      this._viewSource = new BlockQueryViewSource(this.model);
-    }
-    return this._viewSource;
   }
 
   setSelection = (selection: DataViewSelection | undefined) => {
@@ -236,13 +255,6 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
         : []
     );
   };
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
-
-  get getFlag() {
-    return this.host.doc.awarenessStore.getFlag.bind(
-      this.host.doc.awarenessStore
-    );
-  }
 
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
@@ -251,6 +263,7 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
       }),
     };
   };
+
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
       dispose: this.host.event.add(name, handler, {
@@ -259,13 +272,12 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
     };
   };
 
-  get innerModalWidget() {
-    return this.rootElement?.widgetElements[
-      AFFINE_INNER_MODAL_WIDGET
-    ] as AffineInnerModalWidget;
-  }
+  getRootService = () => {
+    return this.std.spec.getService('affine:page');
+  };
 
   override renderBlock() {
+    const peekViewService = this.getRootService().peekViewService;
     return html`
       <div contenteditable="false" style="position: relative">
         ${this.dataView.render({
@@ -279,6 +291,10 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
           headerWidget: this.headerWidget,
           std: this.std,
           detailPanelConfig: {
+            openDetailPanel: peekViewService
+              ? async (target, template) =>
+                  peekViewService.peek(target, template)
+              : undefined,
             target: () => this.innerModalWidget.target,
           },
         })}

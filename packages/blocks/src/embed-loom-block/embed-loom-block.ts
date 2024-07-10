@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -20,11 +20,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override _cardStyle: (typeof EmbedLoomStyles)[number] = 'video';
-
-  @property({ attribute: false })
-  accessor loading = false;
-
   @state()
   private accessor _isSelected = false;
 
@@ -34,6 +29,11 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
   private _isDragging = false;
 
   private _isResizing = false;
+
+  override _cardStyle: (typeof EmbedLoomStyles)[number] = 'video';
+
+  @property({ attribute: false })
+  accessor loading = false;
 
   private _selectBlock() {
     const selectionManager = this.host.selection;
@@ -64,7 +64,9 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
   };
 
   refreshData = () => {
-    refreshEmbedLoomUrlData(this).catch(console.error);
+    refreshEmbedLoomUrlData(this, this.fetchAbortController.signal).catch(
+      console.error
+    );
   };
 
   override connectedCallback() {
@@ -213,8 +215,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
             </div>
           </div>
         </div>
-
-        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }

@@ -42,7 +42,7 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
     return rootElement;
   }
 
-  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
+  static setImageProxyURL = setImageProxyMiddlewareURL;
 
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
@@ -60,15 +60,21 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
         );
       } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
         const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
-        point = edgelessRoot.service.viewport.toViewPointFromClientPoint(point);
+        point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
         await edgelessRoot.addImages(imageFiles, point);
+
+        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
+          control: 'canvas:drop',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'image',
+        });
       }
 
       return true;
     },
   };
-
-  fileDropManager!: FileDropManager;
 
   private _dragHandleOption: DragHandleOption = {
     flavour: ImageBlockSchema.model.flavour,
@@ -155,6 +161,10 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
     },
   };
 
+  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
+
+  fileDropManager!: FileDropManager;
+
   override mounted(): void {
     super.mounted();
 
@@ -166,6 +176,4 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
   }
-
-  static setImageProxyURL = setImageProxyMiddlewareURL;
 }

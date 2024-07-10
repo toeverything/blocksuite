@@ -28,6 +28,19 @@ interface RichTextStackItem {
 
 @customElement('rich-text')
 export class RichText extends WithDisposable(ShadowlessElement) {
+  get inlineEditorContainer() {
+    assertExists(this._inlineEditorContainer);
+    return this._inlineEditorContainer;
+  }
+
+  get inlineEditor() {
+    return this._inlineEditor;
+  }
+
+  private get _yText() {
+    return this.yText instanceof Text ? this.yText.yText : this.yText;
+  }
+
   static override styles = css`
     rich-text {
       display: block;
@@ -63,16 +76,15 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   @query('.inline-editor')
   private accessor _inlineEditorContainer!: HTMLDivElement;
-  get inlineEditorContainer() {
-    assertExists(this._inlineEditorContainer);
-    return this._inlineEditorContainer;
-  }
+
+  private _inlineEditor: AffineInlineEditor | null = null;
 
   @property({ attribute: false })
   accessor yText!: Y.Text | Text;
 
   @property({ attribute: false })
   accessor attributesSchema: z.ZodSchema | undefined = undefined;
+
   @property({ attribute: false })
   accessor attributeRenderer: AttributeRenderer | undefined = undefined;
 
@@ -88,17 +100,11 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     | undefined = undefined;
 
   @property({ attribute: false })
-  accessor embedChecker: <
-    TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-  >(
-    delta: DeltaInsert<TextAttributes>
-  ) => boolean = () => false;
-
-  @property({ attribute: false })
   accessor readonly = false;
 
   @property({ attribute: false })
   accessor inlineRangeProvider: InlineRangeProvider | undefined = undefined;
+
   // rich-text will create a undoManager if it is not provided.
   @property({ attribute: false })
   accessor undoManager!: Y.UndoManager;
@@ -106,13 +112,16 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   // If it is true rich-text will prevent events related to clipboard bubbling up and handle them by itself.
   @property({ attribute: false })
   accessor enableClipboard = true;
+
   // If it is true rich-text will handle undo/redo by itself. (including v-range restore)
   // It will listen ctrl+z/ctrl+shift+z and call undoManager.undo/redo, keydown event will not
   // bubble up if pressed ctrl+z/ctrl+shift+z.
   @property({ attribute: false })
   accessor enableUndoRedo = true;
+
   @property({ attribute: false })
   accessor enableAutoScrollHorizontally = true;
+
   @property({ attribute: false })
   accessor wrapText = true;
 
@@ -124,12 +133,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   accessor verticalScrollContainerGetter:
     | (() => HTMLElement | null)
     | undefined = undefined;
-  #verticalScrollContainer: HTMLElement | null = null;
 
-  private _inlineEditor: AffineInlineEditor | null = null;
-  get inlineEditor() {
-    return this._inlineEditor;
-  }
+  #verticalScrollContainer: HTMLElement | null = null;
 
   private _init() {
     if (this._inlineEditor) {
@@ -289,10 +294,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     e.stopPropagation();
   };
 
-  private get _yText() {
-    return this.yText instanceof Text ? this.yText.yText : this.yText;
-  }
-
   private _onPaste = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor);
@@ -322,6 +323,13 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     this._inlineEditor = null;
   }
 
+  @property({ attribute: false })
+  accessor embedChecker: <
+    TextAttributes extends AffineTextAttributes = AffineTextAttributes,
+  >(
+    delta: DeltaInsert<TextAttributes>
+  ) => boolean = () => false;
+
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
     await this.inlineEditor?.waitForUpdate();
@@ -343,7 +351,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     if (this.enableUndoRedo) {
       this.disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
         if (e.ctrlKey || e.metaKey) {
-          if (e.key === 'z') {
+          if (e.key === 'z' || e.key === 'Z') {
             if (e.shiftKey) {
               this.undoManager.redo();
             } else {

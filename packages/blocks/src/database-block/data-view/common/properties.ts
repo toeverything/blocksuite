@@ -1,5 +1,4 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -159,10 +158,19 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       flex: 1;
     }
   `;
+
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor onBack: (() => void) | undefined = undefined;
+
+  @query('.properties-group')
+  accessor groupContainer!: HTMLElement;
+
+  private itemsGroup() {
+    return this.view.columnsWithoutFilter.map(id => this.view.columnGet(id));
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -175,9 +183,6 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       e.stopPropagation();
     });
   }
-
-  @query('.properties-group')
-  accessor groupContainer!: HTMLElement;
 
   override firstUpdated() {
     const sortable = new Sortable(this.groupContainer, {
@@ -205,10 +210,6 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     });
   }
 
-  private itemsGroup() {
-    return this.view.columnsWithoutFilter.map(id => this.view.columnGet(id));
-  }
-
   renderColumn = (column: DataViewColumnManager) => {
     const isTitle = column.type === 'title';
     const icon = column.hide ? hidden : show;
@@ -228,6 +229,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       <div class="${classList}" @click="${changeVisible}">${icon}</div>
     </div>`;
   };
+
   clickChangeAll = (allShow: boolean) => {
     this.view.columnsWithoutFilter.forEach(id => {
       if (this.view.columnGetType(id) !== 'title') {
@@ -270,7 +272,7 @@ declare global {
 }
 
 export const popPropertiesSetting = (
-  target: ReferenceElement,
+  target: HTMLElement,
   props: {
     view: DataViewManager;
     onClose?: () => void;

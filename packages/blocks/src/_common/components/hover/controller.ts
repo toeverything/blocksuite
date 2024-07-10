@@ -1,5 +1,5 @@
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import { DisposableGroup } from '@blocksuite/global/utils';
+import type { ReactiveController, ReactiveElement } from 'lit';
 import type { StyleInfo } from 'lit/directives/style-map.js';
 
 import type { AdvancedPortalOptions } from '../portal.js';
@@ -14,11 +14,27 @@ type OptionsParams = Omit<
 };
 type HoverPortalOptions = Omit<AdvancedPortalOptions, 'abortController'>;
 
-type HoverOptions = {
+export type HoverOptions = {
   /**
    * Transition style when the portal is shown or hidden.
    */
   transition: {
+    /**
+     * Specifies the length of the transition in ms.
+     *
+     * You only need to specify the transition end duration actually.
+     *
+     * ---
+     *
+     * Why is the duration required?
+     *
+     * The transition event is not reliable, and it may not be triggered in some cases.
+     *
+     * See also https://github.com/w3c/csswg-drafts/issues/3043 https://github.com/toeverything/blocksuite/pull/7248/files#r1631375330
+     *
+     * Take a look at solutions from other projects: https://floating-ui.com/docs/useTransition#duration
+     */
+    duration: number;
     in: StyleInfo;
     out: StyleInfo;
   } | null;
@@ -32,6 +48,7 @@ type HoverOptions = {
 
 const DEFAULT_HOVER_OPTIONS: HoverOptions = {
   transition: {
+    duration: 100,
     in: {
       opacity: '1',
       transition: 'opacity 0.1s ease-in-out',
@@ -45,19 +62,50 @@ const DEFAULT_HOVER_OPTIONS: HoverOptions = {
   allowMultiple: false,
 };
 
+const abortHoverPortal = ({
+  portal,
+  hoverOptions,
+  abortController,
+}: {
+  portal: HTMLDivElement | undefined;
+  hoverOptions: HoverOptions;
+  abortController: AbortController;
+}) => {
+  if (!portal || !hoverOptions.transition) {
+    abortController.abort();
+    return;
+  }
+  // Transition out
+  Object.assign(portal.style, hoverOptions.transition.out);
+
+  portal.addEventListener(
+    'transitionend',
+    () => {
+      abortController.abort();
+    },
+    { signal: abortController.signal }
+  );
+  portal.addEventListener(
+    'transitioncancel',
+    () => {
+      abortController.abort();
+    },
+    { signal: abortController.signal }
+  );
+
+  // Make sure the portal is aborted after the transition ends
+  setTimeout(() => abortController.abort(), hoverOptions.transition.duration);
+};
+
 export class HoverController implements ReactiveController {
-  protected _disposables = new DisposableGroup();
-  host: ReactiveControllerHost;
-
-  static globalAbortController?: AbortController;
-
-  private _abortController?: AbortController;
-  private _setReference?: (element?: Element | undefined) => void;
-  private _portal?: HTMLDivElement;
-  private readonly _onHover: (
-    options: OptionsParams
-  ) => HoverPortalOptions | null;
-  private readonly _hoverOptions: HoverOptions;
+  /**
+   * Whether the host is currently hovering.
+   *
+   * This property is unreliable when the floating element disconnect from the DOM suddenly.
+   */
+  get isHovering() {
+    return this._isHovering;
+  }
 
   get setReference() {
     if (!this._setReference) {
@@ -70,15 +118,42 @@ export class HoverController implements ReactiveController {
     return this._portal;
   }
 
+  static globalAbortController?: AbortController;
+
+  private _abortController?: AbortController;
+
+  private _setReference?: (element?: Element | undefined) => void;
+
+  private _portal?: HTMLDivElement;
+
+  private readonly _onHover: (
+    options: OptionsParams
+  ) => HoverPortalOptions | null;
+
+  private readonly _hoverOptions: HoverOptions;
+
+  private _isHovering = false;
+
+  protected _disposables = new DisposableGroup();
+
+  host: ReactiveElement;
+
   constructor(
-    host: ReactiveControllerHost,
+    host: ReactiveElement,
     onHover: (options: OptionsParams) => HoverPortalOptions | null,
     hoverOptions?: Partial<HoverOptions>
   ) {
+    this._hoverOptions = { ...DEFAULT_HOVER_OPTIONS, ...hoverOptions };
     (this.host = host).addController(this);
     this._onHover = onHover;
-    this._hoverOptions = { ...DEFAULT_HOVER_OPTIONS, ...hoverOptions };
   }
+
+  /**
+   * Callback when the portal needs to be aborted.
+   */
+  onAbort = () => {
+    this.abort();
+  };
 
   hostConnected() {
     if (this._disposables.disposed) {
@@ -86,24 +161,16 @@ export class HoverController implements ReactiveController {
     }
     // Start a timer when the host is connected
     const { setReference, setFloating, dispose } = whenHover(isHover => {
-      if (!isHover) {
-        const abortController = this._abortController;
-        if (!abortController) return;
-        if (!this._portal || !this._hoverOptions.transition) {
-          abortController.abort();
-          return;
-        }
-        // Transition out
-        Object.assign(this._portal.style, this._hoverOptions.transition.out);
-        this._portal.addEventListener(
-          'transitionend',
-          () => {
-            abortController.abort();
-          },
-          { signal: abortController.signal }
-        );
+      if (!this.host.isConnected) {
         return;
       }
+
+      this._isHovering = isHover;
+      if (!isHover) {
+        this.onAbort();
+        return;
+      }
+
       if (this._abortController) {
         return;
       }
@@ -123,6 +190,7 @@ export class HoverController implements ReactiveController {
         abortController: this._abortController,
       });
       if (!portalOptions) {
+        // Sometimes the portal is not ready to show
         this._abortController.abort();
         return;
       }
@@ -133,11 +201,7 @@ export class HoverController implements ReactiveController {
 
       const transition = this._hoverOptions.transition;
       if (transition) {
-        Object.assign(this._portal.style, transition.out);
-        setTimeout(() => {
-          assertExists(this._portal);
-          Object.assign(this._portal.style, transition.in);
-        });
+        Object.assign(this._portal.style, transition.in);
       }
 
       if (this._hoverOptions.setPortalAsFloating) {
@@ -151,5 +215,18 @@ export class HoverController implements ReactiveController {
   hostDisconnected() {
     this._abortController?.abort();
     this._disposables.dispose();
+  }
+
+  abort(force = false) {
+    if (!this._abortController) return;
+    if (force) {
+      this._abortController.abort();
+      return;
+    }
+    abortHoverPortal({
+      portal: this._portal,
+      hoverOptions: this._hoverOptions,
+      abortController: this._abortController,
+    });
   }
 }

@@ -1,9 +1,7 @@
-import type { EditorHost } from '@blocksuite/block-std';
 import {
   type AIItemGroupConfig,
   AIStarIconWithAnimation,
   BlocksUtils,
-  ImageBlockModel,
   MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
@@ -33,7 +31,6 @@ import {
 } from '../../_common/icons.js';
 import {
   actionToHandler,
-  experimentalImageActionsShowWhen,
   imageOnlyShowWhen,
   mindmapChildShowWhen,
   mindmapRootShowWhen,
@@ -53,6 +50,7 @@ import { canvasToBlob, randomSeed } from '../../utils/image.js';
 import {
   getCopilotSelectedElems,
   getEdgelessRootFromEditor,
+  imageCustomInput,
 } from '../../utils/selection-utils.js';
 
 const translateSubItem = translateLangs.map(lang => {
@@ -68,22 +66,6 @@ const toneSubItem = textTones.map(tone => {
     handler: actionToHandler('changeTone', AIStarIconWithAnimation, { tone }),
   };
 });
-
-const imageCustomInput = async (host: EditorHost) => {
-  const selectedElements = getCopilotSelectedElems(host);
-  if (selectedElements.length !== 1) return;
-
-  const imageBlock = selectedElements[0];
-  if (!(imageBlock instanceof ImageBlockModel)) return;
-  if (!imageBlock.sourceId) return;
-
-  const blob = await host.doc.blobSync.get(imageBlock.sourceId);
-  if (!blob) return;
-
-  return {
-    attachments: [blob],
-  };
-};
 
 export const imageFilterSubItem = imageFilterStyles.map(style => {
   return {
@@ -427,22 +409,27 @@ const generateGroup: AIItemGroupConfig = {
             };
           }
 
-          const { notes, frames, shapes, images } =
+          const { notes, frames, shapes, images, edgelessTexts } =
             BlocksUtils.splitElements(selectedElements);
           const f = frames.length;
           const i = images.length;
           const n = notes.length;
           const s = shapes.length;
+          const e = edgelessTexts.length;
 
-          if (f + i + n + s === 0) {
+          if (f + i + n + s + e === 0) {
             return;
           }
 
           let content = (ctx.get()['content'] as string) || '';
 
-          // single note, text
-          if (i === 0 && n + s === 1) {
-            if (n === 1 || (s === 1 && shapes[0] instanceof TextElementModel)) {
+          // single note, text, edgeless text
+          if (i === 0 && n + s + e === 1) {
+            if (
+              n === 1 ||
+              e === 1 ||
+              (s === 1 && shapes[0] instanceof TextElementModel)
+            ) {
               return {
                 content,
               };
@@ -482,7 +469,7 @@ const generateGroup: AIItemGroupConfig = {
     {
       name: 'AI image filter',
       icon: ImproveWritingIcon,
-      showWhen: experimentalImageActionsShowWhen,
+      showWhen: imageOnlyShowWhen,
       subItem: imageFilterSubItem,
       subItemOffset: [12, -4],
       beta: true,
@@ -490,7 +477,7 @@ const generateGroup: AIItemGroupConfig = {
     {
       name: 'Image processing',
       icon: AIImageIcon,
-      showWhen: experimentalImageActionsShowWhen,
+      showWhen: imageOnlyShowWhen,
       subItem: imageProcessingSubItem,
       subItemOffset: [12, -6],
       beta: true,
@@ -498,7 +485,7 @@ const generateGroup: AIItemGroupConfig = {
     {
       name: 'Generate a caption',
       icon: AIPenIcon,
-      showWhen: experimentalImageActionsShowWhen,
+      showWhen: imageOnlyShowWhen,
       beta: true,
       handler: actionToHandler(
         'generateCaption',

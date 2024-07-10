@@ -2,13 +2,14 @@ import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
+  ConnectorCWithArrowIcon,
   ConnectorIcon,
-  CurveLineIcon,
+  ConnectorLWithArrowIcon,
+  ConnectorXWithArrowIcon,
   DiamondIcon,
-  EdgelessEraserIcon,
+  EdgelessEraserLightIcon,
   EdgelessGeneralShapeIcon,
-  EdgelessPenIcon,
-  ElbowedLineIcon,
+  EdgelessPenLightIcon,
   EllipseIcon,
   FrameIcon,
   FrameNavigatorIcon,
@@ -21,7 +22,6 @@ import {
   ScribbledTriangleIcon,
   SelectIcon,
   SquareIcon,
-  StraightLineIcon,
   ToolsIcon,
   TriangleIcon,
   ViewBarIcon,
@@ -70,14 +70,14 @@ const pie = new PieMenuBuilder({
 
 pie.expandableCommand({
   label: 'Pen',
-  icon: EdgelessPenIcon,
+  icon: EdgelessPenLightIcon,
   action: setEdgelessToolAction({ type: 'brush' }),
   submenus: pie => {
     pie.colorPicker({
       label: 'Pen Color',
       active: getActiveConnectorStrokeColor,
       onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-        rootElement.service.editPropsStore.record('brush', {
+        rootElement.service.editPropsStore.recordLastProps('brush', {
           color: color as LastProps['brush']['color'],
         });
       },
@@ -88,7 +88,7 @@ pie.expandableCommand({
 
 pie.command({
   label: 'Eraser',
-  icon: EdgelessEraserIcon,
+  icon: EdgelessEraserLightIcon,
   action: setEdgelessToolAction({
     type: 'eraser',
   }),
@@ -174,11 +174,11 @@ pie.beginSubmenu({
     if (tool.type === 'connector') {
       switch (tool.mode) {
         case ConnectorMode.Orthogonal:
-          return ElbowedLineIcon;
+          return ConnectorLWithArrowIcon;
         case ConnectorMode.Curve:
-          return CurveLineIcon;
+          return ConnectorCWithArrowIcon;
         case ConnectorMode.Straight:
-          return StraightLineIcon;
+          return ConnectorXWithArrowIcon;
       }
     }
     return ConnectorIcon;
@@ -186,17 +186,8 @@ pie.beginSubmenu({
 });
 
 pie.command({
-  label: 'Straight',
-  icon: StraightLineIcon,
-  action: setEdgelessToolAction({
-    type: 'connector',
-    mode: ConnectorMode.Straight,
-  }),
-});
-
-pie.command({
   label: 'Curved',
-  icon: CurveLineIcon,
+  icon: ConnectorCWithArrowIcon,
   action: setEdgelessToolAction({
     type: 'connector',
     mode: ConnectorMode.Curve,
@@ -205,10 +196,19 @@ pie.command({
 
 pie.command({
   label: 'Elbowed',
-  icon: ElbowedLineIcon,
+  icon: ConnectorXWithArrowIcon,
   action: setEdgelessToolAction({
     type: 'connector',
     mode: ConnectorMode.Orthogonal,
+  }),
+});
+
+pie.command({
+  label: 'Straight',
+  icon: ConnectorLWithArrowIcon,
+  action: setEdgelessToolAction({
+    type: 'connector',
+    mode: ConnectorMode.Straight,
   }),
 });
 
@@ -216,7 +216,7 @@ pie.colorPicker({
   label: 'Line Color',
   active: getActiveConnectorStrokeColor,
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-    rootElement.service.editPropsStore.record('connector', {
+    rootElement.service.editPropsStore.recordLastProps('connector', {
       stroke: color as LastProps['connector']['stroke'],
     });
   },
@@ -272,7 +272,7 @@ shapes.forEach(shape => {
         type: 'shape',
         shapeType: shape.type,
       });
-      rootElement.service.editPropsStore.record('shape', {
+      rootElement.service.editPropsStore.recordLastProps('shape', {
         shapeType: shape.type,
       });
       updateShapeOverlay(rootElement);
@@ -298,7 +298,7 @@ pie.command({
         ? ShapeStyle.Scribbled
         : ShapeStyle.General;
 
-    rootElement.service.editPropsStore.record('shape', {
+    rootElement.service.editPropsStore.recordLastProps('shape', {
       shapeStyle: toggleType,
     });
 
@@ -310,7 +310,7 @@ pie.colorPicker({
   label: 'Fill',
   active: getActiveShapeColor('fill'),
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-    rootElement.service.editPropsStore.record('shape', {
+    rootElement.service.editPropsStore.recordLastProps('shape', {
       fillColor: color as LastProps['shape']['fillColor'],
     });
     updateShapeOverlay(rootElement);
@@ -323,7 +323,7 @@ pie.colorPicker({
   hollow: true,
   active: getActiveShapeColor('stroke'),
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-    rootElement.service.editPropsStore.record('shape', {
+    rootElement.service.editPropsStore.recordLastProps('shape', {
       strokeColor: color as LastProps['shape']['strokeColor'],
     });
     updateShapeOverlay(rootElement);

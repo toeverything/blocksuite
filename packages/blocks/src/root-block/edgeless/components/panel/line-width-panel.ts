@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
 import { LineWidth } from '../../../../_common/types.js';
@@ -107,15 +107,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor selectedSize: LineWidth = LineWidth.Two;
-
-  @property({ attribute: false })
-  accessor hasTooltip = true;
-
-  @property({ attribute: false })
-  accessor disable = false;
-
   @query('.line-width-panel')
   private accessor _lineWidthPanel!: HTMLElement;
 
@@ -132,6 +123,15 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   private accessor _dragHandle!: HTMLElement;
 
   private _dragConfig: DragConfig | null = null;
+
+  @property({ attribute: false })
+  accessor selectedSize: LineWidth = LineWidth.Two;
+
+  @property({ attribute: false })
+  accessor hasTooltip = true;
+
+  @property({ attribute: false })
+  accessor disable = false;
 
   private _updateLineWidthPanel(selectedSize: LineWidth) {
     if (!this._lineWidthOverlay) return;
@@ -313,6 +313,12 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     this._disposables.addFromEvent(this, 'pointermove', this._onPointerMove);
     this._disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
     this._disposables.addFromEvent(this, 'pointerout', this._onPointerOut);
+  }
+
+  override willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has('selectedSize')) {
+      this._updateLineWidthPanel(this.selectedSize);
+    }
   }
 
   override disconnectedCallback(): void {

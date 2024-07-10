@@ -43,7 +43,7 @@ export type OrthogonalConnectorInput = {
   endPoint: PointLocation;
 };
 
-export const ConnectorEndpointLocations = [
+export const ConnectorEndpointLocations: IVec2[] = [
   // At top
   [0.5, 0],
   // At right
@@ -52,13 +52,24 @@ export const ConnectorEndpointLocations = [
   [0.5, 1],
   // At left
   [0, 0.5],
-] as const satisfies IVec2[];
+];
+
+export const ConnectorEndpointLocationsOnTriangle: IVec2[] = [
+  // At top
+  [0.5, 0],
+  // At right
+  [0.75, 0.5],
+  // At bottom
+  [0.5, 1],
+  // At left
+  [0.25, 0.5],
+];
 
 export function calculateNearestLocation(
   point: IVec,
   bounds: IBound,
-  shortestDistance = Number.POSITIVE_INFINITY,
-  locations = ConnectorEndpointLocations
+  locations = ConnectorEndpointLocations,
+  shortestDistance = Number.POSITIVE_INFINITY
 ) {
   const { x, y, w, h } = bounds;
   return locations
@@ -780,8 +791,11 @@ function renderRect(
 
 export class ConnectionOverlay extends Overlay {
   points: IVec[] = [];
+
   highlightPoint: IVec | null = null;
+
   sourceBounds: IBound | null = null;
+
   targetBounds: IBound | null = null;
 
   constructor(private _service: EdgelessRootService) {
@@ -862,24 +876,28 @@ export class ConnectionOverlay extends Overlay {
       const rotateBound = Bound.from(
         getBoundsWithRotation(rBound(connectable))
       );
+      // FIXME: the real path needs to be expanded: diamod, ellipse, trangle.
       if (!rotateBound.expand(10).isPointInBound(point)) continue;
 
       // then check if closes to anchors
       const anchors = getAnchors(connectable);
+      const len = anchors.length;
+      const pointerViewCoord = service.viewport.toViewCoord(point[0], point[1]);
+
+      let shortestDistance = Number.POSITIVE_INFINITY;
+      let j = 0;
 
       this.points = anchors.map(a => a.point);
 
-      for (let j = 0; j < anchors.length; j++) {
+      for (; j < len; j++) {
         const anchor = anchors[j];
         const anchorViewCoord = service.viewport.toViewCoord(
           anchor.point[0],
           anchor.point[1]
         );
-        const pointerViewCoord = service.viewport.toViewCoord(
-          point[0],
-          point[1]
-        );
-        if (Vec.dist(anchorViewCoord, pointerViewCoord) < 20) {
+        const d = Vec.dist(anchorViewCoord, pointerViewCoord);
+        if (d < shortestDistance) {
+          shortestDistance = d;
           target = connectable;
           this.highlightPoint = anchor.point;
           result = {
@@ -888,7 +906,8 @@ export class ConnectionOverlay extends Overlay {
           };
         }
       }
-      if (result) break;
+
+      if (shortestDistance < 8 && result) break;
 
       // if not, check if closes to bound
       const nearestPoint = connectable.getNearestPoint(point as IVec2);
@@ -910,8 +929,8 @@ export class ConnectionOverlay extends Overlay {
       }
 
       if (result) break;
-      // if not, check if in inside of the element
 
+      // if not, check if in inside of the element
       if (
         connectable.hitTest(
           point[0],

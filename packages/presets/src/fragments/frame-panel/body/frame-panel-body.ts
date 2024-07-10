@@ -81,42 +81,6 @@ const styles = css`
 `;
 
 export class FramePanelBody extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor edgeless: EdgelessRootBlockComponent | null = null;
-
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @property({ attribute: false })
-  accessor editorHost!: EditorHost;
-
-  // Store the ids of the selected frames
-  @state()
-  private accessor _selected: string[] = [];
-
-  @state()
-  private accessor _dragging = false;
-
-  @property({ attribute: false })
-  accessor insertIndex: number | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor fitPadding!: number[];
-
-  @property({ attribute: false })
-  accessor domHost!: Document | HTMLElement;
-
-  @query('.frame-list-container')
-  accessor frameListContainer!: HTMLElement;
-
-  private _frameItems: FrameListItem[] = [];
-  private _frameElementHeight = 0;
-  private _indicatorTranslateY = 0;
-  private _docDisposables: DisposableGroup | null = null;
-  private _lastEdgelessRootId = '';
-
   get frames() {
     const frames = this.doc.getBlockByFlavour(
       'affine:frame'
@@ -132,11 +96,45 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       : [0, 0, 0, 0];
   }
 
-  compare(a: FrameBlockModel, b: FrameBlockModel) {
-    if (a.index < b.index) return -1;
-    else if (a.index > b.index) return 1;
-    return 0;
-  }
+  static override styles = styles;
+
+  // Store the ids of the selected frames
+  @state()
+  private accessor _selected: string[] = [];
+
+  @state()
+  private accessor _dragging = false;
+
+  private _frameItems: FrameListItem[] = [];
+
+  private _frameElementHeight = 0;
+
+  private _indicatorTranslateY = 0;
+
+  private _docDisposables: DisposableGroup | null = null;
+
+  private _lastEdgelessRootId = '';
+
+  @property({ attribute: false })
+  accessor edgeless: EdgelessRootBlockComponent | null = null;
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @property({ attribute: false })
+  accessor editorHost!: EditorHost;
+
+  @property({ attribute: false })
+  accessor insertIndex: number | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor fitPadding!: number[];
+
+  @property({ attribute: false })
+  accessor domHost!: Document | HTMLElement;
+
+  @query('.frame-list-container')
+  accessor frameListContainer!: HTMLElement;
 
   private _clearDocDisposables = () => {
     this._docDisposables?.dispose();
@@ -251,8 +249,8 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       };
 
       const rootService = this.editorHost.spec.getService('affine:page');
-      rootService.editPropsStore.setItem('viewport', viewport);
-      rootService.slots.editorModeSwitch.emit('edgeless');
+      rootService.editPropsStore.setStorage('viewport', viewport);
+      rootService.docModeService.setMode('edgeless');
     } else {
       this.edgeless.service.viewport.setViewportByBound(
         bound,
@@ -395,6 +393,12 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       ${frameCards}
     </div>`;
     return frameList;
+  }
+
+  compare(a: FrameBlockModel, b: FrameBlockModel) {
+    if (a.index < b.index) return -1;
+    else if (a.index > b.index) return 1;
+    return 0;
   }
 
   override firstUpdated() {

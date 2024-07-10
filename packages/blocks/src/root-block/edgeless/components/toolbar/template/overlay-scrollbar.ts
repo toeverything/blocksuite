@@ -60,15 +60,6 @@ export class OverlayScrollbar extends LitElement {
 
   private _handleVisible = false;
 
-  override firstUpdated(): void {
-    this._initWheelHandler();
-  }
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-    this._disposable.dispose();
-  }
-
   private _toggleScrollbarVisible(visible: boolean) {
     const vis = visible || this._handleVisible ? '1' : '0';
 
@@ -165,6 +156,15 @@ export class OverlayScrollbar extends LitElement {
 
       dispose();
     });
+  }
+
+  override firstUpdated(): void {
+    this._initWheelHandler();
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this._disposable.dispose();
   }
 
   override render() {

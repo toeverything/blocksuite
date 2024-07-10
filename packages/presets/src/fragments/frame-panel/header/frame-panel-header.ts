@@ -3,7 +3,7 @@ import './frames-setting-menu.js';
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
-import { type NavigatorMode } from '@blocksuite/blocks';
+import type { NavigatorMode } from '@blocksuite/blocks';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, LitElement, type PropertyValues } from 'lit';
@@ -100,13 +100,11 @@ const styles = css`
 `;
 
 export class FramePanelHeader extends WithDisposable(LitElement) {
+  get rootService() {
+    return this.editorHost.spec.getService('affine:page');
+  }
+
   static override styles = styles;
-
-  @property({ attribute: false })
-  accessor editorHost!: EditorHost;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent | null;
 
   @state()
   private accessor _settingPopperShow = false;
@@ -122,15 +120,19 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   > | null = null;
 
   private _navigatorMode: NavigatorMode = 'fit';
+
   private _edgelessDisposables: DisposableGroup | null = null;
 
-  get rootService() {
-    return this.editorHost.spec.getService('affine:page');
-  }
+  @property({ attribute: false })
+  accessor editorHost!: EditorHost;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent | null;
 
   private _enterPresentationMode = () => {
-    if (!this.edgeless)
-      this.rootService.slots.editorModeSwitch.emit('edgeless');
+    if (!this.edgeless) {
+      this.rootService.docModeService.setMode('edgeless');
+    }
 
     setTimeout(() => {
       this.edgeless?.updateComplete
@@ -147,7 +149,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode = this.editorHost.spec
       .getService('affine:page')
-      .editPropsStore.getItem('presentFillScreen')
+      .editPropsStore.getStorage('presentFillScreen')
       ? 'fill'
       : 'fit';
   }
@@ -183,8 +185,10 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
       ({ display }) => {
         this._settingPopperShow = display === 'show';
       },
-      14,
-      -100
+      {
+        mainAxis: 14,
+        crossAxis: -100,
+      }
     );
     disposables.add(this._framesSettingMenuPopper);
   }

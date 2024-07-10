@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { type IVec } from '../../../surface-block/index.js';
+import type { IVec } from '../../../surface-block/index.js';
 import type { PieNodeModel } from './base.js';
 import type { PieMenu } from './menu.js';
 import { pieNodeStyles } from './styles.js';
@@ -17,7 +17,23 @@ import {
 
 @customElement('affine-pie-node')
 export class PieNode extends WithDisposable(LitElement) {
+  get icon() {
+    const icon = this.model.icon;
+    if (typeof icon === 'function') {
+      const { menu } = this;
+      const { rootElement, widgetElement } = menu;
+      return icon({ rootElement, menu, widgetElement, node: this });
+    }
+    return icon;
+  }
+
   static override styles = pieNodeStyles;
+
+  @state()
+  private accessor _isHovering = false;
+
+  private _rotatorAngle: number | null = null;
+
   @property({ attribute: false })
   accessor model!: PieNodeModel;
 
@@ -41,63 +57,6 @@ export class PieNode extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor menu!: PieMenu;
-
-  @state()
-  private accessor _isHovering = false;
-
-  private _rotatorAngle: number | null = null;
-
-  select() {
-    const schema = this.model;
-
-    if (isRootNode(schema)) return;
-
-    const ctx = {
-      rootElement: this.menu.rootElement,
-      menu: this.menu,
-      widgetElement: this.menu.widgetElement,
-      node: this,
-    };
-
-    if (isNodeWithAction(schema)) {
-      schema.action(ctx);
-    } else if (isColorNode(schema)) {
-      schema.onChange(schema.color, ctx);
-    }
-
-    this.requestUpdate();
-  }
-
-  get icon() {
-    const icon = this.model.icon;
-    if (typeof icon === 'function') {
-      const { menu } = this;
-      const { rootElement, widgetElement } = menu;
-      return icon({ rootElement, menu, widgetElement, node: this });
-    }
-    return icon;
-  }
-
-  isCenterNode() {
-    return (
-      isNodeWithChildren(this.model) && this.menu.selectionChain.includes(this)
-    );
-  }
-
-  isActive() {
-    return this.menu.isActiveNode(this);
-  }
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-    this._setupEvents();
-  }
-
-  protected override render() {
-    return this.isCenterNode()
-      ? this._renderCenterNode()
-      : this._renderChildNode();
-  }
 
   private _setupEvents() {
     this._disposables.add(
@@ -168,6 +127,48 @@ export class PieNode extends WithDisposable(LitElement) {
       this._isHovering = false;
     }
   };
+
+  protected override render() {
+    return this.isCenterNode()
+      ? this._renderCenterNode()
+      : this._renderChildNode();
+  }
+
+  select() {
+    const schema = this.model;
+
+    if (isRootNode(schema)) return;
+
+    const ctx = {
+      rootElement: this.menu.rootElement,
+      menu: this.menu,
+      widgetElement: this.menu.widgetElement,
+      node: this,
+    };
+
+    if (isNodeWithAction(schema)) {
+      schema.action(ctx);
+    } else if (isColorNode(schema)) {
+      schema.onChange(schema.color, ctx);
+    }
+
+    this.requestUpdate();
+  }
+
+  isCenterNode() {
+    return (
+      isNodeWithChildren(this.model) && this.menu.selectionChain.includes(this)
+    );
+  }
+
+  isActive() {
+    return this.menu.isActiveNode(this);
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this._setupEvents();
+  }
 }
 
 declare global {

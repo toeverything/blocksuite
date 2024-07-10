@@ -3,7 +3,6 @@ import type {
   ClientRectObject,
   Middleware,
   Placement,
-  ReferenceElement,
   VirtualElement,
 } from '@floating-ui/dom';
 import {
@@ -26,8 +25,7 @@ import {
   checkboxChecked,
   checkboxUnchecked,
 } from '../../../list-block/utils/icons.js';
-import { DoneIcon } from '../../icons/index.js';
-import { ArrowRightSmallIcon } from '../../icons/index.js';
+import { ArrowRightSmallIcon, DoneIcon } from '../../icons/index.js';
 import { rangeWrap } from '../../utils/math.js';
 
 type MenuCommon = {
@@ -78,6 +76,8 @@ type NormalMenu = MenuCommon &
         postfix?: TemplateResult;
         icon?: TemplateResult;
         options: MenuOptions;
+        select?: () => void;
+        isSelected?: boolean;
       }
     | {
         type: 'custom';
@@ -95,6 +95,8 @@ export type MenuOptions = {
   onClose?: () => void;
   style?: string;
   input?: {
+    icon?: TemplateResult;
+    divider?: boolean;
     search?: boolean;
     placeholder?: string;
     initValue?: string;
@@ -138,13 +140,58 @@ const isSelectableItem = (item: Item): item is SelectItem => {
 
 @customElement('affine-menu')
 export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
+  private get minIndex() {
+    return this.isSearchMode ? 0 : -1;
+  }
+
+  private get selectedIndex(): number | undefined {
+    return this._selectedIndex;
+  }
+
+  private set selectedIndex(index: number | undefined) {
+    const old =
+      this._selectedIndex != null
+        ? this.selectableItems[this._selectedIndex]
+        : undefined;
+    old?.onHover?.(false);
+    if (index == null) {
+      this._selectedIndex = index;
+      return;
+    }
+    const newIndex = rangeWrap(
+      index ?? this.minIndex,
+      this.minIndex,
+      this.selectableItems.length
+    );
+    this._selectedIndex = newIndex;
+    this.selectableItems[newIndex]?.onHover?.(true);
+  }
+
+  private get text() {
+    return this._text ?? this.options.input?.initValue ?? '';
+  }
+
+  private set text(value: string) {
+    this._text = value;
+  }
+
+  private get selectedItem(): SelectItem | undefined {
+    return this.selectedIndex != null
+      ? this.selectableItems[this.selectedIndex]
+      : undefined;
+  }
+
+  private get isSearchMode() {
+    return this.options.input?.search;
+  }
+
   static override styles = css`
     affine-menu {
       font-family: var(--affine-font-family);
       display: flex;
       flex-direction: column;
       user-select: none;
-      min-width: 200px;
+      min-width: 276px;
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       background-color: var(--affine-background-overlay-panel-color);
@@ -163,8 +210,17 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       gap: 4px;
     }
 
+    .affine-menu-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+    }
+
+    .affine-menu-header .icon {
+    }
     .affine-menu-header input {
-      width: 100%;
+      flex: 1;
       border-radius: 4px;
       outline: none;
       font-size: 14px;
@@ -234,6 +290,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
 
     .affine-menu-action.selected-item svg {
       color: var(--affine-text-emphasis-color);
+      fill: currentColor;
     }
 
     .database-menu-component-action-button:hover {
@@ -255,136 +312,22 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       padding: 0 4px;
     }
   `;
-  @property({ attribute: false })
-  accessor options!: MenuOptions;
+
   @state()
   private accessor _text: string | undefined = undefined;
+
   @state()
   private accessor _selectedIndex: number | undefined = undefined;
+
   private subMenu?: HTMLElement;
+
   private inputRef = createRef<HTMLInputElement>();
+
   private allItems: Array<Item & { index?: number }> = [];
+
   private selectableItems!: Array<SelectItem>;
+
   private _checked: Record<string, boolean> = {};
-
-  private setChecked(name: string, checked: boolean) {
-    this._checked[name] = checked;
-    this.requestUpdate();
-  }
-
-  private getChecked(name: string): boolean {
-    return this._checked[name];
-  }
-
-  private get minIndex() {
-    return this.isSearchMode ? 0 : -1;
-  }
-
-  private get selectedIndex(): number | undefined {
-    return this._selectedIndex;
-  }
-
-  private set selectedIndex(index: number | undefined) {
-    const old =
-      this._selectedIndex != null
-        ? this.selectableItems[this._selectedIndex]
-        : undefined;
-    old?.onHover?.(false);
-    if (index == null) {
-      this._selectedIndex = index;
-      return;
-    }
-    const newIndex = rangeWrap(
-      index ?? this.minIndex,
-      this.minIndex,
-      this.selectableItems.length
-    );
-    this._selectedIndex = newIndex;
-    this.selectableItems[newIndex]?.onHover?.(true);
-  }
-
-  private get text() {
-    return this._text ?? this.options.input?.initValue ?? '';
-  }
-
-  private set text(value: string) {
-    this._text = value;
-  }
-
-  private close() {
-    this.options.onClose?.();
-  }
-
-  private _inputText = (e: InputEvent) => {
-    const target = e.target as HTMLInputElement;
-    this.text = target.value;
-  };
-
-  override firstUpdated() {
-    this.initTime = Date.now();
-    const input = this.inputRef.value;
-    if (input) {
-      this.focusInput();
-      const length = input.value.length;
-      input.setSelectionRange(length, length);
-      this._disposables.addFromEvent(input, 'keydown', e => {
-        e.stopPropagation();
-        if (e.key === 'Escape') {
-          this.close();
-          return;
-        }
-        if (e.key === 'Enter' && !e.isComposing) {
-          const selectedItem = this.selectedItem;
-          if (selectedItem) {
-            selectedItem.select();
-          } else {
-            this.options.input?.onComplete?.(this.text);
-            this._complete();
-          }
-          return;
-        }
-        if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          this.selectedIndex =
-            this.selectedIndex != null ? this.selectedIndex - 1 : this.minIndex;
-          return;
-        }
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          this.selectedIndex =
-            this.selectedIndex != null ? this.selectedIndex + 1 : this.minIndex;
-          return;
-        }
-      });
-
-      this._disposables.addFromEvent(input, 'copy', e => {
-        e.stopPropagation();
-      });
-      this._disposables.addFromEvent(input, 'cut', e => {
-        e.stopPropagation();
-      });
-    }
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.selectedItem?.onHover?.(false);
-  }
-
-  private show(item: Menu): boolean {
-    if (this.isSearchMode) {
-      if (item.type === 'group') {
-        return !item.hide?.();
-      }
-      if (item.type === 'custom') {
-        return this.text.length === 0;
-      }
-      if (!item.name.toLowerCase().includes(this.text.toLowerCase())) {
-        return false;
-      }
-    }
-    return !item.hide?.();
-  }
 
   private processMap: {
     [K in Menu['type']]: (menu: GetMenuByType<K>) => Item[];
@@ -476,7 +419,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       return items;
     },
     'sub-menu': menu => {
-      const select = () => {
+      const openSubMenu = () => {
         this.subMenu?.remove();
         setTimeout(() => {
           const subMenu = new MenuComponent();
@@ -511,6 +454,10 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
           this.subMenu = subMenu;
         });
       };
+      const select = () => {
+        menu.select?.();
+        menu.select ? this._complete() : openSubMenu();
+      };
       const postfix = html` <div class="icon">
         ${menu.postfix ?? ArrowRightSmallIcon}
       </div>`;
@@ -524,9 +471,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
               ${menu.label ?? menu.name}
             </div>
             ${postfix}`,
-          mouseEnter: select,
+          mouseEnter: openSubMenu,
           select,
-          class: '',
+          class: menu.isSelected ? 'selected-item' : '',
         },
       ];
     },
@@ -539,6 +486,44 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       ];
     },
   };
+
+  private initTime = 0;
+
+  @property({ attribute: false })
+  accessor options!: MenuOptions;
+
+  private setChecked(name: string, checked: boolean) {
+    this._checked[name] = checked;
+    this.requestUpdate();
+  }
+
+  private getChecked(name: string): boolean {
+    return this._checked[name];
+  }
+
+  private close() {
+    this.options.onClose?.();
+  }
+
+  private _inputText = (e: InputEvent) => {
+    const target = e.target as HTMLInputElement;
+    this.text = target.value;
+  };
+
+  private show(item: Menu): boolean {
+    if (this.isSearchMode) {
+      if (item.type === 'group') {
+        return !item.hide?.();
+      }
+      if (item.type === 'custom') {
+        return this.text.length === 0;
+      }
+      if (!item.name.toLowerCase().includes(this.text.toLowerCase())) {
+        return false;
+      }
+    }
+    return !item.hide?.();
+  }
 
   private process(menu: Menu): Item[] {
     if (this.show(menu)) {
@@ -562,12 +547,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     this.focusInput();
   };
 
-  private get selectedItem(): SelectItem | undefined {
-    return this.selectedIndex != null
-      ? this.selectableItems[this.selectedIndex]
-      : undefined;
-  }
-
   private _mouseEnter = (index?: number) => {
     if (this._isConsciousChoice()) {
       return;
@@ -579,8 +558,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private initTime = 0;
-
   private _isConsciousChoice() {
     return Date.now() < this.initTime + 100;
   }
@@ -589,6 +566,63 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     this.subMenu?.remove();
     this.subMenu = undefined;
     this.focusInput();
+  }
+
+  private showHeader() {
+    return !this.isSearchMode || !!this.text;
+  }
+
+  override firstUpdated() {
+    this.initTime = Date.now();
+    const input = this.inputRef.value;
+    if (input) {
+      requestAnimationFrame(() => {
+        this.focusInput();
+      });
+      const length = input.value.length;
+      input.setSelectionRange(length, length);
+      this._disposables.addFromEvent(input, 'keydown', e => {
+        e.stopPropagation();
+        if (e.key === 'Escape') {
+          this.close();
+          return;
+        }
+        if (e.key === 'Enter' && !e.isComposing) {
+          const selectedItem = this.selectedItem;
+          if (selectedItem) {
+            selectedItem.select();
+          } else {
+            this.options.input?.onComplete?.(this.text);
+            this._complete();
+          }
+          return;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          this.selectedIndex =
+            this.selectedIndex != null ? this.selectedIndex - 1 : this.minIndex;
+          return;
+        }
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          this.selectedIndex =
+            this.selectedIndex != null ? this.selectedIndex + 1 : this.minIndex;
+          return;
+        }
+      });
+
+      this._disposables.addFromEvent(input, 'copy', e => {
+        e.stopPropagation();
+      });
+      this._disposables.addFromEvent(input, 'cut', e => {
+        e.stopPropagation();
+      });
+    }
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.selectedItem?.onHover?.(false);
   }
 
   mouseEnterHeader = () => {
@@ -623,8 +657,12 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       opacity: showHeader ? '1' : '0',
       height: showHeader ? undefined : '0',
       overflow: showHeader ? undefined : 'hidden',
+      position: showHeader ? undefined : 'absolute',
     });
-    const showHeaderDivider = this.selectableItems.length > 0 && showHeader;
+    const showHeaderDivider =
+      this.selectableItems.length > 0 &&
+      showHeader &&
+      this.options.input?.divider !== false;
     return html`
       <div
         class="affine-menu"
@@ -637,6 +675,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                 style=${headerStyle}
                 @mouseenter="${this.mouseEnterHeader}"
               >
+                ${this.options.input.icon
+                  ? html`<div class="icon">${this.options.input.icon}</div>`
+                  : nothing}
                 <input
                   autocomplete="off"
                   data-1p-ignore
@@ -647,7 +688,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                   @input="${this._inputText}"
                 />
               </div>
-              ${showHeaderDivider ? html`<menu-divider></menu-divider>` : null}`
+              ${showHeaderDivider
+                ? html`<menu-divider style="width: 100%"></menu-divider>`
+                : null}`
           : null}
         <div class="affine-menu-body">
           ${this.selectableItems.length === 0 && this.isSearchMode
@@ -655,8 +698,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
             : ''}
           ${repeat(this.allItems, (menu, index) => {
             const i = menu.index;
-            const hideDividerWhenHeaderDividerIsShow =
-              i === 0 && showHeaderDivider;
+            const hideDividerWhenHeaderDividerIsShow = i === 0;
             const divider =
               menu.upDivider || this.allItems[index - 1]?.downDivider;
             const mouseEnter = () => {
@@ -664,11 +706,14 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
             };
             if (menu.type === 'ui') {
               return html`
-                ${divider ? html`<menu-divider></menu-divider>` : null}
+                ${divider
+                  ? html`<menu-divider style="width: 100%"></menu-divider>`
+                  : null}
                 <div @mouseenter=${mouseEnter}>${menu.render}</div>
               `;
             }
-            const itemClass = menu.class ?? '';
+
+            const itemClass = menu.class || 'affine-menu-item';
             const classes = classMap({
               'affine-menu-action': true,
               selected: menu.type === 'select' && this._selectedIndex === i,
@@ -682,7 +727,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
 
             return html`
               ${divider && !hideDividerWhenHeaderDividerIsShow
-                ? html`<menu-divider></menu-divider>`
+                ? html`<menu-divider style="width: 100%"></menu-divider>`
                 : null}
               <div
                 class="${classes}"
@@ -697,14 +742,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
-
-  private showHeader() {
-    return !this.isSearchMode || !!this.text;
-  }
-
-  private get isSearchMode() {
-    return this.options.input?.search;
-  }
 }
 
 declare global {
@@ -712,15 +749,22 @@ declare global {
     'affine-menu': MenuComponent<unknown>;
   }
 }
-
+export const getDefaultModalRoot = (ele: HTMLElement) => {
+  const host: HTMLElement | null =
+    ele.closest('editor-host') ?? ele.closest('.data-view-popup-container');
+  if (host) {
+    return host;
+  }
+  return document.body;
+};
 export const createModal = (container: HTMLElement = document.body) => {
   const div = document.createElement('div');
-  div.classList.add('blocksuite-overlay');
-  div.style.position = 'fixed';
+  div.style.pointerEvents = 'auto';
+  div.style.position = 'absolute';
   div.style.left = '0';
   div.style.top = '0';
-  div.style.width = '100vw';
-  div.style.height = '100vh';
+  div.style.width = '100%';
+  div.style.height = '100%';
   div.style.zIndex = '1001';
   div.style.fontFamily = 'var(--affine-font-family)';
   container.append(div);
@@ -742,11 +786,8 @@ export const positionToVRect = (x: number, y: number): VirtualElement => {
     },
   };
 };
-export const eventToVRect = (e: MouseEvent): VirtualElement => {
-  return positionToVRect(e.x, e.y);
-};
 export const createPopup = (
-  target: ReferenceElement,
+  target: HTMLElement,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
@@ -755,7 +796,7 @@ export const createPopup = (
     container?: HTMLElement;
   }
 ) => {
-  const modal = createModal(options?.container ?? document.body);
+  const modal = createModal(options?.container ?? getDefaultModalRoot(target));
   autoUpdate(target, content, () => {
     computePosition(target, content, {
       placement: options?.placement,
@@ -794,7 +835,7 @@ export type MenuHandler = {
 };
 
 export const popMenu = <T>(
-  target: ReferenceElement,
+  target: HTMLElement,
   props: {
     options: MenuOptions;
     placement?: Placement;
@@ -814,13 +855,14 @@ export const popMenu = <T>(
     onClose: props.options.onClose,
     middleware: props.middleware,
     container: props.container,
+    placement: props.placement,
   });
   return {
     close,
   };
 };
 export const popFilterableSimpleMenu = (
-  target: ReferenceElement,
+  target: HTMLElement,
   options: Menu[],
   onClose?: () => void
 ) => {

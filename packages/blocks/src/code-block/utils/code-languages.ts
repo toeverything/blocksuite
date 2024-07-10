@@ -85,14 +85,7 @@ const POPULAR_LANGUAGES_MAP: Partial<Record<BundledLanguage, number>> =
     };
   }, {});
 
-export function getLanguagePriority(
-  lang: BundledLanguage,
-  isCurrentLanguage = false
-) {
-  if (isCurrentLanguage) {
-    // Important to show the current language first
-    return -Infinity;
-  }
+export function getLanguagePriority(lang: BundledLanguage) {
   return POPULAR_LANGUAGES_MAP[lang] ?? Infinity;
 }
 

@@ -5,7 +5,10 @@ import type { BlockElement, WidgetElement } from './element/index.js';
 
 export class ViewStore {
   private readonly _blockMap = new Map<string, BlockElement>();
+
   private readonly _widgetMap = new Map<string, WidgetElement>();
+
+  constructor(public std: BlockSuite.Std) {}
 
   setBlock = (node: BlockElement) => {
     this._blockMap.set(node.model.id, node);
@@ -38,8 +41,6 @@ export class ViewStore {
     const widgetIndex = `${node.model.id}|${id}`;
     this._widgetMap.delete(widgetIndex);
   };
-
-  constructor(public std: BlockSuite.Std) {}
 
   calculatePath = (model: BlockModel): string[] => {
     const path: string[] = [];

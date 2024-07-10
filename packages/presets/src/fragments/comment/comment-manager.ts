@@ -26,7 +26,7 @@ export interface CommentContent {
 export type Comment = CommentMeta & CommentRange & CommentContent;
 
 export class CommentManager {
-  constructor(public readonly host: EditorHost) {}
+  constructor(readonly host: EditorHost) {}
 
   get commentsMap() {
     return this.host.doc.spaceDoc.getMap<Y.Map<unknown>>('comments');

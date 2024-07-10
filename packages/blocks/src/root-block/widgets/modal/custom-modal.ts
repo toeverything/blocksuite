@@ -89,6 +89,7 @@ export class AffineCustomModal extends LitElement {
   `;
 
   options!: ModalOptions;
+
   onOpen!: (div: HTMLDivElement) => void;
 
   close() {
@@ -102,7 +103,7 @@ export class AffineCustomModal extends LitElement {
   override render() {
     const { options } = this;
 
-    return html`<div class="modal-background blocksuite-overlay">
+    return html`<div class="modal-background">
       <div class="modal-window">
         <div class="modal-main" ${ref(this.modalRef)}></div>
         <div class="modal-footer">

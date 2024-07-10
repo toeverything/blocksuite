@@ -1,4 +1,3 @@
-import type { ReferenceElement } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import {
@@ -41,7 +40,7 @@ export const openDetail = (
 
 export const popRowMenu = (
   dataViewEle: DataViewRenderer,
-  ele: ReferenceElement,
+  ele: HTMLElement,
   rowId: string,
   selection: TableSelectionController
 ) => {
@@ -134,7 +133,7 @@ export const popRowMenu = (
 
 export const popColStatOperationMenu = (
   _rootElement: RootBlockComponent | null,
-  elem: ReferenceElement,
+  elem: HTMLElement,
   _column: DataViewColumnManager,
   calcType: ColumnDataType,
   onSelect: (formula: StatCalcOp) => void

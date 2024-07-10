@@ -41,26 +41,6 @@ export class SelectCellEditing extends BaseCellRenderer<
     return value ? [value] : [];
   }
 
-  _onChange = ([id]: string[]) => {
-    this.onChange(id);
-  };
-
-  _editComplete = () => {
-    this.selectCurrentCell(false);
-  };
-  _onOptionsChange = (options: SelectTag[]) => {
-    this.column.updateData(data => {
-      return {
-        ...data,
-        options,
-      };
-    });
-  };
-
-  override firstUpdated() {
-    this.popTagSelect();
-  }
-
   private popTagSelect = () => {
     this._disposables.add({
       dispose: popTagSelect(
@@ -77,6 +57,27 @@ export class SelectCellEditing extends BaseCellRenderer<
       ),
     });
   };
+
+  _onChange = ([id]: string[]) => {
+    this.onChange(id);
+  };
+
+  _editComplete = () => {
+    this.selectCurrentCell(false);
+  };
+
+  _onOptionsChange = (options: SelectTag[]) => {
+    this.column.updateData(data => {
+      return {
+        ...data,
+        options,
+      };
+    });
+  };
+
+  override firstUpdated() {
+    this.popTagSelect();
+  }
 
   override render() {
     return html`

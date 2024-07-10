@@ -13,8 +13,11 @@ export interface BlockServiceOptions {
 
 export class BlockService<_Model extends BlockModel = BlockModel> {
   readonly std: BlockStdScope;
+
   readonly flavour: string;
+
   readonly disposables = new DisposableGroup();
+
   readonly specSlots: BlockSpecSlots;
 
   constructor(options: BlockServiceOptions) {

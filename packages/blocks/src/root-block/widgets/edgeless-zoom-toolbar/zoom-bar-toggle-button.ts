@@ -1,46 +1,12 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
-import { computePosition } from '@floating-ui/dom';
+import { offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { createLitPortal } from '../../../_common/components/portal.js';
 import { MoreIcon } from '../../../_common/icons/edgeless.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import { EdgelessZoomToolbar } from './zoom-toolbar.js';
-
-interface ZoomBarPopper {
-  element: EdgelessZoomToolbar;
-  dispose: () => void;
-}
-
-function createZoomMenuPopper(
-  reference: HTMLElement,
-  edgeless: EdgelessRootBlockComponent
-): ZoomBarPopper {
-  const zoomBar = new EdgelessZoomToolbar(edgeless);
-  assertExists(reference.shadowRoot);
-  zoomBar.layout = 'vertical';
-  reference.shadowRoot.append(zoomBar);
-
-  computePosition(reference, zoomBar, {
-    placement: 'top',
-  })
-    .then(({ x, y }) => {
-      Object.assign(zoomBar.style, {
-        left: `${x}px`,
-        top: `${y - 10}px`,
-      });
-    })
-    .catch(console.error);
-
-  return {
-    element: zoomBar,
-    dispose: () => {
-      zoomBar.remove();
-    },
-  };
-}
 
 @customElement('zoom-bar-toggle-button')
 export class ZoomBarToggleButton extends WithDisposable(LitElement) {
@@ -58,45 +24,56 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
+  @query('.toggle-button')
+  private accessor _toggleButton!: HTMLElement;
 
   @state()
   private accessor _showPopper = false;
 
-  private _zoomBar: ZoomBarPopper | null = null;
+  private _abortController: AbortController | null = null;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _closeZoomMenu() {
-    this._zoomBar?.dispose();
-    this._zoomBar = null;
-    this._showPopper = false;
-  }
-
-  private _toggleNoteMenu() {
-    if (this._zoomBar) {
-      this._closeZoomMenu();
-    } else {
-      this._zoomBar = createZoomMenuPopper(this, this.edgeless);
-      this._zoomBar.element.edgeless = this.edgeless;
-      this._zoomBar.element.edgeless = this.edgeless;
-      this._showPopper = true;
+    if (this._abortController && !this._abortController.signal.aborted) {
+      this._abortController.abort();
+      this._abortController = null;
+      this._showPopper = false;
     }
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.edgeless.handleEvent('click', () => {
-      if (this._zoomBar && this._showPopper) {
-        this._closeZoomMenu();
-      }
+  private _toggleZoomMenu() {
+    if (this._abortController && !this._abortController.signal.aborted) {
+      this._closeZoomMenu();
+      return;
+    }
+
+    this._abortController = new AbortController();
+    this._abortController.signal.addEventListener('abort', () => {
+      this._showPopper = false;
     });
+    createLitPortal({
+      template: html`<edgeless-zoom-toolbar
+        .edgeless=${this.edgeless}
+        .layout=${'vertical'}
+      ></edgeless-zoom-toolbar>`,
+      container: this._toggleButton,
+      computePosition: {
+        referenceElement: this._toggleButton,
+        placement: 'top',
+        middleware: [offset(4)],
+        autoUpdate: true,
+      },
+      abortController: this._abortController,
+      closeOnClickAway: true,
+    });
+    this._showPopper = true;
   }
 
   override disconnectedCallback() {
-    this._zoomBar?.dispose();
-    this._zoomBar = null;
-    this._showPopper = false;
     super.disconnectedCallback();
+    this._closeZoomMenu();
   }
 
   override firstUpdated() {
@@ -116,14 +93,13 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
     return html`
       <div class="toggle-button" @pointerdown=${stopPropagation}>
         <edgeless-tool-icon-button
-          class=${this._showPopper ? 'actived' : 'non-actived'}
           .tooltip=${'Toggle Zoom Tool Bar'}
           .tipPosition=${'right'}
           .active=${this._showPopper}
           .arrow=${false}
           .activeMode=${'background'}
           .iconContainerPadding=${6}
-          @click=${() => this._toggleNoteMenu()}
+          @click=${() => this._toggleZoomMenu()}
         >
           ${MoreIcon}
         </edgeless-tool-icon-button>

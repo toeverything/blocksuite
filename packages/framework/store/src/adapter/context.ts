@@ -1,6 +1,10 @@
 type Keyof<T> = T extends unknown ? keyof T : never;
 
 export class ASTWalkerContext<TNode extends object> {
+  get stack() {
+    return this._stack;
+  }
+
   private _stack: {
     node: TNode;
     prop: Keyof<TNode>;
@@ -12,19 +16,16 @@ export class ASTWalkerContext<TNode extends object> {
   private _defaultProp: Keyof<TNode> = 'children' as unknown as Keyof<TNode>;
 
   _skip = false;
+
   _skipChildrenNum = 0;
-
-  setDefaultProp = (parentProp: Keyof<TNode>) => {
-    this._defaultProp = parentProp;
-  };
-
-  get stack() {
-    return this._stack;
-  }
 
   private current() {
     return this._stack[this._stack.length - 1];
   }
+
+  setDefaultProp = (parentProp: Keyof<TNode>) => {
+    this._defaultProp = parentProp;
+  };
 
   previousNode() {
     return this._stack[this._stack.length - 2]?.node;

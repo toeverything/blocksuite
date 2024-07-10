@@ -21,6 +21,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
       z-index: 1;
     }
   `;
+
   @state()
   private accessor _show = false;
 
@@ -34,7 +35,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
     ></outline-panel>`;
   }
 
-  public toggleDisplay() {
+  toggleDisplay() {
     this._show = !this._show;
   }
 
@@ -52,9 +53,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
     return html`
       ${this._show
         ? html`
-            <div class="custom-outline-container blocksuite-overlay">
-              ${this._renderPanel()}
-            </div>
+            <div class="custom-outline-container">${this._renderPanel()}</div>
           `
         : null}
     `;

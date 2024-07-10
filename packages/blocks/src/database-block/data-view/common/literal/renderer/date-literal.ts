@@ -9,6 +9,6 @@ export class DateLiteral extends LiteralElement<number> {
   override render() {
     return this.value
       ? format(new Date(this.value), 'yyyy/MM/dd')
-      : html`<span class="dv-color-2">Empty</span>`;
+      : html`<span class="dv-color-2">Value</span>`;
   }
 }

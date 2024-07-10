@@ -41,14 +41,15 @@ export class EdgelessAlignPanel extends LitElement {
   @property({ attribute: false })
   accessor value: TextAlign = TextAlign.Left;
 
+  @property({ attribute: false })
+  accessor onSelect: undefined | ((value: TextAlign) => void) = undefined;
+
   private _onSelect(value: TextAlign) {
     this.value = value;
     if (this.onSelect) {
       this.onSelect(value);
     }
   }
-  @property({ attribute: false })
-  accessor onSelect: undefined | ((value: TextAlign) => void) = undefined;
 
   override render() {
     return repeat(

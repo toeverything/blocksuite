@@ -30,6 +30,15 @@ const BORDER_WIDTH = 1;
 export class EdgelessConnectorLabelEditor extends WithDisposable(
   ShadowlessElement
 ) {
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
   static override styles = css`
     .edgeless-connector-label-editor {
       position: absolute;
@@ -44,24 +53,30 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
       box-sizing: border-box;
       overflow: visible;
-    }
 
-    .inline-editor {
-      white-space: pre-wrap !important;
-      outline: none;
-    }
+      .inline-editor {
+        white-space: pre-wrap !important;
+        outline: none;
+      }
 
-    .inline-editor span {
-      word-break: normal !important;
-      overflow-wrap: anywhere !important;
-    }
+      .inline-editor span {
+        word-break: normal !important;
+        overflow-wrap: anywhere !important;
+      }
 
-    .edgeless-connector-label-editor-placeholder {
-      pointer-events: none;
-      color: var(--affine-text-disable-color);
-      white-space: nowrap;
+      .edgeless-connector-label-editor-placeholder {
+        pointer-events: none;
+        color: var(--affine-text-disable-color);
+        white-space: nowrap;
+      }
     }
   `;
+
+  private _keeping = false;
+
+  private _isComposition = false;
+
+  private _resizeObserver: ResizeObserver | null = null;
 
   @query('rich-text')
   accessor richText!: RichText;
@@ -71,23 +86,6 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
-
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
-  private _keeping = false;
-  private _isComposition = false;
-  private _resizeObserver: ResizeObserver | null = null;
-
-  setKeeping(keeping: boolean) {
-    this._keeping = keeping;
-  }
 
   private _updateLabelRect = () => {
     const { connector, edgeless } = this;
@@ -110,6 +108,10 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       });
     }
   };
+
+  setKeeping(keeping: boolean) {
+    this._keeping = keeping;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -140,6 +142,27 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
         this.inlineEditor.slots.renderComplete.on(() => {
           this.requestUpdate();
         });
+
+        this.disposables.add(
+          dispatcher.add('keyDown', ctx => {
+            const state = ctx.get('keyboardState');
+            const { key, ctrlKey, metaKey, altKey, shiftKey, isComposing } =
+              state.raw;
+            const onlyCmd = (ctrlKey || metaKey) && !altKey && !shiftKey;
+            const isModEnter = onlyCmd && key === 'Enter';
+            const isEscape = key === 'Escape';
+            if (!isComposing && (isModEnter || isEscape)) {
+              this.inlineEditorContainer.blur();
+
+              edgeless.service.selection.set({
+                elements: [connector.id],
+                editing: false,
+              });
+              return true;
+            }
+            return false;
+          })
+        );
 
         this.disposables.add(
           edgeless.service.surface.elementUpdated.on(({ id }) => {
@@ -237,7 +260,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       labelConstraints: { hasMaxWidth, maxWidth },
     } = connector;
 
-    const lineHeight = getLineHeight(fontFamily, fontSize);
+    const lineHeight = getLineHeight(fontFamily, fontSize, fontWeight);
     const { translateX, translateY, zoom } = this.edgeless.service.viewport;
     const [x, y] = Vec.mul(connector.getPointByOffsetDistance(distance), zoom);
     const transformOperation = [

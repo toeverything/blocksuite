@@ -3,6 +3,7 @@ export { MarkdownTransformer } from './markdown.js';
 export {
   customImageProxyMiddleware,
   defaultImageProxyMiddleware,
+  embedSyncedDocMiddleware,
   replaceIdMiddleware,
   setImageProxyMiddlewareURL,
   titleMiddleware,

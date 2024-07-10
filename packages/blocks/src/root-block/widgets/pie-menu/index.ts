@@ -24,11 +24,6 @@ export const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
 
 @customElement(AFFINE_PIE_MENU_WIDGET)
 export class AffinePieMenuWidget extends WidgetElement {
-  @state()
-  accessor currentMenu: PieMenu | null = null;
-
-  mouse: IVec = [innerWidth / 2, innerHeight / 2];
-
   get isOpen() {
     return !!this.currentMenu;
   }
@@ -45,36 +40,17 @@ export class AffinePieMenuWidget extends WidgetElement {
     throw new Error('AffinePieMenuWidget is only supported in edgeless');
   }
 
+  @state()
+  accessor currentMenu: PieMenu | null = null;
+
+  mouse: IVec = [innerWidth / 2, innerHeight / 2];
+
   // if key is released before 100ms then the menu is kept open, else
   // on trigger key release it will select the currently hovered menu node
   // No action if the currently hovered node is a submenu
   selectOnTrigRelease: { allow: boolean; timeout?: NodeJS.Timeout } = {
     allow: false,
   };
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    if (!this.isEnabled) return;
-
-    this.handleEvent('keyUp', this._handleKeyUp, { global: true });
-    this.handleEvent('pointerMove', this._handleCursorPos, { global: true });
-    this.handleEvent(
-      'wheel',
-      ctx => {
-        const state = ctx.get('defaultState');
-        if (state.event instanceof WheelEvent) state.event.stopPropagation();
-      },
-      { global: true }
-    );
-
-    this._initPie();
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    PieManager.dispose();
-  }
 
   private _initPie() {
     PieManager.setup({ rootElement: this.rootElement });
@@ -106,7 +82,51 @@ export class AffinePieMenuWidget extends WidgetElement {
     this.selectOnTrigRelease.allow = false;
   }
 
-  public _createMenu(
+  private _handleKeyUp = (ctx: UIEventStateContext) => {
+    if (!this.currentMenu) return;
+    const ev = ctx.get('keyboardState');
+    const { trigger } = this.currentMenu.schema;
+
+    if (trigger({ keyEvent: ev.raw, rootElement: this.rootElement })) {
+      clearTimeout(this.selectOnTrigRelease.timeout);
+      if (this.selectOnTrigRelease.allow) {
+        this.currentMenu.selectHovered();
+        this.currentMenu.close();
+      }
+    }
+  };
+
+  private _handleCursorPos = (ctx: UIEventStateContext) => {
+    const ev = ctx.get('pointerState');
+    const { x, y } = ev.point;
+    this.mouse = [x, y];
+  };
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    if (!this.isEnabled) return;
+
+    this.handleEvent('keyUp', this._handleKeyUp, { global: true });
+    this.handleEvent('pointerMove', this._handleCursorPos, { global: true });
+    this.handleEvent(
+      'wheel',
+      ctx => {
+        const state = ctx.get('defaultState');
+        if (state.event instanceof WheelEvent) state.event.stopPropagation();
+      },
+      { global: true }
+    );
+
+    this._initPie();
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    PieManager.dispose();
+  }
+
+  _createMenu(
     schema: PieMenuSchema,
     {
       x,
@@ -131,26 +151,6 @@ export class AffinePieMenuWidget extends WidgetElement {
 
     return menu;
   }
-
-  private _handleKeyUp = (ctx: UIEventStateContext) => {
-    if (!this.currentMenu) return;
-    const ev = ctx.get('keyboardState');
-    const { trigger } = this.currentMenu.schema;
-
-    if (trigger({ keyEvent: ev.raw, rootElement: this.rootElement })) {
-      clearTimeout(this.selectOnTrigRelease.timeout);
-      if (this.selectOnTrigRelease.allow) {
-        this.currentMenu.selectHovered();
-        this.currentMenu.close();
-      }
-    }
-  };
-
-  private _handleCursorPos = (ctx: UIEventStateContext) => {
-    const ev = ctx.get('pointerState');
-    const { x, y } = ev.point;
-    this.mouse = [x, y];
-  };
 
   override render() {
     return this.currentMenu ?? nothing;

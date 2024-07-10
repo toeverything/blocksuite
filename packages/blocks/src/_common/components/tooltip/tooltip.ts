@@ -11,6 +11,7 @@ import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
+import type { HoverOptions } from '../hover/controller.js';
 import { HoverController } from '../hover/index.js';
 
 const styles = css`
@@ -122,6 +123,8 @@ export class Tooltip extends LitElement {
     }
   `;
 
+  private _hoverController!: HoverController;
+
   @property({ attribute: 'tip-position' })
   accessor placement: Placement = 'top';
 
@@ -161,71 +164,70 @@ export class Tooltip extends LitElement {
   @property({ attribute: false })
   accessor allowInteractive = false;
 
-  private _hoverController = new HoverController(
-    this,
-    () => {
-      // const parentElement = this.parentElement;
-      // if (
-      //   parentElement &&
-      //   'disabled' in parentElement &&
-      //   parentElement.disabled
-      // )
-      //   return null;
-      if (this.hidden) return null;
-      let arrowStyles: StyleInfo = {};
-      return {
-        template: ({ positionSlot, updatePortal }) => {
-          positionSlot.on(data => {
-            // The tooltip placement may change,
-            // so we need to update the arrow position
-            if (this.arrow) {
-              arrowStyles = updateArrowStyles(data);
-            } else {
-              arrowStyles = {};
-            }
-            updatePortal();
-          });
+  @property({ attribute: false })
+  accessor hoverOptions: Partial<HoverOptions> = {};
 
-          const slot = this.shadowRoot?.querySelector('slot');
-          if (!slot) throw new Error('slot not found in tooltip!');
-          // slot.addEventListener('slotchange', () => updatePortal, {
-          //   once: true,
-          // });
-          const slottedChildren = slot
-            .assignedNodes()
-            .map(node => node.cloneNode(true));
-          return html`
-            <style>
-              ${this._getStyles()}
-            </style>
-            <div class="affine-tooltip" role="tooltip">${slottedChildren}</div>
-            <div class="arrow" style=${styleMap(arrowStyles)}></div>
-          `;
-        },
-        computePosition: portalRoot => ({
-          referenceElement: this.parentElement!,
-          placement: this.placement,
-          middleware: [
-            this.autoFlip && flip({ padding: 12 }),
-            offset((this.arrow ? TRIANGLE_HEIGHT : 0) + this.offset),
-            arrow({
-              element: portalRoot.shadowRoot!.querySelector('.arrow')!,
-            }),
-          ],
-          autoUpdate: true,
-        }),
-      };
-    },
-    {
-      leaveDelay: 0,
-      // The tooltip is not interactive by default
-      safeBridge: false,
-      allowMultiple: true,
-    }
-  );
+  private _setUpHoverController = () => {
+    this._hoverController = new HoverController(
+      this,
+      () => {
+        // const parentElement = this.parentElement;
+        // if (
+        //   parentElement &&
+        //   'disabled' in parentElement &&
+        //   parentElement.disabled
+        // )
+        //   return null;
+        if (this.hidden) return null;
+        let arrowStyles: StyleInfo = {};
+        return {
+          template: ({ positionSlot, updatePortal }) => {
+            positionSlot.on(data => {
+              // The tooltip placement may change,
+              // so we need to update the arrow position
+              if (this.arrow) {
+                arrowStyles = updateArrowStyles(data);
+              } else {
+                arrowStyles = {};
+              }
+              updatePortal();
+            });
 
-  override connectedCallback() {
-    super.connectedCallback();
+            const children = Array.from(this.childNodes).map(node =>
+              node.cloneNode(true)
+            );
+
+            return html`
+              <style>
+                ${this._getStyles()}
+              </style>
+              <div class="affine-tooltip" role="tooltip">${children}</div>
+              <div class="arrow" style=${styleMap(arrowStyles)}></div>
+            `;
+          },
+          computePosition: portalRoot => ({
+            referenceElement: this.parentElement!,
+            placement: this.placement,
+            middleware: [
+              this.autoFlip && flip({ padding: 12 }),
+              offset((this.arrow ? TRIANGLE_HEIGHT : 0) + this.offset),
+              arrow({
+                element: portalRoot.shadowRoot!.querySelector('.arrow')!,
+              }),
+            ],
+            autoUpdate: true,
+          }),
+        };
+      },
+      {
+        leaveDelay: 0,
+        // The tooltip is not interactive by default
+        safeBridge: false,
+        allowMultiple: true,
+        ...this.hoverOptions,
+      }
+    );
+
     const parent = this.parentElement;
     assertExists(parent, 'Tooltip must have a parent element');
 
@@ -233,17 +235,14 @@ export class Tooltip extends LitElement {
     setTimeout(() => {
       this._hoverController.setReference(parent);
     }, 0);
-  }
-
-  getPortal() {
-    return this._hoverController.portal;
-  }
+  };
 
   private _getStyles() {
     return css`
       ${styles}
       :host {
         z-index: ${unsafeCSS(this.zIndex)};
+        opacity: 0;
         ${
           // All the styles are applied to the portal element
           unsafeCSS(this.style.cssText)
@@ -262,10 +261,14 @@ export class Tooltip extends LitElement {
     `;
   }
 
-  override render() {
-    // The actual tooltip will render as a portal, and all content inside the slot will be treated as a template.
-    // See https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots
-    return html`<slot></slot>`;
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._setUpHoverController();
+  }
+
+  getPortal() {
+    return this._hoverController.portal;
   }
 }
 

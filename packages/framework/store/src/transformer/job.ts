@@ -4,7 +4,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, BlockSchemaType } from '../schema/index.js';
 import type { DocCollection, DocMeta } from '../store/index.js';
 import type { Doc } from '../store/index.js';
-import type { DocsPropertiesMeta } from '../store/meta.js';
 import { AssetsManager } from './assets.js';
 import { BaseBlockTransformer } from './base.js';
 import { type DraftModel, toDraftModel } from './draft.js';
@@ -35,9 +34,27 @@ export type JobConfig = {
 };
 
 export class Job {
+  get collection() {
+    return this._collection;
+  }
+
+  get assetsManager() {
+    return this._assetsManager;
+  }
+
+  get assets() {
+    return this._assetsManager.getAssets();
+  }
+
+  get adapterConfigs() {
+    return this._adapterConfigs;
+  }
+
   private readonly _collection: DocCollection;
+
   private readonly _assetsManager: AssetsManager;
-  private readonly _adapterConfigs: Map<string, string> = new Map();
+
+  private readonly _adapterConfigs = new Map<string, string>();
 
   private readonly _slots: JobSlots = {
     beforeImport: new Slot<BeforeImportPayload>(),
@@ -60,22 +77,6 @@ export class Job {
     });
   }
 
-  get assetsManager() {
-    return this._assetsManager;
-  }
-
-  get assets() {
-    return this._assetsManager.getAssets();
-  }
-
-  get adapterConfigs() {
-    return this._adapterConfigs;
-  }
-
-  reset() {
-    this._assetsManager.cleanup();
-  }
-
   private _getSchema(flavour: string) {
     const schema = this._collection.schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Flavour schema not found for ${flavour}`);
@@ -88,15 +89,14 @@ export class Job {
 
   private _getCollectionMeta() {
     const { meta } = this._collection;
-    const { pageVersion, workspaceVersion, properties, docs } = meta;
+    const { pageVersion, workspaceVersion, docs } = meta;
     assertExists(pageVersion);
     assertExists(workspaceVersion);
-    assertExists(properties);
     assertExists(docs);
     return {
       pageVersion,
       workspaceVersion,
-      properties: JSON.parse(JSON.stringify(properties)) as DocsPropertiesMeta,
+      properties: {}, // for backward compatibility
       pages: JSON.parse(JSON.stringify(docs)) as DocMeta[],
     };
   }
@@ -109,23 +109,8 @@ export class Job {
       id: docMeta.id,
       title: docMeta.title,
       createDate: docMeta.createDate,
-      tags: docMeta.tags ?? [],
+      tags: [], // for backward compatibility
     };
-  }
-
-  private _importDocMeta(doc: Doc, meta: DocSnapshot['meta']) {
-    const docMeta = doc.meta;
-    assertExists(docMeta);
-
-    const collectionTags = this._collection.meta.properties.tags?.options;
-    assertExists(collectionTags);
-    meta.tags.forEach(tag => {
-      const exists = collectionTags.some(t => t.id === tag);
-      if (!exists) {
-        throw new Error(`Tag ${tag} is not in collection options`);
-      }
-      docMeta.tags.push(tag);
-    });
   }
 
   private async _blockToSnapshot(model: DraftModel): Promise<BlockSnapshot> {
@@ -157,13 +142,6 @@ export class Job {
 
     return snapshot;
   }
-
-  blockToSnapshot = async (model: DraftModel): Promise<BlockSnapshot> => {
-    const snapshot = await this._blockToSnapshot(model);
-    BlockSnapshotSchema.parse(snapshot);
-
-    return snapshot;
-  };
 
   private async _snapshotToBlock(
     snapshot: BlockSnapshot,
@@ -215,6 +193,17 @@ export class Job {
 
     return model;
   }
+
+  reset() {
+    this._assetsManager.cleanup();
+  }
+
+  blockToSnapshot = async (model: DraftModel): Promise<BlockSnapshot> => {
+    const snapshot = await this._blockToSnapshot(model);
+    BlockSnapshotSchema.parse(snapshot);
+
+    return snapshot;
+  };
 
   snapshotToModelData = async (snapshot: BlockSnapshot) => {
     const { children, flavour, props, id } = snapshot;
@@ -292,7 +281,6 @@ export class Job {
     const { meta, blocks } = snapshot;
     const doc = this._collection.createDoc({ id: meta.id });
     doc.load();
-    this._importDocMeta(doc, meta);
     await this.snapshotToBlock(blocks, doc);
     this._slots.afterImport.emit({
       type: 'page',
@@ -320,28 +308,6 @@ export class Job {
     CollectionInfoSnapshotSchema.parse(snapshot);
 
     return snapshot;
-  };
-
-  snapshotToCollectionInfo = (snapshot: CollectionInfoSnapshot): void => {
-    this._slots.beforeImport.emit({
-      type: 'info',
-      snapshot,
-    });
-    CollectionInfoSnapshotSchema.parse(snapshot);
-    const { properties } = snapshot;
-    const currentProperties = this._collection.meta.properties;
-    const newOptions = properties.tags?.options ?? [];
-    const currentOptions = currentProperties.tags?.options ?? [];
-    const options = new Set([...newOptions, ...currentOptions]);
-    this._collection.meta.setProperties({
-      tags: {
-        options: Array.from(options),
-      },
-    });
-    this._slots.afterImport.emit({
-      type: 'info',
-      snapshot,
-    });
   };
 
   sliceToSnapshot = async (slice: Slice): Promise<SliceSnapshot> => {

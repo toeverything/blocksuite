@@ -68,12 +68,8 @@ export class DateCellEditing extends BaseCellRenderer<number> {
   private accessor _inputEle!: HTMLInputElement;
 
   private _prevPortalAbortController: AbortController | null = null;
-  private _datePicker: DatePicker | null = null;
 
-  override onExitEditMode() {
-    this._setValue();
-    this._prevPortalAbortController?.abort();
-  }
+  private _datePicker: DatePicker | null = null;
 
   private _setValue = (str: string = this._inputEle.value) => {
     if (str === '') {
@@ -87,10 +83,6 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     this.onChange(date.getTime());
     this._inputEle.value = `${value ?? ''}`;
   };
-
-  override firstUpdated() {
-    this._inputEle.focus();
-  }
 
   private _onFocus = () => {
     if (
@@ -140,6 +132,15 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     if (!this._datePicker) return;
     const v = (e.target as HTMLInputElement).value;
     this._datePicker.value = v ? new Date(v).getTime() : undefined;
+  }
+
+  override onExitEditMode() {
+    this._setValue();
+    this._prevPortalAbortController?.abort();
+  }
+
+  override firstUpdated() {
+    this._inputEle.focus();
   }
 
   override render() {

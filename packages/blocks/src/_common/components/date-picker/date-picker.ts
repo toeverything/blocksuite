@@ -50,66 +50,30 @@ type NavActionArg = {
  */
 @customElement('date-picker')
 export class DatePicker extends WithDisposable(LitElement) {
-  static override styles = datePickerStyle;
-
-  /** Checked date timestamp */
-  @property({ type: Number })
-  accessor value: number | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onChange: ((value: Date) => void) | undefined = undefined;
-
-  /** card padding in px */
-  @property({ type: Number })
-  accessor padding = 20;
-  /** cell size in px */
-  @property({ type: Number })
-  accessor size = 28;
-  /** horizontal gap between cells in px */
-  @property({ type: Number })
-  accessor gapH = 10;
-  /** vertical gap between cells in px */
-  @property({ type: Number })
-  accessor gapV = 8;
-
-  /** current active month */
-  private _cursor = new Date();
-  /** web-accessibility for month select */
-  @property({ attribute: false })
-  private accessor _monthCursor = 0;
-  @property({ attribute: false })
-  private accessor _yearCursor = 0;
-  @property({ attribute: false })
-  private accessor _monthPickYearCursor = 0;
-  /** date matrix */
-  @property({ attribute: false })
-  private accessor _matrix: DateCell[][] = [];
-  @property({ attribute: false })
-  private accessor _yearMatrix: number[] = [];
-  @property({ attribute: false })
-  private accessor _mode: 'date' | 'month' | 'year' = 'date';
-
-  private _maxYear = 2099;
-  private _minYear = 1970;
-
   get year() {
     return this._cursor.getFullYear();
   }
+
   get month() {
     return this._cursor.getMonth();
   }
+
   get date() {
     return this._cursor.getDate();
   }
+
   get day() {
     return this._cursor.getDay();
   }
+
   get yearLabel() {
     return this.year;
   }
+
   get monthLabel() {
     return months[this.month];
   }
+
   get dayLabel() {
     return days[this.day];
   }
@@ -118,10 +82,12 @@ export class DatePicker extends WithDisposable(LitElement) {
     const colNum = 7;
     return this.size * colNum + this.padding * 2 + this.gapH * (colNum - 1);
   }
+
   get cardHeight() {
     const rowNum = 7;
     return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
   }
+
   get minHeight() {
     const rowNum = 8;
     return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
@@ -138,78 +104,63 @@ export class DatePicker extends WithDisposable(LitElement) {
     };
   }
 
-  /**
-   * Focus on date-cell
-   */
-  public focusDateCell() {
-    const lastEl = this.shadowRoot?.querySelector(
-      'button.date-cell[tabindex="0"]'
-    ) as HTMLElement;
-    lastEl?.focus();
-  }
+  static override styles = datePickerStyle;
 
-  /**
-   * check if date-cell is focused
-   * @returns
-   */
-  public isDateCellFocused() {
-    const focused = this.shadowRoot?.activeElement as HTMLElement;
-    return focused?.classList.contains('date-cell');
-  }
+  /** current active month */
+  private _cursor = new Date();
 
-  public focusMonthCell() {
-    const lastEl = this.shadowRoot?.querySelector(
-      'button.month-cell[tabindex="0"]'
-    ) as HTMLElement;
-    lastEl?.focus();
-  }
+  /** web-accessibility for month select */
+  @property({ attribute: false })
+  private accessor _monthCursor = 0;
 
-  public isMonthCellFocused() {
-    const focused = this.shadowRoot?.activeElement as HTMLElement;
-    return focused?.classList.contains('month-cell');
-  }
+  @property({ attribute: false })
+  private accessor _yearCursor = 0;
 
-  public focusYearCell() {
-    const lastEl = this.shadowRoot?.querySelector(
-      'button.year-cell[tabindex="0"]'
-    ) as HTMLElement;
-    lastEl?.focus();
-  }
+  @property({ attribute: false })
+  private accessor _monthPickYearCursor = 0;
 
-  public isYearCellFocused() {
-    const focused = this.shadowRoot?.activeElement as HTMLElement;
-    return focused?.classList.contains('year-cell');
-  }
+  /** date matrix */
+  @property({ attribute: false })
+  private accessor _matrix: DateCell[][] = [];
 
-  public openMonthSelector() {
-    this._monthCursor = this.month;
-    this._monthPickYearCursor = this.year;
-    this._mode = 'month';
-  }
-  public closeMonthSelector() {
-    this._mode = 'date';
-  }
-  public toggleMonthSelector() {
-    if (this._mode === 'month') this.closeMonthSelector();
-    else this.openMonthSelector();
-  }
-  public openYearSelector() {
-    this._yearCursor = clamp(this._minYear, this._maxYear, this.year);
-    this._mode = 'year';
-    this._getYearMatrix();
-  }
-  public closeYearSelector() {
-    this._mode = 'date';
-  }
-  public toggleYearSelector() {
-    if (this._mode === 'year') this.closeYearSelector();
-    else this.openYearSelector();
-  }
+  @property({ attribute: false })
+  private accessor _yearMatrix: number[] = [];
+
+  @property({ attribute: false })
+  private accessor _mode: 'date' | 'month' | 'year' = 'date';
+
+  private _maxYear = 2099;
+
+  private _minYear = 1970;
+
+  /** Checked date timestamp */
+  @property({ type: Number })
+  accessor value: number | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor onChange: ((value: Date) => void) | undefined = undefined;
+
+  /** card padding in px */
+  @property({ type: Number })
+  accessor padding = 20;
+
+  /** cell size in px */
+  @property({ type: Number })
+  accessor size = 28;
+
+  /** horizontal gap between cells in px */
+  @property({ type: Number })
+  accessor gapH = 10;
+
+  /** vertical gap between cells in px */
+  @property({ type: Number })
+  accessor gapV = 8;
 
   private _moveMonth(offset: number) {
     this._cursor.setMonth(this._cursor.getMonth() + offset);
     this._getMatrix();
   }
+
   private _modeDecade(offset: number) {
     this._yearCursor = clamp(
       this._minYear,
@@ -254,90 +205,8 @@ export class DatePicker extends WithDisposable(LitElement) {
     ).filter(v => v >= this._minYear && v <= this._maxYear);
   }
 
-  override firstUpdated(): void {
-    this._disposables.addFromEvent(
-      this,
-      'keydown',
-      e => {
-        e.stopPropagation();
-        const directions = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
-        if (directions.includes(e.key) && this.isDateCellFocused()) {
-          e.preventDefault();
-
-          if (e.key === 'ArrowLeft') {
-            this._cursor.setDate(this._cursor.getDate() - 1);
-          } else if (e.key === 'ArrowRight') {
-            this._cursor.setDate(this._cursor.getDate() + 1);
-          } else if (e.key === 'ArrowUp') {
-            this._cursor.setDate(this._cursor.getDate() - 7);
-          } else if (e.key === 'ArrowDown') {
-            this._cursor.setDate(this._cursor.getDate() + 7);
-          }
-          this._getMatrix();
-          setTimeout(this.focusDateCell.bind(this));
-        }
-
-        if (directions.includes(e.key) && this.isMonthCellFocused()) {
-          e.preventDefault();
-          if (e.key === 'ArrowLeft') {
-            this._monthCursor = (this._monthCursor - 1 + 12) % 12;
-          } else if (e.key === 'ArrowRight') {
-            this._monthCursor = (this._monthCursor + 1) % 12;
-          } else if (e.key === 'ArrowUp') {
-            this._monthCursor = (this._monthCursor - 3 + 12) % 12;
-          } else if (e.key === 'ArrowDown') {
-            this._monthCursor = (this._monthCursor + 3) % 12;
-          }
-          setTimeout(this.focusMonthCell.bind(this));
-        }
-
-        if (directions.includes(e.key) && this.isYearCellFocused()) {
-          e.preventDefault();
-          if (e.key === 'ArrowLeft') {
-            this._modeDecade(-1);
-          } else if (e.key === 'ArrowRight') {
-            this._modeDecade(1);
-          } else if (e.key === 'ArrowUp') {
-            this._modeDecade(-3);
-          } else if (e.key === 'ArrowDown') {
-            this._modeDecade(3);
-          }
-          setTimeout(this.focusYearCell.bind(this));
-        }
-
-        if (e.key === 'Tab') {
-          setTimeout(() => {
-            const focused = this.shadowRoot?.activeElement as HTMLElement;
-            const firstEl = this.shadowRoot?.querySelector('button');
-
-            // check if focus the last element, then focus the first element
-            if (!e.shiftKey && !focused) firstEl?.focus();
-            // check if focused element is inside current date-picker
-            if (e.shiftKey && !this.shadowRoot?.contains(focused))
-              this.focusDateCell();
-          });
-        }
-      },
-      true
-    );
-  }
-
   private _switchMode<T>(map: Record<typeof this._mode, T>) {
     return (map[this._mode] as T) ?? nothing;
-  }
-
-  override updated(_changedProperties: PropertyValues): void {
-    if (_changedProperties.has('value')) {
-      // this._getMatrix();
-      if (this.value) this._onChange(toDate(this.value), false);
-      else this._getMatrix();
-    }
-  }
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-    if (this.value) this._cursor = toDate(this.value);
-    this._getMatrix();
   }
 
   /** Actions */
@@ -542,6 +411,161 @@ export class DatePicker extends WithDisposable(LitElement) {
           </button>`;
         })}
       </div>`;
+  }
+
+  /**
+   * Focus on date-cell
+   */
+  focusDateCell() {
+    const lastEl = this.shadowRoot?.querySelector(
+      'button.date-cell[tabindex="0"]'
+    ) as HTMLElement;
+    lastEl?.focus();
+  }
+
+  /**
+   * check if date-cell is focused
+   * @returns
+   */
+  isDateCellFocused() {
+    const focused = this.shadowRoot?.activeElement as HTMLElement;
+    return focused?.classList.contains('date-cell');
+  }
+
+  focusMonthCell() {
+    const lastEl = this.shadowRoot?.querySelector(
+      'button.month-cell[tabindex="0"]'
+    ) as HTMLElement;
+    lastEl?.focus();
+  }
+
+  isMonthCellFocused() {
+    const focused = this.shadowRoot?.activeElement as HTMLElement;
+    return focused?.classList.contains('month-cell');
+  }
+
+  focusYearCell() {
+    const lastEl = this.shadowRoot?.querySelector(
+      'button.year-cell[tabindex="0"]'
+    ) as HTMLElement;
+    lastEl?.focus();
+  }
+
+  isYearCellFocused() {
+    const focused = this.shadowRoot?.activeElement as HTMLElement;
+    return focused?.classList.contains('year-cell');
+  }
+
+  openMonthSelector() {
+    this._monthCursor = this.month;
+    this._monthPickYearCursor = this.year;
+    this._mode = 'month';
+  }
+
+  closeMonthSelector() {
+    this._mode = 'date';
+  }
+
+  toggleMonthSelector() {
+    if (this._mode === 'month') this.closeMonthSelector();
+    else this.openMonthSelector();
+  }
+
+  openYearSelector() {
+    this._yearCursor = clamp(this._minYear, this._maxYear, this.year);
+    this._mode = 'year';
+    this._getYearMatrix();
+  }
+
+  closeYearSelector() {
+    this._mode = 'date';
+  }
+
+  toggleYearSelector() {
+    if (this._mode === 'year') this.closeYearSelector();
+    else this.openYearSelector();
+  }
+
+  override firstUpdated(): void {
+    this._disposables.addFromEvent(
+      this,
+      'keydown',
+      e => {
+        e.stopPropagation();
+        const directions = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+        if (directions.includes(e.key) && this.isDateCellFocused()) {
+          e.preventDefault();
+
+          if (e.key === 'ArrowLeft') {
+            this._cursor.setDate(this._cursor.getDate() - 1);
+          } else if (e.key === 'ArrowRight') {
+            this._cursor.setDate(this._cursor.getDate() + 1);
+          } else if (e.key === 'ArrowUp') {
+            this._cursor.setDate(this._cursor.getDate() - 7);
+          } else if (e.key === 'ArrowDown') {
+            this._cursor.setDate(this._cursor.getDate() + 7);
+          }
+          this._getMatrix();
+          setTimeout(this.focusDateCell.bind(this));
+        }
+
+        if (directions.includes(e.key) && this.isMonthCellFocused()) {
+          e.preventDefault();
+          if (e.key === 'ArrowLeft') {
+            this._monthCursor = (this._monthCursor - 1 + 12) % 12;
+          } else if (e.key === 'ArrowRight') {
+            this._monthCursor = (this._monthCursor + 1) % 12;
+          } else if (e.key === 'ArrowUp') {
+            this._monthCursor = (this._monthCursor - 3 + 12) % 12;
+          } else if (e.key === 'ArrowDown') {
+            this._monthCursor = (this._monthCursor + 3) % 12;
+          }
+          setTimeout(this.focusMonthCell.bind(this));
+        }
+
+        if (directions.includes(e.key) && this.isYearCellFocused()) {
+          e.preventDefault();
+          if (e.key === 'ArrowLeft') {
+            this._modeDecade(-1);
+          } else if (e.key === 'ArrowRight') {
+            this._modeDecade(1);
+          } else if (e.key === 'ArrowUp') {
+            this._modeDecade(-3);
+          } else if (e.key === 'ArrowDown') {
+            this._modeDecade(3);
+          }
+          setTimeout(this.focusYearCell.bind(this));
+        }
+
+        if (e.key === 'Tab') {
+          setTimeout(() => {
+            const focused = this.shadowRoot?.activeElement as HTMLElement;
+            const firstEl = this.shadowRoot?.querySelector('button');
+
+            // check if focus the last element, then focus the first element
+            if (!e.shiftKey && !focused) firstEl?.focus();
+            // check if focused element is inside current date-picker
+            if (e.shiftKey && !this.shadowRoot?.contains(focused))
+              this.focusDateCell();
+          });
+        }
+      },
+      true
+    );
+  }
+
+  override updated(_changedProperties: PropertyValues): void {
+    if (_changedProperties.has('value')) {
+      // this._getMatrix();
+      if (this.value) this._onChange(toDate(this.value), false);
+      else this._getMatrix();
+    }
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    if (this.value) this._cursor = toDate(this.value);
+    this._getMatrix();
   }
 
   override render() {

@@ -1,6 +1,6 @@
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
+import { type Doc, Job } from '@blocksuite/store';
 import {
   DocCollection,
   type DocCollectionOptions,
@@ -113,7 +113,9 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
   accessor portalHost!: EditorHost;
 
   doc!: Doc;
+
   surface!: SurfaceBlockModel;
+
   mindmapId!: string;
 
   get _mindmap() {
@@ -131,7 +133,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     };
 
     const collection = new DocCollection(options);
-
+    collection.meta.initialize();
     collection.start();
 
     const doc = collection.createDoc({ id: 'doc:home' }).load();
@@ -146,8 +148,8 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     };
   }
 
-  private _toMindmapNode(answer: string) {
-    return markdownToMindmap(answer);
+  private _toMindmapNode(answer: string, doc: Doc) {
+    return markdownToMindmap(answer, doc);
   }
 
   private _switchStyle(style: MindmapStyle) {
@@ -170,7 +172,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     const tempDoc = this._createTemporaryDoc();
-    const mindmapNode = this._toMindmapNode(this.answer);
+    const mindmapNode = this._toMindmapNode(this.answer, tempDoc.doc);
 
     if (!mindmapNode) {
       return;
@@ -233,9 +235,10 @@ type Node = {
   children: Node[];
 };
 
-export const markdownToMindmap = (answer: string) => {
+export const markdownToMindmap = (answer: string, doc: Doc) => {
   let result: Node | null = null;
-  const markdown = new MarkdownAdapter();
+  const job = new Job({ collection: doc.collection });
+  const markdown = new MarkdownAdapter(job);
   const ast = markdown['_markdownToAst'](answer);
   const traverse = (
     markdownNode: Unpacked<(typeof ast)['children']>,

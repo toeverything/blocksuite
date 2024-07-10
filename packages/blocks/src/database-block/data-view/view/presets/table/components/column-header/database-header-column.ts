@@ -1,6 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { ReferenceElement } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -8,10 +7,8 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import {
-  popMenu,
-  positionToVRect,
-} from '../../../../../../../_common/components/index.js';
+import { popMenu } from '../../../../../../../_common/components/index.js';
+import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
 import {
   DatabaseDuplicate,
   DatabaseInsertLeft,
@@ -19,7 +16,6 @@ import {
   DatabaseMoveLeft,
   DatabaseMoveRight,
   DeleteIcon,
-  TextIcon,
 } from '../../../../../common/icons/index.js';
 import type { InsertToPosition } from '../../../../../types.js';
 import { startDrag } from '../../../../../utils/drag.js';
@@ -41,6 +37,10 @@ import {
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
+  private get readonly() {
+    return this.tableViewManager.readonly;
+  }
+
   static override styles = css`
     affine-database-header-column {
       display: flex;
@@ -50,6 +50,11 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       cursor: grabbing;
     }
   `;
+
+  private widthDragBar = createRef();
+
+  private drawWidthDragBarTask = 0;
+
   @property({ attribute: false })
   accessor tableViewManager!: DataViewTableManager;
 
@@ -58,39 +63,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
-
-  private widthDragBar = createRef();
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.tableViewManager.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    const table = this.closest('affine-database-table');
-    if (table) {
-      this.disposables.add(
-        table.handleEvent('dragStart', context => {
-          const event = context.get('pointerState').raw;
-          const target = event.target;
-          if (target instanceof Element) {
-            if (this.widthDragBar.value?.contains(target)) {
-              event.preventDefault();
-              this.widthDragStart(event);
-              return true;
-            }
-            if (this.contains(target)) {
-              event.preventDefault();
-              this.moveColumn(event);
-              return true;
-            }
-          }
-          return false;
-        })
-      );
-    }
-  }
 
   private _columnsOffset = (header: Element, _scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
@@ -168,6 +140,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     };
   };
+
   private moveColumn = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
     const headerContainer = this.closest('affine-database-column-header');
@@ -262,62 +235,24 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private get readonly() {
-    return this.tableViewManager.readonly;
-  }
-
-  editTitle = () => {
-    this._clickColumn();
-  };
-
   private _clickColumn = () => {
     if (this.tableViewManager.readonly) {
       return;
     }
     this.popMenu();
   };
+
   private _contextMenu = (e: MouseEvent) => {
     e.preventDefault();
-    this.popMenu(positionToVRect(e.x, e.y));
+    this.popMenu(e.target as HTMLElement);
   };
 
-  private popMenu(ele?: ReferenceElement) {
+  private popMenu(ele?: HTMLElement) {
     popMenu(ele ?? this, {
       options: {
-        input: {
-          initValue: this.column.name,
-          onComplete: text => {
-            this.column.updateName(text);
-          },
-        },
+        input: inputConfig(this.column),
         items: [
-          {
-            type: 'sub-menu',
-            name: 'Column Type',
-            icon: TextIcon,
-            hide: () => !this.column.updateType || this.column.type === 'title',
-            options: {
-              input: {
-                search: true,
-              },
-              items: this.tableViewManager.allColumnConfig.map(config => {
-                return {
-                  type: 'action',
-                  isSelected: config.type === this.column.type,
-                  name: config.name,
-                  icon: html` <uni-lit
-                    .uni="${this.tableViewManager.getIcon(config.type)}"
-                  ></uni-lit>`,
-                  select: () => {
-                    if (this.column.type === config.type) {
-                      return;
-                    }
-                    this.column.updateType?.(config.type);
-                  },
-                };
-              }),
-            },
-          },
+          typeConfig(this.column, this.tableViewManager),
           {
             type: 'action',
             name: 'Duplicate Column',
@@ -325,15 +260,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             hide: () => !this.column.duplicate || this.column.type === 'title',
             select: () => {
               this.column.duplicate?.();
-              Promise.resolve()
-                .then(() => {
-                  const next = this.nextElementSibling;
-                  if (next instanceof DatabaseHeaderColumn) {
-                    next.editTitle();
-                    next.scrollIntoView();
-                  }
-                })
-                .catch(console.error);
             },
           },
           {
@@ -463,7 +389,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     });
   };
-  private drawWidthDragBarTask = 0;
+
   private drawWidthDragBar = () => {
     const tableContainer = getTableContainer(this);
     const tableRect = tableContainer.getBoundingClientRect();
@@ -476,6 +402,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     );
     this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
   };
+
   private _enterWidthDragBar = () => {
     if (this.drawWidthDragBarTask) {
       cancelAnimationFrame(this.drawWidthDragBarTask);
@@ -483,10 +410,55 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
     this.drawWidthDragBar();
   };
+
   private _leaveWidthDragBar = () => {
     cancelAnimationFrame(this.drawWidthDragBarTask);
     this.drawWidthDragBarTask = 0;
     getVerticalIndicator().remove();
+  };
+
+  private widthDragStart(event: PointerEvent) {
+    startDragWidthAdjustmentBar(
+      event,
+      getTableContainer(this),
+      this.getBoundingClientRect().width,
+      this.column
+    );
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.tableViewManager.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+    const table = this.closest('affine-database-table');
+    if (table) {
+      this.disposables.add(
+        table.handleEvent('dragStart', context => {
+          const event = context.get('pointerState').raw;
+          const target = event.target;
+          if (target instanceof Element) {
+            if (this.widthDragBar.value?.contains(target)) {
+              event.preventDefault();
+              this.widthDragStart(event);
+              return true;
+            }
+            if (this.contains(target)) {
+              event.preventDefault();
+              this.moveColumn(event);
+              return true;
+            }
+          }
+          return false;
+        })
+      );
+    }
+  }
+
+  editTitle = () => {
+    this._clickColumn();
   };
 
   override render() {
@@ -534,15 +506,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         <div style="width: 8px;height: 100%;margin-left: -4px;"></div>
       </div>
     `;
-  }
-
-  private widthDragStart(event: PointerEvent) {
-    startDragWidthAdjustmentBar(
-      event,
-      getTableContainer(this),
-      this.getBoundingClientRect().width,
-      this.column
-    );
   }
 }
 

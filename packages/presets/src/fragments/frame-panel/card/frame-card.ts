@@ -113,6 +113,8 @@ const styles = css`
 export class FrameCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
+  private _frameDisposables: DisposableGroup | null = null;
+
   @property({ attribute: false })
   accessor edgeless: EdgelessRootBlockComponent | null = null;
 
@@ -148,8 +150,6 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
 
   @query('.frame-card-container')
   accessor containerElement!: HTMLElement;
-
-  private _frameDisposables: DisposableGroup | null = null;
 
   private _dispatchSelectEvent(e: MouseEvent) {
     e.stopPropagation();

@@ -33,6 +33,24 @@ export const AFFINE_AI_PANEL_WIDGET = 'affine-ai-panel-widget';
 
 @customElement(AFFINE_AI_PANEL_WIDGET)
 export class AffineAIPanelWidget extends WidgetElement {
+  get viewportOverlayWidget() {
+    const rootId = this.host.doc.root?.id;
+    return rootId
+      ? (this.host.view.getWidget(
+          AFFINE_VIEWPORT_OVERLAY_WIDGET,
+          rootId
+        ) as AffineViewportOverlayWidget)
+      : null;
+  }
+
+  get inputText() {
+    return this._inputText;
+  }
+
+  get answer() {
+    return this._answer;
+  }
+
   static override styles = css`
     :host {
       display: flex;
@@ -40,12 +58,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       border-radius: var(--8, 8px);
       border: 1px solid var(--affine-border-color);
       background: var(--affine-background-overlay-panel-color);
-
-      /* light/toolbarShadow */
-      box-shadow: var(
-        --affine-toolbar-shadow,
-        0px 6px 16px 0px rgba(0, 0, 0, 0.14)
-      );
+      box-shadow: var(--affine-shadow-4);
 
       position: absolute;
       width: max-content;
@@ -81,6 +94,18 @@ export class AffineAIPanelWidget extends WidgetElement {
     }
   `;
 
+  private _stopAutoUpdate?: undefined | (() => void);
+
+  private _discardModalAbort: AbortController | null = null;
+
+  private _abortController = new AbortController();
+
+  private _inputText: string | null = null;
+
+  private _selection?: BaseSelection[];
+
+  private _answer: string | null = null;
+
   ctx: unknown = null;
 
   @property({ attribute: false })
@@ -91,20 +116,6 @@ export class AffineAIPanelWidget extends WidgetElement {
 
   @query('ai-panel-generating')
   accessor generatingElement: AIPanelGenerating | null = null;
-
-  get viewportOverlayWidget() {
-    const rootId = this.host.doc.root?.id;
-    return rootId
-      ? (this.host.view.getWidget(
-          AFFINE_VIEWPORT_OVERLAY_WIDGET,
-          rootId
-        ) as AffineViewportOverlayWidget)
-      : null;
-  }
-
-  private _stopAutoUpdate?: undefined | (() => void);
-
-  private _discardModalAbort: AbortController | null = null;
 
   private _clearDiscardModal = () => {
     if (this._discardModalAbort) {
@@ -139,143 +150,12 @@ export class AffineAIPanelWidget extends WidgetElement {
     }
   };
 
-  toggle = (reference: Element, input?: string) => {
-    if (input) {
-      this._inputText = input;
-      this.generate();
-    } else {
-      // reset state
-      this.hide();
-      this.state = 'input';
-    }
-
-    this._autoUpdatePosition(reference);
-  };
-
-  hide = () => {
-    this._resetAbortController();
-    this.state = 'hidden';
-    this._stopAutoUpdate?.();
-    this._inputText = null;
-    this._answer = null;
-    this._stopAutoUpdate = undefined;
-    this.config?.hideCallback?.();
-    this.viewportOverlayWidget?.unlock();
-  };
-
-  discard = () => {
-    if ((this.state === 'finished' || this.state === 'error') && !this.answer) {
-      this._discardCallback();
-      return;
-    }
-    if (this.state === 'input') {
-      this.hide();
-      return;
-    }
-    this.showDiscardModal()
-      .then(discard => {
-        if (discard) {
-          this._discardCallback();
-        } else {
-          this._cancelCallback();
-        }
-        this._restoreSelection();
-      })
-      .catch(console.error);
-  };
-
-  showDiscardModal = () => {
-    const notification =
-      this.host.std.spec.getService('affine:page').notificationService;
-    if (!notification) {
-      return Promise.resolve(true);
-    }
-    this._clearDiscardModal();
-    this._discardModalAbort = new AbortController();
-    return notification
-      .confirm({
-        title: 'Discard the AI result',
-        message: 'Do you want to discard the results the AI just generated?',
-        cancelText: 'Cancel',
-        confirmText: 'Discard',
-        abort: this._abortController.signal,
-      })
-      .finally(() => (this._discardModalAbort = null));
-  };
-
-  /**
-   * You can evaluate this method multiple times to regenerate the answer.
-   */
-  generate = () => {
-    assertExists(this.config);
-    const text = this._inputText;
-    assertExists(text);
-    assertExists(this.config.generateAnswer);
-
-    this._resetAbortController();
-
-    // reset answer
-    this._answer = null;
-
-    const update = (answer: string) => {
-      this._answer = answer;
-      this.requestUpdate();
-    };
-    const finish = (type: 'success' | 'error' | 'aborted', err?: AIError) => {
-      if (type === 'aborted') return;
-
-      assertExists(this.config);
-      if (type === 'error') {
-        this.state = 'error';
-        this.config.errorStateConfig.error = err;
-      } else {
-        this.state = 'finished';
-        this.config.errorStateConfig.error = undefined;
-      }
-
-      this._resetAbortController();
-    };
-
-    this.scrollTop = 0; // reset scroll top
-    this.state = 'generating';
-    this.config.generateAnswer({
-      input: text,
-      update,
-      finish,
-      signal: this._abortController.signal,
-    });
-  };
-
-  stopGenerating = () => {
-    this._abortController.abort();
-    this.state = 'finished';
-    if (!this.answer) {
-      this.hide();
-    }
-  };
-
-  private _abortController = new AbortController();
   private _resetAbortController = () => {
     if (this.state === 'generating') {
       this._abortController.abort();
     }
     this._abortController = new AbortController();
   };
-
-  private _inputText: string | null = null;
-  get inputText() {
-    return this._inputText;
-  }
-  onInput = (text: string) => {
-    this._inputText = text;
-  };
-
-  private _selection?: BaseSelection[];
-
-  private _answer: string | null = null;
-  get answer() {
-    return this._answer;
-  }
 
   private _inputFinish = (text: string) => {
     this._inputText = text;
@@ -397,39 +277,6 @@ export class AffineAIPanelWidget extends WidgetElement {
     }
   };
 
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this.tabIndex = -1;
-    this.disposables.addFromEvent(
-      document,
-      'pointerdown',
-      this._onDocumentClick
-    );
-    this.disposables.add(
-      this.blockElement.host.event.add('pointerDown', evtState =>
-        this._onDocumentClick(
-          evtState.get('pointerState').event as PointerEvent
-        )
-      )
-    );
-    this.disposables.add(
-      this.blockElement.host.event.add('click', () => {
-        return this.state !== 'hidden' ? true : false;
-      })
-    );
-    this.disposables.addFromEvent(this, 'wheel', stopPropagation);
-    this.disposables.addFromEvent(this, 'pointerdown', stopPropagation);
-    this.disposables.addFromEvent(this, 'pointerup', stopPropagation);
-    this.disposables.addFromEvent(this, 'keydown', this._onKeyDown);
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._clearDiscardModal();
-    this._stopAutoUpdate?.();
-  }
-
   private _onDocumentClick = (e: MouseEvent) => {
     if (
       this.state !== 'hidden' &&
@@ -491,6 +338,158 @@ export class AffineAIPanelWidget extends WidgetElement {
     }
 
     this.dataset.state = this.state;
+  }
+
+  toggle = (reference: Element, input?: string) => {
+    if (input) {
+      this._inputText = input;
+      this.generate();
+    } else {
+      // reset state
+      this.hide();
+      this.state = 'input';
+    }
+
+    this._autoUpdatePosition(reference);
+  };
+
+  hide = () => {
+    this._resetAbortController();
+    this.state = 'hidden';
+    this._stopAutoUpdate?.();
+    this._inputText = null;
+    this._answer = null;
+    this._stopAutoUpdate = undefined;
+    this.config?.hideCallback?.();
+    this.viewportOverlayWidget?.unlock();
+  };
+
+  discard = () => {
+    if ((this.state === 'finished' || this.state === 'error') && !this.answer) {
+      this._discardCallback();
+      return;
+    }
+    if (this.state === 'input') {
+      this.hide();
+      return;
+    }
+    this.showDiscardModal()
+      .then(discard => {
+        if (discard) {
+          this._discardCallback();
+        } else {
+          this._cancelCallback();
+        }
+        this._restoreSelection();
+      })
+      .catch(console.error);
+  };
+
+  showDiscardModal = () => {
+    const notification =
+      this.host.std.spec.getService('affine:page').notificationService;
+    if (!notification) {
+      return Promise.resolve(true);
+    }
+    this._clearDiscardModal();
+    this._discardModalAbort = new AbortController();
+    return notification
+      .confirm({
+        title: 'Discard the AI result',
+        message: 'Do you want to discard the results the AI just generated?',
+        cancelText: 'Cancel',
+        confirmText: 'Discard',
+        abort: this._abortController.signal,
+      })
+      .finally(() => (this._discardModalAbort = null));
+  };
+
+  /**
+   * You can evaluate this method multiple times to regenerate the answer.
+   */
+  generate = () => {
+    assertExists(this.config);
+    const text = this._inputText;
+    assertExists(text);
+    assertExists(this.config.generateAnswer);
+
+    this._resetAbortController();
+
+    // reset answer
+    this._answer = null;
+
+    const update = (answer: string) => {
+      this._answer = answer;
+      this.requestUpdate();
+    };
+    const finish = (type: 'success' | 'error' | 'aborted', err?: AIError) => {
+      if (type === 'aborted') return;
+
+      assertExists(this.config);
+      if (type === 'error') {
+        this.state = 'error';
+        this.config.errorStateConfig.error = err;
+      } else {
+        this.state = 'finished';
+        this.config.errorStateConfig.error = undefined;
+      }
+
+      this._resetAbortController();
+    };
+
+    this.scrollTop = 0; // reset scroll top
+    this.state = 'generating';
+    this.config.generateAnswer({
+      input: text,
+      update,
+      finish,
+      signal: this._abortController.signal,
+    });
+  };
+
+  stopGenerating = () => {
+    this._abortController.abort();
+    this.state = 'finished';
+    if (!this.answer) {
+      this.hide();
+    }
+  };
+
+  onInput = (text: string) => {
+    this._inputText = text;
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.tabIndex = -1;
+    this.disposables.addFromEvent(
+      document,
+      'pointerdown',
+      this._onDocumentClick
+    );
+    this.disposables.add(
+      this.blockElement.host.event.add('pointerDown', evtState =>
+        this._onDocumentClick(
+          evtState.get('pointerState').event as PointerEvent
+        )
+      )
+    );
+    this.disposables.add(
+      this.blockElement.host.event.add('click', () => {
+        return this.state !== 'hidden' ? true : false;
+      })
+    );
+    this.disposables.addFromEvent(this, 'wheel', stopPropagation);
+    this.disposables.addFromEvent(this, 'pointerdown', stopPropagation);
+    this.disposables.addFromEvent(this, 'pointerup', stopPropagation);
+    this.disposables.addFromEvent(this, 'keydown', this._onKeyDown);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._clearDiscardModal();
+    this._stopAutoUpdate?.();
   }
 
   override render() {

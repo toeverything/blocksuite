@@ -6,6 +6,7 @@ export interface Disposable {
 
 export class DisposableGroup implements Disposable {
   private _disposed = false;
+
   private _disposables: Disposable[] = [];
 
   get disposed() {

@@ -12,13 +12,33 @@ export class BlockRenderer
   extends WithDisposable(ShadowlessElement)
   implements DetailSlotProps
 {
+  get model() {
+    return this.host?.doc.getBlock(this.rowId)?.model;
+  }
+
+  get service() {
+    return this.host.std.spec.getService('affine:database');
+  }
+
+  get inlineManager() {
+    return this.service.inlineManager;
+  }
+
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
+
   static override styles = css`
     database-datasource-block-renderer {
-      padding-bottom: 20px;
+      padding-bottom: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 4px;
+      gap: 16px;
+      margin-bottom: 12px;
       border-bottom: 1px solid var(--affine-border-color);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
@@ -26,6 +46,21 @@ export class BlockRenderer
 
     database-datasource-block-renderer .tips-placeholder {
       display: none;
+    }
+
+    database-datasource-block-renderer rich-text {
+      font-size: 15px;
+      line-height: 24px;
+    }
+
+    database-datasource-block-renderer.empty rich-text::before {
+      content: 'Untitled';
+      position: absolute;
+      color: var(--affine-text-disable-color);
+      font-size: 15px;
+      line-height: 24px;
+      user-select: none;
+      pointer-events: none;
     }
 
     .database-block-detail-header-icon {
@@ -41,18 +76,51 @@ export class BlockRenderer
       height: 16px;
     }
   `;
+
   @property({ attribute: false })
   accessor view!: DataViewTableManager | DataViewKanbanManager;
+
   @property({ attribute: false })
   accessor rowId!: string;
+
   @property({ attribute: false })
   accessor host!: EditorHost;
-  get model() {
-    return this.host?.doc.getBlock(this.rowId)?.model;
+
+  protected override render(): unknown {
+    const model = this.model;
+    if (!model) {
+      return;
+    }
+    return html`
+      ${this.renderIcon()}
+      <rich-text
+        .yText=${model.text}
+        .attributesSchema=${this.attributesSchema}
+        .attributeRenderer=${this.attributeRenderer}
+        .embedChecker=${this.inlineManager.embedChecker}
+        .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
+        class="inline-editor"
+      ></rich-text>
+    `;
   }
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
+    if (this.model && this.model.text) {
+      const cb = () => {
+        if (this.model?.text?.length == 0) {
+          // eslint-disable-next-line wc/no-self-class
+          this.classList.add('empty');
+        } else {
+          // eslint-disable-next-line wc/no-self-class
+          this.classList.remove('empty');
+        }
+      };
+      this.model.text.yText.observe(cb);
+      this.disposables.add(() => {
+        this.model?.text?.yText.unobserve(cb);
+      });
+    }
     this._disposables.addFromEvent(
       this,
       'keydown',
@@ -85,33 +153,5 @@ export class BlockRenderer
     return html` <div class="database-block-detail-header-icon">
       ${this.view.cellGetValue(this.rowId, iconColumn)}
     </div>`;
-  }
-
-  get service() {
-    return this.host.std.spec.getService('affine:database');
-  }
-  get inlineManager() {
-    return this.service.inlineManager;
-  }
-  get attributesSchema() {
-    return this.inlineManager.getSchema();
-  }
-  get attributeRenderer() {
-    return this.inlineManager.getRenderer();
-  }
-  protected override render(): unknown {
-    const model = this.model;
-    if (!model) {
-      return;
-    }
-    return html`<rich-text
-        .yText=${model.text}
-        .attributesSchema=${this.attributesSchema}
-        .attributeRenderer=${this.attributeRenderer}
-        .embedChecker=${this.inlineManager.embedChecker}
-        .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
-        class="inline-editor"
-      ></rich-text
-      >${this.renderIcon()} `;
   }
 }

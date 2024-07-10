@@ -20,6 +20,7 @@ import {
   getClipboardSnapshot,
   getClipboardText,
   getCopyClipItemsInPage,
+  getCurrentEditorDocId,
   getEdgelessSelectedRectModel,
   getEditorLocator,
   getInlineSelectionIndex,
@@ -30,6 +31,7 @@ import {
   initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeParagraphs,
+  mockQuickSearch,
   pasteBlocks,
   pasteByKeyboard,
   pasteContent,
@@ -108,7 +110,7 @@ test(scoped`clipboard copy paste title`, async ({ page }) => {
   await assertTitle(page, 'testtest');
 });
 
-test.skip(scoped`clipboard paste html`, async ({ page }) => {
+test(scoped`clipboard paste html`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -134,7 +136,7 @@ test.skip(scoped`clipboard paste html`, async ({ page }) => {
   await assertText(page, 'aaabbbcccddd');
 });
 
-test.skip(
+test(
   scoped`clipboard paste HTML containing Markdown syntax code and image `,
   async ({ page }) => {
     test.info().annotations.push({
@@ -344,7 +346,7 @@ test(scoped`split block when paste`, async ({ page }) => {
     .locator('[data-block-id="2"] .inline-editor')
     .boundingBox();
   const bottomRight789 = await getEditorLocator(page)
-    .locator('[data-block-id="5"] .inline-editor')
+    .locator('[data-block-id="4"] .inline-editor')
     .boundingBox();
   assertExists(topLeft123);
   assertExists(bottomRight789);
@@ -808,15 +810,15 @@ test.skip('cut will delete all content, and copy will reappear content', async (
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -869,15 +871,15 @@ test.skip('cut will delete all content, and copy will reappear content', async (
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -935,15 +937,15 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -981,15 +983,15 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -1061,7 +1063,7 @@ test(scoped`paste note block with background`, async ({ page }) => {
   await selectNoteInEdgeless(page, ids.noteId);
 
   await triggerComponentToolbarAction(page, 'changeNoteColor');
-  const color = '--affine-tag-blue';
+  const color = '--affine-note-background-grey';
   await changeEdgelessNoteBackground(page, color);
   await assertEdgelessNoteBackground(page, ids.noteId, color);
 
@@ -1124,15 +1126,15 @@ test(
       /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -1159,15 +1161,15 @@ test(
       /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -1279,15 +1281,15 @@ test(scoped`auto identify url`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -1311,6 +1313,23 @@ test(scoped`auto identify url`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test(scoped`pasting internal url`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusTitle(page);
+  await type(page, 'test page');
+
+  await focusRichText(page);
+  const docId = await getCurrentEditorDocId(page);
+  await mockQuickSearch(page, {
+    'http://workspace/doc-id': docId,
+  });
+  await pasteContent(page, {
+    'text/plain': 'http://workspace/doc-id',
+  });
+  await expect(page.locator('affine-reference')).toContainText('test page');
 });
 
 test(scoped`paste parent block`, async ({ page }) => {
@@ -1354,7 +1373,9 @@ test(scoped`clipboard copy multi selection`, async ({ page }) => {
   await focusRichText(page, 1);
   await pasteByKeyboard(page);
   await waitNextFrame(page);
-  await assertRichTexts(page, ['abc', 'defbc', 'd']);
+  await type(page, 'cursor');
+  await waitNextFrame(page);
+  await assertRichTexts(page, ['abc', 'defbc', 'dcursor']);
 });
 
 test.skip(scoped`clipboard copy nested items`, async ({ page }) => {

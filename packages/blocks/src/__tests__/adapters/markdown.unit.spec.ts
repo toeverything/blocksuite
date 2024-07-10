@@ -1,10 +1,16 @@
-import type { BlockSnapshot, SliceSnapshot } from '@blocksuite/store';
+import type {
+  BlockSnapshot,
+  DocSnapshot,
+  SliceSnapshot,
+} from '@blocksuite/store';
 import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
+import { embedSyncedDocMiddleware } from '../../_common/transformers/middlewares.js';
 import { NoteDisplayMode } from '../../_common/types.js';
+import { createJob } from '../utils/create-job.js';
 
 describe('snapshot to markdown', () => {
   test('code', async () => {
@@ -64,7 +70,7 @@ describe('snapshot to markdown', () => {
 
     const markdown = '```python\nimport this\n```\n';
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -263,7 +269,7 @@ describe('snapshot to markdown', () => {
 hhh
 `;
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -411,14 +417,13 @@ hhh
 * eee
 `;
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
     expect(target.file).toBe(markdown);
   });
 
-  // TODO(@fourdim): fix this test
   test('todo list', async () => {
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
@@ -553,15 +558,15 @@ hhh
         },
       ],
     };
-    const markdown = `* [ ] aaa
+    const markdown = `\
+* [ ] aaa
   * [x] bbb
     * [ ] ccc
-  - [x] ddd
-
-- [ ] eee
+  * [x] ddd
+* [ ] eee
 `;
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -704,7 +709,7 @@ hhh
 2. ddd
 `;
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -776,7 +781,7 @@ hhh
     };
     const markdown = 'aaa `bbb` ccc\n';
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -848,7 +853,7 @@ hhh
     };
     const markdown = 'aaa [bbb](https://affine.pro/) ccc\n';
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -917,7 +922,7 @@ hhh
     };
     const markdown = 'aaa https://affine.pro/  \n';
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -990,7 +995,7 @@ hhh
 
     const markdown = 'aaa**bbb**ccc\n';
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -1063,7 +1068,7 @@ hhh
 
     const markdown = 'aaa*bbb*ccc\n';
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -1139,7 +1144,7 @@ hhh
     const markdown =
       '![](assets/YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=.blob "aaa")\n\n';
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const blobCRUD = new MemoryBlobCRUD();
     await blobCRUD.set(
       'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
@@ -1372,7 +1377,7 @@ hhh
 | Task 1 | TODO        | 2023-12-15 | 1      | 65       | test1,test2 | [test2](https://google.com) | https://google.com | true     |
 | Task 2 | In Progress | 2023-12-20 |        |          |             | test1                       |                    |          |
 `;
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -1580,12 +1585,419 @@ hhh
 hhh
 `;
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     mdAdapter.applyConfigs(new Map([['title:deadbeef', 'test']]));
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
     expect(target.file).toBe(markdown);
+  });
+
+  test('synced-doc', async () => {
+    // doc -> synced doc block -> deepest synced doc block
+    // The deepest synced doc block only export it's title
+
+    const deepestSyncedDocSnapshot: DocSnapshot = {
+      type: 'page',
+      meta: {
+        id: 'deepestSyncedDoc',
+        title: 'Deepest Doc',
+        createDate: 1715762171116,
+        tags: [],
+      },
+      blocks: {
+        type: 'block',
+        id: '8WdJmN5FTT',
+        flavour: 'affine:page',
+        version: 2,
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: [
+              {
+                insert: 'Deepest Doc',
+              },
+            ],
+          },
+        },
+        children: [
+          {
+            type: 'block',
+            id: 'zVN1EZFuZe',
+            flavour: 'affine:surface',
+            version: 5,
+            props: {
+              elements: {},
+            },
+            children: [],
+          },
+          {
+            type: 'block',
+            id: '2s9sJlphLH',
+            flavour: 'affine:note',
+            version: 1,
+            props: {
+              xywh: '[0,0,800,95]',
+              background: '--affine-background-secondary-color',
+              index: 'a0',
+              hidden: false,
+              displayMode: 'both',
+              edgeless: {
+                style: {
+                  borderRadius: 8,
+                  borderSize: 4,
+                  borderStyle: 'solid',
+                  shadowType: '--affine-note-shadow-box',
+                },
+              },
+            },
+            children: [
+              {
+                type: 'block',
+                id: 'vNp5XrR5yw',
+                flavour: 'affine:paragraph',
+                version: 1,
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [],
+                  },
+                },
+                children: [],
+              },
+              {
+                type: 'block',
+                id: 'JTdfSl1ygZ',
+                flavour: 'affine:paragraph',
+                version: 1,
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'Hello, This is deepest doc.',
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const syncedDocSnapshot: DocSnapshot = {
+      type: 'page',
+      meta: {
+        id: 'syncedDoc',
+        title: 'Synced Doc',
+        createDate: 1719212435051,
+        tags: [],
+      },
+      blocks: {
+        type: 'block',
+        id: 'AGOahFisBN',
+        flavour: 'affine:page',
+        version: 2,
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: [
+              {
+                insert: 'Synced Doc',
+              },
+            ],
+          },
+        },
+        children: [
+          {
+            type: 'block',
+            id: 'gfVzx5tGpB',
+            flavour: 'affine:surface',
+            version: 5,
+            props: {
+              elements: {},
+            },
+            children: [],
+          },
+          {
+            type: 'block',
+            id: 'CzEfaUret4',
+            flavour: 'affine:note',
+            version: 1,
+            props: {
+              xywh: '[0,0,800,95]',
+              background: '--affine-note-background-blue',
+              index: 'a0',
+              hidden: false,
+              displayMode: 'both',
+              edgeless: {
+                style: {
+                  borderRadius: 0,
+                  borderSize: 4,
+                  borderStyle: 'none',
+                  shadowType: '--affine-note-shadow-sticker',
+                },
+              },
+            },
+            children: [
+              {
+                type: 'block',
+                id: 'yFlNufsgke',
+                flavour: 'affine:paragraph',
+                version: 1,
+                props: {
+                  type: 'h1',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'Heading 1',
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              {
+                type: 'block',
+                id: 'oMuLcD6XS3',
+                flavour: 'affine:paragraph',
+                version: 1,
+                props: {
+                  type: 'h2',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'heading 2',
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              {
+                type: 'block',
+                id: 'PQ8FhGV6VM',
+                flavour: 'affine:paragraph',
+                version: 1,
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'paragraph',
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              {
+                type: 'block',
+                id: 'sA9paSrdEN',
+                flavour: 'affine:paragraph',
+                version: 1,
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'strike',
+                        attributes: {
+                          strike: true,
+                        },
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              {
+                type: 'block',
+                id: 'DF26giFpKX',
+                flavour: 'affine:code',
+                version: 1,
+                props: {
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'Hello world!',
+                      },
+                    ],
+                  },
+                  language: 'cpp',
+                  wrap: false,
+                  caption: '',
+                },
+                children: [],
+              },
+              {
+                type: 'block',
+                id: '-3bbVQTvI2',
+                flavour: 'affine:embed-synced-doc',
+                version: 1,
+                props: {
+                  index: 'a0',
+                  xywh: '[0,0,0,0]',
+                  rotate: 0,
+                  pageId: 'deepestSyncedDoc',
+                  style: 'syncedDoc',
+                },
+                children: [],
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const syncedDocMd =
+      '# Synced Doc\n\n# Heading 1\n\n## heading 2\n\nparagraph\n\n~~strike~~\n\n```cpp\nHello world!\n```';
+
+    const docSnapShot: DocSnapshot = {
+      type: 'page',
+      meta: {
+        id: 'y5nsrywQtr',
+        title: 'Test Doc',
+        createDate: 1719222172042,
+        tags: [],
+      },
+      blocks: {
+        type: 'block',
+        id: 'VChAZIX7DM',
+        flavour: 'affine:page',
+        version: 2,
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: [
+              {
+                insert: 'Test Doc',
+              },
+            ],
+          },
+        },
+        children: [
+          {
+            type: 'block',
+            id: 'uRj8gejH4d',
+            flavour: 'affine:surface',
+            version: 5,
+            props: {
+              elements: {},
+            },
+            children: [],
+          },
+          {
+            type: 'block',
+            id: 'AqFoVDUoW9',
+            flavour: 'affine:note',
+            version: 1,
+            props: {
+              xywh: '[0,0,800,95]',
+              background: '--affine-note-background-blue',
+              index: 'a0',
+              hidden: false,
+              displayMode: 'both',
+              edgeless: {
+                style: {
+                  borderRadius: 0,
+                  borderSize: 4,
+                  borderStyle: 'none',
+                  shadowType: '--affine-note-shadow-sticker',
+                },
+              },
+            },
+            children: [
+              {
+                type: 'block',
+                id: 'cWBI4UGTqh',
+                flavour: 'affine:paragraph',
+                version: 1,
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'Hello',
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              {
+                type: 'block',
+                id: 'AqFoVxas19',
+                flavour: 'affine:embed-synced-doc',
+                version: 1,
+                props: {
+                  index: 'a0',
+                  xywh: '[0,0,0,0]',
+                  rotate: 0,
+                  pageId: 'syncedDoc',
+                  style: 'syncedDoc',
+                },
+                children: [],
+              },
+              {
+                type: 'block',
+                id: 'Db976U9v18',
+                flavour: 'affine:paragraph',
+                version: 1,
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'World!',
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const docMd = `\
+# Test Doc
+
+Hello
+
+${syncedDocMd}
+
+Deepest Doc
+
+World!
+`;
+
+    const job = createJob([embedSyncedDocMiddleware('content')]);
+
+    // workaround for adding docs to collection
+    await job.snapshotToDoc(deepestSyncedDocSnapshot);
+    await job.snapshotToDoc(syncedDocSnapshot);
+    await job.snapshotToDoc(docSnapShot);
+
+    const mdAdapter = new MarkdownAdapter(job);
+    const target = await mdAdapter.fromDocSnapshot({
+      snapshot: docSnapShot,
+    });
+    expect(target.file).toBe(docMd);
   });
 });
 
@@ -1625,7 +2037,7 @@ describe('markdown to snapshot', () => {
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -1676,7 +2088,7 @@ describe('markdown to snapshot', () => {
       pageId: '',
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
       pageVersion: 0,
@@ -1731,7 +2143,7 @@ describe('markdown to snapshot', () => {
       pageId: '',
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
       pageVersion: 0,
@@ -1786,7 +2198,7 @@ describe('markdown to snapshot', () => {
       pageId: '',
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
       pageVersion: 0,
@@ -1966,7 +2378,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -2097,7 +2509,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -2228,7 +2640,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -2278,7 +2690,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -2335,7 +2747,7 @@ hhh
       pageId: '',
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
       pageVersion: 0,
@@ -2389,7 +2801,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -2439,7 +2851,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -2490,7 +2902,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -2541,7 +2953,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -2662,7 +3074,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });
@@ -2704,7 +3116,7 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter();
+    const mdAdapter = new MarkdownAdapter(createJob());
     const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
       file: markdown,
     });

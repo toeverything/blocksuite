@@ -1,20 +1,20 @@
 import '../../buttons/tool-icon-button.js';
 import './note-menu.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { ArrowUpIcon, NoteIcon } from '../../../../../_common/icons/index.js';
-import type { NoteTool } from '../../../../../_common/utils/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+import type { NoteTool } from '../../../controllers/tools/note-tool.js';
+import type { EdgelessTool } from '../../../types.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
+import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 import type { EdgelessNoteMenu } from './note-menu.js';
 
 @customElement('edgeless-note-tool-button')
-export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
+export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
   static override styles = css`
     :host {
       display: flex;
@@ -28,11 +28,11 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
+  private _noteMenu: MenuPopper<EdgelessNoteMenu> | null = null;
 
-  @property({ attribute: false })
-  accessor active = false;
+  private _states = ['childFlavour', 'childType', 'tip'] as const;
+
+  override type: EdgelessTool['type'] = 'affine:note';
 
   @state()
   accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
@@ -42,9 +42,6 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
 
   @state()
   accessor tip = 'Text';
-
-  private _noteMenu: MenuPopper<EdgelessNoteMenu> | null = null;
-  private _states = ['childFlavour', 'childType', 'tip'] as const;
 
   private _toggleNoteMenu() {
     if (this._noteMenu) {
@@ -57,10 +54,7 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
         childType: this.childType,
         tip: this.tip,
       });
-      this._noteMenu = createPopper('edgeless-note-menu', this, {
-        x: 110,
-        y: -40,
-      });
+      this._noteMenu = createPopper('edgeless-note-menu', this);
 
       this._noteMenu.element.edgeless = this.edgeless;
       this._noteMenu.element.childFlavour = this.childFlavour;
@@ -111,14 +105,14 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
 
   override render() {
     const { active } = this;
-    const arrowColor = active ? 'currentColor' : '#77757D';
+    const arrowColor = active ? 'currentColor' : 'var(--affine-icon-secondary)';
     return html`
       <edgeless-tool-icon-button
         class="edgeless-note-button"
         .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
         .tooltipOffset=${17}
         .active=${active}
-        .iconContainerPadding=${8}
+        .iconContainerPadding=${6}
         @click=${() => {
           this._toggleNoteMenu();
         }}

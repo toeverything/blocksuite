@@ -7,8 +7,18 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { removeModeFromStorage } from '../mock-services.js';
+
 @customElement('docs-panel')
 export class DocsPanel extends WithDisposable(ShadowlessElement) {
+  private get collection() {
+    return this.editor.doc.collection;
+  }
+
+  private get docs() {
+    return [...this.collection.docs.values()];
+  }
+
   static override styles = css`
     docs-panel {
       display: flex;
@@ -51,29 +61,9 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-hover-color);
     }
   `;
+
   @property({ attribute: false })
   accessor editor!: AffineEditorContainer;
-
-  private get collection() {
-    return this.editor.doc.collection;
-  }
-
-  private get docs() {
-    return [...this.collection.docs.values()];
-  }
-
-  public override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.editor.doc.collection.slots.docUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
-  createDoc = () => {
-    createDocBlock(this.editor.doc.collection);
-  };
 
   protected override render(): unknown {
     const { docs, collection } = this;
@@ -105,6 +95,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
             const isDeleteCurrent = doc.id === this.editor.doc.id;
 
             collection.removeDoc(doc.id);
+            removeModeFromStorage(doc.id);
             // When delete the current doc, we need to set the editor doc to the first remaining doc
             if (isDeleteCurrent) {
               this.editor.doc = this.docs[0].getDoc();
@@ -122,6 +113,19 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
       )}
     `;
   }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.editor.doc.collection.slots.docUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
+  createDoc = () => {
+    createDocBlock(this.editor.doc.collection);
+  };
 }
 
 function createDocBlock(collection: DocCollection) {

@@ -39,11 +39,6 @@ type OutDataOfCommand<C> =
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type CommonMethods<In extends object = {}> = {
-  run(): [
-    result: boolean,
-    ctx: CommandKeyToData<Extract<keyof In, BlockSuite.CommandDataName>>,
-  ];
-  with<T extends Partial<BlockSuite.CommandContext>>(value: T): Chain<In & T>;
   inline: <InlineOut extends BlockSuite.CommandDataName = never>(
     command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
   ) => Chain<In & CommandKeyToData<InlineOut>>;
@@ -53,6 +48,11 @@ type CommonMethods<In extends object = {}> = {
   tryAll: <InlineOut extends BlockSuite.CommandDataName = never>(
     fn: (chain: Chain<In>) => Chain<In & CommandKeyToData<InlineOut>>[]
   ) => Chain<In & CommandKeyToData<InlineOut>>;
+  run(): [
+    result: boolean,
+    ctx: CommandKeyToData<Extract<keyof In, BlockSuite.CommandDataName>>,
+  ];
+  with<T extends Partial<BlockSuite.CommandContext>>(value: T): Chain<In & T>;
 };
 
 type Cmds = {

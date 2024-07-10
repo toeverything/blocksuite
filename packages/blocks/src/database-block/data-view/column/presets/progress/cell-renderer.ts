@@ -79,17 +79,6 @@ const progressColors = {
 export class ProgressCell extends BaseCellRenderer<number> {
   static override styles = styles;
 
-  _bgClick(e: MouseEvent) {
-    if (this.column.readonly) {
-      return;
-    }
-    this.onChange(
-      Math.round(
-        (e.offsetX * 100) / (e.currentTarget as HTMLDivElement).offsetWidth
-      )
-    );
-  }
-
   protected override render() {
     const progress = this.value ?? 0;
     let backgroundColor = progressColors.processing;
@@ -118,29 +107,72 @@ export class ProgressCell extends BaseCellRenderer<number> {
       <div class="progress-number progress">${progress}</div>
     </div>`;
   }
+
+  _bgClick(e: MouseEvent) {
+    if (this.column.readonly) {
+      return;
+    }
+    this.onChange(
+      Math.round(
+        (e.offsetX * 100) / (e.currentTarget as HTMLDivElement).offsetWidth
+      )
+    );
+  }
 }
 
 @customElement('affine-database-progress-cell-editing')
 export class ProgressCellEditing extends BaseCellRenderer<number> {
+  get _value() {
+    return this.tempValue ?? this.value ?? 0;
+  }
+
   static override styles = styles;
 
   @state()
   private accessor tempValue: number | undefined = undefined;
 
-  override onExitEditMode() {
-    this.onChange(this._value);
+  @query('.affine-database-progress-bg')
+  private accessor _progressBg!: HTMLElement;
+
+  protected override render() {
+    const progress = this._value;
+    let backgroundColor = progressColors.processing;
+    if (progress === 100) {
+      backgroundColor = progressColors.success;
+    }
+    const fgStyles = styleMap({
+      width: `${progress}%`,
+      backgroundColor,
+    });
+    const bgStyles = styleMap({
+      backgroundColor:
+        progress === 0 ? progressColors.empty : 'var(--affine-hover-color)',
+    });
+    const handleStyles = styleMap({
+      left: `calc(${progress}% - 3px)`,
+    });
+
+    return html` <div class="affine-database-progress">
+      <div class="affine-database-progress-bar">
+        <div class="affine-database-progress-bg" style=${bgStyles}>
+          <div class="affine-database-progress-fg" style=${fgStyles}></div>
+          <div
+            class="affine-database-progress-drag-handle"
+            style=${handleStyles}
+          ></div>
+        </div>
+      </div>
+      <div class="progress-number progress">${progress}</div>
+    </div>`;
   }
 
-  get _value() {
-    return this.tempValue ?? this.value ?? 0;
+  override onExitEditMode() {
+    this.onChange(this._value);
   }
 
   _onChange(value?: number) {
     this.tempValue = value;
   }
-
-  @query('.affine-database-progress-bg')
-  private accessor _progressBg!: HTMLElement;
 
   override firstUpdated() {
     const disposables = this._disposables;
@@ -195,38 +227,6 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
 
   override onCut(_e: ClipboardEvent) {
     _e.preventDefault();
-  }
-
-  protected override render() {
-    const progress = this._value;
-    let backgroundColor = progressColors.processing;
-    if (progress === 100) {
-      backgroundColor = progressColors.success;
-    }
-    const fgStyles = styleMap({
-      width: `${progress}%`,
-      backgroundColor,
-    });
-    const bgStyles = styleMap({
-      backgroundColor:
-        progress === 0 ? progressColors.empty : 'var(--affine-hover-color)',
-    });
-    const handleStyles = styleMap({
-      left: `calc(${progress}% - 3px)`,
-    });
-
-    return html` <div class="affine-database-progress">
-      <div class="affine-database-progress-bar">
-        <div class="affine-database-progress-bg" style=${bgStyles}>
-          <div class="affine-database-progress-fg" style=${fgStyles}></div>
-          <div
-            class="affine-database-progress-drag-handle"
-            style=${handleStyles}
-          ></div>
-        </div>
-      </div>
-      <div class="progress-number progress">${progress}</div>
-    </div>`;
   }
 }
 

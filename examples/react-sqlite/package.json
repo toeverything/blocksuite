@@ -10,12 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/blocks": "0.14.0-canary-202405100201-e591bb8",
-    "@blocksuite/presets": "0.14.0-canary-202405100201-e591bb8",
-    "@blocksuite/store": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/blocks": "0.15.0-canary-202406291027-8aed732",
+    "@blocksuite/presets": "0.15.0-canary-202406291027-8aed732",
+    "@blocksuite/store": "0.15.0-canary-202406291027-8aed732",
+    "@blocksuite/sync": "0.15.0-canary-202406291027-8aed732",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "sql.js": "^1.10.3"
+    "sql.js": "1.10.2"
   },
   "devDependencies": {
     "@types/react": "^18.3.2",
@@ -31,7 +32,6 @@
     "vite": "^5.2.11"
   },
   "stackblitz": {
-    "installDependencies": false,
     "startCommand": "pnpm i && pnpm dev"
   }
 }

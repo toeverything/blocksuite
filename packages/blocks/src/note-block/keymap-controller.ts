@@ -4,7 +4,7 @@ import type {
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
-import { type BlockElement } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
@@ -16,54 +16,23 @@ import { onModelElementUpdated } from '../root-block/utils/callback.js';
 import { ensureBlockInContainer } from './utils.js';
 
 export class KeymapController implements ReactiveController {
-  private _anchorSel: BlockSelection | null = null;
-  private _focusBlock: BlockElement | null = null;
-
-  host: ReactiveControllerHost & BlockElement;
-
   private get _std() {
     return this.host.std;
   }
+
+  private _anchorSel: BlockSelection | null = null;
+
+  private _focusBlock: BlockElement | null = null;
+
+  host: ReactiveControllerHost & BlockElement;
 
   constructor(host: ReactiveControllerHost & BlockElement) {
     (this.host = host).addController(this);
   }
 
-  hostConnected() {
-    this._reset();
-  }
-
-  hostDisconnected() {
-    this._reset();
-  }
-
   private _reset = () => {
     this._anchorSel = null;
     this._focusBlock = null;
-  };
-
-  bind = () => {
-    this.host.handleEvent('keyDown', ctx => {
-      const state = ctx.get('keyboardState');
-      if (state.raw.key === 'Shift') {
-        return;
-      }
-      this._reset();
-    });
-
-    this.host.bindHotKey({
-      ArrowDown: this._onArrowDown,
-      ArrowUp: this._onArrowUp,
-      'Shift-ArrowDown': this._onShiftArrowDown,
-      'Shift-ArrowUp': this._onShiftArrowUp,
-      Escape: this._onEsc,
-      Enter: this._onEnter,
-      'Mod-a': this._onSelectAll,
-    });
-
-    this._bindQuickActionHotKey();
-    this._bindTextConversionHotKey();
-    this._bindMoveBlockHotKey();
   };
 
   private _onArrowDown = (ctx: UIEventStateContext) => {
@@ -536,5 +505,37 @@ export class KeymapController implements ReactiveController {
         });
       });
     });
+  };
+
+  hostConnected() {
+    this._reset();
+  }
+
+  hostDisconnected() {
+    this._reset();
+  }
+
+  bind = () => {
+    this.host.handleEvent('keyDown', ctx => {
+      const state = ctx.get('keyboardState');
+      if (state.raw.key === 'Shift') {
+        return;
+      }
+      this._reset();
+    });
+
+    this.host.bindHotKey({
+      ArrowDown: this._onArrowDown,
+      ArrowUp: this._onArrowUp,
+      'Shift-ArrowDown': this._onShiftArrowDown,
+      'Shift-ArrowUp': this._onShiftArrowUp,
+      Escape: this._onEsc,
+      Enter: this._onEnter,
+      'Mod-a': this._onSelectAll,
+    });
+
+    this._bindQuickActionHotKey();
+    this._bindTextConversionHotKey();
+    this._bindMoveBlockHotKey();
   };
 }

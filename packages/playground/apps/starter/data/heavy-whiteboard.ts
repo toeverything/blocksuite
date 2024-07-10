@@ -8,7 +8,7 @@ import {
   type Y,
 } from '@blocksuite/store';
 
-import { type InitFn } from './utils.js';
+import type { InitFn } from './utils.js';
 
 const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
 const params = new URLSearchParams(location.search);

@@ -1,13 +1,9 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import {
-  createPopup,
-  eventToVRect,
-} from '../../../../_common/components/index.js';
+import { createPopup } from '../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../_common/icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 import { CrossIcon, FilterIcon } from '../../common/icons/index.js';
@@ -47,6 +43,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       line-height: 22px;
     }
   `;
+
   @property({ attribute: false })
   accessor data!: FilterGroup;
 
@@ -55,6 +52,9 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor setData!: (filter: FilterGroup) => void;
+
+  updateMoreFilterPanel?: () => void;
+
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
       ...this.data,
@@ -63,12 +63,10 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       ),
     });
   };
-  override updated() {
-    this.updateMoreFilterPanel?.();
-  }
+
   private addFilter = (e: MouseEvent) => {
-    const position = eventToVRect(e);
-    popCreateFilter(position, {
+    const element = e.target as HTMLElement;
+    popCreateFilter(element, {
       vars: this.vars,
       onSelect: filter => {
         const index = this.data.conditions.length;
@@ -77,12 +75,13 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
           conditions: [...this.data.conditions, filter],
         });
         requestAnimationFrame(() => {
-          this.expandGroup(position, index);
+          this.expandGroup(element, index);
         });
       },
     });
   };
-  private expandGroup = (position: ReferenceElement, i: number) => {
+
+  private expandGroup = (position: HTMLElement, i: number) => {
     const value = this.data.conditions[i];
     if (value.type !== 'group') {
       return;
@@ -100,6 +99,18 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       },
     });
   };
+
+  private deleteFilter(i: number) {
+    this.setData({
+      ...this.data,
+      conditions: this.data.conditions.filter((_, index) => index !== i),
+    });
+  }
+
+  override updated() {
+    this.updateMoreFilterPanel?.();
+  }
+
   renderMoreFilter = (count: number): TemplateResult => {
     return html` <div
       class="dv-shadow-2 dv-round-8"
@@ -116,7 +127,6 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       ${this.renderAddFilter()}
     </div>`;
   };
-  updateMoreFilterPanel?: () => void;
 
   showMoreFilter = (e: MouseEvent, count: number) => {
     const ins = renderTemplate(() => this.renderMoreFilter(count));
@@ -130,7 +140,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       }
       ins.requestUpdate();
     };
-    const close = createPopup(eventToVRect(e), ins, {
+    const close = createPopup(e.target as HTMLElement, ins, {
       onClose: () => {
         this.updateMoreFilterPanel = undefined;
       },
@@ -179,7 +189,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       ></filter-condition-view>`;
     }
     const expandGroup = (e: MouseEvent) => {
-      this.expandGroup(eventToVRect(e), i);
+      this.expandGroup(e.target as HTMLElement, i);
     };
     const length = condition.conditions.length;
     const text = length > 1 ? `${length} rules` : `${length} rule`;
@@ -215,13 +225,6 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
         .renderMore="${this.renderMore}"
       ></component-overflow>
     `;
-  }
-
-  private deleteFilter(i: number) {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.filter((_, index) => index !== i),
-    });
   }
 }
 

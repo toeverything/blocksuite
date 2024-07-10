@@ -26,10 +26,10 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
-
   @state()
   private accessor _isSelected = false;
+
+  override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
 
   @property({ attribute: false })
   accessor loading = false;
@@ -68,11 +68,15 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   };
 
   refreshData = () => {
-    refreshEmbedGithubUrlData(this).catch(console.error);
+    refreshEmbedGithubUrlData(this, this.fetchAbortController.signal).catch(
+      console.error
+    );
   };
 
   refreshStatus = () => {
-    refreshEmbedGithubStatus(this).catch(console.error);
+    refreshEmbedGithubStatus(this, this.fetchAbortController.signal).catch(
+      console.error
+    );
   };
 
   override connectedCallback() {
@@ -281,8 +285,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
             <div class="affine-embed-github-banner">${bannerImage}</div>
           </div>
         </div>
-
-        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }

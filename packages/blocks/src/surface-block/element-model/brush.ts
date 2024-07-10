@@ -16,7 +16,7 @@ import {
 import { PointLocation } from '../utils/point-location.js';
 import type { IVec2 } from '../utils/vec.js';
 import { Vec } from '../utils/vec.js';
-import { type SerializedXYWH } from '../utils/xywh.js';
+import type { SerializedXYWH } from '../utils/xywh.js';
 import {
   type IBaseProps,
   type IHitTestOptions,
@@ -35,8 +35,26 @@ export type BrushProps = IBaseProps & {
 };
 
 export class BrushElementModel extends SurfaceElementModel<BrushProps> {
-  static override propsToY(props: BrushProps) {
-    return props;
+  /**
+   * The SVG path commands for the brush.
+   */
+  get commands() {
+    if (!this._local.has('commands')) {
+      const stroke = getSolidStrokePoints(this.points, this.lineWidth);
+      const commands = getSvgPathFromStroke(stroke);
+
+      this._local.set('commands', commands);
+    }
+
+    return this._local.get('commands') as string;
+  }
+
+  override get connectable() {
+    return false;
+  }
+
+  override get type() {
+    return 'brush';
   }
 
   @watch((_, instance: BrushElementModel) => {
@@ -97,20 +115,6 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   @yfield()
   accessor color: string = '#000000';
 
-  /**
-   * The SVG path commands for the brush.
-   */
-  get commands() {
-    if (!this._local.has('commands')) {
-      const stroke = getSolidStrokePoints(this.points, this.lineWidth);
-      const commands = getSvgPathFromStroke(stroke);
-
-      this._local.set('commands', commands);
-    }
-
-    return this._local.get('commands') as string;
-  }
-
   @watch((_, instance: BrushElementModel) => {
     instance['_local'].delete('commands');
   })
@@ -138,14 +142,6 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   })
   @yfield()
   accessor lineWidth: number = 4;
-
-  override get connectable() {
-    return false;
-  }
-
-  override get type() {
-    return 'brush';
-  }
 
   override hitTest(px: number, py: number, options?: IHitTestOptions): boolean {
     const hit = isPointOnlines(
@@ -204,6 +200,10 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   override getRelativePointLocation(position: IVec2): PointLocation {
     const point = Bound.deserialize(this.xywh).getRelativePoint(position);
     return new PointLocation(point);
+  }
+
+  static override propsToY(props: BrushProps) {
+    return props;
   }
 }
 

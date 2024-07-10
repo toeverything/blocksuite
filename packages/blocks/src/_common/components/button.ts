@@ -58,7 +58,7 @@ export class IconButton extends LitElement {
     }
 
     /* You can add a 'hover' attribute to the button to show the hover style */
-    :host([hover]) {
+    :host([hover='true']) {
       background: var(--affine-hover-color);
     }
     :host([hover='false']) {
@@ -78,11 +78,12 @@ export class IconButton extends LitElement {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
     }
 
     :host .text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
     }
@@ -100,6 +101,7 @@ export class IconButton extends LitElement {
     }
 
     ::slotted(svg) {
+      flex-shrink: 0;
       color: var(--svg-icon-color);
     }
 
@@ -126,8 +128,8 @@ export class IconButton extends LitElement {
   @property({ attribute: true, type: Boolean })
   accessor active: boolean = false;
 
-  @property({ attribute: true, type: Boolean })
-  accessor hover: boolean | undefined = undefined;
+  @property({ attribute: true, type: String })
+  accessor hover: 'true' | 'false' | undefined = undefined;
 
   // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
   @property({ attribute: true, type: Boolean })
@@ -161,6 +163,7 @@ export class IconButton extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     this.tabIndex = 0;
+    this.role = 'button';
 
     const DEFAULT_SIZE = '28px';
     if (this.size && (this.width || this.height)) {

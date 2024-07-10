@@ -88,7 +88,7 @@ export function mountShapeTextEditor(
   const shapeEditor = new EdgelessShapeTextEditor();
   shapeEditor.element = updatedElement;
   shapeEditor.edgeless = edgeless;
-  shapeEditor.mounteEditor = mountShapeTextEditor;
+  shapeEditor.mountEditor = mountShapeTextEditor;
   const rootElementContainer = edgeless.rootElementContainer;
 
   rootElementContainer.append(shapeEditor);
@@ -128,6 +128,11 @@ export function mountGroupTitleEditor(
   });
 }
 
+/**
+ * @deprecated
+ *
+ * Canvas Text has been deprecated
+ */
 export function addText(
   edgeless: EdgelessRootBlockComponent,
   event: PointerEventState

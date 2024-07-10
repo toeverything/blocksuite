@@ -127,11 +127,6 @@ export class EdgelessToolIconButton extends LitElement {
   @property({ attribute: false })
   accessor hoverState = false;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.role = 'button';
-  }
-
   constructor() {
     super();
 
@@ -145,6 +140,11 @@ export class EdgelessToolIconButton extends LitElement {
       },
       { capture: true }
     );
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.role = 'button';
   }
 
   override render() {

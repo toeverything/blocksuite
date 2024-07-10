@@ -32,16 +32,39 @@ const styles = css`
 
 @customElement('data-view-header-tools-add-row')
 export class DataViewHeaderToolsAddRow extends WidgetBase {
+  private get readonly() {
+    return this.view.readonly;
+  }
+
   static override styles = styles;
 
   @state()
   accessor showToolBar = false;
 
-  private get readonly() {
-    return this.view.readonly;
-  }
+  private _onAddNewRecord = () => {
+    if (this.readonly) return;
+    const selection = this.viewMethods.getSelection?.();
+    if (!selection) {
+      this.addRow('start');
+    } else if (selection.type === 'table') {
+      const { rowsSelection, columnsSelection, focus } = selection;
+      let index = 0;
+      if (rowsSelection && !columnsSelection) {
+        // rows
+        index = rowsSelection.end;
+      } else if (rowsSelection && columnsSelection) {
+        // multiple cells
+        index = rowsSelection.end;
+      } else if (!rowsSelection && !columnsSelection && focus) {
+        // single cell
+        index = focus.rowIndex;
+      }
 
-  public override connectedCallback() {
+      this.addRow(index + 1);
+    }
+  };
+
+  override connectedCallback() {
     super.connectedCallback();
     if (!this.readonly) {
       this.disposables.addFromEvent(this, 'pointerdown', e => {
@@ -129,29 +152,6 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
     this.viewMethods.addRow?.(position);
   };
 
-  private _onAddNewRecord = () => {
-    if (this.readonly) return;
-    const selection = this.viewMethods.getSelection?.();
-    if (!selection) {
-      this.addRow('start');
-    } else if (selection.type === 'table') {
-      const { rowsSelection, columnsSelection, focus } = selection;
-      let index = 0;
-      if (rowsSelection && !columnsSelection) {
-        // rows
-        index = rowsSelection.end;
-      } else if (rowsSelection && columnsSelection) {
-        // multiple cells
-        index = rowsSelection.end;
-      } else if (!rowsSelection && !columnsSelection && focus) {
-        // single cell
-        index = focus.rowIndex;
-      }
-
-      this.addRow(index + 1);
-    }
-  };
-
   override render() {
     if (this.readonly) {
       return;
@@ -173,7 +173,6 @@ declare global {
 }
 const createDropPreview = () => {
   const div = document.createElement('div');
-  div.classList.add('blocksuite-overlay');
   div.dataset.isDropPreview = 'true';
   div.style.pointerEvents = 'none';
   div.style.position = 'fixed';
@@ -197,7 +196,6 @@ const createDropPreview = () => {
 
 const createDragPreview = () => {
   const preview = new NewRecordPreview();
-  preview.classList.add('blocksuite-overlay');
   document.body.append(preview);
   return {
     display(x: number, y: number) {

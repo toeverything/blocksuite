@@ -21,8 +21,6 @@ export interface DetailSlots {
 export interface DataSource {
   addPropertyConfigList: ColumnConfig[];
 
-  getPropertyMeta(type: string): ColumnMeta;
-
   properties: string[];
   rows: string[];
   cellGetValue: (rowId: string, propertyId: string) => unknown;
@@ -63,29 +61,45 @@ export interface DataSource {
 
   detailSlots: DetailSlots;
 
+  getPropertyMeta(type: string): ColumnMeta;
+
   rowMove(rowId: string, position: InsertToPosition): void;
 
   getContext<T>(key: DataViewContextKey<T>): T | undefined;
 }
 
 export abstract class BaseDataSource implements DataSource {
+  get detailSlots(): DetailSlots {
+    return {};
+  }
+
   context = new Map<DataViewContextKey<unknown>, unknown>();
 
-  getContext<T>(key: DataViewContextKey<T>): T | undefined {
-    return this.context.get(key) as T;
-  }
+  abstract properties: string[];
+
+  abstract rows: string[];
+
+  abstract slots: {
+    update: Slot;
+  };
+
+  abstract addPropertyConfigList: ColumnConfig[];
 
   protected setContext<T>(key: DataViewContextKey<T>, value: T): void {
     this.context.set(key, value);
   }
 
-  public abstract cellChangeValue(
+  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+    return this.context.get(key) as T;
+  }
+
+  abstract cellChangeValue(
     rowId: string,
     propertyId: string,
     value: unknown
   ): void;
 
-  public cellChangeRenderValue(
+  cellChangeRenderValue(
     rowId: string,
     propertyId: string,
     value: unknown
@@ -93,43 +107,41 @@ export abstract class BaseDataSource implements DataSource {
     this.cellChangeValue(rowId, propertyId, value);
   }
 
-  public cellGetRenderValue(rowId: string, propertyId: string): unknown {
+  cellGetRenderValue(rowId: string, propertyId: string): unknown {
     return this.cellGetValue(rowId, propertyId);
   }
 
-  public cellGetExtra(_rowId: string, _propertyId: string): unknown {
+  cellGetExtra(_rowId: string, _propertyId: string): unknown {
     return undefined;
   }
 
-  public abstract cellGetValue(rowId: string, propertyId: string): unknown;
+  abstract cellGetValue(rowId: string, propertyId: string): unknown;
 
-  public abstract properties: string[];
-
-  public abstract propertyAdd(
+  abstract propertyAdd(
     insertToPosition: InsertToPosition,
     type?: string
   ): string;
 
-  public abstract propertyChangeData(
+  abstract propertyChangeData(
     propertyId: string,
     data: Record<string, unknown>
   ): void;
 
-  public abstract propertyChangeName(propertyId: string, name: string): void;
+  abstract propertyChangeName(propertyId: string, name: string): void;
 
-  public abstract propertyChangeType(propertyId: string, type: string): void;
+  abstract propertyChangeType(propertyId: string, type: string): void;
 
-  public abstract propertyDelete(id: string): void;
+  abstract propertyDelete(id: string): void;
 
-  public abstract propertyDuplicate(columnId: string): string;
+  abstract propertyDuplicate(columnId: string): string;
 
-  public abstract propertyGetData(propertyId: string): Record<string, unknown>;
+  abstract propertyGetData(propertyId: string): Record<string, unknown>;
 
-  public propertyGetReadonly(_propertyId: string): boolean {
+  propertyGetReadonly(_propertyId: string): boolean {
     return false;
   }
 
-  public propertyGetDefaultWidth(_propertyId: string): number {
+  propertyGetDefaultWidth(_propertyId: string): number {
     return DEFAULT_COLUMN_WIDTH;
   }
 
@@ -145,27 +157,15 @@ export abstract class BaseDataSource implements DataSource {
     };
   }
 
-  public abstract propertyGetName(propertyId: string): string;
+  abstract propertyGetName(propertyId: string): string;
 
-  public abstract propertyGetType(propertyId: string): string;
+  abstract propertyGetType(propertyId: string): string;
 
-  public abstract rowAdd(InsertToPosition: InsertToPosition | number): string;
+  abstract rowAdd(InsertToPosition: InsertToPosition | number): string;
 
-  public abstract rowDelete(ids: string[]): void;
+  abstract rowDelete(ids: string[]): void;
 
-  public abstract rows: string[];
+  abstract getPropertyMeta(type: string): ColumnMeta;
 
-  public abstract slots: {
-    update: Slot;
-  };
-
-  public abstract addPropertyConfigList: ColumnConfig[];
-
-  public abstract getPropertyMeta(type: string): ColumnMeta;
-
-  public get detailSlots(): DetailSlots {
-    return {};
-  }
-
-  public abstract rowMove(rowId: string, position: InsertToPosition): void;
+  abstract rowMove(rowId: string, position: InsertToPosition): void;
 }

@@ -28,7 +28,27 @@ import {
 
 @customElement('affine-pie-menu')
 export class PieMenu extends WithDisposable(LitElement) {
+  get hoveredNode() {
+    return this._hoveredNode;
+  }
+
+  get rootNode() {
+    const node = this.selectionChain[0];
+    assertExists(node, 'No root node');
+    return node;
+  }
+
+  get activeNode() {
+    const node = this.selectionChain[this.selectionChain.length - 1];
+    assertExists(node, 'Required atLeast 1 node active');
+    return node;
+  }
+
   static override styles = pieMenuStyles;
+
+  private _hoveredNode: PieNode | null = null;
+
+  private _openSubmenuTimeout?: NodeJS.Timeout;
 
   slots = {
     pointerAngleUpdated: new Slot<number | null>(),
@@ -51,23 +71,103 @@ export class PieMenu extends WithDisposable(LitElement) {
 
   abortController = new AbortController();
 
-  private _hoveredNode: PieNode | null = null;
+  private _setupEvents() {
+    this._disposables.addFromEvent(
+      this.widgetElement,
+      'pointermove',
+      this._handlePointerMove
+    );
 
-  private _openSubmenuTimeout?: NodeJS.Timeout;
-
-  get hoveredNode() {
-    return this._hoveredNode;
+    this._disposables.addFromEvent(document, 'keydown', this._handleKeyDown);
   }
 
-  get rootNode() {
-    const node = this.selectionChain[0];
-    assertExists(node, 'No root node');
-    return node;
-  }
+  private selectChildWithIndex = (index: number) => {
+    const activeNode = this.activeNode;
+    if (!activeNode || isNaN(index)) return;
 
-  get activeNode() {
-    const node = this.selectionChain[this.selectionChain.length - 1];
-    assertExists(node, 'Required atLeast 1 node active');
+    const node = activeNode.querySelector(
+      `& > affine-pie-node[index='${index}']`
+    );
+
+    if (node instanceof PieNode && !isColorNode(node.model)) {
+      // colors are more than 9 may be another method ?
+      if (isSubmenuNode(node.model)) this.openSubmenu(node);
+      else node.select();
+
+      if (isCommandNode(node.model)) this.close();
+    }
+  };
+
+  private _handleKeyDown = (ev: KeyboardEvent) => {
+    const { key } = ev;
+    if (key === 'Escape') {
+      return this.abortController.abort();
+    }
+
+    if (ev.code === 'Backspace') {
+      if (this.selectionChain.length <= 1) return;
+      const { containerNode } = this.activeNode;
+      if (containerNode) this.popSelectionChainTo(containerNode);
+    }
+
+    if (key.match(/\d+/)) {
+      this.selectChildWithIndex(parseInt(key));
+    }
+  };
+
+  private _handlePointerMove = (ev: PointerEvent) => {
+    const { clientX, clientY } = ev;
+
+    const { ACTIVATE_THRESHOLD_MIN } = PieManager.settings;
+
+    const lenSq = this.getActiveNodeToMouseLenSq([clientX, clientY]);
+
+    if (lenSq > ACTIVATE_THRESHOLD_MIN ** 2) {
+      const [nodeX, nodeY] = this.getActiveNodeRelPos();
+      const dx = clientX - nodeX;
+      const dy = clientY - nodeY;
+
+      const TAU = Math.PI * 2;
+      const angle = toDegree((Math.atan2(dy, dx) + TAU) % TAU); // convert from [-PI, PI] to [0  TAU]
+      this.slots.pointerAngleUpdated.emit(angle);
+    } else {
+      this.slots.pointerAngleUpdated.emit(null); // acts like a abort signal
+    }
+  };
+
+  private _createNodeTree(nodeSchema: PieNodeModel): PieNode {
+    const node = new PieNode();
+    const { angle, startAngle, endAngle, label } = nodeSchema;
+
+    node.id = label;
+    node.model = nodeSchema;
+    node.angle = angle ?? 0;
+    node.startAngle = startAngle ?? 0;
+    node.endAngle = endAngle ?? 0;
+    node.menu = this;
+
+    if (!isRootNode(nodeSchema)) {
+      node.slot = 'children-slot';
+      const { PIE_RADIUS } = PieManager.settings;
+      const isColorNode = nodeSchema.type === 'color';
+      const radius = isColorNode ? PIE_RADIUS * 0.6 : PIE_RADIUS;
+
+      node.position = getPosition(toRadian(node.angle), [radius, radius]);
+    } else {
+      node.position = [0, 0];
+    }
+
+    if (isNodeWithChildren(nodeSchema)) {
+      nodeSchema.children.forEach((childSchema, i) => {
+        const childNode = this._createNodeTree(childSchema);
+        childNode.containerNode = node;
+        childNode.index = i + 1;
+        childNode.setAttribute('index', childNode.index.toString());
+
+        node.append(childNode);
+      });
+    }
+
     return node;
   }
 
@@ -183,112 +283,12 @@ export class PieMenu extends WithDisposable(LitElement) {
       transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
     };
 
-    return html` <div class="pie-menu-container blocksuite-overlay">
+    return html` <div class="pie-menu-container">
       <div class="overlay" @click="${() => this.abortController.abort()}"></div>
 
       <div style="${styleMap(menuStyles)}" class="pie-menu">
         ${this.rootNode ?? nothing}
       </div>
     </div>`;
-  }
-
-  private _setupEvents() {
-    this._disposables.addFromEvent(
-      this.widgetElement,
-      'pointermove',
-      this._handlePointerMove
-    );
-
-    this._disposables.addFromEvent(document, 'keydown', this._handleKeyDown);
-  }
-
-  private selectChildWithIndex = (index: number) => {
-    const activeNode = this.activeNode;
-    if (!activeNode || isNaN(index)) return;
-
-    const node = activeNode.querySelector(
-      `& > affine-pie-node[index='${index}']`
-    );
-
-    if (node instanceof PieNode && !isColorNode(node.model)) {
-      // colors are more than 9 may be another method ?
-      if (isSubmenuNode(node.model)) this.openSubmenu(node);
-      else node.select();
-
-      if (isCommandNode(node.model)) this.close();
-    }
-  };
-
-  private _handleKeyDown = (ev: KeyboardEvent) => {
-    const { key } = ev;
-    if (key === 'Escape') {
-      return this.abortController.abort();
-    }
-
-    if (ev.code === 'Backspace') {
-      if (this.selectionChain.length <= 1) return;
-      const { containerNode } = this.activeNode;
-      if (containerNode) this.popSelectionChainTo(containerNode);
-    }
-
-    if (key.match(/\d+/)) {
-      this.selectChildWithIndex(parseInt(key));
-    }
-  };
-
-  private _handlePointerMove = (ev: PointerEvent) => {
-    const { clientX, clientY } = ev;
-
-    const { ACTIVATE_THRESHOLD_MIN } = PieManager.settings;
-
-    const lenSq = this.getActiveNodeToMouseLenSq([clientX, clientY]);
-
-    if (lenSq > ACTIVATE_THRESHOLD_MIN ** 2) {
-      const [nodeX, nodeY] = this.getActiveNodeRelPos();
-      const dx = clientX - nodeX;
-      const dy = clientY - nodeY;
-
-      const TAU = Math.PI * 2;
-      const angle = toDegree((Math.atan2(dy, dx) + TAU) % TAU); // convert from [-PI, PI] to [0  TAU]
-      this.slots.pointerAngleUpdated.emit(angle);
-    } else {
-      this.slots.pointerAngleUpdated.emit(null); // acts like a abort signal
-    }
-  };
-
-  private _createNodeTree(nodeSchema: PieNodeModel): PieNode {
-    const node = new PieNode();
-    const { angle, startAngle, endAngle, label } = nodeSchema;
-
-    node.id = label;
-    node.model = nodeSchema;
-    node.angle = angle ?? 0;
-    node.startAngle = startAngle ?? 0;
-    node.endAngle = endAngle ?? 0;
-    node.menu = this;
-
-    if (!isRootNode(nodeSchema)) {
-      node.slot = 'children-slot';
-      const { PIE_RADIUS } = PieManager.settings;
-      const isColorNode = nodeSchema.type === 'color';
-      const radius = isColorNode ? PIE_RADIUS * 0.6 : PIE_RADIUS;
-
-      node.position = getPosition(toRadian(node.angle), [radius, radius]);
-    } else {
-      node.position = [0, 0];
-    }
-
-    if (isNodeWithChildren(nodeSchema)) {
-      nodeSchema.children.forEach((childSchema, i) => {
-        const childNode = this._createNodeTree(childSchema);
-        childNode.containerNode = node;
-        childNode.index = i + 1;
-        childNode.setAttribute('index', childNode.index.toString());
-
-        node.append(childNode);
-      });
-    }
-
-    return node;
   }
 }

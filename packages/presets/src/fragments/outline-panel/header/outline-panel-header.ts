@@ -79,18 +79,6 @@ const styles = css`
 export class OutlinePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor showPreviewIcon!: boolean;
-
-  @property({ attribute: false })
-  accessor enableNotesSorting!: boolean;
-
-  @property({ attribute: false })
-  accessor toggleShowPreviewIcon!: (on: boolean) => void;
-
-  @property({ attribute: false })
-  accessor toggleNotesSorting!: () => void;
-
   @state()
   private accessor _settingPopperShow = false;
 
@@ -104,6 +92,18 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
     typeof createButtonPopper
   > | null = null;
 
+  @property({ attribute: false })
+  accessor showPreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  accessor enableNotesSorting!: boolean;
+
+  @property({ attribute: false })
+  accessor toggleShowPreviewIcon!: (on: boolean) => void;
+
+  @property({ attribute: false })
+  accessor toggleNotesSorting!: () => void;
+
   override firstUpdated() {
     const _disposables = this._disposables;
 
@@ -113,8 +113,10 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
       ({ display }) => {
         this._settingPopperShow = display === 'show';
       },
-      14,
-      -30
+      {
+        mainAxis: 14,
+        crossAxis: -30,
+      }
     );
     _disposables.add(this._notePreviewSettingMenuPopper);
   }

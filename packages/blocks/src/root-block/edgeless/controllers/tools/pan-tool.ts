@@ -1,15 +1,19 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
-import type { PanTool } from '../../../../_common/utils/index.js';
-import { EdgelessToolController } from './index.js';
+import { EdgelessToolController } from './edgeless-tool.js';
+
+type PanTool = {
+  type: 'pan';
+  panning: boolean;
+};
 
 export class PanToolController extends EdgelessToolController<PanTool> {
-  readonly tool = <PanTool>{
-    type: 'pan',
-  };
-
   private _lastPoint: [number, number] | null = null;
+
+  readonly tool = {
+    type: 'pan',
+  } as PanTool;
 
   onContainerClick(): void {
     noop();
@@ -73,6 +77,7 @@ export class PanToolController extends EdgelessToolController<PanTool> {
   onPressShiftKey(_: boolean) {
     noop();
   }
+
   onPressSpaceBar(_pressed: boolean): void {
     noop();
   }
@@ -83,5 +88,13 @@ export class PanToolController extends EdgelessToolController<PanTool> {
 
   afterModeSwitch() {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      pan: PanToolController;
+    }
   }
 }

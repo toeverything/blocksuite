@@ -1,6 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { RichText } from '@blocksuite/blocks';
-import { type RootBlockModel } from '@blocksuite/blocks';
+import type { RootBlockModel } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -10,6 +10,26 @@ const DOC_BLOCK_CHILD_PADDING = 24;
 
 @customElement('doc-title')
 export class DocTitle extends WithDisposable(ShadowlessElement) {
+  private get _rootModel() {
+    return this.doc.root as RootBlockModel;
+  }
+
+  private get _inlineEditor() {
+    return this._richTextElement.inlineEditor;
+  }
+
+  private get _viewport() {
+    const el = this.closest<HTMLElement>('.affine-page-viewport');
+    assertExists(el);
+    return el;
+  }
+
+  private get _pageRoot() {
+    const pageRoot = this._viewport.querySelector('affine-page-root');
+    assertExists(pageRoot);
+    return pageRoot;
+  }
+
   static override styles = css`
     .doc-title-container {
       box-sizing: border-box;
@@ -60,9 +80,6 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
   @state()
   private accessor _isReadonly = false;
 
@@ -72,25 +89,8 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
   @query('rich-text')
   private accessor _richTextElement!: RichText;
 
-  private get _rootModel() {
-    return this.doc.root as RootBlockModel;
-  }
-
-  private get _inlineEditor() {
-    return this._richTextElement.inlineEditor;
-  }
-
-  private get _viewport() {
-    const el = this.closest<HTMLElement>('.affine-page-viewport');
-    assertExists(el);
-    return el;
-  }
-
-  private get _pageRoot() {
-    const pageRoot = this._viewport.querySelector('affine-page-root');
-    assertExists(pageRoot);
-    return pageRoot;
-  }
+  @property({ attribute: false })
+  accessor doc!: Doc;
 
   private _onTitleKeyDown = (event: KeyboardEvent) => {
     if (event.isComposing || this.doc.readonly) return;

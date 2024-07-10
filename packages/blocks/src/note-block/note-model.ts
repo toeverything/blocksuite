@@ -3,30 +3,28 @@ import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 import { NOTE_WIDTH } from '../_common/consts.js';
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import {
-  DEFAULT_NOTE_COLOR,
-  NOTE_SHADOWS,
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  DEFAULT_NOTE_SHADOW,
 } from '../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../_common/types.js';
-import {
-  Bound,
-  type SerializedXYWH,
-  StrokeStyle,
-} from '../surface-block/index.js';
+import { StrokeStyle } from '../surface-block/consts.js';
+import { Bound } from '../surface-block/utils/bound.js';
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
   props: (): NoteProps => ({
     xywh: `[0,0,${NOTE_WIDTH},95]`,
-    background: DEFAULT_NOTE_COLOR,
+    background: DEFAULT_NOTE_BACKGROUND_COLOR,
     index: 'a0',
     hidden: false,
     displayMode: NoteDisplayMode.DocAndEdgeless,
     edgeless: {
       style: {
-        borderRadius: 8,
+        borderRadius: 0,
         borderSize: 4,
-        borderStyle: StrokeStyle.Solid,
-        shadowType: NOTE_SHADOWS[1],
+        borderStyle: StrokeStyle.None,
+        shadowType: DEFAULT_NOTE_SHADOW,
       },
     },
   }),
@@ -42,7 +40,6 @@ export const NoteBlockSchema = defineBlockSchema({
       'affine:database',
       'affine:data-view',
       'affine:image',
-      'affine:note-block-*',
       'affine:bookmark',
       'affine:attachment',
       'affine:surface-ref',

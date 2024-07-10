@@ -1,5 +1,8 @@
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
-import { type ViewStore } from '@blocksuite/block-std';
+import type {
+  BlockElement,
+  EditorHost,
+  ViewStore,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
@@ -7,14 +10,13 @@ import type { BlockModel } from '@blocksuite/store';
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import type { RootBlockComponent } from '../../index.js';
-import type { EdgelessCanvasTextEditor } from '../../root-block/edgeless/components/text/types.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
   BLOCK_ID_ATTR as ATTR,
 } from '../consts.js';
-import { type AbstractEditor } from '../types.js';
+import type { AbstractEditor } from '../types.js';
 import { clamp } from './math.js';
 import { matchFlavours } from './model.js';
 import type { Point, Rect } from './rect.js';
@@ -233,19 +235,14 @@ export function getEditorContainer(editorHost: EditorHost): AbstractEditor {
 }
 
 export function isInsidePageEditor(host: EditorHost) {
-  const hostParentEl = host.parentElement;
-  return (
-    !!hostParentEl &&
-    (hostParentEl.classList.contains('affine-page-viewport') ||
-      hostParentEl.classList.contains('page-editor-container'))
+  return Array.from(host.children).some(
+    v => v.tagName.toLowerCase() === 'affine-page-root'
   );
 }
 
 export function isInsideEdgelessEditor(host: EditorHost) {
-  const hostParentEl = host.parentElement;
-  return (
-    !!hostParentEl &&
-    hostParentEl.classList.contains('affine-edgeless-viewport')
+  return Array.from(host.children).some(
+    v => v.tagName.toLowerCase() === 'affine-edgeless-root'
   );
 }
 
@@ -825,7 +822,7 @@ export function getDropRectByPoint(
     const table = getDatabaseBlockTableElement(element);
     assertExists(table);
     let bounds = table.getBoundingClientRect();
-    if (model.isEmpty()) {
+    if (model.isEmpty.value) {
       result.flag = DropFlags.EmptyDatabase;
 
       if (point.y < bounds.top) return result;
@@ -899,12 +896,6 @@ function getCellRect(element: Element, bounds?: DOMRect) {
     colRect.right - bounds.left,
     colRect.height
   );
-}
-
-export function getEdgelessCanvasTextEditor(element: Element | Document) {
-  return element.querySelector(
-    'edgeless-text-editor,edgeless-shape-text-editor'
-  ) as EdgelessCanvasTextEditor | null;
 }
 
 /**

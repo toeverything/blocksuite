@@ -15,6 +15,7 @@ import {
   getBezierNearestTime,
   getBezierParameters,
   getBezierPoint,
+  intersects,
 } from '../utils/curve.js';
 import {
   linePolylineIntersects,
@@ -61,6 +62,13 @@ export enum ConnectorMode {
   Orthogonal,
   Curve,
 }
+export const getConnectorModeName = (mode: ConnectorMode) => {
+  return {
+    [ConnectorMode.Straight]: 'Straight',
+    [ConnectorMode.Orthogonal]: 'Orthogonal',
+    [ConnectorMode.Curve]: 'Curve',
+  }[mode];
+};
 
 export enum ConnectorLabelOffsetAnchor {
   Top = 'top',
@@ -96,7 +104,7 @@ export type SerializedConnectorElement = SerializedElement & {
   target: SerializedConnection;
 };
 
-type ConnectorElementProps = IBaseProps & {
+export type ConnectorElementProps = IBaseProps & {
   mode: ConnectorMode;
   stroke: string;
   strokeWidth: number;
@@ -111,16 +119,6 @@ type ConnectorElementProps = IBaseProps & {
 } & ConnectorLabelProps;
 
 export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementProps> {
-  static override propsToY(props: ConnectorElementProps) {
-    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
-      props.text = new DocCollection.Y.Text(props.text);
-    }
-
-    return props;
-  }
-
-  updatingPath = false;
-
   get type() {
     return 'connector';
   }
@@ -130,11 +128,25 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     return false as const;
   }
 
+  get connected() {
+    return !!(this.source.id || this.target.id);
+  }
+
+  override get elementBound() {
+    let bounds = super.elementBound;
+    if (this.hasLabel()) {
+      bounds = bounds.unite(Bound.fromXYWH(this.labelXYWH!));
+    }
+    return bounds;
+  }
+
+  updatingPath = false;
+
   @derive((path: PointLocation[], instance: ConnectorElementModel) => {
     const { x, y } = instance;
 
     return {
-      absolutePath: path.map(p => p.clone().setVec([p[0] + x, p[1] + y])),
+      absolutePath: path.map(p => p.clone().setVec(Vec.add(p, [x, y]))),
     };
   })
   @local()
@@ -239,6 +251,68 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   } as ConnectorLabelConstraintsProps)
   accessor labelConstraints!: ConnectorLabelConstraintsProps;
 
+  resizePath(originalPath: PointLocation[], matrix: DOMMatrix) {
+    if (this.mode === ConnectorMode.Curve) {
+      return originalPath.map(point => {
+        const [p, t, absIn, absOut] = [
+          point,
+          point.tangent,
+          point.absIn,
+          point.absOut,
+        ]
+          .map(p => new DOMPoint(...p).matrixTransform(matrix))
+          .map(p => [p.x, p.y]);
+        const ip = Vec.sub(absIn, p);
+        const op = Vec.sub(absOut, p);
+        return new PointLocation(p, t, ip, op);
+      });
+    }
+
+    return originalPath.map(point => {
+      const { x, y } = new DOMPoint(...point).matrixTransform(matrix);
+      const p = [x, y];
+      return PointLocation.fromVec(p);
+    });
+  }
+
+  resize(bounds: Bound, originalPath: PointLocation[], matrix: DOMMatrix) {
+    this.updatingPath = false;
+
+    const path = this.resizePath(originalPath, matrix);
+
+    // the property assignment order matters
+    this.xywh = bounds.serialize();
+    this.path = path.map(p => p.clone().setVec(Vec.sub(p, bounds.tl)));
+
+    const props: {
+      labelXYWH?: XYWH;
+      source?: Connection;
+      target?: Connection;
+    } = {};
+
+    // Updates Connector's Label position.
+    if (this.hasLabel()) {
+      const [cx, cy] = this.getPointByOffsetDistance(this.labelOffset.distance);
+      const [, , w, h] = this.labelXYWH!;
+      props.labelXYWH = [cx - w / 2, cy - h / 2, w, h];
+    }
+
+    if (!this.source.id) {
+      props.source = {
+        ...this.source,
+        position: path[0].toVec() as [number, number],
+      };
+    }
+    if (!this.target.id) {
+      props.target = {
+        ...this.target,
+        position: path[path.length - 1].toVec() as [number, number],
+      };
+    }
+
+    return props;
+  }
+
   moveTo(bound: Bound) {
     const oldBound = Bound.deserialize(this.xywh);
     const offset = Vec.sub([bound.x, bound.y], [oldBound.x, oldBound.y]);
@@ -273,14 +347,6 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     );
   }
 
-  override get elementBound() {
-    let bounds = super.elementBound;
-    if (this.hasLabel()) {
-      bounds = bounds.unite(Bound.fromXYWH(this.labelXYWH!));
-    }
-    return bounds;
-  }
-
   override hitTest(
     x: number,
     y: number,
@@ -292,17 +358,16 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
       return true;
     }
 
+    const { mode, strokeWidth, absolutePath: path } = this;
+
     const point =
-      this.mode === ConnectorMode.Curve
-        ? getBezierNearestPoint(
-            getBezierParameters(this.absolutePath),
-            currentPoint
-          )
-        : polyLineNearestPoint(this.absolutePath, currentPoint);
+      mode === ConnectorMode.Curve
+        ? getBezierNearestPoint(getBezierParameters(path), currentPoint)
+        : polyLineNearestPoint(path, currentPoint);
 
     return (
       Vec.dist(point, currentPoint) <
-      (options?.expand ? this.strokeWidth / 2 : 0) + 8
+      (options?.expand ? strokeWidth / 2 : 0) + 8
     );
   }
 
@@ -317,7 +382,15 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   }
 
   override intersectWithLine(start: IVec2, end: IVec2) {
-    let intersected = linePolylineIntersects(start, end, this.absolutePath);
+    const { mode, absolutePath: path } = this;
+
+    let intersected = null;
+
+    if (mode === ConnectorMode.Curve && path.length > 1) {
+      intersected = intersects(path, [start, end]);
+    } else {
+      intersected = linePolylineIntersects(start, end, path);
+    }
 
     if (!intersected && this.hasLabel()) {
       intersected = linePolylineIntersects(
@@ -441,6 +514,14 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     const b = getBezierParameters(path);
     return getBezierNearestTime(b, point);
   }
+
+  static override propsToY(props: ConnectorElementProps) {
+    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
+      props.text = new DocCollection.Y.Text(props.text);
+    }
+
+    return props;
+  }
 }
 
 export class LocalConnectorElementModel extends SurfaceLocalModel {
@@ -499,7 +580,7 @@ export class LocalConnectorElementModel extends SurfaceLocalModel {
 }
 
 export function isConnectorWithLabel(
-  model: SurfaceElementModel | SurfaceLocalModel
+  model: BlockSuite.EdgelessModelType | BlockSuite.SurfaceLocalModelType
 ) {
   return model instanceof ConnectorElementModel && model.hasLabel();
 }
@@ -511,6 +592,9 @@ declare global {
     }
     interface SurfaceLocalModelMap {
       connector: LocalConnectorElementModel;
+    }
+    interface EdgelessTextModelMap {
+      connector: ConnectorElementModel;
     }
   }
 }

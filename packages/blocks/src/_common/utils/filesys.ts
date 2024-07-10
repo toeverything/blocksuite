@@ -170,7 +170,7 @@ export async function openFileOrFiles({
   return new Promise(resolve => {
     // Append a new `<input type="file" multiple? />` and hide it.
     const input = document.createElement('input');
-    input.classList.add('affine-upload-input', 'blocksuite-overlay');
+    input.classList.add('affine-upload-input');
     input.style.display = 'none';
     input.type = 'file';
     if (multiple) {

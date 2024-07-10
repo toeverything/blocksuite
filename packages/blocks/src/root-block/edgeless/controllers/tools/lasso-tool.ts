@@ -1,12 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
-import {
-  type EdgelessTool,
-  type IPoint,
-  LassoMode,
-  type LassoTool,
-} from '../../../../_common/types.js';
+import { type IPoint, LassoMode } from '../../../../_common/types.js';
 import { Bound } from '../../../../surface-block/index.js';
 import {
   getBoundFromPoints,
@@ -21,11 +16,14 @@ import {
   pointInPolygon,
   rotatePoints,
 } from '../../../../surface-block/utils/math-utils.js';
-import { EdgelessToolController } from './index.js';
+import type { EdgelessTool } from '../../types.js';
+import { EdgelessToolController } from './edgeless-tool.js';
 
 class LassoOverlay extends Overlay {
   d = '';
+
   startPoint: IVec | null = null;
+
   render(ctx: CanvasRenderingContext2D): void {
     const path = new Path2D(this.d);
     const { zoom } = this._renderer;
@@ -56,18 +54,12 @@ class LassoOverlay extends Overlay {
   }
 }
 
+export type LassoTool = {
+  type: 'lasso';
+  mode: LassoMode;
+};
+
 export class LassoToolController extends EdgelessToolController<LassoTool> {
-  readonly tool = <LassoTool>{
-    type: 'lasso',
-  };
-
-  private _overlay = new LassoOverlay();
-  private _raf = 0;
-  private _lassoPoints: IVec[] = [];
-  private _lastPoint: IVec = [];
-  private _isSelecting = false;
-  private _currentSelectionState = new Set<string>(); // to finalize the selection
-
   get selection() {
     return this._edgeless.service.selection;
   }
@@ -76,9 +68,21 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     return this._isSelecting;
   }
 
-  abort() {
-    this._reset();
-  }
+  private _overlay = new LassoOverlay();
+
+  private _raf = 0;
+
+  private _lassoPoints: IVec[] = [];
+
+  private _lastPoint: IVec = [];
+
+  private _isSelecting = false;
+
+  private _currentSelectionState = new Set<string>(); // to finalize the selection
+
+  readonly tool = {
+    type: 'lasso',
+  } as LassoTool;
 
   private toModelCoord(p: IPoint): IVec {
     return this._service.viewport.toModelCoord(p.x, p.y);
@@ -167,7 +171,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const elements = this._getElementsInsideLasso().map(el => el.id);
 
     // current selections
-    const selection = this.selection.elements.map(el => el.id);
+    const selection = this.selection.selectedElements.map(el => el.id);
 
     const selectionMode = this._getSelectionMode(e);
     let set!: Set<string>;
@@ -194,6 +198,10 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._setSelectionState(Array.from(set), false);
   }
 
+  abort() {
+    this._reset();
+  }
+
   // For Freehand Mode =
   override onContainerDragStart(e: PointerEventState): void {
     if (this.tool.mode !== LassoMode.FreeHand) return;
@@ -205,7 +213,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     }
 
     this._currentSelectionState = new Set(
-      this.selection.elements.map(el => el.id)
+      this.selection.selectedElements.map(el => el.id)
     );
 
     this._isSelecting = true;
@@ -252,7 +260,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const [x, y] = this.toModelCoord(point);
     if (this._lassoPoints.length < 2) {
       this._currentSelectionState = new Set(
-        this.selection.elements.map(el => el.id)
+        this.selection.selectedElements.map(el => el.id)
       );
 
       const a = [x, y];
@@ -317,7 +325,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   override afterModeSwitch(newTool?: EdgelessTool): void {
     if (newTool?.type === 'lasso')
       this._currentSelectionState = new Set(
-        this.selection.elements.map(el => el.id)
+        this.selection.selectedElements.map(el => el.id)
       );
     this._reset();
   }
@@ -328,5 +336,13 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   override onPressSpaceBar(): void {
     noop();
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessToolMap {
+      lasso: LassoToolController;
+    }
   }
 }

@@ -3,7 +3,7 @@
 const allPackages = [
   'framework/block-std',
   'framework/global',
-  'frameworlk/inline',
+  'framework/inline',
   'framework/store',
   'framework/sync',
   'blocks',
@@ -66,11 +66,17 @@ module.exports = {
   ],
   overrides: [
     {
-      plugins: ['@typescript-eslint'],
+      plugins: ['@typescript-eslint', '@stylistic/ts'],
       files: ['*.ts', '*.spec.ts'],
       rules: {
-        '@typescript-eslint/ban-ts-comment': 'off',
         'no-unused-vars': 'off',
+        '@typescript-eslint/ban-ts-comment': 'off',
+        '@typescript-eslint/explicit-member-accessibility': [
+          'error',
+          {
+            accessibility: 'no-public',
+          },
+        ],
         '@typescript-eslint/no-unused-vars': [
           'error',
           {
@@ -84,14 +90,46 @@ module.exports = {
             ignoreRestSiblings: true,
           },
         ],
+        '@typescript-eslint/member-ordering': [
+          'error',
+          {
+            default: [
+              'private-static-field',
+              'protected-static-field',
+              'public-static-field',
+
+              'private-instance-field',
+              'protected-instance-field',
+              'public-instance-field',
+
+              'private-constructor',
+              'protected-constructor',
+              'public-constructor',
+
+              'private-instance-method',
+              'protected-instance-method',
+              'public-instance-method',
+
+              'private-static-method',
+              'protected-static-method',
+              'public-static-method',
+            ],
+          },
+        ],
         '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'error',
         'no-return-await': 'off',
         '@typescript-eslint/return-await': 'error',
         'require-await': 'off',
+        'no-implied-eval': 'error',
+        '@typescript-eslint/no-implied-eval': 'error',
         '@typescript-eslint/require-await': 'error',
         '@typescript-eslint/await-thenable': 'error',
         '@typescript-eslint/no-floating-promises': 'error',
         '@typescript-eslint/no-misused-promises': 'error',
+        '@typescript-eslint/consistent-generic-constructors': 'error',
+        '@typescript-eslint/consistent-indexed-object-style': 'error',
+        '@typescript-eslint/consistent-type-assertions': 'error',
+        '@typescript-eslint/no-import-type-side-effects': 'error',
         '@typescript-eslint/no-namespace': [
           'error',
           { allowDeclarations: true },
@@ -111,6 +149,8 @@ module.exports = {
         'unicorn/new-for-builtins': 'error',
         'unicorn/prefer-node-protocol': 'error',
         'unicorn/no-useless-length-check': 'error',
+        '@stylistic/ts/lines-between-class-members': 'error',
+        '@stylistic/ts/space-before-blocks': 'error',
       },
     },
     ...allPackages.map(pkg => ({

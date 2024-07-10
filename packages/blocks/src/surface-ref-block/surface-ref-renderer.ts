@@ -9,19 +9,6 @@ import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 import { getSurfaceBlock } from './utils.js';
 
 export class SurfaceRefRenderer {
-  private readonly _surfaceRenderer: Renderer;
-
-  private _surfaceModel: SurfaceBlockModel | null = null;
-  protected _disposables = new DisposableGroup();
-
-  slots = {
-    surfaceRendererInit: new Slot(),
-    surfaceRendererRefresh: new Slot(),
-    surfaceModelChanged: new Slot<SurfaceBlockModel>(),
-    mounted: new Slot(),
-    unmounted: new Slot(),
-  };
-
   get surfaceService() {
     return this.std.spec.getService('affine:surface');
   }
@@ -34,10 +21,24 @@ export class SurfaceRefRenderer {
     return this._surfaceModel;
   }
 
+  private readonly _surfaceRenderer: Renderer;
+
+  private _surfaceModel: SurfaceBlockModel | null = null;
+
+  protected _disposables = new DisposableGroup();
+
+  slots = {
+    surfaceRendererInit: new Slot(),
+    surfaceRendererRefresh: new Slot(),
+    surfaceModelChanged: new Slot<SurfaceBlockModel>(),
+    mounted: new Slot(),
+    unmounted: new Slot(),
+  };
+
   constructor(
-    public readonly id: string,
-    public readonly doc: Doc,
-    public readonly std: BlockStdScope,
+    readonly id: string,
+    readonly doc: Doc,
+    readonly std: BlockStdScope,
     options: {
       enableStackingCanvas?: boolean;
     } = {
@@ -59,32 +60,6 @@ export class SurfaceRefRenderer {
     this.slots.unmounted.once(() => {
       themeObserver.dispose();
     });
-  }
-
-  mount() {
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
-
-    this._initSurfaceModel();
-    this._initSurfaceRenderer();
-    this.slots.mounted.emit();
-  }
-
-  unmount() {
-    this._disposables.dispose();
-    this.slots.unmounted.emit();
-  }
-
-  getModel(id: string): BlockSuite.EdgelessModelType | null {
-    return (
-      (this.doc.getBlockById(id) as Exclude<
-        BlockSuite.EdgelessBlockModelType,
-        NoteBlockModel
-      >) ??
-      this._surfaceModel?.getElementById(id) ??
-      null
-    );
   }
 
   private _initSurfaceRenderer() {
@@ -115,5 +90,31 @@ export class SurfaceRefRenderer {
         })
       );
     }
+  }
+
+  mount() {
+    if (this._disposables.disposed) {
+      this._disposables = new DisposableGroup();
+    }
+
+    this._initSurfaceModel();
+    this._initSurfaceRenderer();
+    this.slots.mounted.emit();
+  }
+
+  unmount() {
+    this._disposables.dispose();
+    this.slots.unmounted.emit();
+  }
+
+  getModel(id: string): BlockSuite.EdgelessModelType | null {
+    return (
+      (this.doc.getBlockById(id) as Exclude<
+        BlockSuite.EdgelessBlockModelType,
+        NoteBlockModel
+      >) ??
+      this._surfaceModel?.getElementById(id) ??
+      null
+    );
   }
 }

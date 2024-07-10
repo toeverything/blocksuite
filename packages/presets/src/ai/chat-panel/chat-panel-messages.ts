@@ -17,7 +17,7 @@ import type {
   BlockSelection,
   TextSelection,
 } from '@blocksuite/block-std';
-import { type EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { ImageSelection } from '@blocksuite/blocks';
 import {
@@ -45,15 +45,27 @@ import {
   EdgelessEditorActions,
   PageEditorActions,
 } from './actions/actions-handle.js';
-import {
-  type ChatContextValue,
-  type ChatItem,
-  type ChatMessage,
+import type {
+  ChatContextValue,
+  ChatItem,
+  ChatMessage,
 } from './chat-context.js';
 import { HISTORY_IMAGE_ACTIONS } from './const.js';
 
 @customElement('chat-panel-messages')
 export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
+  private get _currentTextSelection(): TextSelection | undefined {
+    return this._selectionValue.find(v => v.type === 'text') as TextSelection;
+  }
+
+  private get _currentBlockSelections(): BlockSelection[] | undefined {
+    return this._selectionValue.filter(v => v.type === 'block');
+  }
+
+  private get _currentImageSelections(): ImageSelection[] | undefined {
+    return this._selectionValue.filter(v => v.type === 'image');
+  }
+
   static override styles = css`
     chat-panel-messages {
       position: relative;
@@ -140,6 +152,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private _selectionValue: BaseSelection[] = [];
+
   @state()
   accessor showDownIndicator = false;
 
@@ -161,18 +175,87 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   @query('.chat-panel-messages')
   accessor messagesContainer!: HTMLDivElement;
 
-  private _selectionValue: BaseSelection[] = [];
-  private get _currentTextSelection(): TextSelection | undefined {
-    return this._selectionValue.find(v => v.type === 'text') as TextSelection;
-  }
-  private get _currentBlockSelections(): BlockSelection[] | undefined {
-    return this._selectionValue.filter(v => v.type === 'block');
-  }
-  private get _currentImageSelections(): ImageSelection[] | undefined {
-    return this._selectionValue.filter(v => v.type === 'image');
+  protected override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('host')) {
+      const { disposables } = this;
+
+      disposables.add(
+        this.host.selection.slots.changed.on(() => {
+          this._selectionValue = this.host.selection.value;
+          this.requestUpdate();
+        })
+      );
+      const { docModeService } = this.host.spec.getService('affine:page');
+      disposables.add(docModeService.onModeChange(() => this.requestUpdate()));
+    }
   }
 
-  public override async connectedCallback() {
+  protected override render() {
+    const { items } = this.chatContextValue;
+    const { isLoading } = this;
+    const filteredItems = items.filter(item => {
+      return (
+        'role' in item ||
+        item.messages?.length === 3 ||
+        (HISTORY_IMAGE_ACTIONS.includes(item.action) &&
+          item.messages?.length === 2)
+      );
+    });
+
+    return html`<style>
+        .chat-panel-messages-placeholder div {
+          color: ${isLoading
+            ? 'var(--affine-text-secondary-color)'
+            : 'var(--affine-text-primary-color)'};
+          font-size: ${isLoading ? 'var(--affine-font-sm)' : '18px'};
+          font-weight: 600;
+        }
+      </style>
+
+      <div
+        class="chat-panel-messages"
+        @scroll=${(evt: Event) => {
+          const element = evt.target as HTMLDivElement;
+          this.showDownIndicator =
+            element.scrollHeight - element.scrollTop - element.clientHeight >
+            200;
+        }}
+      >
+        ${items.length === 0
+          ? html`<div class="chat-panel-messages-placeholder">
+                ${AffineIcon(
+                  isLoading
+                    ? 'var(--affine-icon-secondary)'
+                    : 'var(--affine-primary-color)'
+                )}
+                <div>
+                  ${this.isLoading
+                    ? 'AFFiNE AI is loading history...'
+                    : 'What can I help you with?'}
+                </div>
+              </div>
+              <chat-cards
+                .chatContextValue=${this.chatContextValue}
+                .updateContext=${this.updateContext}
+                .host=${this.host}
+                .selectionValue=${this._selectionValue}
+              ></chat-cards> `
+          : repeat(filteredItems, (item, index) => {
+              const isLast = index === filteredItems.length - 1;
+              return html`<div class="message">
+                ${this.renderAvatar(item)}
+                <div class="item-wrapper">${this.renderItem(item, isLast)}</div>
+              </div>`;
+            })}
+      </div>
+      ${this.showDownIndicator
+        ? html`<div class="down-indicator" @click=${() => this.scrollToDown()}>
+            ${DownArrowIcon}
+          </div>`
+        : nothing} `;
+  }
+
+  override async connectedCallback() {
     super.connectedCallback();
 
     const res = await AIProvider.userInfo;
@@ -190,26 +273,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         }
       })
     );
-  }
-
-  protected override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('host')) {
-      const { disposables } = this;
-
-      disposables.add(
-        this.host.selection.slots.changed.on(() => {
-          this._selectionValue = this.host.selection.value;
-          this.requestUpdate();
-        })
-      );
-      disposables.add(
-        this.host.spec
-          .getService('affine:page')
-          .slots.editorModeSwitch.on(() => {
-            this.requestUpdate();
-          })
-      );
-    }
   }
 
   renderError() {
@@ -452,70 +515,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           </div>`
         : nothing}
     `;
-  }
-
-  protected override render() {
-    const { items } = this.chatContextValue;
-    const { isLoading } = this;
-    const filteredItems = items.filter(item => {
-      return (
-        'role' in item ||
-        item.messages?.length === 3 ||
-        (item.action === 'image' && item.messages?.length === 2)
-      );
-    });
-
-    return html`<style>
-        .chat-panel-messages-placeholder div {
-          color: ${isLoading
-            ? 'var(--affine-text-secondary-color)'
-            : 'var(--affine-text-primary-color)'};
-          font-size: ${isLoading ? 'var(--affine-font-sm)' : '18px'};
-          font-weight: 600;
-        }
-      </style>
-
-      <div
-        class="chat-panel-messages"
-        @scroll=${(evt: Event) => {
-          const element = evt.target as HTMLDivElement;
-          this.showDownIndicator =
-            element.scrollHeight - element.scrollTop - element.clientHeight >
-            200;
-        }}
-      >
-        ${items.length === 0
-          ? html`<div class="chat-panel-messages-placeholder">
-                ${AffineIcon(
-                  isLoading
-                    ? 'var(--affine-icon-secondary)'
-                    : 'var(--affine-primary-color)'
-                )}
-                <div>
-                  ${this.isLoading
-                    ? 'AFFiNE AI is loading history...'
-                    : 'What can I help you with?'}
-                </div>
-              </div>
-              <chat-cards
-                .chatContextValue=${this.chatContextValue}
-                .updateContext=${this.updateContext}
-                .host=${this.host}
-                .selectionValue=${this._selectionValue}
-              ></chat-cards> `
-          : repeat(filteredItems, (item, index) => {
-              const isLast = index === filteredItems.length - 1;
-              return html`<div class="message">
-                ${this.renderAvatar(item)}
-                <div class="item-wrapper">${this.renderItem(item, isLast)}</div>
-              </div>`;
-            })}
-      </div>
-      ${this.showDownIndicator
-        ? html`<div class="down-indicator" @click=${() => this.scrollToDown()}>
-            ${DownArrowIcon}
-          </div>`
-        : nothing} `;
   }
 }
 

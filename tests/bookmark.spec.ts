@@ -51,8 +51,10 @@ const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await type(page, '/link');
+  await page.waitForTimeout(100);
+  await type(page, '/link', 100);
   await pressEnter(page);
+  await page.waitForTimeout(100);
   await type(page, inputUrl);
   await pressEnter(page);
 };
@@ -63,15 +65,15 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -116,15 +118,15 @@ test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -155,20 +157,21 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
   const bookmark = page.locator('affine-bookmark');
   await bookmark.click();
   await page.waitForTimeout(100);
-  await page.click('.embed-card-toolbar-button.link');
+  await page.getByRole('button', { name: 'Switch view' }).click();
+  await page.getByRole('button', { name: 'Inline view' }).click();
   await assertStoreMatchJSX(
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -208,15 +211,15 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -257,8 +260,9 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   await copyByKeyboard(page);
   await pressArrowRight(page);
   await waitNextFrame(page);
-  await type(page, '/link');
+  await type(page, '/link', 100);
   await pressEnter(page);
+  await page.waitForTimeout(100);
   await waitNextFrame(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await pressEnter(page);
@@ -267,15 +271,15 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:surface />
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -308,15 +312,15 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -363,15 +367,15 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -425,15 +429,15 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }
@@ -479,6 +483,7 @@ test('press backspace after bookmark block can select bookmark block', async ({
   await pressArrowUp(page);
   await type(page, '/link');
   await pressEnter(page);
+  await page.waitForTimeout(100);
   await type(page, inputUrl);
   await pressEnter(page);
 
@@ -516,15 +521,15 @@ test.describe('embed card toolbar', () => {
       page,
       /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-background-secondary-color"
+    prop:background="--affine-note-background-blue"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 8,
+          "borderRadius": 0,
           "borderSize": 4,
-          "borderStyle": "solid",
-          "shadowType": "--affine-note-shadow-box",
+          "borderStyle": "none",
+          "shadowType": "--affine-note-shadow-sticker",
         },
       }
     }

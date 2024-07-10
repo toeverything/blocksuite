@@ -15,11 +15,7 @@ import {
   getSelectedImagesAsBlobs,
   getSelectedTextContent,
 } from '../utils/selection-utils.js';
-import {
-  type ChatAction,
-  type ChatContextValue,
-  type ChatItem,
-} from './chat-context.js';
+import type { ChatAction, ChatContextValue, ChatItem } from './chat-context.js';
 import type { ChatPanelMessages } from './chat-panel-messages.js';
 
 @customElement('chat-panel')
@@ -94,6 +90,47 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private _chatMessages: Ref<ChatPanelMessages> =
+    createRef<ChatPanelMessages>();
+
+  private _chatSessionId = '';
+
+  private _resettingCounter = 0;
+
+  private _resetItems = debounce(() => {
+    const counter = ++this._resettingCounter;
+    this.isLoading = true;
+    (async () => {
+      const { doc } = this;
+
+      const [histories, actions] = await Promise.all([
+        AIProvider.histories?.chats(doc.collection.id, doc.id),
+        AIProvider.histories?.actions(doc.collection.id, doc.id),
+      ]);
+
+      if (counter !== this._resettingCounter) return;
+
+      const items: ChatItem[] = actions ? [...actions] : [];
+
+      if (histories?.[0]) {
+        this._chatSessionId = histories[0].sessionId;
+        items.push(...histories[0].messages);
+      }
+
+      this.chatContextValue = {
+        ...this.chatContextValue,
+        items: items.sort((a, b) => {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        }),
+      };
+
+      this.isLoading = false;
+      this.scrollToDown();
+    })().catch(console.error);
+  }, 200);
+
   @property({ attribute: false })
   accessor host!: EditorHost;
 
@@ -114,10 +151,40 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     markdown: '',
   };
 
-  private _chatMessages: Ref<ChatPanelMessages> =
-    createRef<ChatPanelMessages>();
+  private _cleanupHistories = async () => {
+    const notification =
+      this.host.std.spec.getService('affine:page').notificationService;
+    if (!notification) return;
 
-  public override connectedCallback() {
+    if (
+      await notification.confirm({
+        title: 'Clear History',
+        message:
+          'Are you sure you want to clear all history? This action will permanently delete all content, including all chat logs and data, and cannot be undone.',
+        confirmText: 'Confirm',
+        cancelText: 'Cancel',
+      })
+    ) {
+      await AIProvider.histories?.cleanup(this.doc.collection.id, this.doc.id, [
+        this._chatSessionId,
+        ...(
+          this.chatContextValue.items.filter(
+            item => 'sessionId' in item
+          ) as ChatAction[]
+        ).map(item => item.sessionId),
+      ]);
+      notification.toast('History cleared');
+      this._resetItems();
+    }
+  };
+
+  protected override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('doc')) {
+      this._resetItems();
+    }
+  }
+
+  override connectedCallback() {
     super.connectedCallback();
     if (!this.doc) throw new Error('doc is required');
 
@@ -167,79 +234,9 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private _chatSessionId = '';
-  private _resettingCounter = 0;
-
-  private _resetItems = debounce(() => {
-    const counter = ++this._resettingCounter;
-    this.isLoading = true;
-    (async () => {
-      const { doc } = this;
-
-      const [histories, actions] = await Promise.all([
-        AIProvider.histories?.chats(doc.collection.id, doc.id),
-        AIProvider.histories?.actions(doc.collection.id, doc.id),
-      ]);
-
-      if (counter !== this._resettingCounter) return;
-
-      const items: ChatItem[] = actions ? [...actions] : [];
-
-      if (histories?.[0]) {
-        this._chatSessionId = histories[0].sessionId;
-        items.push(...histories[0].messages);
-      }
-
-      this.chatContextValue = {
-        ...this.chatContextValue,
-        items: items.sort((a, b) => {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        }),
-      };
-
-      this.isLoading = false;
-      this.scrollToDown();
-    })().catch(console.error);
-  }, 200);
-
-  protected override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('doc')) {
-      this._resetItems();
-    }
-  }
-
   scrollToDown() {
     requestAnimationFrame(() => this._chatMessages.value?.scrollToDown());
   }
-
-  private _cleanupHistories = async () => {
-    const notification =
-      this.host.std.spec.getService('affine:page').notificationService;
-    if (!notification) return;
-
-    if (
-      await notification.confirm({
-        title: 'Clear History',
-        message:
-          'Are you sure you want to clear all history? This action will permanently delete all content, including all chat logs and data, and cannot be undone.',
-        confirmText: 'Confirm',
-        cancelText: 'Cancel',
-      })
-    ) {
-      await AIProvider.histories?.cleanup(this.doc.collection.id, this.doc.id, [
-        this._chatSessionId,
-        ...(
-          this.chatContextValue.items.filter(
-            item => 'sessionId' in item
-          ) as ChatAction[]
-        ).map(item => item.sessionId),
-      ]);
-      notification.toast('History cleared');
-      this._resetItems();
-    }
-  };
 
   override render() {
     return html` <div class="chat-panel-container">

@@ -2,10 +2,8 @@ import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
 import * as Y from 'yjs';
 
 export interface OptionalAttributes {
-  attributes?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  attributes?: Record<string, any>;
 }
 export type DeltaOperation = {
   insert?: string;
@@ -14,6 +12,14 @@ export type DeltaOperation = {
 } & OptionalAttributes;
 
 export class Text {
+  get length() {
+    return this._yText.length;
+  }
+
+  get yText() {
+    return this._yText;
+  }
+
   private readonly _yText: Y.Text;
 
   constructor(input?: Y.Text | string | DeltaInsert[]) {
@@ -34,20 +40,6 @@ export class Text {
     } else {
       this._yText = new Y.Text();
     }
-  }
-
-  static fromDelta(delta: DeltaOperation[]) {
-    const result = new Y.Text();
-    result.applyDelta(delta);
-    return new Text(result);
-  }
-
-  get length() {
-    return this._yText.length;
-  }
-
-  get yText() {
-    return this._yText;
   }
 
   private _transact(callback: () => void) {
@@ -296,5 +288,11 @@ export class Text {
 
   toString() {
     return this._yText?.toString() || '';
+  }
+
+  static fromDelta(delta: DeltaOperation[]) {
+    const result = new Y.Text();
+    result.applyDelta(delta);
+    return new Text(result);
   }
 }

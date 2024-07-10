@@ -1,4 +1,4 @@
-import { type Disposable } from '@blocksuite/global/utils';
+import type { Disposable } from '@blocksuite/global/utils';
 
 import type { TType } from '../logical/typesystem.js';
 import type { StatCalcOpType } from '../view/presets/table/types.js';
@@ -26,6 +26,7 @@ type ColumnOps<
   defaultData: () => Data;
   type: (data: Data) => TType;
   formatValue?: (value: unknown, colData: Data) => Value;
+  isEmpty: (value?: Value) => boolean;
   cellToString: (data: Value, colData: Data) => string;
   cellFromString: (
     data: string,
@@ -48,7 +49,7 @@ export class ColumnConfig<
   convertMap = new Map();
 
   constructor(
-    public readonly type: Type,
+    readonly type: Type,
     public ops: ColumnOps<T, CellData>
   ) {}
 

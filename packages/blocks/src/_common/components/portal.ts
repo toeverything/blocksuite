@@ -34,6 +34,8 @@ import { customElement, property } from 'lit/decorators.js';
  */
 @customElement('blocksuite-portal')
 export class Portal extends LitElement {
+  private _portalRoot: HTMLElement | null = null;
+
   @property({ attribute: false })
   accessor container = document.body;
 
@@ -42,8 +44,6 @@ export class Portal extends LitElement {
 
   @property({ attribute: false })
   accessor shadowDom: boolean | ShadowRootInit = true;
-
-  private _portalRoot: HTMLElement | null = null;
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
@@ -58,7 +58,7 @@ export class Portal extends LitElement {
           ...(typeof this.shadowDom !== 'boolean' ? this.shadowDom : {}),
         })
       : portalRoot;
-    portalRoot.classList.add('blocksuite-portal', 'blocksuite-overlay');
+    portalRoot.classList.add('blocksuite-portal');
     this.container.append(portalRoot);
     this._portalRoot = portalRoot;
     return renderRoot;
@@ -108,6 +108,8 @@ type PortalOptions = {
    * If true, the portalRoot will be added a class `blocksuite-portal`. It's useful for finding the portalRoot.
    */
   identifyWrapper?: boolean;
+
+  portalStyles?: Record<string, string | number | undefined | null>;
 };
 
 /**
@@ -127,7 +129,7 @@ export function createSimplePortal({
 }: PortalOptions) {
   const portalRoot = document.createElement('div');
   if (identifyWrapper) {
-    portalRoot.classList.add('blocksuite-portal', 'blocksuite-overlay');
+    portalRoot.classList.add('blocksuite-portal');
   }
   if (shadowDom) {
     portalRoot.attachShadow({
@@ -295,6 +297,8 @@ export function createLitPortal({
   portalRoot.style.position = 'fixed';
   portalRoot.style.left = '0';
   portalRoot.style.top = '0';
+
+  Object.assign(portalRoot.style, portalOptions.portalStyles);
 
   const computePositionOptions =
     positionConfigOrFn instanceof Function

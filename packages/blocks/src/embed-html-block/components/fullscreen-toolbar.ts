@@ -6,9 +6,25 @@ import { popMenu } from '../../_common/components/index.js';
 import { SettingsIcon } from '../../_common/icons/edgeless.js';
 import { CopyIcon, ExpandCloseIcon } from '../../_common/icons/text.js';
 import type { EmbedHtmlBlockComponent } from '../embed-html-block.js';
+import { DoneIcon } from './../../_common/icons/index.js';
 
 @customElement('embed-html-fullscreen-toolbar')
 export class EmbedHtmlFullscreenToolbar extends LitElement {
+  private get autoHideToolbar() {
+    return (
+      this.embedHtml.edgeless?.service.editPropsStore.getStorage(
+        'autoHideEmbedHTMLFullScreenToolbar'
+      ) ?? false
+    );
+  }
+
+  private set autoHideToolbar(val: boolean) {
+    this.embedHtml.edgeless?.service.editPropsStore.setStorage(
+      'autoHideEmbedHTMLFullScreenToolbar',
+      val
+    );
+  }
+
   static override styles = css`
     :host {
       box-sizing: border-box;
@@ -58,24 +74,7 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       width: 1px;
       height: 36px;
     }
-
-    .fullscreen-toolbar-container icon-button.copy-button {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 7px;
-      width: 108px;
-      padding: 4px 8px;
-      font-size: var(--affine-font-xs);
-      & svg {
-        width: 16px;
-        height: 16px;
-      }
-    }
   `;
-
-  @property({ attribute: false })
-  accessor embedHtml!: EmbedHtmlBlockComponent;
 
   @query('.fullscreen-toolbar-container')
   private accessor _fullScreenToolbarContainer!: HTMLElement;
@@ -86,35 +85,8 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
   @state()
   private accessor _popperVisible = false;
 
-  private get autoHideToolbar() {
-    return (
-      this.embedHtml.edgeless?.service.editPropsStore.getItem(
-        'autoHideEmbedHTMLFullScreenToolbar'
-      ) ?? false
-    );
-  }
-
-  private set autoHideToolbar(val: boolean) {
-    this.embedHtml.edgeless?.service.editPropsStore.setItem(
-      'autoHideEmbedHTMLFullScreenToolbar',
-      val
-    );
-  }
-
-  copyCode = () => {
-    if (this._copied) return;
-
-    this.embedHtml.std.clipboard
-      .writeToClipboard(items => {
-        items['text/plain'] = this.embedHtml.model.html ?? '';
-        return items;
-      })
-      .then(() => {
-        this._copied = true;
-        setTimeout(() => (this._copied = false), 1500);
-      })
-      .catch(console.error);
-  };
+  @property({ attribute: false })
+  accessor embedHtml!: EmbedHtmlBlockComponent;
 
   private _popSettings = () => {
     this._popperVisible = true;
@@ -154,6 +126,21 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
     });
   };
 
+  copyCode = () => {
+    if (this._copied) return;
+
+    this.embedHtml.std.clipboard
+      .writeToClipboard(items => {
+        items['text/plain'] = this.embedHtml.model.html ?? '';
+        return items;
+      })
+      .then(() => {
+        this._copied = true;
+        setTimeout(() => (this._copied = false), 1500);
+      })
+      .catch(console.error);
+  };
+
   override render() {
     const hideToolbar = !this._popperVisible && this.autoHideToolbar;
 
@@ -165,18 +152,15 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
         <icon-button @click=${this.embedHtml.close}
           >${ExpandCloseIcon}</icon-button
         >
-        <icon-button @click=${this._popSettings} ?hover=${this._popperVisible}
+        <icon-button @click=${this._popSettings} hover=${this._popperVisible}
           >${SettingsIcon}</icon-button
         >
 
         <div class="short-v-divider"></div>
 
-        <icon-button
-          class="copy-button"
-          text="${this._copied ? 'Copied' : 'Copy Code'}"
-          @click=${this.copyCode}
-          >${CopyIcon}</icon-button
-        >
+        <icon-button class="copy-button" @click=${this.copyCode}
+          >${this._copied ? DoneIcon : CopyIcon}
+        </icon-button>
       </div>
     </div> `;
   }

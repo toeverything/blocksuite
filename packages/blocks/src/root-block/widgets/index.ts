@@ -7,6 +7,7 @@ export {
   type AffineAIPanelWidgetConfig,
 } from './ai-panel/type.js';
 export { BlockHubWidget } from './block-hub/block-hub.js';
+export { AffineCodeLanguageListWidget } from './code-language-list/index.js';
 export { AffineCodeToolbarWidget } from './code-toolbar/index.js';
 export { AffineDocRemoteSelectionWidget } from './doc-remote-selection/doc-remote-selection.js';
 export { AffineDragHandleWidget } from './drag-handle/drag-handle.js';
@@ -21,6 +22,10 @@ export {
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EdgelessElementToolbarWidget,
 } from './element-toolbar/index.js';
+export {
+  AFFINE_EMBED_CARD_TOOLBAR_WIDGET,
+  EmbedCardToolbar,
+} from './embed-card-toolbar/embed-card-toolbar.js';
 export { toolbarDefaultConfig } from './format-bar/config.js';
 export {
   AFFINE_FORMAT_BAR_WIDGET,

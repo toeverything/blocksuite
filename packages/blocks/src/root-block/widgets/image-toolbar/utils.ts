@@ -1,4 +1,6 @@
-import '../../../_common/components/button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import '../../../_common/components/tooltip/tooltip.js';
 
 import { assertExists } from '@blocksuite/global/utils';
@@ -18,7 +20,8 @@ import type {
 export function ConfigRenderer(
   blockElement: ImageBlockComponent,
   abortController: AbortController,
-  config: ImageConfigItem[]
+  config: ImageConfigItem[],
+  onClick?: () => void
 ) {
   return config
     .filter(item => {
@@ -30,20 +33,21 @@ export function ConfigRenderer(
         case 'common': {
           const defaultItem = item as CommonItem;
           const buttonClass = `image-toolbar-button ${defaultItem.name.toLocaleLowerCase()}`;
-          template = html`<div class=${buttonClass}>
-            <icon-button
-              size="24px"
+          template = html`
+            <editor-icon-button
+              class=${buttonClass}
+              .tooltip=${defaultItem.tooltip}
+              .tooltipOffset=${4}
               @click=${() => defaultItem.action(blockElement, abortController)}
             >
               ${defaultItem.icon}
-              <affine-tooltip>${defaultItem.tooltip}</affine-tooltip>
-            </icon-button>
-          </div>`;
+            </editor-icon-button>
+          `;
           break;
         }
         case 'custom': {
           const customItem = item as CustomItem;
-          template = customItem.render(blockElement);
+          template = customItem.render(blockElement, onClick);
           break;
         }
         default:
@@ -63,7 +67,7 @@ export function MoreMenuRenderer(
 ) {
   return config
     .filter(item => {
-      return item.type === 'divider' || item.showWhen(blockElement);
+      return item.showWhen(blockElement);
     })
     .map(item => {
       let template: TemplateResult | null = null;
@@ -71,30 +75,35 @@ export function MoreMenuRenderer(
         case 'more': {
           const moreItem = item as MoreItem;
           const buttonClass = `menu-item ${moreItem.name.toLocaleLowerCase()}`;
-          template = html`<div class=${buttonClass}>
-            <icon-button
-              width="183px"
-              height="30px"
-              text=${moreItem.name}
-              @click=${() => moreItem.action(blockElement, abortController)}
+          template = html`
+            <editor-menu-action
+              class=${buttonClass}
+              @click=${(e: MouseEvent) => {
+                e.stopPropagation();
+                moreItem.action(blockElement, abortController);
+              }}
             >
-              ${moreItem.icon}
-            </icon-button>
-          </div>`;
+              ${moreItem.icon} ${moreItem.name}
+            </editor-menu-action>
+          `;
           break;
         }
         case 'divider': {
-          template = html`<div class="divider"></div>`;
+          template = html`
+            <editor-toolbar-separator
+              data-orientation="horizontal"
+            ></editor-toolbar-separator>
+          `;
           break;
         }
         default:
           template = null;
       }
 
-      return [template] as const;
+      return template;
     })
-    .filter(([template]) => template !== null && template !== undefined)
-    .map(([template]) => template);
+    .filter((template): template is TemplateResult => template !== null)
+    .map(template => template);
 }
 
 export function duplicate(

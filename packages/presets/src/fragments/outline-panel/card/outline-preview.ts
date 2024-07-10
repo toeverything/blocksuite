@@ -142,6 +142,8 @@ const styles = css`
 export class OutlineBlockPreview extends WithDisposable(LitElement) {
   static override styles = styles;
 
+  private _textDisposables: DisposableGroup | null = null;
+
   @property({ attribute: false })
   accessor block!: ValuesOf<BlockSuite.BlockModels>;
 
@@ -156,8 +158,6 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor cardNumber!: number;
-
-  private _textDisposables: DisposableGroup | null = null;
 
   private _clearTextDisposables = () => {
     this._textDisposables?.dispose();

@@ -10,9 +10,6 @@ import { KanbanGroup } from '../group.js';
 import type { DataViewKanban } from '../kanban-view.js';
 
 export class KanbanDragController implements ReactiveController {
-  constructor(private host: DataViewKanban) {
-    this.host.addController(this);
-  }
   get scrollContainer() {
     const scrollContainer = this.host.querySelector(
       '.affine-data-view-kanban-groups'
@@ -22,6 +19,10 @@ export class KanbanDragController implements ReactiveController {
   }
 
   dropPreview = createDropPreview();
+
+  constructor(private host: DataViewKanban) {
+    this.host.addController(this);
+  }
 
   getInsertPosition = (
     evt: MouseEvent
@@ -46,6 +47,7 @@ export class KanbanDragController implements ReactiveController {
       return;
     }
   };
+
   shooIndicator = (
     evt: MouseEvent,
     self: KanbanCard | undefined
@@ -167,7 +169,7 @@ const createDragPreview = (card: KanbanCard, x: number, y: number) => {
   kanbanCard.isFocus = true;
   kanbanCard.style.backgroundColor = 'var(--affine-background-primary-color)';
   div.append(kanbanCard);
-  div.className = 'with-data-view-css-variable blocksuite-overlay';
+  div.className = 'with-data-view-css-variable';
   div.style.width = `${card.getBoundingClientRect().width}px`;
   div.style.position = 'fixed';
   // div.style.pointerEvents = 'none';

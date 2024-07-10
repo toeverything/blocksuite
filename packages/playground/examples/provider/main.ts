@@ -9,6 +9,7 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 
 const schema = new Schema().register(AffineSchemas);
 const collection = new DocCollection({ schema });
+collection.meta.initialize();
 const doc = collection.createDoc();
 const editor = new AffineEditorContainer();
 editor.doc = doc;
@@ -36,13 +37,13 @@ function loadDoc() {
   provider.on('synced', () => doc.load());
 }
 
-const createBtn = <HTMLButtonElement>document.getElementById('create-doc');
+const createBtn = document.getElementById('create-doc') as HTMLButtonElement;
 createBtn.onclick = () => createDoc();
 
-const loadBtn = <HTMLButtonElement>document.getElementById('load-doc');
+const loadBtn = document.getElementById('load-doc') as HTMLButtonElement;
 loadBtn.onclick = () => loadDoc();
 
-const clearBtn = <HTMLButtonElement>document.getElementById('clear');
+const clearBtn = document.getElementById('clear') as HTMLButtonElement;
 clearBtn.onclick = () => {
   const request = indexedDB.deleteDatabase('provider-demo');
   request.onsuccess = () => console.log('IndexedDB cleared');

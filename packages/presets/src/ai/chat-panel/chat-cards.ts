@@ -239,16 +239,6 @@ export class ChatCards extends WithDisposable(LitElement) {
     );
   }
 
-  protected override async updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('selectionValue')) {
-      await this._updateState();
-    }
-
-    if (_changedProperties.has('host')) {
-      this._onEdgelessCopilotAreaUpdated();
-    }
-  }
-
   private async _updateState() {
     if (
       this.selectionValue.some(
@@ -318,6 +308,16 @@ export class ChatCards extends WithDisposable(LitElement) {
     this.text = text;
     this.markdown = markdown;
     this.images = images;
+  }
+
+  protected override async updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('selectionValue')) {
+      await this._updateState();
+    }
+
+    if (_changedProperties.has('host')) {
+      this._onEdgelessCopilotAreaUpdated();
+    }
   }
 
   protected override render() {

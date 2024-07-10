@@ -65,14 +65,18 @@ function diffArray<T>(
 }
 
 export class BacklinkIndexer {
-  private _disposables = new DisposableGroup();
-
-  private _linkIndexMap: Record<DocId, Record<BlockId, LinkedNode[]>> = {};
   get linkIndexMap() {
     return this._linkIndexMap;
   }
 
-  public slots = {
+  private _disposables = new DisposableGroup();
+
+  private _linkIndexMap: Record<DocId, Record<BlockId, LinkedNode[]>> = {};
+
+  // TODO use inverted index
+  private _backlinkIndexMapCache: Record<DocId, LinkedNode[]> | null = null;
+
+  slots = {
     /**
      * Note: sys:children update will not trigger event
      */
@@ -95,34 +99,6 @@ export class BacklinkIndexer {
     this.slots.indexUpdated.on(() => {
       this._backlinkIndexMapCache = null;
     });
-  }
-
-  // TODO use inverted index
-  private _backlinkIndexMapCache: Record<DocId, LinkedNode[]> | null = null;
-  /**
-   * Get the list of backlinks for a given doc
-   */
-  public getBacklink(targetDocId: DocId) {
-    if (this._backlinkIndexMapCache) {
-      return this._backlinkIndexMapCache[targetDocId] ?? [];
-    }
-    const backlinkIndexMapCache: Record<DocId, LinkedNode[]> = {};
-    for (const [fromDocId, blockMap] of Object.entries(this._linkIndexMap)) {
-      for (const [fromBlockId, links] of Object.entries(blockMap)) {
-        links.forEach(({ pageId, type }) => {
-          if (!(pageId in backlinkIndexMapCache)) {
-            backlinkIndexMapCache[pageId] = [];
-          }
-          backlinkIndexMapCache[pageId].push({
-            pageId: fromDocId,
-            blockId: fromBlockId,
-            type,
-          });
-        });
-      }
-    }
-    this._backlinkIndexMapCache = backlinkIndexMapCache;
-    return this._backlinkIndexMapCache[targetDocId] ?? [];
   }
 
   private _onRefreshIndex() {
@@ -217,6 +193,32 @@ export class BacklinkIndexer {
         blockId,
       });
     }
+  }
+
+  /**
+   * Get the list of backlinks for a given doc
+   */
+  getBacklink(targetDocId: DocId) {
+    if (this._backlinkIndexMapCache) {
+      return this._backlinkIndexMapCache[targetDocId] ?? [];
+    }
+    const backlinkIndexMapCache: Record<DocId, LinkedNode[]> = {};
+    for (const [fromDocId, blockMap] of Object.entries(this._linkIndexMap)) {
+      for (const [fromBlockId, links] of Object.entries(blockMap)) {
+        links.forEach(({ pageId, type }) => {
+          if (!(pageId in backlinkIndexMapCache)) {
+            backlinkIndexMapCache[pageId] = [];
+          }
+          backlinkIndexMapCache[pageId].push({
+            pageId: fromDocId,
+            blockId: fromBlockId,
+            type,
+          });
+        });
+      }
+    }
+    this._backlinkIndexMapCache = backlinkIndexMapCache;
+    return this._backlinkIndexMapCache[targetDocId] ?? [];
   }
 
   dispose() {

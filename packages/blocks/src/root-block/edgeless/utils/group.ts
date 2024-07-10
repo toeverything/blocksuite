@@ -6,7 +6,7 @@ export function getElementsWithoutGroup(
 
   elements.forEach(element => {
     if (element instanceof GroupElementModel) {
-      element.decendants().forEach(child => set.add(child));
+      element.descendants().forEach(child => set.add(child));
     } else {
       set.add(element);
     }

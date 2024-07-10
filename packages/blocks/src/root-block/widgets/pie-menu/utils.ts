@@ -1,7 +1,7 @@
-import type { EdgelessTool } from '../../../_common/types.js';
-import { type IVec } from '../../../surface-block/index.js';
+import type { IVec } from '../../../surface-block/index.js';
 import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EdgelessTool } from '../../edgeless/types.js';
 import type {
   ActionFunction,
   IPieNodeWithAction,

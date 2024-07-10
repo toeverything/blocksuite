@@ -8,6 +8,7 @@ import { buildPath } from '../../../_common/utils/query.js';
 
 export class NoteResizeObserver {
   private _observer: ResizeObserver;
+
   /**
    * Observation will fire when observation starts if Element is being rendered, and Element’s size is not 0,0.
    * https://w3c.github.io/csswg-drafts/resize-observer/#resize-observer-interface
@@ -15,6 +16,7 @@ export class NoteResizeObserver {
    * So we need to cache observed element.
    */
   private _cachedElements = new Map<string, Element>();
+
   private _lastRects = new Map<string, DOMRectReadOnly>();
 
   slots = {

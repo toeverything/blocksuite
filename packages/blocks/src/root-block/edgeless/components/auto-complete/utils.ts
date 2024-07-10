@@ -2,11 +2,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import {
-  FontFamily,
-  FontStyle,
-  FontWeight,
-} from '../../../../surface-block/consts.js';
 import type { Connection } from '../../../../surface-block/element-model/connector.js';
 import {
   GroupElementModel,
@@ -18,7 +13,6 @@ import type {
 } from '../../../../surface-block/element-model/shape.js';
 import {
   Bound,
-  CanvasElementType,
   normalizeDegAngle,
   type Options,
   Overlay,
@@ -27,7 +21,6 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
-import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 
 export enum Direction {
   Right,
@@ -57,6 +50,7 @@ export const DEFAULT_NOTE_BACKGROUND_COLOR =
 
 class AutoCompleteTargetOverlay extends Overlay {
   xywh: XYWH;
+
   constructor(xywh: XYWH) {
     super();
     this.xywh = xywh;
@@ -89,6 +83,7 @@ export class AutoCompleteTextOverlay extends AutoCompleteTargetOverlay {
 
 export class AutoCompleteNoteOverlay extends AutoCompleteTargetOverlay {
   private _background: string;
+
   constructor(xywh: XYWH, background: string) {
     super(xywh);
     this._background = background;
@@ -118,6 +113,7 @@ export class AutoCompleteNoteOverlay extends AutoCompleteTargetOverlay {
 
 export class AutoCompleteFrameOverlay extends AutoCompleteTargetOverlay {
   private _strokeColor;
+
   constructor(xywh: XYWH, strokeColor: string) {
     super(xywh);
     this._strokeColor = strokeColor;
@@ -158,6 +154,7 @@ export class AutoCompleteFrameOverlay extends AutoCompleteTargetOverlay {
 
 export class AutoCompleteShapeOverlay extends Overlay {
   private _shape: Shape;
+
   constructor(
     xywh: XYWH,
     type: TARGET_SHAPE_TYPE,
@@ -330,26 +327,6 @@ export function createShapeElement(
     shapeType: targetType === 'roundedRect' ? 'rect' : targetType,
     radius: targetType === 'roundedRect' ? 0.1 : 0,
     text: new DocCollection.Y.Text(),
-  });
-  const group = current.group;
-  if (group instanceof GroupElementModel) {
-    group.addChild(id);
-  }
-  return id;
-}
-
-export function createTextElement(
-  edgeless: EdgelessRootBlockComponent,
-  current: ShapeElementModel | NoteBlockModel
-) {
-  const id = edgeless.service.addElement(CanvasElementType.TEXT, {
-    text: new DocCollection.Y.Text(),
-    textAlign: 'left',
-    fontSize: 24,
-    fontFamily: FontFamily.Inter,
-    color: GET_DEFAULT_TEXT_COLOR(),
-    fontWeight: FontWeight.Regular,
-    fontStyle: FontStyle.Normal,
   });
   const group = current.group;
   if (group instanceof GroupElementModel) {

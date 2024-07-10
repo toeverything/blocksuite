@@ -2,22 +2,13 @@ import type { IPoint } from './index.js';
 import { clamp } from './math.js';
 
 export class Point {
-  public x: number;
-  public y: number;
+  x: number;
+
+  y: number;
 
   constructor(x = 0, y = 0) {
     this.x = x;
     this.y = y;
-  }
-
-  static from(point: IPoint | number[] | number, y?: number) {
-    if (Array.isArray(point)) {
-      return new Point(point[0], point[1]);
-    }
-    if (typeof point === 'number') {
-      return new Point(point, y ?? point);
-    }
-    return new Point(point.x, point.y);
   }
 
   set(x: number, y: number) {
@@ -63,6 +54,16 @@ export class Point {
     return [this.x, this.y];
   }
 
+  static from(point: IPoint | number[] | number, y?: number) {
+    if (Array.isArray(point)) {
+      return new Point(point[0], point[1]);
+    }
+    if (typeof point === 'number') {
+      return new Point(point, y ?? point);
+    }
+    return new Point(point.x, point.y);
+  }
+
   /**
    * Compares and returns the minimum of two points.
    */
@@ -87,9 +88,10 @@ export class Point {
 
 export class Rect {
   // `[left, top]`
-  public min: Point;
+  min: Point;
+
   // `[right, bottom]`
-  public max: Point;
+  max: Point;
 
   constructor(left: number, top: number, right: number, bottom: number) {
     const [minX, maxX] = left <= right ? [left, right] : [right, left];

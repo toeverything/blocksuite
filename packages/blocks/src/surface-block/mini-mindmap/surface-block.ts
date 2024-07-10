@@ -14,7 +14,9 @@ import type { MindmapService } from './service.js';
 @customElement('mini-mindmap-surface-block')
 export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
   private _theme = new ThemeObserver();
+
   private _layer!: LayerManager;
+
   private _renderer!: Renderer;
 
   @query('.affine-mini-mindmap-surface')
@@ -90,6 +92,7 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
       },
     });
     this._theme.observe(this.ownerDocument.documentElement);
+    this.disposables.add(this._theme);
   }
 
   override firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {

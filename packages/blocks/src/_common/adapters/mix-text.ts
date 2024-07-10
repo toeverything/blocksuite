@@ -1,4 +1,5 @@
 import type { DeltaInsert } from '@blocksuite/inline';
+import type { Job } from '@blocksuite/store';
 import type { AssetsManager } from '@blocksuite/store';
 import {
   ASTWalker,
@@ -35,10 +36,53 @@ type MixTextToSliceSnapshotPayload = {
 
 export class MixTextAdapter extends BaseAdapter<MixText> {
   private _markdownAdapter: MarkdownAdapter;
-  constructor() {
-    super();
-    this._markdownAdapter = new MarkdownAdapter();
+
+  constructor(job: Job) {
+    super(job);
+    this._markdownAdapter = new MarkdownAdapter(job);
   }
+
+  private async _traverseSnapshot(
+    snapshot: BlockSnapshot
+  ): Promise<{ mixtext: string }> {
+    let buffer = '';
+    const walker = new ASTWalker<BlockSnapshot, never>();
+    walker.setONodeTypeGuard(
+      (node): node is BlockSnapshot =>
+        BlockSnapshotSchema.safeParse(node).success
+    );
+    walker.setEnter(o => {
+      const text = (o.node.props.text ?? { delta: [] }) as {
+        delta: DeltaInsert[];
+      };
+      switch (o.node.flavour) {
+        case 'affine:code': {
+          buffer += text.delta.map(delta => delta.insert).join('');
+          buffer += '\n';
+          break;
+        }
+        case 'affine:paragraph': {
+          buffer += text.delta.map(delta => delta.insert).join('');
+          buffer += '\n';
+          break;
+        }
+        case 'affine:list': {
+          buffer += text.delta.map(delta => delta.insert).join('');
+          buffer += '\n';
+          break;
+        }
+        case 'affine:divider': {
+          buffer += '---\n';
+          break;
+        }
+      }
+    });
+    await walker.walkONode(snapshot);
+    return {
+      mixtext: buffer,
+    };
+  }
+
   async fromDocSnapshot({
     snapshot,
     assets,
@@ -207,46 +251,5 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
       pageId: payload.pageId,
     });
     return sliceSnapshot;
-  }
-
-  private async _traverseSnapshot(
-    snapshot: BlockSnapshot
-  ): Promise<{ mixtext: string }> {
-    let buffer = '';
-    const walker = new ASTWalker<BlockSnapshot, never>();
-    walker.setONodeTypeGuard(
-      (node): node is BlockSnapshot =>
-        BlockSnapshotSchema.safeParse(node).success
-    );
-    walker.setEnter(o => {
-      const text = (o.node.props.text ?? { delta: [] }) as {
-        delta: DeltaInsert[];
-      };
-      switch (o.node.flavour) {
-        case 'affine:code': {
-          buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
-          break;
-        }
-        case 'affine:paragraph': {
-          buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
-          break;
-        }
-        case 'affine:list': {
-          buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
-          break;
-        }
-        case 'affine:divider': {
-          buffer += '---\n';
-          break;
-        }
-      }
-    });
-    await walker.walkONode(snapshot);
-    return {
-      mixtext: buffer,
-    };
   }
 }

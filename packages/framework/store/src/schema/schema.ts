@@ -10,14 +10,95 @@ import { BlockSchema } from './base.js';
 import { MigrationError, SchemaValidateError } from './error.js';
 
 export class Schema {
-  readonly flavourSchemaMap = new Map<string, BlockSchemaType>();
-
   get versions() {
     return Object.fromEntries(
       Array.from(this.flavourSchemaMap.values()).map(
         (schema): [string, number] => [schema.model.flavour, schema.version]
       )
     );
+  }
+
+  readonly flavourSchemaMap = new Map<string, BlockSchemaType>();
+
+  private _upgradeBlockVersions = (rootData: Y.Doc) => {
+    const meta = rootData.getMap('meta');
+    const blockVersions = meta.get('blockVersions') as Y.Map<number>;
+    if (!blockVersions) {
+      return;
+    }
+    blockVersions.forEach((version, flavour) => {
+      const currentSchema = this.flavourSchemaMap.get(flavour);
+      if (currentSchema && version !== currentSchema.version) {
+        blockVersions.set(flavour, currentSchema.version);
+      }
+    });
+  };
+
+  private _validateRole(child: BlockSchemaType, parent: BlockSchemaType) {
+    const childRole = child.model.role;
+    const parentRole = parent.model.role;
+    const childFlavour = child.model.flavour;
+    const parentFlavour = parent.model.flavour;
+
+    if (childRole === 'root') {
+      throw new SchemaValidateError(
+        childFlavour,
+        `Root block cannot have parent: ${parentFlavour}.`
+      );
+    }
+
+    if (childRole === 'hub' && parentRole === 'content') {
+      throw new SchemaValidateError(
+        childFlavour,
+        `Hub block cannot be child of content block: ${parentFlavour}.`
+      );
+    }
+
+    if (childRole === 'content' && parentRole === 'root') {
+      throw new SchemaValidateError(
+        childFlavour,
+        `Content block can only be child of hub block or itself. But get: ${parentFlavour}.`
+      );
+    }
+  }
+
+  private _matchFlavour(childFlavour: string, parentFlavour: string) {
+    return (
+      minimatch(childFlavour, parentFlavour) ||
+      minimatch(parentFlavour, childFlavour)
+    );
+  }
+
+  private _validateParent(
+    child: BlockSchemaType,
+    parent: BlockSchemaType
+  ): boolean {
+    const _childFlavour = child.model.flavour;
+    const _parentFlavour = parent.model.flavour;
+
+    const childValidFlavours = child.model.parent || ['*'];
+    const parentValidFlavours = parent.model.children || ['*'];
+
+    return parentValidFlavours.some(parentValidFlavour => {
+      return childValidFlavours.some(childValidFlavour => {
+        if (parentValidFlavour === '*' && childValidFlavour === '*') {
+          return true;
+        }
+
+        if (parentValidFlavour === '*') {
+          return this._matchFlavour(childValidFlavour, _parentFlavour);
+        }
+
+        if (childValidFlavour === '*') {
+          return this._matchFlavour(_childFlavour, parentValidFlavour);
+        }
+
+        return (
+          this._matchFlavour(_childFlavour, parentValidFlavour) &&
+          this._matchFlavour(childValidFlavour, _parentFlavour)
+        );
+      });
+    });
   }
 
   toJSON() {
@@ -129,7 +210,8 @@ export class Schema {
     const blocks = docData.getMap('blocks') as Y.Map<Y.Map<unknown>>;
     Array.from(blocks.values()).forEach(block => {
       const flavour = block.get('sys:flavour') as string;
-      const currentVersion = oldBlockVersions[flavour] ?? 0;
+      const currentVersion =
+        (block.get('sys:version') as number) ?? oldBlockVersions[flavour] ?? 0;
       assertExists(
         currentVersion,
         `previous version for flavour ${flavour} not found`
@@ -171,85 +253,4 @@ export class Schema {
           ${err}`);
     }
   };
-
-  private _upgradeBlockVersions = (rootData: Y.Doc) => {
-    const meta = rootData.getMap('meta');
-    const blockVersions = meta.get('blockVersions') as Y.Map<number>;
-    if (!blockVersions) {
-      return;
-    }
-    blockVersions.forEach((version, flavour) => {
-      const currentSchema = this.flavourSchemaMap.get(flavour);
-      if (currentSchema && version !== currentSchema.version) {
-        blockVersions.set(flavour, currentSchema.version);
-      }
-    });
-  };
-
-  private _validateRole(child: BlockSchemaType, parent: BlockSchemaType) {
-    const childRole = child.model.role;
-    const parentRole = parent.model.role;
-    const childFlavour = child.model.flavour;
-    const parentFlavour = parent.model.flavour;
-
-    if (childRole === 'root') {
-      throw new SchemaValidateError(
-        childFlavour,
-        `Root block cannot have parent: ${parentFlavour}.`
-      );
-    }
-
-    if (childRole === 'hub' && parentRole === 'content') {
-      throw new SchemaValidateError(
-        childFlavour,
-        `Hub block cannot be child of content block: ${parentFlavour}.`
-      );
-    }
-
-    if (childRole === 'content' && parentRole === 'root') {
-      throw new SchemaValidateError(
-        childFlavour,
-        `Content block can only be child of hub block or itself. But get: ${parentFlavour}.`
-      );
-    }
-  }
-
-  private _matchFlavour(childFlavour: string, parentFlavour: string) {
-    return (
-      minimatch(childFlavour, parentFlavour) ||
-      minimatch(parentFlavour, childFlavour)
-    );
-  }
-
-  private _validateParent(
-    child: BlockSchemaType,
-    parent: BlockSchemaType
-  ): boolean {
-    const _childFlavour = child.model.flavour;
-    const _parentFlavour = parent.model.flavour;
-
-    const childValidFlavours = child.model.parent || ['*'];
-    const parentValidFlavours = parent.model.children || ['*'];
-
-    return parentValidFlavours.some(parentValidFlavour => {
-      return childValidFlavours.some(childValidFlavour => {
-        if (parentValidFlavour === '*' && childValidFlavour === '*') {
-          return true;
-        }
-
-        if (parentValidFlavour === '*') {
-          return this._matchFlavour(childValidFlavour, _parentFlavour);
-        }
-
-        if (childValidFlavour === '*') {
-          return this._matchFlavour(_childFlavour, parentValidFlavour);
-        }
-
-        return (
-          this._matchFlavour(_childFlavour, parentValidFlavour) &&
-          this._matchFlavour(childValidFlavour, _parentFlavour)
-        );
-      });
-    });
-  }
 }

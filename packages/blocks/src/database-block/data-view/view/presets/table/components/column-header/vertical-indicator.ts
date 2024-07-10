@@ -52,14 +52,19 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
       box-shadow: 0px 0px 8px 0px rgba(30, 150, 235, 0.35);
     }
   `;
+
   @property({ attribute: false })
   accessor top!: number;
+
   @property({ attribute: false })
   accessor left!: number;
+
   @property({ attribute: false })
   accessor width!: number;
+
   @property({ attribute: false })
   accessor lines!: GroupRectList;
+
   @property({ attribute: false })
   accessor shadow = false;
 
@@ -160,7 +165,6 @@ type VerticalIndicator = {
 export const getVerticalIndicator = (): VerticalIndicator => {
   if (!preview) {
     const dragBar = new TableVerticalIndicator();
-    dragBar.classList.add('blocksuite-overlay');
     preview = {
       display(
         width: number,

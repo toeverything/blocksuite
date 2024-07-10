@@ -25,11 +25,7 @@ export const styles = css`
     width: 100%;
     height: 100%;
     z-index: 1;
-    cursor: pointer;
     border-radius: 8px;
-  }
-  .affine-embed-linked-doc-block-overlay:hover {
-    background: var(--affine-hover-color);
   }
 
   .affine-embed-linked-doc-content {
@@ -111,6 +107,7 @@ export const styles = css`
     line-height: 20px;
   }
 
+  .affine-embed-linked-doc-card-content-reload,
   .affine-embed-linked-doc-content-date {
     display: flex;
     height: 20px;
@@ -119,6 +116,34 @@ export const styles = css`
     gap: 8px;
     width: max-content;
     max-width: 100%;
+    line-height: 20px;
+  }
+
+  .affine-embed-linked-doc-card-content-reload-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .affine-embed-linked-doc-card-content-reload-button svg {
+    width: 12px;
+    height: 12px;
+    fill: var(--affine-background-primary-color);
+  }
+  .affine-embed-linked-doc-card-content-reload-button > span {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--affine-brand-color);
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-xs);
+    font-style: normal;
+    font-weight: 500;
     line-height: 20px;
   }
 
@@ -183,7 +208,9 @@ export const styles = css`
     }
   }
 
-  .affine-embed-linked-doc-block:not(.loading):not(.empty).banner-empty {
+  .affine-embed-linked-doc-block:not(.loading):not(.deleted):not(.error):not(
+      .empty
+    ).banner-empty {
     .affine-embed-linked-doc-content {
       width: 100%;
       height: 100%;
@@ -197,6 +224,7 @@ export const styles = css`
       display: none;
     }
   }
+  .affine-embed-linked-doc-block:not(.loading).error,
   .affine-embed-linked-doc-block:not(.loading).deleted {
     background: var(--affine-background-secondary-color);
 
@@ -288,9 +316,9 @@ export const styles = css`
       height: 170px;
     }
   }
-  .affine-embed-linked-doc-block.vertical:not(.loading):not(
-      .empty
-    ).banner-empty {
+  .affine-embed-linked-doc-block.vertical:not(.loading):not(.deleted):not(
+      .error
+    ):not(.empty).banner-empty {
     .affine-embed-linked-doc-content {
       width: 100%;
       height: 100%;
