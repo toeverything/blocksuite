@@ -12,9 +12,14 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import { CaptionIcon, PaletteIcon } from '../../../_common/icons/text.js';
+import {
+  CaptionIcon,
+  DownloadIcon,
+  PaletteIcon,
+} from '../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
+import { downloadAttachmentBlob } from '../../../attachment-block/utils.js';
 import type {
   AttachmentBlockComponent,
   AttachmentBlockModel,
@@ -87,6 +92,11 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     this.model.doc.updateBlock(this.model, { style, xywh });
   };
 
+  private _download = () => {
+    if (!this._blockElement) return;
+    downloadAttachmentBlob(this._blockElement);
+  };
+
   override render() {
     return html`
       <editor-menu-button
@@ -105,6 +115,17 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
         >
         </card-style-panel>
       </editor-menu-button>
+
+      <editor-toolbar-separator></editor-toolbar-separator>
+
+      <editor-icon-button
+        aria-label="Download"
+        .tooltip=${'Download'}
+        ?disabled=${this._doc.readonly}
+        @click=${this._download}
+      >
+        ${DownloadIcon}
+      </editor-icon-button>
 
       <editor-toolbar-separator></editor-toolbar-separator>
 
