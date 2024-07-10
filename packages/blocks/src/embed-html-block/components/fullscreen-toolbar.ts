@@ -152,7 +152,7 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
         <icon-button @click=${this.embedHtml.close}
           >${ExpandCloseIcon}</icon-button
         >
-        <icon-button @click=${this._popSettings} ?hover=${this._popperVisible}
+        <icon-button @click=${this._popSettings} hover=${this._popperVisible}
           >${SettingsIcon}</icon-button
         >
 

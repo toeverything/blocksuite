@@ -172,7 +172,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
                   height="32px"
                   data-id=${key}
                   text=${name}
-                  ?hover=${this._activatedItemIndex === curIdx}
+                  hover=${this._activatedItemIndex === curIdx}
                   @click=${() => {
                     this.abortController.abort();
                     cleanSpecifiedTail(

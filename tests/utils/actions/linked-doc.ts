@@ -46,9 +46,9 @@ export function getLinkedDocPopover(page: Page) {
 
   const assertActivePageIdx = async (idx: number) => {
     if (idx !== 0) {
-      await expect(pageBtn.nth(0)).not.toHaveAttribute('hover', '');
+      await expect(pageBtn.nth(0)).toHaveAttribute('hover', 'false');
     }
-    await expect(pageBtn.nth(idx)).toHaveAttribute('hover', '');
+    await expect(pageBtn.nth(idx)).toHaveAttribute('hover', 'true');
   };
 
   return {

@@ -553,7 +553,7 @@ export class EmbedCardToolbar extends WidgetElement<
           <icon-button
             size="24px"
             class="embed-card-toolbar-button link"
-            .hover=${false}
+            hover=${false}
             ?disabled=${model.doc.readonly}
             @click=${() => this._turnIntoInlineView()}
           >
@@ -568,7 +568,7 @@ export class EmbedCardToolbar extends WidgetElement<
               card: true,
               'current-view': this._isCardView,
             })}
-            .hover=${false}
+            hover=${false}
             ?disabled=${model.doc.readonly}
             @click=${() => this._convertToCardView()}
           >
@@ -585,7 +585,7 @@ export class EmbedCardToolbar extends WidgetElement<
                     embed: true,
                     'current-view': this._isEmbedView,
                   })}
-                  .hover=${false}
+                  hover=${false}
                   ?disabled=${this._embedViewButtonDisabled}
                   @click=${() => this._convertToEmbedView()}
                 >

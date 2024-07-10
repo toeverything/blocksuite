@@ -58,7 +58,7 @@ export class IconButton extends LitElement {
     }
 
     /* You can add a 'hover' attribute to the button to show the hover style */
-    :host([hover]) {
+    :host([hover='true']) {
       background: var(--affine-hover-color);
     }
     :host([hover='false']) {
@@ -128,8 +128,8 @@ export class IconButton extends LitElement {
   @property({ attribute: true, type: Boolean })
   accessor active: boolean = false;
 
-  @property({ attribute: true, type: Boolean })
-  accessor hover: boolean | undefined = undefined;
+  @property({ attribute: true, type: String })
+  accessor hover: 'true' | 'false' | undefined = undefined;
 
   // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
   @property({ attribute: true, type: Boolean })

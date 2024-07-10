@@ -274,7 +274,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
               <icon-button
                 size="24px"
                 class="affine-reference-popover-view-selector-button link current-view"
-                .hover=${false}
+                hover=${false}
               >
                 ${LinkIcon}
                 <affine-tooltip .offset=${12}>${'Inline view'}</affine-tooltip>
@@ -283,7 +283,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
               <icon-button
                 size="24px"
                 class="affine-reference-popover-view-selector-button embed card-view"
-                .hover=${false}
+                hover=${false}
                 @click=${() => this._convertToCardView()}
               >
                 ${BookmarkIcon}
@@ -295,7 +295,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                     <icon-button
                       size="24px"
                       class="affine-reference-popover-view-selector-button embed embed-view"
-                      .hover=${false}
+                      hover=${false}
                       @click=${() => this._convertToEmbedView()}
                       ?disabled=${this._embedViewButtonDisabled}
                     >
