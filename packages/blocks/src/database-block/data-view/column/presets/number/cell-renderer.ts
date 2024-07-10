@@ -8,7 +8,11 @@ import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
 import { numberColumnModelConfig } from './define.js';
-import { formatNumber, type NumberFormat } from './utils/formatter.js';
+import {
+  formatNumber,
+  type NumberFormat,
+  parseNumber,
+} from './utils/formatter.js';
 
 @customElement('affine-database-number-cell')
 export class NumberCell extends BaseCellRenderer<number> {
@@ -83,12 +87,14 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
     }
 
     const formatMode = (this.column.data.format ?? 'number') as NumberFormat;
-    const value = parseFloat(str);
+    const value = parseNumber(str);
 
     const formatted = formatNumber(value, formatMode);
 
     if (Object.is(value, NaN)) {
-      this._inputEle.value = `${this.value ?? ''}`;
+      this._inputEle.value = this.value
+        ? formatNumber(this.value, formatMode)
+        : '';
       return;
     }
     this._inputEle.value = formatted;
