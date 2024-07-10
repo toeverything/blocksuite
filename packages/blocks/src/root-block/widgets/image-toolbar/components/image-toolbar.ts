@@ -88,19 +88,19 @@ export class AffineImageToolbar extends LitElement {
       template: html`
         <editor-menu-content
           data-show
-          data-orientation="vertical"
+          class="image-more-popup-menu"
           style=${styleMap({
             '--content-padding': '8px',
             '--packed-height': '4px',
-            display: 'flex',
-            flexDirection: 'column',
           })}
         >
-          ${MoreMenuRenderer(
-            this.blockElement,
-            this._popMenuAbortController,
-            this.moreMenuConfig
-          )}
+          <div slot data-size="small" data-orientation="vertical">
+            ${MoreMenuRenderer(
+              this.blockElement,
+              this._popMenuAbortController,
+              this.moreMenuConfig
+            )}
+          </div>
         </editor-menu-content>
       `,
       container: this.blockElement.host,
@@ -142,6 +142,7 @@ export class AffineImageToolbar extends LitElement {
           aria-label="More"
           .tooltip=${'More'}
           .tooltipOffset=${4}
+          .showTooltip=${!this._moreMenuOpen}
           @click=${() => this._toggleMoreMenu()}
         >
           ${MoreVerticalIcon}

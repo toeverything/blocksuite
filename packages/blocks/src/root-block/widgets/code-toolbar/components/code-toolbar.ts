@@ -1,11 +1,16 @@
+import '../../../../_common/components/toolbar/icon-button.js';
+import '../../../../_common/components/toolbar/toolbar.js';
+import '../../../../_common/components/toolbar/menu-button.js';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { createLitPortal } from '../../../../_common/components/index.js';
-import { MorePopupMenu } from '../../../../_common/components/more-popup-menu/more-popup-menu.js';
+import type { EditorIconButton } from '../../../../_common/components/toolbar/icon-button.js';
 import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
 import type { CodeToolbarItem, CodeToolbarMoreItem } from '../types.js';
@@ -21,33 +26,25 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
     }
 
     .code-toolbar-container {
-      display: flex;
+      height: 24px;
       gap: 4px;
-      box-sizing: border-box;
       padding: 4px;
+      margin: 0;
     }
 
     .code-toolbar-button {
-      background-color: var(--affine-background-primary-color);
       color: var(--affine-icon-color);
+      background-color: var(--affine-background-primary-color);
       box-shadow: var(--affine-shadow-1);
       border-radius: 4px;
-    }
-
-    .code-toolbar-button:hover {
-      background: var(--affine-hover-color-filled);
-    }
-
-    .code-toolbar-button[hover] {
-      background: var(--affine-hover-color-filled);
     }
   `;
 
   @state()
   private accessor _moreMenuOpen = false;
 
-  @query('.code-toolbar-button.more-button')
-  private accessor _moreButton!: HTMLElement;
+  @query('.code-toolbar-button.more')
+  private accessor _moreButton!: EditorIconButton;
 
   private _popMenuAbortController: AbortController | null = null;
 
@@ -86,17 +83,26 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
 
     this._currentOpenMenu = this._popMenuAbortController;
 
-    const moreMenu = new MorePopupMenu();
-    const moreItems = MoreMenuRenderer(
-      this.blockElement,
-      this._popMenuAbortController,
-      this.moreItems
-    );
-    moreMenu.items = moreItems;
-
     assertExists(this._moreButton);
     createLitPortal({
-      template: moreMenu,
+      template: html`
+        <editor-menu-content
+          data-show
+          class="more-popup-menu"
+          style=${styleMap({
+            '--content-padding': '8px',
+            '--packed-height': '4px',
+          })}
+        >
+          <div slot data-size="small" data-orientation="vertical">
+            ${MoreMenuRenderer(
+              this.blockElement,
+              this._popMenuAbortController,
+              this.moreItems
+            )}
+          </div>
+        </editor-menu-content>
+      `,
       // should be greater than block-selection z-index as selection and popover wil share the same stacking context(editor-host)
       portalStyles: {
         zIndex: 'var(--affine-z-index-popover)',
@@ -133,21 +139,23 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
       this.closeCurrentMenu
     );
 
-    return html`<div class="code-toolbar-container">
-      ${items}
-      <icon-button
-        class="code-toolbar-button more-button"
-        data-testid="more-button"
-        size="24px"
-        ?disabled=${this.blockElement.readonly}
-        @click=${() => this._toggleMoreMenu()}
-      >
-        ${MoreVerticalIcon}
-        ${!this._moreMenuOpen
-          ? html`<affine-tooltip>More</affine-tooltip>`
-          : nothing}
-      </icon-button>
-    </div>`;
+    return html`
+      <editor-toolbar class="code-toolbar-container" data-without-bg>
+        ${items}
+        <editor-icon-button
+          class="code-toolbar-button more"
+          data-testid="more"
+          aria-label="More"
+          .tooltip=${'More'}
+          .tooltipOffset=${4}
+          .showTooltip=${!this._moreMenuOpen}
+          ?disabled=${this.blockElement.readonly}
+          @click=${() => this._toggleMoreMenu()}
+        >
+          ${MoreVerticalIcon}
+        </editor-icon-button>
+      </editor-toolbar>
+    `;
   }
 }
 

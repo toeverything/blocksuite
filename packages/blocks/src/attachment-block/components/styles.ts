@@ -27,7 +27,7 @@ export const renameStyles = css`
 
   .affine-attachment-rename-input-wrapper:focus-within {
     border-color: var(--affine-blue-700);
-    box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
+    box-shadow: var(--affine-active-shadow);
   }
 
   .affine-attachment-rename-input-wrapper input {

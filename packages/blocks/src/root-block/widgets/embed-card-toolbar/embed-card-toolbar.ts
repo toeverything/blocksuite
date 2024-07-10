@@ -407,7 +407,7 @@ export class EmbedCardToolbar extends WidgetElement<
           </editor-icon-button>
         `}
       >
-        <div slot data-size="large" data-orientation="vertical">
+        <div slot data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.name,

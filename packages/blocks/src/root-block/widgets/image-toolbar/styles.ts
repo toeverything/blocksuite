@@ -1,7 +1,5 @@
 import { css } from 'lit';
 
-import { PANEL_BASE_COLORS } from '../../../_common/styles.js';
-
 export const styles = css`
   :host {
     position: absolute;
@@ -18,7 +16,9 @@ export const styles = css`
   }
 
   .image-toolbar-button {
-    ${PANEL_BASE_COLORS}
+    color: var(--affine-icon-color);
+    background-color: var(--affine-background-primary-color);
+    box-shadow: var(--affine-shadow-1);
     border-radius: 4px;
   }
 `;

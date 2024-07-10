@@ -67,8 +67,8 @@ const editLinkStyle = css`
     background: transparent;
   }
   .affine-edit-area:focus-within {
-    border: 1px solid var(--affine-blue-700);
-    box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
+    border-color: var(--affine-blue-700);
+    box-shadow: var(--affine-active-shadow);
   }
 
   .affine-edit-area.text {
@@ -188,7 +188,7 @@ export const linkPopupStyle = css`
   }
   .affine-link-popover-input:focus {
     border-color: var(--affine-blue-700);
-    box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
+    box-shadow: var(--affine-active-shadow);
   }
 
   ${editLinkStyle}

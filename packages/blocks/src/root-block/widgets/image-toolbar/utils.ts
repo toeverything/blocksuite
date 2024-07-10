@@ -1,4 +1,3 @@
-import '../../../_common/components/button.js';
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';

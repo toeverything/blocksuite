@@ -9,6 +9,7 @@ export class EditorToolbarSeparator extends LitElement {
       align-items: center;
       justify-content: center;
       align-self: stretch;
+      flex-shrink: 0;
 
       width: 4px;
     }

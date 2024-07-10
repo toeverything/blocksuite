@@ -17,29 +17,6 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       justify-content: center;
       gap: 8px;
     }
-
-    ::slotted([slot]) {
-      display: flex;
-      align-items: center;
-      align-self: stretch;
-      gap: 8px;
-      min-height: 36px;
-    }
-
-    ::slotted([slot][data-size='small']) {
-      min-width: 164px;
-    }
-
-    ::slotted([slot][data-size='large']) {
-      min-width: 184px;
-    }
-
-    ::slotted([slot][data-orientation='vertical']) {
-      flex-direction: column;
-      align-items: stretch;
-      gap: unset;
-      min-height: unset;
-    }
   `;
 
   @query('editor-icon-button')
@@ -115,8 +92,8 @@ export class EditorMenuContent extends LitElement {
       outline: none;
     }
 
-    :host:before,
-    :host:after {
+    :host::before,
+    :host::after {
       content: '';
       display: block;
       position: absolute;
@@ -124,11 +101,11 @@ export class EditorMenuContent extends LitElement {
       width: 100%;
     }
 
-    :host:before {
+    :host::before {
       top: var(--offset-height);
     }
 
-    :host:after {
+    :host::after {
       bottom: var(--offset-height);
     }
 
@@ -137,6 +114,29 @@ export class EditorMenuContent extends LitElement {
       justify-content: center;
       gap: 8px;
       padding: var(--content-padding, 0 6px);
+    }
+
+    ::slotted([slot]) {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      gap: 8px;
+      min-height: 36px;
+    }
+
+    ::slotted([slot][data-size='small']) {
+      min-width: 164px;
+    }
+
+    ::slotted([slot][data-size='large']) {
+      min-width: 184px;
+    }
+
+    ::slotted([slot][data-orientation='vertical']) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: unset;
+      min-height: unset;
     }
   `;
 
