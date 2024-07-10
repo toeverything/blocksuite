@@ -1,5 +1,5 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
 import '../../edgeless/components/panel/stroke-style-panel.js';
 import '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/shape-style-panel.js';
@@ -13,6 +13,7 @@ import { cache } from 'lit/directives/cache.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 
+import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   AddTextIcon,
   ChangeShapeIcon,
@@ -35,7 +36,6 @@ import {
   StrokeStyle,
 } from '../../../surface-block/index.js';
 import { lineSizeButtonStyles } from '../../edgeless/components/buttons/line-size-button.js';
-import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import {
   GET_DEFAULT_LINE_COLOR,
@@ -108,11 +108,11 @@ function getMostCommonShapeStyle(elements: ShapeElementModel[]): ShapeStyle {
 
 @customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
+  static override styles = [lineSizeButtonStyles];
+
   get service() {
     return this.edgeless.service;
   }
-
-  static override styles = [lineSizeButtonStyles];
 
   @query('edgeless-shape-panel')
   private accessor _shapePanel!: EdgelessShapePanel;
@@ -231,14 +231,14 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     return join(
       [
         html`
-          <edgeless-menu-button
+          <editor-menu-button
             .button=${html`
-              <edgeless-tool-icon-button
+              <editor-icon-button
                 aria-label="Switch type"
                 .tooltip=${'Switch type'}
               >
                 ${ChangeShapeIcon}${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
+              </editor-icon-button>
             `}
           >
             <edgeless-shape-panel
@@ -247,20 +247,20 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
               .shapeStyle=${selectedShapeStyle}
             >
             </edgeless-shape-panel>
-          </edgeless-menu-button>
+          </editor-menu-button>
         `,
 
         html`
-          <edgeless-menu-button
+          <editor-menu-button
             .button=${html`
-              <edgeless-tool-icon-button aria-label="Style" .tooltip=${'Style'}>
+              <editor-icon-button aria-label="Style" .tooltip=${'Style'}>
                 ${cache(
                   selectedShapeStyle === ShapeStyle.General
                     ? GeneralStyleIcon
                     : ScribbledStyleIcon
                 )}
                 ${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
+              </editor-icon-button>
             `}
           >
             <edgeless-shape-style-panel
@@ -269,21 +269,21 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
               .onSelect=${(value: ShapeStyle) => this._setShapeStyle(value)}
             >
             </edgeless-shape-style-panel>
-          </edgeless-menu-button>
+          </editor-menu-button>
         `,
 
         html`
-          <edgeless-menu-button
+          <editor-menu-button
             .contentPadding=${'8px'}
             .button=${html`
-              <edgeless-tool-icon-button
+              <editor-icon-button
                 aria-label="Fill color"
                 .tooltip=${'Fill color'}
               >
                 <edgeless-color-button
                   .color=${selectedFillColor}
                 ></edgeless-color-button>
-              </edgeless-tool-icon-button>
+              </editor-icon-button>
             `}
           >
             <edgeless-color-panel
@@ -295,14 +295,14 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
               @select=${(e: ColorEvent) => this._setShapeFillColor(e.detail)}
             >
             </edgeless-color-panel>
-          </edgeless-menu-button>
+          </editor-menu-button>
         `,
 
         html`
-          <edgeless-menu-button
+          <editor-menu-button
             .contentPadding=${'8px'}
             .button=${html`
-              <edgeless-tool-icon-button
+              <editor-icon-button
                 aria-label="Border style"
                 .tooltip=${'Border style'}
               >
@@ -310,7 +310,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
                   .color=${selectedStrokeColor}
                   .hollowCircle=${true}
                 ></edgeless-color-button>
-              </edgeless-tool-icon-button>
+              </editor-icon-button>
             `}
           >
             <stroke-style-panel
@@ -324,7 +324,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
                 this._setShapeStrokeColor(e.detail)}
             >
             </stroke-style-panel>
-          </edgeless-menu-button>
+          </editor-menu-button>
         `,
 
         choose<string, TemplateResult<1> | typeof nothing>(
@@ -333,13 +333,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
             [
               'button',
               () => html`
-                <edgeless-tool-icon-button
+                <editor-icon-button
                   aria-label="Add text"
                   .tooltip=${'Add text'}
                   @click=${this._addText}
                 >
                   ${AddTextIcon}
-                </edgeless-tool-icon-button>
+                </editor-icon-button>
               `,
             ],
             [
@@ -356,7 +356,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           ]
         ),
       ].filter(button => button !== nothing),
-      renderMenuDivider
+      renderToolbarSeparator
     );
   }
 }

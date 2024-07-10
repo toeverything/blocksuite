@@ -1,24 +1,27 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
 import '../../edgeless/components/toolbar/shape/shape-menu.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { join } from 'lit/directives/join.js';
-import { repeat } from 'lit/directives/repeat.js';
 
 import { isPeekable, peek } from '../../../_common/components/peekable.js';
+import {
+  type Action,
+  type FatActions,
+  renderActions,
+} from '../../../_common/components/toolbar/utils.js';
 import {
   BringForwardIcon,
   BringToFrontIcon,
   CenterPeekIcon,
   CopyAsPngIcon,
-  FontLinkedDocIcon,
   FrameIcon,
   GroupIcon,
+  LinkedDocIcon,
   MoreCopyIcon,
   MoreDeleteIcon,
   MoreDuplicateIcon,
@@ -29,7 +32,6 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../../../_common/icons/index.js';
-import type { ReorderingType } from '../../../_common/utils/index.js';
 import {
   createLinkedDocFromEdgelessElements,
   createLinkedDocFromNote,
@@ -78,28 +80,6 @@ type RefreshableBlockComponent =
   | ImageBlockComponent
   | AttachmentBlockComponent
   | BookmarkBlockComponent;
-
-type Action = {
-  icon: TemplateResult<1>;
-  name: string;
-  type:
-    | 'delete'
-    | 'copy-as-png'
-    | 'create-frame'
-    | 'create-group'
-    | 'turn-into-linked-doc'
-    | 'create-linked-doc'
-    | 'copy'
-    | 'duplicate'
-    | 'reload'
-    | 'open'
-    | 'center-peek'
-    | ReorderingType;
-  disabled?: boolean;
-};
-
-// Group Actions
-type FatActions = (Action | typeof nothing)[][];
 
 const OPEN_ACTION: Action = {
   icon: OpenIcon,
@@ -150,87 +130,19 @@ const RELOAD_ACTION: Action = {
 };
 
 const TURN_INTO_LINKED_DOC_ACTION: Action = {
-  icon: FontLinkedDocIcon,
+  icon: LinkedDocIcon,
   name: 'Turn into linked doc',
   type: 'turn-into-linked-doc',
 };
 
 const CREATE_LINKED_DOC_ACTION: Action = {
-  icon: FontLinkedDocIcon,
+  icon: LinkedDocIcon,
   name: 'Create linked doc',
   type: 'create-linked-doc',
 };
 
-function Actions(
-  fatActions: FatActions,
-  onClick: (action: Action) => Promise<void> | void
-) {
-  return join(
-    fatActions
-      .filter(g => g.length)
-      .map(g => g.filter(a => a !== nothing) as Action[])
-      .filter(g => g.length)
-      .map(actions =>
-        repeat(
-          actions,
-          action => action.type,
-          action => html`
-            <div
-              aria-label=${action.name}
-              class="action-item ${action.type}"
-              @click=${() => onClick(action)}
-              ?data-disabled=${action.disabled}
-            >
-              ${action.icon}${action.name}
-            </div>
-          `
-        )
-      ),
-    () => html`
-      <edgeless-menu-divider
-        data-orientation="horizontal"
-        style="--height: 8px"
-      ></edgeless-menu-divider>
-    `
-  );
-}
-
 @customElement('edgeless-more-button')
 export class EdgelessMoreButton extends WithDisposable(LitElement) {
-  static override styles = css`
-    .more-actions-container {
-      display: flex;
-      flex-direction: column;
-      min-width: 176px;
-    }
-
-    .action-item {
-      display: flex;
-      align-items: center;
-      white-space: nowrap;
-      box-sizing: border-box;
-      padding: 4px 8px;
-      border-radius: 4px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer;
-      gap: 8px;
-    }
-
-    .action-item:hover {
-      background-color: var(--affine-hover-color);
-    }
-    .action-item:hover.delete {
-      background-color: var(--affine-background-error-color);
-      color: var(--affine-error-color);
-    }
-
-    .action-item[data-disabled] {
-      cursor: not-allowed;
-      color: var(--affine-text-disable-color);
-    }
-  `;
-
   @property({ attribute: false })
   accessor elements: BlockSuite.EdgelessModelType[] = [];
 
@@ -575,7 +487,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   override render() {
     const selection = this.edgeless.service.selection;
-    const actions = Actions(
+    const actions = renderActions(
       selection.selectedElements.some(isFrameBlock)
         ? this._FrameActions
         : this._Actions,
@@ -583,16 +495,18 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     );
 
     return html`
-      <edgeless-menu-button
+      <editor-menu-button
         .contentPadding=${'8px'}
         .button=${html`
-          <edgeless-tool-icon-button aria-label="More" .tooltip=${'More'}>
+          <editor-icon-button aria-label="More" .tooltip=${'More'}>
             ${this.vertical ? MoreVerticalIcon : MoreHorizontalIcon}
-          </edgeless-tool-icon-button>
+          </editor-icon-button>
         `}
       >
-        <div slot class="more-actions-container">${actions}</div>
-      </edgeless-menu-button>
+        <div slot class="more-actions-container" data-orientation="vertical">
+          ${actions}
+        </div>
+      </editor-menu-button>
     `;
   }
 }

@@ -1,4 +1,4 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -45,7 +45,7 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
 
   override render() {
     return html`
-      <edgeless-tool-icon-button
+      <editor-icon-button
         aria-label="Add caption"
         .tooltip=${'Add caption'}
         class="change-image-button caption"
@@ -53,7 +53,7 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
         @click=${() => this._showCaption()}
       >
         ${CaptionIcon}
-      </edgeless-tool-icon-button>
+      </editor-icon-button>
     `;
   }
 }

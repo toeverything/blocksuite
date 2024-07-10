@@ -1,4 +1,6 @@
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import '../../edgeless/components/panel/font-family-panel.js';
 import '../../edgeless/components/panel/size-panel.js';
 import '../../edgeless/components/panel/font-weight-and-style-panel.js';
@@ -10,6 +12,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 
+import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   SmallArrowDownIcon,
   TextAlignCenterIcon,
@@ -41,7 +44,6 @@ import {
   getFontFacesByFontFamily,
   wrapFontFamily,
 } from '../../../surface-block/utils/font.js';
-import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
@@ -324,10 +326,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     return join(
       [
         html`
-          <edgeless-menu-button
+          <editor-menu-button
             .contentPadding=${'8px'}
             .button=${html`
-              <edgeless-tool-icon-button
+              <editor-icon-button
                 aria-label="Font"
                 .tooltip=${'Font'}
                 .justify=${'space-between'}
@@ -339,29 +341,28 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
                   style=${`font-family: ${wrapFontFamily(selectedFontFamily)}`}
                   >Aa</span
                 >${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
+              </editor-icon-button>
             `}
           >
             <edgeless-font-family-panel
-              slot
               .value=${selectedFontFamily}
               .onSelect=${this._setFontFamily}
             ></edgeless-font-family-panel>
-          </edgeless-menu-button>
+          </editor-menu-button>
         `,
 
         html`
-          <edgeless-menu-button
+          <editor-menu-button
             .contentPadding=${'8px'}
             .button=${html`
-              <edgeless-tool-icon-button
+              <editor-icon-button
                 aria-label="Text color"
                 .tooltip=${'Text color'}
               >
                 <edgeless-text-color-icon
                   .color=${selectedColor}
                 ></edgeless-text-color-icon>
-              </edgeless-tool-icon-button>
+              </editor-icon-button>
             `}
           >
             <edgeless-color-panel
@@ -370,14 +371,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
               .options=${LINE_COLORS}
               @select=${this._setTextColor}
             ></edgeless-color-panel>
-          </edgeless-menu-button>
+          </editor-menu-button>
         `,
 
         html`
-          <edgeless-menu-button
+          <editor-menu-button
             .contentPadding=${'8px'}
             .button=${html`
-              <edgeless-tool-icon-button
+              <editor-icon-button
                 aria-label="Font style"
                 .tooltip=${'Font style'}
                 .justify=${'space-between'}
@@ -390,26 +391,25 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
                   ${choose(selectedFontStyle, FONT_STYLE_CHOOSE)}
                 </span>
                 ${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
+              </editor-icon-button>
             `}
           >
             <edgeless-font-weight-and-style-panel
-              slot
               .fontFamily=${selectedFontFamily}
               .fontWeight=${selectedFontWeight}
               .fontStyle=${selectedFontStyle}
               .onSelect=${this._setFontWeightAndStyle}
             ></edgeless-font-weight-and-style-panel>
-          </edgeless-menu-button>
+          </editor-menu-button>
         `,
 
         this.elementType === 'edgeless-text'
           ? nothing
           : html`
-              <edgeless-menu-button
+              <editor-menu-button
                 .contentPadding=${'8px'}
                 .button=${html`
-                  <edgeless-tool-icon-button
+                  <editor-icon-button
                     aria-label="Font size"
                     .tooltip=${'Font size'}
                     .justify=${'space-between'}
@@ -418,28 +418,27 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
                   >
                     <span class="label">${selectedFontSize}</span>
                     ${SmallArrowDownIcon}
-                  </edgeless-tool-icon-button>
+                  </editor-icon-button>
                 `}
               >
                 <edgeless-size-panel
-                  slot
                   data-type="check"
                   .size=${selectedFontSize}
                   .sizeList=${FONT_SIZE_LIST}
                   .onSelect=${this._setFontSize}
                 ></edgeless-size-panel>
-              </edgeless-menu-button>
+              </editor-menu-button>
             `,
 
         html`
-          <edgeless-menu-button
+          <editor-menu-button
             .button=${html`
-              <edgeless-tool-icon-button
+              <editor-icon-button
                 aria-label="Alignment"
                 .tooltip=${'Alignment'}
               >
                 ${choose(selectedAlign, TEXT_ALIGN_CHOOSE)}${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
+              </editor-icon-button>
             `}
           >
             <edgeless-align-panel
@@ -447,10 +446,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
               .value=${selectedAlign}
               .onSelect=${this._setTextAlign}
             ></edgeless-align-panel>
-          </edgeless-menu-button>
+          </editor-menu-button>
         `,
       ].filter(b => b !== nothing),
-      renderMenuDivider
+      renderToolbarSeparator
     );
   }
 }

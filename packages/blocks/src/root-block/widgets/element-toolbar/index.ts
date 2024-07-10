@@ -1,15 +1,15 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/toolbar.js';
 import './more-button.js';
 
 import { WidgetElement } from '@blocksuite/block-std';
-import { baseTheme } from '@toeverything/theme';
-import { css, html, nothing, type TemplateResult, unsafeCSS } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
+import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import { ConnectorCWithArrowIcon } from '../../../_common/icons/edgeless.js';
-import { stopPropagation } from '../../../_common/utils/event.js';
 import {
   atLeastNMatches,
   groupBy,
@@ -40,7 +40,6 @@ import {
   type ShapeElementModel,
   type TextElementModel,
 } from '../../../surface-block/index.js';
-import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
@@ -106,6 +105,17 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
+  static override styles = css`
+    :host {
+      position: absolute;
+      z-index: 3;
+      transform: translateZ(0);
+      will-change: transform;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  `;
+
   get edgeless() {
     return this.blockElement as EdgelessRootBlockComponent;
   }
@@ -121,51 +131,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   get surface() {
     return this.edgeless.surface;
   }
-
-  static override styles = css`
-    :host {
-      position: absolute;
-      z-index: 3;
-      transform: translateZ(0);
-      will-change: transform;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-
-    .edgeless-component-toolbar-container {
-      display: flex;
-      height: 36px;
-      width: max-content;
-      padding: 0 6px;
-      align-items: center;
-      gap: 8px;
-      background: var(--affine-background-overlay-panel-color);
-      border: 0.5px solid var(--affine-border-color);
-      box-shadow: var(--affine-shadow-4);
-      border-radius: 4px;
-      box-sizing: content-box;
-
-      text-align: justify;
-      font-feature-settings:
-        'clig' off,
-        'liga' off;
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      font-size: var(--affine-font-sm);
-      font-style: normal;
-      font-weight: 400;
-      line-height: 22px; /* 157.143% */
-    }
-
-    .edgeless-component-toolbar-container > * {
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      color: var(--affine-text-primary-color);
-      fill: currentColor;
-    }
-  `;
 
   @state()
   private accessor _dragging = false;
@@ -283,14 +248,14 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   private _renderQuickConnectButton() {
     return [
       html`
-        <edgeless-tool-icon-button
+        <editor-icon-button
           aria-label="Draw connector"
           .tooltip=${'Draw connector'}
           .activeMode=${'background'}
           @click=${this._quickConnect}
         >
           ${ConnectorCWithArrowIcon}
-        </edgeless-tool-icon-button>
+        </editor-icon-button>
       `,
     ];
   }
@@ -446,15 +411,12 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     `);
 
     return html`
-      <div
-        class="edgeless-component-toolbar-container"
-        @pointerdown=${stopPropagation}
-      >
+      <editor-toolbar>
         ${join(
           buttons.filter(b => b !== nothing),
-          renderMenuDivider
+          renderToolbarSeparator
         )}
-      </div>
+      </editor-toolbar>
     `;
   }
 }

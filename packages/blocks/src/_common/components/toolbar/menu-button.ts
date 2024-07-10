@@ -1,14 +1,14 @@
-import './tool-icon-button.js';
+import './icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
-import type { EdgelessToolIconButton } from './tool-icon-button.js';
+import { createButtonPopper } from '../../utils/button-popper.js';
+import type { EditorIconButton } from './icon-button.js';
 
-@customElement('edgeless-menu-button')
-export class EdgelessMenuButton extends WithDisposable(LitElement) {
+@customElement('editor-menu-button')
+export class EditorMenuButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
@@ -19,20 +19,31 @@ export class EdgelessMenuButton extends WithDisposable(LitElement) {
 
     ::slotted([slot]) {
       display: flex;
-    }
-
-    ::slotted([slot][data-orientation='horizontal']) {
       align-items: center;
       align-self: stretch;
       gap: 8px;
     }
+
+    ::slotted([slot][data-size='small']) {
+      min-width: 164px;
+    }
+
+    ::slotted([slot][data-size='large']) {
+      min-width: 184px;
+    }
+
+    ::slotted([slot][data-orientation='vertical']) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+    }
   `;
 
-  @query('edgeless-tool-icon-button')
-  private accessor _trigger!: EdgelessToolIconButton;
+  @query('editor-icon-button')
+  private accessor _trigger!: EditorIconButton;
 
-  @query('edgeless-menu-content')
-  private accessor _content!: EdgelessMenuContent;
+  @query('editor-menu-content')
+  private accessor _content!: EditorMenuContent;
 
   private _popper!: ReturnType<typeof createButtonPopper>;
 
@@ -79,15 +90,17 @@ export class EdgelessMenuButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`${this.button}
-      <edgeless-menu-content role="menu" tabindex="-1">
+    return html`
+      ${this.button}
+      <editor-menu-content role="menu" tabindex="-1">
         <slot></slot>
-      </edgeless-menu-content>`;
+      </editor-menu-content>
+    `;
   }
 }
 
-@customElement('edgeless-menu-content')
-export class EdgelessMenuContent extends LitElement {
+@customElement('editor-menu-content')
+export class EditorMenuContent extends LitElement {
   static override styles = css`
     :host {
       display: none;
@@ -95,11 +108,10 @@ export class EdgelessMenuContent extends LitElement {
       justify-content: center;
       gap: 8px;
       padding: var(--content-padding, 0 6px);
-
+      border-radius: 4px;
       border: 0.5px solid var(--affine-border-color);
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-4);
-      border-radius: 4px;
       min-height: 36px;
       outline: none;
     }
@@ -114,46 +126,63 @@ export class EdgelessMenuContent extends LitElement {
   }
 }
 
-@customElement('edgeless-menu-divider')
-export class EdgelessMenuDivider extends LitElement {
+@customElement('editor-menu-action')
+export class EditorMenuAction extends LitElement {
   static override styles = css`
     :host {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      align-self: stretch;
-
-      width: 4px;
-    }
-
-    :host::after {
-      content: '';
-      display: flex;
-      width: 0.5px;
-      height: 100%;
-      background-color: var(--affine-border-color);
-    }
-
-    :host([data-orientation='horizontal']) {
-      height: var(--height, 4px);
-      width: unset;
-    }
-
-    :host([data-orientation='horizontal'])::after {
-      height: 0.5px;
       width: 100%;
+      align-items: center;
+      white-space: nowrap;
+      box-sizing: border-box;
+      padding: 4px 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      gap: 8px;
+      color: var(--affine-text-primary-color);
+    }
+
+    :host(:hover),
+    :host([data-selected]) {
+      background-color: var(--affine-hover-color);
+    }
+
+    :host([data-selected]) {
+      pointer-events: none;
+    }
+
+    :host(:hover.delete) {
+      background-color: var(--affine-background-error-color);
+      color: var(--affine-error-color);
+    }
+
+    :host([disabled]) {
+      pointer-events: none;
+      cursor: not-allowed;
+      color: var(--affine-text-disable-color);
+    }
+
+    ::slotted(svg) {
+      color: var(--affine-icon-color);
     }
   `;
-}
 
-export function renderMenuDivider() {
-  return html`<edgeless-menu-divider></edgeless-menu-divider>`;
+  override connectedCallback() {
+    super.connectedCallback();
+    this.role = 'button';
+  }
+
+  override render() {
+    return html`<slot></slot>`;
+  }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-menu-button': EdgelessMenuButton;
-    'edgeless-menu-content': EdgelessMenuContent;
-    'edgeless-menu-divider': EdgelessMenuDivider;
+    'editor-menu-button': EditorMenuButton;
+    'editor-menu-content': EditorMenuContent;
+    'editor-menu-action': EditorMenuAction;
   }
 }

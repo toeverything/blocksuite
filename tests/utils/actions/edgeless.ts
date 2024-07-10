@@ -255,7 +255,7 @@ export function locatorEdgelessComponentToolButton(
     more: 'More',
   }[type];
   const button = page
-    .locator('edgeless-element-toolbar-widget edgeless-tool-icon-button')
+    .locator('edgeless-element-toolbar-widget editor-icon-button')
     .filter({
       hasText: text,
     });
@@ -710,7 +710,7 @@ export async function updateExistedBrushElementSize(
 
 export async function openComponentToolbarMoreMenu(page: Page) {
   const btn = page.locator(
-    'edgeless-element-toolbar-widget edgeless-more-button edgeless-menu-button'
+    'edgeless-element-toolbar-widget edgeless-more-button editor-menu-button'
   );
 
   await btn.click();
@@ -725,7 +725,7 @@ export async function clickComponentToolbarMoreMenuButton(
   }[button];
 
   const btn = locatorComponentToolbarMoreButton(page)
-    .locator('.action-item')
+    .locator('editor-menu-action')
     .filter({ hasText: text });
 
   await btn.click();
@@ -884,7 +884,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Bring to Front',
         });
@@ -896,7 +896,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Bring Forward',
         });
@@ -908,7 +908,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Send Backward',
         });
@@ -920,7 +920,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Send to Back',
         });
@@ -932,7 +932,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Copy as PNG',
         });
@@ -944,7 +944,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Frame Section',
         });
@@ -956,7 +956,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Duplicate',
         });
@@ -1038,7 +1038,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Group Section',
         });
@@ -1113,7 +1113,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Turn into linked doc',
         });
@@ -1125,7 +1125,7 @@ export async function triggerComponentToolbarAction(
       await moreButton.click();
 
       const actionButton = moreButton
-        .locator('.more-actions-container .action-item')
+        .locator('.more-actions-container editor-menu-action')
         .filter({
           hasText: 'Create linked doc',
         });

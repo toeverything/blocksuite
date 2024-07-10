@@ -1,3 +1,5 @@
+import '../../../../_common/components/toolbar/separator.js';
+
 import { html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -96,7 +98,7 @@ export function LineStylesPanel({
 
   return html`
     ${lineSizePanel}
-    <edgeless-menu-divider></edgeless-menu-divider>
+    <editor-toolbar-separator></editor-toolbar-separator>
     ${lineStyleButtons}
   `;
 }

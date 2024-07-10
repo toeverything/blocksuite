@@ -1,5 +1,6 @@
-import '../../edgeless/components/buttons/tool-icon-button.js';
-import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement, nothing } from 'lit';
@@ -54,8 +55,8 @@ const ALIGNMENT_LIST = [
     content: AlignDistributeHorizontallyIcon,
   },
   {
-    name: 'divider',
-    content: html`<edgeless-menu-divider></edgeless-menu-divider>`,
+    name: 'separator',
+    content: html`<editor-toolbar-separator></editor-toolbar-separator>`,
   },
   {
     name: Alignment.Top,
@@ -268,35 +269,35 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
 
   override render() {
     return html`
-      <edgeless-menu-button
+      <editor-menu-button
         .button=${html`
-          <edgeless-tool-icon-button
+          <editor-icon-button
             aria-label="Align objects"
             .tooltip=${'Align objects'}
           >
             ${AlignLeftIcon}${SmallArrowDownIcon}
-          </edgeless-tool-icon-button>
+          </editor-icon-button>
         `}
       >
-        <div slot data-orientation="horizontal">
+        <div slot>
           ${repeat(
             ALIGNMENT_LIST,
             (item, index) => item.name + index,
             ({ name, content }) => {
-              if (name === 'divider') return content;
+              if (name === 'separator') return content;
               return html`
-                <edgeless-tool-icon-button
+                <editor-icon-button
                   aria-label=${name}
                   .tooltip=${name}
                   @click=${() => this._align(name)}
                 >
                   ${content}
-                </edgeless-tool-icon-button>
+                </editor-icon-button>
               `;
             }
           )}
         </div>
-      </edgeless-menu-button>
+      </editor-menu-button>
     `;
   }
 }
