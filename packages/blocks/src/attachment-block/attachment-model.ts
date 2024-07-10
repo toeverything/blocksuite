@@ -74,7 +74,13 @@ export const AttachmentBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    parent: ['affine:note', 'affine:surface', 'affine:edgeless-text'],
+    parent: [
+      'affine:note',
+      'affine:surface',
+      'affine:edgeless-text',
+      'affine:paragraph',
+      'affine:list',
+    ],
   },
   transformer: () => new AttachmentBlockTransformer(),
   toModel: () => new AttachmentBlockModel(),

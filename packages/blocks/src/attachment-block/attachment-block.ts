@@ -9,6 +9,7 @@ import {
   BlockComponent,
   HoverController,
 } from '../_common/components/index.js';
+import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import {
   AttachmentIcon16,
@@ -158,6 +159,8 @@ export class AttachmentBlockComponent extends BlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    bindContainerHotkey(this);
 
     this.refreshData();
 
