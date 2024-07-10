@@ -112,7 +112,6 @@ export class EditorMenuContent extends LitElement {
     :host([data-show]) {
       ${PANEL_BASE}
       justify-content: center;
-      gap: 8px;
       padding: var(--content-padding, 0 6px);
     }
 
@@ -122,6 +121,10 @@ export class EditorMenuContent extends LitElement {
       align-self: stretch;
       gap: 8px;
       min-height: 36px;
+    }
+
+    ::slotted([slot]) {
+      min-width: 146px;
     }
 
     ::slotted([slot][data-size='small']) {
@@ -162,6 +165,7 @@ export class EditorMenuAction extends LitElement {
       gap: 8px;
       color: var(--affine-text-primary-color);
       font-weight: 400;
+      min-height: 30px; // 22 + 8
     }
 
     :host(:hover),

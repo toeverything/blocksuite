@@ -33,7 +33,12 @@ export class EditorToolbar extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.addFromEvent(this, 'pointerdown', stopPropagation);
+
+    this._disposables.addFromEvent(this, 'pointerdown', (e: PointerEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+    });
+    this._disposables.addFromEvent(this, 'wheel', stopPropagation);
   }
 
   override render() {

@@ -32,11 +32,11 @@ export class EditorIconButton extends LitElement {
       user-select: none;
     }
 
-    .icon-container.active-mode-color[active] {
+    :host([active]) .icon-container.active-mode-color {
       color: var(--affine-primary-color);
     }
 
-    .icon-container.active-mode-background[active] {
+    :host([active]) .icon-container.active-mode-background {
       background: var(--affine-hover-color);
     }
 

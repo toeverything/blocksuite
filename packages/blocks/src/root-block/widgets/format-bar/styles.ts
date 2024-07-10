@@ -11,22 +11,6 @@ const paragraphButtonStyle = css`
     transform: rotate(180deg);
   }
 
-  .paragraph-panel {
-    display: none;
-
-    font-size: var(--affine-font-sm);
-    box-sizing: border-box;
-    position: absolute;
-    min-width: 173px;
-    padding: 8px 4px;
-    overflow-y: auto;
-
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
-    border-radius: 8px;
-    z-index: var(--affine-z-index-popover);
-  }
-
   .highlight-icon > svg:nth-child(2) {
     transition-duration: 0.3s;
   }
@@ -35,52 +19,37 @@ const paragraphButtonStyle = css`
   }
 
   .highlight-panel {
-    display: none;
-
-    font-size: var(--affine-font-sm);
-    box-sizing: border-box;
-    position: absolute;
-    min-width: 178px;
-    padding: 8px 4px 8px 8px;
     max-height: 380px;
-    overflow-y: auto;
-
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
-    border-radius: 8px;
-    z-index: var(--affine-z-index-popover);
   }
 
-  ${scrollbarStyle('.highlight-panel')}
-
   .highligh-panel-heading {
+    display: flex;
     color: var(--affine-text-secondary-color);
     padding: 4px;
   }
+
+  editor-menu-content {
+    display: none;
+    position: absolute;
+    padding: 0;
+    z-index: var(--affine-z-index-popover);
+    --packed-height: 6px;
+  }
+
+  editor-menu-content > div[data-orientation='vertical'] {
+    padding: 8px;
+    overflow-y: auto;
+  }
+
+  ${scrollbarStyle('editor-menu-content > div[data-orientation="vertical"]')}
 `;
 
 export const formatBarStyle = css`
   .affine-format-bar-widget {
-    box-sizing: border-box;
     position: absolute;
     display: none;
-    align-items: center;
-    padding: 4px 8px;
-    gap: 8px;
-    height: 40px;
-    width: max-content;
-
-    border-radius: 8px;
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
     z-index: var(--affine-z-index-popover);
     user-select: none;
-  }
-
-  .divider {
-    width: 1px;
-    height: 24px;
-    background-color: var(--affine-border-color);
   }
 
   ${paragraphButtonStyle}

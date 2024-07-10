@@ -12,7 +12,6 @@ import {
   CodeIcon,
   CopyIcon,
   DatabaseTableViewIcon20,
-  FontLinkedDocIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -20,6 +19,7 @@ import {
   Heading5Icon,
   Heading6Icon,
   ItalicIcon,
+  LinkedDocIcon,
   LinkIcon,
   NumberedListIcon,
   QuoteIcon,
@@ -143,6 +143,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
       },
       showWhen: () => true,
     })
+    .addDivider()
     .addInlineAction({
       id: 'convert-to-database',
       name: 'Group as Database',
@@ -169,10 +170,11 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         );
       },
     })
+    .addDivider()
     .addInlineAction({
       id: 'convert-to-linked-doc',
       name: 'Create Linked Doc',
-      icon: FontLinkedDocIcon,
+      icon: LinkedDocIcon,
       isActive: () => false,
       action: (chain, formatBar) => {
         const [_, ctx] = chain
