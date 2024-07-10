@@ -38,7 +38,6 @@ export async function uploadBlobForImage(
   let sourceId: string | undefined;
 
   try {
-    setImageUploaded(blockId);
     sourceId = await doc.blobSync.set(blob);
   } catch (error) {
     console.error(error);
