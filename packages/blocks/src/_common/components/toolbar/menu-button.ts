@@ -110,6 +110,23 @@ export class EditorMenuContent extends LitElement {
       outline: none;
     }
 
+    :host:before,
+    :host:after {
+      content: '';
+      display: block;
+      position: absolute;
+      height: 6px;
+      width: 100%;
+    }
+
+    :host:before {
+      top: -6px;
+    }
+
+    :host:after {
+      bottom: -6px;
+    }
+
     :host([data-show]) {
       ${PANEL_BASE}
       justify-content: center;
@@ -151,7 +168,8 @@ export class EditorMenuAction extends LitElement {
       pointer-events: none;
     }
 
-    :host(:hover.delete) {
+    :host(:hover.delete),
+    :host(:hover.delete) ::slotted(svg) {
       background-color: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }

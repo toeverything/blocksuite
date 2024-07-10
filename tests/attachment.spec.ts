@@ -38,13 +38,9 @@ const FILE_SIZE = 45801;
 function getAttachment(page: Page) {
   const attachment = page.locator('affine-attachment');
   const loading = attachment.locator('.affine-attachment-card.loading');
-  const options = page.locator('.affine-attachment-options');
-  const turnToEmbedBtn = options
-    .locator('icon-button')
-    .filter({ hasText: 'Turn into Embed view' });
-  const renameBtn = options
-    .locator('icon-button')
-    .filter({ hasText: 'Rename' });
+  const toolbar = page.locator('.affine-attachment-toolbar');
+  const switchViewButton = toolbar.getByRole('button', { name: 'Switch view' });
+  const renameBtn = toolbar.getByRole('button', { name: 'Rename' });
   const renameInput = page.locator('.affine-attachment-rename-container input');
 
   const insertAttachment = async () => {
@@ -79,8 +75,8 @@ function getAttachment(page: Page) {
   return {
     // locators
     attachment,
-    options,
-    turnToEmbedBtn,
+    toolbar,
+    switchViewButton,
     renameBtn,
     renameInput,
 
@@ -95,13 +91,14 @@ function getAttachment(page: Page) {
       attachment.locator('.affine-attachment-content-info').innerText(),
 
     turnToEmbed: async () => {
-      await expect(turnToEmbedBtn).toBeVisible();
-      await turnToEmbedBtn.click();
+      await expect(switchViewButton).toBeVisible();
+      await switchViewButton.click();
+      await page.getByRole('button', { name: 'Embed view' }).click();
       await assertRichImage(page, 1);
     },
     rename: async (newName: string) => {
       await attachment.hover();
-      await expect(options).toBeVisible();
+      await expect(toolbar).toBeVisible();
       await renameBtn.click();
       await page.keyboard.press(`${SHORT_KEY}+a`, { delay: 50 });
       await pressBackspace(page);
