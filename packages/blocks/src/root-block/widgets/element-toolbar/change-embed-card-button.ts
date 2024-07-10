@@ -520,16 +520,16 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     if (this._canConvertToEmbedView || this._isEmbedView) {
       const buttons = [
         {
-          type: 'embed',
-          name: 'Embed view',
-          handler: () => this._convertToEmbedView(),
-          disabled: this.model.doc.readonly && this._embedViewButtonDisabled,
-        },
-        {
           type: 'card',
           name: 'Card view',
           handler: () => this._convertToCardView(),
           disabled: this.model.doc.readonly,
+        },
+        {
+          type: 'embed',
+          name: 'Embed view',
+          handler: () => this._convertToEmbedView(),
+          disabled: this.model.doc.readonly && this._embedViewButtonDisabled,
         },
       ];
 

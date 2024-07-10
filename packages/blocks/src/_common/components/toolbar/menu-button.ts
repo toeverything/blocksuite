@@ -4,6 +4,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { PANEL_BASE } from '../../styles.js';
 import { createButtonPopper } from '../../utils/button-popper.js';
 import type { EditorIconButton } from './icon-button.js';
 
@@ -36,8 +37,8 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
     ::slotted([slot][data-orientation='vertical']) {
       flex-direction: column;
       align-items: stretch;
-      gap: 0;
-      min-height: initial;
+      gap: unset;
+      min-height: unset;
     }
   `;
 
@@ -106,19 +107,14 @@ export class EditorMenuContent extends LitElement {
   static override styles = css`
     :host {
       display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: var(--content-padding, 0 6px);
-      border-radius: 4px;
-      border: 0.5px solid var(--affine-border-color);
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-4);
       outline: none;
     }
 
     :host([data-show]) {
-      display: flex;
+      ${PANEL_BASE}
+      justify-content: center;
+      gap: 8px;
+      padding: var(--content-padding, 0 6px);
     }
   `;
 
@@ -143,6 +139,7 @@ export class EditorMenuAction extends LitElement {
       cursor: pointer;
       gap: 8px;
       color: var(--affine-text-primary-color);
+      font-weight: 400;
     }
 
     :host(:hover),

@@ -438,13 +438,20 @@ export class EmbedCardToolbar extends WidgetElement<
     return 'inline';
   }
 
-  private _viewActions() {
+  private _viewMenuButton() {
     const buttons = [];
 
     buttons.push({
       type: 'inline',
       name: 'Inline view',
       handler: () => this._turnIntoInlineView(),
+      disabled: this.model.doc.readonly,
+    });
+
+    buttons.push({
+      type: 'card',
+      name: 'Card view',
+      handler: () => this._convertToCardView(),
       disabled: this.model.doc.readonly,
     });
 
@@ -457,28 +464,43 @@ export class EmbedCardToolbar extends WidgetElement<
       });
     }
 
-    buttons.push({
-      type: 'card',
-      name: 'Card view',
-      handler: () => this._convertToCardView(),
-      disabled: this.model.doc.readonly,
-    });
-
-    return repeat(
-      buttons,
-      button => button.type,
-      ({ type, name, handler, disabled }) => html`
-        <editor-menu-action
-          aria-label=${name}
-          data-testid=${`link-to-${type}`}
-          ?data-selected=${this._viewType === type}
-          ?disabled=${disabled}
-          @click=${handler}
-        >
-          ${name}
-        </editor-menu-action>
-      `
-    );
+    return html`
+      <editor-menu-button
+        .contentPadding=${'8px'}
+        .button=${html`
+          <editor-icon-button
+            aria-label="Switch view"
+            .justify=${'space-between'}
+            .labelHeight=${'20px'}
+            .iconContainerWidth=${'110px'}
+          >
+            <div class="label">
+              <span style="text-transform: capitalize">${this._viewType}</span>
+              view
+            </div>
+            ${SmallArrowDownIcon}
+          </editor-icon-button>
+        `}
+      >
+        <div slot data-size="small" data-orientation="vertical">
+          ${repeat(
+            buttons,
+            button => button.type,
+            ({ type, name, handler, disabled }) => html`
+              <editor-menu-action
+                aria-label=${name}
+                data-testid=${`link-to-${type}`}
+                ?data-selected=${this._viewType === type}
+                ?disabled=${disabled}
+                @click=${handler}
+              >
+                ${name}
+              </editor-menu-action>
+            `
+          )}
+        </div>
+      </editor-menu-button>
+    `;
   }
 
   private _cardStyleMenuButton() {
@@ -682,31 +704,7 @@ export class EmbedCardToolbar extends WidgetElement<
 
       this._openMenuButton(),
 
-      html`
-        <editor-menu-button
-          .contentPadding=${'8px'}
-          .button=${html`
-            <editor-icon-button
-              aria-label="Switch view"
-              .justify=${'space-between'}
-              .labelHeight=${'20px'}
-              .iconContainerWidth=${'110px'}
-            >
-              <div class="label">
-                <span style="text-transform: capitalize"
-                  >${this._viewType}</span
-                >
-                view
-              </div>
-              ${SmallArrowDownIcon}
-            </editor-icon-button>
-          `}
-        >
-          <div slot data-size="small" data-orientation="vertical">
-            ${this._viewActions()}
-          </div>
-        </editor-menu-button>
-      `,
+      this._viewMenuButton(),
 
       this._cardStyleMenuButton(),
 

@@ -357,6 +357,12 @@ export class LinkPopup extends WithDisposable(LitElement) {
       name: 'Inline view',
     });
 
+    buttons.push({
+      type: 'card',
+      name: 'Card view',
+      handler: () => this._convertToCardView(),
+    });
+
     if (this._canConvertToEmbedView) {
       buttons.push({
         type: 'embed',
@@ -364,12 +370,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         handler: () => this._convertToEmbedView(),
       });
     }
-
-    buttons.push({
-      type: 'card',
-      name: 'Card view',
-      handler: () => this._convertToCardView(),
-    });
 
     return html`
       <editor-menu-button

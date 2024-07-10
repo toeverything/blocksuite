@@ -1,6 +1,8 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
+import { PANEL_BASE } from '../../../../../styles.js';
+
 const editLinkStyle = css`
   .affine-link-edit-popover {
     box-sizing: border-box;
@@ -195,15 +197,29 @@ export const linkPopupStyle = css`
     opacity: var(--add, 1);
   }
 
+  .affine-link-popover.create {
+    ${PANEL_BASE}
+    gap: 12px;
+    padding: 12px;
+  }
+
   .affine-link-popover-input {
-    background: transparent;
-    border: none;
+    min-width: 280px;
+    height: 30px;
+    box-sizing: border-box;
+    padding: 4px 10px;
+    background: var(--affine-white-10);
+    border-radius: 4px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: transparent;
   }
   .affine-link-popover-input::placeholder {
     color: var(--affine-placeholder-color);
   }
   .affine-link-popover-input:focus {
-    border: none;
+    border-color: var(--affine-blue-700);
+    box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
   }
 
   .affine-link-popover-dividing-line {
