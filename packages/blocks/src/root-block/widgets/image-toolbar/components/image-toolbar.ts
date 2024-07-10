@@ -1,12 +1,16 @@
+import '../../../../_common/components/toolbar/icon-button.js';
+import '../../../../_common/components/toolbar/toolbar.js';
+import '../../../../_common/components/toolbar/menu-button.js';
+
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { html, LitElement, nothing } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
-import { MorePopupMenu } from '../../../../_common/components/more-popup-menu/more-popup-menu.js';
 import { createLitPortal } from '../../../../_common/components/portal.js';
+import type { EditorIconButton } from '../../../../_common/components/toolbar/icon-button.js';
 import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
-import { stopPropagation } from '../../../../_common/utils/event.js';
 import type { ImageBlockComponent } from '../../../../image-block/image-block.js';
 import { styles } from '../styles.js';
 import type { ImageConfigItem, MoreMenuConfigItem } from '../type.js';
@@ -14,19 +18,10 @@ import { ConfigRenderer, MoreMenuRenderer } from '../utils.js';
 
 @customElement('affine-image-toolbar')
 export class AffineImageToolbar extends LitElement {
-  get _items() {
-    return ConfigRenderer(
-      this.blockElement,
-      this.abortController,
-      this.config,
-      this.closeCurrentMenu
-    );
-  }
-
   static override styles = styles;
 
-  @query('.image-toolbar-button.more')
-  private accessor _moreButton!: HTMLElement;
+  @query('editor-icon-button.more')
+  private accessor _moreButton!: EditorIconButton;
 
   @state()
   private accessor _moreMenuOpen = false;
@@ -49,6 +44,15 @@ export class AffineImageToolbar extends LitElement {
 
   @property({ attribute: false })
   accessor onActiveStatusChange: (active: boolean) => void = noop;
+
+  get _items() {
+    return ConfigRenderer(
+      this.blockElement,
+      this.abortController,
+      this.config,
+      this.closeCurrentMenu
+    );
+  }
 
   private _clearPopMenu() {
     if (this._popMenuAbortController) {
@@ -79,17 +83,26 @@ export class AffineImageToolbar extends LitElement {
 
     this._currentOpenMenu = this._popMenuAbortController;
 
-    const moreMenu = new MorePopupMenu();
-    const moreItems = MoreMenuRenderer(
-      this.blockElement,
-      this._popMenuAbortController,
-      this.moreMenuConfig
-    );
-    moreMenu.items = moreItems;
-
     assertExists(this._moreButton);
     createLitPortal({
-      template: moreMenu,
+      template: html`
+        <editor-menu-content
+          data-show
+          data-orientation="vertical"
+          style=${styleMap({
+            '--content-padding': '8px',
+            '--packed-height': '4px',
+            display: 'flex',
+            flexDirection: 'column',
+          })}
+        >
+          ${MoreMenuRenderer(
+            this.blockElement,
+            this._popMenuAbortController,
+            this.moreMenuConfig
+          )}
+        </editor-menu-content>
+      `,
       container: this.blockElement.host,
       // stacking-context(editor-host)
       portalStyles: {
@@ -122,22 +135,18 @@ export class AffineImageToolbar extends LitElement {
 
   override render() {
     return html`
-      <div
-        class="affine-image-toolbar-container"
-        @pointerdown=${stopPropagation}
-      >
+      <editor-toolbar class="affine-image-toolbar-container" data-without-bg>
         ${this._items}
-        <icon-button
+        <editor-icon-button
           class="image-toolbar-button more"
-          size="24px"
+          aria-label="More"
+          .tooltip=${'More'}
+          .tooltipOffset=${4}
           @click=${() => this._toggleMoreMenu()}
         >
           ${MoreVerticalIcon}
-          ${!this._moreMenuOpen
-            ? html`<affine-tooltip>More</affine-tooltip>`
-            : nothing}
-        </icon-button>
-      </div>
+        </editor-icon-button>
+      </editor-toolbar>
     `;
   }
 }

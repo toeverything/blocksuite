@@ -131,7 +131,9 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
       this._navigatorSettingButton,
       this._navigatorSettingMenu,
       ({ display }) => this.setPopperShow(display === 'show'),
-      22
+      {
+        mainAxis: 22,
+      }
     );
   }
 

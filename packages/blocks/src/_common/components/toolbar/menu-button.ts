@@ -67,7 +67,10 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       ({ display }) => {
         this._trigger.showTooltip = display === 'hidden';
       },
-      12
+      {
+        mainAxis: 12,
+        ignoreShift: true,
+      }
     );
     this._disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
       e.stopPropagation();
@@ -106,6 +109,8 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
 export class EditorMenuContent extends LitElement {
   static override styles = css`
     :host {
+      --packed-height: 6px;
+      --offset-height: calc(-1 * var(--packed-height));
       display: none;
       outline: none;
     }
@@ -115,16 +120,16 @@ export class EditorMenuContent extends LitElement {
       content: '';
       display: block;
       position: absolute;
-      height: 6px;
+      height: var(--packed-height);
       width: 100%;
     }
 
     :host:before {
-      top: -6px;
+      top: var(--offset-height);
     }
 
     :host:after {
-      bottom: -6px;
+      bottom: var(--offset-height);
     }
 
     :host([data-show]) {

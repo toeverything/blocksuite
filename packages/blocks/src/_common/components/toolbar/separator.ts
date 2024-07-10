@@ -22,7 +22,7 @@ export class EditorToolbarSeparator extends LitElement {
     }
 
     :host([data-orientation='horizontal']) {
-      height: var(--height, 4px);
+      height: 8px;
       width: unset;
     }
 

@@ -52,7 +52,6 @@ export function renderActions(
     () => html`
       <editor-toolbar-separator
         data-orientation="horizontal"
-        style="--height: 8px"
       ></editor-toolbar-separator>
     `
   );

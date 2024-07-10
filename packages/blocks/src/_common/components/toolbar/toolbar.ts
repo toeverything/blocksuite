@@ -14,6 +14,12 @@ export class EditorToolbar extends WithDisposable(LitElement) {
       box-sizing: content-box;
     }
 
+    :host([data-without-bg]) {
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+
     ::slotted(*) {
       display: flex;
       height: 100%;

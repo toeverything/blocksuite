@@ -113,8 +113,10 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
       ({ display }) => {
         this._settingPopperShow = display === 'show';
       },
-      14,
-      -30
+      {
+        mainAxis: 14,
+        crossAxis: -30,
+      }
     );
     _disposables.add(this._notePreviewSettingMenuPopper);
   }

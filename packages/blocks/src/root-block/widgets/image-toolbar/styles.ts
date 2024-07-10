@@ -1,35 +1,24 @@
 import { css } from 'lit';
 
+import { PANEL_BASE_COLORS } from '../../../_common/styles.js';
+
 export const styles = css`
   :host {
-    z-index: 1;
     position: absolute;
     top: 0;
     right: 0;
+    z-index: var(--affine-z-index-popover);
   }
 
   .affine-image-toolbar-container {
-    display: flex;
-    flex-direction: row;
+    height: 24px;
     gap: 4px;
-    box-sizing: border-box;
-    list-style: none;
     padding: 4px;
     margin: 0;
   }
 
   .image-toolbar-button {
-    background: var(--affine-white);
-    color: var(--affine-icon-color);
-    box-shadow: var(--affine-shadow-1);
+    ${PANEL_BASE_COLORS}
     border-radius: 4px;
-  }
-
-  .image-toolbar-button:hover {
-    background: var(--affine-hover-color-filled);
-  }
-
-  .image-toolbar-button.more {
-    position: relative;
   }
 `;
