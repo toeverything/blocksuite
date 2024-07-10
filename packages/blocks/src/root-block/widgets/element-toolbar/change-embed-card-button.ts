@@ -44,7 +44,7 @@ import {
   PaletteIcon,
 } from '../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
-import { getEmbedCardIcons } from '../../../_common/utils/url.js';
+import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import type {
   BookmarkBlockComponent,
@@ -580,7 +580,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       this._canShowUrlOptions && 'url' in model
         ? html`
             <div class="change-embed-card-button url" @click=${this._copyUrl}>
-              <span>${model.url}</span>
+              <span>${getHostName(model.url)}</span>
             </div>
 
             <editor-icon-button

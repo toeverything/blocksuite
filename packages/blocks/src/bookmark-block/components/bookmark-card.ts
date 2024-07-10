@@ -5,7 +5,7 @@ import { classMap } from 'lit/directives/class-map.js';
 
 import { OpenIcon, WebIcon16 } from '../../_common/icons/text.js';
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';
-import { getEmbedCardIcons } from '../../_common/utils/url.js';
+import { getEmbedCardIcons, getHostName } from '../../_common/utils/url.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import { styles } from '../styles.js';
 
@@ -45,14 +45,6 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
     this.bookmark.open();
-  }
-
-  private _getHostName(url: string) {
-    try {
-      return new URL(url).hostname;
-    } catch {
-      return url;
-    }
   }
 
   override connectedCallback(): void {
@@ -148,7 +140,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
             ${descriptionText}
           </div>
           <div class="affine-bookmark-content-url" @click=${this.bookmark.open}>
-            <span>${this._getHostName(url)}</span>
+            <span>${getHostName(url)}</span>
             <div class="affine-bookmark-content-url-icon">${OpenIcon}</div>
           </div>
         </div>

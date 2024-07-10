@@ -22,6 +22,7 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       align-items: center;
       align-self: stretch;
       gap: 8px;
+      min-height: 36px;
     }
 
     ::slotted([slot][data-size='small']) {
@@ -36,6 +37,7 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       flex-direction: column;
       align-items: stretch;
       gap: 0;
+      min-height: initial;
     }
   `;
 
@@ -112,7 +114,6 @@ export class EditorMenuContent extends LitElement {
       border: 0.5px solid var(--affine-border-color);
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-4);
-      min-height: 36px;
       outline: none;
     }
 

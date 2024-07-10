@@ -163,29 +163,35 @@ export const linkPopupStyle = css`
     z-index: var(--affine-z-index-popover);
   }
 
-  .affine-link-popover {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    height: 40px;
-
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
-    border-radius: 8px;
-  }
-
   .affine-link-preview {
     display: flex;
-    width: 180px;
+    width: 140px;
     padding: var(--1, 0px);
-    align-items: flex-start;
-    gap: 10px;
     border-radius: var(--1, 0px);
     opacity: var(--add, 1);
     user-select: none;
     cursor: pointer;
+
+    color: var(--affine-link-color);
+    font-feature-settings:
+      'clig' off,
+      'liga' off;
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-sm);
+    font-style: normal;
+    font-weight: 400;
+    text-decoration: none;
+    text-wrap: nowrap;
+  }
+
+  .affine-link-preview > span {
+    display: inline-block;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+    opacity: var(--add, 1);
   }
 
   .affine-link-popover-input {
@@ -197,25 +203,6 @@ export const linkPopupStyle = css`
   }
   .affine-link-popover-input:focus {
     border: none;
-  }
-
-  .affine-link-preview > span {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-
-    color: var(--affine-link-color);
-    font-feature-settings:
-      'clig' off,
-      'liga' off;
-    font-family: var(--affine-font-family);
-    font-size: 15px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 24px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    opacity: var(--add, 1);
   }
 
   .affine-link-popover-dividing-line {

@@ -69,23 +69,21 @@ export function getFormatBar(page: Page) {
 
 export function getEmbedCardToolbar(page: Page) {
   const embedCardToolbar = page.locator('.embed-card-toolbar');
-  function createButtonLocator(className: string) {
-    return embedCardToolbar.locator(`.embed-card-toolbar-button.${className}`);
+  function createButtonLocator(name: string) {
+    return embedCardToolbar.getByRole('button', { name });
   }
-  const urlButton = createButtonLocator('url');
   const copyButton = createButtonLocator('copy');
   const editButton = createButtonLocator('edit');
-  const docInfo = createButtonLocator('doc-info');
-  const inlineButton = createButtonLocator('link');
-  const cardButton = createButtonLocator('card');
-  const embedButton = createButtonLocator('embed');
-  const cardStyleButton = createButtonLocator('card-style');
+  const cardStyleButton = createButtonLocator('card style');
   const captionButton = createButtonLocator('caption');
-  const moreButton = createButtonLocator('more-button');
-  const cardStyleHorizontalButton = page.locator(
-    '.card-style-button-horizontal'
-  );
-  const cardStyleListButton = page.locator('.card-style-button-list');
+  const moreButton = createButtonLocator('more');
+
+  const cardStyleHorizontalButton = embedCardToolbar.getByRole('button', {
+    name: 'Large horizontal style',
+  });
+  const cardStyleListButton = embedCardToolbar.getByRole('button', {
+    name: 'Small horizontal style',
+  });
 
   const openCardStyleMenu = async () => {
     await expect(embedCardToolbar).toBeVisible();
@@ -101,13 +99,8 @@ export function getEmbedCardToolbar(page: Page) {
 
   return {
     embedCardToolbar,
-    urlButton,
     copyButton,
     editButton,
-    docInfo,
-    inlineButton,
-    cardButton,
-    embedButton,
     cardStyleButton,
     captionButton,
     moreButton,

@@ -194,3 +194,11 @@ export function getEmbedCardIcons(): EmbedCardIcons {
     };
   }
 }
+
+export function getHostName(url: string) {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}

@@ -1,21 +1,20 @@
+import '../../../_common/components/button.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/toolbar.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
+
 import type { EditorHost } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlockModel, DocCollection } from '@blocksuite/store';
-import {
-  autoUpdate,
-  computePosition,
-  flip,
-  offset,
-  type Placement,
-  type ReferenceElement,
-} from '@floating-ui/dom';
-import { html, nothing, type PropertyValues } from 'lit';
+import { type BlockModel, DocCollection, Slice } from '@blocksuite/store';
+import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
+import { html, nothing, type PropertyValues, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { join } from 'lit/directives/join.js';
+import { repeat } from 'lit/directives/repeat.js';
 
-import { EmbedCardMoreMenu } from '../../../_common/components/embed-card/embed-card-more-menu-popper.js';
-import { EmbedCardStyleMenu } from '../../../_common/components/embed-card/embed-card-style-popper.js';
 import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import {
@@ -24,36 +23,39 @@ import {
   isEmbedCardBlockElement,
 } from '../../../_common/components/embed-card/type.js';
 import { isPeekable, peek } from '../../../_common/components/index.js';
-import { createLitPortal } from '../../../_common/components/portal.js';
 import { toast } from '../../../_common/components/toast.js';
+import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
-  BookmarkIcon,
-  MoreVerticalIcon,
-} from '../../../_common/icons/edgeless.js';
+  type Action,
+  renderActions,
+} from '../../../_common/components/toolbar/utils.js';
 import {
   CaptionIcon,
   CenterPeekIcon,
   CopyIcon,
+  DeleteIcon,
+  DuplicateIcon,
   EditIcon,
-  EmbedEdgelessIcon,
-  EmbedPageIcon,
-  EmbedWebIcon,
-  LinkIcon,
+  ExpandFullSmallIcon,
+  MoreVerticalIcon,
   OpenIcon,
   PaletteIcon,
-} from '../../../_common/icons/text.js';
+  RefreshIcon,
+  SmallArrowDownIcon,
+} from '../../../_common/icons/index.js';
+import type { EmbedCardStyle } from '../../../_common/types.js';
+import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
   getBlockComponentByPath,
   getModelByBlockComponent,
 } from '../../../_common/utils/query.js';
+import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
 import {
   type BookmarkBlockModel,
   BookmarkStyles,
 } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
@@ -71,6 +73,8 @@ export class EmbedCardToolbar extends WidgetElement<
   EmbedToolbarModel,
   EmbedToolbarBlockElement
 > {
+  static override styles = embedCardToolbarStyle;
+
   private get _selection() {
     return this.host.selection;
   }
@@ -133,40 +137,7 @@ export class EmbedCardToolbar extends WidgetElement<
     );
   }
 
-  private get _pageIcon() {
-    if (
-      !isEmbedLinkedDocBlock(this.model) &&
-      !isEmbedSyncedDocBlock(this.model)
-    ) {
-      return nothing;
-    }
-    const block = this.blockElement as
-      | EmbedLinkedDocBlockComponent
-      | EmbedSyncedDocBlockComponent;
-
-    return block.editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon;
-  }
-
-  private get _docTitle() {
-    if (
-      !isEmbedLinkedDocBlock(this.model) &&
-      !isEmbedSyncedDocBlock(this.model)
-    ) {
-      return '';
-    }
-    const block = this.blockElement as
-      | EmbedLinkedDocBlockComponent
-      | EmbedSyncedDocBlockComponent;
-    return block.docTitle;
-  }
-
-  static override styles = embedCardToolbarStyle;
-
   private _abortController = new AbortController();
-
-  private _cardStyleMenuAbortController: AbortController | null = null;
-
-  private _moreMenuAbortController: AbortController | null = null;
 
   private _embedOptions: EmbedOptions | null = null;
 
@@ -354,71 +325,243 @@ export class EmbedCardToolbar extends WidgetElement<
     this._resetAbortController();
   }
 
-  private _createMenu(
-    referenceElement: ReferenceElement,
-    menu: EmbedCardStyleMenu | EmbedCardMoreMenu,
-    placement: Placement,
-    offsetValue = 0
-  ) {
-    createLitPortal({
-      template: menu,
-      container: this.embedCardToolbarElement,
-      computePosition: {
-        referenceElement,
-        placement,
-        middleware: [flip(), offset(offsetValue)],
-        autoUpdate: true,
-      },
-      abortController: menu.abortController,
-      closeOnClickAway: true,
-    });
+  private async _copyBlock() {
+    const slice = Slice.fromModels(this.doc, [this.blockElement.model]);
+    await this.std.clipboard.copySlice(slice);
+    toast(this.blockElement.host, 'Copied link to clipboard');
+    this._abortController.abort();
   }
 
-  private _toggleCardStyleMenu() {
-    this._moreMenuAbortController?.abort();
-    if (
-      this._cardStyleMenuAbortController &&
-      !this._cardStyleMenuAbortController.signal.aborted
-    ) {
-      this._cardStyleMenuAbortController.abort();
-      return;
-    }
-    this._cardStyleMenuAbortController = new AbortController();
+  private _duplicateBlock() {
+    const model = this.blockElement.model;
+    const blockProps = getBlockProps(model);
+    const { width, height, xywh, rotate, zIndex, ...duplicateProps } =
+      blockProps;
 
-    if (!this._canShowCardStylePanel(this.model)) {
-      return;
-    }
-
-    const embedCardStyleMenu = new EmbedCardStyleMenu();
-    embedCardStyleMenu.model = this.model;
-    embedCardStyleMenu.abortController = this._cardStyleMenuAbortController;
-
-    assertExists(this.cardStyleButton);
-    this._createMenu(this.cardStyleButton, embedCardStyleMenu, 'top', 4);
-  }
-
-  private _toggleMoreMenu() {
-    this._cardStyleMenuAbortController?.abort();
-    // Abort the previous menu if it's not aborted
-    if (
-      this._moreMenuAbortController &&
-      !this._moreMenuAbortController.signal.aborted
-    ) {
-      this._moreMenuAbortController.abort();
-      return;
-    }
-    this._moreMenuAbortController = new AbortController();
-
-    const embedCardMoreMenu = new EmbedCardMoreMenu();
-    embedCardMoreMenu.block = this.blockElement;
-    embedCardMoreMenu.abortController = this._moreMenuAbortController;
-
-    assertExists(this.moreButton);
-    this._createMenu(
-      this.embedCardToolbarElement,
-      embedCardMoreMenu,
-      'top-end'
+    const { doc } = model;
+    const parent = doc.getParent(model);
+    const index = parent?.children.indexOf(model);
+    doc.addBlock(
+      model.flavour as BlockSuite.Flavour,
+      duplicateProps,
+      parent,
+      index
     );
+    this._abortController.abort();
+  }
+
+  private _refreshData() {
+    this.blockElement.refreshData();
+    this._abortController.abort();
+  }
+
+  private _setEmbedCardStyle(style: EmbedCardStyle) {
+    this.model.doc.updateBlock(this.model, { style });
+    this.requestUpdate();
+    this._abortController.abort();
+  }
+
+  private _openMenuButton() {
+    const buttons: Action[] = [];
+
+    if (
+      isEmbedLinkedDocBlock(this.model) ||
+      isEmbedSyncedDocBlock(this.model)
+    ) {
+      buttons.push({
+        name: 'Open this doc',
+        icon: ExpandFullSmallIcon,
+        handler: () => this.blockElement.open(),
+      });
+    }
+
+    // open in new tab
+
+    if (isPeekable(this.blockElement)) {
+      buttons.push({
+        name: 'Open in center peek',
+        icon: CenterPeekIcon,
+        handler: () => peek(this.blockElement),
+      });
+    }
+
+    // open in split view
+
+    if (buttons.length === 0) {
+      return nothing;
+    }
+
+    return html`
+      <editor-menu-button
+        .contentPadding=${'8px'}
+        .button=${html`
+          <editor-icon-button
+            aria-label="Open"
+            .justify=${'space-between'}
+            .withHover=${true}
+            .labelHeight=${'20px'}
+          >
+            ${OpenIcon}${SmallArrowDownIcon}
+          </editor-icon-button>
+        `}
+      >
+        <div slot data-size="large" data-orientation="vertical">
+          ${repeat(
+            buttons,
+            button => button.name,
+            ({ name, icon, handler, disabled }) => html`
+              <editor-menu-action
+                aria-label=${name}
+                ?disabled=${disabled}
+                @click=${handler}
+              >
+                ${icon}<span class="label">${name}</span>
+              </editor-menu-action>
+            `
+          )}
+        </div>
+      </editor-menu-button>
+    `;
+  }
+
+  private get _viewType(): 'inline' | 'embed' | 'card' {
+    if (this._isCardView) {
+      return 'card';
+    }
+
+    if (this._isEmbedView) {
+      return 'embed';
+    }
+
+    return 'inline';
+  }
+
+  private _viewActions() {
+    const buttons = [];
+
+    buttons.push({
+      type: 'inline',
+      name: 'Inline view',
+      handler: () => this._turnIntoInlineView(),
+      disabled: this.model.doc.readonly,
+    });
+
+    if (this._canConvertToEmbedView || this._isEmbedView) {
+      buttons.push({
+        type: 'embed',
+        name: 'Embed view',
+        handler: () => this._convertToEmbedView(),
+        disabled: this.model.doc.readonly && this._embedViewButtonDisabled,
+      });
+    }
+
+    buttons.push({
+      type: 'card',
+      name: 'Card view',
+      handler: () => this._convertToCardView(),
+      disabled: this.model.doc.readonly,
+    });
+
+    return repeat(
+      buttons,
+      button => button.type,
+      ({ type, name, handler, disabled }) => html`
+        <editor-menu-action
+          aria-label=${name}
+          data-testid=${`link-to-${type}`}
+          ?data-selected=${this._viewType === type}
+          ?disabled=${disabled}
+          @click=${handler}
+        >
+          ${name}
+        </editor-menu-action>
+      `
+    );
+  }
+
+  private _cardStyleActions() {
+    if (this._canShowCardStylePanel(this.blockElement.model)) {
+      const { EmbedCardHorizontalIcon, EmbedCardListIcon } =
+        getEmbedCardIcons();
+
+      const buttons = [
+        {
+          type: 'horizontal',
+          name: 'Large horizontal style',
+          icon: EmbedCardHorizontalIcon,
+        },
+        {
+          type: 'list',
+          name: 'Small horizontal style',
+          icon: EmbedCardListIcon,
+        },
+      ] as {
+        type: EmbedCardStyle;
+        name: string;
+        icon: TemplateResult<1>;
+      }[];
+
+      return repeat(
+        buttons,
+        button => button.type,
+        ({ type, name, icon }) => html`
+          <icon-button
+            width="76px"
+            height="76px"
+            aria-label=${name}
+            class=${classMap({ selected: this.model.style === type })}
+            @click=${() => this._setEmbedCardStyle(type)}
+          >
+            ${icon}
+            <affine-tooltip .offset=${4}>${name}</affine-tooltip>
+          </icon-button>
+        `
+      );
+    }
+
+    return nothing;
+  }
+
+  private _moreActions() {
+    return renderActions([
+      [
+        {
+          type: 'copy',
+          name: 'Copy',
+          icon: CopyIcon,
+          disabled: this.doc.readonly,
+          handler: () => {
+            this._copyBlock().catch(console.error);
+          },
+        },
+        {
+          type: 'duplicate',
+          name: 'Duplicate',
+          icon: DuplicateIcon,
+          disabled: this.doc.readonly,
+          handler: () => this._duplicateBlock(),
+        },
+
+        isEmbedLinkedDocBlock(this.model) || isEmbedSyncedDocBlock(this.model)
+          ? nothing
+          : {
+              type: 'reload',
+              name: 'Reload',
+              icon: RefreshIcon,
+              disabled: this.doc.readonly,
+              handler: () => this._refreshData(),
+            },
+      ],
+      [
+        {
+          type: 'delete',
+          name: 'Delete',
+          icon: DeleteIcon,
+          disabled: this.doc.readonly,
+          handler: () => this.doc.deleteBlock(this.model),
+        },
+      ],
+    ]);
   }
 
   override connectedCallback() {
@@ -475,164 +618,120 @@ export class EmbedCardToolbar extends WidgetElement<
     this._embedOptions =
       'url' in model ? this._rootService.getEmbedBlockOptions(model.url) : null;
 
-    return html`
-      <div
-        class="embed-card-toolbar"
-        @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
-        @click=${(e: MouseEvent) => e.stopPropagation()}
-        @dblclick=${(e: MouseEvent) => e.stopPropagation()}
-      >
-        ${this._canShowUrlOptions && 'url' in model
-          ? html`
-              <div
-                class="embed-card-toolbar-button url"
-                @click=${() => this._copyUrl()}
-              >
-                <span>${model.url}</span>
+    const buttons = [
+      this._canShowUrlOptions && 'url' in model
+        ? html`
+            <a
+              class="affine-link-preview"
+              href=${model.url}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <span>${getHostName(model.url)}</span>
+            </a>
+
+            <editor-icon-button
+              aria-label="Copy"
+              data-testid="copy-link"
+              .tooltip=${'Click to copy link'}
+              ?disabled=${model.doc.readonly}
+              @click=${() => this._copyUrl()}
+            >
+              ${CopyIcon}
+            </editor-icon-button>
+
+            <editor-icon-button
+              aria-label="Edit"
+              data-testid="edit"
+              .tooltip=${'Edit'}
+              ?disabled=${model.doc.readonly}
+              @click=${() => toggleEmbedCardEditModal(this.host, model)}
+            >
+              ${EditIcon}
+            </editor-icon-button>
+          `
+        : nothing,
+
+      this._openMenuButton(),
+
+      html`
+        <editor-menu-button
+          .contentPadding=${'8px'}
+          .button=${html`
+            <editor-icon-button
+              aria-label="Switch view"
+              .justify=${'space-between'}
+              .withHover=${true}
+              .labelHeight=${'20px'}
+              .iconContainerWidth=${'110px'}
+            >
+              <div class="label">
+                <span style="text-transform: capitalize"
+                  >${this._viewType}</span
+                >
+                view
               </div>
+              ${SmallArrowDownIcon}
+            </editor-icon-button>
+          `}
+        >
+          <div slot data-size="small" data-orientation="vertical">
+            ${this._viewActions()}
+          </div>
+        </editor-menu-button>
+      `,
 
-              <icon-button
-                size="24px"
-                class="embed-card-toolbar-button copy"
-                ?disabled=${model.doc.readonly}
-                @click=${() => this._copyUrl()}
-              >
-                ${CopyIcon}
-                <affine-tooltip .offset=${12}
-                  >${'Click to copy link'}</affine-tooltip
-                >
-              </icon-button>
+      html`
+        <editor-menu-button
+          class="card-style-select"
+          .contentPadding=${'8px'}
+          .button=${html`
+            <editor-icon-button
+              aria-label="Card style"
+              .tooltip=${'Card style'}
+            >
+              ${PaletteIcon}
+            </editor-icon-button>
+          `}
+        >
+          <div slot>${this._cardStyleActions()}</div>
+        </editor-menu-button>
+      `,
 
-              <icon-button
-                size="24px"
-                class="embed-card-toolbar-button edit"
-                ?disabled=${model.doc.readonly}
-                @click=${() => toggleEmbedCardEditModal(this.host, model)}
-              >
-                ${EditIcon}
-                <affine-tooltip .offset=${12}>${'Edit'}</affine-tooltip>
-              </icon-button>
-
-              <div class="divider"></div>
-            `
-          : nothing}
-        ${isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
-          ? html`
-              <icon-button
-                size="24px"
-                class="embed-card-toolbar-button doc-info"
-                @click=${() => this.blockElement.open()}
-                ?disabled=${this._openButtonDisabled}
-              >
-                ${isEmbedLinkedDocBlock(model)
-                  ? nothing
-                  : html`${this._pageIcon} <span>${this._docTitle}</span>`}
-                ${OpenIcon}
-                <affine-tooltip .offset=${12}
-                  >${'Open this doc'}</affine-tooltip
-                >
-              </icon-button>
-
-              <div class="divider"></div>
-            `
-          : nothing}
-        ${isPeekable(this.blockElement)
-          ? html`<icon-button
-                size="24px"
-                class="embed-card-toolbar-button peek"
-                @click=${() => peek(this.blockElement)}
-              >
-                ${CenterPeekIcon}
-                <affine-tooltip .offset=${12}
-                  >${'Open in center peek'}</affine-tooltip
-                >
-              </icon-button>
-              <div class="divider"></div>`
-          : nothing}
-        <div class="embed-card-toolbar-button view-selector">
-          <icon-button
-            size="24px"
-            class="embed-card-toolbar-button link"
-            hover=${false}
-            ?disabled=${model.doc.readonly}
-            @click=${() => this._turnIntoInlineView()}
-          >
-            ${LinkIcon}
-            <affine-tooltip .offset=${12}>${'Inline view'}</affine-tooltip>
-          </icon-button>
-
-          <icon-button
-            size="24px"
-            class=${classMap({
-              'embed-card-toolbar-button': true,
-              card: true,
-              'current-view': this._isCardView,
-            })}
-            hover=${false}
-            ?disabled=${model.doc.readonly}
-            @click=${() => this._convertToCardView()}
-          >
-            ${BookmarkIcon}
-            <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
-          </icon-button>
-
-          ${this._canConvertToEmbedView || this._isEmbedView
-            ? html`
-                <icon-button
-                  size="24px"
-                  class=${classMap({
-                    'embed-card-toolbar-button': true,
-                    embed: true,
-                    'current-view': this._isEmbedView,
-                  })}
-                  hover=${false}
-                  ?disabled=${this._embedViewButtonDisabled}
-                  @click=${() => this._convertToEmbedView()}
-                >
-                  ${EmbedWebIcon}
-                  <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
-                </icon-button>
-              `
-            : nothing}
-        </div>
-
-        ${this._canShowCardStylePanel(model)
-          ? html`
-              <icon-button
-                size="24px"
-                class="embed-card-toolbar-button card-style"
-                ?disabled=${model.doc.readonly}
-                @click=${() => this._toggleCardStyleMenu()}
-              >
-                ${PaletteIcon}
-                <affine-tooltip .offset=${12}>${'Card style'}</affine-tooltip>
-              </icon-button>
-            `
-          : nothing}
-
-        <div class="divider"></div>
-
-        <icon-button
-          size="24px"
-          class="embed-card-toolbar-button caption"
+      html`
+        <editor-icon-button
+          aria-label="Caption"
+          .tooltip=${'Add Caption'}
           ?disabled=${model.doc.readonly}
           @click=${() => this._showCaption()}
         >
           ${CaptionIcon}
-          <affine-tooltip .offset=${12}>${'Add Caption'}</affine-tooltip>
-        </icon-button>
+        </editor-icon-button>
+      `,
 
-        <div class="divider"></div>
-
-        <icon-button
-          size="24px"
-          class="embed-card-toolbar-button more-button"
-          @click=${() => this._toggleMoreMenu()}
+      html`
+        <editor-menu-button
+          .contentPadding=${'8px'}
+          .button=${html`
+            <editor-icon-button aria-label="More" .tooltip=${'More'}>
+              ${MoreVerticalIcon}
+            </editor-icon-button>
+          `}
         >
-          ${MoreVerticalIcon}
-          <affine-tooltip .offset=${12}>More</affine-tooltip>
-        </icon-button>
-      </div>
+          <div slot data-size="large" data-orientation="vertical">
+            ${this._moreActions()}
+          </div>
+        </editor-menu-button>
+      `,
+    ];
+
+    return html`
+      <editor-toolbar class="embed-card-toolbar">
+        ${join(
+          buttons.filter(button => button !== nothing),
+          renderToolbarSeparator
+        )}
+      </editor-toolbar>
     `;
   }
 }
