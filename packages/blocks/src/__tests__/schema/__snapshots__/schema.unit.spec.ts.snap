@@ -1,0 +1,788 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`serialized block schema > matches current snapshot 1`] = `
+[
+  "{
+  "flavour": "affine:code",
+  "metadata": {
+    "version": 1,
+    "role": "content",
+    "parent": [
+      "affine:note",
+      "affine:paragraph",
+      "affine:list",
+      "affine:edgeless-text"
+    ],
+    "children": []
+  },
+  "props": {
+    "text": {
+      "type": "text"
+    },
+    "language": {
+      "type": "string",
+      "default": "Plain Text"
+    },
+    "caption": {
+      "type": "string",
+      "default": ""
+    }
+  }
+}",
+  "{
+  "flavour": "affine:paragraph",
+  "metadata": {
+    "version": 1,
+    "role": "content",
+    "parent": [
+      "affine:note",
+      "affine:database",
+      "affine:paragraph",
+      "affine:list",
+      "affine:edgeless-text"
+    ]
+  },
+  "props": {
+    "type": {
+      "type": "string",
+      "default": "text"
+    },
+    "text": {
+      "type": "text"
+    }
+  }
+}",
+  "{
+  "flavour": "affine:page",
+  "metadata": {
+    "version": 2,
+    "role": "root"
+  },
+  "props": {
+    "title": {
+      "type": "text"
+    }
+  }
+}",
+  "{
+  "flavour": "affine:list",
+  "metadata": {
+    "version": 1,
+    "role": "content",
+    "parent": [
+      "affine:note",
+      "affine:database",
+      "affine:list",
+      "affine:paragraph",
+      "affine:edgeless-text"
+    ]
+  },
+  "props": {
+    "type": {
+      "type": "string",
+      "default": "bulleted"
+    },
+    "text": {
+      "type": "text"
+    }
+  }
+}",
+  "{
+  "flavour": "affine:note",
+  "metadata": {
+    "version": 1,
+    "role": "hub",
+    "parent": [
+      "affine:page"
+    ],
+    "children": [
+      "affine:paragraph",
+      "affine:list",
+      "affine:code",
+      "affine:divider",
+      "affine:database",
+      "affine:data-view",
+      "affine:image",
+      "affine:bookmark",
+      "affine:attachment",
+      "affine:surface-ref",
+      "affine:embed-*"
+    ]
+  },
+  "props": {
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,800,95]"
+    },
+    "background": {
+      "type": "string",
+      "default": "--affine-note-background-blue"
+    },
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "displayMode": {
+      "type": "string",
+      "default": "both"
+    }
+  }
+}",
+  "{
+  "flavour": "affine:divider",
+  "metadata": {
+    "version": 1,
+    "role": "content",
+    "children": []
+  },
+  "props": {}
+}",
+  "{
+  "flavour": "affine:image",
+  "metadata": {
+    "version": 1,
+    "role": "content"
+  },
+  "props": {
+    "caption": {
+      "type": "string",
+      "default": ""
+    },
+    "sourceId": {
+      "type": "string",
+      "default": ""
+    },
+    "width": {
+      "type": "number",
+      "default": 0
+    },
+    "height": {
+      "type": "number",
+      "default": 0
+    },
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    },
+    "size": {
+      "type": "number",
+      "default": -1
+    }
+  }
+}",
+  "{
+  "flavour": "affine:surface",
+  "metadata": {
+    "version": 5,
+    "role": "hub",
+    "parent": [
+      "affine:page"
+    ],
+    "children": [
+      "affine:frame",
+      "affine:image",
+      "affine:bookmark",
+      "affine:attachment",
+      "affine:embed-*",
+      "affine:edgeless-text"
+    ]
+  },
+  "props": {
+    "elements": {
+      "type": "boxed"
+    }
+  }
+}",
+  "{
+  "flavour": "affine:bookmark",
+  "metadata": {
+    "version": 1,
+    "role": "content",
+    "parent": [
+      "affine:note",
+      "affine:surface",
+      "affine:edgeless-text"
+    ]
+  },
+  "props": {
+    "style": {
+      "type": "string",
+      "default": "horizontal"
+    },
+    "url": {
+      "type": "string",
+      "default": ""
+    },
+    "caption": {
+      "type": "unknown",
+      "default": null
+    },
+    "description": {
+      "type": "unknown",
+      "default": null
+    },
+    "icon": {
+      "type": "unknown",
+      "default": null
+    },
+    "image": {
+      "type": "unknown",
+      "default": null
+    },
+    "title": {
+      "type": "unknown",
+      "default": null
+    },
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    }
+  }
+}",
+  "{
+  "flavour": "affine:frame",
+  "metadata": {
+    "version": 1,
+    "role": "content",
+    "parent": [
+      "affine:surface"
+    ],
+    "children": []
+  },
+  "props": {
+    "title": {
+      "type": "text"
+    },
+    "background": {
+      "type": "string",
+      "default": "--affine-palette-transparent"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,100,100]"
+    },
+    "index": {
+      "type": "string",
+      "default": "a0"
+    }
+  }
+}",
+  "{
+  "flavour": "affine:database",
+  "metadata": {
+    "version": 3,
+    "role": "hub",
+    "parent": [
+      "affine:note"
+    ],
+    "children": [
+      "affine:paragraph",
+      "affine:list"
+    ]
+  },
+  "props": {
+    "title": {
+      "type": "text"
+    }
+  }
+}",
+  "{
+  "flavour": "affine:surface-ref",
+  "metadata": {
+    "version": 1,
+    "role": "content",
+    "parent": [
+      "affine:note"
+    ]
+  },
+  "props": {
+    "reference": {
+      "type": "string",
+      "default": ""
+    },
+    "caption": {
+      "type": "string",
+      "default": ""
+    }
+  }
+}",
+  "{
+  "flavour": "affine:data-view",
+  "metadata": {
+    "version": 1,
+    "role": "hub",
+    "parent": [
+      "affine:note"
+    ],
+    "children": [
+      "affine:paragraph",
+      "affine:list"
+    ]
+  },
+  "props": {
+    "title": {
+      "type": "string",
+      "default": ""
+    }
+  }
+}",
+  "{
+  "flavour": "affine:attachment",
+  "metadata": {
+    "version": 1,
+    "role": "content",
+    "parent": [
+      "affine:note",
+      "affine:surface",
+      "affine:edgeless-text"
+    ]
+  },
+  "props": {
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "size": {
+      "type": "number",
+      "default": 0
+    },
+    "type": {
+      "type": "string",
+      "default": "application/octet-stream"
+    },
+    "sourceId": {
+      "type": "unknown",
+      "default": "undefined"
+    },
+    "caption": {
+      "type": "unknown",
+      "default": "undefined"
+    },
+    "style": {
+      "type": "string",
+      "default": "horizontalThin"
+    },
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    }
+  }
+}",
+  "{
+  "flavour": "affine:embed-youtube",
+  "metadata": {
+    "version": 1,
+    "role": "content"
+  },
+  "props": {
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    },
+    "style": {
+      "type": "string",
+      "default": "video"
+    },
+    "url": {
+      "type": "string",
+      "default": ""
+    },
+    "caption": {
+      "type": "unknown",
+      "default": null
+    },
+    "image": {
+      "type": "unknown",
+      "default": null
+    },
+    "title": {
+      "type": "unknown",
+      "default": null
+    },
+    "description": {
+      "type": "unknown",
+      "default": null
+    },
+    "creator": {
+      "type": "unknown",
+      "default": null
+    },
+    "creatorUrl": {
+      "type": "unknown",
+      "default": null
+    },
+    "creatorImage": {
+      "type": "unknown",
+      "default": null
+    },
+    "videoId": {
+      "type": "unknown",
+      "default": null
+    }
+  }
+}",
+  "{
+  "flavour": "affine:embed-figma",
+  "metadata": {
+    "version": 1,
+    "role": "content"
+  },
+  "props": {
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    },
+    "style": {
+      "type": "string",
+      "default": "figma"
+    },
+    "url": {
+      "type": "string",
+      "default": ""
+    },
+    "caption": {
+      "type": "unknown",
+      "default": null
+    },
+    "title": {
+      "type": "unknown",
+      "default": null
+    },
+    "description": {
+      "type": "unknown",
+      "default": null
+    }
+  }
+}",
+  "{
+  "flavour": "affine:embed-github",
+  "metadata": {
+    "version": 1,
+    "role": "content"
+  },
+  "props": {
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    },
+    "style": {
+      "type": "string",
+      "default": "horizontal"
+    },
+    "owner": {
+      "type": "string",
+      "default": ""
+    },
+    "repo": {
+      "type": "string",
+      "default": ""
+    },
+    "githubType": {
+      "type": "string",
+      "default": "issue"
+    },
+    "githubId": {
+      "type": "string",
+      "default": ""
+    },
+    "url": {
+      "type": "string",
+      "default": ""
+    },
+    "caption": {
+      "type": "unknown",
+      "default": null
+    },
+    "image": {
+      "type": "unknown",
+      "default": null
+    },
+    "status": {
+      "type": "unknown",
+      "default": null
+    },
+    "statusReason": {
+      "type": "unknown",
+      "default": null
+    },
+    "title": {
+      "type": "unknown",
+      "default": null
+    },
+    "description": {
+      "type": "unknown",
+      "default": null
+    },
+    "createdAt": {
+      "type": "unknown",
+      "default": null
+    },
+    "assignees": {
+      "type": "unknown",
+      "default": null
+    }
+  }
+}",
+  "{
+  "flavour": "affine:embed-html",
+  "metadata": {
+    "version": 1,
+    "role": "content"
+  },
+  "props": {
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    },
+    "style": {
+      "type": "string",
+      "default": "html"
+    },
+    "caption": {
+      "type": "unknown",
+      "default": null
+    },
+    "html": {
+      "type": "unknown",
+      "default": "undefined"
+    },
+    "design": {
+      "type": "unknown",
+      "default": "undefined"
+    }
+  }
+}",
+  "{
+  "flavour": "affine:embed-linked-doc",
+  "metadata": {
+    "version": 1,
+    "role": "content"
+  },
+  "props": {
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    },
+    "pageId": {
+      "type": "string",
+      "default": ""
+    },
+    "style": {
+      "type": "string",
+      "default": "horizontal"
+    },
+    "caption": {
+      "type": "unknown",
+      "default": null
+    }
+  }
+}",
+  "{
+  "flavour": "affine:embed-synced-doc",
+  "metadata": {
+    "version": 1,
+    "role": "content"
+  },
+  "props": {
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    },
+    "pageId": {
+      "type": "string",
+      "default": ""
+    },
+    "style": {
+      "type": "string",
+      "default": "syncedDoc"
+    },
+    "caption": {
+      "type": "unknown",
+      "default": "undefined"
+    },
+    "scale": {
+      "type": "unknown",
+      "default": "undefined"
+    }
+  }
+}",
+  "{
+  "flavour": "affine:embed-loom",
+  "metadata": {
+    "version": 1,
+    "role": "content"
+  },
+  "props": {
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,0,0]"
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    },
+    "style": {
+      "type": "string",
+      "default": "video"
+    },
+    "url": {
+      "type": "string",
+      "default": ""
+    },
+    "caption": {
+      "type": "unknown",
+      "default": null
+    },
+    "image": {
+      "type": "unknown",
+      "default": null
+    },
+    "title": {
+      "type": "unknown",
+      "default": null
+    },
+    "description": {
+      "type": "unknown",
+      "default": null
+    },
+    "videoId": {
+      "type": "unknown",
+      "default": null
+    }
+  }
+}",
+  "{
+  "flavour": "affine:edgeless-text",
+  "metadata": {
+    "version": 1,
+    "role": "hub",
+    "parent": [
+      "affine:surface"
+    ],
+    "children": [
+      "affine:paragraph",
+      "affine:list",
+      "affine:code",
+      "affine:image",
+      "affine:bookmark",
+      "affine:attachment",
+      "affine:embed-!(synced-doc)"
+    ]
+  },
+  "props": {
+    "xywh": {
+      "type": "string",
+      "default": "[0,0,16,16]"
+    },
+    "index": {
+      "type": "string",
+      "default": "a0"
+    },
+    "color": {
+      "type": "string",
+      "default": "#000000"
+    },
+    "fontFamily": {
+      "type": "string",
+      "default": "blocksuite:surface:Inter"
+    },
+    "fontStyle": {
+      "type": "string",
+      "default": "normal"
+    },
+    "fontWeight": {
+      "type": "string",
+      "default": "400"
+    },
+    "textAlign": {
+      "type": "string",
+      "default": "left"
+    },
+    "scale": {
+      "type": "number",
+      "default": 1
+    },
+    "rotate": {
+      "type": "number",
+      "default": 0
+    }
+  }
+}",
+]
+`;
