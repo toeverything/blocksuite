@@ -25,8 +25,6 @@ export const NOTE_CONTAINER_PADDING = 24;
 export const EDGELESS_NOTE_EXTRA_PADDING = 20;
 export const DRAG_HOVER_RECT_PADDING = 4;
 
-export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
-
 export type DropType = 'before' | 'after' | 'in';
 export type DropResult = {
   rect: Rect | null;

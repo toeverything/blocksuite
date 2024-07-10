@@ -7,6 +7,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../../_common/consts.js';
 import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
   type BlockComponent,
@@ -27,7 +28,6 @@ import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   DRAG_HANDLE_CONTAINER_HEIGHT,
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT,
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST,
