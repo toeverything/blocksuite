@@ -259,12 +259,9 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
           },
         ],
       };
-      popCardMenu(
-        this.dataViewEle,
-        e.target as HTMLElement,
-        this.cardId,
-        selection
-      );
+      const target = e.target as HTMLElement;
+      const ref = target.closest('affine-data-view-kanban-cell') ?? this;
+      popCardMenu(this.dataViewEle, ref, this.cardId, selection);
     }
   };
 
