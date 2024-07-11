@@ -12,7 +12,9 @@ function initDoc() {
   const workspace = new DocCollection({ schema });
   workspace.meta.initialize();
   const doc = workspace.createDoc({ id: 'doc:home' });
-  doc.addBlock('todo:container');
+  doc.load();
+  const rootId = doc.addBlock('todo:root');
+  doc.addBlock('todo:container', {}, rootId);
   return doc;
 }
 
@@ -28,6 +30,8 @@ function bindEvents(doc: Doc, container: TodoContainerBlockModel) {
       todoItemBlock.propsUpdated.on(() => {
         render(container);
       });
+
+      render(container);
       addInput.value = '';
       addInput.focus();
     }
@@ -65,9 +69,7 @@ function main() {
     'todo:container'
   )[0] as TodoContainerBlockModel;
   bindEvents(doc, container);
-  container.childrenUpdated.on(() => {
-    render(container);
-  });
+  render(container);
 }
 
 main();
