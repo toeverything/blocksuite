@@ -79,20 +79,22 @@ export function getTooltipWithShortcut(
 
 export function readImageSize(file: File) {
   return new Promise<{ width: number; height: number }>(resolve => {
-    const reader = new FileReader();
     const size = { width: 0, height: 0 };
-    reader.addEventListener('load', _ => {
-      const img = new Image();
-      img.onload = () => {
-        size.width = img.width;
-        size.height = img.height;
-        resolve(size);
-      };
-      img.onerror = () => resolve(size);
-      img.src = reader.result as string;
-    });
-    reader.addEventListener('error', () => resolve(size));
-    reader.readAsDataURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      size.width = img.width;
+      size.height = img.height;
+      URL.revokeObjectURL(img.src);
+      resolve(size);
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(img.src);
+      resolve(size);
+    };
+
+    img.src = URL.createObjectURL(file);
   });
 }
 
