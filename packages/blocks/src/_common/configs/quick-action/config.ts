@@ -49,6 +49,7 @@ export const quickActionConfig: QuickActionConfig[] = [
             toast(host, 'Copied to clipboard');
           },
         })
+        .draftSelectedModels()
         .copySelectedModels()
         .run();
     },

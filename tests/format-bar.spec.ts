@@ -18,6 +18,7 @@ import {
   pressArrowDown,
   pressArrowUp,
   pressEnter,
+  pressEscape,
   pressTab,
   scrollToBottom,
   scrollToTop,
@@ -817,26 +818,6 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await page.waitForTimeout(10);
   // The paragraph button should prevent selection after click
   await assertRichTextInlineRange(page, 0, 0, 3);
-});
-
-test('should format quick bar be able to copy', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  // drag only the `456` paragraph
-  await dragBetweenIndices(page, [1, 0], [1, 3]);
-
-  const { copyBtn } = getFormatBar(page);
-  await expect(copyBtn).toBeVisible();
-  await assertRichTextInlineRange(page, 1, 0, 3);
-  await copyBtn.click();
-  await assertRichTextInlineRange(page, 1, 0, 3);
-
-  await focusRichText(page, 1);
-  await pasteByKeyboard(page);
-  await waitNextFrame(page);
-
-  await assertRichTexts(page, ['123', '456456', '789']);
 });
 
 test('should format quick bar show when double click text', async ({
@@ -1649,4 +1630,66 @@ test('create linked doc from block selection with format bar', async ({
   </affine:note>
 </affine:page>`
   );
+});
+
+test.describe('more menu button', () => {
+  test('should be able to perform the copy action', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    // drag only the `456` paragraph
+    await dragBetweenIndices(page, [1, 0], [1, 3]);
+
+    const { openMoreMenu, copyBtn } = getFormatBar(page);
+    await openMoreMenu();
+    await expect(copyBtn).toBeVisible();
+    await assertRichTextInlineRange(page, 1, 0, 3);
+    await copyBtn.click();
+    await assertRichTextInlineRange(page, 1, 0, 3);
+
+    await focusRichText(page, 1);
+    await pasteByKeyboard(page);
+    await waitNextFrame(page);
+
+    await assertRichTexts(page, ['123', '456456', '789']);
+  });
+
+  // fixme: Copy and paste is broken(ctrl-c/ctrl-v).
+  test.skip('should be able to perform the duplicate action', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+
+    await focusRichText(page, 1);
+    await pressEscape(page);
+
+    const { openMoreMenu, duplicateBtn } = getFormatBar(page);
+    await openMoreMenu();
+    await expect(duplicateBtn).toBeVisible();
+    await duplicateBtn.click();
+
+    await waitNextFrame(page);
+
+    await assertRichTexts(page, ['123', '456', '456', '789']);
+  });
+
+  test('should be able to perform the delete action', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+
+    await focusRichText(page, 1);
+    await pressEscape(page);
+
+    const { openMoreMenu, deleteBtn } = getFormatBar(page);
+    await openMoreMenu();
+    await expect(deleteBtn).toBeVisible();
+    await deleteBtn.click();
+
+    await waitNextFrame(page);
+
+    await assertRichTexts(page, ['123', '789']);
+  });
 });

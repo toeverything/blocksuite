@@ -38,6 +38,7 @@ import {
   copySelectedModelsCommand,
   deleteSelectedModelsCommand,
   deleteTextCommand,
+  draftSelectedModelsCommand,
   formatBlockCommand,
   formatNativeCommand,
   formatTextCommand,
@@ -342,6 +343,7 @@ export class RootService extends BlockService<RootBlockModel> {
       .add('getSelectedBlocks', getSelectedBlocksCommand)
       .add('copySelectedModels', copySelectedModelsCommand)
       .add('deleteSelectedModels', deleteSelectedModelsCommand)
+      .add('draftSelectedModels', draftSelectedModelsCommand)
       .add('getSelectedModels', getSelectedModelsCommand)
       .add('getBlockSelections', getBlockSelectionsCommand)
       .add('getImageSelections', getImageSelectionsCommand)

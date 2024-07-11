@@ -244,8 +244,7 @@ export class Clipboard {
     parent?: string,
     index?: number
   ) => {
-    const job = this._getJob();
-    return job.snapshotToBlock(snapshot, doc, parent, index);
+    return this._getJob().snapshotToBlock(snapshot, doc, parent, index);
   };
 
   copySlice = async (slice: Slice) => {
@@ -264,5 +263,24 @@ export class Clipboard {
       );
       return items;
     });
+  };
+
+  duplicateSlice = async (
+    slice: Slice,
+    doc: Doc,
+    parent?: string,
+    index?: number,
+    type = 'BLOCKSUITE/SNAPSHOT'
+  ) => {
+    const items = {
+      [type]: await this._getClipboardItem(slice, type),
+    };
+
+    await this._getSnapshotByPriority(
+      type => (items[type] as string | File[]) ?? '',
+      doc,
+      parent,
+      index
+    );
   };
 }

@@ -34,6 +34,7 @@ import {
   type InlineActionConfigItem,
   type ParagraphActionConfigItem,
   toolbarDefaultConfig,
+  toolbarMoreButton,
 } from './config.js';
 import { formatBarStyle } from './styles.js';
 
@@ -83,11 +84,6 @@ export class AffineFormatBarWidget extends WidgetElement {
 
   @state()
   accessor configItems: FormatBarConfigItem[] = [];
-
-  private _reset() {
-    this._displayType = 'none';
-    this._selectedBlockElements = [];
-  }
 
   private _shouldDisplay() {
     const readonly = this.doc.awarenessStore.isReadonly(
@@ -200,7 +196,7 @@ export class AffineFormatBarWidget extends WidgetElement {
         if (this.displayType === 'text' || this.displayType === 'native') {
           const range = this.nativeRange;
           if (!range) {
-            this._reset();
+            this.reset();
             return;
           }
           targetRect = range.getBoundingClientRect();
@@ -278,7 +274,7 @@ export class AffineFormatBarWidget extends WidgetElement {
               return;
             }
 
-            this._reset();
+            this.reset();
             return;
           }
 
@@ -295,7 +291,7 @@ export class AffineFormatBarWidget extends WidgetElement {
             return;
           }
 
-          this._reset();
+          this.reset();
         };
 
         update().catch(console.error);
@@ -308,7 +304,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       }
 
       const reset = () => {
-        this._reset();
+        this.reset();
         this.requestUpdate();
       };
       const viewSelection = databaseSelection.viewSelection;
@@ -428,6 +424,11 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
   }
 
+  reset() {
+    this._displayType = 'none';
+    this._selectedBlockElements = [];
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._abortController = new AbortController();
@@ -470,7 +471,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._abortController.abort();
-    this._reset();
+    this.reset();
     this._lastCursor = undefined;
   }
 
@@ -571,6 +572,8 @@ export class AffineFormatBarWidget extends WidgetElement {
     return html`
       <editor-toolbar class="${AFFINE_FORMAT_BAR_WIDGET}">
         ${items}
+        <editor-toolbar-separator></editor-toolbar-separator>
+        ${toolbarMoreButton(this)}
       </editor-toolbar>
     `;
   }

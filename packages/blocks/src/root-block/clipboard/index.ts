@@ -35,6 +35,7 @@ export class PageClipboard {
       .chain()
       .with({ onCopy })
       .getSelectedModels()
+      .draftSelectedModels()
       .copySelectedModels();
   };
 
