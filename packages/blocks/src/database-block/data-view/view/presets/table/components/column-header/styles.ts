@@ -71,7 +71,6 @@ export const styles = css`
         overflow: hidden;
         color: var(--affine-text-secondary-color);
         font-size: 14px;
-        position: absolute;
     }
 
     .affine-database-column-type-icon {
