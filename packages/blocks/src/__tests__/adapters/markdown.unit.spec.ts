@@ -1,6 +1,7 @@
 import type {
   BlockSnapshot,
   DocSnapshot,
+  JobMiddleware,
   SliceSnapshot,
 } from '@blocksuite/store';
 import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
@@ -1584,9 +1585,10 @@ hhh
 
 hhh
 `;
-
-    const mdAdapter = new MarkdownAdapter(createJob());
-    mdAdapter.applyConfigs(new Map([['title:deadbeef', 'test']]));
+    const middleware: JobMiddleware = ({ adapterConfigs }) => {
+      adapterConfigs.set('title:deadbeef', 'test');
+    };
+    const mdAdapter = new MarkdownAdapter(createJob([middleware]));
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });

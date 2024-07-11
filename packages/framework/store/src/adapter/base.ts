@@ -49,13 +49,14 @@ export type ToSliceSnapshotPayload<Target> = {
 };
 
 export abstract class BaseAdapter<AdapterTarget = unknown> {
-  protected configs = new Map<string, unknown>();
-
   job: Job;
 
   constructor(job: Job) {
     this.job = job;
-    this.applyConfigs(job.adapterConfigs);
+  }
+
+  get configs() {
+    return this.job.adapterConfigs;
   }
 
   abstract fromDocSnapshot(
@@ -131,10 +132,6 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     const snapshot = await this.toSliceSnapshot(payload);
     if (!snapshot) return;
     return this.job.snapshotToSlice(snapshot, doc, parent, index);
-  }
-
-  applyConfigs(configs: Map<string, unknown>) {
-    this.configs = new Map(configs);
   }
 }
 
