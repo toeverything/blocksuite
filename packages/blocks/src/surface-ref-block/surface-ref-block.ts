@@ -15,6 +15,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { Peekable } from '../_common/components/peekable.js';
+import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import {
   EdgelessModeIcon,
   FrameIcon,
@@ -522,6 +523,8 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    bindContainerHotkey(this);
 
     this.contentEditable = 'false';
 

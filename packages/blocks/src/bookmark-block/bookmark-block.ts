@@ -5,6 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { BlockComponent } from '../_common/components/block-component.js';
+import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
@@ -58,6 +59,8 @@ export class BookmarkBlockComponent extends BlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    bindContainerHotkey(this);
 
     this._fetchAbortController = new AbortController();
 

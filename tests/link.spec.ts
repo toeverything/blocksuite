@@ -510,7 +510,8 @@ test('convert link to card', async ({ page }) => {
   await linkLocator.hover();
   await waitNextFrame(page);
   await expect(linkPopoverLocator).toBeVisible();
-  await expect(linkToCardBtn).not.toBeVisible();
+  await page.getByRole('button', { name: 'Switch view' }).click();
+  await expect(linkToCardBtn).toBeVisible();
   await expect(linkToEmbedBtn).not.toBeVisible();
 });
 

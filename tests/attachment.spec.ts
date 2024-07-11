@@ -3,10 +3,13 @@ import { expect, type Page } from '@playwright/test';
 
 import { popImageMoreMenu } from './utils/actions/drag.js';
 import {
+  pressArrowDown,
   pressArrowUp,
   pressBackspace,
   pressEnter,
   pressEscape,
+  pressShiftTab,
+  pressTab,
   redoByKeyboard,
   SHORT_KEY,
   type,
@@ -21,7 +24,9 @@ import {
   waitNextFrame,
 } from './utils/actions/misc.js';
 import {
+  assertBlockChildrenIds,
   assertBlockCount,
+  assertBlockFlavour,
   assertBlockSelections,
   assertKeyboardWorkInInput,
   assertRichImage,
@@ -657,4 +662,59 @@ test('cancel file picker with input element resolves', async ({ page }) => {
 
   await expect(attachment).toHaveCount(0);
   await expect(inputFile).toHaveCount(0);
+});
+
+test('indent attachment block to paragraph', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const { insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await pressEnter(page);
+  await insertAttachment();
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+  await assertBlockFlavour(page, '1', 'affine:note');
+  await assertBlockFlavour(page, '2', 'affine:paragraph');
+  await assertBlockFlavour(page, '4', 'affine:attachment');
+
+  await focusRichText(page);
+  await pressArrowDown(page);
+  await assertBlockSelections(page, ['4']);
+  await pressTab(page);
+  await assertBlockChildrenIds(page, '1', ['2']);
+  await assertBlockChildrenIds(page, '2', ['4']);
+
+  await pressShiftTab(page);
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+});
+
+test('indent attachment block to list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const { insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await type(page, '- a');
+  await pressEnter(page);
+  await insertAttachment();
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await assertBlockChildrenIds(page, '1', ['3', '5']);
+  await assertBlockFlavour(page, '1', 'affine:note');
+  await assertBlockFlavour(page, '3', 'affine:list');
+  await assertBlockFlavour(page, '5', 'affine:attachment');
+
+  await focusRichText(page);
+  await pressArrowDown(page);
+  await assertBlockSelections(page, ['5']);
+  await pressTab(page);
+  await assertBlockChildrenIds(page, '1', ['3']);
+  await assertBlockChildrenIds(page, '3', ['5']);
+
+  await pressShiftTab(page);
+  await assertBlockChildrenIds(page, '1', ['3', '5']);
 });
