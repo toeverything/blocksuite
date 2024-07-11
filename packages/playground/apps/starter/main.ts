@@ -22,8 +22,6 @@ async function main() {
   const collection = createStarterDocCollection();
 
   if (isE2E) {
-    collection.meta.initialize();
-
     Object.defineProperty(window, '$blocksuite', {
       value: Object.freeze({
         store,
