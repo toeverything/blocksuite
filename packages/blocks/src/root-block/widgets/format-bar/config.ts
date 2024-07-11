@@ -1,4 +1,8 @@
-import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
+import type {
+  Chain,
+  CommandKeyToData,
+  InitCommandCtx,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { html, type TemplateResult } from 'lit';
@@ -132,7 +136,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     .addDivider()
     .addInlineAction({
       id: 'convert-to-database',
-      name: 'Group as Database',
+      name: 'Create Database',
       icon: DatabaseTableViewIcon20,
       isActive: () => false,
       action: () => {
@@ -143,17 +147,44 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         });
       },
       showWhen: chain => {
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['block', 'text'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || selectedModels.length === 0) return false;
+        const middleware = (count = 0) => {
+          return (
+            ctx: CommandKeyToData<'selectedBlocks'>,
+            next: () => void
+          ) => {
+            const { selectedBlocks } = ctx;
+            if (!selectedBlocks || selectedBlocks.length === count) return;
 
-        return selectedModels.every(block =>
-          DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
-        );
+            const allowed = selectedBlocks.every(block =>
+              DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
+            );
+            if (!allowed) return;
+
+            next();
+          };
+        };
+        let [result] = chain
+          .getTextSelection()
+          .getSelectedBlocks({
+            types: ['text'],
+          })
+          .inline(middleware(1))
+          .run();
+
+        if (result) return true;
+
+        [result] = chain
+          .tryAll(chain => [
+            chain.getBlockSelections(),
+            chain.getImageSelections(),
+          ])
+          .getSelectedBlocks({
+            types: ['block', 'image'],
+          })
+          .inline(middleware(0))
+          .run();
+
+        return result;
       },
     })
     .addDivider()
