@@ -34,7 +34,7 @@ export function createStarterDocCollection() {
   let docSources: StoreOptions['docSources'];
   if (room) {
     docSources = {
-      main: new BroadcastChannelDocSource(),
+      main: new BroadcastChannelDocSource(`broadcast-channel-${room}`),
     };
   }
   const id = room ?? `starter-${Math.random().toString(16).slice(2, 8)}`;

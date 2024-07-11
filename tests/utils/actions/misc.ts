@@ -17,7 +17,9 @@ import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.j
 import type { DocsPanel } from '@playground/apps/_common/components/docs-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import type { AffineEditorContainer } from '@presets/editors/index.js';
 import type { BlockModel } from '@store/schema/index.js';
+import { uuidv4 } from '@store/utils/id-generator.js';
 import lz from 'lz-string';
 
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
@@ -42,7 +44,7 @@ const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
 const RICH_TEXT_SELECTOR = '.inline-editor';
 
 function generateRandomRoomId() {
-  return `playwright-${Math.random().toFixed(8).substring(2)}`;
+  return `playwright-${uuidv4()}`;
 }
 
 export const getSelectionRect = async (page: Page): Promise<DOMRect> => {
@@ -306,7 +308,16 @@ export async function enterPlaygroundRoom(
     multiEditor,
   });
 
-  // await readyPromise;
+  const locator = page.locator('affine-editor-container');
+  await locator.isVisible();
+  await page.evaluate(async () => {
+    const dom = document.querySelector<AffineEditorContainer>(
+      'affine-editor-container'
+    );
+    if (dom) {
+      await dom.updateComplete;
+    }
+  });
 
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
