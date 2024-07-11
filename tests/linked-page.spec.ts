@@ -644,6 +644,41 @@ test.describe('linked page popover', () => {
     await expect(linkedDocPopover).toBeHidden();
     await assertExistRefText('page2');
   });
+
+  test('should more docs works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+
+    await (async () => {
+      for (let index = 0; index < 10; index++) {
+        const newPage = await addNewPage(page);
+        await switchToPage(page, newPage.id);
+        await focusTitle(page);
+        await type(page, 'page' + index);
+      }
+    })();
+
+    await switchToPage(page);
+    await focusRichText(page);
+    await type(page, '@');
+
+    const { pageBtn, linkedDocPopover } = getLinkedDocPopover(page);
+    await expect(linkedDocPopover).toBeVisible();
+    await expect(pageBtn).toHaveText([
+      ...Array.from({ length: 6 }, (_, index) => `page${index}`),
+      '4 more docs',
+      'Create "Untitled" doc',
+      'Import',
+    ]);
+
+    const moreNode = page.locator(`icon-button[data-id="Link to Doc More"]`);
+    await moreNode.click();
+    await expect(pageBtn).toHaveText([
+      ...Array.from({ length: 10 }, (_, index) => `page${index}`),
+      'Create "Untitled" doc',
+      'Import',
+    ]);
+  });
 });
 
 test.describe.skip('linked page with clipboard', () => {

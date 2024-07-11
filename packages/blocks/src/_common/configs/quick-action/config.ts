@@ -10,7 +10,7 @@ import { toast } from '../../components/toast.js';
 import {
   CopyIcon,
   DatabaseTableViewIcon20,
-  FontLinkedDocIcon,
+  LinkedDocIcon,
 } from '../../icons/index.js';
 import {
   convertSelectedBlocksToLinkedDoc,
@@ -102,7 +102,7 @@ export const quickActionConfig: QuickActionConfig[] = [
   {
     id: 'convert-to-linked-doc',
     name: 'Create Linked Doc',
-    icon: FontLinkedDocIcon,
+    icon: LinkedDocIcon,
     hotkey: `Mod-Shift-l`,
     showWhen: host => {
       const [_, ctx] = host.std.command
