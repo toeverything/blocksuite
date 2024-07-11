@@ -171,6 +171,7 @@ async function initEmptyEditor({
           });
         }
       } else {
+        collection.meta.initialize();
         const doc = collection.createDoc({ id: 'doc:home' });
         window.doc = doc;
         waitForMountPageEditor(doc).catch(console.error);
