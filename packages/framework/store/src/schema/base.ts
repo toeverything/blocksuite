@@ -1,5 +1,5 @@
 import { type Disposable, Slot } from '@blocksuite/global/utils';
-import { computed, signal } from '@preact/signals-core';
+import { computed, signal } from '@lit-labs/preact-signals';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 

@@ -395,9 +395,9 @@ importers:
       '@blocksuite/sync':
         specifier: workspace:*
         version: link:../sync
-      '@preact/signals-core':
-        specifier: ^1.6.1
-        version: 1.6.1
+      '@lit-labs/preact-signals':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@types/flexsearch':
         specifier: ^0.7.6
         version: 0.7.6
