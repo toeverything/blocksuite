@@ -496,7 +496,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                     @click=${() => this._setConnectorMode(value)}
                   >
                     ${icon}
-                  </affine-toolabr-icon-button>
+                  </editor-icon-button>
                 `
               )}
             </div>

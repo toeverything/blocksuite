@@ -246,6 +246,6 @@ export function AttachmentOptionsTemplate({
         buttons.filter(button => button !== nothing),
         renderToolbarSeparator
       )}
-    </editor_toolbar>
+    </editor-toolbar>
   `;
 }
