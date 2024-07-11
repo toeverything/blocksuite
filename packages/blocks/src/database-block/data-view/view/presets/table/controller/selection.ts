@@ -189,6 +189,9 @@ export class TableSelectionController implements ReactiveController {
   private handleDragEvent() {
     this.host.disposables.add(
       this.host.handleEvent('dragStart', context => {
+        if (this.host.view.readonly) {
+          return;
+        }
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof HTMLElement) {

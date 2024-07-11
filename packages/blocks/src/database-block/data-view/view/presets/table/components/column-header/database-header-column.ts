@@ -243,6 +243,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   };
 
   private _contextMenu = (e: MouseEvent) => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
     e.preventDefault();
     this.popMenu(e.target as HTMLElement);
   };
@@ -404,6 +407,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   };
 
   private _enterWidthDragBar = () => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
     if (this.drawWidthDragBarTask) {
       cancelAnimationFrame(this.drawWidthDragBarTask);
       this.drawWidthDragBarTask = 0;
@@ -437,6 +443,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     if (table) {
       this.disposables.add(
         table.handleEvent('dragStart', context => {
+          if (this.tableViewManager.readonly) {
+            return;
+          }
           const event = context.get('pointerState').raw;
           const target = event.target;
           if (target instanceof Element) {

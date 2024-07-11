@@ -79,6 +79,9 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   accessor column!: DataViewTableColumnManager;
 
   selectCurrentCell = (editing: boolean) => {
+    if (this.view.readonly) {
+      return;
+    }
     if (this.selectionView) {
       this.selectionView.selection = {
         groupKey: this.groupKey,

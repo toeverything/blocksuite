@@ -113,6 +113,9 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
   accessor rowId!: string;
 
   private _clickDragHandler = () => {
+    if (this.view.readonly) {
+      return;
+    }
     const selectionController = this.selectionController;
     if (selectionController) {
       if (
@@ -225,7 +228,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               >
               </affine-database-cell-container>
             </div>
-            ${column.dataViewManager.header.titleColumn === column.id
+            ${!column.readonly &&
+            column.dataViewManager.header.titleColumn === column.id
               ? html`<div class="row-ops">
                   <div class="row-op" @click="${clickDetail}">
                     ${NewEditIcon}
@@ -251,6 +255,9 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
   };
 
   contextMenu = (e: MouseEvent) => {
+    if (this.view.readonly) {
+      return;
+    }
     const selection = this.selectionController;
     if (!selection) {
       return;
