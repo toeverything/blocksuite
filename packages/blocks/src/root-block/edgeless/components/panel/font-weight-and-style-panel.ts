@@ -161,7 +161,6 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
       () => html`
         <edgeless-menu-divider
           data-orientation="horizontal"
-          style="--height: 8px"
         ></edgeless-menu-divider>
       `
     );

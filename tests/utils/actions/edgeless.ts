@@ -869,7 +869,6 @@ type Action =
   | 'quickConnect'
   | 'turnIntoLinkedDoc'
   | 'createLinkedDoc'
-  | 'linkedDocInfo'
   | 'openLinkedDoc'
   | 'toCardView'
   | 'toEmbedView';
@@ -1132,15 +1131,15 @@ export async function triggerComponentToolbarAction(
       await actionButton.click();
       break;
     }
-    case 'linkedDocInfo': {
-      const button = locatorComponentToolbar(page).locator('.doc-info');
-      await button.click();
-      break;
-    }
     case 'openLinkedDoc': {
-      const button = locatorComponentToolbar(page).locator(
-        'edgeless-change-embed-card-button .open'
-      );
+      const openButton = locatorComponentToolbar(page).getByRole('button', {
+        name: 'Open',
+      });
+      await openButton.click();
+
+      const button = locatorComponentToolbar(page).getByRole('button', {
+        name: 'Open this doc',
+      });
       await button.click();
       break;
     }

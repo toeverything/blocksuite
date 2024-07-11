@@ -182,7 +182,7 @@ export async function getFileType(file: File) {
   }
   // If the file type is not available, try to get it from the buffer.
   const buffer = await file.arrayBuffer();
-  const FileType = await import('@sgtpooki/file-type');
+  const FileType = await import('file-type');
   const fileType = await FileType.fileTypeFromBuffer(buffer);
   return fileType ? fileType.mime : '';
 }

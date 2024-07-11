@@ -1,3 +1,4 @@
+import { Slice } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -8,6 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   BlockComponent,
   HoverController,
+  toast,
 } from '../_common/components/index.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
@@ -89,7 +91,9 @@ export class AttachmentBlockComponent extends BlockComponent<
         anchor: this,
         model: this.model,
         showCaption: () => this.captionEditor.show(),
-        downloadAttachment: this.download,
+        copy: this.copy,
+        download: this.download,
+        refresh: this.refreshData,
         abortController,
       }),
       computePosition: {
@@ -141,6 +145,12 @@ export class AttachmentBlockComponent extends BlockComponent<
       this.download();
     }
   }
+
+  copy = () => {
+    const slice = Slice.fromModels(this.doc, [this.model]);
+    this.std.clipboard.copySlice(slice).catch(console.error);
+    toast(this.host, 'Copied to clipboard');
+  };
 
   open = () => {
     if (!this.blobUrl) {

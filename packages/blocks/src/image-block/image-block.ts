@@ -97,6 +97,9 @@ export class ImageBlockComponent extends BlockComponent<
   }
 
   private _handleClick(event: MouseEvent) {
+    // the peek view need handle shift + click
+    if (event.shiftKey) return;
+
     event.stopPropagation();
     if (!this.isInSurface) {
       this._selectBlock();

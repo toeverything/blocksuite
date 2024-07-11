@@ -1,46 +1,37 @@
-import { baseTheme } from '@toeverything/theme';
-import { css, unsafeCSS } from 'lit';
+import { css } from 'lit';
+
+import { INPUT_FONT_BASE, PANEL_BASE } from '../../../../../styles.js';
 
 const editLinkStyle = css`
   .affine-link-edit-popover {
-    box-sizing: border-box;
-    width: 404px;
-    height: 112px;
-    padding: 12px;
-    box-shadow: var(--affine-shadow-2);
-    background: var(--affine-background-overlay-panel-color);
-    border-radius: 8px;
+    ${PANEL_BASE}
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: auto auto;
     grid-template-rows: repeat(2, 1fr);
-    gap: 12px;
     grid-template-areas:
       'text-area .'
       'link-area btn';
     justify-items: center;
     align-items: center;
-    /* breaks 'basic link' test in chromium */
-    /* user-select: none; */
+    width: 320px;
+    gap: 8px 12px;
+    padding: 12px;
+    box-sizing: content-box;
   }
 
   .affine-link-edit-popover label {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-sm);
     box-sizing: border-box;
-    padding: 6px 0 6px 12px;
     color: var(--affine-icon-color);
+    ${INPUT_FONT_BASE}
+    font-weight: 400;
   }
 
   .affine-link-edit-popover input {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-base);
-    box-sizing: border-box;
-    padding: 6px 12px 6px 0;
-    width: 260px;
-    height: 34px;
     color: inherit;
+    padding: 0;
     border: none;
     background: transparent;
+    ${INPUT_FONT_BASE}
   }
   .affine-link-edit-popover input::placeholder {
     color: var(--affine-placeholder-color);
@@ -53,67 +44,43 @@ const editLinkStyle = css`
     color: var(--affine-primary-color);
   }
 
-  .affine-edit-text-area {
-    grid-area: text-area;
-    width: 338px;
+  .affine-edit-area {
+    width: 280px;
+    padding: 4px 10px;
     display: grid;
-    gap: 6px;
-    grid-template-columns: auto auto auto;
+    gap: 8px;
+    grid-template-columns: 26px auto;
     grid-template-rows: repeat(1, 1fr);
-    grid-template-areas: 'text span text-input';
-    justify-items: center;
-    align-items: center;
+    grid-template-areas: 'label input';
     user-select: none;
-  }
-  .affine-edit-text-area {
+    box-sizing: border-box;
+
     border: 1px solid var(--affine-border-color);
+    box-sizing: border-box;
+
     outline: none;
-    border-radius: 10px;
+    border-radius: 4px;
     background: transparent;
   }
-
-  .affine-edit-text-area:focus-within {
-    border: 1px solid var(--affine-primary-color);
+  .affine-edit-area:focus-within {
+    border-color: var(--affine-blue-700);
+    box-shadow: var(--affine-active-shadow);
   }
 
-  .affine-edit-link-area {
+  .affine-edit-area.text {
+    grid-area: text-area;
+  }
+
+  .affine-edit-area.link {
     grid-area: link-area;
-    width: 338px;
-    display: grid;
-    gap: 6px;
-    grid-template-columns: auto auto auto;
-    grid-template-rows: repeat(1, 1fr);
-    grid-template-areas: 'link span link-input';
-    justify-items: center;
-    align-items: center;
-  }
-  .affine-edit-link-area {
-    border: 1px solid var(--affine-border-color);
-    outline: none;
-    border-radius: 10px;
-    background: transparent;
-  }
-  .affine-edit-link-area:focus-within {
-    border: 1px solid var(--affine-primary-color);
   }
 
-  .affine-link-popover-dividing-line {
-    grid-area: span;
-  }
-  .affine-edit-text-text {
-    grid-area: text;
+  .affine-edit-label {
+    grid-area: label;
   }
 
-  .affine-edit-text-input {
-    grid-area: text-input;
-  }
-
-  .affine-edit-link-text {
-    grid-area: link;
-  }
-
-  .affine-edit-link-input {
-    grid-area: link-input;
+  .affine-edit-input {
+    grid-area: input;
   }
 
   .affine-confirm-button {
@@ -133,11 +100,6 @@ export const linkPopupStyle = css`
   }
 
   .affine-link-popover-container {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-base);
-    font-style: normal;
-    line-height: 24px;
-    color: var(--affine-text-primary-color);
     z-index: var(--affine-z-index-popover);
     animation: affine-popover-fade-in 0.2s ease;
     position: absolute;
@@ -163,81 +125,64 @@ export const linkPopupStyle = css`
     z-index: var(--affine-z-index-popover);
   }
 
-  .affine-link-popover {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    height: 40px;
-
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
-    border-radius: 8px;
-  }
-
   .affine-link-preview {
     display: flex;
-    width: 180px;
+    justify-content: flex-start;
+    width: 140px;
     padding: var(--1, 0px);
-    align-items: flex-start;
-    gap: 10px;
     border-radius: var(--1, 0px);
     opacity: var(--add, 1);
     user-select: none;
     cursor: pointer;
-  }
-
-  .affine-link-popover-input {
-    background: transparent;
-    border: none;
-  }
-  .affine-link-popover-input::placeholder {
-    color: var(--affine-placeholder-color);
-  }
-  .affine-link-popover-input:focus {
-    border: none;
-  }
-
-  .affine-link-preview > span {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
 
     color: var(--affine-link-color);
     font-feature-settings:
       'clig' off,
       'liga' off;
     font-family: var(--affine-font-family);
-    font-size: 15px;
+    font-size: var(--affine-font-sm);
     font-style: normal;
     font-weight: 400;
-    line-height: 24px;
+    text-decoration: none;
+    text-wrap: nowrap;
+  }
+
+  .affine-link-preview > span {
+    display: inline-block;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+
     text-overflow: ellipsis;
     overflow: hidden;
     opacity: var(--add, 1);
   }
 
-  .affine-link-popover-dividing-line {
-    margin: 0 6px;
-    width: 1px;
-    height: 20px;
-    background-color: var(--affine-border-color);
+  .affine-link-popover.create {
+    ${PANEL_BASE}
+    gap: 12px;
+    padding: 12px;
+
+    color: var(--affine-text-primary-color);
   }
 
-  .affine-link-popover-view-selector {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 2px;
-    border-radius: 6px;
-    background: var(--affine-hover-color);
+  .affine-link-popover-input {
+    min-width: 280px;
+    height: 30px;
+    box-sizing: border-box;
+    padding: 4px 10px;
+    background: var(--affine-white-10);
+    border-radius: 4px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: transparent;
+    ${INPUT_FONT_BASE}
   }
-  .affine-link-popover-view-selector > icon-button {
-    padding: 0px;
+  .affine-link-popover-input::placeholder {
+    color: var(--affine-placeholder-color);
   }
-  .affine-link-popover-view-selector .current-view {
-    background: var(--affine-background-overlay-panel-color);
+  .affine-link-popover-input:focus {
+    border-color: var(--affine-blue-700);
+    box-shadow: var(--affine-active-shadow);
   }
 
   ${editLinkStyle}

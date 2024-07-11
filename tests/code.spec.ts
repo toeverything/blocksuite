@@ -63,14 +63,14 @@ function getCodeBlock(page: Page) {
   const codeToolbar = page.locator('affine-code-toolbar');
 
   const copyButton = codeToolbar.getByTestId('copy-code');
-  const moreButton = codeToolbar.getByTestId('more-button');
+  const moreButton = codeToolbar.getByTestId('more');
   const captionButton = codeToolbar.getByTestId('caption');
 
-  const moreMenu = page.locator('more-popup-menu');
+  const moreMenu = page.locator('.more-popup-menu');
 
   const openMore = async () => {
     await moreButton.click();
-    const menu = page.locator('more-popup-menu');
+    const menu = page.locator('.more-popup-menu');
 
     const wrapButton = page.locator('.menu-item.wrap');
 
@@ -1062,7 +1062,7 @@ test('should code block works in read only mode', async ({ page }) => {
 
   await codeBlock.hover();
   await expect(codeBlockController.codeToolbar).toBeVisible();
-  await codeBlockController.moreButton.click({ delay: 50 });
+  await expect(codeBlockController.moreButton).toHaveAttribute('disabled');
 
   await expect(codeBlockController.copyButton).toBeVisible();
   await expect(codeBlockController.moreMenu).toBeHidden();

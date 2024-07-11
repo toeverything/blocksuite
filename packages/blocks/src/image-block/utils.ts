@@ -38,7 +38,6 @@ export async function uploadBlobForImage(
   let sourceId: string | undefined;
 
   try {
-    setImageUploaded(blockId);
     sourceId = await doc.blobSync.set(blob);
   } catch (error) {
     console.error(error);
@@ -77,11 +76,7 @@ async function getImageBlob(model: ImageBlockModel) {
 
   if (!blob.type) {
     const buffer = await blob.arrayBuffer();
-
-    // Switch to the original file-type package after https://github.com/sindresorhus/file-type/issues/578 is fixed
-    // The [@sgtpooki/file-type](https://github.com/sgtpooki/file-type) is a fork of the original file-type package
-    // Please check the commit before updating the package
-    const FileType = await import('@sgtpooki/file-type');
+    const FileType = await import('file-type');
     const fileType = await FileType.fileTypeFromBuffer(buffer);
     if (!fileType?.mime.startsWith('image/')) {
       return null;

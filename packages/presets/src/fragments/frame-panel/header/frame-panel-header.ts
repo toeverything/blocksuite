@@ -185,8 +185,10 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
       ({ display }) => {
         this._settingPopperShow = display === 'show';
       },
-      14,
-      -100
+      {
+        mainAxis: 14,
+        crossAxis: -100,
+      }
     );
     disposables.add(this._framesSettingMenuPopper);
   }

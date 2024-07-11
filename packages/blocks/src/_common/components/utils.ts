@@ -253,11 +253,7 @@ export const scrollbarStyle = (container: string) => {
     );
 
   // sanitize container name
-  if (
-    container.length > 50 ||
-    container.includes('{') ||
-    container.includes('}')
-  )
+  if (container.includes('{') || container.includes('}'))
     throw new Error('Invalid container name!');
 
   return css`

@@ -1,4 +1,5 @@
 import '../../../_common/components/button.js';
+import '../../../_common/components/toolbar/toolbar.js';
 
 import type {
   BaseSelection,
@@ -24,7 +25,6 @@ import {
   type RichText,
 } from '../../../_common/components/index.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
-import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootElement } from '../../../root-block/utils/guard.js';
@@ -41,6 +41,8 @@ export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
+  static override styles = formatBarStyle;
+
   private get _selectionManager() {
     return this.host.selection;
   }
@@ -58,8 +60,6 @@ export class AffineFormatBarWidget extends WidgetElement {
     if (!sl || sl.rangeCount === 0) return null;
     return sl.getRangeAt(0);
   }
-
-  static override styles = formatBarStyle;
 
   @state()
   private accessor _dragging = false;
@@ -568,16 +568,11 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     const items = ConfigRenderer(this);
 
-    return html`<div
-      class="${AFFINE_FORMAT_BAR_WIDGET}"
-      @pointerdown="${(event: Event) => {
-        event.stopPropagation();
-        event.preventDefault();
-      }}"
-      @wheel="${stopPropagation}"
-    >
-      ${items}
-    </div>`;
+    return html`
+      <editor-toolbar class="${AFFINE_FORMAT_BAR_WIDGET}">
+        ${items}
+      </editor-toolbar>
+    `;
   }
 }
 

@@ -1,3 +1,5 @@
+import '../toolbar/separator.js';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { autoPlacement, offset, type Placement, size } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
@@ -154,7 +156,7 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
         class=${classMap({ 'affine-filterable-list': true, flipped: isFlip })}
       >
         <div class="input-wrapper">
-          <div class="search-icon">${SearchIcon}</div>
+          ${SearchIcon}
           <input
             id="filter-input"
             type="text"
@@ -167,7 +169,9 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
           />
         </div>
 
-        <div class="divider"></div>
+        <editor-toolbar-separator
+          data-orientation="horizontal"
+        ></editor-toolbar-separator>
         <div class="items-container">${content}</div>
       </div>
     `;

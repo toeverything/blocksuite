@@ -1,35 +1,23 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import { PANEL_BASE } from '../../styles.js';
 import { stopPropagation } from '../../utils/event.js';
 
 @customElement('editor-toolbar')
 export class EditorToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: max-content;
+      ${PANEL_BASE}
       height: 36px;
-      padding: 0 6px;
       box-sizing: content-box;
-      border-radius: 4px;
-      border: 0.5px solid var(--affine-border-color);
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-4);
+    }
 
-      color: var(--affine-icon-color);
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      font-feature-settings:
-        'clig' off,
-        'liga' off;
-      font-size: var(--affine-font-sm);
-      font-style: normal;
-      font-weight: 500;
-      line-height: 22px;
+    :host([data-without-bg]) {
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
     }
 
     ::slotted(*) {
@@ -45,7 +33,12 @@ export class EditorToolbar extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.addFromEvent(this, 'pointerdown', stopPropagation);
+
+    this._disposables.addFromEvent(this, 'pointerdown', (e: PointerEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+    });
+    this._disposables.addFromEvent(this, 'wheel', stopPropagation);
   }
 
   override render() {

@@ -163,6 +163,7 @@ export class IconButton extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     this.tabIndex = 0;
+    this.role = 'button';
 
     const DEFAULT_SIZE = '28px';
     if (this.size && (this.width || this.height)) {

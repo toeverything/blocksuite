@@ -3,6 +3,7 @@ import './menu-button.js';
 import './separator.js';
 
 import { html, nothing, type TemplateResult } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -34,6 +35,9 @@ export function renderActions(
           action => html`
             <editor-menu-action
               aria-label=${action.name}
+              class=${classMap({
+                delete: action.type === 'delete',
+              })}
               ?data-selected=${selectedName === action.name}
               ?disabled=${action.disabled}
               @click=${action.handler
@@ -48,7 +52,6 @@ export function renderActions(
     () => html`
       <editor-toolbar-separator
         data-orientation="horizontal"
-        style="--height: 8px"
       ></editor-toolbar-separator>
     `
   );

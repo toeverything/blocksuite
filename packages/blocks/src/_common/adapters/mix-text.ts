@@ -237,7 +237,6 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
   async toSliceSnapshot(
     payload: MixTextToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
-    this._markdownAdapter.applyConfigs(this.configs);
     if (payload.file.trim().length === 0) {
       return null;
     }

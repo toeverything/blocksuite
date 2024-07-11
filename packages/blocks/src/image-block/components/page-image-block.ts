@@ -105,21 +105,21 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         return true;
       },
       Delete: ctx => {
-        if (!this._isSelected) return;
+        if (this._host.doc.readonly || !this._isSelected) return;
 
         addParagraph(ctx);
         this._doc.deleteBlock(this._model);
         return true;
       },
       Backspace: ctx => {
-        if (!this._isSelected) return;
+        if (this._host.doc.readonly || !this._isSelected) return;
 
         addParagraph(ctx);
         this._doc.deleteBlock(this._model);
         return true;
       },
       Enter: ctx => {
-        if (!this._isSelected) return;
+        if (this._host.doc.readonly || !this._isSelected) return;
 
         addParagraph(ctx);
         return true;
@@ -147,6 +147,9 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       this.resizeImg,
       'click',
       (event: MouseEvent) => {
+        // the peek view need handle shift + click
+        if (event.shiftKey) return;
+
         event.stopPropagation();
         selection.update(selList => {
           return selList

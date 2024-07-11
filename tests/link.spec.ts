@@ -328,9 +328,13 @@ test('should keyboard work in link popover', async ({ page }) => {
   const editLinkPopover = page.locator('.affine-link-edit-popover');
   await expect(editLinkPopover).toBeVisible();
 
-  const editTextInput = editLinkPopover.locator('.affine-edit-text-input');
+  const editTextInput = editLinkPopover.locator(
+    '.affine-edit-area.text .affine-edit-input'
+  );
   await assertKeyboardWorkInInput(page, editTextInput);
-  const editLinkInput = editLinkPopover.locator('.affine-edit-link-input');
+  const editLinkInput = editLinkPopover.locator(
+    '.affine-edit-area.link .affine-edit-input'
+  );
   await assertKeyboardWorkInInput(page, editLinkInput);
 });
 
@@ -376,26 +380,27 @@ test('create link with paste', async ({ page }) => {
   await focusRichText(page);
   await type(page, 'aaa');
 
-  const createLinkPopoverLocator = page.locator('.affine-link-popover.create');
-  const confirmBtn = page.locator('.affine-link-popover icon-button');
-
   await dragBetweenIndices(page, [0, 0], [0, 3]);
   await pressCreateLinkShortCut(page);
+
+  const createLinkPopoverLocator = page.locator('.affine-link-popover.create');
+  const confirmBtn = createLinkPopoverLocator.locator('.affine-confirm-button');
+
   await expect(createLinkPopoverLocator).toBeVisible();
-  await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'true');
+  await expect(confirmBtn).toHaveAttribute('disabled');
 
   await type(page, 'affine.pro');
-  await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'false');
+  await expect(confirmBtn).not.toHaveAttribute('disabled');
   await selectAllByKeyboard(page);
   await cutByKeyboard(page);
 
   // press enter should not trigger confirm
   await pressEnter(page);
   await expect(createLinkPopoverLocator).toBeVisible();
-  await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'true');
+  await expect(confirmBtn).toHaveAttribute('disabled');
 
   await pasteByKeyboard(page, false);
-  await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'false');
+  await expect(confirmBtn).not.toHaveAttribute('disabled');
   await pressEnter(page);
   await expect(createLinkPopoverLocator).not.toBeVisible();
   await assertStoreMatchJSX(
@@ -484,13 +489,15 @@ test('convert link to card', async ({ page }) => {
 </affine:page>`
   );
 
-  const linkToCardBtn = page.getByTestId('link-to-card');
-  const linkToEmbedBtn = page.getByTestId('link-to-embed');
   const linkLocator = page.locator('affine-link a');
 
   await linkLocator.hover();
   await waitNextFrame(page);
   await expect(linkPopoverLocator).toBeVisible();
+
+  await page.getByRole('button', { name: 'Switch view' }).click();
+  const linkToCardBtn = page.getByTestId('link-to-card');
+  const linkToEmbedBtn = page.getByTestId('link-to-embed');
   await expect(linkToCardBtn).toBeVisible();
   await expect(linkToEmbedBtn).not.toBeVisible();
 

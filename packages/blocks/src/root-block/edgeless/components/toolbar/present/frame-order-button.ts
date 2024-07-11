@@ -77,7 +77,9 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
       this._edgelessFrameOrderButton,
       this._edgelessFrameOrderMenu,
       ({ display }) => this.setPopperShow(display === 'show'),
-      22
+      {
+        mainAxis: 22,
+      }
     );
   }
 }

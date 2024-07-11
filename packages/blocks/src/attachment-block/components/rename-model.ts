@@ -1,3 +1,5 @@
+import '../../_common/components/toolbar/icon-button.js';
+
 import type { EditorHost } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -80,9 +82,13 @@ export const RenameModal = ({
         />
         <span class="affine-attachment-rename-extension">${extension}</span>
       </div>
-      <icon-button class="affine-confirm-button" @click=${onConfirm}
-        >${ConfirmIcon}</icon-button
+      <editor-icon-button
+        class="affine-confirm-button"
+        .iconSize=${'24px'}
+        @click=${onConfirm}
       >
+        ${ConfirmIcon}
+      </editor-icon-button>
     </div>
   `;
 };
