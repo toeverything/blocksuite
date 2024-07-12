@@ -1,6 +1,7 @@
 import { html } from 'lit';
 
 import type { ListBlockModel } from '../list-model.js';
+
 import { getListInfo } from './get-list-info.js';
 import { getNumberPrefix } from './get-number-prefix.js';
 import {
@@ -16,7 +17,7 @@ export function ListIcon(
   showChildren: boolean,
   onClick: (e: MouseEvent) => void
 ) {
-  const { index, deep } = getListInfo(model);
+  const { deep, index } = getListInfo(model);
   switch (model.type) {
     case 'bulleted':
       return html`<div

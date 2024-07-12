@@ -61,8 +61,8 @@ test.describe('focus', () => {
     await initDatabaseDynamicRowWithData(page, '123', true);
 
     const selectColumn = getDatabaseBodyCell(page, {
-      rowIndex: 1,
       columnIndex: 1,
+      rowIndex: 1,
     });
 
     const endBox = await getBoundingBox(selectColumn);
@@ -138,8 +138,8 @@ test.describe('row-level selection', () => {
     await initDatabaseDynamicRowWithData(page, '123', true);
 
     const selectColumn = getDatabaseBodyCell(page, {
-      rowIndex: 1,
       columnIndex: 1,
+      rowIndex: 1,
     });
 
     const endBox = await getBoundingBox(selectColumn);
@@ -249,12 +249,12 @@ test.describe('cell-level selection', () => {
     await initDatabaseDynamicRowWithData(page, '123', true);
 
     const startCell = getDatabaseBodyCell(page, {
-      rowIndex: 0,
       columnIndex: 0,
+      rowIndex: 0,
     });
     const endCell = getDatabaseBodyCell(page, {
-      rowIndex: 1,
       columnIndex: 1,
+      rowIndex: 1,
     });
 
     const startBox = await getBoundingBox(startCell);
@@ -272,8 +272,8 @@ test.describe('cell-level selection', () => {
     );
 
     await assertCellsSelection(page, {
-      start: [0, 0],
       end: [1, 1],
+      start: [0, 0],
     });
   });
 
@@ -292,12 +292,12 @@ test.describe('cell-level selection', () => {
     await pressEscape(page);
 
     const startCell = getDatabaseBodyCell(page, {
-      rowIndex: 0,
       columnIndex: 0,
+      rowIndex: 0,
     });
     const endCell = getDatabaseBodyCell(page, {
-      rowIndex: 1,
       columnIndex: 1,
+      rowIndex: 1,
     });
 
     const startBox = await getBoundingBox(startCell);
@@ -318,13 +318,13 @@ test.describe('cell-level selection', () => {
     await assertDatabaseTitleColumnText(page, '', 0);
     await assertDatabaseTitleColumnText(page, '', 1);
     const selectCell1 = getDatabaseBodyCell(page, {
-      rowIndex: 0,
       columnIndex: 1,
+      rowIndex: 0,
     });
     expect(await selectCell1.innerText()).toBe('');
     const selectCell2 = getDatabaseBodyCell(page, {
-      rowIndex: 1,
       columnIndex: 1,
+      rowIndex: 1,
     });
     expect(await selectCell2.innerText()).toBe('');
   });
@@ -336,7 +336,6 @@ test.describe('kanban view selection', () => {
   }) => {
     await enterPlaygroundRoom(page);
     await initKanbanViewState(page, {
-      rows: ['row1'],
       columns: [
         {
           type: 'number',
@@ -347,29 +346,30 @@ test.describe('kanban view selection', () => {
           value: ['text'],
         },
       ],
+      rows: ['row1'],
     });
 
     await focusKanbanCardHeader(page);
     await pressEscape(page);
     await assertKanbanCellSelected(page, {
-      // group by `number` column, the first(groupIndex: 0) group is `Ungroups`
-      groupIndex: 1,
       cardIndex: 0,
       cellIndex: 0,
+      // group by `number` column, the first(groupIndex: 0) group is `Ungroups`
+      groupIndex: 1,
     });
 
     await pressArrowDown(page, 3);
     await assertKanbanCellSelected(page, {
-      groupIndex: 1,
       cardIndex: 0,
       cellIndex: 0,
+      groupIndex: 1,
     });
 
     await pressArrowUp(page);
     await assertKanbanCellSelected(page, {
-      groupIndex: 1,
       cardIndex: 0,
       cellIndex: 2,
+      groupIndex: 1,
     });
   });
 
@@ -378,7 +378,6 @@ test.describe('kanban view selection', () => {
   }) => {
     await enterPlaygroundRoom(page);
     await initKanbanViewState(page, {
-      rows: ['row1', 'row2'],
       columns: [
         {
           type: 'number',
@@ -389,22 +388,23 @@ test.describe('kanban view selection', () => {
           value: ['text'],
         },
       ],
+      rows: ['row1', 'row2'],
     });
 
     await focusKanbanCardHeader(page);
     await pressEscape(page);
     await pressArrowUp(page);
     await assertKanbanCellSelected(page, {
-      groupIndex: 1,
       cardIndex: 1,
       cellIndex: 2,
+      groupIndex: 1,
     });
 
     await pressArrowDown(page);
     await assertKanbanCellSelected(page, {
-      groupIndex: 1,
       cardIndex: 0,
       cellIndex: 0,
+      groupIndex: 1,
     });
   });
 
@@ -413,13 +413,13 @@ test.describe('kanban view selection', () => {
   }) => {
     await enterPlaygroundRoom(page);
     await initKanbanViewState(page, {
-      rows: ['row1', 'row2', 'row3'],
       columns: [
         {
           type: 'number',
           value: [undefined, 1, 10],
         },
       ],
+      rows: ['row1', 'row2', 'row3'],
     });
 
     await focusKanbanCardHeader(page);
@@ -427,16 +427,16 @@ test.describe('kanban view selection', () => {
 
     await pressArrowRight(page, 3);
     await assertKanbanCellSelected(page, {
-      groupIndex: 0,
       cardIndex: 0,
       cellIndex: 0,
+      groupIndex: 0,
     });
 
     await pressArrowLeft(page);
     await assertKanbanCellSelected(page, {
-      groupIndex: 2,
       cardIndex: 0,
       cellIndex: 0,
+      groupIndex: 2,
     });
   });
 
@@ -445,33 +445,33 @@ test.describe('kanban view selection', () => {
   }) => {
     await enterPlaygroundRoom(page);
     await initKanbanViewState(page, {
-      rows: ['row1', 'row2', 'row3'],
       columns: [
         {
           type: 'number',
           value: [undefined, undefined, undefined],
         },
       ],
+      rows: ['row1', 'row2', 'row3'],
     });
 
     await focusKanbanCardHeader(page);
     await pressEscape(page);
     await pressEscape(page);
     await assertKanbanCardSelected(page, {
-      groupIndex: 0,
       cardIndex: 0,
+      groupIndex: 0,
     });
 
     await pressArrowDown(page, 3);
     await assertKanbanCardSelected(page, {
-      groupIndex: 0,
       cardIndex: 0,
+      groupIndex: 0,
     });
 
     await pressArrowUp(page);
     await assertKanbanCardSelected(page, {
-      groupIndex: 0,
       cardIndex: 2,
+      groupIndex: 0,
     });
   });
 
@@ -480,13 +480,13 @@ test.describe('kanban view selection', () => {
   }) => {
     await enterPlaygroundRoom(page);
     await initKanbanViewState(page, {
-      rows: ['row1', 'row2', 'row3'],
       columns: [
         {
           type: 'number',
           value: [undefined, 1, 10],
         },
       ],
+      rows: ['row1', 'row2', 'row3'],
     });
 
     await focusKanbanCardHeader(page);
@@ -495,27 +495,27 @@ test.describe('kanban view selection', () => {
 
     await pressArrowRight(page, 3);
     await assertKanbanCardSelected(page, {
-      groupIndex: 0,
       cardIndex: 0,
+      groupIndex: 0,
     });
 
     await pressArrowLeft(page);
     await assertKanbanCardSelected(page, {
-      groupIndex: 2,
       cardIndex: 0,
+      groupIndex: 2,
     });
   });
 
   test('should support multi card selection', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initKanbanViewState(page, {
-      rows: ['row1', 'row2'],
       columns: [
         {
           type: 'number',
           value: [undefined, 1],
         },
       ],
+      rows: ['row1', 'row2'],
     });
 
     await focusKanbanCardHeader(page);
@@ -523,8 +523,8 @@ test.describe('kanban view selection', () => {
     await pressEscape(page);
 
     const card = getKanbanCard(page, {
-      groupIndex: 1,
       cardIndex: 0,
+      groupIndex: 1,
     });
     const box = await getBoundingBox(card);
     await shiftClick(page, {
@@ -533,12 +533,12 @@ test.describe('kanban view selection', () => {
     });
 
     await assertKanbanCardSelected(page, {
-      groupIndex: 0,
       cardIndex: 0,
+      groupIndex: 0,
     });
     await assertKanbanCardSelected(page, {
-      groupIndex: 1,
       cardIndex: 0,
+      groupIndex: 1,
     });
   });
 });

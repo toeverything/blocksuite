@@ -1,5 +1,6 @@
 import type { OpSet, ResolvedOptions } from '../core.js';
 import type { Point } from '../geometry.js';
+
 import { HachureFiller } from './hachure-filler.js';
 
 export class HatchFiller extends HachureFiller {

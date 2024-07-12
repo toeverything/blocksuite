@@ -1,8 +1,9 @@
 import type { Doc } from '@blocksuite/store';
 
-import { SurfaceGroupLikeModel } from '../element-model/base.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';
+
+import { SurfaceGroupLikeModel } from '../element-model/base.js';
 
 export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {
   const layer = layers[layerIndex];

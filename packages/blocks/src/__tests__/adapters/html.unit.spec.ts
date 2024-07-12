@@ -1,4 +1,5 @@
 import type { BlockSnapshot } from '@blocksuite/store';
+
 import { MemoryBlobCRUD } from '@blocksuite/store';
 import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
@@ -51,41 +52,22 @@ const template = (html: string) =>
 describe('snapshot to html', () => {
   test('code', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:8hOLxad5Fv',
+              children: [],
               flavour: 'affine:code',
+              id: 'block:8hOLxad5Fv',
               props: {
                 language: 'python',
                 text: {
@@ -97,11 +79,30 @@ describe('snapshot to html', () => {
                   ],
                 },
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
 
     const html = template(
@@ -117,41 +118,22 @@ describe('snapshot to html', () => {
 
   test('code upper case', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:8hOLxad5Fv',
+              children: [],
               flavour: 'affine:code',
+              id: 'block:8hOLxad5Fv',
               props: {
                 language: 'PYTHON',
                 text: {
@@ -163,11 +145,30 @@ describe('snapshot to html', () => {
                   ],
                 },
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
 
     const html = template(
@@ -183,41 +184,22 @@ describe('snapshot to html', () => {
 
   test('code unknown', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:8hOLxad5Fv',
+              children: [],
               flavour: 'affine:code',
+              id: 'block:8hOLxad5Fv',
               props: {
                 language: 'unknown',
                 text: {
@@ -229,11 +211,30 @@ describe('snapshot to html', () => {
                   ],
                 },
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
 
     const html = template(
@@ -249,59 +250,25 @@ describe('snapshot to html', () => {
 
   test('paragraph', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:Bdn8Yvqcny',
-              flavour: 'affine:paragraph',
-              props: {
-                type: 'text',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'aaa',
-                    },
-                  ],
-                },
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'block:72SMa5mdLy',
+                  children: [],
                   flavour: 'affine:paragraph',
+                  id: 'block:72SMa5mdLy',
                   props: {
-                    type: 'text',
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -310,31 +277,17 @@ describe('snapshot to html', () => {
                         },
                       ],
                     },
+                    type: 'text',
                   },
-                  children: [],
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'block:f-Z6nRrGK_',
-                  flavour: 'affine:paragraph',
-                  props: {
-                    type: 'text',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'ccc',
-                        },
-                      ],
-                    },
-                  },
                   children: [
                     {
-                      type: 'block',
-                      id: 'block:sP3bU52el7',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'block:sP3bU52el7',
                       props: {
-                        type: 'text',
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -343,15 +296,15 @@ describe('snapshot to html', () => {
                             },
                           ],
                         },
+                        type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                     {
-                      type: 'block',
-                      id: 'block:X_HMxP4wxC',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'block:X_HMxP4wxC',
                       props: {
-                        type: 'text',
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -360,13 +313,14 @@ describe('snapshot to html', () => {
                             },
                           ],
                         },
+                        type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                     {
-                      type: 'block',
-                      id: 'block:iA34Rb-RvV',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'block:iA34Rb-RvV',
                       props: {
                         text: {
                           '$blocksuite:internal:text$': true,
@@ -378,16 +332,29 @@ describe('snapshot to html', () => {
                         },
                         type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                   ],
+                  flavour: 'affine:paragraph',
+                  id: 'block:f-Z6nRrGK_',
+                  props: {
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ccc',
+                        },
+                      ],
+                    },
+                    type: 'text',
+                  },
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'block:I0Fmz5Nv02',
+                  children: [],
                   flavour: 'affine:paragraph',
+                  id: 'block:I0Fmz5Nv02',
                   props: {
-                    type: 'text',
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -396,17 +363,31 @@ describe('snapshot to html', () => {
                         },
                       ],
                     },
+                    type: 'text',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:paragraph',
+              id: 'block:Bdn8Yvqcny',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+                type: 'text',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'block:12lDwMD7ec',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:12lDwMD7ec',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -415,12 +396,32 @@ describe('snapshot to html', () => {
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const html = template(
       `<div class="affine-paragraph-block-container"><p>aaa</p><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-paragraph-block-container"><p>bbb</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div><div class="affine-paragraph-block-container"><p>ccc</p><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-paragraph-block-container"><p>ddd</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div><div class="affine-paragraph-block-container"><p>eee</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div><div class="affine-paragraph-block-container"><p>fff</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-paragraph-block-container"><p>ggg</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-paragraph-block-container"><p>hhh</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
@@ -435,79 +436,29 @@ describe('snapshot to html', () => {
 
   test('bulleted list', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:imiLDMKSkx',
-              flavour: 'affine:list',
-              props: {
-                type: 'bulleted',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'aaa',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'block:kYliRIovvL',
-                  flavour: 'affine:list',
-                  props: {
-                    type: 'bulleted',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'bbb',
-                        },
-                      ],
-                    },
-                    checked: false,
-                    collapsed: false,
-                  },
                   children: [
                     {
-                      type: 'block',
-                      id: 'block:UyvxA_gqCJ',
+                      children: [],
                       flavour: 'affine:list',
+                      id: 'block:UyvxA_gqCJ',
                       props: {
-                        type: 'bulleted',
+                        checked: false,
+                        collapsed: false,
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -516,19 +467,35 @@ describe('snapshot to html', () => {
                             },
                           ],
                         },
-                        checked: false,
-                        collapsed: false,
+                        type: 'bulleted',
                       },
-                      children: [],
+                      type: 'block',
                     },
                   ],
+                  flavour: 'affine:list',
+                  id: 'block:kYliRIovvL',
+                  props: {
+                    checked: false,
+                    collapsed: false,
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'bbb',
+                        },
+                      ],
+                    },
+                    type: 'bulleted',
+                  },
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'block:-guNZRm5u1',
+                  children: [],
                   flavour: 'affine:list',
+                  id: 'block:-guNZRm5u1',
                   props: {
-                    type: 'bulleted',
+                    checked: false,
+                    collapsed: false,
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -537,19 +504,35 @@ describe('snapshot to html', () => {
                         },
                       ],
                     },
-                    checked: false,
-                    collapsed: false,
+                    type: 'bulleted',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:list',
+              id: 'block:imiLDMKSkx',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+                type: 'bulleted',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'block:B9CaZzQ2CO',
+              children: [],
               flavour: 'affine:list',
+              id: 'block:B9CaZzQ2CO',
               props: {
-                type: 'bulleted',
+                checked: false,
+                collapsed: false,
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -558,14 +541,32 @@ describe('snapshot to html', () => {
                     },
                   ],
                 },
-                checked: false,
-                collapsed: false,
+                type: 'bulleted',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const html = template(
       `<div class="affine-list-block-container"><ul style=""><li>aaa</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-list-block-container"><ul style=""><li>bbb</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-list-block-container"><ul style=""><li>ccc</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-list-block-container"><ul style=""><li>ddd</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-list-block-container"><ul style=""><li>eee</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
@@ -580,43 +581,23 @@ describe('snapshot to html', () => {
 
   test('code inline', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:qhpbuss-KN',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:qhpbuss-KN',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -624,22 +605,42 @@ describe('snapshot to html', () => {
                       insert: 'aaa ',
                     },
                     {
-                      insert: 'bbb',
                       attributes: {
                         code: true,
                       },
+                      insert: 'bbb',
                     },
                     {
                       insert: ' ccc',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const html = template(
       `<div class="affine-paragraph-block-container"><p>aaa <code>bbb</code> ccc</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
@@ -654,43 +655,23 @@ describe('snapshot to html', () => {
 
   test('link', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:Bdn8Yvqcny',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:Bdn8Yvqcny',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -698,22 +679,42 @@ describe('snapshot to html', () => {
                       insert: 'aaa ',
                     },
                     {
-                      insert: 'bbb',
                       attributes: {
                         link: 'https://affine.pro/',
                       },
+                      insert: 'bbb',
                     },
                     {
                       insert: ' ccc',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const html = template(
       `<div class="affine-paragraph-block-container"><p>aaa <a href="https://affine.pro/">bbb</a> ccc</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
@@ -728,43 +729,23 @@ describe('snapshot to html', () => {
 
   test('bold', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:zxDyvrg1Mh',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:zxDyvrg1Mh',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -772,22 +753,42 @@ describe('snapshot to html', () => {
                       insert: 'aaa',
                     },
                     {
-                      insert: 'bbb',
                       attributes: {
                         bold: true,
                       },
+                      insert: 'bbb',
                     },
                     {
                       insert: 'ccc',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
 
     const html = template(
@@ -803,43 +804,23 @@ describe('snapshot to html', () => {
 
   test('italic', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:zxDyvrg1Mh',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:zxDyvrg1Mh',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -847,22 +828,42 @@ describe('snapshot to html', () => {
                       insert: 'aaa',
                     },
                     {
-                      insert: 'bbb',
                       attributes: {
                         italic: true,
                       },
+                      insert: 'bbb',
                     },
                     {
                       insert: 'ccc',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
 
     const html = template(
@@ -878,68 +879,68 @@ describe('snapshot to html', () => {
 
   test('image', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:WcYcyv-oZY',
+      children: [
+        {
+          children: [],
+          flavour: 'affine:surface',
+          id: 'block:zqtuv999Ww',
+          props: {
+            elements: {},
+          },
+          type: 'block',
+        },
+        {
+          children: [
+            {
+              children: [],
+              flavour: 'affine:image',
+              id: 'block:Gan31s-dYK',
+              props: {
+                caption: 'aaa',
+                height: 0,
+                index: 'a0',
+                rotate: 0,
+                sourceId: 'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
+                width: 0,
+                xywh: '[0,0,0,0]',
+              },
+              type: 'block',
+            },
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'block:If92CIQiOl',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+                type: 'text',
+              },
+              type: 'block',
+            },
+          ],
+          flavour: 'affine:note',
+          id: 'block:UTUZojv22c',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
+        },
+      ],
       flavour: 'affine:page',
+      id: 'block:WcYcyv-oZY',
       props: {
         title: {
           '$blocksuite:internal:text$': true,
           delta: [],
         },
       },
-      children: [
-        {
-          type: 'block',
-          id: 'block:zqtuv999Ww',
-          flavour: 'affine:surface',
-          props: {
-            elements: {},
-          },
-          children: [],
-        },
-        {
-          type: 'block',
-          id: 'block:UTUZojv22c',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
-          children: [
-            {
-              type: 'block',
-              id: 'block:Gan31s-dYK',
-              flavour: 'affine:image',
-              props: {
-                sourceId: 'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
-                caption: 'aaa',
-                width: 0,
-                height: 0,
-                index: 'a0',
-                xywh: '[0,0,0,0]',
-                rotate: 0,
-              },
-              children: [],
-            },
-            {
-              type: 'block',
-              id: 'block:If92CIQiOl',
-              flavour: 'affine:paragraph',
-              props: {
-                type: 'text',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [],
-                },
-              },
-              children: [],
-            },
-          ],
-        },
-      ],
+      type: 'block',
     };
 
     const html = template(
@@ -955,8 +956,8 @@ describe('snapshot to html', () => {
     const assets = new AssetsManager({ blob: blobManager });
 
     const target = await htmlAdapter.fromBlockSnapshot({
-      snapshot: blockSnapshot,
       assets,
+      snapshot: blockSnapshot,
     });
     expect(target.file).toBe(html);
   });
@@ -969,21 +970,11 @@ describe('html to snapshot', () => {
     );
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:code',
+          id: 'matchesReplaceMap[1]',
           props: {
             language: 'python',
             text: {
@@ -995,9 +986,19 @@ describe('html to snapshot', () => {
               ],
             },
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const htmlAdapter = new HtmlAdapter(createJob());
@@ -1011,23 +1012,12 @@ describe('html to snapshot', () => {
     const html = template(`<p>aaa</p><p>bbb</p><p>ccc</p><p>ddd</p><p>eee</p>`);
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -1036,15 +1026,15 @@ describe('html to snapshot', () => {
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[2]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[2]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -1053,15 +1043,15 @@ describe('html to snapshot', () => {
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[3]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[3]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -1070,15 +1060,15 @@ describe('html to snapshot', () => {
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[4]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[4]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -1087,15 +1077,15 @@ describe('html to snapshot', () => {
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[5]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[5]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -1104,10 +1094,21 @@ describe('html to snapshot', () => {
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const htmlAdapter = new HtmlAdapter(createJob());
@@ -1121,23 +1122,14 @@ describe('html to snapshot', () => {
     const html = template(`<ol><li><p>p in list</p></li></ol>`);
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:list',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'numbered',
+            checked: false,
+            collapsed: false,
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -1146,12 +1138,21 @@ describe('html to snapshot', () => {
                 },
               ],
             },
-            checked: false,
-            collapsed: false,
+            type: 'numbered',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const htmlAdapter = new HtmlAdapter(createJob());
@@ -1167,27 +1168,27 @@ describe('html to snapshot', () => {
     );
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:embed-youtube',
+          id: 'matchesReplaceMap[1]',
           props: {
             url: 'https://www.youtube.com/watch?v=QDsd0nyzwz0',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const htmlAdapter = new HtmlAdapter(createJob());

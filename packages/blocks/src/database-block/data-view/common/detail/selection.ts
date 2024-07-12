@@ -1,44 +1,17 @@
 import type { KanbanCard } from '../../view/presets/kanban/card.js';
-import { KanbanCell } from '../../view/presets/kanban/cell.js';
 import type { KanbanCardSelection } from '../../view/presets/kanban/types.js';
 import type { RecordDetail } from './detail.js';
+
+import { KanbanCell } from '../../view/presets/kanban/cell.js';
 import { RecordField } from './field.js';
 
 type DetailViewSelection = {
-  propertyId: string;
   isEditing: boolean;
+  propertyId: string;
 };
 
 export class DetailSelection {
   _selection?: DetailViewSelection;
-
-  constructor(private viewEle: RecordDetail) {}
-
-  get selection(): DetailViewSelection | undefined {
-    return this._selection;
-  }
-
-  set selection(selection: DetailViewSelection | undefined) {
-    if (!selection) {
-      this.onSelect();
-      return;
-    }
-    if (selection.isEditing) {
-      const container = this.getFocusCellContainer(selection);
-      const cell = container?.cell;
-      const isEditing = cell
-        ? cell.beforeEnterEditMode()
-          ? selection.isEditing
-          : false
-        : false;
-      this.onSelect({
-        propertyId: selection.propertyId,
-        isEditing,
-      });
-    } else {
-      this.onSelect(selection);
-    }
-  }
 
   onSelect = (selection?: DetailViewSelection) => {
     const old = this._selection;
@@ -50,6 +23,8 @@ export class DetailSelection {
       this.focus(selection);
     }
   };
+
+  constructor(private viewEle: RecordDetail) {}
 
   blur(selection: DetailViewSelection) {
     const container = this.getFocusCellContainer(selection);
@@ -71,6 +46,10 @@ export class DetailSelection {
     }
   }
 
+  deleteProperty() {
+    //
+  }
+
   focus(selection: DetailViewSelection) {
     const container = this.getFocusCellContainer(selection);
     if (!container) {
@@ -89,20 +68,30 @@ export class DetailSelection {
     }
   }
 
-  getSelectCard(selection: KanbanCardSelection) {
-    const { groupKey, cardId } = selection.cards[0];
-
-    return this.viewEle
-      .querySelector(`affine-data-view-kanban-group[data-key="${groupKey}"]`)
-      ?.querySelector(
-        `affine-data-view-kanban-card[data-card-id="${cardId}"]`
-      ) as KanbanCard | undefined;
+  focusDown() {
+    const selection = this.selection;
+    if (!selection || selection?.isEditing) {
+      return;
+    }
+    const nextContainer =
+      this.getFocusCellContainer(selection)?.nextElementSibling;
+    if (nextContainer instanceof KanbanCell) {
+      this.selection = {
+        isEditing: false,
+        propertyId: nextContainer.column.id,
+      };
+    }
   }
 
-  getFocusCellContainer(selection: DetailViewSelection) {
-    return this.viewEle.querySelector(
-      `affine-data-view-record-field[data-column-id="${selection.propertyId}"]`
-    ) as RecordField | undefined;
+  focusFirstCell() {
+    const firstId = this.viewEle.querySelector('affine-data-view-record-field')
+      ?.column.id;
+    if (firstId) {
+      this.selection = {
+        isEditing: true,
+        propertyId: firstId,
+      };
+    }
   }
 
   focusUp() {
@@ -114,39 +103,51 @@ export class DetailSelection {
       this.getFocusCellContainer(selection)?.previousElementSibling;
     if (preContainer instanceof RecordField) {
       this.selection = {
-        propertyId: preContainer.column.id,
         isEditing: false,
+        propertyId: preContainer.column.id,
       };
     }
   }
 
-  focusDown() {
-    const selection = this.selection;
-    if (!selection || selection?.isEditing) {
+  getFocusCellContainer(selection: DetailViewSelection) {
+    return this.viewEle.querySelector(
+      `affine-data-view-record-field[data-column-id="${selection.propertyId}"]`
+    ) as RecordField | undefined;
+  }
+
+  getSelectCard(selection: KanbanCardSelection) {
+    const { cardId, groupKey } = selection.cards[0];
+
+    return this.viewEle
+      .querySelector(`affine-data-view-kanban-group[data-key="${groupKey}"]`)
+      ?.querySelector(
+        `affine-data-view-kanban-card[data-card-id="${cardId}"]`
+      ) as KanbanCard | undefined;
+  }
+
+  get selection(): DetailViewSelection | undefined {
+    return this._selection;
+  }
+
+  set selection(selection: DetailViewSelection | undefined) {
+    if (!selection) {
+      this.onSelect();
       return;
     }
-    const nextContainer =
-      this.getFocusCellContainer(selection)?.nextElementSibling;
-    if (nextContainer instanceof KanbanCell) {
-      this.selection = {
-        propertyId: nextContainer.column.id,
-        isEditing: false,
-      };
-    }
-  }
-
-  deleteProperty() {
-    //
-  }
-
-  focusFirstCell() {
-    const firstId = this.viewEle.querySelector('affine-data-view-record-field')
-      ?.column.id;
-    if (firstId) {
-      this.selection = {
-        propertyId: firstId,
-        isEditing: true,
-      };
+    if (selection.isEditing) {
+      const container = this.getFocusCellContainer(selection);
+      const cell = container?.cell;
+      const isEditing = cell
+        ? cell.beforeEnterEditMode()
+          ? selection.isEditing
+          : false
+        : false;
+      this.onSelect({
+        isEditing,
+        propertyId: selection.propertyId,
+      });
+    } else {
+      this.onSelect(selection);
     }
   }
 }

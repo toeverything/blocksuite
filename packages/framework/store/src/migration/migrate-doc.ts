@@ -2,17 +2,17 @@ import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 interface IDocMigration {
-  desc: string;
   condition: (oldPageVersion: number, docData: Y.Doc) => boolean;
+  desc: string;
   migrate: (oldPageVersion: number, docData: Y.Doc) => void;
 }
 
 export const docMigrations: IDocMigration[] = [
   {
-    desc: 'frame element --> frame block (doc v1 --> v2)',
     condition: oldPageVersion => {
       return oldPageVersion < 2;
     },
+    desc: 'frame element --> frame block (doc v1 --> v2)',
     migrate: (_, docData) => {
       const blocks = docData.getMap('blocks') as Y.Map<Y.Map<unknown>>;
       let rootModel!: Y.Map<unknown>, surface!: Y.Map<unknown>;

@@ -1,11 +1,12 @@
 import type { SerializedXYWH } from '@blocksuite/blocks';
+
 import {
   Boxed,
   type DocCollection,
-  nanoid,
-  native2Y,
   Text,
   type Y,
+  nanoid,
+  native2Y,
 } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';
@@ -37,21 +38,21 @@ export const heavyWhiteboard: InitFn = (
       const id = nanoid();
       surfaceBlockElements[id] = native2Y(
         {
+          fillColor: '--affine-palette-shape-yellow',
+          filled: false,
           id,
           index: 'a0',
-          type: 'shape',
-          xywh: `[${x},${y},100,100]`,
-          seed: Math.floor(Math.random() * 2 ** 31),
-
-          shapeType: SHAPE_TYPES[Math.floor(Math.random() * 40) % 4],
-
           radius: 0,
-          filled: false,
-          fillColor: '--affine-palette-shape-yellow',
-          strokeWidth: 4,
+
+          roughness: 1.4,
+
+          seed: Math.floor(Math.random() * 2 ** 31),
+          shapeType: SHAPE_TYPES[Math.floor(Math.random() * 40) % 4],
           strokeColor: '--affine-palette-line-yellow',
           strokeStyle: 'solid',
-          roughness: 1.4,
+          strokeWidth: 4,
+          type: 'shape',
+          xywh: `[${x},${y},100,100]`,
         },
         { deep: false }
       );

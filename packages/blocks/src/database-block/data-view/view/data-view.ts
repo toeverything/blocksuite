@@ -19,41 +19,41 @@ export interface DataViewProps<
   T extends DataViewManager = DataViewManager,
   Selection extends DataViewSelection = DataViewSelection,
 > {
+  bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable;
+
+  dataSource: DataSource;
+
   dataViewEle: DataViewRenderer;
+  getFlag?: Doc['awarenessStore']['getFlag'];
+  handleEvent: (name: EventName, handler: UIEventHandler) => Disposable;
 
   headerWidget?: DataViewWidget;
 
-  view: T;
-  viewSource: ViewSource;
-  dataSource: DataSource;
-
-  bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable;
-
-  handleEvent: (name: EventName, handler: UIEventHandler) => Disposable;
-
-  setSelection: (selection?: Selection) => void;
+  onDrag?: (evt: MouseEvent, id: string) => () => void;
 
   selectionUpdated: Slot<Selection | undefined>;
 
-  onDrag?: (evt: MouseEvent, id: string) => () => void;
-
-  getFlag?: Doc['awarenessStore']['getFlag'];
+  setSelection: (selection?: Selection) => void;
 
   std: BlockStdScope;
+
+  view: T;
+
+  viewSource: ViewSource;
 }
 
 export interface DataViewExpose {
   addRow?(position: InsertToPosition | number): void;
 
-  getSelection?(): DataViewSelection | undefined;
-
   focusFirstCell(): void;
 
-  showIndicator?(evt: MouseEvent): boolean;
+  getSelection?(): DataViewSelection | undefined;
 
   hideIndicator?(): void;
 
   moveTo?(id: string, evt: MouseEvent): void;
+
+  showIndicator?(evt: MouseEvent): boolean;
 }
 
 declare global {
@@ -65,8 +65,8 @@ export type BasicViewDataType<
   T = NonNullable<unknown>,
 > = {
   id: string;
-  name: string;
   mode: Type;
+  name: string;
 } & T;
 export type _DataViewDataTypeMap = {
   [K in keyof DataViewDataTypeMap]: BasicViewDataType<
@@ -74,7 +74,7 @@ export type _DataViewDataTypeMap = {
     DataViewDataTypeMap[K]
   >;
 };
-export type DefaultViewDataType = BasicViewDataType & { mode: string };
+export type DefaultViewDataType = { mode: string } & BasicViewDataType;
 type FallBack<T> = [T] extends [never] ? DefaultViewDataType : T;
 export type DataViewDataType = FallBack<
   _DataViewDataTypeMap[keyof _DataViewDataTypeMap]
@@ -83,13 +83,13 @@ export type DataViewTypes = keyof DataViewDataTypeMap;
 export interface DataViewConfig<
   Data extends DataViewDataType = DataViewDataType,
 > {
-  defaultName: string;
   dataViewManager: new () => DataViewManagerBase<Data>;
+  defaultName: string;
 }
 
 export interface DataViewRendererConfig {
-  view: UniComponent<DataViewProps, DataViewExpose>;
   icon: UniComponent;
+  view: UniComponent<DataViewProps, DataViewExpose>;
 }
 
 export type ViewMeta<
@@ -97,23 +97,23 @@ export type ViewMeta<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Data extends DataViewDataType = any,
 > = {
-  type: Type;
   model: DataViewConfig<Data>;
   renderer: DataViewRendererConfig;
+  type: Type;
 };
 export const viewType = <Type extends string>(type: Type) => ({
-  type,
   modelConfig: <Data extends DataViewDataType>(
     model: DataViewConfig<Data>
   ) => ({
-    type,
     model,
     rendererConfig: (renderer: DataViewRendererConfig) => ({
-      type,
       model,
       renderer,
+      type,
     }),
+    type,
   }),
+  type,
 });
 
 export class ViewRendererManager {

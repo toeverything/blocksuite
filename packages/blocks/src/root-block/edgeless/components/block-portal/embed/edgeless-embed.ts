@@ -3,6 +3,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { EmbedBlockModel } from '../../../../../_common/embed-block-helper/index.js';
+
 import { Bound } from '../../../../../surface-block/index.js';
 import { isEmbedHtmlBlock } from '../../../utils/query.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
@@ -10,19 +11,19 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 @customElement('edgeless-block-portal-embed')
 export class EdgelessBlockPortalEmbed extends EdgelessPortalBase<EmbedBlockModel> {
   override render() {
-    const { model, index } = this;
+    const { index, model } = this;
     const borderRadius = isEmbedHtmlBlock(model) ? 12 : 8;
     const bound = Bound.deserialize(model.xywh);
     const style = {
-      position: 'absolute',
-      zIndex: `${index}`,
-      width: `${bound.w}px`,
+      borderRadius: `${borderRadius}px`,
+      boxShadow: 'var(--affine-shadow-1)',
       height: `${bound.h}px`,
       left: `${bound.x}px`,
+      position: 'absolute',
       top: `${bound.y}px`,
       transformOrigin: '0px 0px',
-      boxShadow: 'var(--affine-shadow-1)',
-      borderRadius: `${borderRadius}px`,
+      width: `${bound.w}px`,
+      zIndex: `${index}`,
     };
 
     return html`

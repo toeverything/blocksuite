@@ -1,38 +1,38 @@
-import * as process from 'node:process';
-
 import type {
   PlaywrightTestConfig,
   PlaywrightWorkerOptions,
 } from '@playwright/test';
 
+import * as process from 'node:process';
+
 const config: PlaywrightTestConfig = {
+  forbidOnly: !!process.env.CI,
   fullyParallel: true,
+  // See https://playwright.dev/docs/test-reporters#github-actions-annotations
+  reporter: process.env.CI ? 'github' : 'list',
+  retries: 1,
   testDir: 'src/',
   testIgnore: ['**.unit.spec.ts'],
-  webServer: {
-    command: 'pnpm -w dev',
-    port: 5173,
-    // command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
-    // port: process.env.CI ? 4173 : 5173,
-    reuseExistingServer: !process.env.CI,
-    env: {
-      COVERAGE: process.env.COVERAGE ?? '',
-    },
-  },
   use: {
+    actionTimeout: 1000,
     browserName:
       (process.env.BROWSER as PlaywrightWorkerOptions['browserName']) ??
       'chromium',
-    viewport: { width: 900, height: 900 },
-    actionTimeout: 1000,
+    viewport: { height: 900, width: 900 },
   },
-  forbidOnly: !!process.env.CI,
-  workers: 4,
-  retries: 1,
+  webServer: {
+    command: 'pnpm -w dev',
+    env: {
+      COVERAGE: process.env.COVERAGE ?? '',
+    },
+    // command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
+    port: 5173,
+    // port: process.env.CI ? 4173 : 5173,
+    reuseExistingServer: !process.env.CI,
+  },
   // 'github' for GitHub Actions CI to generate annotations, plus a concise 'dot'
   // default 'list' when running locally
-  // See https://playwright.dev/docs/test-reporters#github-actions-annotations
-  reporter: process.env.CI ? 'github' : 'list',
+  workers: 4,
 };
 
 if (process.env.CI) {

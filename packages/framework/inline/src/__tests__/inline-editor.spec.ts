@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { InlineEditor } from '../inline-editor.js';
+
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 import {
   assertSelection,
   enterInlineEditorPlayground,
@@ -191,13 +192,13 @@ test('chinese input', async ({ page }) => {
   await page.waitForTimeout(100);
   const client = await page.context().newCDPSession(page);
   await client.send('Input.imeSetComposition', {
-    selectionStart: 0,
     selectionEnd: 0,
+    selectionStart: 0,
     text: 'n',
   });
   await client.send('Input.imeSetComposition', {
-    selectionStart: 0,
     selectionEnd: 1,
+    selectionStart: 0,
     text: 'ni',
   });
   await client.send('Input.insertText', {
@@ -305,10 +306,10 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
         bold: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -323,11 +324,11 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
         bold: true,
         italic: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -342,12 +343,12 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
         bold: true,
         italic: true,
         underline: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -362,13 +363,13 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
         bold: true,
         italic: true,
-        underline: true,
         strike: true,
+        underline: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -383,14 +384,14 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
         bold: true,
-        italic: true,
-        underline: true,
-        strike: true,
         code: true,
+        italic: true,
+        strike: true,
+        underline: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -418,14 +419,14 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
         bold: true,
-        italic: true,
-        underline: true,
-        strike: true,
         code: true,
+        italic: true,
+        strike: true,
+        underline: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -440,13 +441,13 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
-        italic: true,
-        underline: true,
-        strike: true,
         code: true,
+        italic: true,
+        strike: true,
+        underline: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -461,12 +462,12 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
-        underline: true,
-        strike: true,
         code: true,
+        strike: true,
+        underline: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -481,11 +482,11 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
-        strike: true,
         code: true,
+        strike: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -500,10 +501,10 @@ test('basic styles', async ({ page }) => {
       insert: 'ab',
     },
     {
-      insert: 'cde',
       attributes: {
         code: true,
       },
+      insert: 'cde',
     },
     {
       insert: 'fg',
@@ -559,10 +560,10 @@ test('overlapping styles', async ({ page }) => {
       insert: 'a',
     },
     {
-      insert: 'bcd',
       attributes: {
         bold: true,
       },
+      insert: 'bcd',
     },
     {
       insert: 'efghijk',
@@ -578,19 +579,19 @@ test('overlapping styles', async ({ page }) => {
       insert: 'a',
     },
     {
-      insert: 'bcd',
       attributes: {
         bold: true,
       },
+      insert: 'bcd',
     },
     {
       insert: 'efg',
     },
     {
-      insert: 'hij',
       attributes: {
         bold: true,
       },
+      insert: 'hij',
     },
     {
       insert: 'k',
@@ -606,36 +607,36 @@ test('overlapping styles', async ({ page }) => {
       insert: 'a',
     },
     {
+      attributes: {
+        bold: true,
+      },
       insert: 'bc',
-      attributes: {
-        bold: true,
-      },
     },
     {
+      attributes: {
+        bold: true,
+        italic: true,
+      },
       insert: 'd',
-      attributes: {
-        bold: true,
-        italic: true,
-      },
     },
     {
+      attributes: {
+        italic: true,
+      },
       insert: 'efg',
-      attributes: {
-        italic: true,
-      },
     },
     {
+      attributes: {
+        bold: true,
+        italic: true,
+      },
       insert: 'h',
-      attributes: {
-        bold: true,
-        italic: true,
-      },
     },
     {
-      insert: 'ij',
       attributes: {
         bold: true,
       },
+      insert: 'ij',
     },
     {
       insert: 'k',
@@ -661,36 +662,36 @@ test('overlapping styles', async ({ page }) => {
       insert: 'a',
     },
     {
+      attributes: {
+        bold: true,
+      },
       insert: 'bc',
-      attributes: {
-        bold: true,
-      },
     },
     {
+      attributes: {
+        bold: true,
+        italic: true,
+      },
       insert: 'd',
-      attributes: {
-        bold: true,
-        italic: true,
-      },
     },
     {
+      attributes: {
+        italic: true,
+      },
       insert: 'efg',
-      attributes: {
-        italic: true,
-      },
     },
     {
+      attributes: {
+        bold: true,
+        italic: true,
+      },
       insert: 'h',
-      attributes: {
-        bold: true,
-        italic: true,
-      },
     },
     {
-      insert: 'ij',
       attributes: {
         bold: true,
       },
+      insert: 'ij',
     },
     {
       insert: 'k',
@@ -945,10 +946,10 @@ test('delete embed when pressing backspace after embed', async ({ page }) => {
       insert: 'a',
     },
     {
-      insert: 'b',
       attributes: {
         embed: true,
       },
+      insert: 'b',
     },
   ]);
 
@@ -980,10 +981,10 @@ test('markdown shortcut using keyboard util', async ({ page }) => {
       insert: 'aaa',
     },
     {
-      insert: 'bbb',
       attributes: {
         bold: true,
       },
+      insert: 'bbb',
     },
     {
       insert: 'ccc',

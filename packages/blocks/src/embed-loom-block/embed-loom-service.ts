@@ -9,10 +9,10 @@ import {
 import { queryEmbedLoomData } from './utils.js';
 
 export class EmbedLoomBlockService extends BlockService<EmbedLoomModel> {
-  private static readonly linkPreviewer = new LinkPreviewer();
-
   static setLinkPreviewEndpoint =
     EmbedLoomBlockService.linkPreviewer.setEndpoint;
+
+  private static readonly linkPreviewer = new LinkPreviewer();
 
   queryUrlData = (embedLoomModel: EmbedLoomModel, signal?: AbortSignal) => {
     return queryEmbedLoomData(embedLoomModel, signal);
@@ -25,8 +25,8 @@ export class EmbedLoomBlockService extends BlockService<EmbedLoomModel> {
       const rootService = this.std.spec.getService('affine:page');
       rootService.registerEmbedBlockOptions({
         flavour: this.flavour,
-        urlRegex: loomUrlRegex,
         styles: EmbedLoomStyles,
+        urlRegex: loomUrlRegex,
         viewType: 'embed',
       });
     });

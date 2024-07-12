@@ -1,21 +1,22 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
-import { withTempBlobData } from '../_common/utils/filesys.js';
 import type { ImageBlockProps } from '../image-block/image-model.js';
-import { transformModel } from '../root-block/utils/operations/model.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 
+import { withTempBlobData } from '../_common/utils/filesys.js';
+import { transformModel } from '../root-block/utils/operations/model.js';
+
 type EmbedConfig = {
-  name: string;
-  /**
-   * Check if the attachment can be turned into embed view.
-   */
-  check: (model: AttachmentBlockModel, maxFileSize: number) => boolean;
   /**
    * The action will be executed when the 「Turn into embed view」 button is clicked.
    */
   action?: (model: AttachmentBlockModel) => Promise<void> | void;
+  /**
+   * Check if the attachment can be turned into embed view.
+   */
+  check: (model: AttachmentBlockModel, maxFileSize: number) => boolean;
+  name: string;
   /**
    * The template will be used to render the embed view.
    */
@@ -30,16 +31,16 @@ const MAX_EMBED_SIZE = 10 * 1024 * 1024;
 
 const embedConfig: EmbedConfig[] = [
   {
-    name: 'image',
+    action: model => turnIntoImageBlock(model),
     check: model =>
       model.doc.schema.flavourSchemaMap.has('affine:image') &&
       model.type.startsWith('image/'),
-    action: model => turnIntoImageBlock(model),
+    name: 'image',
   },
   {
-    name: 'pdf',
     check: (model, maxFileSize) =>
       model.type === 'application/pdf' && model.size <= maxFileSize,
+    name: 'pdf',
     template: (_, blobUrl) => {
       // More options: https://tinytip.co/tips/html-pdf-params/
       // https://chromium.googlesource.com/chromium/src/+/refs/tags/121.0.6153.1/chrome/browser/resources/pdf/open_pdf_params_parser.ts
@@ -58,16 +59,16 @@ const embedConfig: EmbedConfig[] = [
     },
   },
   {
-    name: 'video',
     check: (model, maxFileSize) =>
       model.type.startsWith('video/') && model.size <= maxFileSize,
+    name: 'video',
     template: (_, blobUrl) =>
       html`<video width="100%;" height="480" controls src=${blobUrl}></video>`,
   },
   {
-    name: 'audio',
     check: (model, maxFileSize) =>
       model.type.startsWith('audio/') && model.size <= maxFileSize,
+    name: 'audio',
     template: (_, blobUrl) =>
       html`<audio controls src=${blobUrl} style="margin: 4px;"></audio>`,
   },
@@ -117,7 +118,7 @@ export function turnIntoImageBlock(model: AttachmentBlockModel) {
   const sourceId = model.sourceId;
   assertExists(sourceId);
 
-  const { saveAttachmentData, getImageData } = withTempBlobData();
+  const { getImageData, saveAttachmentData } = withTempBlobData();
   saveAttachmentData(sourceId, { name: model.name });
 
   const imageConvertData = model.sourceId
@@ -125,9 +126,9 @@ export function turnIntoImageBlock(model: AttachmentBlockModel) {
     : undefined;
 
   const imageProp: Partial<ImageBlockProps> = {
-    sourceId,
     caption: model.caption,
     size: model.size,
+    sourceId,
     ...imageConvertData,
   };
   transformModel(model, 'affine:image', imageProp);

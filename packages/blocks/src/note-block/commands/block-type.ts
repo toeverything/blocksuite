@@ -23,7 +23,7 @@ export const updateBlockType: Command<
   'updatedBlocks',
   UpdateBlockConfig
 > = (ctx, next) => {
-  const { std, flavour, props } = ctx;
+  const { flavour, props, std } = ctx;
   const host = std.host as EditorHost;
   const doc = std.doc;
 

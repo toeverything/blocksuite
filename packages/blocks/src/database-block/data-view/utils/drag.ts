@@ -6,11 +6,11 @@ export const startDrag = <
 >(
   evt: MouseEvent,
   ops: {
-    transform?: (evt: MouseEvent) => P;
-    onDrag: (p: P) => T;
-    onMove: (p: P) => T;
-    onDrop: (result: T) => void;
     onClear: () => void;
+    onDrag: (p: P) => T;
+    onDrop: (result: T) => void;
+    onMove: (p: P) => T;
+    transform?: (evt: MouseEvent) => P;
   }
 ) => {
   const transform = ops?.transform ?? (e => e as P);

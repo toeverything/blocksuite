@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
@@ -15,30 +14,20 @@ import type {
   DocSnapshot,
   SliceSnapshot,
 } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { BaseAdapter } from '@blocksuite/store';
 
 import { decodeClipboardBlobs, encodeClipboardBlobs } from './utils.js';
 
 export type FileSnapshot = {
+  content: string;
   name: string;
   type: string;
-  content: string;
 };
 
 export class ClipboardAdapter extends BaseAdapter<string> {
   static MIME = 'BLOCKSUITE/SNAPSHOT';
-
-  override fromDocSnapshot(
-    _payload: FromDocSnapshotPayload
-  ): Promise<FromDocSnapshotResult<string>> {
-    throw new Error('not implemented');
-  }
-
-  override toDocSnapshot(
-    _payload: ToDocSnapshotPayload<string>
-  ): Promise<DocSnapshot> {
-    throw new Error('not implemented');
-  }
 
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
@@ -46,9 +35,9 @@ export class ClipboardAdapter extends BaseAdapter<string> {
     throw new Error('not implemented');
   }
 
-  override toBlockSnapshot(
-    _payload: ToBlockSnapshotPayload<string>
-  ): Promise<BlockSnapshot> {
+  override fromDocSnapshot(
+    _payload: FromDocSnapshotPayload
+  ): Promise<FromDocSnapshotResult<string>> {
     throw new Error('not implemented');
   }
 
@@ -61,12 +50,24 @@ export class ClipboardAdapter extends BaseAdapter<string> {
     const map = assets.getAssets();
     const blobs: Record<string, FileSnapshot> = await encodeClipboardBlobs(map);
     return {
-      file: JSON.stringify({
-        snapshot,
-        blobs,
-      }),
       assetsIds: [],
+      file: JSON.stringify({
+        blobs,
+        snapshot,
+      }),
     };
+  }
+
+  override toBlockSnapshot(
+    _payload: ToBlockSnapshotPayload<string>
+  ): Promise<BlockSnapshot> {
+    throw new Error('not implemented');
+  }
+
+  override toDocSnapshot(
+    _payload: ToDocSnapshotPayload<string>
+  ): Promise<DocSnapshot> {
+    throw new Error('not implemented');
   }
 
   override toSliceSnapshot(

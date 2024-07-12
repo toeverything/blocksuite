@@ -1,6 +1,7 @@
+import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
+
 import { Slot } from '@blocksuite/global/utils';
 import { merge } from 'merge';
-import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 
 import type { Space } from '../store/space.js';
 import type { Store } from '../store/store.js';
@@ -15,31 +16,61 @@ type UserSelection = Array<Record<string, unknown>>;
 export type RawAwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > = {
-  user?: UserInfo;
   color?: string;
   flags: Flags;
   // use v2 to avoid crush on old clients
   selectionV2: Record<string, UserSelection>;
+  user?: UserInfo;
 };
 
 export interface AwarenessEvent<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
   id: number;
-  type: 'add' | 'update' | 'remove';
   state?: RawAwarenessState<Flags>;
+  type: 'add' | 'remove' | 'update';
 }
 
 export class AwarenessStore<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
-  readonly awareness: YAwareness<RawAwarenessState<Flags>>;
+  private _onAwarenessChange = (diff: {
+    added: number[];
+    removed: number[];
+    updated: number[];
+  }) => {
+    const { added, removed, updated } = diff;
 
-  readonly store: Store;
+    const states = this.awareness.getStates();
+    added.forEach(id => {
+      this.slots.update.emit({
+        id,
+        state: states.get(id),
+        type: 'add',
+      });
+    });
+    updated.forEach(id => {
+      this.slots.update.emit({
+        id,
+        state: states.get(id),
+        type: 'update',
+      });
+    });
+    removed.forEach(id => {
+      this.slots.update.emit({
+        id,
+        type: 'remove',
+      });
+    });
+  };
+
+  readonly awareness: YAwareness<RawAwarenessState<Flags>>;
 
   readonly slots = {
     update: new Slot<AwarenessEvent<Flags>>(),
   };
+
+  readonly store: Store;
 
   constructor(
     store: Store,
@@ -61,39 +92,11 @@ export class AwarenessStore<
     this.awareness.setLocalStateField('flags', flags);
   }
 
-  private _onAwarenessChange = (diff: {
-    added: number[];
-    removed: number[];
-    updated: number[];
-  }) => {
-    const { added, removed, updated } = diff;
-
-    const states = this.awareness.getStates();
-    added.forEach(id => {
-      this.slots.update.emit({
-        id,
-        type: 'add',
-        state: states.get(id),
-      });
-    });
-    updated.forEach(id => {
-      this.slots.update.emit({
-        id,
-        type: 'update',
-        state: states.get(id),
-      });
-    });
-    removed.forEach(id => {
-      this.slots.update.emit({
-        id,
-        type: 'remove',
-      });
-    });
-  };
-
-  setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
-    const oldFlags = this.awareness.getLocalState()?.flags ?? {};
-    this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
+  destroy() {
+    if (this.awareness) {
+      this.awareness.off('change', this._onAwarenessChange);
+      this.slots.update.dispose();
+    }
   }
 
   getFlag<Key extends keyof Flags>(field: Key): Flags[Key] | undefined {
@@ -101,12 +104,12 @@ export class AwarenessStore<
     return flags[field];
   }
 
-  setReadonly(space: Space, value: boolean): void {
-    const flags = this.getFlag('readonly') ?? {};
-    this.setFlag('readonly', {
-      ...flags,
-      [space.id]: value,
-    } as Flags['readonly']);
+  getLocalSelection(space: Space): ReadonlyArray<Record<string, unknown>> {
+    return (this.awareness.getLocalState()?.selectionV2 ?? {})[space.id] ?? [];
+  }
+
+  getStates(): Map<number, RawAwarenessState<Flags>> {
+    return this.awareness.getStates();
   }
 
   isReadonly(space: Space): boolean {
@@ -118,6 +121,11 @@ export class AwarenessStore<
     }
   }
 
+  setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
+    const oldFlags = this.awareness.getLocalState()?.flags ?? {};
+    this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
+  }
+
   setLocalSelection(space: Space, selection: UserSelection) {
     const oldSelection = this.awareness.getLocalState()?.selectionV2 ?? {};
     this.awareness.setLocalStateField('selectionV2', {
@@ -126,18 +134,11 @@ export class AwarenessStore<
     });
   }
 
-  getLocalSelection(space: Space): ReadonlyArray<Record<string, unknown>> {
-    return (this.awareness.getLocalState()?.selectionV2 ?? {})[space.id] ?? [];
-  }
-
-  getStates(): Map<number, RawAwarenessState<Flags>> {
-    return this.awareness.getStates();
-  }
-
-  destroy() {
-    if (this.awareness) {
-      this.awareness.off('change', this._onAwarenessChange);
-      this.slots.update.dispose();
-    }
+  setReadonly(space: Space, value: boolean): void {
+    const flags = this.getFlag('readonly') ?? {};
+    this.setFlag('readonly', {
+      ...flags,
+      [space.id]: value,
+    } as Flags['readonly']);
   }
 }

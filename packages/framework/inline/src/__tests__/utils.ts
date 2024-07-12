@@ -4,7 +4,8 @@ import type {
   InlineEditor,
   InlineRange,
 } from '@blocksuite/inline';
-import { expect, type Page } from '@playwright/test';
+
+import { type Page, expect } from '@playwright/test';
 
 const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 
@@ -132,7 +133,7 @@ export async function getInlineRangeIndexRect(
   coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
 ) {
   const rect = await page.evaluate(
-    ({ richTextIndex, inlineIndex: vIndex, coordOffSet }) => {
+    ({ coordOffSet, inlineIndex: vIndex, richTextIndex }) => {
       const richText = document.querySelectorAll('test-rich-text')[
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,9 +149,9 @@ export async function getInlineRangeIndexRect(
       };
     },
     {
-      richTextIndex,
-      inlineIndex,
       coordOffSet,
+      inlineIndex,
+      richTextIndex,
     }
   );
   return rect;

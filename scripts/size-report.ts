@@ -1,21 +1,20 @@
+import { markdownTable } from 'markdown-table';
 import { existsSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
-
-import { markdownTable } from 'markdown-table';
 import prettyBytes from 'pretty-bytes';
 
 interface SizeResult {
-  size: number;
-  gzip: number;
   brotli: number;
+  gzip: number;
+  size: number;
 }
 
 interface BundleResult extends SizeResult {
   file: string;
 }
 
-type PackageResult = Record<string, SizeResult & { name: string }>;
+type PackageResult = Record<string, { name: string } & SizeResult>;
 
 const currDir = path.resolve('temp/size');
 const prevDir = path.resolve('temp/size-prev');

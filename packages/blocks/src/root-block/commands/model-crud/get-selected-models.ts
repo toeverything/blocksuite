@@ -1,6 +1,7 @@
 import type { Command } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 /**
  * Retrieves the selected models based on the provided selection types and mode.
@@ -33,8 +34,8 @@ export const getSelectedModelsCommand: Command<
   never,
   'selectedModels',
   {
-    types?: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
     mode?: 'all' | 'flat' | 'highest';
+    types?: Extract<BlockSuite.SelectionType, 'block' | 'image' | 'text'>[];
   }
 > = (ctx, next) => {
   const types = ctx.types ?? ['block', 'text', 'image'];
@@ -48,8 +49,8 @@ export const getSelectedModelsCommand: Command<
       chain.getImageSelections(),
     ])
     .getSelectedBlocks({
-      types,
       mode,
+      types,
     })
     .inline(ctx => {
       const { selectedBlocks } = ctx;

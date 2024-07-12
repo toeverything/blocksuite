@@ -1,5 +1,6 @@
-import { ShadowlessElement } from '@blocksuite/block-std';
 import type { AffineTextAttributes } from '@blocksuite/blocks';
+
+import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type DeltaInsert,
@@ -11,7 +12,7 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 export type TextAttributesWithLatex = {
-  latex?: string | null;
+  latex?: null | string;
 } & AffineTextAttributes;
 
 @customElement('latex-node')
@@ -37,6 +38,24 @@ export class latexNode extends ShadowlessElement {
     }
   `;
 
+  override render() {
+    return html`<span class="affine-latex" data-selected=${this.selected}
+      ><span class="latex-container"></span
+      ><v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+    ></span>`;
+  }
+
+  override updated() {
+    const latexContainer = this.querySelector<HTMLElement>('.latex-container');
+    assertExists(latexContainer);
+    latexContainer.replaceChildren();
+    katex.render(this.delta.attributes?.latex ?? '', latexContainer, {
+      displayMode: false,
+      output: 'mathml',
+      throwOnError: false,
+    });
+  }
+
   @property({ type: Object })
   accessor delta: DeltaInsert<TextAttributesWithLatex> = {
     insert: ZERO_WIDTH_SPACE,
@@ -44,24 +63,6 @@ export class latexNode extends ShadowlessElement {
 
   @property({ type: Boolean })
   accessor selected = false;
-
-  override updated() {
-    const latexContainer = this.querySelector<HTMLElement>('.latex-container');
-    assertExists(latexContainer);
-    latexContainer.replaceChildren();
-    katex.render(this.delta.attributes?.latex ?? '', latexContainer, {
-      throwOnError: false,
-      displayMode: false,
-      output: 'mathml',
-    });
-  }
-
-  override render() {
-    return html`<span class="affine-latex" data-selected=${this.selected}
-      ><span class="latex-container"></span
-      ><v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
-    ></span>`;
-  }
 }
 
 declare global {

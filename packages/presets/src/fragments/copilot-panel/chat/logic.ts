@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import {
   BlocksUtils,
   EmbedHtmlBlockSpec,
@@ -9,6 +10,8 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockSnapshot, type Doc, Job } from '@blocksuite/store';
+
+import type { AILogic } from '../logic.js';
 
 import { LANGUAGE, TONE } from '../config.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
@@ -21,8 +24,8 @@ import {
   runImproveWritingAction,
   runMakeLongerAction,
   runMakeShorterAction,
-  runPartAnalysisAction,
   runPPTGenerateAction,
+  runPartAnalysisAction,
   runRefineAction,
   runSimplifyWritingAction,
   runSummaryAction,
@@ -30,7 +33,6 @@ import {
 } from '../doc/actions.js';
 import { getChatService } from '../doc/api.js';
 import { genHtml } from '../edgeless/gen-html.js';
-import type { AILogic } from '../logic.js';
 import { findLeaf, findTree, getConnectorPath } from '../utils/connector.js';
 import {
   insertFromMarkdown,
@@ -45,120 +47,104 @@ import {
   selectedToCanvas,
   selectedToPng,
 } from '../utils/selection-utils.js';
-import { basicTheme, type PPTDoc, type PPTSection } from './template.js';
+import { type PPTDoc, type PPTSection, basicTheme } from './template.js';
 
 export type ChatReactiveData = {
+  currentRequest?: number;
   history: ChatMessage[];
   syncedDocs: EmbeddedDoc[];
-  value: string;
-  currentRequest?: number;
   tempMessage?: string;
+  value: string;
 };
 
 export class AIChatLogic {
-  get loading() {
-    return this.reactiveData.currentRequest != null;
-  }
-
-  get host() {
-    return this.getHost();
-  }
-
-  get docs() {
-    return [...this.host.doc.collection.docs.values()];
-  }
-
   private requestId = 0;
-
-  reactiveData!: ChatReactiveData;
 
   docSelectionActionList: AllAction[] = [
     {
-      type: 'group',
-      name: 'Translate',
       children: LANGUAGE.map(language => ({
-        type: 'action',
-        name: language,
         action: this.createAction(`Translate to ${language}`, input =>
           runTranslateAction({ input, language })
         ),
+        name: language,
+        type: 'action',
       })),
+      name: 'Translate',
+      type: 'group',
     },
     {
-      type: 'group',
-      name: 'Change tone',
       children: TONE.map(tone => ({
-        type: 'action',
-        name: tone,
         action: this.createAction(`Make more ${tone}`, input =>
           runChangeToneAction({ input, tone })
         ),
+        name: tone,
+        type: 'action',
       })),
+      name: 'Change tone',
+      type: 'group',
     },
     {
-      type: 'action',
-      name: 'Refine',
       action: this.createAction('Refine', input => runRefineAction({ input })),
+      name: 'Refine',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Generate',
       action: this.createAction('Generate', input =>
         runGenerateAction({ input })
       ),
+      name: 'Generate',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Summary',
       action: this.createAction('Summary', input =>
         runSummaryAction({ input })
       ),
+      name: 'Summary',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Improve writing',
       action: this.createAction('Improve writing', input =>
         runImproveWritingAction({ input })
       ),
+      name: 'Improve writing',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Fix spelling',
       action: this.createAction('Fix spelling', input =>
         runFixSpellingAction({ input })
       ),
+      name: 'Fix spelling',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Make shorter',
       action: this.createAction('Make shorter', input =>
         runMakeShorterAction({ input })
       ),
+      name: 'Make shorter',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Make longer',
       action: this.createAction('Make longer', input =>
         runMakeLongerAction({ input })
       ),
+      name: 'Make longer',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Simplify language',
       action: this.createAction('Simplify language', input =>
         runSimplifyWritingAction({ input })
       ),
+      name: 'Simplify language',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Create mind-map',
       action: this.createAction('Create mind-map', (input, background) => {
         const service = getEdgelessService(this.host);
         const [x, y] = [service.viewport.centerX, service.viewport.centerY];
         const reactiveData = this.reactiveData;
         const build = mindMapBuilder(this.host, x, y);
         return (async function* () {
-          const strings = runAnalysisAction({ input, background });
+          const strings = runAnalysisAction({ background, input });
           let text = '';
           for await (const item of strings) {
             yield item;
@@ -170,15 +156,15 @@ export class AIChatLogic {
           }
         })();
       }),
+      name: 'Create mind-map',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Create presentation',
       action: this.createAction('Create mind-map', (input, background) => {
         const reactiveData = this.reactiveData;
         const build = pptBuilder(this.host);
         return (async function* () {
-          const strings = runPPTGenerateAction({ input, background });
+          const strings = runPPTGenerateAction({ background, input });
           let text = '';
           for await (const item of strings) {
             yield item;
@@ -191,10 +177,10 @@ export class AIChatLogic {
           await build.done(text);
         })();
       }),
+      name: 'Create presentation',
+      type: 'action',
     },
     {
-      type: 'action',
-      name: 'Insert into Chat',
       action: async () => {
         const input = await this.getSelectedText();
         if (!input) {
@@ -203,23 +189,18 @@ export class AIChatLogic {
         this.reactiveData.history = [
           ...this.reactiveData.history,
           {
-            role: 'user',
             content: [{ text: input, type: 'text' }],
+            role: 'user',
           },
         ];
       },
+      name: 'Insert into Chat',
+      type: 'action',
     },
   ];
 
   edgelessSelectionActionList: AllAction[] = [
     {
-      type: 'action',
-      name: 'Create mind-map',
-      hide: () => {
-        const service = getEdgelessService(this.host);
-        const ele = service.selection.selectedElements[0];
-        return !SurfaceBlockComponent.isShape(ele);
-      },
       action: async () => {
         const reactiveData = this.reactiveData;
         const service = getEdgelessService(this.host);
@@ -256,7 +237,7 @@ export class AIChatLogic {
         );
         await this.createAction('Part analysis', (input, background) => {
           return (async function* () {
-            const strings = runPartAnalysisAction({ input, path, background });
+            const strings = runPartAnalysisAction({ background, input, path });
             let text = '';
             for await (const item of strings) {
               yield item;
@@ -269,15 +250,15 @@ export class AIChatLogic {
           })();
         })(text);
       },
-    },
-    {
-      type: 'action',
-      name: 'Make it real',
       hide: () => {
         const service = getEdgelessService(this.host);
-        const elements = service.selection.selectedElements;
-        return elements.length === 0;
+        const ele = service.selection.selectedElements[0];
+        return !SurfaceBlockComponent.isShape(ele);
       },
+      name: 'Create mind-map',
+      type: 'action',
+    },
+    {
       action: async () => {
         const img = await selectedToPng(this.host);
         if (!img) return;
@@ -288,77 +269,19 @@ export class AIChatLogic {
         const edgelessRoot = getEdgelessRootFromEditor(this.host);
         edgelessRoot.doc.addBlock(
           EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
-          { html, design: img, xywh: '[0, 400, 400, 200]' },
+          { design: img, html, xywh: '[0, 400, 400, 200]' },
           edgelessRoot.surface.model.id
         );
       },
+      hide: () => {
+        const service = getEdgelessService(this.host);
+        const elements = service.selection.selectedElements;
+        return elements.length === 0;
+      },
+      name: 'Make it real',
+      type: 'action',
     },
   ];
-
-  constructor(
-    private logic: AILogic,
-    private getHost: () => EditorHost
-  ) {
-    this.logic;
-  }
-
-  async startRequest<T>(p: () => Promise<T>): Promise<T> {
-    const id = this.requestId++;
-    this.reactiveData.currentRequest = id;
-    try {
-      const result = await p();
-      if (id === this.reactiveData.currentRequest) {
-        return result;
-      }
-    } finally {
-      this.reactiveData.currentRequest = undefined;
-    }
-    return new Promise(() => {});
-  }
-
-  getSelectedText = async () => {
-    const text = await getSelectedTextContent(this.host);
-    return text;
-  };
-
-  selectTextForBackground = async () => {
-    const text = await this.getSelectedText();
-    if (!text) return;
-    this.reactiveData.history.push({
-      role: 'user',
-      content: [
-        {
-          type: 'text',
-          text,
-        },
-      ],
-    });
-  };
-
-  selectShapesForBackground = async () => {
-    const canvas = await selectedToCanvas(this.host);
-    if (!canvas) {
-      alert('Please select some shapes first');
-      return;
-    }
-    const url = canvas.toDataURL();
-    this.reactiveData.history.push({
-      role: 'user',
-      content: [
-        {
-          type: 'image_url',
-          image_url: {
-            url,
-          },
-        },
-      ],
-    });
-  };
-
-  splitDoc = async (doc: Doc): Promise<string[]> => {
-    const markdown = await docToMarkdown(doc);
-    return splitText(markdown);
-  };
 
   embeddingDocs = async (docList: Doc[]): Promise<EmbeddedDoc[]> => {
     const result: Record<string, EmbeddedDoc> = {};
@@ -374,25 +297,10 @@ export class AIChatLogic {
       .generateEmbeddings(list.map(v => v.text));
     list.forEach((v, i) => {
       const doc = result[v.id] ?? (result[v.id] = { id: v.id, sections: [] });
-      doc.sections.push({ vector: vectors[i], text: v.text });
+      doc.sections.push({ text: v.text, vector: vectors[i] });
     });
     return Object.values(result);
   };
-
-  syncWorkspace = async () => {
-    this.reactiveData.syncedDocs = await this.embeddingDocs(
-      [...this.host.doc.collection.docs.values()].map(v => v.getDoc())
-    );
-  };
-
-  async docBackground(): Promise<ChatMessage[]> {
-    return [
-      {
-        role: 'system',
-        content: `the background is:\n${await Promise.all(this.docs.map(v => docToMarkdown(v.getDoc()))).then(list => list.join('\n'))}`,
-      },
-    ];
-  }
 
   genAnswer = async (text: string) => {
     if (this.loading) {
@@ -401,8 +309,8 @@ export class AIChatLogic {
     this.reactiveData.history = [
       ...this.reactiveData.history,
       {
-        role: 'user',
         content: [{ text: text, type: 'text' }],
+        role: 'user',
       },
     ];
     const background = await this.getBackground();
@@ -424,12 +332,124 @@ export class AIChatLogic {
     this.reactiveData.history = [
       ...this.reactiveData.history,
       {
-        role: 'assistant',
         content: r ?? '',
+        role: 'assistant',
         sources: background.sources,
       },
     ];
   };
+
+  getSelectedText = async () => {
+    const text = await getSelectedTextContent(this.host);
+    return text;
+  };
+
+  reactiveData!: ChatReactiveData;
+
+  selectShapesForBackground = async () => {
+    const canvas = await selectedToCanvas(this.host);
+    if (!canvas) {
+      alert('Please select some shapes first');
+      return;
+    }
+    const url = canvas.toDataURL();
+    this.reactiveData.history.push({
+      content: [
+        {
+          image_url: {
+            url,
+          },
+          type: 'image_url',
+        },
+      ],
+      role: 'user',
+    });
+  };
+
+  selectTextForBackground = async () => {
+    const text = await this.getSelectedText();
+    if (!text) return;
+    this.reactiveData.history.push({
+      content: [
+        {
+          text,
+          type: 'text',
+        },
+      ],
+      role: 'user',
+    });
+  };
+
+  splitDoc = async (doc: Doc): Promise<string[]> => {
+    const markdown = await docToMarkdown(doc);
+    return splitText(markdown);
+  };
+
+  syncWorkspace = async () => {
+    this.reactiveData.syncedDocs = await this.embeddingDocs(
+      [...this.host.doc.collection.docs.values()].map(v => v.getDoc())
+    );
+  };
+
+  constructor(
+    private logic: AILogic,
+    private getHost: () => EditorHost
+  ) {
+    this.logic;
+  }
+
+  createAction(
+    name: string,
+    action: (
+      input: string,
+      background: ChatMessage[]
+    ) => AsyncIterable<string> | Promise<AsyncIterable<string>>
+  ) {
+    return async (text?: string): Promise<void> => {
+      const input = text ? text : await this.getSelectedText();
+      if (!input) {
+        return;
+      }
+      this.reactiveData.history = [
+        ...this.reactiveData.history,
+        {
+          content: [{ text: input, type: 'text' }],
+          role: 'user',
+        },
+        {
+          content: [{ text: name, type: 'text' }],
+          role: 'user',
+        },
+      ];
+      const result = await this.startRequest(async () => {
+        const strings = await action(input, await this.docBackground());
+        let r = '';
+        for await (const item of strings) {
+          r += item;
+          this.reactiveData.tempMessage = r;
+        }
+        this.reactiveData.tempMessage = undefined;
+        return r;
+      });
+      this.reactiveData.history = [
+        ...this.reactiveData.history,
+        {
+          content: result,
+          role: 'assistant',
+          sources: [],
+        },
+      ];
+    };
+  }
+
+  async docBackground(): Promise<ChatMessage[]> {
+    return [
+      {
+        content: `the background is:\n${await Promise.all(this.docs.map(v => docToMarkdown(v.getDoc()))).then(list => list.join('\n'))}`,
+        role: 'system',
+      },
+    ];
+  }
 
   async getBackground(): Promise<{
     messages: ChatMessage[];
@@ -447,8 +467,8 @@ export class AIChatLogic {
     const list = this.reactiveData.syncedDocs
       .flatMap(doc => {
         return doc.sections.map(section => ({
-          id: doc.id,
           distance: distance(result, section.vector),
+          id: doc.id,
           text: section.text,
         }));
       })
@@ -467,8 +487,8 @@ export class AIChatLogic {
     return {
       messages: [
         {
-          role: 'system',
           content: `the background is:\n${list.map(v => v.text).join('\n')}`,
+          role: 'system',
         },
       ],
       sources: [...sources.entries()].map(([id, textList]) => ({
@@ -476,6 +496,35 @@ export class AIChatLogic {
         slice: textList,
       })),
     };
+  }
+
+  async insertBelowSelectedContent(text: string) {
+    if (!text) return;
+
+    const selectedBlocks = getRootService(this.host).selectedBlocks;
+    const blockLength = selectedBlocks.length;
+    if (!blockLength) return;
+
+    const lastBlock = selectedBlocks[blockLength - 1];
+    const parentBlock = lastBlock.parentBlockElement;
+
+    const lastIndex = parentBlock.model.children.findIndex(
+      child => child.id === lastBlock.model.id
+    ) as number;
+
+    const models = await insertFromMarkdown(
+      this.host,
+      text,
+      parentBlock.model.id,
+      lastIndex + 1
+    );
+
+    setTimeout(() => {
+      const selections = models
+        .map(model => model.id)
+        .map(blockId => this.host.selection.create('block', { blockId }));
+      this.host.selection.setGroup('note', selections);
+    }, 0);
   }
 
   async replaceSelectedContent(text: string) {
@@ -508,102 +557,55 @@ export class AIChatLogic {
     }, 0);
   }
 
-  async insertBelowSelectedContent(text: string) {
-    if (!text) return;
-
-    const selectedBlocks = getRootService(this.host).selectedBlocks;
-    const blockLength = selectedBlocks.length;
-    if (!blockLength) return;
-
-    const lastBlock = selectedBlocks[blockLength - 1];
-    const parentBlock = lastBlock.parentBlockElement;
-
-    const lastIndex = parentBlock.model.children.findIndex(
-      child => child.id === lastBlock.model.id
-    ) as number;
-
-    const models = await insertFromMarkdown(
-      this.host,
-      text,
-      parentBlock.model.id,
-      lastIndex + 1
-    );
-
-    setTimeout(() => {
-      const selections = models
-        .map(model => model.id)
-        .map(blockId => this.host.selection.create('block', { blockId }));
-      this.host.selection.setGroup('note', selections);
-    }, 0);
+  async startRequest<T>(p: () => Promise<T>): Promise<T> {
+    const id = this.requestId++;
+    this.reactiveData.currentRequest = id;
+    try {
+      const result = await p();
+      if (id === this.reactiveData.currentRequest) {
+        return result;
+      }
+    } finally {
+      this.reactiveData.currentRequest = undefined;
+    }
+    return new Promise(() => {});
   }
 
-  createAction(
-    name: string,
-    action: (
-      input: string,
-      background: ChatMessage[]
-    ) => Promise<AsyncIterable<string>> | AsyncIterable<string>
-  ) {
-    return async (text?: string): Promise<void> => {
-      const input = text ? text : await this.getSelectedText();
-      if (!input) {
-        return;
-      }
-      this.reactiveData.history = [
-        ...this.reactiveData.history,
-        {
-          role: 'user',
-          content: [{ text: input, type: 'text' }],
-        },
-        {
-          role: 'user',
-          content: [{ text: name, type: 'text' }],
-        },
-      ];
-      const result = await this.startRequest(async () => {
-        const strings = await action(input, await this.docBackground());
-        let r = '';
-        for await (const item of strings) {
-          r += item;
-          this.reactiveData.tempMessage = r;
-        }
-        this.reactiveData.tempMessage = undefined;
-        return r;
-      });
-      this.reactiveData.history = [
-        ...this.reactiveData.history,
-        {
-          role: 'assistant',
-          content: result,
-          sources: [],
-        },
-      ];
-    };
+  get docs() {
+    return [...this.host.doc.collection.docs.values()];
+  }
+
+  get host() {
+    return this.getHost();
+  }
+
+  get loading() {
+    return this.reactiveData.currentRequest != null;
   }
 }
 
 type Action = {
-  type: 'action';
-  name: string;
-  hide?: () => boolean;
   action: () => Promise<void>;
+  hide?: () => boolean;
+  name: string;
+  type: 'action';
 };
 type ActionGroup = {
-  type: 'group';
-  name: string;
   children: AllAction[];
+  name: string;
+  type: 'group';
 };
 export type AllAction = Action | ActionGroup;
 type MessageContent =
   | {
-      type: 'text';
-      text: string;
-    }
-  | {
-      type: 'image_url';
       image_url: {
         url: string;
       };
+      type: 'image_url';
+    }
+  | {
+      text: string;
+      type: 'text';
     };
 
 type BackgroundSource = {
@@ -612,17 +614,17 @@ type BackgroundSource = {
 };
 export type ChatMessage =
   | {
-      role: 'user';
       content: MessageContent[];
+      role: 'user';
     }
   | {
-      role: 'system';
       content: string;
-    }
-  | {
       role: 'assistant';
-      content: string;
       sources: BackgroundSource[];
+    }
+  | {
+      content: string;
+      role: 'system';
     };
 
 const docToMarkdown = async (doc: Doc) => {
@@ -672,8 +674,8 @@ const splitText = (text: string) => {
 export type EmbeddedDoc = {
   id: string;
   sections: {
-    vector: number[];
     text: string;
+    vector: number[];
   }[];
 };
 const mindMapBuilder = (
@@ -707,8 +709,8 @@ const mindMapBuilder = (
         BlocksUtils.mindMap.changeText(selfId, text, service);
       }
       return {
-        id: ids[i++],
         children: block.children.map(id => toTreeNode(id, selfId)),
+        id: ids[i++],
       };
     };
     const tree = toTreeNode(block.children[0]);
@@ -752,19 +754,19 @@ const pptBuilder = (host: EditorHost) => {
       const keywords = getText(v.children[0]);
       const content = getText(v.children[1]);
       return {
-        title,
-        keywords,
         content,
+        keywords,
+        title,
       } satisfies PPTSection;
     });
     const doc: PPTDoc = {
       isCover: docs.length === 0,
-      title: getText(block),
       sections,
+      title: getText(block),
     };
     docs.push(doc);
     const job = service.createTemplateJob('template');
-    const { images, content } = await basicTheme(doc);
+    const { content, images } = await basicTheme(doc);
     if (images.length) {
       await Promise.all(
         images.map(({ id, url }) =>
@@ -778,19 +780,19 @@ const pptBuilder = (host: EditorHost) => {
     getSurfaceElementFromEditor(host).refresh();
   };
   return {
-    process: async (text: string) => {
-      const snapshot = await markdownToSnapshot(text, host);
-      const block = snapshot.snapshot.content[0];
-      if (block.children.length > docs.length + 1) {
-        addPPTTaskQueue.add(() => addDoc(block.children[docs.length]));
-      }
-    },
     done: async (text: string) => {
       const snapshot = await markdownToSnapshot(text, host);
       const block = snapshot.snapshot.content[0];
       addPPTTaskQueue.add(() =>
         addDoc(block.children[block.children.length - 1])
       );
+    },
+    process: async (text: string) => {
+      const snapshot = await markdownToSnapshot(text, host);
+      const block = snapshot.snapshot.content[0];
+      if (block.children.length > docs.length + 1) {
+        addPPTTaskQueue.add(() => addDoc(block.children[docs.length]));
+      }
     },
   };
 };

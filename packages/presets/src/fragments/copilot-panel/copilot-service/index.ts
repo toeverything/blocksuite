@@ -1,7 +1,3 @@
-import './open-ai.js';
-import './fal.js';
-import './llama2.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { nanoid } from '@blocksuite/store';
 import { computePosition } from '@floating-ui/dom';
@@ -11,39 +7,52 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../utils/selection-utils.js';
-import { copilotConfig, type VendorConfig } from './copilot-config.js';
+import { type VendorConfig, copilotConfig } from './copilot-config.js';
+import './fal.js';
 import { falVendor } from './fal.js';
+import './llama2.js';
 import { llama2Vendor } from './llama2.js';
+import './open-ai.js';
 import { openaiVendor } from './open-ai.js';
 import {
-  allKindService,
   type AllServiceKind,
   type ServiceImpl,
   type Vendor,
+  allKindService,
 } from './service-base.js';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const allVendor: Vendor<any>[] = [openaiVendor, falVendor, llama2Vendor];
 
 @customElement('create-new-service')
 export class CreateNewService extends WithDisposable(ShadowlessElement) {
-  get serviceKind() {
-    return allKindService.find(v => v.type === this.type);
+  changeKey(key: string) {
+    this.key = key;
+    this.data = allVendor.find(v => v.key === key)?.initData();
   }
 
-  @property({ attribute: false })
-  accessor type!: string;
+  changeKeyByEvent(e: Event) {
+    const select = e.target as HTMLSelectElement;
+    this.changeKey(select.value);
+  }
 
-  @property({ attribute: false })
-  accessor onSave!: (config: VendorConfig) => void;
+  changeName(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.name = input.value;
+  }
 
-  @state()
-  accessor key = '';
+  close() {
+    this.remove();
+  }
 
-  @state()
-  accessor name = '';
-
-  @state()
-  accessor data: unknown | undefined = undefined;
+  list() {
+    const set = new Set<Vendor<unknown>>();
+    allKindService
+      .find(v => v.type === this.type)
+      ?.implList.forEach(v => {
+        set.add(v.vendor);
+      });
+    return [...set];
+  }
 
   protected override render(): unknown {
     const list = this.list();
@@ -102,46 +111,36 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  changeKeyByEvent(e: Event) {
-    const select = e.target as HTMLSelectElement;
-    this.changeKey(select.value);
-  }
-
-  changeKey(key: string) {
-    this.key = key;
-    this.data = allVendor.find(v => v.key === key)?.initData();
-  }
-
-  changeName(e: Event) {
-    const input = e.target as HTMLInputElement;
-    this.name = input.value;
-  }
-
   save() {
     if (!this.data) {
       return;
     }
     this.onSave({
-      id: nanoid(),
-      vendorKey: this.key,
-      name: this.name,
       data: this.data,
+      id: nanoid(),
+      name: this.name,
+      vendorKey: this.key,
     });
   }
 
-  close() {
-    this.remove();
+  get serviceKind() {
+    return allKindService.find(v => v.type === this.type);
   }
 
-  list() {
-    const set = new Set<Vendor<unknown>>();
-    allKindService
-      .find(v => v.type === this.type)
-      ?.implList.forEach(v => {
-        set.add(v.vendor);
-      });
-    return [...set];
-  }
+  @state()
+  accessor data: undefined | unknown = undefined;
+
+  @state()
+  accessor key = '';
+
+  @state()
+  accessor name = '';
+
+  @property({ attribute: false })
+  accessor onSave!: (config: VendorConfig) => void;
+
+  @property({ attribute: false })
+  accessor type!: string;
 }
 
 @customElement('vendor-service-select')
@@ -160,11 +159,24 @@ export class VendorServiceSelect extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor featureKey!: string;
-
-  @property({ attribute: false })
-  accessor service!: AllServiceKind;
+  changeService(e: Event) {
+    const options = new VendorServiceOptions();
+    options.featureKey = this.featureKey;
+    options.service = this.service;
+    options.close = () => {
+      this.requestUpdate();
+    };
+    const target = e.target as HTMLElement;
+    document.body.append(options);
+    computePosition(target, options)
+      .then(pos => {
+        options.style.left = `${pos.x}px`;
+        options.style.top = `${pos.y}px`;
+      })
+      .catch(() => {
+        options.remove();
+      });
+  }
 
   protected override render(): unknown {
     const list = copilotConfig.getVendorsByService(this.service);
@@ -191,24 +203,11 @@ export class VendorServiceSelect extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  changeService(e: Event) {
-    const options = new VendorServiceOptions();
-    options.featureKey = this.featureKey;
-    options.service = this.service;
-    options.close = () => {
-      this.requestUpdate();
-    };
-    const target = e.target as HTMLElement;
-    document.body.append(options);
-    computePosition(target, options)
-      .then(pos => {
-        options.style.left = `${pos.x}px`;
-        options.style.top = `${pos.y}px`;
-      })
-      .catch(() => {
-        options.remove();
-      });
-  }
+  @property({ attribute: false })
+  accessor featureKey!: string;
+
+  @property({ attribute: false })
+  accessor service!: AllServiceKind;
 }
 
 @customElement('vendor-service-options')
@@ -231,15 +230,6 @@ export class VendorServiceOptions extends WithDisposable(ShadowlessElement) {
       cursor: pointer;
     }
   `;
-
-  @property({ attribute: false })
-  accessor featureKey!: string;
-
-  @property({ attribute: false })
-  accessor service!: AllServiceKind;
-
-  @property({ attribute: false })
-  accessor close!: () => void;
 
   protected override render(): unknown {
     const list = copilotConfig.getVendorsByService(this.service);
@@ -276,4 +266,13 @@ export class VendorServiceOptions extends WithDisposable(ShadowlessElement) {
     this.remove();
     this.close();
   }
+
+  @property({ attribute: false })
+  accessor close!: () => void;
+
+  @property({ attribute: false })
+  accessor featureKey!: string;
+
+  @property({ attribute: false })
+  accessor service!: AllServiceKind;
 }

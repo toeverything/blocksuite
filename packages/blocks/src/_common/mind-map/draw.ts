@@ -1,59 +1,64 @@
 import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
-import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { SHAPE_TEXT_PADDING } from '../../surface-block/element-model/shape.js';
 import type {
   ConnectorElementModel,
   ShapeElementModel,
 } from '../../surface-block/index.js';
+
+import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { SHAPE_TEXT_PADDING } from '../../surface-block/element-model/shape.js';
 import {
   Bound,
   CanvasElementType,
   ConnectorMode,
-  getLineWidth,
   type IShape,
-  normalizeShapeBound,
   ShapeStyle,
   type ShapeType,
   StrokeStyle,
+  getLineWidth,
+  normalizeShapeBound,
 } from '../../surface-block/index.js';
 import {
   type Connector,
-  layout,
   type LayoutNode,
   type LayoutNodeResult,
+  layout,
 } from './layout.js';
 
 export const DEFAULT_SHAPE_PROPS: Partial<IShape> = {
-  shapeType: 'rect' as ShapeType,
-  strokeColor: '--affine-palette-line-blue',
   fillColor: '--affine-palette-shape-blue',
   radius: 0.1,
-  strokeWidth: 2,
-  strokeStyle: StrokeStyle.Solid,
   shapeStyle: ShapeStyle.General,
+  shapeType: 'rect' as ShapeType,
+  strokeColor: '--affine-palette-line-blue',
+  strokeStyle: StrokeStyle.Solid,
+  strokeWidth: 2,
 };
 
 export const DEFAULT_CONNECTOR_PROPS: Partial<ConnectorElementModel> = {
-  stroke: '--affine-palette-line-black',
-  mode: ConnectorMode.Orthogonal,
-  strokeWidth: 2,
-  strokeStyle: StrokeStyle.Solid,
   frontEndpointStyle: 'None',
+  mode: ConnectorMode.Orthogonal,
   rearEndpointStyle: 'None',
+  stroke: '--affine-palette-line-black',
+  strokeStyle: StrokeStyle.Solid,
+  strokeWidth: 2,
 };
 export type TreeNode = {
+  children: TreeNode[];
   // element id in edgeless if it already exists
   id?: string;
   text: string;
-  children: TreeNode[];
 };
 export type TreeNodeWithId = {
-  id: string;
   children: TreeNodeWithId[];
+  id: string;
 };
 const directionMap: Record<string, { from: number[]; to: number[] }> = {
+  bottom: {
+    from: [0.5, 1],
+    to: [0.5, 0],
+  },
   left: {
     from: [0, 0.5],
     to: [1, 0.5],
@@ -65,10 +70,6 @@ const directionMap: Record<string, { from: number[]; to: number[] }> = {
   top: {
     from: [0.5, 0],
     to: [0.5, 1],
-  },
-  bottom: {
-    from: [0.5, 1],
-    to: [0.5, 0],
   },
 };
 
@@ -84,20 +85,20 @@ const drawAllNode = (
   const shapeIds: string[] = [];
   const connectorIds: string[] = [];
   const connectors: { from: string; to: string }[] = [];
-  type LayoutNode_ = Omit<LayoutNode, 'children'> & {
-    id: string;
+  type LayoutNode_ = {
     children: LayoutNode_[];
-  };
+    id: string;
+  } & Omit<LayoutNode, 'children'>;
   const drawNode = (node: TreeNode, isRoot = false): LayoutNode_ => {
-    const { text, children } = node;
+    const { children, text } = node;
     const id = node.id
       ? node.id
       : isRoot && options?.rootId
         ? options.rootId
         : service.addElement(CanvasElementType.SHAPE, {
             ...DEFAULT_SHAPE_PROPS,
-            xywh: `[${0},${0},${0},${0}]`,
             text: new DocCollection.Y.Text(text),
+            xywh: `[${0},${0},${0},${0}]`,
           });
     shapeIds.push(id);
     const ele = service.getElementById(id) as ShapeElementModel;
@@ -111,14 +112,14 @@ const drawAllNode = (
       new Bound(0, 0, Math.max(148, Math.min(600, maxWidth)), 78)
     );
     return {
-      id,
-      width: bound.w,
-      height: bound.h,
       children: children.map(child => {
         const layoutNode = drawNode(child);
         connectors.push({ from: id, to: layoutNode.id });
         return layoutNode;
       }),
+      height: bound.h,
+      id,
+      width: bound.w,
     };
   };
   const layoutNode = drawNode(node, true);
@@ -132,7 +133,7 @@ const drawAllNode = (
     y: root ? root.y : options?.y ?? 0,
   });
   const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
-    const { id, width, height } = node;
+    const { height, id, width } = node;
     const { x, y } = result.self;
 
     service.updateElement(id, {
@@ -144,7 +145,7 @@ const drawAllNode = (
     });
   };
   updatePosition(layoutNode, result);
-  return { shapeIds, connectorIds };
+  return { connectorIds, shapeIds };
 };
 const layoutAllNode = (
   node: TreeNodeWithId,
@@ -155,18 +156,18 @@ const layoutAllNode = (
     y?: number;
   }
 ) => {
-  type LayoutNode_ = Omit<LayoutNode, 'children'> & {
-    id: string;
+  type LayoutNode_ = {
     children: LayoutNode_[];
-  };
+    id: string;
+  } & Omit<LayoutNode, 'children'>;
   const getLayoutNode = (node: TreeNodeWithId): LayoutNode_ => {
     const { children, id } = node;
     const ele = service.getElementById(id) as ShapeElementModel;
     return {
+      children: children.map(child => getLayoutNode(child)),
+      height: ele.h,
       id,
       width: ele.w,
-      height: ele.h,
-      children: children.map(child => getLayoutNode(child)),
     };
   };
   const layoutNode = getLayoutNode(node);
@@ -180,7 +181,7 @@ const layoutAllNode = (
     y: root ? root.y : options?.y ?? 0,
   });
   const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
-    const { id, width, height } = node;
+    const { height, id, width } = node;
     const { x, y } = result.self;
 
     service.updateElement(id, {
@@ -202,11 +203,11 @@ export function drawMindMap(
     y?: number;
   }
 ) {
-  const { shapeIds, connectorIds } = drawAllNode(mindMap, service, ops);
+  const { connectorIds, shapeIds } = drawAllNode(mindMap, service, ops);
 
   service.selection.set({
-    elements: [...shapeIds, ...connectorIds],
     editing: false,
+    elements: [...shapeIds, ...connectorIds],
   });
   service.createGroupFromSelected();
 }
@@ -228,8 +229,8 @@ export const createNode = (
 ) => {
   const id = service.addElement(CanvasElementType.SHAPE, {
     ...DEFAULT_SHAPE_PROPS,
-    xywh: `[${0},${0},${0},${0}]`,
     text: new DocCollection.Y.Text(text),
+    xywh: `[${0},${0},${0},${0}]`,
   });
   const ele = service.getElementById(id) as ShapeElementModel;
   const maxWidth =

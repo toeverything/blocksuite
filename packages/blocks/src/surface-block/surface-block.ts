@@ -1,21 +1,21 @@
-import '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
-
 import { BlockElement, RangeManager } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
+
+import type { EdgelessBlockPortalContainer } from '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
+import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import type { SurfaceBlockModel } from './surface-model.js';
+import type { SurfaceBlockService } from './surface-service.js';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { isInsideEdgelessEditor } from '../_common/utils/index.js';
 import { values } from '../_common/utils/iterable.js';
 import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
-import type { EdgelessBlockPortalContainer } from '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
-import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
 import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
 import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
-import type { SurfaceBlockModel } from './surface-model.js';
-import type { SurfaceBlockService } from './surface-service.js';
 import { Bound } from './utils/bound.js';
 import { normalizeWheelDeltaY } from './utils/index.js';
 
@@ -28,17 +28,11 @@ export class SurfaceBlockComponent extends BlockElement<
   SurfaceBlockModel,
   SurfaceBlockService
 > {
-  get renderer() {
-    return this._renderer;
-  }
+  static isConnector = (element: unknown): element is ConnectorElementModel => {
+    return element instanceof ConnectorElementModel;
+  };
 
-  get edgeless() {
-    return this.parentBlockElement as EdgelessRootBlockComponent;
-  }
-
-  private get _isEdgeless() {
-    return isInsideEdgelessEditor(this.host);
-  }
+  static isShape = isShape;
 
   static override styles = css`
     .affine-edgeless-surface-block-container {
@@ -99,26 +93,34 @@ export class SurfaceBlockComponent extends BlockElement<
     }
   `;
 
-  static isShape = isShape;
+  private _cachedViewport = new Bound();
 
-  private _renderer!: Renderer;
+  private _initThemeObserver = () => {
+    this.themeObserver.observe(document.documentElement);
+    this.themeObserver.on(() => this.requestUpdate());
+    this.disposables.add(() => this.themeObserver.dispose());
+  };
 
   private _lastTime = 0;
 
-  private _cachedViewport = new Bound();
-
-  @query('.affine-edgeless-surface-block-container')
-  private accessor _surfaceContainer!: HTMLElement;
-
-  readonly themeObserver = new ThemeObserver();
+  private _renderer!: Renderer;
 
   overlays!: {
     connector: ConnectionOverlay;
     frame: FrameOverlay;
   };
 
-  @query('edgeless-block-portal-container')
-  accessor portal!: EdgelessBlockPortalContainer;
+  readonly themeObserver = new ThemeObserver();
+
+  private _emitStackingCanvasUpdate() {
+    const evt = new CustomEvent('indexedcanvasupdate', {
+      detail: {
+        content: this._renderer.stackingCanvas,
+      },
+    }) as IndexedCanvasUpdateEvent;
+
+    this.dispatchEvent(evt);
+  }
 
   private _initOverlay() {
     this.overlays = {
@@ -135,19 +137,19 @@ export class SurfaceBlockComponent extends BlockElement<
     const service = this.edgeless.service!;
 
     this._renderer = new Renderer({
-      layerManager: service.layer,
       enableStackingCanvas: true,
-      provider: {
-        selectedElements: () => service.selection.selectedIds,
-        getVariableColor: (val: string) =>
-          this.themeObserver.getVariableValue(val),
-      },
+      layerManager: service.layer,
       onStackingCanvasCreated(canvas) {
         canvas.className = 'indexable-canvas';
 
         canvas.style.setProperty('transform-origin', '0 0');
         canvas.style.setProperty('position', 'absolute');
         canvas.style.setProperty('pointer-events', 'none');
+      },
+      provider: {
+        getVariableColor: (val: string) =>
+          this.themeObserver.getVariableValue(val),
+        selectedElements: () => service.selection.selectedIds,
       },
     });
 
@@ -184,20 +186,8 @@ export class SurfaceBlockComponent extends BlockElement<
     );
   }
 
-  private _initThemeObserver = () => {
-    this.themeObserver.observe(document.documentElement);
-    this.themeObserver.on(() => this.requestUpdate());
-    this.disposables.add(() => this.themeObserver.dispose());
-  };
-
-  private _emitStackingCanvasUpdate() {
-    const evt = new CustomEvent('indexedcanvasupdate', {
-      detail: {
-        content: this._renderer.stackingCanvas,
-      },
-    }) as IndexedCanvasUpdateEvent;
-
-    this.dispatchEvent(evt);
+  private get _isEdgeless() {
+    return isInsideEdgelessEditor(this.host);
   }
 
   override connectedCallback() {
@@ -216,10 +206,6 @@ export class SurfaceBlockComponent extends BlockElement<
     if (!this._isEdgeless) return;
 
     this._renderer.attach(this._surfaceContainer);
-  }
-
-  refresh() {
-    this._renderer.refresh();
   }
 
   fitToViewport(bound: Bound) {
@@ -254,6 +240,10 @@ export class SurfaceBlockComponent extends BlockElement<
     });
   }
 
+  refresh() {
+    this._renderer.refresh();
+  }
+
   override render() {
     if (!this._isEdgeless) return nothing;
 
@@ -264,9 +254,19 @@ export class SurfaceBlockComponent extends BlockElement<
     `;
   }
 
-  static isConnector = (element: unknown): element is ConnectorElementModel => {
-    return element instanceof ConnectorElementModel;
-  };
+  get edgeless() {
+    return this.parentBlockElement as EdgelessRootBlockComponent;
+  }
+
+  get renderer() {
+    return this._renderer;
+  }
+
+  @query('.affine-edgeless-surface-block-container')
+  private accessor _surfaceContainer!: HTMLElement;
+
+  @query('edgeless-block-portal-container')
+  accessor portal!: EdgelessBlockPortalContainer;
 }
 
 declare global {

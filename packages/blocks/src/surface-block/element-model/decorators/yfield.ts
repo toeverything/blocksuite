@@ -1,4 +1,5 @@
 import type { SurfaceElementModel } from '../base.js';
+
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
 import { getDeriveProperties, updateDerivedProp } from './derive.js';
@@ -27,6 +28,13 @@ export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
     const prop = context.name;
 
     return {
+      get(this: SurfaceElementModel) {
+        return (
+          this.yMap.get(prop as string) ??
+          this._preserved.get(prop as string) ??
+          fallback
+        );
+      },
       init(this: SurfaceElementModel, v: V) {
         const yProps = getYFieldPropsSet(this);
 
@@ -47,13 +55,6 @@ export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
           }
         }
         return v;
-      },
-      get(this: SurfaceElementModel) {
-        return (
-          this.yMap.get(prop as string) ??
-          this._preserved.get(prop as string) ??
-          fallback
-        );
       },
       set(this: T, originalVal: V) {
         const isCreating = getDecoratorState()?.creating;
@@ -84,11 +85,11 @@ export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
 
           this.surface['hooks'].update.emit({
             id: this.id,
-            props: {
-              [prop]: val,
-            },
             oldValues: {
               [prop]: oldValue,
+            },
+            props: {
+              [prop]: val,
             },
           });
         }

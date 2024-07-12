@@ -1,18 +1,18 @@
 import { UIEventState } from '../base.js';
 
 type KeyboardEventStateOptions = {
-  event: KeyboardEvent;
   composing: boolean;
+  event: KeyboardEvent;
 };
 
 export class KeyboardEventState extends UIEventState {
-  override type = 'keyboardState';
+  composing: boolean;
 
   raw: KeyboardEvent;
 
-  composing: boolean;
+  override type = 'keyboardState';
 
-  constructor({ event, composing }: KeyboardEventStateOptions) {
+  constructor({ composing, event }: KeyboardEventStateOptions) {
     super(event);
 
     this.raw = event;

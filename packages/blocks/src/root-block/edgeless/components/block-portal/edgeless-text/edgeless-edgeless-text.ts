@@ -1,16 +1,16 @@
-import '../../../../../edgeless-text/edgeless-text-block.js';
-
-import { css, html, type PropertyValueMap } from 'lit';
+import { type PropertyValueMap, css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import { matchFlavours } from '../../../../../_common/utils/model.js';
 import type { EdgelessTextBlockComponent } from '../../../../../edgeless-text/edgeless-text-block.js';
+import type { EdgelessTextBlockModel } from '../../../../../edgeless-text/edgeless-text-model.js';
+
+import { matchFlavours } from '../../../../../_common/utils/model.js';
+import '../../../../../edgeless-text/edgeless-text-block.js';
 import {
   EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
   EDGELESS_TEXT_BLOCK_MIN_WIDTH,
 } from '../../../../../edgeless-text/edgeless-text-block.js';
-import type { EdgelessTextBlockModel } from '../../../../../edgeless-text/edgeless-text-model.js';
 import { Bound } from '../../../../../surface-block/utils/bound.js';
 import {
   DefaultModeDragType,
@@ -27,15 +27,6 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
       overflow-wrap: normal !important;
     }
   `;
-
-  @query('.edgeless-text-block-container')
-  private accessor _textContainer!: HTMLDivElement;
-
-  @query('affine-edgeless-text')
-  private accessor _edgelessText!: EdgelessTextBlockComponent;
-
-  @state()
-  private accessor _editing = false;
 
   private _horizontalResizing = false;
 
@@ -76,14 +67,6 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
     this.edgeless.doc.updateBlock(this.model, {
       xywh: bound.serialize(),
     });
-  }
-
-  get dragMoving() {
-    const controller = this.edgeless.tools.currentController;
-    return (
-      controller instanceof DefaultToolController &&
-      controller.dragType === DefaultModeDragType.ContentMoving
-    );
   }
 
   checkWidthOverflow(width: number) {
@@ -155,7 +138,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
       const containerRect = this._textContainer.getBoundingClientRect();
       const isTop = e.clientY < containerRect.top + containerRect.height / 2;
 
-      let newParagraphId: string | null = null;
+      let newParagraphId: null | string = null;
       if (isTop) {
         const firstChild = this._edgelessText.model.firstChild();
         if (
@@ -205,20 +188,20 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
   }
 
   override render() {
-    const { model, index } = this;
-    const { xywh, scale, rotate, hasMaxWidth } = model;
+    const { index, model } = this;
+    const { hasMaxWidth, rotate, scale, xywh } = model;
     const bound = Bound.deserialize(xywh);
 
     const containerStyle: StyleInfo = {
-      transform: `rotate(${rotate}deg)`,
-      transformOrigin: 'center',
-      padding: '5px 10px',
       border: `1px solid ${this._editing ? 'var(--affine—primary—color, #1e96eb)' : 'transparent'}`,
       borderRadius: '4px',
-      boxSizing: 'border-box',
       boxShadow: this._editing
         ? '0px 0px 0px 2px rgba(30, 150, 235, 0.3)'
         : 'none',
+      boxSizing: 'border-box',
+      padding: '5px 10px',
+      transform: `rotate(${rotate}deg)`,
+      transformOrigin: 'center',
     };
 
     if (hasMaxWidth || this._horizontalResizing) {
@@ -228,13 +211,13 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
     return html`
       <div
         style=${styleMap({
-          position: 'absolute',
-          zIndex: `${index}`,
           left: `${bound.x}px`,
+          position: 'absolute',
           top: `${bound.y}px`,
           transform: `scale(${scale})`,
           transformOrigin: '0 0',
           width: this.dragMoving ? `${bound.w}px` : undefined,
+          zIndex: `${index}`,
         })}
         data-scale="${scale}"
       >
@@ -245,12 +228,12 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
         >
           <div
             style=${styleMap({
-              position: 'absolute',
-              top: '0',
-              left: '0',
               bottom: '0',
-              right: '0',
               display: this._editing ? 'none' : 'block',
+              left: '0',
+              position: 'absolute',
+              right: '0',
+              top: '0',
             })}
           ></div>
           <div
@@ -264,6 +247,23 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
       </div>
     `;
   }
+
+  get dragMoving() {
+    const controller = this.edgeless.tools.currentController;
+    return (
+      controller instanceof DefaultToolController &&
+      controller.dragType === DefaultModeDragType.ContentMoving
+    );
+  }
+
+  @query('affine-edgeless-text')
+  private accessor _edgelessText!: EdgelessTextBlockComponent;
+
+  @state()
+  private accessor _editing = false;
+
+  @query('.edgeless-text-block-container')
+  private accessor _textContainer!: HTMLDivElement;
 }
 
 declare global {

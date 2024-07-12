@@ -1,22 +1,24 @@
 import type { Command } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/block-std';
+
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
+
+import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
-import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 // for native range
 export const formatNativeCommand: Command<
   never,
   never,
   {
+    mode?: 'merge' | 'replace';
     range?: Range;
     styles: AffineTextAttributes;
-    mode?: 'replace' | 'merge';
   }
 > = (ctx, next) => {
-  const { styles, mode = 'merge' } = ctx;
+  const { mode = 'merge', styles } = ctx;
 
   let range = ctx.range;
   if (!range) {

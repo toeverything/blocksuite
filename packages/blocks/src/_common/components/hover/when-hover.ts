@@ -1,6 +1,7 @@
+import type { HoverMiddleware, WhenHoverOptions } from './types.js';
+
 import { dedupe, delayHide, delayShow } from './middlewares/basic.js';
 import { safeBridge, safeTriangle } from './middlewares/safe-area.js';
-import type { HoverMiddleware, WhenHoverOptions } from './types.js';
 
 /**
  * Call the `whenHoverChange` callback when the element is hovered.
@@ -39,11 +40,11 @@ import type { HoverMiddleware, WhenHoverOptions } from './types.js';
 export const whenHover = (
   whenHoverChange: (isHover: boolean, event?: Event) => void,
   {
+    alwayRunWhenNoFloating = true,
     enterDelay = 0,
     leaveDelay = 250,
-    alwayRunWhenNoFloating = true,
-    safeTriangle: triangleOptions = false,
     safeBridge: bridgeOptions = true,
+    safeTriangle: triangleOptions = false,
   }: WhenHoverOptions = {}
 ) => {
   /**
@@ -131,11 +132,11 @@ export const whenHover = (
   };
 
   return {
-    setReference,
-    setFloating,
     dispose: () => {
       abortController.abort();
     },
+    setFloating,
+    setReference,
   };
 };
 

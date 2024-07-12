@@ -1,30 +1,16 @@
 import { flip, offset } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+
+import type { EmbedHtmlBlockComponent } from '../embed-html-block.js';
 
 import { popMenu } from '../../_common/components/index.js';
 import { SettingsIcon } from '../../_common/icons/edgeless.js';
 import { CopyIcon, ExpandCloseIcon } from '../../_common/icons/text.js';
-import type { EmbedHtmlBlockComponent } from '../embed-html-block.js';
 import { DoneIcon } from './../../_common/icons/index.js';
 
 @customElement('embed-html-fullscreen-toolbar')
 export class EmbedHtmlFullscreenToolbar extends LitElement {
-  private get autoHideToolbar() {
-    return (
-      this.embedHtml.edgeless?.service.editPropsStore.getStorage(
-        'autoHideEmbedHTMLFullScreenToolbar'
-      ) ?? false
-    );
-  }
-
-  private set autoHideToolbar(val: boolean) {
-    this.embedHtml.edgeless?.service.editPropsStore.setStorage(
-      'autoHideEmbedHTMLFullScreenToolbar',
-      val
-    );
-  }
-
   static override styles = css`
     :host {
       box-sizing: border-box;
@@ -76,53 +62,41 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
     }
   `;
 
-  @query('.fullscreen-toolbar-container')
-  private accessor _fullScreenToolbarContainer!: HTMLElement;
-
-  @state()
-  private accessor _copied = false;
-
-  @state()
-  private accessor _popperVisible = false;
-
-  @property({ attribute: false })
-  accessor embedHtml!: EmbedHtmlBlockComponent;
-
   private _popSettings = () => {
     this._popperVisible = true;
     popMenu(this._fullScreenToolbarContainer, {
+      container: this.embedHtml.iframeWrapper,
+
+      middleware: [flip(), offset({ crossAxis: -40, mainAxis: 4 })],
       options: {
         items: [
           {
-            type: 'custom',
             render: html`<div class="settings-header">
               <span>Settings</span>
             </div>`,
+            type: 'custom',
           },
 
           {
-            type: 'group',
-            name: 'thing',
             children: () => [
               {
-                type: 'toggle-switch',
                 name: 'Hide toolbar',
                 on: this.autoHideToolbar,
                 onChange: on => {
                   this.autoHideToolbar = on;
                 },
+                type: 'toggle-switch',
               },
             ],
+            name: 'thing',
+            type: 'group',
           },
         ],
         onClose: () => {
           this._popperVisible = false;
         },
       },
-
       placement: 'top-end',
-      middleware: [flip(), offset({ mainAxis: 4, crossAxis: -40 })],
-      container: this.embedHtml.iframeWrapper,
     });
   };
 
@@ -140,6 +114,21 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       })
       .catch(console.error);
   };
+
+  private get autoHideToolbar() {
+    return (
+      this.embedHtml.edgeless?.service.editPropsStore.getStorage(
+        'autoHideEmbedHTMLFullScreenToolbar'
+      ) ?? false
+    );
+  }
+
+  private set autoHideToolbar(val: boolean) {
+    this.embedHtml.edgeless?.service.editPropsStore.setStorage(
+      'autoHideEmbedHTMLFullScreenToolbar',
+      val
+    );
+  }
 
   override render() {
     const hideToolbar = !this._popperVisible && this.autoHideToolbar;
@@ -164,6 +153,18 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       </div>
     </div> `;
   }
+
+  @state()
+  private accessor _copied = false;
+
+  @query('.fullscreen-toolbar-container')
+  private accessor _fullScreenToolbarContainer!: HTMLElement;
+
+  @state()
+  private accessor _popperVisible = false;
+
+  @property({ attribute: false })
+  accessor embedHtml!: EmbedHtmlBlockComponent;
 }
 
 declare global {

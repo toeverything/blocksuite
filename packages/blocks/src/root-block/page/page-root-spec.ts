@@ -1,4 +1,5 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { RootBlockSchema } from '../root-model.js';
@@ -16,15 +17,15 @@ import { PageRootService } from './page-root-service.js';
 
 export type PageRootBlockWidgetName =
   // | typeof AFFINE_BLOCK_HUB_WIDGET
-  | typeof AFFINE_MODAL_WIDGET
-  | typeof AFFINE_INNER_MODAL_WIDGET
-  | typeof AFFINE_SLASH_MENU_WIDGET
-  | typeof AFFINE_LINKED_DOC_WIDGET
-  | typeof AFFINE_PAGE_DRAGGING_AREA_WIDGET
+  | typeof AFFINE_DOC_REMOTE_SELECTION_WIDGET
   | typeof AFFINE_DRAG_HANDLE_WIDGET
   | typeof AFFINE_EMBED_CARD_TOOLBAR_WIDGET
   | typeof AFFINE_FORMAT_BAR_WIDGET
-  | typeof AFFINE_DOC_REMOTE_SELECTION_WIDGET
+  | typeof AFFINE_INNER_MODAL_WIDGET
+  | typeof AFFINE_LINKED_DOC_WIDGET
+  | typeof AFFINE_MODAL_WIDGET
+  | typeof AFFINE_PAGE_DRAGGING_AREA_WIDGET
+  | typeof AFFINE_SLASH_MENU_WIDGET
   | typeof AFFINE_VIEWPORT_OVERLAY_WIDGET;
 
 export const PageRootBlockSpec: BlockSpec<PageRootBlockWidgetName> = {
@@ -35,14 +36,8 @@ export const PageRootBlockSpec: BlockSpec<PageRootBlockWidgetName> = {
     widgets: {
       // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
       //   AFFINE_BLOCK_HUB_WIDGET
-      // )}`,
-      [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
-      [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
-      [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
-        AFFINE_SLASH_MENU_WIDGET
-      )}`,
-      [AFFINE_LINKED_DOC_WIDGET]: literal`${unsafeStatic(
-        AFFINE_LINKED_DOC_WIDGET
+      [AFFINE_DOC_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
+        AFFINE_DOC_REMOTE_SELECTION_WIDGET
       )}`,
       [AFFINE_DRAG_HANDLE_WIDGET]: literal`${unsafeStatic(
         AFFINE_DRAG_HANDLE_WIDGET
@@ -53,11 +48,17 @@ export const PageRootBlockSpec: BlockSpec<PageRootBlockWidgetName> = {
       [AFFINE_FORMAT_BAR_WIDGET]: literal`${unsafeStatic(
         AFFINE_FORMAT_BAR_WIDGET
       )}`,
-      [AFFINE_DOC_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
-        AFFINE_DOC_REMOTE_SELECTION_WIDGET
+      [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
+      [AFFINE_LINKED_DOC_WIDGET]: literal`${unsafeStatic(
+        AFFINE_LINKED_DOC_WIDGET
       )}`,
+      // )}`,
+      [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_PAGE_DRAGGING_AREA_WIDGET]: literal`${unsafeStatic(
         AFFINE_PAGE_DRAGGING_AREA_WIDGET
+      )}`,
+      [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
+        AFFINE_SLASH_MENU_WIDGET
       )}`,
       [AFFINE_VIEWPORT_OVERLAY_WIDGET]: literal`${unsafeStatic(
         AFFINE_VIEWPORT_OVERLAY_WIDGET

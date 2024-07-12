@@ -46,21 +46,21 @@ describe('isEqual', () => {
 
   test('nested', () => {
     const nested = {
-      string: 'this is a string',
-      integer: 42,
       array: [19, 19, 810, 'test', NaN],
+      bigint: 110101195306153019n,
+      float: 114.514,
+      integer: 42,
       nestedArray: [
         [1, 2],
         [3, 4],
       ],
-      float: 114.514,
-      undefined,
       object: {
         'first-child': true,
-        'second-child': false,
         'last-child': null,
+        'second-child': false,
       },
-      bigint: 110101195306153019n,
+      string: 'this is a string',
+      undefined,
     };
     expect(isEqual(nested, nested)).toBe(true);
     // @ts-expect-error

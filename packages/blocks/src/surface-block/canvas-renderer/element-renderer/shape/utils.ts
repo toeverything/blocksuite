@@ -2,14 +2,15 @@ import type { TextAlign, TextVerticalAlign } from '../../../consts.js';
 import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { Bound, SerializedXYWH } from '../../../index.js';
 import type { Renderer } from '../../renderer.js';
+
 import {
+  type TextDelta,
   deltaInsertsToChunks,
   getFontString,
   getLineHeight,
   getLineWidth,
   getTextWidth,
   measureTextInDOM,
-  type TextDelta,
   wrapText,
   wrapTextDeltas,
 } from '../text/utils.js';
@@ -53,7 +54,7 @@ export function drawGeneralShape(
       ctx.strokeStyle = renderer.getVariableColor(shapeModel.strokeStyle);
   }
   if (shapeModel.shadow) {
-    const { blur, offsetX, offsetY, color } = shapeModel.shadow;
+    const { blur, color, offsetX, offsetY } = shapeModel.shadow;
     const scale = ctx.getTransform().a;
 
     ctx.shadowBlur = blur * scale;
@@ -179,10 +180,10 @@ export function normalizeShapeBound(
   const { fontFamily, fontSize, fontStyle, fontWeight } = shape;
   const lineHeight = getLineHeight(fontFamily, fontSize, fontWeight);
   const font = getFontString({
+    fontFamily,
+    fontSize,
     fontStyle,
     fontWeight,
-    fontSize,
-    fontFamily,
   });
   const widestCharWidth =
     [...yText.toString()]
@@ -195,8 +196,8 @@ export function normalizeShapeBound(
   }
   const deltas: TextDelta[] = (yText.toDelta() as TextDelta[]).flatMap(
     delta => ({
-      insert: wrapText(delta.insert, font, bound.w - horiPadding * 2),
       attributes: delta.attributes,
+      insert: wrapText(delta.insert, font, bound.w - horiPadding * 2),
     })
   ) as TextDelta[];
   const lines = deltaInsertsToChunks(deltas);
@@ -219,7 +220,7 @@ export function fitContent(shape: ShapeElementModel) {
   const lines = deltaInsertsToChunks(
     wrapTextDeltas(shape.text, font, shape.maxWidth || Number.MAX_SAFE_INTEGER)
   );
-  const { lineHeight, lineGap } = measureTextInDOM(
+  const { lineGap, lineHeight } = measureTextInDOM(
     shape.fontFamily,
     shape.fontSize,
     shape.fontWeight

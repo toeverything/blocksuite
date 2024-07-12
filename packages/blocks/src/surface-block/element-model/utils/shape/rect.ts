@@ -1,3 +1,7 @@
+import type { IVec2 } from '../../../utils/vec.js';
+import type { IHitTestOptions } from '../../base.js';
+import type { ShapeElementModel } from '../../shape.js';
+
 import { DEFAULT_CENTRAL_AREA_RATIO, type IBound } from '../../../consts.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -11,20 +15,13 @@ import {
   rotatePoints,
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
-import type { IVec2 } from '../../../utils/vec.js';
-import type { IHitTestOptions } from '../../base.js';
-import type { ShapeElementModel } from '../../shape.js';
 
 export const rect = {
-  points({ x, y, w, h }: IBound) {
-    return [
-      [x, y],
-      [x + w, y],
-      [x + w, y + h],
-      [x, y + h],
-    ];
+  containedByBounds(bounds: Bound, element: ShapeElementModel): boolean {
+    const points = getPointsFromBoundsWithRotation(element);
+    return points.some(point => bounds.containsPoint(point));
   },
-  draw(ctx: CanvasRenderingContext2D, { x, y, w, h, rotate = 0 }: IBound) {
+  draw(ctx: CanvasRenderingContext2D, { h, rotate = 0, w, x, y }: IBound) {
     ctx.save();
     ctx.translate(x + w / 2, y + h / 2);
     ctx.rotate((rotate * Math.PI) / 180);
@@ -32,6 +29,28 @@ export const rect = {
     ctx.rect(x, y, w, h);
     ctx.restore();
   },
+  getNearestPoint(point: IVec2, element: ShapeElementModel) {
+    const points = getPointsFromBoundsWithRotation(element);
+    return polygonNearestPoint(points, point);
+  },
+
+  getRelativePointLocation(relativePoint: IVec2, element: ShapeElementModel) {
+    const bound = Bound.deserialize(element.xywh);
+    const point = bound.getRelativePoint(relativePoint);
+    const rotatePoint = rotatePoints(
+      [point],
+      bound.center,
+      element.rotate ?? 0
+    )[0];
+    const points = rotatePoints(
+      bound.points,
+      bound.center,
+      element.rotate ?? 0
+    );
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+    return new PointLocation(rotatePoint, tangent);
+  },
+
   hitTest(
     this: ShapeElementModel,
     x: number,
@@ -78,35 +97,17 @@ export const rect = {
     return hit;
   },
 
-  containedByBounds(bounds: Bound, element: ShapeElementModel): boolean {
-    const points = getPointsFromBoundsWithRotation(element);
-    return points.some(point => bounds.containsPoint(point));
-  },
-
-  getNearestPoint(point: IVec2, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element);
-    return polygonNearestPoint(points, point);
-  },
-
   intersectWithLine(start: IVec2, end: IVec2, element: ShapeElementModel) {
     const points = getPointsFromBoundsWithRotation(element);
     return linePolygonIntersects(start, end, points);
   },
 
-  getRelativePointLocation(relativePoint: IVec2, element: ShapeElementModel) {
-    const bound = Bound.deserialize(element.xywh);
-    const point = bound.getRelativePoint(relativePoint);
-    const rotatePoint = rotatePoints(
-      [point],
-      bound.center,
-      element.rotate ?? 0
-    )[0];
-    const points = rotatePoints(
-      bound.points,
-      bound.center,
-      element.rotate ?? 0
-    );
-    const tangent = polygonGetPointTangent(points, rotatePoint);
-    return new PointLocation(rotatePoint, tangent);
+  points({ h, w, x, y }: IBound) {
+    return [
+      [x, y],
+      [x + w, y],
+      [x + w, y + h],
+      [x, y + h],
+    ];
   },
 };

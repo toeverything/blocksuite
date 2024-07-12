@@ -2,16 +2,17 @@ import type {
   ConnectorElementModel,
   LocalConnectorElementModel,
 } from '../../../element-model/connector.js';
-import { ConnectorMode } from '../../../element-model/connector.js';
 import type { PointLocation } from '../../../index.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
+import type { Renderer } from '../../renderer.js';
+
+import { ConnectorMode } from '../../../element-model/connector.js';
 import {
   type BezierCurveParameters,
   getBezierParameters,
   getBezierTangent,
 } from '../../../utils/curve.js';
 import { type IVec, Vec } from '../../../utils/vec.js';
-import type { Renderer } from '../../renderer.js';
 
 type ConnectorEnd = 'Front' | 'Rear';
 
@@ -120,32 +121,32 @@ export function getArrowOptions(
   model: ConnectorElementModel | LocalConnectorElementModel,
   renderer: Renderer
 ) {
-  const { stroke, seed, mode, rough, roughness, strokeWidth, path } = model;
+  const { mode, path, rough, roughness, seed, stroke, strokeWidth } = model;
   const realStrokeColor = renderer.getVariableColor(stroke);
 
   return {
+    bezierParameters: getBezierParameters(path),
     end,
-    seed,
+    fillColor: realStrokeColor,
+    fillStyle: 'solid',
     mode,
     rough,
     roughness,
-    strokeWidth,
+    seed,
     strokeColor: realStrokeColor,
-    fillColor: realStrokeColor,
-    fillStyle: 'solid',
-    bezierParameters: getBezierParameters(path),
+    strokeWidth,
   };
 }
 
 export function getRcOptions(options: ArrowOptions) {
-  const { seed, roughness, strokeWidth, strokeColor, fillColor } = options;
+  const { fillColor, roughness, seed, strokeColor, strokeWidth } = options;
   return {
-    seed,
-    roughness,
-    stroke: strokeColor,
-    strokeWidth,
     fill: fillColor,
     fillStyle: 'solid',
+    roughness,
+    seed,
+    stroke: strokeColor,
+    strokeWidth,
   };
 }
 
@@ -187,7 +188,7 @@ export function renderArrow(
   rc: RoughCanvas,
   options: ArrowOptions
 ) {
-  const { mode, end, bezierParameters, rough, strokeColor, strokeWidth } =
+  const { bezierParameters, end, mode, rough, strokeColor, strokeWidth } =
     options;
   const radians = Math.PI / 4;
   const size = DEFAULT_ARROW_SIZE * (strokeWidth / 2);
@@ -213,7 +214,7 @@ export function renderTriangle(
   rc: RoughCanvas,
   options: ArrowOptions
 ) {
-  const { mode, end, bezierParameters, rough, strokeColor, strokeWidth } =
+  const { bezierParameters, end, mode, rough, strokeColor, strokeWidth } =
     options;
   const radians = Math.PI / 6;
   const size = DEFAULT_ARROW_SIZE * (strokeWidth / 2);
@@ -246,7 +247,7 @@ export function renderDiamond(
   rc: RoughCanvas,
   options: ArrowOptions
 ) {
-  const { mode, end, rough, bezierParameters, strokeColor, strokeWidth } =
+  const { bezierParameters, end, mode, rough, strokeColor, strokeWidth } =
     options;
   const anchorPoint = getPointWithTangent(points, mode, end, bezierParameters);
   const size = 10 * (strokeWidth / 2);
@@ -275,12 +276,12 @@ export function renderCircle(
 ) {
   const {
     bezierParameters,
-    mode,
     end,
     fillColor,
+    mode,
+    rough,
     strokeColor,
     strokeWidth,
-    rough,
   } = options;
   const radius = 5 * (strokeWidth / 2);
   const centerPoint = getCircleCenterPoint(

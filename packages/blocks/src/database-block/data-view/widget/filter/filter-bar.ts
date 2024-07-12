@@ -1,11 +1,12 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { css, html, type TemplateResult } from 'lit';
+import { type TemplateResult, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
+
 import { createPopup } from '../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../_common/icons/index.js';
-import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 import { CrossIcon, FilterIcon } from '../../common/icons/index.js';
 import { popCreateFilter } from '../../common/ref/ref.js';
 import { renderTemplate } from '../../utils/uni-component/render-template.js';
@@ -44,17 +45,6 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor data!: FilterGroup;
-
-  @property({ attribute: false })
-  accessor vars!: Variable[];
-
-  @property({ attribute: false })
-  accessor setData!: (filter: FilterGroup) => void;
-
-  updateMoreFilterPanel?: () => void;
-
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
       ...this.data,
@@ -67,7 +57,6 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   private addFilter = (e: MouseEvent) => {
     const element = e.target as HTMLElement;
     popCreateFilter(element, {
-      vars: this.vars,
       onSelect: filter => {
         const index = this.data.conditions.length;
         this.setData({
@@ -78,6 +67,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
           this.expandGroup(element, index);
         });
       },
+      vars: this.vars,
     });
   };
 
@@ -88,8 +78,6 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     }
     popFilterModal(position, {
       isRoot: false,
-      vars: this.vars,
-      value: value,
       onBack: () => {
         // do nothing
       },
@@ -97,19 +85,37 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       onDelete: () => {
         this.deleteFilter(i);
       },
+      value: value,
+      vars: this.vars,
     });
   };
 
-  private deleteFilter(i: number) {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.filter((_, index) => index !== i),
-    });
-  }
+  renderAddFilter = () => {
+    return html` <div
+      style="height: 100%;"
+      class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
+      @click="${this.addFilter}"
+    >
+      ${AddCursorIcon} Add filter
+    </div>`;
+  };
 
-  override updated() {
-    this.updateMoreFilterPanel?.();
-  }
+  renderMore = (count: number) => {
+    const max = this.data.conditions.length;
+    if (count === max) {
+      return this.renderAddFilter();
+    }
+    const showMore = (e: MouseEvent) => {
+      this.showMoreFilter(e, count);
+    };
+    return html` <div
+      class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
+      style="height: 100%;"
+      @click="${showMore}"
+    >
+      ${max - count} More
+    </div>`;
+  };
 
   renderMoreFilter = (count: number): TemplateResult => {
     return html` <div
@@ -147,32 +153,23 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  renderAddFilter = () => {
-    return html` <div
-      style="height: 100%;"
-      class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
-      @click="${this.addFilter}"
-    >
-      ${AddCursorIcon} Add filter
-    </div>`;
-  };
+  updateMoreFilterPanel?: () => void;
 
-  renderMore = (count: number) => {
-    const max = this.data.conditions.length;
-    if (count === max) {
-      return this.renderAddFilter();
-    }
-    const showMore = (e: MouseEvent) => {
-      this.showMoreFilter(e, count);
-    };
-    return html` <div
-      class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
-      style="height: 100%;"
-      @click="${showMore}"
-    >
-      ${max - count} More
-    </div>`;
-  };
+  private deleteFilter(i: number) {
+    this.setData({
+      ...this.data,
+      conditions: this.data.conditions.filter((_, index) => index !== i),
+    });
+  }
+
+  override render() {
+    return html`
+      <component-overflow
+        .renderItem="${this.renderFilters()}"
+        .renderMore="${this.renderMore}"
+      ></component-overflow>
+    `;
+  }
 
   renderCondition(i: number) {
     const condition = this.data.conditions[i];
@@ -218,14 +215,18 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     return this.data.conditions.map((_, i) => () => this.renderCondition(i));
   }
 
-  override render() {
-    return html`
-      <component-overflow
-        .renderItem="${this.renderFilters()}"
-        .renderMore="${this.renderMore}"
-      ></component-overflow>
-    `;
+  override updated() {
+    this.updateMoreFilterPanel?.();
   }
+
+  @property({ attribute: false })
+  accessor data!: FilterGroup;
+
+  @property({ attribute: false })
+  accessor setData!: (filter: FilterGroup) => void;
+
+  @property({ attribute: false })
+  accessor vars!: Variable[];
 }
 
 declare global {

@@ -4,35 +4,35 @@ const EOD = 2;
 type TokenType = 0 | 1 | 2;
 
 interface PathToken {
-  type: TokenType;
   text: string;
+  type: TokenType;
 }
 
 export interface Segment {
-  key: string;
   data: number[];
+  key: string;
 }
 
 const PARAMS: Record<string, number> = {
   A: 7,
-  a: 7,
   C: 6,
-  c: 6,
   H: 1,
-  h: 1,
   L: 2,
-  l: 2,
   M: 2,
-  m: 2,
   Q: 4,
-  q: 4,
   S: 4,
-  s: 4,
   T: 2,
-  t: 2,
   V: 1,
-  v: 1,
   Z: 0,
+  a: 7,
+  c: 6,
+  h: 1,
+  l: 2,
+  m: 2,
+  q: 4,
+  s: 4,
+  t: 2,
+  v: 1,
   z: 0,
 };
 
@@ -48,7 +48,7 @@ function tokenize(d: string): PathToken[] {
     }
     match = d.match(/^([aAcChHlLmMqQsStTvVzZ])/);
     if (match) {
-      tokens.push({ type: COMMAND, text: match[0] });
+      tokens.push({ text: match[0], type: COMMAND });
       d = d.slice(match[0].length);
       continue;
     }
@@ -56,13 +56,13 @@ function tokenize(d: string): PathToken[] {
       /^(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)/
     );
     if (match) {
-      tokens.push({ type: NUMBER, text: `${parseFloat(match[0])}` });
+      tokens.push({ text: `${parseFloat(match[0])}`, type: NUMBER });
       d = d.slice(match[0].length);
     } else {
       return [];
     }
   }
-  tokens.push({ type: EOD, text: '' });
+  tokens.push({ text: '', type: EOD });
   return tokens;
 }
 
@@ -106,7 +106,7 @@ export function parsePath(d: string): Segment[] {
         }
       }
       if (typeof PARAMS[mode] === 'number') {
-        const segment: Segment = { key: mode, data: params };
+        const segment: Segment = { data: params, key: mode };
         segments.push(segment);
         index += paramsCount;
         token = tokens[index];
@@ -123,8 +123,8 @@ export function parsePath(d: string): Segment[] {
 }
 
 export function serialize(segments: Segment[]): string {
-  const tokens: (string | number)[] = [];
-  for (const { key, data } of segments) {
+  const tokens: (number | string)[] = [];
+  for (const { data, key } of segments) {
     tokens.push(key);
     switch (key) {
       case 'C':

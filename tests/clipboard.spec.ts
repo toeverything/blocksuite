@@ -1,9 +1,8 @@
-import './utils/declare-test-window.js';
-
 import { expect } from '@playwright/test';
 
 import { initDatabaseColumn } from './database/actions.js';
 import {
+  SHORT_KEY,
   activeNoteInEdgeless,
   captureHistory,
   changeEdgelessNoteBackground,
@@ -49,7 +48,6 @@ import {
   selectNoteInEdgeless,
   setInlineRangeInSelectedRichText,
   setSelection,
-  SHORT_KEY,
   switchEditorMode,
   toViewCoord,
   triggerComponentToolbarAction,
@@ -75,6 +73,7 @@ import {
   assertTextFormats,
   assertTitle,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 
 test.beforeEach(({ page }, testInfo) => {
@@ -125,8 +124,8 @@ test(scoped`clipboard paste html`, async ({ page }) => {
       const dT = new DataTransfer();
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
-        writable: false,
         value: document,
+        writable: false,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
       document.dispatchEvent(e);
@@ -140,8 +139,8 @@ test(
   scoped`clipboard paste HTML containing Markdown syntax code and image `,
   async ({ page }) => {
     test.info().annotations.push({
-      type: 'issue',
       description: 'https://github.com/toeverything/blocksuite/issues/2855',
+      type: 'issue',
     });
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -161,8 +160,8 @@ test(
         const dT = new DataTransfer();
         const e = new ClipboardEvent('paste', { clipboardData: dT });
         Object.defineProperty(e, 'target', {
-          writable: false,
           value: document,
+          writable: false,
         });
         e.clipboardData?.setData('text/html', clipData['text/html']);
         document.dispatchEvent(e);
@@ -179,8 +178,8 @@ test.skip(
   scoped`clipboard paste end with image, the cursor should be controlled by up/down keys`,
   async ({ page }) => {
     test.info().annotations.push({
-      type: 'issue',
       description: 'https://github.com/toeverything/blocksuite/issues/3639',
+      type: 'issue',
     });
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -197,8 +196,8 @@ test.skip(
         const dT = new DataTransfer();
         const e = new ClipboardEvent('paste', { clipboardData: dT });
         Object.defineProperty(e, 'target', {
-          writable: false,
           value: document,
+          writable: false,
         });
         e.clipboardData?.setData('text/html', clipData['text/html']);
         document.dispatchEvent(e);
@@ -442,10 +441,10 @@ test.skip('should keep first line format when pasted into a new line', async ({
 
   const pasteBlocksContent = [
     {
-      flavour: 'affine:list',
-      type: 'todo',
-      text: [{ insert: 'aaa' }],
       children: [],
+      flavour: 'affine:list',
+      text: [{ insert: 'aaa' }],
+      type: 'todo',
     },
   ];
 
@@ -838,29 +837,29 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 
   const pesteBlocksContent = [
     {
-      flavour: 'affine:list',
-      type: 'bulleted',
-      text: [{ insert: '1' }],
       children: [
         {
-          flavour: 'affine:list',
-          type: 'bulleted',
-          text: [{ insert: '2' }],
           children: [],
+          flavour: 'affine:list',
+          text: [{ insert: '2' }],
+          type: 'bulleted',
         },
         {
-          flavour: 'affine:list',
-          type: 'bulleted',
-          text: [{ insert: '3' }],
           children: [],
+          flavour: 'affine:list',
+          text: [{ insert: '3' }],
+          type: 'bulleted',
         },
       ],
+      flavour: 'affine:list',
+      text: [{ insert: '1' }],
+      type: 'bulleted',
     },
     {
-      flavour: 'affine:list',
-      type: 'bulleted',
-      text: [{ insert: '4' }],
       children: [],
+      flavour: 'affine:list',
+      text: [{ insert: '4' }],
+      type: 'bulleted',
     },
   ];
 
@@ -1079,8 +1078,8 @@ test(scoped`paste note block with background`, async ({ page }) => {
 
 test(scoped`copy and paste to selection block selection`, async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2265',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -1099,8 +1098,8 @@ test(
   scoped`should keep paragraph block's type when pasting at the start of empty paragraph block except type text`,
   async ({ page }) => {
     test.info().annotations.push({
-      type: 'issue',
       description: 'https://github.com/toeverything/blocksuite/issues/2336',
+      type: 'issue',
     });
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -1192,8 +1191,8 @@ test(
 
 test(scoped`paste from FeiShu list format`, async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2438',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -1209,8 +1208,8 @@ test(scoped`paste from FeiShu list format`, async ({ page }) => {
       const dT = new DataTransfer();
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
-        writable: false,
         value: document,
+        writable: false,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
       document.dispatchEvent(e);
@@ -1223,8 +1222,8 @@ test(scoped`paste from FeiShu list format`, async ({ page }) => {
 
 test(scoped`paste in list format`, async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2281',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -1242,8 +1241,8 @@ test(scoped`paste in list format`, async ({ page }) => {
       const dT = new DataTransfer();
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
-        writable: false,
         value: document,
+        writable: false,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
       document.dispatchEvent(e);
@@ -1268,8 +1267,8 @@ test(scoped`auto identify url`, async ({ page }) => {
       const dT = new DataTransfer();
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
-        writable: false,
         value: document,
+        writable: false,
       });
       e.clipboardData?.setData('text/plain', clipData['text/plain']);
       document.dispatchEvent(e);
@@ -1334,8 +1333,8 @@ test(scoped`pasting internal url`, async ({ page }) => {
 
 test(scoped`paste parent block`, async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/3153',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -1400,17 +1399,17 @@ test.skip(scoped`clipboard copy nested items`, async ({ page }) => {
 
   const blockJson = [
     {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: [{ insert: 'bc' }],
       children: [
         {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [{ insert: 'd' }],
           children: [],
+          flavour: 'affine:paragraph',
+          text: [{ insert: 'd' }],
+          type: 'text',
         },
       ],
+      flavour: 'affine:paragraph',
+      text: [{ insert: 'bc' }],
+      type: 'text',
     },
   ];
   const htmlText =
@@ -1419,14 +1418,14 @@ test.skip(scoped`clipboard copy nested items`, async ({ page }) => {
       blockJson
     ).replace(/"/g, '&quot;')}"></blocksuite>`;
   const expectClipItems = [
-    { mimeType: 'text/plain', data: 'bcd' },
+    { data: 'bcd', mimeType: 'text/plain' },
     {
-      mimeType: 'text/html',
       data: htmlText,
+      mimeType: 'text/html',
     },
     {
-      mimeType: 'blocksuite/page',
       data: JSON.stringify(blockJson),
+      mimeType: 'blocksuite/page',
     },
   ];
   assertClipData(clipItems, expectClipItems, 'text/plain');
@@ -1438,16 +1437,16 @@ test.skip(scoped`clipboard copy nested items`, async ({ page }) => {
   const clipItems2 = await getCopyClipItemsInPage(page);
   const blockJson2 = [
     {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: [{ insert: 'hi' }],
       children: [],
+      flavour: 'affine:paragraph',
+      text: [{ insert: 'hi' }],
+      type: 'text',
     },
     {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: [{ insert: 'j' }],
       children: [],
+      flavour: 'affine:paragraph',
+      text: [{ insert: 'j' }],
+      type: 'text',
     },
   ];
   const htmlText2 =
@@ -1456,14 +1455,14 @@ test.skip(scoped`clipboard copy nested items`, async ({ page }) => {
       blockJson2
     ).replace(/"/g, '&quot;')}"></blocksuite>`;
   const expectClipItems2 = [
-    { mimeType: 'text/plain', data: 'hi\nj' },
+    { data: 'hi\nj', mimeType: 'text/plain' },
     {
-      mimeType: 'text/html',
       data: htmlText2,
+      mimeType: 'text/html',
     },
     {
-      mimeType: 'blocksuite/page',
       data: JSON.stringify(blockJson2),
+      mimeType: 'blocksuite/page',
     },
   ];
   assertClipData(clipItems2, expectClipItems2, 'text/plain');

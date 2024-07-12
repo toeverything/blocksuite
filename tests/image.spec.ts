@@ -1,10 +1,8 @@
-import './utils/declare-test-window.js';
+import type { Page } from '@playwright/test';
 
+import { expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-
-import type { Page } from '@playwright/test';
-import { expect } from '@playwright/test';
 
 import {
   activeEmbed,
@@ -37,6 +35,7 @@ import {
   assertRichTextInlineRange,
   assertRichTexts,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { test } from './utils/playwright.js';
 
 async function focusCaption(page: Page) {
@@ -52,19 +51,19 @@ test('can drag resize image by left menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 736, height: 552 });
+  await assertImageSize(page, { height: 552, width: 736 });
 
   await dragEmbedResizeByTopLeft(page);
   await waitNextFrame(page);
-  await assertImageSize(page, { width: 342, height: 256 });
+  await assertImageSize(page, { height: 256, width: 342 });
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
-  await assertImageSize(page, { width: 736, height: 552 });
+  await assertImageSize(page, { height: 552, width: 736 });
 
   await redoByKeyboard(page);
   await waitNextFrame(page);
-  await assertImageSize(page, { width: 342, height: 256 });
+  await assertImageSize(page, { height: 256, width: 342 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -74,16 +73,16 @@ test('can drag resize image by right menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 736, height: 552 });
+  await assertImageSize(page, { height: 552, width: 736 });
 
   await dragEmbedResizeByTopRight(page);
-  await assertImageSize(page, { width: 322, height: 241 });
+  await assertImageSize(page, { height: 241, width: 322 });
 
   await undoByKeyboard(page);
-  await assertImageSize(page, { width: 736, height: 552 });
+  await assertImageSize(page, { height: 552, width: 736 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 322, height: 241 });
+  await assertImageSize(page, { height: 241, width: 322 });
 });
 
 test('can click and delete image', async ({ page }) => {
@@ -145,8 +144,8 @@ test('enter shortcut on focusing embed block and its caption', async ({
   await type(page, '123');
 
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2495',
+    type: 'issue',
   });
 
   // blur
@@ -258,9 +257,9 @@ async function initMockImage(page: Page) {
     doc.addBlock(
       'affine:image',
       {
+        height: 180,
         sourceId: '_e2e_test_image_id_',
         width: 200,
-        height: 180,
       },
       noteId
     );
@@ -347,8 +346,8 @@ test('image loading but success', async ({ page }) => {
       count++;
       if (count === 3) {
         return route.fulfill({
-          status: 200,
           body: imageBuffer,
+          status: 200,
         });
       }
       // broken image
@@ -382,8 +381,8 @@ test('image loaded successfully', async ({ page }) => {
     `**/api/collection/${room}/blob/${mockImageId}`,
     async route => {
       return route.fulfill({
-        status: 200,
         body: imageBuffer,
+        status: 200,
       });
     }
   );

@@ -1,5 +1,6 @@
-import { FontFamily, FontWeight } from '../../../consts.js';
 import type { GroupElementModel } from '../../../element-model/group.js';
+
+import { FontFamily, FontWeight } from '../../../consts.js';
 import { Bound } from '../../../utils/bound.js';
 import {
   getFontString,
@@ -39,26 +40,26 @@ export function titleRenderParams(group: GroupElementModel, zoom: number) {
   }
 
   return {
-    radius,
-    font,
     bound,
-    text,
-    titleWidth,
-    titleHeight,
+    font,
     lineHeight,
-    padding,
     offset,
+    padding,
+    radius,
+    text,
     titleBound: new Bound(
       bound.x,
       bound.y - titleHeight,
       titleWidth,
       titleHeight
     ),
+    titleHeight,
+    titleWidth,
   };
 }
 
 export function titleBound(group: GroupElementModel, zoom: number) {
-  const { titleWidth, titleHeight, bound } = titleRenderParams(group, zoom);
+  const { bound, titleHeight, titleWidth } = titleRenderParams(group, zoom);
 
   return new Bound(bound.x, bound.y - titleHeight, titleWidth, titleHeight);
 }
@@ -66,10 +67,10 @@ export function titleBound(group: GroupElementModel, zoom: number) {
 function getGroupTitleFont(zoom: number) {
   const fontSize = 16 / zoom;
   const font = getFontString({
-    fontSize,
     fontFamily: TITLE_FONT,
-    fontWeight: FontWeight.Regular,
+    fontSize,
     fontStyle: 'normal',
+    fontWeight: FontWeight.Regular,
   });
 
   return font;

@@ -5,10 +5,10 @@ import type { BlockSnapshot } from '@blocksuite/store';
 import { markdownToSnapshot } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import {
-  basicTheme,
   type PPTDoc,
   type PPTSection,
   type TemplateImage,
+  basicTheme,
 } from './template.js';
 
 export const PPTBuilder = (host: EditorHost) => {
@@ -23,21 +23,21 @@ export const PPTBuilder = (host: EditorHost) => {
       const keywords = getText(v.children[0]);
       const content = getText(v.children[1]);
       return {
-        title,
-        keywords,
         content,
+        keywords,
+        title,
       } satisfies PPTSection;
     });
     const doc: PPTDoc = {
       isCover: docs.length === 0,
-      title: getText(block),
       sections,
+      title: getText(block),
     };
     docs.push(doc);
 
     if (doc.isCover) return;
     const job = service.createTemplateJob('template');
-    const { images, content } = await basicTheme(doc);
+    const { content, images } = await basicTheme(doc);
     contents.push(content);
     allImages.push(images);
     if (images.length) {
@@ -54,6 +54,11 @@ export const PPTBuilder = (host: EditorHost) => {
   };
 
   return {
+    done: async (text: string) => {
+      const snapshot = await markdownToSnapshot(text, host);
+      const block = snapshot.snapshot.content[0];
+      await addDoc(block.children[block.children.length - 1]);
+    },
     process: async (text: string) => {
       try {
         const snapshot = await markdownToSnapshot(text, host);
@@ -69,11 +74,6 @@ export const PPTBuilder = (host: EditorHost) => {
       }
 
       return { contents, images: allImages };
-    },
-    done: async (text: string) => {
-      const snapshot = await markdownToSnapshot(text, host);
-      const block = snapshot.snapshot.content[0];
-      await addDoc(block.children[block.children.length - 1]);
     },
   };
 };

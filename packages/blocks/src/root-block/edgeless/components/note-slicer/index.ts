@@ -1,21 +1,22 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { SmallScissorsIcon } from '../../../../_common/icons/edgeless.js';
-import {
-  buildPath,
-  getRectByBlockElement,
-  Point,
-} from '../../../../_common/utils/index.js';
 import type {
   EdgelessRootBlockComponent,
   NoteBlockComponent,
   NoteBlockModel,
 } from '../../../../index.js';
+
+import { SmallScissorsIcon } from '../../../../_common/icons/edgeless.js';
+import {
+  Point,
+  buildPath,
+  getRectByBlockElement,
+} from '../../../../_common/utils/index.js';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -97,6 +98,16 @@ const styles = css`
 `;
 @customElement('note-slicer')
 export class NoteSlicer extends WithDisposable(LitElement) {
+  static override styles = styles;
+
+  private _divingLinePositions: Point[] = [];
+
+  private _hidden = false;
+
+  private _noteBlockIds: string[] = [];
+
+  private _noteDisposables: DisposableGroup | null = null;
+
   get _editorHost() {
     return this.edgeless.host;
   }
@@ -114,40 +125,75 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     return this._noteBlockElement?.closest('.edgeless-block-portal-note');
   }
 
-  get _viewportOffset() {
-    const { viewport } = this.edgeless;
-    return {
-      left: viewport.left ?? 0,
-      top: viewport.top ?? 0,
-    };
-  }
-
   get _selection() {
     return this.edgeless.service.selection;
   }
 
-  get _zoom() {
-    return this.edgeless.service.viewport.zoom;
+  private _sliceNote() {
+    if (!this.anchorNote || !this._noteBlockIds.length) return;
+    const doc = this.edgeless.doc;
+
+    const {
+      background,
+      children,
+      displayMode,
+      index: originIndex,
+      xywh,
+    } = this.anchorNote;
+    const {
+      collapse: _,
+      collapsedHeight: __,
+      ...restOfEdgeless
+    } = this.anchorNote.edgeless;
+    const anchorBlockId = this._noteBlockIds[this._activeSlicerIndex];
+    if (!anchorBlockId) return;
+    const sliceIndex = children.findIndex(block => block.id === anchorBlockId);
+    const resetBlocks = children.slice(sliceIndex + 1);
+    const [x, , width] = deserializeXYWH(xywh);
+    const sliceVerticalPos =
+      this._divingLinePositions[this._activeSlicerIndex].y;
+    const newY = this.edgeless.service.viewport.toModelCoord(
+      x,
+      sliceVerticalPos
+    )[1];
+    const newNoteId = this.edgeless.service.addBlock(
+      'affine:note',
+      {
+        background,
+        displayMode,
+        edgeless: restOfEdgeless,
+        index: originIndex + 1,
+        xywh: serializeXYWH(x, newY + NEW_NOTE_GAP, width, DEFAULT_NOTE_HEIGHT),
+      },
+      doc.root?.id
+    );
+
+    doc.moveBlocks(resetBlocks, doc.getBlockById(newNoteId) as NoteBlockModel);
+
+    this._activeSlicerIndex = 0;
+    this._selection.set({
+      editing: false,
+      elements: [newNoteId],
+    });
   }
 
-  static override styles = styles;
+  private _updateActiveSlicerIndex(pos: Point) {
+    const { _divingLinePositions } = this;
+    const curY = pos.y + DIVIDING_LINE_OFFSET * this._zoom;
+    let index = -1;
+    for (let i = 0; i < _divingLinePositions.length; i++) {
+      const currentY = _divingLinePositions[i].y;
+      const previousY = i > 0 ? _divingLinePositions[i - 1].y : 0;
+      const midY = (currentY + previousY) / 2;
+      if (curY < midY) {
+        break;
+      }
+      index++;
+    }
 
-  @state()
-  private accessor _activeSlicerIndex = 0;
-
-  private _hidden = false;
-
-  private _divingLinePositions: Point[] = [];
-
-  private _noteBlockIds: string[] = [];
-
-  private _noteDisposables: DisposableGroup | null = null;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor anchorNote: NoteBlockModel | null = null;
+    if (index < 0) index = 0;
+    this._activeSlicerIndex = index;
+  }
 
   private _updateDivingLineAndBlockIds() {
     if (!this.anchorNote || !this._notePortalElement) {
@@ -187,88 +233,16 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._noteBlockIds = noteBlockIds;
   }
 
-  private _updateActiveSlicerIndex(pos: Point) {
-    const { _divingLinePositions } = this;
-    const curY = pos.y + DIVIDING_LINE_OFFSET * this._zoom;
-    let index = -1;
-    for (let i = 0; i < _divingLinePositions.length; i++) {
-      const currentY = _divingLinePositions[i].y;
-      const previousY = i > 0 ? _divingLinePositions[i - 1].y : 0;
-      const midY = (currentY + previousY) / 2;
-      if (curY < midY) {
-        break;
-      }
-      index++;
-    }
-
-    if (index < 0) index = 0;
-    this._activeSlicerIndex = index;
+  get _viewportOffset() {
+    const { viewport } = this.edgeless;
+    return {
+      left: viewport.left ?? 0,
+      top: viewport.top ?? 0,
+    };
   }
 
-  private _sliceNote() {
-    if (!this.anchorNote || !this._noteBlockIds.length) return;
-    const doc = this.edgeless.doc;
-
-    const {
-      index: originIndex,
-      xywh,
-      background,
-      children,
-      displayMode,
-    } = this.anchorNote;
-    const {
-      collapse: _,
-      collapsedHeight: __,
-      ...restOfEdgeless
-    } = this.anchorNote.edgeless;
-    const anchorBlockId = this._noteBlockIds[this._activeSlicerIndex];
-    if (!anchorBlockId) return;
-    const sliceIndex = children.findIndex(block => block.id === anchorBlockId);
-    const resetBlocks = children.slice(sliceIndex + 1);
-    const [x, , width] = deserializeXYWH(xywh);
-    const sliceVerticalPos =
-      this._divingLinePositions[this._activeSlicerIndex].y;
-    const newY = this.edgeless.service.viewport.toModelCoord(
-      x,
-      sliceVerticalPos
-    )[1];
-    const newNoteId = this.edgeless.service.addBlock(
-      'affine:note',
-      {
-        background,
-        displayMode,
-        xywh: serializeXYWH(x, newY + NEW_NOTE_GAP, width, DEFAULT_NOTE_HEIGHT),
-        index: originIndex + 1,
-        edgeless: restOfEdgeless,
-      },
-      doc.root?.id
-    );
-
-    doc.moveBlocks(resetBlocks, doc.getBlockById(newNoteId) as NoteBlockModel);
-
-    this._activeSlicerIndex = 0;
-    this._selection.set({
-      elements: [newNoteId],
-      editing: false,
-    });
-  }
-
-  protected override updated(_changedProperties: PropertyValues) {
-    super.updated(_changedProperties);
-    if (_changedProperties.has('anchorNote')) {
-      this._noteDisposables?.dispose();
-      this._noteDisposables = null;
-      if (this.anchorNote) {
-        this._noteDisposables = new DisposableGroup();
-        this._noteDisposables.add(
-          this.anchorNote.propsUpdated.on(({ key }) => {
-            if (key === 'children' || key === 'xywh') {
-              this.requestUpdate();
-            }
-          })
-        );
-      }
-    }
+  get _zoom() {
+    return this.edgeless.service.viewport.zoom;
   }
 
   override connectedCallback(): void {
@@ -315,6 +289,13 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     });
   }
 
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.disposables.dispose();
+    this._noteDisposables?.dispose();
+    this._noteDisposables = null;
+  }
+
   override firstUpdated() {
     if (!this.edgeless.service) return;
     this.disposables.add(
@@ -323,13 +304,6 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this.disposables.dispose();
-    this._noteDisposables?.dispose();
-    this._noteDisposables = null;
   }
 
   override render() {
@@ -348,9 +322,9 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         class="note-slicer-button"
         style=${styleMap({
           left: `${buttonPosition.x - 66 * this._zoom}px`,
-          top: `${buttonPosition.y}px`,
           opacity: 1,
           scale: `${this._zoom}`,
+          top: `${buttonPosition.y}px`,
           transform: 'translateY(-50%)',
         })}
       >
@@ -358,8 +332,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       </div>
       ${this._divingLinePositions.map((pos, idx) => {
         const dividingLineClasses = classMap({
-          'note-slicer-dividing-line-container': true,
           active: idx === this._activeSlicerIndex,
+          'note-slicer-dividing-line-container': true,
         });
         return html`<div
           class=${dividingLineClasses}
@@ -374,6 +348,33 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       })}
     </div> `;
   }
+
+  protected override updated(_changedProperties: PropertyValues) {
+    super.updated(_changedProperties);
+    if (_changedProperties.has('anchorNote')) {
+      this._noteDisposables?.dispose();
+      this._noteDisposables = null;
+      if (this.anchorNote) {
+        this._noteDisposables = new DisposableGroup();
+        this._noteDisposables.add(
+          this.anchorNote.propsUpdated.on(({ key }) => {
+            if (key === 'children' || key === 'xywh') {
+              this.requestUpdate();
+            }
+          })
+        );
+      }
+    }
+  }
+
+  @state()
+  private accessor _activeSlicerIndex = 0;
+
+  @property({ attribute: false })
+  accessor anchorNote: NoteBlockModel | null = null;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {

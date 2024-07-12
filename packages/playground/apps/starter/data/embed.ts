@@ -29,8 +29,8 @@ export const embed: InitFn = (collection: DocCollection, id: string) => {
     doc.addBlock(
       'affine:embed-github',
       {
-        url: 'https://www.github.com/toeverything/blocksuite/pull/5927',
         style: 'vertical',
+        url: 'https://www.github.com/toeverything/blocksuite/pull/5927',
         xywh: '[0, 400, 364, 390]',
       },
       surfaceId

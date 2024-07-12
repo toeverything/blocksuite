@@ -2,10 +2,10 @@ export type Point = [number, number];
 export type Line = [Point, Point];
 
 export interface Rectangle {
+  height: number;
+  width: number;
   x: number;
   y: number;
-  width: number;
-  height: number;
 }
 
 export function rotatePoints(

@@ -1,12 +1,13 @@
+import type { TFunction } from './typesystem.js';
+
 import { tDate, tNumber, tString } from './data-type.js';
 import { Matcher } from './matcher.js';
-import type { TFunction } from './typesystem.js';
 import { tArray, tFunction, tUnknown, typesystem } from './typesystem.js';
 
 export const propertyMatcher = new Matcher<
   {
-    name: string;
     impl: (...args: unknown[]) => unknown;
+    name: string;
   },
   TFunction
 >((type, target) => {
@@ -27,13 +28,13 @@ propertyMatcher.register(
     rt: tNumber.create(),
   }),
   {
-    name: 'Length',
     impl: value => {
       if (typeof value !== 'string') {
         return 0;
       }
       return value.length;
     },
+    name: 'Length',
   }
 );
 propertyMatcher.register(
@@ -42,13 +43,13 @@ propertyMatcher.register(
     rt: tNumber.create(),
   }),
   {
-    name: 'Day of month',
     impl: value => {
       if (typeof value !== 'number') {
         return 0;
       }
       return new Date(value).getDate();
     },
+    name: 'Day of month',
   }
 );
 propertyMatcher.register(
@@ -57,13 +58,13 @@ propertyMatcher.register(
     rt: tNumber.create(),
   }),
   {
-    name: 'Day of week',
     impl: value => {
       if (typeof value !== 'number') {
         return 0;
       }
       return new Date(value).getDay();
     },
+    name: 'Day of week',
   }
 );
 propertyMatcher.register(
@@ -72,13 +73,13 @@ propertyMatcher.register(
     rt: tNumber.create(),
   }),
   {
-    name: 'Month of year',
     impl: value => {
       if (typeof value !== 'number') {
         return 0;
       }
       return new Date(value).getMonth() + 1;
     },
+    name: 'Month of year',
   }
 );
 propertyMatcher.register(
@@ -87,12 +88,12 @@ propertyMatcher.register(
     rt: tNumber.create(),
   }),
   {
-    name: 'Size',
     impl: value => {
       if (!Array.isArray(value)) {
         return 0;
       }
       return value.length;
     },
+    name: 'Size',
   }
 );

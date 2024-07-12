@@ -1,25 +1,26 @@
 import type { InlineEditor, KeyboardBindingContext } from '@blocksuite/inline';
+import type { Y } from '@blocksuite/store';
+
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
-  baseTextAttributes,
   type DeltaInsert,
-  getDefaultAttributeRenderer,
   type InlineRange,
   KEYBOARD_ALLOW_DEFAULT,
   type KeyboardBindingHandler,
+  baseTextAttributes,
+  getDefaultAttributeRenderer,
 } from '@blocksuite/inline';
-import type { Y } from '@blocksuite/store';
-import { z, type ZodObject, type ZodTypeAny } from 'zod';
+import { type ZodObject, type ZodTypeAny, z } from 'zod';
 
 export type InlineSpecs<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = {
-  name: string;
-  schema: ZodTypeAny;
-  match: (delta: DeltaInsert<TextAttributes>) => boolean;
-  renderer: AttributeRenderer<TextAttributes>;
   embed?: boolean;
+  match: (delta: DeltaInsert<TextAttributes>) => boolean;
+  name: string;
+  renderer: AttributeRenderer<TextAttributes>;
+  schema: ZodTypeAny;
 };
 
 export type InlineMarkdownMatchAction<
@@ -27,65 +28,26 @@ export type InlineMarkdownMatchAction<
   in TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = (props: {
   inlineEditor: InlineEditor<TextAttributes>;
-  prefixText: string;
   inlineRange: InlineRange;
   pattern: RegExp;
+  prefixText: string;
   undoManager: Y.UndoManager;
 }) => ReturnType<KeyboardBindingHandler>;
 
 export type InlineMarkdownMatch<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = {
+  action: InlineMarkdownMatchAction<TextAttributes>;
   name: string;
   pattern: RegExp;
-  action: InlineMarkdownMatchAction<TextAttributes>;
 };
 
 export class InlineManager<
   in out TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
-  private _specs: InlineSpecs<TextAttributes>[] = [];
-
-  get specs() {
-    return this._specs;
-  }
-
   private _markdownMatches: InlineMarkdownMatch<TextAttributes>[] = [];
 
-  get markdownMatches() {
-    return this._markdownMatches;
-  }
-
-  registerSpecs(specs: InlineSpecs<TextAttributes>[]): void {
-    this._specs = specs;
-  }
-
-  registerMarkdownMatches(
-    markdownMatches: InlineMarkdownMatch<TextAttributes>[]
-  ): void {
-    this._markdownMatches = markdownMatches;
-  }
-
-  markdownShortcutHandler = (
-    context: KeyboardBindingContext<TextAttributes>,
-    undoManager: Y.UndoManager
-  ) => {
-    const { inlineEditor, prefixText, inlineRange } = context;
-    for (const match of this._markdownMatches) {
-      const matchedText = prefixText.match(match.pattern);
-      if (matchedText) {
-        return match.action({
-          inlineEditor,
-          prefixText,
-          inlineRange,
-          pattern: match.pattern,
-          undoManager,
-        });
-      }
-    }
-
-    return KEYBOARD_ALLOW_DEFAULT;
-  };
+  private _specs: InlineSpecs<TextAttributes>[] = [];
 
   embedChecker = (delta: DeltaInsert<TextAttributes>) => {
     for (const spec of this._specs) {
@@ -94,6 +56,27 @@ export class InlineManager<
       }
     }
     return false;
+  };
+
+  markdownShortcutHandler = (
+    context: KeyboardBindingContext<TextAttributes>,
+    undoManager: Y.UndoManager
+  ) => {
+    const { inlineEditor, inlineRange, prefixText } = context;
+    for (const match of this._markdownMatches) {
+      const matchedText = prefixText.match(match.pattern);
+      if (matchedText) {
+        return match.action({
+          inlineEditor,
+          inlineRange,
+          pattern: match.pattern,
+          prefixText,
+          undoManager,
+        });
+      }
+    }
+
+    return KEYBOARD_ALLOW_DEFAULT;
   };
 
   getRenderer(): AttributeRenderer<TextAttributes> {
@@ -126,5 +109,23 @@ export class InlineManager<
         >;
       }, defaultSchema);
     return schema;
+  }
+
+  registerMarkdownMatches(
+    markdownMatches: InlineMarkdownMatch<TextAttributes>[]
+  ): void {
+    this._markdownMatches = markdownMatches;
+  }
+
+  registerSpecs(specs: InlineSpecs<TextAttributes>[]): void {
+    this._specs = specs;
+  }
+
+  get markdownMatches() {
+    return this._markdownMatches;
+  }
+
+  get specs() {
+    return this._specs;
   }
 }

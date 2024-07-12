@@ -1,6 +1,7 @@
 import type { SerializedXYWH } from '../../../index.js';
-import { Bound } from '../../../utils/bound.js';
 import type { MindmapElementModel } from '../../mindmap.js';
+
+import { Bound } from '../../../utils/bound.js';
 
 export const NODE_VERTICAL_SPACING = 45;
 export const NODE_HORIZONTAL_SPACING = 110;
@@ -21,11 +22,11 @@ export type NodeDetail = {
 };
 
 export type MindmapNode = {
-  id: string;
+  children: MindmapNode[];
   detail: NodeDetail;
 
   element: BlockSuite.SurfaceElementModelType;
-  children: MindmapNode[];
+  id: string;
 
   /**
    * This property override the preferredDir or default layout direction.
@@ -34,23 +35,18 @@ export type MindmapNode = {
   overriddenDir?: LayoutType;
 };
 
-export type MindmapRoot = MindmapNode & {
+export type MindmapRoot = {
   left: MindmapNode[];
   right: MindmapNode[];
-};
+} & MindmapNode;
 
 export enum LayoutType {
-  RIGHT = 0,
-  LEFT = 1,
   BALANCE = 2,
+  LEFT = 1,
+  RIGHT = 0,
 }
 
 type TreeSize = {
-  /**
-   * The root node of the tree
-   */
-  root: MindmapNode;
-
   /**
    * The size of the tree, including its descendants
    */
@@ -60,6 +56,11 @@ type TreeSize = {
    * The size of the children of the root
    */
   children: TreeSize[];
+
+  /**
+   * The root node of the tree
+   */
+  root: MindmapNode;
 };
 
 const calculateNodeSize = (
@@ -99,9 +100,9 @@ const calculateNodeSize = (
   }
 
   return {
-    root,
     bound,
     children,
+    root,
   };
 };
 
@@ -184,9 +185,9 @@ const layoutBalance = (
   {
     const leftTreeSize = calculateNodeSize(root, true, leftTree);
     const mockRoot = {
-      root: rootTree.root,
       bound: leftTreeSize.bound,
       children: leftTreeSize.children,
+      root: rootTree.root,
     };
 
     layoutTree(mockRoot, LayoutType.LEFT, mindmap, path, mockRoot.children);
@@ -195,9 +196,9 @@ const layoutBalance = (
   {
     const rightTreeSize = calculateNodeSize(root, true, rightTree);
     const mockRoot = {
-      root: rootTree.root,
       bound: rightTreeSize.bound,
       children: rightTreeSize.children,
+      root: rootTree.root,
     };
 
     layoutTree(mockRoot, LayoutType.RIGHT, mindmap, [0], mockRoot.children);

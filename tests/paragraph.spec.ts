@@ -65,8 +65,8 @@ test('init paragraph by page title enter at last', async ({ page }) => {
 
   //#region Fixes: https://github.com/toeverything/blocksuite/issues/1007
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/1007',
+    type: 'issue',
   });
   await page.keyboard.press('ArrowLeft');
   await focusTitle(page);
@@ -134,14 +134,14 @@ test('backspace and arrow on title', async ({ page }) => {
   await assertTitle(page, 'hll');
 });
 
-for (const { initState, desc } of [
+for (const { desc, initState } of [
   {
-    initState: initEmptyParagraphState,
     desc: 'without surface',
+    initState: initEmptyParagraphState,
   },
   {
-    initState: initEmptyEdgelessState,
     desc: 'with surface',
+    initState: initEmptyEdgelessState,
   },
 ]) {
   test(`backspace on line start of the first block (${desc})`, async ({
@@ -1300,8 +1300,8 @@ test('press arrow up in the second line should move caret to the first line', as
     const note = doc.addBlock('affine:note', {}, rootId);
     const delta = Array.from({ length: 150 }, (_, i) => {
       return i % 2 === 0
-        ? { insert: 'i', attributes: { italic: true } }
-        : { insert: 'b', attributes: { bold: true } };
+        ? { attributes: { italic: true }, insert: 'i' }
+        : { attributes: { bold: true }, insert: 'b' };
     });
     const text = doc.Text.fromDelta(delta);
     doc.addBlock('affine:paragraph', { text }, note);
@@ -1852,8 +1852,8 @@ test('arrow up/down navigation within and across paragraphs containing different
   page,
 }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/5155',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -1900,8 +1900,8 @@ test('select divider using delete keyboard from prev/next paragraph', async ({
   page,
 }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/4547',
+    type: 'issue',
   });
 
   await enterPlaygroundRoom(page);

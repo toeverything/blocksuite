@@ -5,8 +5,8 @@ import type { BaseTextAttributes } from './utils/index.js';
 export type DeltaInsert<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = {
-  insert: string;
   attributes?: TextAttributes;
+  insert: string;
 };
 
 export type AttributeRenderer<
@@ -33,8 +33,8 @@ export type NativePoint = readonly [node: Node, offset: number];
 export type TextPoint = readonly [text: Text, offset: number];
 
 export interface DomPoint {
-  // which text node this point is in
-  text: Text;
   // the index here is relative to the Editor, not text node
   index: number;
+  // which text node this point is in
+  text: Text;
 }

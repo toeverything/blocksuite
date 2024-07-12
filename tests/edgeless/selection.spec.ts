@@ -2,9 +2,9 @@ import { expect } from '@playwright/test';
 
 import * as actions from '../utils/actions/edgeless.js';
 import {
+  Shape,
   getNoteBoundBoxInEdgeless,
   setEdgelessTool,
-  Shape,
   switchEditorMode,
   toModelCoord,
 } from '../utils/actions/edgeless.js';
@@ -386,10 +386,10 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
       y: 1150,
     },
     {
-      click: true,
       beforeMouseUp: async () => {
         await page.waitForTimeout(500);
       },
+      click: true,
     }
   );
 

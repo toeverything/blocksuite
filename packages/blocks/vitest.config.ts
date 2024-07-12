@@ -5,14 +5,14 @@ export default defineConfig({
     target: 'es2018',
   },
   test: {
-    globalSetup: '../../scripts/vitest-global.ts',
-    include: ['src/__tests__/**/*.unit.spec.ts'],
-    testTimeout: 1000,
     coverage: {
       provider: 'istanbul', // or 'c8'
       reporter: ['lcov'],
       reportsDirectory: '../../.coverage/blocks',
     },
+    environment: 'happy-dom',
+    globalSetup: '../../scripts/vitest-global.ts',
+    include: ['src/__tests__/**/*.unit.spec.ts'],
     /**
      * Custom handler for console.log in tests.
      *
@@ -25,6 +25,6 @@ export default defineConfig({
       console.warn(`Unexpected ${type} log`, log);
       throw new Error(log);
     },
-    environment: 'happy-dom',
+    testTimeout: 1000,
   },
 });

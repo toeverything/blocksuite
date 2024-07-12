@@ -1,7 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { toast } from '../../_common/components/toast.js';
 import type { FileSnapshot } from './adapter.js';
+
+import { toast } from '../../_common/components/toast.js';
 
 const chars =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -99,9 +100,9 @@ export async function encodeClipboardBlobs(map: Map<string, Blob>) {
       }
       const content = encode(await blob.arrayBuffer());
       const file: FileSnapshot = {
+        content,
         name: (blob as File).name,
         type: blob.type,
-        content,
       };
       blobs[id] = file;
     })

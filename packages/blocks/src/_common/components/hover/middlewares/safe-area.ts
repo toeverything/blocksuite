@@ -1,13 +1,13 @@
 import type { HoverMiddleware } from '../types.js';
 
 export type SafeTriangleOptions = {
-  zIndex: number;
   buffer: number;
+  debug?: boolean;
   /**
    * abort triangle guard if the mouse not move for some time
    */
   idleTimeout: number;
-  debug?: boolean;
+  zIndex: number;
 };
 
 /**
@@ -49,7 +49,7 @@ const getNearestSide = (
   rect: DOMRect
 ):
   | [
-      'top' | 'bottom' | 'left' | 'right',
+      'bottom' | 'left' | 'right' | 'top',
       { x: number; y: number },
       { x: number; y: number },
     ]
@@ -82,13 +82,13 @@ const getNearestSide = (
  * Licensed under MIT.
  */
 export const safeTriangle = ({
-  zIndex = 10000,
   buffer = 2,
-  idleTimeout = 40,
   debug = false,
+  idleTimeout = 40,
+  zIndex = 10000,
 }: Partial<SafeTriangleOptions> = {}): HoverMiddleware => {
   let abortController = new AbortController();
-  return async ({ event, referenceElement, floatingElement }) => {
+  return async ({ event, floatingElement, referenceElement }) => {
     abortController.abort();
     const newAbortController = new AbortController();
     abortController = newAbortController;
@@ -158,14 +158,14 @@ export const safeTriangle = ({
         Math.abs(p2.x - p3.x)
       );
       Object.assign(svg.style, {
-        position: 'fixed',
-        pointerEvents: 'none',
-        width: areaWidth + buffer * 2,
         height: areaHeight + buffer * 2,
-        zIndex,
-        top: 0,
         left: 0,
+        pointerEvents: 'none',
+        position: 'fixed',
+        top: 0,
         transform: `translate(${basePoint.x}px, ${basePoint.y}px)`,
+        width: areaWidth + buffer * 2,
+        zIndex,
       });
       path.setAttributeNS(
         null,
@@ -233,7 +233,7 @@ export const safeBridge = ({
   idleTimeout = 500,
 }: Partial<SafeBridgeOptions> = {}): HoverMiddleware => {
   let abortController = new AbortController();
-  return async ({ event, referenceElement, floatingElement }) => {
+  return async ({ event, floatingElement, referenceElement }) => {
     abortController.abort();
     const newAbortController = new AbortController();
     abortController = newAbortController;
@@ -317,14 +317,14 @@ export const safeBridge = ({
           document.createElement('div');
         rectDom.id = debugId;
         Object.assign(rectDom.style, {
-          position: 'fixed',
-          pointerEvents: 'none',
           background: 'aqua',
-          opacity: '0.3',
-          top: rectRect.top + 'px',
-          left: rectRect.left + 'px',
-          width: rectRect.width + 'px',
           height: rectRect.height + 'px',
+          left: rectRect.left + 'px',
+          opacity: '0.3',
+          pointerEvents: 'none',
+          position: 'fixed',
+          top: rectRect.top + 'px',
+          width: rectRect.width + 'px',
         });
         document.body.append(rectDom);
         newAbortController.signal.addEventListener('abort', () =>

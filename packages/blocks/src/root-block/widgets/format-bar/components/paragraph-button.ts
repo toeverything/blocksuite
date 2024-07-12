@@ -1,24 +1,25 @@
-import '../../../../_common/components/toolbar/icon-button.js';
-import '../../../../_common/components/toolbar/menu-button.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
-import { ref, type RefOrCallback } from 'lit/directives/ref.js';
+import { type RefOrCallback, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { whenHover } from '../../../../_common/components/hover/index.js';
-import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
-import { ArrowDownIcon } from '../../../../_common/icons/index.js';
 import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
-import { isRootElement } from '../../../../root-block/utils/guard.js';
 import type { ParagraphActionConfigItem } from '../config.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
+import { whenHover } from '../../../../_common/components/hover/index.js';
+import '../../../../_common/components/toolbar/icon-button.js';
+import '../../../../_common/components/toolbar/menu-button.js';
+import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
+import { ArrowDownIcon } from '../../../../_common/icons/index.js';
+import { isRootElement } from '../../../../root-block/utils/guard.js';
+
 interface ParagraphPanelProps {
-  host: EditorHost;
   formatBar: AffineFormatBarWidget;
+  host: EditorHost;
   ref?: RefOrCallback;
 }
 
@@ -98,7 +99,6 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
     assertExists(formatQuickBarElement, 'format quick bar should exist');
     panel.style.display = 'flex';
     computePosition(formatQuickBarElement, panel, {
-      placement: 'top-start',
       middleware: [
         flip(),
         offset(6),
@@ -106,6 +106,7 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
           padding: 6,
         }),
       ],
+      placement: 'top-start',
     })
       .then(({ x, y }) => {
         panel.style.left = `${x}px`;

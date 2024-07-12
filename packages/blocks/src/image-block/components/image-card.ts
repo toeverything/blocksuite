@@ -3,8 +3,9 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { humanFileSize } from '../../_common/utils/math.js';
 import type { ImageBlockComponent } from '../image-block.js';
+
+import { humanFileSize } from '../../_common/utils/math.js';
 import { FailedImageIcon, ImageIcon, LoadingIcon } from '../styles.js';
 
 export const SURFACE_IMAGE_CARD_WIDTH = 220;
@@ -60,11 +61,8 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor block!: ImageBlockComponent;
-
   override render() {
-    const { isInSurface, loading, error, model } = this.block;
+    const { error, isInSurface, loading, model } = this.block;
 
     const width = isInSurface
       ? `${SURFACE_IMAGE_CARD_WIDTH}px`
@@ -77,10 +75,10 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
     const rotate = isInSurface ? model.rotate : 0;
 
     const cardStyleMap = styleMap({
+      height,
       transform: `rotate(${rotate}deg)`,
       transformOrigin: 'center',
       width,
-      height,
     });
 
     const titleIcon = loading
@@ -112,6 +110,9 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor block!: ImageBlockComponent;
 }
 
 declare global {

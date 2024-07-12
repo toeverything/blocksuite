@@ -5,6 +5,7 @@ import type {
   InitCommandCtx,
 } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -13,16 +14,17 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 
+import type {
+  AffineInlineEditor,
+  AffineTextAttributes,
+} from '../../_common/inline/presets/affine-inline-specs.js';
+
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
 } from '../../_common/configs/text-format/consts.js';
 import { BLOCK_ID_ATTR } from '../../_common/consts.js';
-import type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-} from '../../_common/inline/presets/affine-inline-specs.js';
 
 function isActive(std: BlockSuite.Std, key: keyof AffineTextAttributes) {
   const [result] = std.command.chain().isTextStyleActive({ key }).run();
@@ -33,13 +35,13 @@ function handleCommonStyle(
   std: BlockSuite.Std,
   key: Extract<
     keyof AffineTextAttributes,
-    'bold' | 'italic' | 'underline' | 'strike' | 'code'
+    'bold' | 'code' | 'italic' | 'strike' | 'underline'
   >
 ) {
   const active = isActive(std, key);
   const payload: {
+    mode?: 'merge' | 'replace';
     styles: AffineTextAttributes;
-    mode?: 'replace' | 'merge';
   } = {
     styles: {
       [key]: active ? null : true,
@@ -58,7 +60,7 @@ function handleCommonStyle(
 export function generateTextStyleCommand(
   key: Extract<
     keyof AffineTextAttributes,
-    'bold' | 'italic' | 'underline' | 'strike' | 'code'
+    'bold' | 'code' | 'italic' | 'strike' | 'underline'
   >
 ): Command {
   return (ctx, next) => {
@@ -104,7 +106,7 @@ function getSelectedInlineEditors(
   blocks: BlockElement[],
   filter: (
     inlineRoot: InlineRootElement<AffineTextAttributes>
-  ) => InlineEditor<AffineTextAttributes> | []
+  ) => [] | InlineEditor<AffineTextAttributes>
 ) {
   return blocks.flatMap(el => {
     const inlineRoot = el.querySelector<
@@ -123,7 +125,7 @@ function handleCurrentSelection<
 >(
   chain: Chain<InitCommandCtx>,
   handler: (
-    type: 'text' | 'block' | 'native',
+    type: 'block' | 'native' | 'text',
     inlineEditors: InlineEditor<AffineTextAttributes>[]
   ) => CommandKeyToData<InlineOut> | boolean | void
 ) {
@@ -132,14 +134,14 @@ function handleCurrentSelection<
     chain
       .getTextSelection()
       .getSelectedBlocks({
-        types: ['text'],
         filter: el =>
           FORMAT_TEXT_SUPPORT_FLAVOURS.includes(
             el.model.flavour as BlockSuite.Flavour
           ),
+        types: ['text'],
       })
       .inline<InlineOut>((ctx, next) => {
-        const { selectedBlocks, currentTextSelection } = ctx;
+        const { currentTextSelection, selectedBlocks } = ctx;
         assertExists(selectedBlocks);
 
         assertExists(currentTextSelection);
@@ -165,11 +167,11 @@ function handleCurrentSelection<
     chain
       .getBlockSelections()
       .getSelectedBlocks({
-        types: ['block'],
         filter: el =>
           FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(
             el.model.flavour as BlockSuite.Flavour
           ),
+        types: ['block'],
       })
       .inline<InlineOut>((ctx, next) => {
         const { selectedBlocks } = ctx;

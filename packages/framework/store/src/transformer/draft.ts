@@ -1,27 +1,25 @@
 import type { BlockModel } from '../schema/base.js';
 
 type PropsInDraft =
-  | 'version'
   | 'flavour'
-  | 'role'
-  | 'page'
   | 'id'
   | 'keys'
-  | 'text';
+  | 'page'
+  | 'role'
+  | 'text'
+  | 'version';
 
 type ModelProps<Model> = Model extends BlockModel<infer U> ? U : never;
 
-export type DraftModel<Model extends BlockModel = BlockModel> = Pick<
-  Model,
-  PropsInDraft
-> & {
+export type DraftModel<Model extends BlockModel = BlockModel> = {
   children: DraftModel[];
-} & ModelProps<Model>;
+} & ModelProps<Model> &
+  Pick<Model, PropsInDraft>;
 
 export function toDraftModel<Model extends BlockModel = BlockModel>(
   origin: Model
 ): DraftModel<Model> {
-  const { id, version, flavour, role, keys, text, children } = origin;
+  const { children, flavour, id, keys, role, text, version } = origin;
   const props = origin.keys.reduce((acc, key) => {
     return {
       ...acc,
@@ -30,13 +28,13 @@ export function toDraftModel<Model extends BlockModel = BlockModel>(
   }, {} as ModelProps<Model>);
 
   return {
-    id,
-    version,
-    flavour,
-    role,
-    keys,
-    text,
     children: children.map(toDraftModel),
+    flavour,
+    id,
+    keys,
+    role,
+    text,
+    version,
     ...props,
   } as DraftModel<Model>;
 }

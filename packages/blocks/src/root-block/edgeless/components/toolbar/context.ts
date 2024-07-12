@@ -1,17 +1,18 @@
 import type { Slot } from '@blocksuite/store';
+
 import { createContext } from '@lit/context';
 
 import type { EdgelessToolbar } from './edgeless-toolbar.js';
 
 export interface EdgelessToolbarSlots {
-  resize: Slot<{ w: number; h: number }>;
+  resize: Slot<{ h: number; w: number }>;
 }
 
 export const edgelessToolbarSlotsContext = createContext<EdgelessToolbarSlots>(
   Symbol('edgelessToolbarSlotsContext')
 );
 
-export const edgelessToolbarThemeContext = createContext<'light' | 'dark'>(
+export const edgelessToolbarThemeContext = createContext<'dark' | 'light'>(
   Symbol('edgelessToolbarThemeContext')
 );
 

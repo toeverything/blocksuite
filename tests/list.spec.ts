@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 import { getFormatBar } from 'utils/query.js';
 
 import {
@@ -80,7 +80,7 @@ test('convert nested paragraph to list', async ({ page }) => {
   await pressTab(page);
   await dragBetweenIndices(page, [0, 1], [1, 2]);
 
-  const { openParagraphMenu, bulletedBtn } = getFormatBar(page);
+  const { bulletedBtn, openParagraphMenu } = getFormatBar(page);
   await openParagraphMenu();
   await bulletedBtn.click();
 

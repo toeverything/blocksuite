@@ -3,7 +3,7 @@ export function autoScroll(
   y: number,
   threshold = 50
 ): boolean {
-  const { scrollHeight, clientHeight, scrollTop } = viewportElement;
+  const { clientHeight, scrollHeight, scrollTop } = viewportElement;
   let _scrollTop = scrollTop;
   const max = scrollHeight - clientHeight;
 

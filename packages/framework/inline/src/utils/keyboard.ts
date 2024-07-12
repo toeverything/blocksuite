@@ -10,31 +10,31 @@ export const KEYBOARD_PREVENT_DEFAULT = false;
 export const KEYBOARD_ALLOW_DEFAULT = true;
 
 export interface KeyboardBinding {
-  key: number | string | string[];
-  handler: KeyboardBindingHandler;
-  prefix?: RegExp;
-  suffix?: RegExp;
-  shortKey?: boolean;
-  shiftKey?: boolean;
   altKey?: boolean;
-  metaKey?: boolean;
   ctrlKey?: boolean;
+  handler: KeyboardBindingHandler;
+  key: number | string | string[];
+  metaKey?: boolean;
+  prefix?: RegExp;
+  shiftKey?: boolean;
+  shortKey?: boolean;
+  suffix?: RegExp;
 }
 export type KeyboardBindingRecord = Record<string, KeyboardBinding>;
 
 export interface KeyboardBindingContext<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
-  inlineRange: InlineRange;
-  inlineEditor: InlineEditor<TextAttributes>;
   collapsed: boolean;
+  inlineEditor: InlineEditor<TextAttributes>;
+  inlineRange: InlineRange;
   prefixText: string;
-  suffixText: string;
   raw: KeyboardEvent;
+  suffixText: string;
 }
 export type KeyboardBindingHandler = (
   context: KeyboardBindingContext
-) => typeof KEYBOARD_PREVENT_DEFAULT | typeof KEYBOARD_ALLOW_DEFAULT;
+) => typeof KEYBOARD_ALLOW_DEFAULT | typeof KEYBOARD_PREVENT_DEFAULT;
 
 export function createInlineKeyDownHandler(
   inlineEditor: InlineEditor,
@@ -102,12 +102,12 @@ export function createInlineKeyDownHandler(
       ? leafEnd.textContent.slice(offsetEnd)
       : '';
     const currContext: KeyboardBindingContext = {
-      inlineRange,
-      inlineEditor: inlineEditor,
       collapsed: inlineRange.length === 0,
+      inlineEditor: inlineEditor,
+      inlineRange,
       prefixText,
-      suffixText,
       raw: evt,
+      suffixText,
     };
     const prevented = keyMatches.some(binding => {
       if (binding.prefix && !binding.prefix.test(currContext.prefixText)) {

@@ -1,11 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { noop } from '@blocksuite/global/utils';
 
 import { EdgelessToolController } from './edgeless-tool.js';
 
 type PanTool = {
-  type: 'pan';
   panning: boolean;
+  type: 'pan';
 };
 
 export class PanToolController extends EdgelessToolController<PanTool> {
@@ -15,6 +16,14 @@ export class PanToolController extends EdgelessToolController<PanTool> {
     type: 'pan',
   } as PanTool;
 
+  afterModeSwitch() {
+    noop();
+  }
+
+  beforeModeSwitch() {
+    noop();
+  }
+
   onContainerClick(): void {
     noop();
   }
@@ -23,23 +32,15 @@ export class PanToolController extends EdgelessToolController<PanTool> {
     noop();
   }
 
-  onContainerPointerDown(): void {
-    noop();
-  }
-
   onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick() {
-    noop();
-  }
-
-  onContainerDragStart(e: PointerEventState) {
-    this._lastPoint = [e.x, e.y];
+  onContainerDragEnd() {
+    this._lastPoint = null;
     this._edgeless.tools.setEdgelessTool({
+      panning: false,
       type: 'pan',
-      panning: true,
     });
   }
 
@@ -58,11 +59,11 @@ export class PanToolController extends EdgelessToolController<PanTool> {
     viewport.applyDeltaCenter(deltaX / zoom, deltaY / zoom);
   }
 
-  onContainerDragEnd() {
-    this._lastPoint = null;
+  onContainerDragStart(e: PointerEventState) {
+    this._lastPoint = [e.x, e.y];
     this._edgeless.tools.setEdgelessTool({
+      panning: true,
       type: 'pan',
-      panning: false,
     });
   }
 
@@ -74,19 +75,19 @@ export class PanToolController extends EdgelessToolController<PanTool> {
     noop();
   }
 
+  onContainerPointerDown(): void {
+    noop();
+  }
+
+  onContainerTripleClick() {
+    noop();
+  }
+
   onPressShiftKey(_: boolean) {
     noop();
   }
 
   onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
-
-  beforeModeSwitch() {
-    noop();
-  }
-
-  afterModeSwitch() {
     noop();
   }
 }

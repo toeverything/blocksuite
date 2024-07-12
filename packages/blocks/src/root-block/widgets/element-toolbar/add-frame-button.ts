@@ -1,12 +1,12 @@
-import '../../../_common/components/toolbar/icon-button.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
 import { FrameIcon } from '../../../_common/icons/index.js';
 import { Bound, MindmapElementModel } from '../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-add-frame-button')
 export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
@@ -16,16 +16,13 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   private _createFrame = () => {
     const frame = this.edgeless.service.frame.createFrameOnSelected();
     if (!frame) return;
     this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
       control: 'context-menu',
-      page: 'whiteboard editor',
       module: 'toolbar',
+      page: 'whiteboard editor',
       segment: 'toolbar',
       type: 'frame',
     });
@@ -44,6 +41,9 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
       </editor-icon-button>
     `;
   }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {

@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -18,11 +18,15 @@ const styles = css`
 export class DataBaseColumnStats extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor view!: DataViewTableManager;
+  override connectedCallback(): void {
+    super.connectedCallback();
 
-  @property({ attribute: false })
-  accessor group: GroupData | undefined = undefined;
+    this.disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   protected override render() {
     const cols = this.view.columnManagerList;
@@ -43,15 +47,11 @@ export class DataBaseColumnStats extends WithDisposable(LitElement) {
     `;
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
+  @property({ attribute: false })
+  accessor group: GroupData | undefined = undefined;
 
-    this.disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
+  @property({ attribute: false })
+  accessor view!: DataViewTableManager;
 }
 
 declare global {

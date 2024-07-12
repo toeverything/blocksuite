@@ -1,8 +1,7 @@
-import './database-convert-view.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { createSimplePortal } from '../../components/portal.js';
@@ -18,28 +17,22 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../utils/render-linked-doc.js';
+import './database-convert-view.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {
+  action: (host: EditorHost) => void;
+  disabledToolTip?: string;
+  enabledWhen: (host: EditorHost) => boolean;
+  hotkey?: string;
+  icon: TemplateResult<1>;
   id: string;
   name: string;
-  disabledToolTip?: string;
-  icon: TemplateResult<1>;
-  hotkey?: string;
   showWhen: (host: EditorHost) => boolean;
-  enabledWhen: (host: EditorHost) => boolean;
-  action: (host: EditorHost) => void;
 }
 
 export const quickActionConfig: QuickActionConfig[] = [
   {
-    id: 'copy',
-    name: 'Copy',
-    disabledToolTip: undefined,
-    icon: CopyIcon,
-    hotkey: undefined,
-    showWhen: () => true,
-    enabledWhen: () => true,
     action: host => {
       host.std.command
         .chain()
@@ -53,13 +46,41 @@ export const quickActionConfig: QuickActionConfig[] = [
         .copySelectedModels()
         .run();
     },
+    disabledToolTip: undefined,
+    enabledWhen: () => true,
+    hotkey: undefined,
+    icon: CopyIcon,
+    id: 'copy',
+    name: 'Copy',
+    showWhen: () => true,
   },
   {
-    id: 'convert-to-database',
-    name: 'Group as Database',
+    action: host => {
+      createSimplePortal({
+        template: html`<database-convert-view
+          .host=${host}
+        ></database-convert-view>`,
+      });
+    },
     disabledToolTip:
       'Contains Block types that cannot be converted to Database',
+    enabledWhen: host => {
+      const [_, ctx] = host.std.command
+        .chain()
+        .getSelectedModels({
+          types: ['block', 'text'],
+        })
+        .run();
+      const { selectedModels } = ctx;
+      if (!selectedModels || selectedModels.length === 0) return false;
+
+      return selectedModels.every(block =>
+        DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
+      );
+    },
     icon: DatabaseTableViewIcon20,
+    id: 'convert-to-database',
+    name: 'Group as Database',
     showWhen: host => {
       const [_, ctx] = host.std.command
         .chain()
@@ -78,59 +99,14 @@ export const quickActionConfig: QuickActionConfig[] = [
 
       return true;
     },
-    enabledWhen: host => {
-      const [_, ctx] = host.std.command
-        .chain()
-        .getSelectedModels({
-          types: ['block', 'text'],
-        })
-        .run();
-      const { selectedModels } = ctx;
-      if (!selectedModels || selectedModels.length === 0) return false;
-
-      return selectedModels.every(block =>
-        DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
-      );
-    },
-    action: host => {
-      createSimplePortal({
-        template: html`<database-convert-view
-          .host=${host}
-        ></database-convert-view>`,
-      });
-    },
   },
   {
-    id: 'convert-to-linked-doc',
-    name: 'Create Linked Doc',
-    icon: LinkedDocIcon,
-    hotkey: `Mod-Shift-l`,
-    showWhen: host => {
-      const [_, ctx] = host.std.command
-        .chain()
-        .getSelectedModels({
-          types: ['block'],
-        })
-        .run();
-      const { selectedModels } = ctx;
-      return !!selectedModels && selectedModels.length > 0;
-    },
-    enabledWhen: host => {
-      const [_, ctx] = host.std.command
-        .chain()
-        .getSelectedModels({
-          types: ['block'],
-        })
-        .run();
-      const { selectedModels } = ctx;
-      return !!selectedModels && selectedModels.length > 0;
-    },
     action: host => {
       const [_, ctx] = host.std.command
         .chain()
         .getSelectedModels({
-          types: ['block'],
           mode: 'highest',
+          types: ['block'],
         })
         .run();
       const { selectedModels } = ctx;
@@ -154,6 +130,30 @@ export const quickActionConfig: QuickActionConfig[] = [
         linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
         notifyDocCreated(host, doc);
       });
+    },
+    enabledWhen: host => {
+      const [_, ctx] = host.std.command
+        .chain()
+        .getSelectedModels({
+          types: ['block'],
+        })
+        .run();
+      const { selectedModels } = ctx;
+      return !!selectedModels && selectedModels.length > 0;
+    },
+    hotkey: `Mod-Shift-l`,
+    icon: LinkedDocIcon,
+    id: 'convert-to-linked-doc',
+    name: 'Create Linked Doc',
+    showWhen: host => {
+      const [_, ctx] = host.std.command
+        .chain()
+        .getSelectedModels({
+          types: ['block'],
+        })
+        .run();
+      const { selectedModels } = ctx;
+      return !!selectedModels && selectedModels.length > 0;
     },
   },
 ];

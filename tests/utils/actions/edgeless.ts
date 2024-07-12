@@ -1,22 +1,23 @@
-import '../declare-test-window.js';
-
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type { IPoint, NoteDisplayMode } from '@blocks/_common/types.js';
 import type { NoteBlockModel } from '@blocks/note-block/index.js';
 import type { IVec } from '@blocks/surface-block/index.js';
-import { assertExists, sleep } from '@global/utils/index.js';
 import type { Locator, Page } from '@playwright/test';
+
+import { assertExists, sleep } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 
 import type { Bound } from '../asserts.js';
+
+import '../declare-test-window.js';
 import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
+  SHIFT_KEY,
+  SHORT_KEY,
   pressBackspace,
   pressEnter,
   selectAllByKeyboard,
-  SHIFT_KEY,
-  SHORT_KEY,
   type,
 } from './keyboard.js';
 import {
@@ -45,11 +46,11 @@ const AWAIT_TIMEOUT = 500;
 export const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 export type Point = { x: number; y: number };
 export enum Shape {
-  Square = 'Square',
-  Ellipse = 'Ellipse',
   Diamond = 'Diamond',
-  Triangle = 'Triangle',
+  Ellipse = 'Ellipse',
   'Rounded rectangle' = 'Rounded rectangle',
+  Square = 'Square',
+  Triangle = 'Triangle',
 }
 
 export enum LassoMode {
@@ -64,7 +65,7 @@ export enum ConnectorMode {
 }
 
 export async function getNoteRect(page: Page, noteId: string) {
-  const xywh: string | null = await page.evaluate(
+  const xywh: null | string = await page.evaluate(
     ([noteId]) => {
       const doc = window.collection.getDoc('doc:home');
       const block = doc?.getBlockById(noteId);
@@ -78,7 +79,7 @@ export async function getNoteRect(page: Page, noteId: string) {
   );
   expect(xywh).not.toBeNull();
   const [x, y, w, h] = JSON.parse(xywh as string);
-  return { x, y, w, h };
+  return { h, w, x, y };
 }
 
 export async function getNoteProps(page: Page, noteId: string) {
@@ -92,7 +93,7 @@ export async function getNoteProps(page: Page, noteId: string) {
             pre[key] = block[key as keyof typeof block] as string;
             return pre;
           },
-          {} as Record<string, string | number>
+          {} as Record<string, number | string>
         );
       } else {
         return null;
@@ -127,19 +128,19 @@ export async function switchEditorEmbedMode(page: Page) {
 }
 
 type EdgelessTool =
-  | 'default'
-  | 'pan'
-  | 'note'
-  | 'shape'
   | 'brush'
-  | 'eraser'
-  | 'text'
   | 'connector'
+  | 'default'
+  | 'eraser'
   | 'frame'
   | 'frameNavigator'
-  | 'lasso';
-type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
-type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
+  | 'lasso'
+  | 'note'
+  | 'pan'
+  | 'shape'
+  | 'text';
+type ZoomToolType = 'fitToScreen' | 'zoomIn' | 'zoomOut';
+type ComponentToolType = 'brush' | 'more' | 'shape' | 'thick' | 'thin';
 
 const locatorEdgelessToolButtonSenior = async (
   page: Page,
@@ -167,17 +168,17 @@ export async function locatorEdgelessToolButton(
   innerContainer = true
 ) {
   const selector = {
-    default: '.edgeless-default-button',
-    pan: '.edgeless-default-button',
-    shape: '.edgeless-shape-button',
     brush: '.edgeless-brush-button',
-    eraser: '.edgeless-eraser-button',
-    text: '.edgeless-mindmap-button',
     connector: '.edgeless-connector-button',
-    note: '.edgeless-note-button',
+    default: '.edgeless-default-button',
+    eraser: '.edgeless-eraser-button',
     frame: '.edgeless-frame-button',
     frameNavigator: '.edgeless-frame-navigator-button',
     lasso: '.edgeless-lasso-button',
+    note: '.edgeless-note-button',
+    pan: '.edgeless-default-button',
+    shape: '.edgeless-shape-button',
+    text: '.edgeless-mindmap-button',
   }[type];
 
   let buttonType;
@@ -218,9 +219,9 @@ export async function locatorEdgelessZoomToolButton(
   innerContainer = true
 ) {
   const text = {
+    fitToScreen: 'Fit to screen',
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
-    fitToScreen: 'Fit to screen',
   }[type];
 
   const screenWidth = page.viewportSize()?.width;
@@ -248,11 +249,11 @@ export function locatorEdgelessComponentToolButton(
   innerContainer = true
 ) {
   const text = {
-    shape: 'Shape',
     brush: 'Color',
-    thin: 'Thin',
-    thick: 'Thick',
     more: 'More',
+    shape: 'Shape',
+    thick: 'Thick',
+    thin: 'Thin',
   }[type];
   const button = page
     .locator('edgeless-element-toolbar-widget editor-icon-button')
@@ -324,11 +325,11 @@ export async function setEdgelessTool(
   }
 }
 export type ShapeName =
-  | 'rect'
-  | 'ellipse'
   | 'diamond'
-  | 'triangle'
-  | 'roundedRect';
+  | 'ellipse'
+  | 'rect'
+  | 'roundedRect'
+  | 'triangle';
 
 export async function assertEdgelessShapeType(page: Page, type: ShapeName) {
   const curType = await page.evaluate(() => {
@@ -514,8 +515,8 @@ export async function exitEditing(page: Page) {
     if (!container) throw new Error('container not found');
 
     container.service.selection.set({
-      elements: [],
       editing: false,
+      elements: [],
     });
   });
 }
@@ -524,10 +525,10 @@ export async function resizeElementByHandle(
   page: Page,
   delta: Point,
   corner:
-    | 'top-left'
-    | 'top-right'
+    | 'bottom-left'
     | 'bottom-right'
-    | 'bottom-left' = 'top-left',
+    | 'top-left'
+    | 'top-right' = 'top-left',
   steps = 1
 ) {
   const handle = page.locator(`.handle[aria-label="${corner}"] .resize`);
@@ -548,10 +549,10 @@ export async function rotateElementByHandle(
   page: Page,
   deg = 0,
   corner:
-    | 'top-left'
-    | 'top-right'
+    | 'bottom-left'
     | 'bottom-right'
-    | 'bottom-left' = 'top-left',
+    | 'top-left'
+    | 'top-right' = 'top-left',
   steps = 1
 ) {
   const rect = await page
@@ -589,12 +590,12 @@ export async function selectBrushColor(page: Page, color: CssVariableName) {
 
 export async function selectBrushSize(page: Page, size: string) {
   const sizeIndexMap: Record<string, number> = {
-    two: 1,
+    eight: 4,
     four: 2,
     six: 3,
-    eight: 4,
     ten: 5,
     twelve: 6,
+    two: 1,
   };
   const sizeButton = page.locator(
     `edgeless-brush-menu .line-width-panel .line-width-button:nth-child(${sizeIndexMap[size]})`
@@ -840,38 +841,38 @@ export function locatorComponentToolbarMoreButton(page: Page) {
   return moreButton;
 }
 type Action =
-  | 'bringToFront'
-  | 'bringForward'
-  | 'sendBackward'
-  | 'sendToBack'
-  | 'copyAsPng'
-  | 'changeNoteColor'
-  | 'changeShapeStyle'
-  | 'changeShapeFillColor'
-  | 'changeShapeStrokeColor'
-  | 'changeShapeStrokeStyles'
-  | 'changeConnectorStrokeColor'
-  | 'changeConnectorStrokeStyles'
-  | 'changeConnectorShape'
   | 'addFrame'
   | 'addGroup'
   | 'addMindmap'
-  | 'createGroupOnMoreOption'
-  | 'ungroup'
-  | 'releaseFromGroup'
-  | 'createFrameOnMoreOption'
-  | 'duplicate'
-  | 'renameGroup'
+  | 'addText'
   | 'autoSize'
+  | 'bringForward'
+  | 'bringToFront'
+  | 'changeConnectorShape'
+  | 'changeConnectorStrokeColor'
+  | 'changeConnectorStrokeStyles'
+  | 'changeNoteColor'
   | 'changeNoteDisplayMode'
   | 'changeNoteSlicerSetting'
-  | 'addText'
-  | 'quickConnect'
-  | 'turnIntoLinkedDoc'
+  | 'changeShapeFillColor'
+  | 'changeShapeStrokeColor'
+  | 'changeShapeStrokeStyles'
+  | 'changeShapeStyle'
+  | 'copyAsPng'
+  | 'createFrameOnMoreOption'
+  | 'createGroupOnMoreOption'
   | 'createLinkedDoc'
+  | 'duplicate'
   | 'openLinkedDoc'
+  | 'quickConnect'
+  | 'releaseFromGroup'
+  | 'renameGroup'
+  | 'sendBackward'
+  | 'sendToBack'
   | 'toCardView'
-  | 'toEmbedView';
+  | 'toEmbedView'
+  | 'turnIntoLinkedDoc'
+  | 'ungroup';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -1232,7 +1233,7 @@ export async function changeShapeStrokeWidth(page: Page) {
 
 export function locatorShapeStrokeStyleButton(
   page: Page,
-  mode: 'solid' | 'dash' | 'none'
+  mode: 'dash' | 'none' | 'solid'
 ) {
   return page
     .locator('edgeless-change-shape-button')
@@ -1241,7 +1242,7 @@ export function locatorShapeStrokeStyleButton(
 
 export async function changeShapeStrokeStyle(
   page: Page,
-  mode: 'solid' | 'dash' | 'none'
+  mode: 'dash' | 'none' | 'solid'
 ) {
   const button = locatorShapeStrokeStyleButton(page, mode);
   await button.click();
@@ -1295,7 +1296,7 @@ export async function changeConnectorStrokeWidth(
 
 export function locatorConnectorStrokeStyleButton(
   page: Page,
-  mode: 'solid' | 'dash' | 'none'
+  mode: 'dash' | 'none' | 'solid'
 ) {
   return page
     .locator('edgeless-change-connector-button')
@@ -1303,7 +1304,7 @@ export function locatorConnectorStrokeStyleButton(
 }
 export async function changeConnectorStrokeStyle(
   page: Page,
-  mode: 'solid' | 'dash' | 'none'
+  mode: 'dash' | 'none' | 'solid'
 ) {
   const button = locatorConnectorStrokeStyleButton(page, mode);
   await button.click();
@@ -1311,8 +1312,8 @@ export async function changeConnectorStrokeStyle(
 
 export async function initThreeOverlapFilledShapes(page: Page) {
   const rect0 = {
-    start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
+    start: { x: 100, y: 100 },
   };
   await addBasicRectShapeElement(page, rect0.start, rect0.end);
   await page.mouse.click(rect0.start.x + 5, rect0.start.y + 5);
@@ -1320,8 +1321,8 @@ export async function initThreeOverlapFilledShapes(page: Page) {
   await changeShapeFillColor(page, '--affine-palette-shape-teal');
 
   const rect1 = {
-    start: { x: 130, y: 130 },
     end: { x: 230, y: 230 },
+    start: { x: 130, y: 130 },
   };
   await addBasicRectShapeElement(page, rect1.start, rect1.end);
   await page.mouse.click(rect1.start.x + 5, rect1.start.y + 5);
@@ -1329,8 +1330,8 @@ export async function initThreeOverlapFilledShapes(page: Page) {
   await changeShapeFillColor(page, '--affine-palette-shape-black');
 
   const rect2 = {
-    start: { x: 160, y: 160 },
     end: { x: 260, y: 260 },
+    start: { x: 160, y: 160 },
   };
   await addBasicRectShapeElement(page, rect2.start, rect2.end);
   await page.mouse.click(rect2.start.x + 5, rect2.start.y + 5);

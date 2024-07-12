@@ -1,5 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { TemplateResult } from 'lit';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 export type ColumnType = string;
 
@@ -8,45 +9,45 @@ export type ColumnTypeIcon = Record<ColumnType, TemplateResult>;
 export interface Column<
   Data extends Record<string, unknown> = Record<string, unknown>,
 > {
-  id: string;
-  type: ColumnType;
-  name: string;
   data: Data;
+  id: string;
+  name: string;
+  type: ColumnType;
 }
 // Common formula types
 export type StatCalcOpBaseTypes =
-  | 'none'
   | 'count-all'
-  | 'count-values'
-  | 'count-uni-values'
   | 'count-empty'
   | 'count-not-empty'
+  | 'count-uni-values'
+  | 'count-values'
+  | 'none'
   | 'percent-empty'
   | 'percent-not-empty';
 
 // Mathematical formula types
 export type StatCalcOpMathTypes =
-  | StatCalcOpBaseTypes
-  | 'sum'
   | 'avg'
-  | 'median'
-  | 'mode'
-  | 'min'
   | 'max'
-  | 'range';
+  | 'median'
+  | 'min'
+  | 'mode'
+  | 'range'
+  | 'sum'
+  | StatCalcOpBaseTypes;
 
 export type StatCalcOpCheckboxTypes =
-  | StatCalcOpBaseTypes
   | 'checked'
   | 'not-checked'
   | 'percent-checked'
-  | 'percent-not-checked';
+  | 'percent-not-checked'
+  | StatCalcOpBaseTypes;
 
 // Union of all formula types
 export type StatCalcOpType =
   | StatCalcOpBaseTypes
-  | StatCalcOpMathTypes
-  | StatCalcOpCheckboxTypes;
+  | StatCalcOpCheckboxTypes
+  | StatCalcOpMathTypes;
 
 export const getTableContainer = (ele: HTMLElement) => {
   const element = ele.closest(
@@ -56,19 +57,19 @@ export const getTableContainer = (ele: HTMLElement) => {
   return element;
 };
 export type CellFocus = {
-  rowIndex: number;
   columnIndex: number;
+  rowIndex: number;
 };
 export type MultiSelection = {
-  start: number;
   end: number;
+  start: number;
 };
 export type TableViewSelection = {
-  viewId: string;
-  type: 'table';
-  groupKey?: string;
-  rowsSelection?: MultiSelection;
   columnsSelection?: MultiSelection;
   focus: CellFocus;
+  groupKey?: string;
   isEditing: boolean;
+  rowsSelection?: MultiSelection;
+  type: 'table';
+  viewId: string;
 };

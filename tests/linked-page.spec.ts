@@ -430,9 +430,9 @@ test.describe('reference node', () => {
     await focusRichText(page);
     await type(page, '@');
     const {
+      assertExistRefText: assertReferenceText,
       linkedDocPopover,
       refNode,
-      assertExistRefText: assertReferenceText,
     } = getLinkedDocPopover(page);
     await expect(linkedDocPopover).toBeVisible();
     await pressEnter(page);
@@ -544,8 +544,8 @@ test.describe('reference node', () => {
     page,
   }) => {
     test.info().annotations.push({
-      type: 'issue',
       description: 'https://github.com/toeverything/blocksuite/issues/2136',
+      type: 'issue',
     });
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -593,10 +593,10 @@ test.describe('linked page popover', () => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     const {
+      assertActivePageIdx,
+      assertExistRefText,
       linkedDocPopover,
       pageBtn,
-      assertExistRefText,
-      assertActivePageIdx,
     } = getLinkedDocPopover(page);
 
     await focusTitle(page);
@@ -662,7 +662,7 @@ test.describe('linked page popover', () => {
     await focusRichText(page);
     await type(page, '@');
 
-    const { pageBtn, linkedDocPopover } = getLinkedDocPopover(page);
+    const { linkedDocPopover, pageBtn } = getLinkedDocPopover(page);
     await expect(linkedDocPopover).toBeVisible();
     await expect(pageBtn).toHaveText([
       ...Array.from({ length: 6 }, (_, index) => `page${index}`),
@@ -835,8 +835,8 @@ test.describe.skip('linked page with clipboard', () => {
 
 test('should [[Selected text]] converted to linked page', async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2730',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   const { paragraphId } = await initEmptyParagraphState(page);

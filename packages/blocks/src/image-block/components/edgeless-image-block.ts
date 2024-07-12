@@ -14,12 +14,6 @@ export class ImageBlockEdgelessComponent extends WithDisposable(
     }
   `;
 
-  @property({ attribute: false })
-  accessor url: string | undefined = undefined;
-
-  @query('.resizable-img')
-  public accessor resizeImg: HTMLElement | null = null;
-
   private _handleError(error: Error) {
     this.dispatchEvent(new CustomEvent('error', { detail: error }));
   }
@@ -34,6 +28,12 @@ export class ImageBlockEdgelessComponent extends WithDisposable(
       />
     </div>`;
   }
+
+  @query('.resizable-img')
+  public accessor resizeImg: HTMLElement | null = null;
+
+  @property({ attribute: false })
+  accessor url: string | undefined = undefined;
 }
 
 declare global {

@@ -1,7 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
+
+import type { ListBlockModel } from '../../../list-block/index.js';
+import type { RootBlockModel } from '../../../root-block/index.js';
+import type { ExtendedModel } from '../../types.js';
 
 import {
   isInsideBlockByFlavour,
@@ -20,10 +25,7 @@ import {
   focusBlockByModel,
   focusTitle,
 } from '../../../_common/utils/selection.js';
-import type { ListBlockModel } from '../../../list-block/index.js';
-import type { RootBlockModel } from '../../../root-block/index.js';
 import { EMBED_BLOCK_FLAVOUR_LIST } from '../../consts.js';
-import type { ExtendedModel } from '../../types.js';
 
 /**
  * Whether the block supports rendering its children.
@@ -176,9 +178,9 @@ export function handleBlockSplit(
   const id = doc.addBlock(
     model.flavour as never,
     {
+      children,
       text: right,
       type: model.type,
-      children,
     },
     newParent,
     newBlockIndex
@@ -435,9 +437,9 @@ function handleListBlockBackspace(
   const nextSiblings = doc.getNexts(model);
   const index = parent.children.indexOf(model);
   const blockProps = {
-    type: 'text' as const,
-    text: model.text?.clone(),
     children: model.children,
+    text: model.text?.clone(),
+    type: 'text' as const,
   };
   doc.captureSync();
   doc.deleteBlock(model, {

@@ -1,11 +1,14 @@
-import './components/title/index.js';
-
 import { RangeManager } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
+
+import type { NoteBlockComponent } from '../note-block/index.js';
+import type { AffineInnerModalWidget } from '../root-block/index.js';
+import type { DatabaseBlockModel } from './database-model.js';
+import type { DatabaseBlockService } from './database-service.js';
 
 import {
   BlockComponent,
@@ -18,8 +21,6 @@ import {
   MoreHorizontalIcon,
 } from '../_common/icons/index.js';
 import { Rect } from '../_common/utils/index.js';
-import type { NoteBlockComponent } from '../note-block/index.js';
-import type { AffineInnerModalWidget } from '../root-block/index.js';
 import {
   AffineDragHandleWidget,
   EdgelessRootBlockComponent,
@@ -29,24 +30,23 @@ import {
   getDropResult,
 } from '../root-block/widgets/drag-handle/utils.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
+import './components/title/index.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 import { dataViewCommonStyle } from './data-view/common/css-variable.js';
 import {
-  DatabaseSelection,
   DataView,
   type DataViewExpose,
   type DataViewProps,
   type DataViewSelection,
   type DataViewWidget,
   type DataViewWidgetProps,
+  DatabaseSelection,
+  type ViewSource,
   defineUniComponent,
   renderUniLit,
-  type ViewSource,
   widgetPresets,
 } from './data-view/index.js';
-import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
-import type { DatabaseBlockService } from './database-service.js';
 import { DatabaseBlockViewSource } from './view-source.js';
 
 @customElement('affine-database')
@@ -54,47 +54,6 @@ export class DatabaseBlockComponent extends BlockComponent<
   DatabaseBlockModel,
   DatabaseBlockService
 > {
-  override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>('affine-note');
-      return note;
-    }
-    return this.rootElement;
-  }
-
-  get view() {
-    return this.dataView.expose;
-  }
-
-  get dataSource(): DatabaseBlockDataSource {
-    if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDataSource(this.host, {
-        pageId: this.host.doc.id,
-        blockId: this.model.id,
-      });
-    }
-    return this._dataSource;
-  }
-
-  get viewSource(): ViewSource {
-    if (!this._viewSource) {
-      this._viewSource = new DatabaseBlockViewSource(this.model);
-    }
-    return this._viewSource;
-  }
-
-  get getFlag() {
-    return this.host.doc.awarenessStore.getFlag.bind(
-      this.host.doc.awarenessStore
-    );
-  }
-
-  get innerModalWidget() {
-    return this.rootElement!.widgetElements[
-      AFFINE_INNER_MODAL_WIDGET
-    ] as AffineInnerModalWidget;
-  }
-
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}
     affine-database {
@@ -129,29 +88,91 @@ export class DatabaseBlockComponent extends BlockComponent<
     }
   `;
 
-  private dataView = new DataView();
+  _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
+    return {
+      dispose: this.host.event.bindHotkey(hotkeys, {
+        path: this.topContenteditableElement?.path ?? this.path,
+      }),
+    };
+  };
+
+  private _clickDatabaseOps = (e: MouseEvent) => {
+    popMenu(e.currentTarget as HTMLElement, {
+      options: {
+        input: {
+          initValue: this.model.title.toString(),
+          onComplete: text => {
+            this.model.title.replace(0, this.model.title.length, text);
+          },
+          placeholder: 'Untitled',
+        },
+        items: [
+          {
+            icon: CopyIcon,
+            name: 'Copy',
+            select: () => {
+              const slice = Slice.fromModels(this.doc, [this.model]);
+              this.std.clipboard.copySlice(slice).catch(console.error);
+            },
+            type: 'action',
+          },
+          // {
+          //   type: 'action',
+          //   icon: DuplicateIcon,
+          //   name: 'Duplicate',
+          //   select: () => {
+          //   },
+          // },
+          {
+            children: () => [
+              {
+                class: 'delete-item',
+                icon: DeleteIcon,
+                name: 'Delete Database',
+                select: () => {
+                  this.model.children.slice().forEach(block => {
+                    this.doc.deleteBlock(block);
+                  });
+                  this.doc.deleteBlock(this.model);
+                },
+                type: 'action',
+              },
+            ],
+            name: '',
+            type: 'group',
+          },
+        ],
+      },
+    });
+  };
 
   private _dataSource?: DatabaseBlockDataSource;
 
+  _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
+    return {
+      dispose: this.host.event.add(name, handler, {
+        path: this.path,
+      }),
+    };
+  };
+
   private _viewSource?: ViewSource;
 
-  indicator = new DragIndicator();
+  private dataView = new DataView();
 
-  toolsWidget: DataViewWidget = widgetPresets.createTools({
-    table: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-      widgetPresets.tools.tableAddRow,
-    ],
-    kanban: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-    ],
-  });
+  private renderTitle = (dataViewMethod: DataViewExpose) => {
+    const addRow = () => dataViewMethod.addRow?.('start');
+    return html` <affine-database-title
+      style="overflow: hidden"
+      .titleText="${this.model.title}"
+      .readonly="${this.doc.readonly}"
+      .onPressEnterKey="${addRow}"
+    ></affine-database-title>`;
+  };
+
+  getRootService = () => {
+    return this.std.spec.getService('affine:page');
+  };
 
   headerWidget: DataViewWidget = defineUniComponent(
     (props: DataViewWidgetProps) => {
@@ -174,76 +195,7 @@ export class DatabaseBlockComponent extends BlockComponent<
     }
   );
 
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
-
-  private _clickDatabaseOps = (e: MouseEvent) => {
-    popMenu(e.currentTarget as HTMLElement, {
-      options: {
-        input: {
-          initValue: this.model.title.toString(),
-          placeholder: 'Untitled',
-          onComplete: text => {
-            this.model.title.replace(0, this.model.title.length, text);
-          },
-        },
-        items: [
-          {
-            type: 'action',
-            icon: CopyIcon,
-            name: 'Copy',
-            select: () => {
-              const slice = Slice.fromModels(this.doc, [this.model]);
-              this.std.clipboard.copySlice(slice).catch(console.error);
-            },
-          },
-          // {
-          //   type: 'action',
-          //   icon: DuplicateIcon,
-          //   name: 'Duplicate',
-          //   select: () => {
-          //   },
-          // },
-          {
-            type: 'group',
-            name: '',
-            children: () => [
-              {
-                type: 'action',
-                icon: DeleteIcon,
-                class: 'delete-item',
-                name: 'Delete Database',
-                select: () => {
-                  this.model.children.slice().forEach(block => {
-                    this.doc.deleteBlock(block);
-                  });
-                  this.doc.deleteBlock(this.model);
-                },
-              },
-            ],
-          },
-        ],
-      },
-    });
-  };
-
-  private renderDatabaseOps() {
-    if (this.doc.readonly) {
-      return nothing;
-    }
-    return html` <div class="database-ops" @click="${this._clickDatabaseOps}">
-      ${MoreHorizontalIcon}
-    </div>`;
-  }
-
-  private renderTitle = (dataViewMethod: DataViewExpose) => {
-    const addRow = () => dataViewMethod.addRow?.('start');
-    return html` <affine-database-title
-      style="overflow: hidden"
-      .titleText="${this.model.title}"
-      .readonly="${this.doc.readonly}"
-      .onPressEnterKey="${addRow}"
-    ></affine-database-title>`;
-  };
+  indicator = new DragIndicator();
 
   onDrag = (evt: MouseEvent, id: string): (() => void) => {
     const result = getDropResult(evt);
@@ -282,6 +234,47 @@ export class DatabaseBlockComponent extends BlockComponent<
     return () => {};
   };
 
+  selectionUpdated = new Slot<DataViewSelection | undefined>();
+
+  setSelection = (selection: DataViewSelection | undefined) => {
+    this.selection.setGroup(
+      'note',
+      selection
+        ? [
+            new DatabaseSelection({
+              blockId: this.blockId,
+              viewSelection: selection,
+            }),
+          ]
+        : []
+    );
+  };
+
+  toolsWidget: DataViewWidget = widgetPresets.createTools({
+    kanban: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+    ],
+    table: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+      widgetPresets.tools.tableAddRow,
+    ],
+  });
+
+  private renderDatabaseOps() {
+    if (this.doc.readonly) {
+      return nothing;
+    }
+    return html` <div class="database-ops" @click="${this._clickDatabaseOps}">
+      ${MoreHorizontalIcon}
+    </div>`;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -314,20 +307,7 @@ export class DatabaseBlockComponent extends BlockComponent<
     this.disposables.add(
       AffineDragHandleWidget.registerOption({
         flavour: DatabaseBlockSchema.model.flavour,
-        onDragMove: state => {
-          const target = captureEventTarget(state.raw.target);
-          const view = this.view;
-          if (view && target instanceof HTMLElement && this.contains(target)) {
-            canDrop = view.showIndicator?.(state.raw) ?? false;
-            return false;
-          }
-          if (canDrop) {
-            view?.hideIndicator?.();
-            canDrop = false;
-          }
-          return false;
-        },
-        onDragEnd: ({ state, draggingElements }) => {
+        onDragEnd: ({ draggingElements, state }) => {
           const target = state.raw.target;
           const view = this.view;
           if (
@@ -351,43 +331,22 @@ export class DatabaseBlockComponent extends BlockComponent<
           }
           return false;
         },
+        onDragMove: state => {
+          const target = captureEventTarget(state.raw.target);
+          const view = this.view;
+          if (view && target instanceof HTMLElement && this.contains(target)) {
+            canDrop = view.showIndicator?.(state.raw) ?? false;
+            return false;
+          }
+          if (canDrop) {
+            view?.hideIndicator?.();
+            canDrop = false;
+          }
+          return false;
+        },
       })
     );
   }
-
-  setSelection = (selection: DataViewSelection | undefined) => {
-    this.selection.setGroup(
-      'note',
-      selection
-        ? [
-            new DatabaseSelection({
-              blockId: this.blockId,
-              viewSelection: selection,
-            }),
-          ]
-        : []
-    );
-  };
-
-  _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
-    return {
-      dispose: this.host.event.bindHotkey(hotkeys, {
-        path: this.topContenteditableElement?.path ?? this.path,
-      }),
-    };
-  };
-
-  _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
-    return {
-      dispose: this.host.event.add(name, handler, {
-        path: this.path,
-      }),
-    };
-  };
-
-  getRootService = () => {
-    return this.std.spec.getService('affine:page');
-  };
 
   override renderBlock() {
     const peekViewService = this.getRootService().peekViewService;
@@ -398,24 +357,65 @@ export class DatabaseBlockComponent extends BlockComponent<
       >
         ${this.dataView.render({
           bindHotkey: this._bindHotkey,
-          handleEvent: this._handleEvent,
-          getFlag: this.getFlag,
-          selectionUpdated: this.selectionUpdated,
-          setSelection: this.setSelection,
           dataSource: this.dataSource,
-          viewSource: this.viewSource,
-          headerWidget: this.headerWidget,
-          onDrag: this.onDrag,
-          std: this.std,
           detailPanelConfig: {
             openDetailPanel: peekViewService
               ? (target, template) => peekViewService.peek(target, template)
               : undefined,
             target: () => this.innerModalWidget.target,
           },
+          getFlag: this.getFlag,
+          handleEvent: this._handleEvent,
+          headerWidget: this.headerWidget,
+          onDrag: this.onDrag,
+          selectionUpdated: this.selectionUpdated,
+          setSelection: this.setSelection,
+          std: this.std,
+          viewSource: this.viewSource,
         })}
       </div>
     `;
+  }
+
+  get dataSource(): DatabaseBlockDataSource {
+    if (!this._dataSource) {
+      this._dataSource = new DatabaseBlockDataSource(this.host, {
+        blockId: this.model.id,
+        pageId: this.host.doc.id,
+      });
+    }
+    return this._dataSource;
+  }
+
+  get getFlag() {
+    return this.host.doc.awarenessStore.getFlag.bind(
+      this.host.doc.awarenessStore
+    );
+  }
+
+  get innerModalWidget() {
+    return this.rootElement!.widgetElements[
+      AFFINE_INNER_MODAL_WIDGET
+    ] as AffineInnerModalWidget;
+  }
+
+  override get topContenteditableElement() {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
+      const note = this.closest<NoteBlockComponent>('affine-note');
+      return note;
+    }
+    return this.rootElement;
+  }
+
+  get view() {
+    return this.dataView.expose;
+  }
+
+  get viewSource(): ViewSource {
+    if (!this._viewSource) {
+      this._viewSource = new DatabaseBlockViewSource(this.model);
+    }
+    return this._viewSource;
   }
 }
 

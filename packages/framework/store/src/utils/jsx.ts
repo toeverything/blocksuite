@@ -3,10 +3,10 @@ import * as Y from 'yjs';
 type DocRecord = Record<
   string,
   {
-    'sys:id': string;
-    'sys:flavour': string;
-    'sys:children': string[];
     [id: string]: unknown;
+    'sys:children': string[];
+    'sys:flavour': string;
+    'sys:id': string;
   }
 >;
 
@@ -14,10 +14,10 @@ export interface JSXElement {
   // Ad-hoc for `ReactTestComponent` identify.
   // Use ReactTestComponent serializer prevent snapshot be be wrapped in a string, which cases " to be escaped.
   // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L78-L79
-  $$typeof: symbol | 0xea71357;
+  $$typeof: 0xea71357 | symbol;
+  children?: (JSXElement | number | string)[] | null;
+  props: { 'prop:text'?: JSXElement | string } & Record<string, unknown>;
   type: string;
-  props: { 'prop:text'?: string | JSXElement } & Record<string, unknown>;
-  children?: null | (JSXElement | string | number)[];
 }
 
 // Ad-hoc for `ReactTestComponent` identify.
@@ -81,9 +81,9 @@ export function yDocToJSXNode(
 
   return {
     $$typeof: testSymbol,
-    type: flavour,
-    props,
     children: children?.map(id => yDocToJSXNode(serializedDoc, id)) ?? [],
+    props,
+    type: flavour,
   };
 }
 
@@ -127,8 +127,8 @@ function serializeYMap(map: Y.Map<unknown>) {
 }
 
 type DeltaText = {
-  insert: string;
   attributes?: Record<string, unknown>;
+  insert: string;
 }[];
 
 function serializeYText(text: Y.Text): DeltaText {
@@ -150,16 +150,16 @@ function parseDelta(text: DeltaText) {
     // But it will empty children ad `< />`
     // so we return `undefined` directly if not delta text.
     $$typeof: testSymbol, // Symbol.for('react.element'),
-    type: '', // Symbol.for('react.fragment'),
-    props: {},
-    children: text?.map(({ insert, attributes }) => ({
+    children: text?.map(({ attributes, insert }) => ({
       $$typeof: testSymbol,
-      type: 'text',
       props: {
         // Not place at `children` to avoid the trailing whitespace be trim by formatter.
         insert,
         ...attributes,
       },
+      type: 'text',
     })),
+    props: {},
+    type: '', // Symbol.for('react.fragment'),
   };
 }

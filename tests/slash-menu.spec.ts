@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 
 import { addNote, switchEditorMode } from './utils/actions/edgeless.js';
 import {
+  SHORT_KEY,
   pressArrowDown,
   pressArrowLeft,
   pressArrowRight,
@@ -13,7 +14,6 @@ import {
   pressShiftTab,
   pressTab,
   redoByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/keyboard.js';
@@ -505,8 +505,8 @@ test('should slash menu works with fast type', async ({ page }) => {
 
 test('should clean slash string after soft enter', async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/1126',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   const { paragraphId } = await initEmptyParagraphState(page);
@@ -868,20 +868,20 @@ test.describe('slash menu with customize menu', () => {
           items: [
             { groupName: 'Custom Menu' },
             {
-              name: 'Custom Menu Item',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              icon: '' as any,
               action: () => {
                 // do nothing
               },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              icon: '' as any,
+              name: 'Custom Menu Item',
             },
             {
-              name: 'Custom Menu Item',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              icon: '' as any,
               action: () => {
                 // do nothing
               },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              icon: '' as any,
+              name: 'Custom Menu Item',
               showWhen: () => false,
             },
           ],

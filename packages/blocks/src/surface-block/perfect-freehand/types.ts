@@ -12,33 +12,33 @@
  * @param options.last Whether to handle the points as a completed stroke.
  */
 export interface StrokeOptions {
-  size?: number;
-  thinning?: number;
-  smoothing?: number;
-  streamline?: number;
   easing?: (pressure: number) => number;
-  simulatePressure?: boolean;
-  start?: {
-    cap?: boolean;
-    taper?: number | boolean;
-    easing?: (distance: number) => number;
-  };
   end?: {
     cap?: boolean;
-    taper?: number | boolean;
     easing?: (distance: number) => number;
+    taper?: boolean | number;
   };
   // Whether to handle the points as a completed stroke.
   last?: boolean;
+  simulatePressure?: boolean;
+  size?: number;
+  smoothing?: number;
+  start?: {
+    cap?: boolean;
+    easing?: (distance: number) => number;
+    taper?: boolean | number;
+  };
+  streamline?: number;
+  thinning?: number;
 }
 
 /**
  * The points returned by `getStrokePoints`, and the input for `getStrokeOutlinePoints`.
  */
 export interface StrokePoint {
+  distance: number;
   point: number[];
   pressure: number;
-  distance: number;
-  vector: number[];
   runningLength: number;
+  vector: number[];
 }

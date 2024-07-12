@@ -1,11 +1,11 @@
+import type { GetManualChunk } from 'rollup';
+import type { Plugin } from 'vite';
+
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { cpus } from 'node:os';
 import path, { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import type { GetManualChunk } from 'rollup';
-import type { Plugin } from 'vite';
 import { defineConfig, loadEnv } from 'vite';
 import istanbul from 'vite-plugin-istanbul';
 import wasm from 'vite-plugin-wasm';
@@ -70,6 +70,17 @@ function isDepInclude(
 }
 
 const chunkGroups = {
+  ai: [
+    path.dirname(require.resolve('@fal-ai/serverless-client')),
+    path.dirname(require.resolve('openai')),
+  ],
+  blocks: [
+    require.resolve('@blocksuite/blocks'),
+    require.resolve('@blocksuite/blocks/schemas'),
+  ],
+  datefns: [path.dirname(require.resolve('date-fns'))],
+  dompurify: [path.dirname(require.resolve('dompurify'))],
+  dotLottie: [path.dirname(require.resolve('@dotlottie/player-component'))],
   framework: [
     require.resolve('@blocksuite/block-std'),
     require.resolve('@blocksuite/global'),
@@ -80,10 +91,8 @@ const chunkGroups = {
     require.resolve('@blocksuite/store'),
     require.resolve('@blocksuite/sync'),
   ],
-  datefns: [path.dirname(require.resolve('date-fns'))],
-  dompurify: [path.dirname(require.resolve('dompurify'))],
+  presets: [require.resolve('@blocksuite/presets')],
   shiki: [path.dirname(require.resolve('@shikijs/core'))],
-  dotLottie: [path.dirname(require.resolve('@dotlottie/player-component'))],
   unified: [
     path.dirname(require.resolve('unified')),
     path.dirname(require.resolve('rehype-parse')),
@@ -100,15 +109,6 @@ const chunkGroups = {
     path.dirname(require.resolve('micromark-extension-gfm-task-list-item')),
     path.dirname(require.resolve('micromark-util-combine-extensions')),
   ],
-  ai: [
-    path.dirname(require.resolve('@fal-ai/serverless-client')),
-    path.dirname(require.resolve('openai')),
-  ],
-  blocks: [
-    require.resolve('@blocksuite/blocks'),
-    require.resolve('@blocksuite/blocks/schemas'),
-  ],
-  presets: [require.resolve('@blocksuite/presets')],
 };
 
 // https://vitejs.dev/config/
@@ -116,82 +116,48 @@ export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, __dirname, '') };
 
   return defineConfig({
-    envDir: __dirname,
-    define: {
-      'import.meta.env.PLAYGROUND_SERVER': JSON.stringify(
-        process.env.PLAYGROUND_SERVER ?? 'http://localhost:8787'
-      ),
-      'import.meta.env.PLAYGROUND_WS': JSON.stringify(
-        process.env.PLAYGROUND_WS ?? 'ws://localhost:8787'
-      ),
-    },
-    plugins: [
-      hmrPlugin,
-      sourcemapExclude(),
-      enableIstanbul &&
-        istanbul({
-          cwd: fileURLToPath(new URL('../..', import.meta.url)),
-          include: ['packages/**/src/*'],
-          exclude: [
-            'node_modules',
-            'tests',
-            fileURLToPath(new URL('.', import.meta.url)),
-          ],
-          forceBuildInstrument: true,
-        }),
-      wasm(),
-    ],
-    esbuild: {
-      target: 'es2018',
-    },
     build: {
-      target: 'ES2022',
-      sourcemap: true,
       rollupOptions: {
         cache: false,
-        maxParallelFileOps: Math.max(1, cpus().length - 1),
-        onwarn(warning, defaultHandler) {
-          if (['SOURCEMAP_ERROR', 'EVAL'].includes(warning.code)) {
-            return;
-          }
-
-          defaultHandler(warning);
-        },
         input: {
-          main: resolve(__dirname, 'index.html'),
-          'starter/': resolve(__dirname, 'starter/index.html'),
-          'examples/basic/page': resolve(
-            __dirname,
-            'examples/basic/page/index.html'
-          ),
           'examples/basic/edgeless': resolve(
             __dirname,
             'examples/basic/edgeless/index.html'
           ),
-          'examples/multiple-editors/page-page': resolve(
+          'examples/basic/page': resolve(
             __dirname,
-            'examples/multiple-editors/page-page/index.html'
+            'examples/basic/page/index.html'
+          ),
+          'examples/inline': resolve(__dirname, 'examples/inline/index.html'),
+          'examples/multiple-editors/edgeless-edgeless': resolve(
+            __dirname,
+            'examples/multiple-editors/edgeless-edgeless/index.html'
           ),
           'examples/multiple-editors/page-edgeless': resolve(
             __dirname,
             'examples/multiple-editors/page-edgeless/index.html'
           ),
-          'examples/multiple-editors/edgeless-edgeless': resolve(
+          'examples/multiple-editors/page-page': resolve(
             __dirname,
-            'examples/multiple-editors/edgeless-edgeless/index.html'
+            'examples/multiple-editors/page-page/index.html'
           ),
-          'examples/inline': resolve(__dirname, 'examples/inline/index.html'),
-          'examples/store': resolve(__dirname, 'examples/store/index.html'),
           'examples/provider': resolve(
             __dirname,
             'examples/provider/index.html'
           ),
+          'examples/store': resolve(__dirname, 'examples/store/index.html'),
+          main: resolve(__dirname, 'index.html'),
+          'starter/': resolve(__dirname, 'starter/index.html'),
+        },
+        maxParallelFileOps: Math.max(1, cpus().length - 1),
+        onwarn(warning, defaultHandler) {
+          if (['EVAL', 'SOURCEMAP_ERROR'].includes(warning.code)) {
+            return;
+          }
+
+          defaultHandler(warning);
         },
         output: {
-          sourcemapIgnoreList: relativeSourcePath => {
-            const normalizedPath = path.normalize(relativeSourcePath);
-            return normalizedPath.includes('node_modules');
-          },
           manualChunks(id, { getModuleInfo }) {
             for (const group of Object.keys(chunkGroups)) {
               const deps = chunkGroups[group];
@@ -209,8 +175,42 @@ export default ({ mode }) => {
               }
             }
           },
+          sourcemapIgnoreList: relativeSourcePath => {
+            const normalizedPath = path.normalize(relativeSourcePath);
+            return normalizedPath.includes('node_modules');
+          },
         },
       },
+      sourcemap: true,
+      target: 'ES2022',
     },
+    define: {
+      'import.meta.env.PLAYGROUND_SERVER': JSON.stringify(
+        process.env.PLAYGROUND_SERVER ?? 'http://localhost:8787'
+      ),
+      'import.meta.env.PLAYGROUND_WS': JSON.stringify(
+        process.env.PLAYGROUND_WS ?? 'ws://localhost:8787'
+      ),
+    },
+    envDir: __dirname,
+    esbuild: {
+      target: 'es2018',
+    },
+    plugins: [
+      hmrPlugin,
+      sourcemapExclude(),
+      enableIstanbul &&
+        istanbul({
+          cwd: fileURLToPath(new URL('../..', import.meta.url)),
+          exclude: [
+            'node_modules',
+            'tests',
+            fileURLToPath(new URL('.', import.meta.url)),
+          ],
+          forceBuildInstrument: true,
+          include: ['packages/**/src/*'],
+        }),
+      wasm(),
+    ],
   });
 };

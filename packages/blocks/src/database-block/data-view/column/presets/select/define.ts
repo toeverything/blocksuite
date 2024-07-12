@@ -1,10 +1,11 @@
-import { nanoid, Text } from '@blocksuite/store';
+import { Text, nanoid } from '@blocksuite/store';
+
+import type { SelectTag } from '../../../utils/tags/multi-tag-select.js';
+import type { SelectColumnData } from '../../types.js';
 
 import { tTag } from '../../../logical/data-type.js';
 import { getTagColor } from '../../../utils/tags/colors.js';
-import type { SelectTag } from '../../../utils/tags/multi-tag-select.js';
 import { columnType } from '../../column-config.js';
-import type { SelectColumnData } from '../../types.js';
 
 export const selectColumnType = columnType('select');
 
@@ -17,24 +18,17 @@ export const selectColumnModelConfig = selectColumnType.modelConfig<
   string,
   SelectColumnData
 >({
-  name: 'Select',
-  type: data => tTag.create({ tags: data.options }),
-  defaultData: () => ({
-    options: [],
-  }),
   addGroup: (text, oldData) => {
     return {
       options: [
         ...oldData.options,
-        { id: nanoid(), value: text, color: getTagColor() },
+        { color: getTagColor(), id: nanoid(), value: text },
       ],
     };
   },
-  cellToString: (data, colData) =>
-    colData.options.find(v => v.id === data)?.value ?? '',
   cellFromString: (data, colData) => {
     if (!data) {
-      return { value: null, data: colData };
+      return { data: colData, value: null };
     }
     const optionMap = Object.fromEntries(
       colData.options.map(v => [v.value, v])
@@ -48,9 +42,9 @@ export const selectColumnModelConfig = selectColumnType.modelConfig<
     const option = optionMap[name];
     if (!option) {
       const newOption: SelectTag = {
+        color: getTagColor(),
         id: nanoid(),
         value: name,
-        color: getTagColor(),
       };
       colData.options.push(newOption);
       value = newOption.id;
@@ -59,23 +53,30 @@ export const selectColumnModelConfig = selectColumnType.modelConfig<
     }
 
     return {
-      value,
       data: colData,
+      value,
     };
   },
   cellToJson: data => data ?? null,
+  cellToString: (data, colData) =>
+    colData.options.find(v => v.id === data)?.value ?? '',
+  defaultData: () => ({
+    options: [],
+  }),
   isEmpty: data => data == null,
+  name: 'Select',
+  type: data => tTag.create({ tags: data.options }),
 });
 
 selectColumnModelConfig.addConvert('multi-select', (column, cells) => ({
-  column,
   cells: cells.map(v => (v ? [v] : undefined)),
+  column,
 }));
 
 selectColumnModelConfig.addConvert('rich-text', (column, cells) => {
   const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
   return {
-    column: {},
     cells: cells.map(v => new Text(v ? optionMap[v]?.value : '').yText),
+    column: {},
   };
 });

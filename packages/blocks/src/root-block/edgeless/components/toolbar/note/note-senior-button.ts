@@ -1,18 +1,18 @@
-import './note-menu.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+
+import type { NoteTool } from '../../../controllers/tools/note-tool.js';
 
 import {
   Heading1Icon,
   LinkIcon,
   TextIcon,
 } from '../../../../../_common/icons/text.js';
-import type { NoteTool } from '../../../controllers/tools/note-tool.js';
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../auto-complete/utils.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { toShapeNotToAdapt } from './icon.js';
+import './note-menu.js';
 
 @customElement('edgeless-note-senior-button')
 export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
@@ -125,45 +125,31 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
 
   private _states = ['childFlavour', 'childType', 'tip'] as const;
 
-  @state()
-  private accessor _noteBg: string = DEFAULT_NOTE_BACKGROUND_COLOR;
-
-  override type = 'affine:note' as const;
-
   override enableActiveBackground = true;
 
-  // TODO: better to extract these states outside of component?
-  @state()
-  accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
-
-  @state()
-  accessor childType = 'text';
-
-  @state()
-  accessor tip = 'Note';
+  override type = 'affine:note' as const;
 
   private _toggleNoteMenu() {
     if (this.tryDisposePopper()) return;
 
-    const { edgeless, childFlavour, childType, tip } = this;
+    const { childFlavour, childType, edgeless, tip } = this;
 
     this.setEdgelessTool({
-      type: 'affine:note',
       childFlavour,
       childType,
       tip,
+      type: 'affine:note',
     });
     const menu = this.createPopper('edgeless-note-menu', this);
 
     Object.assign(menu.element, {
-      edgeless,
       childFlavour,
       childType,
-      tip,
+      edgeless,
       onChange: (
         props: Partial<{
           childFlavour: NoteTool['childFlavour'];
-          childType: string | null;
+          childType: null | string;
           tip: string;
         }>
       ) => {
@@ -173,12 +159,13 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
           }
         });
         this.setEdgelessTool({
-          type: 'affine:note',
           childFlavour: this.childFlavour,
           childType: this.childType,
           tip: this.tip,
+          type: 'affine:note',
         });
       },
+      tip,
     });
   }
 
@@ -191,7 +178,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
 
     this.disposables.add(
       this.edgeless.service.editPropsStore.slots.lastPropsUpdated.on(
-        ({ type, props }) => {
+        ({ props, type }) => {
           if (type !== this.type) return;
           if (props.background) this._noteBg = props.background as string;
         }
@@ -200,7 +187,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
   }
 
   override render() {
-    const { theme, _noteBg } = this;
+    const { _noteBg, theme } = this;
 
     return html`<edgeless-toolbar-button
       class="edgeless-note-button"
@@ -220,4 +207,17 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
       </div>
     </edgeless-toolbar-button>`;
   }
+
+  @state()
+  private accessor _noteBg: string = DEFAULT_NOTE_BACKGROUND_COLOR;
+
+  // TODO: better to extract these states outside of component?
+  @state()
+  accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
+
+  @state()
+  accessor childType = 'text';
+
+  @state()
+  accessor tip = 'Note';
 }

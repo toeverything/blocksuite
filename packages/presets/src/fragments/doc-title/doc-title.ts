@@ -1,8 +1,9 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { RichText } from '@blocksuite/blocks';
 import type { RootBlockModel } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -10,26 +11,6 @@ const DOC_BLOCK_CHILD_PADDING = 24;
 
 @customElement('doc-title')
 export class DocTitle extends WithDisposable(ShadowlessElement) {
-  private get _rootModel() {
-    return this.doc.root as RootBlockModel;
-  }
-
-  private get _inlineEditor() {
-    return this._richTextElement.inlineEditor;
-  }
-
-  private get _viewport() {
-    const el = this.closest<HTMLElement>('.affine-page-viewport');
-    assertExists(el);
-    return el;
-  }
-
-  private get _pageRoot() {
-    const pageRoot = this._viewport.querySelector('affine-page-root');
-    assertExists(pageRoot);
-    return pageRoot;
-  }
-
   static override styles = css`
     .doc-title-container {
       box-sizing: border-box;
@@ -80,18 +61,6 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @state()
-  private accessor _isReadonly = false;
-
-  @state()
-  private accessor _isComposing = false;
-
-  @query('rich-text')
-  private accessor _richTextElement!: RichText;
-
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
   private _onTitleKeyDown = (event: KeyboardEvent) => {
     if (event.isComposing || this.doc.readonly) return;
     const hasContent = !this.doc.isEmpty;
@@ -119,6 +88,26 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       title: this._rootModel.title.toString(),
     });
   };
+
+  private get _inlineEditor() {
+    return this._richTextElement.inlineEditor;
+  }
+
+  private get _pageRoot() {
+    const pageRoot = this._viewport.querySelector('affine-page-root');
+    assertExists(pageRoot);
+    return pageRoot;
+  }
+
+  private get _rootModel() {
+    return this.doc.root as RootBlockModel;
+  }
+
+  private get _viewport() {
+    const el = this.closest<HTMLElement>('.affine-page-viewport');
+    assertExists(el);
+    return el;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -178,6 +167,18 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @state()
+  private accessor _isComposing = false;
+
+  @state()
+  private accessor _isReadonly = false;
+
+  @query('rich-text')
+  private accessor _richTextElement!: RichText;
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
 }
 
 declare global {

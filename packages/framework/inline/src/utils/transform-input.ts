@@ -4,7 +4,7 @@ import type { BaseTextAttributes } from './base-attributes.js';
 
 function handleInsertText<TextAttributes extends BaseTextAttributes>(
   inlineRange: InlineRange,
-  data: string | null,
+  data: null | string,
   editor: InlineEditor,
   attributes: TextAttributes
 ) {
@@ -18,7 +18,7 @@ function handleInsertText<TextAttributes extends BaseTextAttributes>(
 
 function handleInsertReplacementText<TextAttributes extends BaseTextAttributes>(
   inlineRange: InlineRange,
-  data: string | null,
+  data: null | string,
   editor: InlineEditor,
   attributes: TextAttributes
 ) {
@@ -53,7 +53,7 @@ function handleDelete(inlineRange: InlineRange, editor: InlineEditor) {
 
 export function transformInput<TextAttributes extends BaseTextAttributes>(
   inputType: string,
-  data: string | null,
+  data: null | string,
   attributes: TextAttributes,
   inlineRange: InlineRange,
   editor: InlineEditor

@@ -26,7 +26,7 @@ export function getExampleSpecs() {
   }
 
   return {
-    pageModeSpecs,
     edgelessModeSpecs,
+    pageModeSpecs,
   };
 }

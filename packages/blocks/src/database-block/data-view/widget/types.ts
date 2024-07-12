@@ -6,8 +6,8 @@ import type { DataViewManager } from '../view/data-view-manager.js';
 
 export type DataViewWidgetProps = {
   dataSource: DataSource;
-  viewSource: ViewSource;
   view: DataViewManager;
   viewMethods: DataViewExpose;
+  viewSource: ViewSource;
 };
 export type DataViewWidget = UniComponent<DataViewWidgetProps>;

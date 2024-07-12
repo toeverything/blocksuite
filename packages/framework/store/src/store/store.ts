@@ -13,6 +13,8 @@ import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
 import type { IdGenerator } from '../utils/id-generator.js';
+import type { Space } from './space.js';
+
 import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
@@ -21,17 +23,17 @@ import {
 } from '../utils/id-generator.js';
 import { AwarenessStore, type RawAwarenessState } from '../yjs/awareness.js';
 import { BlockSuiteDoc } from '../yjs/index.js';
-import type { Space } from './space.js';
 
 export type SerializedStore = Record<string, Record<string, unknown>>;
 
 export enum Generator {
   /**
-   * Default mode, generator for the unpredictable id
+   * **Warning**: This generator mode will crash the collaborative feature
+   *  if multiple clients are adding new blocks.
+   * Use this mode only if you know what you're doing.
    */
-  NanoID = 'nanoID',
+  AutoIncrement = 'autoIncrement',
 
-  UUIDv4 = 'uuidV4',
   /**
    * This generator is trying to fix the real-time collaboration on debug mode.
    * This will make generator predictable and won't make conflict
@@ -39,76 +41,75 @@ export enum Generator {
    */
   AutoIncrementByClientId = 'autoIncrementByClientId',
   /**
-   * **Warning**: This generator mode will crash the collaborative feature
-   *  if multiple clients are adding new blocks.
-   * Use this mode only if you know what you're doing.
+   * Default mode, generator for the unpredictable id
    */
-  AutoIncrement = 'autoIncrement',
+  NanoID = 'nanoID',
+  UUIDv4 = 'uuidV4',
 }
 
 export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
-  id?: string;
-  idGenerator?: Generator | IdGenerator;
-  defaultFlags?: Partial<Flags>;
-  logger?: Logger;
-  docSources?: {
-    main: DocSource;
-    shadows?: DocSource[];
-  };
+  awarenessSources?: AwarenessSource[];
   blobSources?: {
     main: BlobSource;
     shadows?: BlobSource[];
   };
-  awarenessSources?: AwarenessSource[];
-  disableSearchIndex?: boolean;
+  defaultFlags?: Partial<Flags>;
   disableBacklinkIndex?: boolean;
+  disableSearchIndex?: boolean;
+  docSources?: {
+    main: DocSource;
+    shadows?: DocSource[];
+  };
+  id?: string;
+  idGenerator?: Generator | IdGenerator;
+  logger?: Logger;
 }
 
 const FLAGS_PRESET = {
-  enable_synced_doc_block: false,
-  enable_pie_menu: false,
-  enable_database_statistics: false,
-  enable_database_attachment_note: false,
-  enable_legacy_validation: true,
-  enable_expand_database_block: false,
-  enable_block_query: false,
-  enable_lasso_tool: false,
-  enable_edgeless_text: true,
   enable_ai_onboarding: false,
+  enable_block_query: false,
+  enable_database_attachment_note: false,
+  enable_database_statistics: false,
+  enable_edgeless_text: true,
+  enable_expand_database_block: false,
+  enable_lasso_tool: false,
+  enable_legacy_validation: true,
+  enable_pie_menu: false,
+  enable_synced_doc_block: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 
 export class Store {
-  readonly id: string;
-
-  readonly doc: BlockSuiteDoc;
-
-  readonly spaces = new Map<string, Space>();
-
   readonly awarenessStore: AwarenessStore;
-
-  readonly idGenerator: IdGenerator;
-
-  readonly docSync: DocEngine;
 
   readonly awarenessSync: AwarenessEngine;
 
   readonly blobSync: BlobEngine;
 
+  readonly doc: BlockSuiteDoc;
+
+  readonly docSync: DocEngine;
+
+  readonly id: string;
+
+  readonly idGenerator: IdGenerator;
+
+  readonly spaces = new Map<string, Space>();
+
   constructor(
     {
-      id,
-      idGenerator,
-      defaultFlags,
       awarenessSources = [],
-      docSources = {
-        main: new NoopDocSource(),
-      },
       blobSources = {
         main: new MemoryBlobSource(),
       },
+      defaultFlags,
+      docSources = {
+        main: new NoopDocSource(),
+      },
+      id,
+      idGenerator,
       logger = new NoopLogger(),
     }: StoreOptions = {
       id: nanoid(),

@@ -1,6 +1,7 @@
+import type { Y } from '@blocksuite/store';
+
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Y } from '@blocksuite/store';
 import { DocCollection, Text } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -11,11 +12,12 @@ import type {
   AffineInlineEditor,
   AffineTextAttributes,
 } from '../../../_common/inline/presets/affine-inline-specs.js';
+import type { DatabaseBlockComponent } from '../../../database-block/index.js';
+
 import { getViewportElement } from '../../../_common/utils/query.js';
 import { BaseCellRenderer } from '../../../database-block/data-view/column/index.js';
 import { createFromBaseCellRenderer } from '../../../database-block/data-view/column/renderer.js';
 import { createIcon } from '../../../database-block/data-view/utils/uni-icon.js';
-import type { DatabaseBlockComponent } from '../../../database-block/index.js';
 import { richTextColumnModelConfig } from './define.js';
 
 function toggleStyle(
@@ -66,36 +68,6 @@ function toggleStyle(
 
 @customElement('affine-data-view-rich-text-cell')
 export class RichTextCell extends BaseCellRenderer<Y.Text> {
-  get service() {
-    const database = this.closest<DatabaseBlockComponent>('affine-data-view');
-    return database?.service;
-  }
-
-  get inlineManager() {
-    return this.service?.inlineManager;
-  }
-
-  get attributesSchema() {
-    return this.inlineManager?.getSchema();
-  }
-
-  get attributeRenderer() {
-    return this.inlineManager?.getRenderer();
-  }
-
-  get inlineEditor() {
-    assertExists(this._richTextElement);
-    const inlineEditor = this._richTextElement.inlineEditor;
-    assertExists(inlineEditor);
-    return inlineEditor;
-  }
-
-  get topContenteditableElement() {
-    const databaseBlock =
-      this.closest<DatabaseBlockComponent>('affine-data-view');
-    return databaseBlock?.topContenteditableElement;
-  }
-
   static override styles = css`
     affine-data-view-rich-text-cell {
       display: flex;
@@ -128,9 +100,6 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     }
   `;
 
-  @query('rich-text')
-  private accessor _richTextElement: RichText | null = null;
-
   private _initYText = (text?: string) => {
     const yText = new DocCollection.Y.Text(text);
     this.onChange(yText);
@@ -160,25 +129,13 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       class="affine-data-view-rich-text inline-editor"
     ></rich-text>`;
   }
-}
 
-@customElement('affine-data-view-rich-text-cell-editing')
-export class RichTextCellEditing extends BaseCellRenderer<Text> {
-  get service() {
-    const database = this.closest<DatabaseBlockComponent>('affine-data-view');
-    return database?.service;
-  }
-
-  get inlineManager() {
-    return this.service?.inlineManager;
+  get attributeRenderer() {
+    return this.inlineManager?.getRenderer();
   }
 
   get attributesSchema() {
     return this.inlineManager?.getSchema();
-  }
-
-  get attributeRenderer() {
-    return this.inlineManager?.getRenderer();
   }
 
   get inlineEditor() {
@@ -188,12 +145,27 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     return inlineEditor;
   }
 
+  get inlineManager() {
+    return this.service?.inlineManager;
+  }
+
+  get service() {
+    const database = this.closest<DatabaseBlockComponent>('affine-data-view');
+    return database?.service;
+  }
+
   get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-data-view');
     return databaseBlock?.topContenteditableElement;
   }
 
+  @query('rich-text')
+  private accessor _richTextElement: RichText | null = null;
+}
+
+@customElement('affine-data-view-rich-text-cell-editing')
+export class RichTextCellEditing extends BaseCellRenderer<Text> {
   static override styles = css`
     affine-data-view-rich-text-cell-editing {
       display: flex;
@@ -223,14 +195,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       flex-grow: 1;
     }
   `;
-
-  @query('rich-text')
-  private accessor _richTextElement: RichText | null = null;
-
-  private _initYText = (text?: string) => {
-    const yText = new Text(text);
-    this.onChange(yText);
-  };
 
   private _handleKeyDown = (event: KeyboardEvent) => {
     if (event.key !== 'Escape') {
@@ -301,6 +265,11 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     }
   };
 
+  private _initYText = (text?: string) => {
+    const yText = new Text(text);
+    this.onChange(yText);
+  };
+
   private _onSoftEnter = () => {
     if (this.value && this.inlineEditor) {
       const inlineRange = this.inlineEditor.getInlineRange();
@@ -361,6 +330,39 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       class="affine-data-view-rich-text inline-editor"
     ></rich-text>`;
   }
+
+  get attributeRenderer() {
+    return this.inlineManager?.getRenderer();
+  }
+
+  get attributesSchema() {
+    return this.inlineManager?.getSchema();
+  }
+
+  get inlineEditor() {
+    assertExists(this._richTextElement);
+    const inlineEditor = this._richTextElement.inlineEditor;
+    assertExists(inlineEditor);
+    return inlineEditor;
+  }
+
+  get inlineManager() {
+    return this.service?.inlineManager;
+  }
+
+  get service() {
+    const database = this.closest<DatabaseBlockComponent>('affine-data-view');
+    return database?.service;
+  }
+
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-data-view');
+    return databaseBlock?.topContenteditableElement;
+  }
+
+  @query('rich-text')
+  private accessor _richTextElement: RichText | null = null;
 }
 
 declare global {
@@ -370,10 +372,10 @@ declare global {
 }
 
 export const richTextColumnConfig = richTextColumnModelConfig.renderConfig({
-  icon: createIcon('TextIcon'),
-
   cellRenderer: {
-    view: createFromBaseCellRenderer(RichTextCell),
     edit: createFromBaseCellRenderer(RichTextCellEditing),
+    view: createFromBaseCellRenderer(RichTextCell),
   },
+
+  icon: createIcon('TextIcon'),
 });

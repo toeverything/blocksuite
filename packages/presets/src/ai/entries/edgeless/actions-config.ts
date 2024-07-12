@@ -55,21 +55,20 @@ import {
 
 const translateSubItem = translateLangs.map(lang => {
   return {
-    type: lang,
     handler: actionToHandler('translate', AIStarIconWithAnimation, { lang }),
+    type: lang,
   };
 });
 
 const toneSubItem = textTones.map(tone => {
   return {
-    type: tone,
     handler: actionToHandler('changeTone', AIStarIconWithAnimation, { tone }),
+    type: tone,
   };
 });
 
 export const imageFilterSubItem = imageFilterStyles.map(style => {
   return {
-    type: style,
     handler: actionToHandler(
       'filterImage',
       AIImageIconWithAnimation,
@@ -78,12 +77,12 @@ export const imageFilterSubItem = imageFilterStyles.map(style => {
       },
       imageCustomInput
     ),
+    type: style,
   };
 });
 
 export const imageProcessingSubItem = imageProcessingTypes.map(type => {
   return {
-    type,
     handler: actionToHandler(
       'processImage',
       AIImageIconWithAnimation,
@@ -92,16 +91,13 @@ export const imageProcessingSubItem = imageProcessingTypes.map(type => {
       },
       imageCustomInput
     ),
+    type,
   };
 });
 
 const othersGroup: AIItemGroupConfig = {
-  name: 'others',
   items: [
     {
-      name: 'Open AI Chat',
-      icon: ChatWithAIIcon,
-      showWhen: () => true,
       handler: host => {
         const panel = getAIPanel(host);
         AIProvider.slots.requestContinueInChat.emit({
@@ -110,156 +106,156 @@ const othersGroup: AIItemGroupConfig = {
         });
         panel.hide();
       },
+      icon: ChatWithAIIcon,
+      name: 'Open AI Chat',
+      showWhen: () => true,
     },
   ],
+  name: 'others',
 };
 
 const editGroup: AIItemGroupConfig = {
-  name: 'edit with ai',
   items: [
     {
-      name: 'Translate to',
       icon: LanguageIcon,
+      name: 'Translate to',
       showWhen: noteBlockOrTextShowWhen,
       subItem: translateSubItem,
     },
     {
-      name: 'Change tone to',
       icon: ToneIcon,
+      name: 'Change tone to',
       showWhen: noteBlockOrTextShowWhen,
       subItem: toneSubItem,
     },
     {
-      name: 'Improve writing',
-      icon: ImproveWritingIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('improveWriting', AIStarIconWithAnimation),
+      icon: ImproveWritingIcon,
+      name: 'Improve writing',
+      showWhen: noteBlockOrTextShowWhen,
     },
 
     {
-      name: 'Make it longer',
-      icon: LongerIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('makeLonger', AIStarIconWithAnimation),
+      icon: LongerIcon,
+      name: 'Make it longer',
+      showWhen: noteBlockOrTextShowWhen,
     },
     {
-      name: 'Make it shorter',
-      icon: ShorterIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('makeShorter', AIStarIconWithAnimation),
+      icon: ShorterIcon,
+      name: 'Make it shorter',
+      showWhen: noteBlockOrTextShowWhen,
     },
     {
-      name: 'Continue writing',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('continueWriting', AIPenIconWithAnimation),
+      icon: AIPenIcon,
+      name: 'Continue writing',
+      showWhen: noteBlockOrTextShowWhen,
     },
   ],
+  name: 'edit with ai',
 };
 
 const draftGroup: AIItemGroupConfig = {
-  name: 'draft with ai',
   items: [
     {
-      name: 'Write an article about this',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writeArticle', AIPenIconWithAnimation),
+      icon: AIPenIcon,
+      name: 'Write an article about this',
+      showWhen: noteBlockOrTextShowWhen,
     },
     {
-      name: 'Write a tweet about this',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writeTwitterPost', AIPenIconWithAnimation),
+      icon: AIPenIcon,
+      name: 'Write a tweet about this',
+      showWhen: noteBlockOrTextShowWhen,
     },
     {
-      name: 'Write a poem about this',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writePoem', AIPenIconWithAnimation),
+      icon: AIPenIcon,
+      name: 'Write a poem about this',
+      showWhen: noteBlockOrTextShowWhen,
     },
     {
-      name: 'Write a blog post about this',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writeBlogPost', AIPenIconWithAnimation),
+      icon: AIPenIcon,
+      name: 'Write a blog post about this',
+      showWhen: noteBlockOrTextShowWhen,
     },
     {
-      name: 'Brainstorm ideas about this',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('brainstorm', AIPenIconWithAnimation),
+      icon: AIPenIcon,
+      name: 'Brainstorm ideas about this',
+      showWhen: noteBlockOrTextShowWhen,
     },
   ],
+  name: 'draft with ai',
 };
 
 const reviewGroup: AIItemGroupConfig = {
-  name: 'review with ai',
   items: [
     {
-      name: 'Fix spelling',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('fixSpelling', AIStarIconWithAnimation),
-    },
-    {
-      name: 'Fix grammar',
       icon: AIPenIcon,
+      name: 'Fix spelling',
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('improveGrammar', AIStarIconWithAnimation),
     },
     {
-      name: 'Explain this image',
+      handler: actionToHandler('improveGrammar', AIStarIconWithAnimation),
       icon: AIPenIcon,
-      showWhen: imageOnlyShowWhen,
+      name: 'Fix grammar',
+      showWhen: noteBlockOrTextShowWhen,
+    },
+    {
       handler: actionToHandler(
         'explainImage',
         AIStarIconWithAnimation,
         undefined,
         imageCustomInput
       ),
+      icon: AIPenIcon,
+      name: 'Explain this image',
+      showWhen: imageOnlyShowWhen,
     },
     {
-      name: 'Explain this code',
-      icon: ExplainIcon,
-      showWhen: noteWithCodeBlockShowWen,
       handler: actionToHandler('explainCode', AIStarIconWithAnimation),
-    },
-    {
-      name: 'Check code error',
       icon: ExplainIcon,
+      name: 'Explain this code',
       showWhen: noteWithCodeBlockShowWen,
-      handler: actionToHandler('checkCodeErrors', AIStarIconWithAnimation),
     },
     {
-      name: 'Explain selection',
-      icon: SelectionIcon,
-      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('checkCodeErrors', AIStarIconWithAnimation),
+      icon: ExplainIcon,
+      name: 'Check code error',
+      showWhen: noteWithCodeBlockShowWen,
+    },
+    {
       handler: actionToHandler('explain', AIStarIconWithAnimation),
+      icon: SelectionIcon,
+      name: 'Explain selection',
+      showWhen: noteBlockOrTextShowWhen,
     },
   ],
+  name: 'review with ai',
 };
 
 const generateGroup: AIItemGroupConfig = {
-  name: 'generate with ai',
   items: [
     {
-      name: 'Summarize',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('summary', AIPenIconWithAnimation),
-    },
-    {
-      name: 'Generate headings',
       icon: AIPenIcon,
-      handler: actionToHandler('createHeadings', AIPenIconWithAnimation),
+      name: 'Summarize',
       showWhen: noteBlockOrTextShowWhen,
-      beta: true,
     },
     {
-      name: 'Generate an image',
-      icon: AIImageIcon,
-      showWhen: () => true,
+      beta: true,
+      handler: actionToHandler('createHeadings', AIPenIconWithAnimation),
+      icon: AIPenIcon,
+      name: 'Generate headings',
+      showWhen: noteBlockOrTextShowWhen,
+    },
+    {
       handler: actionToHandler(
         'createImage',
         AIImageIconWithAnimation,
@@ -287,10 +283,10 @@ const generateGroup: AIItemGroupConfig = {
           }
 
           const {
-            images,
-            shapes,
-            notes: _,
             frames: __,
+            images,
+            notes: _,
+            shapes,
           } = BlocksUtils.splitElements(selectedElements);
 
           const pureShapes = shapes.filter(
@@ -314,9 +310,9 @@ const generateGroup: AIItemGroupConfig = {
             images,
             pureShapes,
             {
+              background: 'white',
               dpr: 1,
               padding: 0,
-              background: 'white',
             }
           );
           if (!canvas) return;
@@ -324,23 +320,24 @@ const generateGroup: AIItemGroupConfig = {
           const png = await canvasToBlob(canvas);
           if (!png) return;
           return {
-            content,
             attachments: [png],
+            content,
             seed: String(randomSeed()),
           };
         }
       ),
+      icon: AIImageIcon,
+      name: 'Generate an image',
+      showWhen: () => true,
     },
     {
-      name: 'Generate outline',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writeOutline', AIPenIconWithAnimation),
+      icon: AIPenIcon,
+      name: 'Generate outline',
+      showWhen: noteBlockOrTextShowWhen,
     },
     {
-      name: 'Expand from this mind map node',
-      icon: AIExpandMindMapIcon,
-      showWhen: mindmapChildShowWhen,
+      beta: true,
       handler: actionToHandler(
         'expandMindmap',
         AIMindMapIconWithAnimation,
@@ -360,18 +357,17 @@ const generateGroup: AIItemGroupConfig = {
           });
         }
       ),
-      beta: true,
+      icon: AIExpandMindMapIcon,
+      name: 'Expand from this mind map node',
+      showWhen: mindmapChildShowWhen,
     },
     {
-      name: 'Brainstorm ideas with mind map',
-      icon: AIMindMapIcon,
-      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('brainstormMindmap', AIMindMapIconWithAnimation),
+      icon: AIMindMapIcon,
+      name: 'Brainstorm ideas with mind map',
+      showWhen: noteBlockOrTextShowWhen,
     },
     {
-      name: 'Regenerate mind map',
-      icon: AIMindMapIcon,
-      showWhen: mindmapRootShowWhen,
       handler: actionToHandler(
         'brainstormMindmap',
         AIMindMapIconWithAnimation,
@@ -379,19 +375,19 @@ const generateGroup: AIItemGroupConfig = {
           regenerate: true,
         }
       ),
+      icon: AIMindMapIcon,
+      name: 'Regenerate mind map',
+      showWhen: mindmapRootShowWhen,
     },
     {
-      name: 'Generate presentation',
-      icon: AIPresentationIcon,
-      showWhen: noteBlockOrTextShowWhen,
+      beta: true,
       handler: actionToHandler('createSlides', AIPresentationIconWithAnimation),
-      beta: true,
+      icon: AIPresentationIcon,
+      name: 'Generate presentation',
+      showWhen: noteBlockOrTextShowWhen,
     },
     {
-      name: 'Make it real',
-      icon: MakeItRealIcon,
       beta: true,
-      showWhen: () => true,
       handler: actionToHandler(
         'makeItReal',
         MakeItRealIconWithAnimation,
@@ -409,7 +405,7 @@ const generateGroup: AIItemGroupConfig = {
             };
           }
 
-          const { notes, frames, shapes, images, edgelessTexts } =
+          const { edgelessTexts, frames, images, notes, shapes } =
             BlocksUtils.splitElements(selectedElements);
           const f = frames.length;
           const i = images.length;
@@ -447,45 +443,45 @@ const generateGroup: AIItemGroupConfig = {
             [...notes, ...frames, ...images],
             shapes,
             {
-              dpr: 1,
               background: 'white',
+              dpr: 1,
             }
           );
           if (!canvas) return;
           const png = await canvasToBlob(canvas);
           if (!png) return;
           ctx.set({
-            width: canvas.width,
             height: canvas.height,
+            width: canvas.width,
           });
 
           return {
-            content,
             attachments: [png],
+            content,
           };
         }
       ),
+      icon: MakeItRealIcon,
+      name: 'Make it real',
+      showWhen: () => true,
     },
     {
-      name: 'AI image filter',
+      beta: true,
       icon: ImproveWritingIcon,
+      name: 'AI image filter',
       showWhen: imageOnlyShowWhen,
       subItem: imageFilterSubItem,
       subItemOffset: [12, -4],
-      beta: true,
     },
     {
-      name: 'Image processing',
+      beta: true,
       icon: AIImageIcon,
+      name: 'Image processing',
       showWhen: imageOnlyShowWhen,
       subItem: imageProcessingSubItem,
       subItemOffset: [12, -6],
-      beta: true,
     },
     {
-      name: 'Generate a caption',
-      icon: AIPenIcon,
-      showWhen: imageOnlyShowWhen,
       beta: true,
       handler: actionToHandler(
         'generateCaption',
@@ -493,15 +489,19 @@ const generateGroup: AIItemGroupConfig = {
         undefined,
         imageCustomInput
       ),
+      icon: AIPenIcon,
+      name: 'Generate a caption',
+      showWhen: imageOnlyShowWhen,
     },
     {
-      name: 'Find actions',
-      icon: AISearchIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('findActions', AIStarIconWithAnimation),
       beta: true,
+      handler: actionToHandler('findActions', AIStarIconWithAnimation),
+      icon: AISearchIcon,
+      name: 'Find actions',
+      showWhen: noteBlockOrTextShowWhen,
     },
   ],
+  name: 'generate with ai',
 };
 
 export const edgelessActionGroups = [

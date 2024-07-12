@@ -96,44 +96,44 @@ test.describe('cursor style', () => {
     await assertEdgelessSelectedRect(page, [200, 200, 100, 100]);
 
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'ns-resize',
       handle: 'top',
-      cursor: 'ns-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'ew-resize',
       handle: 'right',
-      cursor: 'ew-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
-      handle: 'bottom',
       cursor: 'ns-resize',
+      handle: 'bottom',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
-      handle: 'left',
       cursor: 'ew-resize',
+      handle: 'left',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'nwse-resize',
       handle: 'top-left',
-      cursor: 'nwse-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'nesw-resize',
       handle: 'top-right',
-      cursor: 'nesw-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'nesw-resize',
       handle: 'bottom-left',
-      cursor: 'nesw-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
-      handle: 'bottom-right',
       cursor: 'nwse-resize',
+      handle: 'bottom-right',
+      mode: 'resize',
     });
   });
 
@@ -156,44 +156,44 @@ test.describe('cursor style', () => {
     await assertEdgelessSelectedRect(page, [200, 200, 100, 100]);
 
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'ns-resize',
       handle: 'top',
-      cursor: 'ns-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'ew-resize',
       handle: 'right',
-      cursor: 'ew-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
-      handle: 'bottom',
       cursor: 'ns-resize',
+      handle: 'bottom',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
-      handle: 'left',
       cursor: 'ew-resize',
+      handle: 'left',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'nwse-resize',
       handle: 'top-left',
-      cursor: 'nwse-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'nesw-resize',
       handle: 'top-right',
-      cursor: 'nesw-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
+      cursor: 'nesw-resize',
       handle: 'bottom-left',
-      cursor: 'nesw-resize',
+      mode: 'resize',
     });
     await assertEdgelessSelectedReactCursor(page, {
-      mode: 'resize',
-      handle: 'bottom-right',
       cursor: 'nwse-resize',
+      handle: 'bottom-right',
+      mode: 'resize',
     });
   });
 });

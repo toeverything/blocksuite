@@ -1,12 +1,12 @@
-import './icon-button.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+
+import type { EditorIconButton } from './icon-button.js';
 
 import { PANEL_BASE } from '../../styles.js';
 import { createButtonPopper } from '../../utils/button-popper.js';
-import type { EditorIconButton } from './icon-button.js';
+import './icon-button.js';
 
 @customElement('editor-menu-button')
 export class EditorMenuButton extends WithDisposable(LitElement) {
@@ -19,22 +19,18 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @query('editor-icon-button')
-  private accessor _trigger!: EditorIconButton;
-
-  @query('editor-menu-content')
-  private accessor _content!: EditorMenuContent;
-
   private _popper!: ReturnType<typeof createButtonPopper>;
-
-  @property({ attribute: false })
-  accessor button!: string | TemplateResult<1>;
-
-  @property({ attribute: false })
-  accessor contentPadding: string | undefined = undefined;
 
   close() {
     this._popper?.hide();
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.tabIndex = 0;
+    if (this.contentPadding) {
+      this.style.setProperty('--content-padding', this.contentPadding);
+    }
   }
 
   override firstUpdated() {
@@ -45,8 +41,8 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
         this._trigger.showTooltip = display === 'hidden';
       },
       {
-        mainAxis: 12,
         ignoreShift: true,
+        mainAxis: 12,
       }
     );
     this._disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
@@ -64,14 +60,6 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
     this._disposables.add(this._popper);
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.tabIndex = 0;
-    if (this.contentPadding) {
-      this.style.setProperty('--content-padding', this.contentPadding);
-    }
-  }
-
   override render() {
     return html`
       ${this.button}
@@ -80,6 +68,18 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       </editor-menu-content>
     `;
   }
+
+  @query('editor-menu-content')
+  private accessor _content!: EditorMenuContent;
+
+  @query('editor-icon-button')
+  private accessor _trigger!: EditorIconButton;
+
+  @property({ attribute: false })
+  accessor button!: TemplateResult<1> | string;
+
+  @property({ attribute: false })
+  accessor contentPadding: string | undefined = undefined;
 }
 
 @customElement('editor-menu-content')
@@ -206,8 +206,8 @@ export class EditorMenuAction extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
+    'editor-menu-action': EditorMenuAction;
     'editor-menu-button': EditorMenuButton;
     'editor-menu-content': EditorMenuContent;
-    'editor-menu-action': EditorMenuAction;
   }
 }

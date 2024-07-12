@@ -1,14 +1,13 @@
-import './mindmap-menu.js';
-
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { MindmapStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessTool } from '../../../types.js';
+
+import { MindmapStyle } from '../../../../../surface-block/index.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { getMindMaps } from './assets.js';
@@ -21,35 +20,12 @@ import {
   toolConfig2StyleObj,
 } from './basket-elements.js';
 import { basketIconDark, basketIconLight, textIcon } from './icons.js';
+import './mindmap-menu.js';
 
 @customElement('edgeless-mindmap-tool-button')
 export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
-  get mindmaps() {
-    return getMindMaps(this.theme);
-  }
-
-  get draggableTools(): DraggableTool[] {
-    const mindmap = this.mindmaps.find(m => m.style === this.activeStyle)!;
-    return [
-      {
-        name: 'text',
-        icon: textIcon,
-        config: textConfig,
-        standardWidth: 100,
-        render: textRender,
-      },
-      {
-        name: 'mindmap',
-        icon: mindmap.icon,
-        config: mindmapConfig,
-        standardWidth: 350,
-        render: getMindmapRender(this.activeStyle),
-      },
-    ];
-  }
-
   static override styles = css`
     :host {
       width: 100%;
@@ -141,23 +117,11 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
     }
   `;
 
-  override type: EdgelessTool['type'][] = ['mindmap', 'text'];
+  draggableController!: EdgelessDraggableElementController<DraggableTool>;
 
   override enableActiveBackground = true;
 
-  draggableController!: EdgelessDraggableElementController<DraggableTool>;
-
-  @property({ type: Boolean })
-  accessor enableBlur = true;
-
-  @state()
-  accessor activeStyle: MindmapStyle = MindmapStyle.ONE;
-
-  @state()
-  accessor readyToDrop = false;
-
-  @query('.basket-tool-item.mindmap')
-  accessor mindmapElement!: HTMLElement;
+  override type: EdgelessTool['type'][] = ['mindmap', 'text'];
 
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;
@@ -165,8 +129,8 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
 
     const menu = this.createPopper('edgeless-mindmap-menu', this);
     Object.assign(menu.element, {
-      edgeless: this.edgeless,
       activeStyle: this.activeStyle,
+      edgeless: this.edgeless,
       onActiveStyleChange: (style: MindmapStyle) => {
         this.activeStyle = style;
       },
@@ -177,11 +141,25 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
     if (!this.edgeless || !this.toolbarContainer) return;
     if (this.draggableController) return;
     this.draggableController = new EdgelessDraggableElementController(this, {
-      service: this.edgeless.service,
-      edgeless: this.edgeless,
-      scopeElement: this.toolbarContainer,
-      standardWidth: 100,
       clickToDrag: true,
+      edgeless: this.edgeless,
+      onCanceled: overlay => {
+        overlay.transitionWrapper.style.transformOrigin = 'unset';
+        overlay.transitionWrapper.style.setProperty('--rotate', '0deg');
+        this.readyToDrop = false;
+      },
+      onDrop: (el, bound) => {
+        const id = el.data.render(bound, this.edgeless.service, this.edgeless);
+        this.readyToDrop = false;
+        if (el.data.name === 'mindmap') {
+          this.setEdgelessTool(
+            { type: 'default' },
+            { editing: false, elements: [id] }
+          );
+        } else if (el.data.name === 'text') {
+          this.setEdgelessTool({ type: 'default' });
+        }
+      },
       onOverlayCreated: (overlay, { data }) => {
         const tool = this.draggableTools.find(t => t.name === data.name);
         if (!tool) return;
@@ -212,23 +190,9 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
         }
         this.readyToDrop = true;
       },
-      onCanceled: overlay => {
-        overlay.transitionWrapper.style.transformOrigin = 'unset';
-        overlay.transitionWrapper.style.setProperty('--rotate', '0deg');
-        this.readyToDrop = false;
-      },
-      onDrop: (el, bound) => {
-        const id = el.data.render(bound, this.edgeless.service, this.edgeless);
-        this.readyToDrop = false;
-        if (el.data.name === 'mindmap') {
-          this.setEdgelessTool(
-            { type: 'default' },
-            { elements: [id], editing: false }
-          );
-        } else if (el.data.name === 'text') {
-          this.setEdgelessTool({ type: 'default' });
-        }
-      },
+      scopeElement: this.toolbarContainer,
+      service: this.edgeless.service,
+      standardWidth: 100,
     });
 
     const dispose = this.edgeless.bindHotKey(
@@ -266,16 +230,6 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
       { global: true }
     );
     this.disposables.add(dispose);
-  }
-
-  override updated(_changedProperties: Map<PropertyKey, unknown>) {
-    const controllerRequiredProps = ['edgeless', 'toolbarContainer'] as const;
-    if (
-      controllerRequiredProps.some(p => _changedProperties.has(p)) &&
-      !this.draggableController
-    ) {
-      this.initDragController();
-    }
   }
 
   override render() {
@@ -319,8 +273,8 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
                   ? html`<div
                       class=${classMap({
                         'basket-tool-item': true,
-                        next: true,
                         coming: !!dragOut && !cancelled,
+                        next: true,
                       })}
                       style=${nextStyle}
                     >
@@ -385,6 +339,52 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
       </svg>
     </edgeless-toolbar-button>`;
   }
+
+  override updated(_changedProperties: Map<PropertyKey, unknown>) {
+    const controllerRequiredProps = ['edgeless', 'toolbarContainer'] as const;
+    if (
+      controllerRequiredProps.some(p => _changedProperties.has(p)) &&
+      !this.draggableController
+    ) {
+      this.initDragController();
+    }
+  }
+
+  get draggableTools(): DraggableTool[] {
+    const mindmap = this.mindmaps.find(m => m.style === this.activeStyle)!;
+    return [
+      {
+        config: textConfig,
+        icon: textIcon,
+        name: 'text',
+        render: textRender,
+        standardWidth: 100,
+      },
+      {
+        config: mindmapConfig,
+        icon: mindmap.icon,
+        name: 'mindmap',
+        render: getMindmapRender(this.activeStyle),
+        standardWidth: 350,
+      },
+    ];
+  }
+
+  get mindmaps() {
+    return getMindMaps(this.theme);
+  }
+
+  @state()
+  accessor activeStyle: MindmapStyle = MindmapStyle.ONE;
+
+  @property({ type: Boolean })
+  accessor enableBlur = true;
+
+  @query('.basket-tool-item.mindmap')
+  accessor mindmapElement!: HTMLElement;
+
+  @state()
+  accessor readyToDrop = false;
 }
 
 declare global {

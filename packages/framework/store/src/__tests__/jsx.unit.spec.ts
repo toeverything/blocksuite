@@ -10,16 +10,16 @@ describe('basic', () => {
       yDocToJSXNode(
         {
           '0': {
-            'sys:id': '0',
             'sys:children': ['1'],
             'sys:flavour': 'affine:page',
+            'sys:id': '0',
           },
           '1': {
-            'sys:id': '1',
-            'sys:children': [],
-            'sys:flavour': 'affine:paragraph',
             'prop:text': [],
             'prop:type': 'text',
+            'sys:children': [],
+            'sys:flavour': 'affine:paragraph',
+            'sys:id': '1',
           },
         },
         '0'
@@ -38,17 +38,17 @@ describe('basic', () => {
       yDocToJSXNode(
         {
           '0': {
-            'sys:id': '0',
-            'sys:flavour': 'affine:page',
-            'sys:children': ['1'],
             'prop:title': 'this is title',
+            'sys:children': ['1'],
+            'sys:flavour': 'affine:page',
+            'sys:id': '0',
           },
           '1': {
-            'sys:id': '2',
-            'sys:flavour': 'affine:paragraph',
-            'sys:children': [],
-            'prop:type': 'text',
             'prop:text': [{ insert: 'just plain text' }],
+            'prop:type': 'text',
+            'sys:children': [],
+            'sys:flavour': 'affine:paragraph',
+            'sys:id': '2',
           },
         },
         '0'
@@ -70,29 +70,29 @@ describe('basic', () => {
       yDocToJSXNode(
         {
           '0': {
-            'sys:id': '0',
-            'sys:flavour': 'affine:page',
-            'sys:children': ['1'],
             'prop:title': 'this is title',
+            'sys:children': ['1'],
+            'sys:flavour': 'affine:page',
+            'sys:id': '0',
           },
           '1': {
-            'sys:id': '2',
-            'sys:flavour': 'affine:paragraph',
-            'sys:children': [],
-            'prop:type': 'text',
             'prop:text': [
               { insert: 'this is ' },
               {
-                insert: 'a ',
                 attributes: { link: 'http://www.example.com' },
+                insert: 'a ',
               },
               {
+                attributes: { bold: true, link: 'http://www.example.com' },
                 insert: 'link',
-                attributes: { link: 'http://www.example.com', bold: true },
               },
-              { insert: ' with', attributes: { bold: true } },
+              { attributes: { bold: true }, insert: ' with' },
               { insert: ' bold' },
             ],
+            'prop:type': 'text',
+            'sys:children': [],
+            'sys:flavour': 'affine:paragraph',
+            'sys:id': '2',
           },
         },
         '0'

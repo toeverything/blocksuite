@@ -16,16 +16,16 @@ export const FALLBACK_LANG = 'Plain Text';
  * Note: Use it carefully because it is not a valid language.
  */
 export const PLAIN_TEXT_LANG_INFO = {
+  aliases: ['plaintext', 'txt', 'text'] satisfies PlainTextLanguage[],
   // This cast is wrong, but it is safe if we treat it as PlainTextLanguage in all cases.
   id: FALLBACK_LANG as PlainTextLanguage,
-  name: FALLBACK_LANG,
-  aliases: ['plaintext', 'txt', 'text'] satisfies PlainTextLanguage[],
   import: () =>
     Promise.resolve({
       default: [],
     }),
+  name: FALLBACK_LANG,
 } satisfies StrictLanguageInfo;
 
-export type StrictLanguageInfo = BundledLanguageInfo & {
+export type StrictLanguageInfo = {
   id: BundledLanguage | PlainTextLanguage;
-};
+} & BundledLanguageInfo;

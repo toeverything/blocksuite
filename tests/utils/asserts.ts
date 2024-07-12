@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import './declare-test-window.js';
-
 import type {
   BlockElement,
   EditorHost,
 } from '@block-std/view/element/index.js';
-import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
   AffineInlineEditor,
@@ -15,13 +12,15 @@ import type {
   RichText,
   RootBlockModel,
 } from '@blocks/index.js';
-import { assertExists } from '@global/utils/index.js';
 import type { InlineRootElement } from '@inline/inline-editor.js';
 import type { Locator } from '@playwright/test';
-import { expect, type Page } from '@playwright/test';
-import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';
 import type { BlockModel, SerializedStore } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
+
+import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
+import { assertExists } from '@global/utils/index.js';
+import { type Page, expect } from '@playwright/test';
+import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
@@ -41,11 +40,11 @@ import {
   toIdCountMap,
 } from './actions/edgeless.js';
 import {
+  SHORT_KEY,
   pressArrowLeft,
   pressArrowRight,
   pressBackspace,
   redoByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './actions/keyboard.js';
@@ -57,6 +56,7 @@ import {
   getEditorLocator,
   inlineEditorInnerTextToString,
 } from './actions/misc.js';
+import './declare-test-window.js';
 import { getStringFromRichText } from './inline-editor.js';
 import { currentEditorIndex } from './multiple-editor.js';
 
@@ -64,59 +64,52 @@ export { assertExists };
 
 export const defaultStore: SerializedStore = {
   meta: {
+    blockVersions: {
+      'affine:attachment': 1,
+      'affine:bookmark': 1,
+      'affine:code': 1,
+      'affine:data-view': 1,
+      'affine:database': 3,
+      'affine:divider': 1,
+      'affine:edgeless-text': 1,
+      'affine:embed-figma': 1,
+      'affine:embed-github': 1,
+      'affine:embed-html': 1,
+      'affine:embed-linked-doc': 1,
+      'affine:embed-loom': 1,
+      'affine:embed-synced-doc': 1,
+      'affine:embed-youtube': 1,
+      'affine:frame': 1,
+      'affine:image': 1,
+      'affine:list': 1,
+      'affine:note': 1,
+      'affine:page': 2,
+      'affine:paragraph': 1,
+      'affine:surface': 5,
+      'affine:surface-ref': 1,
+    },
+    pageVersion: PAGE_VERSION,
     pages: [
       {
         id: 'doc:home',
-        title: '',
         tags: [],
+        title: '',
       },
     ],
-    blockVersions: {
-      'affine:paragraph': 1,
-      'affine:page': 2,
-      'affine:database': 3,
-      'affine:data-view': 1,
-      'affine:list': 1,
-      'affine:note': 1,
-      'affine:divider': 1,
-      'affine:embed-youtube': 1,
-      'affine:embed-figma': 1,
-      'affine:embed-github': 1,
-      'affine:embed-loom': 1,
-      'affine:embed-html': 1,
-      'affine:embed-linked-doc': 1,
-      'affine:embed-synced-doc': 1,
-      'affine:image': 1,
-      'affine:frame': 1,
-      'affine:code': 1,
-      'affine:surface': 5,
-      'affine:bookmark': 1,
-      'affine:attachment': 1,
-      'affine:surface-ref': 1,
-      'affine:edgeless-text': 1,
-    },
     workspaceVersion: COLLECTION_VERSION,
-    pageVersion: PAGE_VERSION,
   },
   spaces: {
     'doc:home': {
       blocks: {
         '0': {
           'prop:title': '',
-          'sys:id': '0',
-          'sys:flavour': 'affine:page',
           'sys:children': ['1'],
+          'sys:flavour': 'affine:page',
+          'sys:id': '0',
           'sys:version': 2,
         },
         '1': {
-          'sys:flavour': 'affine:note',
-          'sys:id': '1',
-          'sys:children': ['2'],
-          'sys:version': 1,
-          'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
           'prop:background': '--affine-note-background-blue',
-          'prop:index': 'a0',
-          'prop:hidden': false,
           'prop:displayMode': 'both',
           'prop:edgeless': {
             style: {
@@ -126,14 +119,21 @@ export const defaultStore: SerializedStore = {
               shadowType: '--affine-note-shadow-sticker',
             },
           },
+          'prop:hidden': false,
+          'prop:index': 'a0',
+          'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
+          'sys:children': ['2'],
+          'sys:flavour': 'affine:note',
+          'sys:id': '1',
+          'sys:version': 1,
         },
         '2': {
-          'sys:flavour': 'affine:paragraph',
-          'sys:id': '2',
-          'sys:children': [],
-          'sys:version': 1,
           'prop:text': 'hello',
           'prop:type': 'text',
+          'sys:children': [],
+          'sys:flavour': 'affine:paragraph',
+          'sys:id': '2',
+          'sys:version': 1,
         },
       },
     },
@@ -247,12 +247,12 @@ export async function assertRichDragButton(page: Page) {
 
 export async function assertImageSize(
   page: Page,
-  size: { width: number; height: number }
+  size: { height: number; width: number }
 ) {
   const actual = await page.locator('.resizable-img').boundingBox();
   expect(size).toEqual({
-    width: Math.floor(actual?.width ?? NaN),
     height: Math.floor(actual?.height ?? NaN),
+    width: Math.floor(actual?.width ?? NaN),
   });
 }
 
@@ -270,7 +270,7 @@ export async function assertDocTitleFocus(page: Page) {
 
 export async function assertListPrefix(
   page: Page,
-  predict: (string | RegExp)[],
+  predict: (RegExp | string)[],
   range?: [number, number]
 ) {
   const prefixs = page.locator('.affine-list-block__prefix');
@@ -352,7 +352,7 @@ export async function assertTextFormat(
   resultObj: unknown
 ) {
   const actual = await page.evaluate(
-    ({ richTextIndex, index, currentEditorIndex }) => {
+    ({ currentEditorIndex, index, richTextIndex }) => {
       const editorHost =
         document.querySelectorAll('editor-host')[currentEditorIndex];
       const richText = editorHost.querySelectorAll('rich-text')[richTextIndex];
@@ -367,7 +367,7 @@ export async function assertTextFormat(
       });
       return result;
     },
-    { richTextIndex, index, currentEditorIndex }
+    { currentEditorIndex, index, richTextIndex }
   );
   expect(actual).toEqual(resultObj);
 }
@@ -378,7 +378,7 @@ export async function assertRichTextModelType(
   index = 0
 ) {
   const actual = await page.evaluate(
-    ({ index, BLOCK_ID_ATTR, currentEditorIndex }) => {
+    ({ BLOCK_ID_ATTR, currentEditorIndex, index }) => {
       const editorHost =
         document.querySelectorAll('editor-host')[currentEditorIndex];
       const richText = editorHost.querySelectorAll('rich-text')[index];
@@ -389,7 +389,7 @@ export async function assertRichTextModelType(
       }
       return (blockElement.model as BlockModel<{ type: string }>).type;
     },
-    { index, BLOCK_ID_ATTR, currentEditorIndex }
+    { BLOCK_ID_ATTR, currentEditorIndex, index }
   );
   expect(actual).toEqual(type);
 }
@@ -477,7 +477,7 @@ export async function assertTextContent(
 
 export async function assertBlockType(
   page: Page,
-  id: string | number | null,
+  id: null | number | string,
   type: string
 ) {
   const actual = await page.evaluate(
@@ -501,7 +501,7 @@ export async function assertBlockType(
 
 export async function assertBlockFlavour(
   page: Page,
-  id: string | number,
+  id: number | string,
   flavour: BlockSuite.Flavour
 ) {
   const actual = await page.evaluate(
@@ -524,7 +524,7 @@ export async function assertBlockFlavour(
 
 export async function assertBlockTextContent(
   page: Page,
-  id: string | number,
+  id: number | string,
   str: string
 ) {
   const actual = await page.evaluate(
@@ -689,7 +689,7 @@ export async function assertStoreMatchJSX(
   expect(formattedJSX, formattedJSX).toEqual(snapshot.trimStart());
 }
 
-type MimeType = 'text/plain' | 'blocksuite/x-c+w' | 'text/html';
+type MimeType = 'blocksuite/x-c+w' | 'text/html' | 'text/plain';
 
 export function assertClipItems(_page: Page, _key: MimeType, _value: unknown) {
   // FIXME: use original clipboard API
@@ -817,7 +817,7 @@ export function assertSameColor(c1?: `#${string}`, c2?: `#${string}`) {
   expect(c1?.toLowerCase()).toEqual(c2?.toLowerCase());
 }
 
-type Rect = { x: number; y: number; w: number; h: number };
+type Rect = { h: number; w: number; x: number; y: number };
 
 export async function assertNoteRectEqual(
   page: Page,
@@ -901,26 +901,26 @@ export async function assertEdgelessSelectedRectRotation(page: Page, deg = 0) {
 
 export async function assertEdgelessSelectedReactCursor(
   page: Page,
-  expected: (
-    | {
-        mode: 'resize';
-        handle:
-          | 'top'
-          | 'right'
-          | 'bottom'
-          | 'left'
-          | 'top-left'
-          | 'top-right'
-          | 'bottom-right'
-          | 'bottom-left';
-      }
-    | {
-        mode: 'rotate';
-        handle: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
-      }
-  ) & {
+  expected: {
     cursor: string;
-  }
+  } & (
+    | {
+        handle:
+          | 'bottom'
+          | 'bottom-left'
+          | 'bottom-right'
+          | 'left'
+          | 'right'
+          | 'top'
+          | 'top-left'
+          | 'top-right';
+        mode: 'resize';
+      }
+    | {
+        handle: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
+        mode: 'rotate';
+      }
+  )
 ) {
   const editor = getEditorLocator(page);
   const selectedRect = editor
@@ -1022,8 +1022,8 @@ export async function assertConnectorPath(
 }
 
 export function assertRectExist(
-  rect: { x: number; y: number; width: number; height: number } | null
-): asserts rect is { x: number; y: number; width: number; height: number } {
+  rect: { height: number; width: number; x: number; y: number } | null
+): asserts rect is { height: number; width: number; x: number; y: number } {
   expect(rect).not.toBe(null);
 }
 
@@ -1138,8 +1138,8 @@ export async function assertClipboardCustomData(
 }
 
 export function assertClipData(
-  clipItems: { mimeType: string; data: unknown }[],
-  expectClipItems: { mimeType: string; data: unknown }[],
+  clipItems: { data: unknown; mimeType: string }[],
+  expectClipItems: { data: unknown; mimeType: string }[],
   type: string
 ) {
   expect(clipItems.find(item => item.mimeType === type)?.data).toBe(

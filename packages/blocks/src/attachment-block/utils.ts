@@ -1,14 +1,16 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { toast } from '../_common/components/toast.js';
-import { humanFileSize } from '../_common/utils/math.js';
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { AttachmentBlockComponent } from './attachment-block.js';
 import type {
   AttachmentBlockModel,
   AttachmentBlockProps,
 } from './attachment-model.js';
+
+import { toast } from '../_common/components/toast.js';
+import { humanFileSize } from '../_common/utils/math.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 import { allowEmbed } from './embed.js';
 
@@ -143,7 +145,7 @@ export async function checkAttachmentBlob(block: AttachmentBlockComponent) {
  * the download process may take a long time!
  */
 export function downloadAttachmentBlob(block: AttachmentBlockComponent) {
-  const { host, model, loading, error, downloading, blobUrl } = block;
+  const { blobUrl, downloading, error, host, loading, model } = block;
   if (downloading) {
     toast(host, 'Download in progress...');
     return;
@@ -195,7 +197,7 @@ export async function addSiblingAttachmentBlocks(
   files: File[],
   maxFileSize: number,
   targetModel: BlockModel,
-  place: 'before' | 'after' = 'after'
+  place: 'after' | 'before' = 'after'
 ) {
   if (!files.length) {
     return;
@@ -218,9 +220,9 @@ export async function addSiblingAttachmentBlocks(
 
   // Get the types of all files
   const types = await Promise.all(files.map(file => getFileType(file)));
-  const attachmentBlockProps: (Partial<AttachmentBlockProps> & {
+  const attachmentBlockProps: ({
     flavour: 'affine:attachment';
-  })[] = files.map((file, index) => ({
+  } & Partial<AttachmentBlockProps>)[] = files.map((file, index) => ({
     flavour: 'affine:attachment',
     name: file.name,
     size: file.size,

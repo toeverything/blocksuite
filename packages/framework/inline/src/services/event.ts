@@ -1,5 +1,7 @@
 import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange, NativePoint } from '../types.js';
+import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
+
 import {
   type BaseTextAttributes,
   isInEmbedElement,
@@ -8,26 +10,11 @@ import {
 } from '../utils/index.js';
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { transformInput } from '../utils/transform-input.js';
-import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
 export class EventService<TextAttributes extends BaseTextAttributes> {
-  get isComposing() {
-    return this._isComposing;
-  }
-
-  get inlineRangeProvider() {
-    return this.editor.inlineRangeProvider;
-  }
-
-  private _isComposing = false;
-
-  private _previousAnchor: NativePoint | null = null;
-
-  private _previousFocus: NativePoint | null = null;
-
   private _compositionInlineRange: InlineRange | null = null;
 
-  constructor(readonly editor: InlineEditor<TextAttributes>) {}
+  private _isComposing = false;
 
   private _isRangeCompletelyInRoot = (range: Range) => {
     const rootElement = this.editor.rootElement;
@@ -48,144 +35,6 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
         rootRange.comparePoint(range.startContainer, range.endOffset) <= 0
       );
     }
-  };
-
-  private _onSelectionChange = () => {
-    const rootElement = this.editor.rootElement;
-    const previousInlineRange = this.editor.getInlineRange();
-    if (this._isComposing) {
-      return;
-    }
-
-    const selection = document.getSelection();
-    if (!selection) return;
-    if (selection.rangeCount === 0) {
-      if (previousInlineRange !== null) {
-        this.editor.setInlineRange(null, false);
-      }
-
-      return;
-    }
-
-    const range = selection.getRangeAt(0);
-    if (!range.intersectsNode(rootElement)) {
-      const isContainerSelected =
-        range.endContainer.contains(rootElement) &&
-        Array.from(range.endContainer.childNodes).filter(
-          node => node instanceof HTMLElement
-        ).length === 1 &&
-        range.startContainer.contains(rootElement) &&
-        Array.from(range.startContainer.childNodes).filter(
-          node => node instanceof HTMLElement
-        ).length === 1;
-      if (isContainerSelected) {
-        this.editor.focusEnd();
-        return;
-      } else {
-        if (previousInlineRange !== null) {
-          this.editor.setInlineRange(null, false);
-        }
-        return;
-      }
-    }
-
-    this._previousAnchor = [range.startContainer, range.startOffset];
-    this._previousFocus = [range.endContainer, range.endOffset];
-
-    const inlineRange = this.editor.toInlineRange(selection.getRangeAt(0));
-    if (!isMaybeInlineRangeEqual(previousInlineRange, inlineRange)) {
-      this.editor.setInlineRange(inlineRange, false);
-    }
-
-    // avoid infinite syncInlineRange
-    if (
-      ((range.startContainer.nodeType !== Node.TEXT_NODE ||
-        range.endContainer.nodeType !== Node.TEXT_NODE) &&
-        range.startContainer !== this._previousAnchor[0] &&
-        range.endContainer !== this._previousFocus[0] &&
-        range.startOffset !== this._previousAnchor[1] &&
-        range.endOffset !== this._previousFocus[1]) ||
-      range.startContainer.nodeType === Node.COMMENT_NODE ||
-      range.endContainer.nodeType === Node.COMMENT_NODE
-    ) {
-      this.editor.syncInlineRange();
-    }
-  };
-
-  private _onCompositionStart = () => {
-    this._isComposing = true;
-    // embeds is not editable and it will break IME
-    const embeds = this.editor.rootElement.querySelectorAll(
-      '[data-v-embed="true"]'
-    );
-    embeds.forEach(embed => {
-      embed.removeAttribute('contenteditable');
-    });
-
-    const range = this.editor.rangeService.getNativeRange();
-    if (range) {
-      this._compositionInlineRange = this.editor.toInlineRange(range);
-    } else {
-      this._compositionInlineRange = null;
-    }
-  };
-
-  private _onCompositionUpdate = () => {
-    if (!this.editor.rootElement.isConnected) return;
-
-    const range = this.editor.rangeService.getNativeRange();
-    if (
-      this.editor.isReadonly ||
-      !range ||
-      !this._isRangeCompletelyInRoot(range)
-    )
-      return;
-
-    this.editor.slots.inputting.emit();
-  };
-
-  private _onCompositionEnd = async (event: CompositionEvent) => {
-    this._isComposing = false;
-    if (!this.editor.rootElement.isConnected) return;
-
-    const range = this.editor.rangeService.getNativeRange();
-    if (
-      this.editor.isReadonly ||
-      !range ||
-      !this._isRangeCompletelyInRoot(range)
-    )
-      return;
-
-    this.editor.rerenderWholeEditor();
-    await this.editor.waitForUpdate();
-
-    const inlineRange = this._compositionInlineRange;
-    if (!inlineRange) return;
-
-    event.preventDefault();
-
-    const ctx: CompositionEndHookCtx<TextAttributes> = {
-      inlineEditor: this.editor,
-      raw: event,
-      inlineRange,
-      data: event.data,
-      attributes: {} as TextAttributes,
-    };
-    this.editor.hooks.compositionEnd?.(ctx);
-
-    const { inlineRange: newInlineRange, data: newData } = ctx;
-    if (newData && newData.length > 0) {
-      this.editor.insertText(newInlineRange, newData, ctx.attributes);
-      this.editor.setInlineRange(
-        {
-          index: newInlineRange.index + newData.length,
-          length: 0,
-        },
-        false
-      );
-    }
-
-    this.editor.slots.inputting.emit();
   };
 
   private _onBeforeInput = (event: InputEvent) => {
@@ -252,15 +101,15 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     event.preventDefault();
 
     const ctx: BeforeinputHookCtx<TextAttributes> = {
-      inlineEditor: this.editor,
-      raw: event,
-      inlineRange: inlineRange,
-      data: event.data ?? event.dataTransfer?.getData('text/plain') ?? null,
       attributes: {} as TextAttributes,
+      data: event.data ?? event.dataTransfer?.getData('text/plain') ?? null,
+      inlineEditor: this.editor,
+      inlineRange: inlineRange,
+      raw: event,
     };
     this.editor.hooks.beforeinput?.(ctx);
 
-    const { raw: newEvent, data, inlineRange: newInlineRange } = ctx;
+    const { data, inlineRange: newInlineRange, raw: newEvent } = ctx;
     transformInput<TextAttributes>(
       newEvent.inputType,
       data,
@@ -268,6 +117,101 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
       newInlineRange,
       this.editor as InlineEditor
     );
+
+    this.editor.slots.inputting.emit();
+  };
+
+  private _onClick = (event: MouseEvent) => {
+    // select embed element when click on it
+    if (event.target instanceof Node && isInEmbedElement(event.target)) {
+      const selection = document.getSelection();
+      if (!selection) return;
+      if (event.target instanceof HTMLElement) {
+        const vElement = event.target.closest('v-element');
+        if (vElement) {
+          selection.selectAllChildren(vElement);
+        }
+      } else {
+        const vElement = event.target.parentElement?.closest('v-element');
+        if (vElement) {
+          selection.selectAllChildren(vElement);
+        }
+      }
+    }
+  };
+
+  private _onCompositionEnd = async (event: CompositionEvent) => {
+    this._isComposing = false;
+    if (!this.editor.rootElement.isConnected) return;
+
+    const range = this.editor.rangeService.getNativeRange();
+    if (
+      this.editor.isReadonly ||
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
+    )
+      return;
+
+    this.editor.rerenderWholeEditor();
+    await this.editor.waitForUpdate();
+
+    const inlineRange = this._compositionInlineRange;
+    if (!inlineRange) return;
+
+    event.preventDefault();
+
+    const ctx: CompositionEndHookCtx<TextAttributes> = {
+      attributes: {} as TextAttributes,
+      data: event.data,
+      inlineEditor: this.editor,
+      inlineRange,
+      raw: event,
+    };
+    this.editor.hooks.compositionEnd?.(ctx);
+
+    const { data: newData, inlineRange: newInlineRange } = ctx;
+    if (newData && newData.length > 0) {
+      this.editor.insertText(newInlineRange, newData, ctx.attributes);
+      this.editor.setInlineRange(
+        {
+          index: newInlineRange.index + newData.length,
+          length: 0,
+        },
+        false
+      );
+    }
+
+    this.editor.slots.inputting.emit();
+  };
+
+  private _onCompositionStart = () => {
+    this._isComposing = true;
+    // embeds is not editable and it will break IME
+    const embeds = this.editor.rootElement.querySelectorAll(
+      '[data-v-embed="true"]'
+    );
+    embeds.forEach(embed => {
+      embed.removeAttribute('contenteditable');
+    });
+
+    const range = this.editor.rangeService.getNativeRange();
+    if (range) {
+      this._compositionInlineRange = this.editor.toInlineRange(range);
+    } else {
+      this._compositionInlineRange = null;
+    }
+  };
+
+  private _onCompositionUpdate = () => {
+    if (!this.editor.rootElement.isConnected) return;
+
+    const range = this.editor.rangeService.getNativeRange();
+    if (
+      this.editor.isReadonly ||
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
+    )
+      return;
 
     this.editor.slots.inputting.emit();
   };
@@ -331,24 +275,71 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     }
   };
 
-  private _onClick = (event: MouseEvent) => {
-    // select embed element when click on it
-    if (event.target instanceof Node && isInEmbedElement(event.target)) {
-      const selection = document.getSelection();
-      if (!selection) return;
-      if (event.target instanceof HTMLElement) {
-        const vElement = event.target.closest('v-element');
-        if (vElement) {
-          selection.selectAllChildren(vElement);
-        }
+  private _onSelectionChange = () => {
+    const rootElement = this.editor.rootElement;
+    const previousInlineRange = this.editor.getInlineRange();
+    if (this._isComposing) {
+      return;
+    }
+
+    const selection = document.getSelection();
+    if (!selection) return;
+    if (selection.rangeCount === 0) {
+      if (previousInlineRange !== null) {
+        this.editor.setInlineRange(null, false);
+      }
+
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    if (!range.intersectsNode(rootElement)) {
+      const isContainerSelected =
+        range.endContainer.contains(rootElement) &&
+        Array.from(range.endContainer.childNodes).filter(
+          node => node instanceof HTMLElement
+        ).length === 1 &&
+        range.startContainer.contains(rootElement) &&
+        Array.from(range.startContainer.childNodes).filter(
+          node => node instanceof HTMLElement
+        ).length === 1;
+      if (isContainerSelected) {
+        this.editor.focusEnd();
+        return;
       } else {
-        const vElement = event.target.parentElement?.closest('v-element');
-        if (vElement) {
-          selection.selectAllChildren(vElement);
+        if (previousInlineRange !== null) {
+          this.editor.setInlineRange(null, false);
         }
+        return;
       }
     }
+
+    this._previousAnchor = [range.startContainer, range.startOffset];
+    this._previousFocus = [range.endContainer, range.endOffset];
+
+    const inlineRange = this.editor.toInlineRange(selection.getRangeAt(0));
+    if (!isMaybeInlineRangeEqual(previousInlineRange, inlineRange)) {
+      this.editor.setInlineRange(inlineRange, false);
+    }
+
+    // avoid infinite syncInlineRange
+    if (
+      ((range.startContainer.nodeType !== Node.TEXT_NODE ||
+        range.endContainer.nodeType !== Node.TEXT_NODE) &&
+        range.startContainer !== this._previousAnchor[0] &&
+        range.endContainer !== this._previousFocus[0] &&
+        range.startOffset !== this._previousAnchor[1] &&
+        range.endOffset !== this._previousFocus[1]) ||
+      range.startContainer.nodeType === Node.COMMENT_NODE ||
+      range.endContainer.nodeType === Node.COMMENT_NODE
+    ) {
+      this.editor.syncInlineRange();
+    }
   };
+
+  private _previousAnchor: NativePoint | null = null;
+
+  private _previousFocus: NativePoint | null = null;
 
   mount = () => {
     const eventSource = this.editor.eventSource;
@@ -391,4 +382,14 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     );
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
+
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
+
+  get inlineRangeProvider() {
+    return this.editor.inlineRangeProvider;
+  }
+
+  get isComposing() {
+    return this._isComposing;
+  }
 }

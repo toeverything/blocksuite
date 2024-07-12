@@ -17,10 +17,6 @@ export const numberColumnModelConfig = numberColumnType.modelConfig<
     decimal: number;
   }
 >({
-  name: 'Number',
-  type: () => tNumber.create(),
-  defaultData: () => ({ decimal: 0 }),
-  cellToString: data => data?.toString() ?? '',
   cellFromString: data => {
     const num = data ? Number(data) : NaN;
     return {
@@ -28,15 +24,19 @@ export const numberColumnModelConfig = numberColumnType.modelConfig<
     };
   },
   cellToJson: data => data ?? null,
+  cellToString: data => data?.toString() ?? '',
+  defaultData: () => ({ decimal: 0 }),
   isEmpty: data => data == null,
+  name: 'Number',
+  type: () => tNumber.create(),
 });
 
 numberColumnModelConfig.addConvert('rich-text', (_column, cells) => ({
-  column: {},
   cells: cells.map(v => new Text(v?.toString()).yText),
+  column: {},
 }));
 
 numberColumnModelConfig.addConvert('progress', (_column, cells) => ({
-  column: {},
   cells: cells.map(v => clamp(v ?? 0, 0, 100)),
+  column: {},
 }));

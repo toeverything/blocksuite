@@ -4,30 +4,20 @@ import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { isCssVariable } from '../_common/theme/css-variables.js';
 import type { EdgelessFrameTitle } from '../root-block/edgeless/components/block-portal/frame/edgeless-frame.js';
-import { Bound } from '../surface-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
+
+import { isCssVariable } from '../_common/theme/css-variables.js';
+import { Bound } from '../surface-block/index.js';
 
 @customElement('affine-frame')
 export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
-  @state()
-  private accessor _isNavigator = false;
-
-  get titleElement(): EdgelessFrameTitle | null {
-    return (
-      this.closest('affine-edgeless-root')?.querySelector?.(
-        `[data-frame-title-id="${this.model.id}"]`
-      ) ?? null
-    );
+  private get _edgeless() {
+    return this.closest('affine-edgeless-root');
   }
 
   private get _surface() {
     return this.closest('affine-edgeless-root')!.surface;
-  }
-
-  private get _edgeless() {
-    return this.closest('affine-edgeless-root');
   }
 
   override connectedCallback() {
@@ -44,7 +34,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     );
 
     this._disposables.add(
-      this.doc.slots.blockUpdated.on(({ type, id }) => {
+      this.doc.slots.blockUpdated.on(({ id, type }) => {
         if (id === this.model.id && type === 'update') {
           this.requestUpdate();
         }
@@ -63,24 +53,35 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   }
 
   override renderBlock() {
-    const { model, _isNavigator } = this;
+    const { _isNavigator, model } = this;
     const bound = Bound.deserialize(model.xywh);
 
     return html`
       <div
         class="affine-frame-container"
         style=${styleMap({
-          width: bound.w + 'px',
-          height: bound.h + 'px',
           backgroundColor: isCssVariable(model.background)
             ? `var(${model.background})`
             : '',
-          borderRadius: '8px',
           border: _isNavigator ? 'none' : `2px solid var(--affine-black-30)`,
+          borderRadius: '8px',
+          height: bound.h + 'px',
+          width: bound.w + 'px',
         })}
       ></div>
     `;
   }
+
+  get titleElement(): EdgelessFrameTitle | null {
+    return (
+      this.closest('affine-edgeless-root')?.querySelector?.(
+        `[data-frame-title-id="${this.model.id}"]`
+      ) ?? null
+    );
+  }
+
+  @state()
+  private accessor _isNavigator = false;
 }
 
 declare global {

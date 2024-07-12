@@ -1,7 +1,8 @@
 import { BlockModel } from '@blocksuite/store';
 
-import { defineEmbedModel } from '../_common/embed-block-helper/embed-block-model.js';
 import type { EmbedCardStyle } from '../_common/types.js';
+
+import { defineEmbedModel } from '../_common/embed-block-helper/embed-block-model.js';
 
 export const EmbedLinkedDocStyles: EmbedCardStyle[] = [
   'vertical',
@@ -12,9 +13,9 @@ export const EmbedLinkedDocStyles: EmbedCardStyle[] = [
 ];
 
 export type EmbedLinkedDocBlockProps = {
+  caption: null | string;
   pageId: string;
   style: EmbedCardStyle;
-  caption: string | null;
 };
 
 export class EmbedLinkedDocModel extends defineEmbedModel<EmbedLinkedDocBlockProps>(

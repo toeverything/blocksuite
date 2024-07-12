@@ -9,18 +9,18 @@ type PropertyMeta<
   Value = unknown,
   ColumnData extends NonNullable<unknown> = NonNullable<unknown>,
 > = {
-  name: string;
-  key: string;
   columnMeta: ColumnMeta<string, Value, ColumnData>;
-  getColumnData?: (block: T) => ColumnData;
-  setColumnData?: (block: T, data: ColumnData) => void;
   get: (block: T) => Value;
+  getColumnData?: (block: T) => ColumnData;
+  key: string;
+  name: string;
   set?: (block: T, value: Value) => void;
+  setColumnData?: (block: T, data: ColumnData) => void;
   updated: (block: T, callback: () => void) => Disposable;
 };
 export type BlockMeta<T extends BlockModel = BlockModel> = {
-  selector: (block: Block) => boolean;
   properties: PropertyMeta<T>[];
+  selector: (block: Block) => boolean;
 };
 export const createBlockMeta = <T extends BlockModel>(
   options: Omit<BlockMeta<T>, 'properties'>

@@ -3,18 +3,18 @@ import { html } from 'lit';
 
 import { jpegBase64ToFile } from '../edgeless/edit-image.js';
 import {
-  createVendor,
   FastImage2ImageServiceKind,
   Image2ImageServiceKind,
   Text2ImageServiceKind,
+  createVendor,
 } from './service-base.js';
 
 export const falVendor = createVendor<{
   apiKey: string;
 }>({
-  key: 'Fal',
   color: '#5C4DD2',
   initData: () => ({ apiKey: '' }),
+  key: 'Fal',
   renderConfigEditor: (data, refresh) => {
     return html`
       <div style="display:flex;flex-direction: column;gap: 12px;">
@@ -37,15 +37,15 @@ export const falVendor = createVendor<{
 });
 export const createImageGenerator = (apiKey: string) => {
   const connection = fal.realtime.connect('110602490-lcm-sd15-i2i', {
+    onError: error => {
+      console.error(error);
+    },
     onResult: result => {
       const fn = requestMap.get(result.request_id);
       if (fn) {
         fn(result.images[0].url);
         requestMap.delete(result.request_id);
       }
-    },
-    onError: error => {
-      console.error(error);
     },
   });
   const requestMap = new Map<string, (img: string) => void>();
@@ -56,44 +56,43 @@ export const createImageGenerator = (apiKey: string) => {
         credentials: apiKey,
       });
       connection.send({
-        request_id: `${id++}`,
-        prompt,
-        sync_mode: true,
         enable_safety_checks: false,
         image_url: img,
+        prompt,
+        request_id: `${id++}`,
+        sync_mode: true,
       });
       requestMap.set(id.toString(), res);
     });
   };
 };
 Image2ImageServiceKind.implService({
-  name: '110602490-lcm-sd15-i2i',
   method: ({ apiKey }) => ({
     generateImage: async (prompt, image) => {
       const data = await fetch(
         'https://110602490-lcm-sd15-i2i.gateway.alpha.fal.ai/',
         {
-          method: 'post',
+          body: JSON.stringify({
+            enable_safety_checks: false,
+            image_url: image,
+            prompt: prompt,
+            seed: 42,
+            sync_mode: true,
+          }),
           headers: {
             Authorization: `key ${apiKey}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            image_url: image,
-            prompt: prompt,
-            sync_mode: true,
-            seed: 42,
-            enable_safety_checks: false,
-          }),
+          method: 'post',
         }
       ).then(res => res.json());
       return data.images[0].url;
     },
   }),
+  name: '110602490-lcm-sd15-i2i',
   vendor: falVendor,
 });
 Text2ImageServiceKind.implService({
-  name: '110602490-fast-sdxl',
   method: ({ apiKey }) => ({
     generateImage: async prompt => {
       fal.config({
@@ -108,10 +107,10 @@ Text2ImageServiceKind.implService({
       return jpegBase64ToFile(result.images[0].url, 'img');
     },
   }),
+  name: '110602490-fast-sdxl',
   vendor: falVendor,
 });
 FastImage2ImageServiceKind.implService({
-  name: 'lcm-sd15-i2i',
   method: data => ({
     createFastRequest: () => {
       const client = createImageGenerator(data.apiKey);
@@ -120,5 +119,6 @@ FastImage2ImageServiceKind.implService({
       };
     },
   }),
+  name: 'lcm-sd15-i2i',
   vendor: falVendor,
 });

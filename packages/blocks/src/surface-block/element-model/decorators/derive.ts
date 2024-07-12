@@ -1,5 +1,6 @@
-import { keys } from '../../../_common/utils/iterable.js';
 import type { SurfaceElementModel } from '../base.js';
+
+import { keys } from '../../../_common/utils/iterable.js';
 import {
   getDecoratorState,
   getObjectPropMeta,
@@ -12,8 +13,8 @@ function getDerivedMeta(
   proto: unknown,
   prop: string | symbol
 ):
-  | null
-  | ((propValue: unknown, instance: unknown) => Record<string, unknown>)[] {
+  | ((propValue: unknown, instance: unknown) => Record<string, unknown>)[]
+  | null {
   return getObjectPropMeta(proto, deriveSymbol, prop);
 }
 

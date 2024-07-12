@@ -1,18 +1,18 @@
-import './condition.js';
+import type { TemplateResult } from 'lit';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
+
+import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 
 import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import {
   ArrowDownSmallIcon,
   DuplicateIcon,
 } from '../../../../_common/icons/index.js';
-import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 import { firstFilter } from '../../common/ast.js';
 import {
   ConvertIcon,
@@ -20,14 +20,11 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '../../common/icons/index.js';
+import './condition.js';
 import { popAddNewFilter } from './condition.js';
 
 @customElement('filter-group-view')
 export class FilterGroupView extends WithDisposable(ShadowlessElement) {
-  private get isMaxDepth() {
-    return this.depth === 3;
-  }
-
   static override styles = css`
     filter-group-view {
       border-radius: 4px;
@@ -153,30 +150,45 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  private opMap = {
-    and: 'And',
-    or: 'Or',
+  private _addNew = (e: MouseEvent) => {
+    if (this.isMaxDepth) {
+      this.setData({
+        ...this.data,
+        conditions: [...this.data.conditions, firstFilter(this.vars)],
+      });
+      return;
+    }
+    popAddNewFilter(e.target as HTMLElement, {
+      onChange: this.setData,
+      value: this.data,
+      vars: this.vars,
+    });
   };
 
-  @property({ attribute: false })
-  accessor depth = 1;
-
-  @property({ attribute: false })
-  accessor data!: FilterGroup;
-
-  @property({ attribute: false })
-  accessor vars!: Variable[];
-
-  @property({ attribute: false })
-  accessor setData!: (filter: FilterGroup) => void;
-
-  @state()
-  accessor containerClass:
-    | {
-        index: number;
-        class: string;
-      }
-    | undefined = undefined;
+  private _selectOp = (event: MouseEvent) => {
+    popFilterableSimpleMenu(event.target as HTMLElement, [
+      {
+        name: 'And',
+        select: () => {
+          this.setData({
+            ...this.data,
+            op: 'and',
+          });
+        },
+        type: 'action',
+      },
+      {
+        name: 'Or',
+        select: () => {
+          this.setData({
+            ...this.data,
+            op: 'or',
+          });
+        },
+        type: 'action',
+      },
+    ]);
+  };
 
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
@@ -187,70 +199,34 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private _addNew = (e: MouseEvent) => {
-    if (this.isMaxDepth) {
-      this.setData({
-        ...this.data,
-        conditions: [...this.data.conditions, firstFilter(this.vars)],
-      });
-      return;
-    }
-    popAddNewFilter(e.target as HTMLElement, {
-      value: this.data,
-      onChange: this.setData,
-      vars: this.vars,
-    });
-  };
-
-  private _selectOp = (event: MouseEvent) => {
-    popFilterableSimpleMenu(event.target as HTMLElement, [
-      {
-        type: 'action',
-        name: 'And',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'and',
-          });
-        },
-      },
-      {
-        type: 'action',
-        name: 'Or',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'or',
-          });
-        },
-      },
-    ]);
+  private opMap = {
+    and: 'And',
+    or: 'Or',
   };
 
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.data.conditions[i];
     popFilterableSimpleMenu(target, [
       {
-        type: 'action',
-        name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
+        hide: () => this.depth + getDepth(filter) > 3,
         icon: ConvertIcon,
+        name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
         onHover: hover => {
           this.containerClass = hover
-            ? { index: i, class: 'hover-style' }
+            ? { class: 'hover-style', index: i }
             : undefined;
         },
-        hide: () => this.depth + getDepth(filter) > 3,
         select: () => {
-          this.setData({ type: 'group', op: 'and', conditions: [this.data] });
+          this.setData({ conditions: [this.data], op: 'and', type: 'group' });
         },
+        type: 'action',
       },
       {
-        type: 'action',
-        name: 'Duplicate',
         icon: DuplicateIcon,
+        name: 'Duplicate',
         onHover: hover => {
           this.containerClass = hover
-            ? { index: i, class: 'hover-style' }
+            ? { class: 'hover-style', index: i }
             : undefined;
         },
         select: () => {
@@ -262,19 +238,17 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
           );
           this.setData({ ...this.data, conditions: conditions });
         },
+        type: 'action',
       },
       {
-        type: 'group',
-        name: '',
         children: () => [
           {
-            type: 'action',
-            name: 'Delete',
-            icon: DeleteIcon,
             class: 'delete-item',
+            icon: DeleteIcon,
+            name: 'Delete',
             onHover: hover => {
               this.containerClass = hover
-                ? { index: i, class: 'delete-style' }
+                ? { class: 'delete-style', index: i }
                 : undefined;
             },
             select: () => {
@@ -285,10 +259,17 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                 conditions,
               });
             },
+            type: 'action',
           },
         ],
+        name: '',
+        type: 'group',
       },
     ]);
+  }
+
+  private get isMaxDepth() {
+    return this.depth === 3;
   }
 
   override render() {
@@ -315,9 +296,9 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
             `;
           }
           const classList = classMap({
-            'filter-root-item': true,
-            'filter-exactly-hover-container': true,
             'dv-pd-4 dv-round-4': true,
+            'filter-exactly-hover-container': true,
+            'filter-root-item': true,
             [this.containerClass?.class ?? '']:
               this.containerClass?.index === i,
           });
@@ -359,6 +340,26 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @state()
+  accessor containerClass:
+    | {
+        class: string;
+        index: number;
+      }
+    | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor data!: FilterGroup;
+
+  @property({ attribute: false })
+  accessor depth = 1;
+
+  @property({ attribute: false })
+  accessor setData!: (filter: FilterGroup) => void;
+
+  @property({ attribute: false })
+  accessor vars!: Variable[];
 }
 
 declare global {

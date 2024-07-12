@@ -1,20 +1,8 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/toolbar.js';
-import './more-button.js';
-
 import { WidgetElement } from '@blocksuite/block-std';
-import { css, html, nothing, type TemplateResult } from 'lit';
+import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import { ConnectorCWithArrowIcon } from '../../../_common/icons/edgeless.js';
-import {
-  atLeastNMatches,
-  groupBy,
-  pickValues,
-} from '../../../_common/utils/iterable.js';
 import type { AttachmentBlockModel } from '../../../attachment-block/attachment-model.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
@@ -29,19 +17,31 @@ import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
+import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { RootBlockModel } from '../../root-model.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
+import '../../../_common/components/toolbar/toolbar.js';
+import { ConnectorCWithArrowIcon } from '../../../_common/icons/edgeless.js';
+import {
+  atLeastNMatches,
+  groupBy,
+  pickValues,
+} from '../../../_common/utils/iterable.js';
 import {
   ConnectorMode,
   GroupElementModel,
 } from '../../../surface-block/index.js';
 import {
   type BrushElementModel,
-  clamp,
   type ConnectorElementModel,
   type ShapeElementModel,
   type TextElementModel,
+  clamp,
 } from '../../../surface-block/index.js';
-import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   isAttachmentBlock,
@@ -52,7 +52,6 @@ import {
   isImageBlock,
   isNoteBlock,
 } from '../../edgeless/utils/query.js';
-import type { RootBlockModel } from '../../root-model.js';
 import { renderAddFrameButton } from './add-frame-button.js';
 import { renderAddGroupButton } from './add-group-button.js';
 import { renderAlignButton } from './align-button.js';
@@ -68,28 +67,29 @@ import { renderMindmapButton } from './change-mindmap-button.js';
 import { renderNoteButton } from './change-note-button.js';
 import { renderChangeShapeButton } from './change-shape-button.js';
 import { renderChangeTextButton } from './change-text-button.js';
+import './more-button.js';
 import { renderReleaseFromGroupButton } from './release-from-group-button.js';
 
 type CategorizedElements = {
-  shape?: ShapeElementModel[];
-  brush?: BrushElementModel[];
-  text?: TextElementModel[];
-  group?: GroupElementModel[];
-  connector?: ConnectorElementModel[];
-  note?: NoteBlockModel[];
-  frame?: FrameBlockModel[];
-  image?: ImageBlockModel[];
   attachment?: AttachmentBlockModel[];
-  mindmap?: MindmapElementModel[];
-  embedCard?: BookmarkBlockModel[] &
-    EmbedGithubModel[] &
-    EmbedYoutubeModel[] &
-    EmbedFigmaModel[] &
-    EmbedLinkedDocModel[] &
-    EmbedSyncedDocModel[] &
-    EmbedHtmlModel[] &
-    EmbedLoomModel[];
+  brush?: BrushElementModel[];
+  connector?: ConnectorElementModel[];
   edgelessText?: EdgelessTextBlockModel[];
+  embedCard?: BookmarkBlockModel[] &
+    EmbedFigmaModel[] &
+    EmbedGithubModel[] &
+    EmbedHtmlModel[] &
+    EmbedLinkedDocModel[] &
+    EmbedLoomModel[] &
+    EmbedSyncedDocModel[] &
+    EmbedYoutubeModel[];
+  frame?: FrameBlockModel[];
+  group?: GroupElementModel[];
+  image?: ImageBlockModel[];
+  mindmap?: MindmapElementModel[];
+  note?: NoteBlockModel[];
+  shape?: ShapeElementModel[];
+  text?: TextElementModel[];
 };
 
 type CustomEntry = {
@@ -116,47 +116,32 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     }
   `;
 
-  get edgeless() {
-    return this.blockElement as EdgelessRootBlockComponent;
-  }
+  private _quickConnect = ({ x, y }: MouseEvent) => {
+    const element = this.selection.selectedElements[0];
+    const point = this.edgeless.service.viewport.toViewCoordFromClientCoord([
+      x,
+      y,
+    ]);
+    this.edgeless.doc.captureSync();
+    this.edgeless.tools.setEdgelessTool({
+      mode: ConnectorMode.Curve,
+      type: 'connector',
+    });
 
-  get selection() {
-    return this.edgeless.service.selection;
-  }
+    const ctc = this.edgeless.tools.controllers[
+      'connector'
+    ] as ConnectorToolController;
+    ctc.quickConnect(point, element);
+  };
 
-  get slots() {
-    return this.edgeless.slots;
-  }
+  private _updateOnSelectedChange = (element: { id: string } | string) => {
+    const id = typeof element === 'string' ? element : element.id;
 
-  get surface() {
-    return this.edgeless.surface;
-  }
-
-  @state()
-  private accessor _dragging = false;
-
-  @state()
-  private accessor _registeredEntries: {
-    render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
-    when: (model: BlockSuite.EdgelessModelType[]) => boolean;
-  }[] = [];
-
-  @property({ attribute: false })
-  accessor enableNoteSlicer!: boolean;
-
-  @state()
-  accessor toolbarVisible = false;
-
-  @state({
-    hasChanged: (value: string[], oldValue: string[]) => {
-      if (value.length !== oldValue?.length) {
-        return true;
-      }
-
-      return value.some((id, index) => id !== oldValue[index]);
-    },
-  })
-  accessor selectedIds: string[] = [];
+    if (this.isConnected && !this._dragging && this.selection.has(id)) {
+      this._recalculatePosition();
+      this.requestUpdate();
+    }
+  };
 
   private _groupSelected(): CategorizedElements {
     const result = groupBy(this.selection.selectedElements, model => {
@@ -179,15 +164,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     return result as CategorizedElements;
   }
 
-  private _updateOnSelectedChange = (element: string | { id: string }) => {
-    const id = typeof element === 'string' ? element : element.id;
-
-    if (this.isConnected && !this._dragging && this.selection.has(id)) {
-      this._recalculatePosition();
-      this.requestUpdate();
-    }
-  };
-
   private _recalculatePosition() {
     const { selection, viewport } = this.edgeless.service;
     const elements = selection.selectedElements;
@@ -199,7 +175,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     const bound = edgelessElementsBound(selection.selectedElements);
 
-    const { width, height } = viewport;
+    const { height, width } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
 
@@ -226,24 +202,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
     this.selectedIds = selection.selectedIds;
   }
-
-  private _quickConnect = ({ x, y }: MouseEvent) => {
-    const element = this.selection.selectedElements[0];
-    const point = this.edgeless.service.viewport.toViewCoordFromClientCoord([
-      x,
-      y,
-    ]);
-    this.edgeless.doc.captureSync();
-    this.edgeless.tools.setEdgelessTool({
-      type: 'connector',
-      mode: ConnectorMode.Curve,
-    });
-
-    const ctc = this.edgeless.tools.controllers[
-      'connector'
-    ] as ConnectorToolController;
-    ctc.quickConnect(point, element);
-  };
 
   private _renderQuickConnectButton() {
     return [
@@ -334,18 +292,18 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
     const {
-      shape,
+      attachment,
       brush,
       connector,
-      note,
-      text,
+      edgelessText,
+      embedCard,
       frame,
       group,
-      embedCard,
-      attachment,
       image,
-      edgelessText,
       mindmap: mindmaps,
+      note,
+      shape,
+      text,
     } = groupedSelected;
     const { selectedElements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -368,7 +326,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           ]
         : [];
 
-    const buttons: (symbol | TemplateResult)[] = selectedAtLeastTwoTypes
+    const buttons: (TemplateResult | symbol)[] = selectedAtLeastTwoTypes
       ? generalButtons
       : [
           ...generalButtons,
@@ -419,6 +377,48 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       </editor-toolbar>
     `;
   }
+
+  get edgeless() {
+    return this.blockElement as EdgelessRootBlockComponent;
+  }
+
+  get selection() {
+    return this.edgeless.service.selection;
+  }
+
+  get slots() {
+    return this.edgeless.slots;
+  }
+
+  get surface() {
+    return this.edgeless.surface;
+  }
+
+  @state()
+  private accessor _dragging = false;
+
+  @state()
+  private accessor _registeredEntries: {
+    render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
+    when: (model: BlockSuite.EdgelessModelType[]) => boolean;
+  }[] = [];
+
+  @property({ attribute: false })
+  accessor enableNoteSlicer!: boolean;
+
+  @state({
+    hasChanged: (value: string[], oldValue: string[]) => {
+      if (value.length !== oldValue?.length) {
+        return true;
+      }
+
+      return value.some((id, index) => id !== oldValue[index]);
+    },
+  })
+  accessor selectedIds: string[] = [];
+
+  @state()
+  accessor toolbarVisible = false;
 }
 
 declare global {

@@ -1,88 +1,88 @@
 export interface TUnion {
-  type: 'union';
-  title: 'union';
   list: TType[];
+  title: 'union';
+  type: 'union';
 }
 
 export const tUnion = (list: TType[]): TUnion => ({
-  type: 'union',
-  title: 'union',
   list,
+  title: 'union',
+  type: 'union',
 });
 
 // TODO treat as data type
 export interface TArray<_Ele extends TType = TType> {
-  type: 'array';
   ele: TType;
   title: 'array';
+  type: 'array';
 }
 
 export const tArray = <const T extends TType>(ele: T): TArray<T> => {
   return {
-    type: 'array',
-    title: 'array',
     ele,
+    title: 'array',
+    type: 'array',
   };
 };
 export const isTArray = (type: TType): type is TArray => {
   return type.type === 'array';
 };
 export type TTypeVar = {
-  type: 'typeVar';
-  title: 'typeVar';
-  name: string;
   bound: TType;
+  name: string;
+  title: 'typeVar';
+  type: 'typeVar';
 };
 export const tTypeVar = (name: string, bound: TType): TTypeVar => {
   return {
-    type: 'typeVar',
-    title: 'typeVar',
-    name,
     bound,
+    name,
+    title: 'typeVar',
+    type: 'typeVar',
   };
 };
 export type TTypeRef = {
-  type: 'typeRef';
-  title: 'typeRef';
   name: string;
+  title: 'typeRef';
+  type: 'typeRef';
 };
 export const tTypeRef = (name: string): TTypeRef => {
   return {
-    type: 'typeRef',
-    title: 'typeRef',
     name,
+    title: 'typeRef',
+    type: 'typeRef',
   };
 };
 
 export type TFunction = {
-  type: 'function';
-  title: 'function';
-  typeVars: TTypeVar[];
   args: TType[];
   rt: TType;
+  title: 'function';
+  type: 'function';
+  typeVars: TTypeVar[];
 };
 
 export const tFunction = (fn: {
-  typeVars?: TTypeVar[];
   args: TType[];
   rt: TType;
+  typeVars?: TTypeVar[];
 }): TFunction => {
   return {
-    type: 'function',
-    title: 'function',
-    typeVars: fn.typeVars ?? [],
     args: fn.args,
     rt: fn.rt,
+    title: 'function',
+    type: 'function',
+    typeVars: fn.typeVars ?? [],
   };
 };
 
-export type TType = TDataType | TArray | TUnion | TTypeRef | TFunction;
+export type TType = TArray | TDataType | TFunction | TTypeRef | TUnion;
 
 export type DataTypeShape = Record<string, unknown>;
 export type TDataType<Data extends DataTypeShape = Record<string, unknown>> = {
-  type: 'data';
-  name: string;
   data?: Data;
+  name: string;
+  type: 'data';
 };
 export type ValueOfData<T extends DataDefine> =
   T extends DataDefine<infer R> ? R : never;
@@ -108,9 +108,9 @@ export class DataDefine<Data extends DataTypeShape = Record<string, unknown>> {
 
   create(data?: Data): TDataType<Data> {
     return {
-      type: 'data',
-      name: this.config.name,
       data,
+      name: this.config.name,
+      type: 'data',
     };
   }
 
@@ -179,6 +179,23 @@ export class Typesystem {
     const result = new DataDefine(config, this.dataMap);
     this.dataMap.set(config.name, result);
     return result;
+  }
+
+  instance(
+    context: Record<string, TType>,
+    realArgs: TType[],
+    realRt: TType,
+    template: TFunction
+  ): TFunction {
+    const ctx = { ...context };
+    template.args.forEach((arg, i) => {
+      const realArg = realArgs[i];
+      if (realArg) {
+        this.isSubtype(arg, realArg, ctx);
+      }
+    });
+    this.isSubtype(realRt, template.rt);
+    return this.subst(ctx, template);
   }
 
   isDataType(t: TType): t is TDataType {
@@ -256,23 +273,6 @@ export class Typesystem {
       rt: subst(template.rt),
     });
     return result;
-  }
-
-  instance(
-    context: Record<string, TType>,
-    realArgs: TType[],
-    realRt: TType,
-    template: TFunction
-  ): TFunction {
-    const ctx = { ...context };
-    template.args.forEach((arg, i) => {
-      const realArg = realArgs[i];
-      if (realArg) {
-        this.isSubtype(arg, realArg, ctx);
-      }
-    });
-    this.isSubtype(realRt, template.rt);
-    return this.subst(ctx, template);
   }
 }
 

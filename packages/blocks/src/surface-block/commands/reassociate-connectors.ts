@@ -1,4 +1,5 @@
 import type { Command } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 
 /**
@@ -10,9 +11,9 @@ import { assertExists } from '@blocksuite/global/utils';
 export const reassociateConnectorsCommand: Command<
   never,
   never,
-  { oldId: string; newId: string }
+  { newId: string; oldId: string }
 > = (ctx, next) => {
-  const { oldId, newId } = ctx;
+  const { newId, oldId } = ctx;
   assertExists(oldId, 'The old block ID is required!');
   assertExists(newId, 'The new block ID is required!');
 

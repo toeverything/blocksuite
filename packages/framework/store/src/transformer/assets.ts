@@ -1,10 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 interface BlobCRUD {
-  get: (key: string) => Promise<Blob | null> | Blob | null;
-  set: (key: string, value: Blob) => Promise<string> | string;
   delete: (key: string) => Promise<void> | void;
+  get: (key: string) => Blob | Promise<Blob | null> | null;
   list: () => Promise<string[]> | string[];
+  set: (key: string, value: Blob) => Promise<string> | string;
 }
 
 type AssetsManagerConfig = {
@@ -20,16 +20,16 @@ export class AssetsManager {
     this._blob = options.blob;
   }
 
+  cleanup() {
+    this._assetsMap.clear();
+  }
+
   getAssets() {
     return this._assetsMap;
   }
 
   isEmpty() {
     return this._assetsMap.size === 0;
-  }
-
-  cleanup() {
-    this._assetsMap.clear();
   }
 
   async readFromBlob(blobId: string) {

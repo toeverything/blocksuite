@@ -1,12 +1,13 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
-import { generateKeyBetween } from '../../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+
+import { generateKeyBetween } from '../../../../../surface-block/index.js';
 
 @customElement('edgeless-frame-order-menu')
 export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
@@ -94,27 +95,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       width: 90%;
     }
   `;
-
-  @state()
-  private accessor _curIndex = -1;
-
-  @property({ attribute: false })
-  accessor embed = false;
-
-  @query('.edgeless-frame-order-items-container')
-  private accessor _container!: HTMLDivElement;
-
-  @query('.indicator-line')
-  private accessor _indicatorLine!: HTMLDivElement;
-
-  @query('.clone')
-  private accessor _clone!: HTMLDivElement;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor frames!: FrameBlockModel[];
 
   private _bindEvent() {
     const { _disposables } = this;
@@ -241,6 +221,27 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  @query('.clone')
+  private accessor _clone!: HTMLDivElement;
+
+  @query('.edgeless-frame-order-items-container')
+  private accessor _container!: HTMLDivElement;
+
+  @state()
+  private accessor _curIndex = -1;
+
+  @query('.indicator-line')
+  private accessor _indicatorLine!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor embed = false;
+
+  @property({ attribute: false })
+  accessor frames!: FrameBlockModel[];
 }
 
 declare global {

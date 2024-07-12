@@ -15,5 +15,5 @@ export const ToolbarButtonWithMenuMixin = <
 ) => {
   abstract class DerivedClass extends EdgelessToolbarToolMixin(SuperClass) {}
 
-  return DerivedClass as unknown as T & Constructor<ToolbarButtonWithMenuClass>;
+  return DerivedClass as unknown as Constructor<ToolbarButtonWithMenuClass> & T;
 };

@@ -1,6 +1,7 @@
+import type { BlockCollection } from '@blocksuite/store';
+
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockCollection } from '@blocksuite/store';
 import { DocCollection, Text } from '@blocksuite/store';
 import { Generator, Schema } from '@blocksuite/store';
 
@@ -15,16 +16,16 @@ function createCollectionOptions() {
   const idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
   return {
-    id: room,
-    schema,
-    idGenerator,
     defaultFlags: {
-      enable_synced_doc_block: true,
       enable_pie_menu: true,
+      enable_synced_doc_block: true,
       readonly: {
         'doc:home': false,
       },
     },
+    id: room,
+    idGenerator,
+    schema,
   };
 }
 

@@ -1,5 +1,8 @@
 import { html } from 'lit';
 
+import type { DataViewRenderer } from '../../../data-view.js';
+import type { KanbanSelectionController } from './controller/selection.js';
+
 import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import {
   ArrowRightBigIcon,
@@ -8,8 +11,6 @@ import {
   MoveRightIcon,
 } from '../../../../../_common/icons/index.js';
 import { DeleteIcon } from '../../../common/icons/index.js';
-import type { DataViewRenderer } from '../../../data-view.js';
-import type { KanbanSelectionController } from './controller/selection.js';
 
 export const openDetail = (
   dataViewEle: DataViewRenderer,
@@ -19,11 +20,11 @@ export const openDetail = (
   const old = selection.selection;
   selection.selection = undefined;
   dataViewEle.openDetailPanel({
-    view: selection.view,
-    rowId: rowId,
     onClose: () => {
       selection.selection = old;
     },
+    rowId: rowId,
+    view: selection.view,
   });
 };
 
@@ -35,17 +36,16 @@ export const popCardMenu = (
 ) => {
   popFilterableSimpleMenu(ele, [
     {
-      type: 'action',
-      name: 'Expand Card',
       icon: ExpandFullIcon,
+      name: 'Expand Card',
       select: () => {
         openDetail(dataViewEle, rowId, selection);
       },
+      type: 'action',
     },
     {
-      type: 'sub-menu',
-      name: 'Move To',
       icon: ArrowRightBigIcon,
+      name: 'Move To',
       options: {
         input: {
           search: true,
@@ -61,14 +61,15 @@ export const popCardMenu = (
             })
             .map(group => {
               return {
-                type: 'action',
                 name: group.value != null ? group.name : 'Ungroup',
                 select: () => {
                   selection.moveCard(rowId, group.key);
                 },
+                type: 'action',
               };
             }) ?? [],
       },
+      type: 'sub-menu',
     },
     // {
     //   type: 'group',
@@ -93,49 +94,49 @@ export const popCardMenu = (
     //   ],
     // },
     {
-      type: 'group',
-      name: '',
       children: () => [
         {
-          type: 'action',
-          name: 'Insert Before',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveLeftIcon}
           </div>`,
+          name: 'Insert Before',
           select: () => {
             selection.insertRowBefore();
           },
+          type: 'action',
         },
         {
-          type: 'action',
-          name: 'Insert After',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveRightIcon}
           </div>`,
+          name: 'Insert After',
           select: () => {
             selection.insertRowAfter();
           },
+          type: 'action',
         },
       ],
+      name: '',
+      type: 'group',
     },
     {
-      type: 'group',
-      name: '',
       children: () => [
         {
-          type: 'action',
-          name: 'Delete Card',
           class: 'delete-item',
           icon: DeleteIcon,
+          name: 'Delete Card',
           select: () => {
             selection.deleteCard();
           },
+          type: 'action',
         },
       ],
+      name: '',
+      type: 'group',
     },
   ]);
 };

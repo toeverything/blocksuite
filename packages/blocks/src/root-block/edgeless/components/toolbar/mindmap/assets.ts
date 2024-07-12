@@ -12,35 +12,35 @@ import {
 } from './icons.js';
 
 export type ToolbarMindmapItem = {
-  type: 'mindmap';
   icon: TemplateResult;
-  style: MindmapStyle;
   render: DraggableTool['render'];
+  style: MindmapStyle;
+  type: 'mindmap';
 };
 
 export const getMindMaps = (theme: 'dark' | 'light'): ToolbarMindmapItem[] => [
   {
-    type: 'mindmap',
     icon: theme === 'light' ? mindMapStyle1Light : mindMapStyle1Dark,
-    style: MindmapStyle.ONE,
     render: getMindmapRender(MindmapStyle.ONE),
+    style: MindmapStyle.ONE,
+    type: 'mindmap',
   },
   {
-    type: 'mindmap',
     icon: mindMapStyle4,
-    style: MindmapStyle.FOUR,
     render: getMindmapRender(MindmapStyle.FOUR),
+    style: MindmapStyle.FOUR,
+    type: 'mindmap',
   },
   {
-    type: 'mindmap',
     icon: mindMapStyle3,
-    style: MindmapStyle.THREE,
     render: getMindmapRender(MindmapStyle.THREE),
+    style: MindmapStyle.THREE,
+    type: 'mindmap',
   },
   {
-    type: 'mindmap',
     icon: theme === 'light' ? mindMapStyle2Light : mindMapStyle2Dark,
-    style: MindmapStyle.TWO,
     render: getMindmapRender(MindmapStyle.TWO),
+    style: MindmapStyle.TWO,
+    type: 'mindmap',
   },
 ];

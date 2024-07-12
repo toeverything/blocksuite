@@ -1,11 +1,13 @@
-import { assertExists, assertType } from '@blocksuite/global/utils';
 import type { BlockSnapshot, SnapshotReturn } from '@blocksuite/store';
 
+import { assertExists, assertType } from '@blocksuite/global/utils';
+
 import type { ConnectorElementModel } from '../../../surface-block/index.js';
+import type { SlotBlockPayload, TemplateJob } from './template.js';
+
 import { Bound } from '../../../surface-block/utils/bound.js';
 import { generateElementId } from '../../../surface-block/utils/index.js';
 import { sortIndex } from '../../../surface-block/utils/sort.js';
-import type { SlotBlockPayload, TemplateJob } from './template.js';
 
 export const replaceIdMiddleware = (job: TemplateJob) => {
   const regeneratedIdMap = new Map<string, string>();
@@ -58,7 +60,7 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
         val.id = newId;
         elements[newId] = val;
 
-        if (['group', 'connector'].includes(val['type'] as string)) {
+        if (['connector', 'group'].includes(val['type'] as string)) {
           defered.push(newId);
         }
       });
@@ -245,10 +247,10 @@ export const createRegenerateIndexMiddleware = (
 
     const generateIndexMap = () => {
       const indexList: {
+        element?: boolean;
+        flavour: string;
         id: string;
         index: string;
-        flavour: string;
-        element?: boolean;
       }[] = [];
       const frameList: {
         id: string;
@@ -257,8 +259,8 @@ export const createRegenerateIndexMiddleware = (
       const groupIndexMap = new Map<
         string,
         {
-          index: string;
           id: string;
+          index: string;
         }
       >();
 
@@ -271,9 +273,9 @@ export const createRegenerateIndexMiddleware = (
             });
           } else {
             indexList.push({
+              flavour: block.flavour,
               id: block.id,
               index: block.props.index as string,
-              flavour: block.flavour,
             });
           }
         }
@@ -283,10 +285,10 @@ export const createRegenerateIndexMiddleware = (
             block.props.elements as Record<string, Record<string, unknown>>
           ).forEach(([_, element]) => {
             indexList.push({
-              index: element['index'] as string,
+              element: true,
               flavour: element['type'] as string,
               id: element['id'] as string,
-              element: true,
+              index: element['index'] as string,
             });
 
             if (element['type'] === 'group') {
@@ -294,8 +296,8 @@ export const createRegenerateIndexMiddleware = (
                 json: Record<string, boolean>;
               };
               const groupIndex = {
-                index: element['index'] as string,
                 id: element['id'] as string,
+                index: element['index'] as string,
               };
 
               Object.keys(children.json).forEach(key => {

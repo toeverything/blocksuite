@@ -1,8 +1,9 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
+import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import { AttachmentBlockTransformer } from './attachment-transformer.js';
 
 /**
@@ -30,50 +31,47 @@ export const AttachmentBlockStyles: EmbedCardStyle[] = [
 
 export interface AttachmentBlockEdgelessProps {
   index: string;
-  xywh: SerializedXYWH;
   rotate: number;
+  xywh: SerializedXYWH;
 }
 
 export type AttachmentBlockProps = {
+  caption?: string;
+  /**
+   * Whether to show the attachment as an embed view.
+   */
+  embed: BackwardCompatibleUndefined | boolean;
   name: string;
   size: number;
-  /**
-   * MIME type
-   */
-  type: string;
-  caption?: string;
   // `loadingKey` was used to indicate whether the attachment is loading,
   // which is currently unused but no breaking change is needed.
   // The `loadingKey` and `sourceId` should not be existed at the same time.
   // loadingKey?: string | null;
   sourceId?: string;
-  /**
-   * Whether to show the attachment as an embed view.
-   */
-  embed: boolean | BackwardCompatibleUndefined;
-
   style?: (typeof AttachmentBlockStyles)[number];
+
+  /**
+   * MIME type
+   */
+  type: string;
 } & AttachmentBlockEdgelessProps;
 
 export const defaultAttachmentProps: AttachmentBlockProps = {
-  name: '',
-  size: 0,
-  type: 'application/octet-stream',
-  sourceId: undefined,
   caption: undefined,
   embed: false,
-  style: AttachmentBlockStyles[1],
   index: 'a0',
-  xywh: '[0,0,0,0]',
+  name: '',
   rotate: 0,
+  size: 0,
+  sourceId: undefined,
+  style: AttachmentBlockStyles[1],
+  type: 'application/octet-stream',
+  xywh: '[0,0,0,0]',
 };
 
 export const AttachmentBlockSchema = defineBlockSchema({
   flavour: 'affine:attachment',
-  props: (): AttachmentBlockProps => defaultAttachmentProps,
   metadata: {
-    version: 1,
-    role: 'content',
     parent: [
       'affine:note',
       'affine:surface',
@@ -81,9 +79,12 @@ export const AttachmentBlockSchema = defineBlockSchema({
       'affine:paragraph',
       'affine:list',
     ],
+    role: 'content',
+    version: 1,
   },
-  transformer: () => new AttachmentBlockTransformer(),
+  props: (): AttachmentBlockProps => defaultAttachmentProps,
   toModel: () => new AttachmentBlockModel(),
+  transformer: () => new AttachmentBlockTransformer(),
 });
 
 export class AttachmentBlockModel extends selectable<AttachmentBlockProps>(

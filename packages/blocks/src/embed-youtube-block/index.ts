@@ -1,8 +1,9 @@
 import { noop } from '@blocksuite/global/utils';
 
-import { EmbedYoutubeBlockComponent } from './embed-youtube-block.js';
 import type { EmbedYoutubeModel } from './embed-youtube-model.js';
 import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
+
+import { EmbedYoutubeBlockComponent } from './embed-youtube-block.js';
 noop(EmbedYoutubeBlockComponent);
 
 export * from './embed-youtube-block.js';

@@ -1,12 +1,14 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/separator.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { html, LitElement, nothing } from 'lit';
+import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
+import type { GroupElementModel } from '../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
 import { toast } from '../../../_common/components/toast.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   NoteIcon,
@@ -15,23 +17,15 @@ import {
 } from '../../../_common/icons/index.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import type { GroupElementModel } from '../../../surface-block/index.js';
 import {
   deserializeXYWH,
   serializeXYWH,
 } from '../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
 import { mountGroupTitleEditor } from '../../edgeless/utils/text.js';
 
 @customElement('edgeless-change-group-button')
 export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor groups!: GroupElementModel[];
-
   private _insertIntoPage() {
     if (!this.edgeless.doc.root) return;
 
@@ -66,13 +60,17 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
     this.edgeless.doc.addBlock(
       'affine:surface-ref',
       {
-        reference: this.groups[0].id,
         refFlavour: 'group',
+        reference: this.groups[0].id,
       },
       targetParent
     );
 
     toast(this.edgeless.host, 'Group has been inserted into page');
+  }
+
+  protected override createRenderRoot() {
+    return this;
   }
 
   protected override render() {
@@ -127,9 +125,11 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
     );
   }
 
-  protected override createRenderRoot() {
-    return this;
-  }
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor groups!: GroupElementModel[];
 }
 
 declare global {

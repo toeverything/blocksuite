@@ -1,4 +1,4 @@
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 export function fontIcon(svg: TemplateResult<2>, baseSize = 20) {
   // assume 1em = 16px

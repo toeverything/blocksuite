@@ -14,7 +14,7 @@ import {
 } from '../config.js';
 import { BlockHubCards } from './block-hub-cards.js';
 
-export type CardListType = 'blank' | 'text' | 'list' | 'file' | 'database';
+export type CardListType = 'blank' | 'database' | 'file' | 'list' | 'text';
 
 const shouldDisplayCard = (
   type: CardListType | null,

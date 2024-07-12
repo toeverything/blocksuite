@@ -2,48 +2,40 @@ import { UIEventState } from '../base.js';
 
 type PointerEventStateOptions = {
   event: PointerEvent;
+  last: PointerEventState | null;
   rect: DOMRect;
   startX: number;
   startY: number;
-  last: PointerEventState | null;
 };
 
 type Point = { x: number; y: number };
 
 export class PointerEventState extends UIEventState {
-  override type = 'pointerState';
-
-  raw: PointerEvent;
-
-  point: Point;
+  button: number;
 
   containerOffset: Point;
 
-  start: Point;
-
   delta: Point;
-
-  keys: {
-    shift: boolean;
-    cmd: boolean;
-    alt: boolean;
-  };
-
-  button: number;
 
   dragging: boolean;
 
+  keys: {
+    alt: boolean;
+    cmd: boolean;
+    shift: boolean;
+  };
+
+  point: Point;
+
   pressure: number;
 
-  get x() {
-    return this.point.x;
-  }
+  raw: PointerEvent;
 
-  get y() {
-    return this.point.y;
-  }
+  start: Point;
 
-  constructor({ event, rect, startX, startY, last }: PointerEventStateOptions) {
+  override type = 'pointerState';
+
+  constructor({ event, last, rect, startX, startY }: PointerEventStateOptions) {
     super(event);
 
     const offsetX = event.clientX - rect.left;
@@ -57,13 +49,21 @@ export class PointerEventState extends UIEventState {
       ? { x: offsetX - last.point.x, y: offsetY - last.point.y }
       : { x: 0, y: 0 };
     this.keys = {
-      shift: event.shiftKey,
-      cmd: event.metaKey || event.ctrlKey,
       alt: event.altKey,
+      cmd: event.metaKey || event.ctrlKey,
+      shift: event.shiftKey,
     };
     this.button = last?.button || event.button;
     this.dragging = !!last;
     this.pressure = event.pressure;
+  }
+
+  get x() {
+    return this.point.x;
+  }
+
+  get y() {
+    return this.point.y;
   }
 }
 

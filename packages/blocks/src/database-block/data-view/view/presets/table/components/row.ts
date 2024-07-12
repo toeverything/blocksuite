@@ -5,24 +5,17 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { NewEditIcon } from '../../../../../../_common/icons/index.js';
-import { MoreHorizontalIcon } from '../../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 import type { TableViewSelection } from '../types.js';
+
+import { NewEditIcon } from '../../../../../../_common/icons/index.js';
+import { MoreHorizontalIcon } from '../../../../common/icons/index.js';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { openDetail, popRowMenu } from './menu.js';
 
 @customElement('data-view-table-row')
 export class TableRow extends WithDisposable(ShadowlessElement) {
-  get selectionController() {
-    return this.closest('affine-database-table')?.selectionController;
-  }
-
-  get groupKey() {
-    return this.closest('affine-data-view-table-group')?.group?.key;
-  }
-
   static override styles = css`
     .data-view-table-row {
       width: 100%;
@@ -100,18 +93,6 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor dataViewEle!: DataViewRenderer;
-
-  @property({ attribute: false })
-  accessor view!: DataViewTableManager;
-
-  @property({ attribute: false })
-  accessor rowIndex!: number;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
-
   private _clickDragHandler = () => {
     if (this.view.readonly) {
       return;
@@ -128,20 +109,65 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
         };
       } else {
         selectionController.selection = {
-          groupKey: this.groupKey,
-          rowsSelection: {
-            start: this.rowIndex,
-            end: this.rowIndex,
-          },
           focus: {
-            rowIndex: this.rowIndex,
             columnIndex: 0,
+            rowIndex: this.rowIndex,
           },
+          groupKey: this.groupKey,
           isEditing: false,
+          rowsSelection: {
+            end: this.rowIndex,
+            start: this.rowIndex,
+          },
         };
       }
     }
   };
+
+  contextMenu = (e: MouseEvent) => {
+    if (this.view.readonly) {
+      return;
+    }
+    const selection = this.selectionController;
+    if (!selection) {
+      return;
+    }
+    e.preventDefault();
+    const ele = e.target as HTMLElement;
+    const cell = ele.closest('affine-database-cell-container');
+    const columnIndex = cell?.columnIndex ?? 0;
+    selection.selection = {
+      focus: {
+        columnIndex: columnIndex,
+        rowIndex: this.rowIndex,
+      },
+      groupKey: this.groupKey,
+      isEditing: false,
+      rowsSelection: {
+        end: this.rowIndex,
+        start: this.rowIndex,
+      },
+    };
+    const target =
+      cell ??
+      (e.target as HTMLElement).closest('.database-cell') ?? // for last add btn cell
+      (e.target as HTMLElement);
+
+    popRowMenu(this.dataViewEle, target, this.rowId, selection);
+  };
+
+  setSelection = (selection?: Omit<TableViewSelection, 'type' | 'viewId'>) => {
+    if (this.selectionController) {
+      this.selectionController.selection = selection;
+    }
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
+    // eslint-disable-next-line wc/no-self-class
+    this.classList.add('affine-database-block-row', 'database-row');
+  }
 
   protected override render(): unknown {
     const view = this.view;
@@ -170,16 +196,16 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               return;
             }
             this.setSelection({
-              groupKey: this.groupKey,
-              rowsSelection: {
-                start: this.rowIndex,
-                end: this.rowIndex,
-              },
               focus: {
-                rowIndex: this.rowIndex,
                 columnIndex: i,
+                rowIndex: this.rowIndex,
               },
+              groupKey: this.groupKey,
               isEditing: false,
+              rowsSelection: {
+                end: this.rowIndex,
+                start: this.rowIndex,
+              },
             });
             openDetail(this.dataViewEle, this.rowId, this.selectionController);
           };
@@ -189,16 +215,16 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
             }
             const ele = e.currentTarget as HTMLElement;
             this.setSelection({
-              groupKey: this.groupKey,
-              rowsSelection: {
-                start: this.rowIndex,
-                end: this.rowIndex,
-              },
               focus: {
-                rowIndex: this.rowIndex,
                 columnIndex: i,
+                rowIndex: this.rowIndex,
               },
+              groupKey: this.groupKey,
               isEditing: false,
+              rowsSelection: {
+                end: this.rowIndex,
+                start: this.rowIndex,
+              },
             });
             popRowMenu(
               this.dataViewEle,
@@ -212,8 +238,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               <affine-database-cell-container
                 class="database-cell"
                 style=${styleMap({
-                  width: `${column.width}px`,
                   border: i === 0 ? 'none' : undefined,
+                  width: `${column.width}px`,
                 })}
                 .view="${view}"
                 .column="${column}"
@@ -248,50 +274,25 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  setSelection = (selection?: Omit<TableViewSelection, 'viewId' | 'type'>) => {
-    if (this.selectionController) {
-      this.selectionController.selection = selection;
-    }
-  };
-
-  contextMenu = (e: MouseEvent) => {
-    if (this.view.readonly) {
-      return;
-    }
-    const selection = this.selectionController;
-    if (!selection) {
-      return;
-    }
-    e.preventDefault();
-    const ele = e.target as HTMLElement;
-    const cell = ele.closest('affine-database-cell-container');
-    const columnIndex = cell?.columnIndex ?? 0;
-    selection.selection = {
-      groupKey: this.groupKey,
-      rowsSelection: {
-        start: this.rowIndex,
-        end: this.rowIndex,
-      },
-      focus: {
-        rowIndex: this.rowIndex,
-        columnIndex: columnIndex,
-      },
-      isEditing: false,
-    };
-    const target =
-      cell ??
-      (e.target as HTMLElement).closest('.database-cell') ?? // for last add btn cell
-      (e.target as HTMLElement);
-
-    popRowMenu(this.dataViewEle, target, this.rowId, selection);
-  };
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
-    // eslint-disable-next-line wc/no-self-class
-    this.classList.add('affine-database-block-row', 'database-row');
+  get groupKey() {
+    return this.closest('affine-data-view-table-group')?.group?.key;
   }
+
+  get selectionController() {
+    return this.closest('affine-database-table')?.selectionController;
+  }
+
+  @property({ attribute: false })
+  accessor dataViewEle!: DataViewRenderer;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  @property({ attribute: false })
+  accessor rowIndex!: number;
+
+  @property({ attribute: false })
+  accessor view!: DataViewTableManager;
 }
 
 declare global {

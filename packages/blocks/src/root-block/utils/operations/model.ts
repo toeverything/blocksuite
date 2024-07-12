@@ -1,5 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
 
 /**
@@ -46,12 +47,12 @@ export function transformModel(
   const parent = doc.getParent(model);
   assertExists(parent);
   const blockProps: {
-    type?: string;
-    text?: Text;
     children?: BlockModel[];
+    text?: Text;
+    type?: string;
   } = {
-    text: model?.text?.clone(), // should clone before `deleteBlock`
     children: model.children,
+    text: model?.text?.clone(), // should clone before `deleteBlock`
     ...props,
   };
   const index = parent.children.indexOf(model);

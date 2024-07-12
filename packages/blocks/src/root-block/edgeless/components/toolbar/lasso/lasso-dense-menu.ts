@@ -1,9 +1,10 @@
+import type { DenseMenuBuilder } from '../common/type.js';
+
 import {
   LassoFreeHandIcon,
   LassoPolygonalIcon,
 } from '../../../../../_common/icons/edgeless.js';
 import { LassoMode } from '../../../../../_common/types.js';
-import type { DenseMenuBuilder } from '../common/type.js';
 
 export const buildLassoDenseMenu: DenseMenuBuilder = edgeless => {
   // TODO: active state
@@ -14,32 +15,32 @@ export const buildLassoDenseMenu: DenseMenuBuilder = edgeless => {
   const isActive = edgeless.tools.edgelessTool.type === 'lasso';
 
   const createSelect = (mode: LassoMode) => () => {
-    edgeless.tools.setEdgelessTool({ type: 'lasso', mode });
+    edgeless.tools.setEdgelessTool({ mode, type: 'lasso' });
   };
 
   return {
-    name: 'Lasso',
-    type: 'sub-menu',
     icon: LassoFreeHandIcon,
-    select: createSelect(LassoMode.FreeHand),
     isSelected: isActive,
+    name: 'Lasso',
     options: {
       items: [
         {
-          type: 'action',
           icon: LassoFreeHandIcon,
           name: 'Free',
           select: createSelect(LassoMode.FreeHand),
+          type: 'action',
           // isSelected: isActive && prevMode === LassoMode.FreeHand,
         },
         {
-          type: 'action',
           icon: LassoPolygonalIcon,
           name: 'Polygonal',
           select: createSelect(LassoMode.Polygonal),
+          type: 'action',
           // isSelected: isActive && prevMode === LassoMode.Polygonal,
         },
       ],
     },
+    select: createSelect(LassoMode.FreeHand),
+    type: 'sub-menu',
   };
 };

@@ -2,14 +2,14 @@
 // See https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wicg-file-system-access/index.d.ts
 // See also https://caniuse.com/?search=showOpenFilePicker
 interface OpenFilePickerOptions {
-  types?:
-    | {
-        description?: string | undefined;
-        accept: Record<string, string | string[]>;
-      }[]
-    | undefined;
   excludeAcceptAllOption?: boolean | undefined;
   multiple?: boolean | undefined;
+  types?:
+    | {
+        accept: Record<string, string | string[]>;
+        description?: string | undefined;
+      }[]
+    | undefined;
 }
 
 declare global {
@@ -24,7 +24,6 @@ declare global {
 // See [Common MIME types](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types)
 const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
   {
-    description: 'Images',
     accept: {
       'image/*': [
         '.avif',
@@ -39,9 +38,9 @@ const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
         '.webp',
       ],
     },
+    description: 'Images',
   },
   {
-    description: 'Videos',
     accept: {
       'video/*': [
         '.avi',
@@ -54,9 +53,9 @@ const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
         '.3g2',
       ],
     },
+    description: 'Videos',
   },
   {
-    description: 'Audios',
     accept: {
       'audio/*': [
         '.aac',
@@ -71,24 +70,25 @@ const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
         '.3g2',
       ],
     },
+    description: 'Audios',
   },
   {
-    description: 'Markdown',
     accept: {
       'text/markdown': ['.md', '.markdown'],
     },
+    description: 'Markdown',
   },
   {
-    description: 'Html',
     accept: {
       'text/html': ['.html', '.htm'],
     },
+    description: 'Html',
   },
   {
-    description: 'Zip',
     accept: {
       'application/zip': ['.zip'],
     },
+    description: 'Zip',
   },
 ];
 
@@ -97,11 +97,11 @@ const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
  */
 type AcceptTypes =
   | 'Any'
-  | 'Images'
-  | 'Videos'
   | 'Audios'
-  | 'Markdown'
   | 'Html'
+  | 'Images'
+  | 'Markdown'
+  | 'Videos'
   | 'Zip';
 export function openFileOrFiles(options?: {
   acceptType?: AcceptTypes;
@@ -136,8 +136,8 @@ export async function openFileOrFiles({
       if (acceptType !== 'Any' && !fileType)
         throw new Error(`Unexpected acceptType "${acceptType}"`);
       const pickerOpts = {
-        types: fileType ? [fileType] : undefined,
         multiple,
+        types: fileType ? [fileType] : undefined,
       } satisfies OpenFilePickerOptions;
       // Show the file picker, optionally allowing multiple files.
       const handles = await window.showOpenFilePicker(pickerOpts);
@@ -252,9 +252,9 @@ const tempImageMap = new Map<
   {
     // This information comes from pictures.
     // If the user switches between pictures and attachments,
+    height: number | undefined;
     // this information should be retained.
     width: number | undefined;
-    height: number | undefined;
   }
 >();
 
@@ -291,7 +291,7 @@ export function withTempBlobData() {
 
   const saveImageData = (
     sourceId: string,
-    data: { width: number | undefined; height: number | undefined }
+    data: { height: number | undefined; width: number | undefined }
   ) => {
     if (tempImageMap.size > MAX_TEMP_DATA_SIZE) {
       console.warn(
@@ -308,9 +308,9 @@ export function withTempBlobData() {
     return data;
   };
   return {
-    saveAttachmentData,
     getAttachmentData,
-    saveImageData,
     getImageData,
+    saveAttachmentData,
+    saveImageData,
   };
 }

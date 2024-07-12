@@ -34,7 +34,7 @@ export const tPhone = typesystem.defineData({
   name: 'Phone',
   supers: [tString],
 });
-type Tag = { id: string; value: string; color: string };
+type Tag = { color: string; id: string; value: string };
 export const tTag = typesystem.defineData<{ tags: Tag[] }>({
   name: 'Tag',
   supers: [],
@@ -68,9 +68,9 @@ describe('subtyping', () => {
 describe('function apply', () => {
   test('generic type function', () => {
     const fn = tFunction({
-      typeVars: [tTypeVar('A', tUnknown.create())],
       args: [tTypeRef('A'), tTypeRef('A')],
       rt: tBoolean.create(),
+      typeVars: [tTypeVar('A', tUnknown.create())],
     });
     const instancedFn = typesystem.instance(
       {},
@@ -82,16 +82,16 @@ describe('function apply', () => {
   });
   test('tags infer', () => {
     const fn = tFunction({
-      typeVars: [tTypeVar('A', tTag.create())],
       args: [tTypeRef('A'), tArray(tTypeRef('A'))],
       rt: tBoolean.create(),
+      typeVars: [tTypeVar('A', tTag.create())],
     });
     const fnArray = tFunction({
-      typeVars: [tTypeVar('A', tTag.create())],
       args: [tArray(tTypeRef('A')), tArray(tTypeRef('A'))],
       rt: tBoolean.create(),
+      typeVars: [tTypeVar('A', tTag.create())],
     });
-    const tags: Tag[] = [{ id: 'a', value: 'b', color: 'c' }];
+    const tags: Tag[] = [{ color: 'c', id: 'a', value: 'b' }];
     const instancedFn = typesystem.instance(
       {},
       [tTag.create({ tags })],

@@ -26,28 +26,28 @@ function createTestOptions() {
 
 const TestCustomNoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note-block-video',
+  metadata: {
+    parent: ['affine:note'],
+    role: 'content',
+    tag: literal`affine-note-block-video`,
+    version: 1,
+  },
   props: internal => ({
     text: internal.Text(),
   }),
-  metadata: {
-    version: 1,
-    role: 'content',
-    tag: literal`affine-note-block-video`,
-    parent: ['affine:note'],
-  },
 });
 
 const TestInvalidNoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note-invalid-block-video',
+  metadata: {
+    parent: ['affine:note'],
+    role: 'content',
+    tag: literal`affine-invalid-note-block-video`,
+    version: 1,
+  },
   props: internal => ({
     text: internal.Text(),
   }),
-  metadata: {
-    version: 1,
-    role: 'content',
-    tag: literal`affine-invalid-note-block-video`,
-    parent: ['affine:note'],
-  },
 });
 
 const BlockSchemas = [

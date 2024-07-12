@@ -1,4 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import {
   type CopilotSelectionController,
   type FrameBlockModel,
@@ -7,7 +9,6 @@ import {
 } from '@blocksuite/blocks';
 import { BlocksUtils, EdgelessRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
 import { type DraftModel, Slice, toDraftModel } from '@blocksuite/store';
 
 import { getEdgelessCopilotWidget, getService } from './edgeless.js';
@@ -36,7 +37,7 @@ export function getEdgelessService(editor: EditorHost) {
 
 export async function selectedToCanvas(editor: EditorHost) {
   const edgelessRoot = getEdgelessRootFromEditor(editor);
-  const { notes, frames, shapes, images } = BlocksUtils.splitElements(
+  const { frames, images, notes, shapes } = BlocksUtils.splitElements(
     edgelessRoot.service.selection.selectedElements
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
@@ -57,7 +58,7 @@ export async function frameToCanvas(
   editor: EditorHost
 ) {
   const edgelessRoot = getEdgelessRootFromEditor(editor);
-  const { notes, frames, shapes, images } = BlocksUtils.splitElements(
+  const { frames, images, notes, shapes } = BlocksUtils.splitElements(
     edgelessRoot.service.frame.getElementsInFrame(frame, true)
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
@@ -230,7 +231,7 @@ export const getSelections = (
       chain.getBlockSelections(),
       chain.getImageSelections(),
     ])
-    .getSelectedBlocks({ types: ['text', 'block', 'image'], mode })
+    .getSelectedBlocks({ mode, types: ['text', 'block', 'image'] })
     .run();
 
   return data;

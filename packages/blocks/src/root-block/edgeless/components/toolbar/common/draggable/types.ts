@@ -9,14 +9,14 @@ export interface EdgelessDraggableElementHost extends DisposableClass {}
 
 export interface OverlayLayer {
   /**
+   * The real preview element
+   */
+  element: HTMLElement;
+  /**
    * The root element of the overlay,
    * used to handle clip & prevent pointer events
    */
   mask: HTMLElement;
-  /**
-   * The real preview element
-   */
-  element: HTMLElement;
   /**
    * The wrapper that contains the preview element,
    * different from the element, this element has transition effect
@@ -25,26 +25,12 @@ export interface OverlayLayer {
 }
 
 export interface EdgelessDraggableElementOptions<T> {
-  edgeless: EdgelessRootBlockComponent;
-  service: EdgelessRootService;
-  /**
-   * In which element that the target should be dragged out
-   * If not provided, recognized as the drag-out whenever dragging
-   */
-  scopeElement?: HTMLElement;
-  /**
-   * The width of the element when placed to canvas
-   * @default 100
-   */
-  standardWidth?: number;
-
   /**
    * the threshold of mousedown and mouseup duration in ms
    * if the duration is less than this value, it will be treated as a click
    * @default 1500
    */
   clickThreshold?: number;
-
   /**
    * if enabled, when clicked, will trigger drag, press ESC or reclick to cancel
    */
@@ -55,6 +41,7 @@ export interface EdgelessDraggableElementOptions<T> {
    * @default 1.2
    */
   clickToDragScale?: number;
+  edgeless: EdgelessRootBlockComponent;
 
   /**
    * To verify if the move is valid
@@ -62,33 +49,46 @@ export interface EdgelessDraggableElementOptions<T> {
   isValidMove?: (offset: { x: number; y: number }) => boolean;
 
   /**
-   * when element is clicked - mouse down and up without moving
+   * - ESC pressed
+   * - or not dragged out and released
    */
-  onElementClick?: (element: ElementInfo<T>) => void;
-  /**
-   *  when mouse down and moved, create overlay, customize overlay here
-   */
-  onOverlayCreated?: (overlay: OverlayLayer, element: ElementInfo<T>) => void;
-  /**
-   * trigger when enter/leave the scope element
-   */
-  onEnterOrLeaveScope?: (overlay: OverlayLayer, isOutside?: boolean) => void;
+  onCanceled?: (overlay: OverlayLayer, element: ElementInfo<T>) => void;
   /**
    * Drop the element on edgeless canvas
    */
   onDrop?: (element: ElementInfo<T>, bound: Bound) => void;
 
   /**
-   * - ESC pressed
-   * - or not dragged out and released
+   * when element is clicked - mouse down and up without moving
    */
-  onCanceled?: (overlay: OverlayLayer, element: ElementInfo<T>) => void;
+  onElementClick?: (element: ElementInfo<T>) => void;
+
+  /**
+   * trigger when enter/leave the scope element
+   */
+  onEnterOrLeaveScope?: (overlay: OverlayLayer, isOutside?: boolean) => void;
+  /**
+   *  when mouse down and moved, create overlay, customize overlay here
+   */
+  onOverlayCreated?: (overlay: OverlayLayer, element: ElementInfo<T>) => void;
+  /**
+   * In which element that the target should be dragged out
+   * If not provided, recognized as the drag-out whenever dragging
+   */
+  scopeElement?: HTMLElement;
+  service: EdgelessRootService;
+
+  /**
+   * The width of the element when placed to canvas
+   * @default 100
+   */
+  standardWidth?: number;
 }
 
 export type ElementInfo<T> = {
+  data: T;
   // TODO: maybe make it optional, if not provided, clone event target
   preview: TemplateResult;
-  data: T;
   /**
    * Override the value in {@link EdgelessDraggableElementOptions.standardWidth}
    */

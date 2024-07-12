@@ -1,8 +1,9 @@
 import { sleep } from '@global/utils.js';
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import { popImageMoreMenu } from './utils/actions/drag.js';
 import {
+  SHORT_KEY,
   pressArrowDown,
   pressArrowUp,
   pressBackspace,
@@ -11,7 +12,6 @@ import {
   pressShiftTab,
   pressTab,
   redoByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/keyboard.js';
@@ -80,27 +80,11 @@ function getAttachment(page: Page) {
   return {
     // locators
     attachment,
-    toolbar,
-    switchViewButton,
-    renameBtn,
-    renameInput,
-
-    // actions
-    insertAttachment,
-    /**
-     * Wait for the attachment upload to finish
-     */
-    waitLoading: () => loading.waitFor({ state: 'hidden' }),
     getName,
     getSize: () =>
       attachment.locator('.affine-attachment-content-info').innerText(),
-
-    turnToEmbed: async () => {
-      await expect(switchViewButton).toBeVisible();
-      await switchViewButton.click();
-      await page.getByRole('button', { name: 'Embed view' }).click();
-      await assertRichImage(page, 1);
-    },
+    // actions
+    insertAttachment,
     rename: async (newName: string) => {
       await attachment.hover();
       await expect(toolbar).toBeVisible();
@@ -112,12 +96,28 @@ function getAttachment(page: Page) {
       expect(await getName()).toContain(newName);
     },
 
+    renameBtn,
+    renameInput,
+    switchViewButton,
+    toolbar,
+
     // external
     turnImageToCard: async () => {
       const { turnIntoCardButton } = await popImageMoreMenu(page);
       await turnIntoCardButton.click();
       await expect(attachment).toBeVisible();
     },
+    turnToEmbed: async () => {
+      await expect(switchViewButton).toBeVisible();
+      await switchViewButton.click();
+      await page.getByRole('button', { name: 'Embed view' }).click();
+      await assertRichImage(page, 1);
+    },
+
+    /**
+     * Wait for the attachment upload to finish
+     */
+    waitLoading: () => loading.waitFor({ state: 'hidden' }),
   };
 }
 
@@ -125,7 +125,7 @@ test('can insert attachment from slash menu', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
 
-  const { insertAttachment, waitLoading, getName, getSize } =
+  const { getName, getSize, insertAttachment, waitLoading } =
     getAttachment(page);
 
   await focusRichText(page);
@@ -283,19 +283,19 @@ test('should undo/redo works for attachment', async ({ page }) => {
 
 test('should rename attachment works', async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/4534',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   const {
     attachment,
+    getName,
+    insertAttachment,
+    rename,
     renameBtn,
     renameInput,
-    insertAttachment,
     waitLoading,
-    getName,
-    rename,
   } = getAttachment(page);
 
   await focusRichText(page);
@@ -323,7 +323,7 @@ test('should rename attachment works', async ({ page }) => {
 test('should turn attachment to image works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
-  const { insertAttachment, waitLoading, turnToEmbed, turnImageToCard } =
+  const { insertAttachment, turnImageToCard, turnToEmbed, waitLoading } =
     getAttachment(page);
 
   await focusRichText(page);
@@ -443,7 +443,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
 
-  const { insertAttachment, waitLoading, getName, getSize } =
+  const { getName, getSize, insertAttachment, waitLoading } =
     getAttachment(page);
 
   await focusRichText(page);

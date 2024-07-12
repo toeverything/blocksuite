@@ -1,5 +1,6 @@
-import { keys } from '../../../../../_common/utils/iterable.js';
 import type { Template, TemplateManager } from './template-type.js';
+
+import { keys } from '../../../../../_common/utils/iterable.js';
 
 export const templates = [
   {
@@ -40,6 +41,20 @@ const flat = <T>(arr: T[][]) =>
   }, []);
 
 export const builtInTemplates = {
+  categories: async () => {
+    const extendCates = flat(
+      await Promise.all(extendTemplate.map(manager => manager.categories()))
+    );
+
+    return templates.map(cate => cate.name).concat(extendCates);
+  },
+
+  extend(manager: TemplateManager) {
+    if (extendTemplate.includes(manager)) return;
+
+    extendTemplate.push(manager);
+  },
+
   list: async (category: string) => {
     const extendTemplates = flat(
       await Promise.all(extendTemplate.map(manager => manager.list(category)))
@@ -57,14 +72,6 @@ export const builtInTemplates = {
           );
 
     return result.concat(extendTemplates);
-  },
-
-  categories: async () => {
-    const extendCates = flat(
-      await Promise.all(extendTemplate.map(manager => manager.categories()))
-    );
-
-    return templates.map(cate => cate.name).concat(extendCates);
   },
 
   search: async (keyword: string, cateName?: string) => {
@@ -103,11 +110,5 @@ export const builtInTemplates = {
     );
 
     return candidates;
-  },
-
-  extend(manager: TemplateManager) {
-    if (extendTemplate.includes(manager)) return;
-
-    extendTemplate.push(manager);
   },
 } satisfies TemplateManager;

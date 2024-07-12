@@ -3,24 +3,24 @@ import type { TemplateResult } from 'lit';
 import type { CodeBlockComponent } from '../../../code-block/code-block.js';
 
 type CodeToolbarItemBase = {
-  name: string | ((codeBlock: CodeBlockComponent) => string);
-  tooltip: string;
-  icon: TemplateResult | ((codeBlock: CodeBlockComponent) => TemplateResult);
+  icon: ((codeBlock: CodeBlockComponent) => TemplateResult) | TemplateResult;
+  name: ((codeBlock: CodeBlockComponent) => string) | string;
   showWhen: (codeBlock: CodeBlockComponent) => boolean;
+  tooltip: string;
 };
 
-export type CodeToolbarActionItem = CodeToolbarItemBase & {
-  type: 'action';
+export type CodeToolbarActionItem = {
   action: (codeBlock: CodeBlockComponent, onClick?: () => void) => void;
-};
+  type: 'action';
+} & CodeToolbarItemBase;
 
-export type CodeToolbarCustomItem = CodeToolbarItemBase & {
-  type: 'custom';
+export type CodeToolbarCustomItem = {
   render: (
     codeBlock: CodeBlockComponent,
     onClick?: () => void
   ) => TemplateResult | null;
-};
+  type: 'custom';
+} & CodeToolbarItemBase;
 
 export type CodeToolbarItem = CodeToolbarActionItem | CodeToolbarCustomItem;
 
@@ -28,12 +28,12 @@ export type DividerItem = {
   type: 'divider';
 };
 
-export type MoreItem = CodeToolbarItemBase & {
-  type: 'more';
+export type MoreItem = {
   action: (
     codeBlock: CodeBlockComponent,
     abortController: AbortController
   ) => void;
-};
+  type: 'more';
+} & CodeToolbarItemBase;
 
-export type CodeToolbarMoreItem = MoreItem | DividerItem;
+export type CodeToolbarMoreItem = DividerItem | MoreItem;

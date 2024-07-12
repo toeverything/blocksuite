@@ -1,14 +1,38 @@
+import type { EventOptions, UIEventDispatcher } from '../dispatcher.js';
+
 import {
   type UIEventHandler,
   UIEventState,
   UIEventStateContext,
 } from '../base.js';
-import type { EventOptions, UIEventDispatcher } from '../dispatcher.js';
 import { bindKeymap } from '../keymap.js';
 import { KeyboardEventState } from '../state/index.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class KeyboardControl {
+  private _down = (event: KeyboardEvent) => {
+    const keyboardEventState = new KeyboardEventState({
+      composing: this.composition,
+      event,
+    });
+    this._dispatcher.run(
+      'keyDown',
+      this._createContext(event, keyboardEventState)
+    );
+  };
+
+  private _up = (event: KeyboardEvent) => {
+    const keyboardEventState = new KeyboardEventState({
+      composing: this.composition,
+      event,
+    });
+
+    this._dispatcher.run(
+      'keyUp',
+      this._createContext(event, keyboardEventState)
+    );
+  };
+
   private composition = false;
 
   constructor(private _dispatcher: UIEventDispatcher) {}
@@ -24,28 +48,19 @@ export class KeyboardControl {
     );
   }
 
-  private _down = (event: KeyboardEvent) => {
-    const keyboardEventState = new KeyboardEventState({
-      event,
-      composing: this.composition,
-    });
-    this._dispatcher.run(
+  bindHotkey(keymap: Record<string, UIEventHandler>, options?: EventOptions) {
+    return this._dispatcher.add(
       'keyDown',
-      this._createContext(event, keyboardEventState)
+      ctx => {
+        if (this.composition) {
+          return false;
+        }
+        const binding = bindKeymap(keymap);
+        return binding(ctx);
+      },
+      options
     );
-  };
-
-  private _up = (event: KeyboardEvent) => {
-    const keyboardEventState = new KeyboardEventState({
-      event,
-      composing: this.composition,
-    });
-
-    this._dispatcher.run(
-      'keyUp',
-      this._createContext(event, keyboardEventState)
-    );
-  };
+  }
 
   listen() {
     this._dispatcher.disposables.addFromEvent(document, 'keydown', this._down);
@@ -63,20 +78,6 @@ export class KeyboardControl {
       () => {
         this.composition = false;
       }
-    );
-  }
-
-  bindHotkey(keymap: Record<string, UIEventHandler>, options?: EventOptions) {
-    return this._dispatcher.add(
-      'keyDown',
-      ctx => {
-        if (this.composition) {
-          return false;
-        }
-        const binding = bindKeymap(keymap);
-        return binding(ctx);
-      },
-      options
     );
   }
 }

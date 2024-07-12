@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
+  Shape,
   activeNoteInEdgeless,
   createConnectorElement,
   createNote,
@@ -11,7 +12,6 @@ import {
   getConnectorPath,
   locatorComponentToolbarMoreButton,
   selectNoteInEdgeless,
-  Shape,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
@@ -195,15 +195,15 @@ test.describe('single edgeless element to linked doc', () => {
     const groups = await page.evaluate(() => {
       const container = document.querySelector('affine-edgeless-root');
       return container!.service.getElementsByType('group').map(s => ({
-        type: s.type,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         children: s.childElements.map((c: any) => c.type || c.flavour),
+        type: s.type,
       }));
     });
     expect(groups.length).toBe(1);
     expect(groups[0]).toEqual({
-      type: 'group',
       children: ['affine:note', 'shape', 'connector', 'brush'],
+      type: 'group',
     });
   });
 

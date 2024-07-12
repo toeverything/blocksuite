@@ -1,4 +1,4 @@
-export type MaybeDate = Date | string | number | undefined;
+export type MaybeDate = Date | number | string | undefined;
 
 /**
  * @deprecated should not use raw string to represent timestamp

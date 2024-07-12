@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
 import type { Text } from '../reactive/index.js';
+
 import { popProp } from '../reactive/index.js';
 import { stashProp } from '../reactive/index.js';
 import { Boxed, createYProxy } from '../reactive/index.js';
@@ -50,7 +51,7 @@ describe('blocksuite yjs', () => {
       proxy.obj.bar = 100;
       expect(obj.get('bar')).toBe(100);
 
-      proxy.obj2 = { foo: 2, bar: { num: 3 } };
+      proxy.obj2 = { bar: { num: 3 }, foo: 2 };
       expect(map.get('obj2')).toBeInstanceOf(Y.Map);
       // @ts-ignore
       expect(map.get('obj2').get('bar').get('num')).toBe(3);

@@ -3,6 +3,7 @@
 
 import type { IBound } from '../consts.js';
 import type { Bound } from './bound.js';
+
 import { PointLocation } from './point-location.js';
 import { type IVec, Vec } from './vec.js';
 
@@ -12,13 +13,13 @@ export const MACHINE_EPSILON = 1.12e-16;
 export const CURVETIME_EPSILON = 1e-8;
 
 interface TLBounds {
-  minX: number;
-  minY: number;
+  height: number;
   maxX: number;
   maxY: number;
-  width: number;
-  height: number;
+  minX: number;
+  minY: number;
   rotation?: number;
+  width: number;
 }
 
 function square(num: number) {
@@ -171,12 +172,12 @@ export function getBoundsFromPoints(points: IVec[], rotation = 0): TLBounds {
   }
 
   return {
-    minX,
-    minY,
+    height: Math.max(1, maxY - minY),
     maxX,
     maxY,
+    minX,
+    minY,
     width: Math.max(1, maxX - minX),
-    height: Math.max(1, maxY - minY),
   };
 }
 
@@ -425,7 +426,7 @@ export function getPointFromBoundsWithRotation(
   bounds: IBound,
   point: IVec
 ): IVec {
-  const { x, y, w, h, rotate } = bounds;
+  const { h, rotate, w, x, y } = bounds;
 
   if (!rotate) return point;
 
@@ -464,7 +465,7 @@ export function rotatePoint(
 
 export function getPointsFromBoundsWithRotation(
   bounds: IBound,
-  getPoints: (bounds: IBound) => IVec[] = ({ x, y, w, h }: IBound) => [
+  getPoints: (bounds: IBound) => IVec[] = ({ h, w, x, y }: IBound) => [
     // left-top
     [x, y],
     // right-top
@@ -479,7 +480,7 @@ export function getPointsFromBoundsWithRotation(
   let points = getPoints(bounds);
 
   if (rotate) {
-    const { x, y, w, h } = bounds;
+    const { h, w, x, y } = bounds;
     const cx = x + w / 2;
     const cy = y + h / 2;
 
@@ -498,7 +499,7 @@ export function getPointsFromBoundsWithRotation(
 }
 
 export function getQuadBoundsWithRotation(bounds: IBound): DOMRect {
-  const { x, y, w, h, rotate } = bounds;
+  const { h, rotate, w, x, y } = bounds;
   const rect = new DOMRect(x, y, w, h);
 
   if (!rotate) return rect;
@@ -511,8 +512,8 @@ export function getQuadBoundsWithRotation(bounds: IBound): DOMRect {
 }
 
 export function getBoundsWithRotation(bounds: IBound): IBound {
-  const { x, y, width: w, height: h } = getQuadBoundsWithRotation(bounds);
-  return { x, y, w, h };
+  const { height: h, width: w, x, y } = getQuadBoundsWithRotation(bounds);
+  return { h, w, x, y };
 }
 
 export function normalizeDegAngle(angle: number) {
@@ -552,17 +553,17 @@ export function isOverlap(
 }
 
 export function getCenterAreaBounds(bounds: IBound, ratio: number) {
-  const { x, y, w, h, rotate } = bounds;
+  const { h, rotate, w, x, y } = bounds;
   const cx = x + w / 2;
   const cy = y + h / 2;
   const nw = w * ratio;
   const nh = h * ratio;
   return {
-    x: cx - nw / 2,
-    y: cy - nh / 2,
-    w: nw,
     h: nh,
     rotate,
+    w: nw,
+    x: cx - nw / 2,
+    y: cy - nh / 2,
   };
 }
 
@@ -589,7 +590,7 @@ export function isPointOnlines(
     y = hitPoint[1] - element.y;
   } else {
     // Counter-rotate the point around center before testing
-    const { minX, minY, maxX, maxY } = element;
+    const { maxX, maxY, minX, minY } = element;
     const rotatedPoint = rotatePoint(
       hitPoint,
       [minX + (maxX - minX) / 2, minY + (maxY - minY) / 2],

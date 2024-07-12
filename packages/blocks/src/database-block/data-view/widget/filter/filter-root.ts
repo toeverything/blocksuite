@@ -1,17 +1,17 @@
-import './condition.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
+import type { FilterGroupView } from './filter-group.js';
+
 import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import {
   ArrowDownSmallIcon,
   DuplicateIcon,
 } from '../../../../_common/icons/index.js';
-import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 import {
   ConvertIcon,
   DeleteIcon,
@@ -19,8 +19,8 @@ import {
   PlusIcon,
 } from '../../common/icons/index.js';
 import { menuTitle } from '../../utils/menu-title.js';
+import './condition.js';
 import { popAddNewFilter } from './condition.js';
-import type { FilterGroupView } from './filter-group.js';
 import { getDepth } from './filter-group.js';
 
 @customElement('filter-root-view')
@@ -155,25 +155,13 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor data!: FilterGroup;
-
-  @property({ attribute: false })
-  accessor vars!: Variable[];
-
-  @property({ attribute: false })
-  accessor setData!: (filter: FilterGroup) => void;
-
-  @property({ attribute: false })
-  accessor onBack!: () => void;
-
-  @state()
-  accessor containerClass:
-    | {
-        index: number;
-        class: string;
-      }
-    | undefined = undefined;
+  private _addNew = (e: MouseEvent) => {
+    popAddNewFilter(e.target as HTMLElement, {
+      onChange: this.setData,
+      value: this.data,
+      vars: this.vars,
+    });
+  };
 
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
@@ -184,38 +172,29 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private _addNew = (e: MouseEvent) => {
-    popAddNewFilter(e.target as HTMLElement, {
-      value: this.data,
-      onChange: this.setData,
-      vars: this.vars,
-    });
-  };
-
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.data.conditions[i];
     popFilterableSimpleMenu(target, [
       {
-        type: 'action',
-        name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
+        hide: () => getDepth(filter) > 3,
         icon: ConvertIcon,
+        name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
         onHover: hover => {
           this.containerClass = hover
-            ? { index: i, class: 'hover-style' }
+            ? { class: 'hover-style', index: i }
             : undefined;
         },
-        hide: () => getDepth(filter) > 3,
         select: () => {
-          this.setData({ type: 'group', op: 'and', conditions: [this.data] });
+          this.setData({ conditions: [this.data], op: 'and', type: 'group' });
         },
+        type: 'action',
       },
       {
-        type: 'action',
-        name: 'Duplicate',
         icon: DuplicateIcon,
+        name: 'Duplicate',
         onHover: hover => {
           this.containerClass = hover
-            ? { index: i, class: 'hover-style' }
+            ? { class: 'hover-style', index: i }
             : undefined;
         },
         select: () => {
@@ -227,19 +206,17 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
           );
           this.setData({ ...this.data, conditions: conditions });
         },
+        type: 'action',
       },
       {
-        type: 'group',
-        name: '',
         children: () => [
           {
-            type: 'action',
-            name: 'Delete',
-            icon: DeleteIcon,
             class: 'delete-item',
+            icon: DeleteIcon,
+            name: 'Delete',
             onHover: hover => {
               this.containerClass = hover
-                ? { index: i, class: 'delete-style' }
+                ? { class: 'delete-style', index: i }
                 : undefined;
             },
             select: () => {
@@ -250,8 +227,11 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
                 conditions,
               });
             },
+            type: 'action',
           },
         ],
+        name: '',
+        type: 'group',
       },
     ]);
   }
@@ -315,9 +295,9 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
                   </div>
                 `;
           const classList = classMap({
-            'filter-root-item': true,
-            'filter-exactly-hover-container': true,
             'dv-pd-4 dv-round-4': true,
+            'filter-exactly-hover-container': true,
+            'filter-root-item': true,
             [this.containerClass?.class ?? '']:
               this.containerClass?.index === i,
           });
@@ -335,6 +315,26 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @state()
+  accessor containerClass:
+    | {
+        class: string;
+        index: number;
+      }
+    | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor data!: FilterGroup;
+
+  @property({ attribute: false })
+  accessor onBack!: () => void;
+
+  @property({ attribute: false })
+  accessor setData!: (filter: FilterGroup) => void;
+
+  @property({ attribute: false })
+  accessor vars!: Variable[];
 }
 
 declare global {

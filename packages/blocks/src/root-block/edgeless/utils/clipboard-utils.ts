@@ -1,10 +1,11 @@
-import { groupBy } from '../../../_common/utils/iterable.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
+
+import { groupBy } from '../../../_common/utils/iterable.js';
 import { edgelessElementsBound } from './bound-utils.js';
 import { getCloneElements, prepareCloneData } from './clone-utils.js';
 import { getElementsWithoutGroup } from './group.js';
@@ -31,7 +32,7 @@ export async function duplicate(
   totalBound.x += totalBound.w + offset;
 
   const snapshot = await prepareCloneData(copyElements, edgeless.std);
-  const { canvasElements, blockModels } =
+  const { blockModels, canvasElements } =
     await clipboardController.createElementsFromClipboardData(
       snapshot,
       totalBound.center
@@ -43,13 +44,13 @@ export async function duplicate(
 
   if (select) {
     edgeless.service.selection.set({
-      elements: newElements.map(e => e.id),
       editing: false,
+      elements: newElements.map(e => e.id),
     });
   }
 }
 export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
-  const { notes, frames, shapes, images, edgelessTexts, embedSyncedDocs } =
+  const { edgelessTexts, embedSyncedDocs, frames, images, notes, shapes } =
     groupBy(getElementsWithoutGroup(elements), element => {
       if (isNoteBlock(element)) {
         return 'notes';
@@ -64,20 +65,20 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
       }
       return 'shapes';
     }) as {
-      notes: NoteBlockModel[];
-      shapes: BlockSuite.SurfaceModelType[];
-      frames: FrameBlockModel[];
-      images: ImageBlockModel[];
       edgelessTexts: EdgelessTextBlockModel[];
       embedSyncedDocs: EmbedSyncedDocModel[];
+      frames: FrameBlockModel[];
+      images: ImageBlockModel[];
+      notes: NoteBlockModel[];
+      shapes: BlockSuite.SurfaceModelType[];
     };
 
   return {
-    notes: notes ?? [],
-    shapes: shapes ?? [],
-    frames: frames ?? [],
-    images: images ?? [],
     edgelessTexts: edgelessTexts ?? [],
     embedSyncedDocs: embedSyncedDocs ?? [],
+    frames: frames ?? [],
+    images: images ?? [],
+    notes: notes ?? [],
+    shapes: shapes ?? [],
   };
 };

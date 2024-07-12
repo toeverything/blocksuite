@@ -1,29 +1,30 @@
-import '../../../../surface-ref-block/surface-ref-portal.js';
+import type { BlockModel } from '@blocksuite/store';
 
 import {
   type EditorHost,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { debounce, DisposableGroup } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
+import { DisposableGroup, debounce } from '@blocksuite/global/utils';
 import { type Block, BlockViewType, type Doc, nanoid } from '@blocksuite/store';
-import { css, html, nothing, type PropertyValues } from 'lit';
+import { type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import { SpecProvider } from '../../../../specs/index.js';
 import type {
   ElementUpdatedData,
   SurfaceBlockModel,
 } from '../../../../surface-block/surface-model.js';
-import { Bound } from '../../../../surface-block/utils/bound.js';
-import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import type { SurfaceRefPortal } from '../../../../surface-ref-block/surface-ref-portal.js';
 import type { SurfaceRefRenderer } from '../../../../surface-ref-block/surface-ref-renderer.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
+import { SpecProvider } from '../../../../specs/index.js';
+import { Bound } from '../../../../surface-block/utils/bound.js';
+import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
+import '../../../../surface-ref-block/surface-ref-portal.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 
 type RefElement = Exclude<BlockSuite.EdgelessModelType, NoteBlockModel>;
@@ -68,32 +69,22 @@ const styles = css`
 
 @customElement('frame-preview')
 export class FramePreview extends WithDisposable(ShadowlessElement) {
-  get surfaceRenderer() {
-    return this._surfaceRefRenderer.surfaceRenderer;
-  }
-
-  private get _surfaceService() {
-    return this.host?.std.spec.getService('affine:surface');
-  }
-
-  private get _surfaceRefService() {
-    return this.host.spec.getService('affine:surface-ref');
-  }
-
   static override styles = styles;
 
-  @state()
-  private accessor _surfaceModel: SurfaceBlockModel | null = null;
+  private _clearDocDisposables = () => {
+    this._docDisposables?.dispose();
+    this._docDisposables = null;
+  };
 
-  private _surfaceRefRendererId: string = nanoid();
+  private _clearEdgelessDisposables = () => {
+    this._edgelessDisposables?.dispose();
+    this._edgelessDisposables = null;
+  };
 
-  private _surfaceRefRenderer!: SurfaceRefRenderer;
-
-  private _edgelessDisposables: DisposableGroup | null = null;
-
-  private _docDisposables: DisposableGroup | null = null;
-
-  private _frameDisposables: DisposableGroup | null = null;
+  private _clearFrameDisposables = () => {
+    this._frameDisposables?.dispose();
+    this._frameDisposables = null;
+  };
 
   private _debounceHandleElementUpdated = debounce(
     (data: ElementUpdatedData) => {
@@ -114,32 +105,56 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     1000 / 30
   );
 
-  @property({ attribute: false })
-  accessor edgeless: EdgelessRootBlockComponent | null = null;
+  private _docDisposables: DisposableGroup | null = null;
 
-  @property({ attribute: false })
-  accessor frame!: FrameBlockModel;
+  private _edgelessDisposables: DisposableGroup | null = null;
 
-  @property({ attribute: false })
-  accessor doc!: Doc;
+  private _frameDisposables: DisposableGroup | null = null;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
+  private _getSelector = (model: BlockModel) => {
+    return (block: Block, doc: Doc) => {
+      let parent: Block | BlockModel | null = block;
 
-  @property({ attribute: false })
-  accessor surfaceWidth: number = DEFAULT_PREVIEW_CONTAINER_WIDTH;
+      while (parent) {
+        if (parent.id === model.id) {
+          return BlockViewType.Display;
+        }
 
-  @property({ attribute: false })
-  accessor surfaceHeight: number = DEFAULT_PREVIEW_CONTAINER_HEIGHT;
+        parent = doc.getParent(parent.id);
+      }
 
-  @state()
-  accessor fillScreen = false;
+      return BlockViewType.Hidden;
+    };
+  };
 
-  @query('.frame-preview-surface-canvas-container')
-  accessor container!: HTMLDivElement;
+  private _getViewportWH = (referencedModel: RefElement) => {
+    const [, , w, h] = deserializeXYWH(referencedModel.xywh);
 
-  @query('.frame-preview-surface-container surface-ref-portal')
-  accessor blocksPortal!: SurfaceRefPortal;
+    let scale = 1;
+    if (this.fillScreen) {
+      scale = Math.max(this.surfaceWidth / w, this.surfaceHeight / h);
+    } else {
+      scale = Math.min(this.surfaceWidth / w, this.surfaceHeight / h);
+    }
+
+    return {
+      height: h * scale,
+      width: w * scale,
+    };
+  };
+
+  private _overlapWithFrame = (id: string) => {
+    const ele = this.edgeless?.service.getElementById(id);
+    if (!ele || !ele.xywh) return false;
+
+    const frameBound = Bound.deserialize(this.frame.xywh);
+    const eleBound = Bound.deserialize(ele.xywh);
+    return frameBound.isOverlapWithBound(eleBound);
+  };
+
+  private _surfaceRefRenderer!: SurfaceRefRenderer;
+
+  private _surfaceRefRendererId: string = nanoid();
 
   private _attachRenderer() {
     if (
@@ -163,6 +178,144 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
         this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
       );
     }
+  }
+
+  private _cleanupSurfaceRefRenderer() {
+    const surfaceRefService = this._surfaceRefService;
+    if (!surfaceRefService) return;
+    surfaceRefService.removeRenderer(this._surfaceRefRendererId);
+  }
+
+  private _refreshViewport() {
+    if (!this.frame || !this._surfaceService) {
+      return;
+    }
+
+    const referencedModel = this.frame;
+
+    // trigger a rerender to update element's size
+    // and set viewport after element's size has been updated
+    this.updateComplete
+      .then(() => {
+        this.surfaceRenderer.onResize();
+        this.surfaceRenderer.setViewportByBound(
+          Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
+        );
+
+        this.blocksPortal?.setViewport(this.surfaceRenderer);
+      })
+      .catch(console.error);
+  }
+
+  private _renderModel(model: BlockModel) {
+    const selector = this._getSelector(model);
+    this._disposables.add(() => {
+      doc.blockCollection.clearSelector(selector);
+    });
+    const doc = model.doc.blockCollection.getDoc({ selector });
+    const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
+    return this.host.renderSpecPortal(doc, previewSpec.value);
+  }
+
+  private _renderSurfaceContent(referencedModel: FrameBlockModel) {
+    const { height, width } = this._getViewportWH(referencedModel);
+    return html`<div
+      class="frame-preview-surface-container"
+      style=${styleMap({
+        height: `${this.surfaceHeight}px`,
+        width: `${this.surfaceWidth}px`,
+      })}
+    >
+      <div
+        style=${styleMap({
+          backgroundColor: referencedModel.background
+            ? `var(${referencedModel.background})`
+            : 'var(--affine-platte-transparent)',
+          borderRadius: '4px',
+        })}
+      >
+        <div
+          class="frame-preview-surface-viewport"
+          style=${styleMap({
+            aspectRatio: `${width} / ${height}`,
+            height: `${height}px`,
+            width: `${width}px`,
+          })}
+        >
+          <surface-ref-portal
+            .doc=${this.doc}
+            .host=${this.host}
+            .refModel=${referencedModel}
+            .renderModel=${this._renderModel}
+          ></surface-ref-portal>
+          <div class="frame-preview-surface-canvas-container">
+            <!-- attach canvas here -->
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  private _setDocDisposables(doc: Doc) {
+    this._clearDocDisposables();
+    this._docDisposables = new DisposableGroup();
+
+    this._docDisposables.add(
+      doc.slots.blockUpdated.on(event => {
+        const { type } = event;
+        // Should only check for add and delete events, the update event will be handled by the surface renderer
+        if (type === 'update') return;
+
+        const model = doc.getBlockById(event.id);
+        if (!model || !isTopLevelBlock(model) || !model.xywh) return;
+
+        const frameBound = Bound.deserialize(this.frame.xywh);
+        const modelBound = Bound.deserialize(model.xywh);
+        if (frameBound.containsPoint([modelBound.x, modelBound.y])) {
+          this._refreshViewport();
+        }
+      })
+    );
+  }
+
+  private _setEdgelessDisposables(edgeless: EdgelessRootBlockComponent | null) {
+    this._clearEdgelessDisposables();
+    if (!edgeless) return;
+    this._edgelessDisposables = new DisposableGroup();
+    this._edgelessDisposables.add(
+      edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
+        if (fillScreen !== undefined) {
+          this.fillScreen = fillScreen;
+          this._refreshViewport();
+        }
+      })
+    );
+    this._edgelessDisposables.add(
+      edgeless.service.surface.elementAdded.on(({ id }) => {
+        if (this._overlapWithFrame(id)) {
+          this._refreshViewport();
+        }
+      })
+    );
+    this._edgelessDisposables.add(
+      edgeless.service.surface.elementUpdated.on(
+        this._debounceHandleElementUpdated
+      )
+    );
+    this._edgelessDisposables.add(
+      edgeless.service.surface.elementRemoved.on(() => this._refreshViewport())
+    );
+  }
+
+  private _setFrameDisposables(frame: FrameBlockModel) {
+    this._clearFrameDisposables();
+    this._frameDisposables = new DisposableGroup();
+    this._frameDisposables.add(
+      frame.propsUpdated.on(() => {
+        this.requestUpdate();
+        this._refreshViewport();
+      })
+    );
   }
 
   private _setupSurfaceRefRenderer() {
@@ -199,31 +352,12 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     renderer.mount();
   }
 
-  private _cleanupSurfaceRefRenderer() {
-    const surfaceRefService = this._surfaceRefService;
-    if (!surfaceRefService) return;
-    surfaceRefService.removeRenderer(this._surfaceRefRendererId);
+  private get _surfaceRefService() {
+    return this.host.spec.getService('affine:surface-ref');
   }
 
-  private _refreshViewport() {
-    if (!this.frame || !this._surfaceService) {
-      return;
-    }
-
-    const referencedModel = this.frame;
-
-    // trigger a rerender to update element's size
-    // and set viewport after element's size has been updated
-    this.updateComplete
-      .then(() => {
-        this.surfaceRenderer.onResize();
-        this.surfaceRenderer.setViewportByBound(
-          Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
-        );
-
-        this.blocksPortal?.setViewport(this.surfaceRenderer);
-      })
-      .catch(console.error);
+  private get _surfaceService() {
+    return this.host?.std.spec.getService('affine:surface');
   }
 
   private _tryLoadFillScreen() {
@@ -234,173 +368,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       false;
   }
 
-  private _getViewportWH = (referencedModel: RefElement) => {
-    const [, , w, h] = deserializeXYWH(referencedModel.xywh);
-
-    let scale = 1;
-    if (this.fillScreen) {
-      scale = Math.max(this.surfaceWidth / w, this.surfaceHeight / h);
-    } else {
-      scale = Math.min(this.surfaceWidth / w, this.surfaceHeight / h);
-    }
-
-    return {
-      width: w * scale,
-      height: h * scale,
-    };
-  };
-
-  private _overlapWithFrame = (id: string) => {
-    const ele = this.edgeless?.service.getElementById(id);
-    if (!ele || !ele.xywh) return false;
-
-    const frameBound = Bound.deserialize(this.frame.xywh);
-    const eleBound = Bound.deserialize(ele.xywh);
-    return frameBound.isOverlapWithBound(eleBound);
-  };
-
-  private _clearEdgelessDisposables = () => {
-    this._edgelessDisposables?.dispose();
-    this._edgelessDisposables = null;
-  };
-
-  private _clearDocDisposables = () => {
-    this._docDisposables?.dispose();
-    this._docDisposables = null;
-  };
-
-  private _clearFrameDisposables = () => {
-    this._frameDisposables?.dispose();
-    this._frameDisposables = null;
-  };
-
-  private _setEdgelessDisposables(edgeless: EdgelessRootBlockComponent | null) {
-    this._clearEdgelessDisposables();
-    if (!edgeless) return;
-    this._edgelessDisposables = new DisposableGroup();
-    this._edgelessDisposables.add(
-      edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
-        if (fillScreen !== undefined) {
-          this.fillScreen = fillScreen;
-          this._refreshViewport();
-        }
-      })
-    );
-    this._edgelessDisposables.add(
-      edgeless.service.surface.elementAdded.on(({ id }) => {
-        if (this._overlapWithFrame(id)) {
-          this._refreshViewport();
-        }
-      })
-    );
-    this._edgelessDisposables.add(
-      edgeless.service.surface.elementUpdated.on(
-        this._debounceHandleElementUpdated
-      )
-    );
-    this._edgelessDisposables.add(
-      edgeless.service.surface.elementRemoved.on(() => this._refreshViewport())
-    );
-  }
-
-  private _setDocDisposables(doc: Doc) {
-    this._clearDocDisposables();
-    this._docDisposables = new DisposableGroup();
-
-    this._docDisposables.add(
-      doc.slots.blockUpdated.on(event => {
-        const { type } = event;
-        // Should only check for add and delete events, the update event will be handled by the surface renderer
-        if (type === 'update') return;
-
-        const model = doc.getBlockById(event.id);
-        if (!model || !isTopLevelBlock(model) || !model.xywh) return;
-
-        const frameBound = Bound.deserialize(this.frame.xywh);
-        const modelBound = Bound.deserialize(model.xywh);
-        if (frameBound.containsPoint([modelBound.x, modelBound.y])) {
-          this._refreshViewport();
-        }
-      })
-    );
-  }
-
-  private _setFrameDisposables(frame: FrameBlockModel) {
-    this._clearFrameDisposables();
-    this._frameDisposables = new DisposableGroup();
-    this._frameDisposables.add(
-      frame.propsUpdated.on(() => {
-        this.requestUpdate();
-        this._refreshViewport();
-      })
-    );
-  }
-
-  private _getSelector = (model: BlockModel) => {
-    return (block: Block, doc: Doc) => {
-      let parent: BlockModel | Block | null = block;
-
-      while (parent) {
-        if (parent.id === model.id) {
-          return BlockViewType.Display;
-        }
-
-        parent = doc.getParent(parent.id);
-      }
-
-      return BlockViewType.Hidden;
-    };
-  };
-
-  private _renderModel(model: BlockModel) {
-    const selector = this._getSelector(model);
-    this._disposables.add(() => {
-      doc.blockCollection.clearSelector(selector);
-    });
-    const doc = model.doc.blockCollection.getDoc({ selector });
-    const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
-    return this.host.renderSpecPortal(doc, previewSpec.value);
-  }
-
-  private _renderSurfaceContent(referencedModel: FrameBlockModel) {
-    const { width, height } = this._getViewportWH(referencedModel);
-    return html`<div
-      class="frame-preview-surface-container"
-      style=${styleMap({
-        width: `${this.surfaceWidth}px`,
-        height: `${this.surfaceHeight}px`,
-      })}
-    >
-      <div
-        style=${styleMap({
-          backgroundColor: referencedModel.background
-            ? `var(${referencedModel.background})`
-            : 'var(--affine-platte-transparent)',
-          borderRadius: '4px',
-        })}
-      >
-        <div
-          class="frame-preview-surface-viewport"
-          style=${styleMap({
-            width: `${width}px`,
-            height: `${height}px`,
-            aspectRatio: `${width} / ${height}`,
-          })}
-        >
-          <surface-ref-portal
-            .doc=${this.doc}
-            .host=${this.host}
-            .refModel=${referencedModel}
-            .renderModel=${this._renderModel}
-          ></surface-ref-portal>
-          <div class="frame-preview-surface-canvas-container">
-            <!-- attach canvas here -->
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     this._tryLoadFillScreen();
@@ -409,9 +376,27 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     this._setEdgelessDisposables(this.edgeless);
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._cleanupSurfaceRefRenderer();
+    this._clearEdgelessDisposables();
+    this._clearDocDisposables();
+    this._clearFrameDisposables();
+  }
+
   override firstUpdated() {
     this._refreshViewport();
     this._setFrameDisposables(this.frame);
+  }
+
+  override render() {
+    const { _surfaceModel, _surfaceService, frame, host } = this;
+    const noContent =
+      !_surfaceModel || !frame || !frame.xywh || !host || !_surfaceService;
+
+    return html`<div class="frame-preview-container">
+      ${noContent ? nothing : this._renderSurfaceContent(frame)}
+    </div>`;
   }
 
   override updated(_changedProperties: PropertyValues) {
@@ -435,23 +420,39 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     this._attachRenderer();
   }
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._cleanupSurfaceRefRenderer();
-    this._clearEdgelessDisposables();
-    this._clearDocDisposables();
-    this._clearFrameDisposables();
+  get surfaceRenderer() {
+    return this._surfaceRefRenderer.surfaceRenderer;
   }
 
-  override render() {
-    const { _surfaceModel, frame, host, _surfaceService } = this;
-    const noContent =
-      !_surfaceModel || !frame || !frame.xywh || !host || !_surfaceService;
+  @state()
+  private accessor _surfaceModel: SurfaceBlockModel | null = null;
 
-    return html`<div class="frame-preview-container">
-      ${noContent ? nothing : this._renderSurfaceContent(frame)}
-    </div>`;
-  }
+  @query('.frame-preview-surface-container surface-ref-portal')
+  accessor blocksPortal!: SurfaceRefPortal;
+
+  @query('.frame-preview-surface-canvas-container')
+  accessor container!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @property({ attribute: false })
+  accessor edgeless: EdgelessRootBlockComponent | null = null;
+
+  @state()
+  accessor fillScreen = false;
+
+  @property({ attribute: false })
+  accessor frame!: FrameBlockModel;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor surfaceHeight: number = DEFAULT_PREVIEW_CONTAINER_HEIGHT;
+
+  @property({ attribute: false })
+  accessor surfaceWidth: number = DEFAULT_PREVIEW_CONTAINER_WIDTH;
 }
 
 declare global {

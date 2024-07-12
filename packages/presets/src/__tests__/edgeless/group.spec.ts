@@ -2,6 +2,7 @@ import type {
   GroupElementModel,
   MindmapElementModel,
 } from '@blocksuite/blocks';
+
 import {
   type EdgelessRootBlockComponent,
   NoteDisplayMode,
@@ -98,17 +99,17 @@ describe('group', () => {
     });
     const note1 = addNote(doc, {
       displayMode: NoteDisplayMode.DocAndEdgeless,
-      xywh: '[200,200,800,100]',
       edgeless: {
+        collapse: true,
+        collapsedHeight: 100,
         style: {
           borderRadius: 8,
           borderSize: 4,
           borderStyle: 'solid',
           shadowType: '--affine-note-shadow-box',
         },
-        collapse: true,
-        collapsedHeight: 100,
       },
+      xywh: '[200,200,800,100]',
     });
     const children = new DocCollection.Y.Map<boolean>();
 
@@ -195,7 +196,6 @@ describe('mindmap', () => {
 
   test('delete the root node should remove all children', async () => {
     const tree = {
-      text: 'root',
       children: [
         {
           text: 'leaf1',
@@ -204,14 +204,15 @@ describe('mindmap', () => {
           text: 'leaf2',
         },
         {
-          text: 'leaf3',
           children: [
             {
               text: 'leaf4',
             },
           ],
+          text: 'leaf3',
         },
       ],
+      text: 'root',
     };
     const mindmapId = service.addElement('mindmap', { children: tree });
     const mindmap = () =>
@@ -242,7 +243,6 @@ describe('mindmap', () => {
 
   test('mindmap should layout automatically when creating', async () => {
     const tree = {
-      text: 'root',
       children: [
         {
           text: 'leaf1',
@@ -251,18 +251,19 @@ describe('mindmap', () => {
           text: 'leaf2',
         },
         {
-          text: 'leaf3',
           children: [
             {
               text: 'leaf4',
             },
           ],
+          text: 'leaf3',
         },
       ],
+      text: 'root',
     };
     const mindmapId = service.addElement('mindmap', {
-      type: LayoutType.RIGHT,
       children: tree,
+      type: LayoutType.RIGHT,
     });
     const mindmap = () =>
       service.getElementById(mindmapId) as MindmapElementModel;

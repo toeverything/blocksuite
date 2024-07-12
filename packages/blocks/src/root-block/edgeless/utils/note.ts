@@ -1,11 +1,12 @@
-import {
-  asyncFocusRichText,
-  handleNativeRangeAtPoint,
-  type NoteChildrenFlavour,
-  type Point,
-} from '../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
+
+import {
+  type NoteChildrenFlavour,
+  type Point,
+  asyncFocusRichText,
+  handleNativeRangeAtPoint,
+} from '../../../_common/utils/index.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
@@ -14,7 +15,7 @@ import {
 
 export type NoteOptions = {
   childFlavour: NoteChildrenFlavour;
-  childType: string | null;
+  childType: null | string;
   collapse: boolean;
 };
 
@@ -26,8 +27,8 @@ export function addNote(
   height = DEFAULT_NOTE_HEIGHT
 ) {
   const noteId = edgeless.addNoteWithPoint(point, {
-    width,
     height,
+    width,
   });
 
   const doc = edgeless.doc;
@@ -55,8 +56,8 @@ export function addNote(
     const element = blocks.find(b => b.id === noteId);
     if (element) {
       edgeless.service.selection.set({
-        elements: [element.id],
         editing: true,
+        elements: [element.id],
       });
 
       // Waiting dom updated, `note mask` is removed

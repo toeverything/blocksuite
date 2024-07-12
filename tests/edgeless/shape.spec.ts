@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import {
   assertEdgelessTool,
@@ -98,7 +98,6 @@ test.describe('add shape', () => {
     const end0 = { x: 200, y: 200 };
     await setEdgelessTool(page, 'shape');
     await dragBetweenCoords(page, start0, end0, {
-      steps: 50,
       beforeMouseUp: async () => {
         // move the shape
         await page.keyboard.down('Space');
@@ -107,6 +106,7 @@ test.describe('add shape', () => {
 
         await page.mouse.move(500, 600);
       },
+      steps: 50,
     });
 
     await assertEdgelessSelectedRect(page, [200, 200, 300, 400]);
@@ -122,7 +122,6 @@ test.describe('add shape', () => {
     await setEdgelessTool(page, 'shape');
     await page.keyboard.down('Shift');
     await dragBetweenCoords(page, start0, end0, {
-      steps: 50,
       beforeMouseUp: async () => {
         // move the shape
         await page.keyboard.down('Space');
@@ -131,6 +130,7 @@ test.describe('add shape', () => {
 
         await page.mouse.move(500, 600);
       },
+      steps: 50,
     });
 
     await assertEdgelessSelectedRect(page, [200, 200, 400, 400]);
@@ -159,8 +159,8 @@ test.skip('change shape fill color', async ({ page }) => {
   await switchEditorMode(page);
 
   const rect = {
-    start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
+    start: { x: 100, y: 100 },
   };
   await addBasicRectShapeElement(page, rect.start, rect.end);
 
@@ -182,8 +182,8 @@ test('change shape stroke color', async ({ page }) => {
   await switchEditorMode(page);
 
   const rect = {
-    start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
+    start: { x: 100, y: 100 },
   };
   await addBasicRectShapeElement(page, rect.start, rect.end);
 
@@ -617,8 +617,8 @@ test.describe('shape hit test', () => {
     end: { x: number; y: number }
   ) {
     const rect = {
-      start,
       end,
+      start,
     };
     await addBasicRectShapeElement(page, rect.start, rect.end);
 
@@ -640,8 +640,8 @@ test.describe('shape hit test', () => {
   });
 
   const rect = {
-    start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
+    start: { x: 100, y: 100 },
   };
 
   test('can select hollow shape by clicking center area', async ({ page }) => {

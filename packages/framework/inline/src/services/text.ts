@@ -1,48 +1,13 @@
 import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
+
 import { intersectInlineRange } from '../utils/inline-range.js';
 
 export class InlineTextService<TextAttributes extends BaseTextAttributes> {
-  get yText() {
-    return this.editor.yText;
-  }
-
-  readonly transact = this.editor.transact;
-
-  constructor(readonly editor: InlineEditor<TextAttributes>) {}
-
   deleteText = (inlineRange: InlineRange): void => {
     this.transact(() => {
       this.yText.delete(inlineRange.index, inlineRange.length);
-    });
-  };
-
-  insertText = (
-    inlineRange: InlineRange,
-    text: string,
-    attributes: TextAttributes = {} as TextAttributes
-  ): void => {
-    if (this.editor.attributeService.marks) {
-      attributes = { ...attributes, ...this.editor.attributeService.marks };
-    }
-    const normalizedAttributes =
-      this.editor.attributeService.normalizeAttributes(attributes);
-
-    if (!text || !text.length) {
-      throw new Error('text must not be empty');
-    }
-
-    this.transact(() => {
-      this.yText.delete(inlineRange.index, inlineRange.length);
-      this.yText.insert(inlineRange.index, text, normalizedAttributes);
-    });
-  };
-
-  insertLineBreak = (inlineRange: InlineRange): void => {
-    this.transact(() => {
-      this.yText.delete(inlineRange.index, inlineRange.length);
-      this.yText.insert(inlineRange.index, '\n');
     });
   };
 
@@ -51,7 +16,7 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
     attributes: TextAttributes,
     options: {
       match?: (delta: DeltaInsert, deltaInlineRange: InlineRange) => boolean;
-      mode?: 'replace' | 'merge';
+      mode?: 'merge' | 'replace';
     } = {}
   ): void => {
     const { match = () => true, mode = 'merge' } = options;
@@ -82,6 +47,34 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
           );
         });
       });
+  };
+
+  insertLineBreak = (inlineRange: InlineRange): void => {
+    this.transact(() => {
+      this.yText.delete(inlineRange.index, inlineRange.length);
+      this.yText.insert(inlineRange.index, '\n');
+    });
+  };
+
+  insertText = (
+    inlineRange: InlineRange,
+    text: string,
+    attributes: TextAttributes = {} as TextAttributes
+  ): void => {
+    if (this.editor.attributeService.marks) {
+      attributes = { ...attributes, ...this.editor.attributeService.marks };
+    }
+    const normalizedAttributes =
+      this.editor.attributeService.normalizeAttributes(attributes);
+
+    if (!text || !text.length) {
+      throw new Error('text must not be empty');
+    }
+
+    this.transact(() => {
+      this.yText.delete(inlineRange.index, inlineRange.length);
+      this.yText.insert(inlineRange.index, text, normalizedAttributes);
+    });
   };
 
   resetText = (inlineRange: InlineRange): void => {
@@ -121,4 +114,12 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
       this.yText.insert(0, text, attributes);
     });
   };
+
+  readonly transact = this.editor.transact;
+
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
+
+  get yText() {
+    return this.editor.yText;
+  }
 }

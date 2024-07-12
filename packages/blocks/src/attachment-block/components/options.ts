@@ -1,15 +1,17 @@
-import '../../_common/components/toolbar/icon-button.js';
-import '../../_common/components/toolbar/menu-button.js';
-import '../../_common/components/toolbar/separator.js';
-import '../../_common/components/toolbar/toolbar.js';
-
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { AttachmentBlockComponent } from '../attachment-block.js';
+import type { AttachmentBlockModel } from '../attachment-model.js';
+
 import { createLitPortal } from '../../_common/components/portal.js';
+import '../../_common/components/toolbar/icon-button.js';
+import '../../_common/components/toolbar/menu-button.js';
+import '../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../_common/components/toolbar/separator.js';
+import '../../_common/components/toolbar/toolbar.js';
 import { renderActions } from '../../_common/components/toolbar/utils.js';
 import {
   CaptionIcon,
@@ -23,29 +25,27 @@ import {
   SmallArrowDownIcon,
   // ViewIcon,
 } from '../../_common/icons/index.js';
-import type { AttachmentBlockComponent } from '../attachment-block.js';
-import type { AttachmentBlockModel } from '../attachment-model.js';
 import { allowEmbed, convertToEmbed } from '../embed.js';
 import { cloneAttachmentProperties } from '../utils.js';
 import { RenameModal } from './rename-model.js';
 import { styles } from './styles.js';
 
 export function AttachmentOptionsTemplate({
+  abortController,
   anchor,
-  model,
-  showCaption,
   copy,
   download,
+  model,
   refresh,
-  abortController,
+  showCaption,
 }: {
+  abortController: AbortController;
   anchor: AttachmentBlockComponent;
-  model: AttachmentBlockModel;
   copy: () => void;
   download: () => void;
+  model: AttachmentBlockModel;
   refresh: () => void;
   showCaption: () => void;
-  abortController: AbortController;
 }) {
   const disableEmbed = !allowEmbed(model, anchor.service.maxFileSize);
   const readonly = model.doc.readonly;
@@ -53,38 +53,35 @@ export function AttachmentOptionsTemplate({
 
   const viewActions = [
     {
-      type: 'card',
-      name: 'Card view',
       disabled: readonly || !model.embed,
       handler: () => {
         model.doc.updateBlock(model, { embed: false });
         abortController.abort();
       },
+      name: 'Card view',
+      type: 'card',
     },
     {
-      type: 'embed',
-      name: 'Embed view',
       disabled: readonly || disableEmbed,
       handler: () => {
         convertToEmbed(model, anchor.service.maxFileSize);
         abortController.abort();
       },
+      name: 'Embed view',
+      type: 'embed',
     },
   ];
 
   const moreActions = renderActions([
     [
       {
-        type: 'copy',
-        name: 'Copy',
-        icon: CopyIcon,
         disabled: readonly,
         handler: copy,
+        icon: CopyIcon,
+        name: 'Copy',
+        type: 'copy',
       },
       {
-        type: 'duplicate',
-        name: 'Duplicate',
-        icon: DuplicateIcon,
         disabled: readonly,
         handler: () => {
           const prop: { flavour: 'affine:attachment' } = {
@@ -93,32 +90,35 @@ export function AttachmentOptionsTemplate({
           };
           model.doc.addSiblingBlocks(model, [prop]);
         },
+        icon: DuplicateIcon,
+        name: 'Duplicate',
+        type: 'duplicate',
       },
       {
-        type: 'reload',
-        name: 'Reload',
-        icon: RefreshIcon,
         disabled: readonly,
         handler: refresh,
+        icon: RefreshIcon,
+        name: 'Reload',
+        type: 'reload',
       },
       {
-        type: 'download',
-        name: 'Download',
-        icon: DownloadIcon,
         disabled: readonly,
         handler: download,
+        icon: DownloadIcon,
+        name: 'Download',
+        type: 'download',
       },
     ],
     [
       {
-        type: 'delete',
-        name: 'Delete',
-        icon: DeleteIcon,
         disabled: readonly,
         handler: () => {
           model.doc.deleteBlock(model);
           abortController.abort();
         },
+        icon: DeleteIcon,
+        name: 'Delete',
+        type: 'delete',
       },
     ],
   ]);
@@ -141,19 +141,19 @@ export function AttachmentOptionsTemplate({
               abortController.abort();
               const renameAbortController = new AbortController();
               createLitPortal({
-                template: RenameModal({
-                  editorHost: anchor.host,
-                  model,
-                  abortController: renameAbortController,
-                }),
+                abortController: renameAbortController,
                 computePosition: {
-                  referenceElement: anchor,
-                  placement: 'top-start',
                   middleware: [flip(), offset(4)],
+                  placement: 'top-start',
+                  referenceElement: anchor,
                   // It has a overlay mask, so we don't need to update the position.
                   // autoUpdate: true,
                 },
-                abortController: renameAbortController,
+                template: RenameModal({
+                  abortController: renameAbortController,
+                  editorHost: anchor.host,
+                  model,
+                }),
               });
             }}
           >
@@ -183,7 +183,7 @@ export function AttachmentOptionsTemplate({
           ${repeat(
             viewActions,
             button => button.type,
-            ({ type, name, handler }) => html`
+            ({ handler, name, type }) => html`
               <editor-menu-action
                 data-testid=${`link-to-${type}`}
                 ?data-selected=${type === viewType}

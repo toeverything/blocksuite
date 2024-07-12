@@ -6,17 +6,17 @@ import {
 } from './embed-figma-model.js';
 
 const defaultEmbedFigmaProps: EmbedFigmaBlockProps = {
-  style: EmbedFigmaStyles[0],
-  url: '',
   caption: null,
+  description: null,
+  style: EmbedFigmaStyles[0],
 
   title: null,
-  description: null,
+  url: '',
 };
 
 export const EmbedFigmaBlockSchema = createEmbedBlockSchema({
   name: 'figma',
-  version: 1,
-  toModel: () => new EmbedFigmaModel(),
   props: (): EmbedFigmaBlockProps => defaultEmbedFigmaProps,
+  toModel: () => new EmbedFigmaModel(),
+  version: 1,
 });

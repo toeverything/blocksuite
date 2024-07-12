@@ -1,21 +1,20 @@
-import path from 'node:path';
+import type { Plugin } from 'vite';
 
 import { init, parse } from 'es-module-lexer';
 import MagicString from 'magic-string';
 import micromatch from 'micromatch';
-import type { Plugin } from 'vite';
+import path from 'node:path';
 const isMatch = micromatch.isMatch;
 
 export function fineTuneHmr({
-  include,
   exclude,
+  include,
 }: {
-  include: string[];
   exclude: string[];
+  include: string[];
 }): Plugin {
   let root = '';
   const plugin: Plugin = {
-    name: 'add-hot-for-pure-exports',
     apply: 'serve',
     configResolved(config) {
       root = config.root;
@@ -23,6 +22,7 @@ export function fineTuneHmr({
     async configureServer() {
       await init;
     },
+    name: 'add-hot-for-pure-exports',
     transform: (code, id) => {
       // only handle js/ts files
       const includeGlob = include.map(i => path.resolve(root, i));
@@ -53,7 +53,7 @@ export function fineTuneHmr({
         s.prepend(preamble + '\n');
         return {
           code: s.toString(),
-          map: s.generateMap({ hires: true, source: id, includeContent: true }),
+          map: s.generateMap({ hires: true, includeContent: true, source: id }),
         };
       }
       return;

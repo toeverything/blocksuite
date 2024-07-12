@@ -2,8 +2,10 @@ import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
-import { matchFlavours } from '../_common/utils/model.js';
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
+import type { NoteBlockComponent } from './note-block.js';
+
+import { matchFlavours } from '../_common/utils/model.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -20,64 +22,18 @@ import {
   selectBlocksBetween,
   updateBlockType,
 } from './commands/index.js';
-import type { NoteBlockComponent } from './note-block.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
 
 export class NoteBlockService extends BlockService<NoteBlockModel> {
   private _dragHandleOption: DragHandleOption = {
-    flavour: NoteBlockSchema.model.flavour,
     edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
-      if (!anchorBlockPath) {
-        return false;
-      }
-
-      const element = captureEventTarget(state.raw.target);
-      const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
-      if (!insideDragHandle) {
-        return false;
-      }
-
-      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
-      if (
-        !anchorComponent ||
-        !matchFlavours(anchorComponent.model, [NoteBlockSchema.model.flavour])
-      ) {
-        return false;
-      }
-      const noteComponent = anchorComponent as NoteBlockComponent;
-
-      const notePortal = noteComponent.closest('.edgeless-block-portal-note');
-      assertExists(notePortal);
-
-      const dragPreviewEl = notePortal.cloneNode() as HTMLElement;
-      dragPreviewEl.style.transform = '';
-      dragPreviewEl.style.left = '0';
-      dragPreviewEl.style.top = '0';
-
-      const noteBackground = notePortal.querySelector('.note-background');
-      assertExists(noteBackground);
-
-      const noteBackgroundClone = noteBackground.cloneNode();
-      dragPreviewEl.append(noteBackgroundClone);
-
-      const container = document.createElement('div');
-      container.style.width = '100%';
-      container.style.height = '100%';
-      container.style.overflow = 'hidden';
-      dragPreviewEl.append(container);
-
-      render(noteComponent.host.renderModel(noteComponent.model), container);
-
-      startDragging([noteComponent], state, dragPreviewEl);
-      return true;
-    },
+    flavour: NoteBlockSchema.model.flavour,
     onDragEnd: ({
       draggingElements,
       dropBlockId,
       dropType,
-      state,
       editorHost,
+      state,
     }) => {
       if (
         draggingElements.length !== 1 ||
@@ -120,6 +76,51 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
         editorHost.selection.setGroup('edgeless', []);
       }
 
+      return true;
+    },
+    onDragStart: ({ anchorBlockPath, editorHost, startDragging, state }) => {
+      if (!anchorBlockPath) {
+        return false;
+      }
+
+      const element = captureEventTarget(state.raw.target);
+      const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
+      if (!insideDragHandle) {
+        return false;
+      }
+
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
+      if (
+        !anchorComponent ||
+        !matchFlavours(anchorComponent.model, [NoteBlockSchema.model.flavour])
+      ) {
+        return false;
+      }
+      const noteComponent = anchorComponent as NoteBlockComponent;
+
+      const notePortal = noteComponent.closest('.edgeless-block-portal-note');
+      assertExists(notePortal);
+
+      const dragPreviewEl = notePortal.cloneNode() as HTMLElement;
+      dragPreviewEl.style.transform = '';
+      dragPreviewEl.style.left = '0';
+      dragPreviewEl.style.top = '0';
+
+      const noteBackground = notePortal.querySelector('.note-background');
+      assertExists(noteBackground);
+
+      const noteBackgroundClone = noteBackground.cloneNode();
+      dragPreviewEl.append(noteBackgroundClone);
+
+      const container = document.createElement('div');
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.overflow = 'hidden';
+      dragPreviewEl.append(container);
+
+      render(noteComponent.host.renderModel(noteComponent.model), container);
+
+      startDragging([noteComponent], state, dragPreviewEl);
       return true;
     },
   };

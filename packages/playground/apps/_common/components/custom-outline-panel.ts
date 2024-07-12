@@ -3,7 +3,7 @@ import {
   type AffineEditorContainer,
   registerOutlinePanelComponents,
 } from '@blocksuite/presets';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('custom-outline-panel')
@@ -22,21 +22,11 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
     }
   `;
 
-  @state()
-  private accessor _show = false;
-
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-
   private _renderPanel() {
     return html`<outline-panel
       .editor=${this.editor}
       .fitPadding=${[50, 360, 50, 50]}
     ></outline-panel>`;
-  }
-
-  toggleDisplay() {
-    this._show = !this._show;
   }
 
   override connectedCallback(): void {
@@ -58,6 +48,16 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
         : null}
     `;
   }
+
+  toggleDisplay() {
+    this._show = !this._show;
+  }
+
+  @state()
+  private accessor _show = false;
+
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
 }
 
 declare global {

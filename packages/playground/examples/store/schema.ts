@@ -1,35 +1,35 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 const TodoRootBlockSchema = defineBlockSchema({
   flavour: 'todo:root',
   metadata: {
-    version: 1,
     role: 'root',
+    version: 1,
   },
 });
 
 const TodoContainerBlockSchema = defineBlockSchema({
   flavour: 'todo:container',
   metadata: {
-    version: 1,
     role: 'hub',
     tag: literal`todo-container`,
+    version: 1,
   },
 });
 
 const TodoItemBlockSchema = defineBlockSchema({
   flavour: 'todo:item',
+  metadata: {
+    parent: ['todo:container'],
+    role: 'content',
+    tag: literal`todo-item`,
+    version: 1,
+  },
   props: () => ({
     content: '',
     done: false,
   }),
-  metadata: {
-    version: 1,
-    role: 'content',
-    tag: literal`todo-item`,
-    parent: ['todo:container'],
-  },
 });
 
 export const TodoSchema = [
@@ -46,9 +46,9 @@ export type TodoItemBlockModel = SchemaToModel<typeof TodoItemBlockSchema>;
 declare global {
   namespace BlockSuite {
     interface BlockModels {
-      'todo:root': TodoRootBlockModel;
       'todo:container': TodoContainerBlockModel;
       'todo:item': TodoItemBlockModel;
+      'todo:root': TodoRootBlockModel;
     }
   }
 }

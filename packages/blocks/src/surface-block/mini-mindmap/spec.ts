@@ -1,7 +1,8 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 import type { BlockSchema } from '@blocksuite/store';
-import { literal } from 'lit/static-html.js';
 import type { z } from 'zod';
+
+import { literal } from 'lit/static-html.js';
 
 import { RootBlockSchema } from '../../root-block/root-model.js';
 import { SurfaceBlockSchema } from '../surface-model.js';

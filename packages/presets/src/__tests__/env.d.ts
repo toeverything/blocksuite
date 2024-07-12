@@ -8,8 +8,8 @@ declare global {
   const doc: Doc;
   const collection: DocCollection;
   interface Window {
-    editor: AffineEditorContainer;
-    doc: Doc;
     collection: DocCollection;
+    doc: Doc;
+    editor: AffineEditorContainer;
   }
 }

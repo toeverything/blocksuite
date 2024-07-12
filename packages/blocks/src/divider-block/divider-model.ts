@@ -1,11 +1,11 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
 
 export const DividerBlockSchema = defineBlockSchema({
   flavour: 'affine:divider',
   metadata: {
-    version: 1,
-    role: 'content',
     children: [],
+    role: 'content',
+    version: 1,
   },
 });
 

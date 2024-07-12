@@ -1,15 +1,15 @@
-import '../../buttons/toolbar-button.js';
-import './text-menu.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { EdgelessTextIcon } from '../../../../../_common/icons/index.js';
 import type { LastProps } from '../../../../../surface-block/managers/edit-session.js';
+
+import { EdgelessTextIcon } from '../../../../../_common/icons/index.js';
+import '../../buttons/toolbar-button.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
+import './text-menu.js';
 
 /**
  * @deprecated not used
@@ -29,11 +29,6 @@ export class EdgelessTextToolButton extends EdgelessToolbarToolMixin(
       overflow-y: hidden;
     }
   `;
-
-  @state()
-  accessor states: Partial<LastProps['text']> = {
-    color: GET_DEFAULT_TEXT_COLOR(),
-  };
 
   override type = 'text' as const;
 
@@ -70,6 +65,11 @@ export class EdgelessTextToolButton extends EdgelessToolbarToolMixin(
       </edgeless-toolbar-button>
     `;
   }
+
+  @state()
+  accessor states: Partial<LastProps['text']> = {
+    color: GET_DEFAULT_TEXT_COLOR(),
+  };
 }
 
 declare global {

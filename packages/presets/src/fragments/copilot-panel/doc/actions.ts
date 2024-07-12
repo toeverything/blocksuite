@@ -1,4 +1,5 @@
 import type { ChatMessage } from '../chat/logic.js';
+
 import { getChatService, userText } from './api.js';
 
 export function runChangeToneAction({
@@ -10,8 +11,8 @@ export function runChangeToneAction({
 }) {
   return getChatService().chat([
     {
-      role: 'system',
       content: 'You are assisting the user in writing high quality content.',
+      role: 'system',
     },
     userText(input),
     userText(
@@ -24,8 +25,8 @@ export function runFixSpellingAction(payload: { input: string }) {
   const { input } = payload;
   return getChatService().chat([
     {
-      role: 'system',
       content: 'You are a professional writing assistant',
+      role: 'system',
     },
     userText(input),
     userText(
@@ -38,9 +39,9 @@ export function runGenerateAction(payload: { input: string }) {
   const { input } = payload;
   return getChatService().chat([
     {
-      role: 'system',
       content:
         'You are assisting the user in extending the content of the whiteboard.',
+      role: 'system',
     },
     userText(input),
     userText('Generate more content based on the current input.'),
@@ -51,8 +52,8 @@ export function runImproveWritingAction(payload: { input: string }) {
   const { input } = payload;
   return getChatService().chat([
     {
-      role: 'system',
       content: 'You are a professional writing assistant',
+      role: 'system',
     },
     userText(input),
     userText(
@@ -65,8 +66,8 @@ export function runMakeLongerAction(payload: { input: string }) {
   const { input } = payload;
   return getChatService().chat([
     {
-      role: 'system',
       content: 'You are a professional writing assistant',
+      role: 'system',
     },
     userText(input),
     userText(
@@ -79,8 +80,8 @@ export function runMakeShorterAction(payload: { input: string }) {
   const { input } = payload;
   return getChatService().chat([
     {
-      role: 'system',
       content: 'You are a professional writing assistant',
+      role: 'system',
     },
     userText(input),
     userText(
@@ -93,9 +94,9 @@ export function runRefineAction(payload: { input: string }) {
   const { input } = payload;
   return getChatService().chat([
     {
-      role: 'system',
       content:
         'You are assisting the user in refining the content of the whiteboard.',
+      role: 'system',
     },
     userText(input),
     userText('Refine this text.'),
@@ -106,8 +107,8 @@ export function runSimplifyWritingAction(payload: { input: string }) {
   const { input } = payload;
   return getChatService().chat([
     {
-      role: 'system',
       content: 'You are a professional writing assistant',
+      role: 'system',
     },
     userText(input),
     userText(
@@ -120,8 +121,8 @@ export function runSummaryAction(payload: { input: string }) {
   const { input } = payload;
   return getChatService().chat([
     {
-      role: 'system',
       content: 'You are a professional writing assisting.',
+      role: 'system',
     },
     userText(input),
     userText('Summarize this text. Make sure to do your best.'),
@@ -135,8 +136,8 @@ export function runTranslateAction(payload: {
   const { input, language } = payload;
   return getChatService().chat([
     {
-      role: 'system',
       content: 'You are assisting the user in translating the content.',
+      role: 'system',
     },
     userText(
       `Translate the Markdown text
@@ -149,8 +150,8 @@ export function runTranslateAction(payload: {
 }
 
 export function runAnalysisAction(payload: {
-  input: string;
   background: ChatMessage[];
+  input: string;
 }) {
   const { input } = payload;
   return getChatService().chat([
@@ -164,8 +165,8 @@ export function runAnalysisAction(payload: {
 }
 
 export function runPartAnalysisAction(payload: {
-  input: string;
   background: ChatMessage[];
+  input: string;
   path: string[];
 }) {
   const { input, path } = payload;
@@ -181,8 +182,8 @@ ${input}`
   ]);
 }
 export const runPPTGenerateAction = (payload: {
-  input: string;
   background: ChatMessage[];
+  input: string;
 }) => {
   const { input } = payload;
   return getChatService().chat([

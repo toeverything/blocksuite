@@ -1,12 +1,13 @@
 import type { Slot } from '@blocksuite/global/utils';
 import type { BundledLanguage } from 'shiki';
+
 import { bundledLanguagesInfo, isPlainLang } from 'shiki';
 
 import { PLAIN_TEXT_LANG_INFO, type StrictLanguageInfo } from './consts.js';
 
 export interface selectedLanguageChangedSlots {
-  selectedLanguageChanged: Slot<{ language: string | null }>;
   dispose: Slot;
+  selectedLanguageChanged: Slot<{ language: null | string }>;
 }
 // TIOBE Index for May 2023
 // ref https://www.tiobe.com/tiobe-index/

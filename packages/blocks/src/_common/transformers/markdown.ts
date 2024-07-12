@@ -1,5 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { Job } from '@blocksuite/store';
 
 import { MarkdownAdapter } from '../adapters/index.js';
@@ -13,8 +14,8 @@ async function exportDoc(doc: Doc) {
   const adapter = new MarkdownAdapter(job);
 
   const markdownResult = await adapter.fromDocSnapshot({
-    snapshot,
     assets: job.assetsManager,
+    snapshot,
   });
 
   let downloadBlob: Blob;
@@ -52,12 +53,12 @@ async function importMarkdown({
   });
   const adapter = new MarkdownAdapter(job);
   const snapshot = await adapter.toSliceSnapshot({
-    file: markdown,
     assets: job.assetsManager,
-    pageVersion: doc.collection.meta.pageVersion!,
-    workspaceVersion: doc.collection.meta.workspaceVersion!,
-    workspaceId: doc.collection.id,
+    file: markdown,
     pageId: doc.id,
+    pageVersion: doc.collection.meta.pageVersion!,
+    workspaceId: doc.collection.id,
+    workspaceVersion: doc.collection.meta.workspaceVersion!,
   });
 
   assertExists(snapshot, 'import markdown failed, expected to get a snapshot');

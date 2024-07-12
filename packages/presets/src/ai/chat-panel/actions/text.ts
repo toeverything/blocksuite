@@ -1,13 +1,14 @@
-import './action-wrapper.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { createTextRenderer } from '../../messages/text.js';
 import type { ChatAction } from '../chat-context.js';
+
+import { createTextRenderer } from '../../messages/text.js';
+import './action-wrapper.js';
 
 @customElement('action-text')
 export class ActionText extends WithDisposable(LitElement) {
@@ -20,15 +21,6 @@ export class ActionText extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor item!: ChatAction;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor isCode = false;
-
   protected override render() {
     const originalText = this.item.messages[1].content;
     const { isCode } = this;
@@ -36,8 +28,8 @@ export class ActionText extends WithDisposable(LitElement) {
     return html` <action-wrapper .host=${this.host} .item=${this.item}>
       <div
         style=${styleMap({
-          padding: isCode ? '0' : '10px 16px',
           border: isCode ? 'none' : '1px solid var(--affine-border-color)',
+          padding: isCode ? '0' : '10px 16px',
         })}
         class="original-text"
       >
@@ -48,6 +40,15 @@ export class ActionText extends WithDisposable(LitElement) {
       </div>
     </action-wrapper>`;
   }
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor isCode = false;
+
+  @property({ attribute: false })
+  accessor item!: ChatAction;
 }
 
 declare global {

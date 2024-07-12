@@ -3,14 +3,14 @@ import { html, nothing } from 'lit';
 import type { IVec } from '../../../../surface-block/index.js';
 
 export enum HandleDirection {
-  Left = 'left',
-  Top = 'top',
-  Right = 'right',
   Bottom = 'bottom',
-  TopLeft = 'top-left',
   BottomLeft = 'bottom-left',
-  TopRight = 'top-right',
   BottomRight = 'bottom-right',
+  Left = 'left',
+  Right = 'right',
+  Top = 'top',
+  TopLeft = 'top-left',
+  TopRight = 'top-right',
 }
 
 function ResizeHandle(
@@ -19,9 +19,9 @@ function ResizeHandle(
   updateCursor?: (
     dragging: boolean,
     options?: {
-      type: 'resize' | 'rotate';
-      target?: HTMLElement;
       point?: IVec;
+      target?: HTMLElement;
+      type: 'resize' | 'rotate';
     }
   ) => void,
   hideEdgeHandle?: boolean
@@ -39,7 +39,7 @@ function ResizeHandle(
     const target = e.target as HTMLElement;
     const point = [clientX, clientY];
 
-    updateCursor(true, { type, point, target });
+    updateCursor(true, { point, target, type });
   };
 
   const pointerLeave = (e: PointerEvent) => {
@@ -84,7 +84,7 @@ function ResizeHandle(
  * - corner: The selected elements can only be resize dragging corner, this is by default mode
  * - edgeAndCorner: The selected elements can be resize both dragging left right edge or corner, usually when all elements are 'text'
  */
-export type ResizeMode = 'edge' | 'all' | 'none' | 'corner' | 'edgeAndCorner';
+export type ResizeMode = 'all' | 'corner' | 'edge' | 'edgeAndCorner' | 'none';
 
 export function ResizeHandles(
   resizeMode: ResizeMode,
@@ -92,9 +92,9 @@ export function ResizeHandles(
   updateCursor?: (
     dragging: boolean,
     options?: {
-      type: 'resize' | 'rotate';
-      target?: HTMLElement;
       point?: IVec;
+      target?: HTMLElement;
+      type: 'resize' | 'rotate';
     }
   ) => void
 ) {
@@ -120,10 +120,10 @@ export function ResizeHandles(
       updateCursor
     );
     return {
-      handleTopLeft,
-      handleTopRight,
       handleBottomLeft,
       handleBottomRight,
+      handleTopLeft,
+      handleTopRight,
     };
   };
   const getEdgeHandles = (hideEdgeHandle?: boolean) => {
@@ -154,15 +154,15 @@ export function ResizeHandles(
       updateCursor,
       hideEdgeHandle
     );
-    return { handleTop, handleBottom };
+    return { handleBottom, handleTop };
   };
   switch (resizeMode) {
     case 'corner': {
       const {
-        handleTopLeft,
-        handleTopRight,
         handleBottomLeft,
         handleBottomRight,
+        handleTopLeft,
+        handleTopRight,
       } = getCornerHandles();
 
       // prettier-ignore
@@ -179,13 +179,13 @@ export function ResizeHandles(
     }
     case 'all': {
       const {
-        handleTopLeft,
-        handleTopRight,
         handleBottomLeft,
         handleBottomRight,
+        handleTopLeft,
+        handleTopRight,
       } = getCornerHandles();
       const { handleLeft, handleRight } = getEdgeHandles(true);
-      const { handleTop, handleBottom } = getEdgeVerticalHandles(true);
+      const { handleBottom, handleTop } = getEdgeVerticalHandles(true);
 
       // prettier-ignore
       return html`
@@ -201,10 +201,10 @@ export function ResizeHandles(
     }
     case 'edgeAndCorner': {
       const {
-        handleTopLeft,
-        handleTopRight,
         handleBottomLeft,
         handleBottomRight,
+        handleTopLeft,
+        handleTopRight,
       } = getCornerHandles();
       const { handleLeft, handleRight } = getEdgeHandles(true);
 

@@ -4,22 +4,22 @@ import type { OpenAI } from 'openai';
 import type { ChatMessage } from '../chat/logic.js';
 
 export type Vendor<Data> = {
-  key: string;
   color: string;
   initData: () => Data;
+  key: string;
   renderConfigEditor: (data: Data, refresh: () => void) => TemplateResult;
 };
 export type ServiceImpl<M, Data> = {
-  name: string;
   method: (data: Data) => M;
+  name: string;
   vendor: Vendor<Data>;
 };
 export type ServiceKind<M> = {
-  type: string;
-  title: string;
   getImpl: (implName: string) => ServiceImpl<M, unknown> | undefined;
   implList: ServiceImpl<M, unknown>[];
   implService: <Data>(impl: ServiceImpl<M, Data>) => void;
+  title: string;
+  type: string;
 };
 export const createVendor = <Data extends object>(
   config: Vendor<Data>
@@ -27,13 +27,11 @@ export const createVendor = <Data extends object>(
   return config;
 };
 const createServiceKind = <M>(config: {
-  type: string;
   title: string;
+  type: string;
 }): ServiceKind<M> => {
   const implList = [] as ServiceImpl<M, unknown>[];
   return {
-    type: config.type,
-    title: config.title,
     getImpl: implName => {
       return implList.find(v => v.name === implName);
     },
@@ -41,35 +39,37 @@ const createServiceKind = <M>(config: {
     implService: impl => {
       implList.push(impl as never);
     },
+    title: config.title,
+    type: config.type,
   };
 };
 
 export const TextServiceKind = createServiceKind<{
   generateText(messages: ChatMessage[]): Promise<string>;
 }>({
-  type: 'text-service',
   title: 'Text service',
+  type: 'text-service',
 });
 export const ChatServiceKind = createServiceKind<{
   chat(messages: Array<ChatMessage>): AsyncIterable<string>;
 }>({
-  type: 'chat-service',
   title: 'Chat service',
+  type: 'chat-service',
 });
 
 export const Text2ImageServiceKind = createServiceKind<{
   generateImage(prompt: string): Promise<File>;
 }>({
-  type: 'text-to-image-service',
   title: 'Text to image service',
+  type: 'text-to-image-service',
 });
 
 export const EmbeddingServiceKind = createServiceKind<{
   generateEmbedding(text: string): Promise<number[]>;
   generateEmbeddings(textList: string[]): Promise<number[][]>;
 }>({
-  type: 'embedding-service',
   title: 'Embedding service',
+  type: 'embedding-service',
 });
 
 export const Image2TextServiceKind = createServiceKind<{
@@ -77,21 +77,21 @@ export const Image2TextServiceKind = createServiceKind<{
     messages: Array<OpenAI.ChatCompletionMessageParam>
   ): Promise<string>;
 }>({
-  type: 'image-to-text-service',
   title: 'Image to text service',
+  type: 'image-to-text-service',
 });
 
 export const Image2ImageServiceKind = createServiceKind<{
   generateImage(prompt: string, image: string): Promise<string>;
 }>({
-  type: 'image-to-image-service',
   title: 'Image to image service',
+  type: 'image-to-image-service',
 });
 export const FastImage2ImageServiceKind = createServiceKind<{
   createFastRequest(): (prompt: string, image: string) => Promise<string>;
 }>({
-  type: 'fast-image-to-image-service',
   title: 'Fast image to image service',
+  type: 'fast-image-to-image-service',
 });
 
 export const allKindService = [

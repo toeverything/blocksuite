@@ -1,23 +1,23 @@
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
 
-export type EmbedProps<Props = object> = Props & EdgelessSelectableProps;
+export type EmbedProps<Props = object> = EdgelessSelectableProps & Props;
 
 export type LinkPreviewData = {
-  description: string | null;
-  icon: string | null;
-  image: string | null;
-  title: string | null;
+  description: null | string;
+  icon: null | string;
+  image: null | string;
+  title: null | string;
 };
 
 export type LinkPreviewResponseData = {
-  url: string;
-  title?: string;
-  siteName?: string;
+  charset?: string;
+  contentType?: string;
   description?: string;
+  favicons?: string[];
   images?: string[];
   mediaType?: string;
-  contentType?: string;
-  charset?: string;
+  siteName?: string;
+  title?: string;
+  url: string;
   videos?: string[];
-  favicons?: string[];
 };

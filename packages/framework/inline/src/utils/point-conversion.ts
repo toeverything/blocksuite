@@ -1,6 +1,7 @@
 import type { VElement, VLine } from '../components/index.js';
-import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DomPoint, TextPoint } from '../types.js';
+
+import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import {
   isInlineRoot,
   isNativeTextInVText,
@@ -92,7 +93,7 @@ export function textPointToDomPoint(
     lineElement
   );
 
-  return { text, index: index + lineIndex };
+  return { index: index + lineIndex, text };
 }
 
 function getVNodesFromNode(node: Node): VElement[] | VLine[] | null {
@@ -115,7 +116,7 @@ function getVNodesFromNode(node: Node): VElement[] | VLine[] | null {
 }
 
 function getTextPointFromVNodes(
-  vNodes: VLine[] | VElement[],
+  vNodes: VElement[] | VLine[],
   node: Node,
   offset: number
 ): TextPoint | null {

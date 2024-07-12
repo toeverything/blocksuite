@@ -1,8 +1,14 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 import { render } from 'lit';
+
+import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import type { RootBlockComponent } from '../root-block/types.js';
+import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
+import type { AttachmentBlockComponent } from './attachment-block.js';
 
 import {
   FileDropManager,
@@ -11,9 +17,6 @@ import {
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { isInsideEdgelessEditor } from '../_common/utils/query.js';
-import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import type { RootBlockComponent } from '../root-block/types.js';
-import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -23,7 +26,6 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
-import type { AttachmentBlockComponent } from './attachment-block.js';
 import {
   type AttachmentBlockModel,
   AttachmentBlockSchema,
@@ -31,58 +33,57 @@ import {
 import { addSiblingAttachmentBlocks } from './utils.js';
 
 export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
-  get rootElement(): RootBlockComponent {
-    const rootModel = this.doc.root;
-    assertExists(rootModel);
+  private _dragHandleOption: DragHandleOption = {
+    edgeless: true,
+    flavour: AttachmentBlockSchema.model.flavour,
+    onDragEnd: props => {
+      const { draggingElements, editorHost, state } = props;
+      if (
+        draggingElements.length !== 1 ||
+        !matchFlavours(draggingElements[0].model, [
+          AttachmentBlockSchema.model.flavour,
+        ])
+      )
+        return false;
 
-    const rootElement = this.std.view.viewFromPath('block', [
-      rootModel.id,
-    ]) as RootBlockComponent | null;
-    assertExists(rootElement);
-    return rootElement;
-  }
+      const blockComponent = draggingElements[0] as AttachmentBlockComponent;
+      const isInSurface = blockComponent.isInSurface;
+      const target = captureEventTarget(state.raw.target);
+      const isTargetEdgelessContainer =
+        target?.classList.contains('edgeless') &&
+        target?.classList.contains('affine-block-children-container');
 
-  private _fileDropOptions: FileDropOptions = {
-    flavour: this.flavour,
-    onDrop: async ({ files, targetModel, place, point }) => {
-      if (!files.length) return false;
+      if (isInSurface) {
+        const style = blockComponent.model.style;
+        const targetStyle = style === 'cubeThick' ? 'horizontalThin' : style;
+        return convertDragPreviewEdgelessToDoc({
+          blockComponent,
+          style: targetStyle,
+          ...props,
+        });
+      } else if (isTargetEdgelessContainer) {
+        let style = blockComponent.model.style ?? 'cubeThick';
+        const embed = blockComponent.model.embed;
+        if (embed) {
+          style = 'cubeThick';
+          editorHost.doc.updateBlock(blockComponent.model, {
+            embed: false,
+            style,
+          });
+        }
 
-      // generic attachment block for all files except images
-      const attachmentFiles = files.filter(
-        file => !file.type.startsWith('image/')
-      );
-
-      if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
-        await addSiblingAttachmentBlocks(
-          this.host as EditorHost,
-          attachmentFiles,
-          this.maxFileSize,
-          targetModel,
-          place
-        );
-      } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
-        const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
-        point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
-        await edgelessRoot.addAttachments(attachmentFiles, point);
-
-        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
-          control: 'canvas:drop',
-          page: 'whiteboard editor',
-          module: 'toolbar',
-          segment: 'toolbar',
-          type: 'attachment',
+        return convertDragPreviewDocToEdgeless({
+          blockComponent,
+          cssSelector: '.affine-attachment-container',
+          height: EMBED_CARD_HEIGHT[style],
+          width: EMBED_CARD_WIDTH[style],
+          ...props,
         });
       }
 
-      this.slots.onFilesDropped.emit(attachmentFiles);
-      return true;
+      return false;
     },
-  };
-
-  private _dragHandleOption: DragHandleOption = {
-    flavour: AttachmentBlockSchema.model.flavour,
-    edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
+    onDragStart: ({ anchorBlockPath, editorHost, startDragging, state }) => {
       if (!anchorBlockPath) return false;
       const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
       if (
@@ -129,62 +130,52 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
       }
       return false;
     },
-    onDragEnd: props => {
-      const { state, draggingElements, editorHost } = props;
-      if (
-        draggingElements.length !== 1 ||
-        !matchFlavours(draggingElements[0].model, [
-          AttachmentBlockSchema.model.flavour,
-        ])
-      )
-        return false;
+  };
 
-      const blockComponent = draggingElements[0] as AttachmentBlockComponent;
-      const isInSurface = blockComponent.isInSurface;
-      const target = captureEventTarget(state.raw.target);
-      const isTargetEdgelessContainer =
-        target?.classList.contains('edgeless') &&
-        target?.classList.contains('affine-block-children-container');
+  private _fileDropOptions: FileDropOptions = {
+    flavour: this.flavour,
+    onDrop: async ({ files, place, point, targetModel }) => {
+      if (!files.length) return false;
 
-      if (isInSurface) {
-        const style = blockComponent.model.style;
-        const targetStyle = style === 'cubeThick' ? 'horizontalThin' : style;
-        return convertDragPreviewEdgelessToDoc({
-          blockComponent,
-          style: targetStyle,
-          ...props,
-        });
-      } else if (isTargetEdgelessContainer) {
-        let style = blockComponent.model.style ?? 'cubeThick';
-        const embed = blockComponent.model.embed;
-        if (embed) {
-          style = 'cubeThick';
-          editorHost.doc.updateBlock(blockComponent.model, {
-            style,
-            embed: false,
-          });
-        }
+      // generic attachment block for all files except images
+      const attachmentFiles = files.filter(
+        file => !file.type.startsWith('image/')
+      );
 
-        return convertDragPreviewDocToEdgeless({
-          blockComponent,
-          cssSelector: '.affine-attachment-container',
-          width: EMBED_CARD_WIDTH[style],
-          height: EMBED_CARD_HEIGHT[style],
-          ...props,
+      if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
+        await addSiblingAttachmentBlocks(
+          this.host as EditorHost,
+          attachmentFiles,
+          this.maxFileSize,
+          targetModel,
+          place
+        );
+      } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
+        const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+        point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
+        await edgelessRoot.addAttachments(attachmentFiles, point);
+
+        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
+          control: 'canvas:drop',
+          module: 'toolbar',
+          page: 'whiteboard editor',
+          segment: 'toolbar',
+          type: 'attachment',
         });
       }
 
-      return false;
+      this.slots.onFilesDropped.emit(attachmentFiles);
+      return true;
     },
   };
+
+  fileDropManager!: FileDropManager;
 
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
 
   slots = {
     onFilesDropped: new Slot<File[]>(),
   };
-
-  fileDropManager!: FileDropManager;
 
   override mounted(): void {
     super.mounted();
@@ -194,5 +185,16 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
+  }
+
+  get rootElement(): RootBlockComponent {
+    const rootModel = this.doc.root;
+    assertExists(rootModel);
+
+    const rootElement = this.std.view.viewFromPath('block', [
+      rootModel.id,
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
+    return rootElement;
   }
 }

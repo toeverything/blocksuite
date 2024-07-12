@@ -3,12 +3,13 @@ import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
-import { OpenIcon } from '../_common/icons/text.js';
 import type { EmbedFigmaStyles } from './embed-figma-model.js';
 import type { EmbedFigmaModel } from './embed-figma-model.js';
 import type { EmbedFigmaBlockService } from './embed-figma-service.js';
+
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
+import { OpenIcon } from '../_common/icons/text.js';
 import { FigmaIcon, styles } from './styles.js';
 
 @customElement('affine-embed-figma-block')
@@ -18,25 +19,21 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  @state()
-  private accessor _isSelected = false;
-
-  @state()
-  private accessor _showOverlay = true;
+  override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
 
   private _isDragging = false;
 
   private _isResizing = false;
 
-  override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
+  open = () => {
+    let link = this.model.url;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  };
 
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
+  refreshData = () => {};
 
   private _handleClick(event: MouseEvent) {
     event.stopPropagation();
@@ -50,15 +47,13 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     this.open();
   }
 
-  open = () => {
-    let link = this.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
-  };
-
-  refreshData = () => {};
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -66,8 +61,8 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     if (!this.model.description && !this.model.title) {
       this.doc.withoutTransact(() => {
         this.doc.updateBlock(this.model, {
-          title: 'Figma',
           description: this.model.url,
+          title: 'Figma',
         });
       });
     }
@@ -120,7 +115,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   }
 
   override renderBlock() {
-    const { title, description, style, url } = this.model;
+    const { description, style, title, url } = this.model;
 
     this._cardStyle = style;
     this._width = EMBED_CARD_WIDTH[this._cardStyle];
@@ -183,6 +178,12 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
       `
     );
   }
+
+  @state()
+  private accessor _isSelected = false;
+
+  @state()
+  private accessor _showOverlay = true;
 }
 
 declare global {

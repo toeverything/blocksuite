@@ -1,7 +1,9 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { EditingState } from '../types.js';
+
 import { matchFlavours } from './model.js';
 import {
   type BlockComponent,
@@ -16,12 +18,12 @@ import { type Point, Rect } from './rect.js';
 /**
  * A dropping type.
  */
-export type DroppingType = 'none' | 'before' | 'after' | 'database';
+export type DroppingType = 'after' | 'before' | 'database' | 'none';
 
 export type DropResult = {
-  type: DroppingType;
-  rect: Rect;
   modelState: EditingState;
+  rect: Rect;
+  type: DroppingType;
 };
 
 /**
@@ -33,7 +35,7 @@ export function calcDropTarget(
   element: Element,
   draggingElements: BlockComponent[] = [],
   scale: number = 1,
-  flavour: string | null = null // for block-hub
+  flavour: null | string = null // for block-hub
 ): DropResult | null {
   const schema = model.doc.getSchemaByFlavour('affine:database');
   assertExists(schema);
@@ -61,7 +63,7 @@ export function calcDropTarget(
 
   let type: DroppingType = 'none';
   const height = 3 * scale;
-  const { rect: domRect, flag } = getDropRectByPoint(point, model, element);
+  const { flag, rect: domRect } = getDropRectByPoint(point, model, element);
 
   if (flag === DropFlags.EmptyDatabase) {
     // empty database
@@ -71,13 +73,13 @@ export function calcDropTarget(
     type = 'database';
 
     return {
-      type,
-      rect,
       modelState: {
+        element: element as BlockComponent,
         model,
         rect: domRect,
-        element: element as BlockComponent,
       },
+      rect,
+      type,
     };
   } else if (flag === DropFlags.Database) {
     // not empty database
@@ -87,18 +89,18 @@ export function calcDropTarget(
     type = before ? 'before' : 'after';
 
     return {
-      type,
+      modelState: {
+        element: element as BlockComponent,
+        model,
+        rect: domRect,
+      },
       rect: Rect.fromLWTH(
         domRect.left,
         domRect.width,
         (before ? domRect.top - 1 : domRect.bottom) - height / 2,
         height
       ),
-      modelState: {
-        model,
-        rect: domRect,
-        element: element as BlockComponent,
-      },
+      type,
     };
   }
 
@@ -167,12 +169,12 @@ export function calcDropTarget(
   }
 
   return {
-    type,
-    rect: Rect.fromLWTH(domRect.left, domRect.width, top - height / 2, height),
     modelState: {
+      element: element as BlockComponent,
       model,
       rect: domRect,
-      element: element as BlockComponent,
     },
+    rect: Rect.fromLWTH(domRect.left, domRect.width, top - height / 2, height),
+    type,
   };
 }

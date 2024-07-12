@@ -1,11 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { isAbortError } from '../_common/utils/helper.js';
 import type { EmbedLoomBlockComponent } from './embed-loom-block.js';
 import type {
   EmbedLoomBlockUrlData,
   EmbedLoomModel,
 } from './embed-loom-model.js';
+
+import { isAbortError } from '../_common/utils/helper.js';
 
 const LoomOEmbedEndpoint = 'https://www.loom.com/v1/oembed';
 
@@ -32,12 +33,12 @@ export async function queryLoomOEmbedData(
   const oEmbedResponse = await fetch(oEmbedUrl, { signal }).catch(() => null);
   if (oEmbedResponse && oEmbedResponse.ok) {
     const oEmbedJson = await oEmbedResponse.json();
-    const { title, description, thumbnail_url: image } = oEmbedJson;
+    const { description, thumbnail_url: image, title } = oEmbedJson;
 
     loomOEmbedData = {
-      title,
       description,
       image,
+      title,
     };
   }
 
@@ -59,14 +60,14 @@ export async function refreshEmbedLoomUrlData(
     assertExists(queryUrlData);
 
     const loomUrlData = await queryUrlData(embedLoomElement.model);
-    ({ title = null, description = null, image = null } = loomUrlData);
+    ({ description = null, image = null, title = null } = loomUrlData);
 
     if (signal?.aborted) return;
 
     embedLoomElement.doc.updateBlock(embedLoomElement.model, {
-      title,
       description,
       image,
+      title,
     });
   } catch (error) {
     if (signal?.aborted || isAbortError(error)) return;

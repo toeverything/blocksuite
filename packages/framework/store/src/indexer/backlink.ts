@@ -1,5 +1,6 @@
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
+
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { Text } from 'yjs';
 
 import type { BlockIndexer, IndexBlockEvent } from './base.js';
@@ -7,27 +8,27 @@ import type { BlockIndexer, IndexBlockEvent } from './base.js';
 type DocId = string;
 type BlockId = string;
 type LinkedNode = {
-  type: 'LinkedPage' | 'Subpage';
-  pageId: DocId;
   blockId: BlockId;
+  pageId: DocId;
+  type: 'LinkedPage' | 'Subpage';
 };
 /**
  * Please sync type with {@link AffineTextAttributes} manually
  */
 type TextDelta = DeltaInsert<
-  BaseTextAttributes & { reference: Omit<LinkedNode, 'blockId'> }
+  { reference: Omit<LinkedNode, 'blockId'> } & BaseTextAttributes
 >;
 
 export type IndexUpdatedEvent =
   | {
-      action: 'delete';
+      action: 'add' | 'update';
+      blockId: BlockId;
       docId: DocId;
-      blockId?: BlockId;
     }
   | {
-      action: 'add' | 'update';
+      action: 'delete';
+      blockId?: BlockId;
       docId: DocId;
-      blockId: BlockId;
     };
 
 /**
@@ -61,20 +62,16 @@ function diffArray<T>(
     }
   }
 
-  return { changed: add.length || remove.length, add, remove, unchanged };
+  return { add, changed: add.length || remove.length, remove, unchanged };
 }
 
 export class BacklinkIndexer {
-  get linkIndexMap() {
-    return this._linkIndexMap;
-  }
+  // TODO use inverted index
+  private _backlinkIndexMapCache: Record<DocId, LinkedNode[]> | null = null;
 
   private _disposables = new DisposableGroup();
 
   private _linkIndexMap: Record<DocId, Record<BlockId, LinkedNode[]>> = {};
-
-  // TODO use inverted index
-  private _backlinkIndexMapCache: Record<DocId, LinkedNode[]> | null = null;
 
   slots = {
     /**
@@ -101,19 +98,29 @@ export class BacklinkIndexer {
     });
   }
 
-  private _onRefreshIndex() {
-    this._linkIndexMap = {};
+  private _indexDelta({
+    action,
+    blockId,
+    docId,
+    links,
+  }: {
+    action: IndexBlockEvent['action'];
+    blockId: BlockId;
+    docId: DocId;
+    links: LinkedNode[];
+  }) {
+    const before = this._linkIndexMap[docId]?.[blockId] ?? [];
+    const diff = diffArray(before, links);
+    if (!diff.changed) return;
+
+    this._linkIndexMap[docId] = {
+      ...this._linkIndexMap[docId],
+      [blockId]: links,
+    };
+    this.slots.indexUpdated.emit({ action, blockId, docId });
   }
 
-  private _onDocRemoved(docId: DocId) {
-    if (!this._linkIndexMap[docId]) {
-      return;
-    }
-    this._linkIndexMap[docId] = {};
-    this.slots.indexUpdated.emit({ action: 'delete', docId });
-  }
-
-  private _onBlockUpdated({ action, docId, block, blockId }: IndexBlockEvent) {
+  private _onBlockUpdated({ action, block, blockId, docId }: IndexBlockEvent) {
     switch (action) {
       case 'add':
       case 'update': {
@@ -142,13 +149,13 @@ export class BacklinkIndexer {
         ) {
           const pageId = block.get('prop:pageId');
           if (typeof pageId === 'string') {
-            links = [...links, { pageId, blockId, type: 'LinkedPage' }];
+            links = [...links, { blockId, pageId, type: 'LinkedPage' }];
           } else {
             console.warn('Unexpected prop:pageId type', pageId);
           }
         }
 
-        this._indexDelta({ action, docId, blockId, links });
+        this._indexDelta({ action, blockId, docId, links });
         return;
       }
       case 'delete': {
@@ -158,26 +165,16 @@ export class BacklinkIndexer {
     }
   }
 
-  private _indexDelta({
-    action,
-    docId,
-    blockId,
-    links,
-  }: {
-    action: IndexBlockEvent['action'];
-    docId: DocId;
-    blockId: BlockId;
-    links: LinkedNode[];
-  }) {
-    const before = this._linkIndexMap[docId]?.[blockId] ?? [];
-    const diff = diffArray(before, links);
-    if (!diff.changed) return;
+  private _onDocRemoved(docId: DocId) {
+    if (!this._linkIndexMap[docId]) {
+      return;
+    }
+    this._linkIndexMap[docId] = {};
+    this.slots.indexUpdated.emit({ action: 'delete', docId });
+  }
 
-    this._linkIndexMap[docId] = {
-      ...this._linkIndexMap[docId],
-      [blockId]: links,
-    };
-    this.slots.indexUpdated.emit({ action, docId, blockId });
+  private _onRefreshIndex() {
+    this._linkIndexMap = {};
   }
 
   private _removeIndex(docId: DocId, blockId: BlockId) {
@@ -189,10 +186,14 @@ export class BacklinkIndexer {
     if (previousLink.length) {
       this.slots.indexUpdated.emit({
         action: 'delete',
-        docId,
         blockId,
+        docId,
       });
     }
+  }
+
+  dispose() {
+    this._disposables.dispose();
   }
 
   /**
@@ -210,8 +211,8 @@ export class BacklinkIndexer {
             backlinkIndexMapCache[pageId] = [];
           }
           backlinkIndexMapCache[pageId].push({
-            pageId: fromDocId,
             blockId: fromBlockId,
+            pageId: fromDocId,
             type,
           });
         });
@@ -221,7 +222,7 @@ export class BacklinkIndexer {
     return this._backlinkIndexMapCache[targetDocId] ?? [];
   }
 
-  dispose() {
-    this._disposables.dispose();
+  get linkIndexMap() {
+    return this._linkIndexMap;
   }
 }

@@ -1,6 +1,6 @@
-import '../_common/components/rich-text/rich-text.js';
-
 import type { BlockElement } from '@blocksuite/block-std';
+import type { BundledLanguage, Highlighter } from 'shiki';
+
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -9,23 +9,24 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 import { Slice } from '@blocksuite/store';
-import { html, nothing, render, type TemplateResult } from 'lit';
+import { type TemplateResult, html, nothing, render } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import type { BundledLanguage, Highlighter } from 'shiki';
 import { z } from 'zod';
 
-import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
+import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
+
+import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
+import '../_common/components/rich-text/rich-text.js';
 import { toast } from '../_common/components/toast.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { BlockComponent } from './../_common/components/block-component.js';
 import { CodeClipboardController } from './clipboard/index.js';
-import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { codeBlockStyles } from './styles.js';
 import { getStandardLanguage, isPlaintext } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
@@ -40,37 +41,11 @@ import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
-  get readonly() {
-    return this.doc.readonly;
-  }
-
-  override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockElement>(
-        'affine-note, affine-edgeless-text'
-      );
-      return el;
-    }
-    return this.rootElement;
-  }
-
-  get inlineEditor() {
-    const inlineRoot = this.querySelector<InlineRootElement>(
-      `[${INLINE_ROOT_ATTR}]`
-    );
-    if (!inlineRoot) {
-      throw new Error('Inline editor root not found');
-    }
-    return inlineRoot.inlineEditor;
-  }
-
   static override styles = codeBlockStyles;
 
-  private readonly _themeObserver = new ThemeObserver();
+  private _highlighter: Highlighter | null = null;
 
-  private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
-    this._updateLineNumbers();
-  });
+  private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   /**
    * Given the high cost associated with updating the highlight,
@@ -86,24 +61,25 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
    */
   private _previousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
 
-  private _highlighter: Highlighter | null = null;
+  private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
+    this._updateLineNumbers();
+  });
 
-  private _inlineRangeProvider: InlineRangeProvider | null = null;
+  private readonly _themeObserver = new ThemeObserver();
 
-  @query('rich-text')
-  private accessor _richTextElement: RichText | null = null;
-
-  override accessor useCaptionEditor = true;
-
-  override accessor blockContainerStyles = {
-    margin: '24px 0',
-  };
+  readonly attributesSchema = z.object({});
 
   clipboardController = new CodeClipboardController(this);
 
-  highlightOptionsGetter: HighlightOptionsGetter | null = null;
+  readonly getAttributeRenderer = () =>
+    getCodeLineRenderer(() => ({
+      highlighter: this._highlighter,
+      lang:
+        getStandardLanguage(this.model.language.toLowerCase())?.id ??
+        'plaintext',
+    }));
 
-  readonly attributesSchema = z.object({});
+  highlightOptionsGetter: HighlightOptionsGetter | null = null;
 
   private async _startHighlight(lang: StrictLanguageInfo) {
     if (this._highlighter) {
@@ -123,8 +99,8 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
       return;
     }
     this._highlighter = await getHighLighter({
-      themes: [LIGHT_THEME, DARK_THEME],
       langs: [lang.id],
+      themes: [LIGHT_THEME, DARK_THEME],
     });
 
     const richText = this.querySelector('rich-text');
@@ -153,28 +129,14 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
     );
   }
 
-  readonly getAttributeRenderer = () =>
-    getCodeLineRenderer(() => ({
-      lang:
-        getStandardLanguage(this.model.language.toLowerCase())?.id ??
-        'plaintext',
-      highlighter: this._highlighter,
-    }));
-
-  override async getUpdateComplete() {
-    const result = await super.getUpdateComplete();
-    await this._richTextElement?.updateComplete;
-    return result;
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     // set highlight options getter used by "exportToHtml"
     this.clipboardController.hostConnected();
     this.setHighlightOptionsGetter(() => {
       return {
-        lang: this._previousLanguage.id as BundledLanguage,
         highlighter: this._highlighter,
+        lang: this._previousLanguage.id as BundledLanguage,
       };
     });
 
@@ -237,53 +199,6 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
 
         return;
       },
-      Tab: ctx => {
-        const state = ctx.get('keyboardState');
-        const event = state.raw;
-        const inlineEditor = this.inlineEditor;
-        const inlineRange = inlineEditor.getInlineRange();
-        if (inlineRange) {
-          event.stopPropagation();
-          event.preventDefault();
-
-          const text = this.inlineEditor.yText.toString();
-          const index = text.lastIndexOf(
-            LINE_BREAK_SYMBOL,
-            inlineRange.index - 1
-          );
-          const indexArr = allIndexOf(
-            text,
-            LINE_BREAK_SYMBOL,
-            inlineRange.index,
-            inlineRange.index + inlineRange.length
-          )
-            .map(i => i + 1)
-            .reverse();
-          if (index !== -1) {
-            indexArr.push(index + 1);
-          } else {
-            indexArr.push(0);
-          }
-          indexArr.forEach(i => {
-            this.inlineEditor.insertText(
-              {
-                index: i,
-                length: 0,
-              },
-              INDENT_SYMBOL
-            );
-          });
-          this.inlineEditor.setInlineRange({
-            index: inlineRange.index + 2,
-            length:
-              inlineRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
-          });
-
-          return true;
-        }
-
-        return;
-      },
       'Shift-Tab': ctx => {
         const state = ctx.get('keyboardState');
         const event = state.raw;
@@ -336,37 +251,56 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
 
         return;
       },
+      Tab: ctx => {
+        const state = ctx.get('keyboardState');
+        const event = state.raw;
+        const inlineEditor = this.inlineEditor;
+        const inlineRange = inlineEditor.getInlineRange();
+        if (inlineRange) {
+          event.stopPropagation();
+          event.preventDefault();
+
+          const text = this.inlineEditor.yText.toString();
+          const index = text.lastIndexOf(
+            LINE_BREAK_SYMBOL,
+            inlineRange.index - 1
+          );
+          const indexArr = allIndexOf(
+            text,
+            LINE_BREAK_SYMBOL,
+            inlineRange.index,
+            inlineRange.index + inlineRange.length
+          )
+            .map(i => i + 1)
+            .reverse();
+          if (index !== -1) {
+            indexArr.push(index + 1);
+          } else {
+            indexArr.push(0);
+          }
+          indexArr.forEach(i => {
+            this.inlineEditor.insertText(
+              {
+                index: i,
+                length: 0,
+              },
+              INDENT_SYMBOL
+            );
+          });
+          this.inlineEditor.setInlineRange({
+            index: inlineRange.index + 2,
+            length:
+              inlineRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
+          });
+
+          return true;
+        }
+
+        return;
+      },
     });
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.clipboardController.hostDisconnected();
-    this._richTextResizeObserver.disconnect();
-  }
-
-  override updated() {
-    if (this.model.language !== this._previousLanguage.id) {
-      const lang = getStandardLanguage(this.model.language);
-      this._previousLanguage = lang ?? PLAIN_TEXT_LANG_INFO;
-      if (lang) {
-        this._startHighlight(lang).catch(console.error);
-      } else {
-        this._highlighter = null;
-      }
-
-      const richText = this.querySelector('rich-text');
-      const inlineEditor = richText?.inlineEditor;
-      if (inlineEditor) {
-        inlineEditor.requestUpdate();
-      }
-    }
-
-    assertExists(this._richTextElement);
-    this._richTextResizeObserver.disconnect();
-    this._richTextResizeObserver.observe(this._richTextElement);
   }
 
   copyCode() {
@@ -383,20 +317,16 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
       });
   }
 
-  setHighlightOptionsGetter(fn: HighlightOptionsGetter) {
-    this.highlightOptionsGetter = fn;
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.clipboardController.hostDisconnected();
+    this._richTextResizeObserver.disconnect();
   }
 
-  setLang(lang: string | null) {
-    const standardLang = lang ? getStandardLanguage(lang) : null;
-    const langName = standardLang?.id ?? FALLBACK_LANG;
-    this.doc.updateBlock(this.model, {
-      language: langName,
-    });
-  }
-
-  setWrap(wrap: boolean) {
-    this.doc.updateBlock(this.model, { wrap });
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await this._richTextElement?.updateComplete;
+    return result;
   }
 
   override renderBlock(): TemplateResult<1> {
@@ -430,6 +360,77 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
       </div>
     `;
   }
+
+  setHighlightOptionsGetter(fn: HighlightOptionsGetter) {
+    this.highlightOptionsGetter = fn;
+  }
+
+  setLang(lang: null | string) {
+    const standardLang = lang ? getStandardLanguage(lang) : null;
+    const langName = standardLang?.id ?? FALLBACK_LANG;
+    this.doc.updateBlock(this.model, {
+      language: langName,
+    });
+  }
+
+  setWrap(wrap: boolean) {
+    this.doc.updateBlock(this.model, { wrap });
+  }
+
+  override updated() {
+    if (this.model.language !== this._previousLanguage.id) {
+      const lang = getStandardLanguage(this.model.language);
+      this._previousLanguage = lang ?? PLAIN_TEXT_LANG_INFO;
+      if (lang) {
+        this._startHighlight(lang).catch(console.error);
+      } else {
+        this._highlighter = null;
+      }
+
+      const richText = this.querySelector('rich-text');
+      const inlineEditor = richText?.inlineEditor;
+      if (inlineEditor) {
+        inlineEditor.requestUpdate();
+      }
+    }
+
+    assertExists(this._richTextElement);
+    this._richTextResizeObserver.disconnect();
+    this._richTextResizeObserver.observe(this._richTextElement);
+  }
+
+  get inlineEditor() {
+    const inlineRoot = this.querySelector<InlineRootElement>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    if (!inlineRoot) {
+      throw new Error('Inline editor root not found');
+    }
+    return inlineRoot.inlineEditor;
+  }
+
+  get readonly() {
+    return this.doc.readonly;
+  }
+
+  override get topContenteditableElement() {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
+      const el = this.closest<BlockElement>(
+        'affine-note, affine-edgeless-text'
+      );
+      return el;
+    }
+    return this.rootElement;
+  }
+
+  @query('rich-text')
+  private accessor _richTextElement: RichText | null = null;
+
+  override accessor blockContainerStyles = {
+    margin: '24px 0',
+  };
+
+  override accessor useCaptionEditor = true;
 }
 
 function generateLineNumberRender(top = 0) {

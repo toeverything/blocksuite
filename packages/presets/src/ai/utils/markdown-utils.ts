@@ -1,14 +1,5 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import type { EditorHost, TextRangePoint } from '@blocksuite/block-std';
-import {
-  defaultImageProxyMiddleware,
-  MarkdownAdapter,
-  MixTextAdapter,
-  pasteMiddleware,
-  PlainTextAdapter,
-  titleMiddleware,
-} from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import type {
   BlockModel,
   BlockSnapshot,
@@ -16,6 +7,16 @@ import type {
   DraftModel,
   SliceSnapshot,
 } from '@blocksuite/store';
+
+import {
+  MarkdownAdapter,
+  MixTextAdapter,
+  PlainTextAdapter,
+  defaultImageProxyMiddleware,
+  pasteMiddleware,
+  titleMiddleware,
+} from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection, Job, type Slice } from '@blocksuite/store';
 
 const updateSnapshotText = (
@@ -79,8 +80,8 @@ export async function getContentFromSlice(
   const adapter =
     type === 'markdown' ? new MarkdownAdapter(job) : new PlainTextAdapter(job);
   const content = await adapter.fromSliceSnapshot({
-    snapshot,
     assets: job.assetsManager,
+    snapshot,
   });
   return content.file;
 }
@@ -94,8 +95,8 @@ export async function getPlainTextFromSlice(host: EditorHost, slice: Slice) {
   processTextInSnapshot(snapshot, host);
   const plainTextAdapter = new PlainTextAdapter(job);
   const plainText = await plainTextAdapter.fromSliceSnapshot({
-    snapshot,
     assets: job.assetsManager,
+    snapshot,
   });
   return plainText.file;
 }
@@ -109,28 +110,28 @@ export const markdownToSnapshot = async (
     middlewares: [defaultImageProxyMiddleware, pasteMiddleware(host.std)],
   });
   const markdownAdapter = new MixTextAdapter(job);
-  const { blockVersions, workspaceVersion, pageVersion } =
+  const { blockVersions, pageVersion, workspaceVersion } =
     host.std.doc.collection.meta;
   if (!blockVersions || !workspaceVersion || !pageVersion)
     throw new Error(
       'Need blockVersions, workspaceVersion, pageVersion meta information to get slice'
     );
   const payload = {
-    file: markdown,
     assets: job.assetsManager,
     blockVersions,
-    pageVersion,
-    workspaceVersion,
-    workspaceId: host.std.doc.collection.id,
+    file: markdown,
     pageId: host.std.doc.id,
+    pageVersion,
+    workspaceId: host.std.doc.collection.id,
+    workspaceVersion,
   };
 
   const snapshot = await markdownAdapter.toSliceSnapshot(payload);
   assertExists(snapshot, 'import markdown failed, expected to get a snapshot');
 
   return {
-    snapshot,
     job,
+    snapshot,
   };
 };
 
@@ -140,7 +141,7 @@ export async function insertFromMarkdown(
   parent?: string,
   index?: number
 ) {
-  const { snapshot, job } = await markdownToSnapshot(markdown, host);
+  const { job, snapshot } = await markdownToSnapshot(markdown, host);
 
   const snapshots = snapshot.content.flatMap(x => x.children);
 
@@ -166,7 +167,7 @@ export async function replaceFromMarkdown(
   parent?: string,
   index?: number
 ) {
-  const { snapshot, job } = await markdownToSnapshot(markdown, host);
+  const { job, snapshot } = await markdownToSnapshot(markdown, host);
   await job.snapshotToSlice(snapshot, host.doc, parent, index);
 }
 
@@ -181,8 +182,8 @@ export async function markDownToDoc(host: EditorHost, answer: string) {
   });
   const mdAdapter = new MarkdownAdapter(job);
   const doc = await mdAdapter.toDoc({
-    file: answer,
     assets: job.assetsManager,
+    file: answer,
   });
   if (!doc) {
     console.error('Failed to convert markdown to doc');

@@ -1,18 +1,19 @@
-import '../finish-tip.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
+
+import type { AIPanelErrorConfig, CopyConfig } from '../../type.js';
 
 import {
   AIErrorType,
   type AIItemGroupConfig,
 } from '../../../../../_common/components/index.js';
-import type { AIPanelErrorConfig, CopyConfig } from '../../type.js';
 import { filterAIItemGroup } from '../../utils.js';
+import '../finish-tip.js';
 
 @customElement('ai-panel-error')
 export class AIPanelError extends WithDisposable(LitElement) {
@@ -130,18 +131,6 @@ export class AIPanelError extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor config!: AIPanelErrorConfig;
-
-  @property({ attribute: false })
-  accessor copy: CopyConfig | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor withAnswer = false;
-
   private _getResponseGroup = () => {
     let responseGroup: AIItemGroupConfig[] = [];
     const errorType = this.config.error?.type;
@@ -234,6 +223,18 @@ export class AIPanelError extends WithDisposable(LitElement) {
         : nothing}
     `;
   }
+
+  @property({ attribute: false })
+  accessor config!: AIPanelErrorConfig;
+
+  @property({ attribute: false })
+  accessor copy: CopyConfig | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor withAnswer = false;
 }
 
 declare global {

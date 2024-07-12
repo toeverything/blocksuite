@@ -1,8 +1,7 @@
-import './utils/declare-test-window.js';
-
 import { expect } from '@playwright/test';
 
 import {
+  SHORT_KEY,
   addNoteByClick,
   captureHistory,
   click,
@@ -25,7 +24,6 @@ import {
   redoByClick,
   redoByKeyboard,
   setSelection,
-  SHORT_KEY,
   switchEditorMode,
   switchReadonly,
   toggleDarkMode,
@@ -46,6 +44,7 @@ import {
   assertTitle,
   defaultStore,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 import { getFormatBar } from './utils/query.js';
 
@@ -75,7 +74,7 @@ test(scoped`basic init with external text`, async ({ page }) => {
 
     const delta = [
       { insert: 'foo ' },
-      { insert: 'bar', attributes: { bold: true } },
+      { attributes: { bold: true }, insert: 'bar' },
     ];
     doc.addBlock(
       'affine:paragraph',
@@ -102,8 +101,8 @@ test(scoped`basic multi user state`, async ({ context, page: pageA }) => {
   const pageB = await context.newPage();
   await enterPlaygroundRoom(pageB, {
     flags: {},
-    room,
     noInit: true,
+    room,
   });
   await waitDefaultPageLoaded(pageB);
   await focusTitle(pageB);
@@ -125,8 +124,8 @@ test(
     const pageB = await context.newPage();
     await enterPlaygroundRoom(pageB, {
       flags: {},
-      room,
       noInit: true,
+      room,
     });
 
     // wait until pageB content updated
@@ -149,8 +148,8 @@ test(scoped`A first open, B first edit`, async ({ context, page: pageA }) => {
 
   const pageB = await context.newPage();
   await enterPlaygroundRoom(pageB, {
-    room,
     noInit: true,
+    room,
   });
   await pageB.waitForTimeout(500);
   await focusRichText(pageB);
@@ -374,8 +373,8 @@ test(
   scoped`should be able to delete an emoji completely by pressing backspace once`,
   async ({ page }) => {
     test.info().annotations.push({
-      type: 'issue',
       description: 'https://github.com/toeverything/blocksuite/issues/2138',
+      type: 'issue',
     });
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -390,8 +389,8 @@ test(
 
 test(scoped`delete emoji in the middle of the text`, async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2138',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -526,7 +525,7 @@ test('extended inline format', async ({ page }) => {
   await focusRichText(page);
   await type(page, 'aaabbbaaa');
 
-  const { boldBtn, italicBtn, underlineBtn, strikeBtn, codeBtn } =
+  const { boldBtn, codeBtn, italicBtn, strikeBtn, underlineBtn } =
     getFormatBar(page);
   await setSelection(page, 0, 3, 0, 6);
   await boldBtn.click();
@@ -539,14 +538,14 @@ test('extended inline format', async ({ page }) => {
       insert: 'aaa',
     },
     {
-      insert: 'bbb',
       attributes: {
         bold: true,
-        italic: true,
-        underline: true,
-        strike: true,
         code: true,
+        italic: true,
+        strike: true,
+        underline: true,
       },
+      insert: 'bbb',
     },
     {
       insert: 'aaa',
@@ -562,14 +561,14 @@ test('extended inline format', async ({ page }) => {
       insert: 'aaac',
     },
     {
-      insert: 'bbb',
       attributes: {
         bold: true,
-        italic: true,
-        underline: true,
-        strike: true,
         code: true,
+        italic: true,
+        strike: true,
+        underline: true,
       },
+      insert: 'bbb',
     },
     {
       insert: 'aaa',
@@ -585,14 +584,14 @@ test('extended inline format', async ({ page }) => {
       insert: 'aaa',
     },
     {
-      insert: 'bcbb',
       attributes: {
         bold: true,
-        italic: true,
-        underline: true,
-        strike: true,
         code: true,
+        italic: true,
+        strike: true,
+        underline: true,
       },
+      insert: 'bcbb',
     },
     {
       insert: 'aaa',
@@ -608,14 +607,14 @@ test('extended inline format', async ({ page }) => {
       insert: 'aaa',
     },
     {
-      insert: 'bcb',
       attributes: {
         bold: true,
-        italic: true,
-        underline: true,
-        strike: true,
         code: true,
+        italic: true,
+        strike: true,
+        underline: true,
       },
+      insert: 'bcb',
     },
     {
       insert: 'aaa',
@@ -631,23 +630,23 @@ test('extended inline format', async ({ page }) => {
       insert: 'aaa',
     },
     {
-      insert: 'bbb',
       attributes: {
         bold: true,
-        italic: true,
-        underline: true,
-        strike: true,
         code: true,
+        italic: true,
+        strike: true,
+        underline: true,
       },
+      insert: 'bbb',
     },
     {
-      insert: 'c',
       attributes: {
         bold: true,
         italic: true,
-        underline: true,
         strike: true,
+        underline: true,
       },
+      insert: 'c',
     },
     {
       insert: 'aaa',

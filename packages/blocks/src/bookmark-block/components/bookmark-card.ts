@@ -3,37 +3,18 @@ import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
+import type { BookmarkBlockComponent } from '../bookmark-block.js';
+
 import { OpenIcon, WebIcon16 } from '../../_common/icons/text.js';
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import { getEmbedCardIcons, getHostName } from '../../_common/utils/url.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import { styles } from '../styles.js';
 
 @customElement('bookmark-card')
 export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
-  @state()
-  private accessor _isSelected = false;
-
   private readonly _themeObserver = new ThemeObserver();
-
-  @property({ attribute: false })
-  accessor bookmark!: BookmarkBlockComponent;
-
-  @property({ attribute: false })
-  accessor loading!: boolean;
-
-  @property({ attribute: false })
-  accessor error!: boolean;
-
-  private _selectBlock() {
-    const selectionManager = this.bookmark.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.bookmark.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
 
   private _handleClick(event: MouseEvent) {
     event.stopPropagation();
@@ -45,6 +26,14 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
     this.bookmark.open();
+  }
+
+  private _selectBlock() {
+    const selectionManager = this.bookmark.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.bookmark.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
   }
 
   override connectedCallback(): void {
@@ -70,13 +59,13 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { icon, title, url, description, image, style } = this.bookmark.model;
+    const { description, icon, image, style, title, url } = this.bookmark.model;
 
     const cardClassMap = classMap({
-      loading: this.loading,
       error: this.error,
-      [style]: true,
+      loading: this.loading,
       selected: this._isSelected,
+      [style]: true,
     });
 
     const domainName = url.match(
@@ -91,7 +80,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
           : ''
         : title;
 
-    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
+    const { EmbedCardBannerIcon, LoadingIcon } = getEmbedCardIcons();
 
     const titleIconType =
       !icon?.split('.').pop() || icon?.split('.').pop() === 'svg'
@@ -148,6 +137,18 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @state()
+  private accessor _isSelected = false;
+
+  @property({ attribute: false })
+  accessor bookmark!: BookmarkBlockComponent;
+
+  @property({ attribute: false })
+  accessor error!: boolean;
+
+  @property({ attribute: false })
+  accessor loading!: boolean;
 }
 
 declare global {

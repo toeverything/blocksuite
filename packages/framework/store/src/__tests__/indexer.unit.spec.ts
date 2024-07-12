@@ -111,8 +111,8 @@ describe('collection.search works', () => {
     const update = encodeStateAsUpdate(doc.spaceDoc);
     const schema = new Schema();
     const collection2 = new DocCollection({
-      schema,
       id: 'test',
+      schema,
     });
     collection2.meta.initialize();
     const doc2 = collection2.createDoc({
@@ -144,8 +144,8 @@ describe('backlink works', () => {
 
     const text = doc.Text.fromDelta([
       {
+        attributes: { reference: { pageId: subpage.id, type: 'Subpage' } },
         insert: ' ',
-        attributes: { reference: { type: 'Subpage', pageId: subpage.id } },
       },
     ]);
     doc.addBlock(
@@ -189,8 +189,8 @@ describe('backlink works', () => {
       {
         text: doc0.Text.fromDelta([
           {
+            attributes: { reference: { pageId: doc0.id, type: 'LinkedPage' } },
             insert: ' ',
-            attributes: { reference: { type: 'LinkedPage', pageId: doc0.id } },
           },
         ]),
       },
@@ -201,8 +201,8 @@ describe('backlink works', () => {
       {
         text: doc1.Text.fromDelta([
           {
+            attributes: { reference: { pageId: doc1.id, type: 'LinkedPage' } },
             insert: ' ',
-            attributes: { reference: { type: 'LinkedPage', pageId: doc1.id } },
           },
         ]),
       },
@@ -218,8 +218,8 @@ describe('backlink works', () => {
       {
         text: doc1.Text.fromDelta([
           {
+            attributes: { reference: { pageId: doc0.id, type: 'LinkedPage' } },
             insert: ' ',
-            attributes: { reference: { type: 'LinkedPage', pageId: doc0.id } },
           },
         ]),
       },
@@ -230,8 +230,8 @@ describe('backlink works', () => {
       {
         text: doc1.Text.fromDelta([
           {
+            attributes: { reference: { pageId: doc1.id, type: 'LinkedPage' } },
             insert: ' ',
-            attributes: { reference: { type: 'LinkedPage', pageId: doc1.id } },
           },
         ]),
       },

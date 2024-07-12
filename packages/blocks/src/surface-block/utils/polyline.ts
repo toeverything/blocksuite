@@ -22,6 +22,58 @@ export class Polyline {
     return len;
   }
 
+  static lenAtPoint(points: IVec2[], point: IVec2) {
+    const n = points.length;
+    let len = n;
+
+    for (let i = 0; i < n - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+
+      // start
+      if (a[0] === point[0] && a[1] === point[1]) {
+        return len;
+      }
+
+      const aa = Vec.angle(a, point);
+      const ba = Vec.angle(b, point);
+
+      if ((aa + ba) % Math.PI === 0) {
+        len += Vec.dist(a, point);
+        return len;
+      }
+
+      len += Vec.dist(a, b);
+
+      // end
+      if (b[0] === point[0] && b[1] === point[1]) {
+        return len;
+      }
+    }
+
+    return len;
+  }
+
+  static nearestPoint(points: IVec2[], point: IVec2): IVec2 {
+    const n = points.length;
+    const r: IVec2 = [0, 0];
+    let len = Infinity;
+
+    for (let i = 0; i < n - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+      const p = Vec.nearestPointOnLineSegment(a, b, point, true);
+      const d = Vec.dist(p, point);
+      if (d < len) {
+        len = d;
+        r[0] = p[0];
+        r[1] = p[1];
+      }
+    }
+
+    return r;
+  }
+
   static pointAt(points: IVec2[], ratio: number) {
     const n = points.length;
 
@@ -80,57 +132,5 @@ export class Polyline {
 
     const lastPoint = fromStart ? points[n - 1] : points[0];
     return lastPoint;
-  }
-
-  static nearestPoint(points: IVec2[], point: IVec2): IVec2 {
-    const n = points.length;
-    const r: IVec2 = [0, 0];
-    let len = Infinity;
-
-    for (let i = 0; i < n - 1; i++) {
-      const a = points[i];
-      const b = points[i + 1];
-      const p = Vec.nearestPointOnLineSegment(a, b, point, true);
-      const d = Vec.dist(p, point);
-      if (d < len) {
-        len = d;
-        r[0] = p[0];
-        r[1] = p[1];
-      }
-    }
-
-    return r;
-  }
-
-  static lenAtPoint(points: IVec2[], point: IVec2) {
-    const n = points.length;
-    let len = n;
-
-    for (let i = 0; i < n - 1; i++) {
-      const a = points[i];
-      const b = points[i + 1];
-
-      // start
-      if (a[0] === point[0] && a[1] === point[1]) {
-        return len;
-      }
-
-      const aa = Vec.angle(a, point);
-      const ba = Vec.angle(b, point);
-
-      if ((aa + ba) % Math.PI === 0) {
-        len += Vec.dist(a, point);
-        return len;
-      }
-
-      len += Vec.dist(a, b);
-
-      // end
-      if (b[0] === point[0] && b[1] === point[1]) {
-        return len;
-      }
-    }
-
-    return len;
   }
 }

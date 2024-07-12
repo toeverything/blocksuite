@@ -42,10 +42,10 @@ export { TextElementModel } from './element-model/text.js';
 export * from './elements/index.js';
 export { ShapeType } from './elements/shape/consts.js';
 export {
-  markdownToMindmap,
   MindmapRootBlock,
   MindmapService,
   MindmapSurfaceBlock,
+  markdownToMindmap,
 } from './mini-mindmap/index.js';
 export { getStroke } from './perfect-freehand/getStroke.js';
 export { RoughCanvas } from './rough/canvas.js';
@@ -68,10 +68,10 @@ export {
   lineIntersects,
   linePolygonIntersects,
   normalizeDegAngle,
+  polyLineNearestPoint,
   polygonGetPointTangent,
   polygonNearestPoint,
   polygonPointDistance,
-  polyLineNearestPoint,
   rotatePoints,
   sign,
   toDegree,

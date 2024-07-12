@@ -1,5 +1,6 @@
 import type { OpSet, ResolvedOptions } from '../core.js';
 import type { Line, Point } from '../geometry.js';
+
 import { lineLength } from '../geometry.js';
 import { HachureFiller } from './hachure-filler.js';
 import { polygonHachureLines } from './scan-line-hachure.js';
@@ -26,6 +27,6 @@ export class ZigZagFiller extends HachureFiller {
       }
     }
     const ops = this.renderLines(zigzagLines, o);
-    return { type: 'fillSketch', ops };
+    return { ops, type: 'fillSketch' };
   }
 }

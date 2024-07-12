@@ -1,7 +1,8 @@
+import type { DataViewWidget, DataViewWidgetProps } from '../types.js';
+
 import { ExpandDatabaseBlockModal } from '../../../widgets/expand/index.js';
 import { createUniComponentFromWebComponent } from '../../utils/uni-component/index.js';
 import { map } from '../../utils/uni-component/operation.js';
-import type { DataViewWidget, DataViewWidgetProps } from '../types.js';
 import { DataViewHeaderToolsFilter } from './presets/filter/filter.js';
 import { DataViewHeaderToolsSearch } from './presets/search/search.js';
 import { DataViewHeaderToolsAddRow } from './presets/table-add-row/add-row.js';
@@ -9,13 +10,13 @@ import { DataViewHeaderToolsViewOptions } from './presets/view-options/view-opti
 import { DataViewHeaderTools } from './tools-renderer.js';
 
 export const toolsWidgetPresets = {
-  filter: createUniComponentFromWebComponent(DataViewHeaderToolsFilter),
   expand: createUniComponentFromWebComponent(ExpandDatabaseBlockModal),
+  filter: createUniComponentFromWebComponent(DataViewHeaderToolsFilter),
   search: createUniComponentFromWebComponent(DataViewHeaderToolsSearch),
+  tableAddRow: createUniComponentFromWebComponent(DataViewHeaderToolsAddRow),
   viewOptions: createUniComponentFromWebComponent(
     DataViewHeaderToolsViewOptions
   ),
-  tableAddRow: createUniComponentFromWebComponent(DataViewHeaderToolsAddRow),
 };
 export const createWidgetTools = (
   toolsMap: Record<string, DataViewWidget[]>

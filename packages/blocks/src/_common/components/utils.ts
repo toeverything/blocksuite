@@ -1,32 +1,34 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists, sleep } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
+
+import { assertExists, sleep } from '@blocksuite/global/utils';
 import { BlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
+
+import type { AffineInlineEditor } from '../inline/presets/affine-inline-specs.js';
 
 import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
 import { getInlineEditorByModel } from '../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../_common/utils/selection.js';
-import type { AffineInlineEditor } from '../inline/presets/affine-inline-specs.js';
 
 export const createKeydownObserver = ({
-  target,
+  abortController,
   inlineEditor,
-  onUpdateQuery,
-  onMove,
+  interceptor = (_, next) => next(),
   onConfirm,
   onEsc,
-  interceptor = (_, next) => next(),
-  abortController,
+  onMove,
+  onUpdateQuery,
+  target,
 }: {
-  target: HTMLElement;
+  abortController: AbortController;
   inlineEditor: InlineEditor;
-  onUpdateQuery: (val: string) => void;
-  onMove: (step: 1 | -1) => void;
+  interceptor?: (e: KeyboardEvent, next: () => void) => void;
   onConfirm: () => void;
   onEsc?: () => void;
-  interceptor?: (e: KeyboardEvent, next: () => void) => void;
-  abortController: AbortController;
+  onMove: (step: -1 | 1) => void;
+  onUpdateQuery: (val: string) => void;
+  target: HTMLElement;
 }) => {
   let query = '';
   const startIndex = inlineEditor?.getInlineRange()?.index ?? 0;

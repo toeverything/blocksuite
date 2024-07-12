@@ -4,8 +4,6 @@ import type {
 } from './middlewares/safe-area.js';
 
 export type WhenHoverOptions = {
-  enterDelay?: number;
-  leaveDelay?: number;
   /**
    * When already hovered to the reference element,
    * but the floating element is not ready,
@@ -17,15 +15,17 @@ export type WhenHoverOptions = {
    * @default true
    */
   alwayRunWhenNoFloating?: boolean;
-  safeTriangle?: boolean | SafeTriangleOptions;
+  enterDelay?: number;
+  leaveDelay?: number;
   /**
    * Create a virtual rectangular bridge between the reference element and the floating element.
    */
-  safeBridge?: boolean | SafeBridgeOptions;
+  safeBridge?: SafeBridgeOptions | boolean;
+  safeTriangle?: SafeTriangleOptions | boolean;
 };
 
 export type HoverMiddleware = (ctx: {
   event: Event;
-  referenceElement?: Element;
   floatingElement?: Element;
-}) => boolean | Promise<boolean>;
+  referenceElement?: Element;
+}) => Promise<boolean> | boolean;

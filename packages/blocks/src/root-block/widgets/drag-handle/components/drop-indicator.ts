@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -22,22 +22,22 @@ export class DropIndicator extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor rect: Rect | null = null;
-
   override render() {
     if (!this.rect) {
       return null;
     }
-    const { left, top, width, height } = this.rect;
+    const { height, left, top, width } = this.rect;
     const style = styleMap({
-      width: `${width}px`,
       height: `${height}px`,
-      top: `${top}px`,
       left: `${left}px`,
+      top: `${top}px`,
+      width: `${width}px`,
     });
     return html`<div class="affine-drop-indicator" style=${style}></div>`;
   }
+
+  @property({ attribute: false })
+  accessor rect: Rect | null = null;
 }
 
 declare global {

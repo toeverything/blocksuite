@@ -1,11 +1,11 @@
-import '../../../filter/filter-group.js';
-
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { FilterGroup } from '../../../../common/ast.js';
+
 import { FilterIcon } from '../../../../common/icons/index.js';
 import { popCreateFilter } from '../../../../common/ref/ref.js';
+import '../../../filter/filter-group.js';
 import { WidgetBase } from '../../../widget-base.js';
 
 const styles = css`
@@ -32,9 +32,7 @@ const styles = css`
 
 @customElement('data-view-header-tools-filter')
 export class DataViewHeaderToolsFilter extends WidgetBase {
-  private get readonly() {
-    return this.view.readonly;
-  }
+  static override styles = styles;
 
   private get _filter() {
     return this.view.filter;
@@ -44,13 +42,13 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     this.view.updateFilter(filter);
   }
 
-  static override styles = styles;
-
   private addFilter(event: MouseEvent) {
     if (!this._filter.conditions.length && !this.view.filterVisible) {
       this.showToolBar(true);
       popCreateFilter(event.target as HTMLElement, {
-        vars: this.view.vars,
+        onClose: () => {
+          this.showToolBar(false);
+        },
         onSelect: filter => {
           this._filter = {
             ...this._filter,
@@ -58,13 +56,15 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
           };
           this.view.filterSetVisible(true);
         },
-        onClose: () => {
-          this.showToolBar(false);
-        },
+        vars: this.view.vars,
       });
       return;
     }
     this.view.filterSetVisible(!this.view.filterVisible);
+  }
+
+  private get readonly() {
+    return this.view.readonly;
   }
 
   override connectedCallback() {
@@ -76,13 +76,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     );
   }
 
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
-  }
-
   override render() {
     if (this.readonly) return nothing;
     return html`<div
@@ -91,6 +84,13 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     >
       ${FilterIcon} Filter
     </div>`;
+  }
+
+  showToolBar(show: boolean) {
+    const tools = this.closest('data-view-header-tools');
+    if (tools) {
+      tools.showToolBar = show;
+    }
   }
 }
 

@@ -1,8 +1,9 @@
-import '../../panel/one-row-color-panel.js';
-import '../common/slide-menu.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
+import type { EdgelessTool } from '../../../types.js';
+import type { ColorEvent } from '../../panel/color-panel.js';
+import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 
 import {
   ConnectorCWithArrowIcon,
@@ -10,9 +11,8 @@ import {
   ConnectorXWithArrowIcon,
 } from '../../../../../_common/icons/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
-import type { EdgelessTool } from '../../../types.js';
-import type { ColorEvent } from '../../panel/color-panel.js';
-import type { LineWidthEvent } from '../../panel/line-width-panel.js';
+import '../../panel/one-row-color-panel.js';
+import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 function ConnectorModeButtonGroup(
@@ -94,18 +94,6 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
 
   override type: EdgelessTool['type'] = 'connector';
 
-  @property({ attribute: false })
-  accessor mode!: ConnectorMode;
-
-  @property({ attribute: false })
-  accessor stroke!: string;
-
-  @property({ attribute: false })
-  accessor strokeWidth!: number;
-
-  @property({ attribute: false })
-  accessor onChange!: (props: Record<string, unknown>) => void;
-
   override render() {
     const { stroke, strokeWidth } = this;
     const connectorModeButtonGroup = ConnectorModeButtonGroup(
@@ -133,6 +121,18 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
       </edgeless-slide-menu>
     `;
   }
+
+  @property({ attribute: false })
+  accessor mode!: ConnectorMode;
+
+  @property({ attribute: false })
+  accessor onChange!: (props: Record<string, unknown>) => void;
+
+  @property({ attribute: false })
+  accessor stroke!: string;
+
+  @property({ attribute: false })
+  accessor strokeWidth!: number;
 }
 
 declare global {

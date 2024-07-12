@@ -46,15 +46,17 @@ export * from './preview-specs.js';
 export * from './utils/spec-builder.js';
 export * from './utils/spec-provider.js';
 
-// eslint-disable-next-line simple-import-sort/exports
 export {
-  // common
   AttachmentBlockSpec,
   BookmarkBlockSpec,
   CodeBlockSpec,
-  DatabaseBlockSpec,
   DataViewBlockSpec,
+  DatabaseBlockSpec,
   DividerBlockSpec,
+  EdgelessRootBlockSpec,
+  EdgelessSurfaceBlockSpec,
+  EdgelessSurfaceRefBlockSpec,
+  EdgelessTextBlockSpec,
   EmbedFigmaBlockSpec,
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
@@ -62,18 +64,12 @@ export {
   EmbedLoomBlockSpec,
   EmbedSyncedDocBlockSpec,
   EmbedYoutubeBlockSpec,
+  FrameBlockSpec,
   ImageBlockSpec,
   ListBlockSpec,
   NoteBlockSpec,
-  ParagraphBlockSpec,
-  // edgeless
-  EdgelessRootBlockSpec,
-  EdgelessSurfaceBlockSpec,
-  EdgelessSurfaceRefBlockSpec,
-  FrameBlockSpec,
-  EdgelessTextBlockSpec,
-  // page
   PageRootBlockSpec,
   PageSurfaceBlockSpec,
   PageSurfaceRefBlockSpec,
+  ParagraphBlockSpec,
 };

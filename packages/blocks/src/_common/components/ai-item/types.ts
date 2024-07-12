@@ -4,13 +4,15 @@ import type { TemplateResult } from 'lit';
 import type { DocMode } from '../../utils/index.js';
 
 export interface AIItemGroupConfig {
-  name?: string;
   items: AIItemConfig[];
+  name?: string;
 }
 
 export interface AIItemConfig {
+  beta?: boolean;
+  handler?: (host: EditorHost) => void;
+  icon: (() => HTMLElement) | TemplateResult;
   name: string;
-  icon: TemplateResult | (() => HTMLElement);
   showWhen?: (
     chain: Chain<InitCommandCtx>,
     editorMode: DocMode,
@@ -18,13 +20,11 @@ export interface AIItemConfig {
   ) => boolean;
   subItem?: AISubItemConfig[];
   subItemOffset?: [number, number];
-  handler?: (host: EditorHost) => void;
-  beta?: boolean;
 }
 
 export interface AISubItemConfig {
-  type: string;
   handler?: (host: EditorHost) => void;
+  type: string;
 }
 
 abstract class BaseAIError extends Error {
@@ -32,9 +32,9 @@ abstract class BaseAIError extends Error {
 }
 
 export enum AIErrorType {
-  Unauthorized = 'Unauthorized',
-  PaymentRequired = 'PaymentRequired',
   GeneralNetworkError = 'GeneralNetworkError',
+  PaymentRequired = 'PaymentRequired',
+  Unauthorized = 'Unauthorized',
 }
 
 export class UnauthorizedError extends BaseAIError {
@@ -64,6 +64,6 @@ export class GeneralNetworkError extends BaseAIError {
 }
 
 export type AIError =
-  | UnauthorizedError
+  | GeneralNetworkError
   | PaymentRequiredError
-  | GeneralNetworkError;
+  | UnauthorizedError;

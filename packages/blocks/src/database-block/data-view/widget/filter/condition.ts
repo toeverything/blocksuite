@@ -1,18 +1,16 @@
-import '../../common/ref/ref.js';
-import '../../common/literal/define.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import type {
   FilterGroup,
   SingleFilter,
   Variable,
   VariableOrProperty,
 } from '../../common/ast.js';
+
+import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import {
   firstFilter,
   firstFilterByRef,
@@ -20,7 +18,9 @@ import {
   getRefType,
 } from '../../common/ast.js';
 import { CrossIcon } from '../../common/icons/index.js';
+import '../../common/literal/define.js';
 import { popLiteralEdit, renderLiteral } from '../../common/literal/matcher.js';
+import '../../common/ref/ref.js';
 import { tBoolean } from '../../logical/data-type.js';
 import { typesystem } from '../../logical/typesystem.js';
 import { filterMatcher } from './matcher/matcher.js';
@@ -86,21 +86,22 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor data!: SingleFilter;
-
-  @property({ attribute: false })
-  accessor setData!: (filter: SingleFilter) => void;
-
-  @property({ attribute: false })
-  accessor vars!: Variable[];
-
-  @property({ attribute: false })
-  accessor onDelete: (() => void) | undefined = undefined;
-
   private _setRef = (ref: VariableOrProperty) => {
     this.setData(firstFilterByRef(this.vars, ref));
   };
+
+  private _args() {
+    const fn = filterMatcher.find(v => v.data.name === this.data.function);
+    if (!fn) {
+      return [];
+    }
+    const refType = getRefType(this.vars, this.data.left);
+    if (!refType) {
+      return [];
+    }
+    const type = typesystem.instance({}, [refType], tBoolean.create(), fn.type);
+    return type.args.slice(1);
+  }
 
   private _filterLabel() {
     return filterMatcher.find(v => v.data.name === this.data.function)?.data
@@ -123,31 +124,18 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
       list.map(v => {
         const selected = v.name === this.data.function;
         return {
-          type: 'action',
-          name: v.label,
           isSelected: selected,
+          name: v.label,
           select: () => {
             this.setData({
               ...this.data,
               function: v.name,
             });
           },
+          type: 'action',
         };
       })
     );
-  }
-
-  private _args() {
-    const fn = filterMatcher.find(v => v.data.name === this.data.function);
-    if (!fn) {
-      return [];
-    }
-    const refType = getRefType(this.vars, this.data.left);
-    if (!refType) {
-      return [];
-    }
-    const type = typesystem.instance({}, [refType], tBoolean.create(), fn.type);
-    return type.args.slice(1);
   }
 
   override render() {
@@ -204,6 +192,18 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
         : nothing}
     `;
   }
+
+  @property({ attribute: false })
+  accessor data!: SingleFilter;
+
+  @property({ attribute: false })
+  accessor onDelete: (() => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor setData!: (filter: SingleFilter) => void;
+
+  @property({ attribute: false })
+  accessor vars!: Variable[];
 }
 
 declare global {
@@ -214,14 +214,13 @@ declare global {
 export const popAddNewFilter = (
   target: HTMLElement,
   props: {
-    value: FilterGroup;
     onChange: (value: FilterGroup) => void;
+    value: FilterGroup;
     vars: Variable[];
   }
 ) => {
   popFilterableSimpleMenu(target, [
     {
-      type: 'action',
       name: 'Add filter',
       select: () => {
         props.onChange({
@@ -229,9 +228,9 @@ export const popAddNewFilter = (
           conditions: [...props.value.conditions, firstFilter(props.vars)],
         });
       },
+      type: 'action',
     },
     {
-      type: 'action',
       name: 'Add filter group',
       select: () => {
         props.onChange({
@@ -242,6 +241,7 @@ export const popAddNewFilter = (
           ],
         });
       },
+      type: 'action',
     },
   ]);
 };

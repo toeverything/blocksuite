@@ -1,4 +1,4 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
 
 export type ListType = 'bulleted' | 'numbered' | 'todo' | 'toggle';
 
@@ -11,15 +11,7 @@ type ListCollapsed = boolean | typeof BackwardUndefined;
 
 export const ListBlockSchema = defineBlockSchema({
   flavour: 'affine:list',
-  props: internal => ({
-    type: 'bulleted' as ListType,
-    text: internal.Text(),
-    checked: false,
-    collapsed: false as ListCollapsed,
-  }),
   metadata: {
-    version: 1,
-    role: 'content',
     parent: [
       'affine:note',
       'affine:database',
@@ -27,7 +19,15 @@ export const ListBlockSchema = defineBlockSchema({
       'affine:paragraph',
       'affine:edgeless-text',
     ],
+    role: 'content',
+    version: 1,
   },
+  props: internal => ({
+    checked: false,
+    collapsed: false as ListCollapsed,
+    text: internal.Text(),
+    type: 'bulleted' as ListType,
+  }),
 });
 
 export type ListBlockModel = SchemaToModel<typeof ListBlockSchema>;

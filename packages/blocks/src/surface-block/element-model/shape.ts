@@ -1,5 +1,10 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
+import type { IBound, SerializedXYWH } from '../index.js';
+import type { Bound } from '../utils/bound.js';
+import type { PointLocation } from '../utils/point-location.js';
+import type { IVec2 } from '../utils/vec.js';
+
 import {
   DEFAULT_ROUGHNESS,
   FontFamily,
@@ -11,10 +16,6 @@ import {
   type TextStyleProps,
   TextVerticalAlign,
 } from '../consts.js';
-import type { IBound, SerializedXYWH } from '../index.js';
-import type { Bound } from '../utils/bound.js';
-import type { PointLocation } from '../utils/point-location.js';
-import type { IVec2 } from '../utils/vec.js';
 import {
   type IBaseProps,
   type IHitTestOptions,
@@ -29,114 +30,103 @@ import { triangle } from './utils/shape/triangle.js';
 export const shapeMethods: {
   [key in ShapeType]: typeof rect;
 } = {
+  diamond,
+  ellipse,
   rect,
   triangle,
-  ellipse,
-  diamond,
 };
 
-export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
+export type ShapeType = 'diamond' | 'ellipse' | 'rect' | 'triangle';
 export type ShapeStyle = 'General' | 'Scribbled';
 
 export enum ShapeTextFontSize {
-  SMALL = 12,
-  MEDIUM = 20,
   LARGE = 28,
+  MEDIUM = 20,
+  SMALL = 12,
   XLARGE = 36,
 }
 
-export type ShapeProps = IBaseProps & {
-  shapeType: ShapeType;
-  radius: number;
-  filled: boolean;
+export type ShapeProps = {
   fillColor: string;
-  strokeWidth: number;
-  strokeColor: string;
-  strokeStyle: StrokeStyle;
-  shapeStyle: ShapeStyle;
+  filled: boolean;
+  maxWidth?: false | number;
+  radius: number;
   // https://github.com/rough-stuff/rough/wiki#roughness
   roughness?: number;
+  shapeStyle: ShapeStyle;
+  shapeType: ShapeType;
+  strokeColor: string;
+  strokeStyle: StrokeStyle;
 
+  strokeWidth: number;
   text?: Y.Text;
   textHorizontalAlign?: TextAlign;
-  textVerticalAlign?: TextVerticalAlign;
   textResizing?: TextResizing;
-  maxWidth?: false | number;
-} & Partial<TextStyleProps>;
+  textVerticalAlign?: TextVerticalAlign;
+} & IBaseProps &
+  Partial<TextStyleProps>;
 
 export const SHAPE_TEXT_PADDING = 20;
 export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
 export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
+  textBound: IBound | null = null;
+
+  static override propsToY(props: ShapeProps) {
+    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
+      props.text = new DocCollection.Y.Text(props.text);
+    }
+
+    return props;
+  }
+
+  override containedByBounds(bounds: Bound) {
+    return shapeMethods[this.shapeType].containedByBounds(bounds, this);
+  }
+
+  override getNearestPoint(point: IVec2): IVec2 {
+    return shapeMethods[this.shapeType].getNearestPoint(point, this) as IVec2;
+  }
+
+  override getRelativePointLocation(point: IVec2): PointLocation {
+    return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
+  }
+
+  override hitTest(x: number, y: number, options: IHitTestOptions) {
+    return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
+      ...options,
+      ignoreTransparent: options.ignoreTransparent ?? true,
+    });
+  }
+
+  override intersectWithLine(start: IVec2, end: IVec2) {
+    return shapeMethods[this.shapeType].intersectWithLine(start, end, this);
+  }
+
   get type() {
     return 'shape';
   }
 
-  @local()
-  accessor textDisplay: boolean = true;
-
-  @yfield()
-  accessor xywh: SerializedXYWH = '[0,0,100,100]';
-
-  @yfield(0)
-  accessor rotate: number = 0;
-
-  @yfield()
-  accessor shapeType: ShapeType = 'rect';
-
-  @yfield()
-  accessor radius: number = 0;
-
-  @yfield()
-  accessor filled: boolean = false;
+  @yfield('#000000')
+  accessor color!: string;
 
   @yfield()
   accessor fillColor: string = '--affine-palette-shape-yellow';
 
   @yfield()
-  accessor strokeWidth: number = 4;
-
-  @yfield()
-  accessor strokeColor: string = '--affine-palette-line-yellow';
-
-  @yfield()
-  accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
-
-  @yfield('General' as ShapeStyle)
-  accessor shapeStyle: ShapeStyle = 'General';
-
-  @yfield(DEFAULT_ROUGHNESS)
-  accessor roughness: number = DEFAULT_ROUGHNESS;
-
-  @yfield()
-  accessor text: Y.Text | undefined = undefined;
-
-  @yfield('#000000')
-  accessor color!: string;
-
-  @yfield(ShapeTextFontSize.MEDIUM)
-  accessor fontSize!: number;
+  accessor filled: boolean = false;
 
   @yfield(FontFamily.Inter as string)
   accessor fontFamily!: string;
 
-  @yfield(FontWeight.Regular as FontWeight)
-  accessor fontWeight!: FontWeight;
+  @yfield(ShapeTextFontSize.MEDIUM)
+  accessor fontSize!: number;
 
   @yfield(FontStyle.Normal as FontStyle)
   accessor fontStyle!: FontStyle;
 
-  @yfield(TextAlign.Center as TextAlign)
-  accessor textAlign!: TextAlign;
-
-  @yfield(TextAlign.Center as TextAlign)
-  accessor textHorizontalAlign!: TextAlign;
-
-  @yfield(TextVerticalAlign.Center as TextVerticalAlign)
-  accessor textVerticalAlign!: TextVerticalAlign;
-
-  @yfield(TextResizing.AUTO_HEIGHT as TextResizing)
-  accessor textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
+  @yfield(FontWeight.Regular as FontWeight)
+  accessor fontWeight!: FontWeight;
 
   @yfield(false as false | number)
   accessor maxWidth: false | number = false;
@@ -148,45 +138,57 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   ];
 
   @yfield()
+  accessor radius: number = 0;
+
+  @yfield(0)
+  accessor rotate: number = 0;
+
+  @yfield(DEFAULT_ROUGHNESS)
+  accessor roughness: number = DEFAULT_ROUGHNESS;
+
+  @yfield()
   accessor shadow: {
     blur: number;
+    color: string;
     offsetX: number;
     offsetY: number;
-    color: string;
   } | null = null;
 
-  textBound: IBound | null = null;
+  @yfield('General' as ShapeStyle)
+  accessor shapeStyle: ShapeStyle = 'General';
 
-  override hitTest(x: number, y: number, options: IHitTestOptions) {
-    return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
-      ...options,
-      ignoreTransparent: options.ignoreTransparent ?? true,
-    });
-  }
+  @yfield()
+  accessor shapeType: ShapeType = 'rect';
 
-  override containedByBounds(bounds: Bound) {
-    return shapeMethods[this.shapeType].containedByBounds(bounds, this);
-  }
+  @yfield()
+  accessor strokeColor: string = '--affine-palette-line-yellow';
 
-  override intersectWithLine(start: IVec2, end: IVec2) {
-    return shapeMethods[this.shapeType].intersectWithLine(start, end, this);
-  }
+  @yfield()
+  accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
 
-  override getNearestPoint(point: IVec2): IVec2 {
-    return shapeMethods[this.shapeType].getNearestPoint(point, this) as IVec2;
-  }
+  @yfield()
+  accessor strokeWidth: number = 4;
 
-  override getRelativePointLocation(point: IVec2): PointLocation {
-    return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
-  }
+  @yfield()
+  accessor text: Y.Text | undefined = undefined;
 
-  static override propsToY(props: ShapeProps) {
-    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
-      props.text = new DocCollection.Y.Text(props.text);
-    }
+  @yfield(TextAlign.Center as TextAlign)
+  accessor textAlign!: TextAlign;
 
-    return props;
-  }
+  @local()
+  accessor textDisplay: boolean = true;
+
+  @yfield(TextAlign.Center as TextAlign)
+  accessor textHorizontalAlign!: TextAlign;
+
+  @yfield(TextResizing.AUTO_HEIGHT as TextResizing)
+  accessor textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
+
+  @yfield(TextVerticalAlign.Center as TextVerticalAlign)
+  accessor textVerticalAlign!: TextVerticalAlign;
+
+  @yfield()
+  accessor xywh: SerializedXYWH = '[0,0,100,100]';
 }
 
 declare global {

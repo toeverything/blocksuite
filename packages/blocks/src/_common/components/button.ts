@@ -1,5 +1,5 @@
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 /**
@@ -110,31 +110,6 @@ export class IconButton extends LitElement {
     }
   `;
 
-  @property()
-  accessor size: string | number | null = null;
-
-  @property()
-  accessor width: string | number | null = null;
-
-  @property()
-  accessor height: string | number | null = null;
-
-  @property()
-  accessor text: string | null = null;
-
-  @property()
-  accessor subText: string | null = null;
-
-  @property({ attribute: true, type: Boolean })
-  accessor active: boolean = false;
-
-  @property({ attribute: true, type: String })
-  accessor hover: 'true' | 'false' | undefined = undefined;
-
-  // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
-  @property({ attribute: true, type: Boolean })
-  accessor disabled: boolean | undefined = undefined;
-
   constructor() {
     super();
     // Allow activate button by pressing Enter key
@@ -221,6 +196,31 @@ export class IconButton extends LitElement {
       ${textContainer}
       <slot name="suffix"></slot>`;
   }
+
+  @property({ attribute: true, type: Boolean })
+  accessor active: boolean = false;
+
+  // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
+  @property({ attribute: true, type: Boolean })
+  accessor disabled: boolean | undefined = undefined;
+
+  @property()
+  accessor height: null | number | string = null;
+
+  @property({ attribute: true, type: String })
+  accessor hover: 'false' | 'true' | undefined = undefined;
+
+  @property()
+  accessor size: null | number | string = null;
+
+  @property()
+  accessor subText: null | string = null;
+
+  @property()
+  accessor text: null | string = null;
+
+  @property()
+  accessor width: null | number | string = null;
 }
 
 declare global {

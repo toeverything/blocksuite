@@ -9,15 +9,15 @@ declare global {
   }
 }
 export const textColumnModelConfig = textColumnType.modelConfig<string>({
-  name: 'Plain-Text',
-  type: () => tString.create(),
-  defaultData: () => ({}),
-  cellToString: data => data ?? '',
   cellFromString: data => {
     return {
       value: data,
     };
   },
   cellToJson: data => data ?? null,
+  cellToString: data => data ?? '',
+  defaultData: () => ({}),
   isEmpty: data => data == null || data.length === 0,
+  name: 'Plain-Text',
+  type: () => tString.create(),
 });

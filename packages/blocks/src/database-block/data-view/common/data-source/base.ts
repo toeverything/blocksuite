@@ -5,12 +5,13 @@ import type { ColumnConfig } from '../../column/index.js';
 import type { InsertToPosition } from '../../types.js';
 import type { UniComponent } from '../../utils/uni-component/index.js';
 import type { DataViewManager } from '../../view/data-view-manager.js';
-import { DEFAULT_COLUMN_WIDTH } from '../../view/presets/table/consts.js';
 import type { DataViewContextKey } from './context.js';
 
+import { DEFAULT_COLUMN_WIDTH } from '../../view/presets/table/consts.js';
+
 export type DetailSlotProps = {
-  view: DataViewManager;
   rowId: string;
+  view: DataViewManager;
 };
 
 export interface DetailSlots {
@@ -21,83 +22,55 @@ export interface DetailSlots {
 export interface DataSource {
   addPropertyConfigList: ColumnConfig[];
 
-  properties: string[];
-  rows: string[];
-  cellGetValue: (rowId: string, propertyId: string) => unknown;
-  cellGetRenderValue: (rowId: string, propertyId: string) => unknown;
-  cellGetExtra: (rowId: string, columnId: string) => unknown;
   cellChangeRenderValue: (
     rowId: string,
     propertyId: string,
     value: unknown
   ) => unknown;
   cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
-  rowAdd: (InsertToPosition: InsertToPosition | number) => string;
-  rowDelete: (ids: string[]) => void;
-  propertyGetName: (propertyId: string) => string;
-  propertyGetDefaultWidth: (propertyId: string) => number;
-  propertyGetType: (propertyId: string) => string;
-  propertyGetData: (propertyId: string) => Record<string, unknown>;
-  propertyGetReadonly: (columnId: string) => boolean;
-  propertyChangeName: (propertyId: string, name: string) => void;
-  propertyChangeType: (propertyId: string, type: string) => void;
-  propertyChangeData: (
-    propertyId: string,
-    data: Record<string, unknown>
-  ) => void;
-  propertyAdd: (insertToPosition: InsertToPosition, type?: string) => string;
-  propertyDelete: (id: string) => void;
-  propertyDuplicate: (columnId: string) => string;
-
-  slots: {
-    update: Slot;
-  };
-
+  cellGetExtra: (rowId: string, columnId: string) => unknown;
+  cellGetRenderValue: (rowId: string, propertyId: string) => unknown;
+  cellGetValue: (rowId: string, propertyId: string) => unknown;
+  detailSlots: DetailSlots;
+  getContext<T>(key: DataViewContextKey<T>): T | undefined;
+  getPropertyMeta(type: string): ColumnMeta;
   onCellUpdate: (
     rowId: string,
     propertyId: string,
     callback: () => void
   ) => Disposable;
+  properties: string[];
+  propertyAdd: (insertToPosition: InsertToPosition, type?: string) => string;
+  propertyChangeData: (
+    propertyId: string,
+    data: Record<string, unknown>
+  ) => void;
+  propertyChangeName: (propertyId: string, name: string) => void;
+  propertyChangeType: (propertyId: string, type: string) => void;
+  propertyDelete: (id: string) => void;
+  propertyDuplicate: (columnId: string) => string;
+  propertyGetData: (propertyId: string) => Record<string, unknown>;
+  propertyGetDefaultWidth: (propertyId: string) => number;
+  propertyGetName: (propertyId: string) => string;
+  propertyGetReadonly: (columnId: string) => boolean;
 
-  detailSlots: DetailSlots;
+  propertyGetType: (propertyId: string) => string;
 
-  getPropertyMeta(type: string): ColumnMeta;
+  rowAdd: (InsertToPosition: InsertToPosition | number) => string;
+
+  rowDelete: (ids: string[]) => void;
 
   rowMove(rowId: string, position: InsertToPosition): void;
 
-  getContext<T>(key: DataViewContextKey<T>): T | undefined;
+  rows: string[];
+
+  slots: {
+    update: Slot;
+  };
 }
 
 export abstract class BaseDataSource implements DataSource {
-  get detailSlots(): DetailSlots {
-    return {};
-  }
-
   context = new Map<DataViewContextKey<unknown>, unknown>();
-
-  abstract properties: string[];
-
-  abstract rows: string[];
-
-  abstract slots: {
-    update: Slot;
-  };
-
-  abstract addPropertyConfigList: ColumnConfig[];
-
-  protected setContext<T>(key: DataViewContextKey<T>, value: T): void {
-    this.context.set(key, value);
-  }
-
-  getContext<T>(key: DataViewContextKey<T>): T | undefined {
-    return this.context.get(key) as T;
-  }
-
-  abstract cellChangeValue(
-    rowId: string,
-    propertyId: string,
-    value: unknown
-  ): void;
 
   cellChangeRenderValue(
     rowId: string,
@@ -107,15 +80,59 @@ export abstract class BaseDataSource implements DataSource {
     this.cellChangeValue(rowId, propertyId, value);
   }
 
-  cellGetRenderValue(rowId: string, propertyId: string): unknown {
-    return this.cellGetValue(rowId, propertyId);
-  }
-
   cellGetExtra(_rowId: string, _propertyId: string): unknown {
     return undefined;
   }
 
+  cellGetRenderValue(rowId: string, propertyId: string): unknown {
+    return this.cellGetValue(rowId, propertyId);
+  }
+
+  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+    return this.context.get(key) as T;
+  }
+
+  onCellUpdate(
+    _rowId: string,
+    _propertyId: string,
+    _callback: () => void
+  ): Disposable {
+    return {
+      dispose: () => {
+        //
+      },
+    };
+  }
+
+  propertyGetDefaultWidth(_propertyId: string): number {
+    return DEFAULT_COLUMN_WIDTH;
+  }
+
+  propertyGetReadonly(_propertyId: string): boolean {
+    return false;
+  }
+
+  protected setContext<T>(key: DataViewContextKey<T>, value: T): void {
+    this.context.set(key, value);
+  }
+
+  get detailSlots(): DetailSlots {
+    return {};
+  }
+
+  abstract addPropertyConfigList: ColumnConfig[];
+
+  abstract cellChangeValue(
+    rowId: string,
+    propertyId: string,
+    value: unknown
+  ): void;
+
   abstract cellGetValue(rowId: string, propertyId: string): unknown;
+
+  abstract getPropertyMeta(type: string): ColumnMeta;
+
+  abstract properties: string[];
 
   abstract propertyAdd(
     insertToPosition: InsertToPosition,
@@ -137,26 +154,6 @@ export abstract class BaseDataSource implements DataSource {
 
   abstract propertyGetData(propertyId: string): Record<string, unknown>;
 
-  propertyGetReadonly(_propertyId: string): boolean {
-    return false;
-  }
-
-  propertyGetDefaultWidth(_propertyId: string): number {
-    return DEFAULT_COLUMN_WIDTH;
-  }
-
-  onCellUpdate(
-    _rowId: string,
-    _propertyId: string,
-    _callback: () => void
-  ): Disposable {
-    return {
-      dispose: () => {
-        //
-      },
-    };
-  }
-
   abstract propertyGetName(propertyId: string): string;
 
   abstract propertyGetType(propertyId: string): string;
@@ -165,7 +162,11 @@ export abstract class BaseDataSource implements DataSource {
 
   abstract rowDelete(ids: string[]): void;
 
-  abstract getPropertyMeta(type: string): ColumnMeta;
-
   abstract rowMove(rowId: string, position: InsertToPosition): void;
+
+  abstract rows: string[];
+
+  abstract slots: {
+    update: Slot;
+  };
 }

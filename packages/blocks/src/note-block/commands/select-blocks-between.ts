@@ -1,11 +1,11 @@
 import type { Command } from '@blocksuite/block-std';
 
 export const selectBlocksBetween: Command<
-  'focusBlock' | 'anchorBlock',
+  'anchorBlock' | 'focusBlock',
   never,
   { tail: boolean }
 > = (ctx, next) => {
-  const { focusBlock, anchorBlock, tail } = ctx;
+  const { anchorBlock, focusBlock, tail } = ctx;
   if (!focusBlock || !anchorBlock) {
     return;
   }

@@ -1,15 +1,15 @@
-import './components/bookmark-card.js';
-
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { BookmarkBlockModel } from './bookmark-model.js';
+import type { BookmarkBlockService } from './bookmark-service.js';
 
 import { BlockComponent } from '../_common/components/block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
-import type { BookmarkBlockModel } from './bookmark-model.js';
-import type { BookmarkBlockService } from './bookmark-service.js';
+import './components/bookmark-card.js';
 import { refreshBookmarkUrlData } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -17,31 +17,9 @@ export class BookmarkBlockComponent extends BlockComponent<
   BookmarkBlockModel,
   BookmarkBlockService
 > {
-  get isInSurface() {
-    return this._isInSurface;
-  }
-
-  get edgeless() {
-    if (!this._isInSurface) {
-      return null;
-    }
-    return this.host.querySelector('affine-edgeless-root');
-  }
-
-  private _isInSurface = false;
-
   private _fetchAbortController?: AbortController;
 
-  override accessor useCaptionEditor = true;
-
-  @property({ attribute: false })
-  accessor loading = false;
-
-  @property({ attribute: false })
-  accessor error = false;
-
-  @query('bookmark-card')
-  accessor bookmarkCard!: HTMLElement;
+  private _isInSurface = false;
 
   open = () => {
     let link = this.model.url;
@@ -95,9 +73,9 @@ export class BookmarkBlockComponent extends BlockComponent<
     const { style } = this.model;
 
     let containerStyleMap = styleMap({
+      minWidth: '450px',
       position: 'relative',
       width: '100%',
-      minWidth: '450px',
     });
 
     if (this.isInSurface) {
@@ -110,10 +88,10 @@ export class BookmarkBlockComponent extends BlockComponent<
       const scaleX = bound.w / width;
       const scaleY = bound.h / height;
       containerStyleMap = styleMap({
-        width: `${width}px`,
         height: `${height}px`,
         transform: `scale(${scaleX}, ${scaleY})`,
         transformOrigin: '0 0',
+        width: `${width}px`,
       });
     }
 
@@ -127,6 +105,28 @@ export class BookmarkBlockComponent extends BlockComponent<
       </div>
     `;
   }
+
+  get edgeless() {
+    if (!this._isInSurface) {
+      return null;
+    }
+    return this.host.querySelector('affine-edgeless-root');
+  }
+
+  get isInSurface() {
+    return this._isInSurface;
+  }
+
+  @query('bookmark-card')
+  accessor bookmarkCard!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor error = false;
+
+  @property({ attribute: false })
+  accessor loading = false;
+
+  override accessor useCaptionEditor = true;
 }
 
 declare global {

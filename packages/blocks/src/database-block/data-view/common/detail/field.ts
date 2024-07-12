@@ -5,16 +5,17 @@ import { classMap } from 'lit/directives/class-map.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../../../_common/components/index.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
 } from '../../column/index.js';
-import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
 } from '../../view/data-view-manager.js';
+
+import { popMenu } from '../../../../_common/components/index.js';
+import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { inputConfig, typeConfig } from '../column-menu.js';
 import {
   DatabaseDuplicate,
@@ -25,14 +26,6 @@ import {
 
 @customElement('affine-data-view-record-field')
 export class RecordField extends WithDisposable(ShadowlessElement) {
-  private get readonly() {
-    return this.view.readonly;
-  }
-
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
-  }
-
   static override styles = css`
     affine-data-view-record-field {
       display: flex;
@@ -113,31 +106,6 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
 
   private _cell = createRef<DataViewCellLifeCycle>();
 
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
-
-  @property({ attribute: false })
-  accessor column!: DataViewColumnManager;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
-
-  @state()
-  accessor isFocus = false;
-
-  @state()
-  accessor editing = false;
-
-  changeEditing = (editing: boolean) => {
-    const selection = this.closest('affine-data-view-record-detail')?.selection;
-    if (selection) {
-      selection.selection = {
-        propertyId: this.column.id,
-        isEditing: editing,
-      };
-    }
-  };
-
   _click = (e: MouseEvent) => {
     e.stopPropagation();
     if (this.readonly) return;
@@ -155,23 +123,22 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
         items: [
           typeConfig(this.column, this.view),
           {
-            type: 'action',
-            name: 'Duplicate Column',
-            icon: DatabaseDuplicate,
             hide: () => !this.column.duplicate || this.column.type === 'title',
+            icon: DatabaseDuplicate,
+            name: 'Duplicate Column',
             select: () => {
               this.column.duplicate?.();
             },
+            type: 'action',
           },
           {
-            type: 'action',
-            name: 'Move Up',
+            hide: () => columns.findIndex(v => v === this.column.id) === 0,
             icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
               ${DatabaseMoveLeft}
             </div>`,
-            hide: () => columns.findIndex(v => v === this.column.id) === 0,
+            name: 'Move Up',
             select: () => {
               const index = columns.findIndex(v => v === this.column.id);
               const targetId = columns[index - 1];
@@ -179,22 +146,22 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
                 return;
               }
               this.view.columnMove(this.column.id, {
-                id: targetId,
                 before: true,
+                id: targetId,
               });
             },
+            type: 'action',
           },
           {
-            type: 'action',
-            name: 'Move Down',
+            hide: () =>
+              columns.findIndex(v => v === this.column.id) ===
+              columns.length - 1,
             icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
               ${DatabaseMoveRight}
             </div>`,
-            hide: () =>
-              columns.findIndex(v => v === this.column.id) ===
-              columns.length - 1,
+            name: 'Move Down',
             select: () => {
               const index = columns.findIndex(v => v === this.column.id);
               const targetId = columns[index + 1];
@@ -202,46 +169,61 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
                 return;
               }
               this.view.columnMove(this.column.id, {
-                id: targetId,
                 before: false,
+                id: targetId,
               });
             },
+            type: 'action',
           },
           {
-            type: 'group',
-            name: 'operation',
             children: () => [
               {
-                type: 'action',
-                name: 'Delete Column',
-                icon: DeleteIcon,
+                class: 'delete-item',
                 hide: () => !this.column.delete || this.column.type === 'title',
+                icon: DeleteIcon,
+                name: 'Delete Column',
                 select: () => {
                   this.column.delete?.();
                 },
-                class: 'delete-item',
+                type: 'action',
               },
             ],
+            name: 'operation',
+            type: 'group',
           },
         ],
       },
     });
   };
 
+  changeEditing = (editing: boolean) => {
+    const selection = this.closest('affine-data-view-record-detail')?.selection;
+    if (selection) {
+      selection.selection = {
+        isEditing: editing,
+        propertyId: this.column.id,
+      };
+    }
+  };
+
+  private get readonly() {
+    return this.view.readonly;
+  }
+
   override render() {
     const column = this.column;
 
     const props: CellRenderProps = {
-      view: this.view,
       column: this.column,
-      rowId: this.rowId,
       isEditing: this.editing,
+      rowId: this.rowId,
       selectCurrentCell: this.changeEditing,
+      view: this.view,
     };
-    const { view, edit } = this.column.renderer;
+    const { edit, view } = this.column.renderer;
     const contentClass = classMap({
-      'field-content': true,
       empty: !this.editing && this.column.isEmpty(this.rowId),
+      'field-content': true,
       'is-editing': this.editing,
       'is-focus': this.isFocus,
     });
@@ -256,12 +238,31 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       </div>
       <div @click="${this._click}" class="${contentClass}">
         ${renderUniLit(this.editing && edit ? edit : view, props, {
-          ref: this._cell,
           class: 'kanban-cell',
+          ref: this._cell,
         })}
       </div>
     `;
   }
+
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
+
+  @property({ attribute: false })
+  accessor column!: DataViewColumnManager;
+
+  @state()
+  accessor editing = false;
+
+  @state()
+  accessor isFocus = false;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  @property({ attribute: false })
+  accessor view!: DataViewManager;
 }
 
 declare global {

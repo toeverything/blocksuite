@@ -1,5 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 
+import type { DataViewBlockModel } from './data-view-model.js';
+
 import { InlineManager } from '../_common/inline/inline-manager.js';
 import {
   type AffineTextAttributes,
@@ -8,7 +10,6 @@ import {
 import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
 import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
 import { DatabaseSelection } from '../database-block/data-view/index.js';
-import type { DataViewBlockModel } from './data-view-model.js';
 
 export class DataViewBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,

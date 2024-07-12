@@ -7,6 +7,12 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import type { InsertToPosition } from '../../../../../types.js';
+import type {
+  DataViewTableColumnManager,
+  DataViewTableManager,
+} from '../../table-view-manager.js';
+
 import { popMenu } from '../../../../../../../_common/components/index.js';
 import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
 import {
@@ -17,16 +23,11 @@ import {
   DatabaseMoveRight,
   DeleteIcon,
 } from '../../../../../common/icons/index.js';
-import type { InsertToPosition } from '../../../../../types.js';
 import { startDrag } from '../../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../../../utils/insert.js';
 import { getResultInRange } from '../../../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import type {
-  DataViewTableColumnManager,
-  DataViewTableManager,
-} from '../../table-view-manager.js';
 import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 import {
@@ -37,10 +38,6 @@ import {
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
-  private get readonly() {
-    return this.tableViewManager.readonly;
-  }
-
   static override styles = css`
     affine-database-header-column {
       display: flex;
@@ -51,18 +48,43 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  private widthDragBar = createRef();
+  private _clickColumn = () => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
+    this.popMenu();
+  };
 
-  private drawWidthDragBarTask = 0;
-
-  @property({ attribute: false })
-  accessor tableViewManager!: DataViewTableManager;
-
-  @property({ attribute: false })
-  accessor column!: DataViewTableColumnManager;
-
-  @property({ attribute: false })
-  accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
+  private _clickTypeIcon = (event: MouseEvent) => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
+    if (this.column.type === 'title') {
+      return;
+    }
+    event.stopPropagation();
+    popMenu(this, {
+      options: {
+        input: {
+          placeholder: 'Search',
+          search: true,
+        },
+        items: this.tableViewManager.allColumnConfig.map(config => {
+          return {
+            icon: html` <uni-lit
+              .uni="${this.tableViewManager.getIcon(config.type)}"
+            ></uni-lit>`,
+            isSelected: config.type === this.column.type,
+            name: config.name,
+            select: () => {
+              this.column.updateType?.(config.type);
+            },
+            type: 'action',
+          };
+        }),
+      },
+    });
+  };
 
   private _columnsOffset = (header: Element, _scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
@@ -79,8 +101,8 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         continue;
       }
       curr.push({
-        x: v.offsetLeft + v.offsetWidth / 2,
         ele: v,
+        x: v.offsetLeft + v.offsetWidth / 2,
       });
       offsetArr.push(
         v.getBoundingClientRect().left - header.getBoundingClientRect().left
@@ -95,7 +117,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     const getInsertPosition = (offset: number, width: number) => {
       let result: InsertToPosition | undefined = undefined;
       for (let i = 0; i < left.length; i++) {
-        const { x, ele } = left[i];
+        const { ele, x } = left[i];
         if (x < offset) {
           if (result) {
             return result;
@@ -109,7 +131,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         }
       }
       const offsetRight = offset + width;
-      for (const { x, ele } of right) {
+      for (const { ele, x } of right) {
         if (x > offsetRight) {
           if (result) {
             return result;
@@ -132,14 +154,54 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       computeInsertInfo: (offset: number, width: number) => {
         const insertPosition = getInsertPosition(offset, width);
         return {
-          insertPosition: insertPosition,
           insertOffset: insertPosition
             ? getInsertOffset(insertPosition)
             : undefined,
+          insertPosition: insertPosition,
         };
       },
     };
   };
+
+  private _contextMenu = (e: MouseEvent) => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
+    e.preventDefault();
+    this.popMenu(e.target as HTMLElement);
+  };
+
+  private _enterWidthDragBar = () => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
+    if (this.drawWidthDragBarTask) {
+      cancelAnimationFrame(this.drawWidthDragBarTask);
+      this.drawWidthDragBarTask = 0;
+    }
+    this.drawWidthDragBar();
+  };
+
+  private _leaveWidthDragBar = () => {
+    cancelAnimationFrame(this.drawWidthDragBarTask);
+    this.drawWidthDragBarTask = 0;
+    getVerticalIndicator().remove();
+  };
+
+  private drawWidthDragBar = () => {
+    const tableContainer = getTableContainer(this);
+    const tableRect = tableContainer.getBoundingClientRect();
+    const rectList = getTableGroupRects(tableContainer);
+    getVerticalIndicator().display(
+      0,
+      tableRect.top,
+      rectList,
+      this.getBoundingClientRect().right
+    );
+    this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
+  };
+
+  private drawWidthDragBarTask = 0;
 
   private moveColumn = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
@@ -187,9 +249,21 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     const drag = startDrag<{
       insertPosition?: InsertToPosition;
     }>(evt, {
+      onClear: () => {
+        cancelScroll();
+        html?.classList.toggle('affine-database-header-column-grabbing', false);
+        dropPreview.remove();
+        dragPreview.remove();
+      },
       onDrag: () => {
         this.grabStatus = 'grabbing';
         return {};
+      },
+      onDrop: ({ insertPosition }) => {
+        this.grabStatus = 'grabEnd';
+        if (insertPosition) {
+          this.tableViewManager.columnMove(this.column.id, insertPosition);
+        }
       },
       onMove: ({ x }: { x: number }) => {
         this.grabStatus = 'grabbing';
@@ -220,34 +294,13 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           insertPosition: insertInfo.insertPosition,
         };
       },
-      onDrop: ({ insertPosition }) => {
-        this.grabStatus = 'grabEnd';
-        if (insertPosition) {
-          this.tableViewManager.columnMove(this.column.id, insertPosition);
-        }
-      },
-      onClear: () => {
-        cancelScroll();
-        html?.classList.toggle('affine-database-header-column-grabbing', false);
-        dropPreview.remove();
-        dragPreview.remove();
-      },
     });
   };
 
-  private _clickColumn = () => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    this.popMenu();
-  };
+  private widthDragBar = createRef();
 
-  private _contextMenu = (e: MouseEvent) => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    e.preventDefault();
-    this.popMenu(e.target as HTMLElement);
+  editTitle = () => {
+    this._clickColumn();
   };
 
   private popMenu(ele?: HTMLElement) {
@@ -257,22 +310,21 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         items: [
           typeConfig(this.column, this.tableViewManager),
           {
-            type: 'action',
-            name: 'Duplicate Column',
-            icon: DatabaseDuplicate,
             hide: () => !this.column.duplicate || this.column.type === 'title',
+            icon: DatabaseDuplicate,
+            name: 'Duplicate Column',
             select: () => {
               this.column.duplicate?.();
             },
+            type: 'action',
           },
           {
-            type: 'action',
-            name: 'Insert Left Column',
             icon: DatabaseInsertLeft,
+            name: 'Insert Left Column',
             select: () => {
               this.tableViewManager.columnAdd({
-                id: this.column.id,
                 before: true,
+                id: this.column.id,
               });
               Promise.resolve()
                 .then(() => {
@@ -284,15 +336,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 })
                 .catch(console.error);
             },
+            type: 'action',
           },
           {
-            type: 'action',
-            name: 'Insert Right Column',
             icon: DatabaseInsertRight,
+            name: 'Insert Right Column',
             select: () => {
               this.tableViewManager.columnAdd({
-                id: this.column.id,
                 before: false,
+                id: this.column.id,
               });
               Promise.resolve()
                 .then(() => {
@@ -304,12 +356,12 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 })
                 .catch(console.error);
             },
+            type: 'action',
           },
           {
-            type: 'action',
-            name: 'Move Left',
-            icon: DatabaseMoveLeft,
             hide: () => this.column.isFirst,
+            icon: DatabaseMoveLeft,
+            name: 'Move Left',
             select: () => {
               const preId = this.tableViewManager.columnGetPreColumn(
                 this.column.id
@@ -318,16 +370,16 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 return;
               }
               this.tableViewManager.columnMove(this.column.id, {
-                id: preId,
                 before: true,
+                id: preId,
               });
             },
+            type: 'action',
           },
           {
-            type: 'action',
-            name: 'Move Right',
-            icon: DatabaseMoveRight,
             hide: () => this.column.isLast,
+            icon: DatabaseMoveRight,
+            name: 'Move Right',
             select: () => {
               const nextId = this.tableViewManager.columnGetNextColumn(
                 this.column.id
@@ -336,92 +388,36 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 return;
               }
               this.tableViewManager.columnMove(this.column.id, {
-                id: nextId,
                 before: false,
+                id: nextId,
               });
             },
+            type: 'action',
           },
           {
-            type: 'group',
-            name: 'operation',
             children: () => [
               {
-                type: 'action',
-                name: 'Delete Column',
-                icon: DeleteIcon,
+                class: 'delete-item',
                 hide: () => !this.column.delete || this.column.type === 'title',
+                icon: DeleteIcon,
+                name: 'Delete Column',
                 select: () => {
                   this.column.delete?.();
                 },
-                class: 'delete-item',
+                type: 'action',
               },
             ],
+            name: 'operation',
+            type: 'group',
           },
         ],
       },
     });
   }
 
-  private _clickTypeIcon = (event: MouseEvent) => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    if (this.column.type === 'title') {
-      return;
-    }
-    event.stopPropagation();
-    popMenu(this, {
-      options: {
-        input: {
-          search: true,
-          placeholder: 'Search',
-        },
-        items: this.tableViewManager.allColumnConfig.map(config => {
-          return {
-            type: 'action',
-            name: config.name,
-            isSelected: config.type === this.column.type,
-            icon: html` <uni-lit
-              .uni="${this.tableViewManager.getIcon(config.type)}"
-            ></uni-lit>`,
-            select: () => {
-              this.column.updateType?.(config.type);
-            },
-          };
-        }),
-      },
-    });
-  };
-
-  private drawWidthDragBar = () => {
-    const tableContainer = getTableContainer(this);
-    const tableRect = tableContainer.getBoundingClientRect();
-    const rectList = getTableGroupRects(tableContainer);
-    getVerticalIndicator().display(
-      0,
-      tableRect.top,
-      rectList,
-      this.getBoundingClientRect().right
-    );
-    this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
-  };
-
-  private _enterWidthDragBar = () => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    if (this.drawWidthDragBarTask) {
-      cancelAnimationFrame(this.drawWidthDragBarTask);
-      this.drawWidthDragBarTask = 0;
-    }
-    this.drawWidthDragBar();
-  };
-
-  private _leaveWidthDragBar = () => {
-    cancelAnimationFrame(this.drawWidthDragBarTask);
-    this.drawWidthDragBarTask = 0;
-    getVerticalIndicator().remove();
-  };
+  private get readonly() {
+    return this.tableViewManager.readonly;
+  }
 
   private widthDragStart(event: PointerEvent) {
     startDragWidthAdjustmentBar(
@@ -465,10 +461,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       );
     }
   }
-
-  editTitle = () => {
-    this._clickColumn();
-  };
 
   override render() {
     const column = this.column;
@@ -516,11 +508,20 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor column!: DataViewTableColumnManager;
+
+  @property({ attribute: false })
+  accessor grabStatus: 'grabEnd' | 'grabStart' | 'grabbing' = 'grabEnd';
+
+  @property({ attribute: false })
+  accessor tableViewManager!: DataViewTableManager;
 }
 
 type ColumnOffset = {
-  x: number;
   ele: DatabaseHeaderColumn;
+  x: number;
 };
 
 const createDragPreview = (

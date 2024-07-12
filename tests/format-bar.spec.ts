@@ -188,7 +188,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const { boldBtn, italicBtn, underlineBtn, strikeBtn, codeBtn } =
+  const { boldBtn, codeBtn, italicBtn, strikeBtn, underlineBtn } =
     getFormatBar(page);
 
   await expect(boldBtn).not.toHaveAttribute('active', '');
@@ -698,7 +698,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [0, 0], [0, 3]);
 
-  const { openParagraphMenu, h1Btn, bulletedBtn } = getFormatBar(page);
+  const { bulletedBtn, h1Btn, openParagraphMenu } = getFormatBar(page);
   await openParagraphMenu();
 
   await expect(h1Btn).toBeVisible();
@@ -865,7 +865,7 @@ test('should format bar follow scroll', async ({ page }) => {
   await scrollToTop(page);
 
   await dragBetweenIndices(page, [0, 0], [2, 3]);
-  const { formatBar, boldBtn } = getFormatBar(page);
+  const { boldBtn, formatBar } = getFormatBar(page);
   await assertLocatorVisible(page, formatBar);
 
   await scrollToBottom(page);
@@ -938,7 +938,7 @@ test('should format quick bar action status updated while undo', async ({
   await captureHistory(page);
   await dragBetweenIndices(page, [0, 1], [0, 6]);
 
-  const { formatBar, boldBtn } = getFormatBar(page);
+  const { boldBtn, formatBar } = getFormatBar(page);
   await expect(formatBar).toBeVisible();
   await expect(boldBtn).toBeVisible();
 
@@ -1037,7 +1037,7 @@ test('should format quick bar work in single block selection', async ({
   );
 
   const noteEl = page.locator('affine-note');
-  const { x, y, width, height } = await getBoundingBox(noteEl);
+  const { height, width, x, y } = await getBoundingBox(noteEl);
   await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBar).not.toBeVisible();
 });
@@ -1141,7 +1141,7 @@ test('should format quick bar work in multiple block selection', async ({
   );
 
   const noteEl = page.locator('affine-note');
-  const { x, y, width, height } = await getBoundingBox(noteEl);
+  const { height, width, x, y } = await getBoundingBox(noteEl);
   await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBarController.formatBar).not.toBeVisible();
 });
@@ -1253,7 +1253,7 @@ test('should format quick bar with block selection works when update block type'
   await expect(blockSelections).toHaveCount(3);
 
   const noteEl = page.locator('affine-note');
-  const { x, y, width, height } = await getBoundingBox(noteEl);
+  const { height, width, x, y } = await getBoundingBox(noteEl);
   await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBarController.formatBar).not.toBeVisible();
 });
@@ -1348,9 +1348,9 @@ test('should format bar style active correctly', async ({ page }) => {
     });
     const note = doc.addBlock('affine:note', {}, rootId);
     const delta = [
-      { insert: '1', attributes: { bold: true, italic: true } },
-      { insert: '2', attributes: { bold: true, underline: true } },
-      { insert: '3', attributes: { bold: true, code: true } },
+      { attributes: { bold: true, italic: true }, insert: '1' },
+      { attributes: { bold: true, underline: true }, insert: '2' },
+      { attributes: { bold: true, code: true }, insert: '3' },
     ];
     const text = doc.Text.fromDelta(delta);
     doc.addBlock('affine:paragraph', { text }, note);
@@ -1375,7 +1375,7 @@ test('should format quick bar show when double click button', async ({
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
-  const { formatBar, boldBtn } = getFormatBar(page);
+  const { boldBtn, formatBar } = getFormatBar(page);
   await expect(formatBar).toBeVisible();
   await boldBtn.dblclick({
     delay: 100,
@@ -1409,10 +1409,10 @@ test('should the database action icon show correctly', async ({ page }) => {
 
   await page.keyboard.type('hello world');
   const position = {
-    startX: codeBox.x,
-    startY: codeBox.y + codeBox.height / 2,
     endX: codeBox.x + codeBox.width,
     endY: codeBox.y + codeBox.height / 2,
+    startX: codeBox.x,
+    startY: codeBox.y + codeBox.height / 2,
   };
   await page.mouse.click(position.endX + 150, position.endY + 150);
   await dragBetweenCoords(
@@ -1469,7 +1469,7 @@ test('should show format-quick-bar and select all text of the block when triple 
   await assertRichTextInlineRange(page, 0, 0, 5);
 
   const noteEl = page.locator('affine-note');
-  const { x, y, width, height } = await getBoundingBox(noteEl);
+  const { height, width, x, y } = await getBoundingBox(noteEl);
   await page.mouse.click(x + width / 2, y + height / 2);
 
   await expect(formatBar).toBeHidden();
@@ -1504,9 +1504,9 @@ test('should update the format quick bar state when there is a change in keyboar
     });
     const note = doc.addBlock('affine:note', {}, rootId);
     const delta = [
-      { insert: '1', attributes: { bold: true } },
-      { insert: '2', attributes: { bold: true } },
-      { insert: '3', attributes: { bold: false } },
+      { attributes: { bold: true }, insert: '1' },
+      { attributes: { bold: true }, insert: '2' },
+      { attributes: { bold: false }, insert: '3' },
     ];
     const text = doc.Text.fromDelta(delta);
     doc.addBlock('affine:paragraph', { text }, note);
@@ -1545,8 +1545,8 @@ test('format quick bar should not break cursor jumping', async ({ page }) => {
 
 test('selecting image should not show format bar', async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/4535',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initImageState(page);
@@ -1640,7 +1640,7 @@ test.describe('more menu button', () => {
     // drag only the `456` paragraph
     await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-    const { openMoreMenu, copyBtn } = getFormatBar(page);
+    const { copyBtn, openMoreMenu } = getFormatBar(page);
     await openMoreMenu();
     await expect(copyBtn).toBeVisible();
     await assertRichTextInlineRange(page, 1, 0, 3);
@@ -1665,7 +1665,7 @@ test.describe('more menu button', () => {
     await focusRichText(page, 1);
     await pressEscape(page);
 
-    const { openMoreMenu, duplicateBtn } = getFormatBar(page);
+    const { duplicateBtn, openMoreMenu } = getFormatBar(page);
     await openMoreMenu();
     await expect(duplicateBtn).toBeVisible();
     await duplicateBtn.click();
@@ -1683,7 +1683,7 @@ test.describe('more menu button', () => {
     await focusRichText(page, 1);
     await pressEscape(page);
 
-    const { openMoreMenu, deleteBtn } = getFormatBar(page);
+    const { deleteBtn, openMoreMenu } = getFormatBar(page);
     await openMoreMenu();
     await expect(deleteBtn).toBeVisible();
     await deleteBtn.click();

@@ -7,55 +7,55 @@ export function absolutize(segments: Segment[]): Segment[] {
   let subx = 0,
     suby = 0;
   const out: Segment[] = [];
-  for (const { key, data } of segments) {
+  for (const { data, key } of segments) {
     switch (key) {
       case 'M':
-        out.push({ key: 'M', data: [...data] });
+        out.push({ data: [...data], key: 'M' });
         [cx, cy] = data;
         [subx, suby] = data;
         break;
       case 'm':
         cx += data[0];
         cy += data[1];
-        out.push({ key: 'M', data: [cx, cy] });
+        out.push({ data: [cx, cy], key: 'M' });
         subx = cx;
         suby = cy;
         break;
       case 'L':
-        out.push({ key: 'L', data: [...data] });
+        out.push({ data: [...data], key: 'L' });
         [cx, cy] = data;
         break;
       case 'l':
         cx += data[0];
         cy += data[1];
-        out.push({ key: 'L', data: [cx, cy] });
+        out.push({ data: [cx, cy], key: 'L' });
         break;
       case 'C':
-        out.push({ key: 'C', data: [...data] });
+        out.push({ data: [...data], key: 'C' });
         cx = data[4];
         cy = data[5];
         break;
       case 'c': {
         const newdata = data.map((d, i) => (i % 2 ? d + cy : d + cx));
-        out.push({ key: 'C', data: newdata });
+        out.push({ data: newdata, key: 'C' });
         cx = newdata[4];
         cy = newdata[5];
         break;
       }
       case 'Q':
-        out.push({ key: 'Q', data: [...data] });
+        out.push({ data: [...data], key: 'Q' });
         cx = data[2];
         cy = data[3];
         break;
       case 'q': {
         const newdata = data.map((d, i) => (i % 2 ? d + cy : d + cx));
-        out.push({ key: 'Q', data: newdata });
+        out.push({ data: newdata, key: 'Q' });
         cx = newdata[2];
         cy = newdata[3];
         break;
       }
       case 'A':
-        out.push({ key: 'A', data: [...data] });
+        out.push({ data: [...data], key: 'A' });
         cx = data[5];
         cy = data[6];
         break;
@@ -63,51 +63,51 @@ export function absolutize(segments: Segment[]): Segment[] {
         cx += data[5];
         cy += data[6];
         out.push({
-          key: 'A',
           data: [data[0], data[1], data[2], data[3], data[4], cx, cy],
+          key: 'A',
         });
         break;
       case 'H':
-        out.push({ key: 'H', data: [...data] });
+        out.push({ data: [...data], key: 'H' });
         cx = data[0];
         break;
       case 'h':
         cx += data[0];
-        out.push({ key: 'H', data: [cx] });
+        out.push({ data: [cx], key: 'H' });
         break;
       case 'V':
-        out.push({ key: 'V', data: [...data] });
+        out.push({ data: [...data], key: 'V' });
         cy = data[0];
         break;
       case 'v':
         cy += data[0];
-        out.push({ key: 'V', data: [cy] });
+        out.push({ data: [cy], key: 'V' });
         break;
       case 'S':
-        out.push({ key: 'S', data: [...data] });
+        out.push({ data: [...data], key: 'S' });
         cx = data[2];
         cy = data[3];
         break;
       case 's': {
         const newdata = data.map((d, i) => (i % 2 ? d + cy : d + cx));
-        out.push({ key: 'S', data: newdata });
+        out.push({ data: newdata, key: 'S' });
         cx = newdata[2];
         cy = newdata[3];
         break;
       }
       case 'T':
-        out.push({ key: 'T', data: [...data] });
+        out.push({ data: [...data], key: 'T' });
         cx = data[0];
         cy = data[1];
         break;
       case 't':
         cx += data[0];
         cy += data[1];
-        out.push({ key: 'T', data: [cx, cy] });
+        out.push({ data: [cx, cy], key: 'T' });
         break;
       case 'Z':
       case 'z':
-        out.push({ key: 'Z', data: [] });
+        out.push({ data: [], key: 'Z' });
         cx = subx;
         cy = suby;
         break;

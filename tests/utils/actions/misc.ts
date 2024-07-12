@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import '../declare-test-window.js';
-
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
@@ -9,25 +7,27 @@ import type {
   RichText,
   ThemeObserver,
 } from '@blocks/index.js';
-import { assertExists } from '@global/utils.js';
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { DocsPanel } from '@playground/apps/_common/components/docs-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
-import { expect } from '@playwright/test';
 import type { AffineEditorContainer } from '@presets/editors/index.js';
 import type { BlockModel } from '@store/schema/index.js';
+
+import { assertExists } from '@global/utils.js';
+import { expect } from '@playwright/test';
 import { uuidv4 } from '@store/utils/id-generator.js';
 import lz from 'lz-string';
 
+import '../declare-test-window.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
+  SHORT_KEY,
   pressEnter,
   pressSpace,
   pressTab,
-  SHORT_KEY,
   type,
 } from './keyboard.js';
 
@@ -62,15 +62,15 @@ export const getSelectionRect = async (page: Page): Promise<DOMRect> => {
  * ```
  */
 async function initEmptyEditor({
-  page,
   flags = {},
-  noInit = false,
   multiEditor = false,
+  noInit = false,
+  page,
 }: {
-  page: Page;
   flags?: Partial<BlockSuiteFlags>;
-  noInit?: boolean;
   multiEditor?: boolean;
+  noInit?: boolean;
+  page: Page;
 }) {
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
@@ -196,7 +196,7 @@ export const getBlockHub = (page: Page) => {
   return page.locator('affine-block-hub').nth(currentEditorIndex);
 };
 
-type TaggedConsoleMessage = ConsoleMessage & { __ignore?: boolean };
+type TaggedConsoleMessage = { __ignore?: boolean } & ConsoleMessage;
 function ignoredLog(message: ConsoleMessage) {
   (message as TaggedConsoleMessage).__ignore = true;
 }
@@ -218,34 +218,34 @@ function isIgnoredLog(
  */
 export function expectConsoleMessage(
   page: Page,
-  logPrefixOrRegex: string | RegExp,
+  logPrefixOrRegex: RegExp | string,
   type:
-    | 'log'
+    | 'assert'
+    | 'clear'
+    | 'count'
     | 'debug'
-    | 'info'
-    | 'error'
-    | 'warning'
     | 'dir'
     | 'dirxml'
-    | 'table'
-    | 'trace'
-    | 'clear'
-    | 'startGroup'
-    | 'startGroupCollapsed'
     | 'endGroup'
-    | 'assert'
+    | 'error'
+    | 'info'
+    | 'log'
     | 'profile'
     | 'profileEnd'
-    | 'count'
-    | 'timeEnd' = 'error'
+    | 'startGroup'
+    | 'startGroupCollapsed'
+    | 'table'
+    | 'timeEnd'
+    | 'trace'
+    | 'warning' = 'error'
 ) {
   page.on('console', (message: ConsoleMessage) => {
     if (
       [
-        '[vite] connecting...',
-        '[vite] connected.',
-        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
         '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
+        '[vite] connected.',
+        '[vite] connecting...',
+        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
       ].includes(message.text())
     ) {
       ignoredLog(message);
@@ -263,10 +263,10 @@ export function expectConsoleMessage(
 }
 
 export type PlaygroundRoomOptions = {
-  flags?: Partial<BlockSuiteFlags>;
-  room?: string;
   blobSource?: ('idb' | 'mock')[];
+  flags?: Partial<BlockSuiteFlags>;
   noInit?: boolean;
+  room?: string;
 };
 export async function enterPlaygroundRoom(
   page: Page,
@@ -303,10 +303,10 @@ export async function enterPlaygroundRoom(
   });
 
   await initEmptyEditor({
-    page,
     flags: ops?.flags,
-    noInit: ops?.noInit,
     multiEditor,
+    noInit: ops?.noInit,
+    page,
   });
 
   const locator = page.locator('affine-editor-container');
@@ -418,7 +418,7 @@ export async function initEmptyParagraphState(page: Page, rootId?: string) {
     // doc.addBlock('affine:surface', {}, rootId);
     doc.captureSync();
 
-    return { rootId, noteId, paragraphId };
+    return { noteId, paragraphId, rootId };
   }, rootId);
   return ids;
 }
@@ -429,7 +429,7 @@ export async function initMultipleNoteWithParagraphState(
   count = 2
 ) {
   const ids = await page.evaluate(
-    ({ rootId, count }) => {
+    ({ count, rootId }) => {
       const { doc } = window;
       doc.captureSync();
       if (!rootId) {
@@ -449,9 +449,9 @@ export async function initMultipleNoteWithParagraphState(
       // doc.addBlock('affine:surface', {}, rootId);
       doc.captureSync();
 
-      return { rootId, ids };
+      return { ids, rootId };
     },
-    { rootId, count }
+    { count, rootId }
   );
   return ids;
 }
@@ -468,7 +468,7 @@ export async function initEmptyEdgelessState(page: Page) {
 
     doc.resetHistory();
 
-    return { rootId, noteId, paragraphId };
+    return { noteId, paragraphId, rootId };
   });
   return ids;
 }
@@ -503,7 +503,7 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
     model.applyColumnUpdate();
 
     doc.captureSync();
-    return { rootId, noteId, databaseId };
+    return { databaseId, noteId, rootId };
   }, rootId);
   return ids;
 }
@@ -511,13 +511,13 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
 export async function initKanbanViewState(
   page: Page,
   config: {
-    rows: string[];
     columns: { type: string; value?: unknown[] }[];
+    rows: string[];
   },
   rootId?: string
 ) {
   const ids = await page.evaluate(
-    async ({ rootId, config }) => {
+    async ({ config, rootId }) => {
       const { doc } = window;
 
       doc.captureSync();
@@ -540,7 +540,7 @@ export async function initKanbanViewState(
       const rowIds = config.rows.map(rowText => {
         const rowId = doc.addBlock(
           'affine:paragraph',
-          { type: 'text', text: new doc.Text(rowText) },
+          { text: new doc.Text(rowText), type: 'text' },
           databaseId
         );
         return rowId;
@@ -575,9 +575,9 @@ export async function initKanbanViewState(
       }
       model.applyColumnUpdate();
       doc.captureSync();
-      return { rootId, noteId, databaseId };
+      return { databaseId, noteId, rootId };
     },
-    { rootId, config }
+    { config, rootId }
   );
   return ids;
 }
@@ -616,7 +616,7 @@ export async function initEmptyDatabaseWithParagraphState(
     doc.addBlock('affine:paragraph', {}, noteId);
 
     doc.captureSync();
-    return { rootId, noteId, databaseId };
+    return { databaseId, noteId, rootId };
   }, rootId);
   return ids;
 }
@@ -691,7 +691,7 @@ export async function initEmptyCodeBlockState(
     const codeBlockId = doc.addBlock('affine:code', codeBlockProps, noteId);
     doc.captureSync();
 
-    return { rootId, noteId, codeBlockId };
+    return { codeBlockId, noteId, rootId };
   }, codeBlockProps);
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
@@ -916,8 +916,8 @@ export async function pasteContent(
         clipboardData: new DataTransfer(),
       });
       Object.defineProperty(e, 'target', {
-        writable: false,
         value: document,
+        writable: false,
       });
       Object.keys(clipData).forEach(key => {
         e.clipboardData?.setData(key, clipData[key] as string);
@@ -944,8 +944,8 @@ export async function pasteBlocks(page: Page, json: unknown) {
   );
 
   await pasteContent(page, {
-    'text/html': customClipboardFragment,
     'blocksuite/page': stringifiesData,
+    'text/html': customClipboardFragment,
   });
 }
 
@@ -1043,9 +1043,9 @@ export async function setSelection(
     ({
       anchorBlockId,
       anchorOffset,
+      currentEditorIndex,
       focusBlockId,
       focusOffset,
-      currentEditorIndex,
     }) => {
       /* eslint-disable @typescript-eslint/no-non-null-assertion */
       const editorHost =
@@ -1082,9 +1082,9 @@ export async function setSelection(
     {
       anchorBlockId,
       anchorOffset,
+      currentEditorIndex,
       focusBlockId,
       focusOffset,
-      currentEditorIndex,
     }
   );
 }
@@ -1096,12 +1096,12 @@ export async function readClipboardText(
   const id = 'clipboard-test';
   const selector = `#${id}`;
   await page.evaluate(
-    ({ type, id }) => {
+    ({ id, type }) => {
       const input = document.createElement(type);
       input.setAttribute('id', id);
       document.body.append(input);
     },
-    { type, id }
+    { id, type }
   );
   const input = page.locator(selector);
   await input.focus();
@@ -1188,7 +1188,7 @@ export async function getIndexCoordinate(
   coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
 ) {
   const coord = await page.evaluate(
-    ({ richTextIndex, vIndex, coordOffSet, currentEditorIndex }) => {
+    ({ coordOffSet, currentEditorIndex, richTextIndex, vIndex }) => {
       const editorHost =
         document.querySelectorAll('editor-host')[currentEditorIndex];
       const richText = editorHost.querySelectorAll('rich-text')[
@@ -1206,10 +1206,10 @@ export async function getIndexCoordinate(
       };
     },
     {
-      richTextIndex,
-      vIndex,
       coordOffSet,
       currentEditorIndex,
+      richTextIndex,
+      vIndex,
     }
   );
   return coord;
@@ -1324,7 +1324,7 @@ export async function initImageState(page: Page) {
 
     doc.resetHistory();
 
-    return { rootId, noteId, imageId };
+    return { imageId, noteId, rootId };
   });
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.
@@ -1351,7 +1351,7 @@ export async function getCurrentEditorTheme(page: Page) {
     .locator('affine-editor-container')
     .first()
     .evaluate(ele => {
-      return (ele as unknown as Element & { themeObserver: ThemeObserver })
+      return (ele as unknown as { themeObserver: ThemeObserver } & Element)
         .themeObserver.cssVariables?.['--affine-theme-mode'];
     });
   return mode;
@@ -1364,7 +1364,7 @@ export async function getCurrentThemeCSSPropertyValue(
   const value = await page
     .locator('affine-editor-container')
     .evaluate((ele, property: CssVariableName) => {
-      return (ele as unknown as Element & { themeObserver: ThemeObserver })
+      return (ele as unknown as { themeObserver: ThemeObserver } & Element)
         .themeObserver.cssVariables?.[property];
     }, property);
   return value;
@@ -1401,7 +1401,7 @@ export async function scrollToBottom(page: Page) {
   await page
     .locator('.affine-page-viewport')
     .evaluate(node =>
-      node.scrollTo({ left: 0, top: 1000, behavior: 'smooth' })
+      node.scrollTo({ behavior: 'smooth', left: 0, top: 1000 })
     );
   // TODO switch to `scrollend`
   // See https://developer.chrome.com/en/blog/scrollend-a-new-javascript-event/

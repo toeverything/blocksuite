@@ -35,17 +35,17 @@ describe('bound utils', () => {
       .fill(0)
       .map((_, index) => {
         return {
+          h: 1,
+          w: 1,
           x: index,
           y: index,
-          w: 1,
-          h: 1,
         };
       });
     expect(getCommonBound(bounds)).toMatchObject({
+      h: 10,
+      w: 10,
       x: 0,
       y: 0,
-      w: 10,
-      h: 10,
     });
   });
 
@@ -55,10 +55,10 @@ describe('bound utils', () => {
 
   it('getCommonBound parameters length less than 2', () => {
     const b1 = {
+      h: 1,
+      w: 1,
       x: 0,
       y: 0,
-      w: 1,
-      h: 1,
     };
     expect(getCommonBound([b1])).toMatchObject(b1);
   });
@@ -78,7 +78,7 @@ describe('bound utils', () => {
     const b = new Bound(4, 4, 18, 18);
     const marginA = 4;
     const marginB = 6;
-    const points = [{ x: 6, y: 6, other: 10 }];
+    const points = [{ other: 10, x: 6, y: 6 }];
     const transformed = transformPointsToNewBound(
       points,
       a,
@@ -89,9 +89,9 @@ describe('bound utils', () => {
 
     expect(transformed.bound.serialize()).toBe(b.serialize());
     expect(transformed.points[0]).toMatchObject({
+      other: 10,
       x: 7,
       y: 7,
-      other: 10,
     });
   });
 
@@ -100,7 +100,7 @@ describe('bound utils', () => {
     const b = new Bound(4, 4, 4, 4);
     const marginA = 4;
     const marginB = 6;
-    const points = [{ x: 6, y: 6, other: 10 }];
+    const points = [{ other: 10, x: 6, y: 6 }];
     const transformed = transformPointsToNewBound(
       points,
       a,

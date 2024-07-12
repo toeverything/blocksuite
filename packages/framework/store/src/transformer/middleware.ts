@@ -13,22 +13,22 @@ import type {
 
 export type BeforeImportPayload =
   | {
+      index?: number;
+      parent?: string;
       snapshot: BlockSnapshot;
       type: 'block';
-      parent?: string;
-      index?: number;
     }
   | {
-      snapshot: SliceSnapshot;
-      type: 'slice';
+      snapshot: CollectionInfoSnapshot;
+      type: 'info';
     }
   | {
       snapshot: DocSnapshot;
       type: 'page';
     }
   | {
-      snapshot: CollectionInfoSnapshot;
-      type: 'info';
+      snapshot: SliceSnapshot;
+      type: 'slice';
     };
 
 export type BeforeExportPayload =
@@ -50,21 +50,21 @@ export type BeforeExportPayload =
 
 export type FinalPayload =
   | {
-      snapshot: BlockSnapshot;
-      type: 'block';
+      index?: number;
       model: DraftModel;
       parent?: string;
-      index?: number;
+      snapshot: BlockSnapshot;
+      type: 'block';
     }
   | {
+      page: Doc;
       snapshot: DocSnapshot;
       type: 'page';
-      page: Doc;
     }
   | {
+      slice: Slice;
       snapshot: SliceSnapshot;
       type: 'slice';
-      slice: Slice;
     }
   | {
       snapshot: CollectionInfoSnapshot;
@@ -72,17 +72,17 @@ export type FinalPayload =
     };
 
 export type JobSlots = {
-  beforeImport: Slot<BeforeImportPayload>;
+  afterExport: Slot<FinalPayload>;
   afterImport: Slot<FinalPayload>;
   beforeExport: Slot<BeforeExportPayload>;
-  afterExport: Slot<FinalPayload>;
+  beforeImport: Slot<BeforeImportPayload>;
 };
 
 type JobMiddlewareOptions = {
-  collection: DocCollection;
-  assetsManager: AssetsManager;
-  slots: JobSlots;
   adapterConfigs: Map<string, string>;
+  assetsManager: AssetsManager;
+  collection: DocCollection;
+  slots: JobSlots;
 };
 
 export type JobMiddleware = (options: JobMiddlewareOptions) => void;

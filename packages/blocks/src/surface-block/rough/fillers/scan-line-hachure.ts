@@ -1,17 +1,18 @@
 import type { ResolvedOptions } from '../core.js';
 import type { Line, Point } from '../geometry.js';
+
 import { rotateLines, rotatePoints } from '../geometry.js';
 
 interface EdgeEntry {
-  ymin: number;
-  ymax: number;
-  x: number;
   islope: number;
+  x: number;
+  ymax: number;
+  ymin: number;
 }
 
 interface ActiveEdgeEntry {
-  s: number;
   edge: EdgeEntry;
+  s: number;
 }
 
 export function polygonHachureLines(
@@ -66,10 +67,10 @@ function straightHachureLines(polygonList: Point[][], gap: number): Line[] {
       if (p1[1] !== p2[1]) {
         const ymin = Math.min(p1[1], p2[1]);
         edges.push({
-          ymin,
-          ymax: Math.max(p1[1], p2[1]),
-          x: ymin === p1[1] ? p1[0] : p2[0],
           islope: (p2[0] - p1[0]) / (p2[1] - p1[1]),
+          x: ymin === p1[1] ? p1[0] : p2[0],
+          ymax: Math.max(p1[1], p2[1]),
+          ymin,
         });
       }
     }
@@ -111,7 +112,7 @@ function straightHachureLines(polygonList: Point[][], gap: number): Line[] {
       }
       const removed = edges.splice(0, ix + 1);
       removed.forEach(edge => {
-        activeEdges.push({ s: y, edge });
+        activeEdges.push({ edge, s: y });
       });
     }
     activeEdges = activeEdges.filter(ae => {

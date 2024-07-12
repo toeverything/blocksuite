@@ -1,9 +1,11 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
+
 import { DocCollection, Generator, Schema } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { selectColumnModelConfig } from '../../database-block/data-view/column/presets/select/define.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
+
+import { selectColumnModelConfig } from '../../database-block/data-view/column/presets/select/define.js';
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
 import {
   type Cell,
@@ -52,9 +54,9 @@ describe('DatabaseManager', () => {
   let col3: Column['id'];
 
   const selection = [
-    { id: '1', value: 'Done', color: 'var(--affine-tag-white)' },
-    { id: '2', value: 'TODO', color: 'var(--affine-tag-pink)' },
-    { id: '3', value: 'WIP', color: 'var(--affine-tag-blue)' },
+    { color: 'var(--affine-tag-white)', id: '1', value: 'Done' },
+    { color: 'var(--affine-tag-pink)', id: '2', value: 'TODO' },
+    { color: 'var(--affine-tag-blue)', id: '3', value: 'WIP' },
   ];
 
   beforeEach(() => {

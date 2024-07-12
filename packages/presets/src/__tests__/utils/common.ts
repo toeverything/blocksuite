@@ -18,23 +18,23 @@ export function click(target: HTMLElement, position: { x: number; y: number }) {
 
   target.dispatchEvent(
     new PointerEvent('pointerdown', {
+      bubbles: true,
       clientX,
       clientY,
-      bubbles: true,
     })
   );
   target.dispatchEvent(
     new PointerEvent('pointerup', {
+      bubbles: true,
       clientX,
       clientY,
-      bubbles: true,
     })
   );
   target.dispatchEvent(
     new MouseEvent('click', {
+      bubbles: true,
       clientX,
       clientY,
-      bubbles: true,
     })
   );
 }
@@ -54,9 +54,9 @@ export function pointerdown(
 
   target.dispatchEvent(
     new PointerEvent('pointerdown', {
+      bubbles: true,
       clientX,
       clientY,
-      bubbles: true,
     })
   );
 }
@@ -76,9 +76,9 @@ export function pointerup(
 
   target.dispatchEvent(
     new PointerEvent('pointerup', {
+      bubbles: true,
       clientX,
       clientY,
-      bubbles: true,
     })
   );
 }
@@ -98,9 +98,9 @@ export function pointermove(
 
   target.dispatchEvent(
     new PointerEvent('pointermove', {
+      bubbles: true,
       clientX,
       clientY,
-      bubbles: true,
     })
   );
 }

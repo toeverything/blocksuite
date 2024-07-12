@@ -2,23 +2,17 @@ import { BlockElement } from '@blocksuite/block-std';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import type { DatabaseBlockModel } from '../../database-model.js';
+
 import {
   DatabaseTableViewClose,
   DatabaseTableViewIcon,
 } from '../../data-view/common/icons/index.js';
-import type { DatabaseBlockModel } from '../../database-model.js';
 import { fullScreenStyles } from './styles.js';
 
 @customElement('affine-database-table-view-full-screen')
 export class DatabaseTableViewFullScreen extends BlockElement<DatabaseBlockModel> {
   static override styles = fullScreenStyles;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  close = () => {
-    this.abortController.abort();
-  };
 
   _renderView = () => {
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
@@ -30,6 +24,10 @@ export class DatabaseTableViewFullScreen extends BlockElement<DatabaseBlockModel
         .model=${this.model}
       ></affine-database>
     `;
+  };
+
+  close = () => {
+    this.abortController.abort();
   };
 
   override renderBlock() {
@@ -51,6 +49,9 @@ export class DatabaseTableViewFullScreen extends BlockElement<DatabaseBlockModel
       </div>
     </div>`;
   }
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
 }
 
 declare global {

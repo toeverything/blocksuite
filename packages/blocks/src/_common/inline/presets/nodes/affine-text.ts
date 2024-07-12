@@ -21,21 +21,21 @@ export function affineTextStyles(
   let inlineCodeStyle = {};
   if (props.code) {
     inlineCodeStyle = {
-      'font-family': 'var(--affine-font-code-family)',
       background: 'var(--affine-background-code-block)',
       border: '1px solid var(--affine-border-color)',
       'border-radius': '4px',
       color: 'var(--affine-text-primary-color)',
+      'font-family': 'var(--affine-font-code-family)',
       'font-variant-ligatures': 'none',
       'line-height': 'auto',
     };
   }
 
   return styleMap({
-    'font-weight': props.bold ? 'bolder' : 'inherit',
-    'font-style': props.italic ? 'italic' : 'normal',
     'background-color': props.background ? props.background : undefined,
     color: props.color ? props.color : undefined,
+    'font-style': props.italic ? 'italic' : 'normal',
+    'font-weight': props.bold ? 'bolder' : 'inherit',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
     ...inlineCodeStyle,
     ...override,
@@ -44,11 +44,6 @@ export function affineTextStyles(
 
 @customElement('affine-text')
 export class AffineText extends ShadowlessElement {
-  @property({ type: Object })
-  accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
-  };
-
   override render() {
     const style = this.delta.attributes
       ? affineTextStyles(this.delta.attributes)
@@ -68,6 +63,11 @@ export class AffineText extends ShadowlessElement {
       ><v-text .str=${this.delta.insert}></v-text
     ></span>`;
   }
+
+  @property({ type: Object })
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
 }
 
 declare global {

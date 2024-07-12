@@ -1,5 +1,6 @@
-import { getStrokeRadius } from './getStrokeRadius.js';
 import type { StrokeOptions, StrokePoint } from './types.js';
+
+import { getStrokeRadius } from './getStrokeRadius.js';
 import {
   add,
   dist2,
@@ -14,7 +15,7 @@ import {
   uni,
 } from './vec.js';
 
-const { min, PI } = Math;
+const { PI, min } = Math;
 
 // This is the rate of change for simulated pressure. It could be an option.
 const RATE_OF_PRESSURE_CHANGE = 0.275;
@@ -41,14 +42,14 @@ export function getStrokeOutlinePoints(
   options: Partial<StrokeOptions> = {} as Partial<StrokeOptions>
 ): number[][] {
   const {
-    size = 16,
-    smoothing = 0.5,
-    thinning = 0.5,
-    simulatePressure = true,
     easing = t => t,
-    start = {},
     end = {},
     last: isComplete = false,
+    simulatePressure = true,
+    size = 16,
+    smoothing = 0.5,
+    start = {},
+    thinning = 0.5,
   } = options;
 
   const { cap: capStart = true, easing: taperStartEase = t => t * (2 - t) } =
@@ -141,7 +142,7 @@ export function getStrokeOutlinePoints(
 
   for (let i = 0; i < points.length; i++) {
     let { pressure } = points[i];
-    const { point, vector, distance, runningLength } = points[i];
+    const { distance, point, runningLength, vector } = points[i];
 
     // Removes noise from the end of the line
     if (i < points.length - 1 && totalLength - runningLength < 3) {

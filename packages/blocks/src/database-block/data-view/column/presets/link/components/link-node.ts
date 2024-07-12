@@ -18,9 +18,6 @@ export class LinkNode extends ShadowlessElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor link!: string;
-
   protected override render() {
     if (!isValidUrl(this.link)) {
       return html`<span class="normal-text">${this.link}</span>`;
@@ -34,6 +31,9 @@ export class LinkNode extends ShadowlessElement {
       ><span class="link-node-text">${this.link}</span></a
     >`;
   }
+
+  @property({ attribute: false })
+  accessor link!: string;
 }
 
 declare global {

@@ -1,5 +1,3 @@
-import './ask-ai-panel.js';
-
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import {
   type AIItemGroupConfig,
@@ -10,45 +8,38 @@ import { HoverController } from '@blocksuite/blocks';
 import { createLitPortal } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getRootService } from '../../utils/selection-utils.js';
+import './ask-ai-panel.js';
 
-type buttonSize = 'small' | 'middle' | 'large';
-type toggleType = 'hover' | 'click';
+type buttonSize = 'large' | 'middle' | 'small';
+type toggleType = 'click' | 'hover';
 
 const buttonWidthMap: Record<buttonSize, string> = {
-  small: '72px',
-  middle: '76px',
   large: '82px',
+  middle: '76px',
+  small: '72px',
 };
 
 const buttonHeightMap: Record<buttonSize, string> = {
-  small: '24px',
-  middle: '32px',
   large: '32px',
+  middle: '32px',
+  small: '24px',
 };
 
 export type AskAIButtonOptions = {
-  size: buttonSize;
   backgroundColor?: string;
   boxShadow?: string;
   panelWidth?: number;
+  size: buttonSize;
 };
 
 @customElement('ask-ai-button')
 export class AskAIButton extends WithDisposable(LitElement) {
-  get _edgeless() {
-    const rootService = getRootService(this.host);
-    if (rootService instanceof EdgelessRootService) {
-      return rootService;
-    }
-    return null;
-  }
-
   static override styles = css`
     .ask-ai-button {
       border-radius: 4px;
@@ -89,47 +80,7 @@ export class AskAIButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @query('.ask-ai-button')
-  private accessor _askAIButton!: HTMLDivElement;
-
   private _abortController: AbortController | null = null;
-
-  private _whenHover = new HoverController(
-    this,
-    ({ abortController }) => {
-      return {
-        template: html`<ask-ai-panel
-          .host=${this.host}
-          .actionGroups=${this.actionGroups}
-          .abortController=${abortController}
-        ></ask-ai-panel>`,
-        computePosition: {
-          referenceElement: this,
-          placement: 'top-start',
-          middleware: [flip(), offset(-40)],
-          autoUpdate: true,
-        },
-      };
-    },
-    { allowMultiple: true }
-  );
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor actionGroups!: AIItemGroupConfig[];
-
-  @property({ attribute: false })
-  accessor toggleType: toggleType = 'hover';
-
-  @property({ attribute: false })
-  accessor options: AskAIButtonOptions = {
-    size: 'middle',
-    backgroundColor: undefined,
-    boxShadow: undefined,
-    panelWidth: 330,
-  };
 
   private _clearAbortController = () => {
     if (this._abortController) {
@@ -152,27 +103,49 @@ export class AskAIButton extends WithDisposable(LitElement) {
     assertExists(this._askAIButton);
     const panelMinWidth = this.options.panelWidth || 330;
     createLitPortal({
+      abortController: this._abortController,
+      closeOnClickAway: true,
+      computePosition: {
+        autoUpdate: true,
+        middleware: [flip(), offset(4)],
+        placement: 'bottom-start',
+        referenceElement: this._askAIButton,
+      },
+      container: this._askAIButton,
       template: html`<ask-ai-panel
         .host=${this.host}
         .actionGroups=${this.actionGroups}
         .minWidth=${panelMinWidth}
       ></ask-ai-panel>`,
-      container: this._askAIButton,
-      computePosition: {
-        referenceElement: this._askAIButton,
-        placement: 'bottom-start',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-      abortController: this._abortController,
-      closeOnClickAway: true,
     });
   };
 
-  override firstUpdated() {
-    this.disposables.add(() => {
-      this._edgeless?.tool.setEdgelessTool({ type: 'default' });
-    });
+  private _whenHover = new HoverController(
+    this,
+    ({ abortController }) => {
+      return {
+        computePosition: {
+          autoUpdate: true,
+          middleware: [flip(), offset(-40)],
+          placement: 'top-start',
+          referenceElement: this,
+        },
+        template: html`<ask-ai-panel
+          .host=${this.host}
+          .actionGroups=${this.actionGroups}
+          .abortController=${abortController}
+        ></ask-ai-panel>`,
+      };
+    },
+    { allowMultiple: true }
+  );
+
+  get _edgeless() {
+    const rootService = getRootService(this.host);
+    if (rootService instanceof EdgelessRootService) {
+      return rootService;
+    }
+    return null;
   }
 
   override disconnectedCallback() {
@@ -180,8 +153,14 @@ export class AskAIButton extends WithDisposable(LitElement) {
     this._clearAbortController();
   }
 
+  override firstUpdated() {
+    this.disposables.add(() => {
+      this._edgeless?.tool.setEdgelessTool({ type: 'default' });
+    });
+  }
+
   override render() {
-    const { size = 'small', backgroundColor, boxShadow } = this.options;
+    const { backgroundColor, boxShadow, size = 'small' } = this.options;
     const { toggleType } = this;
     const buttonStyles = styleMap({
       backgroundColor: backgroundColor || 'transparent',
@@ -202,6 +181,26 @@ export class AskAIButton extends WithDisposable(LitElement) {
       >
     </div>`;
   }
+
+  @query('.ask-ai-button')
+  private accessor _askAIButton!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor actionGroups!: AIItemGroupConfig[];
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor options: AskAIButtonOptions = {
+    backgroundColor: undefined,
+    boxShadow: undefined,
+    panelWidth: 330,
+    size: 'middle',
+  };
+
+  @property({ attribute: false })
+  accessor toggleType: toggleType = 'hover';
 }
 
 declare global {

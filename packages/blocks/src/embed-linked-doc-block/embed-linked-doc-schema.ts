@@ -6,14 +6,14 @@ import {
 } from './embed-linked-doc-model.js';
 
 const defaultEmbedLinkedDocBlockProps: EmbedLinkedDocBlockProps = {
+  caption: null,
   pageId: '',
   style: EmbedLinkedDocStyles[1],
-  caption: null,
 };
 
 export const EmbedLinkedDocBlockSchema = createEmbedBlockSchema({
   name: 'linked-doc',
-  version: 1,
-  toModel: () => new EmbedLinkedDocModel(),
   props: (): EmbedLinkedDocBlockProps => defaultEmbedLinkedDocBlockProps,
+  toModel: () => new EmbedLinkedDocModel(),
+  version: 1,
 });

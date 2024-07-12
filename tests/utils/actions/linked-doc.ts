@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import { pressEnter, type } from './keyboard.js';
 
@@ -53,18 +53,18 @@ export function getLinkedDocPopover(page: Page) {
 
   return {
     REFERENCE_NODE,
-    linkedDocPopover,
-    refNode,
-    pageBtn,
-
-    findRefNode,
+    assertActivePageIdx,
     assertExistRefText,
     createLinkedDoc: async (pageName?: string) =>
       createDoc('LinkedPage', pageName),
+
     /**
      * @deprecated
      */
     createSubpage: async (pageName?: string) => createDoc('Subpage', pageName),
-    assertActivePageIdx,
+    findRefNode,
+    linkedDocPopover,
+    pageBtn,
+    refNode,
   };
 }

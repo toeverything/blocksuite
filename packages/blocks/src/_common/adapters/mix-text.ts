@@ -1,6 +1,7 @@
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { Job } from '@blocksuite/store';
 import type { AssetsManager } from '@blocksuite/store';
+
 import {
   ASTWalker,
   BaseAdapter,
@@ -13,10 +14,10 @@ import {
   type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
-  nanoid,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
+  nanoid,
 } from '@blocksuite/store';
 
 import { NoteDisplayMode } from '../types.js';
@@ -25,13 +26,13 @@ import { MarkdownAdapter } from './markdown.js';
 export type MixText = string;
 
 type MixTextToSliceSnapshotPayload = {
-  file: MixText;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
-  pageVersion: number;
-  workspaceVersion: number;
-  workspaceId: string;
+  file: MixText;
   pageId: string;
+  pageVersion: number;
+  workspaceId: string;
+  workspaceVersion: number;
 };
 
 export class MixTextAdapter extends BaseAdapter<MixText> {
@@ -83,32 +84,32 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     };
   }
 
-  async fromDocSnapshot({
-    snapshot,
-    assets,
-  }: FromDocSnapshotPayload): Promise<FromDocSnapshotResult<MixText>> {
-    let buffer = '';
-    if (snapshot.meta.title) {
-      buffer += `${snapshot.meta.title}\n\n`;
-    }
-    const { file, assetsIds } = await this.fromBlockSnapshot({
-      snapshot: snapshot.blocks,
-      assets,
-    });
-    buffer += file;
-    return {
-      file: buffer,
-      assetsIds,
-    };
-  }
-
   async fromBlockSnapshot({
     snapshot,
   }: FromBlockSnapshotPayload): Promise<FromBlockSnapshotResult<MixText>> {
     const { mixtext } = await this._traverseSnapshot(snapshot);
     return {
-      file: mixtext,
       assetsIds: [],
+      file: mixtext,
+    };
+  }
+
+  async fromDocSnapshot({
+    assets,
+    snapshot,
+  }: FromDocSnapshotPayload): Promise<FromDocSnapshotResult<MixText>> {
+    let buffer = '';
+    if (snapshot.meta.title) {
+      buffer += `${snapshot.meta.title}\n\n`;
+    }
+    const { assetsIds, file } = await this.fromBlockSnapshot({
+      assets,
+      snapshot: snapshot.blocks,
+    });
+    buffer += file;
+    return {
+      assetsIds,
+      file: buffer,
     };
   }
 
@@ -124,25 +125,94 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     const mixtext =
       buffer.match(/\n/g)?.length === 1 ? buffer.trimEnd() : buffer;
     return {
-      file: mixtext,
       assetsIds: sliceAssetsIds,
+      file: mixtext,
+    };
+  }
+
+  toBlockSnapshot(payload: ToBlockSnapshotPayload<MixText>): BlockSnapshot {
+    payload.file = payload.file.replaceAll('\r', '');
+    return {
+      children: payload.file.split('\n').map((line): BlockSnapshot => {
+        return {
+          children: [],
+          flavour: 'affine:paragraph',
+          id: nanoid(),
+          props: {
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: line,
+                },
+              ],
+            },
+            type: 'text',
+          },
+          type: 'block',
+        };
+      }),
+      flavour: 'affine:note',
+      id: nanoid(),
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
   }
 
   toDocSnapshot(payload: ToDocSnapshotPayload<MixText>): DocSnapshot {
     payload.file = payload.file.replaceAll('\r', '');
     return {
-      type: 'page',
-      meta: {
-        id: nanoid(),
-        title: 'Untitled',
-        createDate: Date.now(),
-        tags: [],
-      },
       blocks: {
-        type: 'block',
-        id: nanoid(),
+        children: [
+          {
+            children: [],
+            flavour: 'affine:surface',
+            id: nanoid(),
+            props: {
+              elements: {},
+            },
+            type: 'block',
+          },
+          {
+            children: payload.file.split('\n').map((line): BlockSnapshot => {
+              return {
+                children: [],
+                flavour: 'affine:paragraph',
+                id: nanoid(),
+                props: {
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: line,
+                      },
+                    ],
+                  },
+                  type: 'text',
+                },
+                type: 'block',
+              };
+            }),
+            flavour: 'affine:note',
+            id: nanoid(),
+            props: {
+              background: '--affine-background-secondary-color',
+              displayMode: NoteDisplayMode.DocAndEdgeless,
+              hidden: false,
+              index: 'a0',
+              xywh: '[0,0,800,95]',
+            },
+            type: 'block',
+          },
+        ],
         flavour: 'affine:page',
+        id: nanoid(),
         props: {
           title: {
             '$blocksuite:internal:text$': true,
@@ -153,84 +223,15 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
             ],
           },
         },
-        children: [
-          {
-            type: 'block',
-            id: nanoid(),
-            flavour: 'affine:surface',
-            props: {
-              elements: {},
-            },
-            children: [],
-          },
-          {
-            type: 'block',
-            id: nanoid(),
-            flavour: 'affine:note',
-            props: {
-              xywh: '[0,0,800,95]',
-              background: '--affine-background-secondary-color',
-              index: 'a0',
-              hidden: false,
-              displayMode: NoteDisplayMode.DocAndEdgeless,
-            },
-            children: payload.file.split('\n').map((line): BlockSnapshot => {
-              return {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:paragraph',
-                props: {
-                  type: 'text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: line,
-                      },
-                    ],
-                  },
-                },
-                children: [],
-              };
-            }),
-          },
-        ],
+        type: 'block',
       },
-    };
-  }
-
-  toBlockSnapshot(payload: ToBlockSnapshotPayload<MixText>): BlockSnapshot {
-    payload.file = payload.file.replaceAll('\r', '');
-    return {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
+      meta: {
+        createDate: Date.now(),
+        id: nanoid(),
+        tags: [],
+        title: 'Untitled',
       },
-      children: payload.file.split('\n').map((line): BlockSnapshot => {
-        return {
-          type: 'block',
-          id: nanoid(),
-          flavour: 'affine:paragraph',
-          props: {
-            type: 'text',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: line,
-                },
-              ],
-            },
-          },
-          children: [],
-        };
-      }),
+      type: 'page',
     };
   }
 
@@ -242,12 +243,12 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     }
     payload.file = payload.file.replaceAll('\r', '');
     const sliceSnapshot = await this._markdownAdapter.toSliceSnapshot({
-      file: payload.file,
       assets: payload.assets,
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
-      workspaceId: payload.workspaceId,
+      file: payload.file,
       pageId: payload.pageId,
+      pageVersion: payload.pageVersion,
+      workspaceId: payload.workspaceId,
+      workspaceVersion: payload.workspaceVersion,
     });
     return sliceSnapshot;
   }

@@ -1,3 +1,5 @@
+import type { FilterDefineType } from './matcher.js';
+
 import { tBoolean, tTag } from '../../../logical/data-type.js';
 import {
   tArray,
@@ -5,35 +7,34 @@ import {
   tTypeRef,
   tTypeVar,
 } from '../../../logical/typesystem.js';
-import type { FilterDefineType } from './matcher.js';
 
 export const tagFilter = {
-  isOneOf: {
-    type: tFunction({
-      typeVars: [tTypeVar('options', tTag.create())],
-      args: [tTypeRef('options'), tArray(tTypeRef('options'))],
-      rt: tBoolean.create(),
-    }),
-    label: 'Is one of',
-    impl: (value, target) => {
-      if (!Array.isArray(target) || !target.length) {
-        return true;
-      }
-      return target.includes(value);
-    },
-  },
   isNotOneOf: {
-    type: tFunction({
-      typeVars: [tTypeVar('options', tTag.create())],
-      args: [tTypeRef('options'), tArray(tTypeRef('options'))],
-      rt: tBoolean.create(),
-    }),
-    label: 'Is not one of',
     impl: (value, target) => {
       if (!Array.isArray(target) || !target.length) {
         return true;
       }
       return !target.includes(value);
     },
+    label: 'Is not one of',
+    type: tFunction({
+      args: [tTypeRef('options'), tArray(tTypeRef('options'))],
+      rt: tBoolean.create(),
+      typeVars: [tTypeVar('options', tTag.create())],
+    }),
+  },
+  isOneOf: {
+    impl: (value, target) => {
+      if (!Array.isArray(target) || !target.length) {
+        return true;
+      }
+      return target.includes(value);
+    },
+    label: 'Is one of',
+    type: tFunction({
+      args: [tTypeRef('options'), tArray(tTypeRef('options'))],
+      rt: tBoolean.create(),
+      typeVars: [tTypeVar('options', tTag.create())],
+    }),
   },
 } as Record<string, FilterDefineType>;

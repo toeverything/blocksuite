@@ -387,7 +387,7 @@ function roots(points: BezierCurveParameters, line: IVec[]) {
 }
 
 export function intersects(path: PointLocation[], line: [IVec, IVec]) {
-  const { minX, maxX, minY, maxY } = Bound.fromPoints(line);
+  const { maxX, maxY, minX, minY } = Bound.fromPoints(line);
   const points = getBezierParameters(path);
   const intersectedPoints = roots(points, line)
     .map(t => getBezierPoint(points, t))

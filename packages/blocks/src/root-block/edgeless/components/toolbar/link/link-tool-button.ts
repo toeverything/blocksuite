@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { LinkIcon } from '../../../../../_common/icons/text.js';
@@ -24,8 +24,8 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
         if (type) {
           this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
             control: 'toolbar:general',
-            page: 'whiteboard editor',
             module: 'toolbar',
+            page: 'whiteboard editor',
             segment: 'toolbar',
             type: type.flavour.split(':')[1],
           });
@@ -33,27 +33,27 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
           if (type.isNewDoc) {
             this.edgeless.service.telemetryService?.track('DocCreated', {
               control: 'toolbar:general',
-              page: 'whiteboard editor',
               module: 'edgeless toolbar',
+              page: 'whiteboard editor',
               segment: 'whiteboard',
               type: type.flavour.split(':')[1],
             });
             this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
               control: 'links',
-              page: 'whiteboard editor',
               module: 'edgeless toolbar',
+              other: 'new doc',
+              page: 'whiteboard editor',
               segment: 'whiteboard',
               type: type.flavour.split(':')[1],
-              other: 'new doc',
             });
           } else {
             this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
               control: 'links',
-              page: 'whiteboard editor',
               module: 'edgeless toolbar',
+              other: 'existing doc',
+              page: 'whiteboard editor',
               segment: 'whiteboard',
               type: type.flavour.split(':')[1],
-              other: 'existing doc',
             });
           }
         }

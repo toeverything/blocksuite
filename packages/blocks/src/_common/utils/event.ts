@@ -11,20 +11,20 @@ export function isPinchEvent(e: WheelEvent) {
 
 // See https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
 export enum MOUSE_BUTTONS {
+  AUXILIARY = 4,
+  FIFTH = 16,
+  FORTH = 8,
   NO_BUTTON = 0,
   PRIMARY = 1,
   SECONDARY = 2,
-  AUXILIARY = 4,
-  FORTH = 8,
-  FIFTH = 16,
 }
 
 export enum MOUSE_BUTTON {
-  MAIN = 0,
   AUXILIARY = 1,
-  SECONDARY = 2,
-  FORTH = 3,
   FIFTH = 4,
+  FORTH = 3,
+  MAIN = 0,
+  SECONDARY = 2,
 }
 
 export function isMiddleButtonPressed(e: MouseEvent) {
@@ -51,28 +51,28 @@ export function on<
   element: T,
   event: K,
   handler: (ev: M[K]) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: AddEventListenerOptions | boolean
 ): () => void;
 export function on<T extends HTMLElement>(
   element: T,
   event: string,
   handler: (ev: Event) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: AddEventListenerOptions | boolean
 ): () => void;
 export function on<T extends Document, K extends keyof M, M = DocumentEventMap>(
   element: T,
   event: K,
   handler: (ev: M[K]) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: AddEventListenerOptions | boolean
 ): () => void;
 export function on<
-  T extends HTMLElement | Document,
+  T extends Document | HTMLElement,
   K extends keyof HTMLElementEventMap,
 >(
   element: T,
   event: K,
   handler: (ev: HTMLElementEventMap[K]) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: AddEventListenerOptions | boolean
 ) {
   const dispose = () => {
     element.removeEventListener(
@@ -99,13 +99,13 @@ export function once<
   element: T,
   event: K,
   handler: (ev: M[K]) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: AddEventListenerOptions | boolean
 ): () => void;
 export function once<T extends HTMLElement>(
   element: T,
   event: string,
   handler: (ev: Event) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: AddEventListenerOptions | boolean
 ): () => void;
 export function once<
   T extends Document,
@@ -115,7 +115,7 @@ export function once<
   element: T,
   event: K,
   handler: (ev: M[K]) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: AddEventListenerOptions | boolean
 ): () => void;
 export function once<
   T extends HTMLElement,
@@ -124,7 +124,7 @@ export function once<
   element: T,
   event: K,
   handler: (ev: HTMLElementEventMap[K]) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: AddEventListenerOptions | boolean
 ) {
   const onceHandler = (e: HTMLElementEventMap[K]) => {
     dispose();

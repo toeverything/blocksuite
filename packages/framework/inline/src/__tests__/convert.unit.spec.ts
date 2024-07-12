@@ -8,43 +8,43 @@ import {
 test('transformDelta', () => {
   expect(
     transformDelta({
-      insert: 'aaa',
       attributes: {
         bold: true,
       },
+      insert: 'aaa',
     })
   ).toEqual([
     {
-      insert: 'aaa',
       attributes: {
         bold: true,
       },
+      insert: 'aaa',
     },
   ]);
 
   expect(
     transformDelta({
-      insert: '\n\naaa\n\nbbb\n\n',
       attributes: {
         bold: true,
       },
+      insert: '\n\naaa\n\nbbb\n\n',
     })
   ).toEqual([
     '\n',
     '\n',
     {
-      insert: 'aaa',
       attributes: {
         bold: true,
       },
+      insert: 'aaa',
     },
     '\n',
     '\n',
     {
-      insert: 'bbb',
       attributes: {
         bold: true,
       },
+      insert: 'bbb',
     },
     '\n',
     '\n',
@@ -55,19 +55,19 @@ test('deltaInsertsToChunks', () => {
   expect(
     deltaInsertsToChunks([
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
     ])
   ).toEqual([
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
     ],
   ]);
@@ -75,10 +75,10 @@ test('deltaInsertsToChunks', () => {
   expect(
     deltaInsertsToChunks([
       {
+        attributes: {
+          bold: true,
+        },
         insert: '\n\naaa\nbbb\n\n',
-        attributes: {
-          bold: true,
-        },
       },
     ])
   ).toEqual([
@@ -86,18 +86,18 @@ test('deltaInsertsToChunks', () => {
     [],
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
     ],
     [
       {
-        insert: 'bbb',
         attributes: {
           bold: true,
         },
+        insert: 'bbb',
       },
     ],
     [],
@@ -107,16 +107,16 @@ test('deltaInsertsToChunks', () => {
   expect(
     deltaInsertsToChunks([
       {
-        insert: '\n\naaa\n',
         attributes: {
           bold: true,
         },
+        insert: '\n\naaa\n',
       },
       {
-        insert: '\nbbb\n\n',
         attributes: {
           italic: true,
         },
+        insert: '\nbbb\n\n',
       },
     ])
   ).toEqual([
@@ -124,19 +124,19 @@ test('deltaInsertsToChunks', () => {
     [],
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
     ],
     [],
     [
       {
-        insert: 'bbb',
         attributes: {
           italic: true,
         },
+        insert: 'bbb',
       },
     ],
     [],

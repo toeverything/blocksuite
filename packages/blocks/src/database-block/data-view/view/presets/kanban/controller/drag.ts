@@ -1,41 +1,104 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { ReactiveController } from 'lit';
 
-import { Point, Rect } from '../../../../../../_common/utils/index.js';
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { InsertToPosition } from '../../../../types.js';
+import type { DataViewKanban } from '../kanban-view.js';
+
+import { Point, Rect } from '../../../../../../_common/utils/index.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
 import { KanbanCard } from '../card.js';
 import { KanbanGroup } from '../group.js';
-import type { DataViewKanban } from '../kanban-view.js';
 
 export class KanbanDragController implements ReactiveController {
-  get scrollContainer() {
-    const scrollContainer = this.host.querySelector(
-      '.affine-data-view-kanban-groups'
-    ) as HTMLElement;
-    assertExists(scrollContainer);
-    return scrollContainer;
-  }
+  dragStart = (ele: KanbanCard, evt: PointerEvent) => {
+    const eleRect = ele.getBoundingClientRect();
+    const offsetLeft = evt.x - eleRect.left;
+    const offsetTop = evt.y - eleRect.top;
+    const preview = createDragPreview(
+      ele,
+      evt.x - offsetLeft,
+      evt.y - offsetTop
+    );
+    const currentGroup = ele.closest('affine-data-view-kanban-group');
+    const cancelScroll = autoScrollOnBoundary(this.scrollContainer);
+    startDrag<
+      | {
+          key: string;
+          position: InsertToPosition;
+          type: 'self';
+        }
+      | { callback: () => void; type: 'out' }
+      | undefined,
+      PointerEvent
+    >(evt, {
+      onClear: () => {
+        preview.remove();
+        this.dropPreview.remove();
+        cancelScroll();
+      },
+      onDrag: () => undefined,
+      onDrop: result => {
+        if (!result) {
+          return;
+        }
+        if (result.type === 'out') {
+          result.callback();
+          return;
+        }
+        if (result && currentGroup) {
+          currentGroup.group.helper.moveCardTo(
+            ele.cardId,
+            currentGroup.group.key,
+            result.key,
+            result.position
+          );
+        }
+      },
+      onMove: evt => {
+        if (!(evt.target instanceof HTMLElement)) {
+          return;
+        }
+        preview.display(evt.x - offsetLeft, evt.y - offsetTop);
+        if (!Rect.fromDOM(this.host).isPointIn(Point.from(evt))) {
+          const callback = this.host.onDrag;
+          if (callback) {
+            this.dropPreview.remove();
+            return {
+              callback: callback(evt, ele.cardId),
+              type: 'out',
+            };
+          }
+          return;
+        }
+        const result = this.shooIndicator(evt, ele);
+        if (result) {
+          return {
+            key: result.group.group.key,
+            position: result.position,
+            type: 'self',
+          };
+        }
+        return;
+      },
+    });
+  };
 
   dropPreview = createDropPreview();
-
-  constructor(private host: DataViewKanban) {
-    this.host.addController(this);
-  }
 
   getInsertPosition = (
     evt: MouseEvent
   ):
-    | { group: KanbanGroup; card?: KanbanCard; position: InsertToPosition }
+    | { card?: KanbanCard; group: KanbanGroup; position: InsertToPosition }
     | undefined => {
     const eles = document.elementsFromPoint(evt.x, evt.y);
     const target = eles.find(v => v instanceof KanbanGroup) as KanbanGroup;
     if (target) {
       const card = getCardByPoint(target, evt.y);
       return {
-        group: target,
         card,
+        group: target,
         position: card
           ? {
               before: true,
@@ -61,6 +124,10 @@ export class KanbanDragController implements ReactiveController {
     return position;
   };
 
+  constructor(private host: DataViewKanban) {
+    this.host.addController(this);
+  }
+
   hostConnected() {
     if (this.host.view.readonly) {
       return;
@@ -85,78 +152,13 @@ export class KanbanDragController implements ReactiveController {
     );
   }
 
-  dragStart = (ele: KanbanCard, evt: PointerEvent) => {
-    const eleRect = ele.getBoundingClientRect();
-    const offsetLeft = evt.x - eleRect.left;
-    const offsetTop = evt.y - eleRect.top;
-    const preview = createDragPreview(
-      ele,
-      evt.x - offsetLeft,
-      evt.y - offsetTop
-    );
-    const currentGroup = ele.closest('affine-data-view-kanban-group');
-    const cancelScroll = autoScrollOnBoundary(this.scrollContainer);
-    startDrag<
-      | { type: 'out'; callback: () => void }
-      | {
-          type: 'self';
-          key: string;
-          position: InsertToPosition;
-        }
-      | undefined,
-      PointerEvent
-    >(evt, {
-      onDrag: () => undefined,
-      onMove: evt => {
-        if (!(evt.target instanceof HTMLElement)) {
-          return;
-        }
-        preview.display(evt.x - offsetLeft, evt.y - offsetTop);
-        if (!Rect.fromDOM(this.host).isPointIn(Point.from(evt))) {
-          const callback = this.host.onDrag;
-          if (callback) {
-            this.dropPreview.remove();
-            return {
-              type: 'out',
-              callback: callback(evt, ele.cardId),
-            };
-          }
-          return;
-        }
-        const result = this.shooIndicator(evt, ele);
-        if (result) {
-          return {
-            type: 'self',
-            key: result.group.group.key,
-            position: result.position,
-          };
-        }
-        return;
-      },
-      onClear: () => {
-        preview.remove();
-        this.dropPreview.remove();
-        cancelScroll();
-      },
-      onDrop: result => {
-        if (!result) {
-          return;
-        }
-        if (result.type === 'out') {
-          result.callback();
-          return;
-        }
-        if (result && currentGroup) {
-          currentGroup.group.helper.moveCardTo(
-            ele.cardId,
-            currentGroup.group.key,
-            result.key,
-            result.position
-          );
-        }
-      },
-    });
-  };
+  get scrollContainer() {
+    const scrollContainer = this.host.querySelector(
+      '.affine-data-view-kanban-groups'
+    ) as HTMLElement;
+    assertExists(scrollContainer);
+    return scrollContainer;
+  }
 }
 
 const createDragPreview = (card: KanbanCard, x: number, y: number) => {

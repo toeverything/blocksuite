@@ -1,18 +1,18 @@
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { Slot, assertExists } from '@blocksuite/global/utils';
 import {
-  autoUpdate,
   type AutoUpdateOptions,
-  computePosition,
   type ComputePositionConfig,
   type ComputePositionReturn,
   type ReferenceElement,
+  autoUpdate,
+  computePosition,
 } from '@floating-ui/dom';
 import {
-  html,
   LitElement,
-  render,
   type RenderOptions,
   type TemplateResult,
+  html,
+  render,
 } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -36,20 +36,6 @@ import { customElement, property } from 'lit/decorators.js';
 export class Portal extends LitElement {
   private _portalRoot: HTMLElement | null = null;
 
-  @property({ attribute: false })
-  accessor container = document.body;
-
-  @property({ attribute: false })
-  accessor template = html``;
-
-  @property({ attribute: false })
-  accessor shadowDom: boolean | ShadowRootInit = true;
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._portalRoot?.remove();
-  }
-
   override createRenderRoot() {
     const portalRoot = document.createElement('div');
     const renderRoot = this.shadowDom
@@ -64,9 +50,23 @@ export class Portal extends LitElement {
     return renderRoot;
   }
 
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._portalRoot?.remove();
+  }
+
   override render() {
     return this.template;
   }
+
+  @property({ attribute: false })
+  accessor container = document.body;
+
+  @property({ attribute: false })
+  accessor shadowDom: ShadowRootInit | boolean = true;
+
+  @property({ attribute: false })
+  accessor template = html``;
 }
 
 declare global {
@@ -79,37 +79,37 @@ declare global {
  * See https://lit.dev/docs/templates/expressions/#child-expressions
  */
 type Renderable =
-  | TemplateResult<1>
-  // Any DOM node can be passed to a child expression.
   | HTMLElement
+  // Any DOM node can be passed to a child expression.
+  | TemplateResult<1>
   // Numbers values like 5 will render the string '5'. Bigints are treated similarly.
-  | number
-  // A boolean value true will render 'true', and false will render 'false', but rendering a boolean like this is uncommon.
   | boolean
-  // The empty string '', null, and undefined are specially treated and render nothing.
-  | string
+  // A boolean value true will render 'true', and false will render 'false', but rendering a boolean like this is uncommon.
   | null
+  // The empty string '', null, and undefined are specially treated and render nothing.
+  | number
+  | string
   | undefined;
 
 type PortalOptions = {
-  template: Renderable | ((ctx: { updatePortal: () => void }) => Renderable);
   container?: Element;
-  /**
-   * The portal is removed when the AbortSignal is aborted.
-   */
-  signal?: AbortSignal;
-  /**
-   * Defaults to `true`.
-   */
-  shadowDom?: boolean | ShadowRootInit;
-  renderOptions?: RenderOptions;
   /**
    * Defaults to `true`.
    * If true, the portalRoot will be added a class `blocksuite-portal`. It's useful for finding the portalRoot.
    */
   identifyWrapper?: boolean;
+  portalStyles?: Record<string, null | number | string | undefined>;
+  renderOptions?: RenderOptions;
+  /**
+   * Defaults to `true`.
+   */
+  shadowDom?: ShadowRootInit | boolean;
+  /**
+   * The portal is removed when the AbortSignal is aborted.
+   */
+  signal?: AbortSignal;
 
-  portalStyles?: Record<string, string | number | undefined | null>;
+  template: ((ctx: { updatePortal: () => void }) => Renderable) | Renderable;
 };
 
 /**
@@ -120,12 +120,12 @@ type PortalOptions = {
  * See {@link Portal} for more details.
  */
 export function createSimplePortal({
-  template,
   container = document.body,
-  signal = new AbortController().signal,
+  identifyWrapper = true,
   renderOptions,
   shadowDom = true,
-  identifyWrapper = true,
+  signal = new AbortController().signal,
+  template,
 }: PortalOptions) {
   const portalRoot = document.createElement('div');
   if (identifyWrapper) {
@@ -169,40 +169,37 @@ export function createSimplePortal({
 }
 
 type ComputePositionOptions = {
-  referenceElement: ReferenceElement;
-  /**
-   * Default `false`.
-   */
-  autoUpdate?: true | AutoUpdateOptions;
   /**
    * Default `true`. Only work when `referenceElement` is an `Element`. Check when position update (`autoUpdate` is `true` or first tick)
    */
   abortWhenRefRemoved?: boolean;
+  /**
+   * Default `false`.
+   */
+  autoUpdate?: AutoUpdateOptions | true;
+  referenceElement: ReferenceElement;
 } & Partial<ComputePositionConfig>;
 
-export type AdvancedPortalOptions = Omit<
-  PortalOptions,
-  'template' | 'signal'
-> & {
+export type AdvancedPortalOptions = {
   abortController: AbortController;
-  template:
-    | Renderable
-    | ((context: {
-        positionSlot: Slot<ComputePositionReturn>;
-        updatePortal: () => void;
-      }) => Renderable);
-  /**
-   * See https://floating-ui.com/docs/computePosition
-   */
-  computePosition?:
-    | ComputePositionOptions
-    | ((portalRoot: Element) => ComputePositionOptions);
   /**
    * Whether to close the portal when click away(click outside).
    * @default false
    */
   closeOnClickAway?: boolean;
-};
+  /**
+   * See https://floating-ui.com/docs/computePosition
+   */
+  computePosition?:
+    | ((portalRoot: Element) => ComputePositionOptions)
+    | ComputePositionOptions;
+  template:
+    | ((context: {
+        positionSlot: Slot<ComputePositionReturn>;
+        updatePortal: () => void;
+      }) => Renderable)
+    | Renderable;
+} & Omit<PortalOptions, 'signal' | 'template'>;
 
 /**
  * Where el is the DOM element you'd like to test for visibility
@@ -250,9 +247,9 @@ function isElementVisible(el: Element) {
  * ```
  */
 export function createLitPortal({
-  computePosition: positionConfigOrFn,
   abortController,
   closeOnClickAway = false,
+  computePosition: positionConfigOrFn,
   ...portalOptions
 }: AdvancedPortalOptions) {
   let positionSlot = new Slot<ComputePositionReturn>();
@@ -262,7 +259,7 @@ export function createLitPortal({
       ? ({ updatePortal }: { updatePortal: () => void }) => {
           // We need to create a new slot for each template, otherwise the slot may be used in the old template
           positionSlot = new Slot<ComputePositionReturn>();
-          return template({ updatePortal, positionSlot });
+          return template({ positionSlot, updatePortal });
         }
       : template;
 

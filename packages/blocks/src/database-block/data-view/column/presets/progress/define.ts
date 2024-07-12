@@ -12,10 +12,6 @@ declare global {
 }
 export const progressColumnModelConfig = progressColumnType.modelConfig<number>(
   {
-    name: 'Progress',
-    type: () => tNumber.create(),
-    defaultData: () => ({}),
-    cellToString: data => data?.toString() ?? '',
     cellFromString: data => {
       const num = data ? Number(data) : NaN;
       return {
@@ -23,16 +19,20 @@ export const progressColumnModelConfig = progressColumnType.modelConfig<number>(
       };
     },
     cellToJson: data => data ?? null,
+    cellToString: data => data?.toString() ?? '',
+    defaultData: () => ({}),
     isEmpty: () => false,
+    name: 'Progress',
+    type: () => tNumber.create(),
   }
 );
 
 progressColumnModelConfig.addConvert('rich-text', (_column, cells) => ({
-  column: {},
   cells: cells.map(v => new Text(v?.toString()).yText),
+  column: {},
 }));
 
 progressColumnModelConfig.addConvert('number', (_column, cells) => ({
-  column: { decimal: 0 },
   cells: cells.map(v => v),
+  column: { decimal: 0 },
 }));

@@ -38,8 +38,8 @@ export const synced: InitFn = (collection: DocCollection, id: string) => {
     // Add markdown to note block
     MarkdownTransformer.importMarkdown({
       doc: docSyncedPage,
-      noteId,
       markdown: syncedDocMarkdown,
+      noteId,
     }).catch(console.error);
   });
 
@@ -57,8 +57,8 @@ export const synced: InitFn = (collection: DocCollection, id: string) => {
     // Add markdown to note block
     MarkdownTransformer.importMarkdown({
       doc: docSyncedEdgeless,
-      noteId,
       markdown: syncedDocMarkdown,
+      noteId,
     }).catch(console.error);
   });
 
@@ -74,8 +74,8 @@ export const synced: InitFn = (collection: DocCollection, id: string) => {
     // Add markdown to note block
     MarkdownTransformer.importMarkdown({
       doc: docMain,
-      noteId,
       markdown: syncedDocMarkdown,
+      noteId,
     })
       .then(() => {
         // Add synced block - self

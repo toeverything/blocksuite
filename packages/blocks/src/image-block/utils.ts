@@ -1,15 +1,17 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
+
+import type { AttachmentBlockProps } from '../attachment-block/attachment-model.js';
+import type { ImageBlockComponent } from './image-block.js';
+import type { ImageBlockModel, ImageBlockProps } from './image-model.js';
 
 import { downloadBlob, withTempBlobData } from '../_common/utils/filesys.js';
 import { humanFileSize } from '../_common/utils/math.js';
-import type { AttachmentBlockProps } from '../attachment-block/attachment-model.js';
 import { readImageSize } from '../root-block/edgeless/components/utils.js';
 import { transformModel } from '../root-block/utils/operations/model.js';
 import { toast } from './../_common/components/toast.js';
-import type { ImageBlockComponent } from './image-block.js';
-import type { ImageBlockModel, ImageBlockProps } from './image-model.js';
 
 const MAX_RETRY_COUNT = 3;
 const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
@@ -108,7 +110,7 @@ export async function fetchImageBlob(block: ImageBlockComponent) {
     }
 
     const { model } = block;
-    const { id, sourceId, doc } = model;
+    const { doc, id, sourceId } = model;
 
     if (isImageUploading(id)) {
       return;
@@ -144,7 +146,7 @@ export async function fetchImageBlob(block: ImageBlockComponent) {
 }
 
 export async function downloadImageBlob(block: ImageBlockComponent) {
-  const { host, downloading } = block;
+  const { downloading, host } = block;
   if (downloading) {
     toast(host, 'Download in progress...');
     return;
@@ -174,12 +176,12 @@ export async function resetImageSize(block: ImageBlockComponent) {
   const file = new File([blob], 'image.png', { type: blob.type });
   const size = await readImageSize(file);
   block.doc.updateBlock(model, {
-    width: size.width,
     height: size.height,
+    width: size.width,
   });
 }
 
-function convertToString(blob: Blob): Promise<string | null> {
+function convertToString(blob: Blob): Promise<null | string> {
   return new Promise(resolve => {
     const reader = new FileReader();
     reader.addEventListener('load', _ => resolve(reader.result as string));
@@ -290,10 +292,10 @@ export function addSiblingImageBlock(
     return;
   }
 
-  const imageBlockProps: Partial<ImageBlockProps> &
-    {
-      flavour: 'affine:image';
-    }[] = imageFiles.map(file => ({
+  const imageBlockProps: {
+    flavour: 'affine:image';
+  }[] &
+    Partial<ImageBlockProps> = imageFiles.map(file => ({
     flavour: 'affine:image',
     size: file.size,
   }));
@@ -311,7 +313,7 @@ export function addImageBlocks(
   editorHost: EditorHost,
   files: File[],
   maxFileSize: number,
-  parent?: BlockModel | string | null,
+  parent?: BlockModel | null | string,
   parentIndex?: number
 ) {
   const imageFiles = files.filter(file => file.type.startsWith('image/'));
@@ -359,15 +361,15 @@ export async function turnImageIntoCardView(block: ImageBlockComponent) {
     throw new Error('Image data not available');
   }
 
-  const { saveImageData, getAttachmentData } = withTempBlobData();
-  saveImageData(sourceId, { width: model.width, height: model.height });
+  const { getAttachmentData, saveImageData } = withTempBlobData();
+  saveImageData(sourceId, { height: model.height, width: model.width });
   const attachmentConvertData = getAttachmentData(sourceId);
   const attachmentProp: Partial<AttachmentBlockProps> = {
-    sourceId,
+    caption: model.caption,
     name: DEFAULT_ATTACHMENT_NAME,
     size: blob.size,
+    sourceId,
     type: blob.type,
-    caption: model.caption,
     ...attachmentConvertData,
   };
   transformModel(model, 'affine:attachment', attachmentProp);

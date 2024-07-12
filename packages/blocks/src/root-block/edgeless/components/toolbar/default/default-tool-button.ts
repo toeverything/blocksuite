@@ -1,12 +1,13 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
+
+import type { EdgelessTool } from '../../../types.js';
 
 import {
   ArrowUpIcon,
   HandIcon,
   SelectIcon,
 } from '../../../../../_common/icons/index.js';
-import type { EdgelessTool } from '../../../types.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
@@ -35,19 +36,6 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
 
   override type: EdgelessTool['type'][] = ['default', 'pan'];
 
-  @query('.current-icon')
-  accessor currentIcon!: HTMLInputElement;
-
-  private _fadeOut() {
-    this.currentIcon.style.opacity = '0';
-    this.currentIcon.style.transform = `translateY(-5px)`;
-  }
-
-  private _fadeIn() {
-    this.currentIcon.style.opacity = '1';
-    this.currentIcon.style.transform = `translateY(0px)`;
-  }
-
   private _changeTool() {
     if (this.toolbar.activePopper) {
       // click manually always closes the popper
@@ -58,7 +46,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
       if (localStorage.defaultTool === 'default') {
         this.setEdgelessTool({ type: 'default' });
       } else if (localStorage.defaultTool === 'pan') {
-        this.setEdgelessTool({ type: 'pan', panning: false });
+        this.setEdgelessTool({ panning: false, type: 'pan' });
       }
       return;
     }
@@ -66,12 +54,22 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
     // wait for animation to finish
     setTimeout(() => {
       if (type === 'default') {
-        this.setEdgelessTool({ type: 'pan', panning: false });
+        this.setEdgelessTool({ panning: false, type: 'pan' });
       } else if (type === 'pan') {
         this.setEdgelessTool({ type: 'default' });
       }
       this._fadeIn();
     }, 100);
+  }
+
+  private _fadeIn() {
+    this.currentIcon.style.opacity = '1';
+    this.currentIcon.style.transform = `translateY(0px)`;
+  }
+
+  private _fadeOut() {
+    this.currentIcon.style.opacity = '0';
+    this.currentIcon.style.transform = `translateY(-5px)`;
   }
 
   override connectedCallback(): void {
@@ -109,6 +107,9 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
       </edgeless-tool-icon-button>
     `;
   }
+
+  @query('.current-icon')
+  accessor currentIcon!: HTMLInputElement;
 }
 
 declare global {

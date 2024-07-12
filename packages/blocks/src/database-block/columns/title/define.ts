@@ -12,16 +12,16 @@ declare global {
 }
 
 export const titlePureColumnConfig = titleColumnType.modelConfig<Text>({
-  name: 'Title',
-  type: () => tRichText.create(),
-  defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
   cellFromString: data => {
     return {
       value: data,
     };
   },
   cellToJson: data => data?.toString() ?? null,
+  cellToString: data => data?.toString() ?? '',
+  defaultData: () => ({}),
+  isEmpty: data => data == null || data.length === 0,
+  name: 'Title',
   onUpdate: (value, _data, callback) => {
     value.yText.observe(callback);
     callback();
@@ -31,6 +31,7 @@ export const titlePureColumnConfig = titleColumnType.modelConfig<Text>({
       },
     };
   },
+  type: () => tRichText.create(),
   valueUpdate: (value, _data, newValue) => {
     const v = newValue as unknown;
     if (typeof v === 'string') {
@@ -39,5 +40,4 @@ export const titlePureColumnConfig = titleColumnType.modelConfig<Text>({
     }
     return newValue;
   },
-  isEmpty: data => data == null || data.length === 0,
 });

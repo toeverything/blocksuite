@@ -1,7 +1,14 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
-import { Slice, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
+
+import { assertExists } from '@blocksuite/global/utils';
+import { Slice, Text } from '@blocksuite/store';
+
+import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
+import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
+import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
+import type { RootBlockComponent } from '../../types.js';
+import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { toast } from '../../../_common/components/toast.js';
@@ -18,8 +25,8 @@ import {
   FrameIcon,
   HeadingIcon,
   ImageIcon20,
-  LinkedDocIcon,
   LinkIcon,
+  LinkedDocIcon,
   NewDocIcon,
   NowIcon,
   PasteIcon,
@@ -38,22 +45,17 @@ import {
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
-import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
 import { GroupingIcon } from '../../../database-block/data-view/common/icons/index.js';
 import { viewPresets } from '../../../database-block/data-view/index.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
 import { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
-import type { RootBlockComponent } from '../../types.js';
-import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips/index.js';
 import {
   createConversionItem,
@@ -67,22 +69,22 @@ import {
 } from './utils.js';
 
 export type SlashMenuConfig = {
-  triggerKeys: string[];
   ignoreBlockTypes: BlockSuite.Flavour[];
   items: SlashMenuItem[];
   maxHeight: number;
   tooltipTimeout: number;
+  triggerKeys: string[];
 };
 
-export type SlashMenuStaticConfig = Omit<SlashMenuConfig, 'items'> & {
+export type SlashMenuStaticConfig = {
   items: SlashMenuStaticItem[];
-};
+} & Omit<SlashMenuConfig, 'items'>;
 
-export type SlashMenuItem = SlashMenuStaticItem | SlashMenuItemGenerator;
+export type SlashMenuItem = SlashMenuItemGenerator | SlashMenuStaticItem;
 
 export type SlashMenuStaticItem =
-  | SlashMenuGroupDivider
   | SlashMenuActionItem
+  | SlashMenuGroupDivider
   | SlashSubMenu;
 
 export type SlashMenuGroupDivider = {
@@ -91,49 +93,46 @@ export type SlashMenuGroupDivider = {
 };
 
 export type SlashMenuActionItem = {
-  name: string;
+  action: (ctx: SlashMenuContext) => Promise<void> | void;
+  alias?: string[];
+  customTemplate?: TemplateResult<1>;
   description?: string;
   icon?: TemplateResult;
-  tooltip?: SlashMenuTooltip;
-  alias?: string[];
+  name: string;
   showWhen?: (ctx: SlashMenuContext) => boolean;
-  action: (ctx: SlashMenuContext) => void | Promise<void>;
 
-  customTemplate?: TemplateResult<1>;
+  tooltip?: SlashMenuTooltip;
 };
 
 export type SlashSubMenu = {
-  name: string;
+  alias?: string[];
   description?: string;
   icon?: TemplateResult;
-  alias?: string[];
+  name: string;
   showWhen?: (ctx: SlashMenuContext) => boolean;
   subMenu: SlashMenuStaticItem[];
 };
 
 export type SlashMenuItemGenerator = (
   ctx: SlashMenuContext
-) => (SlashMenuGroupDivider | SlashMenuActionItem | SlashSubMenu)[];
+) => (SlashMenuActionItem | SlashMenuGroupDivider | SlashSubMenu)[];
 
 export type SlashMenuContext = {
-  rootElement: RootBlockComponent;
   model: BlockModel;
+  rootElement: RootBlockComponent;
 };
 
 export const defaultSlashMenuConfig: SlashMenuConfig = {
-  triggerKeys: ['/', '、'],
   ignoreBlockTypes: ['affine:code'],
-  maxHeight: 344,
-  tooltipTimeout: 800,
   items: [
     // ---------------------------------------------------------
     { groupName: 'Basic' },
     ...textConversionConfigs
-      .filter(i => i.type && ['text', 'h1', 'h2', 'h3'].includes(i.type))
+      .filter(i => i.type && ['h1', 'h2', 'h3', 'text'].includes(i.type))
       .map(createConversionItem),
     {
-      name: 'Other Headings',
       icon: HeadingIcon,
+      name: 'Other Headings',
       subMenu: [
         { groupName: 'Headings' },
         ...textConversionConfigs
@@ -145,9 +144,6 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       .filter(i => i.flavour === 'affine:code')
       .map<SlashMenuActionItem>(config => ({
         ...createConversionItem(config),
-        showWhen: ({ model }) =>
-          model.doc.schema.flavourSchemaMap.has(config.flavour) &&
-          !insideDatabase(model),
         action: ({ rootElement }) => {
           const { flavour, type } = config;
           rootElement.host.std.command
@@ -180,10 +176,13 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
             })
             .run();
         },
+        showWhen: ({ model }) =>
+          model.doc.schema.flavourSchemaMap.has(config.flavour) &&
+          !insideDatabase(model),
       })),
 
     ...textConversionConfigs
-      .filter(i => i.type && ['quote', 'divider'].includes(i.type))
+      .filter(i => i.type && ['divider', 'quote'].includes(i.type))
       .map<SlashMenuActionItem>(config => ({
         ...createConversionItem(config),
         showWhen: ({ model }) =>
@@ -201,12 +200,9 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
     // ---------------------------------------------------------
     { groupName: 'Style' },
     ...textFormatConfigs
-      .filter(i => !['Link', 'Code'].includes(i.name))
-      .map<SlashMenuActionItem>(({ name, icon, id }) => ({
-        name,
-        icon,
-        tooltip: slashMenuToolTips[name],
-        action: ({ rootElement, model }) => {
+      .filter(i => !['Code', 'Link'].includes(i.name))
+      .map<SlashMenuActionItem>(({ icon, id, name }) => ({
+        action: ({ model, rootElement }) => {
           if (!model.text) {
             return;
           }
@@ -230,43 +226,29 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
             [id]: true,
           });
         },
+        icon,
+        name,
+        tooltip: slashMenuToolTips[name],
       })),
 
     // ---------------------------------------------------------
     { groupName: 'Page' },
     {
-      name: 'New Doc',
-      description: 'Start a new document.',
-      icon: NewDocIcon,
-      tooltip: slashMenuToolTips['New Doc'],
-      action: ({ rootElement, model }) => {
+      action: ({ model, rootElement }) => {
         const newDoc = createDefaultDoc(rootElement.doc.collection);
         insertContent(rootElement.host, model, REFERENCE_NODE, {
           reference: {
-            type: 'LinkedPage',
             pageId: newDoc.id,
+            type: 'LinkedPage',
           },
         });
       },
+      description: 'Start a new document.',
+      icon: NewDocIcon,
+      name: 'New Doc',
+      tooltip: slashMenuToolTips['New Doc'],
     },
     {
-      name: 'Linked Doc',
-      description: 'Link to another document.',
-      icon: LinkedDocIcon,
-      tooltip: slashMenuToolTips['Linked Doc'],
-      alias: ['dual link'],
-      showWhen: ({ rootElement }) => {
-        const linkedDocWidgetEle =
-          rootElement.widgetElements['affine-linked-doc-widget'];
-        if (!linkedDocWidgetEle) return false;
-        if (!('showLinkedDoc' in linkedDocWidgetEle)) {
-          console.warn(
-            'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
-          );
-          return false;
-        }
-        return true;
-      },
       action: ({ model, rootElement }) => {
         const triggerKey = '@';
         insertContent(rootElement.host, model, triggerKey);
@@ -283,19 +265,29 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           linkedDocWidget.showLinkedDoc(inlineEditor, triggerKey);
         });
       },
+      alias: ['dual link'],
+      description: 'Link to another document.',
+      icon: LinkedDocIcon,
+      name: 'Linked Doc',
+      showWhen: ({ rootElement }) => {
+        const linkedDocWidgetEle =
+          rootElement.widgetElements['affine-linked-doc-widget'];
+        if (!linkedDocWidgetEle) return false;
+        if (!('showLinkedDoc' in linkedDocWidgetEle)) {
+          console.warn(
+            'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
+          );
+          return false;
+        }
+        return true;
+      },
+      tooltip: slashMenuToolTips['Linked Doc'],
     },
 
     // ---------------------------------------------------------
     { groupName: 'Content & Media' },
     {
-      name: 'Image',
-      description: 'Insert an image.',
-      icon: ImageIcon20,
-      tooltip: slashMenuToolTips['Image'],
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:image') &&
-        !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
+      action: async ({ model, rootElement }) => {
         const parent = rootElement.doc.getParent(model);
         if (!parent) {
           return;
@@ -310,16 +302,16 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         addSiblingImageBlock(rootElement.host, imageFiles, maxFileSize, model);
         tryRemoveEmptyLine(model);
       },
+      description: 'Insert an image.',
+      icon: ImageIcon20,
+      name: 'Image',
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:image') &&
+        !insideDatabase(model),
+      tooltip: slashMenuToolTips['Image'],
     },
     {
-      name: 'Link',
-      description: 'Add a bookmark for reference.',
-      icon: LinkIcon,
-      tooltip: slashMenuToolTips['Link'],
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:bookmark') &&
-        !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
+      action: async ({ model, rootElement }) => {
         const parentModel = rootElement.doc.getParent(model);
         if (!parentModel) {
           return;
@@ -329,21 +321,20 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           rootElement.host,
           'Links',
           'The added link will be displayed as a card view.',
-          { mode: 'page', parentModel, index }
+          { index, mode: 'page', parentModel }
         );
         tryRemoveEmptyLine(model);
       },
+      description: 'Add a bookmark for reference.',
+      icon: LinkIcon,
+      name: 'Link',
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:bookmark') &&
+        !insideDatabase(model),
+      tooltip: slashMenuToolTips['Link'],
     },
     {
-      name: 'Attachment',
-      description: 'Attach a file to document.',
-      icon: FileIcon,
-      tooltip: slashMenuToolTips['Attachment'],
-      alias: ['file'],
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:attachment') &&
-        !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
+      action: async ({ model, rootElement }) => {
         const file = await openFileOrFiles();
         if (!file) return;
 
@@ -360,16 +351,17 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         );
         tryRemoveEmptyLine(model);
       },
+      alias: ['file'],
+      description: 'Attach a file to document.',
+      icon: FileIcon,
+      name: 'Attachment',
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:attachment') &&
+        !insideDatabase(model),
+      tooltip: slashMenuToolTips['Attachment'],
     },
     {
-      name: 'YouTube',
-      description: 'Embed a YouTube video.',
-      icon: YoutubeIcon,
-      tooltip: slashMenuToolTips['YouTube'],
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:embed-youtube') &&
-        !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
+      action: async ({ model, rootElement }) => {
         const parentModel = rootElement.doc.getParent(model);
         if (!parentModel) {
           return;
@@ -379,20 +371,20 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           rootElement.host,
           'YouTube',
           'The added YouTube video link will be displayed as an embed view.',
-          { mode: 'page', parentModel, index }
+          { index, mode: 'page', parentModel }
         );
         tryRemoveEmptyLine(model);
       },
+      description: 'Embed a YouTube video.',
+      icon: YoutubeIcon,
+      name: 'YouTube',
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:embed-youtube') &&
+        !insideDatabase(model),
+      tooltip: slashMenuToolTips['YouTube'],
     },
     {
-      name: 'GitHub',
-      description: 'Link to a GitHub repository.',
-      icon: GithubIcon,
-      tooltip: slashMenuToolTips['Github'],
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:embed-github') &&
-        !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
+      action: async ({ model, rootElement }) => {
         const parentModel = rootElement.doc.getParent(model);
         if (!parentModel) {
           return;
@@ -402,22 +394,22 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           rootElement.host,
           'GitHub',
           'The added GitHub issue or pull request link will be displayed as a card view.',
-          { mode: 'page', parentModel, index }
+          { index, mode: 'page', parentModel }
         );
         tryRemoveEmptyLine(model);
       },
+      description: 'Link to a GitHub repository.',
+      icon: GithubIcon,
+      name: 'GitHub',
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:embed-github') &&
+        !insideDatabase(model),
+      tooltip: slashMenuToolTips['Github'],
     },
     // TODO: X Twitter
 
     {
-      name: 'Figma',
-      description: 'Embed a Figma document.',
-      icon: FigmaIcon,
-      tooltip: slashMenuToolTips['Figma'],
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:embed-figma') &&
-        !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
+      action: async ({ model, rootElement }) => {
         const parentModel = rootElement.doc.getParent(model);
         if (!parentModel) {
           return;
@@ -427,19 +419,21 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           rootElement.host,
           'Figma',
           'The added Figma link will be displayed as an embed view.',
-          { mode: 'page', parentModel, index }
+          { index, mode: 'page', parentModel }
         );
         tryRemoveEmptyLine(model);
       },
+      description: 'Embed a Figma document.',
+      icon: FigmaIcon,
+      name: 'Figma',
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:embed-figma') &&
+        !insideDatabase(model),
+      tooltip: slashMenuToolTips['Figma'],
     },
 
     {
-      name: 'Loom',
-      icon: LoomIcon,
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:embed-loom') &&
-        !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
+      action: async ({ model, rootElement }) => {
         const parentModel = rootElement.doc.getParent(model);
         if (!parentModel) {
           return;
@@ -449,10 +443,15 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           rootElement.host,
           'Loom',
           'The added Loom video link will be displayed as an embed view.',
-          { mode: 'page', parentModel, index }
+          { index, mode: 'page', parentModel }
         );
         tryRemoveEmptyLine(model);
       },
+      icon: LoomIcon,
+      name: 'Loom',
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:embed-loom') &&
+        !insideDatabase(model),
     },
 
     // TODO-slash: Linear
@@ -474,15 +473,12 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         .map(block => block.model) as FrameBlockModel[];
 
       const frameItems = frameModels.map<SlashMenuActionItem>(frameModel => ({
-        name: 'Frame: ' + frameModel.title,
-        icon: FrameIcon,
-        showWhen: () => !insideDatabase(model),
         action: () => {
           const insertIdx = noteModel.children.indexOf(model);
           const surfaceRefProps = {
             flavour: 'affine:surface-ref',
-            reference: frameModel.id,
             refFlavour: 'affine:frame',
+            reference: frameModel.id,
           };
 
           doc.addSiblingBlocks(
@@ -498,6 +494,9 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
             doc.deleteBlock(model);
           }
         },
+        icon: FrameIcon,
+        name: 'Frame: ' + frameModel.title,
+        showWhen: () => !insideDatabase(model),
       }));
 
       const groupElements = Array.from(
@@ -505,16 +504,14 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       ).filter(element => element.get('type') === CanvasElementType.GROUP);
 
       const groupItems = groupElements.map(element => ({
-        name: 'Group: ' + element.get('title'),
-        icon: GroupingIcon,
         action: () => {
           const { doc } = rootElement;
           const noteModel = doc.getParent(model) as NoteBlockModel;
           const insertIdx = noteModel.children.indexOf(model);
           const surfaceRefProps = {
             flavour: 'affine:surface-ref',
-            reference: element.get('id'),
             refFlavour: 'group',
+            reference: element.get('id'),
           };
 
           doc.addSiblingBlocks(
@@ -530,6 +527,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
             doc.deleteBlock(model);
           }
         },
+        icon: GroupingIcon,
+        name: 'Group: ' + element.get('title'),
       }));
 
       const items = [...frameItems, ...groupItems];
@@ -557,44 +556,44 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
 
       return [
         {
-          name: 'Today',
-          icon: TodayIcon,
-          tooltip: slashMenuToolTips['Today'],
-          description: formatDate(now),
-          action: ({ rootElement, model }) => {
+          action: ({ model, rootElement }) => {
             insertContent(rootElement.host, model, formatDate(now));
           },
+          description: formatDate(now),
+          icon: TodayIcon,
+          name: 'Today',
+          tooltip: slashMenuToolTips['Today'],
         },
         {
-          name: 'Tomorrow',
-          icon: TomorrowIcon,
-          tooltip: slashMenuToolTips['Tomorrow'],
-          description: formatDate(tomorrow),
-          action: ({ rootElement, model }) => {
+          action: ({ model, rootElement }) => {
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             insertContent(rootElement.host, model, formatDate(tomorrow));
           },
+          description: formatDate(tomorrow),
+          icon: TomorrowIcon,
+          name: 'Tomorrow',
+          tooltip: slashMenuToolTips['Tomorrow'],
         },
         {
-          name: 'Yesterday',
-          icon: YesterdayIcon,
-          tooltip: slashMenuToolTips['Yesterday'],
-          description: formatDate(yesterday),
-          action: ({ rootElement, model }) => {
+          action: ({ model, rootElement }) => {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
             insertContent(rootElement.host, model, formatDate(yesterday));
           },
+          description: formatDate(yesterday),
+          icon: YesterdayIcon,
+          name: 'Yesterday',
+          tooltip: slashMenuToolTips['Yesterday'],
         },
         {
-          name: 'Now',
-          icon: NowIcon,
-          tooltip: slashMenuToolTips['Now'],
-          description: formatTime(now),
-          action: ({ rootElement, model }) => {
+          action: ({ model, rootElement }) => {
             insertContent(rootElement.host, model, formatTime(now));
           },
+          description: formatTime(now),
+          icon: NowIcon,
+          name: 'Now',
+          tooltip: slashMenuToolTips['Now'],
         },
       ];
     },
@@ -602,16 +601,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
     // ---------------------------------------------------------
     { groupName: 'Database' },
     {
-      name: 'Table View',
-      description: 'Display items in a table format.',
-      alias: ['database'],
-      icon: DatabaseTableViewIcon20,
-      tooltip: slashMenuToolTips['Table View'],
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:database') &&
-        !insideDatabase(model) &&
-        !insideEdgelessText(model),
-      action: ({ rootElement, model }) => {
+      action: ({ model, rootElement }) => {
         const id = createDatabaseBlockInNextLine(model);
         if (!id) {
           return;
@@ -626,18 +616,17 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         );
         tryRemoveEmptyLine(model);
       },
-    },
-    {
-      name: 'Todo',
-      alias: ['todo view'],
+      alias: ['database'],
+      description: 'Display items in a table format.',
       icon: DatabaseTableViewIcon20,
-      tooltip: slashMenuToolTips['Todo'],
+      name: 'Table View',
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:database') &&
         !insideDatabase(model) &&
-        !insideEdgelessText(model) &&
-        !!model.doc.awarenessStore.getFlag('enable_block_query'),
-
+        !insideEdgelessText(model),
+      tooltip: slashMenuToolTips['Table View'],
+    },
+    {
       action: ({ model, rootElement }) => {
         const parent = rootElement.doc.getParent(model);
         assertExists(parent);
@@ -659,17 +648,18 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         });
         tryRemoveEmptyLine(model);
       },
-    },
-    {
-      name: 'Kanban View',
-      description: 'Visualize data in a dashboard.',
-      alias: ['database'],
-      icon: DatabaseKanbanViewIcon20,
-      tooltip: slashMenuToolTips['Kanban View'],
+      alias: ['todo view'],
+      icon: DatabaseTableViewIcon20,
+      name: 'Todo',
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:database') &&
         !insideDatabase(model) &&
-        !insideEdgelessText(model),
+        !insideEdgelessText(model) &&
+        !!model.doc.awarenessStore.getFlag('enable_block_query'),
+
+      tooltip: slashMenuToolTips['Todo'],
+    },
+    {
       action: ({ model, rootElement }) => {
         const id = createDatabaseBlockInNextLine(model);
         if (!id) {
@@ -685,16 +675,21 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         );
         tryRemoveEmptyLine(model);
       },
+      alias: ['database'],
+      description: 'Visualize data in a dashboard.',
+      icon: DatabaseKanbanViewIcon20,
+      name: 'Kanban View',
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:database') &&
+        !insideDatabase(model) &&
+        !insideEdgelessText(model),
+      tooltip: slashMenuToolTips['Kanban View'],
     },
 
     // ---------------------------------------------------------
     { groupName: 'Actions' },
     {
-      name: 'Move Up',
-      description: 'Shift this line up.',
-      icon: ArrowUpBigIcon,
-      tooltip: slashMenuToolTips['Move Up'],
-      action: ({ rootElement, model }) => {
+      action: ({ model, rootElement }) => {
         const doc = rootElement.doc;
         const previousSiblingModel = doc.getPrev(model);
         if (!previousSiblingModel) return;
@@ -704,13 +699,13 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
 
         doc.moveBlocks([model], parentModel, previousSiblingModel, true);
       },
+      description: 'Shift this line up.',
+      icon: ArrowUpBigIcon,
+      name: 'Move Up',
+      tooltip: slashMenuToolTips['Move Up'],
     },
     {
-      name: 'Move Down',
-      description: 'Shift this line down.',
-      icon: ArrowDownBigIcon,
-      tooltip: slashMenuToolTips['Move Down'],
-      action: ({ rootElement, model }) => {
+      action: ({ model, rootElement }) => {
         const doc = rootElement.doc;
         const nextSiblingModel = doc.getNext(model);
         if (!nextSiblingModel) return;
@@ -720,13 +715,13 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
 
         doc.moveBlocks([model], parentModel, nextSiblingModel, false);
       },
+      description: 'Shift this line down.',
+      icon: ArrowDownBigIcon,
+      name: 'Move Down',
+      tooltip: slashMenuToolTips['Move Down'],
     },
     {
-      name: 'Copy',
-      description: 'Copy this line to clipboard.',
-      icon: PasteIcon,
-      tooltip: slashMenuToolTips['Copy'],
-      action: ({ rootElement, model }) => {
+      action: ({ model, rootElement }) => {
         const slice = Slice.fromModels(rootElement.std.doc, [model]);
 
         rootElement.std.clipboard
@@ -738,13 +733,13 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
             console.error(e);
           });
       },
+      description: 'Copy this line to clipboard.',
+      icon: PasteIcon,
+      name: 'Copy',
+      tooltip: slashMenuToolTips['Copy'],
     },
     {
-      name: 'Duplicate',
-      description: 'Create a duplicate of this line.',
-      icon: CopyIcon,
-      tooltip: slashMenuToolTips['Copy'],
-      action: ({ rootElement, model }) => {
+      action: ({ model, rootElement }) => {
         if (!model.text || !(model.text instanceof Text)) {
           throw new Error("Can't duplicate a block without text");
         }
@@ -758,25 +753,32 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         rootElement.doc.addBlock(
           model.flavour as never,
           {
-            type: (model as ParagraphBlockModel).type,
-            text: rootElement.doc.Text.fromDelta(model.text.toDelta()),
             // @ts-expect-error
             checked: model.checked,
+            text: rootElement.doc.Text.fromDelta(model.text.toDelta()),
+            type: (model as ParagraphBlockModel).type,
           },
           rootElement.doc.getParent(model),
           index
         );
       },
+      description: 'Create a duplicate of this line.',
+      icon: CopyIcon,
+      name: 'Duplicate',
+      tooltip: slashMenuToolTips['Copy'],
     },
     {
-      name: 'Delete',
-      description: 'Remove this line permanently.',
-      alias: ['remove'],
-      icon: DeleteIcon,
-      tooltip: slashMenuToolTips['Delete'],
-      action: ({ rootElement, model }) => {
+      action: ({ model, rootElement }) => {
         rootElement.doc.deleteBlock(model);
       },
+      alias: ['remove'],
+      description: 'Remove this line permanently.',
+      icon: DeleteIcon,
+      name: 'Delete',
+      tooltip: slashMenuToolTips['Delete'],
     },
   ],
+  maxHeight: 344,
+  tooltipTimeout: 800,
+  triggerKeys: ['/', '、'],
 };

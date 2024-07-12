@@ -1,3 +1,5 @@
+import type { Doc } from '@blocksuite/store';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import {
   ArrowDownSmallIcon,
@@ -5,14 +7,13 @@ import {
   DualLinkIcon16,
   LinkedDocIcon,
   PlusIcon,
-  popTagSelect,
   type SelectTag,
   TagsIcon,
+  popTagSelect,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -27,42 +28,6 @@ import {
 
 @customElement('doc-meta-tags')
 export class DocMetaTags extends WithDisposable(LitElement) {
-  get pageRoot() {
-    const pageViewport = this.closest('.affine-page-viewport');
-    assertExists(pageViewport);
-    const pageRoot = pageViewport.querySelector('affine-page-root');
-    assertExists(pageRoot);
-    return pageRoot;
-  }
-
-  get meta() {
-    return this.doc.collection.meta;
-  }
-
-  get options() {
-    return this.meta.properties.tags?.options ?? [];
-  }
-
-  set options(tags: SelectTag[]) {
-    this.tags = this.tags.filter(v => tags.find(x => x.id === v));
-    this.doc.collection.meta.setProperties({
-      ...this.meta.properties,
-      tags: {
-        ...this.meta.properties.tags,
-        options: tags,
-      },
-    });
-  }
-
-  get tags() {
-    return this.doc.meta?.tags ?? [];
-  }
-
-  set tags(tags: string[]) {
-    assertExists(this.doc.meta);
-    this.doc.meta.tags = tags;
-  }
-
   static override styles = css`
     .doc-meta-container {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
@@ -299,18 +264,6 @@ export class DocMetaTags extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @state()
-  accessor backlinkList!: BacklinkData[];
-
-  @state()
-  accessor showSelect = false;
-
-  @state()
-  accessor expanded = false;
-
   private _listenBacklinkList = () => {
     const metaMap = Object.fromEntries(
       this.doc.collection.meta.docMetas.map(v => [v.id, v])
@@ -329,8 +282,8 @@ export class DocMetaTags extends WithDisposable(LitElement) {
           if (backlink.pageId === this.doc.id) return;
 
           this.pageRoot.slots.docLinkClicked.emit({
-            docId: backlink.pageId,
             blockId: backlink.blockId,
+            docId: backlink.pageId,
           });
         },
       };
@@ -356,51 +309,6 @@ export class DocMetaTags extends WithDisposable(LitElement) {
     }
   };
 
-  private _toggle = () => {
-    this.expanded = !this.expanded;
-  };
-
-  private _selectTags = () => {
-    this._disposables.add({
-      dispose: popTagSelect(this.shadowRoot?.querySelector('.tags') ?? this, {
-        value: this.tags,
-        onChange: tags => (this.tags = tags),
-        options: this.options,
-        onOptionsChange: options => (this.options = options),
-      }),
-    });
-  };
-
-  private _renderTagsInline = () => {
-    const tags = this.tags;
-    const optionMap = Object.fromEntries(this.options.map(v => [v.id, v]));
-    return html` <div class="tags-inline">
-      ${TagsIcon}
-      ${tags.length > 0
-        ? html` <div class="tag-list">
-            ${repeat(
-              tags.slice(0, 3),
-              id => id,
-              (id, i) => {
-                const tag = optionMap[id];
-                if (!tag) {
-                  return null;
-                }
-                return html` <div>${i !== 0 ? html`,&nbsp;` : ''}</div>
-                  <div class="tag-inline">${tag.value}</div>`;
-              }
-            )}
-            ${tags.length > 3 ? html`, and ${tags.length - 3} more` : ''}
-          </div>`
-        : 'Tags'}
-    </div>`;
-  };
-
-  private _renderBacklinkInline = () => {
-    const backlinkButton = new BacklinkButton(this.backlinkList);
-    return backlinkButton;
-  };
-
   private _renderBacklinkExpanded = () => {
     const backlinkList = this.backlinkList;
     if (!backlinkList.length) {
@@ -423,6 +331,11 @@ export class DocMetaTags extends WithDisposable(LitElement) {
         ${repeat(backlinkList, v => v.pageId, renderLink)}
       </div>
     </div>`;
+  };
+
+  private _renderBacklinkInline = () => {
+    const backlinkButton = new BacklinkButton(this.backlinkList);
+    return backlinkButton;
   };
 
   private _renderTagsExpanded = () => {
@@ -459,6 +372,46 @@ export class DocMetaTags extends WithDisposable(LitElement) {
         </div>
       </div>
     </div>`;
+  };
+
+  private _renderTagsInline = () => {
+    const tags = this.tags;
+    const optionMap = Object.fromEntries(this.options.map(v => [v.id, v]));
+    return html` <div class="tags-inline">
+      ${TagsIcon}
+      ${tags.length > 0
+        ? html` <div class="tag-list">
+            ${repeat(
+              tags.slice(0, 3),
+              id => id,
+              (id, i) => {
+                const tag = optionMap[id];
+                if (!tag) {
+                  return null;
+                }
+                return html` <div>${i !== 0 ? html`,&nbsp;` : ''}</div>
+                  <div class="tag-inline">${tag.value}</div>`;
+              }
+            )}
+            ${tags.length > 3 ? html`, and ${tags.length - 3} more` : ''}
+          </div>`
+        : 'Tags'}
+    </div>`;
+  };
+
+  private _selectTags = () => {
+    this._disposables.add({
+      dispose: popTagSelect(this.shadowRoot?.querySelector('.tags') ?? this, {
+        onChange: tags => (this.tags = tags),
+        onOptionsChange: options => (this.options = options),
+        options: this.options,
+        value: this.tags,
+      }),
+    });
+  };
+
+  private _toggle = () => {
+    this.expanded = !this.expanded;
   };
 
   override connectedCallback() {
@@ -501,6 +454,54 @@ export class DocMetaTags extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  get meta() {
+    return this.doc.collection.meta;
+  }
+
+  get options() {
+    return this.meta.properties.tags?.options ?? [];
+  }
+
+  set options(tags: SelectTag[]) {
+    this.tags = this.tags.filter(v => tags.find(x => x.id === v));
+    this.doc.collection.meta.setProperties({
+      ...this.meta.properties,
+      tags: {
+        ...this.meta.properties.tags,
+        options: tags,
+      },
+    });
+  }
+
+  get pageRoot() {
+    const pageViewport = this.closest('.affine-page-viewport');
+    assertExists(pageViewport);
+    const pageRoot = pageViewport.querySelector('affine-page-root');
+    assertExists(pageRoot);
+    return pageRoot;
+  }
+
+  get tags() {
+    return this.doc.meta?.tags ?? [];
+  }
+
+  set tags(tags: string[]) {
+    assertExists(this.doc.meta);
+    this.doc.meta.tags = tags;
+  }
+
+  @state()
+  accessor backlinkList!: BacklinkData[];
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @state()
+  accessor expanded = false;
+
+  @state()
+  accessor showSelect = false;
 }
 
 declare global {

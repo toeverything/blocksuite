@@ -1,26 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import { native2Y } from '../../reactive/index.js';
 import type { BlockModel } from '../../schema/index.js';
-import { internalPrimitives, type Schema } from '../../schema/index.js';
 import type { YBlock } from './index.js';
 
+import { native2Y } from '../../reactive/index.js';
+import { type Schema, internalPrimitives } from '../../schema/index.js';
+
 export class DocCRUD {
-  get root(): string | null {
-    let rootId: string | null = null;
-    this._yBlocks.forEach(yBlock => {
-      const flavour = yBlock.get('sys:flavour');
-      const schema = this._schema.flavourSchemaMap.get(flavour);
-      if (!schema) return;
-
-      if (schema.model.role === 'root') {
-        rootId = yBlock.get('sys:id');
-      }
-    });
-    return rootId;
-  }
-
   constructor(
     private readonly _yBlocks: Y.Map<YBlock>,
     private readonly _schema: Schema
@@ -42,34 +29,11 @@ export class DocCRUD {
     return fn(index, parent);
   }
 
-  getParent(targetId: string): string | null {
-    const root = this.root;
-    if (!root || root === targetId) return null;
-
-    const findParent = (parentId: string): string | null => {
-      const parentYBlock = this._yBlocks.get(parentId);
-      if (!parentYBlock) return null;
-
-      const children = parentYBlock.get('sys:children');
-
-      for (const childId of children.toArray()) {
-        if (childId === targetId) return parentId;
-
-        const parent = findParent(childId);
-        if (parent != null) return parent;
-      }
-
-      return null;
-    };
-
-    return findParent(root);
-  }
-
   addBlock(
     id: string,
     flavour: string,
     initialProps: Record<string, unknown> = {},
-    parent?: string | null,
+    parent?: null | string,
     parentIndex?: number
   ) {
     const schema = this._schema.flavourSchemaMap.get(flavour);
@@ -86,7 +50,7 @@ export class DocCRUD {
 
     const version = schema.version;
     const children = (
-      initialProps.children as undefined | (string | BlockModel)[]
+      initialProps.children as (BlockModel | string)[] | undefined
     )?.map(child => (typeof child === 'string' ? child : child.id));
 
     yBlock.set('sys:id', id);
@@ -209,18 +173,55 @@ export class DocCRUD {
     this._yBlocks.delete(id);
   }
 
-  updateBlockChildren(id: string, children: string[]) {
-    const yBlock = this._yBlocks.get(id);
-    if (!yBlock) return;
+  getNext(id: string) {
+    return this._getSiblings(
+      id,
+      (index, parent) =>
+        parent
+          .get('sys:children')
+          .toArray()
+          .at(index + 1) ?? null
+    );
+  }
 
-    const yChildren = Y.Array.from(children);
-    yBlock.set('sys:children', yChildren);
+  getParent(targetId: string): null | string {
+    const root = this.root;
+    if (!root || root === targetId) return null;
+
+    const findParent = (parentId: string): null | string => {
+      const parentYBlock = this._yBlocks.get(parentId);
+      if (!parentYBlock) return null;
+
+      const children = parentYBlock.get('sys:children');
+
+      for (const childId of children.toArray()) {
+        if (childId === targetId) return parentId;
+
+        const parent = findParent(childId);
+        if (parent != null) return parent;
+      }
+
+      return null;
+    };
+
+    return findParent(root);
+  }
+
+  getPrev(id: string) {
+    return this._getSiblings(
+      id,
+      (index, parent) =>
+        parent
+          .get('sys:children')
+          .toArray()
+          .at(index - 1) ?? null
+    );
   }
 
   moveBlocks(
     blocksToMove: string[],
     newParent: string,
-    targetSibling: string | null = null,
+    targetSibling: null | string = null,
     shouldInsertBeforeSibling = true
   ) {
     // A map to store parent block and their respective child blocks
@@ -303,25 +304,25 @@ export class DocCRUD {
     );
   }
 
-  getNext(id: string) {
-    return this._getSiblings(
-      id,
-      (index, parent) =>
-        parent
-          .get('sys:children')
-          .toArray()
-          .at(index + 1) ?? null
-    );
+  updateBlockChildren(id: string, children: string[]) {
+    const yBlock = this._yBlocks.get(id);
+    if (!yBlock) return;
+
+    const yChildren = Y.Array.from(children);
+    yBlock.set('sys:children', yChildren);
   }
 
-  getPrev(id: string) {
-    return this._getSiblings(
-      id,
-      (index, parent) =>
-        parent
-          .get('sys:children')
-          .toArray()
-          .at(index - 1) ?? null
-    );
+  get root(): null | string {
+    let rootId: null | string = null;
+    this._yBlocks.forEach(yBlock => {
+      const flavour = yBlock.get('sys:flavour');
+      const schema = this._schema.flavourSchemaMap.get(flavour);
+      if (!schema) return;
+
+      if (schema.model.role === 'root') {
+        rootId = yBlock.get('sys:id');
+      }
+    });
+    return rootId;
   }
 }

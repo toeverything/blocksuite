@@ -1,7 +1,8 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import { clickView, dblclickView } from '../utils/actions/click.js';
 import {
+  Shape,
   createConnectorElement,
   createShapeElement,
   dragBetweenViewCoords,
@@ -9,20 +10,19 @@ import {
   getFirstGroupId,
   getIds,
   getSelectedBound,
-  Shape,
   shiftClickView,
   toIdCountMap,
   toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
+  SHORT_KEY,
   copyByKeyboard,
   pasteByKeyboard,
   pressBackspace,
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from '../utils/actions/keyboard.js';
@@ -192,8 +192,8 @@ test.describe('group', () => {
       await assertSelectedBound(page, [0, 0, 200, 100]);
       await assertGroupIds(page, {
         [groupId]: 2,
-        [outterGroupId]: 2,
         null: 1,
+        [outterGroupId]: 2,
       });
       await assertGroupChildren(page, groupId, 2);
       await assertGroupChildren(page, outterGroupId, 2);
@@ -201,8 +201,8 @@ test.describe('group', () => {
       // undo the creation
       await undoByKeyboard(page);
       await assertGroupIds(page, {
-        [outterGroupId]: 3,
         null: 1,
+        [outterGroupId]: 3,
       });
       await assertGroupChildren(page, outterGroupId, 3);
 
@@ -210,8 +210,8 @@ test.describe('group', () => {
       await redoByKeyboard(page);
       await assertGroupIds(page, {
         [groupId]: 2,
-        [outterGroupId]: 2,
         null: 1,
+        [outterGroupId]: 2,
       });
       await assertGroupChildren(page, groupId, 2);
       await assertGroupChildren(page, outterGroupId, 2);
@@ -224,7 +224,7 @@ test.describe('group', () => {
       await captureHistory(page);
       const groupId = await getFirstGroupId(page, [outterGroupId]);
       await triggerComponentToolbarAction(page, 'ungroup');
-      await assertGroupIds(page, { [outterGroupId]: 3, null: 1 });
+      await assertGroupIds(page, { null: 1, [outterGroupId]: 3 });
       await assertGroupChildrenIds(
         page,
         toIdCountMap(await getIds(page, true)),
@@ -234,9 +234,9 @@ test.describe('group', () => {
       // undo, group should in group again
       await undoByKeyboard(page);
       await assertGroupIds(page, {
-        [outterGroupId]: 2,
         [groupId]: 2,
         null: 1,
+        [outterGroupId]: 2,
       });
       await assertGroupChildrenIds(page, toIdCountMap(initShapes), groupId);
       await assertGroupChildrenIds(
@@ -250,7 +250,7 @@ test.describe('group', () => {
 
       // redo, group should be ungroup again
       await redoByKeyboard(page);
-      await assertGroupIds(page, { [outterGroupId]: 3, null: 1 });
+      await assertGroupIds(page, { null: 1, [outterGroupId]: 3 });
       await assertGroupChildrenIds(
         page,
         toIdCountMap(await getIds(page, true)),
@@ -276,8 +276,8 @@ test.describe('group', () => {
       await captureHistory(page);
       await triggerComponentToolbarAction(page, 'releaseFromGroup');
       await assertGroupIds(page, {
-        [outterGroupId]: 2,
         null: 2,
+        [outterGroupId]: 2,
       });
       await assertGroupChildren(page, outterGroupId, 2);
       await assertSelectedBound(page, [0, 0, 100, 100]);
@@ -285,8 +285,8 @@ test.describe('group', () => {
       // undo the release
       await undoByKeyboard(page);
       await assertGroupIds(page, {
-        [outterGroupId]: 3,
         null: 1,
+        [outterGroupId]: 3,
       });
       await assertGroupChildren(page, outterGroupId, 3);
       await assertSelectedBound(page, [0, 0, 100, 100]);
@@ -294,8 +294,8 @@ test.describe('group', () => {
       // redo the release
       await redoByKeyboard(page);
       await assertGroupIds(page, {
-        [outterGroupId]: 2,
         null: 2,
+        [outterGroupId]: 2,
       });
       await assertGroupChildren(page, outterGroupId, 2);
       await assertSelectedBound(page, [0, 0, 100, 100]);
@@ -310,8 +310,8 @@ test.describe('group', () => {
 
       await assertGroupIds(page, {
         [groupId]: 2,
-        [outterGroupId]: 2,
         null: 1,
+        [outterGroupId]: 2,
       });
       await assertGroupChildren(page, groupId, 2);
       await assertGroupChildren(page, outterGroupId, 2);
@@ -320,8 +320,8 @@ test.describe('group', () => {
       await triggerComponentToolbarAction(page, 'releaseFromGroup');
       await assertGroupIds(page, {
         [groupId]: 2,
-        [outterGroupId]: 1,
         null: 2,
+        [outterGroupId]: 1,
       });
       await assertGroupChildren(page, outterGroupId, 1);
       await assertGroupChildren(page, groupId, 2);
@@ -330,8 +330,8 @@ test.describe('group', () => {
       await undoByKeyboard(page);
       await assertGroupIds(page, {
         [groupId]: 2,
-        [outterGroupId]: 2,
         null: 1,
+        [outterGroupId]: 2,
       });
       await assertGroupChildren(page, groupId, 2);
       await assertGroupChildren(page, outterGroupId, 2);
@@ -340,8 +340,8 @@ test.describe('group', () => {
       await redoByKeyboard(page);
       await assertGroupIds(page, {
         [groupId]: 2,
-        [outterGroupId]: 1,
         null: 2,
+        [outterGroupId]: 1,
       });
       await assertGroupChildren(page, outterGroupId, 1);
       await assertGroupChildren(page, groupId, 2);
@@ -434,8 +434,8 @@ test.describe('group', () => {
       await assertCanvasElementsCount(page, 5);
       await assertGroupIds(page, {
         [firstGroup]: 2,
-        [secondGroup]: 2,
         null: 1,
+        [secondGroup]: 2,
       });
       await assertGroupChildren(page, firstGroup, 2);
       await assertGroupChildren(page, secondGroup, 2);
@@ -520,9 +520,9 @@ test.describe('group', () => {
       const copyedGroupId = await getFirstGroupId(page, [originGroupId]);
 
       await assertGroupIds(page, {
-        [originGroupId]: 2,
         [copyedGroupId]: 2,
         null: 2,
+        [originGroupId]: 2,
       });
       await assertGroupChildren(page, originGroupId, 2);
       await assertGroupChildren(page, copyedGroupId, 2);
@@ -546,9 +546,9 @@ test.describe('group', () => {
       const copyedGroupId = await getFirstGroupId(page, [originGroupId]);
 
       await assertGroupIds(page, {
-        [originGroupId]: 3,
         [copyedGroupId]: 3,
         null: 2,
+        [originGroupId]: 3,
       });
       await assertGroupChildren(page, originGroupId, 3);
       await assertGroupChildren(page, copyedGroupId, 3);

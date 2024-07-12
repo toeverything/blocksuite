@@ -1,4 +1,5 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+
 import {
   AFFINE_AI_PANEL_WIDGET,
   AFFINE_EDGELESS_COPILOT_WIDGET,
@@ -32,15 +33,6 @@ import { setupSpaceEntry } from './entries/space/setup-space.js';
 
 export const AIPageRootBlockSpec: BlockSpec = {
   ...PageRootBlockSpec,
-  view: {
-    ...PageRootBlockSpec.view,
-    widgets: {
-      ...PageRootBlockSpec.view.widgets,
-      [AFFINE_AI_PANEL_WIDGET]: literal`${unsafeStatic(
-        AFFINE_AI_PANEL_WIDGET
-      )}`,
-    },
-  },
   setup: (slots, disposableGroup) => {
     PageRootBlockSpec.setup?.(slots, disposableGroup);
     disposableGroup.add(
@@ -61,22 +53,19 @@ export const AIPageRootBlockSpec: BlockSpec = {
       })
     );
   },
-};
-
-export const AIEdgelessRootBlockSpec: BlockSpec = {
-  ...EdgelessRootBlockSpec,
   view: {
-    ...EdgelessRootBlockSpec.view,
+    ...PageRootBlockSpec.view,
     widgets: {
-      ...EdgelessRootBlockSpec.view.widgets,
-      [AFFINE_EDGELESS_COPILOT_WIDGET]: literal`${unsafeStatic(
-        AFFINE_EDGELESS_COPILOT_WIDGET
-      )}`,
+      ...PageRootBlockSpec.view.widgets,
       [AFFINE_AI_PANEL_WIDGET]: literal`${unsafeStatic(
         AFFINE_AI_PANEL_WIDGET
       )}`,
     },
   },
+};
+
+export const AIEdgelessRootBlockSpec: BlockSpec = {
+  ...EdgelessRootBlockSpec,
   setup(slots, disposableGroup) {
     EdgelessRootBlockSpec.setup?.(slots, disposableGroup);
     slots.widgetConnected.on(view => {
@@ -102,6 +91,18 @@ export const AIEdgelessRootBlockSpec: BlockSpec = {
         setupSlashMenuEntry(view.component);
       }
     });
+  },
+  view: {
+    ...EdgelessRootBlockSpec.view,
+    widgets: {
+      ...EdgelessRootBlockSpec.view.widgets,
+      [AFFINE_AI_PANEL_WIDGET]: literal`${unsafeStatic(
+        AFFINE_AI_PANEL_WIDGET
+      )}`,
+      [AFFINE_EDGELESS_COPILOT_WIDGET]: literal`${unsafeStatic(
+        AFFINE_EDGELESS_COPILOT_WIDGET
+      )}`,
+    },
   },
 };
 

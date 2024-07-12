@@ -20,74 +20,111 @@ import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';
 
 export type SelectTag = {
-  id: string;
   color: string;
-  value: string;
+  id: string;
   parentId?: string;
+  value: string;
 };
 
 type RenderOption = {
-  value: string;
-  id: string;
   color: string;
-  isCreate: boolean;
   group: SelectTag[];
+  id: string;
+  isCreate: boolean;
   select: () => void;
+  value: string;
 };
 
 @customElement('affine-multi-tag-select')
 export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
-  private get color() {
-    if (!this._currentColor) {
-      this._currentColor = getTagColor();
-    }
-    return this._currentColor;
-  }
-
-  get isSingleMode() {
-    return this.mode === 'single';
-  }
-
-  private get selectedTag() {
-    return this.filteredOptions[this.selectedIndex];
-  }
-
   static override styles = styles;
 
-  private filteredOptions: Array<RenderOption> = [];
+  private _clickItemOption = (e: MouseEvent, id: string) => {
+    e.stopPropagation();
+    const option = this.options.find(v => v.id === id);
+    if (!option) {
+      return;
+    }
+    popMenu(e.target as HTMLElement, {
+      middleware: [autoPlacement()],
+      options: {
+        input: {
+          initValue: option.value,
+          onComplete: text => {
+            this.changeTag({
+              ...option,
+              value: text,
+            });
+          },
+        },
+        items: [
+          {
+            class: 'delete-item',
+            icon: DeleteIcon,
+            name: 'Delete',
+            select: () => {
+              this.deleteTag(id);
+            },
+            type: 'action',
+          },
+          {
+            children: () =>
+              selectOptionColors.map(item => {
+                const styles = styleMap({
+                  backgroundColor: item.color,
+                  borderRadius: '50%',
+                  height: '20px',
+                  width: '20px',
+                });
+                return {
+                  icon: html` <div style=${styles}></div>`,
+                  isSelected: option.color === item.color,
+                  name: item.name,
+                  select: () => {
+                    this.changeTag({
+                      ...option,
+                      color: item.color,
+                    });
+                  },
+                  type: 'action',
+                };
+              }),
+            name: 'color',
+            type: 'group',
+          },
+        ],
+      },
+    });
+  };
 
-  @query('.select-input')
-  private accessor _selectInput!: HTMLInputElement;
-
-  @state()
-  private accessor text = '';
-
-  @state()
-  private accessor selectedIndex = 0;
+  private _createOption = () => {
+    const value = this.text.trim();
+    if (value === '') return;
+    const groupInfo = this.getGroupInfoByFullName(value);
+    if (!groupInfo) {
+      return;
+    }
+    const name = groupInfo.name;
+    const tagColor = this.color;
+    this.clearColor();
+    const newSelect: SelectTag = {
+      color: tagColor,
+      id: nanoid(),
+      parentId: groupInfo.parent?.id,
+      value: name,
+    };
+    this.newTags([newSelect]);
+    const newValue = this.isSingleMode
+      ? [newSelect.id]
+      : [...this.value, newSelect.id];
+    this.onChange(newValue);
+    this.text = '';
+    if (this.isSingleMode) {
+      this.editComplete();
+    }
+  };
 
   private _currentColor: string | undefined = undefined;
-
-  @property()
-  accessor mode: 'multi' | 'single' = 'multi';
-
-  @property({ attribute: false })
-  accessor options: SelectTag[] = [];
-
-  @property({ attribute: false })
-  accessor onOptionsChange!: (options: SelectTag[]) => void;
-
-  @property({ attribute: false })
-  accessor value: string[] = [];
-
-  @property({ attribute: false })
-  accessor onChange!: (value: string[]) => void;
-
-  @property({ attribute: false })
-  accessor editComplete!: () => void;
-
-  private clearColor() {
-    this._currentColor = undefined;
-  }
 
   private _onDeleteSelected = (selectedValue: string[], value: string) => {
     const filteredValue = selectedValue.filter(item => item !== value);
@@ -97,21 +134,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   private _onInput = (event: KeyboardEvent) => {
     this.text = (event.target as HTMLInputElement).value;
   };
-
-  private optionsIdMap() {
-    return Object.fromEntries(this.options.map(v => [v.id, v]));
-  }
-
-  private getTagGroup(tag: SelectTag, map = this.optionsIdMap()): SelectTag[] {
-    const result = [];
-    let parentId = tag.parentId;
-    while (parentId) {
-      const parent = map[parentId];
-      result.unshift(parent);
-      parentId = parent.parentId;
-    }
-    return result;
-  }
 
   private _onInputKeydown = (event: KeyboardEvent) => {
     event.stopPropagation();
@@ -137,10 +159,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private setSelectedOption(index: number) {
-    this.selectedIndex = rangeWrap(index, 0, this.filteredOptions.length);
-  }
-
   private _onSelect = (id: string) => {
     const isExist = this.value.findIndex(item => item === id) > -1;
     if (isExist) {
@@ -161,115 +179,26 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     this.text = '';
   };
 
-  private _createOption = () => {
-    const value = this.text.trim();
-    if (value === '') return;
-    const groupInfo = this.getGroupInfoByFullName(value);
-    if (!groupInfo) {
-      return;
-    }
-    const name = groupInfo.name;
-    const tagColor = this.color;
-    this.clearColor();
-    const newSelect: SelectTag = {
-      id: nanoid(),
-      value: name,
-      color: tagColor,
-      parentId: groupInfo.parent?.id,
-    };
-    this.newTags([newSelect]);
-    const newValue = this.isSingleMode
-      ? [newSelect.id]
-      : [...this.value, newSelect.id];
-    this.onChange(newValue);
-    this.text = '';
-    if (this.isSingleMode) {
-      this.editComplete();
-    }
+  private filteredOptions: Array<RenderOption> = [];
+
+  changeTag = (tag: SelectTag) => {
+    this.onOptionsChange(this.options.map(v => (v.id === tag.id ? tag : v)));
   };
 
-  private _clickItemOption = (e: MouseEvent, id: string) => {
-    e.stopPropagation();
-    const option = this.options.find(v => v.id === id);
-    if (!option) {
-      return;
-    }
-    popMenu(e.target as HTMLElement, {
-      options: {
-        input: {
-          initValue: option.value,
-          onComplete: text => {
-            this.changeTag({
-              ...option,
-              value: text,
-            });
-          },
-        },
-        items: [
-          {
-            type: 'action',
-            name: 'Delete',
-            icon: DeleteIcon,
-            class: 'delete-item',
-            select: () => {
-              this.deleteTag(id);
-            },
-          },
-          {
-            type: 'group',
-            name: 'color',
-            children: () =>
-              selectOptionColors.map(item => {
-                const styles = styleMap({
-                  backgroundColor: item.color,
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
-                });
-                return {
-                  type: 'action',
-                  name: item.name,
-                  icon: html` <div style=${styles}></div>`,
-                  isSelected: option.color === item.color,
-                  select: () => {
-                    this.changeTag({
-                      ...option,
-                      color: item.color,
-                    });
-                  },
-                };
-              }),
-          },
-        ],
-      },
-      middleware: [autoPlacement()],
-    });
+  deleteTag = (id: string) => {
+    this.onOptionsChange(
+      this.options
+        .filter(v => v.id !== id)
+        .map(v => ({
+          ...v,
+          parentId: v.parentId === id ? undefined : v.parentId,
+        }))
+    );
   };
 
-  private getTagFullName(tag: SelectTag, group: SelectTag[]) {
-    return [...group, tag].map(v => v.value).join('/');
-  }
-
-  private getGroupInfoByFullName(name: string) {
-    const strings = name.split('/');
-    const names = strings.slice(0, -1);
-    const result: SelectTag[] = [];
-    for (const text of names) {
-      const parent = result[result.length - 1];
-      const tag = this.options.find(
-        v => v.parentId === parent?.id && v.value === text
-      );
-      if (!tag) {
-        return;
-      }
-      result.push(tag);
-    }
-    return {
-      name: strings[strings.length - 1],
-      group: result,
-      parent: result[result.length - 1],
-    };
-  }
+  newTags = (tags: SelectTag[]) => {
+    this.onOptionsChange([...tags, ...this.options]);
+  };
 
   private _filterOptions() {
     const map = this.optionsIdMap();
@@ -300,15 +229,74 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
       });
     if (this.text && !matched) {
       options.push({
-        id: 'create',
         color: this.color,
-        value: this.text,
-        isCreate: true,
         group: [],
+        id: 'create',
+        isCreate: true,
         select: this._createOption,
+        value: this.text,
       });
     }
     return options;
+  }
+
+  private clearColor() {
+    this._currentColor = undefined;
+  }
+
+  private get color() {
+    if (!this._currentColor) {
+      this._currentColor = getTagColor();
+    }
+    return this._currentColor;
+  }
+
+  private getGroupInfoByFullName(name: string) {
+    const strings = name.split('/');
+    const names = strings.slice(0, -1);
+    const result: SelectTag[] = [];
+    for (const text of names) {
+      const parent = result[result.length - 1];
+      const tag = this.options.find(
+        v => v.parentId === parent?.id && v.value === text
+      );
+      if (!tag) {
+        return;
+      }
+      result.push(tag);
+    }
+    return {
+      group: result,
+      name: strings[strings.length - 1],
+      parent: result[result.length - 1],
+    };
+  }
+
+  private getTagFullName(tag: SelectTag, group: SelectTag[]) {
+    return [...group, tag].map(v => v.value).join('/');
+  }
+
+  private getTagGroup(tag: SelectTag, map = this.optionsIdMap()): SelectTag[] {
+    const result = [];
+    let parentId = tag.parentId;
+    while (parentId) {
+      const parent = map[parentId];
+      result.unshift(parent);
+      parentId = parent.parentId;
+    }
+    return result;
+  }
+
+  private optionsIdMap() {
+    return Object.fromEntries(this.options.map(v => [v.id, v]));
+  }
+
+  private get selectedTag() {
+    return this.filteredOptions[this.selectedIndex];
+  }
+
+  private setSelectedOption(index: number) {
+    this.selectedIndex = rangeWrap(index, 0, this.filteredOptions.length);
   }
 
   protected override firstUpdated() {
@@ -326,25 +314,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
       e.stopPropagation();
     });
   }
-
-  newTags = (tags: SelectTag[]) => {
-    this.onOptionsChange([...tags, ...this.options]);
-  };
-
-  deleteTag = (id: string) => {
-    this.onOptionsChange(
-      this.options
-        .filter(v => v.id !== id)
-        .map(v => ({
-          ...v,
-          parentId: v.parentId === id ? undefined : v.parentId,
-        }))
-    );
-  };
-
-  changeTag = (tag: SelectTag) => {
-    this.onOptionsChange(this.options.map(v => (v.id === tag.id ? tag : v)));
-  };
 
   override render() {
     this.filteredOptions = this._filterOptions();
@@ -452,6 +421,37 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get isSingleMode() {
+    return this.mode === 'single';
+  }
+
+  @query('.select-input')
+  private accessor _selectInput!: HTMLInputElement;
+
+  @property({ attribute: false })
+  accessor editComplete!: () => void;
+
+  @property()
+  accessor mode: 'multi' | 'single' = 'multi';
+
+  @property({ attribute: false })
+  accessor onChange!: (value: string[]) => void;
+
+  @property({ attribute: false })
+  accessor onOptionsChange!: (options: SelectTag[]) => void;
+
+  @property({ attribute: false })
+  accessor options: SelectTag[] = [];
+
+  @state()
+  private accessor selectedIndex = 0;
+
+  @state()
+  private accessor text = '';
+
+  @property({ attribute: false })
+  accessor value: string[] = [];
 }
 
 declare global {
@@ -463,14 +463,14 @@ declare global {
 export const popTagSelect = (
   target: HTMLElement,
   ops: {
-    mode?: 'single' | 'multi';
-    value: string[];
-    onChange: (value: string[]) => void;
-    options: SelectTag[];
-    onOptionsChange: (options: SelectTag[]) => void;
-    onComplete?: () => void;
-    minWidth?: number;
     container?: HTMLElement;
+    minWidth?: number;
+    mode?: 'multi' | 'single';
+    onChange: (value: string[]) => void;
+    onComplete?: () => void;
+    onOptionsChange: (options: SelectTag[]) => void;
+    options: SelectTag[];
+    value: string[];
   }
 ) => {
   const component = new MultiTagSelect();
@@ -496,9 +496,9 @@ export const popTagSelect = (
     remove();
   };
   const remove = createPopup(target, component, {
-    onClose: ops.onComplete,
-    middleware: [flip(), offset({ mainAxis: -28, crossAxis: 112 })],
     container: ops.container,
+    middleware: [flip(), offset({ crossAxis: 112, mainAxis: -28 })],
+    onClose: ops.onComplete,
   });
   return remove;
 };

@@ -1,18 +1,19 @@
 import type { Constructor } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import type { EmbedProps } from './types.js';
+
 import {
   type EdgelessSelectableProps,
   selectable,
 } from '../edgeless/mixin/index.js';
-import type { EmbedProps } from './types.js';
 
 export function defineEmbedModel<
   Props extends object,
   T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
 >(SuperClass: T) {
-  return selectable<Props & EdgelessSelectableProps>(
-    SuperClass as Constructor<BlockModel<Props & EdgelessSelectableProps>>
+  return selectable<EdgelessSelectableProps & Props>(
+    SuperClass as Constructor<BlockModel<EdgelessSelectableProps & Props>>
   );
 }
 

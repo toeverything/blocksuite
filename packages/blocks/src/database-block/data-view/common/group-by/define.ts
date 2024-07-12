@@ -11,13 +11,6 @@ const ungroups = {
   value: null,
 };
 groupByMatcher.register(tTag.create(), {
-  name: 'select',
-  groupName: (type, value) => {
-    if (tTag.is(type) && type.data) {
-      return type.data.tags.find(v => v.id === value)?.value ?? '';
-    }
-    return '';
-  },
   defaultKeys: type => {
     if (tTag.is(type) && type.data) {
       return [
@@ -30,6 +23,13 @@ groupByMatcher.register(tTag.create(), {
     }
     return [ungroups];
   },
+  groupName: (type, value) => {
+    if (tTag.is(type) && type.data) {
+      return type.data.tags.find(v => v.id === value)?.value ?? '';
+    }
+    return '';
+  },
+  name: 'select',
   valuesGroup: (value, _type) => {
     if (value == null) {
       return [ungroups];
@@ -44,12 +44,11 @@ groupByMatcher.register(tTag.create(), {
   view: createUniComponentFromWebComponent(SelectGroupView),
 });
 groupByMatcher.register(tArray(tTag.create()), {
-  name: 'multi-select',
-  groupName: (type, value) => {
-    if (tTag.is(type) && type.data) {
-      return type.data.tags.find(v => v.id === value)?.value ?? '';
+  addToGroup: (value, old) => {
+    if (value == null) {
+      return old;
     }
-    return '';
+    return Array.isArray(old) ? [...old, value] : [value];
   },
   defaultKeys: type => {
     if (isTArray(type) && tTag.is(type.ele) && type.ele.data) {
@@ -62,6 +61,19 @@ groupByMatcher.register(tArray(tTag.create()), {
       ];
     }
     return [ungroups];
+  },
+  groupName: (type, value) => {
+    if (tTag.is(type) && type.data) {
+      return type.data.tags.find(v => v.id === value)?.value ?? '';
+    }
+    return '';
+  },
+  name: 'multi-select',
+  removeFromGroup: (value, old) => {
+    if (Array.isArray(old)) {
+      return old.filter(v => v !== value);
+    }
+    return old;
   },
   valuesGroup: (value, _type) => {
     if (value == null) {
@@ -77,28 +89,16 @@ groupByMatcher.register(tArray(tTag.create()), {
     }
     return [ungroups];
   },
-  addToGroup: (value, old) => {
-    if (value == null) {
-      return old;
-    }
-    return Array.isArray(old) ? [...old, value] : [value];
-  },
-  removeFromGroup: (value, old) => {
-    if (Array.isArray(old)) {
-      return old.filter(v => v !== value);
-    }
-    return old;
-  },
   view: createUniComponentFromWebComponent(SelectGroupView),
 });
 groupByMatcher.register(tString.create(), {
-  name: 'text',
-  groupName: (_type, value) => {
-    return `${value ?? ''}`;
-  },
   defaultKeys: _type => {
     return [ungroups];
   },
+  groupName: (_type, value) => {
+    return `${value ?? ''}`;
+  },
+  name: 'text',
   valuesGroup: (value, _type) => {
     if (!value) {
       return [ungroups];
@@ -113,13 +113,14 @@ groupByMatcher.register(tString.create(), {
   view: createUniComponentFromWebComponent(StringGroupView),
 });
 groupByMatcher.register(tNumber.create(), {
-  name: 'number',
-  groupName: (_type, value) => {
-    return `${value ?? ''}`;
-  },
+  addToGroup: value => (typeof value === 'number' ? value * 10 : undefined),
   defaultKeys: _type => {
     return [ungroups];
   },
+  groupName: (_type, value) => {
+    return `${value ?? ''}`;
+  },
+  name: 'number',
   valuesGroup: (value, _type) => {
     if (typeof value !== 'number') {
       return [ungroups];
@@ -131,6 +132,5 @@ groupByMatcher.register(tNumber.create(), {
       },
     ];
   },
-  addToGroup: value => (typeof value === 'number' ? value * 10 : undefined),
   view: createUniComponentFromWebComponent(NumberGroupView),
 });

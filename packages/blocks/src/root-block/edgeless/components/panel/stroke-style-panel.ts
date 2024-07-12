@@ -1,16 +1,16 @@
-import '../../../../_common/components/button.js';
-import '../../../../_common/components/toolbar/separator.js';
-import '../../../../_common/components/tooltip/tooltip.js';
-import './color-panel.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import type { ColorEvent } from './color-panel.js';
+
+import '../../../../_common/components/button.js';
+import '../../../../_common/components/toolbar/separator.js';
+import '../../../../_common/components/tooltip/tooltip.js';
 import { StrokeStyle } from '../../../../surface-block/consts.js';
 import { STROKE_COLORS } from '../../../../surface-block/elements/shape/consts.js';
-import type { ColorEvent } from './color-panel.js';
+import './color-panel.js';
 import { type LineStyleEvent, LineStylesPanel } from './line-styles-panel.js';
 
 @customElement('stroke-style-panel')
@@ -31,32 +31,14 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor strokeWidth!: number;
-
-  @property({ attribute: false })
-  accessor strokeColor!: CssVariableName;
-
-  @property({ attribute: false })
-  accessor strokeStyle!: StrokeStyle;
-
-  @property({ attribute: false })
-  accessor setStrokeStyle!: (e: LineStyleEvent) => void;
-
-  @property({ attribute: false })
-  accessor setStrokeColor!: (e: ColorEvent) => void;
-
-  @property({ attribute: false })
-  accessor hollowCircle: boolean | undefined = undefined;
-
   override render() {
     return html`
       <div class="line-styles">
         ${LineStylesPanel({
+          lineStyles: [StrokeStyle.Solid, StrokeStyle.Dash],
+          onClick: e => this.setStrokeStyle(e),
           selectedLineSize: this.strokeWidth,
           selectedLineStyle: this.strokeStyle,
-          onClick: e => this.setStrokeStyle(e),
-          lineStyles: [StrokeStyle.Solid, StrokeStyle.Dash],
         })}
       </div>
       <editor-toolbar-separator
@@ -73,6 +55,24 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
       </edgeless-color-panel>
     `;
   }
+
+  @property({ attribute: false })
+  accessor hollowCircle: boolean | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor setStrokeColor!: (e: ColorEvent) => void;
+
+  @property({ attribute: false })
+  accessor setStrokeStyle!: (e: LineStyleEvent) => void;
+
+  @property({ attribute: false })
+  accessor strokeColor!: CssVariableName;
+
+  @property({ attribute: false })
+  accessor strokeStyle!: StrokeStyle;
+
+  @property({ attribute: false })
+  accessor strokeWidth!: number;
 }
 
 declare global {

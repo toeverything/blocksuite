@@ -1,19 +1,19 @@
-import './presets/search/search.js';
-import './presets/filter/filter.js';
-import './presets/view-options/view-options.js';
-import './presets/table-add-row/add-row.js';
-
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { ViewSource } from '../../common/index.js';
-import { renderUniLit } from '../../utils/uni-component/index.js';
 import type { DataViewExpose } from '../../view/data-view.js';
 import type { DataViewManager } from '../../view/data-view-manager.js';
 import type { DataViewWidget, DataViewWidgetProps } from '../types.js';
+
+import { renderUniLit } from '../../utils/uni-component/index.js';
 import { WidgetBase } from '../widget-base.js';
+import './presets/filter/filter.js';
+import './presets/search/search.js';
+import './presets/table-add-row/add-row.js';
+import './presets/view-options/view-options.js';
 
 const styles = css`
   .affine-database-toolbar {
@@ -46,33 +46,33 @@ const styles = css`
 export class DataViewHeaderTools extends WidgetBase {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor toolsMap!: Record<string, DataViewWidget[]>;
-
-  @state()
-  accessor showToolBar = false;
-
   override render() {
     if (this.view.isDeleted) {
       return;
     }
     const classList = classMap({
-      'show-toolbar': this.showToolBar,
       'affine-database-toolbar': true,
+      'show-toolbar': this.showToolBar,
     });
     const tools = this.toolsMap[this.view.type];
     return html` <div class="${classList}">
       ${repeat(tools ?? [], uni => {
         const props: DataViewWidgetProps = {
+          dataSource: this.dataSource,
           view: this.view,
           viewMethods: this.viewMethods,
           viewSource: this.viewSource,
-          dataSource: this.dataSource,
         };
         return renderUniLit(uni, props);
       })}
     </div>`;
   }
+
+  @state()
+  accessor showToolBar = false;
+
+  @property({ attribute: false })
+  accessor toolsMap!: Record<string, DataViewWidget[]>;
 }
 
 declare global {

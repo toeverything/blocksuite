@@ -18,27 +18,27 @@ describe('markdownToMindmap: convert markdown list to a mind map tree', () => {
     const nodes = markdownToMindmap(markdown, doc);
 
     expect(nodes).toEqual({
-      text: 'Text A',
       children: [
         {
-          text: 'Text B',
           children: [
             {
-              text: 'Text C',
               children: [],
+              text: 'Text C',
             },
           ],
+          text: 'Text B',
         },
         {
-          text: 'Text D',
           children: [
             {
-              text: 'Text E',
               children: [],
+              text: 'Text E',
             },
           ],
+          text: 'Text D',
         },
       ],
+      text: 'Text A',
     });
   });
 
@@ -56,27 +56,27 @@ describe('markdownToMindmap: convert markdown list to a mind map tree', () => {
     const nodes = markdownToMindmap(markdown, doc);
 
     expect(nodes).toEqual({
-      text: 'Text A',
       children: [
         {
-          text: 'Text B',
           children: [
             {
-              text: 'Text C',
               children: [],
+              text: 'Text C',
             },
           ],
+          text: 'Text B',
         },
         {
-          text: 'Text D',
           children: [
             {
-              text: 'Text E',
               children: [],
+              text: 'Text E',
             },
           ],
+          text: 'Text D',
         },
       ],
+      text: 'Text A',
     });
   });
 

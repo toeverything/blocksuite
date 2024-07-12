@@ -8,11 +8,12 @@ import type {
   ImageSelection,
   SerializedXYWH,
 } from '@blocksuite/blocks';
+
 import {
   BlocksUtils,
   Bound,
-  getElementsBound,
   NoteDisplayMode,
+  getElementsBound,
 } from '@blocksuite/blocks';
 
 import {
@@ -28,8 +29,6 @@ const { matchFlavours } = BlocksUtils;
 
 const CommonActions = [
   {
-    icon: ReplaceIcon,
-    title: 'Replace selection',
     handler: async (
       host: EditorHost,
       content: string,
@@ -39,8 +38,8 @@ const CommonActions = [
       const [_, data] = host.command
         .chain()
         .getSelectedBlocks({
-          currentTextSelection,
           currentBlockSelections,
+          currentTextSelection,
         })
         .run();
       if (!data.selectedBlocks) return;
@@ -68,10 +67,10 @@ const CommonActions = [
         currentTextSelection
       );
     },
+    icon: ReplaceIcon,
+    title: 'Replace selection',
   },
   {
-    icon: InsertBelowIcon,
-    title: 'Insert below',
     handler: async (
       host: EditorHost,
       content: string,
@@ -82,9 +81,9 @@ const CommonActions = [
       const [_, data] = host.command
         .chain()
         .getSelectedBlocks({
-          currentTextSelection,
           currentBlockSelections,
           currentImageSelections,
+          currentTextSelection,
         })
         .run();
       if (!data.selectedBlocks) return;
@@ -95,14 +94,14 @@ const CommonActions = [
         data.selectedBlocks[data.selectedBlocks?.length - 1]
       );
     },
+    icon: InsertBelowIcon,
+    title: 'Insert below',
   },
 ];
 
 export const PageEditorActions = [
   ...CommonActions,
   {
-    icon: CreateIcon,
-    title: 'Create as a doc',
     handler: (host: EditorHost, content: string) => {
       reportResponse('result:add-page');
       const newDoc = host.doc.collection.createDoc();
@@ -127,14 +126,14 @@ export const PageEditorActions = [
         insertFromMarkdown(newHost, content, noteId, 0).catch(console.error);
       })();
     },
+    icon: CreateIcon,
+    title: 'Create as a doc',
   },
 ];
 
 export const EdgelessEditorActions = [
   ...CommonActions,
   {
-    icon: CreateIcon,
-    title: 'Add to edgeless as note',
     handler: async (host: EditorHost, content: string) => {
       reportResponse('result:add-note');
       const { doc } = host;
@@ -158,9 +157,11 @@ export const EdgelessEditorActions = [
       await insertFromMarkdown(host, content, id, 0);
 
       service.selection.set({
-        elements: [id],
         editing: false,
+        elements: [id],
       });
     },
+    icon: CreateIcon,
+    title: 'Add to edgeless as note',
   },
 ];

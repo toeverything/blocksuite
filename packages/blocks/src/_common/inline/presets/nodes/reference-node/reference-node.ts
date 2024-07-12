@@ -1,6 +1,8 @@
 import type { BlockElement } from '@blocksuite/block-std';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { Slot } from '@blocksuite/global/utils';
+import type { Doc, DocMeta } from '@blocksuite/store';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type DeltaInsert,
@@ -9,12 +11,14 @@ import {
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
-import type { Doc, DocMeta } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
 import type { RootBlockComponent } from '../../../../../root-block/types.js';
+import type { AffineTextAttributes } from '../../affine-inline-specs.js';
+import type { ReferenceNodeConfig } from './reference-config.js';
+
 import { HoverController } from '../../../../components/hover/controller.js';
 import { Peekable } from '../../../../components/peekable.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
@@ -23,14 +27,12 @@ import {
   getModelByElement,
   getRootByElement,
 } from '../../../../utils/query.js';
-import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import { affineTextStyles } from '../affine-text.js';
 import { DEFAULT_DOC_NAME, REFERENCE_NODE } from '../consts.js';
-import type { ReferenceNodeConfig } from './reference-config.js';
 import { toggleReferencePopup } from './reference-popup.js';
 
 export type RefNodeSlots = {
-  docLinkClicked: Slot<{ docId: string; blockId?: string }>;
+  docLinkClicked: Slot<{ blockId?: string; docId: string }>;
   tagClicked: Slot<{ tagId: string }>;
 };
 
@@ -43,52 +45,6 @@ declare module '@blocksuite/blocks' {
 @customElement('affine-reference')
 @Peekable({ action: false })
 export class AffineReference extends WithDisposable(ShadowlessElement) {
-  get inlineEditor() {
-    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
-      `[${INLINE_ROOT_ATTR}]`
-    );
-    assertExists(inlineRoot);
-    return inlineRoot.inlineEditor;
-  }
-
-  get selfInlineRange() {
-    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
-    assertExists(selfInlineRange);
-    return selfInlineRange;
-  }
-
-  get blockElement() {
-    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
-      `[${BLOCK_ID_ATTR}]`
-    );
-    assertExists(blockElement);
-    return blockElement;
-  }
-
-  get std() {
-    const std = this.blockElement.std;
-    assertExists(std);
-    return std;
-  }
-
-  get doc() {
-    const doc = this.config.doc;
-    assertExists(doc, '`reference-node` need `Doc`.');
-    return doc;
-  }
-
-  get customIcon() {
-    return this.config.customIcon;
-  }
-
-  get customTitle() {
-    return this.config.customTitle;
-  }
-
-  get customContent() {
-    return this.config.customContent;
-  }
-
   static override styles = css`
     .affine-reference {
       white-space: normal;
@@ -120,8 +76,22 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   `;
 
   private _refAttribute: NonNullable<AffineTextAttributes['reference']> = {
-    type: 'LinkedPage',
     pageId: '0',
+    type: 'LinkedPage',
+  };
+
+  private _updateRefMeta = (doc: Doc) => {
+    const refAttribute = this.delta.attributes?.reference;
+    assertExists(refAttribute, 'Failed to get reference attribute!');
+    this._refAttribute = refAttribute;
+    const refMeta = doc.collection.meta.docMetas.find(
+      doc => doc.id === refAttribute.pageId
+    );
+    this.refMeta = refMeta
+      ? {
+          ...refMeta,
+        }
+      : undefined;
   };
 
   private _whenHover: HoverController = new HoverController(
@@ -157,36 +127,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     },
     { enterDelay: 500 }
   );
-
-  @property({ type: Object })
-  accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
-    attributes: {},
-  };
-
-  @property({ type: Boolean })
-  accessor selected = false;
-
-  @property({ attribute: false })
-  accessor config!: ReferenceNodeConfig;
-
-  // Since the linked doc may be deleted, the `_refMeta` could be undefined.
-  @state()
-  accessor refMeta: DocMeta | undefined = undefined;
-
-  private _updateRefMeta = (doc: Doc) => {
-    const refAttribute = this.delta.attributes?.reference;
-    assertExists(refAttribute, 'Failed to get reference attribute!');
-    this._refAttribute = refAttribute;
-    const refMeta = doc.collection.meta.docMetas.find(
-      doc => doc.id === refAttribute.pageId
-    );
-    this.refMeta = refMeta
-      ? {
-          ...refMeta,
-        }
-      : undefined;
-  };
 
   private _onClick() {
     if (!this.config.interactable) return;
@@ -236,13 +176,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
   }
 
-  override willUpdate(_changedProperties: Map<PropertyKey, unknown>) {
-    super.willUpdate(_changedProperties);
-
-    const doc = this.doc;
-    this._updateRefMeta(doc);
-  }
-
   override render() {
     const refMeta = this.refMeta;
     const isDeleted = !refMeta;
@@ -271,8 +204,8 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       isDeleted
         ? {
             color: 'var(--affine-text-disable-color)',
-            textDecoration: 'line-through',
             fill: 'var(--affine-text-disable-color)',
+            textDecoration: 'line-through',
           }
         : {}
     );
@@ -294,6 +227,75 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       >${content}<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
     ></span>`;
   }
+
+  override willUpdate(_changedProperties: Map<PropertyKey, unknown>) {
+    super.willUpdate(_changedProperties);
+
+    const doc = this.doc;
+    this._updateRefMeta(doc);
+  }
+
+  get blockElement() {
+    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    assertExists(blockElement);
+    return blockElement;
+  }
+
+  get customContent() {
+    return this.config.customContent;
+  }
+
+  get customIcon() {
+    return this.config.customIcon;
+  }
+
+  get customTitle() {
+    return this.config.customTitle;
+  }
+
+  get doc() {
+    const doc = this.config.doc;
+    assertExists(doc, '`reference-node` need `Doc`.');
+    return doc;
+  }
+
+  get inlineEditor() {
+    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    assertExists(inlineRoot);
+    return inlineRoot.inlineEditor;
+  }
+
+  get selfInlineRange() {
+    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
+    assertExists(selfInlineRange);
+    return selfInlineRange;
+  }
+
+  get std() {
+    const std = this.blockElement.std;
+    assertExists(std);
+    return std;
+  }
+
+  @property({ attribute: false })
+  accessor config!: ReferenceNodeConfig;
+
+  @property({ type: Object })
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
+    attributes: {},
+    insert: ZERO_WIDTH_SPACE,
+  };
+
+  // Since the linked doc may be deleted, the `_refMeta` could be undefined.
+  @state()
+  accessor refMeta: DocMeta | undefined = undefined;
+
+  @property({ type: Boolean })
+  accessor selected = false;
 }
 
 declare global {

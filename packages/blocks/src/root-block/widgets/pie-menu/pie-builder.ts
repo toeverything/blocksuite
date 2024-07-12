@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
-import { ColorUnit } from '../../edgeless/components/panel/color-panel.js';
 import type {
   ActionFunction,
   PieColorNodeModel,
@@ -11,22 +10,24 @@ import type {
   PieNodeModel,
   PieSubmenuNodeModel,
 } from './base.js';
+
+import { ColorUnit } from '../../edgeless/components/panel/color-panel.js';
 import { PieManager } from './pie-manager.js';
 import { calcNodeAngles, calcNodeWedges, isNodeWithChildren } from './utils.js';
 
 export interface IPieColorPickerNodeProps {
-  label: string;
   active: (ctx: PieMenuContext) => CssVariableName;
+  colors: { color: CssVariableName }[];
+  hollow?: boolean;
+  label: string;
   onChange: PieColorNodeModel['onChange'];
   openOnHover?: PieSubmenuNodeModel['openOnHover'];
-  hollow?: boolean;
-  colors: { color: CssVariableName }[];
 }
 
-type PieBuilderConstructorProps = Omit<
+type PieBuilderConstructorProps = { icon: PieNodeModel['icon'] } & Omit<
   PieMenuSchema,
-  'root' | 'angle' | 'startAngle' | 'endAngle' | 'disabled'
-> & { icon: PieNodeModel['icon'] };
+  'angle' | 'disabled' | 'endAngle' | 'root' | 'startAngle'
+>;
 
 export class PieMenuBuilder {
   private _schema: PieMenuSchema | null = null;
@@ -37,11 +38,11 @@ export class PieMenuBuilder {
     this._schema = {
       ...base,
       root: {
-        type: 'root',
         children: [],
-        label: base.label,
-        icon: base.icon,
         disabled: false,
+        icon: base.icon,
+        label: base.label,
+        type: 'root',
       },
     };
     this._stack.push(this._schema.root);
@@ -76,72 +77,18 @@ export class PieMenuBuilder {
     return node;
   }
 
-  command(node: Omit<PieCommandNodeModel, 'type'>) {
-    const curNode = this._currentNode();
-    const actionNode: PieCommandNodeModel = { ...node, type: 'command' };
-
-    if (isNodeWithChildren(curNode)) {
-      curNode.children.push(actionNode);
-    }
-
-    return this;
-  }
-
-  expandableCommand(
-    node: Omit<PieSubmenuNodeModel, 'type' | 'children' | 'role'> & {
-      action: ActionFunction;
-      submenus: (pie: PieMenuBuilder) => void;
-    }
-  ) {
-    const { icon, label } = node;
-    this.beginSubmenu({ icon, label }, node.action);
-    node.submenus(this);
-    this.endSubmenu();
-  }
-
-  colorPicker(props: IPieColorPickerNodeProps) {
-    const hollow = props.hollow ?? false;
-
-    const icon = (ctx: PieMenuContext) => {
-      const color = props.active(ctx);
-
-      return ColorUnit(color, { hollowCircle: hollow });
-    };
-
-    const colorPickerNode: PieSubmenuNodeModel = {
-      type: 'submenu',
-      icon,
-      label: props.label,
-      role: 'color-picker',
-      openOnHover: props.openOnHover ?? true,
-      children: props.colors.map(({ color }) => ({
-        icon: () => ColorUnit(color, { hollowCircle: hollow }),
-        type: 'color',
-        hollowCircle: hollow,
-        label: color,
-        color: color,
-        onChange: props.onChange,
-      })),
-    };
-
-    const curNode = this._currentNode();
-    if (isNodeWithChildren(curNode)) {
-      curNode.children.push(colorPickerNode);
-    }
-  }
-
   beginSubmenu(
-    node: Omit<PieSubmenuNodeModel, 'type' | 'children' | 'role'>,
+    node: Omit<PieSubmenuNodeModel, 'children' | 'role' | 'type'>,
     action?: PieSubmenuNodeModel['action']
   ) {
     const curNode = this._currentNode();
     const submenuNode: PieSubmenuNodeModel = {
       openOnHover: true,
       ...node,
-      type: 'submenu',
-      role: action ? 'default' : 'command',
       action,
       children: [],
+      role: action ? 'default' : 'command',
+      type: 'submenu',
     };
     if (submenuNode.action !== undefined)
       submenuNode.timeoutOverride =
@@ -156,24 +103,6 @@ export class PieMenuBuilder {
     return this;
   }
 
-  endSubmenu() {
-    if (this._stack.length === 1)
-      throw new Error('Cant end submenu already on the root node');
-    this._stack.pop();
-
-    return this;
-  }
-
-  reset(base: PieBuilderConstructorProps) {
-    this._stack = [];
-    this._schema = {
-      ...base,
-      root: { type: 'root', children: [], label: base.label },
-    };
-
-    this._stack.push(this._schema.root);
-  }
-
   build() {
     const schema = this._schema;
     assertExists(schema);
@@ -182,5 +111,77 @@ export class PieMenuBuilder {
     this._schema = null;
     this._stack = [];
     return schema;
+  }
+
+  colorPicker(props: IPieColorPickerNodeProps) {
+    const hollow = props.hollow ?? false;
+
+    const icon = (ctx: PieMenuContext) => {
+      const color = props.active(ctx);
+
+      return ColorUnit(color, { hollowCircle: hollow });
+    };
+
+    const colorPickerNode: PieSubmenuNodeModel = {
+      children: props.colors.map(({ color }) => ({
+        color: color,
+        hollowCircle: hollow,
+        icon: () => ColorUnit(color, { hollowCircle: hollow }),
+        label: color,
+        onChange: props.onChange,
+        type: 'color',
+      })),
+      icon,
+      label: props.label,
+      openOnHover: props.openOnHover ?? true,
+      role: 'color-picker',
+      type: 'submenu',
+    };
+
+    const curNode = this._currentNode();
+    if (isNodeWithChildren(curNode)) {
+      curNode.children.push(colorPickerNode);
+    }
+  }
+
+  command(node: Omit<PieCommandNodeModel, 'type'>) {
+    const curNode = this._currentNode();
+    const actionNode: PieCommandNodeModel = { ...node, type: 'command' };
+
+    if (isNodeWithChildren(curNode)) {
+      curNode.children.push(actionNode);
+    }
+
+    return this;
+  }
+
+  endSubmenu() {
+    if (this._stack.length === 1)
+      throw new Error('Cant end submenu already on the root node');
+    this._stack.pop();
+
+    return this;
+  }
+
+  expandableCommand(
+    node: {
+      action: ActionFunction;
+      submenus: (pie: PieMenuBuilder) => void;
+    } & Omit<PieSubmenuNodeModel, 'children' | 'role' | 'type'>
+  ) {
+    const { icon, label } = node;
+    this.beginSubmenu({ icon, label }, node.action);
+    node.submenus(this);
+    this.endSubmenu();
+  }
+
+  reset(base: PieBuilderConstructorProps) {
+    this._stack = [];
+    this._schema = {
+      ...base,
+      root: { children: [], label: base.label, type: 'root' },
+    };
+
+    this._stack.push(this._schema.root);
   }
 }

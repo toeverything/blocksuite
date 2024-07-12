@@ -9,18 +9,18 @@ import {
 export { importHtml, importMarkDown, importNotion } from './import-doc.js';
 
 export function showImportModal({
-  collection,
-  onSuccess,
-  onFail,
-  container = document.body,
   abortController = new AbortController(),
+  collection,
+  container = document.body,
+  onFail,
+  onSuccess,
 }: {
-  collection: DocCollection;
-  onSuccess?: OnSuccessHandler;
-  onFail?: OnFailHandler;
-  multiple?: boolean;
-  container?: HTMLElement;
   abortController?: AbortController;
+  collection: DocCollection;
+  container?: HTMLElement;
+  multiple?: boolean;
+  onFail?: OnFailHandler;
+  onSuccess?: OnSuccessHandler;
 }) {
   const importDoc = new ImportDoc(
     collection,

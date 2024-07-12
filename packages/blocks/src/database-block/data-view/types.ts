@@ -2,8 +2,8 @@ import type { KanbanViewSelectionWithType } from './view/presets/kanban/types.js
 import type { TableViewSelection } from './view/presets/table/types.js';
 
 export type DataViewSelection =
-  | TableViewSelection
-  | KanbanViewSelectionWithType;
+  | KanbanViewSelectionWithType
+  | TableViewSelection;
 export type GetDataViewSelection<
   K extends DataViewSelection['type'],
   T = DataViewSelection,
@@ -17,8 +17,8 @@ export type InsertToPosition =
   | 'end'
   | 'start'
   | {
-      id: string;
       before: boolean;
+      id: string;
     };
 export type ColumnDataUpdater<
   Data extends Record<string, unknown> = Record<string, unknown>,

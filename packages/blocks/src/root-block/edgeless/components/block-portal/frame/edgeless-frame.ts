@@ -4,12 +4,13 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+
 import { FrameBlockModel } from '../../../../../frame-block/index.js';
 import {
   Bound,
   type SerializedXYWH,
 } from '../../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const NESTED_FRAME_OFFSET = 4;
@@ -35,36 +36,18 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @state()
-  private accessor _editing = false;
-
-  @state()
-  private accessor _isNavigator = false;
-
-  @query('.affine-frame-title')
-  private accessor _frameTitleEl!: HTMLDivElement;
-
-  @state()
-  private accessor _nestedFrame = false;
-
-  @state()
-  private accessor _frameTitle = '';
-
-  @state()
-  private accessor _xywh: SerializedXYWH | null = null;
+  private _cachedHeight = 0;
 
   private _cachedWidth = 0;
 
-  private _cachedHeight = 0;
-
-  @property({ attribute: false })
-  accessor frame!: FrameBlockModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor zoom!: number;
+  private _isInsideFrame() {
+    return this.edgeless.service.layer.framesGrid.has(
+      this.frame.elementBound,
+      true,
+      true,
+      new Set([this.frame])
+    );
+  }
 
   private _updateFrameTitleSize() {
     const { _nestedFrame, zoom } = this;
@@ -82,15 +65,6 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
           : -(height + NESTED_FRAME_OFFSET / zoom))
       },${width},${height}]`;
     }
-  }
-
-  private _isInsideFrame() {
-    return this.edgeless.service.layer.framesGrid.has(
-      this.frame.elementBound,
-      true,
-      true,
-      new Set([this.frame])
-    );
   }
 
   override connectedCallback() {
@@ -148,6 +122,55 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     this._xywh = this.frame.xywh;
   }
 
+  override render() {
+    const model = this.frame;
+    const bound = Bound.deserialize(model.xywh);
+
+    const { _editing, _isNavigator, zoom } = this;
+
+    const nestedFrame = this._nestedFrame;
+    const maxWidth = nestedFrame
+      ? bound.w * zoom - NESTED_FRAME_OFFSET / zoom
+      : bound.w * zoom;
+    // 32 is the estimated height of title element
+    const hidden = 32 / zoom >= bound.h && nestedFrame;
+    const transformOperation = [
+      `translate(${bound.x}px, ${bound.y}px)`,
+      `translate(0%, ${nestedFrame ? 0 : -100}%)`,
+      `scale(${1 / zoom})`,
+      `translate(${nestedFrame ? NESTED_FRAME_OFFSET : 0}px, ${
+        nestedFrame ? NESTED_FRAME_OFFSET : -NESTED_FRAME_OFFSET
+      }px)`,
+    ];
+
+    return html`
+      ${this._frameTitle && !_isNavigator && !_editing
+        ? html`
+            <div
+              style=${styleMap({
+                background: nestedFrame
+                  ? 'var(--affine-white)'
+                  : 'var(--affine-text-primary-color)',
+                border: nestedFrame
+                  ? '1px solid var(--affine-border-color)'
+                  : 'none',
+                color: nestedFrame
+                  ? 'var(--affine-text-secondary-color)'
+                  : 'var(--affine-white)',
+                display: hidden ? 'none' : 'initial',
+                maxWidth: maxWidth + 'px',
+                transform: transformOperation.join(' '),
+                transformOrigin: nestedFrame ? 'top left' : 'bottom left',
+              })}
+              class="affine-frame-title"
+            >
+              ${this._frameTitle}
+            </div>
+          `
+        : nothing}
+    `;
+  }
+
   override updated(_changedProperties: Map<string, unknown>) {
     if (this.style.display !== 'block' || !this._frameTitleEl) {
       return;
@@ -171,67 +194,45 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  override render() {
-    const model = this.frame;
-    const bound = Bound.deserialize(model.xywh);
+  @state()
+  private accessor _editing = false;
 
-    const { _isNavigator, _editing, zoom } = this;
+  @state()
+  private accessor _frameTitle = '';
 
-    const nestedFrame = this._nestedFrame;
-    const maxWidth = nestedFrame
-      ? bound.w * zoom - NESTED_FRAME_OFFSET / zoom
-      : bound.w * zoom;
-    // 32 is the estimated height of title element
-    const hidden = 32 / zoom >= bound.h && nestedFrame;
-    const transformOperation = [
-      `translate(${bound.x}px, ${bound.y}px)`,
-      `translate(0%, ${nestedFrame ? 0 : -100}%)`,
-      `scale(${1 / zoom})`,
-      `translate(${nestedFrame ? NESTED_FRAME_OFFSET : 0}px, ${
-        nestedFrame ? NESTED_FRAME_OFFSET : -NESTED_FRAME_OFFSET
-      }px)`,
-    ];
+  @query('.affine-frame-title')
+  private accessor _frameTitleEl!: HTMLDivElement;
 
-    return html`
-      ${this._frameTitle && !_isNavigator && !_editing
-        ? html`
-            <div
-              style=${styleMap({
-                display: hidden ? 'none' : 'initial',
-                transform: transformOperation.join(' '),
-                maxWidth: maxWidth + 'px',
-                transformOrigin: nestedFrame ? 'top left' : 'bottom left',
-                background: nestedFrame
-                  ? 'var(--affine-white)'
-                  : 'var(--affine-text-primary-color)',
-                color: nestedFrame
-                  ? 'var(--affine-text-secondary-color)'
-                  : 'var(--affine-white)',
-                border: nestedFrame
-                  ? '1px solid var(--affine-border-color)'
-                  : 'none',
-              })}
-              class="affine-frame-title"
-            >
-              ${this._frameTitle}
-            </div>
-          `
-        : nothing}
-    `;
-  }
+  @state()
+  private accessor _isNavigator = false;
+
+  @state()
+  private accessor _nestedFrame = false;
+
+  @state()
+  private accessor _xywh: SerializedXYWH | null = null;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor frame!: FrameBlockModel;
+
+  @property({ attribute: false })
+  accessor zoom!: number;
 }
 
 @customElement('edgeless-block-portal-frame')
 class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
   override render() {
-    const { model, index } = this;
+    const { index, model } = this;
     const bound = Bound.deserialize(model.xywh);
     const style = styleMap({
-      position: 'absolute',
-      zIndex: `${index}`,
       left: `${bound.x}px`,
+      position: 'absolute',
       top: `${bound.y}px`,
       transformOrigin: '0px 0px',
+      zIndex: `${index}`,
     });
 
     return html`
@@ -255,20 +256,19 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
+  override connectedCallback(): void {
+    super.connectedCallback();
 
-  @property({ attribute: false })
-  accessor frames!: FrameBlockModel[];
-
-  @property({ attribute: false })
-  accessor startIndex!: number;
-
-  @property({ attribute: false })
-  accessor visibleFrames!: Set<FrameBlockModel>;
+    this._disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
+        // if zoom changed we need to re-render the frame titles
+        this.requestUpdate();
+      })
+    );
+  }
 
   protected override render() {
-    const { visibleFrames, edgeless, startIndex } = this;
+    const { edgeless, startIndex, visibleFrames } = this;
     const zoom = edgeless.service.viewport.zoom;
 
     return repeat(
@@ -299,22 +299,23 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 
-    this._disposables.add(
-      this.edgeless.service.viewport.viewportUpdated.on(() => {
-        // if zoom changed we need to re-render the frame titles
-        this.requestUpdate();
-      })
-    );
-  }
+  @property({ attribute: false })
+  accessor frames!: FrameBlockModel[];
+
+  @property({ attribute: false })
+  accessor startIndex!: number;
+
+  @property({ attribute: false })
+  accessor visibleFrames!: Set<FrameBlockModel>;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-frames-container': EdgelessFramesContainer;
     'edgeless-block-portal-frame': EdgelessBlockPortalFrame;
     'edgeless-frame-title': EdgelessFrameTitle;
+    'edgeless-frames-container': EdgelessFramesContainer;
   }
 }

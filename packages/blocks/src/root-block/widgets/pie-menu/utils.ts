@@ -1,6 +1,4 @@
 import type { IVec } from '../../../surface-block/index.js';
-import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
-import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessTool } from '../../edgeless/types.js';
 import type {
   ActionFunction,
@@ -13,6 +11,9 @@ import type {
   PieRootNodeModel,
   PieSubmenuNodeModel,
 } from './base.js';
+
+import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
+import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 export function updateShapeOverlay(rootElement: EdgelessRootBlockComponent) {
   const controller = rootElement.tools.currentController;
@@ -54,7 +55,7 @@ export function getPosition(angleRad: number, v: IVec): IVec {
 
 export function isNodeWithChildren(
   node: PieNodeModel
-): node is PieNodeModel & { children: PieNonRootNode[] } {
+): node is { children: PieNonRootNode[] } & PieNodeModel {
   return 'children' in node;
 }
 
@@ -227,7 +228,7 @@ export function calcNodeAngles(
 export function calcNodeWedges(
   nodeAngles: number[],
   parentAngle?: number
-): { start: number; end: number }[] {
+): { end: number; start: number }[] {
   // This should never happen, but who knows...
   if (nodeAngles.length === 0 && parentAngle === undefined) {
     return [];
@@ -236,7 +237,7 @@ export function calcNodeWedges(
   // If the node has a single child but no parent (e.g. it's the root node), we can
   // simply return a full circle.
   if (nodeAngles.length === 1 && parentAngle === undefined) {
-    return [{ start: 0, end: 360 }];
+    return [{ end: 360, start: 0 }];
   }
 
   // If the node has a single child and a parent, we can set the start and end
@@ -249,12 +250,12 @@ export function calcNodeWedges(
     [start, center, end] = normalizeConsecutiveAngles(start, center, end);
     [start, end] = scaleWedge(start, center, end, 0.5);
 
-    return [{ start: start, end: end }];
+    return [{ end: end, start: start }];
   }
 
   // In all other cases, we loop through the items and compute the wedges. If the parent
   // angle happens to be inside a wedge, we crop the wedge accordingly.
-  const wedges: { start: number; end: number }[] = [];
+  const wedges: { end: number; start: number }[] = [];
 
   for (let i = 0; i < nodeAngles.length; i++) {
     let start = nodeAngles[(i + nodeAngles.length - 1) % nodeAngles.length];
@@ -270,7 +271,7 @@ export function calcNodeWedges(
 
     [start, end] = scaleWedge(start, center, end, 0.5);
 
-    wedges.push({ start: start, end: end });
+    wedges.push({ end: end, start: start });
   }
 
   return wedges;

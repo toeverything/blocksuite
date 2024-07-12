@@ -1,12 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import { isAbortError } from '../_common/utils/helper.js';
 import type { EmbedYoutubeBlockComponent } from './embed-youtube-block.js';
 import type {
   EmbedYoutubeBlockUrlData,
   EmbedYoutubeModel,
 } from './embed-youtube-model.js';
+
+import { isAbortError } from '../_common/utils/helper.js';
 
 export async function queryEmbedYoutubeData(
   embedYoutubeModel: EmbedYoutubeModel,
@@ -47,12 +48,12 @@ export async function queryYoutubeOEmbedData(
   const oEmbedResponse = await fetch(oEmbedUrl, { signal }).catch(() => null);
   if (oEmbedResponse && oEmbedResponse.ok) {
     const oEmbedJson = await oEmbedResponse.json();
-    const { title, author_name, author_url } = oEmbedJson;
+    const { author_name, author_url, title } = oEmbedJson;
 
     youtubeOEmbedData = {
-      title,
       creator: author_name,
       creatorUrl: author_url,
+      title,
     };
   }
 
@@ -82,23 +83,23 @@ export async function refreshEmbedYoutubeUrlData(
     );
 
     ({
+      creator = null,
+      creatorImage = null,
+      creatorUrl = null,
+      description = null,
       image = null,
       title = null,
-      description = null,
-      creator = null,
-      creatorUrl = null,
-      creatorImage = null,
     } = youtubeUrlData);
 
     if (signal?.aborted) return;
 
     embedYoutubeElement.doc.updateBlock(embedYoutubeElement.model, {
+      creator,
+      creatorImage,
+      creatorUrl,
+      description,
       image,
       title,
-      description,
-      creator,
-      creatorUrl,
-      creatorImage,
     });
   } catch (error) {
     if (signal?.aborted || isAbortError(error)) return;

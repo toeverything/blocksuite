@@ -40,198 +40,198 @@ import { YesterdayTooltip } from './yesterday.js';
 import { YoutubeVideoTooltip } from './youtube-video.js';
 
 export type SlashMenuTooltip = {
-  figure: TemplateResult;
   caption: string;
+  figure: TemplateResult;
 };
 
 export const slashMenuToolTips: Record<string, SlashMenuTooltip> = {
-  Text: {
-    figure: TextTooltip,
-    caption: 'Text',
-  },
-
-  'Heading 1': {
-    figure: Heading1Tooltip,
-    caption: 'Heading #1',
-  },
-
-  'Heading 2': {
-    figure: Heading2Tooltip,
-    caption: 'Heading #2',
-  },
-
-  'Heading 3': {
-    figure: Heading3Tooltip,
-    caption: 'Heading #3',
-  },
-
-  'Heading 4': {
-    figure: Heading4Tooltip,
-    caption: 'Heading #4',
-  },
-
-  'Heading 5': {
-    figure: Heading5Tooltip,
-    caption: 'Heading #5',
-  },
-
-  'Heading 6': {
-    figure: Heading6Tooltip,
-    caption: 'Heading #6',
-  },
-
-  'Code Block': {
-    figure: CodeBlockTooltip,
-    caption: 'Code Block',
-  },
-
-  Quote: {
-    figure: QuoteTooltip,
-    caption: 'Quote',
-  },
-
-  Divider: {
-    figure: DividerTooltip,
-    caption: 'Divider',
-  },
-
-  'Bulleted List': {
-    figure: BulletedListTooltip,
-    caption: 'Bulleted List',
-  },
-
-  'Numbered List': {
-    figure: NumberedListTooltip,
-    caption: 'Numbered List',
-  },
-
-  'To-do List': {
-    figure: ToDoListTooltip,
-    caption: 'To-do List',
+  Attachment: {
+    caption: 'Attachment',
+    figure: AttachmentTooltip,
   },
 
   Bold: {
-    figure: BoldTextTooltip,
     caption: 'Bold Text',
+    figure: BoldTextTooltip,
   },
 
-  Italic: {
-    figure: ItalicTooltip,
-    caption: 'Italic',
+  'Bulleted List': {
+    caption: 'Bulleted List',
+    figure: BulletedListTooltip,
   },
 
-  Underline: {
-    figure: UnderlineTooltip,
-    caption: 'Underline',
-  },
-
-  Strikethrough: {
-    figure: StrikethroughTooltip,
-    caption: 'Strikethrough',
-  },
-
-  'New Doc': {
-    figure: NewDocTooltip,
-    caption: 'New Doc',
-  },
-
-  'Linked Doc': {
-    figure: LinkDocTooltip,
-    caption: 'Link Doc',
-  },
-
-  Link: {
-    figure: LinkTooltip,
-    caption: 'Link',
-  },
-
-  Attachment: {
-    figure: AttachmentTooltip,
-    caption: 'Attachment',
-  },
-
-  Github: {
-    figure: GithubRepoTooltip,
-    caption: 'GitHub Repo',
-  },
-
-  YouTube: {
-    figure: YoutubeVideoTooltip,
-    caption: 'YouTube Video',
-  },
-
-  Image: {
-    figure: PhotoTooltip,
-    caption: 'Photo',
-  },
-
-  'X (Twitter)': {
-    figure: TweetTooltip,
-    caption: 'Tweet',
-  },
-
-  Figma: {
-    figure: FigmaTooltip,
-    caption: 'Figma',
-  },
-
-  Linear: {
-    figure: LinearTooltip,
-    caption: 'Linear',
-  },
-
-  Today: {
-    figure: TodayTooltip,
-    caption: 'Today',
-  },
-
-  Tomorrow: {
-    figure: TomorrowTooltip,
-    caption: 'Tomorrow',
-  },
-
-  Yesterday: {
-    figure: YesterdayTooltip,
-    caption: 'Yesterday',
-  },
-
-  Now: {
-    figure: NowTooltip,
-    caption: 'Now',
-  },
-
-  'Table View': {
-    figure: TableViewTooltip,
-    caption: 'Table View',
-  },
-
-  'Kanban View': {
-    figure: KanbanViewTooltip,
-    caption: 'Kanban View',
-  },
-
-  'Move Up': {
-    figure: MoveUpTooltip,
-    caption: 'Move Up',
-  },
-
-  'Move Down': {
-    figure: MoveDownTooltip,
-    caption: 'Move Down',
+  'Code Block': {
+    caption: 'Code Block',
+    figure: CodeBlockTooltip,
   },
 
   Copy: {
-    figure: CopyTooltip,
     caption: 'Copy / Duplicate',
+    figure: CopyTooltip,
   },
 
   Delete: {
-    figure: DeleteTooltip,
     caption: 'Delete',
+    figure: DeleteTooltip,
+  },
+
+  Divider: {
+    caption: 'Divider',
+    figure: DividerTooltip,
+  },
+
+  Figma: {
+    caption: 'Figma',
+    figure: FigmaTooltip,
+  },
+
+  Github: {
+    caption: 'GitHub Repo',
+    figure: GithubRepoTooltip,
   },
 
   'Group & Frame': {
-    figure: EdgelessTooltip,
     caption: 'Edgeless',
+    figure: EdgelessTooltip,
+  },
+
+  'Heading 1': {
+    caption: 'Heading #1',
+    figure: Heading1Tooltip,
+  },
+
+  'Heading 2': {
+    caption: 'Heading #2',
+    figure: Heading2Tooltip,
+  },
+
+  'Heading 3': {
+    caption: 'Heading #3',
+    figure: Heading3Tooltip,
+  },
+
+  'Heading 4': {
+    caption: 'Heading #4',
+    figure: Heading4Tooltip,
+  },
+
+  'Heading 5': {
+    caption: 'Heading #5',
+    figure: Heading5Tooltip,
+  },
+
+  'Heading 6': {
+    caption: 'Heading #6',
+    figure: Heading6Tooltip,
+  },
+
+  Image: {
+    caption: 'Photo',
+    figure: PhotoTooltip,
+  },
+
+  Italic: {
+    caption: 'Italic',
+    figure: ItalicTooltip,
+  },
+
+  'Kanban View': {
+    caption: 'Kanban View',
+    figure: KanbanViewTooltip,
+  },
+
+  Linear: {
+    caption: 'Linear',
+    figure: LinearTooltip,
+  },
+
+  Link: {
+    caption: 'Link',
+    figure: LinkTooltip,
+  },
+
+  'Linked Doc': {
+    caption: 'Link Doc',
+    figure: LinkDocTooltip,
+  },
+
+  'Move Down': {
+    caption: 'Move Down',
+    figure: MoveDownTooltip,
+  },
+
+  'Move Up': {
+    caption: 'Move Up',
+    figure: MoveUpTooltip,
+  },
+
+  'New Doc': {
+    caption: 'New Doc',
+    figure: NewDocTooltip,
+  },
+
+  Now: {
+    caption: 'Now',
+    figure: NowTooltip,
+  },
+
+  'Numbered List': {
+    caption: 'Numbered List',
+    figure: NumberedListTooltip,
+  },
+
+  Quote: {
+    caption: 'Quote',
+    figure: QuoteTooltip,
+  },
+
+  Strikethrough: {
+    caption: 'Strikethrough',
+    figure: StrikethroughTooltip,
+  },
+
+  'Table View': {
+    caption: 'Table View',
+    figure: TableViewTooltip,
+  },
+
+  Text: {
+    caption: 'Text',
+    figure: TextTooltip,
+  },
+
+  'To-do List': {
+    caption: 'To-do List',
+    figure: ToDoListTooltip,
+  },
+
+  Today: {
+    caption: 'Today',
+    figure: TodayTooltip,
+  },
+
+  Tomorrow: {
+    caption: 'Tomorrow',
+    figure: TomorrowTooltip,
+  },
+
+  Underline: {
+    caption: 'Underline',
+    figure: UnderlineTooltip,
+  },
+
+  'X (Twitter)': {
+    caption: 'Tweet',
+    figure: TweetTooltip,
+  },
+
+  Yesterday: {
+    caption: 'Yesterday',
+    figure: YesterdayTooltip,
+  },
+
+  YouTube: {
+    caption: 'YouTube Video',
+    figure: YoutubeVideoTooltip,
   },
 };

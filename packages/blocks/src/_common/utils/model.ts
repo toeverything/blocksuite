@@ -1,4 +1,5 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
+
 import { minimatch } from 'minimatch';
 
 export function assertFlavours(model: { flavour: string }, allowed: string[]) {

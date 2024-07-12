@@ -5,20 +5,41 @@ import type { DocSource } from '../source.js';
 
 type ChannelMessage =
   | {
-      type: 'init';
+      data: Uint8Array;
+      docId: string;
+      type: 'update';
     }
   | {
-      type: 'update';
-      docId: string;
-      data: Uint8Array;
+      type: 'init';
     };
 
 export class BroadcastChannelDocSource implements DocSource {
-  name = 'broadcast-channel';
+  private _onMessage = (event: MessageEvent<ChannelMessage>) => {
+    if (event.data.type === 'init') {
+      for (const [docId, data] of this.docMap) {
+        this.channel.postMessage({
+          data,
+          docId,
+          type: 'update',
+        } satisfies ChannelMessage);
+      }
+      return;
+    }
+
+    const { data, docId } = event.data;
+    const update = this.docMap.get(docId);
+    if (update) {
+      this.docMap.set(docId, mergeUpdates([update, data]));
+    } else {
+      this.docMap.set(docId, data);
+    }
+  };
 
   channel = new BroadcastChannel(this.channelName);
 
   docMap = new Map<string, Uint8Array>();
+
+  name = 'broadcast-channel';
 
   constructor(readonly channelName: string = 'blocksuite:doc') {
     this.channel.addEventListener('message', this._onMessage);
@@ -27,27 +48,6 @@ export class BroadcastChannelDocSource implements DocSource {
       type: 'init',
     });
   }
-
-  private _onMessage = (event: MessageEvent<ChannelMessage>) => {
-    if (event.data.type === 'init') {
-      for (const [docId, data] of this.docMap) {
-        this.channel.postMessage({
-          type: 'update',
-          docId,
-          data,
-        } satisfies ChannelMessage);
-      }
-      return;
-    }
-
-    const { docId, data } = event.data;
-    const update = this.docMap.get(docId);
-    if (update) {
-      this.docMap.set(docId, mergeUpdates([update, data]));
-    } else {
-      this.docMap.set(docId, data);
-    }
-  };
 
   pull(docId: string, state: Uint8Array) {
     const update = this.docMap.get(docId);
@@ -67,9 +67,9 @@ export class BroadcastChannelDocSource implements DocSource {
 
     assertExists(this.docMap.get(docId));
     this.channel.postMessage({
-      type: 'update',
-      docId,
       data: this.docMap.get(docId)!,
+      docId,
+      type: 'update',
     } satisfies ChannelMessage);
   }
 
@@ -79,7 +79,7 @@ export class BroadcastChannelDocSource implements DocSource {
       'message',
       (event: MessageEvent<ChannelMessage>) => {
         if (event.data.type !== 'update') return;
-        const { docId, data } = event.data;
+        const { data, docId } = event.data;
         cb(docId, data);
       },
       { signal: abortController.signal }

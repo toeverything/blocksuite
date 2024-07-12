@@ -1,4 +1,5 @@
 import type { BlockElement, UIEventStateContext } from '@blocksuite/block-std';
+
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -7,8 +8,9 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 
-import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { RootBlockComponent } from '../../../../root-block/types.js';
+
+import { matchFlavours } from '../../../../_common/utils/model.js';
 import { insertLinkedNode } from '../../../../root-block/widgets/linked-doc/config.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { createDefaultDoc } from '../../../utils/init.js';
@@ -113,13 +115,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   blockElement.bindHotKey({
-    ArrowUp: () => {
-      if (!blockElement.selected?.is('text')) return false;
-
-      const inlineEditor = _getInlineEditor();
-      const inlineRange = inlineEditor.getInlineRange();
-      return !inlineEditor.isFirstLine(inlineRange);
-    },
     ArrowDown: () => {
       if (!blockElement.selected?.is('text')) return false;
 
@@ -127,12 +122,46 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       const inlineRange = inlineEditor.getInlineRange();
       return !inlineEditor.isLastLine(inlineRange);
     },
-    Escape: () => {
-      if (blockElement.selected?.is('text')) {
-        return _selectBlock();
-      }
-      return;
+    ArrowUp: () => {
+      if (!blockElement.selected?.is('text')) return false;
+
+      const inlineEditor = _getInlineEditor();
+      const inlineRange = inlineEditor.getInlineRange();
+      return !inlineEditor.isFirstLine(inlineRange);
     },
+    Backspace: ctx => {
+      if (!blockElement.selected?.is('text')) return;
+      const state = ctx.get('keyboardState');
+      const inlineEditor = _getInlineEditor();
+      if (!onBackspace(editorHost, model, state.raw, inlineEditor)) {
+        _preventDefault(ctx);
+      }
+
+      // Auto delete bracket right
+      if (matchFlavours(blockElement.model, ['affine:code'])) {
+        const inlineRange = inlineEditor.getInlineRange();
+        assertExists(inlineRange);
+        const left = inlineEditor.yText.toString()[inlineRange.index - 1];
+        const right = inlineEditor.yText.toString()[inlineRange.index];
+        if (bracketPairs[leftBrackets.indexOf(left)]?.right === right) {
+          const index = inlineRange.index - 1;
+          inlineEditor.deleteText({
+            index: index,
+            length: 2,
+          });
+          inlineEditor.setInlineRange({
+            index: index,
+            length: 0,
+          });
+          _preventDefault(ctx);
+        }
+      }
+      return true;
+    },
+    'Control-d': ctx => {
+      if (IS_MAC) handleDelete(ctx);
+    },
+    Delete: ctx => handleDelete(ctx),
     Enter: ctx => {
       _preventDefault(ctx);
       if (blockElement.selected?.is('block')) return _selectText(false);
@@ -159,75 +188,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       return true;
     },
-    'Mod-Enter': ctx => {
-      if (!blockElement.selected?.is('text')) return;
-
-      const state = ctx.get('keyboardState');
-      const inlineEditor = _getInlineEditor();
-      const inlineRange = inlineEditor.getInlineRange();
-      assertExists(inlineRange);
-      hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw, true);
-      _preventDefault(ctx);
-
-      return true;
-    },
-    Space: ctx => handleMarkdown(ctx),
-    'Shift-Space': ctx => handleMarkdown(ctx),
-    'Mod-a': ctx => {
-      _preventDefault(ctx);
-      if (!blockElement.selected?.is('text')) return;
-
-      const text = blockElement.selected;
-      const inlineRoot = blockElement.querySelector<InlineRootElement>(
-        `[${INLINE_ROOT_ATTR}]`
-      );
-      if (
-        text.from.index === 0 &&
-        text.from.length === inlineRoot?.inlineEditor.yText.length
-      ) {
+    Escape: () => {
+      if (blockElement.selected?.is('text')) {
         return _selectBlock();
       }
-
-      return _selectAllText();
-    },
-    Tab: ctx => {
-      if (
-        !(
-          blockElement.selected?.is('block') ||
-          blockElement.selected?.is('text')
-        )
-      )
-        return;
-
-      {
-        const [_, context] = std.command
-          .chain()
-          .getSelectedModels({
-            types: ['text'],
-          })
-          .run();
-        const textModels = context.selectedModels;
-        if (textModels && textModels.length === 1) {
-          const inlineEditor = _getInlineEditor();
-          const inlineRange = inlineEditor.getInlineRange();
-          assertExists(inlineRange);
-          handleIndent(blockElement.host, model, inlineRange.index);
-          _preventDefault(ctx);
-
-          return true;
-        }
-      }
-
-      const [_, context] = std.command
-        .chain()
-        .getSelectedModels({
-          types: ['text', 'block'],
-        })
-        .run();
-      const models = context.selectedModels;
-      if (!models) return;
-      handleMultiBlockIndent(blockElement.host, models);
-      return true;
+      return;
     },
     'Mod-Backspace': ctx => {
       if (
@@ -275,6 +240,36 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       handleRemoveAllIndentForMultiBlocks(blockElement.host, models);
       return true;
     },
+    'Mod-Enter': ctx => {
+      if (!blockElement.selected?.is('text')) return;
+
+      const state = ctx.get('keyboardState');
+      const inlineEditor = _getInlineEditor();
+      const inlineRange = inlineEditor.getInlineRange();
+      assertExists(inlineRange);
+      hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw, true);
+      _preventDefault(ctx);
+
+      return true;
+    },
+    'Mod-a': ctx => {
+      _preventDefault(ctx);
+      if (!blockElement.selected?.is('text')) return;
+
+      const text = blockElement.selected;
+      const inlineRoot = blockElement.querySelector<InlineRootElement>(
+        `[${INLINE_ROOT_ATTR}]`
+      );
+      if (
+        text.from.index === 0 &&
+        text.from.length === inlineRoot?.inlineEditor.yText.length
+      ) {
+        return _selectBlock();
+      }
+
+      return _selectAllText();
+    },
+    'Shift-Space': ctx => handleMarkdown(ctx),
     'Shift-Tab': ctx => {
       if (
         !(
@@ -320,38 +315,45 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       handleMultiBlockOutdent(blockElement.host, models);
       return true;
     },
-    Backspace: ctx => {
-      if (!blockElement.selected?.is('text')) return;
-      const state = ctx.get('keyboardState');
-      const inlineEditor = _getInlineEditor();
-      if (!onBackspace(editorHost, model, state.raw, inlineEditor)) {
-        _preventDefault(ctx);
-      }
+    Space: ctx => handleMarkdown(ctx),
+    Tab: ctx => {
+      if (
+        !(
+          blockElement.selected?.is('block') ||
+          blockElement.selected?.is('text')
+        )
+      )
+        return;
 
-      // Auto delete bracket right
-      if (matchFlavours(blockElement.model, ['affine:code'])) {
-        const inlineRange = inlineEditor.getInlineRange();
-        assertExists(inlineRange);
-        const left = inlineEditor.yText.toString()[inlineRange.index - 1];
-        const right = inlineEditor.yText.toString()[inlineRange.index];
-        if (bracketPairs[leftBrackets.indexOf(left)]?.right === right) {
-          const index = inlineRange.index - 1;
-          inlineEditor.deleteText({
-            index: index,
-            length: 2,
-          });
-          inlineEditor.setInlineRange({
-            index: index,
-            length: 0,
-          });
+      {
+        const [_, context] = std.command
+          .chain()
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const textModels = context.selectedModels;
+        if (textModels && textModels.length === 1) {
+          const inlineEditor = _getInlineEditor();
+          const inlineRange = inlineEditor.getInlineRange();
+          assertExists(inlineRange);
+          handleIndent(blockElement.host, model, inlineRange.index);
           _preventDefault(ctx);
+
+          return true;
         }
       }
+
+      const [_, context] = std.command
+        .chain()
+        .getSelectedModels({
+          types: ['text', 'block'],
+        })
+        .run();
+      const models = context.selectedModels;
+      if (!models) return;
+      handleMultiBlockIndent(blockElement.host, models);
       return true;
-    },
-    Delete: ctx => handleDelete(ctx),
-    'Control-d': ctx => {
-      if (IS_MAC) handleDelete(ctx);
     },
   });
 
@@ -436,8 +438,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       title: docName,
     });
     insertLinkedNode({
-      inlineEditor,
       docId: doc.id,
+      inlineEditor,
     });
     return true;
   }

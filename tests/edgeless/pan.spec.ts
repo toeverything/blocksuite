@@ -111,11 +111,11 @@ test('pan tool shortcut does not affect other tools while using the tool', async
     { x: 100, y: 110 },
     { x: 200, y: 300 },
     {
-      click: true,
       beforeMouseUp: async () => {
         await page.keyboard.down('Space');
         await assertEdgelessTool(page, 'brush');
       },
+      click: true,
     }
   );
 
@@ -125,11 +125,11 @@ test('pan tool shortcut does not affect other tools while using the tool', async
     { x: 100, y: 110 },
     { x: 200, y: 300 },
     {
-      click: true,
       beforeMouseUp: async () => {
         await page.keyboard.down('Space');
         await assertEdgelessTool(page, 'eraser');
       },
+      click: true,
     }
   );
   // Maybe add other tools too

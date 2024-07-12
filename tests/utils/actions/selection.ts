@@ -14,10 +14,10 @@ export async function getRichTextBoundingBox(
 }
 
 interface Rect {
+  height: number;
+  width: number;
   x: number;
   y: number;
-  width: number;
-  height: number;
 }
 
 export async function clickInEdge(page: Page, rect: Rect) {

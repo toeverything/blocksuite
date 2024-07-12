@@ -1,4 +1,5 @@
 import type { SurfaceElementModel } from '../base.js';
+
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
 import { getDeriveProperties, updateDerivedProp } from './derive.js';
@@ -17,13 +18,13 @@ export function local<V, T extends SurfaceElementModel>() {
     const prop = context.name;
 
     return {
+      get(this: T) {
+        return this._local.get(prop);
+      },
       init(this: T, v: V) {
         this._local.set(prop, v);
 
         return v;
-      },
-      get(this: T) {
-        return this._local.get(prop);
       },
       set(this: T, originalValue: unknown) {
         const isCreating = getDecoratorState()?.creating;
@@ -43,22 +44,22 @@ export function local<V, T extends SurfaceElementModel>() {
           updateDerivedProp(derivedProps, this);
 
           this._onChange({
-            props: {
-              [prop]: newVal,
-            },
+            local: true,
             oldValues: {
               [prop]: oldValue,
             },
-            local: true,
+            props: {
+              [prop]: newVal,
+            },
           });
 
           this.surface['hooks'].update.emit({
             id: this.id,
-            props: {
-              [prop]: newVal,
-            },
             oldValues: {
               [prop]: oldValue,
+            },
+            props: {
+              [prop]: newVal,
             },
           });
         }

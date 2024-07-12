@@ -1,7 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { rollup } from 'rollup';
 import { minify } from 'terser';
 
@@ -12,36 +11,36 @@ const pkgDir = path.resolve(root, 'packages');
 const sizeDir = path.resolve(root, 'temp/size');
 
 interface Preset {
-  name: string;
-  imports: string[] | string;
-  pkg: string;
   entry: string;
+  imports: string | string[];
+  name: string;
+  pkg: string;
 }
 
 const presets: Preset[] = [
   {
+    entry: 'dist/index.js',
+    imports: '*',
     name: 'blocks',
-    imports: '*',
     pkg: path.resolve(pkgDir, 'blocks'),
-    entry: 'dist/index.js',
   },
   {
+    entry: 'dist/index.js',
+    imports: '*',
     name: 'editor',
-    imports: '*',
     pkg: path.resolve(pkgDir, 'editor'),
-    entry: 'dist/index.js',
   },
   {
+    entry: 'dist/index.js',
+    imports: '*',
     name: 'store',
-    imports: '*',
     pkg: path.resolve(pkgDir, 'store'),
-    entry: 'dist/index.js',
   },
   {
-    name: 'inline',
-    imports: '*',
-    pkg: path.resolve(pkgDir, 'inline'),
     entry: 'dist/index.js',
+    imports: '*',
+    name: 'inline',
+    pkg: path.resolve(pkgDir, 'inline'),
   },
 ];
 
@@ -72,20 +71,20 @@ async function generateBundle(preset: Preset) {
 
   const result = await rollup({
     input: id,
+    logLevel: 'silent',
     plugins: [
       {
+        load(_id) {
+          if (_id === id) return content;
+          return null;
+        },
         name: 'size-data-plugin',
         resolveId(_id) {
           if (_id === id) return id;
           return null;
         },
-        load(_id) {
-          if (_id === id) return content;
-          return null;
-        },
       },
     ],
-    logLevel: 'silent',
   });
 
   const generated = await result.generate({
@@ -104,9 +103,9 @@ async function generateBundle(preset: Preset) {
   const brotli = (await brotliAsync(minified)).length;
 
   return {
+    brotli,
+    gzip,
     name: preset.name,
     size,
-    gzip,
-    brotli,
   };
 }

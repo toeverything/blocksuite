@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -23,12 +23,6 @@ export class EdgelessFontFamilyPanel extends LitElement {
       width: 100%;
     }
   `;
-
-  @property({ attribute: false })
-  accessor value: FontFamily = FontFamily.Inter;
-
-  @property({ attribute: false })
-  accessor onSelect: ((value: FontFamily) => void) | undefined = undefined;
 
   private _onSelect(value: FontFamily) {
     this.value = value;
@@ -58,6 +52,12 @@ export class EdgelessFontFamilyPanel extends LitElement {
       }
     );
   }
+
+  @property({ attribute: false })
+  accessor onSelect: ((value: FontFamily) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor value: FontFamily = FontFamily.Inter;
 }
 
 declare global {

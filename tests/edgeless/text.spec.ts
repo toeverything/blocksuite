@@ -1,7 +1,8 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';
 
 import {
+  SHORT_KEY,
   assertEdgelessTool,
   enterPlaygroundRoom,
   getEdgelessSelectedRect,
@@ -9,7 +10,6 @@ import {
   pressArrowLeft,
   pressEnter,
   setEdgelessTool,
-  SHORT_KEY,
   switchEditorMode,
   type,
   waitForInlineEditorStateUpdated,
@@ -157,7 +157,7 @@ test.describe('edgeless canvas text', () => {
 
     await page.mouse.click(220, 210);
     await waitNextFrame(page);
-    let { width: lastWidth, height: lastHeight } =
+    let { height: lastHeight, width: lastWidth } =
       await getEdgelessSelectedRect(page);
     const fontButton = page.getByRole('button', { name: /^Font$/ });
     await fontButton.click();

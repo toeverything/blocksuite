@@ -1,6 +1,12 @@
 import type { BlockService, EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
+
+import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
+import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
+import type { RootBlockModel } from '../../root-block/index.js';
+import type { IBound } from '../../surface-block/consts.js';
 
 import {
   blockElementGetter,
@@ -9,13 +15,9 @@ import {
   isInsidePageEditor,
   matchFlavours,
 } from '../../_common/utils/index.js';
-import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
-import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import { getBlocksInFrame } from '../../root-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
-import type { RootBlockModel } from '../../root-block/index.js';
-import type { IBound } from '../../surface-block/consts.js';
 import {
   GroupElementModel,
   type Renderer,
@@ -32,21 +34,83 @@ export type ExportOptions = {
   imageProxyEndpoint: string;
 };
 export class ExportManager {
-  get doc(): Doc {
-    return this._blockService.std.doc;
-  }
-
-  get editorHost(): EditorHost {
-    return this._blockService.std.host as EditorHost;
-  }
+  private _blockService: BlockService;
 
   private _exportOptions: ExportOptions;
 
-  private _blockService: BlockService;
+  private _replaceRichTextWithSvgElement = (element: HTMLElement) => {
+    const richList = Array.from(element.querySelectorAll('.inline-editor'));
+    richList.map(rich => {
+      const svgEle = this._elementToSvgElement(
+        rich.cloneNode(true) as HTMLElement,
+        rich.clientWidth,
+        rich.clientHeight + 1
+      );
+      rich.parentElement?.append(svgEle);
+      rich.remove();
+    });
+  };
+
+  replaceImgSrcWithSvg = async (element: HTMLElement) => {
+    const imgList = Array.from(element.querySelectorAll('img'));
+    // Create an array of promises
+    const promises = imgList.map(img => {
+      return fetchImage(
+        img.src,
+        undefined,
+        this._exportOptions.imageProxyEndpoint
+      )
+        .then(response => response.blob())
+        .then(async blob => {
+          // If the file type is SVG, set svg width and height
+          if (blob.type === 'image/svg+xml') {
+            // Parse the SVG
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(
+              await blob.text(),
+              'image/svg+xml'
+            );
+            const svgElement =
+              svgDoc.documentElement as unknown as SVGSVGElement;
+
+            // Check if the SVG has width and height attributes
+            if (
+              !svgElement.hasAttribute('width') &&
+              !svgElement.hasAttribute('height')
+            ) {
+              // Get the viewBox
+              const viewBox = svgElement.viewBox.baseVal;
+              // Set the SVG width and height
+              svgElement.setAttribute('width', `${viewBox.width}px`);
+              svgElement.setAttribute('height', `${viewBox.height}px`);
+            }
+
+            // Replace the img src with the modified SVG
+            const serializer = new XMLSerializer();
+            const newSvgStr = serializer.serializeToString(svgElement);
+            img.src =
+              'data:image/svg+xml;charset=utf-8,' +
+              encodeURIComponent(newSvgStr);
+          }
+        });
+    });
+
+    // Wait for all promises to resolve
+    await Promise.all(promises);
+  };
 
   constructor(blockService: BlockService, options: ExportOptions) {
     this._exportOptions = options;
     this._blockService = blockService;
+  }
+
+  private _checkCanContinueToCanvas(pathName: string, editorMode: boolean) {
+    if (
+      location.pathname !== pathName ||
+      isInsidePageEditor(this.editorHost) !== editorMode
+    ) {
+      throw new Error('Unable to export content to canvas');
+    }
   }
 
   private async _checkReady() {
@@ -83,16 +147,106 @@ export class ExportManager {
     return promise;
   }
 
+  private _createCanvas(bound: IBound, fillStyle: string) {
+    const canvas = document.createElement('canvas');
+    const dpr = window.devicePixelRatio || 1;
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+    canvas.width = (bound.w + 100) * dpr;
+    canvas.height = (bound.h + 100) * dpr;
+
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = fillStyle;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    return { canvas, ctx };
+  }
+
+  private _disableMediaPrint() {
+    document.querySelectorAll('.media-print').forEach(mediaPrint => {
+      mediaPrint.classList.add('hide');
+    });
+  }
+
+  private async _docToCanvas(): Promise<HTMLCanvasElement | void> {
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
+    const pathname = location.pathname;
+    const editorMode = isInsidePageEditor(this.editorHost);
+
+    const rootElement = getRootByEditorHost(this.editorHost);
+    assertExists(rootElement);
+    const viewportElement = rootElement.viewportElement;
+    assertExists(viewportElement);
+    const pageContainer = viewportElement.querySelector(
+      '.affine-page-root-block-container'
+    );
+    const rect = pageContainer?.getBoundingClientRect();
+    const { viewport } = rootElement;
+    assertExists(viewport);
+    const pageWidth = rect?.width;
+    const pageLeft = rect?.left ?? 0;
+    const viewportHeight = viewportElement?.scrollHeight;
+
+    const html2canvasOption = {
+      backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
+      height: viewportHeight,
+      ignoreElements: function (element: Element) {
+        if (
+          CANVAS_EXPORT_IGNORE_TAGS.includes(element.tagName) ||
+          element.classList.contains('dg')
+        ) {
+          return true;
+        } else if (
+          (element.classList.contains('close') &&
+            element.parentElement?.classList.contains(
+              'meta-data-expanded-title'
+            )) ||
+          (element.classList.contains('expand') &&
+            element.parentElement?.classList.contains('meta-data'))
+        ) {
+          // the close and expand buttons in affine-doc-meta-data is not needed to be showed
+          return true;
+        } else {
+          return false;
+        }
+      },
+      onclone: async (_documentClone: Document, element: HTMLElement) => {
+        element.style.height = `${viewportHeight}px`;
+        this._replaceRichTextWithSvgElement(element);
+        await this.replaceImgSrcWithSvg(element);
+      },
+      proxy: this._exportOptions.imageProxyEndpoint,
+      useCORS: this._exportOptions.imageProxyEndpoint ? false : true,
+      width: pageWidth,
+      x: pageLeft - viewport.left,
+    };
+
+    let data: HTMLCanvasElement;
+    try {
+      this._enableMediaPrint();
+      data = await html2canvas(
+        viewportElement as HTMLElement,
+        html2canvasOption
+      );
+    } finally {
+      this._disableMediaPrint();
+    }
+    this._checkCanContinueToCanvas(pathname, editorMode);
+    return data;
+  }
+
   private _drawEdgelessBackground(
     ctx: CanvasRenderingContext2D,
     {
-      size,
       backgroundColor,
       gridColor,
+      size,
     }: {
-      size: number;
       backgroundColor: string;
       gridColor: string;
+      size: number;
     }
   ) {
     const svgImg = `<svg width='${ctx.canvas.width}px' height='${ctx.canvas.height}px' xmlns='http://www.w3.org/2000/svg' style='background-size:${size}px ${size}px;background-color:${backgroundColor}; background-image: radial-gradient(${gridColor} 1px, ${backgroundColor} 1px)'></svg>`;
@@ -114,6 +268,36 @@ export class ExportManager {
       };
 
       img.src = `data:image/svg+xml,${encodeURIComponent(svgImg)}`;
+    });
+  }
+
+  private _elementToSvgElement(
+    node: HTMLElement,
+    width: number,
+    height: number
+  ) {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(xmlns, 'svg');
+    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
+
+    svg.setAttribute('width', `${width}`);
+    svg.setAttribute('height', `${height}`);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+    foreignObject.setAttribute('width', '100%');
+    foreignObject.setAttribute('height', '100%');
+    foreignObject.setAttribute('x', '0');
+    foreignObject.setAttribute('y', '0');
+    foreignObject.setAttribute('externalResourcesRequired', 'true');
+
+    svg.append(foreignObject);
+    foreignObject.append(node);
+    return svg;
+  }
+
+  private _enableMediaPrint() {
+    document.querySelectorAll('.media-print').forEach(mediaPrint => {
+      mediaPrint.classList.remove('hide');
     });
   }
 
@@ -157,8 +341,8 @@ export class ExportManager {
         this._replaceRichTextWithSvgElement(element);
         await this.replaceImgSrcWithSvg(element);
       },
-      useCORS: this._exportOptions.imageProxyEndpoint ? false : true,
       proxy: this._exportOptions.imageProxyEndpoint,
+      useCORS: this._exportOptions.imageProxyEndpoint ? false : true,
     };
 
     let data: HTMLCanvasElement;
@@ -172,148 +356,6 @@ export class ExportManager {
       this._disableMediaPrint();
     }
     return data;
-  }
-
-  private _createCanvas(bound: IBound, fillStyle: string) {
-    const canvas = document.createElement('canvas');
-    const dpr = window.devicePixelRatio || 1;
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-
-    canvas.width = (bound.w + 100) * dpr;
-    canvas.height = (bound.h + 100) * dpr;
-
-    ctx.scale(dpr, dpr);
-    ctx.fillStyle = fillStyle;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    return { canvas, ctx };
-  }
-
-  private async _docToCanvas(): Promise<HTMLCanvasElement | void> {
-    const html2canvas = (await import('html2canvas')).default;
-    if (!(html2canvas instanceof Function)) return;
-
-    const pathname = location.pathname;
-    const editorMode = isInsidePageEditor(this.editorHost);
-
-    const rootElement = getRootByEditorHost(this.editorHost);
-    assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement;
-    assertExists(viewportElement);
-    const pageContainer = viewportElement.querySelector(
-      '.affine-page-root-block-container'
-    );
-    const rect = pageContainer?.getBoundingClientRect();
-    const { viewport } = rootElement;
-    assertExists(viewport);
-    const pageWidth = rect?.width;
-    const pageLeft = rect?.left ?? 0;
-    const viewportHeight = viewportElement?.scrollHeight;
-
-    const html2canvasOption = {
-      ignoreElements: function (element: Element) {
-        if (
-          CANVAS_EXPORT_IGNORE_TAGS.includes(element.tagName) ||
-          element.classList.contains('dg')
-        ) {
-          return true;
-        } else if (
-          (element.classList.contains('close') &&
-            element.parentElement?.classList.contains(
-              'meta-data-expanded-title'
-            )) ||
-          (element.classList.contains('expand') &&
-            element.parentElement?.classList.contains('meta-data'))
-        ) {
-          // the close and expand buttons in affine-doc-meta-data is not needed to be showed
-          return true;
-        } else {
-          return false;
-        }
-      },
-      onclone: async (_documentClone: Document, element: HTMLElement) => {
-        element.style.height = `${viewportHeight}px`;
-        this._replaceRichTextWithSvgElement(element);
-        await this.replaceImgSrcWithSvg(element);
-      },
-      backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
-      x: pageLeft - viewport.left,
-      width: pageWidth,
-      height: viewportHeight,
-      useCORS: this._exportOptions.imageProxyEndpoint ? false : true,
-      proxy: this._exportOptions.imageProxyEndpoint,
-    };
-
-    let data: HTMLCanvasElement;
-    try {
-      this._enableMediaPrint();
-      data = await html2canvas(
-        viewportElement as HTMLElement,
-        html2canvasOption
-      );
-    } finally {
-      this._disableMediaPrint();
-    }
-    this._checkCanContinueToCanvas(pathname, editorMode);
-    return data;
-  }
-
-  private _replaceRichTextWithSvgElement = (element: HTMLElement) => {
-    const richList = Array.from(element.querySelectorAll('.inline-editor'));
-    richList.map(rich => {
-      const svgEle = this._elementToSvgElement(
-        rich.cloneNode(true) as HTMLElement,
-        rich.clientWidth,
-        rich.clientHeight + 1
-      );
-      rich.parentElement?.append(svgEle);
-      rich.remove();
-    });
-  };
-
-  private _enableMediaPrint() {
-    document.querySelectorAll('.media-print').forEach(mediaPrint => {
-      mediaPrint.classList.remove('hide');
-    });
-  }
-
-  private _disableMediaPrint() {
-    document.querySelectorAll('.media-print').forEach(mediaPrint => {
-      mediaPrint.classList.add('hide');
-    });
-  }
-
-  private _elementToSvgElement(
-    node: HTMLElement,
-    width: number,
-    height: number
-  ) {
-    const xmlns = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(xmlns, 'svg');
-    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
-
-    svg.setAttribute('width', `${width}`);
-    svg.setAttribute('height', `${height}`);
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-
-    foreignObject.setAttribute('width', '100%');
-    foreignObject.setAttribute('height', '100%');
-    foreignObject.setAttribute('x', '0');
-    foreignObject.setAttribute('y', '0');
-    foreignObject.setAttribute('externalResourcesRequired', 'true');
-
-    svg.append(foreignObject);
-    foreignObject.append(node);
-    return svg;
-  }
-
-  private _checkCanContinueToCanvas(pathName: string, editorMode: boolean) {
-    if (
-      location.pathname !== pathName ||
-      isInsidePageEditor(this.editorHost) !== editorMode
-    ) {
-      throw new Error('Unable to export content to canvas');
-    }
   }
 
   private async _toCanvas(): Promise<HTMLCanvasElement | void> {
@@ -373,7 +415,7 @@ export class ExportManager {
 
     if (!container) return;
 
-    const { ctx, canvas } = this._createCanvas(
+    const { canvas, ctx } = this._createCanvas(
       bound,
       window.getComputedStyle(container).backgroundColor
     );
@@ -383,10 +425,10 @@ export class ExportManager {
         backgroundColor: containerComputedStyle.getPropertyValue(
           '--affine-background-primary-color'
         ),
-        size: getBackgroundGrid(edgelessBackground.zoom, true).gap,
         gridColor: containerComputedStyle.getPropertyValue(
           '--affine-edgeless-grid-color'
         ),
+        size: getBackgroundGrid(edgelessBackground.zoom, true).gap,
       });
     }
 
@@ -477,6 +519,33 @@ export class ExportManager {
     return canvas;
   }
 
+  async exportPdf() {
+    const rootModel = this.doc.root;
+    if (!rootModel) return;
+    const canvasImage = await this._toCanvas();
+    if (!canvasImage) {
+      return;
+    }
+
+    const PDFLib = await import('pdf-lib');
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    const page = pdfDoc.addPage([canvasImage.width, canvasImage.height]);
+    const imageEmbed = await pdfDoc.embedPng(canvasImage.toDataURL('PNG'));
+    const { height, width } = imageEmbed.scale(1);
+    page.drawImage(imageEmbed, {
+      height,
+      width,
+      x: 0,
+      y: 0,
+    });
+    const pdfBase64 = await pdfDoc.saveAsBase64({ dataUri: true });
+
+    FileExporter.exportFile(
+      (rootModel as RootBlockModel).title.toString() + '.pdf',
+      pdfBase64
+    );
+  }
+
   async exportPng() {
     const rootModel = this.doc.root;
     if (!rootModel) return;
@@ -491,78 +560,11 @@ export class ExportManager {
     );
   }
 
-  replaceImgSrcWithSvg = async (element: HTMLElement) => {
-    const imgList = Array.from(element.querySelectorAll('img'));
-    // Create an array of promises
-    const promises = imgList.map(img => {
-      return fetchImage(
-        img.src,
-        undefined,
-        this._exportOptions.imageProxyEndpoint
-      )
-        .then(response => response.blob())
-        .then(async blob => {
-          // If the file type is SVG, set svg width and height
-          if (blob.type === 'image/svg+xml') {
-            // Parse the SVG
-            const parser = new DOMParser();
-            const svgDoc = parser.parseFromString(
-              await blob.text(),
-              'image/svg+xml'
-            );
-            const svgElement =
-              svgDoc.documentElement as unknown as SVGSVGElement;
+  get doc(): Doc {
+    return this._blockService.std.doc;
+  }
 
-            // Check if the SVG has width and height attributes
-            if (
-              !svgElement.hasAttribute('width') &&
-              !svgElement.hasAttribute('height')
-            ) {
-              // Get the viewBox
-              const viewBox = svgElement.viewBox.baseVal;
-              // Set the SVG width and height
-              svgElement.setAttribute('width', `${viewBox.width}px`);
-              svgElement.setAttribute('height', `${viewBox.height}px`);
-            }
-
-            // Replace the img src with the modified SVG
-            const serializer = new XMLSerializer();
-            const newSvgStr = serializer.serializeToString(svgElement);
-            img.src =
-              'data:image/svg+xml;charset=utf-8,' +
-              encodeURIComponent(newSvgStr);
-          }
-        });
-    });
-
-    // Wait for all promises to resolve
-    await Promise.all(promises);
-  };
-
-  async exportPdf() {
-    const rootModel = this.doc.root;
-    if (!rootModel) return;
-    const canvasImage = await this._toCanvas();
-    if (!canvasImage) {
-      return;
-    }
-
-    const PDFLib = await import('pdf-lib');
-    const pdfDoc = await PDFLib.PDFDocument.create();
-    const page = pdfDoc.addPage([canvasImage.width, canvasImage.height]);
-    const imageEmbed = await pdfDoc.embedPng(canvasImage.toDataURL('PNG'));
-    const { width, height } = imageEmbed.scale(1);
-    page.drawImage(imageEmbed, {
-      x: 0,
-      y: 0,
-      width,
-      height,
-    });
-    const pdfBase64 = await pdfDoc.saveAsBase64({ dataUri: true });
-
-    FileExporter.exportFile(
-      (rootModel as RootBlockModel).title.toString() + '.pdf',
-      pdfBase64
-    );
+  get editorHost(): EditorHost {
+    return this._blockService.std.host as EditorHost;
   }
 }

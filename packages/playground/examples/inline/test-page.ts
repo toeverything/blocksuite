@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import '@shoelace-style/shoelace';
-
 import { ShadowlessElement } from '@blocksuite/block-std';
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
-  baseTextAttributes,
-  createInlineKeyDownHandler,
   type DeltaInsert,
   InlineEditor,
   KEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
+  baseTextAttributes,
+  createInlineKeyDownHandler,
 } from '@blocksuite/inline';
+import '@shoelace-style/shoelace';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -34,20 +33,20 @@ function inlineTextStyles(
   let inlineCodeStyle = {};
   if (props.code) {
     inlineCodeStyle = {
+      background: 'rgba(135,131,120,0.15)',
+      'border-radius': '3px',
+      color: '#EB5757',
       'font-family':
         '"SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace',
-      'line-height': 'normal',
-      background: 'rgba(135,131,120,0.15)',
-      color: '#EB5757',
-      'border-radius': '3px',
       'font-size': '85%',
+      'line-height': 'normal',
       padding: '0.2em 0.4em',
     };
   }
 
   return styleMap({
-    'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
+    'font-weight': props.bold ? 'bold' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
     ...inlineCodeStyle,
   });
@@ -61,9 +60,9 @@ const attributeRenderer: AttributeRenderer = (
   if (delta.attributes?.embed) {
     return html`<span
       style=${styleMap({
-        padding: '0 0.4em',
-        border: selected ? '1px solid #eb763a' : '',
         background: 'rgba(135,131,120,0.15)',
+        border: selected ? '1px solid #eb763a' : '',
+        padding: '0 0.4em',
       })}
       >@flrande<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
     ></span>`;
@@ -128,15 +127,6 @@ function toggleStyle(
 
 @customElement('test-rich-text')
 export class TestRichText extends ShadowlessElement {
-  @query('.rich-text-container')
-  private accessor _container!: HTMLDivElement;
-
-  @property({ attribute: false })
-  accessor inlineEditor!: InlineEditor;
-
-  @property({ attribute: false })
-  accessor undoManager!: Y.UndoManager;
-
   override firstUpdated() {
     this.contentEditable = 'true';
     this.style.outline = 'none';
@@ -144,17 +134,16 @@ export class TestRichText extends ShadowlessElement {
 
     const keydownHandler = createInlineKeyDownHandler(this.inlineEditor, {
       inputRule: {
-        key: ' ',
         handler: context => {
-          const { inlineEditor, prefixText, inlineRange } = context;
+          const { inlineEditor, inlineRange, prefixText } = context;
           for (const match of markdownMatches) {
             const matchedText = prefixText.match(match.pattern);
             if (matchedText) {
               return match.action({
                 inlineEditor,
-                prefixText,
                 inlineRange,
                 pattern: match.pattern,
+                prefixText,
                 undoManager: this.undoManager,
               });
             }
@@ -162,6 +151,7 @@ export class TestRichText extends ShadowlessElement {
 
           return KEYBOARD_ALLOW_DEFAULT;
         },
+        key: ' ',
       },
     });
     this.addEventListener('keydown', keydownHandler);
@@ -230,6 +220,15 @@ export class TestRichText extends ShadowlessElement {
       <div contenteditable="false" class="v-range"></div>
       <div contenteditable="false" class="y-text"></div>`;
   }
+
+  @query('.rich-text-container')
+  private accessor _container!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor inlineEditor!: InlineEditor;
+
+  @property({ attribute: false })
+  accessor undoManager!: Y.UndoManager;
 }
 
 const TEXT_ID = 'inline-editor';
@@ -253,12 +252,6 @@ export class CustomToolbar extends ShadowlessElement {
       grid-template-rows: repeat(2, minmax(0, 1fr));
     }
   `;
-
-  @property({ attribute: false })
-  accessor inlineEditor!: InlineEditor;
-
-  @property({ attribute: false })
-  accessor undoManager!: Y.UndoManager;
 
   override firstUpdated() {
     const boldButton = this.querySelector('.bold');
@@ -361,6 +354,12 @@ export class CustomToolbar extends ShadowlessElement {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor inlineEditor!: InlineEditor;
+
+  @property({ attribute: false })
+  accessor undoManager!: Y.UndoManager;
 }
 
 @customElement('test-page')
@@ -405,9 +404,9 @@ export class TestPage extends ShadowlessElement {
   override firstUpdated() {
     const textA = yDocA.getText(TEXT_ID);
     this._editorA = new InlineEditor<
-      BaseTextAttributes & {
+      {
         embed?: true;
-      }
+      } & BaseTextAttributes
     >(textA, {
       isEmbed: delta => !!delta.attributes?.embed,
     });

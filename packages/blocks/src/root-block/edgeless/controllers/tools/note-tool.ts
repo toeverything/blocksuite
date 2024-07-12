@@ -1,13 +1,15 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import {
-  hasClassNameInList,
-  type NoteChildrenFlavour,
-  Point,
-} from '../../../../_common/utils/index.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 import type { EdgelessTool } from '../../types.js';
+
+import {
+  type NoteChildrenFlavour,
+  Point,
+  hasClassNameInList,
+} from '../../../../_common/utils/index.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   NOTE_INIT_HEIGHT,
@@ -18,25 +20,48 @@ import { DraggingNoteOverlay, NoteOverlay } from '../../utils/tool-overlay.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 export type NoteTool = {
-  type: 'affine:note';
   childFlavour: NoteChildrenFlavour;
-  childType: string | null;
+  childType: null | string;
   tip: string;
+  type: 'affine:note';
 };
 
 export class NoteToolController extends EdgelessToolController<NoteTool> {
-  private _noteOverlay: NoteOverlay | null = null;
+  protected override _draggingArea: SelectionArea | null = null;
 
   private _draggingNoteOverlay: DraggingNoteOverlay | null = null;
 
-  protected override _draggingArea: SelectionArea | null = null;
+  private _noteOverlay: NoteOverlay | null = null;
 
   readonly tool = {
-    type: 'affine:note',
     childFlavour: 'affine:paragraph',
     childType: 'text',
     tip: 'Text',
+    type: 'affine:note',
   } as NoteTool;
+
+  // Ensure clear overlay before adding a new note
+  private _clearOverlay() {
+    this._noteOverlay = this._disposeOverlay(this._noteOverlay);
+    this._draggingNoteOverlay = this._disposeOverlay(this._draggingNoteOverlay);
+    this._edgeless.surface.refresh();
+  }
+
+  private _disposeOverlay(overlay: NoteOverlay | null) {
+    if (!overlay) return null;
+
+    overlay.dispose();
+    this._edgeless.surface.renderer.removeOverlay(overlay);
+    return null;
+  }
+
+  // Should hide overlay when mouse is out of viewport or on menu and toolbar
+  private _hideOverlay() {
+    if (!this._noteOverlay) return;
+
+    this._noteOverlay.globalAlpha = 0;
+    this._edgeless.surface.refresh();
+  }
 
   private _resize(shift = false) {
     const { _draggingArea, _draggingNoteOverlay, _edgeless } = this;
@@ -46,8 +71,8 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     const { viewport } = _edgeless.service;
     const { zoom } = viewport;
     const {
-      start: { x: startX, y: startY },
       end,
+      start: { x: startX, y: startY },
     } = _draggingArea;
     let { x: endX, y: endY } = end;
 
@@ -78,40 +103,19 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._edgeless.surface.refresh();
   }
 
-  private _disposeOverlay(overlay: NoteOverlay | null) {
-    if (!overlay) return null;
+  afterModeSwitch(newTool: EdgelessTool) {
+    if (newTool.type !== 'affine:note') return;
 
-    overlay.dispose();
-    this._edgeless.surface.renderer.removeOverlay(overlay);
-    return null;
+    const attributes =
+      this._edgeless.service.editPropsStore.getLastProps('affine:note');
+    const background = attributes.background;
+    this._noteOverlay = new NoteOverlay(this._edgeless, background);
+    this._noteOverlay.text = newTool.tip;
+    this._edgeless.surface.renderer.addOverlay(this._noteOverlay);
   }
 
-  // Ensure clear overlay before adding a new note
-  private _clearOverlay() {
-    this._noteOverlay = this._disposeOverlay(this._noteOverlay);
-    this._draggingNoteOverlay = this._disposeOverlay(this._draggingNoteOverlay);
-    this._edgeless.surface.refresh();
-  }
-
-  // Should hide overlay when mouse is out of viewport or on menu and toolbar
-  private _hideOverlay() {
-    if (!this._noteOverlay) return;
-
-    this._noteOverlay.globalAlpha = 0;
-    this._edgeless.surface.refresh();
-  }
-
-  onPressShiftKey(pressed: boolean) {
-    if (!this._draggingNoteOverlay) return;
-    this._resize(pressed);
-  }
-
-  onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
-
-  onContainerPointerDown(): void {
-    noop();
+  beforeModeSwitch() {
+    this._clearOverlay();
   }
 
   onContainerClick(e: PointerEventState): void {
@@ -135,41 +139,11 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     noop();
   }
 
-  onContainerTripleClick() {
-    noop();
-  }
-
-  onContainerDragStart(e: PointerEventState) {
-    this._clearOverlay();
-
-    const attributes =
-      this._edgeless.service.editPropsStore.getLastProps('affine:note');
-    const background = attributes.background;
-    this._draggingNoteOverlay = new DraggingNoteOverlay(
-      this._edgeless,
-      background
-    );
-    this._edgeless.surface.renderer.addOverlay(this._draggingNoteOverlay);
-
-    this._draggingArea = {
-      start: new DOMPoint(e.x, e.y),
-      end: new DOMPoint(e.x, e.y),
-    };
-  }
-
-  onContainerDragMove(e: PointerEventState) {
-    assertExists(this._draggingNoteOverlay);
-    assertExists(this._draggingArea);
-
-    this._draggingArea.end = new DOMPoint(e.x, e.y);
-    this._resize(e.keys.shift || this._edgeless.tools.shiftKey);
-  }
-
   onContainerDragEnd() {
     if (!this._draggingNoteOverlay) return;
     this._draggingArea = null;
 
-    const { x, y, width, height } = this._draggingNoteOverlay;
+    const { height, width, x, y } = this._draggingNoteOverlay;
 
     this._disposeOverlay(this._draggingNoteOverlay);
 
@@ -196,6 +170,32 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     );
   }
 
+  onContainerDragMove(e: PointerEventState) {
+    assertExists(this._draggingNoteOverlay);
+    assertExists(this._draggingArea);
+
+    this._draggingArea.end = new DOMPoint(e.x, e.y);
+    this._resize(e.keys.shift || this._edgeless.tools.shiftKey);
+  }
+
+  onContainerDragStart(e: PointerEventState) {
+    this._clearOverlay();
+
+    const attributes =
+      this._edgeless.service.editPropsStore.getLastProps('affine:note');
+    const background = attributes.background;
+    this._draggingNoteOverlay = new DraggingNoteOverlay(
+      this._edgeless,
+      background
+    );
+    this._edgeless.surface.renderer.addOverlay(this._draggingNoteOverlay);
+
+    this._draggingArea = {
+      end: new DOMPoint(e.x, e.y),
+      start: new DOMPoint(e.x, e.y),
+    };
+  }
+
   onContainerMouseMove(e: PointerEventState) {
     if (!this._noteOverlay) return;
 
@@ -218,19 +218,21 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._hideOverlay();
   }
 
-  beforeModeSwitch() {
-    this._clearOverlay();
+  onContainerPointerDown(): void {
+    noop();
   }
 
-  afterModeSwitch(newTool: EdgelessTool) {
-    if (newTool.type !== 'affine:note') return;
+  onContainerTripleClick() {
+    noop();
+  }
 
-    const attributes =
-      this._edgeless.service.editPropsStore.getLastProps('affine:note');
-    const background = attributes.background;
-    this._noteOverlay = new NoteOverlay(this._edgeless, background);
-    this._noteOverlay.text = newTool.tip;
-    this._edgeless.surface.renderer.addOverlay(this._noteOverlay);
+  onPressShiftKey(pressed: boolean) {
+    if (!this._draggingNoteOverlay) return;
+    this._resize(pressed);
+  }
+
+  onPressSpaceBar(_pressed: boolean): void {
+    noop();
   }
 }
 

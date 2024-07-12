@@ -7,18 +7,18 @@ function escapeHtml(html: string) {
 // Custom function to emit toast notifications
 export function notify(
   message: string,
-  variant: 'primary' | 'success' | 'neutral' | 'warning' | 'danger' = 'primary',
+  variant: 'danger' | 'neutral' | 'primary' | 'success' | 'warning' = 'primary',
   icon = 'info-circle',
   duration = 2000
 ) {
   const alert = Object.assign(document.createElement('sl-alert'), {
-    variant,
     closable: true,
     duration: duration,
     innerHTML: `
       <sl-icon name="${icon}" slot="icon"></sl-icon>
       ${escapeHtml(message)}
     `,
+    variant,
   });
 
   document.body.append(alert);

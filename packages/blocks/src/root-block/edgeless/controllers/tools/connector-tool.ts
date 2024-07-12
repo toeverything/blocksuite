@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { assertExists, noop } from '@blocksuite/global/utils';
 
 import type {
@@ -6,6 +7,8 @@ import type {
   IBound,
   IVec2,
 } from '../../../../surface-block/index.js';
+import type { EdgelessTool } from '../../types.js';
+
 import {
   Bound,
   CanvasElementType,
@@ -17,11 +20,10 @@ import {
   ShapeType,
 } from '../../../../surface-block/index.js';
 import {
-  calculateNearestLocation,
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
+  calculateNearestLocation,
 } from '../../../../surface-block/managers/connector-manager.js';
-import type { EdgelessTool } from '../../types.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 enum ConnectorToolMode {
@@ -32,14 +34,17 @@ enum ConnectorToolMode {
 }
 
 export type ConnectorTool = {
-  type: 'connector';
   mode: ConnectorMode;
+  type: 'connector';
 };
 
 export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {
-  private _mode: ConnectorToolMode = ConnectorToolMode.Dragging;
+  // Likes pressing `ESC`
+  private _allowCancel = false;
 
   private _connector: ConnectorElementModel | null = null;
+
+  private _mode: ConnectorToolMode = ConnectorToolMode.Dragging;
 
   private _source: Connection | null = null;
 
@@ -48,9 +53,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   private _sourceLocations: IVec2[] = ConnectorEndpointLocations;
 
   private _startPoint: IVec | null = null;
-
-  // Likes pressing `ESC`
-  private _allowCancel = false;
 
   readonly tool = {
     type: 'connector',
@@ -62,21 +64,158 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
     this._doc.captureSync();
     const id = this._edgeless.service.addElement(CanvasElementType.CONNECTOR, {
-      mode: this.tool.mode,
       controllers: [],
+      mode: this.tool.mode,
       source: this._source,
       target: { position: this._startPoint },
     });
     this._edgeless.service.telemetryService?.track('CanvasElementAdded', {
       control: 'canvas:draw',
-      page: 'whiteboard editor',
       module: 'toolbar',
+      page: 'whiteboard editor',
       segment: 'toolbar',
       type: CanvasElementType.CONNECTOR,
     });
     this._connector = this._edgeless.service.getElementById(
       id
     ) as ConnectorElementModel;
+  }
+
+  afterModeSwitch() {
+    noop();
+  }
+
+  beforeModeSwitch(edgelessTool: EdgelessTool) {
+    if (edgelessTool.type === 'connector') return;
+
+    const id = this._connector?.id;
+    if (this._allowCancel && id) {
+      this._edgeless.service.removeElement(id);
+    }
+
+    this._surface.overlays.connector.clear();
+    this._mode = ConnectorToolMode.Dragging;
+    this._connector = null;
+    this._source = null;
+    this._sourceBounds = null;
+    this._startPoint = null;
+    this._allowCancel = false;
+  }
+
+  findTargetByPoint(point: IVec) {
+    assertExists(this._connector);
+    const {
+      _connector,
+      _edgeless,
+      _service: { viewport },
+      _surface: { overlays },
+    } = this;
+
+    point = viewport.toModelCoord(point[0], point[1]);
+
+    const excludedIds = [];
+    if (_connector.source.id) {
+      excludedIds.push(_connector.source.id);
+    }
+
+    const target = overlays.connector.renderConnector(point, excludedIds);
+    _edgeless.service.updateElement(_connector.id, { target });
+  }
+
+  onContainerClick() {
+    if (this._mode === ConnectorToolMode.Dragging) return;
+    if (!this._connector) return;
+
+    const { id, source, target } = this._connector;
+    let focusedId = id;
+
+    if (source.id && !target.id) {
+      focusedId = source.id;
+      this._allowCancel = true;
+    }
+
+    this._edgeless.tools.switchToDefaultMode({
+      editing: false,
+      elements: [focusedId],
+    });
+  }
+
+  onContainerContextMenu(): void {
+    noop();
+  }
+
+  onContainerDblClick(): void {
+    noop();
+  }
+
+  onContainerDragEnd() {
+    if (this._mode === ConnectorToolMode.Quick) return;
+    assertExists(this._connector);
+
+    this._doc.captureSync();
+    this._edgeless.tools.switchToDefaultMode({
+      editing: false,
+      elements: [this._connector.id],
+    });
+  }
+
+  onContainerDragMove(e: PointerEventState) {
+    this.findTargetByPoint([e.x, e.y]);
+  }
+
+  onContainerDragStart() {
+    if (this._mode === ConnectorToolMode.Quick) return;
+
+    this._createConnector();
+  }
+
+  onContainerMouseMove(e: PointerEventState) {
+    if (this._mode === ConnectorToolMode.Dragging) return;
+
+    assertExists(this._sourceBounds);
+    assertExists(this._connector);
+
+    const sourceId = this._connector.source.id;
+    assertExists(sourceId);
+
+    const point = this._service.viewport.toModelCoord(e.x, e.y);
+    const target = this._surface.overlays.connector.renderConnector(point, [
+      sourceId,
+    ]);
+
+    this._allowCancel = !target.id;
+    this._connector.source.position = calculateNearestLocation(
+      point,
+      this._sourceBounds,
+      this._sourceLocations
+    );
+    this._edgeless.service.updateElement(this._connector.id, {
+      source: this._connector.source,
+      target,
+    });
+  }
+
+  onContainerMouseOut() {
+    noop();
+  }
+
+  onContainerPointerDown(e: PointerEventState) {
+    this._startPoint = this._service.viewport.toModelCoord(e.x, e.y);
+    this._source = this._surface.overlays.connector.renderConnector(
+      this._startPoint
+    );
+  }
+
+  onContainerTripleClick() {
+    noop();
+  }
+
+  onPressShiftKey(_: boolean) {
+    noop();
+  }
+
+  onPressSpaceBar(_pressed: boolean): void {
+    noop();
   }
 
   quickConnect(point: IVec, element: BlockSuite.EdgelessModelType) {
@@ -107,143 +246,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     }
 
     this.findTargetByPoint(point);
-  }
-
-  findTargetByPoint(point: IVec) {
-    assertExists(this._connector);
-    const {
-      _connector,
-      _edgeless,
-      _surface: { overlays },
-      _service: { viewport },
-    } = this;
-
-    point = viewport.toModelCoord(point[0], point[1]);
-
-    const excludedIds = [];
-    if (_connector.source.id) {
-      excludedIds.push(_connector.source.id);
-    }
-
-    const target = overlays.connector.renderConnector(point, excludedIds);
-    _edgeless.service.updateElement(_connector.id, { target });
-  }
-
-  onContainerClick() {
-    if (this._mode === ConnectorToolMode.Dragging) return;
-    if (!this._connector) return;
-
-    const { id, source, target } = this._connector;
-    let focusedId = id;
-
-    if (source.id && !target.id) {
-      focusedId = source.id;
-      this._allowCancel = true;
-    }
-
-    this._edgeless.tools.switchToDefaultMode({
-      elements: [focusedId],
-      editing: false,
-    });
-  }
-
-  onContainerContextMenu(): void {
-    noop();
-  }
-
-  onContainerDblClick(): void {
-    noop();
-  }
-
-  onContainerTripleClick() {
-    noop();
-  }
-
-  onContainerPointerDown(e: PointerEventState) {
-    this._startPoint = this._service.viewport.toModelCoord(e.x, e.y);
-    this._source = this._surface.overlays.connector.renderConnector(
-      this._startPoint
-    );
-  }
-
-  onContainerDragStart() {
-    if (this._mode === ConnectorToolMode.Quick) return;
-
-    this._createConnector();
-  }
-
-  onContainerDragMove(e: PointerEventState) {
-    this.findTargetByPoint([e.x, e.y]);
-  }
-
-  onContainerDragEnd() {
-    if (this._mode === ConnectorToolMode.Quick) return;
-    assertExists(this._connector);
-
-    this._doc.captureSync();
-    this._edgeless.tools.switchToDefaultMode({
-      elements: [this._connector.id],
-      editing: false,
-    });
-  }
-
-  onContainerMouseMove(e: PointerEventState) {
-    if (this._mode === ConnectorToolMode.Dragging) return;
-
-    assertExists(this._sourceBounds);
-    assertExists(this._connector);
-
-    const sourceId = this._connector.source.id;
-    assertExists(sourceId);
-
-    const point = this._service.viewport.toModelCoord(e.x, e.y);
-    const target = this._surface.overlays.connector.renderConnector(point, [
-      sourceId,
-    ]);
-
-    this._allowCancel = !target.id;
-    this._connector.source.position = calculateNearestLocation(
-      point,
-      this._sourceBounds,
-      this._sourceLocations
-    );
-    this._edgeless.service.updateElement(this._connector.id, {
-      target,
-      source: this._connector.source,
-    });
-  }
-
-  onContainerMouseOut() {
-    noop();
-  }
-
-  onPressShiftKey(_: boolean) {
-    noop();
-  }
-
-  onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
-
-  beforeModeSwitch(edgelessTool: EdgelessTool) {
-    if (edgelessTool.type === 'connector') return;
-
-    const id = this._connector?.id;
-    if (this._allowCancel && id) {
-      this._edgeless.service.removeElement(id);
-    }
-
-    this._surface.overlays.connector.clear();
-    this._mode = ConnectorToolMode.Dragging;
-    this._connector = null;
-    this._source = null;
-    this._sourceBounds = null;
-    this._startPoint = null;
-    this._allowCancel = false;
-  }
-
-  afterModeSwitch() {
-    noop();
   }
 }
 

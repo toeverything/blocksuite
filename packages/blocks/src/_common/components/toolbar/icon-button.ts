@@ -1,11 +1,12 @@
-import '../tooltip/tooltip.js';
-
 import type { Placement } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
-import { css, html, LitElement, nothing } from 'lit';
+
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import '../tooltip/tooltip.js';
 
 @customElement('editor-icon-button')
 export class EditorIconButton extends LitElement {
@@ -81,57 +82,6 @@ export class EditorIconButton extends LitElement {
     }
   `;
 
-  @property({ type: Boolean, reflect: true })
-  accessor disabled = false;
-
-  @property({ attribute: false })
-  accessor coming = false;
-
-  @property({ type: Boolean })
-  accessor showTooltip = true;
-
-  @property({ attribute: false })
-  accessor tooltip!: string | TemplateResult<1>;
-
-  @property({ attribute: false })
-  accessor tipPosition: Placement = 'top';
-
-  @property({ attribute: false })
-  accessor arrow = true;
-
-  @property({ attribute: false })
-  accessor tooltipOffset = 8;
-
-  @property({ attribute: false })
-  accessor active = false;
-
-  @property({ attribute: false })
-  accessor activeMode: 'color' | 'background' = 'color';
-
-  @property({ attribute: false })
-  accessor iconContainerWidth: string | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor iconContainerPadding: number | number[] = 2;
-
-  @property({ attribute: false })
-  accessor iconSize: string | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor labelHeight: string | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor withHover: boolean | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor justify: string | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor hover = true;
-
-  @property({ attribute: false })
-  accessor hoverState = false;
-
   constructor() {
     super();
 
@@ -169,10 +119,10 @@ export class EditorIconButton extends LitElement {
     const classnames = `icon-container active-mode-${this.activeMode} ${this.hoverState ? 'hovered' : ''}`;
     const padding = this.iconContainerPadding;
     const iconContainerStyles = styleMap({
-      '--icon-container-width': this.iconContainerWidth,
       '--icon-container-padding': Array.isArray(padding)
         ? padding.map(v => `${v}px`).join(' ')
         : `${padding}px`,
+      '--icon-container-width': this.iconContainerWidth,
       '--icon-size': this.iconSize,
       '--justify': this.justify,
       '--label-height': this.labelHeight,
@@ -206,6 +156,57 @@ export class EditorIconButton extends LitElement {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor active = false;
+
+  @property({ attribute: false })
+  accessor activeMode: 'background' | 'color' = 'color';
+
+  @property({ attribute: false })
+  accessor arrow = true;
+
+  @property({ attribute: false })
+  accessor coming = false;
+
+  @property({ reflect: true, type: Boolean })
+  accessor disabled = false;
+
+  @property({ attribute: false })
+  accessor hover = true;
+
+  @property({ attribute: false })
+  accessor hoverState = false;
+
+  @property({ attribute: false })
+  accessor iconContainerPadding: number | number[] = 2;
+
+  @property({ attribute: false })
+  accessor iconContainerWidth: string | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor iconSize: string | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor justify: string | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor labelHeight: string | undefined = undefined;
+
+  @property({ type: Boolean })
+  accessor showTooltip = true;
+
+  @property({ attribute: false })
+  accessor tipPosition: Placement = 'top';
+
+  @property({ attribute: false })
+  accessor tooltip!: TemplateResult<1> | string;
+
+  @property({ attribute: false })
+  accessor tooltipOffset = 8;
+
+  @property({ attribute: false })
+  accessor withHover: boolean | undefined = undefined;
 }
 
 declare global {

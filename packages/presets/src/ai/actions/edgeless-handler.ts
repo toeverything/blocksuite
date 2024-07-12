@@ -1,10 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  AffineAIPanelWidget,
   AIError,
+  AffineAIPanelWidget,
   EdgelessCopilotWidget,
   MindmapElementModel,
 } from '@blocksuite/blocks';
+import type { TemplateResult } from 'lit';
+
 import {
   BlocksUtils,
   EdgelessTextBlockModel,
@@ -15,7 +17,8 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
+
+import type { CtxRecord } from './types.js';
 
 import { getAIPanel } from '../ai-panel.js';
 import {
@@ -32,8 +35,8 @@ import { AIProvider } from '../provider.js';
 import { reportResponse } from '../utils/action-reporter.js';
 import {
   getEdgelessCopilotWidget,
-  isMindmapChild,
   isMindMapRoot,
+  isMindmapChild,
 } from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getContentFromSlice } from '../utils/markdown-utils.js';
@@ -51,7 +54,6 @@ import {
   getElementToolbar,
   responses,
 } from './edgeless-response.js';
-import type { CtxRecord } from './types.js';
 
 type AnswerRenderer = NonNullable<
   AffineAIPanelWidget['config']
@@ -119,12 +121,12 @@ export async function getContentFromSelected(
   host: EditorHost,
   selected: BlockSuite.EdgelessModelType[]
 ) {
-  const { notes, texts, shapes, images, edgelessTexts } = selected.reduce<{
-    notes: NoteBlockModel[];
-    texts: TextElementModel[];
-    shapes: ShapeElementModel[];
-    images: ImageBlockModel[];
+  const { edgelessTexts, images, notes, shapes, texts } = selected.reduce<{
     edgelessTexts: EdgelessTextBlockModel[];
+    images: ImageBlockModel[];
+    notes: NoteBlockModel[];
+    shapes: ShapeElementModel[];
+    texts: TextElementModel[];
   }>(
     (pre, cur) => {
       if (cur instanceof NoteBlockModel) {
@@ -141,7 +143,7 @@ export async function getContentFromSelected(
 
       return pre;
     },
-    { notes: [], texts: [], shapes: [], images: [], edgelessTexts: [] }
+    { edgelessTexts: [], images: [], notes: [], shapes: [], texts: [] }
   );
 
   const noteContent = await getContentFromHubBlockModel(host, notes);
@@ -174,8 +176,8 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     host: EditorHost,
     ctx: CtxRecord
   ) => Promise<{
+    attachments?: (Blob | string)[];
     content?: string;
-    attachments?: (string | Blob)[];
     seed?: string;
   } | void>,
   trackerOptions?: BlockSuitePresets.TrackerOptions
@@ -194,14 +196,14 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
           const models = getCopilotSelectedElems(host);
           const options = {
             ...variants,
-            signal,
-            input: '',
-            stream: true,
             control,
-            where,
-            models,
-            host,
             docId: host.doc.id,
+            host,
+            input: '',
+            models,
+            signal,
+            stream: true,
+            where,
             workspaceId: host.doc.collection.id,
           } as Parameters<typeof action>[0];
 
@@ -229,14 +231,14 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
 
         const options = {
           ...variants,
-          signal,
+          control: 'format-bar',
+          docId: host.doc.id,
+          host,
           input: markdown,
+          models,
+          signal,
           stream: true,
           where: 'ai-panel',
-          models,
-          control: 'format-bar',
-          host,
-          docId: host.doc.id,
           workspaceId: host.doc.collection.id,
         } as Parameters<typeof action>[0];
 
@@ -259,22 +261,22 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
     host: EditorHost,
     ctx: CtxRecord
   ) => Promise<{
+    attachments?: (Blob | string)[];
     content?: string;
-    attachments?: (string | Blob)[];
     seed?: string;
   } | void>,
   trackerOptions?: BlockSuitePresets.TrackerOptions
 ) {
   return (host: EditorHost, ctx: CtxRecord) => {
     return ({
+      finish,
       signal,
       update,
-      finish,
     }: {
+      finish: (state: 'aborted' | 'error' | 'success', err?: AIError) => void;
       input: string;
       signal?: AbortSignal;
       update: (text: string) => void;
-      finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
     }) => {
       if (!extract) {
         const selectedElements = getCopilotSelectedElems(host);
@@ -291,7 +293,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
 
       if (!stream) return;
 
-      bindTextStream(stream, { update, finish, signal });
+      bindTextStream(stream, { finish, signal, update });
     };
   };
 }
@@ -312,9 +314,9 @@ function updateEdgelessAIPanelConfig<
     host: EditorHost,
     ctx: CtxRecord
   ) => Promise<{
-    input?: string;
+    attachments?: (Blob | string)[];
     content?: string;
-    attachments?: (string | Blob)[];
+    input?: string;
     seed?: string;
   } | void>,
   trackerOptions?: BlockSuitePresets.TrackerOptions
@@ -351,8 +353,8 @@ function updateEdgelessAIPanelConfig<
     aiPanel.updateComplete
       .finally(() => {
         edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
-          elements: [],
           editing: false,
+          elements: [],
         });
         host.selection.clear();
         edgelessCopilot.lockToolbar(false);
@@ -372,9 +374,9 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     host: EditorHost,
     ctx: CtxRecord
   ) => Promise<{
-    input?: string;
+    attachments?: (Blob | string)[];
     content?: string;
-    attachments?: (string | Blob)[];
+    input?: string;
     seed?: string;
   } | void>,
   trackerOptions?: BlockSuitePresets.TrackerOptions
@@ -436,11 +438,11 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
       togglePanel = async () => {
         if (isEmpty) return true;
         const {
-          notes,
-          shapes,
-          images,
           edgelessTexts,
           frames: _,
+          images,
+          notes,
+          shapes,
         } = BlocksUtils.splitElements(selectedElements);
         const blocks = [...notes, ...shapes, ...images, ...edgelessTexts];
         if (blocks.length === 0) return true;

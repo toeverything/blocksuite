@@ -14,27 +14,27 @@ import type { ISurfaceElement } from '../surface-element.js';
 import type { SHAPE_TEXT_FONT_SIZE, ShapeType } from './consts.js';
 
 export interface IShape extends ISurfaceElement {
-  type: CanvasElementType.SHAPE;
-  shapeType: ShapeType;
-  radius: number;
-  filled: boolean;
+  color?: string;
   fillColor: string;
-  strokeWidth: number;
-  strokeColor: string;
-  strokeStyle: StrokeStyle;
-  shapeStyle: ShapeStyle;
+  filled: boolean;
+  fontFamily?: FontFamily;
+  fontSize?: SHAPE_TEXT_FONT_SIZE;
+  fontStyle?: FontStyle;
+  fontWeight?: FontWeight;
+  radius: number;
   // https://github.com/rough-stuff/rough/wiki#roughness
   roughness?: number;
+  shapeStyle: ShapeStyle;
 
+  shapeType: ShapeType;
+  strokeColor: string;
+  strokeStyle: StrokeStyle;
+  strokeWidth: number;
   text?: Y.Text;
-  color?: string;
-  fontSize?: SHAPE_TEXT_FONT_SIZE;
-  fontFamily?: FontFamily;
-  fontWeight?: FontWeight;
-  fontStyle?: FontStyle;
   textAlign?: TextAlign;
   textHorizontalAlign?: TextAlign;
   textVerticalAlign?: TextVerticalAlign;
+  type: CanvasElementType.SHAPE;
 
   // outdated, use `fontWeight` and `fontStyle` instead
   // bold?: boolean;

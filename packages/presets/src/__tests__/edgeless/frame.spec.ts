@@ -1,4 +1,5 @@
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
+
 import { Text } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -20,8 +21,8 @@ describe('frame', () => {
     const frame = service.doc.addBlock(
       'affine:frame',
       {
-        xywh: '[0,0,300,300]',
         title: new Text('Frame 1'),
+        xywh: '[0,0,300,300]',
       },
       service.surface.id
     );
@@ -44,8 +45,8 @@ describe('frame', () => {
     const nestedFrame = service.doc.addBlock(
       'affine:frame',
       {
-        xywh: '[20,20,200,200]',
         title: new Text('Frame 2'),
+        xywh: '[20,20,200,200]',
       },
       service.surface.id
     );

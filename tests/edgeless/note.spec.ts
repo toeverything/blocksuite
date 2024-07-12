@@ -126,10 +126,10 @@ test('resize note in edgeless mode', async ({ page }) => {
   );
   const draggedRect = await getNoteRect(page, noteId);
   assertRectEqual(draggedRect, {
+    h: initRect.h,
+    w: initRect.w - 100,
     x: initRect.x + 100,
     y: initRect.y,
-    w: initRect.w - 100,
-    h: initRect.h,
   });
 
   await switchEditorMode(page);
@@ -166,10 +166,10 @@ test('resize note then auto size and custom size', async ({ page }) => {
 
   const draggedRect = await getNoteRect(page, noteId);
   assertRectEqual(draggedRect, {
+    h: initRect.h + 100,
+    w: initRect.w,
     x: initRect.x,
     y: initRect.y,
-    w: initRect.w,
-    h: initRect.h + 100,
   });
 
   await triggerComponentToolbarAction(page, 'autoSize');
@@ -245,7 +245,7 @@ test('always keep at least 1 note block', async ({ page }) => {
 
 test('edgeless arrow up/down', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { paragraphId, noteId } = await initEmptyEdgelessState(page);
+  const { noteId, paragraphId } = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await activeNoteInEdgeless(page, noteId);
   await waitNextFrame(page, 400);
@@ -639,10 +639,10 @@ test('undo/redo should work correctly after resizing', async ({ page }) => {
   );
   const draggedRect = await getNoteRect(page, noteId);
   assertRectEqual(draggedRect, {
+    h: draggedRect.h, // not assert `h` here
+    w: initRect.w - 50,
     x: initRect.x,
     y: initRect.y,
-    w: initRect.w - 50,
-    h: draggedRect.h, // not assert `h` here
   });
   expect(draggedRect.h).toBe(initRect.h);
 
@@ -672,8 +672,8 @@ test('format quick bar should show up when double-clicking on text', async ({
     .locator('rich-text')
     .nth(1)
     .dblclick({
-      position: { x: 10, y: 10 },
       delay: 20,
+      position: { x: 10, y: 10 },
     });
   await page.waitForTimeout(200);
   const formatBar = page.locator('.affine-format-bar-widget');

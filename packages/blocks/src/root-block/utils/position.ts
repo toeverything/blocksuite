@@ -2,29 +2,29 @@ import { clamp } from '../../_common/utils/math.js';
 
 type CollisionBox = {
   /**
-   * The point that the objRect is positioned to.
+   * The boundary rect of the container that the obj is in.
    */
-  positioningPoint: { x: number; y: number };
+  boundaryRect?: DOMRect;
+  edgeGap?: number;
   /**
    * The boundary rect of the obj that is being positioned.
    */
   objRect?: { height: number; width: number };
-  /**
-   * The boundary rect of the container that the obj is in.
-   */
-  boundaryRect?: DOMRect;
   offsetX?: number;
   offsetY?: number;
-  edgeGap?: number;
+  /**
+   * The point that the objRect is positioned to.
+   */
+  positioningPoint: { x: number; y: number };
 };
 
 export function calcSafeCoordinate({
-  positioningPoint,
-  objRect = { width: 0, height: 0 },
   boundaryRect = document.body.getBoundingClientRect(),
+  edgeGap = 20,
+  objRect = { height: 0, width: 0 },
   offsetX = 0,
   offsetY = 0,
-  edgeGap = 20,
+  positioningPoint,
 }: CollisionBox) {
   const safeX = clamp(
     positioningPoint.x + offsetX,
@@ -59,12 +59,12 @@ export function compareTopAndBottomSpace(
   const spaceRect = container.getBoundingClientRect();
   const topSpace = objRect.top - spaceRect.top;
   const bottomSpace = spaceRect.bottom - objRect.bottom;
-  const topOrBottom: 'top' | 'bottom' =
+  const topOrBottom: 'bottom' | 'top' =
     topSpace > bottomSpace ? 'top' : 'bottom';
   return {
-    placement: topOrBottom,
     // the height is the available space.
     height: (topOrBottom === 'top' ? topSpace : bottomSpace) - gap,
+    placement: topOrBottom,
   };
 }
 
@@ -86,7 +86,7 @@ export function getPopperPosition(
       'The popper element is not exist. Popper position maybe incorrect'
     );
   }
-  const { placement, height } = compareTopAndBottomSpace(
+  const { height, placement } = compareTopAndBottomSpace(
     reference,
     document.body,
     gap + offsetY
@@ -105,14 +105,13 @@ export function getPopperPosition(
   const popperRect = popper?.getBoundingClientRect();
 
   const safeCoordinate = calcSafeCoordinate({
-    positioningPoint,
-    objRect: popperRect,
     boundaryRect,
+    objRect: popperRect,
     offsetY: placement === 'bottom' ? offsetY : -offsetY,
+    positioningPoint,
   });
 
   return {
-    placement,
     /**
      * The height is the available space height.
      *
@@ -120,6 +119,7 @@ export function getPopperPosition(
      * because sometimes the popper's height is smaller than the available space.
      */
     height,
+    placement,
     x: `${safeCoordinate.x}px`,
     y:
       placement === 'bottom'

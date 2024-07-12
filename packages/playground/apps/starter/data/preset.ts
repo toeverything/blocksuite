@@ -24,8 +24,8 @@ export const preset: InitFn = async (collection: DocCollection, id: string) => {
   // Import preset markdown content inside note block
   await MarkdownTransformer.importMarkdown({
     doc,
-    noteId,
     markdown: presetMarkdown,
+    noteId,
   });
 
   doc.resetHistory();

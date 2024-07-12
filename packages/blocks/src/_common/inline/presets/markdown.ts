@@ -17,13 +17,11 @@ import type { AffineTextAttributes } from './affine-inline-specs.js';
 export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttributes>[] =
   [
     {
-      name: 'bolditalic',
-      pattern: /(?:\*\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*\*)$/g,
       action: ({
         inlineEditor,
-        prefixText,
         inlineRange,
         pattern,
+        prefixText,
         undoManager,
       }) => {
         const match = pattern.exec(prefixText);
@@ -79,15 +77,15 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
 
         return KEYBOARD_PREVENT_DEFAULT;
       },
+      name: 'bolditalic',
+      pattern: /(?:\*\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*\*)$/g,
     },
     {
-      name: 'bold',
-      pattern: /(?:\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*)$/g,
       action: ({
         inlineEditor,
-        prefixText,
         inlineRange,
         pattern,
+        prefixText,
         undoManager,
       }) => {
         const match = pattern.exec(prefixText);
@@ -141,15 +139,15 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
 
         return KEYBOARD_PREVENT_DEFAULT;
       },
+      name: 'bold',
+      pattern: /(?:\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*)$/g,
     },
     {
-      name: 'italic',
-      pattern: /(?:\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*)$/g,
       action: ({
         inlineEditor,
-        prefixText,
         inlineRange,
         pattern,
+        prefixText,
         undoManager,
       }) => {
         const match = pattern.exec(prefixText);
@@ -203,15 +201,15 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
 
         return KEYBOARD_PREVENT_DEFAULT;
       },
+      name: 'italic',
+      pattern: /(?:\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*)$/g,
     },
     {
-      name: 'strikethrough',
-      pattern: /(?:~~)([^\s~](?:[^~]*?[^\s~])?)(?:~~)$/g,
       action: ({
         inlineEditor,
-        prefixText,
         inlineRange,
         pattern,
+        prefixText,
         undoManager,
       }) => {
         const match = pattern.exec(prefixText);
@@ -265,15 +263,15 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
 
         return KEYBOARD_PREVENT_DEFAULT;
       },
+      name: 'strikethrough',
+      pattern: /(?:~~)([^\s~](?:[^~]*?[^\s~])?)(?:~~)$/g,
     },
     {
-      name: 'underthrough',
-      pattern: /(?:~)([^\s~](?:[^~]*?[^\s~])?)(?:~)$/g,
       action: ({
         inlineEditor,
-        prefixText,
         inlineRange,
         pattern,
+        prefixText,
         undoManager,
       }) => {
         const match = pattern.exec(prefixText);
@@ -327,15 +325,15 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
 
         return KEYBOARD_PREVENT_DEFAULT;
       },
+      name: 'underthrough',
+      pattern: /(?:~)([^\s~](?:[^~]*?[^\s~])?)(?:~)$/g,
     },
     {
-      name: 'code',
-      pattern: /(?:`)([^\s`](?:[^`]*?[^\s`])?)(?:`)$/g,
       action: ({
         inlineEditor,
-        prefixText,
         inlineRange,
         pattern,
+        prefixText,
         undoManager,
       }) => {
         const match = pattern.exec(prefixText);
@@ -393,15 +391,15 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
 
         return KEYBOARD_PREVENT_DEFAULT;
       },
+      name: 'code',
+      pattern: /(?:`)([^\s`](?:[^`]*?[^\s`])?)(?:`)$/g,
     },
     {
-      name: 'link',
-      pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
       action: ({
         inlineEditor,
-        prefixText,
         inlineRange,
         pattern,
+        prefixText,
         undoManager,
       }) => {
         const startIndex = prefixText.search(pattern);
@@ -457,5 +455,7 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
 
         return KEYBOARD_PREVENT_DEFAULT;
       },
+      name: 'link',
+      pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
     },
   ];

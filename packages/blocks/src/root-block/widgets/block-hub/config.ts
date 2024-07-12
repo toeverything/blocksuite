@@ -22,139 +22,139 @@ export const RIGHT_OFFSET = 24;
 export const TOP_DISTANCE = 24;
 
 export type BlockHubItem = {
-  flavour: string;
-  type: string | null;
-  name: string;
   description: string;
+  flavour: string;
   icon: unknown;
+  name: string;
   tooltip: string;
+  type: null | string;
 };
 
 export const BLOCKHUB_TEXT_ITEMS: BlockHubItem[] = [
   {
-    flavour: 'affine:paragraph',
-    type: 'text',
-    name: 'Text',
     description: 'Start typing with plain text.',
+    flavour: 'affine:paragraph',
     icon: TextIcon,
+    name: 'Text',
     tooltip: 'Drag/Click to insert Text block',
+    type: 'text',
   },
   {
-    flavour: 'affine:paragraph',
-    type: 'h1',
-    name: 'Heading 1',
     description: 'Headings in the largest font.',
+    flavour: 'affine:paragraph',
     icon: Heading1Icon,
+    name: 'Heading 1',
     tooltip: 'Drag/Click to insert Heading 1',
+    type: 'h1',
   },
   {
-    flavour: 'affine:paragraph',
-    type: 'h2',
-    name: 'Heading 2',
     description: 'Headings in the 2nd font size.',
+    flavour: 'affine:paragraph',
     icon: Heading2Icon,
+    name: 'Heading 2',
     tooltip: 'Drag/Click to insert Heading 2',
+    type: 'h2',
   },
   {
-    flavour: 'affine:paragraph',
-    type: 'h3',
-    name: 'Heading 3',
     description: 'Headings in the 3rd font size.',
+    flavour: 'affine:paragraph',
     icon: Heading3Icon,
+    name: 'Heading 3',
     tooltip: 'Drag/Click to insert Heading 3',
+    type: 'h3',
   },
   {
-    flavour: 'affine:paragraph',
-    type: 'h4',
-    name: 'Heading 4',
     description: 'Heading in the 4th font size.',
+    flavour: 'affine:paragraph',
     icon: Heading4Icon,
+    name: 'Heading 4',
     tooltip: 'Drag/Click to insert Heading 4',
+    type: 'h4',
   },
   {
-    flavour: 'affine:paragraph',
-    type: 'h5',
-    name: 'Heading 5',
     description: 'Heading in the 5th font size.',
+    flavour: 'affine:paragraph',
     icon: Heading5Icon,
+    name: 'Heading 5',
     tooltip: 'Drag/Click to insert Heading 5',
+    type: 'h5',
   },
   {
-    flavour: 'affine:paragraph',
-    type: 'h6',
-    name: 'Heading 6',
     description: 'Heading in the 6th font size.',
-    icon: Heading6Icon,
-    tooltip: 'Drag/Click to insert Heading 6',
-  },
-  {
-    flavour: 'affine:code',
-    type: 'code',
-    name: 'Code Block',
-    description: 'Capture a code snippet.',
-    icon: CodeBlockIcon,
-    tooltip: 'Drag/Click to insert Code Block',
-  },
-  {
     flavour: 'affine:paragraph',
-    type: 'quote',
-    name: 'Quote',
-    description: 'Capture a quote.',
-    icon: QuoteIcon,
-    tooltip: 'Drag/Click to insert Quote',
+    icon: Heading6Icon,
+    name: 'Heading 6',
+    tooltip: 'Drag/Click to insert Heading 6',
+    type: 'h6',
   },
   {
-    flavour: 'affine:divider',
-    type: null,
-    name: 'Divider',
+    description: 'Capture a code snippet.',
+    flavour: 'affine:code',
+    icon: CodeBlockIcon,
+    name: 'Code Block',
+    tooltip: 'Drag/Click to insert Code Block',
+    type: 'code',
+  },
+  {
+    description: 'Capture a quote.',
+    flavour: 'affine:paragraph',
+    icon: QuoteIcon,
+    name: 'Quote',
+    tooltip: 'Drag/Click to insert Quote',
+    type: 'quote',
+  },
+  {
     description: 'A visual divider.',
+    flavour: 'affine:divider',
     icon: DividerIcon,
+    name: 'Divider',
     tooltip: 'A visual divider',
+    type: null,
   },
 ];
 
 export const BLOCKHUB_LIST_ITEMS: BlockHubItem[] = [
   {
-    flavour: 'affine:list',
-    type: 'bulleted',
-    name: 'Bulleted List',
     description: 'A simple bulleted list.',
+    flavour: 'affine:list',
     icon: BulletedListIcon,
+    name: 'Bulleted List',
     tooltip: 'Drag/Click to insert Bulleted List',
+    type: 'bulleted',
   },
   {
-    flavour: 'affine:list',
-    type: 'numbered',
-    name: 'Numbered List',
     description: 'A list with numbering.',
+    flavour: 'affine:list',
     icon: NumberedListIcon,
+    name: 'Numbered List',
     tooltip: 'Drag/Click to insert Numbered List',
+    type: 'numbered',
   },
   {
-    flavour: 'affine:list',
-    type: 'todo',
-    name: 'To-do List',
     description: 'Track tasks with a to-do list.',
+    flavour: 'affine:list',
     icon: CheckBoxIcon,
+    name: 'To-do List',
     tooltip: 'Drag/Click to insert To-do List',
+    type: 'todo',
   },
 ];
 
 export const BLOCKHUB_FILE_ITEMS: BlockHubItem[] = [
   {
-    flavour: 'affine:image',
-    type: 'image',
-    name: 'Image',
     description: 'Upload images.',
+    flavour: 'affine:image',
     icon: ImageIcon,
+    name: 'Image',
     tooltip: 'Drag/Click to insert Image',
+    type: 'image',
   },
   {
-    flavour: 'affine:bookmark',
-    type: 'bookmark',
-    name: 'Bookmark',
     description: 'Insert a link in card view.',
+    flavour: 'affine:bookmark',
     icon: BookmarkIcon,
+    name: 'Bookmark',
     tooltip: 'Drag/Click to insert Bookmark',
+    type: 'bookmark',
   },
 ];

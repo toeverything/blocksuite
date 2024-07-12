@@ -1,5 +1,6 @@
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
+
 import { html } from 'lit';
 
 import type { ParagraphType } from '../paragraph-block/index.js';
@@ -173,20 +174,20 @@ const h6 = html`<svg
   />
 </svg> `;
 export const getIcon = (
-  model: BlockModel & { type?: string }
+  model: { type?: string } & BlockModel
 ): TemplateResult => {
   if (model.flavour === 'affine:paragraph') {
     const type = model.type as ParagraphType;
     return (
       {
-        text: text,
-        quote: quote,
         h1: h1,
         h2: h2,
         h3: h3,
         h4: h4,
         h5: h5,
         h6: h6,
+        quote: quote,
+        text: text,
       } as Record<ParagraphType, TemplateResult>
     )[type];
   }

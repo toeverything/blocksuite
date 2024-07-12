@@ -7,11 +7,11 @@ export const map = <T, R, P extends NonNullable<unknown>>(
   return (ele, props) => {
     const result = component(ele, map(props));
     return {
+      expose: result.expose,
       unmount: result.unmount,
       update: props => {
         result.update(map(props));
       },
-      expose: result.expose,
     };
   };
 };

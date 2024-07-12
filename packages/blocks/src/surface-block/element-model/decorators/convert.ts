@@ -1,4 +1,5 @@
 import type { SurfaceElementModel } from '../base.js';
+
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const convertSymbol = Symbol('convert');
@@ -33,7 +34,7 @@ export function convert<V, T extends SurfaceElementModel>(
 function getConvertMeta(
   proto: unknown,
   prop: string | symbol
-): null | ((propValue: unknown, instance: unknown) => unknown) {
+): ((propValue: unknown, instance: unknown) => unknown) | null {
   return getObjectPropMeta(proto, convertSymbol, prop);
 }
 

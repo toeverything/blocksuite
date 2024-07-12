@@ -63,20 +63,20 @@ export async function createDefaultDocCollection() {
   );
 
   const options: DocCollectionOptions = {
-    id: 'quickEdgeless',
-    schema,
-    idGenerator,
+    awarenessSources,
     blobSources: {
       main: new IndexedDBBlobSource('quickEdgeless'),
     },
-    docSources,
-    awarenessSources,
     defaultFlags: {
-      enable_synced_doc_block: true,
-      enable_pie_menu: true,
       enable_lasso_tool: true,
+      enable_pie_menu: true,
+      enable_synced_doc_block: true,
       ...flags,
     },
+    docSources,
+    id: 'quickEdgeless',
+    idGenerator,
+    schema,
   };
   const collection = new DocCollection(options);
   collection.start();

@@ -2,10 +2,11 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { Filter, Variable, VariableOrProperty } from '../ast.js';
+
 import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../_common/icons/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import type { Filter, Variable, VariableOrProperty } from '../ast.js';
 import { firstFilterByRef, firstFilterInGroup } from '../ast.js';
 
 @customElement('variable-ref-view')
@@ -34,33 +35,29 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor data: VariableOrProperty | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor setData!: (filter: VariableOrProperty) => void;
-
-  @property({ attribute: false })
-  accessor vars!: Variable[];
-
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', e => {
       popFilterableSimpleMenu(
         e.target as HTMLElement,
         this.vars.map(v => ({
-          type: 'action',
-          name: v.name,
           icon: renderUniLit(v.icon, {}),
+          name: v.name,
           select: () => {
             this.setData({
-              type: 'ref',
               name: v.id,
+              type: 'ref',
             });
           },
+          type: 'action',
         }))
       );
     });
+  }
+
+  override render() {
+    const data = this.fieldData;
+    return html` ${renderUniLit(data?.icon, {})} ${data?.name} `;
   }
 
   get field() {
@@ -91,10 +88,14 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     return this.data.propertyFuncName;
   }
 
-  override render() {
-    const data = this.fieldData;
-    return html` ${renderUniLit(data?.icon, {})} ${data?.name} `;
-  }
+  @property({ attribute: false })
+  accessor data: VariableOrProperty | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor setData!: (filter: VariableOrProperty) => void;
+
+  @property({ attribute: false })
+  accessor vars!: Variable[];
 }
 
 declare global {
@@ -105,40 +106,40 @@ declare global {
 export const popCreateFilter = (
   target: HTMLElement,
   props: {
-    vars: Variable[];
-    onSelect: (filter: Filter) => void;
     onClose?: () => void;
+    onSelect: (filter: Filter) => void;
+    vars: Variable[];
   }
 ) => {
   popFilterableSimpleMenu(
     target,
     [
       ...props.vars.map(v => ({
-        type: 'action' as const,
-        name: v.name,
         icon: renderUniLit(v.icon, {}),
+        name: v.name,
         select: () => {
           props.onSelect(
             firstFilterByRef(props.vars, {
-              type: 'ref',
               name: v.id,
+              type: 'ref',
             })
           );
         },
+        type: 'action' as const,
       })),
       {
-        type: 'group',
-        name: '',
         children: () => [
           {
-            type: 'action',
-            name: 'Add filter group',
             icon: AddCursorIcon,
+            name: 'Add filter group',
             select: () => {
               props.onSelect(firstFilterInGroup(props.vars));
             },
+            type: 'action',
           },
         ],
+        name: '',
+        type: 'group',
       },
     ],
     props.onClose

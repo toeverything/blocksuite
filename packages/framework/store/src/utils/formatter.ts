@@ -29,6 +29,12 @@ function initCustomFormatter() {
   // custom formatter for Chrome
   // https://www.mattzeunert.com/2016/02/19/custom-chrome-devtools-object-formatters.html
   const formatter = {
+    body(obj: unknown) {
+      return ['object', { config: { expand: true }, object: obj }];
+    },
+    hasBody() {
+      return true;
+    },
     header(obj: unknown, config = { expand: false }) {
       if (!isBlockModel(obj) || config.expand) {
         return null;
@@ -49,12 +55,6 @@ function initCustomFormatter() {
         ['span', bannerStyle, obj.constructor.name],
         ['span', typeStyle, obj.flavour],
       ];
-    },
-    hasBody() {
-      return true;
-    },
-    body(obj: unknown) {
-      return ['object', { object: obj, config: { expand: true } }];
     },
   };
 

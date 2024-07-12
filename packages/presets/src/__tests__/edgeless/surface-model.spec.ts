@@ -4,6 +4,7 @@ import type {
   ShapeElementModel,
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
+
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -77,8 +78,8 @@ describe('element model', () => {
 
   test('defined prop should not be overwritten by default value', () => {
     const id = model.addElement({
-      type: 'shape',
       strokeColor: '--affine-palette-line-black',
+      type: 'shape',
     });
 
     const element = model.getElementById(id)! as ShapeElementModel;
@@ -113,11 +114,11 @@ describe('group', () => {
     });
 
     const groupId = model.addElement({
-      type: 'group',
       children: {
         [id]: true,
         [id2]: true,
       },
+      type: 'group',
     });
     const group = model.getElementById(groupId);
     const shape = model.getElementById(id)!;
@@ -142,12 +143,12 @@ describe('group', () => {
     });
 
     const groupId = model.addElement({
-      type: 'group',
       children: {
         [id]: true,
         [id2]: true,
         [id3]: true,
       },
+      type: 'group',
     });
     const group = model.getElementById(groupId) as GroupElementModel;
 
@@ -170,11 +171,11 @@ describe('group', () => {
     });
 
     const groupId = model.addElement({
-      type: 'group',
       children: {
         [id]: true,
         [id2]: true,
       },
+      type: 'group',
     });
 
     model.removeElement(groupId);
@@ -195,11 +196,11 @@ describe('group', () => {
     });
 
     const groupId = model.addElement({
-      type: 'group',
       children: {
         [id]: true,
         [id2]: true,
       },
+      type: 'group',
     });
     const group = model.getElementById(groupId) as GroupElementModel;
 
@@ -222,13 +223,13 @@ describe('connector', () => {
       type: 'shape',
     });
     const connectorId = model.addElement({
-      type: 'connector',
       source: {
         id,
       },
       target: {
         id: id2,
       },
+      type: 'connector',
     });
     const connector = model.getElementById(connectorId);
 
@@ -244,22 +245,22 @@ describe('connector', () => {
       type: 'shape',
     });
     const connectorId = model.addElement({
-      type: 'connector',
       source: {
         id,
       },
       target: {
         id: id2,
       },
+      type: 'connector',
     });
     const connectorId2 = model.addElement({
-      type: 'connector',
       source: {
         id,
       },
       target: {
         id: id2,
       },
+      type: 'connector',
     });
     const connector = model.getElementById(connectorId);
     const connector2 = model.getElementById(connectorId2);
@@ -276,13 +277,13 @@ describe('connector', () => {
       type: 'shape',
     });
     const connectorId = model.addElement({
-      type: 'connector',
       source: {
         id,
       },
       target: {
         id: id2,
       },
+      type: 'connector',
     });
 
     model.updateElement(connectorId, {
@@ -306,13 +307,13 @@ describe('connector', () => {
       type: 'shape',
     });
     const connectorId = model.addElement({
-      type: 'connector',
       source: {
         id,
       },
       target: {
         id: id2,
       },
+      type: 'connector',
     });
 
     model.removeElement(connectorId);
@@ -327,8 +328,8 @@ describe('connector', () => {
 describe('stash/pop', () => {
   test('stash and pop should work correctly', () => {
     const id = model.addElement({
-      type: 'shape',
       strokeWidth: 4,
+      type: 'shape',
     });
     const elementModel = model.getElementById(id)! as ShapeElementModel;
 
@@ -350,8 +351,8 @@ describe('stash/pop', () => {
 
   test('assign stashed property should emit event', () => {
     const id = model.addElement({
-      type: 'shape',
       strokeWidth: 4,
+      type: 'shape',
     });
     const elementModel = model.getElementById(id)! as ShapeElementModel;
 
@@ -366,12 +367,12 @@ describe('stash/pop', () => {
 
   test('stashed property should also trigger derive decorator', () => {
     const id = model.addElement({
-      type: 'brush',
       points: [
         [0, 0],
         [100, 100],
         [120, 150],
       ],
+      type: 'brush',
     });
     const elementModel = model.getElementById(id)! as BrushElementModel;
 
@@ -415,12 +416,12 @@ describe('stash/pop', () => {
 describe('derive decorator', () => {
   test('derived decorator should work correctly', () => {
     const id = model.addElement({
-      type: 'brush',
       points: [
         [0, 0],
         [100, 100],
         [120, 150],
       ],
+      type: 'brush',
     });
     const elementModel = model.getElementById(id)! as BrushElementModel;
 
@@ -464,12 +465,12 @@ describe('local decorator', () => {
 describe('convert decorator', () => {
   test('convert decorator', () => {
     const id = model.addElement({
-      type: 'brush',
       points: [
         [50, 25],
         [200, 200],
         [300, 300],
       ],
+      type: 'brush',
     });
     const elementModel = model.getElementById(id)! as BrushElementModel;
     const halfLineWidth = elementModel.lineWidth / 2;

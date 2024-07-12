@@ -2,16 +2,16 @@ import { html } from 'lit';
 
 import {
   ChatServiceKind,
-  createVendor,
   TextServiceKind,
+  createVendor,
 } from './service-base.js';
 
 export const llama2Vendor = createVendor<{
   host: string;
 }>({
-  key: 'llama',
   color: '#202123',
   initData: () => ({ host: '' }),
+  key: 'llama',
   renderConfigEditor: (data, refresh) => {
     return html`
       <div style="display:flex;flex-direction: column;gap: 12px;">
@@ -33,30 +33,29 @@ export const llama2Vendor = createVendor<{
   },
 });
 TextServiceKind.implService({
-  name: 'llama2',
   method: data => ({
     generateText: async messages => {
       const result: {
         message: {
-          role: string;
           content: string;
+          role: string;
         };
       } = await fetch(`${data.host}/api/chat`, {
-        method: 'POST',
         body: JSON.stringify({
-          model: 'llama2',
           messages: messages,
+          model: 'llama2',
           stream: false,
         }),
+        method: 'POST',
       }).then(res => res.json());
       return result.message.content;
     },
   }),
+  name: 'llama2',
   vendor: llama2Vendor,
 });
 
 ChatServiceKind.implService({
-  name: 'llama2',
   method: data => ({
     chat: messages => {
       const llama2Messages = messages.map(message => {
@@ -72,9 +71,9 @@ ChatServiceKind.implService({
             }
           });
           return {
-            role: message.role,
             content: text,
             images: imgs,
+            role: message.role,
           };
         }
         return message;
@@ -82,20 +81,21 @@ ChatServiceKind.implService({
       return (async function* () {
         const result: {
           message: {
-            role: string;
             content: string;
+            role: string;
           };
         } = await fetch(`${data.host}/api/chat`, {
-          method: 'POST',
           body: JSON.stringify({
-            model: 'llama2',
             messages: llama2Messages,
+            model: 'llama2',
             stream: false,
           }),
+          method: 'POST',
         }).then(res => res.json());
         yield result.message.content;
       })();
     },
   }),
+  name: 'llama2',
   vendor: llama2Vendor,
 });

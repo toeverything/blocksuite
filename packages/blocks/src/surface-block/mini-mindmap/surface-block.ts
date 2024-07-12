@@ -2,31 +2,23 @@ import { BlockElement } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { ThemeObserver } from '../../_common/theme/theme-observer.js';
-import { fitContent } from '../canvas-renderer/element-renderer/shape/utils.js';
-import { Renderer } from '../canvas-renderer/renderer.js';
 import type { ShapeElementModel } from '../element-model/shape.js';
-import { LayerManager } from '../managers/layer-manager.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Bound } from '../utils/bound.js';
 import type { MindmapService } from './service.js';
 
+import { ThemeObserver } from '../../_common/theme/theme-observer.js';
+import { fitContent } from '../canvas-renderer/element-renderer/shape/utils.js';
+import { Renderer } from '../canvas-renderer/renderer.js';
+import { LayerManager } from '../managers/layer-manager.js';
+
 @customElement('mini-mindmap-surface-block')
 export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
-  private _theme = new ThemeObserver();
-
   private _layer!: LayerManager;
 
   private _renderer!: Renderer;
 
-  @query('.affine-mini-mindmap-surface')
-  accessor editorContainer!: HTMLDivElement;
-
-  get mindmapService() {
-    return this.host.spec.getService(
-      'affine:page'
-    ) as unknown as MindmapService;
-  }
+  private _theme = new ThemeObserver();
 
   private _adjustNodeWidth() {
     this.model.doc.transact(() => {
@@ -84,11 +76,11 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
     super.connectedCallback();
     this._layer = LayerManager.create(this.doc, this.model);
     this._renderer = new Renderer({
-      layerManager: this._layer,
       enableStackingCanvas: true,
+      layerManager: this._layer,
       provider: {
-        selectedElements: () => [],
         getVariableColor: (val: string) => this._theme.getVariableValue(val),
+        selectedElements: () => [],
       },
     });
     this._theme.observe(this.ownerDocument.documentElement);
@@ -117,4 +109,13 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
       </div>
     `;
   }
+
+  get mindmapService() {
+    return this.host.spec.getService(
+      'affine:page'
+    ) as unknown as MindmapService;
+  }
+
+  @query('.affine-mini-mindmap-surface')
+  accessor editorContainer!: HTMLDivElement;
 }

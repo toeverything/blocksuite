@@ -6,10 +6,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 interface PR {
-  type: string;
-  description: string;
   contributor: string;
+  description: string;
   prNumber: number;
+  type: string;
 }
 
 function analyzeReleaseNotes(filePath: string): string {
@@ -31,10 +31,10 @@ function analyzeReleaseNotes(filePath: string): string {
       if (prInfo) {
         const [, type, description, contributor, prNumber] = prInfo;
         prs.push({
-          type,
-          description,
           contributor,
+          description,
           prNumber: Number(prNumber),
+          type,
         });
       }
     }

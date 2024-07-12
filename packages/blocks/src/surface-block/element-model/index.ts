@@ -1,10 +1,11 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
+
 import { SurfaceElementModel } from './base.js';
 import { BrushElementModel } from './brush.js';
 import { ConnectorElementModel } from './connector.js';
-import { initializedObservers, initializeWatchers } from './decorators.js';
+import { initializeWatchers, initializedObservers } from './decorators.js';
 import { getDecoratorState } from './decorators/common.js';
 import { GroupElementModel } from './group.js';
 import { MindmapElementModel } from './mindmap.js';
@@ -12,12 +13,12 @@ import { ShapeElementModel } from './shape.js';
 import { TextElementModel } from './text.js';
 
 const elementsCtorMap = {
-  group: GroupElementModel,
-  connector: ConnectorElementModel,
-  shape: ShapeElementModel,
   brush: BrushElementModel,
-  text: TextElementModel,
+  connector: ConnectorElementModel,
+  group: GroupElementModel,
   mindmap: MindmapElementModel,
+  shape: ShapeElementModel,
+  text: TextElementModel,
 };
 
 export function createElementModel(
@@ -26,19 +27,19 @@ export function createElementModel(
   yMap: Y.Map<unknown>,
   model: SurfaceBlockModel,
   options: {
+    newCreate?: boolean;
     onChange: (payload: {
       id: string;
-      props: Record<string, unknown>;
-      oldValues: Record<string, unknown>;
       local: boolean;
+      oldValues: Record<string, unknown>;
+      props: Record<string, unknown>;
     }) => void;
     skipFieldInit?: boolean;
-    newCreate?: boolean;
   }
 ): {
   model: SurfaceElementModel;
-  unmount: () => void;
   mount: () => void;
+  unmount: () => void;
 } {
   const stashed = new Map<string | symbol, unknown>();
   const Ctor = elementsCtorMap[type as keyof typeof elementsCtorMap];
@@ -54,10 +55,10 @@ export function createElementModel(
   let mounted = false;
   const elementModel = new Ctor({
     id,
-    yMap,
     model,
-    stashedStore: stashed,
     onChange: payload => mounted && options.onChange({ id, ...payload }),
+    stashedStore: stashed,
+    yMap,
   }) as SurfaceElementModel;
 
   state.creating = false;
@@ -95,9 +96,9 @@ export function createElementModel(
 function onElementChange(
   yMap: Y.Map<unknown>,
   callback: (payload: {
-    props: Record<string, unknown>;
-    oldValues: Record<string, unknown>;
     local: boolean;
+    oldValues: Record<string, unknown>;
+    props: Record<string, unknown>;
   }) => void
 ) {
   const observer = (
@@ -122,9 +123,9 @@ function onElementChange(
     });
 
     callback({
-      props,
-      oldValues,
       local: transaction.local,
+      oldValues,
+      props,
     });
   };
 
@@ -152,13 +153,13 @@ export function createModelFromProps(
   options: {
     onChange: (payload: {
       id: string;
-      props: Record<string, unknown>;
-      oldValues: Record<string, unknown>;
       local: boolean;
+      oldValues: Record<string, unknown>;
+      props: Record<string, unknown>;
     }) => void;
   }
 ) {
-  const { type, id, ...rest } = props;
+  const { id, type, ...rest } = props;
 
   if (!id) {
     throw new Error('Cannot find id in props');
@@ -202,21 +203,21 @@ export {
 };
 
 export enum CanvasElementType {
-  SHAPE = 'shape',
   BRUSH = 'brush',
   CONNECTOR = 'connector',
-  TEXT = 'text',
   GROUP = 'group',
   MINDMAP = 'mindmap',
+  SHAPE = 'shape',
+  TEXT = 'text',
 }
 
 export type ElementModelMap = {
-  ['shape']: ShapeElementModel;
   ['brush']: BrushElementModel;
   ['connector']: ConnectorElementModel;
-  ['text']: TextElementModel;
   ['group']: GroupElementModel;
   ['mindmap']: MindmapElementModel;
+  ['shape']: ShapeElementModel;
+  ['text']: TextElementModel;
 };
 
 export function isCanvasElementType(type: string): type is CanvasElementType {

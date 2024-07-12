@@ -1,4 +1,5 @@
 import type { StrokeOptions, StrokePoint } from './types.js';
+
 import { add, dist, isEqual, lrp, sub, uni } from './vec.js';
 
 /**
@@ -17,9 +18,9 @@ import { add, dist, isEqual, lrp, sub, uni } from './vec.js';
  */
 export function getStrokePoints<
   T extends number[],
-  K extends { x: number; y: number; pressure?: number },
->(points: (T | K)[], options = {} as StrokeOptions): StrokePoint[] {
-  const { streamline = 0.5, size = 16, last: isComplete = false } = options;
+  K extends { pressure?: number; x: number; y: number },
+>(points: (K | T)[], options = {} as StrokeOptions): StrokePoint[] {
+  const { last: isComplete = false, size = 16, streamline = 0.5 } = options;
 
   // If we don't have any points, return an empty array.
   if (points.length === 0) return [];
@@ -30,7 +31,7 @@ export function getStrokePoints<
   // Whatever the input is, make sure that the points are in number[][].
   let pts = Array.isArray(points[0])
     ? (points as T[])
-    : (points as K[]).map(({ x, y, pressure = 0.5 }) => [x, y, pressure]);
+    : (points as K[]).map(({ pressure = 0.5, x, y }) => [x, y, pressure]);
 
   // Add extra points between the two, to help avoid "dash" lines
   // for strokes with tapered start and ends. Don't mutate the
@@ -53,11 +54,11 @@ export function getStrokePoints<
   // Start it out with the first point, which needs no adjustment.
   const strokePoints: StrokePoint[] = [
     {
+      distance: 0,
       point: [pts[0][0], pts[0][1]],
       pressure: pts[0][2] >= 0 ? pts[0][2] : 0.25,
-      vector: [1, 1],
-      distance: 0,
       runningLength: 0,
+      vector: [1, 1],
     },
   ];
 
@@ -103,16 +104,16 @@ export function getStrokePoints<
     }
     // Create a new strokepoint (it will be the new "previous" one).
     prev = {
+      // The distance between the current point and the previous point
+      distance,
       // The adjusted point
       point,
       // The input pressure (or .5 if not specified)
       pressure: pts[i][2] >= 0 ? pts[i][2] : 0.5,
-      // The vector from the current point to the previous point
-      vector: uni(sub(prev.point, point)),
-      // The distance between the current point and the previous point
-      distance,
       // The total distance so far
       runningLength,
+      // The vector from the current point to the previous point
+      vector: uni(sub(prev.point, point)),
     };
 
     // Push it to the strokePoints array.

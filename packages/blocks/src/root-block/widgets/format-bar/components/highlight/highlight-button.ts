@@ -1,21 +1,22 @@
-import '../../../../../_common/components/toolbar/icon-button.js';
-import '../../../../../_common/components/toolbar/menu-button.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
-import { ref, type RefOrCallback } from 'lit/directives/ref.js';
+import { type RefOrCallback, ref } from 'lit/directives/ref.js';
+
+import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
+import type { AffineFormatBarWidget } from '../../format-bar.js';
 
 import { whenHover } from '../../../../../_common/components/hover/index.js';
+import '../../../../../_common/components/toolbar/icon-button.js';
+import '../../../../../_common/components/toolbar/menu-button.js';
 import {
   ArrowDownIcon,
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
   TextForegroundDuotoneIcon,
 } from '../../../../../_common/icons/index.js';
-import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
-import type { AffineFormatBarWidget } from '../../format-bar.js';
 import { backgroundConfig, foregroundConfig } from './consts.js';
 
 enum HighlightType {
@@ -23,12 +24,12 @@ enum HighlightType {
   Background,
 }
 
-let lastUsedColor: string | null = null;
+let lastUsedColor: null | string = null;
 let lastUsedHighlightType: HighlightType = HighlightType.Background;
 
 const updateHighlight = (
   host: EditorHost,
-  color: string | null,
+  color: null | string,
   highlightType: HighlightType
 ) => {
   lastUsedColor = color;
@@ -38,8 +39,8 @@ const updateHighlight = (
     styles: AffineTextAttributes;
   } = {
     styles: {
-      color: highlightType === HighlightType.Foreground ? color : null,
       background: highlightType === HighlightType.Background ? color : null,
+      color: highlightType === HighlightType.Foreground ? color : null,
     },
   };
   host.std.command
@@ -62,7 +63,7 @@ const HighlightPanel = (
         <!-- Text Color Highlight -->
         <div class="highligh-panel-heading">Color</div>
         ${foregroundConfig.map(
-          ({ name, color }) => html`
+          ({ color, name }) => html`
             <editor-menu-action
               data-testid="${color ?? 'unset'}"
               @click="${() => {
@@ -85,7 +86,7 @@ const HighlightPanel = (
         <!-- Text Background Highlight -->
         <div class="highligh-panel-heading">Background</div>
         ${backgroundConfig.map(
-          ({ name, color }) => html`
+          ({ color, name }) => html`
             <editor-menu-action
               @click="${() => {
                 updateHighlight(
@@ -127,7 +128,6 @@ export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
     assertExists(panel);
     panel.style.display = 'flex';
     computePosition(button, panel, {
-      placement: 'bottom',
       middleware: [
         flip(),
         offset(6),
@@ -135,6 +135,7 @@ export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
           padding: 6,
         }),
       ],
+      placement: 'bottom',
     })
       .then(({ x, y }) => {
         panel.style.left = `${x}px`;

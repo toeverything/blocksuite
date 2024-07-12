@@ -1,8 +1,9 @@
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import { PlusIcon } from '../../../../../../_common/icons/index.js';
 import type { InsertToPosition } from '../../../../types.js';
+
+import { PlusIcon } from '../../../../../../_common/icons/index.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { WidgetBase } from '../../../widget-base.js';
 import { NewRecordPreview } from './new-record-preview.js';
@@ -32,46 +33,7 @@ const styles = css`
 
 @customElement('data-view-header-tools-add-row')
 export class DataViewHeaderToolsAddRow extends WidgetBase {
-  private get readonly() {
-    return this.view.readonly;
-  }
-
   static override styles = styles;
-
-  @state()
-  accessor showToolBar = false;
-
-  private _onAddNewRecord = () => {
-    if (this.readonly) return;
-    const selection = this.viewMethods.getSelection?.();
-    if (!selection) {
-      this.addRow('start');
-    } else if (selection.type === 'table') {
-      const { rowsSelection, columnsSelection, focus } = selection;
-      let index = 0;
-      if (rowsSelection && !columnsSelection) {
-        // rows
-        index = rowsSelection.end;
-      } else if (rowsSelection && columnsSelection) {
-        // multiple cells
-        index = rowsSelection.end;
-      } else if (!rowsSelection && !columnsSelection && focus) {
-        // single cell
-        index = focus.rowIndex;
-      }
-
-      this.addRow(index + 1);
-    }
-  };
-
-  override connectedCallback() {
-    super.connectedCallback();
-    if (!this.readonly) {
-      this.disposables.addFromEvent(this, 'pointerdown', e => {
-        this._dragStart(e);
-      });
-    }
-  }
 
   _dragStart = (e: MouseEvent) => {
     e.preventDefault();
@@ -88,19 +50,19 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
     const rects = Array.from(rows).map(v => {
       const rect = v.getBoundingClientRect();
       return {
-        id: v.dataset.rowId as string,
-        top: rect.top,
         bottom: rect.bottom,
-        mid: (rect.top + rect.bottom) / 2,
-        width: rect.width,
+        id: v.dataset.rowId as string,
         left: rect.left,
+        mid: (rect.top + rect.bottom) / 2,
+        top: rect.top,
+        width: rect.width,
       };
     });
 
     const getPosition = (
       y: number
     ):
-      | { position: InsertToPosition; y: number; x: number; width: number }
+      | { position: InsertToPosition; width: number; x: number; y: number }
       | undefined => {
       const data = rects.find(v => y < v.bottom);
       if (!data || y < data.top) {
@@ -108,21 +70,29 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
       }
       return {
         position: {
-          id: data.id,
           before: y < data.mid,
+          id: data.id,
         },
-        y: y < data.mid ? data.top : data.bottom,
         width: data.width,
         x: data.left,
+        y: y < data.mid ? data.top : data.bottom,
       };
     };
 
     const dropPreview = createDropPreview();
     const dragPreview = createDragPreview();
     startDrag<{ position?: InsertToPosition }, MouseEvent>(e, {
-      transform: e => e,
+      onClear: () => {
+        dropPreview.remove();
+        dragPreview.remove();
+      },
       onDrag: () => {
         return {};
+      },
+      onDrop: data => {
+        if (data.position) {
+          this.viewMethods.addRow?.(data.position);
+        }
       },
       onMove: e => {
         dragPreview.display(e.x, e.y);
@@ -136,21 +106,49 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
           position: p?.position,
         };
       },
-      onDrop: data => {
-        if (data.position) {
-          this.viewMethods.addRow?.(data.position);
-        }
-      },
-      onClear: () => {
-        dropPreview.remove();
-        dragPreview.remove();
-      },
+      transform: e => e,
     });
+  };
+
+  private _onAddNewRecord = () => {
+    if (this.readonly) return;
+    const selection = this.viewMethods.getSelection?.();
+    if (!selection) {
+      this.addRow('start');
+    } else if (selection.type === 'table') {
+      const { columnsSelection, focus, rowsSelection } = selection;
+      let index = 0;
+      if (rowsSelection && !columnsSelection) {
+        // rows
+        index = rowsSelection.end;
+      } else if (rowsSelection && columnsSelection) {
+        // multiple cells
+        index = rowsSelection.end;
+      } else if (!rowsSelection && !columnsSelection && focus) {
+        // single cell
+        index = focus.rowIndex;
+      }
+
+      this.addRow(index + 1);
+    }
   };
 
   addRow = (position: InsertToPosition | number) => {
     this.viewMethods.addRow?.(position);
   };
+
+  private get readonly() {
+    return this.view.readonly;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    if (!this.readonly) {
+      this.disposables.addFromEvent(this, 'pointerdown', e => {
+        this._dragStart(e);
+      });
+    }
+  }
 
   override render() {
     if (this.readonly) {
@@ -164,6 +162,9 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
       ${PlusIcon}<span>New Record</span>
     </div>`;
   }
+
+  @state()
+  accessor showToolBar = false;
 }
 
 declare global {

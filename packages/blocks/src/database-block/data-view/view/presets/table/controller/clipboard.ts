@@ -1,7 +1,8 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
@@ -12,18 +13,6 @@ const BLOCKSUITE_DATABASE = 'blocksuite/database';
 const TEXT = 'text/plain';
 
 export class TableClipboardController implements ReactiveController {
-  private get readonly() {
-    return this.host.view.readonly;
-  }
-
-  private get std() {
-    return this.host.std;
-  }
-
-  constructor(public host: DataViewTable) {
-    host.addController(this);
-  }
-
   private _onCopy = (
     _context: UIEventStateContext,
     tableSelection: TableViewSelection,
@@ -47,8 +36,8 @@ export class TableClipboardController implements ReactiveController {
       .writeToClipboard(items => {
         return {
           ...items,
-          [TEXT]: formatValue,
           [BLOCKSUITE_DATABASE]: JSON.stringify(copiedValues),
+          [TEXT]: formatValue,
         };
       })
       .catch(console.error);
@@ -110,6 +99,18 @@ export class TableClipboardController implements ReactiveController {
     return true;
   };
 
+  constructor(public host: DataViewTable) {
+    host.addController(this);
+  }
+
+  private get readonly() {
+    return this.host.view.readonly;
+  }
+
+  private get std() {
+    return this.host.std;
+  }
+
   hostConnected() {
     this.host.disposables.add(
       this.host.handleEvent('copy', ctx => {
@@ -158,11 +159,11 @@ function copyCellsValue(
   view: DataViewTable,
   isCut = false
 ) {
-  const { rowsSelection, columnsSelection, focus, groupKey } = selection;
+  const { columnsSelection, focus, groupKey, rowsSelection } = selection;
   const values: string[][] = [];
   if (rowsSelection && !columnsSelection) {
     // rows
-    const { start, end } = rowsSelection;
+    const { end, start } = rowsSelection;
     const titleIndex = data.columnsWithoutFilter.findIndex(
       id => data.columnGetType(id) === 'title'
     );
@@ -234,11 +235,11 @@ function getCopiedValuesFromSelection(
   data: DataViewTableManager,
   view: DataViewTable
 ): CopyedSelectionData {
-  const { rowsSelection, columnsSelection, focus, groupKey } = selection;
+  const { columnsSelection, focus, groupKey, rowsSelection } = selection;
   const values: CopyedColumn[][] = [];
   if (rowsSelection && !columnsSelection) {
     // rows
-    const { start, end } = rowsSelection;
+    const { end, start } = rowsSelection;
     for (let i = start; i <= end; i++) {
       const cellValues: CopyedColumn[] = [];
       for (let j = 0; j < data.columns.length; j++) {
@@ -287,36 +288,36 @@ function getTargetRangeFromSelection(
   selection: TableViewSelection,
   data: DataViewTableManager
 ) {
-  const { rowsSelection, columnsSelection, focus } = selection;
+  const { columnsSelection, focus, rowsSelection } = selection;
   let range: {
-    row: { start: number; end: number; length: number };
-    column: { start: number; end: number; length: number };
     anchor?: boolean;
+    column: { end: number; length: number; start: number };
+    row: { end: number; length: number; start: number };
   } = {
-    row: {
-      start: 0,
-      end: 0,
-      length: 0,
-    },
     column: {
-      start: 0,
       end: 0,
       length: 0,
+      start: 0,
+    },
+    row: {
+      end: 0,
+      length: 0,
+      start: 0,
     },
   };
 
   if (rowsSelection && !columnsSelection) {
     // rows
     range = {
-      row: {
-        start: rowsSelection.start,
-        end: rowsSelection.end,
-        length: rowsSelection.end - rowsSelection.start + 1,
-      },
       column: {
-        start: 0,
         end: data.columns.length - 1,
         length: data.columns.length,
+        start: 0,
+      },
+      row: {
+        end: rowsSelection.end,
+        length: rowsSelection.end - rowsSelection.start + 1,
+        start: rowsSelection.start,
       },
     };
     if (rowsSelection.start === rowsSelection.end) {
@@ -325,30 +326,30 @@ function getTargetRangeFromSelection(
   } else if (rowsSelection && columnsSelection) {
     // multiple cells
     range = {
-      row: {
-        start: rowsSelection.start,
-        end: rowsSelection.end,
-        length: rowsSelection.end - rowsSelection.start + 1,
-      },
       column: {
-        start: columnsSelection.start,
         end: columnsSelection.end,
         length: columnsSelection.end - columnsSelection.start + 1,
+        start: columnsSelection.start,
+      },
+      row: {
+        end: rowsSelection.end,
+        length: rowsSelection.end - rowsSelection.start + 1,
+        start: rowsSelection.start,
       },
     };
   } else if (!rowsSelection && !columnsSelection && focus) {
     // single cell
     range = {
       anchor: true,
-      row: {
-        start: focus.rowIndex,
-        end: focus.rowIndex,
-        length: 1,
-      },
       column: {
-        start: focus.columnIndex,
         end: focus.columnIndex,
         length: 1,
+        start: focus.columnIndex,
+      },
+      row: {
+        end: focus.rowIndex,
+        length: 1,
+        start: focus.rowIndex,
       },
     };
   }
@@ -400,6 +401,22 @@ const cellToStringMap: Record<
   string,
   (container: DatabaseCellContainer | undefined) => string
 > = {
+  checkbox: container => {
+    return getColumnValue(container);
+  },
+  date: container => {
+    return getColumnValue(container);
+  },
+  link: container => getColumnValue(container),
+  'multi-select': container => {
+    return getColumnValue(container);
+  },
+  number: container => {
+    return getColumnValue(container);
+  },
+  progress: container => {
+    return getColumnValue(container);
+  },
   'rich-text': container => {
     const cell = container?.querySelector(
       'affine-database-rich-text-cell-editing'
@@ -414,6 +431,9 @@ const cellToStringMap: Record<
     }
     return value ?? '';
   },
+  select: container => {
+    return getColumnValue(container);
+  },
   title: container => {
     const cell = container?.querySelector('data-view-header-area-text-editing');
     const value = getColumnValue(container);
@@ -425,24 +445,5 @@ const cellToStringMap: Record<
       return data;
     }
     return value ?? '';
-  },
-  date: container => {
-    return getColumnValue(container);
-  },
-  number: container => {
-    return getColumnValue(container);
-  },
-  select: container => {
-    return getColumnValue(container);
-  },
-  'multi-select': container => {
-    return getColumnValue(container);
-  },
-  progress: container => {
-    return getColumnValue(container);
-  },
-  link: container => getColumnValue(container),
-  checkbox: container => {
-    return getColumnValue(container);
   },
 };

@@ -10,7 +10,7 @@ import type { RefNodeSlots } from './inline/presets/nodes/reference-node/referen
 import type { BlockComponent } from './utils/query.js';
 import type { Point } from './utils/rect.js';
 
-export type SelectionPosition = 'start' | 'end' | Point;
+export type SelectionPosition = 'end' | 'start' | Point;
 
 export interface IPoint {
   x: number;
@@ -27,11 +27,11 @@ export interface EditingState {
 
 export type CommonSlots = RefNodeSlots;
 
-export type DocMode = 'page' | 'edgeless';
+export type DocMode = 'edgeless' | 'page';
 
 type EditorSlots = {
-  editorModeSwitched: Slot<DocMode>;
   docUpdated: Slot<{ newDocId: string }>;
+  editorModeSwitched: Slot<DocMode>;
 };
 
 export type AbstractEditor = {
@@ -45,18 +45,18 @@ export type ExtendedModel = BlockModel & Record<string, any>;
 
 export type Connectable = Exclude<
   BlockSuite.EdgelessModelType,
-  ConnectorElementModel | BrushElementModel | GroupElementModel
+  BrushElementModel | ConnectorElementModel | GroupElementModel
 >;
 
 export enum LineWidth {
-  Two = 2,
+  Eight = 8,
   // Thin
   Four = 4,
   Six = 6,
-  Eight = 8,
   // Thick
   Ten = 10,
   Twelve = 12,
+  Two = 2,
 }
 
 export enum LassoMode {
@@ -65,42 +65,42 @@ export enum LassoMode {
 }
 
 export type NoteChildrenFlavour =
-  | 'affine:paragraph'
-  | 'affine:list'
-  | 'affine:code'
-  | 'affine:divider'
-  | 'affine:database'
-  | 'affine:data-view'
-  | 'affine:image'
-  | 'affine:bookmark'
   | 'affine:attachment'
+  | 'affine:bookmark'
+  | 'affine:code'
+  | 'affine:data-view'
+  | 'affine:database'
+  | 'affine:divider'
+  | 'affine:image'
+  | 'affine:list'
+  | 'affine:paragraph'
   | 'affine:surface-ref';
 
 export enum NoteDisplayMode {
   DocAndEdgeless = 'both',
-  EdgelessOnly = 'edgeless',
   DocOnly = 'doc',
+  EdgelessOnly = 'edgeless',
 }
 
 export interface Viewport {
+  clientHeight: number;
+  clientWidth: number;
   left: number;
-  top: number;
+  scrollHeight: number;
   scrollLeft: number;
   scrollTop: number;
   scrollWidth: number;
-  scrollHeight: number;
-  clientWidth: number;
-  clientHeight: number;
+  top: number;
 }
 
 export type EmbedCardStyle =
-  | 'horizontal'
-  | 'horizontalThin'
-  | 'list'
-  | 'vertical'
   | 'cube'
   | 'cubeThick'
-  | 'video'
   | 'figma'
+  | 'horizontal'
+  | 'horizontalThin'
   | 'html'
-  | 'syncedDoc';
+  | 'list'
+  | 'syncedDoc'
+  | 'vertical'
+  | 'video';

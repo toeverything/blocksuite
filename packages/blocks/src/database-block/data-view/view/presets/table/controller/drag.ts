@@ -3,16 +3,82 @@
 import type { ReactiveController } from 'lit';
 
 import type { InsertToPosition } from '../../../../types.js';
-import { startDrag } from '../../../../utils/drag.js';
-import { TableRow } from '../components/row.js';
 import type { DataViewTable } from '../table-view.js';
 
-export class TableDragController implements ReactiveController {
-  dropPreview = createDropPreview();
+import { startDrag } from '../../../../utils/drag.js';
+import { TableRow } from '../components/row.js';
 
-  constructor(private host: DataViewTable) {
-    this.host.addController(this);
-  }
+export class TableDragController implements ReactiveController {
+  dragStart = (row: TableRow, evt: PointerEvent) => {
+    const eleRect = row.getBoundingClientRect();
+    const offsetLeft = evt.x - eleRect.left;
+    const offsetTop = evt.y - eleRect.top;
+    const preview = createDragPreview(
+      row,
+      evt.x - offsetLeft,
+      evt.y - offsetTop
+    );
+    const fromGroup = row.groupKey;
+
+    startDrag<
+      | {
+          groupKey?: string;
+          position: InsertToPosition;
+          type: 'self';
+        }
+      | { callback: () => void; type: 'out' }
+      | undefined,
+      PointerEvent
+    >(evt, {
+      onClear: () => {
+        preview.remove();
+        this.dropPreview.remove();
+      },
+      onDrag: () => undefined,
+      onDrop: result => {
+        if (!result) {
+          return;
+        }
+        if (result.type === 'out') {
+          result.callback();
+          return;
+        }
+        if (result.type === 'self') {
+          this.host.view.rowMove(
+            row.rowId,
+            result.position,
+            fromGroup,
+            result.groupKey
+          );
+        }
+      },
+      onMove: evt => {
+        preview.display(evt.x - offsetLeft, evt.y - offsetTop);
+        if (!this.host.contains(evt.target as Node)) {
+          const callback = this.host.onDrag;
+          if (callback) {
+            this.dropPreview.remove();
+            return {
+              callback: callback(evt, row.rowId),
+              type: 'out',
+            };
+          }
+          return;
+        }
+        const result = this.showIndicator(evt);
+        if (result) {
+          return {
+            groupKey: result.groupKey,
+            position: result.position,
+            type: 'self',
+          };
+        }
+        return;
+      },
+    });
+  };
+
+  dropPreview = createDropPreview();
 
   getInsertPosition = (
     evt: MouseEvent
@@ -20,9 +86,9 @@ export class TableDragController implements ReactiveController {
     | {
         groupKey: string | undefined;
         position: InsertToPosition;
-        y: number;
         width: number;
         x: number;
+        y: number;
       }
     | undefined => {
     const y = evt.y;
@@ -39,12 +105,12 @@ export class TableDragController implements ReactiveController {
         return {
           groupKey: row.groupKey,
           position: {
-            id: row.dataset.rowId as string,
             before: y < mid,
+            id: row.dataset.rowId as string,
           },
-          y: y < mid ? rect.top : rect.bottom,
           width: tableRect.width,
           x: tableRect.left,
+          y: y < mid ? rect.top : rect.bottom,
         };
       }
     }
@@ -60,6 +126,10 @@ export class TableDragController implements ReactiveController {
     }
     return position;
   };
+
+  constructor(private host: DataViewTable) {
+    this.host.addController(this);
+  }
 
   hostConnected() {
     if (this.host.view.readonly) {
@@ -86,75 +156,6 @@ export class TableDragController implements ReactiveController {
       })
     );
   }
-
-  dragStart = (row: TableRow, evt: PointerEvent) => {
-    const eleRect = row.getBoundingClientRect();
-    const offsetLeft = evt.x - eleRect.left;
-    const offsetTop = evt.y - eleRect.top;
-    const preview = createDragPreview(
-      row,
-      evt.x - offsetLeft,
-      evt.y - offsetTop
-    );
-    const fromGroup = row.groupKey;
-
-    startDrag<
-      | undefined
-      | {
-          type: 'self';
-          groupKey?: string;
-          position: InsertToPosition;
-        }
-      | { type: 'out'; callback: () => void },
-      PointerEvent
-    >(evt, {
-      onDrag: () => undefined,
-      onMove: evt => {
-        preview.display(evt.x - offsetLeft, evt.y - offsetTop);
-        if (!this.host.contains(evt.target as Node)) {
-          const callback = this.host.onDrag;
-          if (callback) {
-            this.dropPreview.remove();
-            return {
-              type: 'out',
-              callback: callback(evt, row.rowId),
-            };
-          }
-          return;
-        }
-        const result = this.showIndicator(evt);
-        if (result) {
-          return {
-            type: 'self',
-            groupKey: result.groupKey,
-            position: result.position,
-          };
-        }
-        return;
-      },
-      onClear: () => {
-        preview.remove();
-        this.dropPreview.remove();
-      },
-      onDrop: result => {
-        if (!result) {
-          return;
-        }
-        if (result.type === 'out') {
-          result.callback();
-          return;
-        }
-        if (result.type === 'self') {
-          this.host.view.rowMove(
-            row.rowId,
-            result.position,
-            fromGroup,
-            result.groupKey
-          );
-        }
-      },
-    });
-  };
 }
 
 const createDragPreview = (row: TableRow, x: number, y: number) => {

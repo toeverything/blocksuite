@@ -3,20 +3,20 @@ import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
 
 export interface BeforeinputHookCtx<TextAttributes extends BaseTextAttributes> {
-  inlineEditor: InlineEditor<TextAttributes>;
-  raw: InputEvent;
-  inlineRange: InlineRange;
-  data: string | null;
   attributes: TextAttributes;
+  data: null | string;
+  inlineEditor: InlineEditor<TextAttributes>;
+  inlineRange: InlineRange;
+  raw: InputEvent;
 }
 export interface CompositionEndHookCtx<
   TextAttributes extends BaseTextAttributes,
 > {
-  inlineEditor: InlineEditor<TextAttributes>;
-  raw: CompositionEvent;
-  inlineRange: InlineRange;
-  data: string | null;
   attributes: TextAttributes;
+  data: null | string;
+  inlineEditor: InlineEditor<TextAttributes>;
+  inlineRange: InlineRange;
+  raw: CompositionEvent;
 }
 
 export type HookContext<TextAttributes extends BaseTextAttributes> =

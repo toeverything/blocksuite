@@ -1,12 +1,11 @@
-import '../buttons/tool-icon-button.js';
-
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { CheckIcon } from '../../../../_common/icons/edgeless.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { clamp } from '../../../../_common/utils/math.js';
+import '../buttons/tool-icon-button.js';
 
 const MIN_SIZE = 1;
 const MAX_SIZE = 200;
@@ -59,35 +58,6 @@ export class EdgelessSizePanel extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor size!: number;
-
-  @property({ attribute: false })
-  accessor sizeList!: SizeItem[];
-
-  @property({ attribute: false })
-  accessor onSelect: ((size: number) => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onPopperCose: (() => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor minSize: number = MIN_SIZE;
-
-  @property({ attribute: false })
-  accessor maxSize: number = MAX_SIZE;
-
-  @property({ attribute: 'data-type' })
-  accessor type: 'normal' | 'check' = 'normal';
-
-  private _onSelect(size: number) {
-    this.onSelect?.(size);
-  }
-
-  private _onPopperClose() {
-    this.onPopperCose?.();
-  }
-
   private _onKeydown = (e: KeyboardEvent) => {
     e.stopPropagation();
 
@@ -108,11 +78,19 @@ export class EdgelessSizePanel extends LitElement {
     }
   };
 
-  renderItem() {
-    return this.type === 'normal'
-      ? this.renderItemWithNormal
-      : this.renderItemWithCheck;
-  }
+  renderItemWithCheck = ({ name, value }: SizeItem) => {
+    const active = this.size === value;
+    return html`
+      <edgeless-tool-icon-button
+        .iconContainerPadding=${[4, 8]}
+        .justify=${'space-between'}
+        .active=${active}
+        @click=${() => this._onSelect(value)}
+      >
+        ${name ?? value} ${active ? CheckIcon : nothing}
+      </edgeless-tool-icon-button>
+    `;
+  };
 
   renderItemWithNormal = ({ name, value }: SizeItem) => {
     return html`
@@ -127,19 +105,13 @@ export class EdgelessSizePanel extends LitElement {
     `;
   };
 
-  renderItemWithCheck = ({ name, value }: SizeItem) => {
-    const active = this.size === value;
-    return html`
-      <edgeless-tool-icon-button
-        .iconContainerPadding=${[4, 8]}
-        .justify=${'space-between'}
-        .active=${active}
-        @click=${() => this._onSelect(value)}
-      >
-        ${name ?? value} ${active ? CheckIcon : nothing}
-      </edgeless-tool-icon-button>
-    `;
-  };
+  private _onPopperClose() {
+    this.onPopperCose?.();
+  }
+
+  private _onSelect(size: number) {
+    this.onSelect?.(size);
+  }
 
   override render() {
     return html`
@@ -159,6 +131,33 @@ export class EdgelessSizePanel extends LitElement {
       />
     `;
   }
+
+  renderItem() {
+    return this.type === 'normal'
+      ? this.renderItemWithNormal
+      : this.renderItemWithCheck;
+  }
+
+  @property({ attribute: false })
+  accessor maxSize: number = MAX_SIZE;
+
+  @property({ attribute: false })
+  accessor minSize: number = MIN_SIZE;
+
+  @property({ attribute: false })
+  accessor onPopperCose: (() => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor onSelect: ((size: number) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor size!: number;
+
+  @property({ attribute: false })
+  accessor sizeList!: SizeItem[];
+
+  @property({ attribute: 'data-type' })
+  accessor type: 'check' | 'normal' = 'normal';
 }
 
 declare global {

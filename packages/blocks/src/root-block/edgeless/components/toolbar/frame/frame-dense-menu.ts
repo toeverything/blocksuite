@@ -1,30 +1,31 @@
 import type { Menu } from '../../../../../_common/components/index.js';
-import { FrameIcon } from '../../../../../_common/icons/edgeless.js';
 import type { DenseMenuBuilder } from '../common/type.js';
+
+import { FrameIcon } from '../../../../../_common/icons/edgeless.js';
 import { FrameConfig } from './config.js';
 import { createFrame } from './service.js';
 
 export const buildFrameDenseMenu: DenseMenuBuilder = edgeless => ({
-  type: 'sub-menu',
-  name: 'Frame',
   icon: FrameIcon,
-  select: () => edgeless.tools.setEdgelessTool({ type: 'frame' }),
   isSelected: edgeless.tools.edgelessTool.type === 'frame',
+  name: 'Frame',
   options: {
     items: [
       {
-        type: 'action',
         name: 'Custom',
         select: () => edgeless.tools.setEdgelessTool({ type: 'frame' }),
+        type: 'action',
       },
       ...FrameConfig.map(
         config =>
           ({
-            type: 'action',
             name: `Slide ${config.name}`,
             select: () => createFrame(edgeless, config.wh),
+            type: 'action',
           }) satisfies Menu
       ),
     ],
   },
+  select: () => edgeless.tools.setEdgelessTool({ type: 'frame' }),
+  type: 'sub-menu',
 });

@@ -1,10 +1,11 @@
 import { nothing } from 'lit';
 import { html } from 'lit/static-html.js';
 
-import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import { MoreHorizontalIcon, PlusIcon } from '../icons/index.js';
 import type { GroupData } from './helper.js';
 import type { GroupRenderProps } from './matcher.js';
+
+import { renderUniLit } from '../../utils/uni-component/uni-component.js';
+import { MoreHorizontalIcon, PlusIcon } from '../icons/index.js';
 
 function GroupHeaderCount(group: GroupData) {
   const cards = group.rows;
@@ -17,9 +18,9 @@ function GroupHeaderCount(group: GroupData) {
 export function GroupTitle(
   groupData: GroupData,
   ops: {
-    readonly: boolean;
     clickAdd: (evt: MouseEvent) => void;
     clickOps: (evt: MouseEvent) => void;
+    readonly: boolean;
   }
 ) {
   const data = groupData.helper.groupConfig();
@@ -33,11 +34,11 @@ export function GroupTitle(
           .uni="${groupData.helper.column.icon}"
         ></uni-lit>`;
   const props: GroupRenderProps = {
-    value: groupData.value,
     data: groupData.helper.data,
+    readonly: ops.readonly,
     updateData: groupData.helper.updateData,
     updateValue: value => groupData.helper.updateValue(groupData.rows, value),
-    readonly: ops.readonly,
+    value: groupData.value,
   };
 
   return html`

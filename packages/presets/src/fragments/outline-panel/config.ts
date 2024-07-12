@@ -25,53 +25,53 @@ import {
 const paragraphIconMap: {
   [key in ParagraphBlockModel['type']]: TemplateResult<1>;
 } = {
-  quote: SmallQuoteBlockIcon,
-  text: SmallTextIcon,
   h1: SmallHeading1Icon,
   h2: SmallHeading2Icon,
   h3: SmallHeading3Icon,
   h4: SmallHeading4Icon,
   h5: SmallHeading5Icon,
   h6: SmallHeading6Icon,
+  quote: SmallQuoteBlockIcon,
+  text: SmallTextIcon,
 };
 
 export const previewIconMap = {
   ...paragraphIconMap,
-  code: SmallCodeBlockIcon,
-  numbered: SmallNumberListIcon,
+  attachment: SmallAttachmentIcon,
+  bookmark: SmallBookmarkIcon,
   bulleted: SmallBulletListIcon,
+  code: SmallCodeBlockIcon,
+  image: SmallImageIcon,
+  kanban: SmallDatabaseKanbanIcon,
+  numbered: SmallNumberListIcon,
+  table: SmallDatabaseTableIcon,
   todo: SmallTodoIcon,
   toggle: BlockPreviewIcon,
-  bookmark: SmallBookmarkIcon,
-  image: SmallImageIcon,
-  table: SmallDatabaseTableIcon,
-  kanban: SmallDatabaseKanbanIcon,
-  attachment: SmallAttachmentIcon,
 };
 
 const paragraphPlaceholderMap: {
   [key in ParagraphBlockModel['type']]: string;
 } = {
-  quote: 'Quote',
-  text: 'Text Block',
   h1: 'Heading 1',
   h2: 'Heading 2',
   h3: 'Heading 3',
   h4: 'Heading 4',
   h5: 'Heading 5',
   h6: 'Heading 6',
+  quote: 'Quote',
+  text: 'Text Block',
 };
 
 export const placeholderMap = {
-  code: 'Code Block',
-  bulleted: 'Bulleted List',
-  numbered: 'Numbered List',
-  toggle: 'Toggle List',
-  todo: 'Todo',
-  bookmark: 'Bookmark',
-  image: 'Image',
-  database: 'Database',
   attachment: 'Attachment',
+  bookmark: 'Bookmark',
+  bulleted: 'Bulleted List',
+  code: 'Code Block',
+  database: 'Database',
+  image: 'Image',
+  numbered: 'Numbered List',
+  todo: 'Todo',
+  toggle: 'Toggle List',
   ...paragraphPlaceholderMap,
 };
 
@@ -82,6 +82,6 @@ export const headingKeys = new Set(
 export const outlineSettingsKey = 'outlinePanelSettings';
 
 export type OutlineSettingsDataType = {
-  showIcons: boolean;
   enableSorting: boolean;
+  showIcons: boolean;
 };

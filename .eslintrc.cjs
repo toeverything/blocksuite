@@ -55,6 +55,8 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:wc/recommended',
     'plugin:lit/recommended',
+    'plugin:perfectionist/recommended-natural',
+    'prettier',
   ],
   ignorePatterns: [
     '**/dist/*',
@@ -88,32 +90,6 @@ module.exports = {
             caughtErrorsIgnorePattern: '^_',
             destructuredArrayIgnorePattern: '^_',
             ignoreRestSiblings: true,
-          },
-        ],
-        '@typescript-eslint/member-ordering': [
-          'error',
-          {
-            default: [
-              'private-static-field',
-              'protected-static-field',
-              'public-static-field',
-
-              'private-instance-field',
-              'protected-instance-field',
-              'public-instance-field',
-
-              'private-constructor',
-              'protected-constructor',
-              'public-constructor',
-
-              'private-instance-method',
-              'protected-instance-method',
-              'public-instance-method',
-
-              'private-static-method',
-              'protected-static-method',
-              'public-static-method',
-            ],
           },
         ],
         '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'error',
@@ -172,42 +148,11 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'simple-import-sort', 'prettier', 'unicorn'],
+  plugins: ['unicorn'],
   rules: {
     '@typescript-eslint/consistent-type-imports': [
       'error',
       { prefer: 'type-imports', disallowTypeAnnotations: false },
-    ],
-    'simple-import-sort/imports': 'error',
-    'simple-import-sort/exports': 'error',
-    '@typescript-eslint/no-restricted-imports': [
-      'error',
-      {
-        patterns: [
-          {
-            group: ['**/dist', '**/dist/**'],
-            message: 'Don not import from dist',
-            allowTypeImports: false,
-          },
-          {
-            group: ['**/src', '**/src/**'],
-            message: 'Don not import from src',
-            allowTypeImports: false,
-          },
-          {
-            group: ['**/*.css', '**/*.css?*'],
-            message:
-              'Don not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-            allowTypeImports: false,
-          },
-        ],
-      },
-    ],
-    'prettier/prettier': [
-      'error',
-      {
-        endOfLine: 'auto',
-      },
     ],
     'arrow-body-style': 'off',
     'prefer-arrow-callback': 'off',

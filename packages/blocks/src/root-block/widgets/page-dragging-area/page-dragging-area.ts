@@ -1,21 +1,23 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { BlockElement, WidgetElement } from '@blocksuite/block-std';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { PageRootBlockComponent, RootBlockModel } from '../../index.js';
+
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { getScrollContainer } from '../../../_common/utils/scroll-container.js';
-import type { PageRootBlockComponent, RootBlockModel } from '../../index.js';
 import { autoScroll } from '../../text-selection/utils.js';
 
 type Rect = {
+  height: number;
   left: number;
   top: number;
   width: number;
-  height: number;
 };
 
 type BlockInfo = {
@@ -31,11 +33,91 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
   RootBlockModel,
   PageRootBlockComponent
 > {
-  private get _viewport() {
-    const rootElement = this.blockElement;
-    assertExists(rootElement);
-    return rootElement.viewport;
-  }
+  static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
+
+  private _dragging = false;
+
+  private _initialContainerOffset: {
+    x: number;
+    y: number;
+  } = {
+    x: 0,
+    y: 0,
+  };
+
+  private _initialScrollOffset: {
+    left: number;
+    top: number;
+  } = {
+    left: 0,
+    top: 0,
+  };
+
+  private _lastPointerState: PointerEventState | null = null;
+
+  private _rafID = 0;
+
+  private _updateDraggingArea = (
+    state: PointerEventState,
+    shouldAutoScroll: boolean
+  ) => {
+    const { x, y } = state;
+    const { x: startX, y: startY } = state.start;
+
+    const { left: initScrollX, top: initScrollY } = this._initialScrollOffset;
+    assertExists(this._viewport, 'viewport should exist');
+    const { scrollHeight, scrollLeft, scrollTop, scrollWidth } = this._viewport;
+
+    const { x: initConX, y: initConY } = this._initialContainerOffset;
+    const { x: conX, y: conY } = state.containerOffset;
+
+    const { left: viewportLeft, top: viewportTop } = this._viewport;
+    let left = Math.min(
+      startX + initScrollX + initConX - viewportLeft,
+      x + scrollLeft + conX - viewportLeft
+    );
+    let right = Math.max(
+      startX + initScrollX + initConX - viewportLeft,
+      x + scrollLeft + conX - viewportLeft
+    );
+    let top = Math.min(
+      startY + initScrollY + initConY - viewportTop,
+      y + scrollTop + conY - viewportTop
+    );
+    let bottom = Math.max(
+      startY + initScrollY + initConY - viewportTop,
+      y + scrollTop + conY - viewportTop
+    );
+
+    left = Math.max(left, conX - viewportLeft);
+    right = Math.min(right, scrollWidth);
+    top = Math.max(top, conY - viewportTop);
+    bottom = Math.min(bottom, scrollHeight);
+
+    const userRect = {
+      height: bottom - top,
+      left,
+      top,
+      width: right - left,
+    };
+    this.rect = userRect;
+    this._selectBlocksByRect({
+      height: userRect.height,
+      left: userRect.left + viewportLeft,
+      top: userRect.top + viewportTop,
+      width: userRect.width,
+    });
+    this._lastPointerState = state;
+
+    if (shouldAutoScroll) {
+      const rect = this.scrollContainer.getBoundingClientRect();
+      const result = autoScroll(this.scrollContainer, state.raw.y - rect.top);
+      if (!result) {
+        this._clearRaf();
+        return;
+      }
+    }
+  };
 
   private get _allBlocksWithRect(): BlockInfo[] {
     assertExists(this._viewport, 'viewport should exist');
@@ -68,41 +150,21 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
       return {
         element,
         rect: {
+          height: bounding.height,
           left: bounding.left + scrollLeft,
           top: bounding.top + scrollTop,
           width: bounding.width,
-          height: bounding.height,
         },
       };
     });
   }
 
-  static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
-
-  private _rafID = 0;
-
-  private _lastPointerState: PointerEventState | null = null;
-
-  private _dragging = false;
-
-  private _initialScrollOffset: {
-    top: number;
-    left: number;
-  } = {
-    top: 0,
-    left: 0,
-  };
-
-  private _initialContainerOffset: {
-    x: number;
-    y: number;
-  } = {
-    x: 0,
-    y: 0,
-  };
-
-  @state()
-  accessor rect: Rect | null = null;
+  private _clearRaf() {
+    if (this._rafID) {
+      cancelAnimationFrame(this._rafID);
+      this._rafID = 0;
+    }
+  }
 
   private _selectBlocksByRect(userRect: Rect) {
     const selections = getSelectingBlockPaths(
@@ -117,74 +179,15 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
     this.host.selection.setGroup('note', selections);
   }
 
-  private _clearRaf() {
-    if (this._rafID) {
-      cancelAnimationFrame(this._rafID);
-      this._rafID = 0;
-    }
+  private get _viewport() {
+    const rootElement = this.blockElement;
+    assertExists(rootElement);
+    return rootElement.viewport;
   }
 
-  private _updateDraggingArea = (
-    state: PointerEventState,
-    shouldAutoScroll: boolean
-  ) => {
-    const { x, y } = state;
-    const { x: startX, y: startY } = state.start;
-
-    const { left: initScrollX, top: initScrollY } = this._initialScrollOffset;
-    assertExists(this._viewport, 'viewport should exist');
-    const { scrollLeft, scrollTop, scrollWidth, scrollHeight } = this._viewport;
-
-    const { x: initConX, y: initConY } = this._initialContainerOffset;
-    const { x: conX, y: conY } = state.containerOffset;
-
-    const { left: viewportLeft, top: viewportTop } = this._viewport;
-    let left = Math.min(
-      startX + initScrollX + initConX - viewportLeft,
-      x + scrollLeft + conX - viewportLeft
-    );
-    let right = Math.max(
-      startX + initScrollX + initConX - viewportLeft,
-      x + scrollLeft + conX - viewportLeft
-    );
-    let top = Math.min(
-      startY + initScrollY + initConY - viewportTop,
-      y + scrollTop + conY - viewportTop
-    );
-    let bottom = Math.max(
-      startY + initScrollY + initConY - viewportTop,
-      y + scrollTop + conY - viewportTop
-    );
-
-    left = Math.max(left, conX - viewportLeft);
-    right = Math.min(right, scrollWidth);
-    top = Math.max(top, conY - viewportTop);
-    bottom = Math.min(bottom, scrollHeight);
-
-    const userRect = {
-      left,
-      top,
-      width: right - left,
-      height: bottom - top,
-    };
-    this.rect = userRect;
-    this._selectBlocksByRect({
-      left: userRect.left + viewportLeft,
-      top: userRect.top + viewportTop,
-      width: userRect.width,
-      height: userRect.height,
-    });
-    this._lastPointerState = state;
-
-    if (shouldAutoScroll) {
-      const rect = this.scrollContainer.getBoundingClientRect();
-      const result = autoScroll(this.scrollContainer, state.raw.y - rect.top);
-      if (!result) {
-        this._clearRaf();
-        return;
-      }
-    }
-  };
+  private get scrollContainer() {
+    return getScrollContainer(this.blockElement);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -238,8 +241,8 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
         this._dragging = false;
         this.rect = null;
         this._initialScrollOffset = {
-          top: 0,
           left: 0,
+          top: 0,
         };
         this._initialContainerOffset = {
           x: 0,
@@ -266,8 +269,10 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
     );
   }
 
-  private get scrollContainer() {
-    return getScrollContainer(this.blockElement);
+  override disconnectedCallback() {
+    this._clearRaf();
+    this._disposables.dispose();
+    super.disconnectedCallback();
   }
 
   override firstUpdated() {
@@ -281,21 +286,15 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
     });
   }
 
-  override disconnectedCallback() {
-    this._clearRaf();
-    this._disposables.dispose();
-    super.disconnectedCallback();
-  }
-
   override render() {
     const rect = this.rect;
     if (!rect) return nothing;
 
     const style = {
+      height: rect.height + 'px',
       left: rect.left + 'px',
       top: rect.top + 'px',
       width: rect.width + 'px',
-      height: rect.height + 'px',
     };
     return html`
       <style>
@@ -309,6 +308,9 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
       <div class="affine-page-dragging-area" style=${styleMap(style)}></div>
     `;
   }
+
+  @state()
+  accessor rect: Rect | null = null;
 }
 
 function rectIntersects(a: Rect, b: Rect) {

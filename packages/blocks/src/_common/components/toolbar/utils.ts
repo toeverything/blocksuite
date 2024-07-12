@@ -1,18 +1,18 @@
-import './icon-button.js';
-import './menu-button.js';
-import './separator.js';
-
-import { html, nothing, type TemplateResult } from 'lit';
+import { type TemplateResult, html, nothing } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import './icon-button.js';
+import './menu-button.js';
+import './separator.js';
+
 export type Action = {
+  disabled?: boolean;
+  handler?: () => void;
   icon: TemplateResult<1>;
   name: string;
   type?: string;
-  handler?: () => void;
-  disabled?: boolean;
 };
 
 // Group Actions

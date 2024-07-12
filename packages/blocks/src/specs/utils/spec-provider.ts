@@ -1,4 +1,5 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 
 import { SpecBuilder } from './spec-builder.js';
@@ -10,14 +11,21 @@ export class SpecProvider {
 
   private constructor() {}
 
+  static getInstance() {
+    if (!SpecProvider.instance) {
+      SpecProvider.instance = new SpecProvider();
+    }
+    return SpecProvider.instance;
+  }
+
   addSpec(id: string, spec: BlockSpec[]) {
     if (!this.specMap.has(id)) {
       this.specMap.set(id, spec);
     }
   }
 
-  hasSpec(id: string) {
-    return this.specMap.has(id);
+  clearSpec(id: string) {
+    this.specMap.delete(id);
   }
 
   getSpec(id: string) {
@@ -26,14 +34,7 @@ export class SpecProvider {
     return new SpecBuilder(spec);
   }
 
-  clearSpec(id: string) {
-    this.specMap.delete(id);
-  }
-
-  static getInstance() {
-    if (!SpecProvider.instance) {
-      SpecProvider.instance = new SpecProvider();
-    }
-    return SpecProvider.instance;
+  hasSpec(id: string) {
+    return this.specMap.has(id);
   }
 }

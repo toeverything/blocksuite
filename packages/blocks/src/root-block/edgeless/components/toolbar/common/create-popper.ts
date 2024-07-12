@@ -4,9 +4,9 @@ import { assertExists } from '@blocksuite/global/utils';
 const leaveToPercent = `calc(100% + 10px)`;
 
 export interface MenuPopper<T extends HTMLElement> {
-  element: T;
-  dispose: () => void;
   cancel?: () => void;
+  dispose: () => void;
+  element: T;
 }
 
 // store active poppers
@@ -54,25 +54,25 @@ export function createPopper<T extends keyof HTMLElementTagNameMap>(
   requestAnimationFrame(() => animateEnter(menu));
 
   Object.assign(clipWrapper.style, {
+    alignItems: 'end',
+    bottom: '100%',
+    boxSizing: 'border-box',
+    display: 'flex',
     height: '100px',
+    left: '0px',
+    maxWidth: '100%',
+    overflow: 'hidden',
     pointerEvents: 'none',
     position: 'absolute',
-    overflow: 'hidden',
     width: '100%',
-    maxWidth: '100%',
-    boxSizing: 'border-box',
-    left: '0px',
-    bottom: '100%',
-    display: 'flex',
-    alignItems: 'end',
   });
 
   Object.assign(menu.style, {
-    width: '100%',
+    bottom: '0%',
     marginLeft: '30px',
     maxWidth: 'calc(100% - 60px)',
-    bottom: '0%',
     pointerEvents: 'auto',
+    width: '100%',
   });
   const remove = () => {
     clipWrapper.remove();
@@ -82,13 +82,13 @@ export function createPopper<T extends keyof HTMLElementTagNameMap>(
   };
 
   const popper: MenuPopper<HTMLElementTagNameMap[T]> = {
-    element: menu,
     dispose: function () {
       // apply leave transition
       animateLeave(menu);
       menu.addEventListener('transitionend', remove, { once: true });
       popper.cancel = () => menu.removeEventListener('transitionend', remove);
     },
+    element: menu,
   };
 
   popMap.get(reference)?.set(tagName, popper);

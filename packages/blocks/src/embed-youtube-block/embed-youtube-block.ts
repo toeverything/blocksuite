@@ -3,17 +3,18 @@ import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
+import type { EmbedYoutubeStyles } from './embed-youtube-model.js';
+import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
+
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import type { EmbedYoutubeStyles } from './embed-youtube-model.js';
 import {
   type EmbedYoutubeModel,
   youtubeUrlRegex,
 } from './embed-youtube-model.js';
-import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
-import { styles, YoutubeIcon } from './styles.js';
+import { YoutubeIcon, styles } from './styles.js';
 import { refreshEmbedYoutubeUrlData } from './utils.js';
 
 @customElement('affine-embed-youtube-block')
@@ -23,43 +24,11 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  @state()
-  private accessor _isSelected = false;
-
-  @state()
-  private accessor _showOverlay = true;
-
-  @state()
-  private accessor _showImage = false;
+  override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
 
   private _isDragging = false;
 
   private _isResizing = false;
-
-  override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
-
-  @property({ attribute: false })
-  accessor loading = false;
-
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.open();
-  }
 
   open = () => {
     let link = this.model.url;
@@ -74,6 +43,26 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       console.error
     );
   };
+
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (!this.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.open();
+  }
+
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -151,13 +140,13 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
   override renderBlock() {
     const {
-      image,
-      title = 'YouTube',
-      description,
       creator,
       creatorImage,
-      videoId,
+      description,
+      image,
       style,
+      title = 'YouTube',
+      videoId,
     } = this.model;
 
     this._cardStyle = style;
@@ -165,7 +154,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const loading = this.loading;
-    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
+    const { EmbedCardBannerIcon, LoadingIcon } = getEmbedCardIcons();
     const titleIcon = loading ? LoadingIcon : YoutubeIcon;
     const titleText = loading ? 'Loading...' : title;
     const descriptionText = loading ? '' : description;
@@ -218,8 +207,8 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
                       <img
                         class=${classMap({
                           'affine-embed-youtube-video-iframe-overlay': true,
-                          'media-print': true,
                           hide: !this._showImage,
+                          'media-print': true,
                         })}
                         src=${`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
                         alt="YouTube Video"
@@ -264,6 +253,18 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       `
     );
   }
+
+  @state()
+  private accessor _isSelected = false;
+
+  @state()
+  private accessor _showImage = false;
+
+  @state()
+  private accessor _showOverlay = true;
+
+  @property({ attribute: false })
+  accessor loading = false;
 }
 
 declare global {

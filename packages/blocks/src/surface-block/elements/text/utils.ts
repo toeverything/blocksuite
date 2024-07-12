@@ -1,6 +1,7 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
 import type { FontFamily } from '../../consts.js';
+
 import { wrapFontFamily } from '../../utils/font.js';
 
 const RS_LTR_CHARS =
@@ -56,10 +57,10 @@ export function getLineHeight(fontFamily: FontFamily, fontSize: number) {
 }
 
 export function getFontString({
+  fontFamily,
+  fontSize,
   fontStyle,
   fontWeight,
-  fontSize,
-  fontFamily,
 }: {
   fontFamily: FontFamily;
   fontSize: number;
@@ -98,7 +99,7 @@ export function getTextRect(
   text: string,
   fontFamily: string,
   fontSize: number
-): { w: number; h: number } {
+): { h: number; w: number } {
   text = text
     .split('\n')
     .map(x => x || ' ')
@@ -108,7 +109,7 @@ export function getTextRect(
   const font = `${fontSize}px "${fontFamily}"`;
   const w = getTextWidth(text, font);
   const h = getTextHeight(text, lineHeight);
-  return { w, h };
+  return { h, w };
 }
 
 export function getTextWidth(text: string, font: string): number {

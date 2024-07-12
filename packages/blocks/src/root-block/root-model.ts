@@ -1,4 +1,5 @@
 import type { Text } from '@blocksuite/store';
+
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 type RootBlockProps = {
@@ -26,12 +27,12 @@ export class RootBlockModel extends BlockModel<RootBlockProps> {
 
 export const RootBlockSchema = defineBlockSchema({
   flavour: 'affine:page',
+  metadata: {
+    role: 'root',
+    version: 2,
+  },
   props: (internal): RootBlockProps => ({
     title: internal.Text(),
   }),
-  metadata: {
-    version: 2,
-    role: 'root',
-  },
   toModel: () => new RootBlockModel(),
 });

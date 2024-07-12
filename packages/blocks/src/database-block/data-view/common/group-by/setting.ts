@@ -1,9 +1,12 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { PropertyValues } from 'lit';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
+
+import type { GroupRenderProps } from './matcher.js';
 
 import {
   type Menu,
@@ -17,7 +20,6 @@ import { DataViewKanbanManager } from '../../view/presets/kanban/kanban-view-man
 import { DataViewTableManager } from '../../view/presets/table/table-view-manager.js';
 import { dataViewCssVariable } from '../css-variable.js';
 import { DeleteIcon } from '../icons/index.js';
-import type { GroupRenderProps } from './matcher.js';
 import { groupByMatcher } from './matcher.js';
 
 @customElement('data-view-group-setting')
@@ -53,11 +55,17 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor view!: DataViewTableManager | DataViewKanbanManager;
-
-  @query('.group-sort-setting')
-  accessor groupContainer!: HTMLElement;
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+    this._disposables.addFromEvent(this, 'pointerdown', e => {
+      e.stopPropagation();
+    });
+  }
 
   protected override firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -113,9 +121,9 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
           group => group.key,
           group => {
             const props: GroupRenderProps = {
-              value: group.value,
               data: group.helper.data,
               readonly: true,
+              value: group.value,
             };
             const config = group.helper.groupConfig();
             return html` <div class="dv-hover dv-round-4 group-item">
@@ -133,27 +141,20 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    this._disposables.addFromEvent(this, 'pointerdown', e => {
-      e.stopPropagation();
-    });
-  }
+  @query('.group-sort-setting')
+  accessor groupContainer!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor view!: DataViewKanbanManager | DataViewTableManager;
 }
 export const selectGroupByProperty = (
-  view: DataViewTableManager | DataViewKanbanManager,
+  view: DataViewKanbanManager | DataViewTableManager,
   onClose?: () => void
 ): MenuOptions => {
   return {
-    onClose,
     input: {
-      search: true,
       placeholder: 'Search',
+      search: true,
     },
     items: [
       ...view.columnsWithoutFilter
@@ -166,40 +167,41 @@ export const selectGroupByProperty = (
         .map<Menu>(id => {
           const column = view.columnGet(id);
           return {
-            type: 'action',
-            name: column.name,
-            isSelected: view.view.groupBy?.columnId === id,
             icon: html` <uni-lit .uni="${column.icon}"></uni-lit>`,
+            isSelected: view.view.groupBy?.columnId === id,
+            name: column.name,
             select: () => {
               view.changeGroup(id);
             },
+            type: 'action',
           };
         }),
       {
-        type: 'group',
-        name: '',
-        hide: () =>
-          view instanceof DataViewKanbanManager || view.view.groupBy == null,
         children: () => [
           {
-            type: 'action',
-            icon: DeleteIcon,
             class: 'delete-item',
+            icon: DeleteIcon,
             name: 'Remove Grouping',
             select: () => {
               if (view instanceof DataViewTableManager) {
                 view.changeGroup(undefined);
               }
             },
+            type: 'action',
           },
         ],
+        hide: () =>
+          view instanceof DataViewKanbanManager || view.view.groupBy == null,
+        name: '',
+        type: 'group',
       },
     ],
+    onClose,
   };
 };
 export const popSelectGroupByProperty = (
   target: HTMLElement,
-  view: DataViewTableManager | DataViewKanbanManager,
+  view: DataViewKanbanManager | DataViewTableManager,
   onClose?: () => void
 ) => {
   popMenu(target, {
@@ -208,7 +210,7 @@ export const popSelectGroupByProperty = (
 };
 export const popGroupSetting = (
   target: HTMLElement,
-  view: DataViewTableManager | DataViewKanbanManager,
+  view: DataViewKanbanManager | DataViewTableManager,
   onBack: () => void
 ) => {
   const groupBy = view.view.groupBy;
@@ -231,12 +233,10 @@ export const popGroupSetting = (
           menuHandler.close();
         }),
         {
-          type: 'group',
-          name: '',
           children: () => [
             {
-              type: 'sub-menu',
               name: 'Group By',
+              options: selectGroupByProperty(view, reopen),
               postfix: html`
                 <div
                   style="display:flex;align-items:center;gap: 4px;font-size: 12px;line-height: 20px;color: var(--affine-text-secondary-color);margin-right: 4px;margin-left: 8px;"
@@ -247,22 +247,24 @@ export const popGroupSetting = (
                 </div>
                 ${ArrowRightSmallIcon}
               `,
-              options: selectGroupByProperty(view, reopen),
+              type: 'sub-menu',
             },
           ],
+          name: '',
+          type: 'group',
         },
         {
-          type: 'group',
-          name: '',
           children: () => [
             {
-              type: 'custom',
               render: html` <data-view-group-setting
                 .view="${view}"
                 .columnId="${groupBy.columnId}"
               ></data-view-group-setting>`,
+              type: 'custom',
             },
           ],
+          name: '',
+          type: 'group',
         },
       ],
     },

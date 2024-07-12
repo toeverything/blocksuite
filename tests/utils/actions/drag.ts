@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+
 import { assertImageOption } from 'utils/asserts.js';
 
 import { getIndexCoordinate, waitNextFrame } from './misc.js';
@@ -9,8 +10,8 @@ export async function dragBetweenCoords(
   to: { x: number; y: number },
   options?: {
     beforeMouseUp?: () => Promise<void>;
-    steps?: number;
     click?: boolean;
+    steps?: number;
   }
 ) {
   const steps = options?.steps ?? 20;
@@ -32,8 +33,8 @@ export async function dragBetweenIndices(
   endCoordOffSet: { x: number; y: number } = { x: 0, y: 0 },
   options?: {
     beforeMouseUp?: () => Promise<void>;
-    steps?: number;
     click?: boolean;
+    steps?: number;
   }
 ) {
   const finalOptions = {
@@ -234,11 +235,11 @@ export async function popImageMoreMenu(page: Page) {
   });
 
   return {
-    menu,
     copyButton,
-    turnIntoCardButton,
-    duplicateButton,
     deleteButton,
+    duplicateButton,
+    menu,
+    turnIntoCardButton,
   };
 }
 

@@ -1,58 +1,58 @@
-import '../../../../_common/components/toolbar/separator.js';
-
 import { html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { LineWidth } from '../../../../_common/types.js';
+import type { LineWidthEvent } from './line-width-panel.js';
+
+import '../../../../_common/components/toolbar/separator.js';
 import {
   BanIcon,
   DashLineIcon,
   StraightLineIcon,
 } from '../../../../_common/icons/edgeless.js';
-import type { LineWidth } from '../../../../_common/types.js';
 import { StrokeStyle } from '../../../../surface-block/consts.js';
-import type { LineWidthEvent } from './line-width-panel.js';
 
 export type LineStyleEvent =
   | {
-      type: 'size';
-      value: LineWidth;
-    }
-  | {
       type: 'lineStyle';
       value: StrokeStyle;
+    }
+  | {
+      type: 'size';
+      value: LineWidth;
     };
 
 interface LineStylesPanelProps {
+  lineStyles?: StrokeStyle[];
   onClick?: (e: LineStyleEvent) => void;
   selectedLineSize?: LineWidth;
   selectedLineStyle?: StrokeStyle;
-  lineStyles?: StrokeStyle[];
 }
 
 const LINE_STYLE_LIST = [
   {
+    icon: StraightLineIcon,
     name: 'Solid',
     value: StrokeStyle.Solid,
-    icon: StraightLineIcon,
   },
   {
+    icon: DashLineIcon,
     name: 'Dash',
     value: StrokeStyle.Dash,
-    icon: DashLineIcon,
   },
   {
+    icon: BanIcon,
     name: 'None',
     value: StrokeStyle.None,
-    icon: BanIcon,
   },
 ];
 
 export function LineStylesPanel({
+  lineStyles = [StrokeStyle.Solid, StrokeStyle.Dash, StrokeStyle.None],
   onClick,
   selectedLineSize,
   selectedLineStyle,
-  lineStyles = [StrokeStyle.Solid, StrokeStyle.Dash, StrokeStyle.None],
 }: LineStylesPanelProps = {}) {
   const lineSizePanel = html`
     <edgeless-line-width-panel
@@ -70,11 +70,11 @@ export function LineStylesPanel({
   const lineStyleButtons = repeat(
     LINE_STYLE_LIST.filter(item => lineStyles.includes(item.value)),
     item => item.value,
-    ({ name, icon, value }) => {
+    ({ icon, name, value }) => {
       const active = selectedLineStyle === value;
       const classes: Record<string, boolean> = {
-        'line-style-button': true,
         [`mode-${value}`]: true,
+        'line-style-button': true,
       };
       if (active) classes['active'] = true;
 

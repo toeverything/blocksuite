@@ -1,4 +1,5 @@
 import type { SurfaceBlockModel } from '@blocksuite/blocks';
+
 import { beforeEach, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';

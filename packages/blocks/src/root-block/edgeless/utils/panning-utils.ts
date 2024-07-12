@@ -11,8 +11,8 @@ export function calPanDelta(
   edgeDistance = 20
 ): IVec | null {
   // Get viewport edge
-  const { left, top, cumulativeParentScale } = viewport;
-  let { width, height } = viewport;
+  const { cumulativeParentScale, left, top } = viewport;
+  let { height, width } = viewport;
   width /= cumulativeParentScale;
   height /= cumulativeParentScale;
   // Get pointer position

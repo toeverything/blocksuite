@@ -5,13 +5,9 @@ export interface Disposable {
 }
 
 export class DisposableGroup implements Disposable {
-  private _disposed = false;
-
   private _disposables: Disposable[] = [];
 
-  get disposed() {
-    return this._disposed;
-  }
+  private _disposed = false;
 
   /**
    * Add to group to be disposed with others.
@@ -31,25 +27,26 @@ export class DisposableGroup implements Disposable {
     element: Window,
     eventName: N,
     handler: (e: WindowEventMap[N]) => void,
-    options?: boolean | AddEventListenerOptions
+    options?: AddEventListenerOptions | boolean
   ): void;
+
   addFromEvent<N extends keyof DocumentEventMap>(
     element: Document,
     eventName: N,
     handler: (e: DocumentEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
+    eventOptions?: AddEventListenerOptions | boolean
   ): void;
   addFromEvent<N extends keyof HTMLElementEventMap>(
     element: HTMLElement,
     eventName: N,
     handler: (e: HTMLElementEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
+    eventOptions?: AddEventListenerOptions | boolean
   ): void;
   addFromEvent(
-    target: HTMLElement | Window | Document,
+    target: Document | HTMLElement | Window,
     type: string,
     handler: (e: Event) => void,
-    eventOptions?: boolean | AddEventListenerOptions
+    eventOptions?: AddEventListenerOptions | boolean
   ) {
     this.add({
       dispose: () => {
@@ -63,6 +60,10 @@ export class DisposableGroup implements Disposable {
     disposeAll(this._disposables);
     this._disposables = [];
     this._disposed = true;
+  }
+
+  get disposed() {
+    return this._disposed;
   }
 }
 

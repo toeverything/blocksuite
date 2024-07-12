@@ -1,34 +1,34 @@
 import type { AIError } from '@blocksuite/blocks';
 
 export type ChatMessage = {
-  content: string;
-  role: 'user' | 'assistant';
   attachments?: string[];
+  content: string;
   createdAt: string;
+  role: 'assistant' | 'user';
 };
 
 export type ChatAction = {
   action: string;
+  createdAt: string;
   messages: ChatMessage[];
   sessionId: string;
-  createdAt: string;
 };
 
-export type ChatItem = ChatMessage | ChatAction;
+export type ChatItem = ChatAction | ChatMessage;
 
 export type ChatStatus =
-  | 'loading'
-  | 'success'
   | 'error'
   | 'idle'
+  | 'loading'
+  | 'success'
   | 'transmitting';
 
 export type ChatContextValue = {
-  items: ChatItem[];
-  status: ChatStatus;
-  error: AIError | null;
-  quote: string;
-  markdown: string;
-  images: File[];
   abortController: AbortController | null;
+  error: AIError | null;
+  images: File[];
+  items: ChatItem[];
+  markdown: string;
+  quote: string;
+  status: ChatStatus;
 };

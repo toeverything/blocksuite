@@ -7,12 +7,12 @@ export type DocMessage = {
   channel: 'doc';
   payload:
     | {
-        type: 'init';
+        docId: string;
+        type: 'update';
+        updates: number[];
       }
     | {
-        type: 'update';
-        docId: string;
-        updates: number[];
+        type: 'init';
       };
 };
 

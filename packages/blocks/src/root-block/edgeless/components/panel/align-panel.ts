@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -11,19 +11,19 @@ import { TextAlign } from '../../../../surface-block/consts.js';
 
 const TEXT_ALIGN_LIST = [
   {
+    icon: TextAlignLeftIcon,
     name: 'Left',
     value: TextAlign.Left,
-    icon: TextAlignLeftIcon,
   },
   {
+    icon: TextAlignCenterIcon,
     name: 'Center',
     value: TextAlign.Center,
-    icon: TextAlignCenterIcon,
   },
   {
+    icon: TextAlignRightIcon,
     name: 'Right',
     value: TextAlign.Right,
-    icon: TextAlignRightIcon,
   },
 ];
 
@@ -38,12 +38,6 @@ export class EdgelessAlignPanel extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor value: TextAlign = TextAlign.Left;
-
-  @property({ attribute: false })
-  accessor onSelect: undefined | ((value: TextAlign) => void) = undefined;
-
   private _onSelect(value: TextAlign) {
     this.value = value;
     if (this.onSelect) {
@@ -55,7 +49,7 @@ export class EdgelessAlignPanel extends LitElement {
     return repeat(
       TEXT_ALIGN_LIST,
       item => item.name,
-      ({ name, value, icon }) => html`
+      ({ icon, name, value }) => html`
         <edgeless-tool-icon-button
           .activeMode=${'background'}
           aria-label=${name}
@@ -68,6 +62,12 @@ export class EdgelessAlignPanel extends LitElement {
       `
     );
   }
+
+  @property({ attribute: false })
+  accessor onSelect: ((value: TextAlign) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor value: TextAlign = TextAlign.Left;
 }
 
 declare global {

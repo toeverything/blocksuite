@@ -13,24 +13,24 @@ declare global {
   ];
 
   interface Window {
-    editor: AffineEditorContainer;
-    doc: Doc;
-    collection: DocCollection;
-    blockSchemas: z.infer<typeof BlockSchema>[];
-    job: Job;
     Y: typeof DocCollection.Y;
-    std: typeof std;
-    testUtils: TestUtils;
+    bcProvider: ReturnType<typeof setupBroadcastProvider>;
+    blockSchemas: z.infer<typeof BlockSchema>[];
+    collection: DocCollection;
+    devtoolsFormatters: {
+      body: (obj: unknown, config: unknown) => HTMLTemplate | null;
+      hasBody: (obj: unknown, config: unknown) => boolean | null;
+      header: (obj: unknown, config: unknown) => HTMLTemplate | null;
+    }[];
+    doc: Doc;
+    editor: AffineEditorContainer;
     host: EditorHost;
+    job: Job;
+    std: typeof std;
+
+    testUtils: TestUtils;
     testWorker: Worker;
 
     wsProvider: ReturnType<typeof setupBroadcastProvider>;
-    bcProvider: ReturnType<typeof setupBroadcastProvider>;
-
-    devtoolsFormatters: {
-      header: (obj: unknown, config: unknown) => null | HTMLTemplate;
-      hasBody: (obj: unknown, config: unknown) => boolean | null;
-      body: (obj: unknown, config: unknown) => null | HTMLTemplate;
-    }[];
   }
 }

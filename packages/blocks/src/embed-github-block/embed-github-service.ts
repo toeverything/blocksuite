@@ -9,10 +9,14 @@ import {
 import { queryEmbedGithubApiData, queryEmbedGithubData } from './utils.js';
 
 export class EmbedGithubBlockService extends BlockService<EmbedGithubModel> {
-  private static readonly linkPreviewer = new LinkPreviewer();
-
   static setLinkPreviewEndpoint =
     EmbedGithubBlockService.linkPreviewer.setEndpoint;
+
+  private static readonly linkPreviewer = new LinkPreviewer();
+
+  queryApiData = (embedGithubModel: EmbedGithubModel, signal?: AbortSignal) => {
+    return queryEmbedGithubApiData(embedGithubModel, signal);
+  };
 
   queryUrlData = (embedGithubModel: EmbedGithubModel, signal?: AbortSignal) => {
     return queryEmbedGithubData(
@@ -22,10 +26,6 @@ export class EmbedGithubBlockService extends BlockService<EmbedGithubModel> {
     );
   };
 
-  queryApiData = (embedGithubModel: EmbedGithubModel, signal?: AbortSignal) => {
-    return queryEmbedGithubApiData(embedGithubModel, signal);
-  };
-
   override mounted() {
     super.mounted();
 
@@ -33,8 +33,8 @@ export class EmbedGithubBlockService extends BlockService<EmbedGithubModel> {
       const rootService = this.std.spec.getService('affine:page');
       rootService.registerEmbedBlockOptions({
         flavour: this.flavour,
-        urlRegex: githubUrlRegex,
         styles: EmbedGithubStyles,
+        urlRegex: githubUrlRegex,
         viewType: 'card',
       });
     });

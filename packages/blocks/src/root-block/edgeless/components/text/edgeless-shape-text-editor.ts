@@ -10,6 +10,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
 import {
   getNearestTranslation,
   isElementOutsideViewport,
@@ -20,116 +22,17 @@ import {
   MindmapElementModel,
   type ShapeElementModel,
 } from '../../../../surface-block/element-model/index.js';
-import { Bound, toRadian, Vec } from '../../../../surface-block/index.js';
+import { Bound, Vec, toRadian } from '../../../../surface-block/index.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 
 @customElement('edgeless-shape-text-editor')
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
+  private _keeping = false;
 
   private _lastXYWH = '';
 
-  private _keeping = false;
-
   private _resizeObserver: ResizeObserver | null = null;
-
-  @query('rich-text')
-  accessor richText!: RichText;
-
-  @property({ attribute: false })
-  accessor element!: ShapeElementModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor mountEditor:
-    | ((
-        element: ShapeElementModel,
-        edgeless: EdgelessRootBlockComponent
-      ) => void)
-    | undefined = undefined;
-
-  private _updateElementWH() {
-    const bcr = this.richText.getBoundingClientRect();
-    const containerHeight = this.richText.offsetHeight;
-    const containerWidth = this.richText.offsetWidth;
-    const textResizing = this.element.textResizing;
-
-    if (this._lastXYWH !== this.element.xywh) {
-      this.requestUpdate();
-    }
-
-    if (
-      (containerHeight !== this.element.h &&
-        textResizing === TextResizing.AUTO_HEIGHT) ||
-      (textResizing === TextResizing.AUTO_WIDTH &&
-        containerWidth !== this.element.w)
-    ) {
-      const [leftTopX, leftTopY] = Vec.rotWith(
-        [this.richText.offsetLeft, this.richText.offsetTop],
-        [bcr.left + bcr.width / 2, bcr.top + bcr.height / 2],
-        toRadian(-this.element.rotate)
-      );
-
-      const [modelLeftTopX, modelLeftTopY] =
-        this.edgeless.service.viewport.toModelCoord(leftTopX, leftTopY);
-
-      this.edgeless.service.updateElement(this.element.id, {
-        xywh: new Bound(
-          modelLeftTopX,
-          modelLeftTopY,
-          textResizing === TextResizing.AUTO_WIDTH
-            ? containerWidth
-            : this.element.w,
-          containerHeight
-        ).serialize(),
-      });
-      this.element.group instanceof MindmapElementModel &&
-        this.element.group.layout();
-      this.richText.style.minHeight = `${containerHeight}px`;
-    }
-
-    this.edgeless.service.selection.set({
-      elements: [this.element.id],
-      editing: true,
-    });
-  }
-
-  private _unmount() {
-    this._resizeObserver?.disconnect();
-    this._resizeObserver = null;
-
-    if (this.element.text) {
-      const text = this.element.text.toString();
-      const trimed = text.trim();
-      const len = trimed.length;
-      if (len === 0) {
-        this.element.text = undefined;
-      } else if (len < text.length) {
-        this.element.text = new DocCollection.Y.Text(trimed);
-      }
-    }
-
-    this.element.textDisplay = true;
-    this.element.group instanceof MindmapElementModel &&
-      this.element.group.layout();
-
-    this.remove();
-    this.edgeless.service.selection.set({
-      elements: [],
-      editing: false,
-    });
-  }
 
   private _initMindmapKeyBindings() {
     if (!this.element.surface.isInMindmap(this.element.id)) {
@@ -207,8 +110,76 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     });
   }
 
-  setKeeping(keeping: boolean) {
-    this._keeping = keeping;
+  private _unmount() {
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = null;
+
+    if (this.element.text) {
+      const text = this.element.text.toString();
+      const trimed = text.trim();
+      const len = trimed.length;
+      if (len === 0) {
+        this.element.text = undefined;
+      } else if (len < text.length) {
+        this.element.text = new DocCollection.Y.Text(trimed);
+      }
+    }
+
+    this.element.textDisplay = true;
+    this.element.group instanceof MindmapElementModel &&
+      this.element.group.layout();
+
+    this.remove();
+    this.edgeless.service.selection.set({
+      editing: false,
+      elements: [],
+    });
+  }
+
+  private _updateElementWH() {
+    const bcr = this.richText.getBoundingClientRect();
+    const containerHeight = this.richText.offsetHeight;
+    const containerWidth = this.richText.offsetWidth;
+    const textResizing = this.element.textResizing;
+
+    if (this._lastXYWH !== this.element.xywh) {
+      this.requestUpdate();
+    }
+
+    if (
+      (containerHeight !== this.element.h &&
+        textResizing === TextResizing.AUTO_HEIGHT) ||
+      (textResizing === TextResizing.AUTO_WIDTH &&
+        containerWidth !== this.element.w)
+    ) {
+      const [leftTopX, leftTopY] = Vec.rotWith(
+        [this.richText.offsetLeft, this.richText.offsetTop],
+        [bcr.left + bcr.width / 2, bcr.top + bcr.height / 2],
+        toRadian(-this.element.rotate)
+      );
+
+      const [modelLeftTopX, modelLeftTopY] =
+        this.edgeless.service.viewport.toModelCoord(leftTopX, leftTopY);
+
+      this.edgeless.service.updateElement(this.element.id, {
+        xywh: new Bound(
+          modelLeftTopX,
+          modelLeftTopY,
+          textResizing === TextResizing.AUTO_WIDTH
+            ? containerWidth
+            : this.element.w,
+          containerHeight
+        ).serialize(),
+      });
+      this.element.group instanceof MindmapElementModel &&
+        this.element.group.layout();
+      this.richText.style.minHeight = `${containerHeight}px`;
+    }
+
+    this.edgeless.service.selection.set({
+      editing: true,
+      elements: [this.element.id],
+    });
   }
 
   override connectedCallback() {
@@ -271,8 +242,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       if (evt.key === 'Escape') {
         requestAnimationFrame(() => {
           this.edgeless.service.selection.set({
-            elements: [this.element.id],
             editing: false,
+            elements: [this.element.id],
           });
         });
 
@@ -312,46 +283,46 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     const autoWidth = textResizing === TextResizing.AUTO_WIDTH;
 
     const inlineEditorStyle = styleMap({
-      position: 'absolute',
-      left: x + 'px',
-      top: y + 'px',
-      width:
-        textResizing > TextResizing.AUTO_WIDTH
-          ? rect.width + 'px'
-          : 'fit-content',
-      // override rich-text style (height: 100%)
-      height: 'initial',
-      minHeight:
-        textResizing === TextResizing.AUTO_WIDTH ? '1em' : `${rect.height}px`,
-      maxWidth:
-        textResizing === TextResizing.AUTO_WIDTH
-          ? this.element.maxWidth
-            ? `${this.element.maxWidth}px`
-            : undefined
-          : undefined,
-      boxSizing: 'border-box',
-      fontSize: this.element.fontSize + 'px',
-      fontFamily: wrapFontFamily(this.element.fontFamily),
-      fontWeight: this.element.fontWeight,
-      lineHeight: 'normal',
-      outline: 'none',
-      transform: `scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
-      transformOrigin: 'top left',
-      color: isCssVariable(this.element.color)
-        ? `var(${this.element.color})`
-        : this.element.color,
-      padding: `${verticalPadding}px ${horiPadding}px`,
-      textAlign: this.element.textAlign,
-      display: 'grid',
-      gridTemplateColumns: '100%',
+      alignContent: 'center',
       alignItems:
         this.element.textVerticalAlign === 'center'
           ? 'center'
           : this.element.textVerticalAlign === 'bottom'
             ? 'end'
             : 'start',
-      alignContent: 'center',
+      boxSizing: 'border-box',
+      color: isCssVariable(this.element.color)
+        ? `var(${this.element.color})`
+        : this.element.color,
+      display: 'grid',
+      fontFamily: wrapFontFamily(this.element.fontFamily),
+      fontSize: this.element.fontSize + 'px',
+      fontWeight: this.element.fontWeight,
       gap: '0',
+      gridTemplateColumns: '100%',
+      // override rich-text style (height: 100%)
+      height: 'initial',
+      left: x + 'px',
+      lineHeight: 'normal',
+      maxWidth:
+        textResizing === TextResizing.AUTO_WIDTH
+          ? this.element.maxWidth
+            ? `${this.element.maxWidth}px`
+            : undefined
+          : undefined,
+      minHeight:
+        textResizing === TextResizing.AUTO_WIDTH ? '1em' : `${rect.height}px`,
+      outline: 'none',
+      padding: `${verticalPadding}px ${horiPadding}px`,
+      position: 'absolute',
+      textAlign: this.element.textAlign,
+      top: y + 'px',
+      transform: `scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
+      transformOrigin: 'top left',
+      width:
+        textResizing > TextResizing.AUTO_WIDTH
+          ? rect.width + 'px'
+          : 'fit-content',
       zIndex: '1',
     });
 
@@ -375,6 +346,36 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         style=${inlineEditorStyle}
       ></rich-text>`;
   }
+
+  setKeeping(keeping: boolean) {
+    this._keeping = keeping;
+  }
+
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor element!: ShapeElementModel;
+
+  @property({ attribute: false })
+  accessor mountEditor:
+    | ((
+        element: ShapeElementModel,
+        edgeless: EdgelessRootBlockComponent
+      ) => void)
+    | undefined = undefined;
+
+  @query('rich-text')
+  accessor richText!: RichText;
 }
 
 declare global {

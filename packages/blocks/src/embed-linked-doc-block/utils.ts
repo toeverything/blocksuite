@@ -1,5 +1,7 @@
 import type { TemplateResult } from 'lit';
 
+import type { EmbedLinkedDocStyles } from './embed-linked-doc-model.js';
+
 import {
   DarkLoadingIcon,
   EmbedEdgelessIcon,
@@ -12,7 +14,6 @@ import {
   DarkSyncedDocErrorBanner,
   LightSyncedDocErrorBanner,
 } from '../embed-synced-doc-block/styles.js';
-import type { EmbedLinkedDocStyles } from './embed-linked-doc-model.js';
 import {
   DarkLinkedEdgelessDeletedLargeBanner,
   DarkLinkedEdgelessDeletedSmallBanner,
@@ -34,17 +35,17 @@ import {
 } from './styles.js';
 
 type EmbedCardImages = {
-  LoadingIcon: TemplateResult<1>;
-  ReloadIcon: TemplateResult<1>;
-  LinkedDocIcon: TemplateResult<1>;
+  LinkedDocDeletedBanner: TemplateResult<1>;
   LinkedDocDeletedIcon: TemplateResult<1>;
   LinkedDocEmptyBanner: TemplateResult<1>;
-  LinkedDocDeletedBanner: TemplateResult<1>;
+  LinkedDocIcon: TemplateResult<1>;
+  LoadingIcon: TemplateResult<1>;
+  ReloadIcon: TemplateResult<1>;
   SyncedDocErrorBanner: TemplateResult<1>;
 };
 
 export function getEmbedLinkedDocIcons(
-  editorMode: 'page' | 'edgeless',
+  editorMode: 'edgeless' | 'page',
   style: (typeof EmbedLinkedDocStyles)[number]
 ): EmbedCardImages {
   const theme = getThemeMode();
@@ -52,60 +53,60 @@ export function getEmbedLinkedDocIcons(
   if (editorMode === 'page') {
     if (theme === 'light') {
       return {
-        LoadingIcon: LightLoadingIcon,
-        ReloadIcon,
-        LinkedDocIcon: EmbedPageIcon,
+        LinkedDocDeletedBanner: small
+          ? LightLinkedPageDeletedSmallBanner
+          : LightLinkedPageDeletedLargeBanner,
         LinkedDocDeletedIcon,
         LinkedDocEmptyBanner: small
           ? LightLinkedPageEmptySmallBanner
           : LightLinkedPageEmptyLargeBanner,
-        LinkedDocDeletedBanner: small
-          ? LightLinkedPageDeletedSmallBanner
-          : LightLinkedPageDeletedLargeBanner,
+        LinkedDocIcon: EmbedPageIcon,
+        LoadingIcon: LightLoadingIcon,
+        ReloadIcon,
         SyncedDocErrorBanner: LightSyncedDocErrorBanner,
       };
     } else {
       return {
-        ReloadIcon,
-        LoadingIcon: DarkLoadingIcon,
-        LinkedDocIcon: EmbedPageIcon,
+        LinkedDocDeletedBanner: small
+          ? DarkLinkedPageDeletedSmallBanner
+          : DarkLinkedPageDeletedLargeBanner,
         LinkedDocDeletedIcon,
         LinkedDocEmptyBanner: small
           ? DarkLinkedPageEmptySmallBanner
           : DarkLinkedPageEmptyLargeBanner,
-        LinkedDocDeletedBanner: small
-          ? DarkLinkedPageDeletedSmallBanner
-          : DarkLinkedPageDeletedLargeBanner,
+        LinkedDocIcon: EmbedPageIcon,
+        LoadingIcon: DarkLoadingIcon,
+        ReloadIcon,
         SyncedDocErrorBanner: DarkSyncedDocErrorBanner,
       };
     }
   } else {
     if (theme === 'light') {
       return {
-        ReloadIcon,
-        LoadingIcon: LightLoadingIcon,
-        LinkedDocIcon: EmbedEdgelessIcon,
+        LinkedDocDeletedBanner: small
+          ? LightLinkedEdgelessDeletedSmallBanner
+          : LightLinkedEdgelessDeletedLargeBanner,
         LinkedDocDeletedIcon,
         LinkedDocEmptyBanner: small
           ? LightLinkedEdgelessEmptySmallBanner
           : LightLinkedEdgelessEmptyLargeBanner,
-        LinkedDocDeletedBanner: small
-          ? LightLinkedEdgelessDeletedSmallBanner
-          : LightLinkedEdgelessDeletedLargeBanner,
+        LinkedDocIcon: EmbedEdgelessIcon,
+        LoadingIcon: LightLoadingIcon,
+        ReloadIcon,
         SyncedDocErrorBanner: LightSyncedDocErrorBanner,
       };
     } else {
       return {
-        ReloadIcon,
-        LoadingIcon: DarkLoadingIcon,
-        LinkedDocIcon: EmbedEdgelessIcon,
+        LinkedDocDeletedBanner: small
+          ? DarkLinkedEdgelessDeletedSmallBanner
+          : DarkLinkedEdgelessDeletedLargeBanner,
         LinkedDocDeletedIcon,
         LinkedDocEmptyBanner: small
           ? DarkLinkedEdgelessEmptySmallBanner
           : DarkLinkedEdgelessEmptyLargeBanner,
-        LinkedDocDeletedBanner: small
-          ? DarkLinkedEdgelessDeletedSmallBanner
-          : DarkLinkedEdgelessDeletedLargeBanner,
+        LinkedDocIcon: EmbedEdgelessIcon,
+        LoadingIcon: DarkLoadingIcon,
+        ReloadIcon,
         SyncedDocErrorBanner: DarkSyncedDocErrorBanner,
       };
     }

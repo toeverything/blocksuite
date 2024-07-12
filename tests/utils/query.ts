@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import { waitNextFrame } from './actions/misc.js';
 import { assertAlmostEqual } from './asserts.js';
@@ -19,9 +19,9 @@ export function getFormatBar(page: Page) {
   const createLinkedDocBtn = formatBar.getByTestId('convert-to-linked-doc');
   const defaultColorBtn = formatBar.getByTestId('unset');
   const highlight = {
+    defaultColorBtn,
     highlightBtn,
     redForegroundBtn,
-    defaultColorBtn,
   };
 
   const paragraphBtn = formatBar.locator(`.paragraph-button`);
@@ -54,29 +54,29 @@ export function getFormatBar(page: Page) {
   };
 
   return {
-    formatBar,
+    assertBoundingBox,
     boldBtn,
-    italicBtn,
-    underlineBtn,
-    strikeBtn,
-    codeBtn,
-    linkBtn,
-    highlight,
-    createLinkedDocBtn,
-
-    openParagraphMenu,
-    textBtn,
-    h1Btn,
     bulletedBtn,
     codeBlockBtn,
+    codeBtn,
+    copyBtn,
+    createLinkedDocBtn,
+    deleteBtn,
+    duplicateBtn,
+
+    formatBar,
+    h1Btn,
+    highlight,
+    italicBtn,
+    linkBtn,
 
     moreBtn,
     openMoreMenu,
-    copyBtn,
-    duplicateBtn,
-    deleteBtn,
+    openParagraphMenu,
+    strikeBtn,
+    textBtn,
 
-    assertBoundingBox,
+    underlineBtn,
   };
 }
 
@@ -111,15 +111,15 @@ export function getEmbedCardToolbar(page: Page) {
   };
 
   return {
-    embedCardToolbar,
+    captionButton,
+    cardStyleButton,
+    cardStyleHorizontalButton,
+    cardStyleListButton,
     copyButton,
     editButton,
-    cardStyleButton,
-    captionButton,
+    embedCardToolbar,
     moreButton,
     openCardStyleMenu,
     openMoreMenu,
-    cardStyleHorizontalButton,
-    cardStyleListButton,
   };
 }

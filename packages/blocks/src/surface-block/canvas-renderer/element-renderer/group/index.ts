@@ -1,6 +1,7 @@
 import type { GroupElementModel } from '../../../element-model/group.js';
-import { Bound } from '../../../utils/bound.js';
 import type { Renderer } from '../../renderer.js';
+
+import { Bound } from '../../../utils/bound.js';
 import { titleRenderParams } from './utils.js';
 
 export function group(
@@ -34,14 +35,14 @@ function renderTitle(
 ) {
   const zoom = renderer.zoom;
   const {
-    titleWidth,
-    text,
-    lineHeight,
     font,
-    padding,
+    lineHeight,
     offset,
+    padding,
     radius,
+    text,
     titleBound,
+    titleWidth,
   } = titleRenderParams(model, zoom);
 
   if (!model.showTitle) return;

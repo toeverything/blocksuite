@@ -10,18 +10,18 @@ declare global {
 }
 
 export interface TestResult {
-  success: boolean;
   messages: string[];
+  success: boolean;
 }
 
 const testResult: TestResult = {
-  success: true,
   messages: [],
+  success: true,
 };
 
 interface TestCase {
-  name: string;
   callback: () => Promise<boolean>;
+  name: string;
 }
 
 let testCases: TestCase[] = [];
@@ -44,7 +44,7 @@ function reject(message: string) {
 }
 
 export function testSerial(name: string, callback: () => Promise<boolean>) {
-  testCases.push({ name, callback });
+  testCases.push({ callback, name });
 }
 
 function wait(ms: number) {
@@ -55,7 +55,7 @@ export async function runOnce() {
   await wait(50); // for correct event sequence
 
   for (const testCase of testCases) {
-    const { name, callback } = testCase;
+    const { callback, name } = testCase;
     const result = await callback();
 
     if (result) addMessage(`✅ ${name}`);

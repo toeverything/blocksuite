@@ -55,9 +55,9 @@ const getImages = async (
   const imgs: Record<
     string,
     {
+      height: number;
       id: string;
       width: number;
-      height: number;
     }
   > = {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,9 +72,9 @@ const getImages = async (
         const id = nanoid();
         data.sourceId = id;
         imgs[data.caption] = {
+          height: bound.h,
           id: id,
           width: bound.w,
-          height: bound.h,
         };
       }
       Object.values(data).forEach(v => run(v));
@@ -100,17 +100,17 @@ const getImages = async (
   return list.filter(notNull);
 };
 export type PPTSection = {
-  title: string;
   content: string;
   keywords: string;
+  title: string;
 };
 type TemplateImage = {
   id: string;
   url: string;
 };
 type DocTemplate = {
-  images: TemplateImage[];
   content: unknown;
+  images: TemplateImage[];
 };
 const createBasicCover = async (
   title: string,
@@ -119,22 +119,22 @@ const createBasicCover = async (
   const template = basicCover();
   replaceText(
     {
-      title: title,
-      'section1.title': section1.title,
       'section1.content': section1.content,
+      'section1.title': section1.title,
+      title: title,
     },
     template
   );
   return {
+    content: template,
     images: await getImages(
       {
-        'section1.image': getImageUrlByKeyword(section1.keywords),
         background: () =>
           'https://cdn.affine.pro/ppt-images/background/basic_cover_background.png',
+        'section1.image': getImageUrlByKeyword(section1.keywords),
       },
       template
     ),
-    content: template,
   };
 };
 const basic1section = async (
@@ -144,22 +144,22 @@ const basic1section = async (
   const template = basic1();
   replaceText(
     {
-      title: title,
-      'section1.title': section1.title,
       'section1.content': section1.content,
+      'section1.title': section1.title,
+      title: title,
     },
     template
   );
   return {
+    content: template,
     images: await getImages(
       {
-        'section1.image': getImageUrlByKeyword(section1.keywords),
         background: () =>
           'https://cdn.affine.pro/ppt-images/background/basic_1_selection_background.png',
+        'section1.image': getImageUrlByKeyword(section1.keywords),
       },
       template
     ),
-    content: template,
   };
 };
 const basic2section = async (
@@ -170,25 +170,25 @@ const basic2section = async (
   const template = basic2();
   replaceText(
     {
-      title: title,
-      'section1.title': section1.title,
       'section1.content': section1.content,
-      'section2.title': section2.title,
+      'section1.title': section1.title,
       'section2.content': section2.content,
+      'section2.title': section2.title,
+      title: title,
     },
     template
   );
   return {
+    content: template,
     images: await getImages(
       {
-        'section1.image': getImageUrlByKeyword(section1.keywords),
-        'section2.image': getImageUrlByKeyword(section2.keywords),
         background: () =>
           'https://cdn.affine.pro/ppt-images/background/basic_2_selection_background.png',
+        'section1.image': getImageUrlByKeyword(section1.keywords),
+        'section2.image': getImageUrlByKeyword(section2.keywords),
       },
       template
     ),
-    content: template,
   };
 };
 const basic3section = async (
@@ -200,28 +200,28 @@ const basic3section = async (
   const template = basic3();
   replaceText(
     {
-      title: title,
-      'section1.title': section1.title,
       'section1.content': section1.content,
-      'section2.title': section2.title,
+      'section1.title': section1.title,
       'section2.content': section2.content,
-      'section3.title': section3.title,
+      'section2.title': section2.title,
       'section3.content': section3.content,
+      'section3.title': section3.title,
+      title: title,
     },
     template
   );
   return {
+    content: template,
     images: await getImages(
       {
+        background: () =>
+          'https://cdn.affine.pro/ppt-images/background/basic_3_selection_background.png',
         'section1.image': getImageUrlByKeyword(section1.keywords),
         'section2.image': getImageUrlByKeyword(section2.keywords),
         'section3.image': getImageUrlByKeyword(section3.keywords),
-        background: () =>
-          'https://cdn.affine.pro/ppt-images/background/basic_3_selection_background.png',
       },
       template
     ),
-    content: template,
   };
 };
 const basic4section = async (
@@ -234,37 +234,37 @@ const basic4section = async (
   const template = basic4();
   replaceText(
     {
-      title: title,
-      'section1.title': section1.title,
       'section1.content': section1.content,
-      'section2.title': section2.title,
+      'section1.title': section1.title,
       'section2.content': section2.content,
-      'section3.title': section3.title,
+      'section2.title': section2.title,
       'section3.content': section3.content,
-      'section4.title': section4.title,
+      'section3.title': section3.title,
       'section4.content': section4.content,
+      'section4.title': section4.title,
+      title: title,
     },
     template
   );
   return {
+    content: template,
     images: await getImages(
       {
+        background: () =>
+          'https://cdn.affine.pro/ppt-images/background/basic_4_selection_background.png',
         'section1.image': getImageUrlByKeyword(section1.keywords),
         'section2.image': getImageUrlByKeyword(section2.keywords),
         'section3.image': getImageUrlByKeyword(section3.keywords),
         'section4.image': getImageUrlByKeyword(section4.keywords),
-        background: () =>
-          'https://cdn.affine.pro/ppt-images/background/basic_4_selection_background.png',
       },
       template
     ),
-    content: template,
   };
 };
 export type PPTDoc = {
   isCover: boolean;
-  title: string;
   sections: PPTSection[];
+  title: string;
 };
 export const basicTheme = (doc: PPTDoc) => {
   if (doc.isCover) {

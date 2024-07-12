@@ -8,8 +8,8 @@ import {
 import {
   Bound,
   type IVec,
-  normalizeDegAngle,
   Vec,
+  normalizeDegAngle,
 } from '../../../surface-block/index.js';
 
 // "<svg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'><g><path fill='white' d='M13.7,18.5h3.9l0-1.5c0-1.4-1.2-2.6-2.6-2.6h-1.5v3.9l-5.8-5.8l5.8-5.8v3.9h2.3c3.1,0,5.6,2.5,5.6,5.6v2.3h3.9l-5.8,5.8L13.7,18.5z'/><path d='M20.4,19.4v-3.2c0-2.6-2.1-4.7-4.7-4.7h-3.2l0,0V9L9,12.6l3.6,3.6v-2.6l0,0H15c1.9,0,3.5,1.6,3.5,3.5v2.4l0,0h-2.6l3.6,3.6l3.6-3.6L20.4,19.4L20.4,19.4z'/></g></svg>";
@@ -25,10 +25,10 @@ export function getCommonRectStyle(
 ) {
   return {
     '--affine-border-width': `${active ? 2 : 1}px`,
-    width: `${rect.width}px`,
+    backgroundColor: !active && selected ? 'var(--affine-hover-color)' : '',
     height: `${rect.height}px`,
     transform: `translate(${rect.x}px, ${rect.y}px) rotate(${rotate}deg)`,
-    backgroundColor: !active && selected ? 'var(--affine-hover-color)' : '',
+    width: `${rect.width}px`,
   };
 }
 
@@ -78,8 +78,8 @@ export function getTooltipWithShortcut(
 }
 
 export function readImageSize(file: File) {
-  return new Promise<{ width: number; height: number }>(resolve => {
-    const size = { width: 0, height: 0 };
+  return new Promise<{ height: number; width: number }>(resolve => {
+    const size = { height: 0, width: 0 };
     const img = new Image();
 
     img.onload = () => {
@@ -110,7 +110,7 @@ export function calcAngle(target: HTMLElement, point: IVec, offset = 0) {
     .closest('.affine-edgeless-selected-rect')
     ?.getBoundingClientRect();
   assertExists(rect);
-  const { left, top, right, bottom } = rect;
+  const { bottom, left, right, top } = rect;
   const center = Vec.med([left, top], [right, bottom]);
   return normalizeDegAngle(
     ((Vec.angle(center, point) + offset) * 180) / Math.PI
@@ -127,7 +127,7 @@ export function calcAngleWithRotation(
   assertExists(handle);
   const ariaLabel = handle.getAttribute('aria-label');
   assertExists(ariaLabel);
-  const { left, top, right, bottom, width, height } = rect;
+  const { bottom, height, left, right, top, width } = rect;
   const size = Math.min(width, height);
   const sx = size / width;
   const sy = size / height;

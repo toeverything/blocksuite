@@ -1,3 +1,5 @@
+import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
+
 import {
   CancelWrapIcon,
   CaptionIcon,
@@ -7,52 +9,46 @@ import {
   WrapIcon,
 } from '../../../_common/icons/text.js';
 import { isInsidePageEditor } from '../../../_common/utils/query.js';
-import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
 import { duplicateCodeBlock } from './utils.js';
 
 export const defaultItems: CodeToolbarItem[] = [
   {
-    type: 'action',
-    name: 'copy-code',
-    icon: CopyIcon,
-    tooltip: 'Copy Code',
-    showWhen: () => true,
     action: (codeBlock, onClick) => {
       codeBlock.copyCode();
       onClick?.();
     },
+    icon: CopyIcon,
+    name: 'copy-code',
+    showWhen: () => true,
+    tooltip: 'Copy Code',
+    type: 'action',
   },
   {
-    type: 'action',
-    name: 'caption',
-    icon: CaptionIcon,
-    tooltip: 'Caption',
-    showWhen: blockElement => !blockElement.doc.readonly,
     action: (codeBlock, onClick) => {
       codeBlock.captionEditor.show();
       onClick?.();
     },
+    icon: CaptionIcon,
+    name: 'caption',
+    showWhen: blockElement => !blockElement.doc.readonly,
+    tooltip: 'Caption',
+    type: 'action',
   },
 ];
 
 export const defaultMoreItems: CodeToolbarMoreItem[] = [
   {
-    type: 'more',
-    name: codeBlock => (codeBlock.model.wrap ? 'Cancel Wrap' : 'Wrap'),
-    tooltip: '',
-    icon: codeBlock => (codeBlock.model.wrap ? CancelWrapIcon : WrapIcon),
-    showWhen: () => true,
     action: (codeBlock, abortController) => {
       codeBlock.setWrap(!codeBlock.model.wrap);
       abortController.abort();
     },
+    icon: codeBlock => (codeBlock.model.wrap ? CancelWrapIcon : WrapIcon),
+    name: codeBlock => (codeBlock.model.wrap ? 'Cancel Wrap' : 'Wrap'),
+    showWhen: () => true,
+    tooltip: '',
+    type: 'more',
   },
   {
-    type: 'more',
-    name: 'Duplicate',
-    tooltip: '',
-    icon: DuplicateIcon,
-    showWhen: () => true,
     action: (codeBlock, abortController) => {
       const codeId = duplicateCodeBlock(codeBlock.model);
 
@@ -76,19 +72,24 @@ export const defaultMoreItems: CodeToolbarMoreItem[] = [
 
       abortController.abort();
     },
+    icon: DuplicateIcon,
+    name: 'Duplicate',
+    showWhen: () => true,
+    tooltip: '',
+    type: 'more',
   },
   {
     type: 'divider',
   },
   {
-    type: 'more',
-    name: 'Delete',
-    tooltip: '',
-    icon: DeleteIcon,
-    showWhen: () => true,
     action: (codeBlock, abortController) => {
       codeBlock.doc.deleteBlock(codeBlock.model);
       abortController.abort();
     },
+    icon: DeleteIcon,
+    name: 'Delete',
+    showWhen: () => true,
+    tooltip: '',
+    type: 'more',
   },
 ];

@@ -1,5 +1,7 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import {
   FontFamily,
@@ -8,34 +10,18 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '../surface-block/consts.js';
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 type EdgelessTextProps = {
-  xywh: SerializedXYWH;
-  index: string;
-  scale: number;
-  rotate: number;
   hasMaxWidth: boolean;
+  index: string;
+  rotate: number;
+  scale: number;
+  xywh: SerializedXYWH;
 } & Omit<TextStyleProps, 'fontSize'>;
 
 export const EdgelessTextBlockSchema = defineBlockSchema({
   flavour: 'affine:edgeless-text',
-  props: (): EdgelessTextProps => ({
-    xywh: '[0,0,16,16]',
-    index: 'a0',
-    color: '#000000',
-    fontFamily: FontFamily.Inter,
-    fontStyle: FontStyle.Normal,
-    fontWeight: FontWeight.Regular,
-    textAlign: TextAlign.Left,
-    scale: 1,
-    rotate: 0,
-    hasMaxWidth: false,
-  }),
   metadata: {
-    version: 1,
-    role: 'hub',
-    parent: ['affine:surface'],
     children: [
       'affine:paragraph',
       'affine:list',
@@ -45,7 +31,22 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
       'affine:attachment',
       'affine:embed-!(synced-doc)',
     ],
+    parent: ['affine:surface'],
+    role: 'hub',
+    version: 1,
   },
+  props: (): EdgelessTextProps => ({
+    color: '#000000',
+    fontFamily: FontFamily.Inter,
+    fontStyle: FontStyle.Normal,
+    fontWeight: FontWeight.Regular,
+    hasMaxWidth: false,
+    index: 'a0',
+    rotate: 0,
+    scale: 1,
+    textAlign: TextAlign.Left,
+    xywh: '[0,0,16,16]',
+  }),
   toModel: () => {
     return new EdgelessTextBlockModel();
   },

@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+
 import { expect } from '@playwright/test';
 
 import {
@@ -81,27 +82,27 @@ function getCodeBlock(page: Page) {
     const deleteButton = page.locator('.menu-item.delete');
 
     return {
+      cancelWrapButton,
+      deleteButton,
+      duplicateButton,
       menu,
       wrapButton,
-      cancelWrapButton,
-      duplicateButton,
-      deleteButton,
     };
   };
 
   return {
+    captionButton,
+    clickLanguageButton,
     codeBlock,
     codeToolbar,
-    captionButton,
-    languageButton,
-    langList,
     copyButton,
-    moreButton,
     langFilterInput,
-    moreMenu,
+    langList,
+    languageButton,
+    moreButton,
 
+    moreMenu,
     openMore,
-    clickLanguageButton,
   };
 }
 
@@ -231,8 +232,8 @@ test('use markdown syntax with trailing characters can create code block', async
 
 test('support ```[lang] to add code block with language', async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/1314',
+    type: 'issue',
   });
 
   await enterPlaygroundRoom(page);
@@ -592,7 +593,7 @@ test('language selection list should not close when hovering out of code block',
   const bBox = await codeBlockController.codeBlock.boundingBox();
   if (!bBox) throw new Error('Expected bounding box');
 
-  const { x, y, width, height } = bBox;
+  const { height, width, x, y } = bBox;
 
   // hovering inside the code block should keep the list open
   await page.mouse.move(x + width / 2, y + height / 2);
@@ -768,10 +769,10 @@ test('drag select code block can delete it', async ({ page }) => {
     throw new Error("Failed to get code block's bounding box");
   }
   const position = {
-    startX: bbox.x - 10,
-    startY: bbox.y - 10,
     endX: bbox.x + bbox.width,
     endY: bbox.y + bbox.height / 2,
+    startX: bbox.x - 10,
+    startY: bbox.y - 10,
   };
   await dragBetweenCoords(
     page,
@@ -1115,8 +1116,8 @@ test('multi-line indent', async ({ page }) => {
 
 test('should bracket complete works in code block', async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/1800',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);

@@ -1,13 +1,15 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
 import type { ListBlockModel } from '../../list-block/index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import type { SurfaceRefBlockModel } from '../../surface-ref-block/surface-ref-model.js';
+
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 
-export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
+export const replaceIdMiddleware: JobMiddleware = ({ collection, slots }) => {
   const idMap = new Map<string, string>();
   slots.afterImport.on(payload => {
     if (
@@ -26,9 +28,9 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
     // replace LinkedPage pageId with new id in paragraph blocks
     if (
       payload.type === 'block' &&
-      ['affine:paragraph', 'affine:list'].includes(payload.snapshot.flavour)
+      ['affine:list', 'affine:paragraph'].includes(payload.snapshot.flavour)
     ) {
-      const model = payload.model as ParagraphBlockModel | ListBlockModel;
+      const model = payload.model as ListBlockModel | ParagraphBlockModel;
       let prev = 0;
       const delta: DeltaOperation[] = [];
       for (const d of model.text.toDelta()) {
@@ -44,13 +46,13 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
           }
 
           delta.push({
-            retain: d.insert?.length ?? 0,
             attributes: {
               reference: {
                 ...d.attributes.reference,
                 pageId: newId,
               },
             },
+            retain: d.insert?.length ?? 0,
           });
           prev = 0;
         } else {
@@ -170,9 +172,9 @@ export const customImageProxyMiddleware = (
 };
 
 export const titleMiddleware: JobMiddleware = ({
-  slots,
-  collection,
   adapterConfigs,
+  collection,
+  slots,
 }) => {
   slots.beforeExport.on(() => {
     for (const meta of collection.meta.docMetas) {

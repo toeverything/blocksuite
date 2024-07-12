@@ -9,32 +9,13 @@ import type {
 } from '../database-block/data-view/index.js';
 import type { DataViewTypes } from '../database-block/data-view/view/data-view.js';
 import type { DataViewBlockModel } from './data-view-model.js';
+
 import { blockQueryViewMap, blockQueryViews } from './views/index.js';
 
 export class BlockQueryViewSource implements ViewSource {
-  get currentViewId(): string {
-    return this.currentId ?? this.model.views[0].id;
-  }
-
-  get views(): SingleViewSource[] {
-    return this.model.views.map(v => this.viewGet(v.id));
-  }
-
-  get currentView(): SingleViewSource {
-    return this.viewGet(this.currentViewId);
-  }
-
-  get readonly(): boolean {
-    return this.model.doc.readonly;
-  }
-
-  get allViewMeta(): ViewMeta[] {
-    return blockQueryViews;
-  }
+  private currentId?: string;
 
   private viewMap = new Map<string, SingleViewSource>();
-
-  private currentId?: string;
 
   updateSlot = new Slot<{ viewId?: string }>();
 
@@ -42,34 +23,34 @@ export class BlockQueryViewSource implements ViewSource {
     (typeof blockQueryViews)[number]['type'],
     () => DataViewDataType
   > = {
-    table: () => {
-      return {
-        id: this.model.doc.generateBlockId(),
-        name: 'Table View',
-        mode: 'table',
-        columns: [],
-        filter: {
-          type: 'group',
-          op: 'and',
-          conditions: [],
-        },
-      };
-    },
     kanban: () => {
       return {
-        id: this.model.doc.generateBlockId(),
-        name: 'Kanban View',
-        mode: 'kanban',
         columns: [],
         filter: {
-          type: 'group',
-          op: 'and',
           conditions: [],
+          op: 'and',
+          type: 'group',
         },
+        groupProperties: [],
         header: {
           iconColumn: 'type',
         },
-        groupProperties: [],
+        id: this.model.doc.generateBlockId(),
+        mode: 'kanban',
+        name: 'Kanban View',
+      };
+    },
+    table: () => {
+      return {
+        columns: [],
+        filter: {
+          conditions: [],
+          op: 'and',
+          type: 'group',
+        },
+        id: this.model.doc.generateBlockId(),
+        mode: 'table',
+        name: 'Table View',
       };
     },
   };
@@ -80,6 +61,19 @@ export class BlockQueryViewSource implements ViewSource {
     this.model.views.forEach(v => {
       this.updateSlot.emit({ viewId: v.id });
     });
+  }
+
+  duplicate(id: string): void {
+    const newId = this.model.duplicateView(id);
+    this.selectView(newId);
+  }
+
+  getViewMeta(type: string): ViewMeta {
+    return blockQueryViewMap[type];
+  }
+
+  moveTo(id: string, position: InsertToPosition): void {
+    this.model.moveViewTo(id, position);
   }
 
   selectView(id: string): void {
@@ -119,21 +113,6 @@ export class BlockQueryViewSource implements ViewSource {
         })
         .pipe(slot);
       result = {
-        duplicate(): void {
-          self.duplicate(id);
-        },
-        get view() {
-          const view = getView();
-          if (!view) {
-            throw new Error('view not found');
-          }
-          return view;
-        },
-        updateView: updater => {
-          this.model.doc.captureSync();
-          this.model.updateView(id, updater);
-          this.model.applyViewsUpdate();
-        },
         delete: () => {
           this.model.doc.captureSync();
           if (this.model.views.length === 1) {
@@ -144,12 +123,27 @@ export class BlockQueryViewSource implements ViewSource {
           this.currentId = undefined;
           this.model.applyViewsUpdate();
         },
+        duplicate(): void {
+          self.duplicate(id);
+        },
+        isDeleted() {
+          return self.model.views.every(v => v.id !== id);
+        },
         get readonly() {
           return self.model.doc.readonly;
         },
         updateSlot: slot,
-        isDeleted() {
-          return self.model.views.every(v => v.id !== id);
+        updateView: updater => {
+          this.model.doc.captureSync();
+          this.model.updateView(id, updater);
+          this.model.applyViewsUpdate();
+        },
+        get view() {
+          const view = getView();
+          if (!view) {
+            throw new Error('view not found');
+          }
+          return view;
         },
       };
       this.viewMap.set(id, result);
@@ -157,16 +151,23 @@ export class BlockQueryViewSource implements ViewSource {
     return result;
   }
 
-  duplicate(id: string): void {
-    const newId = this.model.duplicateView(id);
-    this.selectView(newId);
+  get allViewMeta(): ViewMeta[] {
+    return blockQueryViews;
   }
 
-  moveTo(id: string, position: InsertToPosition): void {
-    this.model.moveViewTo(id, position);
+  get currentView(): SingleViewSource {
+    return this.viewGet(this.currentViewId);
   }
 
-  getViewMeta(type: string): ViewMeta {
-    return blockQueryViewMap[type];
+  get currentViewId(): string {
+    return this.currentId ?? this.model.views[0].id;
+  }
+
+  get readonly(): boolean {
+    return this.model.doc.readonly;
+  }
+
+  get views(): SingleViewSource[] {
+    return this.model.views.map(v => this.viewGet(v.id));
   }
 }

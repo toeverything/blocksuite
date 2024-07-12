@@ -1,9 +1,11 @@
 import type { BlockSelection, Command } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
+
+import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 
 // for block selection
 export const formatBlockCommand: Command<
@@ -11,8 +13,8 @@ export const formatBlockCommand: Command<
   never,
   {
     blockSelections?: BlockSelection[];
+    mode?: 'merge' | 'replace';
     styles: AffineTextAttributes;
-    mode?: 'replace' | 'merge';
   }
 > = (ctx, next) => {
   const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;

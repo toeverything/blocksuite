@@ -27,13 +27,13 @@ export const SHAPE_OVERLAY_HEIGHT = 100;
 export const SHAPE_OVERLAY_OFFSET_X = 6;
 export const SHAPE_OVERLAY_OFFSET_Y = 6;
 export const SHAPE_OVERLAY_OPTIONS = {
-  seed: 666,
-  roughness: DEFAULT_ROUGHNESS,
-  strokeStyle: StrokeStyle.Solid,
-  strokeLineDash: [] as number[],
-  stroke: 'black',
-  strokeWidth: LineWidth.Two,
   fill: 'transparent',
+  roughness: DEFAULT_ROUGHNESS,
+  seed: 666,
+  stroke: 'black',
+  strokeLineDash: [] as number[],
+  strokeStyle: StrokeStyle.Solid,
+  strokeWidth: LineWidth.Two,
 };
 
 export const DEFAULT_NOTE_CHILD_FLAVOUR = 'affine:paragraph';

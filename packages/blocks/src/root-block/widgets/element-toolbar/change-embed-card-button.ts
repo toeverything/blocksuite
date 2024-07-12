@@ -1,38 +1,14 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import '../../edgeless/components/panel/card-style-panel.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
-import { isPeekable, peek } from '../../../_common/components/index.js';
-import { toast } from '../../../_common/components/toast.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import type { Action } from '../../../_common/components/toolbar/utils.js';
-import {
-  EMBED_CARD_HEIGHT,
-  EMBED_CARD_WIDTH,
-} from '../../../_common/consts.js';
-import {
-  CaptionIcon,
-  CenterPeekIcon,
-  CopyIcon,
-  EditIcon,
-  ExpandFullSmallIcon,
-  OpenIcon,
-  PaletteIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
-import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
-import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import type {
   BookmarkBlockComponent,
   BookmarkBlockModel,
@@ -62,8 +38,34 @@ import type {
   EmbedYoutubeBlockComponent,
   EmbedYoutubeModel,
 } from '../../../embed-youtube-block/index.js';
-import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EmbedOptions } from '../../root-service.js';
+
+import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
+import { isPeekable, peek } from '../../../_common/components/index.js';
+import { toast } from '../../../_common/components/toast.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
+import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '../../../_common/consts.js';
+import {
+  CaptionIcon,
+  CenterPeekIcon,
+  CopyIcon,
+  EditIcon,
+  ExpandFullSmallIcon,
+  OpenIcon,
+  PaletteIcon,
+  SmallArrowDownIcon,
+} from '../../../_common/icons/index.js';
+import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
+import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
+import { Bound } from '../../../surface-block/index.js';
+import '../../edgeless/components/panel/card-style-panel.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
@@ -71,7 +73,6 @@ import {
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../edgeless/utils/query.js';
-import type { EmbedOptions } from '../../root-service.js';
 
 @customElement('edgeless-change-embed-card-button')
 export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
@@ -109,17 +110,136 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
   `;
 
-  private get _doc() {
-    return this.model.doc;
-  }
+  private _convertToCardView = () => {
+    if (this._isCardView) {
+      return;
+    }
 
-  private get std() {
-    return this.edgeless.std;
-  }
+    const block = this._blockElement;
+    if (block && 'convertToCard' in block) {
+      block.convertToCard();
+      return;
+    }
 
-  private get _rootService() {
-    return this.std.spec.getService('affine:page');
-  }
+    if (!('url' in this.model)) {
+      return;
+    }
+
+    const { caption, id, style, url, xywh } = this.model;
+
+    let targetFlavour = 'affine:bookmark',
+      targetStyle = style;
+
+    if (this._embedOptions && this._embedOptions.viewType === 'card') {
+      const { flavour, styles } = this._embedOptions;
+      targetFlavour = flavour;
+      targetStyle = styles.includes(style) ? style : styles[0];
+    } else {
+      targetStyle = BookmarkStyles.includes(style) ? style : BookmarkStyles[0];
+    }
+
+    const bound = Bound.deserialize(xywh);
+    bound.w = EMBED_CARD_WIDTH[targetStyle];
+    bound.h = EMBED_CARD_HEIGHT[targetStyle];
+
+    const newId = this.edgeless.service.addBlock(
+      targetFlavour,
+      { caption, style: targetStyle, url, xywh: bound.serialize() },
+      this.edgeless.surface.model
+    );
+
+    this.std.command.exec('reassociateConnectors', {
+      newId,
+      oldId: id,
+    });
+
+    this.edgeless.service.selection.set({
+      editing: false,
+      elements: [newId],
+    });
+    this._doc.deleteBlock(this.model);
+  };
+
+  private _convertToEmbedView = () => {
+    if (this._isEmbedView) {
+      return;
+    }
+
+    const block = this._blockElement;
+    if (block && 'convertToEmbed' in block) {
+      block.convertToEmbed();
+      return;
+    }
+
+    if (!('url' in this.model)) {
+      return;
+    }
+
+    if (!this._embedOptions) return;
+
+    const { flavour, styles } = this._embedOptions;
+
+    const { id, style, url, xywh } = this.model;
+
+    const targetStyle = styles.includes(style) ? style : styles[0];
+
+    const bound = Bound.deserialize(xywh);
+    bound.w = EMBED_CARD_WIDTH[targetStyle];
+    bound.h = EMBED_CARD_HEIGHT[targetStyle];
+
+    const newId = this.edgeless.service.addBlock(
+      flavour,
+      {
+        style: targetStyle,
+        url,
+        xywh: bound.serialize(),
+      },
+      this.edgeless.surface.model
+    );
+
+    this.std.command.exec('reassociateConnectors', {
+      newId,
+      oldId: id,
+    });
+
+    this.edgeless.service.selection.set({
+      editing: false,
+      elements: [newId],
+    });
+    this._doc.deleteBlock(this.model);
+  };
+
+  private _copyUrl = () => {
+    if (!('url' in this.model)) {
+      return;
+    }
+
+    navigator.clipboard.writeText(this.model.url).catch(console.error);
+    toast(this.std.host as EditorHost, 'Copied link to clipboard');
+    this.edgeless.service.selection.clear();
+  };
+
+  private _embedOptions: EmbedOptions | null = null;
+
+  private _getScale = () => {
+    if (isEmbedSyncedDocBlock(this.model)) {
+      return this.model.scale ?? 1;
+    } else if (isEmbedHtmlBlock(this.model)) {
+      return 1;
+    }
+
+    const bound = Bound.deserialize(this.model.xywh);
+    return bound.h / EMBED_CARD_HEIGHT[this.model.style];
+  };
+
+  private _open = () => {
+    this._blockElement?.open();
+  };
+
+  private _peek = () => {
+    if (!this._blockElement) return;
+    peek(this._blockElement);
+  };
 
   private get _blockElement() {
     const blockSelection =
@@ -132,44 +252,16 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     const blockElement = this.std.view.getBlock(blockSelection[0].blockId) as
       | BookmarkBlockComponent
-      | EmbedGithubBlockComponent
-      | EmbedYoutubeBlockComponent
       | EmbedFigmaBlockComponent
+      | EmbedGithubBlockComponent
       | EmbedLinkedDocBlockComponent
-      | EmbedSyncedDocBlockComponent
       | EmbedLoomBlockComponent
+      | EmbedSyncedDocBlockComponent
+      | EmbedYoutubeBlockComponent
       | null;
     assertExists(blockElement);
 
     return blockElement;
-  }
-
-  private get _canShowUrlOptions() {
-    return (
-      'url' in this.model &&
-      (isBookmarkBlock(this.model) ||
-        isEmbedGithubBlock(this.model) ||
-        isEmbedLinkedDocBlock(this.model))
-    );
-  }
-
-  private get _canShowFullScreenButton() {
-    return isEmbedHtmlBlock(this.model);
-  }
-
-  private get _isCardView() {
-    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
-      return true;
-    }
-    return this._embedOptions?.viewType === 'card';
-  }
-
-  private get _isEmbedView() {
-    return (
-      !isBookmarkBlock(this.model) &&
-      (isEmbedSyncedDocBlock(this.model) ||
-        this._embedOptions?.viewType === 'embed')
-    );
   }
 
   private get _canConvertToEmbedView() {
@@ -199,39 +291,21 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     );
   }
 
-  private get _getCardStyleOptions(): {
-    style: EmbedCardStyle;
-    Icon: TemplateResult<1>;
-    tooltip: string;
-  }[] {
-    const {
-      EmbedCardHorizontalIcon,
-      EmbedCardListIcon,
-      EmbedCardVerticalIcon,
-      EmbedCardCubeIcon,
-    } = getEmbedCardIcons();
-    return [
-      {
-        style: 'horizontal',
-        Icon: EmbedCardHorizontalIcon,
-        tooltip: 'Large horizontal style',
-      },
-      {
-        style: 'list',
-        Icon: EmbedCardListIcon,
-        tooltip: 'Small horizontal style',
-      },
-      {
-        style: 'vertical',
-        Icon: EmbedCardVerticalIcon,
-        tooltip: 'Large vertical style',
-      },
-      {
-        style: 'cube',
-        Icon: EmbedCardCubeIcon,
-        tooltip: 'Small vertical style',
-      },
-    ];
+  private get _canShowFullScreenButton() {
+    return isEmbedHtmlBlock(this.model);
+  }
+
+  private get _canShowUrlOptions() {
+    return (
+      'url' in this.model &&
+      (isBookmarkBlock(this.model) ||
+        isEmbedGithubBlock(this.model) ||
+        isEmbedLinkedDocBlock(this.model))
+    );
+  }
+
+  private get _doc() {
+    return this.model.doc;
   }
 
   private get _embedViewButtonDisabled() {
@@ -245,193 +319,60 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     );
   }
 
+  private get _getCardStyleOptions(): {
+    Icon: TemplateResult<1>;
+    style: EmbedCardStyle;
+    tooltip: string;
+  }[] {
+    const {
+      EmbedCardCubeIcon,
+      EmbedCardHorizontalIcon,
+      EmbedCardListIcon,
+      EmbedCardVerticalIcon,
+    } = getEmbedCardIcons();
+    return [
+      {
+        Icon: EmbedCardHorizontalIcon,
+        style: 'horizontal',
+        tooltip: 'Large horizontal style',
+      },
+      {
+        Icon: EmbedCardListIcon,
+        style: 'list',
+        tooltip: 'Small horizontal style',
+      },
+      {
+        Icon: EmbedCardVerticalIcon,
+        style: 'vertical',
+        tooltip: 'Large vertical style',
+      },
+      {
+        Icon: EmbedCardCubeIcon,
+        style: 'cube',
+        tooltip: 'Small vertical style',
+      },
+    ];
+  }
+
+  private get _isCardView() {
+    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
+      return true;
+    }
+    return this._embedOptions?.viewType === 'card';
+  }
+
+  private get _isEmbedView() {
+    return (
+      !isBookmarkBlock(this.model) &&
+      (isEmbedSyncedDocBlock(this.model) ||
+        this._embedOptions?.viewType === 'embed')
+    );
+  }
+
   get _openButtonDisabled() {
     return (
       isEmbedLinkedDocBlock(this.model) && this.model.pageId === this._doc.id
     );
-  }
-
-  @state()
-  private accessor _embedScale = 1;
-
-  private _embedOptions: EmbedOptions | null = null;
-
-  @property({ attribute: false })
-  accessor model!:
-    | BookmarkBlockModel
-    | EmbedGithubModel
-    | EmbedYoutubeModel
-    | EmbedFigmaModel
-    | EmbedLinkedDocModel
-    | EmbedSyncedDocModel
-    | EmbedHtmlModel
-    | EmbedLoomModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor quickConnectButton!: TemplateResult<1>;
-
-  private _open = () => {
-    this._blockElement?.open();
-  };
-
-  private _peek = () => {
-    if (!this._blockElement) return;
-    peek(this._blockElement);
-  };
-
-  private _showCaption() {
-    this._blockElement?.captionEditor.show();
-  }
-
-  private _copyUrl = () => {
-    if (!('url' in this.model)) {
-      return;
-    }
-
-    navigator.clipboard.writeText(this.model.url).catch(console.error);
-    toast(this.std.host as EditorHost, 'Copied link to clipboard');
-    this.edgeless.service.selection.clear();
-  };
-
-  private _setCardStyle(style: EmbedCardStyle) {
-    const bounds = Bound.deserialize(this.model.xywh);
-    bounds.w = EMBED_CARD_WIDTH[style];
-    bounds.h = EMBED_CARD_HEIGHT[style];
-    const xywh = bounds.serialize();
-    this.model.doc.updateBlock(this.model, { style, xywh });
-  }
-
-  private _convertToCardView = () => {
-    if (this._isCardView) {
-      return;
-    }
-
-    const block = this._blockElement;
-    if (block && 'convertToCard' in block) {
-      block.convertToCard();
-      return;
-    }
-
-    if (!('url' in this.model)) {
-      return;
-    }
-
-    const { id, url, xywh, style, caption } = this.model;
-
-    let targetFlavour = 'affine:bookmark',
-      targetStyle = style;
-
-    if (this._embedOptions && this._embedOptions.viewType === 'card') {
-      const { flavour, styles } = this._embedOptions;
-      targetFlavour = flavour;
-      targetStyle = styles.includes(style) ? style : styles[0];
-    } else {
-      targetStyle = BookmarkStyles.includes(style) ? style : BookmarkStyles[0];
-    }
-
-    const bound = Bound.deserialize(xywh);
-    bound.w = EMBED_CARD_WIDTH[targetStyle];
-    bound.h = EMBED_CARD_HEIGHT[targetStyle];
-
-    const newId = this.edgeless.service.addBlock(
-      targetFlavour,
-      { url, xywh: bound.serialize(), style: targetStyle, caption },
-      this.edgeless.surface.model
-    );
-
-    this.std.command.exec('reassociateConnectors', {
-      oldId: id,
-      newId,
-    });
-
-    this.edgeless.service.selection.set({
-      editing: false,
-      elements: [newId],
-    });
-    this._doc.deleteBlock(this.model);
-  };
-
-  private _convertToEmbedView = () => {
-    if (this._isEmbedView) {
-      return;
-    }
-
-    const block = this._blockElement;
-    if (block && 'convertToEmbed' in block) {
-      block.convertToEmbed();
-      return;
-    }
-
-    if (!('url' in this.model)) {
-      return;
-    }
-
-    if (!this._embedOptions) return;
-
-    const { flavour, styles } = this._embedOptions;
-
-    const { id, url, xywh, style } = this.model;
-
-    const targetStyle = styles.includes(style) ? style : styles[0];
-
-    const bound = Bound.deserialize(xywh);
-    bound.w = EMBED_CARD_WIDTH[targetStyle];
-    bound.h = EMBED_CARD_HEIGHT[targetStyle];
-
-    const newId = this.edgeless.service.addBlock(
-      flavour,
-      {
-        url,
-        xywh: bound.serialize(),
-        style: targetStyle,
-      },
-      this.edgeless.surface.model
-    );
-
-    this.std.command.exec('reassociateConnectors', {
-      oldId: id,
-      newId,
-    });
-
-    this.edgeless.service.selection.set({
-      editing: false,
-      elements: [newId],
-    });
-    this._doc.deleteBlock(this.model);
-  };
-
-  private _getScale = () => {
-    if (isEmbedSyncedDocBlock(this.model)) {
-      return this.model.scale ?? 1;
-    } else if (isEmbedHtmlBlock(this.model)) {
-      return 1;
-    }
-
-    const bound = Bound.deserialize(this.model.xywh);
-    return bound.h / EMBED_CARD_HEIGHT[this.model.style];
-  };
-
-  private _setEmbedScale(scale: number) {
-    if (isEmbedHtmlBlock(this.model)) return;
-
-    const bound = Bound.deserialize(this.model.xywh);
-    if (isEmbedSyncedDocBlock(this.model)) {
-      const oldScale = this.model.scale ?? 1;
-      const ratio = scale / oldScale;
-      bound.w *= ratio;
-      bound.h *= ratio;
-      const xywh = bound.serialize();
-      this.model.doc.updateBlock(this.model, { scale, xywh });
-    } else {
-      bound.h = EMBED_CARD_HEIGHT[this.model.style] * scale;
-      bound.w = EMBED_CARD_WIDTH[this.model.style] * scale;
-      const xywh = bound.serialize();
-      this.model.doc.updateBlock(this.model, { xywh });
-    }
-    this._embedScale = scale;
   }
 
   private _openMenuButton() {
@@ -442,16 +383,16 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       isEmbedSyncedDocBlock(this.model)
     ) {
       buttons.push({
-        name: 'Open this doc',
-        icon: ExpandFullSmallIcon,
-        handler: this._open,
         disabled: this._openButtonDisabled,
+        handler: this._open,
+        icon: ExpandFullSmallIcon,
+        name: 'Open this doc',
       });
     } else if (this._canShowFullScreenButton) {
       buttons.push({
-        name: 'Open this doc',
-        icon: ExpandFullSmallIcon,
         handler: this._open,
+        icon: ExpandFullSmallIcon,
+        name: 'Open this doc',
       });
     }
 
@@ -459,9 +400,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     if (this._blockElement && isPeekable(this._blockElement)) {
       buttons.push({
-        name: 'Open in center peek',
-        icon: CenterPeekIcon,
         handler: () => this._peek(),
+        icon: CenterPeekIcon,
+        name: 'Open in center peek',
       });
     }
 
@@ -488,7 +429,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           ${repeat(
             buttons,
             button => button.name,
-            ({ name, icon, handler, disabled }) => html`
+            ({ disabled, handler, icon, name }) => html`
               <editor-menu-action
                 aria-label=${name}
                 ?disabled=${disabled}
@@ -503,33 +444,56 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     `;
   }
 
-  private get _viewType(): 'inline' | 'embed' | 'card' {
-    if (this._isCardView) {
-      return 'card';
-    }
+  private get _rootService() {
+    return this.std.spec.getService('affine:page');
+  }
 
-    if (this._isEmbedView) {
-      return 'embed';
-    }
+  private _setCardStyle(style: EmbedCardStyle) {
+    const bounds = Bound.deserialize(this.model.xywh);
+    bounds.w = EMBED_CARD_WIDTH[style];
+    bounds.h = EMBED_CARD_HEIGHT[style];
+    const xywh = bounds.serialize();
+    this.model.doc.updateBlock(this.model, { style, xywh });
+  }
 
-    // unreachable
-    return 'inline';
+  private _setEmbedScale(scale: number) {
+    if (isEmbedHtmlBlock(this.model)) return;
+
+    const bound = Bound.deserialize(this.model.xywh);
+    if (isEmbedSyncedDocBlock(this.model)) {
+      const oldScale = this.model.scale ?? 1;
+      const ratio = scale / oldScale;
+      bound.w *= ratio;
+      bound.h *= ratio;
+      const xywh = bound.serialize();
+      this.model.doc.updateBlock(this.model, { scale, xywh });
+    } else {
+      bound.h = EMBED_CARD_HEIGHT[this.model.style] * scale;
+      bound.w = EMBED_CARD_WIDTH[this.model.style] * scale;
+      const xywh = bound.serialize();
+      this.model.doc.updateBlock(this.model, { xywh });
+    }
+    this._embedScale = scale;
+  }
+
+  private _showCaption() {
+    this._blockElement?.captionEditor.show();
   }
 
   private _viewMenuButton() {
     if (this._canConvertToEmbedView || this._isEmbedView) {
       const buttons = [
         {
-          type: 'card',
-          name: 'Card view',
-          handler: () => this._convertToCardView(),
           disabled: this.model.doc.readonly,
+          handler: () => this._convertToCardView(),
+          name: 'Card view',
+          type: 'card',
         },
         {
-          type: 'embed',
-          name: 'Embed view',
-          handler: () => this._convertToEmbedView(),
           disabled: this.model.doc.readonly && this._embedViewButtonDisabled,
+          handler: () => this._convertToEmbedView(),
+          name: 'Embed view',
+          type: 'embed',
         },
       ];
 
@@ -557,7 +521,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             ${repeat(
               buttons,
               button => button.type,
-              ({ type, name, handler, disabled }) => html`
+              ({ disabled, handler, name, type }) => html`
                 <editor-menu-action
                   aria-label=${name}
                   data-testid=${`link-to-${type}`}
@@ -575,6 +539,23 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
 
     return nothing;
+  }
+
+  private get _viewType(): 'card' | 'embed' | 'inline' {
+    if (this._isCardView) {
+      return 'card';
+    }
+
+    if (this._isEmbedView) {
+      return 'embed';
+    }
+
+    // unreachable
+    return 'inline';
+  }
+
+  private get std() {
+    return this.edgeless.std;
   }
 
   override connectedCallback() {
@@ -702,6 +683,26 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       renderToolbarSeparator
     );
   }
+
+  @state()
+  private accessor _embedScale = 1;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor model!:
+    | BookmarkBlockModel
+    | EmbedFigmaModel
+    | EmbedGithubModel
+    | EmbedHtmlModel
+    | EmbedLinkedDocModel
+    | EmbedLoomModel
+    | EmbedSyncedDocModel
+    | EmbedYoutubeModel;
+
+  @property({ attribute: false })
+  accessor quickConnectButton!: TemplateResult<1>;
 }
 
 declare global {

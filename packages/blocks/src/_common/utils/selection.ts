@@ -1,11 +1,13 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { IS_FIREFOX } from '@blocksuite/global/env';
-import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange, VLine } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 
+import { IS_FIREFOX } from '@blocksuite/global/env';
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 import type { SelectionPosition } from '../types.js';
+
 import { matchFlavours } from './model.js';
 import {
   asyncGetRichTextByModel,
@@ -22,8 +24,8 @@ declare global {
       x: number,
       y: number
     ): {
-      offsetNode: Node;
       offset: number;
+      offsetNode: Node;
     };
   }
 }
@@ -126,7 +128,7 @@ function setNewTop(y: number, editableContainer: Element, zoom = 1) {
   const SCROLL_THRESHOLD = 100;
 
   const scrollContainer = editableContainer.closest('.affine-page-viewport');
-  const { top, bottom } = Rect.fromDOM(editableContainer);
+  const { bottom, top } = Rect.fromDOM(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =
     (Number(

@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
-import { css, html, LitElement, nothing } from 'lit';
+
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { getAIPanel } from '../ai-panel.js';
@@ -36,9 +37,6 @@ export class AIAnswerWrapper extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor options: AIAnswerWrapperOptions | undefined = undefined;
-
   protected override render() {
     return html`<style>
         :host {
@@ -49,6 +47,9 @@ export class AIAnswerWrapper extends LitElement {
       </style>
       <slot></slot> `;
   }
+
+  @property({ attribute: false })
+  accessor options: AIAnswerWrapperOptions | undefined = undefined;
 }
 
 declare global {

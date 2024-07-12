@@ -1,5 +1,14 @@
 import { nanoid } from '@blocksuite/store';
 
+import type {
+  ColumnMeta,
+  DataViewDataType,
+  ViewMeta,
+} from './data-view/index.js';
+import type { DataViewTypes } from './data-view/view/data-view.js';
+import type { Column } from './data-view/view/presets/table/types.js';
+import type { DatabaseBlockModel } from './database-model.js';
+
 import { databaseBlockAllColumnMap } from './columns/index.js';
 import { titlePureColumnConfig } from './columns/title/define.js';
 import { multiSelectColumnModelConfig } from './data-view/column/presets/multi-select/define.js';
@@ -8,16 +17,8 @@ import { selectColumnModelConfig } from './data-view/column/presets/select/defin
 import { textColumnModelConfig } from './data-view/column/presets/text/define.js';
 import { groupByMatcher } from './data-view/common/group-by/matcher.js';
 import { defaultGroupBy } from './data-view/common/view-manager.js';
-import type {
-  ColumnMeta,
-  DataViewDataType,
-  ViewMeta,
-} from './data-view/index.js';
 import { columnPresets } from './data-view/index.js';
 import { getTagColor } from './data-view/utils/tags/colors.js';
-import type { DataViewTypes } from './data-view/view/data-view.js';
-import type { Column } from './data-view/view/presets/table/types.js';
-import type { DatabaseBlockModel } from './database-model.js';
 
 const initMap: Record<
   DataViewTypes,
@@ -28,23 +29,6 @@ const initMap: Record<
     name: string
   ) => DataViewDataType
 > = {
-  table(_columnMetaMap, model, id, name) {
-    return {
-      id,
-      name,
-      mode: 'table',
-      columns: [],
-      filter: {
-        type: 'group',
-        op: 'and',
-        conditions: [],
-      },
-      header: {
-        titleColumn: model.columns.find(v => v.type === 'title')?.id,
-        iconColumn: 'type',
-      },
-    };
-  },
   kanban(columnMetaMap, model, id, name) {
     const allowList = model.columns.filter(column => {
       const type = columnMetaMap[column.type].model.dataType(column.data);
@@ -53,8 +37,8 @@ const initMap: Record<
     const getWeight = (column: Column) => {
       if (
         [
-          selectColumnModelConfig.type as string,
           multiSelectColumnModelConfig.type,
+          selectColumnModelConfig.type as string,
         ].includes(column.type)
       ) {
         return 3;
@@ -74,28 +58,45 @@ const initMap: Record<
       throw new Error('not implement yet');
     }
     return {
-      id,
-      name,
-      mode: 'kanban',
       columns: model.columns.map(v => ({
-        id: v.id,
         hide: false,
+        id: v.id,
       })),
       filter: {
-        type: 'group',
-        op: 'and',
         conditions: [],
+        op: 'and',
+        type: 'group',
       },
       groupBy: defaultGroupBy(
         columnMetaMap[column.type],
         column.id,
         column.data
       ),
-      header: {
-        titleColumn: model.columns.find(v => v.type === 'title')?.id,
-        iconColumn: 'type',
-      },
       groupProperties: [],
+      header: {
+        iconColumn: 'type',
+        titleColumn: model.columns.find(v => v.type === 'title')?.id,
+      },
+      id,
+      mode: 'kanban',
+      name,
+    };
+  },
+  table(_columnMetaMap, model, id, name) {
+    return {
+      columns: [],
+      filter: {
+        conditions: [],
+        op: 'and',
+        type: 'group',
+      },
+      header: {
+        iconColumn: 'type',
+        titleColumn: model.columns.find(v => v.type === 'title')?.id,
+      },
+      id,
+      mode: 'table',
+      name,
     };
   },
 };
@@ -131,18 +132,18 @@ export const databaseViewInitTemplate = (
     columnPresets.selectColumnConfig.model.create('Status', {
       options: [
         {
-          id: ids[0],
           color: getTagColor(),
+          id: ids[0],
           value: 'TODO',
         },
         {
-          id: ids[1],
           color: getTagColor(),
+          id: ids[1],
           value: 'In Progress',
         },
         {
-          id: ids[2],
           color: getTagColor(),
+          id: ids[2],
           value: 'Done',
         },
       ],

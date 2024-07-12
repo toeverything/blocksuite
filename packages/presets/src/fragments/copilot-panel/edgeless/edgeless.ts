@@ -3,13 +3,14 @@ import { FrameBlockModel } from '@blocksuite/blocks';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { AILogic } from '../logic.js';
+
 import {
   FastImage2ImageServiceKind,
   Image2ImageServiceKind,
   Image2TextServiceKind,
   Text2ImageServiceKind,
 } from '../copilot-service/service-base.js';
-import type { AILogic } from '../logic.js';
 import {
   getSurfaceElementFromEditor,
   stopPropagation,
@@ -18,13 +19,6 @@ import {
 @customElement('copilot-edgeless-panel')
 export class CopilotEdgelessPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css``;
-
-  @property({ attribute: false })
-  accessor logic!: AILogic;
-
-  get host() {
-    return this.logic.getHost();
-  }
 
   protected override render(): unknown {
     const frames = getSurfaceElementFromEditor(this.host).model.children.filter(
@@ -166,6 +160,13 @@ export class CopilotEdgelessPanel extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get host() {
+    return this.logic.getHost();
+  }
+
+  @property({ attribute: false })
+  accessor logic!: AILogic;
 }
 
 declare global {

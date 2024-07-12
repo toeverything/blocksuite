@@ -1,31 +1,32 @@
 import type { BlockModel, InternalPrimitives } from '../schema/index.js';
-import { internalPrimitives } from '../schema/index.js';
 import type { AssetsManager } from './assets.js';
 import type { DraftModel } from './draft.js';
-import { fromJSON, toJSON } from './json.js';
 import type { BlockSnapshot } from './type.js';
+
+import { internalPrimitives } from '../schema/index.js';
+import { fromJSON, toJSON } from './json.js';
 
 type BlockSnapshotLeaf = Pick<
   BlockSnapshot,
-  'id' | 'flavour' | 'props' | 'version'
+  'flavour' | 'id' | 'props' | 'version'
 >;
 
 export type FromSnapshotPayload = {
-  json: BlockSnapshotLeaf;
   assets: AssetsManager;
   children: BlockSnapshot[];
+  json: BlockSnapshotLeaf;
 };
 
 export type ToSnapshotPayload<Props extends object> = {
-  model: DraftModel<BlockModel<Props>>;
   assets: AssetsManager;
+  model: DraftModel<BlockModel<Props>>;
 };
 
 export type SnapshotReturn<Props extends object> = {
-  id: string;
   flavour: string;
-  version: number;
+  id: string;
   props: Props;
+  version: number;
 };
 
 export class BaseBlockTransformer<Props extends object = object> {
@@ -53,30 +54,30 @@ export class BaseBlockTransformer<Props extends object = object> {
   }: FromSnapshotPayload):
     | Promise<SnapshotReturn<Props>>
     | SnapshotReturn<Props> {
-    const { flavour, id, version, props: _props } = json;
+    const { flavour, id, props: _props, version } = json;
 
     const props = this._propsFromSnapshot(_props);
 
     return {
-      id,
       flavour,
-      version: version ?? -1,
+      id,
       props,
+      version: version ?? -1,
     };
   }
 
   toSnapshot({
     model,
-  }: ToSnapshotPayload<Props>): Promise<BlockSnapshotLeaf> | BlockSnapshotLeaf {
-    const { id, flavour, version } = model;
+  }: ToSnapshotPayload<Props>): BlockSnapshotLeaf | Promise<BlockSnapshotLeaf> {
+    const { flavour, id, version } = model;
 
     const props = this._propsToSnapshot(model);
 
     return {
-      id,
       flavour,
-      version,
+      id,
       props,
+      version,
     };
   }
 }

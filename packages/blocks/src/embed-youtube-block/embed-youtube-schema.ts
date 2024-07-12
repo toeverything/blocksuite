@@ -6,22 +6,22 @@ import {
 } from './embed-youtube-model.js';
 
 const defaultEmbedYoutubeProps: EmbedYoutubeBlockProps = {
-  style: EmbedYoutubeStyles[0],
-  url: '',
   caption: null,
-
-  image: null,
-  title: null,
-  description: null,
   creator: null,
-  creatorUrl: null,
   creatorImage: null,
+
+  creatorUrl: null,
+  description: null,
+  image: null,
+  style: EmbedYoutubeStyles[0],
+  title: null,
+  url: '',
   videoId: null,
 };
 
 export const EmbedYoutubeBlockSchema = createEmbedBlockSchema({
   name: 'youtube',
-  version: 1,
-  toModel: () => new EmbedYoutubeModel(),
   props: (): EmbedYoutubeBlockProps => defaultEmbedYoutubeProps,
+  toModel: () => new EmbedYoutubeModel(),
+  version: 1,
 });

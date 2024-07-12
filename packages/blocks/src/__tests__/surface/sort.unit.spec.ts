@@ -6,24 +6,24 @@ describe('loadingSort', () => {
   it('should sort correctly', () => {
     const elements = [
       {
-        id: '1',
         deps: ['2', '3'],
+        id: '1',
       },
       {
-        id: '2',
         deps: ['4', '5'],
+        id: '2',
       },
       {
-        id: '3',
         deps: ['a'],
+        id: '3',
       },
       {
-        id: '4',
         deps: ['b', '5'],
+        id: '4',
       },
       {
-        id: '5',
         deps: [],
+        id: '5',
       },
     ];
 
@@ -35,16 +35,16 @@ describe('loadingSort', () => {
   it('should sort correctly when no deps', () => {
     const elements = [
       {
+        deps: [],
         id: '1',
-        deps: [],
       },
       {
+        deps: [],
         id: '2',
-        deps: [],
       },
       {
-        id: '3',
         deps: [],
+        id: '3',
       },
     ];
 
@@ -56,32 +56,32 @@ describe('loadingSort', () => {
   it('should sort correctly elements deps same element', () => {
     const elements = [
       {
-        id: '1',
         deps: ['2', '3'],
+        id: '1',
       },
       {
-        id: '2',
         deps: ['4', '5'],
+        id: '2',
       },
       {
-        id: '3',
         deps: ['6', '7'],
+        id: '3',
       },
       {
-        id: '4',
         deps: ['b', '5'],
+        id: '4',
       },
       {
-        id: '5',
         deps: ['7'],
+        id: '5',
       },
       {
+        deps: [],
         id: '6',
-        deps: [],
       },
       {
-        id: '7',
         deps: [],
+        id: '7',
       },
     ];
 

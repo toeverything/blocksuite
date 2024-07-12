@@ -1,5 +1,6 @@
-import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import type { AffineAIPanelState } from '@blocksuite/blocks';
+
+import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import {
   type AffineAIPanelWidgetConfig,
   BlocksUtils,
@@ -9,7 +10,7 @@ import {
   ParagraphBlockComponent,
 } from '@blocksuite/blocks';
 import { type BlockSelector, BlockViewType, type Doc } from '@blocksuite/store';
-import { css, html, LitElement, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -66,8 +67,8 @@ const customHeadingStyles = css`
 `;
 
 type TextRendererOptions = {
-  maxHeight?: number;
   customHeading?: boolean;
+  maxHeight?: number;
 };
 
 @customElement('ai-answer-text')
@@ -143,33 +144,7 @@ export class AIAnswerText extends WithDisposable(LitElement) {
     ${customHeadingStyles}
   `;
 
-  @query('.ai-answer-text-container')
-  private accessor _container!: HTMLDivElement;
-
-  private _doc!: Doc;
-
   private _answers: string[] = [];
-
-  private _timer?: ReturnType<typeof setInterval> | null = null;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor answer!: string;
-
-  @property({ attribute: false })
-  accessor options!: TextRendererOptions;
-
-  @property({ attribute: false })
-  accessor state: AffineAIPanelState | undefined = undefined;
-
-  private _onWheel(e: MouseEvent) {
-    e.stopPropagation();
-    if (this.state === 'generating') {
-      e.preventDefault();
-    }
-  }
 
   private _clearTimer = () => {
     if (this._timer) {
@@ -177,6 +152,8 @@ export class AIAnswerText extends WithDisposable(LitElement) {
       this._timer = null;
     }
   };
+
+  private _doc!: Doc;
 
   private _selector: BlockSelector = block =>
     BlocksUtils.matchFlavours(block.model, [
@@ -190,6 +167,8 @@ export class AIAnswerText extends WithDisposable(LitElement) {
     ])
       ? BlockViewType.Display
       : BlockViewType.Hidden;
+
+  private _timer?: ReturnType<typeof setInterval> | null = null;
 
   private _updateDoc = () => {
     if (this._answers.length > 0) {
@@ -218,13 +197,11 @@ export class AIAnswerText extends WithDisposable(LitElement) {
     }
   };
 
-  override shouldUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('answer')) {
-      this._answers.push(this.answer);
-      return false;
+  private _onWheel(e: MouseEvent) {
+    e.stopPropagation();
+    if (this.state === 'generating') {
+      e.preventDefault();
     }
-
-    return true;
   }
 
   override connectedCallback() {
@@ -242,20 +219,12 @@ export class AIAnswerText extends WithDisposable(LitElement) {
     this._clearTimer();
   }
 
-  override updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
-    requestAnimationFrame(() => {
-      if (!this._container) return;
-      this._container.scrollTop = this._container.scrollHeight;
-    });
-  }
-
   override render() {
-    const { maxHeight, customHeading } = this.options;
+    const { customHeading, maxHeight } = this.options;
     const classes = classMap({
       'ai-answer-text-container': true,
-      'show-scrollbar': !!maxHeight,
       'custom-heading': !!customHeading,
+      'show-scrollbar': !!maxHeight,
     });
     return html`
       <style>
@@ -273,6 +242,38 @@ export class AIAnswerText extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  override shouldUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('answer')) {
+      this._answers.push(this.answer);
+      return false;
+    }
+
+    return true;
+  }
+
+  override updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+    requestAnimationFrame(() => {
+      if (!this._container) return;
+      this._container.scrollTop = this._container.scrollHeight;
+    });
+  }
+
+  @query('.ai-answer-text-container')
+  private accessor _container!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor answer!: string;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor options!: TextRendererOptions;
+
+  @property({ attribute: false })
+  accessor state: AffineAIPanelState | undefined = undefined;
 }
 
 declare global {

@@ -7,16 +7,16 @@ import { waitNextFrame } from './misc.js';
 function getDebugMenu(page: Page) {
   const debugMenu = page.locator('debug-menu');
   return {
-    debugMenu,
-    undoBtn: debugMenu.locator('sl-tooltip[content="Undo"]'),
-    redoBtn: debugMenu.locator('sl-tooltip[content="Redo"]'),
-
     blockTypeButton: debugMenu.getByRole('button', { name: 'Block Type' }),
+    debugMenu,
+    pagesBtn: debugMenu.getByTestId('docs-button'),
+
+    redoBtn: debugMenu.locator('sl-tooltip[content="Redo"]'),
     testOperationsButton: debugMenu.getByRole('button', {
       name: 'Test Operations',
     }),
 
-    pagesBtn: debugMenu.getByTestId('docs-button'),
+    undoBtn: debugMenu.locator('sl-tooltip[content="Undo"]'),
   };
 }
 
@@ -109,13 +109,11 @@ export async function clickTestOperationsMenuItem(page: Page, name: string) {
 
 export async function switchReadonly(page: Page) {
   await page.evaluate(() => {
-    const defaultPage = document.querySelector(
-      'affine-page-root'
-    ) as HTMLElement & {
+    const defaultPage = document.querySelector('affine-page-root') as {
       doc: {
         awarenessStore: { setFlag: (key: string, value: unknown) => void };
       };
-    };
+    } & HTMLElement;
     const doc = defaultPage.doc;
     doc.awarenessStore.setFlag('readonly', { 'doc:home': true });
   });

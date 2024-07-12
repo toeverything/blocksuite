@@ -1,10 +1,11 @@
 import type { Disposable } from '@blocksuite/global/utils';
+
 import { autoUpdate } from '@floating-ui/dom';
 import {
+  type Rect,
   autoPlacement,
   computePosition,
   offset,
-  type Rect,
   shift,
   size,
 } from '@floating-ui/dom';
@@ -29,7 +30,7 @@ export function listenClickAway(
   };
 }
 
-type Display = 'show' | 'hidden';
+type Display = 'hidden' | 'show';
 
 const ATTR_SHOW = 'data-show';
 /**
@@ -51,15 +52,15 @@ export function createButtonPopper(
     /** DEFAULT EMPTY FUNCTION */
   },
   {
-    mainAxis,
     crossAxis,
-    rootBoundary,
     ignoreShift,
+    mainAxis,
+    rootBoundary,
   }: {
-    mainAxis?: number;
     crossAxis?: number;
-    rootBoundary?: Rect | (() => Rect | undefined);
     ignoreShift?: boolean;
+    mainAxis?: number;
+    rootBoundary?: (() => Rect | undefined) | Rect;
   } = {}
 ) {
   let display: Display = 'hidden';
@@ -76,8 +77,8 @@ export function createButtonPopper(
     computePosition(reference, popperElement, {
       middleware: [
         offset({
-          mainAxis: mainAxis ?? 14,
           crossAxis: crossAxis ?? 0,
+          mainAxis: mainAxis ?? 14,
         }),
         autoPlacement({
           allowedPlacements: ['top', 'bottom'],
@@ -94,16 +95,16 @@ export function createButtonPopper(
         }),
       ],
     })
-      .then(({ x, y, middlewareData: data }) => {
+      .then(({ middlewareData: data, x, y }) => {
         if (!ignoreShift) {
           x += data.shift?.x ?? 0;
           y += data.shift?.y ?? 0;
         }
         Object.assign(popperElement.style, {
-          position: 'absolute',
-          zIndex: 1,
           left: `${x}px`,
+          position: 'absolute',
           top: `${y}px`,
+          zIndex: 1,
         });
       })
       .catch(console.error);
@@ -139,15 +140,15 @@ export function createButtonPopper(
   const clickAway = listenClickAway(reference, () => hide());
 
   return {
-    get state() {
-      return display;
-    },
-    show,
-    hide,
-    toggle,
     dispose: () => {
       cleanup?.();
       clickAway.dispose();
     },
+    hide,
+    show,
+    get state() {
+      return display;
+    },
+    toggle,
   };
 }

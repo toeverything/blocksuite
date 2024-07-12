@@ -3,21 +3,22 @@ import type {
   LocalConnectorElementModel,
   PointStyle,
 } from '../../../element-model/connector.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
+import type { PointLocation } from '../../../utils/point-location.js';
+import type { Renderer } from '../../renderer.js';
+
 import {
   ConnectorMode,
   isConnectorWithLabel,
 } from '../../../element-model/connector.js';
-import type { RoughCanvas } from '../../../rough/canvas.js';
 import { getBezierParameters } from '../../../utils/curve.js';
-import type { PointLocation } from '../../../utils/point-location.js';
-import type { Renderer } from '../../renderer.js';
 import {
+  type TextDelta,
   deltaInsertsToChunks,
   getFontString,
   getLineHeight,
   getTextWidth,
   isRTL,
-  type TextDelta,
   wrapTextDeltas,
 } from '../text/utils.js';
 import {
@@ -37,11 +38,11 @@ export function connector(
   rc: RoughCanvas
 ) {
   const {
+    frontEndpointStyle,
     mode,
     path: points,
-    strokeStyle,
-    frontEndpointStyle,
     rearEndpointStyle,
+    strokeStyle,
     strokeWidth,
   } = model;
 
@@ -107,15 +108,15 @@ function renderPoints(
   dash: boolean,
   curve: boolean
 ) {
-  const { seed, stroke, strokeWidth, roughness, rough } = model;
+  const { rough, roughness, seed, stroke, strokeWidth } = model;
   const realStrokeColor = renderer.getVariableColor(stroke);
 
   if (rough) {
     const options = {
-      seed,
       roughness,
-      strokeLineDash: dash ? [12, 12] : undefined,
+      seed,
       stroke: realStrokeColor,
+      strokeLineDash: dash ? [12, 12] : undefined,
       strokeWidth,
     };
     if (curve) {
@@ -200,23 +201,23 @@ function renderLabel(
   renderer: Renderer
 ) {
   const {
-    text,
-    labelXYWH,
+    labelConstraints: { hasMaxWidth, maxWidth },
     labelStyle: {
       color,
-      fontSize,
-      fontWeight,
-      fontStyle,
       fontFamily,
+      fontSize,
+      fontStyle,
+      fontWeight,
       textAlign,
     },
-    labelConstraints: { hasMaxWidth, maxWidth },
+    labelXYWH,
+    text,
   } = model;
   const font = getFontString({
+    fontFamily,
+    fontSize,
     fontStyle,
     fontWeight,
-    fontSize,
-    fontFamily,
   });
   const [, , w, h] = labelXYWH!;
   const cx = w / 2;

@@ -1,7 +1,8 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { DocCollection } from '@blocksuite/store';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -11,14 +12,6 @@ import { removeModeFromStorage } from '../mock-services.js';
 
 @customElement('docs-panel')
 export class DocsPanel extends WithDisposable(ShadowlessElement) {
-  private get collection() {
-    return this.editor.doc.collection;
-  }
-
-  private get docs() {
-    return [...this.collection.docs.values()];
-  }
-
   static override styles = css`
     docs-panel {
       display: flex;
@@ -62,11 +55,29 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
+  createDoc = () => {
+    createDocBlock(this.editor.doc.collection);
+  };
+
+  private get collection() {
+    return this.editor.doc.collection;
+  }
+
+  private get docs() {
+    return [...this.collection.docs.values()];
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.editor.doc.collection.slots.docUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   protected override render(): unknown {
-    const { docs, collection } = this;
+    const { collection, docs } = this;
     return html`
       <div @click="${this.createDoc}" class="new-doc-button">New Doc</div>
       ${repeat(
@@ -78,11 +89,11 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
               this.editor.doc.id === doc.id
                 ? 'var(--affine-hover-color)'
                 : undefined,
-            padding: '4px 4px 4px 8px',
             borderRadius: '4px',
             cursor: 'pointer',
             display: 'flex',
             justifyContent: 'space-between',
+            padding: '4px 4px 4px 8px',
           });
           const click = () => {
             this.editor.doc = doc.getDoc();
@@ -114,18 +125,8 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.editor.doc.collection.slots.docUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
-  createDoc = () => {
-    createDocBlock(this.editor.doc.collection);
-  };
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
 }
 
 function createDocBlock(collection: DocCollection) {

@@ -8,46 +8,46 @@ test('getDeltaByRangeIndex', () => {
   const yText = yDoc.getText('text');
   yText.applyDelta([
     {
-      insert: 'aaa',
       attributes: {
         bold: true,
       },
+      insert: 'aaa',
     },
     {
-      insert: 'bbb',
       attributes: {
         italic: true,
       },
+      insert: 'bbb',
     },
   ]);
   const inlineEditor = new InlineEditor(yText);
 
   expect(inlineEditor.getDeltaByRangeIndex(0)).toEqual({
-    insert: 'aaa',
     attributes: {
       bold: true,
     },
+    insert: 'aaa',
   });
 
   expect(inlineEditor.getDeltaByRangeIndex(1)).toEqual({
-    insert: 'aaa',
     attributes: {
       bold: true,
     },
+    insert: 'aaa',
   });
 
   expect(inlineEditor.getDeltaByRangeIndex(3)).toEqual({
-    insert: 'aaa',
     attributes: {
       bold: true,
     },
+    insert: 'aaa',
   });
 
   expect(inlineEditor.getDeltaByRangeIndex(4)).toEqual({
-    insert: 'bbb',
     attributes: {
       italic: true,
     },
+    insert: 'bbb',
   });
 });
 
@@ -56,22 +56,22 @@ test('getDeltasByInlineRange', () => {
   const yText = yDoc.getText('text');
   yText.applyDelta([
     {
-      insert: 'aaa',
       attributes: {
         bold: true,
       },
+      insert: 'aaa',
     },
     {
-      insert: 'bbb',
       attributes: {
         italic: true,
       },
+      insert: 'bbb',
     },
     {
-      insert: 'ccc',
       attributes: {
         underline: true,
       },
+      insert: 'ccc',
     },
   ]);
   const inlineEditor = new InlineEditor(yText);
@@ -84,10 +84,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
       {
         index: 0,
@@ -104,10 +104,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
       {
         index: 0,
@@ -124,10 +124,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
       {
         index: 0,
@@ -144,10 +144,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
       {
         index: 0,
@@ -156,10 +156,10 @@ test('getDeltasByInlineRange', () => {
     ],
     [
       {
-        insert: 'bbb',
         attributes: {
           italic: true,
         },
+        insert: 'bbb',
       },
       {
         index: 3,
@@ -176,10 +176,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
       {
         index: 0,
@@ -188,10 +188,10 @@ test('getDeltasByInlineRange', () => {
     ],
     [
       {
-        insert: 'bbb',
         attributes: {
           italic: true,
         },
+        insert: 'bbb',
       },
       {
         index: 3,
@@ -208,10 +208,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
       {
         index: 0,
@@ -220,10 +220,10 @@ test('getDeltasByInlineRange', () => {
     ],
     [
       {
-        insert: 'bbb',
         attributes: {
           italic: true,
         },
+        insert: 'bbb',
       },
       {
         index: 3,
@@ -240,10 +240,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'aaa',
         attributes: {
           bold: true,
         },
+        insert: 'aaa',
       },
       {
         index: 0,
@@ -252,10 +252,10 @@ test('getDeltasByInlineRange', () => {
     ],
     [
       {
-        insert: 'bbb',
         attributes: {
           italic: true,
         },
+        insert: 'bbb',
       },
       {
         index: 3,
@@ -264,10 +264,10 @@ test('getDeltasByInlineRange', () => {
     ],
     [
       {
-        insert: 'ccc',
         attributes: {
           underline: true,
         },
+        insert: 'ccc',
       },
       {
         index: 6,
@@ -284,10 +284,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'bbb',
         attributes: {
           italic: true,
         },
+        insert: 'bbb',
       },
       {
         index: 3,
@@ -304,10 +304,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'bbb',
         attributes: {
           italic: true,
         },
+        insert: 'bbb',
       },
       {
         index: 3,
@@ -324,10 +324,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'bbb',
         attributes: {
           italic: true,
         },
+        insert: 'bbb',
       },
       {
         index: 3,
@@ -344,10 +344,10 @@ test('getDeltasByInlineRange', () => {
   ).toEqual([
     [
       {
-        insert: 'bbb',
         attributes: {
           italic: true,
         },
+        insert: 'bbb',
       },
       {
         index: 3,
@@ -356,10 +356,10 @@ test('getDeltasByInlineRange', () => {
     ],
     [
       {
-        insert: 'ccc',
         attributes: {
           underline: true,
         },
+        insert: 'ccc',
       },
       {
         index: 6,
@@ -399,16 +399,16 @@ test('cursor with format', () => {
 
   expect(inlineEditor.yText.toDelta()).toEqual([
     {
-      insert: 'aaa',
       attributes: {
         bold: true,
       },
+      insert: 'aaa',
     },
     {
-      insert: 'bbb',
       attributes: {
         italic: true,
       },
+      insert: 'bbb',
     },
   ]);
 });
@@ -444,16 +444,16 @@ test('incorrect format value `false`', () => {
 
   expect(inlineEditor.yText.toDelta()).toEqual([
     {
-      insert: 'aaa',
       attributes: {
         italic: true,
       },
+      insert: 'aaa',
     },
     {
-      insert: 'bbb',
       attributes: {
         underline: true,
       },
+      insert: 'bbb',
     },
   ]);
 });

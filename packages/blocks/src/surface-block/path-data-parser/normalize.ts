@@ -12,31 +12,31 @@ export function normalize(segments: Segment[]): Segment[] {
   let lcx = 0,
     lcy = 0;
 
-  for (const { key, data } of segments) {
+  for (const { data, key } of segments) {
     switch (key) {
       case 'M':
-        out.push({ key: 'M', data: [...data] });
+        out.push({ data: [...data], key: 'M' });
         [cx, cy] = data;
         [subx, suby] = data;
         break;
       case 'C':
-        out.push({ key: 'C', data: [...data] });
+        out.push({ data: [...data], key: 'C' });
         cx = data[4];
         cy = data[5];
         lcx = data[2];
         lcy = data[3];
         break;
       case 'L':
-        out.push({ key: 'L', data: [...data] });
+        out.push({ data: [...data], key: 'L' });
         [cx, cy] = data;
         break;
       case 'H':
         cx = data[0];
-        out.push({ key: 'L', data: [cx, cy] });
+        out.push({ data: [cx, cy], key: 'L' });
         break;
       case 'V':
         cy = data[0];
-        out.push({ key: 'L', data: [cx, cy] });
+        out.push({ data: [cx, cy], key: 'L' });
         break;
       case 'S': {
         let cx1 = 0,
@@ -48,7 +48,7 @@ export function normalize(segments: Segment[]): Segment[] {
           cx1 = cx;
           cy1 = cy;
         }
-        out.push({ key: 'C', data: [cx1, cy1, ...data] });
+        out.push({ data: [cx1, cy1, ...data], key: 'C' });
         lcx = data[0];
         lcy = data[1];
         cx = data[2];
@@ -70,7 +70,7 @@ export function normalize(segments: Segment[]): Segment[] {
         const cy1 = cy + (2 * (y1 - cy)) / 3;
         const cx2 = x + (2 * (x1 - x)) / 3;
         const cy2 = y + (2 * (y1 - y)) / 3;
-        out.push({ key: 'C', data: [cx1, cy1, cx2, cy2, x, y] });
+        out.push({ data: [cx1, cy1, cx2, cy2, x, y], key: 'C' });
         lcx = x1;
         lcy = y1;
         cx = x;
@@ -83,7 +83,7 @@ export function normalize(segments: Segment[]): Segment[] {
         const cy1 = cy + (2 * (y1 - cy)) / 3;
         const cx2 = x + (2 * (x1 - x)) / 3;
         const cy2 = y + (2 * (y1 - y)) / 3;
-        out.push({ key: 'C', data: [cx1, cy1, cx2, cy2, x, y] });
+        out.push({ data: [cx1, cy1, cx2, cy2, x, y], key: 'C' });
         lcx = x1;
         lcy = y1;
         cx = x;
@@ -99,7 +99,7 @@ export function normalize(segments: Segment[]): Segment[] {
         const x = data[5];
         const y = data[6];
         if (r1 === 0 || r2 === 0) {
-          out.push({ key: 'C', data: [cx, cy, x, y, x, y] });
+          out.push({ data: [cx, cy, x, y, x, y], key: 'C' });
           cx = x;
           cy = y;
         } else {
@@ -116,7 +116,7 @@ export function normalize(segments: Segment[]): Segment[] {
               sweepFlag
             );
             curves.forEach(function (curve) {
-              out.push({ key: 'C', data: curve });
+              out.push({ data: curve, key: 'C' });
             });
             cx = x;
             cy = y;
@@ -125,7 +125,7 @@ export function normalize(segments: Segment[]): Segment[] {
         break;
       }
       case 'Z':
-        out.push({ key: 'Z', data: [] });
+        out.push({ data: [], key: 'Z' });
         cx = subx;
         cy = suby;
         break;

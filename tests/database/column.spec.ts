@@ -373,18 +373,18 @@ test.describe('switch column type', () => {
     await waitNextFrame(page, 500);
     const progressBg = page.locator('.affine-database-progress-bg');
     const {
+      width: progressBgWidth,
       x: progressBgX,
       y: progressBgY,
-      width: progressBgWidth,
     } = await getBoundingBox(progressBg);
     await page.mouse.move(progressBgX, progressBgY);
     await page.mouse.click(progressBgX, progressBgY);
     const dragHandle = page.locator('.affine-database-progress-drag-handle');
     const {
+      height,
+      width,
       x: dragX,
       y: dragY,
-      width,
-      height,
     } = await getBoundingBox(dragHandle);
     const dragCenterX = dragX + width / 2;
     const dragCenterY = dragY + height / 2;

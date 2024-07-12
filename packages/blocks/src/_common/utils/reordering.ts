@@ -1,6 +1,6 @@
-export type ReorderingType = 'front' | 'forward' | 'backward' | 'back';
+export type ReorderingType = 'back' | 'backward' | 'forward' | 'front';
 
 export interface ReorderingAction<T> {
-  type: ReorderingType;
   elements: T[];
+  type: ReorderingType;
 }

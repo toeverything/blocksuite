@@ -1,6 +1,7 @@
+import type { BlockCollection } from '@blocksuite/store';
+
 import { AffineSchemas, TestUtils } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockCollection } from '@blocksuite/store';
 import {
   DocCollection,
   type DocCollectionOptions,
@@ -17,8 +18,9 @@ import {
   MemoryBlobSource,
 } from '@blocksuite/sync';
 
-import { MockServerBlobSource } from '../../_common/sync/blob/mock-server.js';
 import type { InitFn } from '../data/utils.js';
+
+import { MockServerBlobSource } from '../../_common/sync/blob/mock-server.js';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room');
@@ -57,19 +59,19 @@ export function createStarterDocCollection() {
   );
 
   const options: DocCollectionOptions = {
-    id: collectionId,
-    schema,
-    idGenerator,
+    awarenessSources: [new BroadcastChannelAwarenessSource(id)],
+    blobSources,
     defaultFlags: {
-      enable_synced_doc_block: true,
-      enable_pie_menu: true,
-      enable_lasso_tool: true,
       enable_edgeless_text: true,
+      enable_lasso_tool: true,
+      enable_pie_menu: true,
+      enable_synced_doc_block: true,
       ...flags,
     },
-    awarenessSources: [new BroadcastChannelAwarenessSource(id)],
     docSources,
-    blobSources,
+    id: collectionId,
+    idGenerator,
+    schema,
   };
   const collection = new DocCollection(options);
   collection.start();

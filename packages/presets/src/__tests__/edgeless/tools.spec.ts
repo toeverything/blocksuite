@@ -3,6 +3,7 @@ import type {
   SurfaceBlockComponent,
 } from '@blocksuite/blocks';
 import type {} from '@blocksuite/blocks';
+
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -31,9 +32,9 @@ describe('default tool', () => {
 
   test('element click selection', async () => {
     const id = service.addElement('shape', {
+      fillColor: 'red',
       shapeType: 'rect',
       xywh: '[0,0,100,100]',
-      fillColor: 'red',
     });
 
     await wait();
@@ -52,9 +53,9 @@ describe('default tool', () => {
 
   test('element drag moving', async () => {
     const id = edgeless.service.addElement('shape', {
+      fillColor: 'red',
       shapeType: 'rect',
       xywh: '[0,0,100,100]',
-      fillColor: 'red',
     });
     await wait();
 

@@ -12,29 +12,29 @@ export const EDGELESS_BLOCK_CHILD_BORDER_WIDTH = 2;
 export const PAGE_HEADER_HEIGHT = 53;
 
 export const EMBED_CARD_WIDTH: Record<EmbedCardStyle, number> = {
-  horizontal: 752,
-  horizontalThin: 752,
-  list: 752,
-  vertical: 364,
   cube: 170,
   cubeThick: 170,
-  video: 752,
   figma: 752,
+  horizontal: 752,
+  horizontalThin: 752,
   html: 752,
+  list: 752,
   syncedDoc: 752,
+  vertical: 364,
+  video: 752,
 };
 
 export const EMBED_CARD_HEIGHT: Record<EmbedCardStyle, number> = {
-  horizontal: 116,
-  horizontalThin: 80,
-  list: 46,
-  vertical: 390,
   cube: 114,
   cubeThick: 132,
-  video: 544,
   figma: 544,
+  horizontal: 116,
+  horizontalThin: 80,
   html: 544,
+  list: 46,
   syncedDoc: 455,
+  vertical: 390,
+  video: 544,
 };
 
 export const EMBED_BLOCK_FLAVOUR_LIST = [

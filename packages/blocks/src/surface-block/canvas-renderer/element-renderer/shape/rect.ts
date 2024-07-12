@@ -1,6 +1,7 @@
 import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
+
 import { drawGeneralShape } from './utils.js';
 
 /**
@@ -16,14 +17,14 @@ export function rect(
   rc: RoughCanvas
 ) {
   const {
-    seed,
-    strokeWidth,
     filled,
     radius,
-    strokeStyle,
-    roughness,
     rotate,
+    roughness,
+    seed,
     shapeStyle,
+    strokeStyle,
+    strokeWidth,
   } = model;
   const [, , w, h] = model.deserializedXYWH;
   const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -67,12 +68,12 @@ export function rect(
       Z
       `,
       {
-        seed,
-        roughness,
-        strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
-        stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
-        strokeWidth,
         fill: filled ? realFillColor : undefined,
+        roughness,
+        seed,
+        stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
+        strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
+        strokeWidth,
       }
     );
   }

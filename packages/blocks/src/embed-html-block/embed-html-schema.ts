@@ -6,15 +6,15 @@ import {
 } from './embed-html-model.js';
 
 const defaultEmbedHtmlProps: EmbedHtmlBlockProps = {
-  style: EmbedHtmlStyles[0],
   caption: null,
-  html: undefined,
   design: undefined,
+  html: undefined,
+  style: EmbedHtmlStyles[0],
 };
 
 export const EmbedHtmlBlockSchema = createEmbedBlockSchema({
   name: 'html',
-  version: 1,
-  toModel: () => new EmbedHtmlModel(),
   props: (): EmbedHtmlBlockProps => defaultEmbedHtmlProps,
+  toModel: () => new EmbedHtmlModel(),
+  version: 1,
 });

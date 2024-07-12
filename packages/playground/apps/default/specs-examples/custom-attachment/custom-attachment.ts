@@ -32,7 +32,7 @@ export function getCustomAttachmentSpecs() {
   });
 
   return {
-    pageModeSpecs,
     edgelessModeSpecs,
+    pageModeSpecs,
   };
 }

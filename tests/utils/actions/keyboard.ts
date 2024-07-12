@@ -185,7 +185,7 @@ export async function createCodeBlock(page: Page) {
 
 export async function getCursorBlockIdAndHeight(
   page: Page
-): Promise<[string | null, number | null]> {
+): Promise<[null | string, null | number]> {
   return page.evaluate(() => {
     const selection = window.getSelection() as Selection;
 

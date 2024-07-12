@@ -1,43 +1,39 @@
-import './common/group-by/define.js';
-
 import type { BlockStdScope } from '@blocksuite/block-std';
+import type { ReferenceElement } from '@floating-ui/dom';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
-import type { ReferenceElement } from '@floating-ui/dom';
-import { css, type TemplateResult, unsafeCSS } from 'lit';
+import { type TemplateResult, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataSource } from './common/data-source/base.js';
-import { createRecordDetail, popSideDetail } from './common/detail/layout.js';
 import type { ViewSource } from './common/index.js';
 import type { DataViewSelection, DataViewSelectionState } from './types.js';
-import { renderUniLit } from './utils/uni-component/index.js';
 import type { DataViewExpose, DataViewProps } from './view/data-view.js';
 import type { DataViewBase } from './view/data-view-base.js';
 import type { DataViewManager } from './view/data-view-manager.js';
 
+import { dataViewCommonStyle } from './common/css-variable.js';
+import { createRecordDetail, popSideDetail } from './common/detail/layout.js';
+import './common/group-by/define.js';
+import { renderUniLit } from './utils/uni-component/index.js';
+
 type ViewProps = {
-  view: DataViewManager;
-  viewUpdated: Slot<{ viewId: string }>;
-  selectionUpdated: Slot<DataViewSelectionState>;
-  setSelection: (selection?: DataViewSelectionState) => void;
   bindHotkey: DataViewBase['bindHotkey'];
   handleEvent: DataViewBase['handleEvent'];
+  selectionUpdated: Slot<DataViewSelectionState>;
+  setSelection: (selection?: DataViewSelectionState) => void;
+  view: DataViewManager;
+  viewUpdated: Slot<{ viewId: string }>;
 };
 
 export type DataViewRendererConfig = {
   bindHotkey: DataViewProps['bindHotkey'];
-  handleEvent: DataViewProps['handleEvent'];
-  getFlag?: DataViewProps['getFlag'];
-  selectionUpdated: Slot<DataViewSelection | undefined>;
-  setSelection: (selection: DataViewSelection | undefined) => void;
   dataSource: DataSource;
-  viewSource: ViewSource;
   detailPanelConfig?: {
     openDetailPanel?: (
       target: HTMLElement,
@@ -45,17 +41,18 @@ export type DataViewRendererConfig = {
     ) => Promise<void>;
     target?: () => ReferenceElement;
   };
+  getFlag?: DataViewProps['getFlag'];
+  handleEvent: DataViewProps['handleEvent'];
   headerWidget: DataViewProps['headerWidget'];
   onDrag?: DataViewProps['onDrag'];
+  selectionUpdated: Slot<DataViewSelection | undefined>;
+  setSelection: (selection: DataViewSelection | undefined) => void;
   std: BlockStdScope;
+  viewSource: ViewSource;
 };
 
 @customElement('affine-data-view-renderer')
 export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
-  get expose() {
-    return this._view.value;
-  }
-
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-data-view-renderer'))}
     affine-data-view-renderer {
@@ -68,11 +65,35 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
 
   private viewMap: Record<string, ViewProps> = {};
 
-  @property({ attribute: false })
-  accessor config!: DataViewRendererConfig;
+  focusFirstCell = () => {
+    this._view.value?.focusFirstCell();
+  };
 
-  @state()
-  accessor currentView: string | undefined = undefined;
+  openDetailPanel = (ops: {
+    onClose?: () => void;
+    rowId: string;
+    view: DataViewManager;
+  }) => {
+    const openDetailPanel = this.config.detailPanelConfig?.openDetailPanel;
+    if (openDetailPanel) {
+      openDetailPanel(
+        this,
+        createRecordDetail({
+          rowId: ops.rowId,
+          view: ops.view,
+        })
+      )
+        .catch(console.error)
+        .finally(ops.onClose);
+    } else {
+      popSideDetail({
+        onClose: ops.onClose,
+        rowId: ops.rowId,
+        target: this.config.detailPanelConfig?.target?.() ?? document.body,
+        view: ops.view,
+      });
+    }
+  };
 
   private getView(id: string): ViewProps {
     if (!this.viewMap[id]) {
@@ -83,18 +104,6 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
       ).model.dataViewManager)();
       view.init(this.config.dataSource, singleViewSource);
       this.viewMap[id] = {
-        view: view,
-        viewUpdated: singleViewSource.updateSlot,
-        selectionUpdated: new Slot<DataViewSelectionState>(),
-        setSelection: selection => {
-          this.config.setSelection(selection);
-        },
-        handleEvent: (name, handler) =>
-          this.config.handleEvent(name, context => {
-            if (this.config.viewSource.currentViewId === id) {
-              return handler(context);
-            }
-          }),
         bindHotkey: hotkeys =>
           this.config.bindHotkey(
             Object.fromEntries(
@@ -108,6 +117,18 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
               ])
             )
           ),
+        handleEvent: (name, handler) =>
+          this.config.handleEvent(name, context => {
+            if (this.config.viewSource.currentViewId === id) {
+              return handler(context);
+            }
+          }),
+        selectionUpdated: new Slot<DataViewSelectionState>(),
+        setSelection: selection => {
+          this.config.setSelection(selection);
+        },
+        view: view,
+        viewUpdated: singleViewSource.updateSlot,
       };
     }
     return this.viewMap[id];
@@ -118,18 +139,18 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
       return;
     }
     const props: DataViewProps = {
+      bindHotkey: viewData.bindHotkey,
+      dataSource: this.config.dataSource,
       dataViewEle: this,
-      view: viewData.view,
+      getFlag: this.config.getFlag,
+      handleEvent: viewData.handleEvent,
       headerWidget: this.config.headerWidget,
+      onDrag: this.config.onDrag,
       selectionUpdated: viewData.selectionUpdated,
       setSelection: viewData.setSelection,
-      bindHotkey: viewData.bindHotkey,
-      handleEvent: viewData.handleEvent,
-      getFlag: this.config.getFlag,
-      onDrag: this.config.onDrag,
       std: this.config.std,
+      view: viewData.view,
       viewSource: this.config.viewSource,
-      dataSource: this.config.dataSource,
     };
     return keyed(
       viewData.view.id,
@@ -161,44 +182,14 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  focusFirstCell = () => {
-    this._view.value?.focusFirstCell();
-  };
-
-  openDetailPanel = (ops: {
-    view: DataViewManager;
-    rowId: string;
-    onClose?: () => void;
-  }) => {
-    const openDetailPanel = this.config.detailPanelConfig?.openDetailPanel;
-    if (openDetailPanel) {
-      openDetailPanel(
-        this,
-        createRecordDetail({
-          view: ops.view,
-          rowId: ops.rowId,
-        })
-      )
-        .catch(console.error)
-        .finally(ops.onClose);
-    } else {
-      popSideDetail({
-        target: this.config.detailPanelConfig?.target?.() ?? document.body,
-        view: ops.view,
-        rowId: ops.rowId,
-        onClose: ops.onClose,
-      });
-    }
-  };
-
   override render() {
     const views = this.config.viewSource.views;
     const viewData = views
       .map(view => this.getView(view.view.id))
       .find(v => v.view.id === this.config.viewSource.currentViewId);
     const containerClass = classMap({
-      'toolbar-hover-container': true,
       'data-view-root': true,
+      'toolbar-hover-container': true,
     });
     return html`
       <div style="display: contents" class="${containerClass}">
@@ -206,6 +197,16 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get expose() {
+    return this._view.value;
+  }
+
+  @property({ attribute: false })
+  accessor config!: DataViewRendererConfig;
+
+  @state()
+  accessor currentView: string | undefined = undefined;
 }
 
 declare global {
@@ -217,14 +218,14 @@ declare global {
 export class DataView {
   private _ref = createRef<DataViewRenderer>();
 
-  get expose() {
-    return this._ref.value?.expose;
-  }
-
   render(props: DataViewRendererConfig) {
     return html` <affine-data-view-renderer
       ${ref(this._ref)}
       .config="${props}"
     ></affine-data-view-renderer>`;
+  }
+
+  get expose() {
+    return this._ref.value?.expose;
   }
 }

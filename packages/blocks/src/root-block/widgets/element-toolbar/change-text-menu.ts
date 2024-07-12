@@ -1,17 +1,14 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import '../../edgeless/components/panel/font-family-panel.js';
-import '../../edgeless/components/panel/size-panel.js';
-import '../../edgeless/components/panel/font-weight-and-style-panel.js';
-import '../../edgeless/components/panel/align-panel.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   SmallArrowDownIcon,
@@ -44,12 +41,15 @@ import {
   getFontFacesByFontFamily,
   wrapFontFamily,
 } from '../../../surface-block/utils/font.js';
+import '../../edgeless/components/panel/align-panel.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
   LINE_COLORS,
 } from '../../edgeless/components/panel/color-panel.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import '../../edgeless/components/panel/font-family-panel.js';
+import '../../edgeless/components/panel/font-weight-and-style-panel.js';
+import '../../edgeless/components/panel/size-panel.js';
 
 const FONT_SIZE_LIST = [
   {
@@ -180,39 +180,76 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor elements!: BlockSuite.EdgelessTextModelType[];
+  private _setFontFamily = (fontFamily: FontFamily) => {
+    const currentFontWeight = getMostCommonFontWeight(this.elements);
+    const fontWeight = isFontWeightSupported(fontFamily, currentFontWeight)
+      ? currentFontWeight
+      : FontWeight.Regular;
+    const currentFontStyle = getMostCommonFontStyle(this.elements);
+    const fontStyle = isFontStyleSupported(fontFamily, currentFontStyle)
+      ? currentFontStyle
+      : FontStyle.Normal;
 
-  @property({ attribute: false })
-  accessor elementType!: BlockSuite.EdgelessTextModelKeyType;
+    const props = { fontFamily, fontStyle, fontWeight };
+    this.elements.forEach(element => {
+      this.service.updateElement(element.id, buildProps(element, props));
+      this._updateElementBound(element);
+    });
+  };
 
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
+  private _setFontSize = (fontSize: number) => {
+    const props = { fontSize };
+    this.elements.forEach(element => {
+      this.service.updateElement(element.id, buildProps(element, props));
+      this._updateElementBound(element);
+    });
+  };
 
-  get service() {
-    return this.edgeless.service;
-  }
+  private _setFontWeightAndStyle = (
+    fontWeight: FontWeight,
+    fontStyle: FontStyle
+  ) => {
+    const props = { fontStyle, fontWeight };
+    this.elements.forEach(element => {
+      this.service.updateElement(element.id, buildProps(element, props));
+      this._updateElementBound(element);
+    });
+  };
+
+  private _setTextAlign = (textAlign: TextAlign) => {
+    const props = { textAlign };
+    this.elements.forEach(element => {
+      this.service.updateElement(element.id, buildProps(element, props));
+    });
+  };
+
+  private _setTextColor = ({ detail: color }: ColorEvent) => {
+    const props = { color };
+    this.elements.forEach(element => {
+      this.service.updateElement(element.id, buildProps(element, props));
+    });
+  };
 
   private _updateElementBound = (element: BlockSuite.EdgelessTextModelType) => {
     const elementType = this.elementType;
     if (elementType === 'text' && element instanceof TextElementModel) {
       // the change of font family will change the bound of the text
       const {
-        text: yText,
         fontFamily,
-        fontStyle,
         fontSize,
+        fontStyle,
         fontWeight,
         hasMaxWidth,
+        text: yText,
       } = element;
       const newBound = normalizeTextBound(
         {
-          yText,
           fontFamily,
-          fontStyle,
           fontSize,
+          fontStyle,
           fontWeight,
           hasMaxWidth,
+          yText,
         },
         Bound.fromXYWH(element.deserializedXYWH)
       );
@@ -221,22 +258,22 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       });
     } else if (elementType === 'connector' && isConnectorWithLabel(element)) {
       const {
-        text,
-        labelXYWH,
-        labelStyle: { fontFamily, fontStyle, fontSize, fontWeight },
         labelConstraints: { hasMaxWidth, maxWidth },
+        labelStyle: { fontFamily, fontSize, fontStyle, fontWeight },
+        labelXYWH,
+        text,
       } = element as ConnectorElementModel;
       const prevBounds = Bound.fromXYWH(labelXYWH || [0, 0, 16, 16]);
       const center = prevBounds.center;
       const bounds = normalizeTextBound(
         {
-          yText: text!,
           fontFamily,
-          fontStyle,
           fontSize,
+          fontStyle,
           fontWeight,
           hasMaxWidth,
           maxWidth,
+          yText: text!,
         },
         prevBounds
       );
@@ -257,56 +294,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       });
     }
     // no need to update the bound of edgeless text block, which updates itself using ResizeObserver
-  };
-
-  private _setTextColor = ({ detail: color }: ColorEvent) => {
-    const props = { color };
-    this.elements.forEach(element => {
-      this.service.updateElement(element.id, buildProps(element, props));
-    });
-  };
-
-  private _setTextAlign = (textAlign: TextAlign) => {
-    const props = { textAlign };
-    this.elements.forEach(element => {
-      this.service.updateElement(element.id, buildProps(element, props));
-    });
-  };
-
-  private _setFontFamily = (fontFamily: FontFamily) => {
-    const currentFontWeight = getMostCommonFontWeight(this.elements);
-    const fontWeight = isFontWeightSupported(fontFamily, currentFontWeight)
-      ? currentFontWeight
-      : FontWeight.Regular;
-    const currentFontStyle = getMostCommonFontStyle(this.elements);
-    const fontStyle = isFontStyleSupported(fontFamily, currentFontStyle)
-      ? currentFontStyle
-      : FontStyle.Normal;
-
-    const props = { fontFamily, fontWeight, fontStyle };
-    this.elements.forEach(element => {
-      this.service.updateElement(element.id, buildProps(element, props));
-      this._updateElementBound(element);
-    });
-  };
-
-  private _setFontSize = (fontSize: number) => {
-    const props = { fontSize };
-    this.elements.forEach(element => {
-      this.service.updateElement(element.id, buildProps(element, props));
-      this._updateElementBound(element);
-    });
-  };
-
-  private _setFontWeightAndStyle = (
-    fontWeight: FontWeight,
-    fontStyle: FontStyle
-  ) => {
-    const props = { fontWeight, fontStyle };
-    this.elements.forEach(element => {
-      this.service.updateElement(element.id, buildProps(element, props));
-      this._updateElementBound(element);
-    });
   };
 
   override render() {
@@ -452,6 +439,19 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       renderToolbarSeparator
     );
   }
+
+  get service() {
+    return this.edgeless.service;
+  }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor elementType!: BlockSuite.EdgelessTextModelKeyType;
+
+  @property({ attribute: false })
+  accessor elements!: BlockSuite.EdgelessTextModelType[];
 }
 
 declare global {

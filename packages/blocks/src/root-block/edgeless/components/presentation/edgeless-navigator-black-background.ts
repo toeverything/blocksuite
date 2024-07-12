@@ -1,10 +1,11 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
-import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
+import { Bound } from '../../../../surface-block/index.js';
 
 @customElement('edgeless-navigator-black-background')
 export class EdgelessNavigatorBlackBackground extends WithDisposable(
@@ -20,16 +21,7 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     }
   `;
 
-  @state()
-  private accessor frame: FrameBlockModel | undefined = undefined;
-
-  @state()
-  private accessor show = false;
-
   private _blackBackground = false;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _tryLoadBlackBackground() {
     const value = this.edgeless.service.editPropsStore.getStorage(
@@ -105,6 +97,15 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
       </style>
       <div class="edgeless-navigator-black-background"></div>`;
   }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @state()
+  private accessor frame: FrameBlockModel | undefined = undefined;
+
+  @state()
+  private accessor show = false;
 }
 
 declare global {

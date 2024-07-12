@@ -1,17 +1,17 @@
-import '../../../utils/tags/multi-tag-select.js';
-import '../../../utils/tags/multi-tag-view.js';
-
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import type { SelectColumnData } from '../../types.js';
+
+import '../../../utils/tags/multi-tag-select.js';
 import {
-  popTagSelect,
   type SelectTag,
+  popTagSelect,
 } from '../../../utils/tags/multi-tag-select.js';
+import '../../../utils/tags/multi-tag-view.js';
 import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
-import type { SelectColumnData } from '../../types.js';
 import { multiSelectColumnModelConfig } from './define.js';
 
 @customElement('affine-database-multi-select-cell')
@@ -34,36 +34,12 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
   string[],
   SelectColumnData
 > {
-  get _options(): SelectTag[] {
-    return this.column.data.options;
-  }
-
-  get _value() {
-    return this.value ?? [];
-  }
-
-  private popTagSelect = () => {
-    this._disposables.add({
-      dispose: popTagSelect(
-        this.querySelector('affine-multi-tag-view') ?? this,
-        {
-          options: this._options,
-          onOptionsChange: this._onOptionsChange,
-          value: this._value,
-          onChange: this._onChange,
-          onComplete: this._editComplete,
-          minWidth: 400,
-        }
-      ),
-    });
+  _editComplete = () => {
+    this.selectCurrentCell(false);
   };
 
   _onChange = (ids: string[]) => {
     this.onChange(ids);
-  };
-
-  _editComplete = () => {
-    this.selectCurrentCell(false);
   };
 
   _onOptionsChange = (options: SelectTag[]) => {
@@ -74,6 +50,30 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
       };
     });
   };
+
+  private popTagSelect = () => {
+    this._disposables.add({
+      dispose: popTagSelect(
+        this.querySelector('affine-multi-tag-view') ?? this,
+        {
+          minWidth: 400,
+          onChange: this._onChange,
+          onComplete: this._editComplete,
+          onOptionsChange: this._onOptionsChange,
+          options: this._options,
+          value: this._value,
+        }
+      ),
+    });
+  };
+
+  get _options(): SelectTag[] {
+    return this.column.data.options;
+  }
+
+  get _value() {
+    return this.value ?? [];
+  }
 
   override firstUpdated() {
     this.popTagSelect();
@@ -91,9 +91,9 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
 
 export const multiSelectColumnConfig =
   multiSelectColumnModelConfig.renderConfig({
-    icon: createIcon('DatabaseMultiSelect'),
     cellRenderer: {
-      view: createFromBaseCellRenderer(MultiSelectCell),
       edit: createFromBaseCellRenderer(MultiSelectCellEditing),
+      view: createFromBaseCellRenderer(MultiSelectCell),
     },
+    icon: createIcon('DatabaseMultiSelect'),
   });

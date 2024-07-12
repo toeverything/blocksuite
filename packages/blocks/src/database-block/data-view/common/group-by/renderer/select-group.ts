@@ -3,9 +3,10 @@ import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { SelectTag } from '../../../utils/tags/multi-tag-select.js';
+
 import { popMenu } from '../../../../../_common/components/index.js';
 import { selectOptionColors } from '../../../utils/tags/colors.js';
-import type { SelectTag } from '../../../utils/tags/multi-tag-select.js';
 import { BaseGroup } from './base.js';
 
 @customElement('data-view-group-title-select-view')
@@ -15,10 +16,6 @@ export class SelectGroupView extends BaseGroup<
   },
   string
 > {
-  get tag() {
-    return this.data.options.find(v => v.id === this.value);
-  }
-
   static override styles = css`
     data-view-group-title-select-view {
       overflow: hidden;
@@ -59,17 +56,17 @@ export class SelectGroupView extends BaseGroup<
           const styles = styleMap({
             backgroundColor: color,
             borderRadius: '50%',
-            width: '20px',
             height: '20px',
+            width: '20px',
           });
           return {
-            type: 'action',
-            name: name,
-            isSelected: this.tag?.color === color,
             icon: html` <div style=${styles}></div>`,
+            isSelected: this.tag?.color === color,
+            name: name,
             select: () => {
               this.updateTag({ color });
             },
+            type: 'action',
           };
         }),
       },
@@ -110,5 +107,9 @@ export class SelectGroupView extends BaseGroup<
         return v;
       }),
     });
+  }
+
+  get tag() {
+    return this.data.options.find(v => v.id === this.value);
   }
 }

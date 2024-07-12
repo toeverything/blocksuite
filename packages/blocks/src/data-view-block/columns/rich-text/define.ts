@@ -1,10 +1,11 @@
 import { nanoid } from '@blocksuite/store';
 
 import type { RichTextCellType } from '../../../database-block/columns/utils.js';
+import type { SelectTag } from '../../../database-block/data-view/utils/tags/multi-tag-select.js';
+
 import { columnType } from '../../../database-block/data-view/column/column-config.js';
 import { tRichText } from '../../../database-block/data-view/logical/data-type.js';
 import { getTagColor } from '../../../database-block/data-view/utils/tags/colors.js';
-import type { SelectTag } from '../../../database-block/data-view/utils/tags/multi-tag-select.js';
 
 export const richTextColumnType = columnType('rich-text');
 
@@ -15,26 +16,26 @@ declare global {
 }
 export const richTextColumnModelConfig =
   richTextColumnType.modelConfig<RichTextCellType>({
-    name: 'Text',
-    type: () => tRichText.create(),
-    defaultData: () => ({}),
-    cellToString: data => data?.toString() ?? '',
     cellFromString: data => {
       return {
         value: data,
       };
     },
     cellToJson: data => data?.toString() ?? null,
+    cellToString: data => data?.toString() ?? '',
+    defaultData: () => ({}),
     isEmpty: data => data == null || data.length === 0,
+    name: 'Text',
+    type: () => tRichText.create(),
   });
 richTextColumnModelConfig.addConvert('select', (_column, cells) => {
   const options: Record<string, SelectTag> = {};
   const getTag = (name: string) => {
     if (options[name]) return options[name];
     const tag: SelectTag = {
+      color: getTagColor(),
       id: nanoid(),
       value: name,
-      color: getTagColor(),
     };
     options[name] = tag;
     return tag;
@@ -59,9 +60,9 @@ richTextColumnModelConfig.addConvert('multi-select', (_column, cells) => {
   const getTag = (name: string) => {
     if (options[name]) return options[name];
     const tag: SelectTag = {
+      color: getTagColor(),
       id: nanoid(),
       value: name,
-      color: getTagColor(),
     };
     options[name] = tag;
     return tag;

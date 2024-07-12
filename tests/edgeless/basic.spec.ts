@@ -3,6 +3,8 @@ import { assertExists } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 
 import {
+  Shape,
+  ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH,
   createShapeElement,
   decreaseZoomLevel,
   deleteAll,
@@ -11,10 +13,8 @@ import {
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
-  Shape,
   shiftClickView,
   switchEditorMode,
-  ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH,
   zoomByMouseWheel,
   zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
@@ -221,8 +221,8 @@ test('Before and after switching to Edgeless, the previous zoom ratio and positi
   page,
 }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2479',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
@@ -245,8 +245,8 @@ test('should close zoom bar when click blank area', async ({ page }) => {
   assertExists(screenWidth);
   if (screenWidth > ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH) {
     await page.setViewportSize({
-      width: 1000,
       height: 1000,
+      width: 1000,
     });
   }
 

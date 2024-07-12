@@ -6,26 +6,26 @@ import {
 } from './embed-github-model.js';
 
 const defaultEmbedGithubProps: EmbedGithubBlockProps = {
-  style: EmbedGithubStyles[1],
+  assignees: null,
+  caption: null,
+  createdAt: null,
+  description: null,
+  githubId: '',
+  githubType: 'issue',
+  image: null,
+
   owner: '',
   repo: '',
-  githubType: 'issue',
-  githubId: '',
-  url: '',
-  caption: null,
-
-  image: null,
   status: null,
   statusReason: null,
+  style: EmbedGithubStyles[1],
   title: null,
-  description: null,
-  createdAt: null,
-  assignees: null,
+  url: '',
 };
 
 export const EmbedGithubBlockSchema = createEmbedBlockSchema({
   name: 'github',
-  version: 1,
-  toModel: () => new EmbedGithubModel(),
   props: (): EmbedGithubBlockProps => defaultEmbedGithubProps,
+  toModel: () => new EmbedGithubModel(),
+  version: 1,
 });

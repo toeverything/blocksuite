@@ -1,7 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 import { getRootByEditorHost } from '../utils/query.js';
 
@@ -11,7 +12,7 @@ let ToastContainer: HTMLDivElement | null = null;
  * DO NOT USE FOR USER INPUT
  * See https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
  */
-const htmlToElement = <T extends ChildNode>(html: string | TemplateResult) => {
+const htmlToElement = <T extends ChildNode>(html: TemplateResult | string) => {
   const template = document.createElement('template');
   if (typeof html === 'string') {
     html = html.trim(); // Never return a text node of whitespace as the result

@@ -1,5 +1,3 @@
-import './latex-node.js';
-
 import {
   EdgelessEditorBlockSpecs,
   type InlineMarkdownMatch,
@@ -17,23 +15,22 @@ import { z } from 'zod';
 
 import type { TextAttributesWithLatex } from './latex-node.js';
 
+import './latex-node.js';
+
 const latexSpec: InlineSpecs<TextAttributesWithLatex> = {
-  name: 'latex',
-  schema: z.string().optional().nullable().catch(undefined),
+  embed: true,
   match: delta => !!delta.attributes?.latex,
+  name: 'latex',
   renderer: (delta, selected) => {
     return html`<latex-node
       .delta=${delta}
       .selected=${selected}
     ></latex-node>`;
   },
-  embed: true,
+  schema: z.string().optional().nullable().catch(undefined),
 };
 const latexMarkdownMatch: InlineMarkdownMatch<TextAttributesWithLatex> = {
-  name: 'latex',
-  /* eslint-disable no-useless-escape */
-  pattern: /(?:\$)([^\s\$](?:[^`]*?[^\s\$])?)(?:\$)$/g,
-  action: ({ inlineEditor, prefixText, inlineRange, pattern, undoManager }) => {
+  action: ({ inlineEditor, inlineRange, pattern, prefixText, undoManager }) => {
     const match = pattern.exec(prefixText);
     if (!match) {
       return KEYBOARD_ALLOW_DEFAULT;
@@ -97,6 +94,9 @@ const latexMarkdownMatch: InlineMarkdownMatch<TextAttributesWithLatex> = {
 
     return KEYBOARD_PREVENT_DEFAULT;
   },
+  name: 'latex',
+  /* eslint-disable no-useless-escape */
+  pattern: /(?:\$)([^\s\$](?:[^`]*?[^\s\$])?)(?:\$)$/g,
 };
 
 class CustomParagraphService extends ParagraphBlockService<TextAttributesWithLatex> {
@@ -153,7 +153,7 @@ export function getLatexSpecs() {
   });
 
   return {
-    pageModeSpecs,
     edgelessModeSpecs,
+    pageModeSpecs,
   };
 }

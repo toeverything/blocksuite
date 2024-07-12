@@ -3,73 +3,73 @@ import { z } from 'zod';
 import type { DocMeta, DocsPropertiesMeta } from '../store/meta.js';
 
 export type BlockSnapshot = {
-  type: 'block';
-  id: string;
-  flavour: string;
-  version?: number;
-  props: Record<string, unknown>;
   children: BlockSnapshot[];
+  flavour: string;
+  id: string;
+  props: Record<string, unknown>;
+  type: 'block';
+  version?: number;
 };
 
 export const BlockSnapshotSchema: z.ZodType<BlockSnapshot> = z.object({
-  type: z.literal('block'),
-  id: z.string(),
-  flavour: z.string(),
-  version: z.number().optional(),
-  props: z.record(z.unknown()),
   children: z.lazy(() => BlockSnapshotSchema.array()),
+  flavour: z.string(),
+  id: z.string(),
+  props: z.record(z.unknown()),
+  type: z.literal('block'),
+  version: z.number().optional(),
 });
 
 export type SliceSnapshot = {
-  type: 'slice';
   content: BlockSnapshot[];
-  pageVersion: number;
-  workspaceVersion: number;
-  workspaceId: string;
   pageId: string;
+  pageVersion: number;
+  type: 'slice';
+  workspaceId: string;
+  workspaceVersion: number;
 };
 
 export const SliceSnapshotSchema: z.ZodType<SliceSnapshot> = z.object({
-  type: z.literal('slice'),
   content: BlockSnapshotSchema.array(),
-  pageVersion: z.number(),
-  workspaceVersion: z.number(),
-  workspaceId: z.string(),
   pageId: z.string(),
+  pageVersion: z.number(),
+  type: z.literal('slice'),
+  workspaceId: z.string(),
+  workspaceVersion: z.number(),
 });
 
 export type CollectionInfoSnapshot = {
   id: string;
-  type: 'info';
   pageVersion: number;
-  workspaceVersion: number;
   properties: DocsPropertiesMeta;
+  type: 'info';
+  workspaceVersion: number;
 };
 
 export const CollectionInfoSnapshotSchema: z.ZodType<CollectionInfoSnapshot> =
   z.object({
     id: z.string(),
-    type: z.literal('info'),
     pageVersion: z.number(),
-    workspaceVersion: z.number(),
     properties: z.record(z.any()),
+    type: z.literal('info'),
+    workspaceVersion: z.number(),
   });
 
 export type DocSnapshot = {
-  type: 'page';
-  meta: DocMeta;
   blocks: BlockSnapshot;
+  meta: DocMeta;
+  type: 'page';
 };
 
 const DocMetaSchema = z.object({
-  id: z.string(),
-  title: z.string(),
   createDate: z.number(),
+  id: z.string(),
   tags: z.array(z.string()),
+  title: z.string(),
 });
 
 export const DocSnapshotSchema: z.ZodType<DocSnapshot> = z.object({
-  type: z.literal('page'),
-  meta: DocMetaSchema,
   blocks: BlockSnapshotSchema,
+  meta: DocMetaSchema,
+  type: z.literal('page'),
 });

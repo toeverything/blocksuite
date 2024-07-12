@@ -1,12 +1,11 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import '@blocksuite/presets/themes/affine.css';
-import '../dev-format.js';
-
 import * as blocks from '@blocksuite/blocks';
 import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
+import '@blocksuite/presets/themes/affine.css';
 import * as store from '@blocksuite/store';
 
+import '../dev-format.js';
 import {
   createStarterDocCollection,
   initStarterDocCollection,
@@ -24,10 +23,10 @@ async function main() {
   if (isE2E) {
     Object.defineProperty(window, '$blocksuite', {
       value: Object.freeze({
-        store,
         blocks,
-        global: { utils: globalUtils },
         editor,
+        global: { utils: globalUtils },
+        store,
       }),
     });
 

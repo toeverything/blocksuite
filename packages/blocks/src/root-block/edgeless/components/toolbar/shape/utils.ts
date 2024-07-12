@@ -1,21 +1,20 @@
-import { render, type TemplateResult } from 'lit';
+import { type TemplateResult, render } from 'lit';
 
 import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
 
 type TransformState = {
+  /** scale */
+  s?: number;
   /** horizental offset base on center */
   x?: number | string;
   /** vertical offset base on center */
   y?: number | string;
-  /** scale */
-  s?: number;
   /** z-index */
   z?: number;
 };
 
 export type DraggableShape = {
   name: ShapeTool['shapeType'];
-  svg: TemplateResult;
   style: {
     default?: TransformState;
     hover?: TransformState;
@@ -24,6 +23,7 @@ export type DraggableShape = {
      */
     next?: TransformState;
   };
+  svg: TemplateResult;
 };
 
 /**
@@ -40,7 +40,7 @@ export const buildVariablesObject = (style: DraggableShape['style']) => {
 
   const resolveValue = (
     variable: keyof TransformState,
-    value: string | number
+    value: number | string
   ) => {
     if (['x', 'y'].includes(variable)) {
       return typeof value === 'number' ? `${value}px` : value;
@@ -66,42 +66,42 @@ export const buildVariablesObject = (style: DraggableShape['style']) => {
 
 // drag helper
 export type ShapeDragEvent = {
+  el: HTMLElement;
   inputType: 'mouse' | 'touch';
+  originalEvent: MouseEvent | TouchEvent;
   x: number;
   y: number;
-  el: HTMLElement;
-  originalEvent: MouseEvent | TouchEvent;
 };
 
 export const touchResolver = (event: TouchEvent) =>
   ({
+    el: event.currentTarget as HTMLElement,
     inputType: 'touch',
+    originalEvent: event,
     x: event.touches[0].clientX,
     y: event.touches[0].clientY,
-    el: event.currentTarget as HTMLElement,
-    originalEvent: event,
   }) satisfies ShapeDragEvent;
 
 export const mouseResolver = (event: MouseEvent) =>
   ({
+    el: event.currentTarget as HTMLElement,
     inputType: 'mouse',
+    originalEvent: event,
     x: event.clientX,
     y: event.clientY,
-    el: event.currentTarget as HTMLElement,
-    originalEvent: event,
   }) satisfies ShapeDragEvent;
 
 // overlay helper
 export const defaultDraggingInfo = {
-  startPos: { x: 0, y: 0 },
-  toolbarRect: {} as DOMRect,
   edgelessRect: {} as DOMRect,
-  shapeRectOriginal: {} as DOMRect,
-  shapeEl: null as unknown as HTMLElement,
-  parentToMount: null as unknown as HTMLElement,
   moved: false,
+  parentToMount: null as unknown as HTMLElement,
   shape: null as unknown as DraggableShape,
+  shapeEl: null as unknown as HTMLElement,
+  shapeRectOriginal: {} as DOMRect,
+  startPos: { x: 0, y: 0 },
   style: {} as CSSStyleDeclaration,
+  toolbarRect: {} as DOMRect,
 };
 export type DraggingInfo = typeof defaultDraggingInfo;
 
@@ -109,14 +109,14 @@ export const createShapeDraggingOverlay = (info: DraggingInfo) => {
   const { edgelessRect, parentToMount } = info;
   const overlay = document.createElement('div');
   Object.assign(overlay.style, {
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    width: edgelessRect.width + 'px',
-    // always clip
     // height: toolbarRect.bottom - edgelessRect.top + 'px',
     height: edgelessRect.height + 'px',
+    left: '0',
     overflow: 'hidden',
+    position: 'absolute',
+    // always clip
+    top: '0',
+    width: edgelessRect.width + 'px',
     zIndex: '9999',
 
     // for debug purpose
@@ -127,19 +127,19 @@ export const createShapeDraggingOverlay = (info: DraggingInfo) => {
   const shapeScaleWrapper = document.createElement('div');
   Object.assign(shapeScaleWrapper.style, {
     transform: 'scale(var(--s, 1))',
-    transition: 'transform 0.1s',
     transformOrigin: 'var(--o, center)',
+    transition: 'transform 0.1s',
   });
   render(info.shape.svg, shapeScaleWrapper);
   Object.assign(shape.style, {
-    position: 'absolute',
     color: info.style.color,
-    stroke: info.style.stroke,
-    filter: `var(--shape-filter, ${info.style.filter})`,
-    transform: 'translate(var(--x, 0), var(--y, 0))',
-    left: 'var(--left, 0)',
-    top: 'var(--top, 0)',
     cursor: 'grabbing',
+    filter: `var(--shape-filter, ${info.style.filter})`,
+    left: 'var(--left, 0)',
+    position: 'absolute',
+    stroke: info.style.stroke,
+    top: 'var(--top, 0)',
+    transform: 'translate(var(--x, 0), var(--y, 0))',
     transition: 'inherit',
   });
 

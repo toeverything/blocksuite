@@ -9,10 +9,10 @@ import {
 import { queryEmbedYoutubeData } from './utils.js';
 
 export class EmbedYoutubeBlockService extends BlockService<EmbedYoutubeModel> {
-  private static readonly linkPreviewer = new LinkPreviewer();
-
   static setLinkPreviewEndpoint =
     EmbedYoutubeBlockService.linkPreviewer.setEndpoint;
+
+  private static readonly linkPreviewer = new LinkPreviewer();
 
   queryUrlData = (
     embedYoutubeModel: EmbedYoutubeModel,
@@ -32,8 +32,8 @@ export class EmbedYoutubeBlockService extends BlockService<EmbedYoutubeModel> {
       const rootService = this.std.spec.getService('affine:page');
       rootService.registerEmbedBlockOptions({
         flavour: this.flavour,
-        urlRegex: youtubeUrlRegex,
         styles: EmbedYoutubeStyles,
+        urlRegex: youtubeUrlRegex,
         viewType: 'embed',
       });
     });

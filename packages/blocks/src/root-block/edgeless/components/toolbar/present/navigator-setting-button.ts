@@ -1,15 +1,15 @@
-import './frame-order-menu.js';
-import '../../buttons/tool-icon-button.js';
-import '../../../../../_common/components/toggle-switch.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { NavigatorSettingsIcon } from '../../../../../_common/icons/edgeless.js';
-import { createButtonPopper } from '../../../../../_common/utils/button-popper.js';
 import type { FrameBlockModel } from '../../../../../frame-block/frame-model.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+
+import '../../../../../_common/components/toggle-switch.js';
+import { NavigatorSettingsIcon } from '../../../../../_common/icons/edgeless.js';
+import { createButtonPopper } from '../../../../../_common/utils/button-popper.js';
+import '../../buttons/tool-icon-button.js';
+import './frame-order-menu.js';
 
 @customElement('edgeless-navigator-setting-button')
 export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
@@ -72,44 +72,9 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @query('.navigator-setting-button')
-  private accessor _navigatorSettingButton!: HTMLElement;
-
-  @query('.navigator-setting-menu')
-  private accessor _navigatorSettingMenu!: HTMLElement;
-
   private _navigatorSettingPopper?: ReturnType<
     typeof createButtonPopper
   > | null = null;
-
-  @state()
-  accessor blackBackground = true;
-
-  @property({ attribute: false })
-  accessor includeFrameOrder = false;
-
-  @property({ attribute: false })
-  accessor frames!: FrameBlockModel[];
-
-  @property({ attribute: false })
-  accessor popperShow = false;
-
-  @property({ attribute: false })
-  accessor hideToolbar = false;
-
-  @property({ attribute: false })
-  accessor onHideToolbarChange: undefined | ((hideToolbar: boolean) => void) =
-    undefined;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  private _tryRestoreSettings() {
-    const blackBackground = this.edgeless.service.editPropsStore.getStorage(
-      'presentBlackBackground'
-    );
-    this.blackBackground = blackBackground ?? true;
-  }
 
   private _onBlackBackgroundChange = (checked: boolean) => {
     this.blackBackground = checked;
@@ -118,8 +83,12 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     });
   };
 
-  @property({ attribute: false })
-  accessor setPopperShow: (show: boolean) => void = () => {};
+  private _tryRestoreSettings() {
+    const blackBackground = this.edgeless.service.editPropsStore.getStorage(
+      'presentBlackBackground'
+    );
+    this.blackBackground = blackBackground ?? true;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -197,6 +166,37 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  @query('.navigator-setting-button')
+  private accessor _navigatorSettingButton!: HTMLElement;
+
+  @query('.navigator-setting-menu')
+  private accessor _navigatorSettingMenu!: HTMLElement;
+
+  @state()
+  accessor blackBackground = true;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor frames!: FrameBlockModel[];
+
+  @property({ attribute: false })
+  accessor hideToolbar = false;
+
+  @property({ attribute: false })
+  accessor includeFrameOrder = false;
+
+  @property({ attribute: false })
+  accessor onHideToolbarChange: ((hideToolbar: boolean) => void) | undefined =
+    undefined;
+
+  @property({ attribute: false })
+  accessor popperShow = false;
+
+  @property({ attribute: false })
+  accessor setPopperShow: (show: boolean) => void = () => {};
 }
 
 declare global {

@@ -1,16 +1,16 @@
-import './components/image-toolbar.js';
-
 import { WidgetElement } from '@blocksuite/block-std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { HoverController } from '../../../_common/components/hover/controller.js';
-import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
-import { commonConfig, moreMenuConfig } from './config.js';
 import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
+
+import { HoverController } from '../../../_common/components/hover/controller.js';
+import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
+import './components/image-toolbar.js';
+import { commonConfig, moreMenuConfig } from './config.js';
 
 export const AFFINE_IMAGE_TOOLBAR_WIDGET = 'affine-image-toolbar-widget';
 
@@ -22,10 +22,6 @@ export class AffineImageToolbarWidget extends WidgetElement<
   private _hoverController: HoverController | null = null;
 
   private _isActivated = false;
-
-  config: ImageConfigItem[] = [];
-
-  moreMenuConfig: MoreMenuConfigItem[] = [];
 
   private _setHoverController = () => {
     this._hoverController = null;
@@ -58,6 +54,23 @@ export class AffineImageToolbarWidget extends WidgetElement<
         }
 
         return {
+          computePosition: {
+            autoUpdate: true,
+            middleware: [
+              shift({
+                crossAxis: true,
+                limiter: limitShift(),
+                padding: {
+                  bottom: 12,
+                  right: 12,
+                  top: PAGE_HEADER_HEIGHT + 12,
+                },
+              }),
+            ],
+            placement: 'right-start',
+            referenceElement: imageContainer,
+          },
+          container: this.blockElement,
           template: html`<affine-image-toolbar
             .blockElement=${imageBlock}
             .abortController=${abortController}
@@ -70,23 +83,6 @@ export class AffineImageToolbarWidget extends WidgetElement<
               }
             }}
           ></affine-image-toolbar>`,
-          container: this.blockElement,
-          computePosition: {
-            referenceElement: imageContainer,
-            placement: 'right-start',
-            middleware: [
-              shift({
-                crossAxis: true,
-                padding: {
-                  top: PAGE_HEADER_HEIGHT + 12,
-                  bottom: 12,
-                  right: 12,
-                },
-                limiter: limitShift(),
-              }),
-            ],
-            autoUpdate: true,
-          },
         };
       },
       { allowMultiple: true }
@@ -100,12 +96,6 @@ export class AffineImageToolbarWidget extends WidgetElement<
       this._hoverController?.abort();
       return;
     };
-  };
-
-  clearConfig = () => {
-    this.config = [];
-    this.moreMenuConfig = [];
-    return this;
   };
 
   addConfigItems = (item: ImageConfigItem[], index?: number) => {
@@ -134,6 +124,16 @@ export class AffineImageToolbarWidget extends WidgetElement<
       .addMoreMenuItems(moreMenuConfig);
     return this;
   };
+
+  clearConfig = () => {
+    this.config = [];
+    this.moreMenuConfig = [];
+    return this;
+  };
+
+  config: ImageConfigItem[] = [];
+
+  moreMenuConfig: MoreMenuConfigItem[] = [];
 
   override firstUpdated() {
     if (!this.config.length || !this.moreMenuConfig.length) {

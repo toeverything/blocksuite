@@ -5,40 +5,40 @@ import { MemoryBlobCRUD } from '../adapter/index.js';
 import { Text } from '../reactive/index.js';
 import {
   type BlockModel,
-  defineBlockSchema,
   Schema,
   type SchemaToModel,
+  defineBlockSchema,
 } from '../schema/index.js';
 import { DocCollection, Generator } from '../store/index.js';
 import { AssetsManager, BaseBlockTransformer } from '../transformer/index.js';
 
 const docSchema = defineBlockSchema({
   flavour: 'page',
-  props: internal => ({
-    title: internal.Text('doc title'),
-    count: 3,
-    style: {
-      color: 'red',
-    },
-    items: [
-      {
-        id: 0,
-        content: internal.Text('item 1'),
-      },
-      {
-        id: 1,
-        content: internal.Text('item 2'),
-      },
-      {
-        id: 2,
-        content: internal.Text('item 3'),
-      },
-    ],
-  }),
   metadata: {
     role: 'root',
     version: 1,
   },
+  props: internal => ({
+    count: 3,
+    items: [
+      {
+        content: internal.Text('item 1'),
+        id: 0,
+      },
+      {
+        content: internal.Text('item 2'),
+        id: 1,
+      },
+      {
+        content: internal.Text('item 3'),
+        id: 2,
+      },
+    ],
+    style: {
+      color: 'red',
+    },
+    title: internal.Text('doc title'),
+  }),
 });
 
 type RootBlockModel = SchemaToModel<typeof docSchema>;
@@ -65,8 +65,8 @@ test('model to snapshot', () => {
 
   expect(rootModel).not.toBeNull();
   const snapshot = transformer.toSnapshot({
-    model: rootModel,
     assets,
+    model: rootModel,
   });
   expect(snapshot).toMatchSnapshot();
 });
@@ -85,14 +85,14 @@ test('snapshot to model', async () => {
 
   expect(rootModel).not.toBeNull();
   const snapshot = await transformer.toSnapshot({
-    model: rootModel,
     assets,
+    model: rootModel,
   });
 
   const model = await transformer.fromSnapshot({
-    json: snapshot,
     assets,
     children: [],
+    json: snapshot,
   });
   expect(model.flavour).toBe(rootModel.flavour);
 

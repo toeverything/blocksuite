@@ -1,6 +1,7 @@
 import { assertExists, throttle } from '@blocksuite/global/utils';
 
 import type { BaseSelection, TextSelection } from '../../selection/index.js';
+
 import { BlockElement } from '../element/block-element.js';
 import { RangeManager } from './range-manager.js';
 
@@ -8,101 +9,153 @@ import { RangeManager } from './range-manager.js';
  * Two-way binding between native range and text selection
  */
 export class RangeBinding {
-  get selectionManager() {
-    return this.host.selection;
-  }
-
-  get rangeManager() {
-    assertExists(this.host.rangeManager);
-    return this.host.rangeManager;
-  }
-
-  get host() {
-    return this.manager.host;
-  }
-
-  private _prevTextSelection: {
-    selection: TextSelection;
-    path: string[];
-  } | null = null;
-
   private _compositionStartCallback:
     | ((event: CompositionEvent) => Promise<void>)
     | null = null;
 
-  isComposing = false;
+  private _onBeforeInput = (event: InputEvent) => {
+    const selection = this.selectionManager.find('text');
+    if (!selection) return;
 
-  constructor(public manager: RangeManager) {
-    this.host.disposables.add(
-      this.selectionManager.slots.changed.on(this._onStdSelectionChanged)
-    );
+    if (event.isComposing) return;
 
-    this.host.disposables.addFromEvent(
-      document,
-      'selectionchange',
-      throttle(() => {
-        this._onNativeSelectionChanged().catch(console.error);
-      }, 10)
-    );
+    const { from, to } = selection;
+    if (!to || from.blockId === to.blockId) return;
 
-    this.host.disposables.add(
-      this.host.event.add('beforeInput', ctx => {
-        const event = ctx.get('defaultState').event as InputEvent;
-        this._onBeforeInput(event);
-      })
-    );
+    const range = this.rangeManager.value;
+    if (!range) return;
 
-    this.host.disposables.add(
-      this.host.event.add('compositionStart', this._onCompositionStart)
-    );
-    this.host.disposables.add(
-      this.host.event.add('compositionEnd', ctx => {
-        const event = ctx.get('defaultState').event as CompositionEvent;
-        this._onCompositionEnd(event);
-      })
-    );
-  }
+    const blocks = this.rangeManager.getSelectedBlockElementsByRange(range, {
+      mode: 'flat',
+    });
 
-  private _onStdSelectionChanged = (selections: BaseSelection[]) => {
-    const text =
-      selections.find((selection): selection is TextSelection =>
-        selection.is('text')
-      ) ?? null;
+    const start = blocks.at(0);
+    const end = blocks.at(-1);
+    if (!start || !end) return;
 
-    if (text === this._prevTextSelection) {
-      return;
+    const startText = start.model.text;
+    const endText = end.model.text;
+    if (!startText || !endText) return;
+
+    event.preventDefault();
+
+    this.host.doc.transact(() => {
+      startText.delete(from.index, from.length);
+      startText.insert(event.data ?? '', from.index);
+      endText.delete(0, to.length);
+      startText.join(endText);
+
+      blocks
+        .slice(1)
+        // delete from lowest to highest
+        .reverse()
+        .forEach(block => {
+          const parent = this.host.doc.getParent(block.model);
+          assertExists(parent);
+          this.host.doc.deleteBlock(block.model, {
+            bringChildrenTo: parent,
+          });
+        });
+    });
+
+    const newSelection = this.selectionManager.create('text', {
+      from: {
+        blockId: from.blockId,
+        index: from.index + (event.data?.length ?? 0),
+        length: 0,
+      },
+      to: null,
+    });
+    this.selectionManager.setGroup('note', [newSelection]);
+  };
+
+  private _onCompositionEnd = (event: CompositionEvent) => {
+    if (this._compositionStartCallback) {
+      event.preventDefault();
+      this._compositionStartCallback(event).catch(console.error);
+      this._compositionStartCallback = null;
     }
+  };
 
-    // wait for lit updated
-    this.host.updateComplete
-      .then(() => {
-        const model = text && this.host.doc.getBlockById(text.blockId);
-        const path = model && this.host.view.calculatePath(model);
+  private _onCompositionStart = () => {
+    const selection = this.selectionManager.find('text');
+    if (!selection) return;
 
-        const eq =
-          text && this._prevTextSelection && path
-            ? text.equals(this._prevTextSelection.selection) &&
-              path.join('') === this._prevTextSelection.path.join('')
-            : false;
+    const { from, to } = selection;
+    if (!to) return;
 
-        if (eq) {
-          return;
-        }
+    this.isComposing = true;
 
-        this._prevTextSelection =
-          text && path
-            ? {
-                selection: text,
-                path: path,
-              }
-            : null;
-        if (text) {
-          this.rangeManager.syncTextSelectionToRange(text);
-        } else {
-          this.rangeManager.clear();
-        }
-      })
-      .catch(console.error);
+    const range = this.rangeManager.value;
+    if (!range) return;
+
+    const blocks = this.rangeManager.getSelectedBlockElementsByRange(range, {
+      mode: 'flat',
+    });
+    const highestBlocks = this.rangeManager.getSelectedBlockElementsByRange(
+      range,
+      {
+        match: block => block.model.role === 'content',
+        mode: 'highest',
+      }
+    );
+
+    const start = blocks.at(0);
+    const end = blocks.at(-1);
+    if (!start || !end) return;
+
+    const startText = start.model.text;
+    const endText = end.model.text;
+    if (!startText || !endText) return;
+
+    this._compositionStartCallback = async event => {
+      this.isComposing = false;
+
+      const parents: BlockElement[] = [];
+      for (const highestBlock of highestBlocks) {
+        const parentModel = this.host.doc.getParent(highestBlock.blockId);
+        if (!parentModel) continue;
+        const parent = this.host.view.getBlock(parentModel.id);
+        if (!(parent instanceof BlockElement) || parents.includes(parent))
+          continue;
+
+        // Restore the DOM structure damaged by the composition
+        parent.dirty = true;
+        await parent.updateComplete;
+        await parent.updateComplete;
+        parents.push(parent);
+      }
+
+      this.host.doc.transact(() => {
+        endText.delete(0, to.length);
+        startText.join(endText);
+
+        blocks
+          .slice(1)
+          // delete from lowest to highest
+          .reverse()
+          .forEach(block => {
+            const parent = this.host.doc.getParent(block.model);
+            assertExists(parent);
+            this.host.doc.deleteBlock(block.model, {
+              bringChildrenTo: parent,
+            });
+          });
+      });
+
+      await this.host.updateComplete;
+
+      const selection = this.selectionManager.create('text', {
+        from: {
+          blockId: from.blockId,
+          index: from.index + (event.data?.length ?? 0),
+          length: 0,
+        },
+        to: null,
+      });
+      this.host.selection.setGroup('note', [selection]);
+      this.rangeManager.syncTextSelectionToRange(selection);
+    };
   };
 
   private _onNativeSelectionChanged = async () => {
@@ -176,154 +229,102 @@ export class RangeBinding {
 
     const path = this.host.view.calculatePath(model);
     this._prevTextSelection = {
-      selection: textSelection,
       path,
+      selection: textSelection,
     };
     this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
   };
 
-  private _onBeforeInput = (event: InputEvent) => {
-    const selection = this.selectionManager.find('text');
-    if (!selection) return;
+  private _onStdSelectionChanged = (selections: BaseSelection[]) => {
+    const text =
+      selections.find((selection): selection is TextSelection =>
+        selection.is('text')
+      ) ?? null;
 
-    if (event.isComposing) return;
+    if (text === this._prevTextSelection) {
+      return;
+    }
 
-    const { from, to } = selection;
-    if (!to || from.blockId === to.blockId) return;
+    // wait for lit updated
+    this.host.updateComplete
+      .then(() => {
+        const model = text && this.host.doc.getBlockById(text.blockId);
+        const path = model && this.host.view.calculatePath(model);
 
-    const range = this.rangeManager.value;
-    if (!range) return;
+        const eq =
+          text && this._prevTextSelection && path
+            ? text.equals(this._prevTextSelection.selection) &&
+              path.join('') === this._prevTextSelection.path.join('')
+            : false;
 
-    const blocks = this.rangeManager.getSelectedBlockElementsByRange(range, {
-      mode: 'flat',
-    });
+        if (eq) {
+          return;
+        }
 
-    const start = blocks.at(0);
-    const end = blocks.at(-1);
-    if (!start || !end) return;
-
-    const startText = start.model.text;
-    const endText = end.model.text;
-    if (!startText || !endText) return;
-
-    event.preventDefault();
-
-    this.host.doc.transact(() => {
-      startText.delete(from.index, from.length);
-      startText.insert(event.data ?? '', from.index);
-      endText.delete(0, to.length);
-      startText.join(endText);
-
-      blocks
-        .slice(1)
-        // delete from lowest to highest
-        .reverse()
-        .forEach(block => {
-          const parent = this.host.doc.getParent(block.model);
-          assertExists(parent);
-          this.host.doc.deleteBlock(block.model, {
-            bringChildrenTo: parent,
-          });
-        });
-    });
-
-    const newSelection = this.selectionManager.create('text', {
-      from: {
-        blockId: from.blockId,
-        index: from.index + (event.data?.length ?? 0),
-        length: 0,
-      },
-      to: null,
-    });
-    this.selectionManager.setGroup('note', [newSelection]);
+        this._prevTextSelection =
+          text && path
+            ? {
+                path: path,
+                selection: text,
+              }
+            : null;
+        if (text) {
+          this.rangeManager.syncTextSelectionToRange(text);
+        } else {
+          this.rangeManager.clear();
+        }
+      })
+      .catch(console.error);
   };
 
-  private _onCompositionStart = () => {
-    const selection = this.selectionManager.find('text');
-    if (!selection) return;
+  private _prevTextSelection: {
+    path: string[];
+    selection: TextSelection;
+  } | null = null;
 
-    const { from, to } = selection;
-    if (!to) return;
+  isComposing = false;
 
-    this.isComposing = true;
-
-    const range = this.rangeManager.value;
-    if (!range) return;
-
-    const blocks = this.rangeManager.getSelectedBlockElementsByRange(range, {
-      mode: 'flat',
-    });
-    const highestBlocks = this.rangeManager.getSelectedBlockElementsByRange(
-      range,
-      {
-        mode: 'highest',
-        match: block => block.model.role === 'content',
-      }
+  constructor(public manager: RangeManager) {
+    this.host.disposables.add(
+      this.selectionManager.slots.changed.on(this._onStdSelectionChanged)
     );
 
-    const start = blocks.at(0);
-    const end = blocks.at(-1);
-    if (!start || !end) return;
+    this.host.disposables.addFromEvent(
+      document,
+      'selectionchange',
+      throttle(() => {
+        this._onNativeSelectionChanged().catch(console.error);
+      }, 10)
+    );
 
-    const startText = start.model.text;
-    const endText = end.model.text;
-    if (!startText || !endText) return;
+    this.host.disposables.add(
+      this.host.event.add('beforeInput', ctx => {
+        const event = ctx.get('defaultState').event as InputEvent;
+        this._onBeforeInput(event);
+      })
+    );
 
-    this._compositionStartCallback = async event => {
-      this.isComposing = false;
+    this.host.disposables.add(
+      this.host.event.add('compositionStart', this._onCompositionStart)
+    );
+    this.host.disposables.add(
+      this.host.event.add('compositionEnd', ctx => {
+        const event = ctx.get('defaultState').event as CompositionEvent;
+        this._onCompositionEnd(event);
+      })
+    );
+  }
 
-      const parents: BlockElement[] = [];
-      for (const highestBlock of highestBlocks) {
-        const parentModel = this.host.doc.getParent(highestBlock.blockId);
-        if (!parentModel) continue;
-        const parent = this.host.view.getBlock(parentModel.id);
-        if (!(parent instanceof BlockElement) || parents.includes(parent))
-          continue;
+  get host() {
+    return this.manager.host;
+  }
 
-        // Restore the DOM structure damaged by the composition
-        parent.dirty = true;
-        await parent.updateComplete;
-        await parent.updateComplete;
-        parents.push(parent);
-      }
+  get rangeManager() {
+    assertExists(this.host.rangeManager);
+    return this.host.rangeManager;
+  }
 
-      this.host.doc.transact(() => {
-        endText.delete(0, to.length);
-        startText.join(endText);
-
-        blocks
-          .slice(1)
-          // delete from lowest to highest
-          .reverse()
-          .forEach(block => {
-            const parent = this.host.doc.getParent(block.model);
-            assertExists(parent);
-            this.host.doc.deleteBlock(block.model, {
-              bringChildrenTo: parent,
-            });
-          });
-      });
-
-      await this.host.updateComplete;
-
-      const selection = this.selectionManager.create('text', {
-        from: {
-          blockId: from.blockId,
-          index: from.index + (event.data?.length ?? 0),
-          length: 0,
-        },
-        to: null,
-      });
-      this.host.selection.setGroup('note', [selection]);
-      this.rangeManager.syncTextSelectionToRange(selection);
-    };
-  };
-
-  private _onCompositionEnd = (event: CompositionEvent) => {
-    if (this._compositionStartCallback) {
-      event.preventDefault();
-      this._compositionStartCallback(event).catch(console.error);
-      this._compositionStartCallback = null;
-    }
-  };
+  get selectionManager() {
+    return this.host.selection;
+  }
 }

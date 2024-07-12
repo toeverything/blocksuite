@@ -1,14 +1,15 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { selectable } from '../_common/edgeless/mixin/index.js';
 import type { LinkPreviewData } from '../_common/embed-block-helper/index.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
+import { selectable } from '../_common/edgeless/mixin/index.js';
+
 export interface BookmarkBlockEdgelessProps {
   index: string;
-  xywh: SerializedXYWH;
   rotate: number;
+  xywh: SerializedXYWH;
 }
 
 export const BookmarkStyles: EmbedCardStyle[] = [
@@ -19,33 +20,30 @@ export const BookmarkStyles: EmbedCardStyle[] = [
 ] as const;
 
 export type BookmarkBlockProps = {
+  caption: null | string;
   style: (typeof BookmarkStyles)[number];
   url: string;
-  caption: string | null;
-} & LinkPreviewData &
-  BookmarkBlockEdgelessProps;
+} & BookmarkBlockEdgelessProps &
+  LinkPreviewData;
 
 const defaultBookmarkProps: BookmarkBlockProps = {
-  style: BookmarkStyles[1],
-  url: '',
   caption: null,
-
   description: null,
   icon: null,
-  image: null,
-  title: null,
 
+  image: null,
   index: 'a0',
-  xywh: '[0,0,0,0]',
   rotate: 0,
+  style: BookmarkStyles[1],
+
+  title: null,
+  url: '',
+  xywh: '[0,0,0,0]',
 };
 
 export const BookmarkBlockSchema = defineBlockSchema({
   flavour: 'affine:bookmark',
-  props: (): BookmarkBlockProps => defaultBookmarkProps,
   metadata: {
-    version: 1,
-    role: 'content',
     parent: [
       'affine:note',
       'affine:surface',
@@ -53,7 +51,10 @@ export const BookmarkBlockSchema = defineBlockSchema({
       'affine:paragraph',
       'affine:list',
     ],
+    role: 'content',
+    version: 1,
   },
+  props: (): BookmarkBlockProps => defaultBookmarkProps,
   toModel: () => new BookmarkBlockModel(),
 });
 

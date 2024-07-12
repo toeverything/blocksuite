@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -7,12 +8,13 @@ import {
   BlockViewType,
   type Doc,
 } from '@blocksuite/store';
-import { css, render, type TemplateResult } from 'lit';
+import { type TemplateResult, css, render } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
+
 import { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import {
   getElementProps,
@@ -112,12 +114,12 @@ export function promptDocTitle(host: EditorHost, autofill?: string) {
   if (!notification) return Promise.resolve(undefined);
 
   return notification.prompt({
-    title: 'Create linked doc',
+    autofill,
+    cancelText: 'Cancel',
+    confirmText: 'Confirm',
     message: 'Enter a title for the new doc.',
     placeholder: 'Untitled',
-    autofill,
-    confirmText: 'Confirm',
-    cancelText: 'Cancel',
+    title: 'Create linked doc',
   });
 }
 
@@ -154,10 +156,8 @@ export function notifyDocCreated(host: EditorHost, doc: Doc) {
   const disposable = host.slots.unmounted.on(closeNotify);
 
   notification.notify({
-    title: 'Linked doc created',
-    message: 'You can click undo to recovery block content',
+    abort: abortController.signal,
     accent: 'info',
-    duration: 10 * 1000,
     action: {
       label: 'Undo',
       onClick: () => {
@@ -165,8 +165,10 @@ export function notifyDocCreated(host: EditorHost, doc: Doc) {
         clear();
       },
     },
-    abort: abortController.signal,
+    duration: 10 * 1000,
+    message: 'You can click undo to recovery block content',
     onClose: clear,
+    title: 'Linked doc created',
   });
 }
 
@@ -294,7 +296,7 @@ async function renderNoteContent(
   const childIds = noteChildren.map(child => child.id);
   const ids: string[] = [];
   childIds.map(block => {
-    let parent: string | null = block;
+    let parent: null | string = block;
     while (parent && !ids.includes(parent)) {
       ids.push(parent);
       parent = doc.blockCollection.crud.getParent(parent);
@@ -533,8 +535,8 @@ export function createLinkedDocFromNote(
       'affine:note',
       {
         ...blockProps,
-        hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
       },
       rootId
     );

@@ -1,31 +1,32 @@
-import { propertyMatcher } from '../logical/property-matcher.js';
 import type { TType } from '../logical/typesystem.js';
 import type { UniComponent } from '../utils/uni-component/uni-component.js';
+
+import { propertyMatcher } from '../logical/property-matcher.js';
 import { filterMatcher } from '../widget/filter/matcher/matcher.js';
 
 export type Variable = {
+  icon?: UniComponent;
+  id: string;
   name: string;
   type: TType;
-  id: string;
-  icon?: UniComponent;
 };
 export type FilterGroup = {
-  type: 'group';
-  op: 'and' | 'or';
   conditions: Filter[];
+  op: 'and' | 'or';
+  type: 'group';
 };
 export type VariableRef = {
-  type: 'ref';
   name: string;
+  type: 'ref';
 };
 
 export type Property = {
-  type: 'property';
-  ref: VariableRef;
   propertyFuncName: string;
+  ref: VariableRef;
+  type: 'property';
 };
 
-export type VariableOrProperty = VariableRef | Property;
+export type VariableOrProperty = Property | VariableRef;
 
 export type Literal = {
   type: 'literal';
@@ -33,12 +34,12 @@ export type Literal = {
 };
 export type Value = /*VariableRef*/ Literal;
 export type SingleFilter = {
-  type: 'filter';
-  left: VariableOrProperty;
-  function?: string;
   args: Value[];
+  function?: string;
+  left: VariableOrProperty;
+  type: 'filter';
 };
-export type Filter = SingleFilter | FilterGroup;
+export type Filter = FilterGroup | SingleFilter;
 export type SortExp = {
   left: VariableOrProperty;
   type: 'asc' | 'desc';
@@ -72,34 +73,34 @@ export const firstFilterByRef = (
   ref: VariableOrProperty
 ): SingleFilter => {
   return {
-    type: 'filter',
-    left: ref,
-    function: firstFilterName(vars, ref),
     args: [],
+    function: firstFilterName(vars, ref),
+    left: ref,
+    type: 'filter',
   };
 };
 
 export const firstFilter = (vars: Variable[]): SingleFilter => {
   const ref: VariableRef = {
-    type: 'ref',
     name: vars[0].id,
+    type: 'ref',
   };
   const filter = firstFilterName(vars, ref);
   if (!filter) {
     throw new Error(`can't match any filter`);
   }
   return {
-    type: 'filter',
-    left: ref,
-    function: filter,
     args: [],
+    function: filter,
+    left: ref,
+    type: 'filter',
   };
 };
 
 export const firstFilterInGroup = (vars: Variable[]): FilterGroup => {
   return {
-    type: 'group',
-    op: 'and',
     conditions: [firstFilter(vars)],
+    op: 'and',
+    type: 'group',
   };
 };

@@ -9,25 +9,25 @@ export interface CellRenderProps<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown,
 > {
-  view: DataViewManager;
   column: DataViewColumnManager<Value, Data>;
-  rowId: string;
   isEditing: boolean;
+  rowId: string;
   selectCurrentCell: (editing: boolean) => void;
+  view: DataViewManager;
 }
 
 export interface DataViewCellLifeCycle {
   beforeEnterEditMode(): boolean;
 
-  onEnterEditMode(): void;
-
-  onExitEditMode(): void;
+  blurCell(): boolean;
 
   focusCell(): boolean;
 
-  blurCell(): boolean;
-
   forceUpdate(): void;
+
+  onEnterEditMode(): void;
+
+  onExitEditMode(): void;
 }
 
 export type DataViewCellComponent<
@@ -39,8 +39,8 @@ export type CellRenderer<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown,
 > = {
-  view: DataViewCellComponent<Data, Value>;
   edit?: DataViewCellComponent<Data, Value>;
+  view: DataViewCellComponent<Data, Value>;
 };
 declare global {
   export interface ColumnConfigMap {}

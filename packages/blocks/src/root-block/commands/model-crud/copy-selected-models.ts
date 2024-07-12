@@ -1,4 +1,5 @@
 import type { Command } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 

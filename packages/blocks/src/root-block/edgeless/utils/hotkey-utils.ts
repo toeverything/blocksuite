@@ -1,11 +1,12 @@
-import { ShapeType } from '../../../surface-block/index.js';
 import type { ShapeTool } from '../controllers/tools/shape-tool.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
+import { ShapeType } from '../../../surface-block/index.js';
+
 const shapeMap: Record<ShapeTool['shapeType'], number> = {
-  [ShapeType.Rect]: 0,
-  [ShapeType.Ellipse]: 1,
   [ShapeType.Diamond]: 2,
+  [ShapeType.Ellipse]: 1,
+  [ShapeType.Rect]: 0,
   [ShapeType.Triangle]: 3,
   roundedRect: 4,
 };
@@ -22,12 +23,12 @@ export function updateShapeProps(
   const props =
     shapeType === 'roundedRect'
       ? {
-          shapeType: ShapeType.Rect,
           radius: 0.1,
+          shapeType: ShapeType.Rect,
         }
       : {
-          shapeType,
           radius: 0,
+          shapeType,
         };
 
   edgeless.service.editPropsStore.recordLastProps('shape', props);

@@ -64,25 +64,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     }
   `;
 
-  @query('input')
-  private accessor _inputEle!: HTMLInputElement;
-
-  private _prevPortalAbortController: AbortController | null = null;
-
   private _datePicker: DatePicker | null = null;
-
-  private _setValue = (str: string = this._inputEle.value) => {
-    if (str === '') {
-      this.onChange(undefined);
-      this._inputEle.value = '';
-      return;
-    }
-
-    const date = new Date(str);
-    const value = format(date, 'yyyy-MM-dd');
-    this.onChange(date.getTime());
-    this._inputEle.value = `${value ?? ''}`;
-  };
 
   private _onFocus = () => {
     if (
@@ -106,9 +88,9 @@ export class DateCellEditing extends BaseCellRenderer<number> {
       abortController,
       closeOnClickAway: true,
       computePosition: {
-        referenceElement: this._inputEle,
-        placement: 'bottom',
         middleware: [offset(10), flip()],
+        placement: 'bottom',
+        referenceElement: this._inputEle,
       },
       template: () => {
         const datePicker = new DatePicker();
@@ -128,19 +110,34 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     root.style.zIndex = '1002';
   };
 
+  private _prevPortalAbortController: AbortController | null = null;
+
+  private _setValue = (str: string = this._inputEle.value) => {
+    if (str === '') {
+      this.onChange(undefined);
+      this._inputEle.value = '';
+      return;
+    }
+
+    const date = new Date(str);
+    const value = format(date, 'yyyy-MM-dd');
+    this.onChange(date.getTime());
+    this._inputEle.value = `${value ?? ''}`;
+  };
+
   private _onInput(e: InputEvent) {
     if (!this._datePicker) return;
     const v = (e.target as HTMLInputElement).value;
     this._datePicker.value = v ? new Date(v).getTime() : undefined;
   }
 
+  override firstUpdated() {
+    this._inputEle.focus();
+  }
+
   override onExitEditMode() {
     this._setValue();
     this._prevPortalAbortController?.abort();
-  }
-
-  override firstUpdated() {
-    this._inputEle.focus();
   }
 
   override render() {
@@ -153,12 +150,15 @@ export class DateCellEditing extends BaseCellRenderer<number> {
       @input=${this._onInput}
     />`;
   }
+
+  @query('input')
+  private accessor _inputEle!: HTMLInputElement;
 }
 
 export const dateColumnConfig = dateColumnModelConfig.renderConfig({
-  icon: createIcon('DateTime'),
   cellRenderer: {
-    view: createFromBaseCellRenderer(DateCell),
     edit: createFromBaseCellRenderer(DateCellEditing),
+    view: createFromBaseCellRenderer(DateCell),
   },
+  icon: createIcon('DateTime'),
 });

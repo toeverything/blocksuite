@@ -16,6 +16,6 @@ export interface BlockSpec<
 > {
   schema: BlockSchemaType;
   service?: BlockServiceConstructor<Service>;
-  view: BlockView<WidgetNames>;
   setup?: (slots: BlockSpecSlots, disposableGroup: DisposableGroup) => void;
+  view: BlockView<WidgetNames>;
 }

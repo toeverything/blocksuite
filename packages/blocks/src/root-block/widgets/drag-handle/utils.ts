@@ -1,17 +1,23 @@
 import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import {
   type BaseSelection,
   PathFinder,
   type PointerEventState,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
+
+import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../../_common/consts.js';
 import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
   type BlockComponent,
   type EmbedCardStyle,
+  Point,
+  Rect,
   findClosestBlockElement,
   getClosestBlockElementByElement,
   getClosestBlockElementByPoint,
@@ -20,12 +26,8 @@ import {
   getRectByBlockElement,
   isInsidePageEditor,
   matchFlavours,
-  Point,
-  Rect,
 } from '../../../_common/utils/index.js';
-import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
   DRAG_HANDLE_CONTAINER_HEIGHT,
@@ -39,18 +41,18 @@ import {
 } from './config.js';
 
 const heightMap: Record<string, number> = {
-  text: 23,
+  database: 28,
+  divider: 36,
   h1: 40,
   h2: 36,
   h3: 32,
   h4: 32,
   h5: 28,
   h6: 26,
-  quote: 46,
-  list: 24,
-  database: 28,
   image: 28,
-  divider: 36,
+  list: 24,
+  quote: 46,
+  text: 23,
 };
 
 export const getDragHandleContainerHeight = (model: BlockModel) => {
@@ -112,8 +114,8 @@ export const includeTextSelection = (selections: BaseSelection[]) => {
  * Check if the path of two blocks are equal
  */
 export const isBlockPathEqual = (
-  path1: string | null | undefined,
-  path2: string | null | undefined
+  path1: null | string | undefined,
+  path2: null | string | undefined
 ) => {
   if (!path1 || !path2) {
     return false;
@@ -216,7 +218,7 @@ export function calcDropTarget(
    */
   allowSublist: boolean = true
 ): DropResult | null {
-  let type: DropType | 'none' = 'none';
+  let type: 'none' | DropType = 'none';
   const height = 3 * scale;
   const { rect: domRect } = getDropRectByPoint(point, model, element);
 
@@ -307,9 +309,9 @@ export function calcDropTarget(
   }
 
   return {
-    rect: Rect.fromLWTH(domRect.left, domRect.width, top - height / 2, height),
     dropBlockId: model.id,
     dropType: type,
+    rect: Rect.fromLWTH(domRect.left, domRect.width, top - height / 2, height),
   };
 }
 
@@ -363,27 +365,27 @@ export function updateDragHandleClassName(blockElements: BlockElement[] = []) {
 
 export function getDuplicateBlocks(blocks: BlockModel[]) {
   const duplicateBlocks = blocks.map(block => ({
-    flavour: block.flavour,
     blockProps: getBlockProps(block),
+    flavour: block.flavour,
   }));
   return duplicateBlocks;
 }
 
 export function convertDragPreviewDocToEdgeless({
   blockComponent,
-  dragPreview,
   cssSelector,
-  width,
+  dragPreview,
   height,
   noteScale,
   state,
-}: OnDragEndProps & {
+  width,
+}: {
   blockComponent: BlockElement;
   cssSelector: string;
-  width?: number;
   height?: number;
   style?: EmbedCardStyle;
-}): boolean {
+  width?: number;
+} & OnDragEndProps): boolean {
   const edgelessRoot = blockComponent.closest(
     'affine-edgeless-root'
   ) as EdgelessRootBlockComponent;
@@ -452,8 +454,8 @@ export function convertDragPreviewDocToEdgeless({
   }
 
   edgelessRoot.service.selection.set({
-    elements: [blockId],
     editing: false,
+    elements: [blockId],
   });
 
   return true;
@@ -465,10 +467,10 @@ export function convertDragPreviewEdgelessToDoc({
   dropType,
   state,
   style,
-}: OnDragEndProps & {
+}: {
   blockComponent: BlockElement;
   style?: EmbedCardStyle;
-}): boolean {
+} & OnDragEndProps): boolean {
   const doc = blockComponent.doc;
   const host = blockComponent.host;
   const targetBlock = doc.getBlockById(dropBlockId);
@@ -484,7 +486,7 @@ export function convertDragPreviewEdgelessToDoc({
 
   const blockModel = blockComponent.model;
 
-  const { width, height, xywh, rotate, zIndex, ...blockProps } =
+  const { height, rotate, width, xywh, zIndex, ...blockProps } =
     getBlockProps(blockModel);
   if (style) {
     blockProps.style = style;

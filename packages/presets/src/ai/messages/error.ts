@@ -1,5 +1,5 @@
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
-import { html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { ErrorTipIcon } from '../_common/icons.js';
@@ -7,9 +7,6 @@ import { AIProvider } from '../provider.js';
 
 @customElement('ai-error-wrapper')
 class AIErrorWrapper extends WithDisposable(LitElement) {
-  @property({ attribute: false })
-  accessor text!: TemplateResult<1>;
-
   protected override render() {
     return html` <style>
         .answer-tip {
@@ -58,6 +55,9 @@ class AIErrorWrapper extends WithDisposable(LitElement) {
         <slot></slot>
       </div>`;
   }
+
+  @property({ attribute: false })
+  accessor text!: TemplateResult<1>;
 }
 
 export const PaymentRequiredErrorRenderer = (host: EditorHost) => html`

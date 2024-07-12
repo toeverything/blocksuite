@@ -1,21 +1,23 @@
+import type { UserInfo } from '@blocksuite/store';
+
 import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { UserInfo } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
+import type { RootBlockModel } from '../../root-model.js';
+
 import { RemoteCursor } from '../../../_common/icons/edgeless.js';
 import { requestThrottledConnectFrame } from '../../../_common/utils/event.js';
 import { pickValues } from '../../../_common/utils/iterable.js';
-import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
 import {
   getSelectedRect,
   isTopLevelBlock,
 } from '../../../root-block/edgeless/utils/query.js';
 import { RemoteColorManager } from '../../../root-block/remote-color-manager/remote-color-manager.js';
-import type { RootBlockModel } from '../../root-model.js';
 
 export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
   'affine-edgeless-remote-selection-widget';
@@ -25,18 +27,6 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
-  get edgeless() {
-    return this.blockElement;
-  }
-
-  get selection() {
-    return this.edgeless.service.selection;
-  }
-
-  get surface() {
-    return this.edgeless.surface;
-  }
-
   static override styles = css`
     :host {
       pointer-events: none;
@@ -93,42 +83,35 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
     }
   `;
 
-  @state()
-  private accessor _remoteRects: Map<
-    number,
-    {
-      width: number;
-      height: number;
-      borderStyle: string;
-      left: number;
-      top: number;
-      rotate: number;
-    }
-  > = new Map();
-
-  @state()
-  private accessor _remoteCursors: Map<
-    number,
-    {
-      x: number;
-      y: number;
-      user?: UserInfo | undefined;
-    }
-  > = new Map();
-
   private _remoteColorManager: RemoteColorManager | null = null;
 
-  private _updateTransform = requestThrottledConnectFrame(() => {
-    const { translateX, translateY } = this.edgeless.service.viewport;
+  private _updateOnElementChange = (element: { id: string } | string) => {
+    const id = typeof element === 'string' ? element : element.id;
 
-    this.style.setProperty(
-      'transform',
-      `translate(${translateX}px, ${translateY}px)`
+    if (this.isConnected && this.selection.hasRemote(id))
+      this._updateRemoteRects();
+  };
+
+  private _updateRemoteCursor = () => {
+    const remoteCursors: EdgelessRemoteSelectionWidget['_remoteCursors'] =
+      new Map();
+    const status = this.doc.awarenessStore.getStates();
+
+    this.selection.remoteCursorSelectionMap.forEach(
+      (cursorSelection, clientId) => {
+        remoteCursors.set(clientId, {
+          user: status.get(clientId)?.user,
+          x: cursorSelection.x,
+          y: cursorSelection.y,
+        });
+      }
     );
-  }, this);
+
+    this._remoteCursors = remoteCursors;
+  };
 
   private _updateRemoteRects = () => {
-    const { selection, blockElement } = this;
+    const { blockElement, selection } = this;
     const remoteSelectionsMap = selection.remoteSurfaceSelectionsMap;
     const remoteRects: EdgelessRemoteSelectionWidget['_remoteRects'] =
       new Map();
@@ -156,12 +139,12 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
         }
 
         remoteRects.set(clientId, {
-          width,
-          height,
           borderStyle: 'solid',
+          height,
           left,
-          top,
           rotate,
+          top,
+          width,
         });
       });
     });
@@ -169,30 +152,14 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
     this._remoteRects = remoteRects;
   };
 
-  private _updateRemoteCursor = () => {
-    const remoteCursors: EdgelessRemoteSelectionWidget['_remoteCursors'] =
-      new Map();
-    const status = this.doc.awarenessStore.getStates();
+  private _updateTransform = requestThrottledConnectFrame(() => {
+    const { translateX, translateY } = this.edgeless.service.viewport;
 
-    this.selection.remoteCursorSelectionMap.forEach(
-      (cursorSelection, clientId) => {
-        remoteCursors.set(clientId, {
-          x: cursorSelection.x,
-          y: cursorSelection.y,
-          user: status.get(clientId)?.user,
-        });
-      }
+    this.style.setProperty(
+      'transform',
+      `translate(${translateX}px, ${translateY}px)`
     );
-
-    this._remoteCursors = remoteCursors;
-  };
-
-  private _updateOnElementChange = (element: string | { id: string }) => {
-    const id = typeof element === 'string' ? element : element.id;
-
-    if (this.isConnected && this.selection.hasRemote(id))
-      this._updateRemoteRects();
-  };
+  }, this);
 
   override connectedCallback() {
     super.connectedCallback();
@@ -229,7 +196,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
   }
 
   override render() {
-    const { _remoteRects, _remoteCursors, _remoteColorManager } = this;
+    const { _remoteColorManager, _remoteCursors, _remoteRects } = this;
     assertExists(_remoteColorManager);
     const { zoom } = this.edgeless.service.viewport;
 
@@ -241,14 +208,14 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
           data-client-id=${id}
           class="remote-rect"
           style=${styleMap({
-            pointerEvents: 'none',
-            width: `${zoom * rect.width}px`,
-            height: `${zoom * rect.height}px`,
-            borderStyle: rect.borderStyle,
             borderColor: _remoteColorManager.get(id),
+            borderStyle: rect.borderStyle,
+            height: `${zoom * rect.height}px`,
+            pointerEvents: 'none',
             transform: `translate(${zoom * rect.left}px, ${
               zoom * rect.top
             }px) rotate(${rect.rotate}deg)`,
+            width: `${zoom * rect.width}px`,
           })}
         ></div>`
     );
@@ -261,9 +228,9 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
           data-client-id=${id}
           class="remote-cursor"
           style=${styleMap({
+            color: _remoteColorManager.get(id),
             pointerEvents: 'none',
             transform: `translate(${zoom * cursor.x}px, ${zoom * cursor.y}px)`,
-            color: _remoteColorManager.get(id),
           })}
         >
           ${RemoteCursor}
@@ -283,6 +250,41 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
       <div class="affine-edgeless-remote-selection">${rects}${cursors}</div>
     `;
   }
+
+  get edgeless() {
+    return this.blockElement;
+  }
+
+  get selection() {
+    return this.edgeless.service.selection;
+  }
+
+  get surface() {
+    return this.edgeless.surface;
+  }
+
+  @state()
+  private accessor _remoteCursors: Map<
+    number,
+    {
+      user?: UserInfo | undefined;
+      x: number;
+      y: number;
+    }
+  > = new Map();
+
+  @state()
+  private accessor _remoteRects: Map<
+    number,
+    {
+      borderStyle: string;
+      height: number;
+      left: number;
+      rotate: number;
+      top: number;
+      width: number;
+    }
+  > = new Map();
 }
 
 declare global {

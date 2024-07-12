@@ -1,6 +1,34 @@
 import type { TemplateResult } from 'lit';
 
 export interface NotificationService {
+  confirm(options: {
+    abort?: AbortSignal;
+    cancelText?: string;
+    confirmText?: string;
+    message: TemplateResult | string;
+    title: TemplateResult | string;
+  }): Promise<boolean>;
+  notify(options: {
+    abort?: AbortSignal;
+    accent?: 'error' | 'info' | 'success' | 'warning';
+    action?: {
+      label: TemplateResult | string;
+      onClick: () => void;
+    };
+    duration?: number; // unit ms, give 0 to disable auto dismiss
+    message?: TemplateResult | string;
+    onClose: () => void;
+    title: TemplateResult | string;
+  }): void;
+  prompt(options: {
+    abort?: AbortSignal;
+    autofill?: string;
+    cancelText?: string;
+    confirmText?: string;
+    message: TemplateResult | string;
+    placeholder?: string;
+    title: TemplateResult | string;
+  }): Promise<null | string>; // when cancel, return null
   toast(
     message: string,
     options?: {
@@ -8,32 +36,4 @@ export interface NotificationService {
       portal?: HTMLElement;
     }
   ): void;
-  confirm(options: {
-    title: string | TemplateResult;
-    message: string | TemplateResult;
-    confirmText?: string;
-    cancelText?: string;
-    abort?: AbortSignal;
-  }): Promise<boolean>;
-  prompt(options: {
-    title: string | TemplateResult;
-    message: string | TemplateResult;
-    autofill?: string;
-    placeholder?: string;
-    confirmText?: string;
-    cancelText?: string;
-    abort?: AbortSignal;
-  }): Promise<string | null>; // when cancel, return null
-  notify(options: {
-    title: string | TemplateResult;
-    message?: string | TemplateResult;
-    accent?: 'info' | 'success' | 'warning' | 'error';
-    duration?: number; // unit ms, give 0 to disable auto dismiss
-    abort?: AbortSignal;
-    action?: {
-      label: string | TemplateResult;
-      onClick: () => void;
-    };
-    onClose: () => void;
-  }): void;
 }

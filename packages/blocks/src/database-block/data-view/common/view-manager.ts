@@ -1,6 +1,7 @@
 import type { ColumnMeta } from '../column/column-config.js';
-import { groupByMatcher } from './group-by/matcher.js';
 import type { GroupBy } from './types.js';
+
+import { groupByMatcher } from './group-by/matcher.js';
 
 export const defaultGroupBy = (
   columnMeta: ColumnMeta,
@@ -10,9 +11,9 @@ export const defaultGroupBy = (
   const name = groupByMatcher.match(columnMeta.model.dataType(data))?.name;
   return name != null
     ? {
-        type: 'groupBy',
         columnId: columnId,
         name: name,
+        type: 'groupBy',
       }
     : undefined;
 };

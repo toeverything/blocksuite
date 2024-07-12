@@ -1,4 +1,4 @@
-export function loadingSort<T extends { id: string; deps: string[] }>(
+export function loadingSort<T extends { deps: string[]; id: string }>(
   elements: T[]
 ) {
   const graph = new Map<string, string[]>();

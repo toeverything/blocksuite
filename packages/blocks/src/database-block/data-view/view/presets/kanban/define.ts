@@ -1,5 +1,6 @@
 import type { FilterGroup } from '../../../common/ast.js';
 import type { GroupBy, GroupProperty, Sort } from '../../../common/types.js';
+
 import { type BasicViewDataType, viewType } from '../../data-view.js';
 import { DataViewKanbanManager } from './kanban-view-manager.js';
 
@@ -11,27 +12,27 @@ declare global {
   }
 }
 export type KanbanViewColumn = {
-  id: string;
   hide?: boolean;
+  id: string;
 };
 
 type DataType = {
   columns: KanbanViewColumn[];
   filter: FilterGroup;
   groupBy?: GroupBy;
-  sort?: Sort;
-  header: {
-    titleColumn?: string;
-    iconColumn?: string;
-    coverColumn?: string;
-  };
   groupProperties: GroupProperty[];
+  header: {
+    coverColumn?: string;
+    iconColumn?: string;
+    titleColumn?: string;
+  };
+  sort?: Sort;
 };
 export type KanbanViewData = BasicViewDataType<
   typeof kanbanViewType.type,
   DataType
 >;
 export const kanbanViewModel = kanbanViewType.modelConfig<KanbanViewData>({
-  defaultName: 'Kanban View',
   dataViewManager: DataViewKanbanManager,
+  defaultName: 'Kanban View',
 });

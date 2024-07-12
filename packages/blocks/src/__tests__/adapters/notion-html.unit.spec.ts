@@ -21,21 +21,11 @@ describe('notion html to snapshot', () => {
   </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:code',
+          id: 'matchesReplaceMap[1]',
           props: {
             language: 'Plain Text',
             text: {
@@ -48,9 +38,19 @@ describe('notion html to snapshot', () => {
               ],
             },
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -76,55 +76,16 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:paragraph',
-          props: {
-            type: 'text',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'aaa',
-                },
-              ],
-            },
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[2]',
-              flavour: 'affine:paragraph',
-              props: {
-                type: 'text',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'bbb',
-                    },
-                  ],
-                },
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'matchesReplaceMap[3]',
+                  children: [],
                   flavour: 'affine:paragraph',
+                  id: 'matchesReplaceMap[3]',
                   props: {
-                    type: 'text',
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -133,17 +94,31 @@ describe('notion html to snapshot', () => {
                         },
                       ],
                     },
+                    type: 'text',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[2]',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'bbb',
+                    },
+                  ],
+                },
+                type: 'text',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'matchesReplaceMap[4]',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[4]',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -152,17 +127,31 @@ describe('notion html to snapshot', () => {
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
+          props: {
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+            type: 'text',
+          },
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[5]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[5]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -171,10 +160,21 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
     const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
@@ -191,23 +191,12 @@ describe('notion html to snapshot', () => {
       </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'h1',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -216,15 +205,15 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
+            type: 'h1',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[2]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[2]',
           props: {
-            type: 'h2',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -233,15 +222,15 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
+            type: 'h2',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[3]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[3]',
           props: {
-            type: 'h3',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -250,10 +239,21 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
+            type: 'h3',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -359,59 +359,18 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:list',
-          props: {
-            type: 'bulleted',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'aaa',
-                },
-              ],
-            },
-            checked: false,
-            collapsed: false,
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[2]',
-              flavour: 'affine:list',
-              props: {
-                type: 'bulleted',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'bbb',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'matchesReplaceMap[3]',
+                  children: [],
                   flavour: 'affine:list',
+                  id: 'matchesReplaceMap[3]',
                   props: {
-                    type: 'bulleted',
+                    checked: false,
+                    collapsed: false,
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -420,77 +379,16 @@ describe('notion html to snapshot', () => {
                         },
                       ],
                     },
-                    checked: false,
-                    collapsed: false,
+                    type: 'bulleted',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
-            },
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[4]',
               flavour: 'affine:list',
+              id: 'matchesReplaceMap[2]',
               props: {
-                type: 'bulleted',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'ddd',
-                    },
-                  ],
-                },
                 checked: false,
                 collapsed: false,
-              },
-              children: [],
-            },
-          ],
-        },
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[5]',
-          flavour: 'affine:list',
-          props: {
-            type: 'bulleted',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'eee',
-                },
-              ],
-            },
-            checked: false,
-            collapsed: false,
-          },
-          children: [],
-        },
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[6]',
-          flavour: 'affine:list',
-          props: {
-            type: 'todo',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'aaa',
-                },
-              ],
-            },
-            checked: false,
-            collapsed: false,
-          },
-          children: [
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[7]',
-              flavour: 'affine:list',
-              props: {
-                type: 'todo',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -499,37 +397,114 @@ describe('notion html to snapshot', () => {
                     },
                   ],
                 },
+                type: 'bulleted',
+              },
+              type: 'block',
+            },
+            {
+              children: [],
+              flavour: 'affine:list',
+              id: 'matchesReplaceMap[4]',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'ddd',
+                    },
+                  ],
+                },
+                type: 'bulleted',
+              },
+              type: 'block',
+            },
+          ],
+          flavour: 'affine:list',
+          id: 'matchesReplaceMap[1]',
+          props: {
+            checked: false,
+            collapsed: false,
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+            type: 'bulleted',
+          },
+          type: 'block',
+        },
+        {
+          children: [],
+          flavour: 'affine:list',
+          id: 'matchesReplaceMap[5]',
+          props: {
+            checked: false,
+            collapsed: false,
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'eee',
+                },
+              ],
+            },
+            type: 'bulleted',
+          },
+          type: 'block',
+        },
+        {
+          children: [
+            {
+              children: [
+                {
+                  children: [],
+                  flavour: 'affine:list',
+                  id: 'matchesReplaceMap[8]',
+                  props: {
+                    checked: false,
+                    collapsed: false,
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ccc',
+                        },
+                      ],
+                    },
+                    type: 'todo',
+                  },
+                  type: 'block',
+                },
+              ],
+              flavour: 'affine:list',
+              id: 'matchesReplaceMap[7]',
+              props: {
                 checked: true,
                 collapsed: false,
-              },
-              children: [
-                {
-                  type: 'block',
-                  id: 'matchesReplaceMap[8]',
-                  flavour: 'affine:list',
-                  props: {
-                    type: 'todo',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'ccc',
-                        },
-                      ],
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'bbb',
                     },
-                    checked: false,
-                    collapsed: false,
-                  },
-                  children: [],
+                  ],
                 },
-              ],
+                type: 'todo',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'matchesReplaceMap[9]',
+              children: [],
               flavour: 'affine:list',
+              id: 'matchesReplaceMap[9]',
               props: {
-                type: 'todo',
+                checked: false,
+                collapsed: false,
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -538,116 +513,35 @@ describe('notion html to snapshot', () => {
                     },
                   ],
                 },
-                checked: false,
-                collapsed: false,
+                type: 'todo',
               },
-              children: [],
+              type: 'block',
             },
           ],
-        },
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[10]',
           flavour: 'affine:list',
+          id: 'matchesReplaceMap[6]',
           props: {
-            type: 'todo',
+            checked: false,
+            collapsed: false,
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
                 {
-                  insert: 'eee',
+                  insert: 'aaa',
                 },
               ],
             },
+            type: 'todo',
+          },
+          type: 'block',
+        },
+        {
+          children: [],
+          flavour: 'affine:list',
+          id: 'matchesReplaceMap[10]',
+          props: {
             checked: true,
             collapsed: false,
-          },
-          children: [],
-        },
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[11]',
-          flavour: 'affine:list',
-          props: {
-            type: 'numbered',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'aaa',
-                },
-              ],
-            },
-            checked: false,
-            collapsed: false,
-          },
-          children: [
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[12]',
-              flavour: 'affine:list',
-              props: {
-                type: 'numbered',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'bbb',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
-              children: [
-                {
-                  type: 'block',
-                  id: 'matchesReplaceMap[13]',
-                  flavour: 'affine:list',
-                  props: {
-                    type: 'numbered',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'ccc',
-                        },
-                      ],
-                    },
-                    checked: false,
-                    collapsed: false,
-                  },
-                  children: [],
-                },
-              ],
-            },
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[14]',
-              flavour: 'affine:list',
-              props: {
-                type: 'numbered',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'ddd',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
-              children: [],
-            },
-          ],
-        },
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[15]',
-          flavour: 'affine:list',
-          props: {
-            type: 'numbered',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -656,53 +550,21 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
-            checked: false,
-            collapsed: false,
+            type: 'todo',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[16]',
-          flavour: 'affine:list',
-          props: {
-            type: 'toggle',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'aaa',
-                },
-              ],
-            },
-            checked: false,
-            collapsed: false,
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[17]',
-              flavour: 'affine:list',
-              props: {
-                type: 'toggle',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'bbb',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'matchesReplaceMap[18]',
+                  children: [],
                   flavour: 'affine:list',
+                  id: 'matchesReplaceMap[13]',
                   props: {
-                    type: 'toggle',
+                    checked: false,
+                    collapsed: false,
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -711,16 +573,95 @@ describe('notion html to snapshot', () => {
                         },
                       ],
                     },
-                    checked: false,
-                    collapsed: false,
+                    type: 'numbered',
                   },
+                  type: 'block',
+                },
+              ],
+              flavour: 'affine:list',
+              id: 'matchesReplaceMap[12]',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'bbb',
+                    },
+                  ],
+                },
+                type: 'numbered',
+              },
+              type: 'block',
+            },
+            {
+              children: [],
+              flavour: 'affine:list',
+              id: 'matchesReplaceMap[14]',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'ddd',
+                    },
+                  ],
+                },
+                type: 'numbered',
+              },
+              type: 'block',
+            },
+          ],
+          flavour: 'affine:list',
+          id: 'matchesReplaceMap[11]',
+          props: {
+            checked: false,
+            collapsed: false,
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+            type: 'numbered',
+          },
+          type: 'block',
+        },
+        {
+          children: [],
+          flavour: 'affine:list',
+          id: 'matchesReplaceMap[15]',
+          props: {
+            checked: false,
+            collapsed: false,
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'eee',
+                },
+              ],
+            },
+            type: 'numbered',
+          },
+          type: 'block',
+        },
+        {
+          children: [
+            {
+              children: [
+                {
                   children: [
                     {
-                      type: 'block',
-                      id: 'matchesReplaceMap[19]',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'matchesReplaceMap[19]',
                       props: {
-                        type: 'text',
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -729,17 +670,33 @@ describe('notion html to snapshot', () => {
                             },
                           ],
                         },
+                        type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                   ],
+                  flavour: 'affine:list',
+                  id: 'matchesReplaceMap[18]',
+                  props: {
+                    checked: false,
+                    collapsed: false,
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ccc',
+                        },
+                      ],
+                    },
+                    type: 'toggle',
+                  },
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'matchesReplaceMap[20]',
+                  children: [],
                   flavour: 'affine:paragraph',
+                  id: 'matchesReplaceMap[20]',
                   props: {
-                    type: 'text',
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -748,17 +705,33 @@ describe('notion html to snapshot', () => {
                         },
                       ],
                     },
+                    type: 'text',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:list',
+              id: 'matchesReplaceMap[17]',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'bbb',
+                    },
+                  ],
+                },
+                type: 'toggle',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'matchesReplaceMap[21]',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[21]',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -767,12 +740,39 @@ describe('notion html to snapshot', () => {
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:list',
+          id: 'matchesReplaceMap[16]',
+          props: {
+            checked: false,
+            collapsed: false,
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+            type: 'toggle',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -795,23 +795,12 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'quote',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -820,15 +809,15 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
+            type: 'quote',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[2]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[2]',
           props: {
-            type: 'quote',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -837,31 +826,17 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
+            type: 'quote',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[3]',
-          flavour: 'affine:paragraph',
-          props: {
-            type: 'quote',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'ccc',
-                },
-              ],
-            },
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[4]',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[4]',
               props: {
-                type: 'quote',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -870,12 +845,37 @@ describe('notion html to snapshot', () => {
                     },
                   ],
                 },
+                type: 'quote',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[3]',
+          props: {
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'ccc',
+                },
+              ],
+            },
+            type: 'quote',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -895,23 +895,12 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -920,10 +909,21 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -941,23 +941,12 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -966,22 +955,22 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
-          },
-          children: [],
-        },
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[2]',
-          flavour: 'affine:divider',
-          props: {},
-          children: [],
-        },
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[3]',
-          flavour: 'affine:paragraph',
-          props: {
             type: 'text',
+          },
+          type: 'block',
+        },
+        {
+          children: [],
+          flavour: 'affine:divider',
+          id: 'matchesReplaceMap[2]',
+          props: {},
+          type: 'block',
+        },
+        {
+          children: [],
+          flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[3]',
+          props: {
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -990,10 +979,21 @@ describe('notion html to snapshot', () => {
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -1010,38 +1010,38 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
                 {
-                  insert: 'Untitled',
                   attributes: {
                     link: 'https://www.notion.so/ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21',
                   },
+                  insert: 'Untitled',
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -1059,33 +1059,33 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:image',
+          id: 'matchesReplaceMap[1]',
           props: {
             sourceId: 'matchesReplaceMap[2]',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
-      file: html,
       assets: new AssetsManager({ blob: new MemoryBlobCRUD() }),
+      file: html,
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
@@ -1106,32 +1106,32 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:bookmark',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'card',
-            url: 'https://affine.pro/',
-            title: 'AFFiNE - All In One KnowledgeOS',
             description:
               'The universal editor that lets you work, play, present or create just about anything.',
             icon: 'https://affine.pro/favicon-96.png',
+            title: 'AFFiNE - All In One KnowledgeOS',
+            type: 'card',
+            url: 'https://affine.pro/',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -1150,30 +1150,30 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:attachment',
+          id: 'matchesReplaceMap[1]',
           props: {
             name: 'README.pdf',
             size: 0,
-            type: '',
             sourceId: 'matchesReplaceMap[2]',
+            type: '',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -1182,8 +1182,8 @@ describe('notion html to snapshot', () => {
     const assestsManager = new AssetsManager({ blob: blobCRUD });
     await assestsManager.readFromBlob(key);
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
-      file: html,
       assets: assestsManager,
+      file: html,
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
@@ -1267,112 +1267,73 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:database',
-          props: {
-            views: [
-              {
-                id: 'matchesReplaceMap[2]',
-                name: 'Table View',
-                mode: 'table',
-                columns: [],
-                filter: {
-                  type: 'group',
-                  op: 'and',
-                  conditions: [],
+          children: [
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[61]',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      attributes: {
+                        link: 'https://www.notion.so/https-affine-pro-ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21',
+                      },
+                      insert: 'https://affine.pro',
+                    },
+                  ],
                 },
-                header: {
-                  titleColumn: 'matchesReplaceMap[4]',
-                  iconColumn: 'type',
-                },
+                type: 'text',
               },
-            ],
-            title: {
-              '$blocksuite:internal:text$': true,
-              delta: [],
+              type: 'block',
             },
-            columns: [
-              {
-                type: 'title',
-                name: 'Name',
-                data: {},
-                id: 'matchesReplaceMap[4]',
-              },
-              {
-                type: 'multi-select',
-                name: 'Tags',
-                data: {
-                  options: [
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[62]',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
                     {
-                      id: 'matchesReplaceMap[51]',
-                      value: 'aaa',
-                      color: 'matchesReplaceMap[6]',
-                    },
-                    {
-                      id: 'matchesReplaceMap[37]',
-                      value: 'bbb',
-                      color: 'matchesReplaceMap[8]',
+                      attributes: {
+                        link: 'https://www.notion.so/ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21',
+                      },
+                      insert: 'Untitled',
                     },
                   ],
                 },
-                id: 'matchesReplaceMap[50]',
+                type: 'text',
               },
-              {
-                type: 'multi-select',
-                name: 'Multi-select',
-                data: {
-                  options: [
+              type: 'block',
+            },
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[63]',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
                     {
-                      id: 'matchesReplaceMap[40]',
-                      value: 'aaa',
-                      color: 'matchesReplaceMap[11]',
-                    },
-                    {
-                      id: 'matchesReplaceMap[54]',
-                      value: 'bbb',
-                      color: 'matchesReplaceMap[13]',
-                    },
-                    {
-                      id: 'matchesReplaceMap[41]',
-                      value: 'ccc',
-                      color: 'matchesReplaceMap[15]',
+                      attributes: {
+                        link: 'https://www.notion.so/ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21',
+                      },
+                      insert: 'Untitled',
                     },
                   ],
                 },
-                id: 'matchesReplaceMap[53]',
+                type: 'text',
               },
-              {
-                type: 'number',
-                name: 'Number',
-                data: {},
-                id: 'matchesReplaceMap[56]',
-              },
-              {
-                type: 'rich-text',
-                name: 'Status',
-                data: {},
-                id: 'matchesReplaceMap[58]',
-              },
-              {
-                type: 'checkbox',
-                name: 'Checkbox',
-                data: {},
-                id: 'matchesReplaceMap[60]',
-              },
-            ],
+              type: 'block',
+            },
+          ],
+          flavour: 'affine:database',
+          id: 'matchesReplaceMap[1]',
+          props: {
             cells: {
               'matchesReplaceMap[61]': {
                 'matchesReplaceMap[50]': {
@@ -1462,71 +1423,110 @@ describe('notion html to snapshot', () => {
                 },
               },
             },
+            columns: [
+              {
+                data: {},
+                id: 'matchesReplaceMap[4]',
+                name: 'Name',
+                type: 'title',
+              },
+              {
+                data: {
+                  options: [
+                    {
+                      color: 'matchesReplaceMap[6]',
+                      id: 'matchesReplaceMap[51]',
+                      value: 'aaa',
+                    },
+                    {
+                      color: 'matchesReplaceMap[8]',
+                      id: 'matchesReplaceMap[37]',
+                      value: 'bbb',
+                    },
+                  ],
+                },
+                id: 'matchesReplaceMap[50]',
+                name: 'Tags',
+                type: 'multi-select',
+              },
+              {
+                data: {
+                  options: [
+                    {
+                      color: 'matchesReplaceMap[11]',
+                      id: 'matchesReplaceMap[40]',
+                      value: 'aaa',
+                    },
+                    {
+                      color: 'matchesReplaceMap[13]',
+                      id: 'matchesReplaceMap[54]',
+                      value: 'bbb',
+                    },
+                    {
+                      color: 'matchesReplaceMap[15]',
+                      id: 'matchesReplaceMap[41]',
+                      value: 'ccc',
+                    },
+                  ],
+                },
+                id: 'matchesReplaceMap[53]',
+                name: 'Multi-select',
+                type: 'multi-select',
+              },
+              {
+                data: {},
+                id: 'matchesReplaceMap[56]',
+                name: 'Number',
+                type: 'number',
+              },
+              {
+                data: {},
+                id: 'matchesReplaceMap[58]',
+                name: 'Status',
+                type: 'rich-text',
+              },
+              {
+                data: {},
+                id: 'matchesReplaceMap[60]',
+                name: 'Checkbox',
+                type: 'checkbox',
+              },
+            ],
+            title: {
+              '$blocksuite:internal:text$': true,
+              delta: [],
+            },
+            views: [
+              {
+                columns: [],
+                filter: {
+                  conditions: [],
+                  op: 'and',
+                  type: 'group',
+                },
+                header: {
+                  iconColumn: 'type',
+                  titleColumn: 'matchesReplaceMap[4]',
+                },
+                id: 'matchesReplaceMap[2]',
+                mode: 'table',
+                name: 'Table View',
+              },
+            ],
           },
-          children: [
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[61]',
-              flavour: 'affine:paragraph',
-              props: {
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'https://affine.pro',
-                      attributes: {
-                        link: 'https://www.notion.so/https-affine-pro-ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21',
-                      },
-                    },
-                  ],
-                },
-                type: 'text',
-              },
-              children: [],
-            },
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[62]',
-              flavour: 'affine:paragraph',
-              props: {
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'Untitled',
-                      attributes: {
-                        link: 'https://www.notion.so/ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21',
-                      },
-                    },
-                  ],
-                },
-                type: 'text',
-              },
-              children: [],
-            },
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[63]',
-              flavour: 'affine:paragraph',
-              props: {
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'Untitled',
-                      attributes: {
-                        link: 'https://www.notion.so/ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21',
-                      },
-                    },
-                  ],
-                },
-                type: 'text',
-              },
-              children: [],
-            },
-          ],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());
@@ -1542,57 +1542,73 @@ describe('notion html to snapshot', () => {
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: 'both',
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:database',
-          props: {
-            views: [
-              {
-                id: 'matchesReplaceMap[2]',
-                name: 'Table View',
-                mode: 'table',
-                columns: [],
-                filter: {
-                  type: 'group',
-                  op: 'and',
-                  conditions: [],
+          children: [
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[20]',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aa',
+                    },
+                  ],
                 },
-                header: {
-                  titleColumn: '',
-                  iconColumn: 'type',
-                },
+                type: 'text',
               },
-            ],
-            title: {
-              '$blocksuite:internal:text$': true,
-              delta: [],
+              type: 'block',
             },
-            columns: [
-              {
-                type: 'rich-text',
-                name: '',
-                data: {},
-                id: 'matchesReplaceMap[17]',
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[21]',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aa',
+                    },
+                  ],
+                },
+                type: 'text',
               },
-              {
-                type: 'rich-text',
-                name: '',
-                data: {},
-                id: 'matchesReplaceMap[19]',
+              type: 'block',
+            },
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[22]',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+                type: 'text',
               },
-            ],
+              type: 'block',
+            },
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[23]',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+                type: 'text',
+              },
+              type: 'block',
+            },
+          ],
+          flavour: 'affine:database',
+          id: 'matchesReplaceMap[1]',
+          props: {
             cells: {
               'matchesReplaceMap[20]': {
                 'matchesReplaceMap[17]': {
@@ -1651,71 +1667,55 @@ describe('notion html to snapshot', () => {
                 },
               },
             },
+            columns: [
+              {
+                data: {},
+                id: 'matchesReplaceMap[17]',
+                name: '',
+                type: 'rich-text',
+              },
+              {
+                data: {},
+                id: 'matchesReplaceMap[19]',
+                name: '',
+                type: 'rich-text',
+              },
+            ],
+            title: {
+              '$blocksuite:internal:text$': true,
+              delta: [],
+            },
+            views: [
+              {
+                columns: [],
+                filter: {
+                  conditions: [],
+                  op: 'and',
+                  type: 'group',
+                },
+                header: {
+                  iconColumn: 'type',
+                  titleColumn: '',
+                },
+                id: 'matchesReplaceMap[2]',
+                mode: 'table',
+                name: 'Table View',
+              },
+            ],
           },
-          children: [
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[20]',
-              flavour: 'affine:paragraph',
-              props: {
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'aa',
-                    },
-                  ],
-                },
-                type: 'text',
-              },
-              children: [],
-            },
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[21]',
-              flavour: 'affine:paragraph',
-              props: {
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'aa',
-                    },
-                  ],
-                },
-                type: 'text',
-              },
-              children: [],
-            },
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[22]',
-              flavour: 'affine:paragraph',
-              props: {
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [],
-                },
-                type: 'text',
-              },
-              children: [],
-            },
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[23]',
-              flavour: 'affine:paragraph',
-              props: {
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [],
-                },
-                type: 'text',
-              },
-              children: [],
-            },
-          ],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: 'both',
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const adapter = new NotionHtmlAdapter(createJob());

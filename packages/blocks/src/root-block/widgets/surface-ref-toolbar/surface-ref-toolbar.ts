@@ -4,6 +4,11 @@ import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type {
+  SurfaceRefBlockComponent,
+  SurfaceRefBlockModel,
+} from '../../../surface-ref-block/index.js';
+
 import { HoverController } from '../../../_common/components/hover/controller.js';
 import { isPeekable, peek } from '../../../_common/components/peekable.js';
 import { toast } from '../../../_common/components/toast.js';
@@ -17,10 +22,6 @@ import {
   DownloadIcon,
 } from '../../../_common/icons/text.js';
 import { downloadBlob } from '../../../_common/utils/filesys.js';
-import type {
-  SurfaceRefBlockComponent,
-  SurfaceRefBlockModel,
-} from '../../../surface-ref-block/index.js';
 import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
 
 export const AFFINE_SURFACE_REF_TOOLBAR = 'affine-surface-ref-toolbar';
@@ -54,30 +55,30 @@ export class AffineSurfaceRefToolbar extends WidgetElement<
       }
 
       return {
-        template: SurfaceRefToolbarOptions({
-          blockElement: this.blockElement,
-          model: this.blockElement.model,
-          abortController,
-        }),
         computePosition: {
-          referenceElement: this.blockElement,
-          placement: 'top-start',
+          autoUpdate: true,
           middleware: [
             offset({
-              mainAxis: 12,
               crossAxis: 10,
+              mainAxis: 12,
             }),
             shift({
               crossAxis: true,
               padding: {
-                top: PAGE_HEADER_HEIGHT + 12,
                 bottom: 12,
                 right: 12,
+                top: PAGE_HEADER_HEIGHT + 12,
               },
             }),
           ],
-          autoUpdate: true,
+          placement: 'top-start',
+          referenceElement: this.blockElement,
         },
+        template: SurfaceRefToolbarOptions({
+          abortController,
+          blockElement: this.blockElement,
+          model: this.blockElement.model,
+        }),
       };
     }
   );
@@ -96,11 +97,11 @@ declare global {
 }
 
 function SurfaceRefToolbarOptions(options: {
+  abortController: AbortController;
   blockElement: SurfaceRefBlockComponent;
   model: SurfaceRefBlockModel;
-  abortController: AbortController;
 }) {
-  const { blockElement, model, abortController } = options;
+  const { abortController, blockElement, model } = options;
   const readonly = model.doc.readonly;
   const hasValidReference = !!blockElement.referenceModel;
 
@@ -184,10 +185,10 @@ function SurfaceRefToolbarOptions(options: {
           if (!referencedModel) return;
 
           edgelessToBlob(blockElement.host, {
+            blockContainer: blockElement.portal,
+            edgelessElement: referencedModel,
             surfaceRefBlock: blockElement,
             surfaceRenderer: blockElement.surfaceRenderer,
-            edgelessElement: referencedModel,
-            blockContainer: blockElement.portal,
           })
             .then(blob => {
               const fileName =
@@ -227,11 +228,11 @@ function SurfaceRefToolbarOptions(options: {
         ?hidden=${!hasValidReference}
         @click=${() => {
           edgelessToBlob(blockElement.host, {
-            surfaceRefBlock: blockElement,
-            surfaceRenderer: blockElement.surfaceRenderer,
+            blockContainer: blockElement.portal,
             edgelessElement:
               blockElement.referenceModel as BlockSuite.EdgelessModelType,
-            blockContainer: blockElement.portal,
+            surfaceRefBlock: blockElement,
+            surfaceRenderer: blockElement.surfaceRenderer,
           })
             .then(blob => {
               return writeImageBlobToClipboard(blob);

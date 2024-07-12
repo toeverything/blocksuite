@@ -26,7 +26,7 @@ export function BlockHubCards(
     >
       <div class="block-hub-cards-title-container">${title}</div>
       ${blockHubItems.map(
-        ({ flavour, type, name, description, icon, tooltip }, index) => {
+        ({ description, flavour, icon, name, tooltip, type }, index) => {
           return html`
             <div class="card-container-wrapper">
               <div class="card-container-inner">

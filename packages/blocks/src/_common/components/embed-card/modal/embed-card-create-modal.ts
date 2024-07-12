@@ -1,16 +1,18 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless/edgeless-root-block.js';
+import type { EmbedCardStyle } from '../../../types.js';
+
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { Vec } from '../../../../surface-block/utils/vec.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
-import type { EmbedCardStyle } from '../../../types.js';
 import { getRootByEditorHost } from '../../../utils/query.js';
 import { isValidUrl } from '../../../utils/url.js';
 import { toast } from '../../toast.js';
@@ -20,48 +22,8 @@ import { embedCardModalStyles } from './styles.js';
 export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
-  @state()
-  private accessor _linkInputValue = '';
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor titleText!: string;
-
-  @property({ attribute: false })
-  accessor descriptionText!: string;
-
-  @property({ attribute: false })
-  accessor createOptions!:
-    | {
-        mode: 'page';
-        parentModel: BlockModel | string;
-        index?: number;
-      }
-    | {
-        mode: 'edgeless';
-      };
-
-  @property({ attribute: false })
-  accessor onConfirm!: () => void;
-
-  @query('input')
-  accessor input!: HTMLInputElement;
-
-  private _handleInput(e: InputEvent) {
-    const target = e.target as HTMLInputElement;
-    this._linkInputValue = target.value;
-  }
-
-  private _onDocumentKeydown = (e: KeyboardEvent) => {
-    e.stopPropagation();
-    if (e.key === 'Enter' && !e.isComposing) {
-      this._onConfirm();
-    }
-    if (e.key === 'Escape') {
-      this.remove();
-    }
+  private _onCancel = () => {
+    this.remove();
   };
 
   private _onConfirm = () => {
@@ -78,7 +40,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
 
     const { mode } = this.createOptions;
     if (mode === 'page') {
-      const { parentModel, index } = this.createOptions;
+      const { index, parentModel } = this.createOptions;
       let flavour = 'affine:bookmark';
 
       if (embedOptions) {
@@ -112,13 +74,13 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       edgelessRoot.service.addBlock(
         flavour,
         {
+          style: targetStyle,
           url,
           xywh: Bound.fromCenter(
             center,
             EMBED_CARD_WIDTH[targetStyle],
             EMBED_CARD_HEIGHT[targetStyle]
           ).serialize(),
-          style: targetStyle,
         },
         surface.model
       );
@@ -131,9 +93,20 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
     this.remove();
   };
 
-  private _onCancel = () => {
-    this.remove();
+  private _onDocumentKeydown = (e: KeyboardEvent) => {
+    e.stopPropagation();
+    if (e.key === 'Enter' && !e.isComposing) {
+      this._onConfirm();
+    }
+    if (e.key === 'Escape') {
+      this.remove();
+    }
   };
+
+  private _handleInput(e: InputEvent) {
+    const target = e.target as HTMLInputElement;
+    this._linkInputValue = target.value;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -176,9 +149,9 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
         <div class="embed-card-modal-row">
           <div
             class=${classMap({
+              disabled: !isValidUrl(this._linkInputValue),
               'embed-card-modal-button': true,
               save: true,
-              disabled: !isValidUrl(this._linkInputValue),
             })}
             tabindex="0"
             @click=${this._onConfirm}
@@ -189,6 +162,35 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       </div>
     </div>`;
   }
+
+  @state()
+  private accessor _linkInputValue = '';
+
+  @property({ attribute: false })
+  accessor createOptions!:
+    | {
+        index?: number;
+        mode: 'page';
+        parentModel: BlockModel | string;
+      }
+    | {
+        mode: 'edgeless';
+      };
+
+  @property({ attribute: false })
+  accessor descriptionText!: string;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @query('input')
+  accessor input!: HTMLInputElement;
+
+  @property({ attribute: false })
+  accessor onConfirm!: () => void;
+
+  @property({ attribute: false })
+  accessor titleText!: string;
 }
 
 export async function toggleEmbedCardCreateModal(
@@ -197,9 +199,9 @@ export async function toggleEmbedCardCreateModal(
   descriptionText: string,
   createOptions:
     | {
+        index?: number;
         mode: 'page';
         parentModel: BlockModel | string;
-        index?: number;
       }
     | {
         mode: 'edgeless';

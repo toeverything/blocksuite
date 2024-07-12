@@ -1,17 +1,19 @@
-import { type Logger, Slot } from '@blocksuite/global/utils';
 import type { Doc } from 'yjs';
+
+import { type Logger, Slot } from '@blocksuite/global/utils';
+
+import type { DocSource } from './source.js';
 
 import { SharedPriorityTarget } from '../utils/async-queue.js';
 import { MANUALLY_STOP, throwIfAborted } from '../utils/throw-if-aborted.js';
 import { DocEngineStep, DocPeerStep } from './consts.js';
 import { type DocPeerStatus, SyncPeer } from './peer.js';
-import type { DocSource } from './source.js';
 
 export interface DocEngineStatus {
-  step: DocEngineStep;
   main: DocPeerStatus | null;
-  shadows: (DocPeerStatus | null)[];
   retrying: boolean;
+  shadows: (DocPeerStatus | null)[];
+  step: DocEngineStep;
 }
 
 /**
@@ -44,17 +46,9 @@ export interface DocEngineStatus {
  * 4. continuously sync main and shadows
  */
 export class DocEngine {
-  get rootDocId() {
-    return this.rootDoc.guid;
-  }
-
-  get status() {
-    return this._status;
-  }
+  private _abort = new AbortController();
 
   private _status: DocEngineStatus;
-
-  private _abort = new AbortController();
 
   readonly onStatusChange = new Slot<DocEngineStatus>();
 
@@ -67,10 +61,10 @@ export class DocEngine {
     readonly logger: Logger
   ) {
     this._status = {
-      step: DocEngineStep.Stopped,
       main: null,
-      shadows: shadows.map(() => null),
       retrying: false,
+      shadows: shadows.map(() => null),
+      step: DocEngineStep.Stopped,
     };
     this.logger.debug(`syne-engine:${this.rootDocId} status init`, this.status);
   }
@@ -79,6 +73,24 @@ export class DocEngine {
     this.logger.debug(`syne-engine:${this.rootDocId} status change`, s);
     this._status = s;
     this.onStatusChange.emit(s);
+  }
+
+  canGracefulStop() {
+    return !!this.status.main && this.status.main.pendingPushUpdates === 0;
+  }
+
+  forceStop() {
+    this._abort.abort(MANUALLY_STOP);
+    this.setStatus({
+      main: null,
+      retrying: false,
+      shadows: this.shadows.map(() => null),
+      step: DocEngineStep.Stopped,
+    });
+  }
+
+  setPriorityRule(target: ((id: string) => boolean) | null) {
+    this.priorityTarget.priorityRule = target;
   }
 
   start() {
@@ -90,42 +102,6 @@ export class DocEngine {
     this.sync(this._abort.signal).catch(err => {
       // should never reach here
       this.logger.error(`syne-engine:${this.rootDocId}`, err);
-    });
-  }
-
-  canGracefulStop() {
-    return !!this.status.main && this.status.main.pendingPushUpdates === 0;
-  }
-
-  async waitForGracefulStop(abort?: AbortSignal) {
-    await Promise.race([
-      new Promise((_, reject) => {
-        if (abort?.aborted) {
-          reject(abort?.reason);
-        }
-        abort?.addEventListener('abort', () => {
-          reject(abort.reason);
-        });
-      }),
-      new Promise<void>(resolve => {
-        this.onStatusChange.on(() => {
-          if (this.canGracefulStop()) {
-            resolve();
-          }
-        });
-      }),
-    ]);
-    throwIfAborted(abort);
-    this.forceStop();
-  }
-
-  forceStop() {
-    this._abort.abort(MANUALLY_STOP);
-    this.setStatus({
-      step: DocEngineStep.Stopped,
-      main: null,
-      shadows: this.shadows.map(() => null),
-      retrying: false,
     });
   }
 
@@ -218,37 +194,35 @@ export class DocEngine {
       }
     }
     this.setStatus({
-      step,
       main: local?.status ?? null,
-      shadows: shadows.map(peer => peer?.status ?? null),
       retrying: allPeer.some(
         peer => peer?.status.step === DocPeerStep.Retrying
       ),
+      shadows: shadows.map(peer => peer?.status ?? null),
+      step,
     });
   }
 
-  async waitForSynced(abort?: AbortSignal) {
-    if (this.status.step === DocEngineStep.Synced) {
-      return;
-    } else {
-      return Promise.race([
-        new Promise<void>(resolve => {
-          this.onStatusChange.on(status => {
-            if (status.step === DocEngineStep.Synced) {
-              resolve();
-            }
-          });
-        }),
-        new Promise((_, reject) => {
-          if (abort?.aborted) {
-            reject(abort?.reason);
+  async waitForGracefulStop(abort?: AbortSignal) {
+    await Promise.race([
+      new Promise((_, reject) => {
+        if (abort?.aborted) {
+          reject(abort?.reason);
+        }
+        abort?.addEventListener('abort', () => {
+          reject(abort.reason);
+        });
+      }),
+      new Promise<void>(resolve => {
+        this.onStatusChange.on(() => {
+          if (this.canGracefulStop()) {
+            resolve();
           }
-          abort?.addEventListener('abort', () => {
-            reject(abort.reason);
-          });
-        }),
-      ]);
-    }
+        });
+      }),
+    ]);
+    throwIfAborted(abort);
+    this.forceStop();
   }
 
   async waitForLoadedRootDoc(abort?: AbortSignal) {
@@ -280,7 +254,35 @@ export class DocEngine {
     }
   }
 
-  setPriorityRule(target: ((id: string) => boolean) | null) {
-    this.priorityTarget.priorityRule = target;
+  async waitForSynced(abort?: AbortSignal) {
+    if (this.status.step === DocEngineStep.Synced) {
+      return;
+    } else {
+      return Promise.race([
+        new Promise<void>(resolve => {
+          this.onStatusChange.on(status => {
+            if (status.step === DocEngineStep.Synced) {
+              resolve();
+            }
+          });
+        }),
+        new Promise((_, reject) => {
+          if (abort?.aborted) {
+            reject(abort?.reason);
+          }
+          abort?.addEventListener('abort', () => {
+            reject(abort.reason);
+          });
+        }),
+      ]);
+    }
+  }
+
+  get rootDocId() {
+    return this.rootDoc.guid;
+  }
+
+  get status() {
+    return this._status;
   }
 }

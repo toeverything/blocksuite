@@ -1,5 +1,3 @@
-import './template-panel.js';
-
 import {
   arrow,
   autoUpdate,
@@ -7,15 +5,17 @@ import {
   offset,
   shift,
 } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+
+import type { EdgelessTool } from '../../../types.js';
+import type { EdgelessTemplatePanel } from './template-panel.js';
 
 import { ArrowDownSmallIcon } from '../../../../../_common/icons/text.js';
 import { once } from '../../../../../_common/utils/event.js';
-import type { EdgelessTool } from '../../../types.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { TemplateCard1, TemplateCard2, TemplateCard3 } from './icon.js';
-import type { EdgelessTemplatePanel } from './template-panel.js';
+import './template-panel.js';
 
 @customElement('edgeless-template-button')
 export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
@@ -114,16 +114,30 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
     }
   `;
 
-  @state()
-  private accessor _openedPanel: EdgelessTemplatePanel | null = null;
-
   private _cleanup: (() => void) | null = null;
 
   private _prevTool: EdgelessTool | null = null;
 
+  override enableActiveBackground = true;
+
   override type: EdgelessTool['type'] = 'template';
 
-  override enableActiveBackground = true;
+  private _closePanel() {
+    if (this._openedPanel) {
+      this._openedPanel.remove();
+      this._openedPanel = null;
+      this._cleanup?.();
+      this._cleanup = null;
+      this.requestUpdate();
+
+      if (this._prevTool && this._prevTool.type !== 'template') {
+        this.setEdgelessTool(this._prevTool);
+        this._prevTool = null;
+      } else {
+        this.setEdgelessTool({ type: 'default' });
+      }
+    }
+  }
 
   private _togglePanel() {
     if (this._openedPanel) {
@@ -154,10 +168,10 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
 
       autoUpdate(this, panel, () => {
         computePosition(this, panel, {
-          placement: 'top',
           middleware: [offset(20), arrow({ element: arrowEl }), shift()],
+          placement: 'top',
         })
-          .then(({ x, y, middlewareData }) => {
+          .then(({ middlewareData, x, y }) => {
             panel.style.left = `${x}px`;
             panel.style.top = `${y}px`;
 
@@ -170,23 +184,6 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
           });
       });
     });
-  }
-
-  private _closePanel() {
-    if (this._openedPanel) {
-      this._openedPanel.remove();
-      this._openedPanel = null;
-      this._cleanup?.();
-      this._cleanup = null;
-      this.requestUpdate();
-
-      if (this._prevTool && this._prevTool.type !== 'template') {
-        this.setEdgelessTool(this._prevTool);
-        this._prevTool = null;
-      } else {
-        this.setEdgelessTool({ type: 'default' });
-      }
-    }
   }
 
   override render() {
@@ -202,4 +199,7 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
       </div>
     </edgeless-toolbar-button>`;
   }
+
+  @state()
+  private accessor _openedPanel: EdgelessTemplatePanel | null = null;
 }

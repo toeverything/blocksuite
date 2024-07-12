@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -10,12 +10,12 @@ import { ShapeStyle } from '../../../../surface-block/index.js';
 
 const SHAPE_STYLE_LIST = [
   {
-    value: ShapeStyle.General,
     icon: GeneralStyleIcon,
+    value: ShapeStyle.General,
   },
   {
-    value: ShapeStyle.Scribbled,
     icon: ScribbledStyleIcon,
+    value: ShapeStyle.Scribbled,
   },
 ];
 
@@ -30,12 +30,6 @@ export class EdgelessShapeStylePanel extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor value!: ShapeStyle;
-
-  @property({ attribute: false })
-  accessor onSelect: undefined | ((value: ShapeStyle) => void) = undefined;
-
   private _onSelect(value: ShapeStyle) {
     this.value = value;
     if (this.onSelect) {
@@ -47,7 +41,7 @@ export class EdgelessShapeStylePanel extends LitElement {
     return repeat(
       SHAPE_STYLE_LIST,
       item => item.value,
-      ({ value, icon }) =>
+      ({ icon, value }) =>
         html`<edgeless-tool-icon-button
           .tipPosition=${'top'}
           .activeMode=${'background'}
@@ -60,6 +54,12 @@ export class EdgelessShapeStylePanel extends LitElement {
         </edgeless-tool-icon-button>`
     );
   }
+
+  @property({ attribute: false })
+  accessor onSelect: ((value: ShapeStyle) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor value!: ShapeStyle;
 }
 
 declare global {

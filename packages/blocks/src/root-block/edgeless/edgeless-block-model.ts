@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { BlockModel } from '@blocksuite/store';
 
 import type { EdgelessSelectableProps } from '../../_common/edgeless/mixin/edgeless-selectable.js';
@@ -7,6 +8,9 @@ import type {
   IHitTestOptions,
 } from '../../surface-block/element-model/base.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import type { IVec } from '../../surface-block/utils/vec.js';
+import type { SerializedXYWH } from '../../surface-block/utils/xywh.js';
+
 import { Bound } from '../../surface-block/utils/bound.js';
 import {
   getBoundsWithRotation,
@@ -17,8 +21,6 @@ import {
   rotatePoints,
 } from '../../surface-block/utils/math-utils.js';
 import { PointLocation } from '../../surface-block/utils/point-location.js';
-import type { IVec } from '../../surface-block/utils/vec.js';
-import type { SerializedXYWH } from '../../surface-block/utils/xywh.js';
 
 export class EdgelessBlockModel<
     Props extends EdgelessSelectableProps = EdgelessSelectableProps,
@@ -26,58 +28,29 @@ export class EdgelessBlockModel<
   extends BlockModel<Props>
   implements IEdgelessElement
 {
-  get externalXYWH(): SerializedXYWH | undefined {
-    return this._externalXYWH;
-  }
-
-  set externalXYWH(xywh: SerializedXYWH | undefined) {
-    this._externalXYWH = xywh;
-  }
-
-  get externalBound(): Bound | null {
-    return this._externalXYWH ? Bound.deserialize(this._externalXYWH) : null;
-  }
-
-  get elementBound() {
-    const bound = Bound.deserialize(this.xywh);
-    return Bound.from(getBoundsWithRotation({ ...bound, rotate: this.rotate }));
-  }
-
-  get group(): IEdgelessElement['group'] {
-    const surfaceModel = this.doc.getBlockByFlavour(
-      'affine:surface'
-    ) as SurfaceBlockModel[];
-
-    return surfaceModel[0]?.getGroup(this.id) ?? null;
-  }
-
-  get groups() {
-    const surfaceModel = this.doc.getBlockByFlavour(
-      'affine:surface'
-    ) as SurfaceBlockModel[];
-
-    return surfaceModel[0]?.getGroups(this.id) ?? [];
-  }
-
   private _externalXYWH: SerializedXYWH | undefined = undefined;
 
   connectable = true;
 
   rotate = 0;
 
-  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
-    const bound = Bound.deserialize(this.xywh);
-    return bound.isPointInBound([x, y], 0);
+  boxSelect(bound: Bound): boolean {
+    return (
+      this.containedByBounds(bound) ||
+      bound.points.some((point, i, points) =>
+        this.intersectWithLine(point, points[(i + 1) % points.length])
+      )
+    );
   }
 
   containedByBounds(bounds: Bound): boolean {
     const bound = Bound.deserialize(this.xywh);
     const points = getPointsFromBoundsWithRotation({
-      x: bound.x,
-      y: bound.y,
-      w: bound.w,
       h: bound.h,
       rotate: this.rotate,
+      w: bound.w,
+      x: bound.x,
+      y: bound.y,
     });
     return points.some(point => bounds.containsPoint(point));
   }
@@ -87,15 +60,6 @@ export class EdgelessBlockModel<
     return polygonNearestPoint(
       rotatePoints(bound.points, bound.center, this.rotate ?? 0),
       point
-    );
-  }
-
-  intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
-    const bound = Bound.deserialize(this.xywh);
-    return linePolygonIntersects(
-      start,
-      end,
-      rotatePoints(bound.points, bound.center, this.rotate ?? 0)
     );
   }
 
@@ -113,12 +77,50 @@ export class EdgelessBlockModel<
     return new PointLocation(rotatePoint, tangent);
   }
 
-  boxSelect(bound: Bound): boolean {
-    return (
-      this.containedByBounds(bound) ||
-      bound.points.some((point, i, points) =>
-        this.intersectWithLine(point, points[(i + 1) % points.length])
-      )
+  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return bound.isPointInBound([x, y], 0);
+  }
+
+  intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
+    const bound = Bound.deserialize(this.xywh);
+    return linePolygonIntersects(
+      start,
+      end,
+      rotatePoints(bound.points, bound.center, this.rotate ?? 0)
     );
+  }
+
+  get elementBound() {
+    const bound = Bound.deserialize(this.xywh);
+    return Bound.from(getBoundsWithRotation({ ...bound, rotate: this.rotate }));
+  }
+
+  get externalBound(): Bound | null {
+    return this._externalXYWH ? Bound.deserialize(this._externalXYWH) : null;
+  }
+
+  get externalXYWH(): SerializedXYWH | undefined {
+    return this._externalXYWH;
+  }
+
+  set externalXYWH(xywh: SerializedXYWH | undefined) {
+    this._externalXYWH = xywh;
+  }
+
+  get group(): IEdgelessElement['group'] {
+    const surfaceModel = this.doc.getBlockByFlavour(
+      'affine:surface'
+    ) as SurfaceBlockModel[];
+
+    return surfaceModel[0]?.getGroup(this.id) ?? null;
+  }
+
+  get groups() {
+    const surfaceModel = this.doc.getBlockByFlavour(
+      'affine:surface'
+    ) as SurfaceBlockModel[];
+
+    return surfaceModel[0]?.getGroups(this.id) ?? [];
   }
 }

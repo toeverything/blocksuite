@@ -1,81 +1,43 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
+import type { StaticValue } from 'lit/static-html.js';
+
 import { handleError } from '@blocksuite/global/exceptions';
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { Slot, assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Doc } from '@blocksuite/store';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import {
-  css,
   LitElement,
-  nothing,
   type PropertyValues,
   type TemplateResult,
+  css,
+  nothing,
 } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
 import type { CommandManager } from '../../command/index.js';
 import type { UIEventDispatcher } from '../../event/index.js';
-import { BlockStdScope } from '../../scope/index.js';
 import type { SelectionManager } from '../../selection/index.js';
 import type { BlockSpec, SpecStore } from '../../spec/index.js';
+import type { ViewStore } from '../view-store.js';
+
+import { BlockStdScope } from '../../scope/index.js';
 import { RangeManager } from '../utils/range-manager.js';
 import { WithDisposable } from '../utils/with-disposable.js';
-import type { ViewStore } from '../view-store.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
 @customElement('editor-host')
 export class EditorHost extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
-  get command(): CommandManager {
-    return this.std.command;
-  }
-
-  get event(): UIEventDispatcher {
-    return this.std.event;
-  }
-
-  get selection(): SelectionManager {
-    return this.std.selection;
-  }
-
-  get view(): ViewStore {
-    return this.std.view;
-  }
-
-  get spec(): SpecStore {
-    return this.std.spec;
-  }
-
   static override styles = css`
     editor-host {
       outline: none;
       isolation: isolate;
     }
   `;
-
-  @property({ attribute: false })
-  accessor specs!: BlockSpec[];
-
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @property({ attribute: false })
-  accessor blockIdAttr = 'data-block-id';
-
-  @property({ attribute: false })
-  accessor widgetIdAttr = 'data-widget-id';
-
-  std!: BlockSuite.Std;
-
-  rangeManager: RangeManager | null = null;
-
-  readonly slots = {
-    unmounted: new Slot(),
-  };
 
   private _renderModel = (model: BlockModel): TemplateResult => {
     const { flavour } = model;
@@ -116,11 +78,66 @@ export class EditorHost extends SignalWatcher(
     ></${tag}>`;
   };
 
-  override willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('specs')) {
-      this.std.spec.applySpecs(this.specs);
+  rangeManager: RangeManager | null = null;
+
+  renderChildren = (model: BlockModel): TemplateResult => {
+    return html`${repeat(
+      model.children,
+      child => child.id,
+      child => this._renderModel(child)
+    )}`;
+  };
+
+  /**
+   * @deprecated
+   *
+   * This method is deprecated. Use `renderSpecPortal` instead.
+   */
+  renderModel = (model: BlockModel): TemplateResult => {
+    return this._renderModel(model);
+  };
+
+  renderSpecPortal = (doc: Doc, specs: BlockSpec[]) => {
+    return html`
+      <editor-host
+        .doc=${doc}
+        .specs=${specs}
+        contenteditable="false"
+      ></editor-host>
+    `;
+  };
+
+  readonly slots = {
+    unmounted: new Slot(),
+  };
+
+  std!: BlockSuite.Std;
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    if (!this.doc.root) {
+      throw new Error(
+        'This doc is missing root block. Please initialize the default block structure before connecting the editor to DOM.'
+      );
     }
-    super.willUpdate(changedProperties);
+
+    this.std = new BlockStdScope({
+      doc: this.doc,
+      host: this,
+    });
+
+    this.std.mount();
+    this.std.spec.applySpecs(this.specs);
+    this.rangeManager = new RangeManager(this);
+    this.tabIndex = 0;
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.std.unmount();
+    this.rangeManager = null;
+    this.slots.unmounted.emit();
   }
 
   override async getUpdateComplete(): Promise<boolean> {
@@ -152,33 +169,6 @@ export class EditorHost extends SignalWatcher(
     }
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-
-    if (!this.doc.root) {
-      throw new Error(
-        'This doc is missing root block. Please initialize the default block structure before connecting the editor to DOM.'
-      );
-    }
-
-    this.std = new BlockStdScope({
-      host: this,
-      doc: this.doc,
-    });
-
-    this.std.mount();
-    this.std.spec.applySpecs(this.specs);
-    this.rangeManager = new RangeManager(this);
-    this.tabIndex = 0;
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.std.unmount();
-    this.rangeManager = null;
-    this.slots.unmounted.emit();
-  }
-
   override render() {
     const { root } = this.doc;
     if (!root) return nothing;
@@ -186,32 +176,44 @@ export class EditorHost extends SignalWatcher(
     return this._renderModel(root);
   }
 
-  /**
-   * @deprecated
-   *
-   * This method is deprecated. Use `renderSpecPortal` instead.
-   */
-  renderModel = (model: BlockModel): TemplateResult => {
-    return this._renderModel(model);
-  };
+  override willUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('specs')) {
+      this.std.spec.applySpecs(this.specs);
+    }
+    super.willUpdate(changedProperties);
+  }
 
-  renderSpecPortal = (doc: Doc, specs: BlockSpec[]) => {
-    return html`
-      <editor-host
-        .doc=${doc}
-        .specs=${specs}
-        contenteditable="false"
-      ></editor-host>
-    `;
-  };
+  get command(): CommandManager {
+    return this.std.command;
+  }
 
-  renderChildren = (model: BlockModel): TemplateResult => {
-    return html`${repeat(
-      model.children,
-      child => child.id,
-      child => this._renderModel(child)
-    )}`;
-  };
+  get event(): UIEventDispatcher {
+    return this.std.event;
+  }
+
+  get selection(): SelectionManager {
+    return this.std.selection;
+  }
+
+  get spec(): SpecStore {
+    return this.std.spec;
+  }
+
+  get view(): ViewStore {
+    return this.std.view;
+  }
+
+  @property({ attribute: false })
+  accessor blockIdAttr = 'data-block-id';
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @property({ attribute: false })
+  accessor specs!: BlockSpec[];
+
+  @property({ attribute: false })
+  accessor widgetIdAttr = 'data-widget-id';
 }
 
 declare global {

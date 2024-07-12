@@ -1,7 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { isAbortError } from '../_common/utils/helper.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
+
+import { isAbortError } from '../_common/utils/helper.js';
 
 export async function refreshBookmarkUrlData(
   bookmarkElement: BookmarkBlockComponent,
@@ -35,10 +36,10 @@ export async function refreshBookmarkUrlData(
     if (signal?.aborted) return;
 
     bookmarkElement.doc.updateBlock(bookmarkElement.model, {
-      title,
       description,
       icon,
       image,
+      title,
     });
   } catch (error) {
     if (signal?.aborted || isAbortError(error)) return;

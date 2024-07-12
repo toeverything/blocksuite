@@ -1,6 +1,6 @@
-import './tool-icon-button.js';
-
 import { css, html } from 'lit';
+
+import './tool-icon-button.js';
 
 export const lineSizeButtonStyles = [
   css`
@@ -29,26 +29,26 @@ export const lineSizeButtonStyles = [
 ];
 
 export interface LineSizeButtonProps {
-  className?: string;
-  size: 's' | 'l';
   active?: boolean;
-  tooltip?: string;
+  className?: string;
   onClick: (event: MouseEvent) => void;
+  size: 'l' | 's';
+  tooltip?: string;
 }
 
 function getTooltip(size: LineSizeButtonProps['size']) {
   return {
-    s: 'Thin',
     l: 'Thick',
+    s: 'Thin',
   }[size];
 }
 
 export function LineSizeButton({
-  className,
-  size,
   active,
-  tooltip: tooltipFromProps,
+  className,
   onClick,
+  size,
+  tooltip: tooltipFromProps,
 }: LineSizeButtonProps) {
   const classnames = `edgeless-component-line-size-button size-${size} ${
     active ? 'active' : ''

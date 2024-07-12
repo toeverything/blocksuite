@@ -7,15 +7,15 @@ import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { basicTheme } from '../slides/template.js';
 
 type PPTSection = {
-  title: string;
   content: string;
   keywords: string;
+  title: string;
 };
 
 type PPTDoc = {
   isCover: boolean;
-  title: string;
   sections: PPTSection[];
+  title: string;
 };
 
 export const PPTBuilder = (host: EditorHost) => {
@@ -28,15 +28,15 @@ export const PPTBuilder = (host: EditorHost) => {
       const keywords = getText(v.children[0]);
       const content = getText(v.children[1]);
       return {
-        title,
-        keywords,
         content,
+        keywords,
+        title,
       } satisfies PPTSection;
     });
     const doc: PPTDoc = {
       isCover: docs.length === 0,
-      title: getText(block),
       sections,
+      title: getText(block),
     };
     docs.push(doc);
 
@@ -44,7 +44,7 @@ export const PPTBuilder = (host: EditorHost) => {
     if (done) return;
     done = true;
     const job = service.createTemplateJob('template');
-    const { images, content } = await basicTheme(doc);
+    const { content, images } = await basicTheme(doc);
 
     if (images.length) {
       await Promise.all(
@@ -60,6 +60,11 @@ export const PPTBuilder = (host: EditorHost) => {
   };
 
   return {
+    done: async (text: string) => {
+      const snapshot = await markdownToSnapshot(text, host);
+      const block = snapshot.snapshot.content[0];
+      await addDoc(block.children[block.children.length - 1]);
+    },
     process: async (text: string) => {
       const snapshot = await markdownToSnapshot(text, host);
 
@@ -69,11 +74,6 @@ export const PPTBuilder = (host: EditorHost) => {
         const { centerX, centerY, zoom } = service.getFitToScreenData();
         service.viewport.setViewport(zoom, [centerX, centerY]);
       }
-    },
-    done: async (text: string) => {
-      const snapshot = await markdownToSnapshot(text, host);
-      const block = snapshot.snapshot.content[0];
-      await addDoc(block.children[block.children.length - 1]);
     },
   };
 };

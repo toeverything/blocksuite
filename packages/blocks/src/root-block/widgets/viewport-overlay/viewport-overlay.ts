@@ -28,21 +28,6 @@ export class AffineViewportOverlayWidget extends WidgetElement<
     }
   `;
 
-  @state()
-  private accessor _lockViewport = false;
-
-  lock() {
-    this._lockViewport = true;
-  }
-
-  unlock() {
-    this._lockViewport = false;
-  }
-
-  toggleLock() {
-    this._lockViewport = !this._lockViewport;
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     this.handleEvent(
@@ -68,17 +53,32 @@ export class AffineViewportOverlayWidget extends WidgetElement<
     );
   }
 
+  lock() {
+    this._lockViewport = true;
+  }
+
   override render() {
     const classes = classMap({
       'affine-viewport-overlay-widget': true,
       lock: this._lockViewport,
     });
     const style = styleMap({
-      width: `${this._lockViewport ? '100vw' : '0'}`,
       height: `${this._lockViewport ? '100%' : '0'}`,
+      width: `${this._lockViewport ? '100vw' : '0'}`,
     });
     return html` <div class=${classes} style=${style}></div> `;
   }
+
+  toggleLock() {
+    this._lockViewport = !this._lockViewport;
+  }
+
+  unlock() {
+    this._lockViewport = false;
+  }
+
+  @state()
+  private accessor _lockViewport = false;
 }
 
 declare global {

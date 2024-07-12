@@ -10,31 +10,31 @@ import type {
 export interface SingleViewSource<
   View extends DataViewDataType = DataViewDataType,
 > {
+  delete(): void;
+  duplicate(): void;
   get readonly(): boolean;
-  readonly view: View;
-  readonly updateView: (updater: (view: View) => Partial<View>) => void;
+
+  isDeleted(): boolean;
 
   updateSlot: Slot<{ viewId: string }>;
 
-  delete(): void;
-
-  isDeleted(): boolean;
-  duplicate(): void;
+  readonly updateView: (updater: (view: View) => Partial<View>) => void;
+  readonly view: View;
 }
 
 export interface ViewSource {
-  get readonly(): boolean;
-  get currentViewId(): string;
-  get currentView(): SingleViewSource;
   allViewMeta: ViewMeta[];
-  selectView: (id: string) => void;
-  views: SingleViewSource[];
-  updateSlot: Slot<{ viewId?: string }>;
   checkViewDataUpdate(): void;
+  duplicate(id: string): void;
+  get currentView(): SingleViewSource;
+  get currentViewId(): string;
+  get readonly(): boolean;
   getViewMeta(type: string): ViewMeta;
-  viewGet(id: string): SingleViewSource;
+  moveTo(id: string, position: InsertToPosition): void;
+  selectView: (id: string) => void;
+  updateSlot: Slot<{ viewId?: string }>;
   viewAdd(type: DataViewTypes): string;
 
-  moveTo(id: string, position: InsertToPosition): void;
-  duplicate(id: string): void;
+  viewGet(id: string): SingleViewSource;
+  views: SingleViewSource[];
 }

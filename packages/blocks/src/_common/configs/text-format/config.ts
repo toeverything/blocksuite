@@ -11,20 +11,19 @@ import {
 } from '../../icons/index.js';
 
 export interface TextFormatConfig {
+  action: (host: EditorHost) => void;
+  activeWhen: (host: EditorHost) => boolean;
+  hotkey?: string;
+  icon: TemplateResult<1>;
   id: string;
   name: string;
-  icon: TemplateResult<1>;
-  hotkey?: string;
-  activeWhen: (host: EditorHost) => boolean;
-  action: (host: EditorHost) => void;
 }
 
 export const textFormatConfigs: TextFormatConfig[] = [
   {
-    id: 'bold',
-    name: 'Bold',
-    icon: BoldIcon,
-    hotkey: 'Mod-b',
+    action: host => {
+      host.std.command.chain().toggleBold().run();
+    },
     activeWhen: host => {
       const [result] = host.std.command
         .chain()
@@ -32,15 +31,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
         .run();
       return result;
     },
-    action: host => {
-      host.std.command.chain().toggleBold().run();
-    },
+    hotkey: 'Mod-b',
+    icon: BoldIcon,
+    id: 'bold',
+    name: 'Bold',
   },
   {
-    id: 'italic',
-    name: 'Italic',
-    icon: ItalicIcon,
-    hotkey: 'Mod-i',
+    action: host => {
+      host.std.command.chain().toggleItalic().run();
+    },
     activeWhen: host => {
       const [result] = host.std.command
         .chain()
@@ -48,15 +47,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
         .run();
       return result;
     },
-    action: host => {
-      host.std.command.chain().toggleItalic().run();
-    },
+    hotkey: 'Mod-i',
+    icon: ItalicIcon,
+    id: 'italic',
+    name: 'Italic',
   },
   {
-    id: 'underline',
-    name: 'Underline',
-    icon: UnderlineIcon,
-    hotkey: 'Mod-u',
+    action: host => {
+      host.std.command.chain().toggleUnderline().run();
+    },
     activeWhen: host => {
       const [result] = host.std.command
         .chain()
@@ -64,15 +63,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
         .run();
       return result;
     },
-    action: host => {
-      host.std.command.chain().toggleUnderline().run();
-    },
+    hotkey: 'Mod-u',
+    icon: UnderlineIcon,
+    id: 'underline',
+    name: 'Underline',
   },
   {
-    id: 'strike',
-    name: 'Strikethrough',
-    icon: StrikethroughIcon,
-    hotkey: 'Mod-shift-s',
+    action: host => {
+      host.std.command.chain().toggleStrike().run();
+    },
     activeWhen: host => {
       const [result] = host.std.command
         .chain()
@@ -80,15 +79,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
         .run();
       return result;
     },
-    action: host => {
-      host.std.command.chain().toggleStrike().run();
-    },
+    hotkey: 'Mod-shift-s',
+    icon: StrikethroughIcon,
+    id: 'strike',
+    name: 'Strikethrough',
   },
   {
-    id: 'code',
-    name: 'Code',
-    icon: CodeIcon,
-    hotkey: 'Mod-e',
+    action: host => {
+      host.std.command.chain().toggleCode().run();
+    },
     activeWhen: host => {
       const [result] = host.std.command
         .chain()
@@ -96,15 +95,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
         .run();
       return result;
     },
-    action: host => {
-      host.std.command.chain().toggleCode().run();
-    },
+    hotkey: 'Mod-e',
+    icon: CodeIcon,
+    id: 'code',
+    name: 'Code',
   },
   {
-    id: 'link',
-    name: 'Link',
-    icon: LinkIcon,
-    hotkey: 'Mod-k',
+    action: host => {
+      host.std.command.chain().toggleLink().run();
+    },
     activeWhen: host => {
       const [result] = host.std.command
         .chain()
@@ -112,8 +111,9 @@ export const textFormatConfigs: TextFormatConfig[] = [
         .run();
       return result;
     },
-    action: host => {
-      host.std.command.chain().toggleLink().run();
-    },
+    hotkey: 'Mod-k',
+    icon: LinkIcon,
+    id: 'link',
+    name: 'Link',
   },
 ];

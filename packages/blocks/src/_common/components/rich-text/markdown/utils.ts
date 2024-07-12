@@ -1,11 +1,12 @@
 import type { BlockElement } from '@blocksuite/block-std';
 
+import type { ListType } from '../../../../list-block/index.js';
+
 import {
   asyncFocusRichText,
   getInlineEditorByModel,
   matchFlavours,
 } from '../../../../_common/utils/index.js';
-import type { ListType } from '../../../../list-block/index.js';
 
 function addSpace(element: BlockElement, index: number) {
   element.model.text?.insert(' ', index);
@@ -42,9 +43,9 @@ export function convertToList(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      type: listType,
-      text: model.text?.clone(),
       children: model.children,
+      text: model.text?.clone(),
+      type: listType,
       ...otherProperties,
     };
     doc.deleteBlock(model, {
@@ -59,7 +60,7 @@ export function convertToList(
 
 export function convertToParagraph(
   element: BlockElement,
-  type: 'text' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+  type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'quote' | 'text',
   prefix: string
 ): boolean {
   const { doc, model } = element;
@@ -76,9 +77,9 @@ export function convertToParagraph(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      type: type,
-      text: model.text?.clone(),
       children: model.children,
+      text: model.text?.clone(),
+      type: type,
     };
     doc.deleteBlock(model, {
       deleteChildren: false,

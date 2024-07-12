@@ -1,9 +1,9 @@
 import {
-  columnPresets,
   type DatabaseBlockModel,
-  databaseViewAddView,
   type ListType,
   type ParagraphType,
+  columnPresets,
+  databaseViewAddView,
   richTextColumnConfig,
   viewPresets,
 } from '@blocksuite/blocks';
@@ -35,8 +35,8 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
     const databaseId = doc.addBlock(
       'affine:database',
       {
-        columns: [],
         cells: {},
+        columns: [],
       },
       noteId
     );
@@ -70,8 +70,8 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           return {
             groupBy: {
               columnId: database.columns[1].id,
-              type: 'groupBy',
               name: 'select',
+              type: 'groupBy',
             },
           };
         });
@@ -88,7 +88,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         paragraphTypes.forEach(type => {
           const id = doc.addBlock(
             'affine:paragraph',
-            { type: type, text: new Text(`Paragraph type ${type}`) },
+            { text: new Text(`Paragraph type ${type}`), type: type },
             databaseId
           );
           database.updateCell(id, {
@@ -106,7 +106,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         listTypes.forEach(type => {
           const id = doc.addBlock(
             'affine:list',
-            { type: type, text: new Text(`List type ${type}`) },
+            { text: new Text(`List type ${type}`), type: type },
             databaseId
           );
           database.updateCell(id, {

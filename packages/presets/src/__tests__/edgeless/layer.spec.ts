@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { BlockElement } from '@blocksuite/block-std';
+
 import {
   type EdgelessRootBlockComponent,
-  generateKeyBetween,
   type NoteBlockModel,
+  generateKeyBetween,
 } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -275,11 +276,11 @@ test('blocks should rerender when their z-index changed', async () => {
   assertBlockElementsContent();
 
   service.addElement('shape', {
-    shapeType: 'rect',
     index: generateKeyBetween(
       service.getElementById(blocks[1])!.index,
       service.getElementById(blocks[2])!.index
     ),
+    shapeType: 'rect',
   });
 
   await wait();

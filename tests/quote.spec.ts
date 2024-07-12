@@ -16,8 +16,8 @@ import { test } from './utils/playwright.js';
 
 test('prohibit creating divider within quote', async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/995',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -34,8 +34,8 @@ test('prohibit creating divider within quote', async ({ page }) => {
 
 test('quote arrow up/down', async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2834',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);

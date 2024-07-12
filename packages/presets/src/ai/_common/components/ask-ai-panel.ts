@@ -3,7 +3,7 @@ import {
   type AIItemGroupConfig,
   EdgelessRootService,
 } from '@blocksuite/blocks';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -42,26 +42,6 @@ export class AskAIPanel extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor actionGroups!: AIItemGroupConfig[];
-
-  @property({ attribute: false })
-  accessor abortController: AbortController | null = null;
-
-  @property({ attribute: false })
-  accessor minWidth = 330;
-
-  get _edgeless() {
-    const rootService = getRootService(this.host);
-    if (rootService instanceof EdgelessRootService) {
-      return rootService;
-    }
-    return null;
-  }
-
   get _actionGroups() {
     const filteredConfig = this.actionGroups
       .map(group => ({
@@ -80,6 +60,14 @@ export class AskAIPanel extends WithDisposable(LitElement) {
     return filteredConfig;
   }
 
+  get _edgeless() {
+    const rootService = getRootService(this.host);
+    if (rootService instanceof EdgelessRootService) {
+      return rootService;
+    }
+    return null;
+  }
+
   override render() {
     const style = styleMap({
       minWidth: `${this.minWidth}px`,
@@ -91,6 +79,18 @@ export class AskAIPanel extends WithDisposable(LitElement) {
       ></ai-item-list>
     </div>`;
   }
+
+  @property({ attribute: false })
+  accessor abortController: AbortController | null = null;
+
+  @property({ attribute: false })
+  accessor actionGroups!: AIItemGroupConfig[];
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor minWidth = 330;
 }
 
 declare global {

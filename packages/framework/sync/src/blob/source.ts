@@ -1,8 +1,8 @@
 export interface BlobSource {
+  delete: (key: string) => Promise<void>;
+  get: (key: string) => Promise<Blob | null>;
+  list: () => Promise<string[]>;
   name: string;
   readonly: boolean;
-  get: (key: string) => Promise<Blob | null>;
   set: (key: string, value: Blob) => Promise<string>;
-  delete: (key: string) => Promise<void>;
-  list: () => Promise<string[]>;
 }

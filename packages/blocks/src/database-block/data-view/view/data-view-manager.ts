@@ -1,4 +1,4 @@
-import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
+import { type Disposable, Slot, assertExists } from '@blocksuite/global/utils';
 
 import type { ColumnMeta } from '../column/column-config.js';
 import type { CellRenderer, ColumnConfig } from '../column/index.js';
@@ -12,69 +12,27 @@ import type { UniComponent } from '../utils/uni-component/index.js';
 import type { DataViewDataType } from './data-view.js';
 
 export interface DataViewManager {
-  get id(): string;
-
-  get type(): string;
-
-  get readonly(): boolean;
-
-  get columnManagerList(): DataViewColumnManager[];
-
-  get columns(): string[];
-
-  get detailColumns(): string[];
-
-  get columnsWithoutFilter(): string[];
-
-  get rows(): string[];
-
-  get filter(): FilterGroup;
-
-  get filterVisible(): boolean;
-
-  get vars(): Variable[];
-
-  get allColumnConfig(): ColumnConfig[];
-
-  get isDeleted(): boolean;
-
-  get detailSlots(): DetailSlots;
-
-  slots: {
-    update: Slot<{
-      viewId: string;
-    }>;
-  };
-
-  filterSetVisible(visible: boolean): void;
-
-  updateFilter(filter: FilterGroup): void;
-
-  cellGetValue(rowId: string, columnId: string): unknown;
-
-  cellGetRenderValue(rowId: string, columnId: string): unknown;
+  cellGetExtra(rowId: string, columnId: string): undefined | unknown;
 
   cellGetJsonValue(rowId: string, columnId: string): unknown;
 
+  cellGetRenderValue(rowId: string, columnId: string): unknown;
+
   cellGetStringValue(rowId: string, columnId: string): string;
 
-  cellGetExtra(rowId: string, columnId: string): unknown | undefined;
+  cellGetValue(rowId: string, columnId: string): unknown;
 
   cellSetValueFromString(
     columnId: string,
     value: string
   ): {
-    value: unknown;
     data?: Record<string, unknown>;
+    value: unknown;
   };
 
   cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void;
 
   cellUpdateValue(rowId: string, columnId: string, value: unknown): void;
-
-  rowDelete(ids: string[]): void;
-
-  rowAdd(insertPosition: InsertToPosition): string;
 
   columnAdd(toAfterOfColumn: InsertToPosition, type?: string): string;
 
@@ -84,35 +42,73 @@ export interface DataViewManager {
 
   columnGet(columnId: string): DataViewColumnManager;
 
-  columnGetMeta(type: string): ColumnMeta;
-
-  columnGetPreColumn(columnId: string): DataViewColumnManager | undefined;
-
-  columnGetNextColumn(columnId: string): DataViewColumnManager | undefined;
-
-  columnGetName(columnId: string): string;
-
-  columnGetType(columnId: string): string;
-
-  columnGetHide(columnId: string): boolean;
-
   columnGetData(columnId: string): Record<string, unknown>;
 
   columnGetDataType(columnId: string): TType;
 
-  columnGetIndex(columnId: string): number;
+  columnGetHide(columnId: string): boolean;
 
   columnGetIdByIndex(index: number): string;
 
+  columnGetIndex(columnId: string): number;
+
+  columnGetMeta(type: string): ColumnMeta;
+
+  columnGetName(columnId: string): string;
+
+  columnGetNextColumn(columnId: string): DataViewColumnManager | undefined;
+
+  columnGetPreColumn(columnId: string): DataViewColumnManager | undefined;
+
   columnGetReadonly(columnId: string): boolean;
 
-  columnUpdateName(columnId: string, name: string): void;
+  columnGetType(columnId: string): string;
+
+  columnMove(columnId: string, position: InsertToPosition): void;
+
+  columnUpdateData(columnId: string, data: Record<string, unknown>): void;
 
   columnUpdateHide(columnId: string, hide: boolean): void;
 
+  columnUpdateName(columnId: string, name: string): void;
+
   columnUpdateType(columnId: string, type: string): void;
 
-  columnUpdateData(columnId: string, data: Record<string, unknown>): void;
+  deleteView(): void;
+
+  duplicateView(): void;
+
+  filterSetVisible(visible: boolean): void;
+
+  get allColumnConfig(): ColumnConfig[];
+
+  get columnManagerList(): DataViewColumnManager[];
+
+  get columns(): string[];
+
+  get columnsWithoutFilter(): string[];
+
+  get detailColumns(): string[];
+
+  get detailSlots(): DetailSlots;
+
+  get filter(): FilterGroup;
+
+  get filterVisible(): boolean;
+
+  get id(): string;
+
+  get isDeleted(): boolean;
+
+  get readonly(): boolean;
+
+  get rows(): string[];
+
+  get type(): string;
+
+  get vars(): Variable[];
+
+  getContext<T>(key: DataViewContextKey<T>): T | undefined;
 
   getIcon(type: string): UniComponent | undefined;
 
@@ -122,54 +118,68 @@ export interface DataViewManager {
     callback: () => void
   ): Disposable;
 
-  columnMove(columnId: string, position: InsertToPosition): void;
+  rowAdd(insertPosition: InsertToPosition): string;
+  rowDelete(ids: string[]): void;
+
   rowMove(rowId: string, position: InsertToPosition): void;
+  slots: {
+    update: Slot<{
+      viewId: string;
+    }>;
+  };
 
-  duplicateView(): void;
-  deleteView(): void;
-
-  getContext<T>(key: DataViewContextKey<T>): T | undefined;
+  updateFilter(filter: FilterGroup): void;
 }
 
 export interface DataViewColumnManager<
   Value = unknown,
   Data extends Record<string, unknown> = Record<string, unknown>,
 > {
+  get data(): Data;
+
+  get dataType(): TType;
+
   get dataViewManager(): DataViewManager;
+
+  get delete(): (() => void) | undefined;
+
+  get detailRenderer(): CellRenderer;
+
+  get duplicate(): (() => void) | undefined;
+
+  get hide(): boolean;
+
+  get icon(): UniComponent | undefined;
 
   get id(): string;
 
   get index(): number;
 
-  get type(): string;
+  get isFirst(): boolean;
 
-  get dataType(): TType;
+  get isLast(): boolean;
 
   get name(): string;
-
-  get hide(): boolean;
-
-  get data(): Data;
 
   get readonly(): boolean;
 
   get renderer(): CellRenderer;
 
-  get detailRenderer(): CellRenderer;
+  get type(): string;
 
-  get isFirst(): boolean;
+  get updateType(): ((type: string) => void) | undefined;
 
-  get isLast(): boolean;
-
-  isEmpty(rowId: string): boolean;
-
-  getStringValue(rowId: string): string;
+  getExtra(rowId: string): unknown;
 
   getJsonValue(rowId: string): unknown;
 
+  getStringValue(rowId: string): string;
+
   getValue(rowId: string): Value | undefined;
 
-  getExtra(rowId: string): unknown;
+  isEmpty(rowId: string): boolean;
+
+  onCellUpdate(rowId: string, callback: () => void): Disposable;
 
   setValue(rowId: string, value: Value | undefined): void;
 
@@ -178,91 +188,18 @@ export interface DataViewColumnManager<
   updateHide(hide: boolean): void;
 
   updateName(name: string): void;
-
-  get updateType(): undefined | ((type: string) => void);
-
-  get delete(): undefined | (() => void);
-
-  get duplicate(): undefined | (() => void);
-
-  get icon(): UniComponent | undefined;
-
-  onCellUpdate(rowId: string, callback: () => void): Disposable;
 }
 
 export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
   implements DataViewManager
 {
-  protected get dataSource(): DataSource {
-    assertExists(this._dataSource, 'data source is not set');
-    return this._dataSource;
-  }
+  private _dataSource?: DataSource;
 
-  protected get viewSource(): SingleViewSource<ViewData> {
-    assertExists(this._viewSource, 'view source is not set');
-    return this._viewSource;
-  }
-
-  get rows(): string[] {
-    return this.filteredRows(this.searchString);
-  }
-
-  get columnManagerList(): ReturnType<this['columnGet']>[] {
-    return this.columns.map(
-      id => this.columnGet(id) as ReturnType<this['columnGet']>
-    );
-  }
-
-  get readonly(): boolean {
-    return false;
-  }
-
-  abstract get columns(): string[];
-
-  abstract get detailColumns(): string[];
-
-  abstract get columnsWithoutFilter(): string[];
-
-  abstract get id(): string;
-
-  abstract get type(): string;
-
-  get allColumnConfig(): ColumnConfig[] {
-    return this.dataSource.addPropertyConfigList;
-  }
-
-  abstract get isDeleted(): boolean;
-
-  get detailSlots(): DetailSlots {
-    return this.dataSource.detailSlots;
-  }
-
-  abstract get filter(): FilterGroup;
-
-  get vars(): Variable[] {
-    return this.columnsWithoutFilter.map(id => {
-      const v = this.columnGet(id);
-      const propertyMeta = this.dataSource.getPropertyMeta(v.type);
-      return {
-        id: v.id,
-        name: v.name,
-        type: propertyMeta.model.dataType(v.data),
-        icon: v.icon,
-      };
-    });
-  }
-
-  get filterVisible(): boolean {
-    return this._filterVisible ?? this.filter.conditions.length > 0;
-  }
+  private _filterVisible?: boolean;
 
   private _viewSource?: SingleViewSource<ViewData>;
 
-  private _dataSource?: DataSource;
-
   private searchString = '';
-
-  private _filterVisible?: boolean;
 
   slots = {
     update: new Slot<{
@@ -286,41 +223,8 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     });
   }
 
-  getContext<T>(key: DataViewContextKey<T>): T | undefined {
-    return this.dataSource.getContext(key);
-  }
-
-  init(dataSource: DataSource, viewSource: SingleViewSource<ViewData>) {
-    this._dataSource = dataSource;
-    this._viewSource = viewSource;
-    this._dataSource.slots.update
-      .flatMap(() => ({ viewId: this.id }))
-      .pipe(this.slots.update);
-    this._viewSource.updateSlot.pipe(this.slots.update);
-  }
-
-  setSearch(str: string): void {
-    this.searchString = str;
-    this.slots.update.emit({ viewId: this.id });
-  }
-
-  abstract isShow(rowId: string): boolean;
-
-  onCellUpdate(
-    rowId: string,
-    columnId: string,
-    callback: () => void
-  ): Disposable {
-    return this.dataSource.onCellUpdate(rowId, columnId, callback);
-  }
-
-  cellGetValue(rowId: string, columnId: string): unknown {
-    return this.dataSource
-      .getPropertyMeta(this.columnGetType(columnId))
-      .model.formatValue(
-        this.dataSource.cellGetValue(rowId, columnId),
-        this.columnGetData(columnId)
-      );
+  cellGetExtra(rowId: string, columnId: string): unknown {
+    return this.dataSource.cellGetExtra(rowId, columnId);
   }
 
   cellGetJsonValue(rowId: string, columnId: string): unknown {
@@ -347,8 +251,13 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     );
   }
 
-  cellGetExtra(rowId: string, columnId: string): unknown {
-    return this.dataSource.cellGetExtra(rowId, columnId);
+  cellGetValue(rowId: string, columnId: string): unknown {
+    return this.dataSource
+      .getPropertyMeta(this.columnGetType(columnId))
+      .model.formatValue(
+        this.dataSource.cellGetValue(rowId, columnId),
+        this.columnGetData(columnId)
+      );
   }
 
   cellSetValueFromString(columnId: string, cellData: string) {
@@ -385,12 +294,6 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     });
   }
 
-  abstract columnGet(columnId: string): DataViewColumnManager;
-
-  columnGetMeta(type: string): ColumnMeta {
-    return this.dataSource.getPropertyMeta(type);
-  }
-
   columnGetData(columnId: string): Record<string, unknown> {
     return this.dataSource.propertyGetData(columnId);
   }
@@ -401,20 +304,16 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
       .model.dataType(this.columnGetData(columnId));
   }
 
-  abstract columnGetHide(columnId: string): boolean;
-
-  abstract columnUpdateHide(columnId: string, hide: boolean): void;
-
   columnGetIdByIndex(index: number): string {
     return this.columns[index];
   }
 
-  columnGetReadonly(columnId: string): boolean {
-    return this.dataSource.propertyGetReadonly(columnId);
-  }
-
   columnGetIndex(columnId: string): number {
     return this.columns.indexOf(columnId);
+  }
+
+  columnGetMeta(type: string): ColumnMeta {
+    return this.dataSource.getPropertyMeta(type);
   }
 
   columnGetName(columnId: string): string {
@@ -433,6 +332,10 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     );
   }
 
+  columnGetReadonly(columnId: string): boolean {
+    return this.dataSource.propertyGetReadonly(columnId);
+  }
+
   columnGetType(columnId: string): string {
     return this.dataSource.propertyGetType(columnId);
   }
@@ -449,6 +352,36 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     this.dataSource.propertyChangeType(columnId, type);
   }
 
+  filterSetVisible(visible: boolean): void {
+    this._filterVisible = visible;
+    this.slots.update.emit({ viewId: this.id });
+  }
+
+  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+    return this.dataSource.getContext(key);
+  }
+
+  getIcon(type: string): UniComponent | undefined {
+    return this.dataSource.getPropertyMeta(type).renderer.icon;
+  }
+
+  init(dataSource: DataSource, viewSource: SingleViewSource<ViewData>) {
+    this._dataSource = dataSource;
+    this._viewSource = viewSource;
+    this._dataSource.slots.update
+      .flatMap(() => ({ viewId: this.id }))
+      .pipe(this.slots.update);
+    this._viewSource.updateSlot.pipe(this.slots.update);
+  }
+
+  onCellUpdate(
+    rowId: string,
+    columnId: string,
+    callback: () => void
+  ): Disposable {
+    return this.dataSource.onCellUpdate(rowId, columnId, callback);
+  }
+
   rowAdd(insertPosition: InsertToPosition | number): string {
     return this.dataSource.rowAdd(insertPosition);
   }
@@ -457,26 +390,93 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     this.dataSource.rowDelete(ids);
   }
 
-  getIcon(type: string): UniComponent | undefined {
-    return this.dataSource.getPropertyMeta(type).renderer.icon;
-  }
-
-  abstract columnMove(columnId: string, position: InsertToPosition): void;
-
-  abstract deleteView(): void;
-
-  abstract updateFilter(filter: FilterGroup): void;
-
-  filterSetVisible(visible: boolean): void {
-    this._filterVisible = visible;
-    this.slots.update.emit({ viewId: this.id });
-  }
-
   rowMove(rowId: string, position: InsertToPosition): void {
     this.dataSource.rowMove(rowId, position);
   }
 
+  setSearch(str: string): void {
+    this.searchString = str;
+    this.slots.update.emit({ viewId: this.id });
+  }
+
+  get allColumnConfig(): ColumnConfig[] {
+    return this.dataSource.addPropertyConfigList;
+  }
+
+  get columnManagerList(): ReturnType<this['columnGet']>[] {
+    return this.columns.map(
+      id => this.columnGet(id) as ReturnType<this['columnGet']>
+    );
+  }
+
+  protected get dataSource(): DataSource {
+    assertExists(this._dataSource, 'data source is not set');
+    return this._dataSource;
+  }
+
+  get detailSlots(): DetailSlots {
+    return this.dataSource.detailSlots;
+  }
+
+  get filterVisible(): boolean {
+    return this._filterVisible ?? this.filter.conditions.length > 0;
+  }
+
+  get readonly(): boolean {
+    return false;
+  }
+
+  get rows(): string[] {
+    return this.filteredRows(this.searchString);
+  }
+
+  get vars(): Variable[] {
+    return this.columnsWithoutFilter.map(id => {
+      const v = this.columnGet(id);
+      const propertyMeta = this.dataSource.getPropertyMeta(v.type);
+      return {
+        icon: v.icon,
+        id: v.id,
+        name: v.name,
+        type: propertyMeta.model.dataType(v.data),
+      };
+    });
+  }
+
+  protected get viewSource(): SingleViewSource<ViewData> {
+    assertExists(this._viewSource, 'view source is not set');
+    return this._viewSource;
+  }
+
+  abstract columnGet(columnId: string): DataViewColumnManager;
+
+  abstract columnGetHide(columnId: string): boolean;
+
+  abstract columnMove(columnId: string, position: InsertToPosition): void;
+
+  abstract columnUpdateHide(columnId: string, hide: boolean): void;
+
+  abstract get columns(): string[];
+
+  abstract get columnsWithoutFilter(): string[];
+
+  abstract deleteView(): void;
+
+  abstract get detailColumns(): string[];
+
   abstract duplicateView(): void;
+
+  abstract get filter(): FilterGroup;
+
+  abstract get id(): string;
+
+  abstract get isDeleted(): boolean;
+
+  abstract isShow(rowId: string): boolean;
+
+  abstract get type(): string;
+
+  abstract updateFilter(filter: FilterGroup): void;
 }
 
 export abstract class DataViewColumnManagerBase
@@ -487,54 +487,20 @@ export abstract class DataViewColumnManagerBase
     public dataViewManager: DataViewManager
   ) {}
 
-  get index(): number {
-    return this.dataViewManager.columnGetIndex(this.id);
+  getExtra(rowId: string): unknown {
+    return this.dataViewManager.cellGetExtra(rowId, this.id);
   }
 
-  get data(): Record<string, unknown> {
-    return this.dataViewManager.columnGetData(this.id);
+  getJsonValue(rowId: string): unknown {
+    return this.dataViewManager.cellGetJsonValue(rowId, this.id);
   }
 
-  get hide(): boolean {
-    return this.dataViewManager.columnGetHide(this.id);
+  getStringValue(rowId: string): string {
+    return this.dataViewManager.cellGetStringValue(rowId, this.id);
   }
 
-  get id(): string {
-    return this.propertyId;
-  }
-
-  get isFirst(): boolean {
-    return this.dataViewManager.columnGetIndex(this.id) === 0;
-  }
-
-  get isLast(): boolean {
-    return (
-      this.dataViewManager.columnGetIndex(this.id) ===
-      this.dataViewManager.columnManagerList.length - 1
-    );
-  }
-
-  get name(): string {
-    return this.dataViewManager.columnGetName(this.id);
-  }
-
-  get renderer(): CellRenderer {
-    return this.dataViewManager.columnGetMeta(this.type).renderer.cellRenderer;
-  }
-
-  get detailRenderer(): CellRenderer {
-    return (
-      this.dataViewManager.columnGetMeta(this.type).renderer
-        .detailCellRenderer ?? this.renderer
-    );
-  }
-
-  get type(): string {
-    return this.dataViewManager.columnGetType(this.id);
-  }
-
-  get dataType(): TType {
-    return this.dataViewManager.columnGetDataType(this.id);
+  getValue(rowId: string): undefined | unknown {
+    return this.dataViewManager.cellGetRenderValue(rowId, this.id);
   }
 
   isEmpty(rowId: string): boolean {
@@ -543,16 +509,21 @@ export abstract class DataViewColumnManagerBase
       .model.ops.isEmpty(this.getValue(rowId));
   }
 
-  getValue(rowId: string): unknown | undefined {
-    return this.dataViewManager.cellGetRenderValue(rowId, this.id);
+  onCellUpdate(rowId: string, callback: () => void): Disposable {
+    return this.dataViewManager.onCellUpdate(rowId, this.id, callback);
   }
 
-  getExtra(rowId: string): unknown {
-    return this.dataViewManager.cellGetExtra(rowId, this.id);
-  }
-
-  setValue(rowId: string, value: unknown | undefined): void {
+  setValue(rowId: string, value: undefined | unknown): void {
     this.dataViewManager.cellUpdateRenderValue(rowId, this.id, value);
+  }
+
+  setValueFromString(value: string) {
+    const result = this.dataViewManager.cellSetValueFromString(this.id, value);
+
+    if (result.data) {
+      this.dataViewManager.columnUpdateData(this.id, result.data);
+    }
+    return result.value;
   }
 
   updateData(updater: ColumnDataUpdater): void {
@@ -571,16 +542,59 @@ export abstract class DataViewColumnManagerBase
     this.dataViewManager.columnUpdateName(this.id, name);
   }
 
+  get data(): Record<string, unknown> {
+    return this.dataViewManager.columnGetData(this.id);
+  }
+
+  get dataType(): TType {
+    return this.dataViewManager.columnGetDataType(this.id);
+  }
+
   get delete(): (() => void) | undefined {
     return () => this.dataViewManager.columnDelete(this.id);
+  }
+
+  get detailRenderer(): CellRenderer {
+    return (
+      this.dataViewManager.columnGetMeta(this.type).renderer
+        .detailCellRenderer ?? this.renderer
+    );
   }
 
   get duplicate(): (() => void) | undefined {
     return () => this.dataViewManager.columnDuplicate(this.id);
   }
 
-  get updateType(): undefined | ((type: string) => void) {
-    return type => this.dataViewManager.columnUpdateType(this.id, type);
+  get hide(): boolean {
+    return this.dataViewManager.columnGetHide(this.id);
+  }
+
+  get icon(): UniComponent | undefined {
+    if (!this.type) return undefined;
+    return this.dataViewManager.getIcon(this.type);
+  }
+
+  get id(): string {
+    return this.propertyId;
+  }
+
+  get index(): number {
+    return this.dataViewManager.columnGetIndex(this.id);
+  }
+
+  get isFirst(): boolean {
+    return this.dataViewManager.columnGetIndex(this.id) === 0;
+  }
+
+  get isLast(): boolean {
+    return (
+      this.dataViewManager.columnGetIndex(this.id) ===
+      this.dataViewManager.columnManagerList.length - 1
+    );
+  }
+
+  get name(): string {
+    return this.dataViewManager.columnGetName(this.id);
   }
 
   get readonly(): boolean {
@@ -590,29 +604,15 @@ export abstract class DataViewColumnManagerBase
     );
   }
 
-  getJsonValue(rowId: string): unknown {
-    return this.dataViewManager.cellGetJsonValue(rowId, this.id);
+  get renderer(): CellRenderer {
+    return this.dataViewManager.columnGetMeta(this.type).renderer.cellRenderer;
   }
 
-  getStringValue(rowId: string): string {
-    return this.dataViewManager.cellGetStringValue(rowId, this.id);
+  get type(): string {
+    return this.dataViewManager.columnGetType(this.id);
   }
 
-  setValueFromString(value: string) {
-    const result = this.dataViewManager.cellSetValueFromString(this.id, value);
-
-    if (result.data) {
-      this.dataViewManager.columnUpdateData(this.id, result.data);
-    }
-    return result.value;
-  }
-
-  get icon(): UniComponent | undefined {
-    if (!this.type) return undefined;
-    return this.dataViewManager.getIcon(this.type);
-  }
-
-  onCellUpdate(rowId: string, callback: () => void): Disposable {
-    return this.dataViewManager.onCellUpdate(rowId, this.id, callback);
+  get updateType(): ((type: string) => void) | undefined {
+    return type => this.dataViewManager.columnUpdateType(this.id, type);
   }
 }

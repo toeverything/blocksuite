@@ -1,4 +1,4 @@
-import type { nothing, TemplateResult } from 'lit';
+import type { TemplateResult, nothing } from 'lit';
 
 import type {
   AIError,
@@ -7,20 +7,20 @@ import type {
 
 export interface CopyConfig {
   allowed: boolean;
-  onCopy: () => boolean | Promise<boolean>;
+  onCopy: () => Promise<boolean> | boolean;
 }
 
 export interface AIPanelAnswerConfig {
-  responses: AIItemGroupConfig[];
   actions: AIItemGroupConfig[];
+  responses: AIItemGroupConfig[];
 }
 
 export interface AIPanelErrorConfig {
-  login: () => void;
-  upgrade: () => void;
   cancel: () => void;
-  responses: AIItemGroupConfig[];
   error?: AIError;
+  login: () => void;
+  responses: AIItemGroupConfig[];
+  upgrade: () => void;
 }
 
 export interface AIPanelGeneratingConfig {
@@ -34,26 +34,26 @@ export interface AffineAIPanelWidgetConfig {
     answer: string,
     state?: AffineAIPanelState
   ) => TemplateResult<1> | typeof nothing;
+  copy?: CopyConfig;
+
+  discardCallback?: () => void;
+  errorStateConfig: AIPanelErrorConfig;
+  finishStateConfig: AIPanelAnswerConfig;
   generateAnswer?: (props: {
+    finish: (type: 'aborted' | 'error' | 'success', err?: AIError) => void;
     input: string;
-    update: (answer: string) => void;
-    finish: (type: 'success' | 'error' | 'aborted', err?: AIError) => void;
     // Used to allow users to stop actively when generating
     signal: AbortSignal;
+    update: (answer: string) => void;
   }) => void;
-
-  finishStateConfig: AIPanelAnswerConfig;
   generatingStateConfig: AIPanelGeneratingConfig;
-  errorStateConfig: AIPanelErrorConfig;
-  hideCallback?: () => void;
-  discardCallback?: () => void;
 
-  copy?: CopyConfig;
+  hideCallback?: () => void;
 }
 
 export type AffineAIPanelState =
-  | 'hidden'
-  | 'input'
-  | 'generating'
+  | 'error'
   | 'finished'
-  | 'error';
+  | 'generating'
+  | 'hidden'
+  | 'input';

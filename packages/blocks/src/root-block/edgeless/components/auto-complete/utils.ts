@@ -3,23 +3,24 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { Connection } from '../../../../surface-block/element-model/connector.js';
-import {
-  GroupElementModel,
-  ShapeElementModel,
-} from '../../../../surface-block/element-model/index.js';
 import type {
   ShapeStyle,
   ShapeType,
 } from '../../../../surface-block/element-model/shape.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
+import {
+  GroupElementModel,
+  ShapeElementModel,
+} from '../../../../surface-block/element-model/index.js';
 import {
   Bound,
-  normalizeDegAngle,
   type Options,
   Overlay,
   type RoughCanvas,
   type XYWH,
+  normalizeDegAngle,
 } from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 
 export enum Direction {
@@ -38,12 +39,12 @@ export const DEFAULT_NOTE_OVERLAY_HEIGHT = 110;
 export const DEFAULT_TEXT_WIDTH = 116;
 export const DEFAULT_TEXT_HEIGHT = 24;
 
-export type TARGET_SHAPE_TYPE = ShapeType | 'roundedRect';
+export type TARGET_SHAPE_TYPE = 'roundedRect' | ShapeType;
 export type AUTO_COMPLETE_TARGET_TYPE =
-  | TARGET_SHAPE_TYPE
-  | 'text'
+  | 'frame'
   | 'note'
-  | 'frame';
+  | 'text'
+  | TARGET_SHAPE_TYPE;
 
 export const DEFAULT_NOTE_BACKGROUND_COLOR =
   '--affine-background-secondary-color';
@@ -177,7 +178,7 @@ export function nextBound(
   elements: ShapeElementModel[]
 ) {
   const bound = Bound.deserialize(curShape.xywh);
-  const { x, y, w, h } = bound;
+  const { h, w, x, y } = bound;
   let nextBound: Bound;
   let angle = 0;
   switch (type) {
@@ -260,7 +261,7 @@ export function getPosition(type: Direction) {
       endPosition = [0.5, 1];
       break;
   }
-  return { startPosition, endPosition };
+  return { endPosition, startPosition };
 }
 
 export function isShape(element: unknown): element is ShapeElementModel {
@@ -273,7 +274,7 @@ export function capitalizeFirstLetter(str: string) {
 
 export function createEdgelessElement(
   edgeless: EdgelessRootBlockComponent,
-  current: ShapeElementModel | NoteBlockModel,
+  current: NoteBlockModel | ShapeElementModel,
   bound: Bound
 ) {
   let id;
@@ -313,7 +314,7 @@ export function createEdgelessElement(
 
 export function createShapeElement(
   edgeless: EdgelessRootBlockComponent,
-  current: ShapeElementModel | NoteBlockModel,
+  current: NoteBlockModel | ShapeElementModel,
   targetType: TARGET_SHAPE_TYPE
 ) {
   const service = edgeless.service!;
@@ -324,8 +325,8 @@ export function createShapeElement(
 
   const id = service.addElement('shape', {
     ...props,
-    shapeType: targetType === 'roundedRect' ? 'rect' : targetType,
     radius: targetType === 'roundedRect' ? 0.1 : 0,
+    shapeType: targetType === 'roundedRect' ? 'rect' : targetType,
     text: new DocCollection.Y.Text(),
   });
   const group = current.group;

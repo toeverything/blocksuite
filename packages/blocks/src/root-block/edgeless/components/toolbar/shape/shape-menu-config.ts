@@ -1,5 +1,7 @@
 import type { TemplateResult } from 'lit';
 
+import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
+
 import {
   DiamondIcon,
   EllipseIcon,
@@ -13,70 +15,69 @@ import {
   TriangleIcon,
 } from '../../../../../_common/icons/index.js';
 import { ShapeType } from '../../../../../surface-block/index.js';
-import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
 
-const { Rect, Ellipse, Triangle, Diamond } = ShapeType;
+const { Diamond, Ellipse, Rect, Triangle } = ShapeType;
 
 type Config = {
-  name: ShapeTool['shapeType'];
+  disabled: boolean;
   generalIcon: TemplateResult<1>;
+  name: ShapeTool['shapeType'];
   scribbledIcon: TemplateResult<1>;
   tooltip: string;
-  disabled: boolean;
   value: Record<string, unknown>;
 };
 
 export const ShapeComponentConfig: Config[] = [
   {
-    name: Rect,
+    disabled: false,
     generalIcon: SquareIcon,
+    name: Rect,
     scribbledIcon: ScribbledSquareIcon,
     tooltip: 'Square',
-    disabled: false,
     value: {
-      shapeType: Rect,
       radius: 0,
+      shapeType: Rect,
     },
   },
   {
-    name: Ellipse,
+    disabled: false,
     generalIcon: EllipseIcon,
+    name: Ellipse,
     scribbledIcon: ScribbledEllipseIcon,
     tooltip: 'Ellipse',
-    disabled: false,
     value: {
       shapeType: Ellipse,
     },
   },
   {
-    name: Diamond,
+    disabled: false,
     generalIcon: DiamondIcon,
+    name: Diamond,
     scribbledIcon: ScribbledDiamondIcon,
     tooltip: 'Diamond',
-    disabled: false,
     value: {
       shapeType: Diamond,
     },
   },
   {
-    name: Triangle,
+    disabled: false,
     generalIcon: TriangleIcon,
+    name: Triangle,
     scribbledIcon: ScribbledTriangleIcon,
     tooltip: 'Triangle',
-    disabled: false,
     value: {
       shapeType: Triangle,
     },
   },
   {
-    name: 'roundedRect',
+    disabled: false,
     generalIcon: RoundedRectangleIcon,
+    name: 'roundedRect',
     scribbledIcon: ScribbledRoundedRectangleIcon,
     tooltip: 'Rounded rectangle',
-    disabled: false,
     value: {
-      shapeType: Rect,
       radius: 0.1,
+      shapeType: Rect,
     },
   },
 ];

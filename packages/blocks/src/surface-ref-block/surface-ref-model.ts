@@ -1,23 +1,23 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
 
 type SurfaceRefProps = {
-  reference: string;
   caption: string;
   refFlavour: string;
+  reference: string;
 };
 
 export const SurfaceRefBlockSchema = defineBlockSchema({
   flavour: 'affine:surface-ref',
+  metadata: {
+    parent: ['affine:note', 'affine:paragraph', 'affine:list'],
+    role: 'content',
+    version: 1,
+  },
   props: () =>
     ({
-      reference: '',
       caption: '',
+      reference: '',
     }) as SurfaceRefProps,
-  metadata: {
-    version: 1,
-    role: 'content',
-    parent: ['affine:note', 'affine:paragraph', 'affine:list'],
-  },
 });
 
 export type SurfaceRefBlockModel = SchemaToModel<typeof SurfaceRefBlockSchema>;

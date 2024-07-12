@@ -1,5 +1,3 @@
-import '../../../../_common/components/rich-text/rich-text.js';
-
 import {
   RangeManager,
   ShadowlessElement,
@@ -12,6 +10,9 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
+import '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { almostEqual } from '../../../../_common/utils/math.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
@@ -20,7 +21,6 @@ import {
   type ConnectorElementModel,
   Vec,
 } from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 const HORIZONTAL_PADDING = 2;
 const VERTICAL_PADDING = 2;
@@ -30,15 +30,6 @@ const BORDER_WIDTH = 1;
 export class EdgelessConnectorLabelEditor extends WithDisposable(
   ShadowlessElement
 ) {
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
   static override styles = css`
     .edgeless-connector-label-editor {
       position: absolute;
@@ -72,20 +63,11 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
     }
   `;
 
-  private _keeping = false;
-
   private _isComposition = false;
 
+  private _keeping = false;
+
   private _resizeObserver: ResizeObserver | null = null;
-
-  @query('rich-text')
-  accessor richText!: RichText;
-
-  @property({ attribute: false })
-  accessor connector!: ConnectorElementModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _updateLabelRect = () => {
     const { connector, edgeless } = this;
@@ -109,10 +91,6 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
     }
   };
 
-  setKeeping(keeping: boolean) {
-    this._keeping = keeping;
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
@@ -125,7 +103,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
   }
 
   override firstUpdated() {
-    const { edgeless, connector } = this;
+    const { connector, edgeless } = this;
     const { dispatcher } = edgeless;
     assertExists(dispatcher);
 
@@ -146,7 +124,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
         this.disposables.add(
           dispatcher.add('keyDown', ctx => {
             const state = ctx.get('keyboardState');
-            const { key, ctrlKey, metaKey, altKey, shiftKey, isComposing } =
+            const { altKey, ctrlKey, isComposing, key, metaKey, shiftKey } =
               state.raw;
             const onlyCmd = (ctrlKey || metaKey) && !altKey && !shiftKey;
             const isModEnter = onlyCmd && key === 'Enter';
@@ -155,8 +133,8 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
               this.inlineEditorContainer.blur();
 
               edgeless.service.selection.set({
-                elements: [connector.id],
                 editing: false,
+                elements: [connector.id],
               });
               return true;
             }
@@ -187,10 +165,10 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
             if (len === 0) {
               // reset
               edgeless.service.updateElement(connector.id, {
-                text: undefined,
-                labelXYWH: undefined,
-                labelStyle: undefined,
                 labelOffset: undefined,
+                labelStyle: undefined,
+                labelXYWH: undefined,
+                text: undefined,
               });
             } else if (len < text.length) {
               edgeless.service.updateElement(connector.id, {
@@ -203,8 +181,8 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
           connector.lableEditing = false;
 
           edgeless.service.selection.set({
-            elements: [],
             editing: false,
+            elements: [],
           });
         });
 
@@ -248,16 +226,16 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
   override render() {
     const { connector } = this;
     const {
+      labelConstraints: { hasMaxWidth, maxWidth },
       labelOffset: { distance },
       labelStyle: {
+        color,
         fontFamily,
         fontSize,
         fontStyle,
         fontWeight,
-        color,
         textAlign,
       },
-      labelConstraints: { hasMaxWidth, maxWidth },
     } = connector;
 
     const lineHeight = getLineHeight(fontFamily, fontSize, fontWeight);
@@ -276,16 +254,16 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       <div
         class="edgeless-connector-label-editor"
         style=${styleMap({
+          color: isCssVariable(color) ? `var(${color})` : color,
           fontFamily: `"${fontFamily}"`,
           fontSize: `${fontSize}px`,
           fontStyle,
           fontWeight,
-          textAlign,
           lineHeight: `${lineHeight}px`,
           maxWidth: hasMaxWidth
             ? `${maxWidth + BORDER_WIDTH * 2 + HORIZONTAL_PADDING * 2}px`
             : 'initial',
-          color: isCssVariable(color) ? `var(${color})` : color,
+          textAlign,
           transform: transformOperation.join(' '),
         })}
       >
@@ -294,10 +272,10 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
           .enableFormat=${false}
           style=${isEmpty
             ? styleMap({
-                position: 'absolute',
                 left: 0,
-                top: 0,
                 padding: `${VERTICAL_PADDING}px ${HORIZONTAL_PADDING}px`,
+                position: 'absolute',
+                top: 0,
               })
             : nothing}
         ></rich-text>
@@ -311,6 +289,28 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       </div>
     `;
   }
+
+  setKeeping(keeping: boolean) {
+    this._keeping = keeping;
+  }
+
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
+  @property({ attribute: false })
+  accessor connector!: ConnectorElementModel;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @query('rich-text')
+  accessor richText!: RichText;
 }
 
 declare global {

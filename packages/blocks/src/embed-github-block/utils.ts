@@ -2,12 +2,13 @@ import { assertExists } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
 import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import { isAbortError } from '../_common/utils/helper.js';
 import type { EmbedGithubBlockComponent } from './embed-github-block.js';
 import type {
   EmbedGithubBlockUrlData,
   EmbedGithubModel,
 } from './embed-github-model.js';
+
+import { isAbortError } from '../_common/utils/helper.js';
 import {
   GithubIssueClosedFailureIcon,
   GithubIssueClosedSuccessIcon,
@@ -34,7 +35,7 @@ export async function queryEmbedGithubApiData(
   embedGithubModel: EmbedGithubModel,
   signal?: AbortSignal
 ): Promise<Partial<EmbedGithubBlockUrlData>> {
-  const { owner, repo, githubType, githubId } = embedGithubModel;
+  const { githubId, githubType, owner, repo } = embedGithubModel;
   let githubApiData: Partial<EmbedGithubBlockUrlData> = {};
 
   // github's public api has a rate limit of 60 requests per hour
@@ -49,7 +50,7 @@ export async function queryEmbedGithubApiData(
 
   if (githubApiResponse && githubApiResponse.ok) {
     const githubApiJson = await githubApiResponse.json();
-    const { state, state_reason, draft, merged, created_at, assignees } =
+    const { assignees, created_at, draft, merged, state, state_reason } =
       githubApiJson;
 
     const assigneeLogins = assignees.map(
@@ -64,10 +65,10 @@ export async function queryEmbedGithubApiData(
     }
 
     githubApiData = {
+      assignees: assigneeLogins,
+      createdAt: created_at,
       status,
       statusReason: state_reason,
-      createdAt: created_at,
-      assignees: assigneeLogins,
     };
   }
 
@@ -94,25 +95,25 @@ export async function refreshEmbedGithubUrlData(
 
     const githubUrlData = await queryUrlData(embedGithubElement.model);
     ({
+      assignees = null,
+      createdAt = null,
+      description = null,
       image = null,
       status = null,
       statusReason = null,
       title = null,
-      description = null,
-      createdAt = null,
-      assignees = null,
     } = githubUrlData);
 
     if (signal?.aborted) return;
 
     embedGithubElement.doc.updateBlock(embedGithubElement.model, {
+      assignees,
+      createdAt,
+      description,
       image,
       status,
       statusReason,
       title,
-      description,
-      createdAt,
-      assignees,
     });
   } catch (error) {
     if (signal?.aborted || isAbortError(error)) return;
@@ -133,17 +134,17 @@ export async function refreshEmbedGithubStatus(
   if (!githubApiData.status || signal?.aborted) return;
 
   embedGithubElement.doc.updateBlock(embedGithubElement.model, {
+    assignees: githubApiData.assignees,
+    createdAt: githubApiData.createdAt,
     status: githubApiData.status,
     statusReason: githubApiData.statusReason,
-    createdAt: githubApiData.createdAt,
-    assignees: githubApiData.assignees,
   });
 }
 
 export function getGithubStatusIcon(
   type: 'issue' | 'pr',
   status: string,
-  statusReason: string | null
+  statusReason: null | string
 ) {
   if (type === 'issue') {
     if (status === 'open') {

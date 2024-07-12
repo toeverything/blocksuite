@@ -1,5 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { PageRootService } from '@blocksuite/blocks';
+
 import {
   type DocMode,
   type DocModeService,
@@ -31,12 +32,6 @@ const DEFAULT_MODE = 'page';
 const slotMap = new Map<string, Slot<DocMode>>();
 export function mockDocModeService(curDocId: string) {
   const docModeService: DocModeService = {
-    setMode: (mode: DocMode, docId: string = curDocId) => {
-      const modeMap = getModeFromStorage();
-      modeMap.set(docId, mode);
-      saveModeToStorage(modeMap);
-      slotMap.get(docId)?.emit(mode);
-    },
     getMode: (docId: string = curDocId) => {
       try {
         const modeMap = getModeFromStorage();
@@ -44,12 +39,6 @@ export function mockDocModeService(curDocId: string) {
       } catch (_e) {
         return DEFAULT_MODE;
       }
-    },
-    toggleMode: (docId: string = curDocId) => {
-      const mode =
-        docModeService.getMode(docId) === 'page' ? 'edgeless' : 'page';
-      docModeService.setMode(mode, docId);
-      return mode;
     },
     onModeChange: (
       handler: (mode: DocMode) => void,
@@ -60,26 +49,38 @@ export function mockDocModeService(curDocId: string) {
       }
       return slotMap.get(docId)!.on(handler);
     },
+    setMode: (mode: DocMode, docId: string = curDocId) => {
+      const modeMap = getModeFromStorage();
+      modeMap.set(docId, mode);
+      saveModeToStorage(modeMap);
+      slotMap.get(docId)?.emit(mode);
+    },
+    toggleMode: (docId: string = curDocId) => {
+      const mode =
+        docModeService.getMode(docId) === 'page' ? 'edgeless' : 'page';
+      docModeService.setMode(mode, docId);
+      return mode;
+    },
   };
   return docModeService;
 }
 
 export function mockNotificationService(service: PageRootService) {
   const notificationService: NotificationService = {
-    toast: (message, options) => {
-      toast(service.host as EditorHost, message, options?.duration);
-    },
     confirm: notification => {
       return Promise.resolve(confirm(notification.title.toString()));
+    },
+    notify: notification => {
+      // todo: implement in playground
+      console.log(notification);
     },
     prompt: notification => {
       return Promise.resolve(
         prompt(notification.title.toString(), notification.autofill?.toString())
       );
     },
-    notify: notification => {
-      // todo: implement in playground
-      console.log(notification);
+    toast: (message, options) => {
+      toast(service.host as EditorHost, message, options?.duration);
     },
   };
   return notificationService;

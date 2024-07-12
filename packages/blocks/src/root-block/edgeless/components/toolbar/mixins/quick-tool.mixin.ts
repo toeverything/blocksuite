@@ -16,5 +16,5 @@ export const QuickToolMixin = <T extends Constructor<LitElement>>(
 ) => {
   abstract class DerivedClass extends EdgelessToolbarToolMixin(SuperClass) {}
 
-  return DerivedClass as unknown as T & Constructor<QuickToolMixinClass>;
+  return DerivedClass as unknown as Constructor<QuickToolMixinClass> & T;
 };

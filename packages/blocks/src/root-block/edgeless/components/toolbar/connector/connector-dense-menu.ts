@@ -1,3 +1,5 @@
+import type { DenseMenuBuilder } from '../common/type.js';
+
 import {
   ConnectorCWithArrowIcon,
   ConnectorIcon,
@@ -5,7 +7,6 @@ import {
   ConnectorXWithArrowIcon,
 } from '../../../../../_common/icons/edgeless.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
-import type { DenseMenuBuilder } from '../common/type.js';
 
 export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
   const prevMode =
@@ -17,41 +18,41 @@ export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
   const createSelect =
     (mode: ConnectorMode, record = true) =>
     () => {
-      edgeless.tools.setEdgelessTool({ type: 'connector', mode });
+      edgeless.tools.setEdgelessTool({ mode, type: 'connector' });
       record &&
         edgeless.service.editPropsStore.recordLastProps('connector', { mode });
     };
 
   return {
-    type: 'sub-menu',
-    name: 'Connector',
     icon: ConnectorIcon,
-    select: createSelect(prevMode, false),
     isSelected,
+    name: 'Connector',
     options: {
       items: [
         {
-          type: 'action',
-          name: 'Curve',
           icon: ConnectorCWithArrowIcon,
-          select: createSelect(ConnectorMode.Curve),
           isSelected: isSelected && prevMode === ConnectorMode.Curve,
+          name: 'Curve',
+          select: createSelect(ConnectorMode.Curve),
+          type: 'action',
         },
         {
-          type: 'action',
-          name: 'Elbowed',
           icon: ConnectorXWithArrowIcon,
-          select: createSelect(ConnectorMode.Orthogonal),
           isSelected: isSelected && prevMode === ConnectorMode.Orthogonal,
+          name: 'Elbowed',
+          select: createSelect(ConnectorMode.Orthogonal),
+          type: 'action',
         },
         {
-          type: 'action',
-          name: 'Straight',
           icon: ConnectorLWithArrowIcon,
-          select: createSelect(ConnectorMode.Straight),
           isSelected: isSelected && prevMode === ConnectorMode.Straight,
+          name: 'Straight',
+          select: createSelect(ConnectorMode.Straight),
+          type: 'action',
         },
       ],
     },
+    select: createSelect(prevMode, false),
+    type: 'sub-menu',
   };
 };

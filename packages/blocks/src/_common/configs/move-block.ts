@@ -1,5 +1,6 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 
 const getSelection = (blockComponent: BlockElement) =>
@@ -21,15 +22,13 @@ const pathToBlock = (blockElement: BlockElement, blockId: string) =>
   blockElement.host.view.getBlock(blockId);
 
 interface MoveBlockConfig {
-  name: string;
-  hotkey: string[];
   action: (blockElement: BlockElement) => void;
+  hotkey: string[];
+  name: string;
 }
 
 export const moveBlockConfigs: MoveBlockConfig[] = [
   {
-    name: 'Move Up',
-    hotkey: ['Mod-Alt-ArrowUp', 'Mod-Shift-ArrowUp'],
     action: blockElement => {
       const doc = blockElement.doc;
       const textSelection = getTextSelection(blockElement);
@@ -85,10 +84,10 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       }
       return;
     },
+    hotkey: ['Mod-Alt-ArrowUp', 'Mod-Shift-ArrowUp'],
+    name: 'Move Up',
   },
   {
-    name: 'Move Down',
-    hotkey: ['Mod-Alt-ArrowDown', 'Mod-Shift-ArrowDown'],
     action: blockElement => {
       const doc = blockElement.doc;
       const textSelection = getTextSelection(blockElement);
@@ -135,5 +134,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       }
       return;
     },
+    hotkey: ['Mod-Alt-ArrowDown', 'Mod-Shift-ArrowDown'],
+    name: 'Move Down',
   },
 ];

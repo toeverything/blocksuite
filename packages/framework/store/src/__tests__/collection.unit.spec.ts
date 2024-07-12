@@ -2,14 +2,16 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import type { Slot } from '@blocksuite/global/utils';
+
 import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
-import { COLLECTION_VERSION, PAGE_VERSION } from '../consts.js';
 import type { BlockModel, BlockSchemaType, Doc } from '../index.js';
-import { DocCollection, Generator, Schema } from '../index.js';
 import type { DocMeta } from '../store/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+
+import { COLLECTION_VERSION, PAGE_VERSION } from '../consts.js';
+import { DocCollection, Generator, Schema } from '../index.js';
 import {
   NoteBlockSchema,
   ParagraphBlockSchema,
@@ -110,20 +112,20 @@ describe('basic', () => {
 
     assert.deepEqual(actual, {
       [spaceMetaId]: {
-        pages: [
-          {
-            id: 'doc:home',
-            title: '',
-            tags: [],
-          },
-        ],
-        workspaceVersion: COLLECTION_VERSION,
-        pageVersion: PAGE_VERSION,
         blockVersions: {
           'affine:note': 1,
           'affine:page': 2,
           'affine:paragraph': 1,
         },
+        pageVersion: PAGE_VERSION,
+        pages: [
+          {
+            id: 'doc:home',
+            tags: [],
+            title: '',
+          },
+        ],
+        workspaceVersion: COLLECTION_VERSION,
       },
       spaces: {
         [spaceId]: {
@@ -276,10 +278,10 @@ describe('addBlock', () => {
         'prop:count': 0,
         'prop:items': [],
         'prop:style': {},
+        'prop:title': 'hello',
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
-        'prop:title': 'hello',
         'sys:version': 2,
       },
     });
@@ -294,8 +296,8 @@ describe('addBlock', () => {
     doc.addBlock('affine:paragraph', {}, noteId);
     doc.addBlocks(
       [
-        { flavour: 'affine:paragraph', blockProps: { type: 'h1' } },
-        { flavour: 'affine:paragraph', blockProps: { type: 'h2' } },
+        { blockProps: { type: 'h1' }, flavour: 'affine:paragraph' },
+        { blockProps: { type: 'h2' }, flavour: 'affine:paragraph' },
       ],
       noteId
     );
@@ -305,10 +307,10 @@ describe('addBlock', () => {
         'prop:count': 0,
         'prop:items': [],
         'prop:style': {},
+        'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
-        'prop:title': '',
         'sys:version': 2,
       },
       '1': {
@@ -318,27 +320,27 @@ describe('addBlock', () => {
         'sys:version': 1,
       },
       '2': {
+        'prop:text': '',
+        'prop:type': 'text',
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '2',
-        'prop:text': '',
-        'prop:type': 'text',
         'sys:version': 1,
       },
       '3': {
+        'prop:text': '',
+        'prop:type': 'h1',
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '3',
-        'prop:text': '',
-        'prop:type': 'h1',
         'sys:version': 1,
       },
       '4': {
+        'prop:text': '',
+        'prop:type': 'h2',
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '4',
-        'prop:text': '',
-        'prop:type': 'h2',
         'sys:version': 1,
       },
     });
@@ -448,16 +450,16 @@ describe('addBlock', () => {
     collection.setDocMeta('doc:home', { favorite: true });
     assert.deepEqual(
       // @ts-ignore
-      collection.meta.docMetas.map(({ id, title, favorite }) => ({
+      collection.meta.docMetas.map(({ favorite, id, title }) => ({
+        favorite,
         id,
         title,
-        favorite,
       })),
       [
         {
+          favorite: true,
           id: 'doc:home',
           title: '',
-          favorite: true,
         },
       ]
     );
@@ -786,11 +788,11 @@ describe('deleteBlock', () => {
         'sys:version': 1,
       },
       '2': {
+        'prop:text': '',
+        'prop:type': 'text',
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '2',
-        'prop:text': '',
-        'prop:type': 'text',
         'sys:version': 1,
       },
     });
@@ -963,9 +965,9 @@ describe('collection search', () => {
 declare global {
   namespace BlockSuite {
     interface BlockModels {
+      'affine:note': BlockModel;
       'affine:page': BlockModel;
       'affine:paragraph': BlockModel;
-      'affine:note': BlockModel;
     }
   }
 }

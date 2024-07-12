@@ -1,10 +1,12 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
+
+import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 
 // for text selection
@@ -12,12 +14,12 @@ export const formatTextCommand: Command<
   'currentTextSelection',
   never,
   {
-    textSelection?: TextSelection;
+    mode?: 'merge' | 'replace';
     styles: AffineTextAttributes;
-    mode?: 'replace' | 'merge';
+    textSelection?: TextSelection;
   }
 > = (ctx, next) => {
-  const { styles, mode = 'merge' } = ctx;
+  const { mode = 'merge', styles } = ctx;
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
   assertExists(
@@ -28,11 +30,11 @@ export const formatTextCommand: Command<
   const success = ctx.std.command
     .chain()
     .getSelectedBlocks({
-      textSelection,
       filter: el =>
         FORMAT_TEXT_SUPPORT_FLAVOURS.includes(
           el.model.flavour as BlockSuite.Flavour
         ),
+      textSelection,
       types: ['text'],
     })
     .inline((ctx, next) => {

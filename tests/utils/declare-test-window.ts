@@ -9,17 +9,17 @@ declare global {
   interface Window {
     /** Available on playground window */
     $blocksuite: {
-      store: typeof import('../../packages/framework/store/src/index.js');
       blocks: typeof import('../../packages/blocks/src/index.js');
+      editor: typeof import('../../packages/presets/src/index.js');
       global: {
         utils: typeof import('../../packages/framework/global/src/utils.js');
       };
-      editor: typeof import('../../packages/presets/src/index.js');
+      store: typeof import('../../packages/framework/store/src/index.js');
     };
-    collection: DocCollection;
     blockSchema: Record<string, typeof BlockModel>;
-    doc: Doc;
+    collection: DocCollection;
     debugMenu: DebugMenu;
+    doc: Doc;
     editor: AffineEditorContainer;
     host: EditorHost;
     testUtils: TestUtils;

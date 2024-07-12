@@ -16,10 +16,10 @@ export const todoMeta = createBlockMeta<ListBlockModel>({
   },
 });
 todoMeta.addProperty({
-  name: 'Content',
-  key: 'todo-title',
   columnMeta: richTextColumnConfig,
   get: block => block.text.yText,
+  key: 'todo-title',
+  name: 'Content',
   set: (_block, _value) => {
     //
   },
@@ -33,10 +33,10 @@ todoMeta.addProperty({
   },
 });
 todoMeta.addProperty({
-  name: 'Checked',
-  key: 'todo-checked',
   columnMeta: columnPresets.checkboxColumnConfig,
   get: block => block.checked,
+  key: 'todo-checked',
+  name: 'Checked',
   set: (block, value) => {
     block.checked = value;
   },
@@ -50,10 +50,10 @@ todoMeta.addProperty({
 });
 
 todoMeta.addProperty({
-  name: 'Source',
-  key: 'todo-source',
   columnMeta: columnPresets.textColumnConfig,
   get: block => block.doc.meta?.title ?? '',
+  key: 'todo-source',
+  name: 'Source',
   updated: (block, callback) => {
     return block.doc.collection.meta.docMetaUpdated.on(() => {
       callback();

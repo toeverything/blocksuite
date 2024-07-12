@@ -1,5 +1,6 @@
-import { on, once } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
+
+import { on, once } from '@blocksuite/blocks';
 
 import type { OutlinePanelBody } from '../body/outline-panel-body.js';
 import type { OutlineNoteCard } from '../card/outline-card.js';
@@ -9,20 +10,20 @@ import type { OutlineNoteCard } from '../card/outline-card.js';
  * @param notes notes to drag
  */
 export function startDragging(options: {
+  container: OutlinePanelBody;
+  doc: Doc;
+  document: Document;
+  host: Document | HTMLElement;
   onDragEnd?: (insertIndex?: number) => void;
   onDragMove?: (insertIdx?: number, indicatorTranslateY?: number) => void;
   outlineListContainer: HTMLElement;
-  document: Document;
-  host: Document | HTMLElement;
-  container: OutlinePanelBody;
-  doc: Doc;
 }) {
   const {
+    container,
     document,
     host,
-    container,
-    onDragMove,
     onDragEnd,
+    onDragMove,
     outlineListContainer,
   } = options;
   const maskElement = createMaskElement(document);
@@ -30,8 +31,8 @@ export function startDragging(options: {
   const children = Array.from(
     outlineListContainer.children
   ) as OutlineNoteCard[];
-  let idx: undefined | number;
-  let indicatorTranslateY: undefined | number;
+  let idx: number | undefined;
+  let indicatorTranslateY: number | undefined;
 
   container.renderRoot.append(maskElement);
 

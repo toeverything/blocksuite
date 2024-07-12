@@ -2,7 +2,7 @@
 export type OmitFunctionsAndKeysAndReadOnly<T, K extends keyof any> = {
   [P in Exclude<
     keyof T,
-    K | FunctionPropertyNames<T> | ReadOnlyPropertyNames<T>
+    FunctionPropertyNames<T> | K | ReadOnlyPropertyNames<T>
   >]: T[P];
 };
 

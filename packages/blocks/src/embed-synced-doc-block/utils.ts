@@ -21,40 +21,40 @@ import {
 
 type SyncedCardImages = {
   LoadingIcon: TemplateResult<1>;
-  SyncedDocIcon: TemplateResult<1>;
-  SyncedDocErrorIcon: TemplateResult<1>;
-  SyncedDocDeletedIcon: TemplateResult<1>;
   ReloadIcon: TemplateResult<1>;
+  SyncedDocDeletedBanner: TemplateResult<1>;
+  SyncedDocDeletedIcon: TemplateResult<1>;
   SyncedDocEmptyBanner: TemplateResult<1>;
   SyncedDocErrorBanner: TemplateResult<1>;
-  SyncedDocDeletedBanner: TemplateResult<1>;
+  SyncedDocErrorIcon: TemplateResult<1>;
+  SyncedDocIcon: TemplateResult<1>;
 };
 
 export function getSyncedDocIcons(
-  editorMode: 'page' | 'edgeless'
+  editorMode: 'edgeless' | 'page'
 ): SyncedCardImages {
   const theme = getThemeMode();
   if (theme === 'light') {
     return {
       LoadingIcon: LightLoadingIcon,
-      SyncedDocIcon: editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
-      SyncedDocErrorIcon,
-      SyncedDocDeletedIcon,
       ReloadIcon,
+      SyncedDocDeletedBanner: LightSyncedDocDeletedBanner,
+      SyncedDocDeletedIcon,
       SyncedDocEmptyBanner: LightSyncedDocEmptyBanner,
       SyncedDocErrorBanner: LightSyncedDocErrorBanner,
-      SyncedDocDeletedBanner: LightSyncedDocDeletedBanner,
+      SyncedDocErrorIcon,
+      SyncedDocIcon: editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
     };
   } else {
     return {
       LoadingIcon: DarkLoadingIcon,
-      SyncedDocIcon: editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
-      SyncedDocErrorIcon,
-      SyncedDocDeletedIcon,
       ReloadIcon,
+      SyncedDocDeletedBanner: DarkSyncedDocDeletedBanner,
+      SyncedDocDeletedIcon,
       SyncedDocEmptyBanner: DarkSyncedDocEmptyBanner,
       SyncedDocErrorBanner: DarkSyncedDocErrorBanner,
-      SyncedDocDeletedBanner: DarkSyncedDocDeletedBanner,
+      SyncedDocErrorIcon,
+      SyncedDocIcon: editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
     };
   }
 }

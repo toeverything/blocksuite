@@ -1,7 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import { MarkdownAdapter } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
 
 export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
@@ -17,7 +18,7 @@ export const markdownToSnapshot = async (
 ) => {
   const job = new Job({ collection: host.std.doc.collection });
   const markdownAdapter = new MarkdownAdapter(job);
-  const { blockVersions, workspaceVersion, pageVersion } =
+  const { blockVersions, pageVersion, workspaceVersion } =
     host.std.doc.collection.meta;
   if (!blockVersions || !workspaceVersion || !pageVersion)
     throw new Error(
@@ -25,21 +26,21 @@ export const markdownToSnapshot = async (
     );
 
   const payload = {
-    file: markdown,
     assets: job.assetsManager,
     blockVersions,
-    pageVersion,
-    workspaceVersion,
-    workspaceId: host.std.doc.collection.id,
+    file: markdown,
     pageId: host.std.doc.id,
+    pageVersion,
+    workspaceId: host.std.doc.collection.id,
+    workspaceVersion,
   };
 
   const snapshot = await markdownAdapter.toSliceSnapshot(payload);
   assertExists(snapshot, 'import markdown failed, expected to get a snapshot');
 
   return {
-    snapshot,
     job,
+    snapshot,
   };
 };
 export async function insertFromMarkdown(
@@ -48,7 +49,7 @@ export async function insertFromMarkdown(
   parent?: string,
   index?: number
 ) {
-  const { snapshot, job } = await markdownToSnapshot(markdown, host);
+  const { job, snapshot } = await markdownToSnapshot(markdown, host);
 
   const snapshots = snapshot.content[0].children;
 

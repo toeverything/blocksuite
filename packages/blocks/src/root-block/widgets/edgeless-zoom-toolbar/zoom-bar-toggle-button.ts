@@ -1,12 +1,13 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { offset } from '@floating-ui/dom';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { createLitPortal } from '../../../_common/components/portal.js';
 import { MoreIcon } from '../../../_common/icons/edgeless.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('zoom-bar-toggle-button')
 export class ZoomBarToggleButton extends WithDisposable(LitElement) {
@@ -24,16 +25,7 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @query('.toggle-button')
-  private accessor _toggleButton!: HTMLElement;
-
-  @state()
-  private accessor _showPopper = false;
-
   private _abortController: AbortController | null = null;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _closeZoomMenu() {
     if (this._abortController && !this._abortController.signal.aborted) {
@@ -54,19 +46,19 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
       this._showPopper = false;
     });
     createLitPortal({
+      abortController: this._abortController,
+      closeOnClickAway: true,
+      computePosition: {
+        autoUpdate: true,
+        middleware: [offset(4)],
+        placement: 'top',
+        referenceElement: this._toggleButton,
+      },
+      container: this._toggleButton,
       template: html`<edgeless-zoom-toolbar
         .edgeless=${this.edgeless}
         .layout=${'vertical'}
       ></edgeless-zoom-toolbar>`,
-      container: this._toggleButton,
-      computePosition: {
-        referenceElement: this._toggleButton,
-        placement: 'top',
-        middleware: [offset(4)],
-        autoUpdate: true,
-      },
-      abortController: this._abortController,
-      closeOnClickAway: true,
     });
     this._showPopper = true;
   }
@@ -106,6 +98,15 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  @state()
+  private accessor _showPopper = false;
+
+  @query('.toggle-button')
+  private accessor _toggleButton!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {

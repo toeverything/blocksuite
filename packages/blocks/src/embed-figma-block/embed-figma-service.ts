@@ -14,8 +14,8 @@ export class EmbedFigmaBlockService extends BlockService<EmbedFigmaModel> {
       const rootService = this.std.spec.getService('affine:page');
       rootService.registerEmbedBlockOptions({
         flavour: this.flavour,
-        urlRegex: figmaUrlRegex,
         styles: EmbedFigmaStyles,
+        urlRegex: figmaUrlRegex,
         viewType: 'embed',
       });
     });

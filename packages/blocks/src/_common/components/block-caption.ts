@@ -1,6 +1,7 @@
 import type { BlockElement } from '@blocksuite/block-std';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Text } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -9,7 +10,7 @@ import { stopPropagation } from '../utils/event.js';
 import { asyncFocusRichText } from '../utils/selection.js';
 
 export interface BlockCaptionProps {
-  caption: string | null | undefined;
+  caption: null | string | undefined;
 }
 
 @customElement('block-caption-editor')
@@ -36,34 +37,10 @@ export class BlockCaptionEditor<
 
   private _focus = false;
 
-  @property({ attribute: false })
-  accessor block!: BlockElement<Model> & { isInSurface?: boolean };
-
-  @state()
-  accessor display = false;
-
-  @state()
-  accessor caption: string | null | undefined = undefined;
-
-  @query('.block-caption-editor')
-  accessor input!: HTMLInputElement;
-
-  private _onInputChange(e: InputEvent) {
-    const target = e.target as HTMLInputElement;
-    this.caption = target.value;
-    this.block.doc.updateBlock(this.block.model, {
-      caption: this.caption,
-    });
-  }
-
-  private _onInputFocus() {
-    this._focus = true;
-  }
-
-  private _onInputBlur() {
-    this._focus = false;
-    this.display = !!this.caption?.length;
-  }
+  show = () => {
+    this.display = true;
+    this.updateComplete.then(() => this.input.focus()).catch(console.error);
+  };
 
   private _onCaptionKeydown(event: KeyboardEvent) {
     event.stopPropagation();
@@ -104,10 +81,22 @@ export class BlockCaptionEditor<
     }
   }
 
-  show = () => {
-    this.display = true;
-    this.updateComplete.then(() => this.input.focus()).catch(console.error);
-  };
+  private _onInputBlur() {
+    this._focus = false;
+    this.display = !!this.caption?.length;
+  }
+
+  private _onInputChange(e: InputEvent) {
+    const target = e.target as HTMLInputElement;
+    this.caption = target.value;
+    this.block.doc.updateBlock(this.block.model, {
+      caption: this.caption,
+    });
+  }
+
+  private _onInputFocus() {
+    this._focus = true;
+  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -149,6 +138,18 @@ export class BlockCaptionEditor<
       @keyup=${stopPropagation}
     ></textarea>`;
   }
+
+  @property({ attribute: false })
+  accessor block!: { isInSurface?: boolean } & BlockElement<Model>;
+
+  @state()
+  accessor caption: null | string | undefined = undefined;
+
+  @state()
+  accessor display = false;
+
+  @query('.block-caption-editor')
+  accessor input!: HTMLInputElement;
 }
 
 declare global {

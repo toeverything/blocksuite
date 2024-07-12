@@ -27,8 +27,8 @@ export class TextCell extends BaseCellRenderer<string> {
 }
 
 export const imageColumnConfig = imageColumnModelConfig.renderConfig({
-  icon: createIcon('ImageIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(TextCell),
   },
+  icon: createIcon('ImageIcon'),
 });

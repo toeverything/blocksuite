@@ -1,22 +1,23 @@
-import '../../_common/components/toolbar/icon-button.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import { toast } from '../../_common/components/toast.js';
-import { ConfirmIcon } from '../../_common/icons/index.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
+
+import { toast } from '../../_common/components/toast.js';
+import '../../_common/components/toolbar/icon-button.js';
+import { ConfirmIcon } from '../../_common/icons/index.js';
 import { renameStyles } from './styles.js';
 
 export const RenameModal = ({
+  abortController,
   editorHost,
   model,
-  abortController,
 }: {
+  abortController: AbortController;
   editorHost: EditorHost;
   model: AttachmentBlockModel;
-  abortController: AbortController;
 }) => {
   const inputRef = createRef<HTMLInputElement>();
   // Fix auto focus

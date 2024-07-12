@@ -1,24 +1,24 @@
 export type LayoutNode = {
-  width: number;
-  height: number;
   children: LayoutNode[];
+  height: number;
+  width: number;
 };
 export type Connector = {
-  direction: 'left' | 'right' | 'top' | 'bottom';
+  direction: 'bottom' | 'left' | 'right' | 'top';
   parentId: string;
 } | null;
 export type LayoutNodeResult = {
+  children: LayoutNodeResult[];
   self: {
+    height: number;
+    width: number;
     x: number;
     y: number;
-    width: number;
-    height: number;
   };
-  children: LayoutNodeResult[];
 };
 export type LayoutOptions = {
-  gapVertical?: number;
   gapHorizontal?: number;
+  gapVertical?: number;
   x?: number;
   y?: number;
 };
@@ -34,9 +34,9 @@ const defaultOptions: LayoutOptionsRequired = {
   y: 0,
 };
 type BoxWithHeight = {
-  self: LayoutNode;
-  height: number;
   children: BoxWithHeight[];
+  height: number;
+  self: LayoutNode;
 };
 const sum = (arr: number[]) => arr.reduce((prev, cur) => prev + cur, 0);
 const computeBoxHeight = (
@@ -46,13 +46,13 @@ const computeBoxHeight = (
   const { height } = node;
   const children = node.children.map(child => computeBoxHeight(child, options));
   return {
-    self: node,
+    children,
     height: Math.max(
       height,
       children.reduce((prev, cur) => prev + cur.height, 0) +
         options.gapVertical * (children.length - 1)
     ),
-    children,
+    self: node,
   };
 };
 const computePositionRight = (
@@ -61,15 +61,15 @@ const computePositionRight = (
   y: number,
   options: LayoutOptionsRequired
 ): LayoutNodeResult => {
-  const { self, children, height } = node;
+  const { children, height, self } = node;
   const result: LayoutNodeResult = {
+    children: [],
     self: {
+      height: self.height,
+      width: self.width,
       x: x,
       y: y - self.height / 2,
-      width: self.width,
-      height: self.height,
     },
-    children: [],
   };
   let top = y - height / 2;
   children.forEach(child => {
@@ -101,15 +101,15 @@ const computePositionLeft = (
   y: number,
   options: LayoutOptionsRequired
 ): LayoutNodeResult => {
-  const { self, children, height } = node;
+  const { children, height, self } = node;
   const result: LayoutNodeResult = {
+    children: [],
     self: {
+      height: self.height,
+      width: self.width,
       x: x - self.width,
       y: y - self.height / 2,
-      width: self.width,
-      height: self.height,
     },
-    children: [],
   };
   let top = y - height / 2;
   children.forEach(child => {
@@ -167,13 +167,13 @@ const leftRightLayout: Layout = (node, options) => {
       realOptions.gapVertical * (leftBox.length - 1)) /
       2;
   const root: LayoutNodeResult = {
+    children: [],
     self: {
+      height: node.height,
+      width: node.width,
       x: 0 - node.width / 2,
       y: 0 - node.height / 2,
-      width: node.width,
-      height: node.height,
     },
-    children: [],
   };
   leftBox.forEach(box => {
     root.children.push(
@@ -201,9 +201,9 @@ const leftRightLayout: Layout = (node, options) => {
 };
 
 type BoxWithWidth = {
+  children: BoxWithWidth[];
   self: LayoutNode;
   width: number;
-  children: BoxWithWidth[];
 };
 
 const computeBoxWidth = (
@@ -213,13 +213,13 @@ const computeBoxWidth = (
   const { width } = node;
   const children = node.children.map(child => computeBoxWidth(child, options));
   return {
+    children,
     self: node,
     width: Math.max(
       width,
       children.reduce((prev, cur) => prev + cur.width, 0) +
         options.gapHorizontal * (children.length - 1)
     ),
-    children,
   };
 };
 
@@ -229,15 +229,15 @@ const computePositionTop = (
   y: number,
   options: LayoutOptionsRequired
 ): LayoutNodeResult => {
-  const { self, children, width } = node;
+  const { children, self, width } = node;
   const result: LayoutNodeResult = {
+    children: [],
     self: {
+      height: self.height,
+      width: self.width,
       x,
       y,
-      width: self.width,
-      height: self.height,
     },
-    children: [],
   };
   let left = x - width / 2;
   children.forEach(child => {
@@ -268,15 +268,15 @@ const computePositionBottom = (
   y: number,
   options: LayoutOptionsRequired
 ): LayoutNodeResult => {
-  const { self, children, width } = node;
+  const { children, self, width } = node;
   const result: LayoutNodeResult = {
+    children: [],
     self: {
+      height: self.height,
+      width: self.width,
       x,
       y,
-      width: self.width,
-      height: self.height,
     },
-    children: [],
   };
   let left = x - width / 2;
   children.forEach(child => {
@@ -334,13 +334,13 @@ const topBottomLayout: Layout = (node, options) => {
       realOptions.gapHorizontal * (bottomBox.length - 1)) /
       2;
   const root: LayoutNodeResult = {
+    children: [],
     self: {
+      height: node.height,
+      width: node.width,
       x: 0,
       y: 0,
-      width: node.width,
-      height: node.height,
     },
-    children: [],
   };
   topBox.forEach(box => {
     root.children.push(
@@ -367,10 +367,10 @@ const topBottomLayout: Layout = (node, options) => {
   return root;
 };
 export const layout = {
-  right: rightLayout,
+  bottom: bottomLayout,
   left: leftLayout,
   leftRight: leftRightLayout,
+  right: rightLayout,
   top: topLayout,
-  bottom: bottomLayout,
   topBottom: topBottomLayout,
 } satisfies Record<string, Layout>;

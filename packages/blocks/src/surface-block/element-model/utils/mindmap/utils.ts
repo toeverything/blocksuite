@@ -2,14 +2,15 @@ import { assertType } from '@blocksuite/global/utils';
 
 import type { MindmapElementModel } from '../../mindmap.js';
 import type { ShapeElementModel } from '../../shape.js';
+
 import { LayoutType, type MindmapNode } from './layout.js';
 
 export function getHoveredArea(
   target: ShapeElementModel,
   position: [number, number],
   layoutDir: LayoutType
-): 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' {
-  const { x, y, w, h } = target;
+): 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right' {
+  const { h, w, x, y } = target;
   const center =
     layoutDir === LayoutType.BALANCE
       ? [x + w / 2, y + h / 2]
@@ -29,7 +30,7 @@ export function showMergeIndicator(
   /**
    * The hovered node
    */
-  target: string | MindmapNode,
+  target: MindmapNode | string,
   source: MindmapNode,
   position: [number, number]
 ) {
@@ -69,7 +70,6 @@ export function showMergeIndicator(
     const getInfo = () => {
       if (!isSibling) {
         return {
-          target,
           index: hoveredArea.includes('top') ? 0 : target.children.length,
           layoutType:
             layoutType === LayoutType.BALANCE
@@ -77,17 +77,18 @@ export function showMergeIndicator(
                 ? LayoutType.RIGHT
                 : LayoutType.LEFT
               : layoutType,
+          target,
         };
       }
 
       const parentNode = mindmap.getParentNode(target.id)!;
 
       return {
-        target: parentNode,
         index:
           parentNode.children.indexOf(target) +
           (hoveredArea.includes('bottom') ? 1 : 0),
         layoutType,
+        target: parentNode,
       };
     };
 

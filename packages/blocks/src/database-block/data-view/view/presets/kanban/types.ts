@@ -1,32 +1,32 @@
 type WithKanbanViewType<T> = T extends unknown
   ? {
-      viewId: string;
       type: 'kanban';
+      viewId: string;
     } & T
   : never;
 
 export type KanbanCellSelection = {
-  selectionType: 'cell';
-  groupKey: string;
   cardId: string;
   columnId: string;
+  groupKey: string;
   isEditing: boolean;
+  selectionType: 'cell';
 };
 export type KanbanCardSelectionCard = {
-  groupKey: string;
   cardId: string;
+  groupKey: string;
 };
 export type KanbanCardSelection = {
-  selectionType: 'card';
   cards: [KanbanCardSelectionCard, ...KanbanCardSelectionCard[]];
+  selectionType: 'card';
 };
 export type KanbanGroupSelection = {
-  selectionType: 'group';
   groupKeys: [string, ...string[]];
+  selectionType: 'group';
 };
 export type KanbanViewSelection =
-  | KanbanCellSelection
   | KanbanCardSelection
+  | KanbanCellSelection
   | KanbanGroupSelection;
 export type KanbanViewSelectionWithType =
   WithKanbanViewType<KanbanViewSelection>;

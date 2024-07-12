@@ -15,6 +15,13 @@ export class MockServerBlobSource implements BlobSource {
 
   constructor(readonly name: string) {}
 
+  async delete(key: string) {
+    this._cache.delete(key);
+    await fetch(`/api/collection/${this.name}/blob/${key}`, {
+      method: 'DELETE',
+    });
+  }
+
   async get(key: string) {
     if (this._cache.has(key)) {
       return this._cache.get(key) as Blob;
@@ -32,24 +39,17 @@ export class MockServerBlobSource implements BlobSource {
     }
   }
 
-  async set(key: string, value: Blob) {
-    this._cache.set(key, value);
-    await fetch(`/api/collection/${this.name}/blob/${key}`, {
-      method: 'PUT',
-      body: await value.arrayBuffer(),
-    });
-    return key;
-  }
-
-  async delete(key: string) {
-    this._cache.delete(key);
-    await fetch(`/api/collection/${this.name}/blob/${key}`, {
-      method: 'DELETE',
-    });
-  }
-
   // eslint-disable-next-line @typescript-eslint/require-await
   async list() {
     return Array.from(this._cache.keys());
+  }
+
+  async set(key: string, value: Blob) {
+    this._cache.set(key, value);
+    await fetch(`/api/collection/${this.name}/blob/${key}`, {
+      body: await value.arrayBuffer(),
+      method: 'PUT',
+    });
+    return key;
   }
 }

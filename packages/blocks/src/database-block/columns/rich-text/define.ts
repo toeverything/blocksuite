@@ -1,10 +1,11 @@
-import { nanoid, Text } from '@blocksuite/store';
+import { Text, nanoid } from '@blocksuite/store';
+
+import type { SelectTag } from '../../data-view/utils/tags/multi-tag-select.js';
 
 import { clamp } from '../../../_common/utils/math.js';
 import { columnType } from '../../data-view/column/column-config.js';
 import { tRichText } from '../../data-view/logical/data-type.js';
 import { getTagColor } from '../../data-view/utils/tags/colors.js';
-import type { SelectTag } from '../../data-view/utils/tags/multi-tag-select.js';
 import { type RichTextCellType, toYText } from '../utils.js';
 
 export const richTextColumnType = columnType('rich-text');
@@ -17,16 +18,16 @@ declare global {
 
 export const richTextColumnModelConfig =
   richTextColumnType.modelConfig<RichTextCellType>({
-    name: 'Text',
-    type: () => tRichText.create(),
-    defaultData: () => ({}),
-    cellToString: data => data?.toString() ?? '',
     cellFromString: data => {
       return {
         value: new Text(data),
       };
     },
     cellToJson: data => data?.toString() ?? null,
+    cellToString: data => data?.toString() ?? '',
+    defaultData: () => ({}),
+    isEmpty: data => data == null || data.length === 0,
+    name: 'Text',
     onUpdate: (value, _data, callback) => {
       const yText = toYText(value);
       yText.observe(callback);
@@ -37,7 +38,7 @@ export const richTextColumnModelConfig =
         },
       };
     },
-    isEmpty: data => data == null || data.length === 0,
+    type: () => tRichText.create(),
   });
 
 richTextColumnModelConfig.addConvert('select', (_column, cells) => {
@@ -45,9 +46,9 @@ richTextColumnModelConfig.addConvert('select', (_column, cells) => {
   const getTag = (name: string) => {
     if (options[name]) return options[name];
     const tag: SelectTag = {
+      color: getTagColor(),
       id: nanoid(),
       value: name,
-      color: getTagColor(),
     };
     options[name] = tag;
     return tag;
@@ -72,9 +73,9 @@ richTextColumnModelConfig.addConvert('multi-select', (_column, cells) => {
   const getTag = (name: string) => {
     if (options[name]) return options[name];
     const tag: SelectTag = {
+      color: getTagColor(),
       id: nanoid(),
       value: name,
-      color: getTagColor(),
     };
     options[name] = tag;
     return tag;
@@ -99,30 +100,30 @@ richTextColumnModelConfig.addConvert('multi-select', (_column, cells) => {
 
 richTextColumnModelConfig.addConvert('number', (_column, cells) => {
   return {
-    column: { decimal: 0 },
     cells: cells.map(v => {
       const num = v ? parseFloat(v.toString()) : NaN;
       return isNaN(num) ? undefined : num;
     }),
+    column: { decimal: 0 },
   };
 });
 
 richTextColumnModelConfig.addConvert('progress', (_column, cells) => {
   return {
-    column: {},
     cells: cells.map(v => {
       const progress = v ? parseInt(v.toString()) : NaN;
       return !isNaN(progress) ? clamp(progress, 0, 100) : undefined;
     }),
+    column: {},
   };
 });
 
 richTextColumnModelConfig.addConvert('checkbox', (_column, cells) => {
   const truthyValues = ['yes', 'true'];
   return {
-    column: {},
     cells: cells.map(v =>
       v && truthyValues.includes(v.toString().toLowerCase()) ? true : undefined
     ),
+    column: {},
   };
 });

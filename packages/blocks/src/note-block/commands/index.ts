@@ -8,9 +8,9 @@ export * from './text-style.js';
 declare global {
   namespace BlockSuite {
     interface CommandContext {
-      focusBlock?: BlockElement | null;
-
       anchorBlock?: BlockElement | null;
+
+      focusBlock?: BlockElement | null;
     }
   }
 }

@@ -3,16 +3,16 @@ import type { TemplateResult } from 'lit';
 export type FilterableListItemKey = string;
 
 export interface FilterableListItem<Props = unknown> {
-  name: string;
-  label?: string;
-  icon?: TemplateResult;
   aliases?: string[];
+  icon?: TemplateResult;
+  label?: string;
+  name: string;
   props?: Props;
 }
 
 export interface FilterableListOptions<Props = unknown> {
-  placeholder?: string;
-  items: FilterableListItem<Props>[];
   active?: (item: FilterableListItem) => boolean;
+  items: FilterableListItem<Props>[];
   onSelect: (item: FilterableListItem) => void;
+  placeholder?: string;
 }

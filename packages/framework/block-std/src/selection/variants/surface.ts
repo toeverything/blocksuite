@@ -3,19 +3,19 @@ import z from 'zod';
 import { BaseSelection } from '../base.js';
 
 const SurfaceSelectionSchema = z.object({
-  elements: z.array(z.string()),
   editing: z.boolean(),
+  elements: z.array(z.string()),
   inoperable: z.boolean().optional(),
 });
 
 export class SurfaceSelection extends BaseSelection {
-  static override type = 'surface';
-
   static override group = 'edgeless';
 
-  readonly elements: string[];
+  static override type = 'surface';
 
   readonly editing: boolean;
+
+  readonly elements: string[];
 
   readonly inoperable: boolean;
 
@@ -32,8 +32,23 @@ export class SurfaceSelection extends BaseSelection {
     this.inoperable = inoperable;
   }
 
-  isEmpty() {
-    return this.elements.length === 0 && !this.editing;
+  static override fromJSON(
+    json:
+      | {
+          blockId: string[];
+          editing: boolean;
+          elements: string[];
+          inoperable?: boolean;
+        }
+      | Record<string, unknown>
+  ): SurfaceSelection {
+    SurfaceSelectionSchema.parse(json);
+    return new SurfaceSelection(
+      json.blockId as string,
+      json.elements as string[],
+      json.editing as boolean,
+      (json.inoperable as boolean) || false
+    );
   }
 
   override equals(other: BaseSelection): boolean {
@@ -50,33 +65,18 @@ export class SurfaceSelection extends BaseSelection {
     return false;
   }
 
-  override toJSON(): Record<string, unknown> {
-    return {
-      type: 'surface',
-      blockId: this.blockId,
-      elements: this.elements,
-      editing: this.editing,
-      inoperable: this.inoperable,
-    };
+  isEmpty() {
+    return this.elements.length === 0 && !this.editing;
   }
 
-  static override fromJSON(
-    json:
-      | Record<string, unknown>
-      | {
-          blockId: string[];
-          elements: string[];
-          editing: boolean;
-          inoperable?: boolean;
-        }
-  ): SurfaceSelection {
-    SurfaceSelectionSchema.parse(json);
-    return new SurfaceSelection(
-      json.blockId as string,
-      json.elements as string[],
-      json.editing as boolean,
-      (json.inoperable as boolean) || false
-    );
+  override toJSON(): Record<string, unknown> {
+    return {
+      blockId: this.blockId,
+      editing: this.editing,
+      elements: this.elements,
+      inoperable: this.inoperable,
+      type: 'surface',
+    };
   }
 }
 

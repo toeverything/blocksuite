@@ -164,33 +164,33 @@ export function isUrlInClipboard(clipboardData: DataTransfer) {
 }
 
 type EmbedCardIcons = {
-  LoadingIcon: TemplateResult<1>;
   EmbedCardBannerIcon: TemplateResult<1>;
+  EmbedCardCubeIcon: TemplateResult<1>;
   EmbedCardHorizontalIcon: TemplateResult<1>;
   EmbedCardListIcon: TemplateResult<1>;
   EmbedCardVerticalIcon: TemplateResult<1>;
-  EmbedCardCubeIcon: TemplateResult<1>;
+  LoadingIcon: TemplateResult<1>;
 };
 
 export function getEmbedCardIcons(): EmbedCardIcons {
   const theme = getThemeMode();
   if (theme === 'light') {
     return {
-      LoadingIcon: LightLoadingIcon,
       EmbedCardBannerIcon: EmbedCardLightBannerIcon,
+      EmbedCardCubeIcon: EmbedCardLightCubeIcon,
       EmbedCardHorizontalIcon: EmbedCardLightHorizontalIcon,
       EmbedCardListIcon: EmbedCardLightListIcon,
       EmbedCardVerticalIcon: EmbedCardLightVerticalIcon,
-      EmbedCardCubeIcon: EmbedCardLightCubeIcon,
+      LoadingIcon: LightLoadingIcon,
     };
   } else {
     return {
-      LoadingIcon: DarkLoadingIcon,
       EmbedCardBannerIcon: EmbedCardDarkBannerIcon,
+      EmbedCardCubeIcon: EmbedCardDarkCubeIcon,
       EmbedCardHorizontalIcon: EmbedCardDarkHorizontalIcon,
       EmbedCardListIcon: EmbedCardDarkListIcon,
       EmbedCardVerticalIcon: EmbedCardDarkVerticalIcon,
-      EmbedCardCubeIcon: EmbedCardDarkCubeIcon,
+      LoadingIcon: DarkLoadingIcon,
     };
   }
 }

@@ -1,5 +1,6 @@
-import { Matcher } from '../../../logical/matcher.js';
 import type { TFunction } from '../../../logical/typesystem.js';
+
+import { Matcher } from '../../../logical/matcher.js';
 import { typesystem } from '../../../logical/typesystem.js';
 import { booleanFilter } from './boolean.js';
 import { dateFilter } from './date.js';
@@ -10,9 +11,9 @@ import { tagFilter } from './tag.js';
 import { unknownFilter } from './unknown.js';
 
 export type FilterMatcherDataType = {
-  name: string;
-  label: string;
   impl: (...args: unknown[]) => boolean;
+  label: string;
+  name: string;
 };
 export type FilterDefineType = {
   type: TFunction;

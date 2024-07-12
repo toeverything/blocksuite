@@ -1,8 +1,9 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { FrameNavigatorIcon } from '../../../../../_common/icons/edgeless.js';
 import type { EdgelessTool } from '../../../types.js';
+
+import { FrameNavigatorIcon } from '../../../../../_common/icons/edgeless.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 

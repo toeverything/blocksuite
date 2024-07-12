@@ -13,7 +13,7 @@
  */
 export function countBy<T>(
   items: T[],
-  key: (item: T) => string | number | null
+  key: (item: T) => null | number | string
 ): Record<string, number> {
   const count: Record<string, number> = {};
   items.forEach(item => {
@@ -110,7 +110,7 @@ export function atLeastNMatches<T>(
  */
 export function groupBy<T, K extends string>(
   arr: T[],
-  key: K | ((item: T) => K)
+  key: ((item: T) => K) | K
 ): Record<K, T[]> {
   const result = {} as Record<string, T[]>;
 
@@ -195,7 +195,7 @@ export function last<T extends Iterable<unknown>>(
     return iterable[iterable.length - 1];
   }
 
-  let last: unknown | undefined;
+  let last: undefined | unknown;
   for (const item of iterable) {
     last = item;
   }

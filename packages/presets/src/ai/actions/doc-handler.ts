@@ -4,8 +4,9 @@ import type {
   AffineAIPanelWidget,
   AffineAIPanelWidgetConfig,
 } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import type { TemplateResult } from 'lit';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 import {
   buildCopyConfig,
@@ -27,13 +28,13 @@ import {
 export function bindTextStream(
   stream: BlockSuitePresets.TextStream,
   {
-    update,
     finish,
     signal,
+    update,
   }: {
-    update: (text: string) => void;
-    finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
+    finish: (state: 'aborted' | 'error' | 'success', err?: AIError) => void;
     signal?: AbortSignal;
+    update: (text: string) => void;
   }
 ) {
   (async () => {
@@ -98,14 +99,14 @@ export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
         const options = {
           ...variants,
           attachments: sendAttachments ? attachments : undefined,
-          input: sendAttachments ? '' : markdown,
-          stream: true,
+          control,
+          docId: host.doc.id,
           host,
+          input: sendAttachments ? '' : markdown,
           models,
           signal,
-          control,
+          stream: true,
           where,
-          docId: host.doc.id,
           workspaceId: host.doc.collection.id,
         } as Parameters<typeof action>[0];
         // @ts-expect-error todo: maybe fix this
@@ -129,14 +130,14 @@ export function actionToGenerateAnswer<
 ) {
   return (host: EditorHost) => {
     return ({
+      finish,
       signal,
       update,
-      finish,
     }: {
+      finish: (state: 'aborted' | 'error' | 'success', err?: AIError) => void;
       input: string;
       signal?: AbortSignal;
       update: (text: string) => void;
-      finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
     }) => {
       const { selectedBlocks: blocks } = getSelections(host);
       if (!blocks || blocks.length === 0) return;
@@ -147,7 +148,7 @@ export function actionToGenerateAnswer<
         trackerOptions
       )?.(host);
       if (!stream) return;
-      bindTextStream(stream, { update, finish, signal });
+      bindTextStream(stream, { finish, signal, update });
     };
   };
 }
@@ -227,15 +228,15 @@ export function handleInlineAskAIAction(host: EditorHost) {
       .then(context => {
         assertExists(AIProvider.actions.chat);
         const stream = AIProvider.actions.chat({
-          input: `${context}\n${input}`,
-          stream: true,
-          host,
-          where: 'inline-chat-panel',
           control: 'chat-send',
           docId: host.doc.id,
+          host,
+          input: `${context}\n${input}`,
+          stream: true,
+          where: 'inline-chat-panel',
           workspaceId: host.doc.collection.id,
         });
-        bindTextStream(stream, { update, finish, signal });
+        bindTextStream(stream, { finish, signal, update });
       })
       .catch(console.error);
   };

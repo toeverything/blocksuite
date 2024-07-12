@@ -21,8 +21,7 @@ import {
 import { MultiTagLiteral, TagLiteral } from './renderer/tag-literal.js';
 
 literalMatcher.register(tBoolean.create(), {
-  view: createUniComponentFromWebComponent(BooleanLiteral),
-  popEdit: (position, { value, onChange }) => {
+  popEdit: (position, { onChange, value }) => {
     popMenu(position, {
       options: {
         input: {
@@ -30,21 +29,21 @@ literalMatcher.register(tBoolean.create(), {
         },
         items: [true, false].map(v => {
           return {
-            type: 'action',
-            name: v.toString().toUpperCase(),
             isSelected: v === value,
+            name: v.toString().toUpperCase(),
             select: () => {
               onChange(v);
             },
+            type: 'action',
           };
         }),
       },
     });
   },
+  view: createUniComponentFromWebComponent(BooleanLiteral),
 });
 literalMatcher.register(tString.create(), {
-  view: createUniComponentFromWebComponent(StringLiteral),
-  popEdit: (position, { value, onChange }) => {
+  popEdit: (position, { onChange, value }) => {
     popMenu(position, {
       options: {
         input: {
@@ -57,10 +56,10 @@ literalMatcher.register(tString.create(), {
       },
     });
   },
+  view: createUniComponentFromWebComponent(StringLiteral),
 });
 literalMatcher.register(tNumber.create(), {
-  view: createUniComponentFromWebComponent(NumberLiteral),
-  popEdit: (position, { value, onChange }) => {
+  popEdit: (position, { onChange, value }) => {
     popMenu(position, {
       options: {
         input: {
@@ -80,10 +79,10 @@ literalMatcher.register(tNumber.create(), {
       },
     });
   },
+  view: createUniComponentFromWebComponent(NumberLiteral),
 });
 literalMatcher.register(tArray(tTag.create()), {
-  view: createUniComponentFromWebComponent(MultiTagLiteral),
-  popEdit: (position, { value, onChange, type }) => {
+  popEdit: (position, { onChange, type, value }) => {
     if (!isTArray(type)) {
       return;
     }
@@ -104,12 +103,11 @@ literalMatcher.register(tArray(tTag.create()), {
               width: 'max-content',
             });
             return {
-              type: 'checkbox',
-              name: tag.value,
               checked: list.includes(tag.id),
               label: html` <div class="dv-round-4" style=${styles}>
                 ${tag.value}
               </div>`,
+              name: tag.value,
               select: checked => {
                 if (checked) {
                   list = list.filter(v => v !== tag.id);
@@ -121,14 +119,15 @@ literalMatcher.register(tArray(tTag.create()), {
                   return true;
                 }
               },
+              type: 'checkbox',
             };
           }) ?? [],
       },
     });
   },
+  view: createUniComponentFromWebComponent(MultiTagLiteral),
 });
 literalMatcher.register(tTag.create(), {
-  view: createUniComponentFromWebComponent(TagLiteral),
   popEdit: (position, { onChange, type }) => {
     if (!tTag.is(type)) {
       return;
@@ -146,24 +145,24 @@ literalMatcher.register(tTag.create(), {
               width: 'max-content',
             });
             return {
-              type: 'action',
-              name: tag.value,
               label: html` <div class="dv-round-4" style=${styles}>
                 ${tag.value}
               </div>`,
+              name: tag.value,
               select: () => {
                 onChange(tag.id);
               },
+              type: 'action',
             };
           }) ?? [],
       },
     });
   },
+  view: createUniComponentFromWebComponent(TagLiteral),
 });
 
 literalMatcher.register(tDate.create(), {
-  view: createUniComponentFromWebComponent(DateLiteral),
-  popEdit: (position, { value, onChange }) => {
+  popEdit: (position, { onChange, value }) => {
     const input = document.createElement('input');
     input.type = 'date';
     input.click();
@@ -179,4 +178,5 @@ literalMatcher.register(tDate.create(), {
       };
     });
   },
+  view: createUniComponentFromWebComponent(DateLiteral),
 });

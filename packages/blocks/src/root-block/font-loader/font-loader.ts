@@ -2,28 +2,29 @@ import { IS_FIREFOX } from '@blocksuite/global/env';
 
 export interface FontConfig {
   font: string;
-  weight: string;
-  url: string;
   style: string;
+  url: string;
+  weight: string;
 }
 
 const initFontFace = IS_FIREFOX
-  ? ({ font, weight, url, style }: FontConfig) =>
+  ? ({ font, style, url, weight }: FontConfig) =>
       new FontFace(`"${font}"`, `url(${url})`, {
-        weight,
         style,
+        weight,
       })
-  : ({ font, weight, url, style }: FontConfig) =>
+  : ({ font, style, url, weight }: FontConfig) =>
       new FontFace(font, `url(${url})`, {
-        weight,
         style,
+        weight,
       });
 
 export class FontLoader {
   readonly fontFaces: FontFace[] = [];
 
-  get ready() {
-    return Promise.all(this.fontFaces.map(fontFace => fontFace.loaded));
+  clear() {
+    this.fontFaces.forEach(fontFace => document.fonts.delete(fontFace));
+    this.fontFaces.splice(0, this.fontFaces.length);
   }
 
   load(fonts: FontConfig[]) {
@@ -37,8 +38,7 @@ export class FontLoader {
     );
   }
 
-  clear() {
-    this.fontFaces.forEach(fontFace => document.fonts.delete(fontFace));
-    this.fontFaces.splice(0, this.fontFaces.length);
+  get ready() {
+    return Promise.all(this.fontFaces.map(fontFace => fontFace.loaded));
   }
 }

@@ -1,30 +1,31 @@
-import { createZodUnion } from '../../../_common/utils/index.js';
 import type { StrokeStyle } from '../../consts.js';
 
+import { createZodUnion } from '../../../_common/utils/index.js';
+
 export enum ShapeType {
+  Diamond = 'diamond',
+  Ellipse = 'ellipse',
   Rect = 'rect',
   Triangle = 'triangle',
-  Ellipse = 'ellipse',
-  Diamond = 'diamond',
 }
 
 export enum SHAPE_TEXT_FONT_SIZE {
-  SMALL = 12,
-  MEDIUM = 20,
   LARGE = 28,
+  MEDIUM = 20,
+  SMALL = 12,
   XLARGE = 36,
 }
 
 export interface GeneralShapeOptions {
+  fillColor: string;
+  height: number;
+  radius?: number;
+  strokeColor: string;
+  strokeStyle: StrokeStyle;
+  strokeWidth: number;
+  width: number;
   x: number;
   y: number;
-  width: number;
-  height: number;
-  strokeWidth: number;
-  strokeColor: string;
-  fillColor: string;
-  strokeStyle: StrokeStyle;
-  radius?: number;
 }
 
 export const FILL_COLORS = [

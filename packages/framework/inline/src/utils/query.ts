@@ -1,7 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { INLINE_ROOT_ATTR } from '../consts.js';
 import type { InlineEditor, InlineRootElement } from '../inline-editor.js';
+
+import { INLINE_ROOT_ATTR } from '../consts.js';
 
 export function getInlineEditorInsideRoot(element: Element): InlineEditor {
   const rootElement = element.closest(

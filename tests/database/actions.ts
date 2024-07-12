@@ -1,8 +1,9 @@
 import type { RichTextCell } from '@blocks/database-block/columns/rich-text/cell-renderer.js';
 import type { RichTextCellEditing } from '@blocks/database-block/columns/rich-text/cell-renderer.js';
 import type { ColumnType } from '@blocks/database-block/data-view/view/presets/table/types.js';
+
 import { ZERO_WIDTH_SPACE } from '@inline/consts.js';
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 
 import {
   pressEnter,
@@ -114,11 +115,11 @@ export async function assertDatabaseTitleColumnText(
 export function getDatabaseBodyCell(
   page: Page,
   {
-    rowIndex,
     columnIndex,
+    rowIndex,
   }: {
-    rowIndex: number;
     columnIndex: number;
+    rowIndex: number;
   }
 ) {
   const row = getDatabaseBodyRow(page, rowIndex);
@@ -129,25 +130,25 @@ export function getDatabaseBodyCell(
 export function getDatabaseBodyCellContent(
   page: Page,
   {
-    rowIndex,
-    columnIndex,
     cellClass,
+    columnIndex,
+    rowIndex,
   }: {
-    rowIndex: number;
-    columnIndex: number;
     cellClass: string;
+    columnIndex: number;
+    rowIndex: number;
   }
 ) {
-  const cell = getDatabaseBodyCell(page, { rowIndex, columnIndex });
+  const cell = getDatabaseBodyCell(page, { columnIndex, rowIndex });
   const cellContent = cell.locator(`.${cellClass}`);
   return cellContent;
 }
 
 export function getFirstColumnCell(page: Page, cellClass: string) {
   const cellContent = getDatabaseBodyCellContent(page, {
-    rowIndex: 0,
-    columnIndex: 1,
     cellClass,
+    columnIndex: 1,
+    rowIndex: 0,
   });
   return cellContent;
 }
@@ -190,12 +191,12 @@ export async function assertColumnWidth(locator: Locator, width: number) {
 export async function assertDatabaseCellRichTexts(
   page: Page,
   {
-    rowIndex = 0,
     columnIndex = 1,
+    rowIndex = 0,
     text,
   }: {
-    rowIndex?: number;
     columnIndex?: number;
+    rowIndex?: number;
     text: string;
   }
 ) {
@@ -218,12 +219,12 @@ export async function assertDatabaseCellRichTexts(
 export async function assertDatabaseCellNumber(
   page: Page,
   {
-    rowIndex = 0,
     columnIndex = 1,
+    rowIndex = 0,
     text,
   }: {
-    rowIndex?: number;
     columnIndex?: number;
+    rowIndex?: number;
     text: string;
   }
 ) {
@@ -241,17 +242,17 @@ export async function assertDatabaseCellNumber(
 export async function assertDatabaseCellLink(
   page: Page,
   {
-    rowIndex = 0,
     columnIndex = 1,
+    rowIndex = 0,
     text,
   }: {
-    rowIndex?: number;
     columnIndex?: number;
+    rowIndex?: number;
     text: string;
   }
 ) {
   const actualTexts = await page.evaluate(
-    ({ rowIndex, columnIndex }) => {
+    ({ columnIndex, rowIndex }) => {
       const rows = document.querySelector('.affine-database-block-rows');
       const row = rows?.querySelector(
         `.database-row:nth-child(${rowIndex + 1})`
@@ -267,7 +268,7 @@ export async function assertDatabaseCellLink(
       if (!richText) throw new Error('Missing database rich text cell');
       return richText.inlineEditor.yText.toString();
     },
-    { rowIndex, columnIndex }
+    { columnIndex, rowIndex }
   );
   expect(actualTexts).toEqual(text);
 }
@@ -324,11 +325,11 @@ export async function getDatabaseMouse(page: Page) {
     '.affine-database-table'
   );
   return {
-    mouseOver: async () => {
-      await page.mouse.move(databaseRect.x, databaseRect.y);
-    },
     mouseLeave: async () => {
       await page.mouse.move(databaseRect.x - 1, databaseRect.y - 1);
+    },
+    mouseOver: async () => {
+      await page.mouse.move(databaseRect.x, databaseRect.y);
     },
   };
 }
@@ -341,8 +342,8 @@ export async function getDatabaseHeaderColumn(page: Page, index = 0) {
   const typeIcon = column.locator('.affine-database-column-type-icon');
 
   return {
-    column,
     box,
+    column,
     text,
     textElement,
     typeIcon,
@@ -370,10 +371,10 @@ export async function assertRowsSelection(
       .boundingBox();
     assertExists(lastCell);
     expect(selectionBox).toEqual({
-      x: rowBox.x,
-      y: rowBox.y,
       height: rowBox.height,
       width: containerBox.width,
+      x: rowBox.x,
+      y: rowBox.y,
     });
   } else {
     // multiple rows
@@ -388,10 +389,10 @@ export async function assertRowsSelection(
       .boundingBox();
     assertExists(lastCell);
     expect(selectionBox).toEqual({
+      height: startRowBox.height + endRowBox.height,
+      width: containerBox.width,
       x: startRowBox.x,
       y: startRowBox.y,
-      width: containerBox.width,
-      height: startRowBox.height + endRowBox.height,
     });
   }
 }
@@ -399,11 +400,11 @@ export async function assertRowsSelection(
 export async function assertCellsSelection(
   page: Page,
   cellIndexes: {
-    start: [rowIndex: number, columnIndex: number];
     end?: [rowIndex: number, columnIndex: number];
+    start: [rowIndex: number, columnIndex: number];
   }
 ) {
-  const { start, end } = cellIndexes;
+  const { end, start } = cellIndexes;
 
   if (!end) {
     // single cell
@@ -411,13 +412,13 @@ export async function assertCellsSelection(
     const focusBox = await getBoundingBox(focus);
 
     const [rowIndex, columnIndex] = start;
-    const cell = getDatabaseBodyCell(page, { rowIndex, columnIndex });
+    const cell = getDatabaseBodyCell(page, { columnIndex, rowIndex });
     const cellBox = await getBoundingBox(cell);
     expect(focusBox).toEqual({
-      x: cellBox.x,
-      y: cellBox.y - 1,
       height: cellBox.height + 2,
       width: cellBox.width + 1,
+      x: cellBox.x,
+      y: cellBox.y - 1,
     });
   } else {
     // multi cells
@@ -438,8 +439,8 @@ export async function assertCellsSelection(
     let y = 0;
     for (let i = rowIndexStart; i <= rowIndexEnd; i++) {
       const cell = getDatabaseBodyCell(page, {
-        rowIndex: i,
         columnIndex: columnIndexStart,
+        rowIndex: i,
       });
       const box = await getBoundingBox(cell);
       height += box.height + 1;
@@ -450,8 +451,8 @@ export async function assertCellsSelection(
 
     for (let j = columnIndexStart; j <= columnIndexEnd; j++) {
       const cell = getDatabaseBodyCell(page, {
-        rowIndex: rowIndexStart,
         columnIndex: j,
+        rowIndex: rowIndexStart,
       });
       const box = await getBoundingBox(cell);
       width += box.width;
@@ -461,10 +462,10 @@ export async function assertCellsSelection(
     }
 
     expect(selectionBox).toEqual({
-      x,
-      y,
       height,
       width,
+      x,
+      y,
     });
   }
 }
@@ -498,17 +499,17 @@ export async function focusKanbanCardHeader(page: Page, index = 0) {
 export async function assertKanbanCellSelected(
   page: Page,
   {
-    groupIndex,
     cardIndex,
     cellIndex,
+    groupIndex,
   }: {
-    groupIndex: number;
     cardIndex: number;
     cellIndex: number;
+    groupIndex: number;
   }
 ) {
   const border = await page.evaluate(
-    ({ groupIndex, cardIndex, cellIndex }) => {
+    ({ cardIndex, cellIndex, groupIndex }) => {
       const group = document.querySelector(
         `affine-data-view-kanban-group:nth-child(${groupIndex + 1})`
       );
@@ -524,9 +525,9 @@ export async function assertKanbanCellSelected(
       return cell.style.border;
     },
     {
-      groupIndex,
       cardIndex,
       cellIndex,
+      groupIndex,
     }
   );
 
@@ -536,15 +537,15 @@ export async function assertKanbanCellSelected(
 export async function assertKanbanCardSelected(
   page: Page,
   {
-    groupIndex,
     cardIndex,
+    groupIndex,
   }: {
-    groupIndex: number;
     cardIndex: number;
+    groupIndex: number;
   }
 ) {
   const border = await page.evaluate(
-    ({ groupIndex, cardIndex }) => {
+    ({ cardIndex, groupIndex }) => {
       const group = document.querySelector(
         `affine-data-view-kanban-group:nth-child(${groupIndex + 1})`
       );
@@ -555,8 +556,8 @@ export async function assertKanbanCardSelected(
       return card.style.border;
     },
     {
-      groupIndex,
       cardIndex,
+      groupIndex,
     }
   );
 
@@ -566,11 +567,11 @@ export async function assertKanbanCardSelected(
 export function getKanbanCard(
   page: Page,
   {
-    groupIndex,
     cardIndex,
+    groupIndex,
   }: {
-    groupIndex: number;
     cardIndex: number;
+    groupIndex: number;
   }
 ) {
   const group = page.locator('affine-data-view-kanban-group').nth(groupIndex);

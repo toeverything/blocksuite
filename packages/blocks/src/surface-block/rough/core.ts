@@ -8,86 +8,86 @@ export interface Config {
 }
 
 export interface DrawingSurface {
-  width: number | SVGAnimatedLength;
-  height: number | SVGAnimatedLength;
+  height: SVGAnimatedLength | number;
+  width: SVGAnimatedLength | number;
 }
 
 export interface Options {
-  maxRandomnessOffset?: number;
-  roughness?: number;
   bowing?: number;
-  stroke?: string;
-  strokeWidth?: number;
   curveFitting?: number;
-  curveTightness?: number;
   curveStepCount?: number;
-  fill?: string;
-  fillStyle?: string;
-  fillWeight?: number;
-  hachureAngle?: number;
-  hachureGap?: number;
-  simplification?: number;
-  dashOffset?: number;
+  curveTightness?: number;
   dashGap?: number;
-  zigzagOffset?: number;
-  seed?: number;
-  strokeLineDash?: number[];
-  strokeLineDashOffset?: number;
-  fillLineDash?: number[];
-  fillLineDashOffset?: number;
+  dashOffset?: number;
   disableMultiStroke?: boolean;
   disableMultiStrokeFill?: boolean;
-  preserveVertices?: boolean;
+  fill?: string;
+  fillLineDash?: number[];
+  fillLineDashOffset?: number;
+  fillStyle?: string;
+  fillWeight?: number;
   fixedDecimalPlaceDigits?: number;
+  hachureAngle?: number;
+  hachureGap?: number;
+  maxRandomnessOffset?: number;
+  preserveVertices?: boolean;
+  roughness?: number;
+  seed?: number;
+  simplification?: number;
+  stroke?: string;
+  strokeLineDash?: number[];
+  strokeLineDashOffset?: number;
+  strokeWidth?: number;
+  zigzagOffset?: number;
 }
 
 export interface ResolvedOptions extends Options {
-  maxRandomnessOffset: number;
-  roughness: number;
   bowing: number;
-  stroke: string;
-  strokeWidth: number;
   curveFitting: number;
-  curveTightness: number;
   curveStepCount: number;
+  curveTightness: number;
+  dashGap: number;
+  dashOffset: number;
+  disableMultiStroke: boolean;
+  disableMultiStrokeFill: boolean;
   fillStyle: string;
   fillWeight: number;
   hachureAngle: number;
   hachureGap: number;
-  dashOffset: number;
-  dashGap: number;
-  zigzagOffset: number;
-  seed: number;
-  randomizer?: Random;
-  disableMultiStroke: boolean;
-  disableMultiStrokeFill: boolean;
+  maxRandomnessOffset: number;
   preserveVertices: boolean;
+  randomizer?: Random;
+  roughness: number;
+  seed: number;
+  stroke: string;
+  strokeWidth: number;
+  zigzagOffset: number;
 }
 
-export declare type OpType = 'move' | 'bcurveTo' | 'lineTo';
-export declare type OpSetType = 'path' | 'fillPath' | 'fillSketch';
+export declare type OpType = 'bcurveTo' | 'lineTo' | 'move';
+export declare type OpSetType = 'fillPath' | 'fillSketch' | 'path';
 
 export interface Op {
-  op: OpType;
   data: number[];
+  op: OpType;
 }
 
 export interface OpSet {
-  type: OpSetType;
   ops: Op[];
-  size?: Point;
   path?: string;
+  size?: Point;
+  type: OpSetType;
 }
 
 export interface Drawable {
-  shape: string;
   options: ResolvedOptions;
   sets: OpSet[];
+  shape: string;
 }
 
 export interface PathInfo {
   d: string;
+  fill?: string;
   stroke: string;
   strokeWidth: number;
-  fill?: string;
 }

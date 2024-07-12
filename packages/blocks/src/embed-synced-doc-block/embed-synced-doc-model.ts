@@ -1,15 +1,16 @@
 import { BlockModel } from '@blocksuite/store';
 
-import { defineEmbedModel } from '../_common/embed-block-helper/embed-block-model.js';
 import type { EmbedCardStyle } from '../_common/types.js';
+
+import { defineEmbedModel } from '../_common/embed-block-helper/embed-block-model.js';
 
 export const EmbedSyncedDocStyles: EmbedCardStyle[] = ['syncedDoc'];
 
 export type EmbedSyncedDocBlockProps = {
+  caption?: null | string;
   pageId: string;
-  style: EmbedCardStyle;
-  caption?: string | null;
   scale?: number;
+  style: EmbedCardStyle;
 };
 
 export class EmbedSyncedDocModel extends defineEmbedModel<EmbedSyncedDocBlockProps>(

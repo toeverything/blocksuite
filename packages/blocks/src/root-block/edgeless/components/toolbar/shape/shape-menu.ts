@@ -1,22 +1,22 @@
-import '../../buttons/tool-icon-button.js';
-import '../../panel/one-row-color-panel.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
+import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
+import type { ShapeName } from './shape-tool-element.js';
 
 import {
   GeneralStyleIcon,
   ScribbledStyleIcon,
 } from '../../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
+import '../../buttons/tool-icon-button.js';
 import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
+import '../../panel/one-row-color-panel.js';
 import {
   LINE_COLOR_PREFIX,
   SHAPE_COLOR_PREFIX,
   ShapeComponentConfig,
 } from './shape-menu-config.js';
-import type { ShapeName } from './shape-tool-element.js';
 
 @customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends LitElement {
@@ -47,23 +47,11 @@ export class EdgelessShapeMenu extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor shapeType!: ShapeName;
-
-  @property({ attribute: false })
-  accessor fillColor!: CssVariableName;
-
-  @property({ attribute: false })
-  accessor shapeStyle!: ShapeStyle;
-
-  @property({ attribute: false })
-  accessor strokeColor!: CssVariableName;
-
-  @property({ attribute: false })
-  accessor radius!: number;
-
-  @property({ attribute: false })
-  accessor onChange!: (props: Record<string, unknown>) => void;
+  private _setShapeStyle = (shapeStyle: ShapeStyle) => {
+    this.onChange({
+      shapeStyle,
+    });
+  };
 
   private _setStrokeColor = (strokeColor: CssVariableName) => {
     const props: Record<string, unknown> = { strokeColor };
@@ -77,14 +65,8 @@ export class EdgelessShapeMenu extends LitElement {
     this.onChange(props);
   };
 
-  private _setShapeStyle = (shapeStyle: ShapeStyle) => {
-    this.onChange({
-      shapeStyle,
-    });
-  };
-
   override render() {
-    const { radius, strokeColor, shapeStyle } = this;
+    const { radius, shapeStyle, strokeColor } = this;
     let { shapeType } = this;
     if (shapeType === 'rect' && radius > 0) {
       shapeType = 'roundedRect';
@@ -118,7 +100,7 @@ export class EdgelessShapeMenu extends LitElement {
           <menu-divider .vertical=${true}></menu-divider>
           <div class="shape-type-container">
             ${ShapeComponentConfig.map(
-              ({ name, generalIcon, scribbledIcon, tooltip, value }) => {
+              ({ generalIcon, name, scribbledIcon, tooltip, value }) => {
                 return html`
                   <edgeless-tool-icon-button
                     .tooltip=${tooltip}
@@ -143,6 +125,24 @@ export class EdgelessShapeMenu extends LitElement {
       </edgeless-slide-menu>
     `;
   }
+
+  @property({ attribute: false })
+  accessor fillColor!: CssVariableName;
+
+  @property({ attribute: false })
+  accessor onChange!: (props: Record<string, unknown>) => void;
+
+  @property({ attribute: false })
+  accessor radius!: number;
+
+  @property({ attribute: false })
+  accessor shapeStyle!: ShapeStyle;
+
+  @property({ attribute: false })
+  accessor shapeType!: ShapeName;
+
+  @property({ attribute: false })
+  accessor strokeColor!: CssVariableName;
 }
 
 declare global {

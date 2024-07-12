@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
+
 import { expect } from '@playwright/test';
 
 import {
@@ -1044,8 +1045,8 @@ test('should refresh selected rects when resizing the window/viewport', async ({
   }
 
   await page.setViewportSize({
-    width: size.width - 100,
     height: size.height - 100,
+    width: size.width - 100,
   });
   await page.waitForTimeout(250);
 

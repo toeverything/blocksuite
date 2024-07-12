@@ -1,17 +1,18 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { TemplateResult } from 'lit';
+
 import {
   AFFINE_AI_PANEL_WIDGET,
+  type AIItemConfig,
   AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
-  type AIItemConfig,
   Bound,
   ImageBlockModel,
+  NoteDisplayMode,
   isInsideEdgelessEditor,
   matchFlavours,
-  NoteDisplayMode,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { TemplateResult } from 'lit';
 
 import {
   AIPenIcon,
@@ -48,10 +49,10 @@ function getSelection(host: EditorHost) {
   const lastBlock = selectedBlocks[length - 1];
   const selectedModels = selectedBlocks.map(block => block.model);
   return {
-    textSelection,
-    selectedModels,
     firstBlock,
     lastBlock,
+    selectedModels,
+    textSelection,
   };
 }
 
@@ -60,12 +61,6 @@ function useAsCaption<T extends keyof BlockSuitePresets.AIActions>(
   id?: T
 ): AIItemConfig {
   return {
-    name: 'Use as caption',
-    icon: AIPenIcon,
-    showWhen: () => {
-      const panel = getAIPanel(host);
-      return id === 'generateCaption' && !!panel.answer;
-    },
     handler: () => {
       reportResponse('result:use-as-caption');
       const panel = getAIPanel(host);
@@ -81,17 +76,17 @@ function useAsCaption<T extends keyof BlockSuitePresets.AIActions>(
       host.doc.updateBlock(imageBlock, { caption });
       panel.hide();
     },
+    icon: AIPenIcon,
+    name: 'Use as caption',
+    showWhen: () => {
+      const panel = getAIPanel(host);
+      return id === 'generateCaption' && !!panel.answer;
+    },
   };
 }
 
 function createNewNote(host: EditorHost): AIItemConfig {
   return {
-    name: 'Create new note',
-    icon: CreateIcon,
-    showWhen: () => {
-      const panel = getAIPanel(host);
-      return !!panel.answer && isInsideEdgelessEditor(host);
-    },
     handler: () => {
       reportResponse('result:add-note');
       // get the note block
@@ -111,9 +106,9 @@ function createNewNote(host: EditorHost): AIItemConfig {
         const noteBlockId = doc.addBlock(
           'affine:note',
           {
-            xywh: newBound.serialize(),
             displayMode: NoteDisplayMode.EdgelessOnly,
             index: service.generateIndex('affine:note'),
+            xywh: newBound.serialize(),
           },
           doc.root!.id
         );
@@ -121,8 +116,8 @@ function createNewNote(host: EditorHost): AIItemConfig {
         insertFromMarkdown(host, panel.answer!, noteBlockId)
           .then(() => {
             service.selection.set({
-              elements: [noteBlockId],
               editing: false,
+              elements: [noteBlockId],
             });
 
             // set the viewport to show the new note block and original note block
@@ -131,7 +126,7 @@ function createNewNote(host: EditorHost): AIItemConfig {
             const newNoteBound = Bound.deserialize(newNote.xywh);
 
             const bounds = [bound, newNoteBound];
-            const { zoom, centerX, centerY } = service.getFitToScreenData(
+            const { centerX, centerY, zoom } = service.getFitToScreenData(
               [20, 20, 20, 20],
               bounds
             );
@@ -143,6 +138,12 @@ function createNewNote(host: EditorHost): AIItemConfig {
       });
       // hide the panel
       panel.hide();
+    },
+    icon: CreateIcon,
+    name: 'Create new note',
+    showWhen: () => {
+      const panel = getAIPanel(host);
+      return !!panel.answer && isInsideEdgelessEditor(host);
     },
   };
 }
@@ -156,7 +157,7 @@ export function buildTextResponseConfig<
     const selection = getSelection(host);
     if (!selection || !panel.answer) return;
 
-    const { textSelection, firstBlock, selectedModels } = selection;
+    const { firstBlock, selectedModels, textSelection } = selection;
     await replace(
       host,
       panel.answer,
@@ -191,47 +192,44 @@ export function buildTextResponseConfig<
 
   return [
     {
-      name: 'Response',
       items: [
         {
-          name: 'Insert below',
-          icon: InsertBelowIcon,
-          showWhen: () =>
-            !!panel.answer && (!id || !INSERT_ABOVE_ACTIONS.includes(id)),
           handler: () => {
             reportResponse('result:insert');
             _insertBelow().catch(console.error);
           },
+          icon: InsertBelowIcon,
+          name: 'Insert below',
+          showWhen: () =>
+            !!panel.answer && (!id || !INSERT_ABOVE_ACTIONS.includes(id)),
         },
         {
-          name: 'Insert above',
-          icon: InsertTopIcon,
-          showWhen: () =>
-            !!panel.answer && !!id && INSERT_ABOVE_ACTIONS.includes(id),
           handler: () => {
             reportResponse('result:insert');
             _insertAbove().catch(console.error);
           },
+          icon: InsertTopIcon,
+          name: 'Insert above',
+          showWhen: () =>
+            !!panel.answer && !!id && INSERT_ABOVE_ACTIONS.includes(id),
         },
         useAsCaption(host, id),
         {
-          name: 'Replace selection',
-          icon: ReplaceIcon,
-          showWhen: () => !!panel.answer,
           handler: () => {
             reportResponse('result:replace');
             _replace().catch(console.error);
           },
+          icon: ReplaceIcon,
+          name: 'Replace selection',
+          showWhen: () => !!panel.answer,
         },
         createNewNote(host),
       ],
+      name: 'Response',
     },
     {
-      name: '',
       items: [
         {
-          name: 'Continue in chat',
-          icon: ChatWithAIIcon,
           handler: () => {
             reportResponse('result:continue-in-chat');
             AIProvider.slots.requestContinueInChat.emit({
@@ -240,23 +238,26 @@ export function buildTextResponseConfig<
             });
             panel.hide();
           },
+          icon: ChatWithAIIcon,
+          name: 'Continue in chat',
         },
         {
-          name: 'Regenerate',
-          icon: RetryIcon,
           handler: () => {
             reportResponse('result:retry');
             panel.generate();
           },
+          icon: RetryIcon,
+          name: 'Regenerate',
         },
         {
-          name: 'Discard',
-          icon: DiscardIcon,
           handler: () => {
             panel.discard();
           },
+          icon: DiscardIcon,
+          name: 'Discard',
         },
       ],
+      name: '',
     },
   ];
 }
@@ -269,7 +270,7 @@ export function buildErrorResponseConfig<
     const selection = getSelection(host);
     if (!selection || !panel.answer) return;
 
-    const { textSelection, firstBlock, selectedModels } = selection;
+    const { firstBlock, selectedModels, textSelection } = selection;
     await replace(
       host,
       panel.answer,
@@ -304,60 +305,60 @@ export function buildErrorResponseConfig<
 
   return [
     {
-      name: 'Response',
       items: [
         {
-          name: 'Replace selection',
-          icon: ReplaceIcon,
-          showWhen: () => !!panel.answer,
           handler: () => {
             _replace().catch(console.error);
           },
+          icon: ReplaceIcon,
+          name: 'Replace selection',
+          showWhen: () => !!panel.answer,
         },
         {
-          name: 'Insert below',
-          icon: InsertBelowIcon,
-          showWhen: () =>
-            !!panel.answer && (!id || !INSERT_ABOVE_ACTIONS.includes(id)),
           handler: () => {
             _insertBelow().catch(console.error);
           },
+          icon: InsertBelowIcon,
+          name: 'Insert below',
+          showWhen: () =>
+            !!panel.answer && (!id || !INSERT_ABOVE_ACTIONS.includes(id)),
         },
         {
-          name: 'Insert above',
-          icon: InsertTopIcon,
-          showWhen: () =>
-            !!panel.answer && !!id && INSERT_ABOVE_ACTIONS.includes(id),
           handler: () => {
             reportResponse('result:insert');
             _insertAbove().catch(console.error);
           },
+          icon: InsertTopIcon,
+          name: 'Insert above',
+          showWhen: () =>
+            !!panel.answer && !!id && INSERT_ABOVE_ACTIONS.includes(id),
         },
         useAsCaption(host, id),
         createNewNote(host),
       ],
+      name: 'Response',
     },
     {
-      name: '',
       items: [
         {
-          name: 'Retry',
-          icon: RetryIcon,
-          showWhen: () => true,
           handler: () => {
             reportResponse('result:retry');
             panel.generate();
           },
+          icon: RetryIcon,
+          name: 'Retry',
+          showWhen: () => true,
         },
         {
-          name: 'Discard',
-          icon: DiscardIcon,
-          showWhen: () => !!panel.answer,
           handler: () => {
             panel.discard();
           },
+          icon: DiscardIcon,
+          name: 'Discard',
+          showWhen: () => !!panel.answer,
         },
       ],
+      name: '',
     },
   ];
 }
@@ -367,8 +368,8 @@ export function buildFinishConfig<T extends keyof BlockSuitePresets.AIActions>(
   id?: T
 ) {
   return {
-    responses: buildTextResponseConfig(panel, id),
     actions: [],
+    responses: buildTextResponseConfig(panel, id),
   };
 }
 
@@ -377,18 +378,18 @@ export function buildErrorConfig<T extends keyof BlockSuitePresets.AIActions>(
   id?: T
 ) {
   return {
-    upgrade: () => {
-      AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
+    cancel: () => {
       panel.hide();
     },
     login: () => {
       AIProvider.slots.requestLogin.emit({ host: panel.host });
       panel.hide();
     },
-    cancel: () => {
+    responses: buildErrorResponseConfig(panel, id),
+    upgrade: () => {
+      AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
       panel.hide();
     },
-    responses: buildErrorResponseConfig(panel, id),
   };
 }
 
@@ -412,10 +413,10 @@ export function buildAIPanelConfig(
 ): AffineAIPanelWidgetConfig {
   return {
     answerRenderer: createTextRenderer(panel.host, { maxHeight: 320 }),
+    copy: buildCopyConfig(panel),
+    errorStateConfig: buildErrorConfig(panel),
     finishStateConfig: buildFinishConfig(panel),
     generatingStateConfig: buildGeneratingConfig(),
-    errorStateConfig: buildErrorConfig(panel),
-    copy: buildCopyConfig(panel),
   };
 }
 

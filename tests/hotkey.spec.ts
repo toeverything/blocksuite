@@ -1,6 +1,9 @@
 import { expect } from '@playwright/test';
 
 import {
+  MODIFIER_KEY,
+  SHIFT_KEY,
+  SHORT_KEY,
   cutByKeyboard,
   dragBetweenIndices,
   dragOverTitle,
@@ -11,7 +14,6 @@ import {
   initEmptyParagraphState,
   initThreeParagraphs,
   inlineCode,
-  MODIFIER_KEY,
   pasteByKeyboard,
   pressArrowDown,
   pressArrowLeft,
@@ -27,8 +29,6 @@ import {
   redoByKeyboard,
   resetHistory,
   setInlineRangeInSelectedRichText,
-  SHIFT_KEY,
-  SHORT_KEY,
   strikethrough,
   type,
   undoByClick,
@@ -1406,8 +1406,8 @@ test('should forwardDelete works when delete multi characters', async ({
   page,
 }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/3122',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -1421,8 +1421,8 @@ test('should forwardDelete works when delete multi characters', async ({
 
 test('should drag multiple block and input text works', async ({ page }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2982',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -1499,8 +1499,8 @@ test('Enter key should as expected after setting heading by shortkey', async ({
   page,
 }) => {
   test.info().annotations.push({
-    type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/4987',
+    type: 'issue',
   });
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);

@@ -32,7 +32,7 @@ export function createZodUnion<
 export function createZodUnion<T extends readonly z.Primitive[]>(values: T) {
   if (values.length > 1) {
     return createManyUnion(
-      values as T & [z.Primitive, z.Primitive, ...z.Primitive[]]
+      values as [z.Primitive, z.Primitive, ...z.Primitive[]] & T
     );
   }
   if (values.length === 1) {

@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
+
 import { expect } from '@playwright/test';
 
 import {
+  SHORT_KEY,
   cutByKeyboard,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -15,7 +17,6 @@ import {
   pressTab,
   selectAllByKeyboard,
   setSelection,
-  SHORT_KEY,
   switchReadonly,
   type,
   waitNextFrame,
@@ -161,11 +162,11 @@ async function createLinkBlock(page: Page, str: string, link: string) {
 
       const text = doc.Text.fromDelta([
         { insert: 'Hello' },
-        { insert: str, attributes: { link } },
+        { attributes: { link }, insert: str },
       ]);
       const id = doc.addBlock(
         'affine:paragraph',
-        { type: 'text', text: text },
+        { text: text, type: 'text' },
         noteId
       );
       return id;

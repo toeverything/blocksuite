@@ -1,23 +1,24 @@
+import type { Op, OpSet, ResolvedOptions } from './core.js';
+import type { RenderHelper } from './fillers/filler-interface.js';
+import type { Point } from './geometry.js';
+
 import { absolutize } from '../path-data-parser/absolutize.js';
 import { normalize } from '../path-data-parser/normalize.js';
 import { parsePath } from '../path-data-parser/parser.js';
-import type { Op, OpSet, ResolvedOptions } from './core.js';
 import { getFiller } from './fillers/filler.js';
-import type { RenderHelper } from './fillers/filler-interface.js';
-import type { Point } from './geometry.js';
 import { Random } from './math.js';
 
 interface EllipseParams {
+  increment: number;
   rx: number;
   ry: number;
-  increment: number;
 }
 
 const helper: RenderHelper = {
+  doubleLineOps: doubleLineFillOps,
+  ellipse,
   randOffset,
   randOffsetWithRange,
-  ellipse,
-  doubleLineOps: doubleLineFillOps,
 };
 
 export function line(
@@ -27,7 +28,7 @@ export function line(
   y2: number,
   o: ResolvedOptions
 ): OpSet {
-  return { type: 'path', ops: _doubleLine(x1, y1, x2, y2, o) };
+  return { ops: _doubleLine(x1, y1, x2, y2, o), type: 'path' };
 }
 
 export function linearPath(
@@ -60,11 +61,11 @@ export function linearPath(
         )
       );
     }
-    return { type: 'path', ops };
+    return { ops, type: 'path' };
   } else if (len === 2) {
     return line(points[0][0], points[0][1], points[1][0], points[1][1], o);
   }
-  return { type: 'path', ops: [] };
+  return { ops: [], type: 'path' };
 }
 
 export function polygon(points: Point[], o: ResolvedOptions): OpSet {
@@ -97,12 +98,12 @@ export function curve(points: Point[], o: ResolvedOptions): OpSet {
     );
     o1 = o1.concat(o2);
   }
-  return { type: 'path', ops: o1 };
+  return { ops: o1, type: 'path' };
 }
 
 export interface EllipseResult {
-  opset: OpSet;
   estimatedPoints: Point[];
+  opset: OpSet;
 }
 
 export function ellipse(
@@ -171,7 +172,7 @@ export function ellipseWithParams(
   }
   return {
     estimatedPoints: cp1,
-    opset: { type: 'path', ops: o1 },
+    opset: { ops: o1, type: 'path' },
   };
 }
 
@@ -229,15 +230,15 @@ export function arc(
       );
     } else {
       ops.push(
-        { op: 'lineTo', data: [cx, cy] },
+        { data: [cx, cy], op: 'lineTo' },
         {
-          op: 'lineTo',
           data: [cx + rx * Math.cos(strt), cy + ry * Math.sin(strt)],
+          op: 'lineTo',
         }
       );
     }
   }
-  return { type: 'path', ops };
+  return { ops, type: 'path' };
 }
 
 export function svgPath(path: string, o: ResolvedOptions): OpSet {
@@ -245,14 +246,14 @@ export function svgPath(path: string, o: ResolvedOptions): OpSet {
   const ops: Op[] = [];
   let first: Point = [0, 0];
   let current: Point = [0, 0];
-  for (const { key, data } of segments) {
+  for (const { data, key } of segments) {
     switch (key) {
       case 'M': {
         const ro = 1 * (o.maxRandomnessOffset || 0);
         const pv = o.preserveVertices;
         ops.push({
-          op: 'move',
           data: data.map(d => d + (pv ? 0 : _offsetOpt(ro, o))),
+          op: 'move',
         });
         current = [data[0], data[1]];
         first = [data[0], data[1]];
@@ -274,7 +275,7 @@ export function svgPath(path: string, o: ResolvedOptions): OpSet {
         break;
     }
   }
-  return { type: 'path', ops };
+  return { ops, type: 'path' };
 }
 
 // Fills
@@ -290,25 +291,25 @@ export function solidFillPolygon(
       const len = points.length;
       if (len > 2) {
         ops.push({
-          op: 'move',
           data: [
             points[0][0] + _offsetOpt(offset, o),
             points[0][1] + _offsetOpt(offset, o),
           ],
+          op: 'move',
         });
         for (let i = 1; i < len; i++) {
           ops.push({
-            op: 'lineTo',
             data: [
               points[i][0] + _offsetOpt(offset, o),
               points[i][1] + _offsetOpt(offset, o),
             ],
+            op: 'lineTo',
           });
         }
       }
     }
   }
-  return { type: 'fillPath', ops };
+  return { ops, type: 'fillPath' };
 }
 
 export function patternFillPolygons(
@@ -466,25 +467,24 @@ function _line(
   if (move) {
     if (overlay) {
       ops.push({
-        op: 'move',
         data: [
           x1 + (preserveVertices ? 0 : randomHalf()),
           y1 + (preserveVertices ? 0 : randomHalf()),
         ],
+        op: 'move',
       });
     } else {
       ops.push({
-        op: 'move',
         data: [
           x1 + (preserveVertices ? 0 : _offsetOpt(offset, o, roughnessGain)),
           y1 + (preserveVertices ? 0 : _offsetOpt(offset, o, roughnessGain)),
         ],
+        op: 'move',
       });
     }
   }
   if (overlay) {
     ops.push({
-      op: 'bcurveTo',
       data: [
         midDispX + x1 + (x2 - x1) * divergePoint + randomHalf(),
         midDispY + y1 + (y2 - y1) * divergePoint + randomHalf(),
@@ -493,10 +493,10 @@ function _line(
         x2 + (preserveVertices ? 0 : randomHalf()),
         y2 + (preserveVertices ? 0 : randomHalf()),
       ],
+      op: 'bcurveTo',
     });
   } else {
     ops.push({
-      op: 'bcurveTo',
       data: [
         midDispX + x1 + (x2 - x1) * divergePoint + randomFull(),
         midDispY + y1 + (y2 - y1) * divergePoint + randomFull(),
@@ -505,6 +505,7 @@ function _line(
         x2 + (preserveVertices ? 0 : randomFull()),
         y2 + (preserveVertices ? 0 : randomFull()),
       ],
+      op: 'bcurveTo',
     });
   }
   return ops;
@@ -549,7 +550,7 @@ function _curve(
   if (len > 3) {
     const b = [];
     const s = 1 - o.curveTightness;
-    ops.push({ op: 'move', data: [points[1][0], points[1][1]] });
+    ops.push({ data: [points[1][0], points[1][1]], op: 'move' });
     for (let i = 1; i + 2 < len; i++) {
       const cachedVertArray = points[i];
       b[0] = [cachedVertArray[0], cachedVertArray[1]];
@@ -563,24 +564,23 @@ function _curve(
       ];
       b[3] = [points[i + 1][0], points[i + 1][1]];
       ops.push({
-        op: 'bcurveTo',
         data: [b[1][0], b[1][1], b[2][0], b[2][1], b[3][0], b[3][1]],
+        op: 'bcurveTo',
       });
     }
     if (closePoint && closePoint.length === 2) {
       const ro = o.maxRandomnessOffset;
       ops.push({
-        op: 'lineTo',
         data: [
           closePoint[0] + _offsetOpt(ro, o),
           closePoint[1] + _offsetOpt(ro, o),
         ],
+        op: 'lineTo',
       });
     }
   } else if (len === 3) {
-    ops.push({ op: 'move', data: [points[1][0], points[1][1]] });
+    ops.push({ data: [points[1][0], points[1][1]], op: 'move' });
     ops.push({
-      op: 'bcurveTo',
       data: [
         points[1][0],
         points[1][1],
@@ -589,6 +589,7 @@ function _curve(
         points[2][0],
         points[2][1],
       ],
+      op: 'bcurveTo',
     });
   } else if (len === 2) {
     ops.push(
@@ -713,21 +714,20 @@ function _bezierTo(
   const preserveVertices = o.preserveVertices;
   for (let i = 0; i < iterations; i++) {
     if (i === 0) {
-      ops.push({ op: 'move', data: [current[0], current[1]] });
+      ops.push({ data: [current[0], current[1]], op: 'move' });
     } else {
       ops.push({
-        op: 'move',
         data: [
           current[0] + (preserveVertices ? 0 : _offsetOpt(ros[0], o)),
           current[1] + (preserveVertices ? 0 : _offsetOpt(ros[0], o)),
         ],
+        op: 'move',
       });
     }
     f = preserveVertices
       ? [x, y]
       : [x + _offsetOpt(ros[i], o), y + _offsetOpt(ros[i], o)];
     ops.push({
-      op: 'bcurveTo',
       data: [
         x1 + _offsetOpt(ros[i], o),
         y1 + _offsetOpt(ros[i], o),
@@ -736,6 +736,7 @@ function _bezierTo(
         f[0],
         f[1],
       ],
+      op: 'bcurveTo',
     });
   }
   return ops;

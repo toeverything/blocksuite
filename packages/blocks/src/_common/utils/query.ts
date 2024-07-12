@@ -3,23 +3,25 @@ import type {
   EditorHost,
   ViewStore,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import type { RootBlockComponent } from '../../index.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
-import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
-  BLOCK_ID_ATTR as ATTR,
-} from '../consts.js';
 import type { AbstractEditor } from '../types.js';
+import type { Point, Rect } from './rect.js';
+
+import {
+  BLOCK_ID_ATTR as ATTR,
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
+} from '../consts.js';
 import { clamp } from './math.js';
 import { matchFlavours } from './model.js';
-import type { Point, Rect } from './rect.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 
@@ -65,7 +67,7 @@ export function getNextBlock(
   if (model.children.length) {
     return model.children[0];
   }
-  let currentBlock: typeof model | null = model;
+  let currentBlock: null | typeof model = model;
   while (currentBlock) {
     const nextSibling = doc.getNext(currentBlock);
     if (nextSibling) {
@@ -487,8 +489,8 @@ function isEdgelessChildImage({ classList }: Element) {
 export function getClosestBlockElementByPoint(
   point: Point,
   state: {
-    rect?: Rect;
     container?: Element;
+    rect?: Rect;
     snapToEdge?: {
       x: boolean;
       y: boolean;
@@ -688,7 +690,7 @@ export function getModelByBlockComponent(component: Element) {
  * https://github.com/toeverything/blocksuite/issues/902
  * https://github.com/toeverything/blocksuite/pull/1121
  */
-export function getRectByBlockElement(element: Element | BlockComponent) {
+export function getRectByBlockElement(element: BlockComponent | Element) {
   if (isDatabase(element)) return element.getBoundingClientRect();
   return (element.firstElementChild ?? element).getBoundingClientRect();
 }
@@ -698,7 +700,7 @@ export function getRectByBlockElement(element: Element | BlockComponent) {
  * Only keep block elements of same level.
  */
 export function getBlockElementsExcludeSubtrees(
-  elements: Element[] | BlockComponent[]
+  elements: BlockComponent[] | Element[]
 ) {
   if (elements.length <= 1) return elements;
   let parent = elements[0];
@@ -738,7 +740,7 @@ function findBlockElement(elements: Element[], parent?: Element) {
   return null;
 }
 
-export function getThemeMode(): 'light' | 'dark' {
+export function getThemeMode(): 'dark' | 'light' {
   const mode = getComputedStyle(document.documentElement).getPropertyValue(
     '--affine-theme-mode'
   );
@@ -808,12 +810,12 @@ export function getDropRectByPoint(
   model: BlockModel,
   element: Element
 ): {
-  rect: DOMRect;
   flag: DropFlags;
+  rect: DOMRect;
 } {
   const result = {
-    rect: getRectByBlockElement(element),
     flag: DropFlags.Normal,
+    rect: getRectByBlockElement(element),
   };
 
   const isDatabase = matchFlavours(model, ['affine:database']);

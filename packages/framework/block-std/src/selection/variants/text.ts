@@ -10,8 +10,8 @@ export type TextRangePoint = {
 
 export type TextSelectionProps = {
   from: TextRangePoint;
-  to: TextRangePoint | null;
   reverse?: boolean;
+  to: TextRangePoint | null;
 };
 
 const TextSelectionSchema = z.object({
@@ -20,6 +20,9 @@ const TextSelectionSchema = z.object({
     index: z.number(),
     length: z.number(),
   }),
+  // since `reverse` may not exist in remote selection.
+  reverse: z.boolean().optional(),
+  // The `optional()` is for backward compatibility,
   to: z
     .object({
       blockId: z.string(),
@@ -27,31 +30,20 @@ const TextSelectionSchema = z.object({
       length: z.number(),
     })
     .nullable(),
-  // The `optional()` is for backward compatibility,
-  // since `reverse` may not exist in remote selection.
-  reverse: z.boolean().optional(),
 });
 
 export class TextSelection extends BaseSelection {
-  get start(): TextRangePoint {
-    return this.reverse ? this.to ?? this.from : this.from;
-  }
-
-  get end(): TextRangePoint {
-    return this.reverse ? this.from : this.to ?? this.from;
-  }
+  static override group = 'note';
 
   static override type = 'text';
 
-  static override group = 'note';
-
   from: TextRangePoint;
-
-  to: TextRangePoint | null;
 
   reverse: boolean;
 
-  constructor({ from, to, reverse }: TextSelectionProps) {
+  to: TextRangePoint | null;
+
+  constructor({ from, reverse, to }: TextSelectionProps) {
     super({
       blockId: from.blockId,
     });
@@ -60,6 +52,15 @@ export class TextSelection extends BaseSelection {
     this.to = this._equalPoint(from, to) ? null : to;
 
     this.reverse = !!reverse;
+  }
+
+  static override fromJSON(json: Record<string, unknown>): TextSelection {
+    TextSelectionSchema.parse(json);
+    return new TextSelection({
+      from: json.from as TextRangePoint,
+      reverse: !!json.reverse,
+      to: json.to as TextRangePoint | null,
+    });
   }
 
   private _equalPoint(
@@ -90,15 +91,6 @@ export class TextSelection extends BaseSelection {
     return false;
   }
 
-  override toJSON(): Record<string, unknown> {
-    return {
-      type: 'text',
-      from: this.from,
-      to: this.to,
-      reverse: this.reverse,
-    };
-  }
-
   isCollapsed(): boolean {
     return this.to === null && this.from.length === 0;
   }
@@ -107,13 +99,21 @@ export class TextSelection extends BaseSelection {
     return this.to === null || this.from.blockId === this.to.blockId;
   }
 
-  static override fromJSON(json: Record<string, unknown>): TextSelection {
-    TextSelectionSchema.parse(json);
-    return new TextSelection({
-      from: json.from as TextRangePoint,
-      to: json.to as TextRangePoint | null,
-      reverse: !!json.reverse,
-    });
+  override toJSON(): Record<string, unknown> {
+    return {
+      from: this.from,
+      reverse: this.reverse,
+      to: this.to,
+      type: 'text',
+    };
+  }
+
+  get end(): TextRangePoint {
+    return this.reverse ? this.from : this.to ?? this.from;
+  }
+
+  get start(): TextRangePoint {
+    return this.reverse ? this.to ?? this.from : this.from;
   }
 }
 

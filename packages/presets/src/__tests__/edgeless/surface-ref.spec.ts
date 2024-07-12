@@ -2,6 +2,7 @@ import type {
   EdgelessRootBlockComponent,
   SurfaceRefBlockComponent,
 } from '@blocksuite/blocks';
+
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -118,10 +119,10 @@ describe('basic', () => {
   test('content in group should be rendered in the correct order', async () => {
     const groupId = service.addElement('group', {
       children: {
-        [shapeA]: true,
-        [shapeB]: true,
         [noteA]: true,
         [noteB]: true,
+        [shapeA]: true,
+        [shapeB]: true,
       },
     });
     const surfaceRefId = doc.addBlock(
@@ -155,10 +156,10 @@ describe('basic', () => {
   test('view in edgeless mode button', async () => {
     const groupId = service.addElement('group', {
       children: {
-        [shapeA]: true,
-        [shapeB]: true,
         [noteA]: true,
         [noteB]: true,
+        [shapeA]: true,
+        [shapeB]: true,
       },
     });
     const surfaceRefId = doc.addBlock(

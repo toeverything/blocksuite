@@ -1,4 +1,3 @@
-import { assertExists, sha } from '@blocksuite/global/utils';
 import type {
   CollectionInfoSnapshot,
   Doc,
@@ -6,7 +5,9 @@ import type {
   DocSnapshot,
   JobMiddleware,
 } from '@blocksuite/store';
-import { extMimeMap, getAssetName, Job } from '@blocksuite/store';
+
+import { assertExists, sha } from '@blocksuite/global/utils';
+import { Job, extMimeMap, getAssetName } from '@blocksuite/store';
 import JSZip from 'jszip';
 
 import { replaceIdMiddleware, titleMiddleware } from './middlewares.js';
@@ -74,7 +75,7 @@ async function importDocs(collection: DocCollection, imported: Blob) {
     info = JSON.parse(json) as CollectionInfoSnapshot;
   }
 
-  const migrationMiddleware: JobMiddleware = ({ slots, collection }) => {
+  const migrationMiddleware: JobMiddleware = ({ collection, slots }) => {
     slots.afterImport.on(payload => {
       if (payload.type === 'page') {
         collection.schema.upgradeDoc(

@@ -1,7 +1,7 @@
+import type { UserConfig } from 'vite';
+
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-
-import type { UserConfig } from 'vite';
 import { defineConfig, mergeConfig } from 'vite';
 
 import { brotliAsync, gzipAsync } from '../../scripts/utils.js';
@@ -14,14 +14,22 @@ const baseConfig: UserConfig = base({ mode: process.env.NODE_ENV });
 const config = mergeConfig(
   baseConfig,
   defineConfig({
+    build: {
+      outDir: resolve(__dirname, 'temp/dist-basic'),
+      rollupOptions: {
+        output: {
+          entryFileNames: '[name].js',
+        },
+      },
+    },
     plugins: [
       {
+        load(id) {
+          if (id === 'empty-file') return 'export {}';
+        },
         name: 'remove-dynamic-import',
         resolveDynamicImport() {
           return 'empty-file';
-        },
-        load(id) {
-          if (id === 'empty-file') return 'export {}';
         },
         async writeBundle(o, bundle) {
           const chunk = bundle['main.js'];
@@ -35,24 +43,16 @@ const config = mergeConfig(
           await writeFile(
             resolve(sizeDir, `playground.json`),
             JSON.stringify({
-              file: 'examples/basic',
-              size: file.length,
-              gzip: gzipped.length,
               brotli: brotli.length,
+              file: 'examples/basic',
+              gzip: gzipped.length,
+              size: file.length,
             }),
             'utf-8'
           );
         },
       },
     ],
-    build: {
-      outDir: resolve(__dirname, 'temp/dist-basic'),
-      rollupOptions: {
-        output: {
-          entryFileNames: '[name].js',
-        },
-      },
-    },
   })
 );
 

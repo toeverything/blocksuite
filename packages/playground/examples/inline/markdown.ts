@@ -1,32 +1,31 @@
+import type * as Y from 'yjs';
+
 import {
   type InlineEditor,
   type InlineRange,
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
-import type * as Y from 'yjs';
 
 interface MarkdownMatch {
-  name: string;
-  pattern: RegExp;
   action: (props: {
     inlineEditor: InlineEditor;
-    prefixText: string;
     inlineRange: InlineRange;
     pattern: RegExp;
+    prefixText: string;
     undoManager: Y.UndoManager;
   }) => boolean;
+  name: string;
+  pattern: RegExp;
 }
 
 export const markdownMatches: MarkdownMatch[] = [
   {
-    name: 'bolditalic',
-    pattern: /(?:\*){3}([^* \n](.+?[^* \n])?)(?:\*){3}$/g,
     action: ({
       inlineEditor,
-      prefixText,
       inlineRange,
       pattern,
+      prefixText,
       undoManager,
     }) => {
       const match = pattern.exec(prefixText);
@@ -78,15 +77,15 @@ export const markdownMatches: MarkdownMatch[] = [
 
       return KEYBOARD_PREVENT_DEFAULT;
     },
+    name: 'bolditalic',
+    pattern: /(?:\*){3}([^* \n](.+?[^* \n])?)(?:\*){3}$/g,
   },
   {
-    name: 'bold',
-    pattern: /(?:\*){2}([^* \n](.+?[^* \n])?)(?:\*){2}$/g,
     action: ({
       inlineEditor,
-      prefixText,
       inlineRange,
       pattern,
+      prefixText,
       undoManager,
     }) => {
       const match = pattern.exec(prefixText);
@@ -136,15 +135,15 @@ export const markdownMatches: MarkdownMatch[] = [
 
       return KEYBOARD_PREVENT_DEFAULT;
     },
+    name: 'bold',
+    pattern: /(?:\*){2}([^* \n](.+?[^* \n])?)(?:\*){2}$/g,
   },
   {
-    name: 'italic',
-    pattern: /(?:\*){1}([^* \n](.+?[^* \n])?)(?:\*){1}$/g,
     action: ({
       inlineEditor,
-      prefixText,
       inlineRange,
       pattern,
+      prefixText,
       undoManager,
     }) => {
       const match = pattern.exec(prefixText);
@@ -194,15 +193,15 @@ export const markdownMatches: MarkdownMatch[] = [
 
       return KEYBOARD_PREVENT_DEFAULT;
     },
+    name: 'italic',
+    pattern: /(?:\*){1}([^* \n](.+?[^* \n])?)(?:\*){1}$/g,
   },
   {
-    name: 'strikethrough',
-    pattern: /(?:~~)([^~ \n](.+?[^~ \n])?)(?:~~)$/g,
     action: ({
       inlineEditor,
-      prefixText,
       inlineRange,
       pattern,
+      prefixText,
       undoManager,
     }) => {
       const match = pattern.exec(prefixText);
@@ -252,15 +251,15 @@ export const markdownMatches: MarkdownMatch[] = [
 
       return KEYBOARD_PREVENT_DEFAULT;
     },
+    name: 'strikethrough',
+    pattern: /(?:~~)([^~ \n](.+?[^~ \n])?)(?:~~)$/g,
   },
   {
-    name: 'underthrough',
-    pattern: /(?:~)([^~ \n](.+?[^~ \n])?)(?:~)$/g,
     action: ({
       inlineEditor,
-      prefixText,
       inlineRange,
       pattern,
+      prefixText,
       undoManager,
     }) => {
       const match = pattern.exec(prefixText);
@@ -310,15 +309,15 @@ export const markdownMatches: MarkdownMatch[] = [
 
       return KEYBOARD_PREVENT_DEFAULT;
     },
+    name: 'underthrough',
+    pattern: /(?:~)([^~ \n](.+?[^~ \n])?)(?:~)$/g,
   },
   {
-    name: 'code',
-    pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
     action: ({
       inlineEditor,
-      prefixText,
       inlineRange,
       pattern,
+      prefixText,
       undoManager,
     }) => {
       const match = pattern.exec(prefixText);
@@ -372,5 +371,7 @@ export const markdownMatches: MarkdownMatch[] = [
 
       return KEYBOARD_PREVENT_DEFAULT;
     },
+    name: 'code',
+    pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
   },
 ];

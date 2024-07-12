@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
+import { DocCollection, Schema, type Y } from '@blocksuite/store';
 // normal import
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import { DocCollection, Schema, type Y } from '@blocksuite/store';
 import { assert, describe, expect, test } from 'vitest';
 
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
@@ -80,8 +79,8 @@ describe('block migration', () => {
     schema.upgradeDoc(
       0,
       {
-        'affine:page': 1,
         'affine:note': 1,
+        'affine:page': 1,
         'affine:paragraph': 1,
         'affine:surface': 3,
       },
@@ -126,8 +125,8 @@ describe('block migration', () => {
       0,
       {
         'affine:list': 1,
-        'affine:page': 1,
         'affine:note': 1,
+        'affine:page': 1,
         'affine:paragraph': 1,
         'affine:surface': 3,
       },
@@ -186,11 +185,11 @@ describe('block migration', () => {
     schema.upgradeDoc(
       0,
       {
-        'affine:page': 1,
-        'affine:surface': 4,
-        'affine:note': 1,
-        'affine:paragraph': 1,
         'affine:database': 2,
+        'affine:note': 1,
+        'affine:page': 1,
+        'affine:paragraph': 1,
+        'affine:surface': 4,
       },
       doc
     );

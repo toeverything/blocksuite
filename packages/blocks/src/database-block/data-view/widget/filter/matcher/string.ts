@@ -1,48 +1,10 @@
-import { tBoolean, tString } from '../../../logical/data-type.js';
-import { tFunction } from '../../../logical/typesystem.js';
 import type { FilterDefineType } from './matcher.js';
 
+import { tBoolean, tString } from '../../../logical/data-type.js';
+import { tFunction } from '../../../logical/typesystem.js';
+
 export const stringFilter = {
-  is: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
-    label: 'Is',
-    impl: (value, target) => {
-      if (
-        typeof value !== 'string' ||
-        typeof target !== 'string' ||
-        target === ''
-      ) {
-        return true;
-      }
-      return value == target;
-    },
-  },
-  isNot: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
-    label: 'Is not',
-    impl: (value, target) => {
-      if (
-        typeof value !== 'string' ||
-        typeof target !== 'string' ||
-        target === ''
-      ) {
-        return true;
-      }
-      return value != target;
-    },
-  },
   contains: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
-    label: 'Contains',
     impl: (value, target) => {
       if (
         typeof value !== 'string' ||
@@ -53,13 +15,13 @@ export const stringFilter = {
       }
       return value.includes(target);
     },
-  },
-  doesNoContains: {
+    label: 'Contains',
     type: tFunction({
       args: [tString.create(), tString.create()],
       rt: tBoolean.create(),
     }),
-    label: 'Does no contains',
+  },
+  doesNoContains: {
     impl: (value, target) => {
       if (
         typeof value !== 'string' ||
@@ -70,30 +32,13 @@ export const stringFilter = {
       }
       return !value.includes(target);
     },
-  },
-  startsWith: {
+    label: 'Does no contains',
     type: tFunction({
       args: [tString.create(), tString.create()],
       rt: tBoolean.create(),
     }),
-    label: 'Starts with',
-    impl: (value, target) => {
-      if (
-        typeof value !== 'string' ||
-        typeof target !== 'string' ||
-        target === ''
-      ) {
-        return true;
-      }
-      return value.startsWith(target);
-    },
   },
   endsWith: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
-    label: 'Ends with',
     impl: (value, target) => {
       if (
         typeof value !== 'string' ||
@@ -104,5 +49,61 @@ export const stringFilter = {
       }
       return value.endsWith(target);
     },
+    label: 'Ends with',
+    type: tFunction({
+      args: [tString.create(), tString.create()],
+      rt: tBoolean.create(),
+    }),
+  },
+  is: {
+    impl: (value, target) => {
+      if (
+        typeof value !== 'string' ||
+        typeof target !== 'string' ||
+        target === ''
+      ) {
+        return true;
+      }
+      return value == target;
+    },
+    label: 'Is',
+    type: tFunction({
+      args: [tString.create(), tString.create()],
+      rt: tBoolean.create(),
+    }),
+  },
+  isNot: {
+    impl: (value, target) => {
+      if (
+        typeof value !== 'string' ||
+        typeof target !== 'string' ||
+        target === ''
+      ) {
+        return true;
+      }
+      return value != target;
+    },
+    label: 'Is not',
+    type: tFunction({
+      args: [tString.create(), tString.create()],
+      rt: tBoolean.create(),
+    }),
+  },
+  startsWith: {
+    impl: (value, target) => {
+      if (
+        typeof value !== 'string' ||
+        typeof target !== 'string' ||
+        target === ''
+      ) {
+        return true;
+      }
+      return value.startsWith(target);
+    },
+    label: 'Starts with',
+    type: tFunction({
+      args: [tString.create(), tString.create()],
+      rt: tBoolean.create(),
+    }),
   },
 } as Record<string, FilterDefineType>;

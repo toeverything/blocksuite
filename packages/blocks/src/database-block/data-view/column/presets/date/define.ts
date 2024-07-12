@@ -8,10 +8,6 @@ declare global {
   }
 }
 export const dateColumnModelConfig = dateColumnType.modelConfig<number>({
-  name: 'Date',
-  type: () => tDate.create(),
-  defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
   cellFromString: data => {
     const isDateFormat = !isNaN(Date.parse(data));
 
@@ -20,5 +16,9 @@ export const dateColumnModelConfig = dateColumnType.modelConfig<number>({
     };
   },
   cellToJson: data => data ?? null,
+  cellToString: data => data?.toString() ?? '',
+  defaultData: () => ({}),
   isEmpty: data => data == null,
+  name: 'Date',
+  type: () => tDate.create(),
 });

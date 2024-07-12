@@ -93,11 +93,11 @@ test.describe('copy&paste when selecting', () => {
     await initDatabaseRowWithData(page, '');
 
     const startCell = getDatabaseBodyCell(page, {
-      rowIndex: 0,
       columnIndex: 0,
+      rowIndex: 0,
     });
     const startCellBox = await getBoundingBox(startCell);
-    const endCell = getDatabaseBodyCell(page, { rowIndex: 1, columnIndex: 1 });
+    const endCell = getDatabaseBodyCell(page, { columnIndex: 1, rowIndex: 1 });
     const endCellBox = await getBoundingBox(endCell);
     const startX = startCellBox.x + startCellBox.width / 2;
     const startY = startCellBox.y + startCellBox.height / 2;
@@ -121,12 +121,12 @@ test.describe('copy&paste when selecting', () => {
     await assertDatabaseTitleColumnText(page, 'text1', 2);
     await assertDatabaseTitleColumnText(page, 'text2', 3);
     const selectCell21 = getDatabaseBodyCell(page, {
-      rowIndex: 2,
       columnIndex: 1,
+      rowIndex: 2,
     });
     const selectCell31 = getDatabaseBodyCell(page, {
-      rowIndex: 3,
       columnIndex: 1,
+      rowIndex: 3,
     });
     expect(await selectCell21.innerText()).toBe('123');
     expect(await selectCell31.innerText()).toBe('a');
@@ -146,8 +146,8 @@ test.describe('copy&paste when selecting', () => {
     await initDatabaseColumn(page);
     await switchColumnType(page, 'Number', 2);
     const numberCell = getDatabaseBodyCell(page, {
-      rowIndex: 0,
       columnIndex: 2,
+      rowIndex: 0,
     });
     await numberCell.click();
     await waitNextFrame(page);
@@ -163,13 +163,13 @@ test.describe('copy&paste when selecting', () => {
 
     await assertDatabaseTitleColumnText(page, 'text1', 1);
     const selectCell = getDatabaseBodyCell(page, {
-      rowIndex: 1,
       columnIndex: 1,
+      rowIndex: 1,
     });
     expect(await selectCell.innerText()).toBe('abc');
     const selectNumberCell = getDatabaseBodyCell(page, {
-      rowIndex: 1,
       columnIndex: 2,
+      rowIndex: 1,
     });
     expect(await selectNumberCell.innerText()).toBe('123');
   });

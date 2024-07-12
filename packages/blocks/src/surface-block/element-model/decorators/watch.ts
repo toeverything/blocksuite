@@ -1,4 +1,5 @@
 import type { SurfaceElementModel } from '../base.js';
+
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 type WatchFn<T extends SurfaceElementModel = SurfaceElementModel> = (
@@ -31,7 +32,7 @@ export function watch<V, T extends SurfaceElementModel>(
   };
 }
 
-function getWatchMeta(proto: unknown, prop: string | symbol): null | WatchFn {
+function getWatchMeta(proto: unknown, prop: string | symbol): WatchFn | null {
   return getObjectPropMeta(proto, watchSymbol, prop);
 }
 

@@ -1,7 +1,9 @@
 import type { Command } from '@blocksuite/block-std';
+
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { AffineTextAttributes } from '../../_common/inline/presets/affine-inline-specs.js';
+
 import { toggleLinkPopup } from '../../_common/inline/presets/nodes/link-node/link-popup/toggle-link-popup.js';
 import { generateTextStyleCommand, getCombinedTextStyle } from './utils.js';
 
@@ -99,14 +101,14 @@ declare global {
     }
 
     interface Commands {
-      toggleBold: typeof toggleBold;
-      toggleItalic: typeof toggleItalic;
-      toggleUnderline: typeof toggleUnderline;
-      toggleStrike: typeof toggleStrike;
-      toggleCode: typeof toggleCode;
-      toggleLink: typeof toggleLink;
       getTextStyle: typeof getTextStyle;
       isTextStyleActive: typeof isTextStyleActive;
+      toggleBold: typeof toggleBold;
+      toggleCode: typeof toggleCode;
+      toggleItalic: typeof toggleItalic;
+      toggleLink: typeof toggleLink;
+      toggleStrike: typeof toggleStrike;
+      toggleUnderline: typeof toggleUnderline;
     }
   }
 }

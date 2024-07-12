@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  AffineAIPanelWidget,
   AIItemConfig,
+  AffineAIPanelWidget,
   EdgelessCopilotWidget,
   EdgelessElementToolbarWidget,
   EdgelessRootService,
@@ -9,17 +9,20 @@ import type {
   ShapeElementModel,
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
+import type { TemplateResult } from 'lit';
+
 import {
   DeleteIcon,
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EmbedHtmlBlockSpec,
-  fitContent,
   ImageBlockModel,
   InsertBelowIcon,
   NoteDisplayMode,
   ResetIcon,
+  fitContent,
 } from '@blocksuite/blocks';
-import type { TemplateResult } from 'lit';
+
+import type { CtxRecord } from './types.js';
 
 import { AIPenIcon, ChatWithAIIcon } from '../_common/icons.js';
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
@@ -40,7 +43,6 @@ import {
   getEdgelessService,
 } from '../utils/selection-utils.js';
 import { EXCLUDING_INSERT_ACTIONS, generatingStages } from './consts.js';
-import type { CtxRecord } from './types.js';
 
 type FinishConfig = Exclude<
   AffineAIPanelWidget['config'],
@@ -75,23 +77,23 @@ export function discard(
   _: EdgelessCopilotWidget
 ): AIItemConfig {
   return {
-    name: 'Discard',
-    icon: DeleteIcon,
-    showWhen: () => !!panel.answer,
     handler: () => {
       panel.discard();
     },
+    icon: DeleteIcon,
+    name: 'Discard',
+    showWhen: () => !!panel.answer,
   };
 }
 
 export function retry(panel: AffineAIPanelWidget): AIItemConfig {
   return {
-    name: 'Retry',
-    icon: ResetIcon,
     handler: () => {
       reportResponse('result:retry');
       panel.generate();
     },
+    icon: ResetIcon,
+    name: 'Retry',
   };
 }
 
@@ -103,17 +105,17 @@ export function createInsertResp<T extends keyof BlockSuitePresets.AIActions>(
   buttonText: string = 'Insert below'
 ): AIItemConfig {
   return {
-    name: buttonText,
-    icon: InsertBelowIcon,
-    showWhen: () => {
-      const panel = getAIPanel(host);
-      return !EXCLUDING_INSERT_ACTIONS.includes(id) && !!panel.answer;
-    },
     handler: () => {
       reportResponse('result:insert');
       handler(host, ctx);
       const panel = getAIPanel(host);
       panel.hide();
+    },
+    icon: InsertBelowIcon,
+    name: buttonText,
+    showWhen: () => {
+      const panel = getAIPanel(host);
+      return !EXCLUDING_INSERT_ACTIONS.includes(id) && !!panel.answer;
     },
   };
 }
@@ -123,12 +125,6 @@ export function useAsCaption<T extends keyof BlockSuitePresets.AIActions>(
   host: EditorHost
 ): AIItemConfig {
   return {
-    name: 'Use as caption',
-    icon: AIPenIcon,
-    showWhen: () => {
-      const panel = getAIPanel(host);
-      return id === 'generateCaption' && !!panel.answer;
-    },
     handler: () => {
       reportResponse('result:use-as-caption');
       const panel = getAIPanel(host);
@@ -144,12 +140,18 @@ export function useAsCaption<T extends keyof BlockSuitePresets.AIActions>(
       host.doc.updateBlock(imageBlock, { caption });
       panel.hide();
     },
+    icon: AIPenIcon,
+    name: 'Use as caption',
+    showWhen: () => {
+      const panel = getAIPanel(host);
+      return id === 'generateCaption' && !!panel.answer;
+    },
   };
 }
 
 type MindMapNode = {
-  text: string;
   children: MindMapNode[];
+  text: string;
 };
 
 const defaultHandler = (host: EditorHost) => {
@@ -162,8 +164,8 @@ const defaultHandler = (host: EditorHost) => {
     const noteBlockId = doc.addBlock(
       'affine:note',
       {
-        xywh: bounds.serialize(),
         displayMode: NoteDisplayMode.EdgelessOnly,
+        xywh: bounds.serialize(),
       },
       doc.root!.id
     );
@@ -173,8 +175,8 @@ const defaultHandler = (host: EditorHost) => {
         const service = getService(host);
 
         service.selection.set({
-          elements: [noteBlockId],
           editing: false,
+          elements: [noteBlockId],
         });
       })
       .catch(err => {
@@ -219,6 +221,109 @@ export const responses: {
     ctx: CtxRecord
   ) => void;
 } = {
+  brainstormMindmap: (host, ctx) => {
+    const aiPanel = getAIPanel(host);
+    const edgelessService = getEdgelessService(host);
+    const edgelessCopilot = getEdgelessCopilotWidget(host);
+    const selectionRect = edgelessCopilot.selectionModelRect;
+    const [surface] = host.doc.getBlockByFlavour(
+      'affine:surface'
+    ) as SurfaceBlockModel[];
+    const elements = ctx.get()[
+      'selectedElements'
+    ] as BlockSuite.EdgelessModelType[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = ctx.get() as any;
+    let newGenerated = true;
+
+    // This means regenerate
+    if (isMindMapRoot(elements[0])) {
+      const mindmap = elements[0].group as MindmapElementModel;
+      const xywh = mindmap.tree.element.xywh;
+
+      surface.removeElement(mindmap.id);
+
+      if (data.node) {
+        data.node.xywh = xywh;
+        newGenerated = false;
+      }
+    }
+
+    edgelessCopilot.hideCopilotPanel();
+    aiPanel.hide();
+
+    const mindmapId = surface.addElement({
+      children: data.node,
+      style: data.style,
+      type: 'mindmap',
+    });
+
+    edgelessService.telemetryService?.track('CanvasElementAdded', {
+      control: 'ai',
+      module: 'toolbar',
+      page: 'whiteboard editor',
+      segment: 'toolbar',
+      type: 'mindmap',
+    });
+
+    const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
+
+    host.doc.transact(() => {
+      mindmap.childElements.forEach(shape => {
+        fitContent(shape as ShapeElementModel);
+      });
+    });
+
+    queueMicrotask(() => {
+      if (newGenerated && selectionRect) {
+        mindmap.moveTo([
+          selectionRect.x,
+          selectionRect.y,
+          selectionRect.width,
+          selectionRect.height,
+        ]);
+      }
+    });
+
+    // This is a workaround to make sure mindmap and other microtask are done
+    setTimeout(() => {
+      edgelessService.viewport.setViewportByBound(
+        mindmap.elementBound,
+        [20, 20, 20, 20],
+        true
+      );
+
+      edgelessService.selection.set({
+        editing: false,
+        elements: [mindmap.tree.element.id],
+      });
+    });
+  },
+  createImage: imageHandler,
+  createSlides: (host, ctx) => {
+    const data = ctx.get();
+    const contents = data.contents as unknown[];
+    if (!contents) return;
+    const images = data.images as { id: string; url: string }[][];
+    const service = host.spec.getService<EdgelessRootService>('affine:page');
+
+    (async function () {
+      for (let i = 0; i < contents.length - 1; i++) {
+        const image = images[i];
+        const content = contents[i];
+        const job = service.createTemplateJob('template');
+        await Promise.all(
+          image.map(({ id, url }) =>
+            fetch(url)
+              .then(res => res.blob())
+              .then(blob => job.job.assets.set(id, blob))
+          )
+        );
+        await job.insertTemplate(content);
+        getSurfaceElementFromEditor(host).refresh();
+      }
+    })().catch(console.error);
+  },
   expandMindmap: (host, ctx) => {
     const [surface] = host.doc.getBlockByFlavour(
       'affine:surface'
@@ -264,90 +369,13 @@ export const responses: {
         const edgelessService = getEdgelessService(host);
 
         edgelessService.selection.set({
-          elements: [subtree.element.id],
           editing: false,
+          elements: [subtree.element.id],
         });
       });
     }
   },
-  brainstormMindmap: (host, ctx) => {
-    const aiPanel = getAIPanel(host);
-    const edgelessService = getEdgelessService(host);
-    const edgelessCopilot = getEdgelessCopilotWidget(host);
-    const selectionRect = edgelessCopilot.selectionModelRect;
-    const [surface] = host.doc.getBlockByFlavour(
-      'affine:surface'
-    ) as SurfaceBlockModel[];
-    const elements = ctx.get()[
-      'selectedElements'
-    ] as BlockSuite.EdgelessModelType[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = ctx.get() as any;
-    let newGenerated = true;
-
-    // This means regenerate
-    if (isMindMapRoot(elements[0])) {
-      const mindmap = elements[0].group as MindmapElementModel;
-      const xywh = mindmap.tree.element.xywh;
-
-      surface.removeElement(mindmap.id);
-
-      if (data.node) {
-        data.node.xywh = xywh;
-        newGenerated = false;
-      }
-    }
-
-    edgelessCopilot.hideCopilotPanel();
-    aiPanel.hide();
-
-    const mindmapId = surface.addElement({
-      type: 'mindmap',
-      children: data.node,
-      style: data.style,
-    });
-
-    edgelessService.telemetryService?.track('CanvasElementAdded', {
-      control: 'ai',
-      page: 'whiteboard editor',
-      module: 'toolbar',
-      segment: 'toolbar',
-      type: 'mindmap',
-    });
-
-    const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
-
-    host.doc.transact(() => {
-      mindmap.childElements.forEach(shape => {
-        fitContent(shape as ShapeElementModel);
-      });
-    });
-
-    queueMicrotask(() => {
-      if (newGenerated && selectionRect) {
-        mindmap.moveTo([
-          selectionRect.x,
-          selectionRect.y,
-          selectionRect.width,
-          selectionRect.height,
-        ]);
-      }
-    });
-
-    // This is a workaround to make sure mindmap and other microtask are done
-    setTimeout(() => {
-      edgelessService.viewport.setViewportByBound(
-        mindmap.elementBound,
-        [20, 20, 20, 20],
-        true
-      );
-
-      edgelessService.selection.set({
-        elements: [mindmap.tree.element.id],
-        editing: false,
-      });
-    });
-  },
+  filterImage: imageHandler,
   makeItReal: (host, ctx) => {
     const aiPanel = getAIPanel(host);
     let html = aiPanel.answer;
@@ -374,41 +402,15 @@ export const responses: {
       edgelessRoot.doc.addBlock(
         EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
         {
-          html,
           design: 'ai:makeItReal', // as tag
+          html,
           xywh: bounds.serialize(),
         },
         surface.id
       );
     });
   },
-  createSlides: (host, ctx) => {
-    const data = ctx.get();
-    const contents = data.contents as unknown[];
-    if (!contents) return;
-    const images = data.images as { url: string; id: string }[][];
-    const service = host.spec.getService<EdgelessRootService>('affine:page');
-
-    (async function () {
-      for (let i = 0; i < contents.length - 1; i++) {
-        const image = images[i];
-        const content = contents[i];
-        const job = service.createTemplateJob('template');
-        await Promise.all(
-          image.map(({ id, url }) =>
-            fetch(url)
-              .then(res => res.blob())
-              .then(blob => job.job.assets.set(id, blob))
-          )
-        );
-        await job.insertTemplate(content);
-        getSurfaceElementFromEditor(host).refresh();
-      }
-    })().catch(console.error);
-  },
-  createImage: imageHandler,
   processImage: imageHandler,
-  filterImage: imageHandler,
 };
 
 const getButtonText: {
@@ -451,13 +453,11 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
   >
 ): FinishConfig {
   return {
+    actions: [],
     responses: [
       {
-        name: 'Response',
         items: [
           {
-            name: 'Continue in chat',
-            icon: ChatWithAIIcon,
             handler: () => {
               reportResponse('result:continue-in-chat');
               const panel = getAIPanel(host);
@@ -467,15 +467,17 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
               });
               panel.hide();
             },
+            icon: ChatWithAIIcon,
+            name: 'Continue in chat',
           },
           getInsertAndReplaceHandler(id, host, ctx, variants),
           useAsCaption(id, host),
           retry(getAIPanel(host)),
           discard(getAIPanel(host), getEdgelessCopilotWidget(host)),
         ],
+        name: 'Response',
       },
     ],
-    actions: [],
   };
 }
 
@@ -502,29 +504,29 @@ export function actionToErrorResponse<
   >
 ): ErrorConfig {
   return {
-    upgrade: () => {
-      AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
+    cancel: () => {
       panel.hide();
     },
     login: () => {
       AIProvider.slots.requestLogin.emit({ host: panel.host });
       panel.hide();
     },
-    cancel: () => {
-      panel.hide();
-    },
     responses: [
       {
-        name: 'Response',
         items: [getInsertAndReplaceHandler(id, host, ctx, variants)],
+        name: 'Response',
       },
       {
-        name: '',
         items: [
           retry(getAIPanel(host)),
           discard(getAIPanel(host), getEdgelessCopilotWidget(host)),
         ],
+        name: '',
       },
     ],
+    upgrade: () => {
+      AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
+      panel.hide();
+    },
   };
 }

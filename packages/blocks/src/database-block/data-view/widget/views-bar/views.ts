@@ -1,8 +1,8 @@
-import '../../common/component/overflow/overflow.js';
-
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+
+import type { SingleViewSource } from '../../common/index.js';
 
 import {
   popFilterableSimpleMenu,
@@ -15,17 +15,13 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../../../_common/icons/index.js';
+import '../../common/component/overflow/overflow.js';
 import { DeleteIcon } from '../../common/icons/index.js';
-import type { SingleViewSource } from '../../common/index.js';
 import { renderUniLit } from '../../utils/uni-component/index.js';
 import { WidgetBase } from '../widget-base.js';
 
 @customElement('data-view-header-views')
 export class DataViewHeaderViews extends WidgetBase {
-  get readonly() {
-    return this.viewSource.readonly;
-  }
-
   static override styles = css`
     data-view-header-views {
       height: 32px;
@@ -73,22 +69,18 @@ export class DataViewHeaderViews extends WidgetBase {
     }
   `;
 
-  private getRenderer(view: SingleViewSource) {
-    return this.viewSource.getViewMeta(view.view.mode).renderer;
-  }
-
   _addViewMenu = (event: MouseEvent) => {
     popFilterableSimpleMenu(
       event.target as HTMLElement,
       this.viewSource.allViewMeta.map(v => {
         return {
-          type: 'action',
-          name: v.model.defaultName,
           icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
+          name: v.model.defaultName,
           select: () => {
             const id = this.viewSource.viewAdd(v.type);
             this.viewSource.selectView(id);
           },
+          type: 'action',
         };
       })
     );
@@ -103,13 +95,9 @@ export class DataViewHeaderViews extends WidgetBase {
           this.openViewOption(event.target as HTMLElement, v.view.id);
         };
         return {
-          type: 'action' as const,
           icon: html`<uni-lit .uni=${this.getRenderer(v).icon}></uni-lit>`,
-          name: v.view.name,
           isSelected: this.viewSource.currentViewId === v.view.id,
-          select: () => {
-            this.viewSource.selectView(v.view.id);
-          },
+          name: v.view.name,
           postfix: html`<div
             class="dv-hover dv-round-4"
             @click="${openViewOption}"
@@ -117,24 +105,28 @@ export class DataViewHeaderViews extends WidgetBase {
           >
             ${MoreHorizontalIcon}
           </div>`,
+          select: () => {
+            this.viewSource.selectView(v.view.id);
+          },
+          type: 'action' as const,
         };
       }),
       {
-        type: 'group',
-        name: '',
-        hide: () => this.readonly,
         children: () =>
           this.viewSource.allViewMeta.map(v => {
             return {
-              type: 'action',
-              name: `Create ${v.model.defaultName}`,
               icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
+              name: `Create ${v.model.defaultName}`,
               select: () => {
                 const id = this.viewSource.viewAdd(v.type);
                 this.viewSource.selectView(id);
               },
+              type: 'action',
             };
           }),
+        hide: () => this.readonly,
+        name: '',
+        type: 'group',
       },
     ]);
   };
@@ -161,20 +153,19 @@ export class DataViewHeaderViews extends WidgetBase {
         },
         items: [
           {
-            type: 'action',
-            name: 'Edit View',
             icon: renderUniLit(this.getRenderer(view).icon, {}),
+            name: 'Edit View',
             select: () => {
               this.closest('affine-data-view-renderer')
                 ?.querySelector('data-view-header-tools-view-options')
                 ?.openMoreAction(target);
             },
+            type: 'action',
           },
           {
-            type: 'action',
-            name: 'Move Left',
             hide: () => index === 0,
             icon: MoveLeftIcon,
+            name: 'Move Left',
             select: () => {
               const target = views[index - 1];
               this.viewSource.moveTo(
@@ -182,12 +173,12 @@ export class DataViewHeaderViews extends WidgetBase {
                 target ? { before: true, id: target.view.id } : 'start'
               );
             },
+            type: 'action',
           },
           {
-            type: 'action',
-            name: 'Move Right',
-            icon: MoveRightIcon,
             hide: () => index === views.length - 1,
+            icon: MoveRightIcon,
+            name: 'Move Right',
             select: () => {
               const target = views[index + 1];
               this.viewSource.moveTo(
@@ -195,51 +186,35 @@ export class DataViewHeaderViews extends WidgetBase {
                 target ? { before: false, id: target.view.id } : 'end'
               );
             },
+            type: 'action',
           },
           {
-            type: 'action',
-            name: 'Duplicate',
             icon: DuplicateIcon,
+            name: 'Duplicate',
             select: () => {
               this.viewSource.duplicate(view.view.id);
             },
+            type: 'action',
           },
           {
-            type: 'group',
-            name: '',
             children: () => [
               {
-                type: 'action',
-                name: 'Delete View',
+                class: 'delete-item',
                 icon: DeleteIcon,
+                name: 'Delete View',
                 select: () => {
                   view.delete();
                 },
-                class: 'delete-item',
+                type: 'action',
               },
             ],
+            name: '',
+            type: 'group',
           },
         ],
       },
     });
   };
-
-  _clickView(event: MouseEvent, id: string) {
-    if (this.viewSource.currentViewId !== id) {
-      this.viewSource.selectView(id);
-      return;
-    }
-    this.openViewOption(event.target as HTMLElement, id);
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.viewSource.updateSlot.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
 
   renderMore = (count: number) => {
     const views = this.viewSource.views;
@@ -265,9 +240,9 @@ export class DataViewHeaderViews extends WidgetBase {
     const views = this.viewSource.views;
     return views.map(view => () => {
       const classList = classMap({
+        active: this.viewSource.currentViewId === view.view.id,
         'database-view-button': true,
         'dv-hover': true,
-        active: this.viewSource.currentViewId === view.view.id,
       });
       return html`
         <div
@@ -283,6 +258,27 @@ export class DataViewHeaderViews extends WidgetBase {
     });
   };
 
+  _clickView(event: MouseEvent, id: string) {
+    if (this.viewSource.currentViewId !== id) {
+      this.viewSource.selectView(id);
+      return;
+    }
+    this.openViewOption(event.target as HTMLElement, id);
+  }
+
+  private getRenderer(view: SingleViewSource) {
+    return this.viewSource.getViewMeta(view.view.mode).renderer;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.viewSource.updateSlot.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
   override render() {
     return html`
       <component-overflow
@@ -290,6 +286,10 @@ export class DataViewHeaderViews extends WidgetBase {
         .renderMore="${this.renderMore}"
       ></component-overflow>
     `;
+  }
+
+  get readonly() {
+    return this.viewSource.readonly;
   }
 }
 

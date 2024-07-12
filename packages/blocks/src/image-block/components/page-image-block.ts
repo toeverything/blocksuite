@@ -1,28 +1,18 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { css, html, type PropertyValues } from 'lit';
+import { type PropertyValues, css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { ImageBlockComponent } from '../image-block.js';
+
 import { ImageResizeManager } from '../image-resize-manager.js';
 import { shouldResizeImage } from '../utils.js';
 import { ImageSelectedRect } from './image-selected-rect.js';
 
 @customElement('affine-page-image')
 export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
-  private get _host() {
-    return this.block.host;
-  }
-
-  private get _doc() {
-    return this.block.doc;
-  }
-
-  private get _model() {
-    return this.block.model;
-  }
-
   static override styles = css`
     affine-page-image {
       display: flex;
@@ -46,15 +36,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
   `;
 
   private _isDragging = false;
-
-  @property({ attribute: false })
-  accessor block!: ImageBlockComponent;
-
-  @state()
-  accessor _isSelected = false;
-
-  @query('.resizable-img')
-  accessor resizeImg!: HTMLElement;
 
   private _bindKeyMap() {
     const selection = this._host.selection;
@@ -91,6 +72,26 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     };
 
     this.block.bindHotKey({
+      Backspace: ctx => {
+        if (this._host.doc.readonly || !this._isSelected) return;
+
+        addParagraph(ctx);
+        this._doc.deleteBlock(this._model);
+        return true;
+      },
+      Delete: ctx => {
+        if (this._host.doc.readonly || !this._isSelected) return;
+
+        addParagraph(ctx);
+        this._doc.deleteBlock(this._model);
+        return true;
+      },
+      Enter: ctx => {
+        if (this._host.doc.readonly || !this._isSelected) return;
+
+        addParagraph(ctx);
+        return true;
+      },
       Escape: () => {
         selection.update(selList => {
           return selList.map(sel => {
@@ -104,27 +105,15 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         });
         return true;
       },
-      Delete: ctx => {
-        if (this._host.doc.readonly || !this._isSelected) return;
-
-        addParagraph(ctx);
-        this._doc.deleteBlock(this._model);
-        return true;
-      },
-      Backspace: ctx => {
-        if (this._host.doc.readonly || !this._isSelected) return;
-
-        addParagraph(ctx);
-        this._doc.deleteBlock(this._model);
-        return true;
-      },
-      Enter: ctx => {
-        if (this._host.doc.readonly || !this._isSelected) return;
-
-        addParagraph(ctx);
-        return true;
-      },
     });
+  }
+
+  private get _doc() {
+    return this.block.doc;
+  }
+
+  private _handleError() {
+    this.block.error = true;
   }
 
   private _handleSelection() {
@@ -153,7 +142,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         event.stopPropagation();
         selection.update(selList => {
           return selList
-            .filter(sel => !['text', 'block', 'image'].includes(sel.type))
+            .filter(sel => !['block', 'image', 'text'].includes(sel.type))
             .concat(selection.create('image', { blockId: this.block.blockId }));
         });
         return true;
@@ -175,6 +164,35 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         global: true,
       }
     );
+  }
+
+  private get _host() {
+    return this.block.host;
+  }
+
+  private get _model() {
+    return this.block.model;
+  }
+
+  private _normalizeImageSize() {
+    // If is dragging, we should use the real size of the image
+    if (this._isDragging && this.resizeImg) {
+      return {
+        width: this.resizeImg.style.width,
+      };
+    }
+
+    const { height, width } = this._model;
+    if (!width || !height) {
+      return {
+        height: 'unset',
+        width: 'unset',
+      };
+    }
+
+    return {
+      width: `${width}px`,
+    };
   }
 
   private _observeDrag() {
@@ -214,31 +232,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         return false;
       })
     );
-  }
-
-  private _handleError() {
-    this.block.error = true;
-  }
-
-  private _normalizeImageSize() {
-    // If is dragging, we should use the real size of the image
-    if (this._isDragging && this.resizeImg) {
-      return {
-        width: this.resizeImg.style.width,
-      };
-    }
-
-    const { width, height } = this._model;
-    if (!width || !height) {
-      return {
-        width: 'unset',
-        height: 'unset',
-      };
-    }
-
-    return {
-      width: `${width}px`,
-    };
   }
 
   override connectedCallback() {
@@ -290,6 +283,15 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @state()
+  accessor _isSelected = false;
+
+  @property({ attribute: false })
+  accessor block!: ImageBlockComponent;
+
+  @query('.resizable-img')
+  accessor resizeImg!: HTMLElement;
 }
 
 declare global {

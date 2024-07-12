@@ -1,9 +1,13 @@
-import { assertInstanceOf } from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { LayoutType } from '../../../../../surface-block/element-model/utils/mindmap/layout.js';
+import { assertInstanceOf } from '@blocksuite/global/utils';
+import { DocCollection } from '@blocksuite/store';
+
 import type { MindmapStyle } from '../../../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+import type { EdgelessRootService } from '../../../edgeless-root-service.js';
+
+import { LayoutType } from '../../../../../surface-block/element-model/utils/mindmap/layout.js';
 import {
   Bound,
   CanvasElementType,
@@ -11,79 +15,77 @@ import {
   type ShapeElementModel,
   TextElementModel,
 } from '../../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import type { EdgelessRootService } from '../../../edgeless-root-service.js';
 import { mountTextElementEditor } from '../../../utils/text.js';
 
-export type ConfigProperty = 'x' | 'y' | 'r' | 's' | 'z' | 'o';
-export type ConfigState = 'default' | 'active' | 'hover' | 'next';
+export type ConfigProperty = 'o' | 'r' | 's' | 'x' | 'y' | 'z';
+export type ConfigState = 'active' | 'default' | 'hover' | 'next';
 export type ConfigStyle = Partial<Record<ConfigProperty, number | string>>;
 export type ToolConfig = Record<ConfigState, ConfigStyle>;
 
 export type DraggableTool = {
-  name: 'text' | 'mindmap';
-  icon: TemplateResult;
   config: ToolConfig;
-  standardWidth?: number;
+  icon: TemplateResult;
+  name: 'mindmap' | 'text';
   render: (
     bound: Bound,
     edgelessService: EdgelessRootService,
     edgeless: EdgelessRootBlockComponent
   ) => string;
+  standardWidth?: number;
 };
 
-const unitMap = { x: 'px', y: 'px', r: 'deg', s: '', z: '', o: '' };
+const unitMap = { o: '', r: 'deg', s: '', x: 'px', y: 'px', z: '' };
 export const textConfig: ToolConfig = {
+  active: {
+    r: -8,
+    s: 0.92,
+    x: -22,
+    y: -9,
+  },
   default: {
-    x: -20,
-    y: -8,
     r: 7.74,
     s: 0.92,
+    x: -20,
+    y: -8,
     z: 2,
   },
-  active: {
-    x: -22,
-    y: -9,
-    r: -8,
-    s: 0.92,
-  },
   hover: {
-    x: -22,
-    y: -9,
     r: -8,
     s: 1,
+    x: -22,
+    y: -9,
     z: 3,
   },
   next: {
+    r: 0,
     x: -22,
     y: 64,
-    r: 0,
   },
 };
 export const mindmapConfig: ToolConfig = {
+  active: {
+    r: 9,
+    s: 1,
+    x: 11,
+    y: -14,
+  },
   default: {
+    r: -7,
+    s: 1,
     x: 4,
     y: -4,
-    s: 1,
     z: 1,
-    r: -7,
-  },
-  active: {
-    x: 11,
-    y: -14,
-    r: 9,
-    s: 1,
   },
   hover: {
-    x: 11,
-    y: -14,
     r: 9,
     s: 1.16,
+    x: 11,
+    y: -14,
     z: 3,
   },
   next: {
-    y: 64,
     r: 0,
+    y: 64,
   },
 };
 
@@ -97,8 +99,8 @@ export const getMindmapRender =
 
     edgelessService.telemetryService?.track('CanvasElementAdded', {
       control: 'toolbar:dnd', // for now we use toolbar:dnd for all mindmap creation here
-      page: 'whiteboard editor',
       module: 'toolbar',
+      page: 'whiteboard editor',
       segment: 'toolbar',
       type: 'mindmap',
     });
@@ -122,7 +124,7 @@ export const getMindmapRender =
     ) => {
       const id = mindmap.addNode(...args);
       const node = edgelessService.getElementById(id) as ShapeElementModel;
-      return { node, id };
+      return { id, node };
     };
     const root = createNode(null, undefined, undefined, {
       text: 'Mind Map',
@@ -166,8 +168,8 @@ export const textRender: DraggableTool['render'] = (
     });
   } else {
     id = service.addElement(CanvasElementType.TEXT, {
-      xywh: new Bound(bound.x, vCenter - h / 2, w, h).serialize(),
       text: new DocCollection.Y.Text(),
+      xywh: new Bound(bound.x, vCenter - h / 2, w, h).serialize(),
     });
 
     edgeless.doc.captureSync();
@@ -178,8 +180,8 @@ export const textRender: DraggableTool['render'] = (
 
   service.telemetryService?.track('CanvasElementAdded', {
     control: 'toolbar:dnd',
-    page: 'whiteboard editor',
     module: 'toolbar',
+    page: 'whiteboard editor',
     segment: 'toolbar',
     type: 'text',
   });

@@ -1,20 +1,25 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
 import type { ReactiveController, ReactiveElement } from 'lit';
 import type { StyleInfo } from 'lit/directives/style-map.js';
 
-import type { AdvancedPortalOptions } from '../portal.js';
-import { createLitPortal } from '../portal.js';
-import { whenHover, type WhenHoverOptions } from './when-hover.js';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
-type OptionsParams = Omit<
-  ReturnType<typeof whenHover>,
-  'setFloating' | 'dispose'
-> & {
+import type { AdvancedPortalOptions } from '../portal.js';
+
+import { createLitPortal } from '../portal.js';
+import { type WhenHoverOptions, whenHover } from './when-hover.js';
+
+type OptionsParams = {
   abortController: AbortController;
-};
+} & Omit<ReturnType<typeof whenHover>, 'dispose' | 'setFloating'>;
 type HoverPortalOptions = Omit<AdvancedPortalOptions, 'abortController'>;
 
 export type HoverOptions = {
+  allowMultiple?: boolean;
+  /**
+   * Set the portal as hover element automatically.
+   * @default true
+   */
+  setPortalAsFloating: boolean;
   /**
    * Transition style when the portal is shown or hidden.
    */
@@ -38,15 +43,11 @@ export type HoverOptions = {
     in: StyleInfo;
     out: StyleInfo;
   } | null;
-  /**
-   * Set the portal as hover element automatically.
-   * @default true
-   */
-  setPortalAsFloating: boolean;
-  allowMultiple?: boolean;
 } & WhenHoverOptions;
 
 const DEFAULT_HOVER_OPTIONS: HoverOptions = {
+  allowMultiple: false,
+  setPortalAsFloating: true,
   transition: {
     duration: 100,
     in: {
@@ -58,18 +59,16 @@ const DEFAULT_HOVER_OPTIONS: HoverOptions = {
       transition: 'opacity 0.1s ease-in-out',
     },
   },
-  setPortalAsFloating: true,
-  allowMultiple: false,
 };
 
 const abortHoverPortal = ({
-  portal,
-  hoverOptions,
   abortController,
+  hoverOptions,
+  portal,
 }: {
-  portal: HTMLDivElement | undefined;
-  hoverOptions: HoverOptions;
   abortController: AbortController;
+  hoverOptions: HoverOptions;
+  portal: HTMLDivElement | undefined;
 }) => {
   if (!portal || !hoverOptions.transition) {
     abortController.abort();
@@ -98,45 +97,32 @@ const abortHoverPortal = ({
 };
 
 export class HoverController implements ReactiveController {
-  /**
-   * Whether the host is currently hovering.
-   *
-   * This property is unreliable when the floating element disconnect from the DOM suddenly.
-   */
-  get isHovering() {
-    return this._isHovering;
-  }
-
-  get setReference() {
-    if (!this._setReference) {
-      throw new Error('setReference is not ready');
-    }
-    return this._setReference;
-  }
-
-  get portal() {
-    return this._portal;
-  }
-
   static globalAbortController?: AbortController;
 
   private _abortController?: AbortController;
 
-  private _setReference?: (element?: Element | undefined) => void;
-
-  private _portal?: HTMLDivElement;
-
-  private readonly _onHover: (
-    options: OptionsParams
-  ) => HoverPortalOptions | null;
+  protected _disposables = new DisposableGroup();
 
   private readonly _hoverOptions: HoverOptions;
 
   private _isHovering = false;
 
-  protected _disposables = new DisposableGroup();
+  private readonly _onHover: (
+    options: OptionsParams
+  ) => HoverPortalOptions | null;
+
+  private _portal?: HTMLDivElement;
+
+  private _setReference?: (element?: Element | undefined) => void;
 
   host: ReactiveElement;
+
+  /**
+   * Callback when the portal needs to be aborted.
+   */
+  onAbort = () => {
+    this.abort();
+  };
 
   constructor(
     host: ReactiveElement,
@@ -148,19 +134,25 @@ export class HoverController implements ReactiveController {
     this._onHover = onHover;
   }
 
-  /**
-   * Callback when the portal needs to be aborted.
-   */
-  onAbort = () => {
-    this.abort();
-  };
+  abort(force = false) {
+    if (!this._abortController) return;
+    if (force) {
+      this._abortController.abort();
+      return;
+    }
+    abortHoverPortal({
+      abortController: this._abortController,
+      hoverOptions: this._hoverOptions,
+      portal: this._portal,
+    });
+  }
 
   hostConnected() {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
     // Start a timer when the host is connected
-    const { setReference, setFloating, dispose } = whenHover(isHover => {
+    const { dispose, setFloating, setReference } = whenHover(isHover => {
       if (!this.host.isConnected) {
         return;
       }
@@ -186,8 +178,8 @@ export class HoverController implements ReactiveController {
       }
 
       const portalOptions = this._onHover({
-        setReference,
         abortController: this._abortController,
+        setReference,
       });
       if (!portalOptions) {
         // Sometimes the portal is not ready to show
@@ -217,16 +209,23 @@ export class HoverController implements ReactiveController {
     this._disposables.dispose();
   }
 
-  abort(force = false) {
-    if (!this._abortController) return;
-    if (force) {
-      this._abortController.abort();
-      return;
+  /**
+   * Whether the host is currently hovering.
+   *
+   * This property is unreliable when the floating element disconnect from the DOM suddenly.
+   */
+  get isHovering() {
+    return this._isHovering;
+  }
+
+  get portal() {
+    return this._portal;
+  }
+
+  get setReference() {
+    if (!this._setReference) {
+      throw new Error('setReference is not ready');
     }
-    abortHoverPortal({
-      portal: this._portal,
-      hoverOptions: this._hoverOptions,
-      abortController: this._abortController,
-    });
+    return this._setReference;
   }
 }

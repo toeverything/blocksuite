@@ -2,16 +2,18 @@ import type {
   BaseBlockTransformer,
   InternalPrimitives,
 } from '@blocksuite/store';
+
 import { defineBlockSchema } from '@blocksuite/store';
 
-import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
-import { isAbortError } from '../utils/helper.js';
 import type { EmbedBlockModel } from './embed-block-model.js';
 import type {
   EmbedProps,
   LinkPreviewData,
   LinkPreviewResponseData,
 } from './types.js';
+
+import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
+import { isAbortError } from '../utils/helper.js';
 
 export function createEmbedBlockSchema<
   Props extends object,
@@ -21,32 +23,32 @@ export function createEmbedBlockSchema<
   > = BaseBlockTransformer<EmbedProps<Props>>,
 >({
   name,
-  version,
-  toModel,
   props,
+  toModel,
   transformer,
+  version,
 }: {
   name: string;
-  version: number;
-  toModel: () => Model;
   props?: (internalPrimitives: InternalPrimitives) => Props;
+  toModel: () => Model;
   transformer?: () => Transformer;
+  version: number;
 }) {
   return defineBlockSchema({
     flavour: `affine:embed-${name}`,
+    metadata: {
+      role: 'content',
+      version,
+    },
     props: internalPrimitives => {
       const userProps = props?.(internalPrimitives);
 
       return {
         index: 'a0',
-        xywh: '[0,0,0,0]',
         rotate: 0,
+        xywh: '[0,0,0,0]',
         ...userProps,
       } as unknown as EmbedProps<Props>;
-    },
-    metadata: {
-      version,
-      role: 'content',
     },
     toModel,
     transformer,
@@ -57,16 +59,6 @@ export function createEmbedBlockSchema<
 
 export class LinkPreviewer {
   private _endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
-
-  private _getStringFromHTML(html: string) {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.textContent;
-  }
-
-  setEndpoint = (endpoint: string) => {
-    this._endpoint = endpoint;
-  };
 
   query = async (
     url: string,
@@ -85,23 +77,23 @@ export class LinkPreviewer {
       try {
         const { tweet } = await fetch(url, { signal }).then(res => res.json());
         return {
-          title: tweet.author.name,
-          icon: tweet.author.avatar_url,
           description: tweet.text,
+          icon: tweet.author.avatar_url,
           image: tweet.media?.photos[0].url || tweet.author.banner_url,
+          title: tweet.author.name,
         };
       } catch (_) {
         throw new Error('Failed to fetch tweet');
       }
     } else {
       const response = await fetch(this._endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           url,
         }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
         signal,
       })
         .then(r => {
@@ -119,13 +111,23 @@ export class LinkPreviewer {
 
       const data: LinkPreviewResponseData = await response.json();
       return {
-        title: data.title ? this._getStringFromHTML(data.title) : null,
         description: data.description
           ? this._getStringFromHTML(data.description)
           : null,
         icon: data.favicons?.[0],
         image: data.images?.[0],
+        title: data.title ? this._getStringFromHTML(data.title) : null,
       };
     }
   };
+
+  setEndpoint = (endpoint: string) => {
+    this._endpoint = endpoint;
+  };
+
+  private _getStringFromHTML(html: string) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent;
+  }
 }

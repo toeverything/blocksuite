@@ -1,6 +1,7 @@
 import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
+
 import { drawGeneralShape } from './utils.js';
 
 export function ellipse(
@@ -11,13 +12,13 @@ export function ellipse(
   rc: RoughCanvas
 ) {
   const {
-    seed,
-    strokeWidth,
     filled,
-    strokeStyle,
-    roughness,
     rotate,
+    roughness,
+    seed,
     shapeStyle,
+    strokeStyle,
+    strokeWidth,
   } = model;
   const [, , w, h] = model.deserializedXYWH;
   const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -40,13 +41,13 @@ export function ellipse(
     drawGeneralShape(ctx, model, renderer);
   } else {
     rc.ellipse(cx, cy, renderWidth, renderHeight, {
-      seed,
-      roughness: shapeStyle === 'Scribbled' ? roughness : 0,
-      strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
-      stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
-      strokeWidth,
-      fill: filled ? realFillColor : undefined,
       curveFitting: 1,
+      fill: filled ? realFillColor : undefined,
+      roughness: shapeStyle === 'Scribbled' ? roughness : 0,
+      seed,
+      stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
+      strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
+      strokeWidth,
     });
   }
 }

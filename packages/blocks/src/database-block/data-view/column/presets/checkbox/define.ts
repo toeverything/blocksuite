@@ -12,22 +12,22 @@ declare global {
 
 export const checkboxColumnModelConfig =
   checkboxColumnType.modelConfig<boolean>({
-    name: 'Checkbox',
-    type: () => tBoolean.create(),
-    defaultData: () => ({}),
-    cellToString: data => (data ? 'True' : 'False'),
     cellFromString: data => {
       return {
         value: data !== 'False',
       };
     },
     cellToJson: data => data ?? null,
+    cellToString: data => (data ? 'True' : 'False'),
+    defaultData: () => ({}),
     isEmpty: () => false,
+    name: 'Checkbox',
+    type: () => tBoolean.create(),
   });
 
 checkboxColumnModelConfig.addConvert('rich-text', (_columns, cells) => {
   return {
-    column: {},
     cells: cells.map(v => new Text(v ? 'Yes' : 'No').yText),
+    column: {},
   };
 });

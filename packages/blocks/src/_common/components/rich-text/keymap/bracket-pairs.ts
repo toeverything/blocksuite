@@ -1,73 +1,73 @@
 interface BracketPair {
-  name: string;
   left: string;
+  name: string;
   right: string;
 }
 
 export const bracketPairs: BracketPair[] = [
   {
-    name: 'parenthesis',
     left: '(',
+    name: 'parenthesis',
     right: ')',
   },
   {
-    name: 'square bracket',
     left: '[',
+    name: 'square bracket',
     right: ']',
   },
   {
-    name: 'curly bracket',
     left: '{',
+    name: 'curly bracket',
     right: '}',
   },
   {
-    name: 'single quote',
     left: "'",
+    name: 'single quote',
     right: "'",
   },
   {
-    name: 'double quote',
     left: '"',
+    name: 'double quote',
     right: '"',
   },
   {
-    name: 'angle bracket',
     left: '<',
+    name: 'angle bracket',
     right: '>',
   },
   {
-    name: 'fullwidth single quote',
     left: '‘',
+    name: 'fullwidth single quote',
     right: '’',
   },
   {
-    name: 'fullwidth double quote',
     left: '“',
+    name: 'fullwidth double quote',
     right: '”',
   },
   {
-    name: 'fullwidth parenthesis',
     left: '（',
+    name: 'fullwidth parenthesis',
     right: '）',
   },
   {
-    name: 'fullwidth square bracket',
     left: '【',
+    name: 'fullwidth square bracket',
     right: '】',
   },
   {
-    name: 'fullwidth angle bracket',
     left: '《',
+    name: 'fullwidth angle bracket',
     right: '》',
   },
   {
-    name: 'corner bracket',
     left: '「',
+    name: 'corner bracket',
     right: '」',
   },
   {
-    name: 'white corner bracket',
     left: '『',
+    name: 'white corner bracket',
     right: '』',
   },
 ];

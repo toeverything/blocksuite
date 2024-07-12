@@ -1,5 +1,6 @@
 import type { TextElementModel } from '../../../element-model/text.js';
 import type { Renderer } from '../../renderer.js';
+
 import {
   deltaInsertsToChunks,
   getFontString,
@@ -17,12 +18,12 @@ export function text(
 ) {
   const {
     color,
-    fontSize,
-    fontWeight,
-    fontStyle,
     fontFamily,
-    textAlign,
+    fontSize,
+    fontStyle,
+    fontWeight,
     rotate,
+    textAlign,
   } = model;
   const [, , w, h] = model.deserializedXYWH;
   const cx = w / 2;
@@ -34,10 +35,10 @@ export function text(
 
   // const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
   const font = getFontString({
+    fontFamily,
+    fontSize,
     fontStyle,
     fontWeight,
-    fontSize,
-    fontFamily,
   });
   const deltas = wrapTextDeltas(model.text, font, w);
   const lines = deltaInsertsToChunks(deltas);

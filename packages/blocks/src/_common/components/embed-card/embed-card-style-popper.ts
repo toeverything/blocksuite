@@ -1,8 +1,5 @@
-import './../button.js';
-import '../tooltip/tooltip.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -10,7 +7,10 @@ import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedCardStyle } from '../../types.js';
+
 import { getEmbedCardIcons } from '../../utils/url.js';
+import '../tooltip/tooltip.js';
+import './../button.js';
 
 @customElement('embed-card-style-menu')
 export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
@@ -40,12 +40,6 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor model!: BookmarkBlockModel | EmbedGithubModel | EmbedLinkedDocModel;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
   private _setEmbedCardStyle(style: EmbedCardStyle) {
     this.model.doc.updateBlock(this.model, { style });
     this.requestUpdate();
@@ -64,8 +58,8 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
             width="76px"
             height="76px"
             class=${classMap({
-              selected: this.model.style === 'horizontal',
               'card-style-button-horizontal': true,
+              selected: this.model.style === 'horizontal',
             })}
             @click=${() => this._setEmbedCardStyle('horizontal')}
           >
@@ -79,8 +73,8 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
             width="76px"
             height="76px"
             class=${classMap({
-              selected: this.model.style === 'list',
               'card-style-button-list': true,
+              selected: this.model.style === 'list',
             })}
             @click=${() => this._setEmbedCardStyle('list')}
           >
@@ -93,6 +87,12 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @property({ attribute: false })
+  accessor model!: BookmarkBlockModel | EmbedGithubModel | EmbedLinkedDocModel;
 }
 
 declare global {

@@ -1,12 +1,14 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
+
 import { WidgetElement } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import type { IVec } from '../../../surface-block/index.js';
-import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { PieMenuSchema } from './base.js';
+
+import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { PieNodeCenter } from './components/pie-node-center.js';
 import { PieNodeChild } from './components/pie-node-child.js';
 import { PieNodeContent } from './components/pie-node-content.js';
@@ -24,63 +26,11 @@ export const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
 
 @customElement(AFFINE_PIE_MENU_WIDGET)
 export class AffinePieMenuWidget extends WidgetElement {
-  get isOpen() {
-    return !!this.currentMenu;
-  }
-
-  get isEnabled() {
-    return this.doc.awarenessStore.getFlag('enable_pie_menu');
-  }
-
-  get rootElement(): EdgelessRootBlockComponent {
-    const rootElement = this.blockElement;
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      return rootElement;
-    }
-    throw new Error('AffinePieMenuWidget is only supported in edgeless');
-  }
-
-  @state()
-  accessor currentMenu: PieMenu | null = null;
-
-  mouse: IVec = [innerWidth / 2, innerHeight / 2];
-
-  // if key is released before 100ms then the menu is kept open, else
-  // on trigger key release it will select the currently hovered menu node
-  // No action if the currently hovered node is a submenu
-  selectOnTrigRelease: { allow: boolean; timeout?: NodeJS.Timeout } = {
-    allow: false,
+  private _handleCursorPos = (ctx: UIEventStateContext) => {
+    const ev = ctx.get('pointerState');
+    const { x, y } = ev.point;
+    this.mouse = [x, y];
   };
-
-  private _initPie() {
-    PieManager.setup({ rootElement: this.rootElement });
-
-    this._disposables.add(
-      PieManager.slots.open.on(this._attachMenu.bind(this))
-    );
-  }
-
-  private _attachMenu(schema: PieMenuSchema) {
-    if (this.currentMenu && this.currentMenu.id === schema.id)
-      return this.currentMenu.close();
-
-    const [x, y] = this.mouse;
-    const menu = this._createMenu(schema, {
-      x,
-      y,
-      widgetElement: this,
-    });
-    this.currentMenu = menu;
-
-    this.selectOnTrigRelease.timeout = setTimeout(() => {
-      this.selectOnTrigRelease.allow = true;
-    }, PieManager.settings.SELECT_ON_RELEASE_TIMEOUT);
-  }
-
-  private _onMenuClose() {
-    this.currentMenu = null;
-    this.selectOnTrigRelease.allow = false;
-  }
 
   private _handleKeyUp = (ctx: UIEventStateContext) => {
     if (!this.currentMenu) return;
@@ -96,11 +46,70 @@ export class AffinePieMenuWidget extends WidgetElement {
     }
   };
 
-  private _handleCursorPos = (ctx: UIEventStateContext) => {
-    const ev = ctx.get('pointerState');
-    const { x, y } = ev.point;
-    this.mouse = [x, y];
+  mouse: IVec = [innerWidth / 2, innerHeight / 2];
+
+  // No action if the currently hovered node is a submenu
+  selectOnTrigRelease: { allow: boolean; timeout?: NodeJS.Timeout } = {
+    allow: false,
   };
+
+  private _attachMenu(schema: PieMenuSchema) {
+    if (this.currentMenu && this.currentMenu.id === schema.id)
+      return this.currentMenu.close();
+
+    const [x, y] = this.mouse;
+    const menu = this._createMenu(schema, {
+      widgetElement: this,
+      x,
+      y,
+    });
+    this.currentMenu = menu;
+
+    this.selectOnTrigRelease.timeout = setTimeout(() => {
+      this.selectOnTrigRelease.allow = true;
+    }, PieManager.settings.SELECT_ON_RELEASE_TIMEOUT);
+  }
+
+  // if key is released before 100ms then the menu is kept open, else
+  // on trigger key release it will select the currently hovered menu node
+  _createMenu(
+    schema: PieMenuSchema,
+    {
+      widgetElement,
+      x,
+      y,
+    }: {
+      widgetElement: AffinePieMenuWidget;
+      x: number;
+      y: number;
+    }
+  ) {
+    const menu = new PieMenu();
+    menu.id = schema.id;
+    menu.schema = schema;
+    menu.position = [x, y];
+    menu.rootElement = widgetElement.rootElement;
+    menu.widgetElement = widgetElement;
+    menu.abortController.signal.addEventListener(
+      'abort',
+      this._onMenuClose.bind(this)
+    );
+
+    return menu;
+  }
+
+  private _initPie() {
+    PieManager.setup({ rootElement: this.rootElement });
+
+    this._disposables.add(
+      PieManager.slots.open.on(this._attachMenu.bind(this))
+    );
+  }
+
+  private _onMenuClose() {
+    this.currentMenu = null;
+    this.selectOnTrigRelease.allow = false;
+  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -126,35 +135,28 @@ export class AffinePieMenuWidget extends WidgetElement {
     PieManager.dispose();
   }
 
-  _createMenu(
-    schema: PieMenuSchema,
-    {
-      x,
-      y,
-      widgetElement,
-    }: {
-      x: number;
-      y: number;
-      widgetElement: AffinePieMenuWidget;
-    }
-  ) {
-    const menu = new PieMenu();
-    menu.id = schema.id;
-    menu.schema = schema;
-    menu.position = [x, y];
-    menu.rootElement = widgetElement.rootElement;
-    menu.widgetElement = widgetElement;
-    menu.abortController.signal.addEventListener(
-      'abort',
-      this._onMenuClose.bind(this)
-    );
-
-    return menu;
-  }
-
   override render() {
     return this.currentMenu ?? nothing;
   }
+
+  get isEnabled() {
+    return this.doc.awarenessStore.getFlag('enable_pie_menu');
+  }
+
+  get isOpen() {
+    return !!this.currentMenu;
+  }
+
+  get rootElement(): EdgelessRootBlockComponent {
+    const rootElement = this.blockElement;
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      return rootElement;
+    }
+    throw new Error('AffinePieMenuWidget is only supported in edgeless');
+  }
+
+  @state()
+  accessor currentMenu: PieMenu | null = null;
 }
 
 declare global {

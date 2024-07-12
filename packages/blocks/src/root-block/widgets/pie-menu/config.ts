@@ -1,6 +1,10 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import type { LastProps } from '../../../surface-block/managers/edit-session.js';
+import type { PieMenuContext } from './base.js';
+
 import {
   ConnectorCWithArrowIcon,
   ConnectorIcon,
@@ -26,7 +30,6 @@ import {
   TriangleIcon,
   ViewBarIcon,
 } from '../../../_common/icons/edgeless.js';
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
 import { ConnectorMode } from '../../../surface-block/element-model/connector.js';
 import {
@@ -34,14 +37,12 @@ import {
   STROKE_COLORS,
 } from '../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle, ShapeType } from '../../../surface-block/index.js';
-import type { LastProps } from '../../../surface-block/managers/edit-session.js';
 import { LINE_COLORS } from '../../edgeless/components/panel/color-panel.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from '../../edgeless/utils/consts.js';
-import type { PieMenuContext } from './base.js';
 import { PieMenuBuilder } from './pie-builder.js';
 import {
   getActiveConnectorStrokeColor,
@@ -57,9 +58,9 @@ import {
 export const AFFINE_PIE_MENU_ID_EDGELESS_TOOLS = 'affine:pie:edgeless:tools';
 
 const pie = new PieMenuBuilder({
+  icon: ToolsIcon,
   id: AFFINE_PIE_MENU_ID_EDGELESS_TOOLS,
   label: 'Tools',
-  icon: ToolsIcon,
   trigger: ({ keyEvent: ev, rootElement }) => {
     if (isControlledKeyboardEvent(ev)) return false;
     const isEditing = rootElement.service.selection.editing;
@@ -69,68 +70,84 @@ const pie = new PieMenuBuilder({
 });
 
 pie.expandableCommand({
-  label: 'Pen',
-  icon: EdgelessPenLightIcon,
   action: setEdgelessToolAction({ type: 'brush' }),
+  icon: EdgelessPenLightIcon,
+  label: 'Pen',
   submenus: pie => {
     pie.colorPicker({
-      label: 'Pen Color',
       active: getActiveConnectorStrokeColor,
+      colors: LINE_COLORS.map(color => ({ color })),
+      label: 'Pen Color',
       onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
         rootElement.service.editPropsStore.recordLastProps('brush', {
           color: color as LastProps['brush']['color'],
         });
       },
-      colors: LINE_COLORS.map(color => ({ color })),
     });
   },
 });
 
 pie.command({
-  label: 'Eraser',
-  icon: EdgelessEraserLightIcon,
   action: setEdgelessToolAction({
     type: 'eraser',
   }),
+  icon: EdgelessEraserLightIcon,
+  label: 'Eraser',
 });
 
 pie.command({
-  label: 'Frame',
-  icon: FrameIcon,
   action: setEdgelessToolAction({
     type: 'frame',
   }),
+  icon: FrameIcon,
+  label: 'Frame',
 });
 
 pie.command({
-  label: 'Select',
-  icon: SelectIcon,
   action: setEdgelessToolAction({
     type: 'default',
   }),
+  icon: SelectIcon,
+  label: 'Select',
 });
 
 pie.command({
-  label: 'Note',
-  icon: NoteIcon,
   action: setEdgelessToolAction({
-    type: 'affine:note',
     childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
     childType: DEFAULT_NOTE_CHILD_TYPE,
     tip: DEFAULT_NOTE_TIP,
+    type: 'affine:note',
   }),
+  icon: NoteIcon,
+  label: 'Note',
 });
 
 pie.command({
-  label: 'Reset Zoom',
-  icon: ViewBarIcon,
   action: ({ rootElement }) => {
     rootElement.service.zoomToFit();
   },
+  icon: ViewBarIcon,
+  label: 'Reset Zoom',
 });
 
 pie.command({
-  label: 'Present',
+  action: ({ rootElement }) => {
+    const { type } = rootElement.edgelessTool;
+    if (type === 'frameNavigator') {
+      rootElement.tools.setEdgelessTool({ type: 'default' });
+
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(console.error);
+      }
+
+      return;
+    }
+
+    rootElement.tools.setEdgelessTool({
+      mode: 'fit',
+      type: 'frameNavigator',
+    });
+  },
   icon: ({ rootElement }) => {
     const { type } = rootElement.edgelessTool;
     if (type === 'frameNavigator') {
@@ -147,27 +164,10 @@ pie.command({
 
     return FrameNavigatorIcon;
   },
-  action: ({ rootElement }) => {
-    const { type } = rootElement.edgelessTool;
-    if (type === 'frameNavigator') {
-      rootElement.tools.setEdgelessTool({ type: 'default' });
-
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(console.error);
-      }
-
-      return;
-    }
-
-    rootElement.tools.setEdgelessTool({
-      type: 'frameNavigator',
-      mode: 'fit',
-    });
-  },
+  label: 'Present',
 });
 // Connector submenu
 pie.beginSubmenu({
-  label: 'Connector',
   icon: ({ rootElement }) => {
     const tool = rootElement.edgelessTool;
 
@@ -183,113 +183,105 @@ pie.beginSubmenu({
     }
     return ConnectorIcon;
   },
+  label: 'Connector',
 });
 
 pie.command({
-  label: 'Curved',
-  icon: ConnectorCWithArrowIcon,
   action: setEdgelessToolAction({
-    type: 'connector',
     mode: ConnectorMode.Curve,
+    type: 'connector',
   }),
+  icon: ConnectorCWithArrowIcon,
+  label: 'Curved',
 });
 
 pie.command({
-  label: 'Elbowed',
-  icon: ConnectorXWithArrowIcon,
   action: setEdgelessToolAction({
-    type: 'connector',
     mode: ConnectorMode.Orthogonal,
+    type: 'connector',
   }),
+  icon: ConnectorXWithArrowIcon,
+  label: 'Elbowed',
 });
 
 pie.command({
-  label: 'Straight',
-  icon: ConnectorLWithArrowIcon,
   action: setEdgelessToolAction({
-    type: 'connector',
     mode: ConnectorMode.Straight,
+    type: 'connector',
   }),
+  icon: ConnectorLWithArrowIcon,
+  label: 'Straight',
 });
 
 pie.colorPicker({
-  label: 'Line Color',
   active: getActiveConnectorStrokeColor,
+  colors: LINE_COLORS.map(color => ({ color })),
+  label: 'Line Color',
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
     rootElement.service.editPropsStore.recordLastProps('connector', {
       stroke: color as LastProps['connector']['stroke'],
     });
   },
-  colors: LINE_COLORS.map(color => ({ color })),
 });
 
 pie.endSubmenu();
 
 // Shapes Submenu
 pie.beginSubmenu({
-  label: 'Shapes',
   icon: EdgelessGeneralShapeIcon,
+  label: 'Shapes',
 });
 
 const shapes = [
   {
-    type: ShapeType.Rect,
-    label: 'Rect',
     icon: (style: ShapeStyle) =>
       style === ShapeStyle.General ? SquareIcon : ScribbledSquareIcon,
+    label: 'Rect',
+    type: ShapeType.Rect,
   },
   {
-    type: ShapeType.Ellipse,
-    label: 'Ellipse',
     icon: (style: ShapeStyle) =>
       style === ShapeStyle.General ? EllipseIcon : ScribbledEllipseIcon,
+    label: 'Ellipse',
+    type: ShapeType.Ellipse,
   },
   {
-    type: ShapeType.Triangle,
-    label: 'Triangle',
     icon: (style: ShapeStyle) =>
       style === ShapeStyle.General ? TriangleIcon : ScribbledTriangleIcon,
+    label: 'Triangle',
+    type: ShapeType.Triangle,
   },
   {
-    type: ShapeType.Diamond,
-    label: 'Diamond',
     icon: (style: ShapeStyle) =>
       style === ShapeStyle.General ? DiamondIcon : ScribbledDiamondIcon,
+    label: 'Diamond',
+    type: ShapeType.Diamond,
   },
 ];
 
 shapes.forEach(shape => {
   pie.command({
-    label: shape.label,
-    icon: ({ rootElement }) => {
-      const attributes =
-        rootElement.service.editPropsStore.getLastProps('shape');
-      return shape.icon(attributes.shapeStyle);
-    },
-
     action: ({ rootElement }) => {
       rootElement.service.tool.setEdgelessTool({
-        type: 'shape',
         shapeType: shape.type,
+        type: 'shape',
       });
       rootElement.service.editPropsStore.recordLastProps('shape', {
         shapeType: shape.type,
       });
       updateShapeOverlay(rootElement);
     },
+    icon: ({ rootElement }) => {
+      const attributes =
+        rootElement.service.editPropsStore.getLastProps('shape');
+      return shape.icon(attributes.shapeStyle);
+    },
+
+    label: shape.label,
   });
 });
 
 pie.command({
-  label: 'Toggle Style',
-  icon: ({ rootElement }) => {
-    const { shapeStyle } =
-      rootElement.service.editPropsStore.getLastProps('shape');
-    return shapeStyle === ShapeStyle.General
-      ? ScribbledStyleIcon
-      : GeneralStyleIcon;
-  },
-
   action: ({ rootElement }) => {
     const { shapeStyle } =
       rootElement.service.editPropsStore.getLastProps('shape');
@@ -304,31 +296,40 @@ pie.command({
 
     updateShapeOverlay(rootElement);
   },
+  icon: ({ rootElement }) => {
+    const { shapeStyle } =
+      rootElement.service.editPropsStore.getLastProps('shape');
+    return shapeStyle === ShapeStyle.General
+      ? ScribbledStyleIcon
+      : GeneralStyleIcon;
+  },
+
+  label: 'Toggle Style',
 });
 
 pie.colorPicker({
-  label: 'Fill',
   active: getActiveShapeColor('fill'),
+  colors: FILL_COLORS.map(color => ({ color })),
+  label: 'Fill',
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
     rootElement.service.editPropsStore.recordLastProps('shape', {
       fillColor: color as LastProps['shape']['fillColor'],
     });
     updateShapeOverlay(rootElement);
   },
-  colors: FILL_COLORS.map(color => ({ color })),
 });
 
 pie.colorPicker({
-  label: 'Stroke',
-  hollow: true,
   active: getActiveShapeColor('stroke'),
+  colors: STROKE_COLORS.map(color => ({ color, name: 'Color' })),
+  hollow: true,
+  label: 'Stroke',
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
     rootElement.service.editPropsStore.recordLastProps('shape', {
       strokeColor: color as LastProps['shape']['strokeColor'],
     });
     updateShapeOverlay(rootElement);
   },
-  colors: STROKE_COLORS.map(color => ({ color, name: 'Color' })),
 });
 
 pie.endSubmenu();

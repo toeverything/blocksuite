@@ -1,5 +1,6 @@
 import type { DirectiveResult } from 'lit/directive.js';
-import { styleMap, type StyleMapDirective } from 'lit/directives/style-map.js';
+
+import { type StyleMapDirective, styleMap } from 'lit/directives/style-map.js';
 
 import type { SelectionRect } from './doc-remote-selection.js';
 
@@ -8,15 +9,15 @@ export function selectionStyle(
   color: string
 ): DirectiveResult<typeof StyleMapDirective> {
   return styleMap({
-    position: 'absolute',
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
-    top: `${rect.top}px`,
-    left: `${rect.left}px`,
     backgroundColor: color,
-    pointerEvent: 'none',
-    opacity: '20%',
     borderRadius: '3px',
+    height: `${rect.height}px`,
+    left: `${rect.left}px`,
+    opacity: '20%',
+    pointerEvent: 'none',
+    position: 'absolute',
+    top: `${rect.top}px`,
+    width: `${rect.width}px`,
   });
 }
 
@@ -25,13 +26,13 @@ export function cursorStyle(
   color: string
 ): DirectiveResult<typeof StyleMapDirective> {
   return styleMap({
-    position: 'absolute',
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
-    top: `${rect.top}px`,
-    left: `${rect.left}px`,
     backgroundColor: color,
+    height: `${rect.height}px`,
+    left: `${rect.left}px`,
     pointerEvent: 'none',
+    position: 'absolute',
+    top: `${rect.top}px`,
+    width: `${rect.width}px`,
   });
 }
 
@@ -60,10 +61,10 @@ function merge(rect1: SelectionRect, rect2: SelectionRect): SelectionRect {
   const bottom = Math.max(rect1.top + rect1.height, rect2.top + rect2.height);
 
   return {
+    height: bottom - top,
     left: left,
     top: top,
     width: right - left,
-    height: bottom - top,
   };
 }
 

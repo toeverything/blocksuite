@@ -4,29 +4,30 @@ import type {
   TextSelection,
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
+import type { RoleType } from '@blocksuite/store';
+
 import { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { RoleType } from '@blocksuite/store';
 
 import type { ImageSelection } from '../../../image-block/image-selection.js';
 
 export const getSelectedBlocksCommand: Command<
-  'currentTextSelection' | 'currentBlockSelections' | 'currentImageSelections',
+  'currentBlockSelections' | 'currentImageSelections' | 'currentTextSelection',
   'selectedBlocks',
   {
-    textSelection?: TextSelection;
     blockSelections?: BlockSelection[];
-    imageSelections?: ImageSelection[];
     filter?: (el: BlockElement) => boolean;
-    types?: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
-    roles?: RoleType[];
+    imageSelections?: ImageSelection[];
     mode?: 'all' | 'flat' | 'highest';
+    roles?: RoleType[];
+    textSelection?: TextSelection;
+    types?: Extract<BlockSuite.SelectionType, 'block' | 'image' | 'text'>[];
   }
 > = (ctx, next) => {
   const {
-    types = ['block', 'text', 'image'],
-    roles = ['content'],
     mode = 'flat',
+    roles = ['content'],
+    types = ['block', 'text', 'image'],
   } = ctx;
 
   let dirtyResult: BlockElement[] = [];
@@ -82,7 +83,7 @@ export const getSelectedBlocksCommand: Command<
           blockElements.push(parent);
         }
       }
-      if (['flat', 'all'].includes(mode)) {
+      if (['all', 'flat'].includes(mode)) {
         viewStore.walkThrough(node => {
           const view = node;
           if (!(view instanceof BlockElement)) {

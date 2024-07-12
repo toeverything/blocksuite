@@ -1,5 +1,10 @@
 import { html } from 'lit';
 
+import type { RootBlockComponent } from '../../../../../../root-block/index.js';
+import type { DataViewRenderer } from '../../../../data-view.js';
+import type { DataViewColumnManager } from '../../../data-view-manager.js';
+import type { TableSelectionController } from '../controller/selection.js';
+
 import {
   type Menu,
   popFilterableSimpleMenu,
@@ -9,17 +14,13 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../../../../../_common/icons/index.js';
-import type { RootBlockComponent } from '../../../../../../root-block/index.js';
 import { DeleteIcon } from '../../../../common/icons/index.js';
-import type { DataViewRenderer } from '../../../../data-view.js';
-import type { DataViewColumnManager } from '../../../data-view-manager.js';
-import type { TableSelectionController } from '../controller/selection.js';
 import {
-  checkboxCalcOps,
   type ColumnDataType,
+  type StatCalcOp,
+  checkboxCalcOps,
   commonCalcOps,
   numberColCalcOps,
-  type StatCalcOp,
 } from '../stat-ops.js';
 
 export const openDetail = (
@@ -30,11 +31,11 @@ export const openDetail = (
   const old = selection.selection;
   selection.selection = undefined;
   dataViewEle.openDetailPanel({
-    view: selection.host.view,
-    rowId: rowId,
     onClose: () => {
       selection.selection = old;
     },
+    rowId: rowId,
+    view: selection.host.view,
   });
 };
 
@@ -46,12 +47,12 @@ export const popRowMenu = (
 ) => {
   popFilterableSimpleMenu(ele, [
     {
-      type: 'action',
-      name: 'Expand Row',
       icon: ExpandFullIcon,
+      name: 'Expand Row',
       select: () => {
         openDetail(dataViewEle, rowId, selection);
       },
+      type: 'action',
     },
     // {
     //   type: 'group',
@@ -76,32 +77,30 @@ export const popRowMenu = (
     //   ],
     // },
     {
-      type: 'group',
-      name: '',
       children: () => [
         {
-          type: 'action',
-          name: 'Insert Before',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveLeftIcon}
           </div>`,
+          name: 'Insert Before',
           select: () => {
             selection.insertRowBefore(selection.selection?.groupKey, rowId);
           },
+          type: 'action',
         },
         {
-          type: 'action',
-          name: 'Insert After',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveRightIcon}
           </div>`,
+          name: 'Insert After',
           select: () => {
             selection.insertRowAfter(selection.selection?.groupKey, rowId);
           },
+          type: 'action',
         },
         // {
         //   type: 'action',
@@ -112,21 +111,23 @@ export const popRowMenu = (
         //   },
         // },
       ],
+      name: '',
+      type: 'group',
     },
     {
-      type: 'group',
-      name: '',
       children: () => [
         {
-          type: 'action',
-          name: 'Delete Row',
           class: 'delete-item',
           icon: DeleteIcon,
+          name: 'Delete Row',
           select: () => {
             selection.deleteRow(rowId);
           },
+          type: 'action',
         },
       ],
+      name: '',
+      type: 'group',
     },
   ]);
 };
@@ -151,11 +152,11 @@ export const popColStatOperationMenu = (
   }
 
   const menus: Menu[] = operations.map(op => ({
-    type: 'action',
     name: op.label,
     select: () => {
       onSelect(op);
     },
+    type: 'action',
   }));
 
   return popFilterableSimpleMenu(elem, menus);

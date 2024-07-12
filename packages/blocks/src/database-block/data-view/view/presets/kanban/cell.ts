@@ -10,11 +10,12 @@ import type {
   CellRenderProps,
   DataViewCellLifeCycle,
 } from '../../../column/index.js';
-import { renderUniLit } from '../../../utils/uni-component/uni-component.js';
 import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,
 } from './kanban-view-manager.js';
+
+import { renderUniLit } from '../../../utils/uni-component/uni-component.js';
 
 const styles = css`
   affine-data-view-kanban-cell {
@@ -56,38 +57,24 @@ const styles = css`
 
 @customElement('affine-data-view-kanban-cell')
 export class KanbanCell extends WithDisposable(ShadowlessElement) {
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
-  }
-
-  get selection() {
-    return this.closest('affine-data-view-kanban')?.selectionController;
-  }
-
   static override styles = styles;
 
   private _cell = createRef<DataViewCellLifeCycle>();
 
-  @property({ attribute: false })
-  accessor contentOnly = false;
+  selectCurrentCell = (editing: boolean) => {
+    const selectionElement = this.closest(
+      'affine-data-view-kanban'
+    )?.selectionController;
+    if (!selectionElement) return;
 
-  @property({ attribute: false })
-  accessor view!: DataViewKanbanManager;
-
-  @property({ attribute: false })
-  accessor groupKey!: string;
-
-  @property({ attribute: false })
-  accessor cardId!: string;
-
-  @property({ attribute: false })
-  accessor column!: DataViewKanbanColumnManager;
-
-  @state()
-  accessor isFocus = false;
-
-  @state()
-  accessor editing = false;
+    selectionElement.selection = {
+      cardId: this.cardId,
+      columnId: this.column.id,
+      groupKey: this.groupKey,
+      isEditing: editing,
+      selectionType: 'cell',
+    };
+  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -108,37 +95,15 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
     });
   }
 
-  selectCurrentCell = (editing: boolean) => {
-    const selectionElement = this.closest(
-      'affine-data-view-kanban'
-    )?.selectionController;
-    if (!selectionElement) return;
-
-    selectionElement.selection = {
-      selectionType: 'cell',
-      groupKey: this.groupKey,
-      cardId: this.cardId,
-      columnId: this.column.id,
-      isEditing: editing,
-    };
-  };
-
-  renderIcon() {
-    if (this.contentOnly) {
-      return;
-    }
-    return html` <uni-lit class="icon" .uni="${this.column.icon}"></uni-lit>`;
-  }
-
   override render() {
     const props: CellRenderProps = {
-      view: this.view,
       column: this.column,
-      rowId: this.cardId,
       isEditing: this.editing,
+      rowId: this.cardId,
       selectCurrentCell: this.selectCurrentCell,
+      view: this.view,
     };
-    const { view, edit } = this.column.renderer;
+    const { edit, view } = this.column.renderer;
     this.style.border = this.isFocus
       ? '1px solid var(--affine-primary-color)'
       : '';
@@ -147,11 +112,47 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
       : '';
     return html` ${this.renderIcon()}
     ${renderUniLit(this.editing && edit ? edit : view, props, {
-      ref: this._cell,
       class: 'kanban-cell',
+      ref: this._cell,
       style: { display: 'block', flex: '1', overflow: 'hidden' },
     })}`;
   }
+
+  renderIcon() {
+    if (this.contentOnly) {
+      return;
+    }
+    return html` <uni-lit class="icon" .uni="${this.column.icon}"></uni-lit>`;
+  }
+
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
+
+  get selection() {
+    return this.closest('affine-data-view-kanban')?.selectionController;
+  }
+
+  @property({ attribute: false })
+  accessor cardId!: string;
+
+  @property({ attribute: false })
+  accessor column!: DataViewKanbanColumnManager;
+
+  @property({ attribute: false })
+  accessor contentOnly = false;
+
+  @state()
+  accessor editing = false;
+
+  @property({ attribute: false })
+  accessor groupKey!: string;
+
+  @state()
+  accessor isFocus = false;
+
+  @property({ attribute: false })
+  accessor view!: DataViewKanbanManager;
 }
 
 declare global {

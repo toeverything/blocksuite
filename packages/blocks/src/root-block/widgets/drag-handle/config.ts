@@ -25,61 +25,49 @@ export const NOTE_CONTAINER_PADDING = 24;
 export const EDGELESS_NOTE_EXTRA_PADDING = 20;
 export const DRAG_HOVER_RECT_PADDING = 4;
 
-export type DropType = 'before' | 'after' | 'in';
+export type DropType = 'after' | 'before' | 'in';
 export type DropResult = {
-  rect: Rect | null;
   dropBlockId: string;
   dropType: DropType;
+  rect: Rect | null;
 };
 
 export type OnDragStartProps = {
-  state: PointerEventState;
+  anchorBlockId: string;
+  anchorBlockPath: null | string;
+  editorHost: EditorHost;
   startDragging: (
     blockElements: BlockElement[],
     state: PointerEventState,
     dragPreview?: HTMLElement,
     dragPreviewOffset?: Point
   ) => void;
-  anchorBlockId: string;
-  anchorBlockPath: string | null;
-  editorHost: EditorHost;
+  state: PointerEventState;
 };
 
 export type OnDragEndProps = {
-  state: PointerEventState;
+  dragPreview: DragPreview;
   draggingElements: BlockElement[];
   dropBlockId: string;
   dropType: DropType | null;
-  dragPreview: DragPreview;
-  noteScale: number;
   editorHost: EditorHost;
+  noteScale: number;
+  state: PointerEventState;
 };
 
 export type DragHandleOption = {
-  flavour: string | RegExp;
   edgeless?: boolean;
-  onDragStart?: (props: OnDragStartProps) => boolean;
+  flavour: RegExp | string;
+  onDragEnd?: (props: OnDragEndProps) => boolean;
   onDragMove?: (
     state: PointerEventState,
     draggingElements?: BlockElement[]
   ) => boolean;
-  onDragEnd?: (props: OnDragEndProps) => boolean;
+  onDragStart?: (props: OnDragStartProps) => boolean;
 };
 
 export class DragHandleOptionsRunner {
-  get options(): DragHandleOption[] {
-    return Array.from(this.optionMap.keys());
-  }
-
   private optionMap = new Map<DragHandleOption, number>();
-
-  private _getExistingOptionWithSameFlavour(
-    option: DragHandleOption
-  ): DragHandleOption | undefined {
-    return Array.from(this.optionMap.keys()).find(
-      op => op.flavour === option.flavour
-    );
-  }
 
   private _decreaseOptionCount(option: DragHandleOption) {
     const count = this.optionMap.get(option) || 0;
@@ -88,6 +76,14 @@ export class DragHandleOptionsRunner {
     } else {
       this.optionMap.delete(option);
     }
+  }
+
+  private _getExistingOptionWithSameFlavour(
+    option: DragHandleOption
+  ): DragHandleOption | undefined {
+    return Array.from(this.optionMap.keys()).find(
+      op => op.flavour === option.flavour
+    );
   }
 
   getOption(flavour: string): DragHandleOption | undefined {
@@ -111,5 +107,9 @@ export class DragHandleOptionsRunner {
         this._decreaseOptionCount(currentOption);
       },
     };
+  }
+
+  get options(): DragHandleOption[] {
+    return Array.from(this.optionMap.keys());
   }
 }

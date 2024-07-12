@@ -11,14 +11,14 @@ export class BaseGroup<Data extends NonNullable<unknown>, Value>
   accessor data!: Data;
 
   @property({ attribute: false })
-  accessor updateData: ((data: Data) => void) | undefined = undefined;
+  accessor readonly!: boolean;
 
   @property({ attribute: false })
-  accessor value!: Value;
+  accessor updateData: ((data: Data) => void) | undefined = undefined;
 
   @property({ attribute: false })
   accessor updateValue: ((value: Value) => void) | undefined = undefined;
 
   @property({ attribute: false })
-  accessor readonly!: boolean;
+  accessor value!: Value;
 }

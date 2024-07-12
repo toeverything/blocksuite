@@ -1,6 +1,7 @@
 import type { Y } from '@blocksuite/store';
 
 import type { SurfaceElementModel } from '../base.js';
+
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const observeSymbol = Symbol('observe');
@@ -57,7 +58,7 @@ export function observe<
 function getObserveMeta(
   proto: unknown,
   prop: string | symbol
-): null | ObserveFn {
+): ObserveFn | null {
   // @ts-ignore
   return getObjectPropMeta(proto, observeSymbol, prop);
 }
@@ -84,8 +85,8 @@ export function startObserve(
   }
 
   const value = receiver[prop as keyof SurfaceElementModel] as
-    | Y.Map<unknown>
     | Y.Array<unknown>
+    | Y.Map<unknown>
     | null;
 
   observeFn(null, receiver, null);

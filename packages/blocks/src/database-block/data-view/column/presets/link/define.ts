@@ -8,15 +8,15 @@ declare global {
   }
 }
 export const linkColumnModelConfig = linkColumnType.modelConfig<string>({
-  name: 'Link',
-  type: () => tString.create(),
-  defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
   cellFromString: data => {
     return {
       value: data,
     };
   },
   cellToJson: data => data ?? null,
+  cellToString: data => data?.toString() ?? '',
+  defaultData: () => ({}),
   isEmpty: data => data == null || data.length == 0,
+  name: 'Link',
+  type: () => tString.create(),
 });

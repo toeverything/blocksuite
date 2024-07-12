@@ -1,5 +1,6 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { AffineEditorContainer } from '@blocksuite/presets';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { registerFramePanelComponents } from '@blocksuite/presets';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -21,18 +22,8 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @state()
-  private accessor _show = false;
-
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-
   private _renderPanel() {
     return html`<frame-panel .editor=${this.editor}></frame-panel>`;
-  }
-
-  toggleDisplay() {
-    this._show = !this._show;
   }
 
   override connectedCallback(): void {
@@ -60,6 +51,16 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
         : nothing}
     `;
   }
+
+  toggleDisplay() {
+    this._show = !this._show;
+  }
+
+  @state()
+  private accessor _show = false;
+
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
 }
 
 declare global {

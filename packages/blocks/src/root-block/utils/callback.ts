@@ -1,8 +1,10 @@
 import type { BlockElement, EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
+
 import {
   asyncGetRichTextByModel,
   buildPath,

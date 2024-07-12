@@ -4,7 +4,7 @@ import { BlockSuiteError } from '../exceptions/index.js';
 
 export function isPrimitive(
   a: unknown
-): a is null | undefined | boolean | number | string {
+): a is boolean | null | number | string | undefined {
   return a !== Object(a);
 }
 
@@ -12,7 +12,7 @@ export function assertType<T>(_: unknown): asserts _ is T {}
 
 export function assertExists<T>(
   val: T | null | undefined,
-  message: string | Error = 'val does not exist'
+  message: Error | string = 'val does not exist'
 ): asserts val is T {
   if (val === null || val === undefined) {
     if (message instanceof Error) {
@@ -38,15 +38,15 @@ export type Equals<X, Y> =
     : false;
 
 type Allowed =
-  | unknown
-  | void
-  | null
-  | undefined
   | boolean
+  | null
   | number
+  | object
   | string
+  | undefined
+  | unknown
   | unknown[]
-  | object;
+  | void;
 export function isEqual<T extends Allowed, U extends T>(
   val: T,
   expected: U

@@ -1,4 +1,3 @@
-import { cmdSymbol } from './consts.js';
 import type {
   Chain,
   Command,
@@ -8,16 +7,10 @@ import type {
   InitCommandCtx,
 } from './types.js';
 
+import { cmdSymbol } from './consts.js';
+
 export class CommandManager {
   private _commands = new Map<string, Command>();
-
-  constructor(public std: BlockSuite.Std) {}
-
-  private _getCommandCtx = (): InitCommandCtx => {
-    return {
-      std: this.std,
-    };
-  };
 
   private _createChain = (
     methods: Record<BlockSuite.CommandName, unknown>,
@@ -29,6 +22,10 @@ export class CommandManager {
 
     return {
       [cmdSymbol]: _cmds,
+      inline: function (this: Chain, command) {
+        const cmds = this[cmdSymbol];
+        return createChain(methods, [...cmds, command]) as never;
+      },
       run: function (this: Chain) {
         let ctx = getCommandCtx();
         let success = false;
@@ -46,17 +43,6 @@ export class CommandManager {
         }
 
         return [success, ctx];
-      },
-      with: function (this: Chain, value) {
-        const cmds = this[cmdSymbol];
-        return createChain(methods, [
-          ...cmds,
-          (_, next) => next(value),
-        ]) as never;
-      },
-      inline: function (this: Chain, command) {
-        const cmds = this[cmdSymbol];
-        return createChain(methods, [...cmds, command]) as never;
       },
       try: function (this: Chain, fn) {
         const cmds = this[cmdSymbol];
@@ -124,18 +110,22 @@ export class CommandManager {
           },
         ]) as never;
       },
+      with: function (this: Chain, value) {
+        const cmds = this[cmdSymbol];
+        return createChain(methods, [
+          ...cmds,
+          (_, next) => next(value),
+        ]) as never;
+      },
       ...methods,
     } as Chain;
   };
 
-  add<N extends BlockSuite.CommandName>(
-    name: N,
-    command: BlockSuite.Commands[N]
-  ): CommandManager;
-  add(name: string, command: Command) {
-    this._commands.set(name, command);
-    return this;
-  }
+  private _getCommandCtx = (): InitCommandCtx => {
+    return {
+      std: this.std,
+    };
+  };
 
   chain = (): Chain<InitCommandCtx> => {
     const methods = {} as Record<
@@ -159,15 +149,26 @@ export class CommandManager {
     return createChain(methods, []) as never;
   };
 
+  constructor(public std: BlockSuite.Std) {}
+  add<N extends BlockSuite.CommandName>(
+    name: N,
+    command: BlockSuite.Commands[N]
+  ): CommandManager;
+
+  add(name: string, command: Command) {
+    this._commands.set(name, command);
+    return this;
+  }
+
   exec<K extends keyof BlockSuite.Commands>(
     command: K,
     ...args: IfAllKeysOptional<
       Omit<InDataOfCommand<BlockSuite.Commands[K]>, keyof InitCommandCtx>,
       [
-        inData: void | Omit<
+        inData: Omit<
           InDataOfCommand<BlockSuite.Commands[K]>,
           keyof InitCommandCtx
-        >,
+        > | void,
       ],
       [
         inData: Omit<

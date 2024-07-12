@@ -3,24 +3,24 @@ import type { BaseTextAttributes } from './base-attributes.js';
 
 export function transformDelta<TextAttributes extends BaseTextAttributes>(
   delta: DeltaInsert<TextAttributes>
-): (DeltaInsert<TextAttributes> | '\n')[] {
-  const result: (DeltaInsert<TextAttributes> | '\n')[] = [];
+): ('\n' | DeltaInsert<TextAttributes>)[] {
+  const result: ('\n' | DeltaInsert<TextAttributes>)[] = [];
 
   let tmpString = delta.insert;
   while (tmpString.length > 0) {
     const index = tmpString.indexOf('\n');
     if (index === -1) {
       result.push({
-        insert: tmpString,
         attributes: delta.attributes,
+        insert: tmpString,
       });
       break;
     }
 
     if (tmpString.slice(0, index).length > 0) {
       result.push({
-        insert: tmpString.slice(0, index),
         attributes: delta.attributes,
+        insert: tmpString.slice(0, index),
       });
     }
 
@@ -43,7 +43,7 @@ export function deltaInsertsToChunks<TextAttributes extends BaseTextAttributes>(
 
   const transformedDelta = delta.flatMap(transformDelta);
 
-  function* chunksGenerator(arr: (DeltaInsert<TextAttributes> | '\n')[]) {
+  function* chunksGenerator(arr: ('\n' | DeltaInsert<TextAttributes>)[]) {
     let start = 0;
     for (let i = 0; i < arr.length; i++) {
       if (arr[i] === '\n') {

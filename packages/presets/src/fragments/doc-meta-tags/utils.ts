@@ -7,13 +7,13 @@ export const DOC_BLOCK_CHILD_PADDING = 24;
 export const DEFAULT_DOC_NAME = 'Untitled';
 
 export type BackLink = {
-  pageId: string;
   blockId: string;
+  pageId: string;
   type: NonNullable<AffineTextAttributes['reference']>['type'];
 };
 
-export type BacklinkData = BackLink &
-  DocMeta & {
-    jump: () => void;
-    icon: TemplateResult;
-  };
+export type BacklinkData = {
+  icon: TemplateResult;
+  jump: () => void;
+} & BackLink &
+  DocMeta;

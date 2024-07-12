@@ -21,38 +21,38 @@ const distanceWeight = 1 / 8;
 export const autoScrollOnBoundary = (
   container: HTMLElement,
   ops?: {
-    vertical?: boolean;
-    horizontal?: boolean;
     boundary?:
-      | number
       | {
+          bottom?: number;
           left?: number;
           right?: number;
           top?: number;
-          bottom?: number;
-        };
+        }
+      | number;
+    horizontal?: boolean;
     onScroll?: () => void;
+    vertical?: boolean;
   }
 ) => {
-  const { vertical = false, horizontal = true, boundary } = ops ?? {};
+  const { boundary, horizontal = true, vertical = false } = ops ?? {};
   const defaultBoundary = 20;
   const {
+    bottom = defaultBoundary,
     left = defaultBoundary,
     right = defaultBoundary,
     top = defaultBoundary,
-    bottom = defaultBoundary,
   } = typeof boundary === 'number'
     ? {
+        bottom: boundary,
         left: boundary,
         right: boundary,
         top: boundary,
-        bottom: boundary,
       }
     : boundary ?? {
+        bottom: defaultBoundary,
         left: defaultBoundary,
         right: defaultBoundary,
         top: defaultBoundary,
-        bottom: defaultBoundary,
       };
   const mousePosition = { x: 0, y: 0 };
   const mouseMove = (e: MouseEvent) => {

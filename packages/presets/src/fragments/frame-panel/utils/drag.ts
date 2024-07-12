@@ -1,13 +1,15 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { Doc } from '@blocksuite/store';
+
 import {
   type EdgelessRootBlockComponent,
   type FrameBlockModel,
   on,
   once,
 } from '@blocksuite/blocks';
-import type { Doc } from '@blocksuite/store';
 
 import type { FramePanelBody } from '../body/frame-panel-body.js';
+
 import { FrameCard } from '../card/frame-card.js';
 
 /**
@@ -16,43 +18,43 @@ import { FrameCard } from '../card/frame-card.js';
  */
 export function startDragging(
   frames: {
-    frame: FrameBlockModel;
-    element: FrameCard;
     cardIndex: number;
+    element: FrameCard;
+    frame: FrameBlockModel;
     frameIndex: string;
   }[],
   options: {
-    width: number;
-    onDragEnd?: (insertIndex?: number) => void;
-    onDragMove?: (insertIdx?: number, indicatorTranslateY?: number) => void;
-    framePanelBody: HTMLElement;
-    frameListContainer: HTMLElement;
-    frameElementHeight: number;
+    container: FramePanelBody;
+    doc: Doc;
     document: Document;
     domHost: Document | HTMLElement;
-    container: FramePanelBody;
+    edgeless: EdgelessRootBlockComponent | null;
+    editorHost: EditorHost;
+    frameElementHeight: number;
+    frameListContainer: HTMLElement;
+    framePanelBody: HTMLElement;
+    onDragEnd?: (insertIndex?: number) => void;
+    onDragMove?: (insertIdx?: number, indicatorTranslateY?: number) => void;
     start: {
       x: number;
       y: number;
     };
-    edgeless: EdgelessRootBlockComponent | null;
-    doc: Doc;
-    editorHost: EditorHost;
+    width: number;
   }
 ) {
   const {
+    container,
+    doc,
     document,
     domHost,
-    container,
-    onDragMove,
-    onDragEnd,
-    frameElementHeight,
-    framePanelBody,
-    frameListContainer,
-    start,
     edgeless,
-    doc,
     editorHost,
+    frameElementHeight,
+    frameListContainer,
+    framePanelBody,
+    onDragEnd,
+    onDragMove,
+    start,
   } = options;
   const cardElements = frames
     .slice(frames.length - 2, frames.length)
@@ -81,8 +83,8 @@ export function startDragging(
   const computedStyle = getComputedStyle(frameListContainer);
   const frameListContainerGap =
     parseInt(computedStyle.getPropertyValue('gap')) ?? 16;
-  let idx: undefined | number;
-  let indicatorTranslateY: undefined | number;
+  let idx: number | undefined;
+  let indicatorTranslateY: number | undefined;
 
   container.renderRoot.append(maskElement);
   container.renderRoot.append(...cardElements);

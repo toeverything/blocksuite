@@ -14,28 +14,7 @@ export class KanbanHotkeysController implements ReactiveController {
   hostConnected() {
     this.host.disposables.add(
       this.host.bindHotkey({
-        Escape: () => {
-          this.host.selectionController.focusOut();
-          return true;
-        },
-        Enter: () => {
-          this.host.selectionController.focusIn();
-        },
-        ArrowUp: context => {
-          if (!this.hasSelection) return false;
-
-          this.host.selectionController.focusNext('up');
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
         ArrowDown: context => {
-          if (!this.hasSelection) return false;
-
-          this.host.selectionController.focusNext('down');
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
-        Tab: context => {
           if (!this.hasSelection) return false;
 
           this.host.selectionController.focusNext('down');
@@ -56,8 +35,29 @@ export class KanbanHotkeysController implements ReactiveController {
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
+        ArrowUp: context => {
+          if (!this.hasSelection) return false;
+
+          this.host.selectionController.focusNext('up');
+          context.get('keyboardState').raw.preventDefault();
+          return true;
+        },
         Backspace: () => {
           this.host.selectionController.deleteCard();
+        },
+        Enter: () => {
+          this.host.selectionController.focusIn();
+        },
+        Escape: () => {
+          this.host.selectionController.focusOut();
+          return true;
+        },
+        Tab: context => {
+          if (!this.hasSelection) return false;
+
+          this.host.selectionController.focusNext('down');
+          context.get('keyboardState').raw.preventDefault();
+          return true;
         },
       })
     );

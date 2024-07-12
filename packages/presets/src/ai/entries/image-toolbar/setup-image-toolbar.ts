@@ -1,19 +1,20 @@
-import '../../_common/components/ask-ai-button.js';
-
 import type {
   AffineImageToolbarWidget,
   ImageBlockComponent,
 } from '@blocksuite/blocks';
+
 import { html } from 'lit';
 
 import type { AskAIButtonOptions } from '../../_common/components/ask-ai-button.js';
+
+import '../../_common/components/ask-ai-button.js';
 import { buildAIImageItemGroups } from '../../_common/config.js';
 
 const AIImageItemGroups = buildAIImageItemGroups();
 const buttonOptions: AskAIButtonOptions = {
-  size: 'small',
   backgroundColor: 'var(--affine-white)',
   panelWidth: 300,
+  size: 'small',
 };
 
 export function setupImageToolbarEntry(imageToolbar: AffineImageToolbarWidget) {
@@ -29,7 +30,6 @@ export function setupImageToolbarEntry(imageToolbar: AffineImageToolbarWidget) {
   imageToolbar.addConfigItems(
     [
       {
-        type: 'custom',
         render(imageBlock: ImageBlockComponent, onClick?: () => void) {
           return html`<ask-ai-button
             class="image-toolbar-button ask-ai"
@@ -45,6 +45,7 @@ export function setupImageToolbarEntry(imageToolbar: AffineImageToolbarWidget) {
           ></ask-ai-button>`;
         },
         showWhen: () => true,
+        type: 'custom',
       },
     ],
     0

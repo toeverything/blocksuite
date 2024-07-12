@@ -1,23 +1,23 @@
 import type { VariableOrProperty } from './ast.js';
 
 export type GroupBy = {
-  type: 'groupBy';
   columnId: string;
   name: string;
   sort?: {
     desc: boolean;
   };
+  type: 'groupBy';
 };
 export type GroupProperty = {
-  key: string;
   hide?: boolean;
+  key: string;
   manuallyCardSort: string[];
 };
 export type SortBy = {
-  ref: VariableOrProperty;
   desc: boolean;
+  ref: VariableOrProperty;
 };
 export type Sort = {
-  sortBy: SortBy[];
   manuallySort: string[];
+  sortBy: SortBy[];
 };

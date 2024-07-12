@@ -3,6 +3,7 @@ import type {
   EdgelessElementToolbarWidget,
   EdgelessRootBlockComponent,
 } from '@blocksuite/blocks';
+
 import {
   EdgelessCopilotToolbarEntry,
   type EdgelessCopilotWidget,
@@ -22,9 +23,6 @@ export function setupEdgelessElementToolbarEntry(
   widget: EdgelessElementToolbarWidget
 ) {
   widget.registerEntry({
-    when: () => {
-      return true;
-    },
     render: (edgeless: EdgelessRootBlockComponent) => {
       const chain = edgeless.service.std.command.chain();
       const filteredGroups = edgelessActionGroups.reduce((pre, group) => {
@@ -44,6 +42,9 @@ export function setupEdgelessElementToolbarEntry(
         .host=${edgeless.host}
         .groups=${edgelessActionGroups}
       ></edgeless-copilot-toolbar-entry>`;
+    },
+    when: () => {
+      return true;
     },
   });
 }

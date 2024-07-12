@@ -1,11 +1,10 @@
-import '../buttons/tool-icon-button.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { clamp } from '../../../../_common/utils/math.js';
+import '../buttons/tool-icon-button.js';
 
 const MIN_SCALE = 0;
 const MAX_SCALE = 400;
@@ -50,32 +49,6 @@ export class EdgelessScalePanel extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor scale!: number;
-
-  @property({ attribute: false })
-  accessor scaleList: readonly number[] = SCALE_LIST;
-
-  @property({ attribute: false })
-  accessor onSelect: ((size: number) => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onPopperCose: (() => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor minScale: number = MIN_SCALE;
-
-  @property({ attribute: false })
-  accessor maxScale: number = MAX_SCALE;
-
-  private _onSelect(scale: number) {
-    this.onSelect?.(scale / 100);
-  }
-
-  private _onPopperClose() {
-    this.onPopperCose?.();
-  }
-
   private _onKeydown = (e: KeyboardEvent) => {
     e.stopPropagation();
 
@@ -95,6 +68,14 @@ export class EdgelessScalePanel extends LitElement {
       this._onPopperClose();
     }
   };
+
+  private _onPopperClose() {
+    this.onPopperCose?.();
+  }
+
+  private _onSelect(scale: number) {
+    this.onSelect?.(scale / 100);
+  }
 
   override render() {
     return html`
@@ -126,6 +107,24 @@ export class EdgelessScalePanel extends LitElement {
       />
     `;
   }
+
+  @property({ attribute: false })
+  accessor maxScale: number = MAX_SCALE;
+
+  @property({ attribute: false })
+  accessor minScale: number = MIN_SCALE;
+
+  @property({ attribute: false })
+  accessor onPopperCose: (() => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor onSelect: ((size: number) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor scale!: number;
+
+  @property({ attribute: false })
+  accessor scaleList: readonly number[] = SCALE_LIST;
 }
 
 declare global {

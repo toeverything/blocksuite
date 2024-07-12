@@ -1,8 +1,9 @@
-import { Matcher } from '../../logical/matcher.js';
 import type { TType } from '../../logical/typesystem.js';
+
+import { Matcher } from '../../logical/matcher.js';
 import {
-  renderUniLit,
   type UniComponent,
+  renderUniLit,
 } from '../../utils/uni-component/uni-component.js';
 
 export const renderLiteral = (
@@ -14,7 +15,7 @@ export const renderLiteral = (
   if (!data) {
     return;
   }
-  return renderUniLit(data.view, { value, onChange, type });
+  return renderUniLit(data.view, { onChange, type, value });
 };
 
 export const popLiteralEdit = (
@@ -27,16 +28,16 @@ export const popLiteralEdit = (
   if (!data) {
     return;
   }
-  data.popEdit(target, { value, onChange, type });
+  data.popEdit(target, { onChange, type, value });
 };
 
 export type LiteralViewProps<Value = unknown, Type extends TType = TType> = {
+  onChange: (value?: Value) => void;
   type: Type;
   value?: Value;
-  onChange: (value?: Value) => void;
 };
 export type LiteralData<Value = unknown> = {
-  view: UniComponent<LiteralViewProps<Value>>;
   popEdit: (position: HTMLElement, props: LiteralViewProps<Value>) => void;
+  view: UniComponent<LiteralViewProps<Value>>;
 };
 export const literalMatcher = new Matcher<LiteralData>();

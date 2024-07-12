@@ -3,9 +3,10 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import type { DividerBlockModel } from './divider-model.js';
+
 import { BlockComponent } from '../_common/components/block-component.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
-import type { DividerBlockModel } from './divider-model.js';
 import { dividerBlockStyles } from './styles.js';
 
 @customElement('affine-divider')

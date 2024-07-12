@@ -1,17 +1,17 @@
 import type { AllServiceKind, GetMethod, ServiceImpl } from './service-base.js';
 
 export type VendorConfig = {
-  id: string;
-  vendorKey: string;
-  name: string;
   data: unknown;
+  id: string;
+  name: string;
+  vendorKey: string;
 };
 type ServiceType = string;
 export type ServiceConfigMap = Record<
   ServiceType,
   {
-    vendorId: string;
     implName: string;
+    vendorId: string;
   }
 >;
 export type CopilotConfigDataType = {
@@ -20,8 +20,8 @@ export type CopilotConfigDataType = {
 };
 
 type VendorPack<T extends AllServiceKind> = {
-  vendor: VendorConfig;
   impl: ServiceImpl<GetMethod<T>, unknown>;
+  vendor: VendorConfig;
 };
 
 /**
@@ -63,6 +63,72 @@ const seed = 1234567890;
 export class CopilotConfig {
   _config?: CopilotConfigDataType;
 
+  addVendor(config: VendorConfig) {
+    this._config?.vendors.push(config);
+    this.save();
+  }
+
+  changeService(
+    featureKey: string,
+    serviceType: string,
+    vendorId: string,
+    implName: string
+  ) {
+    this.config.feature[featureKey] = this.config.feature[featureKey] ?? {};
+    this.config.feature[featureKey][serviceType] = {
+      implName,
+      vendorId,
+    };
+    this.save();
+  }
+
+  getService<T extends AllServiceKind>(
+    featureKey: string,
+    serviceKind: T
+  ): GetMethod<T> {
+    const vendorPack = this.getVendor(featureKey, serviceKind);
+    if (!vendorPack) {
+      throw new Error(`no vendor for ${serviceKind.type}`);
+    }
+    const method = vendorPack.impl.method(vendorPack.vendor.data);
+    return method as GetMethod<T>;
+  }
+
+  getVendor<T extends AllServiceKind>(
+    featureKey: string,
+    serviceKind: T
+  ): VendorPack<T> | undefined {
+    const config = this.config.feature[featureKey] ?? {};
+    const serviceConfig = config[serviceKind.type];
+    const vendor =
+      serviceConfig &&
+      this.config.vendors.find(v => v.id === serviceConfig.vendorId);
+    if (vendor) {
+      const impl = serviceKind.getImpl(serviceConfig.implName);
+      return {
+        impl: impl as never,
+        vendor,
+      };
+    } else {
+      return this.getVendorsByService(serviceKind)[0];
+    }
+  }
+
+  getVendorsByService<T extends AllServiceKind>(
+    serviceKind: T
+  ): VendorPack<T>[] {
+    return this.config.vendors.flatMap(vendor => {
+      return serviceKind.implList
+        .filter(impl => impl.vendor.key === vendor.vendorKey)
+        .map(impl => {
+          return {
+            impl: impl as never,
+            vendor: vendor,
+          };
+        });
+    });
+  }
+
   loadFromLocalStorage() {
     try {
       return JSON.parse(localStorage.getItem('copilotConfig') ?? '');
@@ -79,37 +145,41 @@ export class CopilotConfig {
 
     if (openAIKey) {
       result.push({
-        id: 'url-openai',
-        vendorKey: 'OpenAI',
-        name: 'url',
         data: {
           apiKey: 'sk-' + decode(openAIKey, seed),
         },
+        id: 'url-openai',
+        name: 'url',
+        vendorKey: 'OpenAI',
       });
     }
     const falKey = params.get('fal');
     if (falKey) {
       result.push({
-        id: 'url-fal',
-        vendorKey: 'Fal',
-        name: 'url',
         data: {
           apiKey: falKey,
         },
+        id: 'url-fal',
+        name: 'url',
+        vendorKey: 'Fal',
       });
     }
     const llamaUrl = params.get('llama');
     if (llamaUrl) {
       result.push({
-        id: 'url-llama',
-        vendorKey: 'llama',
-        name: 'url',
         data: {
           host: llamaUrl,
         },
+        id: 'url-llama',
+        name: 'url',
+        vendorKey: 'llama',
       });
     }
     return result;
+  }
+
+  save() {
+    localStorage.setItem('copilotConfig', JSON.stringify(this.config));
   }
 
   get config(): CopilotConfigDataType {
@@ -129,76 +199,6 @@ export class CopilotConfig {
         ...this.loadVendorFromUrl(),
       ],
     };
-  }
-
-  save() {
-    localStorage.setItem('copilotConfig', JSON.stringify(this.config));
-  }
-
-  changeService(
-    featureKey: string,
-    serviceType: string,
-    vendorId: string,
-    implName: string
-  ) {
-    this.config.feature[featureKey] = this.config.feature[featureKey] ?? {};
-    this.config.feature[featureKey][serviceType] = {
-      vendorId,
-      implName,
-    };
-    this.save();
-  }
-
-  addVendor(config: VendorConfig) {
-    this._config?.vendors.push(config);
-    this.save();
-  }
-
-  getVendor<T extends AllServiceKind>(
-    featureKey: string,
-    serviceKind: T
-  ): VendorPack<T> | undefined {
-    const config = this.config.feature[featureKey] ?? {};
-    const serviceConfig = config[serviceKind.type];
-    const vendor =
-      serviceConfig &&
-      this.config.vendors.find(v => v.id === serviceConfig.vendorId);
-    if (vendor) {
-      const impl = serviceKind.getImpl(serviceConfig.implName);
-      return {
-        vendor,
-        impl: impl as never,
-      };
-    } else {
-      return this.getVendorsByService(serviceKind)[0];
-    }
-  }
-
-  getService<T extends AllServiceKind>(
-    featureKey: string,
-    serviceKind: T
-  ): GetMethod<T> {
-    const vendorPack = this.getVendor(featureKey, serviceKind);
-    if (!vendorPack) {
-      throw new Error(`no vendor for ${serviceKind.type}`);
-    }
-    const method = vendorPack.impl.method(vendorPack.vendor.data);
-    return method as GetMethod<T>;
-  }
-
-  getVendorsByService<T extends AllServiceKind>(
-    serviceKind: T
-  ): VendorPack<T>[] {
-    return this.config.vendors.flatMap(vendor => {
-      return serviceKind.implList
-        .filter(impl => impl.vendor.key === vendor.vendorKey)
-        .map(impl => {
-          return {
-            vendor: vendor,
-            impl: impl as never,
-          };
-        });
-    });
   }
 }
 

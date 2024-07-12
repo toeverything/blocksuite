@@ -2,24 +2,24 @@ import { expect, test } from 'vitest';
 import * as Y from 'yjs';
 
 import {
-  defineBlockSchema,
   Schema,
   type SchemaToModel,
+  defineBlockSchema,
 } from '../schema/index.js';
 import { Block, type YBlock } from '../store/doc/block.js';
 import { DocCollection, Generator } from '../store/index.js';
 
 const pageSchema = defineBlockSchema({
   flavour: 'page',
-  props: internal => ({
-    title: internal.Text(),
-    count: 0,
-    style: {} as Record<string, unknown>,
-  }),
   metadata: {
     role: 'root',
     version: 1,
   },
+  props: internal => ({
+    count: 0,
+    style: {} as Record<string, unknown>,
+    title: internal.Text(),
+  }),
 });
 type RootModel = SchemaToModel<typeof pageSchema>;
 

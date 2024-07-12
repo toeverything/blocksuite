@@ -4,6 +4,7 @@ import type {
   JobMiddleware,
   SliceSnapshot,
 } from '@blocksuite/store';
+
 import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
@@ -16,41 +17,22 @@ import { createJob } from '../utils/create-job.js';
 describe('snapshot to markdown', () => {
   test('code', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:8hOLxad5Fv',
+              children: [],
               flavour: 'affine:code',
+              id: 'block:8hOLxad5Fv',
               props: {
                 language: 'python',
                 text: {
@@ -62,11 +44,30 @@ describe('snapshot to markdown', () => {
                   ],
                 },
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
 
     const markdown = '```python\nimport this\n```\n';
@@ -80,59 +81,25 @@ describe('snapshot to markdown', () => {
 
   test('paragraph', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:Bdn8Yvqcny',
-              flavour: 'affine:paragraph',
-              props: {
-                type: 'text',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'aaa',
-                    },
-                  ],
-                },
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'block:72SMa5mdLy',
+                  children: [],
                   flavour: 'affine:paragraph',
+                  id: 'block:72SMa5mdLy',
                   props: {
-                    type: 'text',
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -141,31 +108,17 @@ describe('snapshot to markdown', () => {
                         },
                       ],
                     },
+                    type: 'text',
                   },
-                  children: [],
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'block:f-Z6nRrGK_',
-                  flavour: 'affine:paragraph',
-                  props: {
-                    type: 'text',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'ccc',
-                        },
-                      ],
-                    },
-                  },
                   children: [
                     {
-                      type: 'block',
-                      id: 'block:sP3bU52el7',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'block:sP3bU52el7',
                       props: {
-                        type: 'text',
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -174,15 +127,15 @@ describe('snapshot to markdown', () => {
                             },
                           ],
                         },
+                        type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                     {
-                      type: 'block',
-                      id: 'block:X_HMxP4wxC',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'block:X_HMxP4wxC',
                       props: {
-                        type: 'text',
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -191,13 +144,14 @@ describe('snapshot to markdown', () => {
                             },
                           ],
                         },
+                        type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                     {
-                      type: 'block',
-                      id: 'block:iA34Rb-RvV',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'block:iA34Rb-RvV',
                       props: {
                         text: {
                           '$blocksuite:internal:text$': true,
@@ -209,16 +163,29 @@ describe('snapshot to markdown', () => {
                         },
                         type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                   ],
+                  flavour: 'affine:paragraph',
+                  id: 'block:f-Z6nRrGK_',
+                  props: {
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ccc',
+                        },
+                      ],
+                    },
+                    type: 'text',
+                  },
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'block:I0Fmz5Nv02',
+                  children: [],
                   flavour: 'affine:paragraph',
+                  id: 'block:I0Fmz5Nv02',
                   props: {
-                    type: 'text',
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -227,17 +194,31 @@ describe('snapshot to markdown', () => {
                         },
                       ],
                     },
+                    type: 'text',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:paragraph',
+              id: 'block:Bdn8Yvqcny',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+                type: 'text',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'block:12lDwMD7ec',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:12lDwMD7ec',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -246,12 +227,32 @@ describe('snapshot to markdown', () => {
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const markdown = `aaa
 
@@ -279,79 +280,29 @@ hhh
 
   test('bulleted list', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:imiLDMKSkx',
-              flavour: 'affine:list',
-              props: {
-                type: 'bulleted',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'aaa',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'block:kYliRIovvL',
-                  flavour: 'affine:list',
-                  props: {
-                    type: 'bulleted',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'bbb',
-                        },
-                      ],
-                    },
-                    checked: false,
-                    collapsed: false,
-                  },
                   children: [
                     {
-                      type: 'block',
-                      id: 'block:UyvxA_gqCJ',
+                      children: [],
                       flavour: 'affine:list',
+                      id: 'block:UyvxA_gqCJ',
                       props: {
-                        type: 'bulleted',
+                        checked: false,
+                        collapsed: false,
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -360,19 +311,35 @@ hhh
                             },
                           ],
                         },
-                        checked: false,
-                        collapsed: false,
+                        type: 'bulleted',
                       },
-                      children: [],
+                      type: 'block',
                     },
                   ],
+                  flavour: 'affine:list',
+                  id: 'block:kYliRIovvL',
+                  props: {
+                    checked: false,
+                    collapsed: false,
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'bbb',
+                        },
+                      ],
+                    },
+                    type: 'bulleted',
+                  },
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'block:-guNZRm5u1',
+                  children: [],
                   flavour: 'affine:list',
+                  id: 'block:-guNZRm5u1',
                   props: {
-                    type: 'bulleted',
+                    checked: false,
+                    collapsed: false,
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -381,19 +348,35 @@ hhh
                         },
                       ],
                     },
-                    checked: false,
-                    collapsed: false,
+                    type: 'bulleted',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:list',
+              id: 'block:imiLDMKSkx',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+                type: 'bulleted',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'block:B9CaZzQ2CO',
+              children: [],
               flavour: 'affine:list',
+              id: 'block:B9CaZzQ2CO',
               props: {
-                type: 'bulleted',
+                checked: false,
+                collapsed: false,
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -402,14 +385,32 @@ hhh
                     },
                   ],
                 },
-                checked: false,
-                collapsed: false,
+                type: 'bulleted',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const markdown = `* aaa
   * bbb
@@ -427,79 +428,29 @@ hhh
 
   test('todo list', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:imiLDMKSkx',
-              flavour: 'affine:list',
-              props: {
-                type: 'todo',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'aaa',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'block:kYliRIovvL',
-                  flavour: 'affine:list',
-                  props: {
-                    type: 'todo',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'bbb',
-                        },
-                      ],
-                    },
-                    checked: true,
-                    collapsed: false,
-                  },
                   children: [
                     {
-                      type: 'block',
-                      id: 'block:UyvxA_gqCJ',
+                      children: [],
                       flavour: 'affine:list',
+                      id: 'block:UyvxA_gqCJ',
                       props: {
-                        type: 'todo',
+                        checked: false,
+                        collapsed: false,
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -508,19 +459,35 @@ hhh
                             },
                           ],
                         },
-                        checked: false,
-                        collapsed: false,
+                        type: 'todo',
                       },
-                      children: [],
+                      type: 'block',
                     },
                   ],
+                  flavour: 'affine:list',
+                  id: 'block:kYliRIovvL',
+                  props: {
+                    checked: true,
+                    collapsed: false,
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'bbb',
+                        },
+                      ],
+                    },
+                    type: 'todo',
+                  },
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'block:-guNZRm5u1',
+                  children: [],
                   flavour: 'affine:list',
+                  id: 'block:-guNZRm5u1',
                   props: {
-                    type: 'todo',
+                    checked: true,
+                    collapsed: false,
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -529,19 +496,35 @@ hhh
                         },
                       ],
                     },
-                    checked: true,
-                    collapsed: false,
+                    type: 'todo',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:list',
+              id: 'block:imiLDMKSkx',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+                type: 'todo',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'block:B9CaZzQ2CO',
+              children: [],
               flavour: 'affine:list',
+              id: 'block:B9CaZzQ2CO',
               props: {
-                type: 'todo',
+                checked: false,
+                collapsed: false,
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -550,14 +533,32 @@ hhh
                     },
                   ],
                 },
-                checked: false,
-                collapsed: false,
+                type: 'todo',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const markdown = `\
 * [ ] aaa
@@ -576,37 +577,105 @@ hhh
 
   test('numbered list', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:m5hvdXHXS2',
-      flavour: 'affine:page',
-      version: 2,
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Y4J-oO9h9d',
+          children: [],
           flavour: 'affine:surface',
-          version: 5,
+          id: 'block:Y4J-oO9h9d',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
+          version: 5,
         },
         {
-          type: 'block',
-          id: 'block:1Ll22zT992',
+          children: [
+            {
+              children: [
+                {
+                  children: [],
+                  flavour: 'affine:list',
+                  id: 'block:8-GeKDc06x',
+                  props: {
+                    checked: false,
+                    collapsed: false,
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'bbb',
+                        },
+                      ],
+                    },
+                    type: 'numbered',
+                  },
+                  type: 'block',
+                  version: 1,
+                },
+                {
+                  children: [],
+                  flavour: 'affine:list',
+                  id: 'block:f0c-9xKaEL',
+                  props: {
+                    checked: false,
+                    collapsed: false,
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ccc',
+                        },
+                      ],
+                    },
+                    type: 'numbered',
+                  },
+                  type: 'block',
+                  version: 1,
+                },
+              ],
+              flavour: 'affine:list',
+              id: 'block:Fd0ZCYB7a4',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+                type: 'numbered',
+              },
+              type: 'block',
+              version: 1,
+            },
+            {
+              children: [],
+              flavour: 'affine:list',
+              id: 'block:Fd0ZCYB7a5',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'ddd',
+                    },
+                  ],
+                },
+                type: 'numbered',
+              },
+              type: 'block',
+              version: 1,
+            },
+          ],
           flavour: 'affine:note',
-          version: 1,
+          id: 'block:1Ll22zT992',
           props: {
-            xywh: '[0,0,800,95]',
             background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
             displayMode: 'both',
             edgeless: {
               style: {
@@ -616,92 +685,24 @@ hhh
                 shadowType: '--affine-note-shadow-box',
               },
             },
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
           },
-          children: [
-            {
-              type: 'block',
-              id: 'block:Fd0ZCYB7a4',
-              flavour: 'affine:list',
-              version: 1,
-              props: {
-                type: 'numbered',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'aaa',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
-              children: [
-                {
-                  type: 'block',
-                  id: 'block:8-GeKDc06x',
-                  flavour: 'affine:list',
-                  version: 1,
-                  props: {
-                    type: 'numbered',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'bbb',
-                        },
-                      ],
-                    },
-                    checked: false,
-                    collapsed: false,
-                  },
-                  children: [],
-                },
-                {
-                  type: 'block',
-                  id: 'block:f0c-9xKaEL',
-                  flavour: 'affine:list',
-                  version: 1,
-                  props: {
-                    type: 'numbered',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'ccc',
-                        },
-                      ],
-                    },
-                    checked: false,
-                    collapsed: false,
-                  },
-                  children: [],
-                },
-              ],
-            },
-            {
-              type: 'block',
-              id: 'block:Fd0ZCYB7a5',
-              flavour: 'affine:list',
-              version: 1,
-              props: {
-                type: 'numbered',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'ddd',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
-              children: [],
-            },
-          ],
+          type: 'block',
+          version: 1,
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:m5hvdXHXS2',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
+      version: 2,
     };
 
     const markdown = `1. aaa
@@ -719,43 +720,23 @@ hhh
 
   test('code inline', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:qhpbuss-KN',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:qhpbuss-KN',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -763,22 +744,42 @@ hhh
                       insert: 'aaa ',
                     },
                     {
-                      insert: 'bbb',
                       attributes: {
                         code: true,
                       },
+                      insert: 'bbb',
                     },
                     {
                       insert: ' ccc',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const markdown = 'aaa `bbb` ccc\n';
 
@@ -791,43 +792,23 @@ hhh
 
   test('link', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:Bdn8Yvqcny',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:Bdn8Yvqcny',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -835,22 +816,42 @@ hhh
                       insert: 'aaa ',
                     },
                     {
-                      insert: 'bbb',
                       attributes: {
                         link: 'https://affine.pro/',
                       },
+                      insert: 'bbb',
                     },
                     {
                       insert: ' ccc',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const markdown = 'aaa [bbb](https://affine.pro/) ccc\n';
 
@@ -863,43 +864,23 @@ hhh
 
   test('inline link', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:Bdn8Yvqcny',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:Bdn8Yvqcny',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -907,19 +888,39 @@ hhh
                       insert: 'aaa ',
                     },
                     {
-                      insert: 'https://affine.pro/  ',
                       attributes: {
                         link: 'https://affine.pro/  ',
                       },
+                      insert: 'https://affine.pro/  ',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const markdown = 'aaa https://affine.pro/  \n';
 
@@ -932,43 +933,23 @@ hhh
 
   test('bold', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:zxDyvrg1Mh',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:zxDyvrg1Mh',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -976,22 +957,42 @@ hhh
                       insert: 'aaa',
                     },
                     {
-                      insert: 'bbb',
                       attributes: {
                         bold: true,
                       },
+                      insert: 'bbb',
                     },
                     {
                       insert: 'ccc',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
 
     const markdown = 'aaa**bbb**ccc\n';
@@ -1005,43 +1006,23 @@ hhh
 
   test('italic', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:zxDyvrg1Mh',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:zxDyvrg1Mh',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -1049,22 +1030,42 @@ hhh
                       insert: 'aaa',
                     },
                     {
-                      insert: 'bbb',
                       attributes: {
                         italic: true,
                       },
+                      insert: 'bbb',
                     },
                     {
                       insert: 'ccc',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
 
     const markdown = 'aaa*bbb*ccc\n';
@@ -1078,68 +1079,68 @@ hhh
 
   test('image', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:WcYcyv-oZY',
+      children: [
+        {
+          children: [],
+          flavour: 'affine:surface',
+          id: 'block:zqtuv999Ww',
+          props: {
+            elements: {},
+          },
+          type: 'block',
+        },
+        {
+          children: [
+            {
+              children: [],
+              flavour: 'affine:image',
+              id: 'block:Gan31s-dYK',
+              props: {
+                caption: 'aaa',
+                height: 0,
+                index: 'a0',
+                rotate: 0,
+                sourceId: 'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
+                width: 0,
+                xywh: '[0,0,0,0]',
+              },
+              type: 'block',
+            },
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'block:If92CIQiOl',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+                type: 'text',
+              },
+              type: 'block',
+            },
+          ],
+          flavour: 'affine:note',
+          id: 'block:UTUZojv22c',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
+        },
+      ],
       flavour: 'affine:page',
+      id: 'block:WcYcyv-oZY',
       props: {
         title: {
           '$blocksuite:internal:text$': true,
           delta: [],
         },
       },
-      children: [
-        {
-          type: 'block',
-          id: 'block:zqtuv999Ww',
-          flavour: 'affine:surface',
-          props: {
-            elements: {},
-          },
-          children: [],
-        },
-        {
-          type: 'block',
-          id: 'block:UTUZojv22c',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
-          children: [
-            {
-              type: 'block',
-              id: 'block:Gan31s-dYK',
-              flavour: 'affine:image',
-              props: {
-                sourceId: 'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
-                caption: 'aaa',
-                width: 0,
-                height: 0,
-                index: 'a0',
-                xywh: '[0,0,0,0]',
-                rotate: 0,
-              },
-              children: [],
-            },
-            {
-              type: 'block',
-              id: 'block:If92CIQiOl',
-              flavour: 'affine:paragraph',
-              props: {
-                type: 'text',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [],
-                },
-              },
-              children: [],
-            },
-          ],
-        },
-      ],
+      type: 'block',
     };
 
     const markdown =
@@ -1154,67 +1155,58 @@ hhh
     const assets = new AssetsManager({ blob: blobCRUD });
 
     const target = await mdAdapter.fromBlockSnapshot({
-      snapshot: blockSnapshot,
       assets,
+      snapshot: blockSnapshot,
     });
     expect(target.file).toBe(markdown);
   });
 
   test('table', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:8Wb7CSJ9Qe',
+      children: [
+        {
+          children: [],
+          flavour: 'affine:paragraph',
+          id: 'block:P_-Wg7Rg9O',
+          props: {
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'Task 1',
+                },
+              ],
+            },
+            type: 'text',
+          },
+          type: 'block',
+        },
+        {
+          children: [],
+          flavour: 'affine:paragraph',
+          id: 'block:0vhfgcHtPF',
+          props: {
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'Task 2',
+                },
+              ],
+            },
+            type: 'text',
+          },
+          type: 'block',
+        },
+      ],
       flavour: 'affine:database',
+      id: 'block:8Wb7CSJ9Qe',
       props: {
         cells: {
-          'block:P_-Wg7Rg9O': {
-            'block:qyo8q9VPWU': {
-              columnId: 'block:qyo8q9VPWU',
-              value: 'TKip9uc7Yx',
-            },
+          'block:0vhfgcHtPF': {
             'block:5cglrBmAr3': {
               columnId: 'block:5cglrBmAr3',
-              value: 1702598400000,
-            },
-            'block:8Fa0JQe7WY': {
-              columnId: 'block:8Fa0JQe7WY',
-              value: 1,
-            },
-            'block:5ej6StPuF_': {
-              columnId: 'block:5ej6StPuF_',
-              value: 65,
-            },
-            'block:DPhZ6JBziD': {
-              columnId: 'block:DPhZ6JBziD',
-              value: ['-2_QD3GZT1', '73UrEZWaKk'],
-            },
-            'block:O8dpIDiP7-': {
-              columnId: 'block:O8dpIDiP7-',
-              value: {
-                '$blocksuite:internal:text$': true,
-                delta: [
-                  {
-                    insert: 'test2',
-                    attributes: {
-                      link: 'https://google.com',
-                    },
-                  },
-                ],
-              },
-            },
-            'block:U8lPD59MkF': {
-              columnId: 'block:U8lPD59MkF',
-              value: 'https://google.com',
-            },
-            'block:-DT7B0TafG': {
-              columnId: 'block:-DT7B0TafG',
-              value: true,
-            },
-          },
-          'block:0vhfgcHtPF': {
-            'block:qyo8q9VPWU': {
-              columnId: 'block:qyo8q9VPWU',
-              value: 'F2bgsaE3X2',
+              value: 1703030400000,
             },
             'block:O8dpIDiP7-': {
               columnId: 'block:O8dpIDiP7-',
@@ -1227,9 +1219,58 @@ hhh
                 ],
               },
             },
+            'block:qyo8q9VPWU': {
+              columnId: 'block:qyo8q9VPWU',
+              value: 'F2bgsaE3X2',
+            },
+          },
+          'block:P_-Wg7Rg9O': {
+            'block:-DT7B0TafG': {
+              columnId: 'block:-DT7B0TafG',
+              value: true,
+            },
             'block:5cglrBmAr3': {
               columnId: 'block:5cglrBmAr3',
-              value: 1703030400000,
+              value: 1702598400000,
+            },
+            'block:5ej6StPuF_': {
+              columnId: 'block:5ej6StPuF_',
+              value: 65,
+            },
+            'block:8Fa0JQe7WY': {
+              columnId: 'block:8Fa0JQe7WY',
+              value: 1,
+            },
+            'block:DPhZ6JBziD': {
+              columnId: 'block:DPhZ6JBziD',
+              value: ['-2_QD3GZT1', '73UrEZWaKk'],
+            },
+            'block:O8dpIDiP7-': {
+              columnId: 'block:O8dpIDiP7-',
+              value: {
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    attributes: {
+                      link: 'https://google.com',
+                    },
+                    insert: 'test2',
+                  },
+                ],
+              },
+            },
+            'block:U8lPD59MkF': {
+              columnId: 'block:U8lPD59MkF',
+              value: 'https://google.com',
+            },
+            'block:qyo8q9VPWU': {
+              columnId: 'block:qyo8q9VPWU',
+              value: 'TKip9uc7Yx',
+            },
+          },
+          'block:W_eirvg7EJ': {
+            'block:qyo8q9VPWU': {
+              columnId: 'block:qyo8q9VPWU',
             },
           },
           'block:b4_02QXMAM': {
@@ -1238,138 +1279,98 @@ hhh
               value: 'y3O1A2IHHu',
             },
           },
-          'block:W_eirvg7EJ': {
-            'block:qyo8q9VPWU': {
-              columnId: 'block:qyo8q9VPWU',
-            },
-          },
         },
         columns: [
           {
-            type: 'title',
-            name: 'Title',
             data: {},
             id: 'block:2VfUaitjf9',
+            name: 'Title',
+            type: 'title',
           },
           {
-            type: 'select',
-            name: 'Status',
             data: {
               options: [
                 {
-                  id: 'TKip9uc7Yx',
                   color: 'var(--affine-tag-white)',
+                  id: 'TKip9uc7Yx',
                   value: 'TODO',
                 },
                 {
-                  id: 'F2bgsaE3X2',
                   color: 'var(--affine-tag-green)',
+                  id: 'F2bgsaE3X2',
                   value: 'In Progress',
                 },
                 {
-                  id: 'y3O1A2IHHu',
                   color: 'var(--affine-tag-gray)',
+                  id: 'y3O1A2IHHu',
                   value: 'Done',
                 },
               ],
             },
             id: 'block:qyo8q9VPWU',
+            name: 'Status',
+            type: 'select',
           },
           {
-            type: 'date',
-            name: 'Date',
             data: {},
             id: 'block:5cglrBmAr3',
+            name: 'Date',
+            type: 'date',
           },
           {
-            type: 'number',
-            name: 'Number',
             data: {
               decimal: 0,
             },
             id: 'block:8Fa0JQe7WY',
+            name: 'Number',
+            type: 'number',
           },
           {
-            type: 'progress',
-            name: 'Progress',
             data: {},
             id: 'block:5ej6StPuF_',
+            name: 'Progress',
+            type: 'progress',
           },
           {
-            type: 'multi-select',
-            name: 'MultiSelect',
             data: {
               options: [
                 {
+                  color: 'var(--affine-tag-purple)',
                   id: '73UrEZWaKk',
                   value: 'test2',
-                  color: 'var(--affine-tag-purple)',
                 },
                 {
+                  color: 'var(--affine-tag-teal)',
                   id: '-2_QD3GZT1',
                   value: 'test1',
-                  color: 'var(--affine-tag-teal)',
                 },
               ],
             },
             id: 'block:DPhZ6JBziD',
+            name: 'MultiSelect',
+            type: 'multi-select',
           },
           {
-            type: 'rich-text',
-            name: 'RichText',
             data: {},
             id: 'block:O8dpIDiP7-',
+            name: 'RichText',
+            type: 'rich-text',
           },
           {
-            type: 'link',
-            name: 'Link',
             data: {},
             id: 'block:U8lPD59MkF',
+            name: 'Link',
+            type: 'link',
           },
           {
-            type: 'checkbox',
-            name: 'Checkbox',
             data: {},
             id: 'block:-DT7B0TafG',
+            name: 'Checkbox',
+            type: 'checkbox',
           },
         ],
       },
-      children: [
-        {
-          type: 'block',
-          id: 'block:P_-Wg7Rg9O',
-          flavour: 'affine:paragraph',
-          props: {
-            type: 'text',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'Task 1',
-                },
-              ],
-            },
-          },
-          children: [],
-        },
-        {
-          type: 'block',
-          id: 'block:0vhfgcHtPF',
-          flavour: 'affine:paragraph',
-          props: {
-            type: 'text',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'Task 2',
-                },
-              ],
-            },
-          },
-          children: [],
-        },
-      ],
+      type: 'block',
     };
 
     const md = `\
@@ -1387,59 +1388,25 @@ hhh
 
   test('reference', async () => {
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
       children: [
         {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
+          children: [],
           flavour: 'affine:surface',
+          id: 'block:Tk4gSPocAt',
           props: {
             elements: {},
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
-          },
           children: [
             {
-              type: 'block',
-              id: 'block:Bdn8Yvqcny',
-              flavour: 'affine:paragraph',
-              props: {
-                type: 'text',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'aaa',
-                    },
-                  ],
-                },
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'block:72SMa5mdLy',
+                  children: [],
                   flavour: 'affine:paragraph',
+                  id: 'block:72SMa5mdLy',
                   props: {
-                    type: 'text',
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -1448,31 +1415,17 @@ hhh
                         },
                       ],
                     },
+                    type: 'text',
                   },
-                  children: [],
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'block:f-Z6nRrGK_',
-                  flavour: 'affine:paragraph',
-                  props: {
-                    type: 'text',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: 'ccc',
-                        },
-                      ],
-                    },
-                  },
                   children: [
                     {
-                      type: 'block',
-                      id: 'block:sP3bU52el7',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'block:sP3bU52el7',
                       props: {
-                        type: 'text',
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -1481,15 +1434,15 @@ hhh
                             },
                           ],
                         },
+                        type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                     {
-                      type: 'block',
-                      id: 'block:X_HMxP4wxC',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'block:X_HMxP4wxC',
                       props: {
-                        type: 'text',
                         text: {
                           '$blocksuite:internal:text$': true,
                           delta: [
@@ -1497,23 +1450,24 @@ hhh
                               insert: 'eee',
                             },
                             {
-                              insert: '',
                               attributes: {
                                 reference: {
-                                  type: 'LinkedPage',
                                   pageId: 'deadbeef',
+                                  type: 'LinkedPage',
                                 },
                               },
+                              insert: '',
                             },
                           ],
                         },
+                        type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                     {
-                      type: 'block',
-                      id: 'block:iA34Rb-RvV',
+                      children: [],
                       flavour: 'affine:paragraph',
+                      id: 'block:iA34Rb-RvV',
                       props: {
                         text: {
                           '$blocksuite:internal:text$': true,
@@ -1525,16 +1479,29 @@ hhh
                         },
                         type: 'text',
                       },
-                      children: [],
+                      type: 'block',
                     },
                   ],
+                  flavour: 'affine:paragraph',
+                  id: 'block:f-Z6nRrGK_',
+                  props: {
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ccc',
+                        },
+                      ],
+                    },
+                    type: 'text',
+                  },
+                  type: 'block',
                 },
                 {
-                  type: 'block',
-                  id: 'block:I0Fmz5Nv02',
+                  children: [],
                   flavour: 'affine:paragraph',
+                  id: 'block:I0Fmz5Nv02',
                   props: {
-                    type: 'text',
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -1543,17 +1510,31 @@ hhh
                         },
                       ],
                     },
+                    type: 'text',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:paragraph',
+              id: 'block:Bdn8Yvqcny',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+                type: 'text',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'block:12lDwMD7ec',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'block:12lDwMD7ec',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -1562,12 +1543,32 @@ hhh
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'block:WfnS5ZDCJT',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
+      flavour: 'affine:page',
+      id: 'block:vu6SK6WJpW',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      type: 'block',
     };
     const markdown = `aaa
 
@@ -1600,18 +1601,76 @@ hhh
     // The deepest synced doc block only export it's title
 
     const deepestSyncedDocSnapshot: DocSnapshot = {
-      type: 'page',
-      meta: {
-        id: 'deepestSyncedDoc',
-        title: 'Deepest Doc',
-        createDate: 1715762171116,
-        tags: [],
-      },
       blocks: {
-        type: 'block',
-        id: '8WdJmN5FTT',
+        children: [
+          {
+            children: [],
+            flavour: 'affine:surface',
+            id: 'zVN1EZFuZe',
+            props: {
+              elements: {},
+            },
+            type: 'block',
+            version: 5,
+          },
+          {
+            children: [
+              {
+                children: [],
+                flavour: 'affine:paragraph',
+                id: 'vNp5XrR5yw',
+                props: {
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [],
+                  },
+                  type: 'text',
+                },
+                type: 'block',
+                version: 1,
+              },
+              {
+                children: [],
+                flavour: 'affine:paragraph',
+                id: 'JTdfSl1ygZ',
+                props: {
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'Hello, This is deepest doc.',
+                      },
+                    ],
+                  },
+                  type: 'text',
+                },
+                type: 'block',
+                version: 1,
+              },
+            ],
+            flavour: 'affine:note',
+            id: '2s9sJlphLH',
+            props: {
+              background: '--affine-background-secondary-color',
+              displayMode: 'both',
+              edgeless: {
+                style: {
+                  borderRadius: 8,
+                  borderSize: 4,
+                  borderStyle: 'solid',
+                  shadowType: '--affine-note-shadow-box',
+                },
+              },
+              hidden: false,
+              index: 'a0',
+              xywh: '[0,0,800,95]',
+            },
+            type: 'block',
+            version: 1,
+          },
+        ],
         flavour: 'affine:page',
-        version: 2,
+        id: '8WdJmN5FTT',
         props: {
           title: {
             '$blocksuite:internal:text$': true,
@@ -1622,89 +1681,166 @@ hhh
             ],
           },
         },
+        type: 'block',
+        version: 2,
+      },
+      meta: {
+        createDate: 1715762171116,
+        id: 'deepestSyncedDoc',
+        tags: [],
+        title: 'Deepest Doc',
+      },
+      type: 'page',
+    };
+
+    const syncedDocSnapshot: DocSnapshot = {
+      blocks: {
         children: [
           {
-            type: 'block',
-            id: 'zVN1EZFuZe',
+            children: [],
             flavour: 'affine:surface',
-            version: 5,
+            id: 'gfVzx5tGpB',
             props: {
               elements: {},
             },
-            children: [],
+            type: 'block',
+            version: 5,
           },
           {
-            type: 'block',
-            id: '2s9sJlphLH',
-            flavour: 'affine:note',
-            version: 1,
-            props: {
-              xywh: '[0,0,800,95]',
-              background: '--affine-background-secondary-color',
-              index: 'a0',
-              hidden: false,
-              displayMode: 'both',
-              edgeless: {
-                style: {
-                  borderRadius: 8,
-                  borderSize: 4,
-                  borderStyle: 'solid',
-                  shadowType: '--affine-note-shadow-box',
-                },
-              },
-            },
             children: [
               {
-                type: 'block',
-                id: 'vNp5XrR5yw',
-                flavour: 'affine:paragraph',
-                version: 1,
-                props: {
-                  type: 'text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [],
-                  },
-                },
                 children: [],
-              },
-              {
-                type: 'block',
-                id: 'JTdfSl1ygZ',
                 flavour: 'affine:paragraph',
-                version: 1,
+                id: 'yFlNufsgke',
                 props: {
-                  type: 'text',
                   text: {
                     '$blocksuite:internal:text$': true,
                     delta: [
                       {
-                        insert: 'Hello, This is deepest doc.',
+                        insert: 'Heading 1',
                       },
                     ],
                   },
+                  type: 'h1',
                 },
+                type: 'block',
+                version: 1,
+              },
+              {
                 children: [],
+                flavour: 'affine:paragraph',
+                id: 'oMuLcD6XS3',
+                props: {
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'heading 2',
+                      },
+                    ],
+                  },
+                  type: 'h2',
+                },
+                type: 'block',
+                version: 1,
+              },
+              {
+                children: [],
+                flavour: 'affine:paragraph',
+                id: 'PQ8FhGV6VM',
+                props: {
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'paragraph',
+                      },
+                    ],
+                  },
+                  type: 'text',
+                },
+                type: 'block',
+                version: 1,
+              },
+              {
+                children: [],
+                flavour: 'affine:paragraph',
+                id: 'sA9paSrdEN',
+                props: {
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        attributes: {
+                          strike: true,
+                        },
+                        insert: 'strike',
+                      },
+                    ],
+                  },
+                  type: 'text',
+                },
+                type: 'block',
+                version: 1,
+              },
+              {
+                children: [],
+                flavour: 'affine:code',
+                id: 'DF26giFpKX',
+                props: {
+                  caption: '',
+                  language: 'cpp',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'Hello world!',
+                      },
+                    ],
+                  },
+                  wrap: false,
+                },
+                type: 'block',
+                version: 1,
+              },
+              {
+                children: [],
+                flavour: 'affine:embed-synced-doc',
+                id: '-3bbVQTvI2',
+                props: {
+                  index: 'a0',
+                  pageId: 'deepestSyncedDoc',
+                  rotate: 0,
+                  style: 'syncedDoc',
+                  xywh: '[0,0,0,0]',
+                },
+                type: 'block',
+                version: 1,
               },
             ],
+            flavour: 'affine:note',
+            id: 'CzEfaUret4',
+            props: {
+              background: '--affine-note-background-blue',
+              displayMode: 'both',
+              edgeless: {
+                style: {
+                  borderRadius: 0,
+                  borderSize: 4,
+                  borderStyle: 'none',
+                  shadowType: '--affine-note-shadow-sticker',
+                },
+              },
+              hidden: false,
+              index: 'a0',
+              xywh: '[0,0,800,95]',
+            },
+            type: 'block',
+            version: 1,
           },
         ],
-      },
-    };
-
-    const syncedDocSnapshot: DocSnapshot = {
-      type: 'page',
-      meta: {
-        id: 'syncedDoc',
-        title: 'Synced Doc',
-        createDate: 1719212435051,
-        tags: [],
-      },
-      blocks: {
-        type: 'block',
-        id: 'AGOahFisBN',
         flavour: 'affine:page',
-        version: 2,
+        id: 'AGOahFisBN',
         props: {
           title: {
             '$blocksuite:internal:text$': true,
@@ -1715,27 +1851,91 @@ hhh
             ],
           },
         },
+        type: 'block',
+        version: 2,
+      },
+      meta: {
+        createDate: 1719212435051,
+        id: 'syncedDoc',
+        tags: [],
+        title: 'Synced Doc',
+      },
+      type: 'page',
+    };
+
+    const syncedDocMd =
+      '# Synced Doc\n\n# Heading 1\n\n## heading 2\n\nparagraph\n\n~~strike~~\n\n```cpp\nHello world!\n```';
+
+    const docSnapShot: DocSnapshot = {
+      blocks: {
         children: [
           {
-            type: 'block',
-            id: 'gfVzx5tGpB',
+            children: [],
             flavour: 'affine:surface',
-            version: 5,
+            id: 'uRj8gejH4d',
             props: {
               elements: {},
             },
-            children: [],
+            type: 'block',
+            version: 5,
           },
           {
-            type: 'block',
-            id: 'CzEfaUret4',
+            children: [
+              {
+                children: [],
+                flavour: 'affine:paragraph',
+                id: 'cWBI4UGTqh',
+                props: {
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'Hello',
+                      },
+                    ],
+                  },
+                  type: 'text',
+                },
+                type: 'block',
+                version: 1,
+              },
+              {
+                children: [],
+                flavour: 'affine:embed-synced-doc',
+                id: 'AqFoVxas19',
+                props: {
+                  index: 'a0',
+                  pageId: 'syncedDoc',
+                  rotate: 0,
+                  style: 'syncedDoc',
+                  xywh: '[0,0,0,0]',
+                },
+                type: 'block',
+                version: 1,
+              },
+              {
+                children: [],
+                flavour: 'affine:paragraph',
+                id: 'Db976U9v18',
+                props: {
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'World!',
+                      },
+                    ],
+                  },
+                  type: 'text',
+                },
+                type: 'block',
+                version: 1,
+              },
+            ],
             flavour: 'affine:note',
-            version: 1,
+            id: 'AqFoVDUoW9',
             props: {
-              xywh: '[0,0,800,95]',
               background: '--affine-note-background-blue',
-              index: 'a0',
-              hidden: false,
               displayMode: 'both',
               edgeless: {
                 style: {
@@ -1745,139 +1945,16 @@ hhh
                   shadowType: '--affine-note-shadow-sticker',
                 },
               },
+              hidden: false,
+              index: 'a0',
+              xywh: '[0,0,800,95]',
             },
-            children: [
-              {
-                type: 'block',
-                id: 'yFlNufsgke',
-                flavour: 'affine:paragraph',
-                version: 1,
-                props: {
-                  type: 'h1',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: 'Heading 1',
-                      },
-                    ],
-                  },
-                },
-                children: [],
-              },
-              {
-                type: 'block',
-                id: 'oMuLcD6XS3',
-                flavour: 'affine:paragraph',
-                version: 1,
-                props: {
-                  type: 'h2',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: 'heading 2',
-                      },
-                    ],
-                  },
-                },
-                children: [],
-              },
-              {
-                type: 'block',
-                id: 'PQ8FhGV6VM',
-                flavour: 'affine:paragraph',
-                version: 1,
-                props: {
-                  type: 'text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: 'paragraph',
-                      },
-                    ],
-                  },
-                },
-                children: [],
-              },
-              {
-                type: 'block',
-                id: 'sA9paSrdEN',
-                flavour: 'affine:paragraph',
-                version: 1,
-                props: {
-                  type: 'text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: 'strike',
-                        attributes: {
-                          strike: true,
-                        },
-                      },
-                    ],
-                  },
-                },
-                children: [],
-              },
-              {
-                type: 'block',
-                id: 'DF26giFpKX',
-                flavour: 'affine:code',
-                version: 1,
-                props: {
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: 'Hello world!',
-                      },
-                    ],
-                  },
-                  language: 'cpp',
-                  wrap: false,
-                  caption: '',
-                },
-                children: [],
-              },
-              {
-                type: 'block',
-                id: '-3bbVQTvI2',
-                flavour: 'affine:embed-synced-doc',
-                version: 1,
-                props: {
-                  index: 'a0',
-                  xywh: '[0,0,0,0]',
-                  rotate: 0,
-                  pageId: 'deepestSyncedDoc',
-                  style: 'syncedDoc',
-                },
-                children: [],
-              },
-            ],
+            type: 'block',
+            version: 1,
           },
         ],
-      },
-    };
-
-    const syncedDocMd =
-      '# Synced Doc\n\n# Heading 1\n\n## heading 2\n\nparagraph\n\n~~strike~~\n\n```cpp\nHello world!\n```';
-
-    const docSnapShot: DocSnapshot = {
-      type: 'page',
-      meta: {
-        id: 'y5nsrywQtr',
-        title: 'Test Doc',
-        createDate: 1719222172042,
-        tags: [],
-      },
-      blocks: {
-        type: 'block',
-        id: 'VChAZIX7DM',
         flavour: 'affine:page',
-        version: 2,
+        id: 'VChAZIX7DM',
         props: {
           title: {
             '$blocksuite:internal:text$': true,
@@ -1888,92 +1965,16 @@ hhh
             ],
           },
         },
-        children: [
-          {
-            type: 'block',
-            id: 'uRj8gejH4d',
-            flavour: 'affine:surface',
-            version: 5,
-            props: {
-              elements: {},
-            },
-            children: [],
-          },
-          {
-            type: 'block',
-            id: 'AqFoVDUoW9',
-            flavour: 'affine:note',
-            version: 1,
-            props: {
-              xywh: '[0,0,800,95]',
-              background: '--affine-note-background-blue',
-              index: 'a0',
-              hidden: false,
-              displayMode: 'both',
-              edgeless: {
-                style: {
-                  borderRadius: 0,
-                  borderSize: 4,
-                  borderStyle: 'none',
-                  shadowType: '--affine-note-shadow-sticker',
-                },
-              },
-            },
-            children: [
-              {
-                type: 'block',
-                id: 'cWBI4UGTqh',
-                flavour: 'affine:paragraph',
-                version: 1,
-                props: {
-                  type: 'text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: 'Hello',
-                      },
-                    ],
-                  },
-                },
-                children: [],
-              },
-              {
-                type: 'block',
-                id: 'AqFoVxas19',
-                flavour: 'affine:embed-synced-doc',
-                version: 1,
-                props: {
-                  index: 'a0',
-                  xywh: '[0,0,0,0]',
-                  rotate: 0,
-                  pageId: 'syncedDoc',
-                  style: 'syncedDoc',
-                },
-                children: [],
-              },
-              {
-                type: 'block',
-                id: 'Db976U9v18',
-                flavour: 'affine:paragraph',
-                version: 1,
-                props: {
-                  type: 'text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: 'World!',
-                      },
-                    ],
-                  },
-                },
-                children: [],
-              },
-            ],
-          },
-        ],
+        type: 'block',
+        version: 2,
       },
+      meta: {
+        createDate: 1719222172042,
+        id: 'y5nsrywQtr',
+        tags: [],
+        title: 'Test Doc',
+      },
+      type: 'page',
     };
 
     const docMd = `\
@@ -2008,21 +2009,11 @@ describe('markdown to snapshot', () => {
     const markdown = '```python\nimport this\n```\n';
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:code',
+          id: 'matchesReplaceMap[1]',
           props: {
             language: 'python',
             text: {
@@ -2034,9 +2025,19 @@ describe('markdown to snapshot', () => {
               ],
             },
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -2050,24 +2051,13 @@ describe('markdown to snapshot', () => {
     const markdown = '```python\n    import this\n```';
 
     const sliceSnapshot: SliceSnapshot = {
-      type: 'slice',
       content: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[0]',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: 'both',
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[1]',
+              children: [],
               flavour: 'affine:code',
+              id: 'matchesReplaceMap[1]',
               props: {
                 language: 'python',
                 text: {
@@ -2079,24 +2069,35 @@ describe('markdown to snapshot', () => {
                   ],
                 },
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'matchesReplaceMap[0]',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: 'both',
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
-      pageVersion: 0,
-      workspaceVersion: 0,
-      workspaceId: '',
       pageId: '',
+      pageVersion: 0,
+      type: 'slice',
+      workspaceId: '',
+      workspaceVersion: 0,
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
-      pageVersion: 0,
-      workspaceVersion: 0,
-      workspaceId: '',
       pageId: '',
+      pageVersion: 0,
+      workspaceId: '',
+      workspaceVersion: 0,
     });
     expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
   });
@@ -2105,24 +2106,13 @@ describe('markdown to snapshot', () => {
     const markdown = '````python\n```python\n    import this\n```\n````';
 
     const sliceSnapshot: SliceSnapshot = {
-      type: 'slice',
       content: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[0]',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: 'both',
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[1]',
+              children: [],
               flavour: 'affine:code',
+              id: 'matchesReplaceMap[1]',
               props: {
                 language: 'python',
                 text: {
@@ -2134,24 +2124,35 @@ describe('markdown to snapshot', () => {
                   ],
                 },
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'matchesReplaceMap[0]',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: 'both',
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
-      pageVersion: 0,
-      workspaceVersion: 0,
-      workspaceId: '',
       pageId: '',
+      pageVersion: 0,
+      type: 'slice',
+      workspaceId: '',
+      workspaceVersion: 0,
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
-      pageVersion: 0,
-      workspaceVersion: 0,
-      workspaceId: '',
       pageId: '',
+      pageVersion: 0,
+      workspaceId: '',
+      workspaceVersion: 0,
     });
     expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
   });
@@ -2160,24 +2161,13 @@ describe('markdown to snapshot', () => {
     const markdown = '~~~~python\n````python\n    import this\n````\n~~~~';
 
     const sliceSnapshot: SliceSnapshot = {
-      type: 'slice',
       content: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[0]',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: 'both',
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[1]',
+              children: [],
               flavour: 'affine:code',
+              id: 'matchesReplaceMap[1]',
               props: {
                 language: 'python',
                 text: {
@@ -2189,24 +2179,35 @@ describe('markdown to snapshot', () => {
                   ],
                 },
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'matchesReplaceMap[0]',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: 'both',
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
-      pageVersion: 0,
-      workspaceVersion: 0,
-      workspaceId: '',
       pageId: '',
+      pageVersion: 0,
+      type: 'slice',
+      workspaceId: '',
+      workspaceVersion: 0,
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
-      pageVersion: 0,
-      workspaceVersion: 0,
-      workspaceId: '',
       pageId: '',
+      pageVersion: 0,
+      workspaceId: '',
+      workspaceVersion: 0,
     });
     expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
   });
@@ -2230,23 +2231,12 @@ hhh
 `;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2255,15 +2245,15 @@ hhh
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[2]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[2]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2272,15 +2262,15 @@ hhh
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[3]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[3]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2289,15 +2279,15 @@ hhh
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[4]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[4]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2306,15 +2296,15 @@ hhh
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[5]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[5]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2323,13 +2313,14 @@ hhh
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[6]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[6]',
           props: {
             text: {
               '$blocksuite:internal:text$': true,
@@ -2341,14 +2332,13 @@ hhh
             },
             type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[7]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[7]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2357,15 +2347,15 @@ hhh
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[8]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[8]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2374,10 +2364,21 @@ hhh
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -2400,59 +2401,18 @@ hhh
 `;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:list',
-          props: {
-            type: 'bulleted',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'aaa',
-                },
-              ],
-            },
-            checked: false,
-            collapsed: false,
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[2]',
-              flavour: 'affine:list',
-              props: {
-                type: 'bulleted',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'bbb',
-                    },
-                  ],
-                },
-                checked: false,
-                collapsed: false,
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'matchesReplaceMap[3]',
+                  children: [],
                   flavour: 'affine:list',
+                  id: 'matchesReplaceMap[3]',
                   props: {
-                    type: 'bulleted',
+                    checked: false,
+                    collapsed: false,
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -2461,19 +2421,35 @@ hhh
                         },
                       ],
                     },
-                    checked: false,
-                    collapsed: false,
+                    type: 'bulleted',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:list',
+              id: 'matchesReplaceMap[2]',
+              props: {
+                checked: false,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'bbb',
+                    },
+                  ],
+                },
+                type: 'bulleted',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'matchesReplaceMap[4]',
+              children: [],
               flavour: 'affine:list',
+              id: 'matchesReplaceMap[4]',
               props: {
-                type: 'bulleted',
+                checked: false,
+                collapsed: false,
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -2482,19 +2458,35 @@ hhh
                     },
                   ],
                 },
-                checked: false,
-                collapsed: false,
+                type: 'bulleted',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:list',
+          id: 'matchesReplaceMap[1]',
+          props: {
+            checked: false,
+            collapsed: false,
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+            type: 'bulleted',
+          },
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[5]',
+          children: [],
           flavour: 'affine:list',
+          id: 'matchesReplaceMap[5]',
           props: {
-            type: 'bulleted',
+            checked: false,
+            collapsed: false,
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2503,12 +2495,21 @@ hhh
                 },
               ],
             },
-            checked: false,
-            collapsed: false,
+            type: 'bulleted',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -2531,59 +2532,18 @@ hhh
 `;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:list',
-          props: {
-            type: 'todo',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'aaa',
-                },
-              ],
-            },
-            checked: false,
-            collapsed: false,
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[2]',
-              flavour: 'affine:list',
-              props: {
-                type: 'todo',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'bbb',
-                    },
-                  ],
-                },
-                checked: true,
-                collapsed: false,
-              },
               children: [
                 {
-                  type: 'block',
-                  id: 'matchesReplaceMap[3]',
+                  children: [],
                   flavour: 'affine:list',
+                  id: 'matchesReplaceMap[3]',
                   props: {
-                    type: 'todo',
+                    checked: false,
+                    collapsed: false,
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
@@ -2592,19 +2552,35 @@ hhh
                         },
                       ],
                     },
-                    checked: false,
-                    collapsed: false,
+                    type: 'todo',
                   },
-                  children: [],
+                  type: 'block',
                 },
               ],
+              flavour: 'affine:list',
+              id: 'matchesReplaceMap[2]',
+              props: {
+                checked: true,
+                collapsed: false,
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'bbb',
+                    },
+                  ],
+                },
+                type: 'todo',
+              },
+              type: 'block',
             },
             {
-              type: 'block',
-              id: 'matchesReplaceMap[4]',
+              children: [],
               flavour: 'affine:list',
+              id: 'matchesReplaceMap[4]',
               props: {
-                type: 'todo',
+                checked: true,
+                collapsed: false,
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -2613,19 +2589,35 @@ hhh
                     },
                   ],
                 },
-                checked: true,
-                collapsed: false,
+                type: 'todo',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:list',
+          id: 'matchesReplaceMap[1]',
+          props: {
+            checked: false,
+            collapsed: false,
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+            type: 'todo',
+          },
+          type: 'block',
         },
         {
-          type: 'block',
-          id: 'matchesReplaceMap[5]',
+          children: [],
           flavour: 'affine:list',
+          id: 'matchesReplaceMap[5]',
           props: {
-            type: 'todo',
+            checked: false,
+            collapsed: false,
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2634,12 +2626,21 @@ hhh
                 },
               ],
             },
-            checked: false,
-            collapsed: false,
+            type: 'todo',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -2652,23 +2653,12 @@ hhh
   test('code inline', async () => {
     const markdown = 'aaa `bbb` ccc\n';
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2676,20 +2666,31 @@ hhh
                   insert: 'aaa ',
                 },
                 {
-                  insert: 'bbb',
                   attributes: {
                     code: true,
                   },
+                  insert: 'bbb',
                 },
                 {
                   insert: ' ccc',
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -2703,59 +2704,59 @@ hhh
     const markdown = '``` ```\n    aaa';
 
     const sliceSnapshot: SliceSnapshot = {
-      type: 'slice',
       content: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[0]',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
-            index: 'a0',
-            hidden: false,
-            displayMode: 'both',
-          },
           children: [
             {
-              type: 'block',
-              id: 'matchesReplaceMap[1]',
+              children: [],
               flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[1]',
               props: {
-                type: 'text',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
                     {
-                      insert: ' ',
                       attributes: {
                         code: true,
                       },
+                      insert: ' ',
                     },
                     {
                       insert: '\n    aaa',
                     },
                   ],
                 },
+                type: 'text',
               },
-              children: [],
+              type: 'block',
             },
           ],
+          flavour: 'affine:note',
+          id: 'matchesReplaceMap[0]',
+          props: {
+            background: '--affine-background-secondary-color',
+            displayMode: 'both',
+            hidden: false,
+            index: 'a0',
+            xywh: '[0,0,800,95]',
+          },
+          type: 'block',
         },
       ],
-      pageVersion: 0,
-      workspaceVersion: 0,
-      workspaceId: '',
       pageId: '',
+      pageVersion: 0,
+      type: 'slice',
+      workspaceId: '',
+      workspaceVersion: 0,
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
-      pageVersion: 0,
-      workspaceVersion: 0,
-      workspaceId: '',
       pageId: '',
+      pageVersion: 0,
+      workspaceId: '',
+      workspaceVersion: 0,
     });
     expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
   });
@@ -2763,23 +2764,12 @@ hhh
   test('link', async () => {
     const markdown = 'aaa [bbb](https://affine.pro/) ccc\n';
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2787,20 +2777,31 @@ hhh
                   insert: 'aaa ',
                 },
                 {
-                  insert: 'bbb',
                   attributes: {
                     link: 'https://affine.pro/',
                   },
+                  insert: 'bbb',
                 },
                 {
                   insert: ' ccc',
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -2813,23 +2814,12 @@ hhh
   test('inline link', async () => {
     const markdown = 'aaa https://affine.pro/ ccc\n';
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2837,20 +2827,31 @@ hhh
                   insert: 'aaa ',
                 },
                 {
-                  insert: 'https://affine.pro/',
                   attributes: {
                     link: 'https://affine.pro/',
                   },
+                  insert: 'https://affine.pro/',
                 },
                 {
                   insert: ' ccc',
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -2864,23 +2865,12 @@ hhh
     const markdown = 'aaa**bbb**ccc\n';
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2888,20 +2878,31 @@ hhh
                   insert: 'aaa',
                 },
                 {
-                  insert: 'bbb',
                   attributes: {
                     bold: true,
                   },
+                  insert: 'bbb',
                 },
                 {
                   insert: 'ccc',
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -2915,23 +2916,12 @@ hhh
     const markdown = 'aaa*bbb*ccc\n';
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
-            type: 'text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -2939,20 +2929,31 @@ hhh
                   insert: 'aaa',
                 },
                 {
-                  insert: 'bbb',
                   attributes: {
                     italic: true,
                   },
+                  insert: 'bbb',
                 },
                 {
                   insert: 'ccc',
                 },
               ],
             },
+            type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -2969,43 +2970,30 @@ hhh
 `;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:database',
-          props: {
-            views: [
-              {
-                id: 'matchesReplaceMap[2]',
-                name: 'Table View',
-                mode: 'table',
-                columns: [],
-                filter: {
-                  type: 'group',
-                  op: 'and',
-                  conditions: [],
+          children: [
+            {
+              children: [],
+              flavour: 'affine:paragraph',
+              id: 'matchesReplaceMap[12]',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'ddd',
+                    },
+                  ],
                 },
-                header: {
-                  titleColumn: 'matchesReplaceMap[9]',
-                  iconColumn: 'type',
-                },
+                type: 'text',
               },
-            ],
-            title: {
-              '$blocksuite:internal:text$': true,
-              delta: [],
+              type: 'block',
             },
+          ],
+          flavour: 'affine:database',
+          id: 'matchesReplaceMap[1]',
+          props: {
             cells: {
               'matchesReplaceMap[12]': {
                 'matchesReplaceMap[10]': {
@@ -3034,46 +3022,59 @@ hhh
             },
             columns: [
               {
-                type: 'title',
-                name: 'aaa',
                 data: {},
                 id: 'matchesReplaceMap[9]',
+                name: 'aaa',
+                type: 'title',
               },
               {
-                type: 'rich-text',
-                name: 'bbb',
                 data: {},
                 id: 'matchesReplaceMap[10]',
+                name: 'bbb',
+                type: 'rich-text',
               },
               {
-                type: 'rich-text',
-                name: 'ccc',
                 data: {},
                 id: 'matchesReplaceMap[11]',
+                name: 'ccc',
+                type: 'rich-text',
+              },
+            ],
+            title: {
+              '$blocksuite:internal:text$': true,
+              delta: [],
+            },
+            views: [
+              {
+                columns: [],
+                filter: {
+                  conditions: [],
+                  op: 'and',
+                  type: 'group',
+                },
+                header: {
+                  iconColumn: 'type',
+                  titleColumn: 'matchesReplaceMap[9]',
+                },
+                id: 'matchesReplaceMap[2]',
+                mode: 'table',
+                name: 'Table View',
               },
             ],
           },
-          children: [
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[12]',
-              flavour: 'affine:paragraph',
-              props: {
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: 'ddd',
-                    },
-                  ],
-                },
-                type: 'text',
-              },
-              children: [],
-            },
-          ],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());
@@ -3087,21 +3088,11 @@ hhh
     const markdown = `<aaa>\n`;
 
     const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
       children: [
         {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
+          children: [],
           flavour: 'affine:paragraph',
+          id: 'matchesReplaceMap[1]',
           props: {
             text: {
               '$blocksuite:internal:text$': true,
@@ -3113,9 +3104,19 @@ hhh
             },
             type: 'text',
           },
-          children: [],
+          type: 'block',
         },
       ],
+      flavour: 'affine:note',
+      id: 'matchesReplaceMap[0]',
+      props: {
+        background: '--affine-background-secondary-color',
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+        hidden: false,
+        index: 'a0',
+        xywh: '[0,0,800,95]',
+      },
+      type: 'block',
     };
 
     const mdAdapter = new MarkdownAdapter(createJob());

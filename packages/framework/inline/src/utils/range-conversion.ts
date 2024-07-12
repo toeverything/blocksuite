@@ -1,7 +1,8 @@
 import type * as Y from 'yjs';
 
-import { VElement } from '../components/v-element.js';
 import type { InlineRange } from '../types.js';
+
+import { VElement } from '../components/v-element.js';
 import { isInEmbedElement } from './embed.js';
 import {
   nativePointToTextPoint,
@@ -10,36 +11,36 @@ import {
 import { calculateTextLength, getTextNodesFromElement } from './text.js';
 
 type InlineRangeRunnerContext = {
-  rootElement: HTMLElement;
-  range: Range;
-  yText: Y.Text;
-  startNode: Node | null;
-  startOffset: number;
-  startText: Text;
-  startTextOffset: number;
   endNode: Node | null;
   endOffset: number;
   endText: Text;
   endTextOffset: number;
+  range: Range;
+  rootElement: HTMLElement;
+  startNode: Node | null;
+  startOffset: number;
+  startText: Text;
+  startTextOffset: number;
+  yText: Y.Text;
 };
 
 type Predict = (context: InlineRangeRunnerContext) => boolean;
 type Handler = (context: InlineRangeRunnerContext) => InlineRange | null;
 
 const rangeHasAnchorAndFocus: Predict = ({
+  endText,
   rootElement,
   startText,
-  endText,
 }) => {
   return rootElement.contains(startText) && rootElement.contains(endText);
 };
 
 const rangeHasAnchorAndFocusHandler: Handler = ({
+  endText,
+  endTextOffset,
   rootElement,
   startText,
-  endText,
   startTextOffset,
-  endTextOffset,
 }) => {
   const anchorDomPoint = textPointToDomPoint(
     startText,
@@ -62,14 +63,14 @@ const rangeHasAnchorAndFocusHandler: Handler = ({
   };
 };
 
-const rangeOnlyHasFocus: Predict = ({ rootElement, startText, endText }) => {
+const rangeOnlyHasFocus: Predict = ({ endText, rootElement, startText }) => {
   return !rootElement.contains(startText) && rootElement.contains(endText);
 };
 
 const rangeOnlyHasFocusHandler: Handler = ({
-  rootElement,
   endText,
   endTextOffset,
+  rootElement,
 }) => {
   const focusDomPoint = textPointToDomPoint(
     endText,
@@ -87,15 +88,15 @@ const rangeOnlyHasFocusHandler: Handler = ({
   };
 };
 
-const rangeOnlyHasAnchor: Predict = ({ rootElement, startText, endText }) => {
+const rangeOnlyHasAnchor: Predict = ({ endText, rootElement, startText }) => {
   return rootElement.contains(startText) && !rootElement.contains(endText);
 };
 
 const rangeOnlyHasAnchorHandler: Handler = ({
-  yText,
   rootElement,
   startText,
   startTextOffset,
+  yText,
 }) => {
   const startDomPoint = textPointToDomPoint(
     startText,
@@ -114,10 +115,10 @@ const rangeOnlyHasAnchorHandler: Handler = ({
 };
 
 const rangeHasNoAnchorAndFocus: Predict = ({
-  rootElement,
-  startText,
   endText,
   range,
+  rootElement,
+  startText,
 }) => {
   return (
     !rootElement.contains(startText) &&
@@ -138,7 +139,7 @@ const buildContext = (
   rootElement: HTMLElement,
   yText: Y.Text
 ): InlineRangeRunnerContext | null => {
-  const { startContainer, startOffset, endContainer, endOffset } = range;
+  const { endContainer, endOffset, startContainer, startOffset } = range;
 
   const startTextPoint = nativePointToTextPoint(startContainer, startOffset);
   const endTextPoint = nativePointToTextPoint(endContainer, endOffset);
@@ -151,17 +152,17 @@ const buildContext = (
   const [endText, endTextOffset] = endTextPoint;
 
   return {
-    rootElement,
-    range,
-    yText,
-    startNode: startContainer,
-    startOffset,
     endNode: endContainer,
     endOffset,
-    startText,
-    startTextOffset,
     endText,
     endTextOffset,
+    range,
+    rootElement,
+    startNode: startContainer,
+    startOffset,
+    startText,
+    startTextOffset,
+    yText,
   };
 };
 

@@ -4,8 +4,9 @@ import type {
   ShapeType,
 } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import { Bound } from '../../../utils/bound.js';
 import type { Renderer } from '../../renderer.js';
+
+import { Bound } from '../../../utils/bound.js';
 import {
   deltaInsertsToChunks,
   getFontMetrics,
@@ -31,9 +32,9 @@ const shapeRenderers: {
   ) => void;
 } = {
   diamond,
+  ellipse,
   rect,
   triangle,
-  ellipse,
 };
 
 export function shape(
@@ -56,18 +57,18 @@ function renderText(
   renderer: Renderer
 ) {
   const {
+    color,
+    fontFamily,
+    fontSize,
+    fontWeight,
+    h,
+    padding,
+    text,
+    textAlign,
+    textVerticalAlign,
+    w,
     x,
     y,
-    text,
-    color,
-    fontSize,
-    fontFamily,
-    fontWeight,
-    textAlign,
-    w,
-    h,
-    textVerticalAlign,
-    padding,
   } = model;
   if (!text) return;
 

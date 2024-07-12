@@ -1,8 +1,9 @@
 import { noop } from '@blocksuite/global/utils';
 
-import { EmbedLoomBlockComponent } from './embed-loom-block.js';
 import type { EmbedLoomModel } from './embed-loom-model.js';
 import type { EmbedLoomBlockService } from './embed-loom-service.js';
+
+import { EmbedLoomBlockComponent } from './embed-loom-block.js';
 noop(EmbedLoomBlockComponent);
 
 export * from './embed-loom-block.js';

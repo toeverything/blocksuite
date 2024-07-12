@@ -1,7 +1,7 @@
 interface HighlightConfig {
+  color: null | string;
+  hotkey: null | string;
   name: string;
-  color: string | null;
-  hotkey: string | null;
 }
 
 const colors = [
@@ -17,26 +17,26 @@ const colors = [
 
 export const backgroundConfig: HighlightConfig[] = [
   {
-    name: 'Default Background',
     color: null,
     hotkey: null,
+    name: 'Default Background',
   },
   ...colors.map(color => ({
-    name: `${color[0].toUpperCase()}${color.slice(1)} Background`,
     color: `var(--affine-text-highlight-${color})`,
     hotkey: null,
+    name: `${color[0].toUpperCase()}${color.slice(1)} Background`,
   })),
 ];
 
 export const foregroundConfig: HighlightConfig[] = [
   {
-    name: 'Default Color',
     color: null,
     hotkey: null,
+    name: 'Default Color',
   },
   ...colors.map(color => ({
-    name: `${color[0].toUpperCase()}${color.slice(1)}`,
     color: `var(--affine-text-highlight-foreground-${color})`,
     hotkey: null,
+    name: `${color[0].toUpperCase()}${color.slice(1)}`,
   })),
 ];

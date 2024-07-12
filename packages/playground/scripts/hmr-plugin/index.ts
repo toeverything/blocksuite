@@ -1,8 +1,7 @@
 import path from 'node:path';
-
 import {
-  hmrPlugin as wcHmrPlugin,
   presets,
+  hmrPlugin as wcHmrPlugin,
 } from 'vite-plugin-web-components-hmr';
 
 import { fineTuneHmr } from './fine-tune.js';
@@ -19,20 +18,20 @@ const exclude = ['**/*/node_modules/**/*'];
 export const hmrPlugin = process.env.WC_HMR
   ? [
       wcHmrPlugin({
-        include,
-        exclude,
-        presets: [presets.lit],
-        decorators: [{ name: 'customElement', import: 'lit/decorators.js' }],
         baseClasses: [
           {
-            name: 'ShadowlessElement',
             import: customLitPath,
+            name: 'ShadowlessElement',
           },
         ],
+        decorators: [{ import: 'lit/decorators.js', name: 'customElement' }],
+        exclude,
+        include,
+        presets: [presets.lit],
       }),
       fineTuneHmr({
-        include,
         exclude,
+        include,
       }),
     ]
   : [];

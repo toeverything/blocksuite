@@ -287,10 +287,10 @@ test('should support drag to change column width', async ({ page }) => {
     { x: box.x, y: box.y },
     { x: box.x + dragDistance, y: box.y },
     {
-      steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
       },
+      steps: 50,
     }
   );
 
@@ -319,10 +319,10 @@ test('should display the add column button on the right side of database correct
     { x: box.x, y: box.y },
     { x: box.x + 400, y: box.y },
     {
-      steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
       },
+      steps: 50,
     }
   );
   await focusDatabaseHeader(page);
@@ -348,7 +348,6 @@ test('should support drag and drop to move columns', async ({ page }) => {
     { x, y },
     { x: x + 100, y },
     {
-      steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
         const indicator = page
@@ -361,6 +360,7 @@ test('should support drag and drop to move columns', async ({ page }) => {
         const indicatorBox = await getBoundingBox(indicator);
         expect(box.x + box.width - indicatorBox.x < 10).toBe(true);
       },
+      steps: 50,
     }
   );
 
@@ -393,11 +393,11 @@ test('support drag and drop the add button to insert row', async ({ page }) => {
     // The drag judgment range is: [-20, 20]
     { x: endX, y: endY - 21 },
     {
-      steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
         await expect(page.locator('affine-drag-indicator div')).toBeHidden();
       },
+      steps: 50,
     }
   );
 
@@ -406,13 +406,13 @@ test('support drag and drop the add button to insert row', async ({ page }) => {
     { x: startX, y: startY },
     { x: endX, y: endY },
     {
-      steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
         await expect(
           page.locator('div[data-is-drop-preview="true"]')
         ).toBeVisible();
       },
+      steps: 50,
     }
   );
   const rows = getDatabaseBodyRows(page);
@@ -439,8 +439,8 @@ test('should the indicator display correctly when resize the window', async ({
   const size = page.viewportSize();
   if (!size) throw new Error('Missing page size');
   await page.setViewportSize({
-    width: size.width - 100,
     height: size.height - 100,
+    width: size.width - 100,
   });
   await page.waitForTimeout(250);
 
@@ -460,7 +460,6 @@ test('should the indicator display correctly when resize the window', async ({
     { x: startX, y: startY },
     { x: endX, y: endY },
     {
-      steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
         const { x: indicatorX } = await getBoundingBox(
@@ -471,6 +470,7 @@ test('should the indicator display correctly when resize the window', async ({
         );
         expect(indicatorX).toBe(databaseX);
       },
+      steps: 50,
     }
   );
 });
@@ -559,10 +559,10 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'h',
       },
       {
-        insert: 'eade',
         attributes: {
           bold: true,
         },
+        insert: 'eade',
       },
       {
         insert: 'r',
@@ -597,10 +597,10 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'co',
       },
       {
-        insert: 'lu',
         attributes: {
           bold: true,
         },
+        insert: 'lu',
       },
       {
         insert: 'mn',

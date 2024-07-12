@@ -6,19 +6,19 @@ import {
 } from './embed-loom-model.js';
 
 const defaultEmbedLoomProps: EmbedLoomBlockProps = {
-  style: EmbedLoomStyles[0],
-  url: '',
   caption: null,
-
-  image: null,
-  title: null,
   description: null,
+  image: null,
+
+  style: EmbedLoomStyles[0],
+  title: null,
+  url: '',
   videoId: null,
 };
 
 export const EmbedLoomBlockSchema = createEmbedBlockSchema({
   name: 'loom',
-  version: 1,
-  toModel: () => new EmbedLoomModel(),
   props: (): EmbedLoomBlockProps => defaultEmbedLoomProps,
+  toModel: () => new EmbedLoomModel(),
+  version: 1,
 });

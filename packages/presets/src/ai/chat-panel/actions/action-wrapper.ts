@@ -1,10 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import type { ChatAction } from '../chat-context.js';
+
 import {
-  ActionIcon,
   AIChangeToneIcon,
   AIDoneIcon,
   AIExpandMindMapIcon,
@@ -19,44 +21,44 @@ import {
   AIMindMapIcon,
   AIPenIcon,
   AIPresentationIcon,
+  ActionIcon,
   ArrowDownIcon,
   ArrowUpIcon,
 } from '../../_common/icons.js';
 import { createTextRenderer } from '../../messages/text.js';
-import type { ChatAction } from '../chat-context.js';
 import { renderImages } from '../components/images.js';
 import { HISTORY_IMAGE_ACTIONS } from '../const.js';
 
 const icons: Record<string, TemplateResult<1>> = {
+  'AI image filter anime style': AIImageIcon,
+  'AI image filter clay style': AIImageIcon,
+  'AI image filter pixel style': AIImageIcon,
+  'AI image filter sketch style': AIImageIcon,
+  'Brainstorm mindmap': AIMindMapIcon,
+  'Change tone': AIChangeToneIcon,
+  'Check code error': AIExplainIcon,
+  Clearer: AIImageIcon,
+  'Continue writing': AIPenIcon,
+  'Convert to sticker': AIImageIcon,
+  'Create a presentation': AIPresentationIcon,
+  'Create headings': AIPenIcon,
+  'Expand mind map': AIExpandMindMapIcon,
+  'Explain this': AIExplainSelectionIcon,
+  'Explain this code': AIExplainIcon,
+  'Find action items from it': AIFindActionsIcon,
   'Fix spelling for it': AIDoneIcon,
   'Improve grammar for it': AIDoneIcon,
-  'Explain this code': AIExplainIcon,
-  'Check code error': AIExplainIcon,
-  'Explain this': AIExplainSelectionIcon,
-  Translate: ActionIcon,
-  'Change tone': AIChangeToneIcon,
   'Improve writing for it': AIImproveWritingIcon,
   'Make it longer': AIMakeLongerIcon,
-  'Make it shorter': AIMakeShorterIcon,
-  'Continue writing': AIPenIcon,
   'Make it real': AIMakeRealIcon,
-  'Find action items from it': AIFindActionsIcon,
+  'Make it shorter': AIMakeShorterIcon,
+  'Remove background': AIImageIcon,
   Summary: AIPenIcon,
-  'Create headings': AIPenIcon,
+  Translate: ActionIcon,
+  'Write a blog post about this': AIPenIcon,
+  'Write a poem about this': AIPenIcon,
   'Write outline': AIPenIcon,
   image: AIImageIcon,
-  'Brainstorm mindmap': AIMindMapIcon,
-  'Expand mind map': AIExpandMindMapIcon,
-  'Create a presentation': AIPresentationIcon,
-  'Write a poem about this': AIPenIcon,
-  'Write a blog post about this': AIPenIcon,
-  'AI image filter clay style': AIImageIcon,
-  'AI image filter sketch style': AIImageIcon,
-  'AI image filter anime style': AIImageIcon,
-  'AI image filter pixel style': AIImageIcon,
-  Clearer: AIImageIcon,
-  'Remove background': AIImageIcon,
-  'Convert to sticker': AIImageIcon,
 };
 
 @customElement('action-wrapper')
@@ -109,15 +111,6 @@ export class ActionWrapper extends WithDisposable(LitElement) {
     }
   `;
 
-  @state()
-  accessor promptShow = false;
-
-  @property({ attribute: false })
-  accessor item!: ChatAction;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
   protected override render() {
     const { item } = this;
 
@@ -157,6 +150,15 @@ export class ActionWrapper extends WithDisposable(LitElement) {
           `
         : nothing} `;
   }
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor item!: ChatAction;
+
+  @state()
+  accessor promptShow = false;
 }
 
 declare global {

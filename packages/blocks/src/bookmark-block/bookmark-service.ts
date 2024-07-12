@@ -2,10 +2,12 @@ import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
+import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
+import type { BookmarkBlockComponent } from './bookmark-block.js';
+
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
-import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -15,22 +17,59 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
-import type { BookmarkBlockComponent } from './bookmark-block.js';
 import {
   type BookmarkBlockModel,
   BookmarkBlockSchema,
 } from './bookmark-model.js';
 
 export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
-  private static readonly linkPreviewer = new LinkPreviewer();
-
   static setLinkPreviewEndpoint =
     BookmarkBlockService.linkPreviewer.setEndpoint;
 
   private _dragHandleOption: DragHandleOption = {
-    flavour: BookmarkBlockSchema.model.flavour,
     edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
+    flavour: BookmarkBlockSchema.model.flavour,
+    onDragEnd: props => {
+      const { draggingElements, state } = props;
+      if (
+        draggingElements.length !== 1 ||
+        !matchFlavours(draggingElements[0].model, [
+          BookmarkBlockSchema.model.flavour,
+        ])
+      )
+        return false;
+
+      const blockComponent = draggingElements[0] as BookmarkBlockComponent;
+      const isInSurface = blockComponent.isInSurface;
+      const target = captureEventTarget(state.raw.target);
+      const isTargetEdgelessContainer =
+        target?.classList.contains('edgeless') &&
+        target?.classList.contains('affine-block-children-container');
+
+      if (isInSurface) {
+        const style = blockComponent.model.style;
+        const targetStyle =
+          style === 'vertical' || style === 'cube' ? 'horizontal' : style;
+        return convertDragPreviewEdgelessToDoc({
+          blockComponent,
+          style: targetStyle,
+          ...props,
+        });
+      } else if (isTargetEdgelessContainer) {
+        const style = blockComponent.model.style;
+
+        return convertDragPreviewDocToEdgeless({
+          blockComponent,
+          cssSelector: 'bookmark-card',
+          height: EMBED_CARD_HEIGHT[style],
+          width: EMBED_CARD_WIDTH[style],
+          ...props,
+        });
+      }
+
+      return false;
+    },
+    onDragStart: ({ anchorBlockPath, editorHost, startDragging, state }) => {
       if (!anchorBlockPath) return false;
       const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
       if (
@@ -77,47 +116,9 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
       }
       return false;
     },
-    onDragEnd: props => {
-      const { state, draggingElements } = props;
-      if (
-        draggingElements.length !== 1 ||
-        !matchFlavours(draggingElements[0].model, [
-          BookmarkBlockSchema.model.flavour,
-        ])
-      )
-        return false;
-
-      const blockComponent = draggingElements[0] as BookmarkBlockComponent;
-      const isInSurface = blockComponent.isInSurface;
-      const target = captureEventTarget(state.raw.target);
-      const isTargetEdgelessContainer =
-        target?.classList.contains('edgeless') &&
-        target?.classList.contains('affine-block-children-container');
-
-      if (isInSurface) {
-        const style = blockComponent.model.style;
-        const targetStyle =
-          style === 'vertical' || style === 'cube' ? 'horizontal' : style;
-        return convertDragPreviewEdgelessToDoc({
-          blockComponent,
-          style: targetStyle,
-          ...props,
-        });
-      } else if (isTargetEdgelessContainer) {
-        const style = blockComponent.model.style;
-
-        return convertDragPreviewDocToEdgeless({
-          blockComponent,
-          cssSelector: 'bookmark-card',
-          width: EMBED_CARD_WIDTH[style],
-          height: EMBED_CARD_HEIGHT[style],
-          ...props,
-        });
-      }
-
-      return false;
-    },
   };
+
+  private static readonly linkPreviewer = new LinkPreviewer();
 
   queryUrlData = (url: string, signal?: AbortSignal) => {
     return BookmarkBlockService.linkPreviewer.query(url, signal);

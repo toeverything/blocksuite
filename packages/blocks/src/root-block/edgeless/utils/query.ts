@@ -16,32 +16,33 @@ import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { PointLocation } from '../../../surface-block/index.js';
+import type { EdgelessBlockModel } from '../edgeless-block-model.js';
+import type { EdgelessTool } from '../types.js';
+import type { Viewport } from './viewport.js';
+
 import {
   Bound,
   type CanvasElementWithText,
-  clamp,
   ConnectorElementModel,
-  deserializeXYWH,
-  getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
   MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
+  clamp,
+  deserializeXYWH,
+  getQuadBoundsWithRotation,
 } from '../../../surface-block/index.js';
-import type { EdgelessBlockModel } from '../edgeless-block-model.js';
-import type { EdgelessTool } from '../types.js';
 import { getElementsWithoutGroup } from './group.js';
-import type { Viewport } from './viewport.js';
 
 export function isMindmapNode(
-  element: EdgelessBlockModel | BlockSuite.EdgelessModelType | null
+  element: BlockSuite.EdgelessModelType | EdgelessBlockModel | null
 ) {
   return element?.group instanceof MindmapElementModel;
 }
 
 export function isTopLevelBlock(
-  selectable: BlockModel | BlockSuite.EdgelessModelType | BlockModel | null
+  selectable: BlockModel | BlockModel | BlockSuite.EdgelessModelType | null
 ): selectable is EdgelessBlockModel {
   return !!selectable && 'flavour' in selectable;
 }
@@ -199,7 +200,7 @@ export function isConnectable(
 }
 
 export function getSelectionBoxBound(viewport: Viewport, bound: Bound) {
-  const { w, h } = bound;
+  const { h, w } = bound;
   const [x, y] = viewport.toViewCoord(bound.x, bound.y);
   return new DOMRect(x, y, w * viewport.zoom, h * viewport.zoom);
 }
@@ -253,12 +254,12 @@ export function getSelectedRect(
     (bounds, selectable, index) => {
       const rotate = isTopLevelBlock(selectable) ? 0 : selectable.rotate;
       const [x, y, w, h] = deserializeXYWH(selectable.xywh);
-      let { left, top, right, bottom } = getQuadBoundsWithRotation({
-        x,
-        y,
-        w,
+      let { bottom, left, right, top } = getQuadBoundsWithRotation({
         h,
         rotate,
+        w,
+        x,
+        y,
       });
 
       if (index !== 0) {
@@ -281,8 +282,8 @@ export function getSelectedRect(
 
 export type SelectableProps = {
   bound: Bound;
-  rotate: number;
   path?: PointLocation[];
+  rotate: number;
 };
 
 export function getSelectableBounds(

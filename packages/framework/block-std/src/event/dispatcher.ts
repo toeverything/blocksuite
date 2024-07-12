@@ -1,8 +1,10 @@
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { PathFinder } from '../utils/index.js';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+
 import type { BlockElement } from '../view/index.js';
+
+import { PathFinder } from '../utils/index.js';
 import {
   type UIEventHandler,
   UIEventState,
@@ -60,113 +62,19 @@ export type EventOptions = {
   path?: string[];
 };
 export type EventHandlerRunner = {
-  fn: UIEventHandler;
   flavour?: string;
+  fn: UIEventHandler;
   path?: string[];
 };
 
 export type EventScope = {
-  runners: EventHandlerRunner[];
   flavours: string[];
   paths: string[][];
+  runners: EventHandlerRunner[];
 };
 
 export class UIEventDispatcher {
-  get active() {
-    return this._active;
-  }
-
-  get host() {
-    return this.std.host;
-  }
-
-  private get _currentSelections() {
-    return this.std.selection.value;
-  }
-
-  private _handlersMap = Object.fromEntries(
-    eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
-  ) as Record<EventName, Array<EventHandlerRunner>>;
-
-  private _pointerControl: PointerControl;
-
-  private _keyboardControl: KeyboardControl;
-
-  private _rangeControl: RangeControl;
-
-  private _clipboardControl: ClipboardControl;
-
   private _active = false;
-
-  disposables = new DisposableGroup();
-
-  /**
-   * @deprecated
-   *
-   * This property is deprecated and will be removed in the future.
-   */
-  slots = {
-    parentScaleChanged: new Slot<number>(),
-    editorHostPanned: new Slot(),
-  };
-
-  constructor(public std: BlockSuite.Std) {
-    this._pointerControl = new PointerControl(this);
-    this._keyboardControl = new KeyboardControl(this);
-    this._rangeControl = new RangeControl(this);
-    this._clipboardControl = new ClipboardControl(this);
-  }
-
-  private _getEventScope(name: EventName, state: EventSourceState) {
-    const handlers = this._handlersMap[name];
-    if (!handlers) return;
-
-    let output: EventScope | undefined;
-
-    switch (state.sourceType) {
-      case EventScopeSourceType.Selection: {
-        output = this._buildEventScopeBySelection(name);
-        break;
-      }
-      case EventScopeSourceType.Target: {
-        output = this._buildEventScopeByTarget(
-          name,
-          state.event.target as Node
-        );
-        break;
-      }
-      default: {
-        throw new Error(`Unknown event scope source: ${state.sourceType}`);
-      }
-    }
-
-    return output;
-  }
-
-  private _buildEventScopeByTarget(name: EventName, target: Node) {
-    const handlers = this._handlersMap[name];
-    if (!handlers) return;
-
-    // TODO(mirone/#6534): find a better way to get block element from a node
-    const el = target instanceof Element ? target : target.parentElement;
-    const block = el?.closest<BlockElement>('[data-block-id]');
-
-    const path = block?.path;
-    if (!path) {
-      return this._buildEventScopeBySelection(name);
-    }
-
-    const flavours = path
-      .map(blockId => {
-        return this.std.doc.getBlockById(blockId)?.flavour;
-      })
-      .filter((flavour): flavour is string => {
-        return !!flavour;
-      })
-      .reverse();
-
-    return this.buildEventScope(name, flavours, [path]);
-  }
 
   private _calculatePath = (model: BlockModel): string[] => {
     const path: string[] = [];
@@ -178,32 +86,38 @@ export class UIEventDispatcher {
     return path.reverse();
   };
 
-  private _buildEventScopeBySelection(name: EventName) {
-    const handlers = this._handlersMap[name];
-    if (!handlers) return;
+  private _clipboardControl: ClipboardControl;
 
-    const selections = this._currentSelections;
-    const seen: Record<string, boolean> = {};
+  private _handlersMap = Object.fromEntries(
+    eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
+  ) as Record<EventName, Array<EventHandlerRunner>>;
 
-    const paths = selections
-      .map(selection => selection.blockId)
-      .map(id => this.std.doc.getBlockById(id))
-      .filter((block): block is BlockModel => !!block)
-      .map(block => this._calculatePath(block));
+  private _keyboardControl: KeyboardControl;
 
-    const flavours = paths
-      .flatMap(path =>
-        path.map(blockId => this.std.doc.getBlockById(blockId)?.flavour)
-      )
-      .filter((flavour): flavour is string => {
-        if (!flavour) return false;
-        if (seen[flavour]) return false;
-        seen[flavour] = true;
-        return true;
-      })
-      .reverse();
+  private _pointerControl: PointerControl;
 
-    return this.buildEventScope(name, flavours, paths);
+  private _rangeControl: RangeControl;
+
+  bindHotkey = (...args: Parameters<KeyboardControl['bindHotkey']>) =>
+    this._keyboardControl.bindHotkey(...args);
+
+  disposables = new DisposableGroup();
+
+  /**
+   * @deprecated
+   *
+   * This property is deprecated and will be removed in the future.
+   */
+  slots = {
+    editorHostPanned: new Slot(),
+    parentScaleChanged: new Slot<number>(),
+  };
+
+  constructor(public std: BlockSuite.Std) {
+    this._pointerControl = new PointerControl(this);
+    this._keyboardControl = new KeyboardControl(this);
+    this._rangeControl = new RangeControl(this);
+    this._clipboardControl = new ClipboardControl(this);
   }
 
   private _bindEvents() {
@@ -269,41 +183,93 @@ export class UIEventDispatcher {
     });
   }
 
-  mount() {
-    if (this.disposables.disposed) {
-      this.disposables = new DisposableGroup();
-    }
-    this._bindEvents();
+  private _buildEventScopeBySelection(name: EventName) {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    const selections = this._currentSelections;
+    const seen: Record<string, boolean> = {};
+
+    const paths = selections
+      .map(selection => selection.blockId)
+      .map(id => this.std.doc.getBlockById(id))
+      .filter((block): block is BlockModel => !!block)
+      .map(block => this._calculatePath(block));
+
+    const flavours = paths
+      .flatMap(path =>
+        path.map(blockId => this.std.doc.getBlockById(blockId)?.flavour)
+      )
+      .filter((flavour): flavour is string => {
+        if (!flavour) return false;
+        if (seen[flavour]) return false;
+        seen[flavour] = true;
+        return true;
+      })
+      .reverse();
+
+    return this.buildEventScope(name, flavours, paths);
   }
 
-  unmount() {
-    this.disposables.dispose();
+  private _buildEventScopeByTarget(name: EventName, target: Node) {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    // TODO(mirone/#6534): find a better way to get block element from a node
+    const el = target instanceof Element ? target : target.parentElement;
+    const block = el?.closest<BlockElement>('[data-block-id]');
+
+    const path = block?.path;
+    if (!path) {
+      return this._buildEventScopeBySelection(name);
+    }
+
+    const flavours = path
+      .map(blockId => {
+        return this.std.doc.getBlockById(blockId)?.flavour;
+      })
+      .filter((flavour): flavour is string => {
+        return !!flavour;
+      })
+      .reverse();
+
+    return this.buildEventScope(name, flavours, [path]);
   }
 
-  run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
-    if (!this.active) return;
+  private get _currentSelections() {
+    return this.std.selection.value;
+  }
 
-    const sourceState = context.get('sourceState');
-    if (!scope) {
-      scope = this._getEventScope(name, sourceState);
-      if (!scope) {
-        return;
+  private _getEventScope(name: EventName, state: EventSourceState) {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    let output: EventScope | undefined;
+
+    switch (state.sourceType) {
+      case EventScopeSourceType.Selection: {
+        output = this._buildEventScopeBySelection(name);
+        break;
+      }
+      case EventScopeSourceType.Target: {
+        output = this._buildEventScopeByTarget(
+          name,
+          state.event.target as Node
+        );
+        break;
+      }
+      default: {
+        throw new Error(`Unknown event scope source: ${state.sourceType}`);
       }
     }
-    for (const runner of scope.runners) {
-      const { fn } = runner;
-      const result = fn(context);
-      if (result) {
-        context.get('defaultState').event.stopPropagation();
-        return;
-      }
-    }
+
+    return output;
   }
 
   add(name: EventName, handler: UIEventHandler, options?: EventOptions) {
     const runner: EventHandlerRunner = {
-      fn: handler,
       flavour: options?.flavour,
+      fn: handler,
       path: options?.path,
     };
     this._handlersMap[name].unshift(runner);
@@ -315,9 +281,6 @@ export class UIEventDispatcher {
       }
     };
   }
-
-  bindHotkey = (...args: Parameters<KeyboardControl['bindHotkey']>) =>
-    this._keyboardControl.bindHotkey(...args);
 
   buildEventScope(
     name: EventName,
@@ -342,9 +305,48 @@ export class UIEventDispatcher {
     );
 
     return {
-      runners: pathEvents.concat(flavourEvents).concat(globalEvents),
       flavours,
       paths,
+      runners: pathEvents.concat(flavourEvents).concat(globalEvents),
     };
+  }
+
+  mount() {
+    if (this.disposables.disposed) {
+      this.disposables = new DisposableGroup();
+    }
+    this._bindEvents();
+  }
+
+  run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
+    if (!this.active) return;
+
+    const sourceState = context.get('sourceState');
+    if (!scope) {
+      scope = this._getEventScope(name, sourceState);
+      if (!scope) {
+        return;
+      }
+    }
+    for (const runner of scope.runners) {
+      const { fn } = runner;
+      const result = fn(context);
+      if (result) {
+        context.get('defaultState').event.stopPropagation();
+        return;
+      }
+    }
+  }
+
+  unmount() {
+    this.disposables.dispose();
+  }
+
+  get active() {
+    return this._active;
+  }
+
+  get host() {
+    return this.std.host;
   }
 }

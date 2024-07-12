@@ -4,6 +4,6 @@ import { tableViewModel } from './define.js';
 import { DataViewTable } from './table-view.js';
 
 export const tableViewConfig = tableViewModel.rendererConfig({
-  view: createUniComponentFromWebComponent(DataViewTable),
   icon: createIcon('DatabaseTableViewIcon'),
+  view: createUniComponentFromWebComponent(DataViewTable),
 });

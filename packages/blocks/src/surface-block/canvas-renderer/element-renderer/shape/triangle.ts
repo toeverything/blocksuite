@@ -1,6 +1,7 @@
 import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
+
 import { drawGeneralShape } from './utils.js';
 
 export function triangle(
@@ -11,13 +12,13 @@ export function triangle(
   rc: RoughCanvas
 ) {
   const {
-    seed,
-    strokeWidth,
     filled,
-    strokeStyle,
-    roughness,
     rotate,
+    roughness,
+    seed,
     shapeStyle,
+    strokeStyle,
+    strokeWidth,
   } = model;
   const [, , w, h] = model.deserializedXYWH;
   const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -46,12 +47,12 @@ export function triangle(
         [0, renderHeight],
       ],
       {
-        seed,
-        roughness: shapeStyle === 'Scribbled' ? roughness : 0,
-        strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
-        stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
-        strokeWidth,
         fill: filled ? realFillColor : undefined,
+        roughness: shapeStyle === 'Scribbled' ? roughness : 0,
+        seed,
+        stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
+        strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
+        strokeWidth,
       }
     );
   }

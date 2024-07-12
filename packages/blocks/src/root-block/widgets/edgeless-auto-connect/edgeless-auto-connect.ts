@@ -1,8 +1,15 @@
 import { WidgetElement } from '@blocksuite/block-std';
-import { css, html, nothing, type TemplateResult } from 'lit';
+import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
+import type { NoteBlockModel } from '../../../note-block/index.js';
+import type { SurfaceRefBlockModel } from '../../../surface-ref-block/surface-ref-model.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EdgelessRootService } from '../../edgeless/edgeless-root-service.js';
+import type { RootBlockModel } from '../../root-model.js';
 
 import {
   AutoConnectLeftIcon,
@@ -16,14 +23,8 @@ import {
   stopPropagation,
 } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
-import type { NoteBlockModel } from '../../../note-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
-import type { SurfaceRefBlockModel } from '../../../surface-ref-block/surface-ref-model.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessRootService } from '../../edgeless/edgeless-root-service.js';
 import { isNoteBlock } from '../../edgeless/utils/query.js';
-import type { RootBlockModel } from '../../root-model.js';
 
 const PAGE_VISIBLE_INDEX_LABEL_WIDTH = 44;
 const PAGE_VISIBLE_INDEX_LABEL_HEIGHT = 24;
@@ -98,7 +99,7 @@ function getIndexLabelTooltip(icon: TemplateResult, content: string) {
     </div>`;
 }
 
-type AutoConnectElement = NoteBlockModel | FrameBlockModel;
+type AutoConnectElement = FrameBlockModel | NoteBlockModel;
 
 export const AFFINE_EDGELESS_AUTO_CONNECT_WIDGET =
   'affine-edgeless-auto-connect-widget';
@@ -165,24 +166,193 @@ export class EdgelessAutoConnectWidget extends WidgetElement<
     }
   `;
 
-  @state()
-  private accessor _show = false;
+  private _EdgelessOnlyLabels() {
+    const { _edgelessOnlyNotesSet } = this;
 
-  @state()
-  private accessor _pageVisibleElementsMap: Map<AutoConnectElement, number> =
-    new Map();
+    if (!_edgelessOnlyNotesSet.size) return nothing;
 
-  @state()
-  private accessor _edgelessOnlyNotesSet = new Set<NoteBlockModel>();
+    return html`${repeat(
+      _edgelessOnlyNotesSet,
+      note => note.id,
+      note => {
+        const { viewport } = this.service;
+        const { zoom } = viewport;
+        const bound = Bound.deserialize(note.xywh);
+        const [left, right] = viewport.toViewCoord(bound.x, bound.y);
+        const [width, height] = [bound.w * zoom, bound.h * zoom];
+        const style = styleMap({
+          alignItems: 'center',
+          backgroundColor: 'var(--affine-text-secondary-color)',
+          border: '1px solid var(--affine-border-color)',
+          borderRadius: '50%',
+          color: 'var(--affine-white)',
+          display: 'flex',
+          height: `${EDGELESS_ONLY_INDEX_LABEL_HEIGHT}px`,
+          justifyContent: 'center',
+          position: 'absolute',
+          transform: `translate(${
+            left + width / 2 - EDGELESS_ONLY_INDEX_LABEL_WIDTH / 2
+          }px,
+          ${right + height + INDEX_LABEL_OFFSET}px)`,
+          width: `${EDGELESS_ONLY_INDEX_LABEL_WIDTH}px`,
+        });
 
-  @state()
-  private accessor _index = -1;
+        return html`<div style=${style}>
+          ${HiddenIcon}
+          <affine-tooltip tip-position="bottom">
+            ${getIndexLabelTooltip(SmallDocIcon, 'Hidden on page')}
+          </affine-tooltip>
+        </div>`;
+      }
+    )}`;
+  }
 
-  private _setHostStyle() {
-    this.style.position = 'absolute';
-    this.style.top = '0';
-    this.style.left = '0';
-    this.style.zIndex = '1';
+  private _NavigatorComponent(elements: AutoConnectElement[]) {
+    const { viewport } = this.service;
+    const { zoom } = viewport;
+    const className = `navigator ${this._index >= 0 ? 'show' : 'hidden'}`;
+    const element = elements[this._index];
+    const bound = Bound.deserialize(element.xywh);
+    const [left, right] = viewport.toViewCoord(bound.x, bound.y);
+    const [width, height] = [bound.w * zoom, bound.h * zoom];
+    const navigatorStyle = styleMap({
+      position: 'absolute',
+      transform: `translate(${left + width / 2 - 26}px, ${
+        right + height + 16
+      }px)`,
+    });
+
+    return html`<div class=${className} style=${navigatorStyle}>
+      <div
+        role="button"
+        class="edgeless-auto-connect-previous-button"
+        @pointerdown=${(e: PointerEvent) => {
+          stopPropagation(e);
+          this._navigateToPrev();
+        }}
+      >
+        ${AutoConnectLeftIcon}
+      </div>
+      <span></span>
+      <div
+        role="button"
+        class="edgeless-auto-connect-next-button"
+        @pointerdown=${(e: PointerEvent) => {
+          stopPropagation(e);
+          this._navigateToNext();
+        }}
+      >
+        ${AutoConnectRightIcon}
+      </div>
+    </div> `;
+  }
+
+  private _PageVisibleIndexLabels(
+    elements: AutoConnectElement[],
+    counts: number[]
+  ) {
+    const { viewport } = this.service;
+    const { zoom } = viewport;
+    let index = 0;
+
+    return html`${repeat(
+      elements,
+      element => element.id,
+      (element, i) => {
+        const bound = Bound.deserialize(element.xywh);
+        const [left, right] = viewport.toViewCoord(bound.x, bound.y);
+        const [width, height] = [bound.w * zoom, bound.h * zoom];
+        const style = styleMap({
+          alignItems: 'center',
+          display: 'flex',
+          height: `${PAGE_VISIBLE_INDEX_LABEL_HEIGHT}px`,
+          justifyContent: 'center',
+          maxWidth: `${PAGE_VISIBLE_INDEX_LABEL_WIDTH}px`,
+          position: 'absolute',
+          transform: `translate(${
+            left + width / 2 - PAGE_VISIBLE_INDEX_LABEL_WIDTH / 2
+          }px,
+          ${right + height + INDEX_LABEL_OFFSET}px)`,
+          width: `${PAGE_VISIBLE_INDEX_LABEL_WIDTH}px`,
+        });
+        const components = [];
+        const count = counts[i];
+        const initGap = 24 / count - 24;
+        const positions = calculatePosition(
+          initGap,
+          count,
+          PAGE_VISIBLE_INDEX_LABEL_HEIGHT
+        );
+
+        for (let j = 0; j < count; j++) {
+          index++;
+          components.push(html`
+            <div
+              style=${styleMap({
+                left: positions[j][1] + 'px',
+                position: 'absolute',
+                top: positions[j][0] + 'px',
+                transition: 'all 0.1s linear',
+              })}
+              index=${i}
+              class="edgeless-index-label"
+              @pointerdown=${(e: PointerEvent) => {
+                stopPropagation(e);
+                this._index = this._index === i ? -1 : i;
+              }}
+            >
+              ${index}
+              <affine-tooltip tip-position="bottom">
+                ${getIndexLabelTooltip(SmallDocIcon, 'Page mode index')}
+              </affine-tooltip>
+            </div>
+          `);
+        }
+
+        function updateChildrenPosition(e: MouseEvent, positions: number[][]) {
+          if (!e.target) return;
+          const children = (e.target as HTMLElement).children;
+          (Array.from(children) as HTMLElement[]).forEach((c, index) => {
+            c.style.top = positions[index][0] + 'px';
+            c.style.left = positions[index][1] + 'px';
+          });
+        }
+
+        return html`<div
+          style=${style}
+          @mouseenter=${(e: MouseEvent) => {
+            const positions = calculatePosition(
+              5,
+              count,
+              PAGE_VISIBLE_INDEX_LABEL_HEIGHT
+            );
+            updateChildrenPosition(e, positions);
+          }}
+          @mouseleave=${(e: MouseEvent) => {
+            const positions = calculatePosition(
+              initGap,
+              count,
+              PAGE_VISIBLE_INDEX_LABEL_HEIGHT
+            );
+            updateChildrenPosition(e, positions);
+          }}
+        >
+          ${components}
+        </div>`;
+      }
+    )}`;
+  }
+
+  private _getElementsAndCounts() {
+    const elements: AutoConnectElement[] = [];
+    const counts: number[] = [];
+
+    for (const [key, value] of this._pageVisibleElementsMap.entries()) {
+      elements.push(key);
+      counts.push(value);
+    }
+
+    return { counts, elements };
   }
 
   private _initLabels() {
@@ -299,18 +469,6 @@ export class EdgelessAutoConnectWidget extends WidgetElement<
     updateLabels();
   }
 
-  private _getElementsAndCounts() {
-    const elements: AutoConnectElement[] = [];
-    const counts: number[] = [];
-
-    for (const [key, value] of this._pageVisibleElementsMap.entries()) {
-      elements.push(key);
-      counts.push(value);
-    }
-
-    return { elements, counts };
-  }
-
   private _navigateToNext() {
     const { elements } = this._getElementsAndCounts();
     if (this._index >= elements.length - 1) return;
@@ -318,8 +476,8 @@ export class EdgelessAutoConnectWidget extends WidgetElement<
     const element = elements[this._index];
     const bound = Bound.deserialize(element.xywh);
     this.service.selection.set({
-      elements: [element.id],
       editing: false,
+      elements: [element.id],
     });
     this.service.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
@@ -331,187 +489,24 @@ export class EdgelessAutoConnectWidget extends WidgetElement<
     const element = elements[this._index];
     const bound = Bound.deserialize(element.xywh);
     this.service.selection.set({
-      elements: [element.id],
       editing: false,
+      elements: [element.id],
     });
     this.service.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
 
-  private _NavigatorComponent(elements: AutoConnectElement[]) {
-    const { viewport } = this.service;
-    const { zoom } = viewport;
-    const className = `navigator ${this._index >= 0 ? 'show' : 'hidden'}`;
-    const element = elements[this._index];
-    const bound = Bound.deserialize(element.xywh);
-    const [left, right] = viewport.toViewCoord(bound.x, bound.y);
-    const [width, height] = [bound.w * zoom, bound.h * zoom];
-    const navigatorStyle = styleMap({
-      position: 'absolute',
-      transform: `translate(${left + width / 2 - 26}px, ${
-        right + height + 16
-      }px)`,
-    });
-
-    return html`<div class=${className} style=${navigatorStyle}>
-      <div
-        role="button"
-        class="edgeless-auto-connect-previous-button"
-        @pointerdown=${(e: PointerEvent) => {
-          stopPropagation(e);
-          this._navigateToPrev();
-        }}
-      >
-        ${AutoConnectLeftIcon}
-      </div>
-      <span></span>
-      <div
-        role="button"
-        class="edgeless-auto-connect-next-button"
-        @pointerdown=${(e: PointerEvent) => {
-          stopPropagation(e);
-          this._navigateToNext();
-        }}
-      >
-        ${AutoConnectRightIcon}
-      </div>
-    </div> `;
+  private _setHostStyle() {
+    this.style.position = 'absolute';
+    this.style.top = '0';
+    this.style.left = '0';
+    this.style.zIndex = '1';
   }
 
-  private _PageVisibleIndexLabels(
-    elements: AutoConnectElement[],
-    counts: number[]
-  ) {
-    const { viewport } = this.service;
-    const { zoom } = viewport;
-    let index = 0;
+  override connectedCallback(): void {
+    super.connectedCallback();
 
-    return html`${repeat(
-      elements,
-      element => element.id,
-      (element, i) => {
-        const bound = Bound.deserialize(element.xywh);
-        const [left, right] = viewport.toViewCoord(bound.x, bound.y);
-        const [width, height] = [bound.w * zoom, bound.h * zoom];
-        const style = styleMap({
-          width: `${PAGE_VISIBLE_INDEX_LABEL_WIDTH}px`,
-          maxWidth: `${PAGE_VISIBLE_INDEX_LABEL_WIDTH}px`,
-          height: `${PAGE_VISIBLE_INDEX_LABEL_HEIGHT}px`,
-          position: 'absolute',
-          transform: `translate(${
-            left + width / 2 - PAGE_VISIBLE_INDEX_LABEL_WIDTH / 2
-          }px,
-          ${right + height + INDEX_LABEL_OFFSET}px)`,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        });
-        const components = [];
-        const count = counts[i];
-        const initGap = 24 / count - 24;
-        const positions = calculatePosition(
-          initGap,
-          count,
-          PAGE_VISIBLE_INDEX_LABEL_HEIGHT
-        );
-
-        for (let j = 0; j < count; j++) {
-          index++;
-          components.push(html`
-            <div
-              style=${styleMap({
-                position: 'absolute',
-                top: positions[j][0] + 'px',
-                left: positions[j][1] + 'px',
-                transition: 'all 0.1s linear',
-              })}
-              index=${i}
-              class="edgeless-index-label"
-              @pointerdown=${(e: PointerEvent) => {
-                stopPropagation(e);
-                this._index = this._index === i ? -1 : i;
-              }}
-            >
-              ${index}
-              <affine-tooltip tip-position="bottom">
-                ${getIndexLabelTooltip(SmallDocIcon, 'Page mode index')}
-              </affine-tooltip>
-            </div>
-          `);
-        }
-
-        function updateChildrenPosition(e: MouseEvent, positions: number[][]) {
-          if (!e.target) return;
-          const children = (e.target as HTMLElement).children;
-          (Array.from(children) as HTMLElement[]).forEach((c, index) => {
-            c.style.top = positions[index][0] + 'px';
-            c.style.left = positions[index][1] + 'px';
-          });
-        }
-
-        return html`<div
-          style=${style}
-          @mouseenter=${(e: MouseEvent) => {
-            const positions = calculatePosition(
-              5,
-              count,
-              PAGE_VISIBLE_INDEX_LABEL_HEIGHT
-            );
-            updateChildrenPosition(e, positions);
-          }}
-          @mouseleave=${(e: MouseEvent) => {
-            const positions = calculatePosition(
-              initGap,
-              count,
-              PAGE_VISIBLE_INDEX_LABEL_HEIGHT
-            );
-            updateChildrenPosition(e, positions);
-          }}
-        >
-          ${components}
-        </div>`;
-      }
-    )}`;
-  }
-
-  private _EdgelessOnlyLabels() {
-    const { _edgelessOnlyNotesSet } = this;
-
-    if (!_edgelessOnlyNotesSet.size) return nothing;
-
-    return html`${repeat(
-      _edgelessOnlyNotesSet,
-      note => note.id,
-      note => {
-        const { viewport } = this.service;
-        const { zoom } = viewport;
-        const bound = Bound.deserialize(note.xywh);
-        const [left, right] = viewport.toViewCoord(bound.x, bound.y);
-        const [width, height] = [bound.w * zoom, bound.h * zoom];
-        const style = styleMap({
-          width: `${EDGELESS_ONLY_INDEX_LABEL_WIDTH}px`,
-          height: `${EDGELESS_ONLY_INDEX_LABEL_HEIGHT}px`,
-          borderRadius: '50%',
-          backgroundColor: 'var(--affine-text-secondary-color)',
-          border: '1px solid var(--affine-border-color)',
-          color: 'var(--affine-white)',
-          position: 'absolute',
-          transform: `translate(${
-            left + width / 2 - EDGELESS_ONLY_INDEX_LABEL_WIDTH / 2
-          }px,
-          ${right + height + INDEX_LABEL_OFFSET}px)`,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        });
-
-        return html`<div style=${style}>
-          ${HiddenIcon}
-          <affine-tooltip tip-position="bottom">
-            ${getIndexLabelTooltip(SmallDocIcon, 'Hidden on page')}
-          </affine-tooltip>
-        </div>`;
-      }
-    )}`;
+    this._setHostStyle();
+    this._initLabels();
   }
 
   override firstUpdated(): void {
@@ -535,17 +530,10 @@ export class EdgelessAutoConnectWidget extends WidgetElement<
     );
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    this._setHostStyle();
-    this._initLabels();
-  }
-
   override render() {
     if (!this._show) return nothing;
 
-    const { elements, counts } = this._getElementsAndCounts();
+    const { counts, elements } = this._getElementsAndCounts();
 
     return html`${this._PageVisibleIndexLabels(elements, counts)}
     ${this._EdgelessOnlyLabels()}
@@ -553,6 +541,19 @@ export class EdgelessAutoConnectWidget extends WidgetElement<
       ? this._NavigatorComponent(elements)
       : nothing} `;
   }
+
+  @state()
+  private accessor _edgelessOnlyNotesSet = new Set<NoteBlockModel>();
+
+  @state()
+  private accessor _index = -1;
+
+  @state()
+  private accessor _pageVisibleElementsMap: Map<AutoConnectElement, number> =
+    new Map();
+
+  @state()
+  private accessor _show = false;
 }
 
 declare global {

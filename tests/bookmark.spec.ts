@@ -1,10 +1,10 @@
-import './utils/declare-test-window.js';
-
 import type { Page } from '@playwright/test';
+
 import { expect } from '@playwright/test';
 import { getEmbedCardToolbar } from 'utils/query.js';
 
 import {
+  SHORT_KEY,
   activeNoteInEdgeless,
   copyByKeyboard,
   enterPlaygroundRoom,
@@ -21,7 +21,6 @@ import {
   pressTab,
   selectAllByKeyboard,
   setInlineRangeInSelectedRichText,
-  SHORT_KEY,
   switchEditorMode,
   type,
   waitForInlineEditorStateUpdated,
@@ -37,6 +36,7 @@ import {
   assertRichTextInlineRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 
 const inputUrl = 'http://localhost';

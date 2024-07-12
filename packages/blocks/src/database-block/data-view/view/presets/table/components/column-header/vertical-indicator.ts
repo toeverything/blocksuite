@@ -5,14 +5,15 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { DataViewTableColumnManager } from '../../table-view-manager.js';
+
 import { startDrag } from '../../../../../utils/drag.js';
 import { getResultInRange } from '../../../../../utils/utils.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../consts.js';
-import type { DataViewTableColumnManager } from '../../table-view-manager.js';
 
 type GroupRectList = {
-  top: number;
   bottom: number;
+  top: number;
 }[];
 
 @customElement('data-view-table-vertical-indicator')
@@ -53,14 +54,31 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor top!: number;
+  protected override render(): unknown {
+    const containerStyle = styleMap({
+      left: `${this.left}px`,
+      top: `${this.top}px`,
+      width: `${Math.max(this.width, 1)}px`,
+    });
+    return html`
+      <div class="vertical-indicator-container" style=${containerStyle}>
+        ${repeat(this.lines, ({ bottom, top }) => {
+          const groupStyle = styleMap({
+            height: `${bottom - top}px`,
+            top: `${top}px`,
+          });
+          const groupClass = classMap({
+            'vertical-indicator-group': true,
+            'with-shadow': this.shadow,
+          });
+          return html`<div class="${groupClass}" style=${groupStyle}></div>`;
+        })}
+      </div>
+    `;
+  }
 
   @property({ attribute: false })
   accessor left!: number;
-
-  @property({ attribute: false })
-  accessor width!: number;
 
   @property({ attribute: false })
   accessor lines!: GroupRectList;
@@ -68,28 +86,11 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor shadow = false;
 
-  protected override render(): unknown {
-    const containerStyle = styleMap({
-      top: `${this.top}px`,
-      left: `${this.left}px`,
-      width: `${Math.max(this.width, 1)}px`,
-    });
-    return html`
-      <div class="vertical-indicator-container" style=${containerStyle}>
-        ${repeat(this.lines, ({ top, bottom }) => {
-          const groupStyle = styleMap({
-            top: `${top}px`,
-            height: `${bottom - top}px`,
-          });
-          const groupClass = classMap({
-            'with-shadow': this.shadow,
-            'vertical-indicator-group': true,
-          });
-          return html`<div class="${groupClass}" style=${groupStyle}></div>`;
-        })}
-      </div>
-    `;
-  }
+  @property({ attribute: false })
+  accessor top!: number;
+
+  @property({ attribute: false })
+  accessor width!: number;
 }
 
 export const getTableGroupRects = (tableContainer: HTMLElement) => {
@@ -108,8 +109,8 @@ export const getTableGroupRects = (tableContainer: HTMLElement) => {
         .querySelector('.affine-database-block-rows')
         ?.getBoundingClientRect().bottom ?? groupRect.bottom;
     return {
-      top: top - tableRect.top,
       bottom: bottom - tableRect.top,
+      top: top - tableRect.top,
     };
   });
 };
@@ -132,7 +133,14 @@ export const startDragWidthAdjustmentBar = (
   preview.display(column.width * scale, tableRect.top, rectList, left);
   tableContainer.style.pointerEvents = 'none';
   startDrag<{ width: number }>(evt, {
+    onClear: () => {
+      tableContainer.style.pointerEvents = 'auto';
+      preview.remove();
+    },
     onDrag: () => ({ width: column.width }),
+    onDrop: ({ width }) => {
+      column.updateWidth(width);
+    },
     onMove: ({ x }) => {
       const width = Math.round(
         getResultInRange((x - left) / scale, DEFAULT_COLUMN_MIN_WIDTH, Infinity)
@@ -141,13 +149,6 @@ export const startDragWidthAdjustmentBar = (
       return {
         width,
       };
-    },
-    onDrop: ({ width }) => {
-      column.updateWidth(width);
-    },
-    onClear: () => {
-      tableContainer.style.pointerEvents = 'auto';
-      preview.remove();
     },
   });
 };

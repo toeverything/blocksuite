@@ -19,11 +19,11 @@ test('extension api', async () => {
     type: 'template',
   } as Template;
   const customTemplate = {
-    list: () => {
-      return [mockTemplate];
-    },
     categories: () => {
       return ['custom'];
+    },
+    list: () => {
+      return [mockTemplate];
     },
     search: (_, __) => {
       return [mockTemplate];

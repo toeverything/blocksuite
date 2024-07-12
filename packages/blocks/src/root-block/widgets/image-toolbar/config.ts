@@ -1,3 +1,6 @@
+import type { ImageBlockComponent } from '../../../image-block/image-block.js';
+import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
+
 import { BookmarkIcon } from '../../../_common/icons/edgeless.js';
 import {
   CaptionIcon,
@@ -6,16 +9,10 @@ import {
   DownloadIcon,
   DuplicateIcon,
 } from '../../../_common/icons/text.js';
-import type { ImageBlockComponent } from '../../../image-block/image-block.js';
-import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
 import { duplicate } from './utils.js';
 
 export const commonConfig: ImageConfigItem[] = [
   {
-    name: 'download',
-    icon: DownloadIcon,
-    tooltip: 'Download',
-    showWhen: () => true,
     action: (
       blockElement: ImageBlockComponent,
       abortController: AbortController
@@ -23,13 +20,13 @@ export const commonConfig: ImageConfigItem[] = [
       abortController.abort();
       blockElement.download();
     },
+    icon: DownloadIcon,
+    name: 'download',
+    showWhen: () => true,
+    tooltip: 'Download',
     type: 'common',
   },
   {
-    name: 'caption',
-    icon: CaptionIcon,
-    tooltip: 'Caption',
-    showWhen: blockElement => !blockElement.doc.readonly,
     action: (
       blockElement: ImageBlockComponent,
       abortController: AbortController
@@ -37,22 +34,16 @@ export const commonConfig: ImageConfigItem[] = [
       abortController.abort();
       blockElement.captionEditor.show();
     },
+    icon: CaptionIcon,
+    name: 'caption',
+    showWhen: blockElement => !blockElement.doc.readonly,
+    tooltip: 'Caption',
     type: 'common',
   },
 ];
 
 export const moreMenuConfig: MoreMenuConfigItem[] = [
   {
-    name: 'Turn into card view',
-    icon: BookmarkIcon,
-    tooltip: 'Turn into Card view',
-    showWhen: blockElement => {
-      const doc = blockElement.doc;
-      const supportAttachment =
-        doc.schema.flavourSchemaMap.has('affine:attachment');
-      const readonly = doc.readonly;
-      return supportAttachment && !readonly && !!blockElement.blob;
-    },
     action: (
       blockElement: ImageBlockComponent,
       abortController: AbortController
@@ -60,13 +51,19 @@ export const moreMenuConfig: MoreMenuConfigItem[] = [
       blockElement.convertToCardView();
       abortController.abort();
     },
+    icon: BookmarkIcon,
+    name: 'Turn into card view',
+    showWhen: blockElement => {
+      const doc = blockElement.doc;
+      const supportAttachment =
+        doc.schema.flavourSchemaMap.has('affine:attachment');
+      const readonly = doc.readonly;
+      return supportAttachment && !readonly && !!blockElement.blob;
+    },
+    tooltip: 'Turn into Card view',
     type: 'more',
   },
   {
-    name: 'Copy',
-    icon: CopyIcon,
-    tooltip: 'Copy',
-    showWhen: () => true,
     action: (
       blockElement: ImageBlockComponent,
       abortController: AbortController
@@ -74,30 +71,30 @@ export const moreMenuConfig: MoreMenuConfigItem[] = [
       blockElement.copy();
       abortController.abort();
     },
+    icon: CopyIcon,
+    name: 'Copy',
+    showWhen: () => true,
+    tooltip: 'Copy',
     type: 'more',
   },
   {
-    name: 'Duplicate',
-    icon: DuplicateIcon,
-    tooltip: 'Duplicate',
-    showWhen: blockElement => !blockElement.doc.readonly,
     action: (
       blockElement: ImageBlockComponent,
       abortController: AbortController
     ) => {
       duplicate(blockElement, abortController);
     },
+    icon: DuplicateIcon,
+    name: 'Duplicate',
+    showWhen: blockElement => !blockElement.doc.readonly,
+    tooltip: 'Duplicate',
     type: 'more',
   },
   {
-    type: 'divider',
     showWhen: blockElement => !blockElement.doc.readonly,
+    type: 'divider',
   },
   {
-    name: 'Delete',
-    icon: DeleteIcon,
-    tooltip: 'Delete',
-    showWhen: blockElement => !blockElement.doc.readonly,
     action: (
       blockElement: ImageBlockComponent,
       abortController: AbortController
@@ -105,6 +102,10 @@ export const moreMenuConfig: MoreMenuConfigItem[] = [
       abortController.abort();
       blockElement.doc.deleteBlock(blockElement.model);
     },
+    icon: DeleteIcon,
+    name: 'Delete',
+    showWhen: blockElement => !blockElement.doc.readonly,
+    tooltip: 'Delete',
     type: 'more',
   },
 ];

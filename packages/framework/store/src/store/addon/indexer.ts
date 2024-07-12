@@ -1,15 +1,16 @@
 import type { QueryContent } from '../../indexer/index.js';
+import type { DocCollectionOptions } from '../collection.js';
+
 import {
   BacklinkIndexer,
   BlockIndexer,
   SearchIndexer,
 } from '../../indexer/index.js';
-import type { DocCollectionOptions } from '../collection.js';
 import { addOnFactory } from './shared.js';
 
 type Indexer = {
-  search: SearchIndexer | null;
   backlink: BacklinkIndexer | null;
+  search: SearchIndexer | null;
 };
 
 export interface IndexerAddon {
@@ -26,10 +27,10 @@ export const indexer = addOnFactory<keyof IndexerAddon>(
         super(storeOptions);
         const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
         this.indexer = {
+          backlink: new BacklinkIndexer(blockIndexer),
           search: !storeOptions.disableSearchIndex
             ? new SearchIndexer(this.doc)
             : null,
-          backlink: new BacklinkIndexer(blockIndexer),
         };
       }
 
@@ -39,8 +40,8 @@ export const indexer = addOnFactory<keyof IndexerAddon>(
           new Map<
             string,
             {
-              space: string;
               content: string;
+              space: string;
             }
           >()
         );

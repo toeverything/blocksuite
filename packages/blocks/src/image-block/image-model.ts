@@ -1,40 +1,41 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { SerializedXYWH } from '../surface-block/index.js';
+
+import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
   caption?: string;
-  sourceId?: string;
-  width?: number;
   height?: number;
   index: string;
-  xywh: SerializedXYWH;
   rotate: number;
   size?: number;
+  sourceId?: string;
+  width?: number;
+  xywh: SerializedXYWH;
 };
 
 const defaultImageProps: ImageBlockProps = {
   caption: '',
-  sourceId: '',
-  width: 0,
   height: 0,
   index: 'a0',
-  xywh: '[0,0,0,0]',
   rotate: 0,
   size: -1,
+  sourceId: '',
+  width: 0,
+  xywh: '[0,0,0,0]',
 };
 
 export const ImageBlockSchema = defineBlockSchema({
   flavour: 'affine:image',
-  props: () => defaultImageProps,
   metadata: {
-    version: 1,
     role: 'content',
+    version: 1,
   },
-  transformer: () => new ImageBlockTransformer(),
+  props: () => defaultImageProps,
   toModel: () => new ImageBlockModel(),
+  transformer: () => new ImageBlockTransformer(),
 });
 
 export class ImageBlockModel extends selectable<ImageBlockProps>(BlockModel) {}

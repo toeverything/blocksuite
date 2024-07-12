@@ -1,4 +1,5 @@
 import type { Doc } from '@blocksuite/store';
+
 import { Job } from '@blocksuite/store';
 
 import { HtmlAdapter } from '../adapters/index.js';
@@ -9,8 +10,8 @@ async function exportDoc(doc: Doc) {
   const snapshot = await job.docToSnapshot(doc);
   const adapter = new HtmlAdapter(job);
   const htmlResult = await adapter.fromDocSnapshot({
-    snapshot,
     assets: job.assetsManager,
+    snapshot,
   });
 
   let downloadBlob: Blob;

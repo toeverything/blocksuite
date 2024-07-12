@@ -46,13 +46,13 @@ describe('slot', () => {
 
   test('subscribe', () => {
     type Data = {
-      name: string;
       age: number;
+      name: string;
     };
     const slot = new Slot<Data>();
     const callback = vi.fn(v => expect(v).toBe('田所'));
     slot.subscribe(v => v.name, callback);
-    slot.emit({ name: '田所', age: 24 });
+    slot.emit({ age: 24, name: '田所' });
     expect(callback).toBeCalledTimes(1);
   });
 });

@@ -28,19 +28,19 @@ export function upgradeDB(db: IDBPDatabase<BlockSuiteBinaryDB>) {
 }
 
 type ChannelMessage = {
-  type: 'db-updated';
   payload: { docId: string; update: Uint8Array };
+  type: 'db-updated';
 };
 
 export class IndexedDBDocSource implements DocSource {
-  name = 'indexeddb';
-
-  mergeCount = 1;
+  // indexeddb could be shared between tabs, so we use broadcast channel to notify other tabs
+  channel = new BroadcastChannel('indexeddb:' + this.dbName);
 
   dbPromise: Promise<IDBPDatabase<BlockSuiteBinaryDB>> | null = null;
 
-  // indexeddb could be shared between tabs, so we use broadcast channel to notify other tabs
-  channel = new BroadcastChannel('indexeddb:' + this.dbName);
+  mergeCount = 1;
+
+  name = 'indexeddb';
 
   constructor(readonly dbName: string = DEFAULT_DB_NAME) {}
 
@@ -95,14 +95,14 @@ export class IndexedDBDocSource implements DocSource {
       updates: rows,
     });
     this.channel.postMessage({
-      type: 'db-updated',
       payload: { docId, update: data },
+      type: 'db-updated',
     } satisfies ChannelMessage);
   }
 
   subscribe(cb: (docId: string, data: Uint8Array) => void) {
     function onMessage(event: MessageEvent<ChannelMessage>) {
-      const { type, payload } = event.data;
+      const { payload, type } = event.data;
       if (type === 'db-updated') {
         const { docId, update } = payload;
         cb(docId, update);

@@ -1,7 +1,8 @@
-import { VElement } from '../components/v-element.js';
 import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';
+
+import { VElement } from '../components/v-element.js';
 
 export function isInEmbedElement(node: Node): boolean {
   if (node instanceof Element) {
@@ -35,8 +36,8 @@ export function transformDeltasToEmbedDeltas<
   for (const delta of deltas) {
     if (editor.isEmbed(delta)) {
       const dividedDeltas = [...delta.insert].map(subInsert => ({
-        insert: subInsert,
         attributes: delta.attributes,
+        insert: subInsert,
       }));
       result.push(...dividedDeltas);
     } else {

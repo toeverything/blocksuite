@@ -3,9 +3,12 @@ import type {
   CommandKeyToData,
   InitCommandCtx,
 } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
+
+import type { AffineFormatBarWidget } from './format-bar.js';
 
 import { toast } from '../../../_common/components/index.js';
 import { createSimplePortal } from '../../../_common/components/portal.js';
@@ -27,8 +30,8 @@ import {
   Heading5Icon,
   Heading6Icon,
   ItalicIcon,
-  LinkedDocIcon,
   LinkIcon,
+  LinkedDocIcon,
   MoreVerticalIcon,
   NumberedListIcon,
   QuoteIcon,
@@ -42,7 +45,6 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
-import type { AffineFormatBarWidget } from './format-bar.js';
 
 export type DividerConfigItem = {
   type: 'divider';
@@ -54,47 +56,47 @@ export type ParagraphDropdownConfigItem = {
   type: 'paragraph-dropdown';
 };
 export type InlineActionConfigItem = {
-  id: string;
-  name: string;
-  type: 'inline-action';
   action: (
     chain: Chain<InitCommandCtx>,
     formatBar: AffineFormatBarWidget
   ) => void;
-  icon: TemplateResult | (() => HTMLElement);
+  icon: (() => HTMLElement) | TemplateResult;
+  id: string;
   isActive: (
     chain: Chain<InitCommandCtx>,
     formatBar: AffineFormatBarWidget
   ) => boolean;
+  name: string;
   showWhen: (
     chain: Chain<InitCommandCtx>,
     formatBar: AffineFormatBarWidget
   ) => boolean;
+  type: 'inline-action';
 };
 export type ParagraphActionConfigItem = {
-  id: string;
-  type: 'paragraph-action';
-  name: string;
   action: (
     chain: Chain<InitCommandCtx>,
     formatBar: AffineFormatBarWidget
   ) => void;
-  icon: TemplateResult | (() => HTMLElement);
   flavour: string;
+  icon: (() => HTMLElement) | TemplateResult;
+  id: string;
+  name: string;
+  type: 'paragraph-action';
 };
 
 export type CustomConfigItem = {
-  type: 'custom';
   render: (formatBar: AffineFormatBarWidget) => TemplateResult | null;
+  type: 'custom';
 };
 
 export type FormatBarConfigItem =
+  | CustomConfigItem
   | DividerConfigItem
   | HighlighterDropdownConfigItem
-  | ParagraphDropdownConfigItem
-  | ParagraphActionConfigItem
   | InlineActionConfigItem
-  | CustomConfigItem;
+  | ParagraphActionConfigItem
+  | ParagraphDropdownConfigItem;
 
 export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
   toolbar
@@ -102,43 +104,39 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     .addParagraphDropdown()
     .addDivider()
     .addTextStyleToggle({
-      key: 'bold',
       action: chain => chain.toggleBold().run(),
       icon: BoldIcon,
+      key: 'bold',
     })
     .addTextStyleToggle({
-      key: 'italic',
       action: chain => chain.toggleItalic().run(),
       icon: ItalicIcon,
+      key: 'italic',
     })
     .addTextStyleToggle({
-      key: 'underline',
       action: chain => chain.toggleUnderline().run(),
       icon: UnderlineIcon,
+      key: 'underline',
     })
     .addTextStyleToggle({
-      key: 'strike',
       action: chain => chain.toggleStrike().run(),
       icon: StrikethroughIcon,
+      key: 'strike',
     })
     .addTextStyleToggle({
-      key: 'code',
       action: chain => chain.toggleCode().run(),
       icon: CodeIcon,
+      key: 'code',
     })
     .addTextStyleToggle({
-      key: 'link',
       action: chain => chain.toggleLink().run(),
       icon: LinkIcon,
+      key: 'link',
     })
     .addDivider()
     .addHighlighterDropdown()
     .addDivider()
     .addInlineAction({
-      id: 'convert-to-database',
-      name: 'Create Database',
-      icon: DatabaseTableViewIcon20,
-      isActive: () => false,
       action: () => {
         createSimplePortal({
           template: html`<database-convert-view
@@ -146,6 +144,10 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
           ></database-convert-view>`,
         });
       },
+      icon: DatabaseTableViewIcon20,
+      id: 'convert-to-database',
+      isActive: () => false,
+      name: 'Create Database',
       showWhen: chain => {
         const middleware = (count = 0) => {
           return (
@@ -189,15 +191,11 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     })
     .addDivider()
     .addInlineAction({
-      id: 'convert-to-linked-doc',
-      name: 'Create Linked Doc',
-      icon: LinkedDocIcon,
-      isActive: () => false,
       action: (chain, formatBar) => {
         const [_, ctx] = chain
           .getSelectedModels({
-            types: ['block', 'text'],
             mode: 'highest',
+            types: ['block', 'text'],
           })
           .run();
         const { selectedModels } = ctx;
@@ -225,25 +223,29 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
             .getService('affine:page')
             .telemetryService?.track('DocCreated', {
               control: 'create linked doc',
-              page: 'doc editor',
               module: 'format toolbar',
+              page: 'doc editor',
               type: 'embed-linked-doc',
             });
           host.spec
             .getService('affine:page')
             .telemetryService?.track('LinkedDocCreated', {
               control: 'create linked doc',
-              page: 'doc editor',
               module: 'format toolbar',
+              page: 'doc editor',
               type: 'embed-linked-doc',
             });
         });
       },
+      icon: LinkedDocIcon,
+      id: 'convert-to-linked-doc',
+      isActive: () => false,
+      name: 'Create Linked Doc',
       showWhen: chain => {
         const [_, ctx] = chain
           .getSelectedModels({
-            types: ['block', 'text'],
             mode: 'highest',
+            types: ['block', 'text'],
           })
           .run();
         const { selectedModels } = ctx;
@@ -252,74 +254,74 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     })
     .addBlockTypeSwitch({
       flavour: 'affine:paragraph',
-      type: 'text',
-      name: 'Text',
       icon: TextIcon,
+      name: 'Text',
+      type: 'text',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:paragraph',
-      type: 'h1',
-      name: 'Heading 1',
       icon: Heading1Icon,
+      name: 'Heading 1',
+      type: 'h1',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:paragraph',
-      type: 'h2',
-      name: 'Heading 2',
       icon: Heading2Icon,
+      name: 'Heading 2',
+      type: 'h2',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:paragraph',
-      type: 'h3',
-      name: 'Heading 3',
       icon: Heading3Icon,
+      name: 'Heading 3',
+      type: 'h3',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:paragraph',
-      type: 'h4',
-      name: 'Heading 4',
       icon: Heading4Icon,
+      name: 'Heading 4',
+      type: 'h4',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:paragraph',
-      type: 'h5',
-      name: 'Heading 5',
       icon: Heading5Icon,
+      name: 'Heading 5',
+      type: 'h5',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:paragraph',
-      type: 'h6',
-      name: 'Heading 6',
       icon: Heading6Icon,
+      name: 'Heading 6',
+      type: 'h6',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:list',
-      type: 'bulleted',
-      name: 'Bulleted List',
       icon: BulletedListIcon,
+      name: 'Bulleted List',
+      type: 'bulleted',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:list',
-      type: 'numbered',
-      name: 'Numbered List',
       icon: NumberedListIcon,
+      name: 'Numbered List',
+      type: 'numbered',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:list',
-      type: 'todo',
-      name: 'To-do List',
       icon: CheckBoxIcon,
+      name: 'To-do List',
+      type: 'todo',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:code',
-      name: 'Code Block',
       icon: CodeIcon,
+      name: 'Code Block',
     })
     .addBlockTypeSwitch({
       flavour: 'affine:paragraph',
-      type: 'quote',
-      name: 'Quote',
       icon: QuoteIcon,
+      name: 'Quote',
+      type: 'quote',
     });
 }
 
@@ -327,9 +329,6 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
   const actions = [
     [
       {
-        type: 'copy',
-        name: 'Copy',
-        icon: CopyIcon,
         disabled: toolbar.doc.readonly,
         handler: () => {
           toolbar.std.command
@@ -344,11 +343,11 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
             .copySelectedModels()
             .run();
         },
+        icon: CopyIcon,
+        name: 'Copy',
+        type: 'copy',
       },
       {
-        type: 'duplicate',
-        name: 'Duplicate',
-        icon: DuplicateIcon,
         disabled: toolbar.doc.readonly,
         handler: () => {
           toolbar.std.doc.captureSync();
@@ -398,13 +397,13 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
             })
             .run();
         },
+        icon: DuplicateIcon,
+        name: 'Duplicate',
+        type: 'duplicate',
       },
     ],
     [
       {
-        type: 'delete',
-        name: 'Delete',
-        icon: DeleteIcon,
         disabled: toolbar.doc.readonly,
         handler: () => {
           // remove text
@@ -431,6 +430,9 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
 
           toolbar.reset();
         },
+        icon: DeleteIcon,
+        name: 'Delete',
+        type: 'delete',
       },
     ],
   ];

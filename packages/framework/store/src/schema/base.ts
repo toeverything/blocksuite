@@ -1,13 +1,15 @@
+import type * as Y from 'yjs';
+
 import { type Disposable, Slot } from '@blocksuite/global/utils';
 import { computed, signal } from '@preact/signals-core';
-import type * as Y from 'yjs';
 import { z } from 'zod';
 
-import { Boxed } from '../reactive/boxed.js';
-import { Text } from '../reactive/text.js';
 import type { YBlock } from '../store/doc/block.js';
 import type { Doc } from '../store/index.js';
 import type { BaseBlockTransformer } from '../transformer/base.js';
+
+import { Boxed } from '../reactive/boxed.js';
+import { Text } from '../reactive/text.js';
 
 const FlavourSchema = z.string();
 const ParentSchema = z.array(z.string()).optional();
@@ -18,39 +20,39 @@ const RoleSchema = z.enum(role);
 export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
-  Text: (input?: Y.Text | string) => Text;
   Boxed: <T>(input: T) => Boxed<T>;
+  Text: (input?: Y.Text | string) => Text;
 }
 
 export const internalPrimitives: InternalPrimitives = Object.freeze({
-  Text: (input: Y.Text | string = '') => new Text(input),
   Boxed: <T>(input: T) => new Boxed(input),
+  Text: (input: Y.Text | string = '') => new Text(input),
 });
 
 export const BlockSchema = z.object({
-  version: z.number(),
   model: z.object({
-    role: RoleSchema,
+    children: ContentSchema,
     flavour: FlavourSchema,
     parent: ParentSchema,
-    children: ContentSchema,
     props: z
       .function()
       .args(z.custom<InternalPrimitives>())
       .returns(z.record(z.any()))
       .optional(),
+    role: RoleSchema,
     toModel: z.function().args().returns(z.custom<BlockModel>()).optional(),
   }),
-  transformer: z
-    .function()
-    .args()
-    .returns(z.custom<BaseBlockTransformer>())
-    .optional(),
   onUpgrade: z
     .function()
     .args(z.any(), z.number(), z.number())
     .returns(z.void())
     .optional(),
+  transformer: z
+    .function()
+    .args()
+    .returns(z.custom<BaseBlockTransformer>())
+    .optional(),
+  version: z.number(),
 });
 
 export type BlockSchemaType = z.infer<typeof BlockSchema>;
@@ -62,43 +64,42 @@ export type PropsGetter<Props> = (
 export type SchemaToModel<
   Schema extends {
     model: {
-      props: PropsGetter<object>;
       flavour: string;
+      props: PropsGetter<object>;
     };
   },
-> = BlockModel<ReturnType<Schema['model']['props']>> &
-  ReturnType<Schema['model']['props']> & {
-    flavour: Schema['model']['flavour'];
-  };
+> = {
+  flavour: Schema['model']['flavour'];
+} & BlockModel<ReturnType<Schema['model']['props']>> &
+  ReturnType<Schema['model']['props']>;
 
 export function defineBlockSchema<
   Flavour extends string,
   Role extends RoleType,
   Props extends object,
   Metadata extends Readonly<{
-    version: number;
-    role: Role;
-    parent?: string[];
     children?: string[];
+    parent?: string[];
+    role: Role;
+    version: number;
   }>,
   Model extends BlockModel<Props>,
   Transformer extends BaseBlockTransformer<Props>,
 >(options: {
   flavour: Flavour;
   metadata: Metadata;
-  props?: (internalPrimitives: InternalPrimitives) => Props;
   onUpgrade?: (
     data: Props,
     previousVersion: number,
     latestVersion: number
   ) => void;
+  props?: (internalPrimitives: InternalPrimitives) => Props;
   toModel?: () => Model;
   transformer?: () => Transformer;
 }): {
-  version: number;
   model: {
-    props: PropsGetter<Props>;
     flavour: Flavour;
+    props: PropsGetter<Props>;
   } & Metadata;
   onUpgrade?: (
     data: Props,
@@ -106,44 +107,45 @@ export function defineBlockSchema<
     latestVersion: number
   ) => void;
   transformer?: () => Transformer;
+  version: number;
 };
 
 export function defineBlockSchema({
   flavour,
-  props,
   metadata,
   onUpgrade,
+  props,
   toModel,
   transformer,
 }: {
   flavour: string;
   metadata: {
-    version: number;
-    role: RoleType;
-    parent?: string[];
     children?: string[];
+    parent?: string[];
+    role: RoleType;
+    version: number;
   };
-  props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
   onUpgrade?: (
     data: Record<string, unknown>,
     previousVersion: number,
     latestVersion: number
   ) => void;
+  props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
   toModel?: () => BlockModel;
   transformer?: () => BaseBlockTransformer;
 }): BlockSchemaType {
   const schema = {
-    version: metadata.version,
     model: {
-      role: metadata.role,
-      parent: metadata.parent,
       children: metadata.children,
       flavour,
+      parent: metadata.parent,
       props,
+      role: metadata.role,
       toModel,
     },
     onUpgrade,
     transformer,
+    version: metadata.version,
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);
   return schema;
@@ -178,41 +180,6 @@ export class BlockModel<
 
   private _onDeleted: Disposable;
 
-  // This is used to avoid https://stackoverflow.com/questions/55886792/infer-typescript-generic-class-type
-  [modelLabel]: Props = 'type_info_label' as never;
-
-  version!: number;
-
-  flavour!: string;
-
-  role!: RoleType;
-
-  /**
-   * @deprecated use doc instead
-   */
-  page!: Doc;
-
-  id!: string;
-
-  yBlock!: YBlock;
-
-  keys!: string[];
-
-  stash!: (prop: keyof Props & string) => void;
-
-  pop!: (prop: keyof Props & string) => void;
-
-  // text is optional
-  text?: Text;
-
-  created = new Slot();
-
-  deleted = new Slot();
-
-  propsUpdated = new Slot<{ key: string }>();
-
-  childrenUpdated = new Slot();
-
   childMap = computed(() =>
     this._children.value.reduce((map, id, index) => {
       map.set(id, index);
@@ -220,9 +187,44 @@ export class BlockModel<
     }, new Map<string, number>())
   );
 
+  childrenUpdated = new Slot();
+
+  created = new Slot();
+
+  deleted = new Slot();
+
+  flavour!: string;
+
+  id!: string;
+
   isEmpty = computed(() => {
     return this._children.value.length === 0;
   });
+
+  keys!: string[];
+
+  // This is used to avoid https://stackoverflow.com/questions/55886792/infer-typescript-generic-class-type
+  [modelLabel]: Props = 'type_info_label' as never;
+
+  /**
+   * @deprecated use doc instead
+   */
+  page!: Doc;
+
+  pop!: (prop: keyof Props & string) => void;
+
+  propsUpdated = new Slot<{ key: string }>();
+
+  role!: RoleType;
+
+  stash!: (prop: keyof Props & string) => void;
+
+  // text is optional
+  text?: Text;
+
+  version!: number;
+
+  yBlock!: YBlock;
 
   constructor() {
     super();
@@ -242,23 +244,11 @@ export class BlockModel<
     this._onDeleted.dispose();
   }
 
-  get doc() {
-    return this.page;
-  }
-
-  set doc(doc: Doc) {
-    this.page = doc;
-  }
-
-  get children() {
-    const value: BlockModel[] = [];
-    this._children.value.forEach(id => {
-      const block = this.page.getBlock(id);
-      if (block) {
-        value.push(block.model);
-      }
-    });
-    return value;
+  dispose() {
+    this.created.dispose();
+    this.deleted.dispose();
+    this.propsUpdated.dispose();
+    this.childrenUpdated.dispose();
   }
 
   firstChild(): BlockModel | null {
@@ -272,10 +262,22 @@ export class BlockModel<
     return this.children[this.children.length - 1].lastChild();
   }
 
-  dispose() {
-    this.created.dispose();
-    this.deleted.dispose();
-    this.propsUpdated.dispose();
-    this.childrenUpdated.dispose();
+  get children() {
+    const value: BlockModel[] = [];
+    this._children.value.forEach(id => {
+      const block = this.page.getBlock(id);
+      if (block) {
+        value.push(block.model);
+      }
+    });
+    return value;
+  }
+
+  get doc() {
+    return this.page;
+  }
+
+  set doc(doc: Doc) {
+    this.page = doc;
   }
 }

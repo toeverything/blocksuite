@@ -16,7 +16,7 @@ export const observeLastProps = <T extends LastPropsKey>(
 ) => {
   const _prevStates = { ...initStates };
   return edgelessService.editPropsStore.slots.lastPropsUpdated.on(
-    ({ type, props }) => {
+    ({ props, type }) => {
       if (type !== toolType) return;
       const updates = fields
         .filter(_key => {

@@ -1,4 +1,5 @@
 import type { ConnectorElementModel } from '@blocksuite/blocks';
+
 import {
   type EdgelessRootService,
   SurfaceBlockComponent,
@@ -39,8 +40,8 @@ export const getConnectorPath = (id: string, surface: EdgelessRootService) => {
   return result;
 };
 type ElementTree = {
-  id: string;
   children: ElementTree[];
+  id: string;
 };
 export const findTree = (
   rootId: string,
@@ -54,7 +55,6 @@ export const findTree = (
     set.add(id);
     const children = getConnectorFromId(id, surface);
     return {
-      id,
       children: children.flatMap(model => {
         const childId = model.target.id;
         if (childId) {
@@ -65,6 +65,7 @@ export const findTree = (
         }
         return [];
       }),
+      id,
     };
   };
   const tree = run(rootId);

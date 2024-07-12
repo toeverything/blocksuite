@@ -6,15 +6,15 @@ import {
 } from './embed-synced-doc-model.js';
 
 export const defaultEmbedSyncedDocBlockProps: EmbedSyncedDocBlockProps = {
-  pageId: '',
-  style: EmbedSyncedDocStyles[0],
   caption: undefined,
+  pageId: '',
   scale: undefined,
+  style: EmbedSyncedDocStyles[0],
 };
 
 export const EmbedSyncedDocBlockSchema = createEmbedBlockSchema({
   name: 'synced-doc',
-  version: 1,
-  toModel: () => new EmbedSyncedDocModel(),
   props: (): EmbedSyncedDocBlockProps => defaultEmbedSyncedDocBlockProps,
+  toModel: () => new EmbedSyncedDocModel(),
+  version: 1,
 });

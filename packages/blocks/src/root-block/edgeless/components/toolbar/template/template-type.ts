@@ -1,7 +1,7 @@
 export type Template = {
-  name?: string;
-  content: unknown;
   assets?: Record<string, string>;
+  content: unknown;
+  name?: string;
   preview?: string;
   type: string;
 };
@@ -12,11 +12,11 @@ export type TemplateCategory = {
 };
 
 export interface TemplateManager {
-  list(category: string): Promise<Template[]> | Template[];
-
   categories(): Promise<string[]> | string[];
 
-  search(keyword: string, category?: string): Promise<Template[]> | Template[];
-
   extend?(manager: TemplateManager): void;
+
+  list(category: string): Promise<Template[]> | Template[];
+
+  search(keyword: string, category?: string): Promise<Template[]> | Template[];
 }

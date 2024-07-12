@@ -1,15 +1,16 @@
 import type {
+  AIItemConfig,
   AffineAIPanelWidget,
   AffineSlashMenuActionItem,
   AffineSlashMenuContext,
   AffineSlashMenuItem,
   AffineSlashSubMenu,
-  AIItemConfig,
 } from '@blocksuite/blocks';
+
 import {
   AFFINE_AI_PANEL_WIDGET,
-  AffineSlashMenuWidget,
   AIStarIcon,
+  AffineSlashMenuWidget,
   MoreHorizontalIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -59,9 +60,9 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
     return {
       ...basicItemConfig(item),
       subMenu: item.subItem.map<AffineSlashMenuActionItem>(
-        ({ type, handler }) => ({
-          name: type,
+        ({ handler, type }) => ({
           action: ({ rootElement }) => handler?.(rootElement.host),
+          name: type,
         })
       ),
     };
@@ -69,9 +70,9 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
 
   const basicItemConfig = (item: AIItemConfig) => {
     return {
-      name: item.name,
-      icon: iconWrapper(item.icon),
       alias: ['ai'],
+      icon: iconWrapper(item.icon),
+      name: item.name,
       showWhen: showWhenWrapper(item),
     };
   };
@@ -79,9 +80,6 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
   const AIMenuItems: AffineSlashMenuItem[] = [
     { groupName: 'AFFiNE AI' },
     {
-      name: 'Ask AI',
-      icon: AIStarIcon,
-      showWhen: showWhenWrapper(),
       action: ({ rootElement }) => {
         const view = rootElement.host.view;
         const affineAIPanelWidget = view.getWidget(
@@ -93,35 +91,38 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
         assertExists(affineAIPanelWidget.host);
         handleInlineAskAIAction(affineAIPanelWidget.host);
       },
+      icon: AIStarIcon,
+      name: 'Ask AI',
+      showWhen: showWhenWrapper(),
     },
 
     ...AIItems.filter(({ name }) =>
-      ['Fix spelling', 'Fix grammar'].includes(name)
+      ['Fix grammar', 'Fix spelling'].includes(name)
     ).map(item => ({
       ...actionItemWrapper(item),
       name: `${item.name} from above`,
     })),
 
     ...AIItems.filter(({ name }) =>
-      ['Summarize', 'Continue writing'].includes(name)
+      ['Continue writing', 'Summarize'].includes(name)
     ).map(actionItemWrapper),
 
     {
-      name: 'Action with above',
       icon: iconWrapper(MoreHorizontalIcon),
+      name: 'Action with above',
       subMenu: [
         { groupName: 'Action with above' },
         ...AIItems.filter(({ name }) =>
-          ['Translate to', 'Change tone to'].includes(name)
+          ['Change tone to', 'Translate to'].includes(name)
         ).map(subMenuWrapper),
 
         ...AIItems.filter(({ name }) =>
           [
+            'Find actions',
+            'Generate outline',
             'Improve writing',
             'Make it longer',
             'Make it shorter',
-            'Generate outline',
-            'Find actions',
           ].includes(name)
         ).map(actionItemWrapper),
       ],

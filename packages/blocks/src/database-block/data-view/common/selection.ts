@@ -4,48 +4,48 @@ import { z } from 'zod';
 import type { DataViewSelection, GetDataViewSelection } from '../types.js';
 
 const TableViewSelectionSchema = z.object({
-  viewId: z.string(),
-  type: z.literal('table'),
-  rowsSelection: z
-    .object({
-      start: z.number(),
-      end: z.number(),
-    })
-    .optional(),
   columnsSelection: z
     .object({
-      start: z.number(),
       end: z.number(),
+      start: z.number(),
     })
     .optional(),
   focus: z.object({
-    rowIndex: z.number(),
     columnIndex: z.number(),
+    rowIndex: z.number(),
   }),
   isEditing: z.boolean(),
+  rowsSelection: z
+    .object({
+      end: z.number(),
+      start: z.number(),
+    })
+    .optional(),
+  type: z.literal('table'),
+  viewId: z.string(),
 });
 
 const KanbanCellSelectionSchema = z.object({
-  selectionType: z.literal('cell'),
-  groupKey: z.string(),
   cardId: z.string(),
   columnId: z.string(),
+  groupKey: z.string(),
   isEditing: z.boolean(),
+  selectionType: z.literal('cell'),
 });
 
 const KanbanCardSelectionSchema = z.object({
-  selectionType: z.literal('card'),
   cards: z.array(
     z.object({
-      groupKey: z.string(),
       cardId: z.string(),
+      groupKey: z.string(),
     })
   ),
+  selectionType: z.literal('card'),
 });
 
 const KanbanGroupSelectionSchema = z.object({
-  selectionType: z.literal('group'),
   groupKeys: z.array(z.string()),
+  selectionType: z.literal('group'),
 });
 
 const DatabaseSelectionSchema = z.object({
@@ -59,9 +59,9 @@ const DatabaseSelectionSchema = z.object({
 });
 
 export class DatabaseSelection extends BaseSelection {
-  static override type = 'database';
-
   static override group = 'note';
+
+  static override type = 'database';
 
   readonly viewSelection: DataViewSelection;
 
@@ -79,8 +79,19 @@ export class DatabaseSelection extends BaseSelection {
     this.viewSelection = viewSelection;
   }
 
-  get viewId() {
-    return this.viewSelection.viewId;
+  static override fromJSON(json: Record<string, unknown>): DatabaseSelection {
+    DatabaseSelectionSchema.parse(json);
+    return new DatabaseSelection({
+      blockId: json.blockId as string,
+      viewSelection: json.viewSelection as DataViewSelection,
+    });
+  }
+
+  override equals(other: BaseSelection): boolean {
+    if (!(other instanceof DatabaseSelection)) {
+      return false;
+    }
+    return this.blockId === other.blockId;
   }
 
   getSelection<T extends DataViewSelection['type']>(
@@ -91,27 +102,16 @@ export class DatabaseSelection extends BaseSelection {
       : undefined;
   }
 
-  override equals(other: BaseSelection): boolean {
-    if (!(other instanceof DatabaseSelection)) {
-      return false;
-    }
-    return this.blockId === other.blockId;
-  }
-
   override toJSON(): Record<string, unknown> {
     return {
-      type: 'database',
       blockId: this.blockId,
+      type: 'database',
       viewSelection: this.viewSelection,
     };
   }
 
-  static override fromJSON(json: Record<string, unknown>): DatabaseSelection {
-    DatabaseSelectionSchema.parse(json);
-    return new DatabaseSelection({
-      blockId: json.blockId as string,
-      viewSelection: json.viewSelection as DataViewSelection,
-    });
+  get viewId() {
+    return this.viewSelection.viewId;
   }
 }
 

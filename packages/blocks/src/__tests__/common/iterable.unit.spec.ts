@@ -10,9 +10,9 @@ import {
 describe('countBy', () => {
   it('basic', () => {
     const items = [
-      { name: 'a', classroom: 'c1' },
-      { name: 'b', classroom: 'c2' },
-      { name: 'a', classroom: 'c2' },
+      { classroom: 'c1', name: 'a' },
+      { classroom: 'c2', name: 'b' },
+      { classroom: 'c2', name: 'a' },
     ];
     const counted = countBy(items, i => i.name);
     expect(counted).toEqual({ a: 2, b: 1 });
@@ -59,21 +59,21 @@ describe('atLeastNMatches', () => {
 describe('groupBy', () => {
   it('basic', () => {
     const students = [
-      { name: 'Alice', age: 25 },
-      { name: 'Bob', age: 23 },
-      { name: 'Cathy', age: 25 },
-      { name: 'David', age: 23 },
+      { age: 25, name: 'Alice' },
+      { age: 23, name: 'Bob' },
+      { age: 25, name: 'Cathy' },
+      { age: 23, name: 'David' },
     ];
 
     const groupedByAge = groupBy(students, student => student.age.toString());
     const expectedGroupedByAge = {
       '23': [
-        { name: 'Bob', age: 23 },
-        { name: 'David', age: 23 },
+        { age: 23, name: 'Bob' },
+        { age: 23, name: 'David' },
       ],
       '25': [
-        { name: 'Alice', age: 25 },
-        { name: 'Cathy', age: 25 },
+        { age: 25, name: 'Alice' },
+        { age: 25, name: 'Cathy' },
       ],
     };
     expect(groupedByAge).toMatchObject(expectedGroupedByAge);
