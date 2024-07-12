@@ -1,6 +1,7 @@
 import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 
 import { Slot } from '@blocksuite/global/utils';
+import { type Signal, signal } from '@preact/signals-core';
 import { merge } from 'merge';
 
 import type { Space } from '../store/space.js';
@@ -34,11 +35,15 @@ export interface AwarenessEvent<
 export class AwarenessStore<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
+  private _flags: Signal<Flags>;
+
   private _onAwarenessChange = (diff: {
     added: number[];
     removed: number[];
     updated: number[];
   }) => {
+    this._flags.value = this.awareness.getLocalState()?.flags ?? {};
+
     const { added, removed, updated } = diff;
 
     const states = this.awareness.getStates();
@@ -77,6 +82,7 @@ export class AwarenessStore<
     awareness: YAwareness<RawAwarenessState<Flags>>,
     defaultFlags: Flags
   ) {
+    this._flags = signal<Flags>(defaultFlags);
     this.store = store;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
@@ -99,9 +105,8 @@ export class AwarenessStore<
     }
   }
 
-  getFlag<Key extends keyof Flags>(field: Key): Flags[Key] | undefined {
-    const flags = this.awareness.getLocalState()?.flags ?? {};
-    return flags[field];
+  getFlag<Key extends keyof Flags>(field: Key) {
+    return this._flags.value[field];
   }
 
   getLocalSelection(space: Space): ReadonlyArray<Record<string, unknown>> {

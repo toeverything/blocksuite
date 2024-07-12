@@ -6,6 +6,8 @@ import { intersectInlineRange } from '../utils/inline-range.js';
 
 export class InlineTextService<TextAttributes extends BaseTextAttributes> {
   deleteText = (inlineRange: InlineRange): void => {
+    if (this.editor.isReadonly) return;
+
     this.transact(() => {
       this.yText.delete(inlineRange.index, inlineRange.length);
     });
@@ -19,6 +21,8 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
       mode?: 'replace' | 'merge';
     } = {}
   ): void => {
+    if (this.editor.isReadonly) return;
+
     const { match = () => true, mode = 'merge' } = options;
     const deltas = this.editor.deltaService.getDeltasByInlineRange(inlineRange);
 
@@ -50,6 +54,8 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
   };
 
   insertLineBreak = (inlineRange: InlineRange): void => {
+    if (this.editor.isReadonly) return;
+
     this.transact(() => {
       this.yText.delete(inlineRange.index, inlineRange.length);
       this.yText.insert(inlineRange.index, '\n');
@@ -61,6 +67,8 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
     text: string,
     attributes: TextAttributes = {} as TextAttributes
   ): void => {
+    if (this.editor.isReadonly) return;
+
     if (this.editor.attributeService.marks) {
       attributes = { ...attributes, ...this.editor.attributeService.marks };
     }
@@ -78,6 +86,8 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
   };
 
   resetText = (inlineRange: InlineRange): void => {
+    if (this.editor.isReadonly) return;
+
     const coverDeltas: DeltaInsert[] = [];
     for (
       let i = inlineRange.index;
@@ -109,6 +119,8 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
     text: string,
     attributes: TextAttributes = {} as TextAttributes
   ): void => {
+    if (this.editor.isReadonly) return;
+
     this.transact(() => {
       this.yText.delete(0, this.yText.length);
       this.yText.insert(0, text, attributes);

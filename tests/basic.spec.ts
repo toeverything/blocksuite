@@ -1,12 +1,10 @@
 import { expect } from '@playwright/test';
 
 import {
-  SHORT_KEY,
   addNoteByClick,
   captureHistory,
   click,
   disconnectByClick,
-  dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
@@ -25,7 +23,6 @@ import {
   redoByKeyboard,
   setSelection,
   switchEditorMode,
-  switchReadonly,
   toggleDarkMode,
   type,
   undoByClick,
@@ -247,41 +244,6 @@ test(scoped`undo after adding block twice`, async ({ page }) => {
   await redoByKeyboard(page);
   await assertRichTexts(page, ['hello', 'world']);
 });
-
-test(
-  scoped`should readonly mode not be able to modify text`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    const { paragraphId } = await initEmptyParagraphState(page);
-
-    await focusRichText(page);
-    await type(page, 'hello');
-    await switchReadonly(page);
-
-    await dragBetweenIndices(page, [0, 1], [0, 3]);
-    await page.keyboard.press(`${SHORT_KEY}+b`);
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:paragraph
-  prop:text="hello"
-  prop:type="text"
-/>`,
-      paragraphId
-    );
-
-    await undoByKeyboard(page);
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:paragraph
-  prop:text="hello"
-  prop:type="text"
-/>`,
-      paragraphId
-    );
-  }
-);
 
 test(scoped`undo/redo twice after adding block twice`, async ({ page }) => {
   await enterPlaygroundRoom(page);

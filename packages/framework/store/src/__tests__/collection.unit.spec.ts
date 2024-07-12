@@ -962,6 +962,22 @@ describe('collection search', () => {
   });
 });
 
+describe('flags', () => {
+  it('update flags', () => {
+    const options = createTestOptions();
+    const collection = new DocCollection(options);
+    collection.meta.initialize();
+
+    const awareness = collection.awarenessStore;
+
+    awareness.setFlag('enable_lasso_tool', false);
+    expect(awareness.getFlag('enable_lasso_tool')).toBe(false);
+
+    awareness.setFlag('enable_lasso_tool', true);
+    expect(awareness.getFlag('enable_lasso_tool')).toBe(true);
+  });
+});
+
 declare global {
   namespace BlockSuite {
     interface BlockModels {

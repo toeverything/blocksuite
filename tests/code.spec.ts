@@ -1047,28 +1047,6 @@ test('should open more menu and close on selecting', async ({ page }) => {
   await expect(moreMenu.menu).toBeHidden();
 });
 
-test('should code block works in read only mode', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyCodeBlockState(page);
-  await focusRichTextEnd(page);
-
-  await page.waitForTimeout(300);
-  await switchReadonly(page);
-
-  const codeBlockController = getCodeBlock(page);
-  const codeBlock = codeBlockController.codeBlock;
-  await codeBlock.hover();
-  await codeBlockController.clickLanguageButton();
-  await expect(codeBlockController.langList).toBeHidden();
-
-  await codeBlock.hover();
-  await expect(codeBlockController.codeToolbar).toBeVisible();
-  await expect(codeBlockController.moreButton).toHaveAttribute('disabled');
-
-  await expect(codeBlockController.copyButton).toBeVisible();
-  await expect(codeBlockController.moreMenu).toBeHidden();
-});
-
 test('should code block lang input supports alias', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
@@ -1189,4 +1167,47 @@ test('code hotkey should not effect in global', async ({ page }) => {
   await assertTitle(page, 'aaa');
   await assertBlockCount(page, 'paragraph', 0);
   await assertBlockCount(page, 'code', 1);
+});
+
+test.describe('readonly mode', () => {
+  test('should code block widget be disabled in read only mode', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyCodeBlockState(page);
+    await focusRichTextEnd(page);
+
+    await page.waitForTimeout(300);
+    await switchReadonly(page);
+
+    const codeBlockController = getCodeBlock(page);
+    const codeBlock = codeBlockController.codeBlock;
+    await codeBlock.hover();
+    await codeBlockController.clickLanguageButton();
+    await expect(codeBlockController.langList).toBeHidden();
+
+    await codeBlock.hover();
+    await expect(codeBlockController.codeToolbar).toBeVisible();
+    await expect(codeBlockController.moreButton).toHaveAttribute('disabled');
+
+    await expect(codeBlockController.copyButton).toBeVisible();
+    await expect(codeBlockController.moreMenu).toBeHidden();
+  });
+
+  test('should not be able to modify code block in readonly mode', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyCodeBlockState(page);
+    await focusRichText(page);
+
+    await type(page, 'const a = 10;');
+    await assertRichTexts(page, ['const a = 10;']);
+
+    await switchReadonly(page);
+    await pressBackspace(page, 3);
+    await pressTab(page, 3);
+    await pressEnter(page, 2);
+    await assertRichTexts(page, ['const a = 10;']);
+  });
 });

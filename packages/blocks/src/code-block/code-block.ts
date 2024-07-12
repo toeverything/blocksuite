@@ -200,6 +200,7 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
         return;
       },
       Tab: ctx => {
+        if (this.doc.readonly) return;
         const state = ctx.get('keyboardState');
         const event = state.raw;
         const inlineEditor = this.inlineEditor;

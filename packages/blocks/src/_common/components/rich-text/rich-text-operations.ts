@@ -211,7 +211,7 @@ export function handleIndent(
 ) {
   const doc = model.doc;
   const previousSibling = doc.getPrev(model);
-  if (!previousSibling || !supportsChildren(previousSibling)) {
+  if (doc.readonly || !previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
     return;
   }
@@ -308,7 +308,7 @@ export function handleUnindent(
 ) {
   const doc = model.doc;
   const parent = doc.getParent(model);
-  if (!parent || parent.role !== 'content') {
+  if (doc.readonly || !parent || parent.role !== 'content') {
     // Top most, can not unindent, do nothing
     return;
   }
