@@ -228,4 +228,21 @@ test.describe('edgeless text block', () => {
     await assertBlockTextContent(page, 5, 'asss');
     await assertBlockTextContent(page, 7, 'b');
   });
+
+  test('edgeless text should not blur after pressing backspace', async ({
+    page,
+  }) => {
+    // https://github.com/toeverything/blocksuite/pull/7555
+
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await type(page, 'a');
+    await assertBlockTextContent(page, 5, 'a');
+    await pressBackspace(page);
+    await type(page, 'b');
+    await assertBlockTextContent(page, 5, 'b');
+  });
 });

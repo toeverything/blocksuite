@@ -47,33 +47,33 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     )
       return;
 
-    const tmpInlineRange = this.editor.toInlineRange(range);
-    if (!tmpInlineRange) return;
+    let inlineRange = this.editor.toInlineRange(range);
+    if (!inlineRange) return;
 
     let ifHandleTargetRange = true;
 
     if (event.inputType.startsWith('delete')) {
       if (
         isInEmbedGap(range.commonAncestorContainer) &&
-        tmpInlineRange.length === 0 &&
-        tmpInlineRange.index > 0
+        inlineRange.length === 0 &&
+        inlineRange.index > 0
       ) {
-        this.editor.setInlineRange({
-          index: tmpInlineRange.index - 1,
+        inlineRange = {
+          index: inlineRange.index - 1,
           length: 1,
-        });
+        };
         ifHandleTargetRange = false;
       } else if (
         isInEmptyLine(range.commonAncestorContainer) &&
-        tmpInlineRange.length === 0 &&
-        tmpInlineRange.index > 0
+        inlineRange.length === 0 &&
+        inlineRange.index > 0
       ) {
         // do not use target range when deleting across lines
         // https://github.com/toeverything/blocksuite/issues/5381
-        this.editor.setInlineRange({
-          index: tmpInlineRange.index - 1,
+        inlineRange = {
+          index: inlineRange.index - 1,
           length: 1,
-        });
+        };
         ifHandleTargetRange = false;
       }
     }
@@ -85,17 +85,14 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
         const range = document.createRange();
         range.setStart(staticRange.startContainer, staticRange.startOffset);
         range.setEnd(staticRange.endContainer, staticRange.endOffset);
-        const inlineRange = this.editor.toInlineRange(range);
+        const targetInlineRange = this.editor.toInlineRange(range);
 
-        if (
-          !isMaybeInlineRangeEqual(this.editor.getInlineRange(), inlineRange)
-        ) {
-          this.editor.setInlineRange(inlineRange, false);
+        if (!isMaybeInlineRangeEqual(inlineRange, targetInlineRange)) {
+          inlineRange = targetInlineRange;
         }
       }
     }
 
-    const inlineRange = this.editor.getInlineRange();
     if (!inlineRange) return;
 
     event.preventDefault();
@@ -103,18 +100,17 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     const ctx: BeforeinputHookCtx<TextAttributes> = {
       inlineEditor: this.editor,
       raw: event,
-      inlineRange: inlineRange,
+      inlineRange,
       data: event.data ?? event.dataTransfer?.getData('text/plain') ?? null,
       attributes: {} as TextAttributes,
     };
     this.editor.hooks.beforeinput?.(ctx);
 
-    const { raw: newEvent, data, inlineRange: newInlineRange } = ctx;
     transformInput<TextAttributes>(
-      newEvent.inputType,
-      data,
+      ctx.raw.inputType,
+      ctx.data,
       ctx.attributes,
-      newInlineRange,
+      ctx.inlineRange,
       this.editor as InlineEditor
     );
 
