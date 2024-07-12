@@ -7,6 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { ImageBlockComponent } from '../image-block.js';
 
+import { asyncFocusRichText } from '../../_common/utils/selection.js';
 import { ImageResizeManager } from '../image-resize-manager.js';
 import { shouldResizeImage } from '../utils.js';
 import { ImageSelectedRect } from './image-selected-rect.js';
@@ -55,20 +56,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       const event = ctx.get('defaultState').event;
       event.preventDefault();
 
-      selection.update(selList =>
-        selList
-          .filter(sel => !sel.is('image'))
-          .concat(
-            selection.create('text', {
-              from: {
-                blockId,
-                index: 0,
-                length: 0,
-              },
-              to: null,
-            })
-          )
-      );
+      asyncFocusRichText(this._host, blockId)?.catch(console.error);
     };
 
     this.block.bindHotKey({
