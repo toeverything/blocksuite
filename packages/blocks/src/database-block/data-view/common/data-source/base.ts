@@ -7,6 +7,7 @@ import type { UniComponent } from '../../utils/uni-component/index.js';
 import type { DataViewManager } from '../../view/data-view-manager.js';
 import type { DataViewContextKey } from './context.js';
 
+import { type DatabaseFlags, defaultDatabaseFlags } from '../../../types.js';
 import { DEFAULT_COLUMN_WIDTH } from '../../view/presets/table/consts.js';
 
 export type DetailSlotProps = {
@@ -60,6 +61,7 @@ export interface DataSource {
     callback: () => void
   ) => Disposable;
 
+  getFlag(): DatabaseFlags;
   detailSlots: DetailSlots;
 
   getPropertyMeta(type: string): ColumnMeta;
@@ -92,6 +94,10 @@ export abstract class BaseDataSource implements DataSource {
     return this.context.get(key) as T;
   }
 
+  getFlag(): DatabaseFlags {
+    return { ...defaultDatabaseFlags };
+  }
+
   onCellUpdate(
     _rowId: string,
     _propertyId: string,
@@ -121,6 +127,12 @@ export abstract class BaseDataSource implements DataSource {
   }
 
   abstract addPropertyConfigList: ColumnConfig[];
+
+  abstract cellChangeValue(
+    rowId: string,
+    propertyId: string,
+    value: unknown
+  ): void;
 
   abstract cellChangeValue(
     rowId: string,

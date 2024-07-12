@@ -1,5 +1,6 @@
 import { type Disposable, Slot, assertExists } from '@blocksuite/global/utils';
 
+import type { DatabaseFlags } from '../../types.js';
 import type { ColumnMeta } from '../column/column-config.js';
 import type { CellRenderer, ColumnConfig } from '../column/index.js';
 import type { FilterGroup, Variable } from '../common/ast.js';
@@ -45,6 +46,8 @@ export interface DataViewManager {
       viewId: string;
     }>;
   };
+
+  getFlag(): DatabaseFlags;
 
   filterSetVisible(visible: boolean): void;
 
@@ -359,6 +362,10 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
 
   getContext<T>(key: DataViewContextKey<T>): T | undefined {
     return this.dataSource.getContext(key);
+  }
+
+  getFlag(): DatabaseFlags {
+    return this.dataSource.getFlag();
   }
 
   getIcon(type: string): UniComponent | undefined {

@@ -4,6 +4,7 @@ import { type Disposable, Slot, assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
 
 import type { DatabaseBlockModel } from './database-model.js';
+import type { DatabaseFlags } from './types.js';
 
 import { getIcon } from './block-icons.js';
 import {
@@ -131,6 +132,15 @@ export class DatabaseBlockDataSource extends BaseDataSource {
       return model?.text;
     }
     return this._model.getCell(rowId, propertyId)?.value;
+  }
+
+  override getFlag(): DatabaseFlags {
+    return {
+      ...super.getFlag,
+      enable_number_formatting:
+        this.doc.awarenessStore.getFlag('enable_database_number_formatting') ??
+        false,
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

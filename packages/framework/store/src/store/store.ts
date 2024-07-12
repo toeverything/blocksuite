@@ -70,6 +70,7 @@ export interface StoreOptions<
 const FLAGS_PRESET = {
   enable_synced_doc_block: false,
   enable_pie_menu: false,
+  enable_database_number_formatting: false,
   enable_database_statistics: false,
   enable_database_attachment_note: false,
   enable_legacy_validation: true,

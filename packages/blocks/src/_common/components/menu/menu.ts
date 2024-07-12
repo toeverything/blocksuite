@@ -32,14 +32,14 @@ import { rangeWrap } from '../../utils/math.js';
 type MenuCommon = {
   hide?: () => boolean;
 };
-type GroupMenu = MenuCommon & {
+export type GroupMenu = MenuCommon & {
   type: 'group';
   name: string;
-  children: () => NormalMenu[];
+  children: () => Menu[];
 };
 // eslint-disable-next-line @typescript-eslint/ban-types
 type MenuClass = (string & {}) | 'delete-item';
-type NormalMenu = MenuCommon &
+export type NormalMenu = MenuCommon &
   (
     | {
         type: 'action';
@@ -369,8 +369,8 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       padding: 8px 12px;
     }
 
-    .affine-menu-header .icon {
-    }
+    /* .affine-menu-header .icon {
+    } */
     .affine-menu-header input {
       flex: 1;
       border-radius: 4px;
@@ -400,14 +400,14 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     .affine-menu-action svg {
       width: 20px;
       height: 20px;
-      color: var(--affine-icon-color);
-      fill: var(--affine-icon-color);
     }
 
     .affine-menu-action .icon {
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--affine-icon-color);
+      fill: var(--affine-icon-color);
     }
 
     .affine-menu-action .content {
@@ -440,7 +440,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       color: var(--affine-text-emphasis-color);
     }
 
-    .affine-menu-action.selected-item svg {
+    .affine-menu-action.selected-item .icon {
       color: var(--affine-text-emphasis-color);
       fill: currentColor;
     }

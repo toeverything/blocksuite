@@ -9,11 +9,20 @@ import { html } from 'lit/static-html.js';
 
 import type { InsertToPosition } from '../../../../../types.js';
 import type {
+  DataViewColumnManager,
+  DataViewManager,
+} from '../../../../data-view-manager.js';
+import type {
   DataViewTableColumnManager,
   DataViewTableManager,
 } from '../../table-view-manager.js';
 
-import { popMenu } from '../../../../../../../_common/components/index.js';
+import {
+  type Menu,
+  type NormalMenu,
+  popMenu,
+} from '../../../../../../../_common/components/index.js';
+import { numberFormats } from '../../../../../column/presets/number/utils/formats.js';
 import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
 import {
   DatabaseDuplicate,
@@ -30,6 +39,7 @@ import { getResultInRange } from '../../../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
+import './number-format-bar.js';
 import {
   getTableGroupRects,
   getVerticalIndicator,
@@ -304,11 +314,65 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   };
 
   private popMenu(ele?: HTMLElement) {
+    const enableNumberFormatting =
+      this.tableViewManager.getFlag().enable_number_formatting;
+
     popMenu(ele ?? this, {
       options: {
         input: inputConfig(this.column),
         items: [
-          typeConfig(this.column, this.tableViewManager),
+          {
+            type: 'group',
+            name: 'Column Prop Group ',
+            children: () => [
+              typeConfig(this.column, this.tableViewManager),
+              // Number format begin
+              ...(enableNumberFormatting
+                ? ([
+                    {
+                      type: 'sub-menu',
+                      name: 'Number Format',
+
+                      hide: () =>
+                        !this.column.updateData ||
+                        this.column.type !== 'number',
+                      options: {
+                        input: {
+                          search: true,
+                        },
+                        items: [
+                          numberFormatConfig(
+                            this.column,
+                            this.tableViewManager
+                          ),
+                          ...(numberFormats.map(format => {
+                            return {
+                              type: 'action',
+                              isSelected:
+                                this.column.data.format === format.type,
+                              icon: html`<span
+                                style="font-size: var(--affine-font-base); scale: 1.2;"
+                                >${format.symbol}</span
+                              >`,
+                              name: format.label,
+                              select: () => {
+                                if (this.column.data.format === format.type)
+                                  return;
+                                this.column.updateData(() => ({
+                                  format: format.type,
+                                }));
+                              },
+                            };
+                          }) as Menu[]),
+                        ],
+                      },
+                    },
+                  ] as Menu[])
+                : []),
+              // Number format end
+            ],
+          },
+
           {
             type: 'action',
             name: 'Duplicate Column',
@@ -551,6 +615,18 @@ const createDragPreview = (
     },
   };
 };
+
+function numberFormatConfig(
+  column: DataViewColumnManager,
+  _view: DataViewManager
+): NormalMenu {
+  return {
+    type: 'custom',
+    render: html`<affine-database-number-format-bar
+      .column=${column}
+    ></affine-database-number-format-bar>`,
+  };
+}
 
 declare global {
   interface HTMLElementTagNameMap {

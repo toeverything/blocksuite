@@ -43,7 +43,11 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       options: {
         input: inputConfig(this.column),
         items: [
-          typeConfig(this.column, this.view),
+          {
+            type: 'group',
+            name: 'Column Prop Group ',
+            children: () => [typeConfig(this.column, this.view)],
+          },
           {
             type: 'action',
             name: 'Duplicate Column',
