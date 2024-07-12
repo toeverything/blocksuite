@@ -96,7 +96,10 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       </div>
       ${this.finish
         ? html`
-            <ai-finish-tip .copy=${this.copy}></ai-finish-tip>
+            <ai-finish-tip
+              .copy=${this.copy}
+              .host=${this.host}
+            ></ai-finish-tip>
             ${responseGroup.length > 0
               ? html`
                   <ai-panel-divider></ai-panel-divider>

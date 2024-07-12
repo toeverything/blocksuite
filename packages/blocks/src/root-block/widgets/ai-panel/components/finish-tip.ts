@@ -1,3 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -73,6 +75,12 @@ export class AIFinishTip extends WithDisposable(LitElement) {
                   class="copy"
                   @click=${async () => {
                     this.copied = !!(await this.copy?.onCopy());
+                    if (this.copied) {
+                      const rootService =
+                        this.host.spec.getService('affine:page');
+                      const { notificationService } = rootService;
+                      notificationService?.toast('Copied to clipboard');
+                    }
                   }}
                 >
                   ${CopyIcon}
@@ -88,6 +96,9 @@ export class AIFinishTip extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor copy: CopyConfig | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 }
 
 declare global {

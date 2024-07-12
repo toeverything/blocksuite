@@ -204,7 +204,10 @@ export class AIPanelError extends WithDisposable(LitElement) {
         ${errorTemplate}
       </div>
       ${this.withAnswer
-        ? html`<ai-finish-tip .copy=${this.copy}></ai-finish-tip>`
+        ? html`<ai-finish-tip
+            .copy=${this.copy}
+            .host=${this.host}
+          ></ai-finish-tip>`
         : nothing}
       ${responseGroup.length > 0
         ? html`
