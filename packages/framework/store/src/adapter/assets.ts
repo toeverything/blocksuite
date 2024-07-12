@@ -6,12 +6,21 @@ import { assertExists, sha } from '@blocksuite/global/utils';
 export class MemoryBlobCRUD {
   private readonly _map = new Map<string, Blob>();
 
+  delete(key: string) {
+    this._map.delete(key);
+  }
+
   get(key: string) {
     return this._map.get(key) ?? null;
   }
 
+  list() {
+    return Array.from(this._map.keys());
+  }
   async set(value: Blob): Promise<string>;
+
   async set(key: string, value: Blob): Promise<string>;
+
   async set(valueOrKey: string | Blob, _value?: Blob) {
     const key =
       typeof valueOrKey === 'string'
@@ -26,100 +35,92 @@ export class MemoryBlobCRUD {
     this._map.set(key, value);
     return key;
   }
-
-  delete(key: string) {
-    this._map.delete(key);
-  }
-
-  list() {
-    return Array.from(this._map.keys());
-  }
 }
 
 export const mimeExtMap = new Map([
-  ['audio/aac', 'aac'],
-  ['application/x-abiword', 'abw'],
-  ['image/apng', 'apng'],
-  ['application/x-freearc', 'arc'],
-  ['image/avif', 'avif'],
-  ['video/x-msvideo', 'avi'],
-  ['application/vnd.amazon.ebook', 'azw'],
-  ['application/octet-stream', 'bin'],
-  ['image/bmp', 'bmp'],
-  ['application/x-bzip', 'bz'],
-  ['application/x-bzip2', 'bz2'],
-  ['application/x-cdf', 'cda'],
-  ['application/x-csh', 'csh'],
-  ['text/css', 'css'],
-  ['text/csv', 'csv'],
-  ['application/msword', 'doc'],
-  [
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'docx',
-  ],
-  ['application/vnd.ms-fontobject', 'eot'],
   ['application/epub+zip', 'epub'],
   ['application/gzip', 'gz'],
-  ['image/gif', 'gif'],
-  ['text/html', 'html'],
-  ['image/vnd.microsoft.icon', 'ico'],
-  ['text/calendar', 'ics'],
   ['application/java-archive', 'jar'],
-  ['image/jpeg', 'jpeg'],
-  ['text/javascript', 'js'],
   ['application/json', 'json'],
   ['application/ld+json', 'jsonld'],
-  ['audio/midi', 'mid'],
-  ['audio/x-midi', 'midi'],
-  ['audio/mpeg', 'mp3'],
-  ['video/mp4', 'mp4'],
-  ['video/mpeg', 'mpeg'],
+  ['application/msword', 'doc'],
+  ['application/octet-stream', 'bin'],
+  ['application/ogg', 'ogx'],
+  ['application/pdf', 'pdf'],
+  ['application/rtf', 'rtf'],
+  ['application/vnd.amazon.ebook', 'azw'],
   ['application/vnd.apple.installer+xml', 'mpkg'],
+  ['application/vnd.mozilla.xul+xml', 'xul'],
+  ['application/vnd.ms-excel', 'xls'],
+  ['application/vnd.ms-fontobject', 'eot'],
+  ['application/vnd.ms-powerpoint', 'ppt'],
   ['application/vnd.oasis.opendocument.presentation', 'odp'],
   ['application/vnd.oasis.opendocument.spreadsheet', 'ods'],
   ['application/vnd.oasis.opendocument.text', 'odt'],
-  ['audio/ogg', 'oga'],
-  ['video/ogg', 'ogv'],
-  ['application/ogg', 'ogx'],
-  ['audio/opus', 'opus'],
-  ['font/otf', 'otf'],
-  ['image/png', 'png'],
-  ['application/pdf', 'pdf'],
-  ['application/x-httpd-php', 'php'],
-  ['application/vnd.ms-powerpoint', 'ppt'],
   [
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'pptx',
   ],
-  ['application/vnd.rar', 'rar'],
-  ['application/rtf', 'rtf'],
-  ['application/x-sh', 'sh'],
-  ['image/svg+xml', 'svg'],
-  ['application/x-tar', 'tar'],
-  ['image/tiff', 'tiff'],
-  ['video/mp2t', 'ts'],
-  ['font/ttf', 'ttf'],
-  ['text/plain', 'txt'],
-  ['application/vnd.visio', 'vsd'],
-  ['audio/wav', 'wav'],
-  ['audio/webm', 'weba'],
-  ['video/webm', 'webm'],
-  ['image/webp', 'webp'],
-  ['font/woff', 'woff'],
-  ['font/woff2', 'woff2'],
-  ['application/xhtml+xml', 'xhtml'],
-  ['application/vnd.ms-excel', 'xls'],
   ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'xlsx'],
+  [
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'docx',
+  ],
+  ['application/vnd.rar', 'rar'],
+  ['application/vnd.visio', 'vsd'],
+  ['application/x-7z-compressed', '7z'],
+  ['application/x-abiword', 'abw'],
+  ['application/x-bzip', 'bz'],
+  ['application/x-bzip2', 'bz2'],
+  ['application/x-cdf', 'cda'],
+  ['application/x-csh', 'csh'],
+  ['application/x-freearc', 'arc'],
+  ['application/x-httpd-php', 'php'],
+  ['application/x-sh', 'sh'],
+  ['application/x-tar', 'tar'],
+  ['application/xhtml+xml', 'xhtml'],
   ['application/xml', 'xml'],
-  ['text/xml', 'xml'],
-  ['application/vnd.mozilla.xul+xml', 'xul'],
   ['application/zip', 'zip'],
   ['application/zstd', 'zst'],
-  ['video/3gpp', '3gp'],
   ['audio/3gpp', '3gp'],
-  ['video/3gpp2', '3g2'],
   ['audio/3gpp2', '3g2'],
-  ['application/x-7z-compressed', '7z'],
+  ['audio/aac', 'aac'],
+  ['audio/midi', 'mid'],
+  ['audio/mpeg', 'mp3'],
+  ['audio/ogg', 'oga'],
+  ['audio/opus', 'opus'],
+  ['audio/wav', 'wav'],
+  ['audio/webm', 'weba'],
+  ['audio/x-midi', 'midi'],
+  ['font/otf', 'otf'],
+  ['font/ttf', 'ttf'],
+  ['font/woff', 'woff'],
+  ['font/woff2', 'woff2'],
+  ['image/apng', 'apng'],
+  ['image/avif', 'avif'],
+  ['image/bmp', 'bmp'],
+  ['image/gif', 'gif'],
+  ['image/jpeg', 'jpeg'],
+  ['image/png', 'png'],
+  ['image/svg+xml', 'svg'],
+  ['image/tiff', 'tiff'],
+  ['image/vnd.microsoft.icon', 'ico'],
+  ['image/webp', 'webp'],
+  ['text/calendar', 'ics'],
+  ['text/css', 'css'],
+  ['text/csv', 'csv'],
+  ['text/html', 'html'],
+  ['text/javascript', 'js'],
+  ['text/plain', 'txt'],
+  ['text/xml', 'xml'],
+  ['video/3gpp', '3gp'],
+  ['video/3gpp2', '3g2'],
+  ['video/mp2t', 'ts'],
+  ['video/mp4', 'mp4'],
+  ['video/mpeg', 'mpeg'],
+  ['video/ogg', 'ogv'],
+  ['video/webm', 'webm'],
+  ['video/x-msvideo', 'avi'],
 ]);
 
 export const extMimeMap = new Map(

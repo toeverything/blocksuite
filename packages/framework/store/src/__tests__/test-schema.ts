@@ -1,4 +1,4 @@
-import { defineBlockSchema, type SchemaToModel } from '../schema/index.js';
+import { type SchemaToModel, defineBlockSchema } from '../schema/index.js';
 
 export const RootBlockSchema = defineBlockSchema({
   flavour: 'affine:page',

@@ -1,3 +1,5 @@
+import type { DenseMenuBuilder } from '../common/type.js';
+
 import {
   ConnectorCWithArrowIcon,
   ConnectorIcon,
@@ -5,7 +7,6 @@ import {
   ConnectorXWithArrowIcon,
 } from '../../../../../_common/icons/edgeless.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
-import type { DenseMenuBuilder } from '../common/type.js';
 
 export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
   const prevMode =

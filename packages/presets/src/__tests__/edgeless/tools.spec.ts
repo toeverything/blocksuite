@@ -3,6 +3,7 @@ import type {
   SurfaceBlockComponent,
 } from '@blocksuite/blocks';
 import type {} from '@blocksuite/blocks';
+
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';

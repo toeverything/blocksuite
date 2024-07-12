@@ -1,7 +1,8 @@
 import type { Op, OpSet, ResolvedOptions } from '../core.js';
 import type { Line, Point } from '../geometry.js';
-import { lineLength } from '../geometry.js';
 import type { PatternFiller, RenderHelper } from './filler-interface.js';
+
+import { lineLength } from '../geometry.js';
 import { polygonHachureLines } from './scan-line-hachure.js';
 
 export class DashedFiller implements PatternFiller {

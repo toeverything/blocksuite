@@ -1,6 +1,10 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import type { LastProps } from '../../../surface-block/managers/edit-session.js';
+import type { PieMenuContext } from './base.js';
+
 import {
   ConnectorCWithArrowIcon,
   ConnectorIcon,
@@ -26,7 +30,6 @@ import {
   TriangleIcon,
   ViewBarIcon,
 } from '../../../_common/icons/edgeless.js';
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
 import { ConnectorMode } from '../../../surface-block/element-model/connector.js';
 import {
@@ -34,14 +37,12 @@ import {
   STROKE_COLORS,
 } from '../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle, ShapeType } from '../../../surface-block/index.js';
-import type { LastProps } from '../../../surface-block/managers/edit-session.js';
 import { LINE_COLORS } from '../../edgeless/components/panel/color-panel.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from '../../edgeless/utils/consts.js';
-import type { PieMenuContext } from './base.js';
 import { PieMenuBuilder } from './pie-builder.js';
 import {
   getActiveConnectorStrokeColor,

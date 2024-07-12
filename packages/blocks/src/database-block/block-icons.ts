@@ -1,5 +1,6 @@
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
+
 import { html } from 'lit';
 
 import type { ParagraphType } from '../paragraph-block/index.js';

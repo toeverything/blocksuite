@@ -1,61 +1,14 @@
 import type { BlockElement } from '../../view/index.js';
-import { UIEventState, UIEventStateContext } from '../base.js';
 import type {
   EventName,
   EventScope,
   UIEventDispatcher,
 } from '../dispatcher.js';
+
+import { UIEventState, UIEventStateContext } from '../base.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class RangeControl {
-  private _prev: Range | null = null;
-
-  constructor(private _dispatcher: UIEventDispatcher) {}
-
-  private _compositionUpdate = (event: Event) => {
-    const scope = this._buildScope('compositionUpdate');
-
-    this._dispatcher.run(
-      'compositionUpdate',
-      this._createContext(event),
-      scope
-    );
-  };
-
-  private _compositionStart = (event: Event) => {
-    const scope = this._buildScope('compositionStart');
-
-    this._dispatcher.run('compositionStart', this._createContext(event), scope);
-  };
-
-  private _compositionEnd = (event: Event) => {
-    const scope = this._buildScope('compositionEnd');
-
-    this._dispatcher.run('compositionEnd', this._createContext(event), scope);
-  };
-
-  private _selectionChange = (event: Event) => {
-    const selection = document.getSelection();
-    if (!selection) return;
-
-    if (!selection.containsNode(this._dispatcher.host, true)) return;
-    if (selection.containsNode(this._dispatcher.host)) return;
-
-    const scope = this._buildScope('selectionChange');
-
-    this._dispatcher.run('selectionChange', this._createContext(event), scope);
-  };
-
-  private _createContext(event: Event) {
-    return UIEventStateContext.from(
-      new UIEventState(event),
-      new EventSourceState({
-        event,
-        sourceType: EventScopeSourceType.Selection,
-      })
-    );
-  }
-
   private _buildScope = (eventName: EventName) => {
     let scope: EventScope | undefined;
     const selection = document.getSelection();
@@ -70,6 +23,44 @@ export class RangeControl {
 
     return scope;
   };
+
+  private _compositionEnd = (event: Event) => {
+    const scope = this._buildScope('compositionEnd');
+
+    this._dispatcher.run('compositionEnd', this._createContext(event), scope);
+  };
+
+  private _compositionStart = (event: Event) => {
+    const scope = this._buildScope('compositionStart');
+
+    this._dispatcher.run('compositionStart', this._createContext(event), scope);
+  };
+
+  private _compositionUpdate = (event: Event) => {
+    const scope = this._buildScope('compositionUpdate');
+
+    this._dispatcher.run(
+      'compositionUpdate',
+      this._createContext(event),
+      scope
+    );
+  };
+
+  private _prev: Range | null = null;
+
+  private _selectionChange = (event: Event) => {
+    const selection = document.getSelection();
+    if (!selection) return;
+
+    if (!selection.containsNode(this._dispatcher.host, true)) return;
+    if (selection.containsNode(this._dispatcher.host)) return;
+
+    const scope = this._buildScope('selectionChange');
+
+    this._dispatcher.run('selectionChange', this._createContext(event), scope);
+  };
+
+  constructor(private _dispatcher: UIEventDispatcher) {}
 
   private _buildEventScopeByNativeRange(name: EventName, range: Range) {
     const blocks = this._findBlockElementPath(range);
@@ -93,6 +84,16 @@ export class RangeControl {
     ).reverse();
 
     return this._dispatcher.buildEventScope(name, flavours, paths);
+  }
+
+  private _createContext(event: Event) {
+    return UIEventStateContext.from(
+      new UIEventState(event),
+      new EventSourceState({
+        event,
+        sourceType: EventScopeSourceType.Selection,
+      })
+    );
   }
 
   private _findBlockElementPath(range: Range): string[][] {

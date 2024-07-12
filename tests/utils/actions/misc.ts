@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import '../declare-test-window.js';
-
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
@@ -9,25 +7,27 @@ import type {
   RichText,
   ThemeObserver,
 } from '@blocks/index.js';
-import { assertExists } from '@global/utils.js';
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { DocsPanel } from '@playground/apps/_common/components/docs-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
-import { expect } from '@playwright/test';
 import type { AffineEditorContainer } from '@presets/editors/index.js';
 import type { BlockModel } from '@store/schema/index.js';
+
+import { assertExists } from '@global/utils.js';
+import { expect } from '@playwright/test';
 import { uuidv4 } from '@store/utils/id-generator.js';
 import lz from 'lz-string';
 
+import '../declare-test-window.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
+  SHORT_KEY,
   pressEnter,
   pressSpace,
   pressTab,
-  SHORT_KEY,
   type,
 } from './keyboard.js';
 
@@ -242,10 +242,10 @@ export function expectConsoleMessage(
   page.on('console', (message: ConsoleMessage) => {
     if (
       [
-        '[vite] connecting...',
-        '[vite] connected.',
-        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
         '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
+        '[vite] connected.',
+        '[vite] connecting...',
+        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
       ].includes(message.text())
     ) {
       ignoredLog(message);

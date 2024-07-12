@@ -1,9 +1,8 @@
-import './utils/declare-test-window.js';
-
 import { expect } from '@playwright/test';
 
 import { initDatabaseColumn } from './database/actions.js';
 import {
+  SHORT_KEY,
   activeNoteInEdgeless,
   captureHistory,
   changeEdgelessNoteBackground,
@@ -49,7 +48,6 @@ import {
   selectNoteInEdgeless,
   setInlineRangeInSelectedRichText,
   setSelection,
-  SHORT_KEY,
   switchEditorMode,
   toViewCoord,
   triggerComponentToolbarAction,
@@ -75,6 +73,7 @@ import {
   assertTextFormats,
   assertTitle,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 
 test.beforeEach(({ page }, testInfo) => {

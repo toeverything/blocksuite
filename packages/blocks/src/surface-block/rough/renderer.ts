@@ -1,10 +1,11 @@
+import type { Op, OpSet, ResolvedOptions } from './core.js';
+import type { RenderHelper } from './fillers/filler-interface.js';
+import type { Point } from './geometry.js';
+
 import { absolutize } from '../path-data-parser/absolutize.js';
 import { normalize } from '../path-data-parser/normalize.js';
 import { parsePath } from '../path-data-parser/parser.js';
-import type { Op, OpSet, ResolvedOptions } from './core.js';
 import { getFiller } from './fillers/filler.js';
-import type { RenderHelper } from './fillers/filler-interface.js';
-import type { Point } from './geometry.js';
 import { Random } from './math.js';
 
 interface EllipseParams {

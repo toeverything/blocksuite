@@ -1,25 +1,26 @@
-import './common/group-by/define.js';
-
 import type { BlockStdScope } from '@blocksuite/block-std';
+import type { ReferenceElement } from '@floating-ui/dom';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
-import type { ReferenceElement } from '@floating-ui/dom';
-import { css, type TemplateResult, unsafeCSS } from 'lit';
+import { type TemplateResult, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataSource } from './common/data-source/base.js';
-import { createRecordDetail, popSideDetail } from './common/detail/layout.js';
 import type { ViewSource } from './common/index.js';
 import type { DataViewSelection, DataViewSelectionState } from './types.js';
-import { renderUniLit } from './utils/uni-component/index.js';
 import type { DataViewExpose, DataViewProps } from './view/data-view.js';
 import type { DataViewBase } from './view/data-view-base.js';
 import type { DataViewManager } from './view/data-view-manager.js';
+
+import { dataViewCommonStyle } from './common/css-variable.js';
+import { createRecordDetail, popSideDetail } from './common/detail/layout.js';
+import './common/group-by/define.js';
+import { renderUniLit } from './utils/uni-component/index.js';
 
 type ViewProps = {
   view: DataViewManager;
@@ -52,9 +53,9 @@ export type DataViewRendererConfig = {
 
 @customElement('affine-data-view-renderer')
 export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
-  get expose() {
-    return this._view.value;
-  }
+  private _view = createRef<DataViewExpose>();
+
+  private viewMap: Record<string, ViewProps> = {};
 
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-data-view-renderer'))}
@@ -64,15 +65,35 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  private _view = createRef<DataViewExpose>();
+  focusFirstCell = () => {
+    this._view.value?.focusFirstCell();
+  };
 
-  private viewMap: Record<string, ViewProps> = {};
-
-  @property({ attribute: false })
-  accessor config!: DataViewRendererConfig;
-
-  @state()
-  accessor currentView: string | undefined = undefined;
+  openDetailPanel = (ops: {
+    view: DataViewManager;
+    rowId: string;
+    onClose?: () => void;
+  }) => {
+    const openDetailPanel = this.config.detailPanelConfig?.openDetailPanel;
+    if (openDetailPanel) {
+      openDetailPanel(
+        this,
+        createRecordDetail({
+          view: ops.view,
+          rowId: ops.rowId,
+        })
+      )
+        .catch(console.error)
+        .finally(ops.onClose);
+    } else {
+      popSideDetail({
+        target: this.config.detailPanelConfig?.target?.() ?? document.body,
+        view: ops.view,
+        rowId: ops.rowId,
+        onClose: ops.onClose,
+      });
+    }
+  };
 
   private getView(id: string): ViewProps {
     if (!this.viewMap[id]) {
@@ -161,36 +182,6 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  focusFirstCell = () => {
-    this._view.value?.focusFirstCell();
-  };
-
-  openDetailPanel = (ops: {
-    view: DataViewManager;
-    rowId: string;
-    onClose?: () => void;
-  }) => {
-    const openDetailPanel = this.config.detailPanelConfig?.openDetailPanel;
-    if (openDetailPanel) {
-      openDetailPanel(
-        this,
-        createRecordDetail({
-          view: ops.view,
-          rowId: ops.rowId,
-        })
-      )
-        .catch(console.error)
-        .finally(ops.onClose);
-    } else {
-      popSideDetail({
-        target: this.config.detailPanelConfig?.target?.() ?? document.body,
-        view: ops.view,
-        rowId: ops.rowId,
-        onClose: ops.onClose,
-      });
-    }
-  };
-
   override render() {
     const views = this.config.viewSource.views;
     const viewData = views
@@ -206,6 +197,16 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get expose() {
+    return this._view.value;
+  }
+
+  @property({ attribute: false })
+  accessor config!: DataViewRendererConfig;
+
+  @state()
+  accessor currentView: string | undefined = undefined;
 }
 
 declare global {
@@ -217,14 +218,14 @@ declare global {
 export class DataView {
   private _ref = createRef<DataViewRenderer>();
 
-  get expose() {
-    return this._ref.value?.expose;
-  }
-
   render(props: DataViewRendererConfig) {
     return html` <affine-data-view-renderer
       ${ref(this._ref)}
       .config="${props}"
     ></affine-data-view-renderer>`;
+  }
+
+  get expose() {
+    return this._ref.value?.expose;
   }
 }

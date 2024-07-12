@@ -1,15 +1,16 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
 import {
+  type ReferenceElement,
   autoUpdate,
   computePosition,
-  type ReferenceElement,
   size,
 } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { createModal } from '../../../../_common/components/index.js';
 import type { DataViewManager } from '../../view/data-view-manager.js';
+
+import { createModal } from '../../../../_common/components/index.js';
 import { CrossIcon } from '../icons/index.js';
 import { RecordDetail } from './detail.js';
 
@@ -64,21 +65,6 @@ class SideLayoutModal extends ShadowlessElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor content: HTMLElement | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor close: (() => void) | undefined = undefined;
-
-  renderOps() {
-    return html``;
-    // return html`
-    //   <div class='header-op' style='transform: rotate(180deg)'>
-    //     ${arrowUp}
-    //   </div>
-    //   <div class='header-op'>${arrowUp}</div>`;
-  }
-
   override render() {
     return html`
       <div class="side-modal-header">
@@ -90,6 +76,21 @@ class SideLayoutModal extends ShadowlessElement {
       <div class="side-modal-content">${this.content}</div>
     `;
   }
+
+  renderOps() {
+    return html``;
+    // return html`
+    //   <div class='header-op' style='transform: rotate(180deg)'>
+    //     ${arrowUp}
+    //   </div>
+    //   <div class='header-op'>${arrowUp}</div>`;
+  }
+
+  @property({ attribute: false })
+  accessor close: (() => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor content: HTMLElement | undefined = undefined;
 }
 
 export const popSideDetail = (ops: {

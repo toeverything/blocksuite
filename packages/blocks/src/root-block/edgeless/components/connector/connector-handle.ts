@@ -1,20 +1,23 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import {
   type ConnectorElementModel,
   Vec,
 } from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 const SIZE = 12;
 const HALF_SIZE = SIZE / 2;
 
 @customElement('edgeless-connector-handle')
 export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
+  private _lastZoom = 1;
+
   static override styles = css`
     .line-controller {
       position: absolute;
@@ -40,19 +43,21 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     }
   `;
 
-  @query('.line-start')
-  private accessor _startHandler!: HTMLDivElement;
+  private _bindEvent() {
+    const edgeless = this.edgeless;
 
-  @query('.line-end')
-  private accessor _endHandler!: HTMLDivElement;
-
-  private _lastZoom = 1;
-
-  @property({ attribute: false })
-  accessor connector!: ConnectorElementModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
+    this._disposables.addFromEvent(this._startHandler, 'pointerdown', e => {
+      edgeless.slots.elementResizeStart.emit();
+      this._capPointerDown(e, 'source');
+    });
+    this._disposables.addFromEvent(this._endHandler, 'pointerdown', e => {
+      edgeless.slots.elementResizeStart.emit();
+      this._capPointerDown(e, 'target');
+    });
+    this._disposables.add(() => {
+      edgeless.surface.overlays.connector.clear();
+    });
+  }
 
   private _capPointerDown(e: PointerEvent, connection: 'target' | 'source') {
     const { edgeless, connector, _disposables } = this;
@@ -77,22 +82,6 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
       this._disposables = new DisposableGroup();
       this._bindEvent();
       edgeless.slots.elementResizeEnd.emit();
-    });
-  }
-
-  private _bindEvent() {
-    const edgeless = this.edgeless;
-
-    this._disposables.addFromEvent(this._startHandler, 'pointerdown', e => {
-      edgeless.slots.elementResizeStart.emit();
-      this._capPointerDown(e, 'source');
-    });
-    this._disposables.addFromEvent(this._endHandler, 'pointerdown', e => {
-      edgeless.slots.elementResizeStart.emit();
-      this._capPointerDown(e, 'target');
-    });
-    this._disposables.add(() => {
-      edgeless.surface.overlays.connector.clear();
     });
   }
 
@@ -135,6 +124,18 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
       <div class="line-controller line-end" style=${styleMap(endStyle)}></div>
     `;
   }
+
+  @query('.line-end')
+  private accessor _endHandler!: HTMLDivElement;
+
+  @query('.line-start')
+  private accessor _startHandler!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor connector!: ConnectorElementModel;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {

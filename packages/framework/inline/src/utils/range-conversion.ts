@@ -1,7 +1,8 @@
 import type * as Y from 'yjs';
 
-import { VElement } from '../components/v-element.js';
 import type { InlineRange } from '../types.js';
+
+import { VElement } from '../components/v-element.js';
 import { isInEmbedElement } from './embed.js';
 import {
   nativePointToTextPoint,

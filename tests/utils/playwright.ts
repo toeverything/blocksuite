@@ -1,9 +1,8 @@
+import { type Page, test as baseTest, expect } from '@playwright/test';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-
-import { expect, type Page, test as baseTest } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,

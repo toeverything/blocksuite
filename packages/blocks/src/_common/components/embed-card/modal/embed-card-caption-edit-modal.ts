@@ -4,27 +4,22 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { BlockComponent } from '../../../utils/query.js';
+
 import { embedCardModalStyles } from './styles.js';
 
 @customElement('embed-card-caption-edit-modal')
 export class EmbedCardEditCaptionEditModal extends WithDisposable(
   ShadowlessElement
 ) {
-  private get _model() {
-    return this.block.model;
-  }
+  static override styles = embedCardModalStyles;
 
   private get _doc() {
     return this.block.doc;
   }
 
-  static override styles = embedCardModalStyles;
-
-  @property({ attribute: false })
-  accessor block!: BlockComponent;
-
-  @query('.embed-card-modal-input.caption')
-  accessor captionInput!: HTMLTextAreaElement;
+  private get _model() {
+    return this.block.model;
+  }
 
   private _onKeydown(e: KeyboardEvent) {
     e.stopPropagation();
@@ -85,6 +80,12 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor block!: BlockComponent;
+
+  @query('.embed-card-modal-input.caption')
+  accessor captionInput!: HTMLTextAreaElement;
 }
 
 export function toggleEmbedCardCaptionEditModal(block: BlockComponent) {

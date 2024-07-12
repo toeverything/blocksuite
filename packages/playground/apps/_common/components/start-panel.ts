@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '@shoelace-style/shoelace/dist/components/card/card.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 

@@ -1,10 +1,8 @@
-import './utils/declare-test-window.js';
+import type { Page } from '@playwright/test';
 
+import { expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-
-import type { Page } from '@playwright/test';
-import { expect } from '@playwright/test';
 
 import {
   activeEmbed,
@@ -37,6 +35,7 @@ import {
   assertRichTextInlineRange,
   assertRichTexts,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { test } from './utils/playwright.js';
 
 async function focusCaption(page: Page) {

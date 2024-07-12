@@ -2,10 +2,12 @@ import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
+import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
+import type { BookmarkBlockComponent } from './bookmark-block.js';
+
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
-import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -15,18 +17,12 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
-import type { BookmarkBlockComponent } from './bookmark-block.js';
 import {
   type BookmarkBlockModel,
   BookmarkBlockSchema,
 } from './bookmark-model.js';
 
 export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
-  private static readonly linkPreviewer = new LinkPreviewer();
-
-  static setLinkPreviewEndpoint =
-    BookmarkBlockService.linkPreviewer.setEndpoint;
-
   private _dragHandleOption: DragHandleOption = {
     flavour: BookmarkBlockSchema.model.flavour,
     edgeless: true,
@@ -118,6 +114,11 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
       return false;
     },
   };
+
+  private static readonly linkPreviewer = new LinkPreviewer();
+
+  static setLinkPreviewEndpoint =
+    BookmarkBlockService.linkPreviewer.setEndpoint;
 
   queryUrlData = (url: string, signal?: AbortSignal) => {
     return BookmarkBlockService.linkPreviewer.query(url, signal);

@@ -1,23 +1,20 @@
-import { html, LitElement } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
+
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 import { getInlineEditorInsideRoot } from '../utils/query.js';
 
 @customElement('v-element')
 export class VElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > extends LitElement {
-  @property({ type: Object })
-  accessor delta: DeltaInsert<T> = {
-    insert: ZERO_WIDTH_SPACE,
-  };
-
-  @property({ attribute: false })
-  accessor selected!: boolean;
+  override createRenderRoot() {
+    return this;
+  }
 
   override render() {
     const inlineEditor = getInlineEditorInsideRoot(this);
@@ -48,9 +45,13 @@ export class VElement<
     >`;
   }
 
-  override createRenderRoot() {
-    return this;
-  }
+  @property({ type: Object })
+  accessor delta: DeltaInsert<T> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
+
+  @property({ attribute: false })
+  accessor selected!: boolean;
 }
 
 declare global {

@@ -1,10 +1,12 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
 import type { ListBlockModel } from '../../list-block/index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import type { SurfaceRefBlockModel } from '../../surface-ref-block/surface-ref-model.js';
+
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 
 export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
@@ -26,7 +28,7 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
     // replace LinkedPage pageId with new id in paragraph blocks
     if (
       payload.type === 'block' &&
-      ['affine:paragraph', 'affine:list'].includes(payload.snapshot.flavour)
+      ['affine:list', 'affine:paragraph'].includes(payload.snapshot.flavour)
     ) {
       const model = payload.model as ParagraphBlockModel | ListBlockModel;
       let prev = 0;

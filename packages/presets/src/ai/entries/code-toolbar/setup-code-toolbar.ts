@@ -1,10 +1,11 @@
-import '../../_common/components/ask-ai-button.js';
-
 import type {
   AffineCodeToolbarWidget,
   CodeBlockComponent,
 } from '@blocksuite/blocks';
+
 import { html } from 'lit';
+
+import '../../_common/components/ask-ai-button.js';
 
 const AICodeItemGroups = buildAICodeItemGroups();
 const buttonOptions: AskAIButtonOptions = {
@@ -13,6 +14,7 @@ const buttonOptions: AskAIButtonOptions = {
 };
 
 import type { AskAIButtonOptions } from '../../_common/components/ask-ai-button.js';
+
 import { buildAICodeItemGroups } from '../../_common/config.js';
 import { AIStarIcon } from '../../_common/icons.js';
 

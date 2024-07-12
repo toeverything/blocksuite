@@ -1,6 +1,7 @@
 import { assertExists, throttle } from '@blocksuite/global/utils';
 
 import type { BaseSelection, TextSelection } from '../../selection/index.js';
+
 import { BlockElement } from '../element/block-element.js';
 import { RangeManager } from './range-manager.js';
 
@@ -8,179 +9,9 @@ import { RangeManager } from './range-manager.js';
  * Two-way binding between native range and text selection
  */
 export class RangeBinding {
-  get selectionManager() {
-    return this.host.selection;
-  }
-
-  get rangeManager() {
-    assertExists(this.host.rangeManager);
-    return this.host.rangeManager;
-  }
-
-  get host() {
-    return this.manager.host;
-  }
-
-  private _prevTextSelection: {
-    selection: TextSelection;
-    path: string[];
-  } | null = null;
-
   private _compositionStartCallback:
     | ((event: CompositionEvent) => Promise<void>)
     | null = null;
-
-  isComposing = false;
-
-  constructor(public manager: RangeManager) {
-    this.host.disposables.add(
-      this.selectionManager.slots.changed.on(this._onStdSelectionChanged)
-    );
-
-    this.host.disposables.addFromEvent(
-      document,
-      'selectionchange',
-      throttle(() => {
-        this._onNativeSelectionChanged().catch(console.error);
-      }, 10)
-    );
-
-    this.host.disposables.add(
-      this.host.event.add('beforeInput', ctx => {
-        const event = ctx.get('defaultState').event as InputEvent;
-        this._onBeforeInput(event);
-      })
-    );
-
-    this.host.disposables.add(
-      this.host.event.add('compositionStart', this._onCompositionStart)
-    );
-    this.host.disposables.add(
-      this.host.event.add('compositionEnd', ctx => {
-        const event = ctx.get('defaultState').event as CompositionEvent;
-        this._onCompositionEnd(event);
-      })
-    );
-  }
-
-  private _onStdSelectionChanged = (selections: BaseSelection[]) => {
-    const text =
-      selections.find((selection): selection is TextSelection =>
-        selection.is('text')
-      ) ?? null;
-
-    if (text === this._prevTextSelection) {
-      return;
-    }
-
-    // wait for lit updated
-    this.host.updateComplete
-      .then(() => {
-        const model = text && this.host.doc.getBlockById(text.blockId);
-        const path = model && this.host.view.calculatePath(model);
-
-        const eq =
-          text && this._prevTextSelection && path
-            ? text.equals(this._prevTextSelection.selection) &&
-              path.join('') === this._prevTextSelection.path.join('')
-            : false;
-
-        if (eq) {
-          return;
-        }
-
-        this._prevTextSelection =
-          text && path
-            ? {
-                selection: text,
-                path: path,
-              }
-            : null;
-        if (text) {
-          this.rangeManager.syncTextSelectionToRange(text);
-        } else {
-          this.rangeManager.clear();
-        }
-      })
-      .catch(console.error);
-  };
-
-  private _onNativeSelectionChanged = async () => {
-    if (this.isComposing) return;
-
-    await this.host.updateComplete;
-
-    const selection = document.getSelection();
-    if (!selection) {
-      this.selectionManager.clear(['text']);
-      return;
-    }
-    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-    const isRangeReversed =
-      !!selection.anchorNode &&
-      !!selection.focusNode &&
-      (selection.anchorNode === selection.focusNode
-        ? selection.anchorOffset > selection.focusOffset
-        : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
-          Node.DOCUMENT_POSITION_PRECEDING);
-
-    if (!range) {
-      this._prevTextSelection = null;
-      this.selectionManager.clear(['text']);
-      return;
-    }
-
-    // range is in a non-editable element
-    // ex. placeholder
-    const isRangeOutNotEditable =
-      (range.startContainer instanceof HTMLElement &&
-        range.startContainer.contentEditable === 'false') ||
-      (range.endContainer instanceof HTMLElement &&
-        range.endContainer.contentEditable === 'false');
-    if (isRangeOutNotEditable) {
-      this._prevTextSelection = null;
-      this.selectionManager.clear(['text']);
-
-      // force clear native selection to break inline editor input
-      selection.removeRange(range);
-      return;
-    }
-
-    const el =
-      range.commonAncestorContainer instanceof Element
-        ? range.commonAncestorContainer
-        : range.commonAncestorContainer.parentElement;
-    if (!el) return;
-    const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
-    if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
-      return;
-
-    const inlineEditor = this.rangeManager.getClosestInlineEditor(
-      range.commonAncestorContainer
-    );
-    if (inlineEditor?.isComposing) return;
-
-    const textSelection = this.rangeManager.rangeToTextSelection(
-      range,
-      isRangeReversed
-    );
-    if (!textSelection) {
-      this._prevTextSelection = null;
-      this.selectionManager.clear(['text']);
-      return;
-    }
-
-    const model = this.host.doc.getBlockById(textSelection.blockId);
-    // If the model is not found, the selection maybe in another editor
-    if (!model) return;
-
-    const path = this.host.view.calculatePath(model);
-    this._prevTextSelection = {
-      selection: textSelection,
-      path,
-    };
-    this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
-  };
 
   private _onBeforeInput = (event: InputEvent) => {
     const selection = this.selectionManager.find('text');
@@ -236,6 +67,14 @@ export class RangeBinding {
       to: null,
     });
     this.selectionManager.setGroup('note', [newSelection]);
+  };
+
+  private _onCompositionEnd = (event: CompositionEvent) => {
+    if (this._compositionStartCallback) {
+      event.preventDefault();
+      this._compositionStartCallback(event).catch(console.error);
+      this._compositionStartCallback = null;
+    }
   };
 
   private _onCompositionStart = () => {
@@ -319,11 +158,173 @@ export class RangeBinding {
     };
   };
 
-  private _onCompositionEnd = (event: CompositionEvent) => {
-    if (this._compositionStartCallback) {
-      event.preventDefault();
-      this._compositionStartCallback(event).catch(console.error);
-      this._compositionStartCallback = null;
+  private _onNativeSelectionChanged = async () => {
+    if (this.isComposing) return;
+
+    await this.host.updateComplete;
+
+    const selection = document.getSelection();
+    if (!selection) {
+      this.selectionManager.clear(['text']);
+      return;
     }
+    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    const isRangeReversed =
+      !!selection.anchorNode &&
+      !!selection.focusNode &&
+      (selection.anchorNode === selection.focusNode
+        ? selection.anchorOffset > selection.focusOffset
+        : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
+          Node.DOCUMENT_POSITION_PRECEDING);
+
+    if (!range) {
+      this._prevTextSelection = null;
+      this.selectionManager.clear(['text']);
+      return;
+    }
+
+    // range is in a non-editable element
+    // ex. placeholder
+    const isRangeOutNotEditable =
+      (range.startContainer instanceof HTMLElement &&
+        range.startContainer.contentEditable === 'false') ||
+      (range.endContainer instanceof HTMLElement &&
+        range.endContainer.contentEditable === 'false');
+    if (isRangeOutNotEditable) {
+      this._prevTextSelection = null;
+      this.selectionManager.clear(['text']);
+
+      // force clear native selection to break inline editor input
+      selection.removeRange(range);
+      return;
+    }
+
+    const el =
+      range.commonAncestorContainer instanceof Element
+        ? range.commonAncestorContainer
+        : range.commonAncestorContainer.parentElement;
+    if (!el) return;
+    const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
+    if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
+      return;
+
+    const inlineEditor = this.rangeManager.getClosestInlineEditor(
+      range.commonAncestorContainer
+    );
+    if (inlineEditor?.isComposing) return;
+
+    const textSelection = this.rangeManager.rangeToTextSelection(
+      range,
+      isRangeReversed
+    );
+    if (!textSelection) {
+      this._prevTextSelection = null;
+      this.selectionManager.clear(['text']);
+      return;
+    }
+
+    const model = this.host.doc.getBlockById(textSelection.blockId);
+    // If the model is not found, the selection maybe in another editor
+    if (!model) return;
+
+    const path = this.host.view.calculatePath(model);
+    this._prevTextSelection = {
+      selection: textSelection,
+      path,
+    };
+    this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
   };
+
+  private _onStdSelectionChanged = (selections: BaseSelection[]) => {
+    const text =
+      selections.find((selection): selection is TextSelection =>
+        selection.is('text')
+      ) ?? null;
+
+    if (text === this._prevTextSelection) {
+      return;
+    }
+
+    // wait for lit updated
+    this.host.updateComplete
+      .then(() => {
+        const model = text && this.host.doc.getBlockById(text.blockId);
+        const path = model && this.host.view.calculatePath(model);
+
+        const eq =
+          text && this._prevTextSelection && path
+            ? text.equals(this._prevTextSelection.selection) &&
+              path.join('') === this._prevTextSelection.path.join('')
+            : false;
+
+        if (eq) {
+          return;
+        }
+
+        this._prevTextSelection =
+          text && path
+            ? {
+                selection: text,
+                path: path,
+              }
+            : null;
+        if (text) {
+          this.rangeManager.syncTextSelectionToRange(text);
+        } else {
+          this.rangeManager.clear();
+        }
+      })
+      .catch(console.error);
+  };
+
+  private _prevTextSelection: {
+    selection: TextSelection;
+    path: string[];
+  } | null = null;
+
+  isComposing = false;
+
+  constructor(public manager: RangeManager) {
+    this.host.disposables.add(
+      this.selectionManager.slots.changed.on(this._onStdSelectionChanged)
+    );
+
+    this.host.disposables.addFromEvent(
+      document,
+      'selectionchange',
+      throttle(() => {
+        this._onNativeSelectionChanged().catch(console.error);
+      }, 10)
+    );
+
+    this.host.disposables.add(
+      this.host.event.add('beforeInput', ctx => {
+        const event = ctx.get('defaultState').event as InputEvent;
+        this._onBeforeInput(event);
+      })
+    );
+
+    this.host.disposables.add(
+      this.host.event.add('compositionStart', this._onCompositionStart)
+    );
+    this.host.disposables.add(
+      this.host.event.add('compositionEnd', ctx => {
+        const event = ctx.get('defaultState').event as CompositionEvent;
+        this._onCompositionEnd(event);
+      })
+    );
+  }
+
+  get host() {
+    return this.manager.host;
+  }
+
+  get rangeManager() {
+    assertExists(this.host.rangeManager);
+    return this.host.rangeManager;
+  }
+
+  get selectionManager() {
+    return this.host.selection;
+  }
 }

@@ -8,8 +8,8 @@ declare module 'y-protocols/awareness.js' {
       doc: Y.Doc
     ): Awareness<State>;
 
-    getStates(): Map<number, State>;
     getLocalState(): State;
+    getStates(): Map<number, State>;
     setLocalState(state: State): void;
     setLocalStateField<Field extends keyof State>(
       field: Field,

@@ -1,27 +1,27 @@
 // related component
-import './components/column-header/column-header.js';
-import './components/cell-container.js';
-import './components/row.js';
-import './group.js';
-
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../../../../_common/components/index.js';
-import { AddCursorIcon } from '../../../../../_common/icons/index.js';
 import type { GroupHelper } from '../../../common/group-by/helper.js';
 import type { InsertToPosition } from '../../../types.js';
+import type { DataViewTableManager } from './table-view-manager.js';
+import type { TableViewSelection } from './types.js';
+
+import { popMenu } from '../../../../../_common/components/index.js';
+import { AddCursorIcon } from '../../../../../_common/icons/index.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
 import { renderUniLit } from '../../../utils/uni-component/index.js';
 import { DataViewBase } from '../../data-view-base.js';
+import './components/cell-container.js';
+import './components/column-header/column-header.js';
+import './components/row.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import { TableClipboardController } from './controller/clipboard.js';
 import { TableDragController } from './controller/drag.js';
 import { TableHotkeysController } from './controller/hotkeys.js';
 import { TableSelectionController } from './controller/selection.js';
-import type { DataViewTableManager } from './table-view-manager.js';
-import type { TableViewSelection } from './types.js';
+import './group.js';
 
 const styles = css`
   affine-database-table {
@@ -132,20 +132,6 @@ export class DataViewTable extends DataViewBase<
   DataViewTableManager,
   TableViewSelection
 > {
-  private get readonly() {
-    return this.view.readonly;
-  }
-
-  static override styles = styles;
-
-  dragController = new TableDragController(this);
-
-  selectionController = new TableSelectionController(this);
-
-  hotkeysController = new TableHotkeysController(this);
-
-  clipboardController = new TableClipboardController(this);
-
   private _addRow = (
     tableViewManager: DataViewTableManager,
     position: InsertToPosition | number
@@ -171,48 +157,30 @@ export class DataViewTable extends DataViewBase<
     });
   };
 
-  private renderTable() {
-    const groupHelper = this.view.groupHelper;
-    if (groupHelper) {
-      return html`
-        <div style="display:flex;flex-direction: column;gap: 16px;">
-          ${groupHelper.groups.map(group => {
-            return html`<affine-data-view-table-group
-              data-group-key="${group.key}"
-              .dataViewEle="${this.dataViewEle}"
-              .view="${this.view}"
-              .viewEle="${this}"
-              .group="${group}"
-            ></affine-data-view-table-group>`;
-          })}
-          ${this.renderAddGroup(groupHelper)}
-        </div>
-      `;
+  static override styles = styles;
+
+  clipboardController = new TableClipboardController(this);
+
+  dragController = new TableDragController(this);
+
+  getSelection = () => {
+    return this.selectionController.selection;
+  };
+
+  hotkeysController = new TableHotkeysController(this);
+
+  onWheel = (event: WheelEvent) => {
+    if (event.metaKey || event.ctrlKey) {
+      return;
     }
-    return html`<affine-data-view-table-group
-      .dataViewEle="${this.dataViewEle}"
-      .view="${this.view}"
-      .viewEle="${this}"
-    ></affine-data-view-table-group>`;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-        this.querySelectorAll('affine-data-view-table-group').forEach(v => {
-          v.requestUpdate();
-        });
-      })
-    );
-
-    if (this.readonly) return;
-  }
-
-  override addRow(position: InsertToPosition) {
-    this._addRow(this.view, position);
-  }
+    const ele = event.currentTarget;
+    if (ele instanceof HTMLElement) {
+      if (ele.scrollWidth === ele.clientWidth) {
+        return;
+      }
+      event.stopPropagation();
+    }
+  };
 
   renderAddGroup = (groupHelper: GroupHelper) => {
     const addGroup = groupHelper.addGroup;
@@ -247,18 +215,58 @@ export class DataViewTable extends DataViewBase<
     </div>`;
   };
 
-  onWheel = (event: WheelEvent) => {
-    if (event.metaKey || event.ctrlKey) {
-      return;
+  selectionController = new TableSelectionController(this);
+
+  private get readonly() {
+    return this.view.readonly;
+  }
+
+  private renderTable() {
+    const groupHelper = this.view.groupHelper;
+    if (groupHelper) {
+      return html`
+        <div style="display:flex;flex-direction: column;gap: 16px;">
+          ${groupHelper.groups.map(group => {
+            return html`<affine-data-view-table-group
+              data-group-key="${group.key}"
+              .dataViewEle="${this.dataViewEle}"
+              .view="${this.view}"
+              .viewEle="${this}"
+              .group="${group}"
+            ></affine-data-view-table-group>`;
+          })}
+          ${this.renderAddGroup(groupHelper)}
+        </div>
+      `;
     }
-    const ele = event.currentTarget;
-    if (ele instanceof HTMLElement) {
-      if (ele.scrollWidth === ele.clientWidth) {
-        return;
-      }
-      event.stopPropagation();
-    }
-  };
+    return html`<affine-data-view-table-group
+      .dataViewEle="${this.dataViewEle}"
+      .view="${this.view}"
+      .viewEle="${this}"
+    ></affine-data-view-table-group>`;
+  }
+
+  override addRow(position: InsertToPosition) {
+    this._addRow(this.view, position);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+        this.querySelectorAll('affine-data-view-table-group').forEach(v => {
+          v.requestUpdate();
+        });
+      })
+    );
+
+    if (this.readonly) return;
+  }
+
+  focusFirstCell(): void {
+    this.selectionController.focusFirstCell();
+  }
 
   hideIndicator(): void {
     this.dragController.dropPreview.remove();
@@ -269,10 +277,6 @@ export class DataViewTable extends DataViewBase<
     if (result) {
       this.view.rowMove(id, result.position, undefined, result.groupKey);
     }
-  }
-
-  showIndicator(evt: MouseEvent): boolean {
-    return this.dragController.showIndicator(evt) != null;
   }
 
   override render() {
@@ -293,13 +297,9 @@ export class DataViewTable extends DataViewBase<
     `;
   }
 
-  focusFirstCell(): void {
-    this.selectionController.focusFirstCell();
+  showIndicator(evt: MouseEvent): boolean {
+    return this.dragController.showIndicator(evt) != null;
   }
-
-  getSelection = () => {
-    return this.selectionController.selection;
-  };
 }
 
 declare global {

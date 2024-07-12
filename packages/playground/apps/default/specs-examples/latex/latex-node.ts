@@ -1,5 +1,6 @@
-import { ShadowlessElement } from '@blocksuite/block-std';
 import type { AffineTextAttributes } from '@blocksuite/blocks';
+
+import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type DeltaInsert,
@@ -37,13 +38,12 @@ export class latexNode extends ShadowlessElement {
     }
   `;
 
-  @property({ type: Object })
-  accessor delta: DeltaInsert<TextAttributesWithLatex> = {
-    insert: ZERO_WIDTH_SPACE,
-  };
-
-  @property({ type: Boolean })
-  accessor selected = false;
+  override render() {
+    return html`<span class="affine-latex" data-selected=${this.selected}
+      ><span class="latex-container"></span
+      ><v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+    ></span>`;
+  }
 
   override updated() {
     const latexContainer = this.querySelector<HTMLElement>('.latex-container');
@@ -56,12 +56,13 @@ export class latexNode extends ShadowlessElement {
     });
   }
 
-  override render() {
-    return html`<span class="affine-latex" data-selected=${this.selected}
-      ><span class="latex-container"></span
-      ><v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
-    ></span>`;
-  }
+  @property({ type: Object })
+  accessor delta: DeltaInsert<TextAttributesWithLatex> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
+
+  @property({ type: Boolean })
+  accessor selected = false;
 }
 
 declare global {

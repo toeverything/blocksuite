@@ -1,12 +1,12 @@
-import '../../panel/one-row-color-panel.js';
-import '../../buttons/tool-icon-button.js';
-import '../common/slide-menu.js';
-
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
+
+import '../../buttons/tool-icon-button.js';
+import '../../panel/one-row-color-panel.js';
+import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 @customElement('edgeless-text-menu')
@@ -20,12 +20,6 @@ export class EdgelessTextMenu extends EdgelessToolbarToolMixin(LitElement) {
   `;
 
   override type: EdgelessTool['type'] = 'text';
-
-  @property({ attribute: false })
-  accessor color!: string;
-
-  @property({ attribute: false })
-  accessor onChange!: (props: Record<string, unknown>) => void;
 
   override render() {
     if (this.edgelessTool.type !== 'text') return nothing;
@@ -41,6 +35,12 @@ export class EdgelessTextMenu extends EdgelessToolbarToolMixin(LitElement) {
       </edgeless-slide-menu>
     `;
   }
+
+  @property({ attribute: false })
+  accessor color!: string;
+
+  @property({ attribute: false })
+  accessor onChange!: (props: Record<string, unknown>) => void;
 }
 
 declare global {

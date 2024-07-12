@@ -14,46 +14,7 @@ export abstract class BaseCellRenderer<
   extends WithDisposable(ShadowlessElement)
   implements DataViewCellLifeCycle, CellRenderProps<Data, Value>
 {
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
-
-  @property({ attribute: false })
-  accessor column!: DataViewColumnManager<Value, Data>;
-
-  @property()
-  accessor rowId!: string;
-
-  @property({ attribute: false })
-  accessor isEditing!: boolean;
-
-  @property({ attribute: false })
-  accessor selectCurrentCell!: (editing: boolean) => void;
-
-  get readonly(): boolean {
-    return this.column.readonly;
-  }
-
-  get value() {
-    return this.column.getValue(this.rowId);
-  }
-
-  onChange(value: Value | undefined): void {
-    this.column.setValue(this.rowId, value);
-  }
-
   beforeEnterEditMode(): boolean {
-    return true;
-  }
-
-  onEnterEditMode(): void {
-    // do nothing
-  }
-
-  onExitEditMode() {
-    // do nothing
-  }
-
-  focusCell() {
     return true;
   }
 
@@ -97,13 +58,52 @@ export abstract class BaseCellRenderer<
     });
   }
 
+  focusCell() {
+    return true;
+  }
+
   forceUpdate(): void {
     this.requestUpdate();
+  }
+
+  onChange(value: Value | undefined): void {
+    this.column.setValue(this.rowId, value);
   }
 
   onCopy(_e: ClipboardEvent) {}
 
   onCut(_e: ClipboardEvent) {}
 
+  onEnterEditMode(): void {
+    // do nothing
+  }
+
+  onExitEditMode() {
+    // do nothing
+  }
+
   onPaste(_e: ClipboardEvent) {}
+
+  get readonly(): boolean {
+    return this.column.readonly;
+  }
+
+  get value() {
+    return this.column.getValue(this.rowId);
+  }
+
+  @property({ attribute: false })
+  accessor column!: DataViewColumnManager<Value, Data>;
+
+  @property({ attribute: false })
+  accessor isEditing!: boolean;
+
+  @property()
+  accessor rowId!: string;
+
+  @property({ attribute: false })
+  accessor selectCurrentCell!: (editing: boolean) => void;
+
+  @property({ attribute: false })
+  accessor view!: DataViewManager;
 }

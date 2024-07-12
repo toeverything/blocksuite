@@ -1,4 +1,5 @@
 import type { Slot } from '@blocksuite/store';
+
 import { createContext } from '@lit/context';
 
 import type { EdgelessToolbar } from './edgeless-toolbar.js';

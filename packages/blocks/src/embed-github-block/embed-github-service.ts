@@ -14,16 +14,16 @@ export class EmbedGithubBlockService extends BlockService<EmbedGithubModel> {
   static setLinkPreviewEndpoint =
     EmbedGithubBlockService.linkPreviewer.setEndpoint;
 
+  queryApiData = (embedGithubModel: EmbedGithubModel, signal?: AbortSignal) => {
+    return queryEmbedGithubApiData(embedGithubModel, signal);
+  };
+
   queryUrlData = (embedGithubModel: EmbedGithubModel, signal?: AbortSignal) => {
     return queryEmbedGithubData(
       embedGithubModel,
       EmbedGithubBlockService.linkPreviewer,
       signal
     );
-  };
-
-  queryApiData = (embedGithubModel: EmbedGithubModel, signal?: AbortSignal) => {
-    return queryEmbedGithubApiData(embedGithubModel, signal);
   };
 
   override mounted() {

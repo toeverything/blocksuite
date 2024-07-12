@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { consume } from '@lit/context';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -90,38 +90,6 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
     }
   `;
 
-  @query('.menu-container')
-  private accessor _menuContainer!: HTMLDivElement;
-
-  @query('.slide-menu-content')
-  private accessor _slideMenuContent!: HTMLDivElement;
-
-  @consume({ context: edgelessToolbarSlotsContext })
-  accessor toolbarSlots!: EdgelessToolbarSlots;
-
-  @property({ attribute: false })
-  accessor showPrevious = false;
-
-  @property({ attribute: false })
-  accessor showNext = false;
-
-  @property({ attribute: false })
-  accessor height = '40px';
-
-  private _toggleSlideButton() {
-    const scrollLeft = this._menuContainer.scrollLeft;
-    const menuWidth = this._menuContainer.clientWidth;
-
-    const leftMin = 0;
-    const leftMax = this._slideMenuContent.clientWidth - menuWidth + 2; // border is 2
-    this.showPrevious = scrollLeft > leftMin;
-    this.showNext = scrollLeft < leftMax;
-  }
-
-  private _handleWheel(event: WheelEvent) {
-    event.stopPropagation();
-  }
-
   private _handleSlideButtonClick(direction: 'left' | 'right') {
     const totalWidth = this._slideMenuContent.clientWidth;
     const currentScrollLeft = this._menuContainer.scrollLeft;
@@ -132,6 +100,20 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       left: Math.max(0, Math.min(newLeft, totalWidth)),
       behavior: 'smooth',
     });
+  }
+
+  private _handleWheel(event: WheelEvent) {
+    event.stopPropagation();
+  }
+
+  private _toggleSlideButton() {
+    const scrollLeft = this._menuContainer.scrollLeft;
+    const menuWidth = this._menuContainer.clientWidth;
+
+    const leftMin = 0;
+    const leftMax = this._slideMenuContent.clientWidth - menuWidth + 2; // border is 2
+    this.showPrevious = scrollLeft > leftMin;
+    this.showNext = scrollLeft < leftMax;
   }
 
   override firstUpdated() {
@@ -172,6 +154,24 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  @query('.menu-container')
+  private accessor _menuContainer!: HTMLDivElement;
+
+  @query('.slide-menu-content')
+  private accessor _slideMenuContent!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor height = '40px';
+
+  @property({ attribute: false })
+  accessor showNext = false;
+
+  @property({ attribute: false })
+  accessor showPrevious = false;
+
+  @consume({ context: edgelessToolbarSlotsContext })
+  accessor toolbarSlots!: EdgelessToolbarSlots;
 }
 
 declare global {

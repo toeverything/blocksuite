@@ -1,6 +1,7 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
-import { css, type TemplateResult } from 'lit';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { type TemplateResult, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -15,6 +16,7 @@ import type { EmbedLoomModel } from '../../embed-loom-block/embed-loom-model.js'
 import type { EmbedSyncedDocModel } from '../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../embed-youtube-block/embed-youtube-model.js';
 import type { ImageBlockModel } from '../../image-block/image-model.js';
+
 import { Bound } from '../../surface-block/utils/bound.js';
 
 @customElement('surface-ref-generic-block-portal')
@@ -26,25 +28,6 @@ export class SurfaceRefGenericBlockPortal extends WithDisposable(
       position: relative;
     }
   `;
-
-  @property({ attribute: false })
-  accessor index!: number;
-
-  @property({ attribute: false })
-  accessor model!:
-    | ImageBlockModel
-    | AttachmentBlockModel
-    | BookmarkBlockModel
-    | EmbedGithubModel
-    | EmbedYoutubeModel
-    | EmbedFigmaModel
-    | EmbedLinkedDocModel
-    | EmbedSyncedDocModel
-    | EmbedHtmlModel
-    | EmbedLoomModel;
-
-  @property({ attribute: false })
-  accessor renderModel!: (model: BlockModel) => TemplateResult;
 
   override firstUpdated() {
     this.disposables.add(
@@ -72,6 +55,25 @@ export class SurfaceRefGenericBlockPortal extends WithDisposable(
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor index!: number;
+
+  @property({ attribute: false })
+  accessor model!:
+    | ImageBlockModel
+    | AttachmentBlockModel
+    | BookmarkBlockModel
+    | EmbedGithubModel
+    | EmbedYoutubeModel
+    | EmbedFigmaModel
+    | EmbedLinkedDocModel
+    | EmbedSyncedDocModel
+    | EmbedHtmlModel
+    | EmbedLoomModel;
+
+  @property({ attribute: false })
+  accessor renderModel!: (model: BlockModel) => TemplateResult;
 }
 
 declare global {

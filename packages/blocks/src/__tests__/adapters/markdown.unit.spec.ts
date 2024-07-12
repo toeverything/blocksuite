@@ -4,6 +4,7 @@ import type {
   JobMiddleware,
   SliceSnapshot,
 } from '@blocksuite/store';
+
 import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 

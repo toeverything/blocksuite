@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
+  Shape,
   activeNoteInEdgeless,
   createConnectorElement,
   createNote,
@@ -11,7 +12,6 @@ import {
   getConnectorPath,
   locatorComponentToolbarMoreButton,
   selectNoteInEdgeless,
-  Shape,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {

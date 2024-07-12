@@ -2,8 +2,8 @@ import { html } from 'lit';
 
 import {
   ChatServiceKind,
-  createVendor,
   TextServiceKind,
+  createVendor,
 } from './service-base.js';
 
 export const llama2Vendor = createVendor<{

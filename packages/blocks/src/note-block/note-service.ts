@@ -2,8 +2,10 @@ import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
-import { matchFlavours } from '../_common/utils/model.js';
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
+import type { NoteBlockComponent } from './note-block.js';
+
+import { matchFlavours } from '../_common/utils/model.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -20,7 +22,6 @@ import {
   selectBlocksBetween,
   updateBlockType,
 } from './commands/index.js';
-import type { NoteBlockComponent } from './note-block.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
 
 export class NoteBlockService extends BlockService<NoteBlockModel> {

@@ -13,45 +13,14 @@ import type {
   FrameBlockComponent,
   FrameBlockModel,
 } from '../../../../frame-block/index.js';
-import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
+import { Bound } from '../../../../surface-block/index.js';
 
 @customElement('edgeless-frame-title-editor')
 export class EdgelessFrameTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {
-  get editorHost() {
-    return this.edgeless.host;
-  }
-
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
-  get frameBlock() {
-    assertExists(this.frameModel.page.root);
-    const block = this.editorHost.view.viewFromPath('block', [
-      this.frameModel.page.root.id,
-      this.frameModel.id,
-    ]) as FrameBlockComponent | null;
-    assertExists(block);
-    return block;
-  }
-
-  @query('rich-text')
-  accessor richText!: RichText;
-
-  @property({ attribute: false })
-  accessor frameModel!: FrameBlockModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
@@ -65,12 +34,6 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   override connectedCallback() {
     super.connectedCallback();
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
-  }
-
-  override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    await this.richText?.updateComplete;
-    return result;
   }
 
   override firstUpdated(): void {
@@ -116,6 +79,12 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       .catch(console.error);
   }
 
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.richText?.updateComplete;
+    return result;
+  }
+
   override render() {
     const viewport = this.edgeless.service.viewport;
     const bound = Bound.deserialize(this.frameModel.xywh);
@@ -159,6 +128,38 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       style=${inlineEditorStyle}
     ></rich-text>`;
   }
+
+  get editorHost() {
+    return this.edgeless.host;
+  }
+
+  get frameBlock() {
+    assertExists(this.frameModel.page.root);
+    const block = this.editorHost.view.viewFromPath('block', [
+      this.frameModel.page.root.id,
+      this.frameModel.id,
+    ]) as FrameBlockComponent | null;
+    assertExists(block);
+    return block;
+  }
+
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor frameModel!: FrameBlockModel;
+
+  @query('rich-text')
+  accessor richText!: RichText;
 }
 
 declare global {

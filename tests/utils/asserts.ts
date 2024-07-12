@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import './declare-test-window.js';
-
 import type {
   BlockElement,
   EditorHost,
 } from '@block-std/view/element/index.js';
-import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
   AffineInlineEditor,
@@ -15,13 +12,15 @@ import type {
   RichText,
   RootBlockModel,
 } from '@blocks/index.js';
-import { assertExists } from '@global/utils/index.js';
 import type { InlineRootElement } from '@inline/inline-editor.js';
 import type { Locator } from '@playwright/test';
-import { expect, type Page } from '@playwright/test';
-import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';
 import type { BlockModel, SerializedStore } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
+
+import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
+import { assertExists } from '@global/utils/index.js';
+import { type Page, expect } from '@playwright/test';
+import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
@@ -41,11 +40,11 @@ import {
   toIdCountMap,
 } from './actions/edgeless.js';
 import {
+  SHORT_KEY,
   pressArrowLeft,
   pressArrowRight,
   pressBackspace,
   redoByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './actions/keyboard.js';
@@ -57,6 +56,7 @@ import {
   getEditorLocator,
   inlineEditorInnerTextToString,
 } from './actions/misc.js';
+import './declare-test-window.js';
 import { getStringFromRichText } from './inline-editor.js';
 import { currentEditorIndex } from './multiple-editor.js';
 

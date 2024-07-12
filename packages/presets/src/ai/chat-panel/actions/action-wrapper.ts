@@ -1,10 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import type { ChatAction } from '../chat-context.js';
+
 import {
-  ActionIcon,
   AIChangeToneIcon,
   AIDoneIcon,
   AIExpandMindMapIcon,
@@ -19,11 +21,11 @@ import {
   AIMindMapIcon,
   AIPenIcon,
   AIPresentationIcon,
+  ActionIcon,
   ArrowDownIcon,
   ArrowUpIcon,
 } from '../../_common/icons.js';
 import { createTextRenderer } from '../../messages/text.js';
-import type { ChatAction } from '../chat-context.js';
 import { renderImages } from '../components/images.js';
 import { HISTORY_IMAGE_ACTIONS } from '../const.js';
 
@@ -109,15 +111,6 @@ export class ActionWrapper extends WithDisposable(LitElement) {
     }
   `;
 
-  @state()
-  accessor promptShow = false;
-
-  @property({ attribute: false })
-  accessor item!: ChatAction;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
   protected override render() {
     const { item } = this;
 
@@ -157,6 +150,15 @@ export class ActionWrapper extends WithDisposable(LitElement) {
           `
         : nothing} `;
   }
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor item!: ChatAction;
+
+  @state()
+  accessor promptShow = false;
 }
 
 declare global {

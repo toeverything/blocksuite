@@ -1,50 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { UIEventState, UIEventStateContext } from '../base.js';
 import type { UIEventDispatcher } from '../dispatcher.js';
+
+import { UIEventState, UIEventStateContext } from '../base.js';
 import { PointerEventState } from '../state/index.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 import { isFarEnough } from '../utils.js';
 
 export class PointerControl {
-  private get _rect() {
-    return this._dispatcher.host.getBoundingClientRect();
-  }
-
-  private _lastPointerDownEvent: PointerEvent | null = null;
-
-  private _startDragState: PointerEventState | null = null;
-
-  private _lastDragState: PointerEventState | null = null;
-
-  private _pointerDownCount = 0;
-
-  private _dragging = false;
-
-  private _startX = -Infinity;
-
-  private _startY = -Infinity;
-
-  constructor(private _dispatcher: UIEventDispatcher) {}
-
-  private _reset = () => {
-    this._startX = -Infinity;
-    this._startY = -Infinity;
-    this._lastDragState = null;
-    this._dragging = false;
-  };
-
-  private _createContext(event: Event, pointerState: PointerEventState) {
-    return UIEventStateContext.from(
-      new UIEventState(event),
-      new EventSourceState({
-        event,
-        sourceType: EventScopeSourceType.Target,
-      }),
-      pointerState
-    );
-  }
-
   private _down = (event: PointerEvent) => {
     if (
       this._lastPointerDownEvent &&
@@ -83,37 +46,11 @@ export class PointerControl {
     this._dispatcher.disposables.addFromEvent(document, 'pointerup', this._up);
   };
 
-  private _up = (event: PointerEvent) => {
-    const pointerEventState = new PointerEventState({
-      event,
-      rect: this._rect,
-      startX: this._startX,
-      startY: this._startY,
-      last: this._lastDragState,
-    });
-    const context = this._createContext(event, pointerEventState);
+  private _dragging = false;
 
-    const run = () => {
-      if (this._dragging) {
-        this._dispatcher.run('dragEnd', context);
-        return;
-      }
-      this._dispatcher.run('click', context);
-      if (this._pointerDownCount === 2) {
-        this._dispatcher.run('doubleClick', context);
-      }
-      if (this._pointerDownCount === 3) {
-        this._dispatcher.run('tripleClick', context);
-      }
-    };
+  private _lastDragState: PointerEventState | null = null;
 
-    run();
-    this._dispatcher.run('pointerUp', context);
-
-    this._reset();
-    document.removeEventListener('pointermove', this._move);
-    document.removeEventListener('pointerup', this._up);
-  };
+  private _lastPointerDownEvent: PointerEvent | null = null;
 
   private _move = (event: PointerEvent) => {
     const last = this._lastDragState;
@@ -164,6 +101,70 @@ export class PointerControl {
 
     this._dispatcher.run('pointerOut', this._createContext(event, state));
   };
+
+  private _pointerDownCount = 0;
+
+  private _reset = () => {
+    this._startX = -Infinity;
+    this._startY = -Infinity;
+    this._lastDragState = null;
+    this._dragging = false;
+  };
+
+  private _startDragState: PointerEventState | null = null;
+
+  private _startX = -Infinity;
+
+  private _startY = -Infinity;
+
+  private _up = (event: PointerEvent) => {
+    const pointerEventState = new PointerEventState({
+      event,
+      rect: this._rect,
+      startX: this._startX,
+      startY: this._startY,
+      last: this._lastDragState,
+    });
+    const context = this._createContext(event, pointerEventState);
+
+    const run = () => {
+      if (this._dragging) {
+        this._dispatcher.run('dragEnd', context);
+        return;
+      }
+      this._dispatcher.run('click', context);
+      if (this._pointerDownCount === 2) {
+        this._dispatcher.run('doubleClick', context);
+      }
+      if (this._pointerDownCount === 3) {
+        this._dispatcher.run('tripleClick', context);
+      }
+    };
+
+    run();
+    this._dispatcher.run('pointerUp', context);
+
+    this._reset();
+    document.removeEventListener('pointermove', this._move);
+    document.removeEventListener('pointerup', this._up);
+  };
+
+  constructor(private _dispatcher: UIEventDispatcher) {}
+
+  private _createContext(event: Event, pointerState: PointerEventState) {
+    return UIEventStateContext.from(
+      new UIEventState(event),
+      new EventSourceState({
+        event,
+        sourceType: EventScopeSourceType.Target,
+      }),
+      pointerState
+    );
+  }
+
+  private get _rect() {
+    return this._dispatcher.host.getBoundingClientRect();
+  }
 
   listen() {
     this._dispatcher.disposables.addFromEvent(

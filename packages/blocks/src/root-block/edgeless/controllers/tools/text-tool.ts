@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { noop } from '@blocksuite/global/utils';
 
 import { addText } from '../../utils/text.js';
@@ -12,6 +13,14 @@ export class TextToolController extends EdgelessToolController<TextTool> {
   readonly tool = {
     type: 'text',
   } as TextTool;
+
+  afterModeSwitch() {
+    noop();
+  }
+
+  beforeModeSwitch() {
+    noop();
+  }
 
   onContainerClick(e: PointerEventState): void {
     const textFlag = this._edgeless.doc.awarenessStore.getFlag(
@@ -47,19 +56,11 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     noop();
   }
 
-  onContainerPointerDown(): void {
-    noop();
-  }
-
   onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick() {
-    noop();
-  }
-
-  onContainerDragStart() {
+  onContainerDragEnd() {
     noop();
   }
 
@@ -67,7 +68,7 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     noop();
   }
 
-  onContainerDragEnd() {
+  onContainerDragStart() {
     noop();
   }
 
@@ -79,19 +80,19 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     noop();
   }
 
+  onContainerPointerDown(): void {
+    noop();
+  }
+
+  onContainerTripleClick() {
+    noop();
+  }
+
   onPressShiftKey(_: boolean) {
     noop();
   }
 
   onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
-
-  beforeModeSwitch() {
-    noop();
-  }
-
-  afterModeSwitch() {
     noop();
   }
 }

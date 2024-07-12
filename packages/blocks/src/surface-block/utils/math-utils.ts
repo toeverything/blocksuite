@@ -3,6 +3,7 @@
 
 import type { IBound } from '../consts.js';
 import type { Bound } from './bound.js';
+
 import { PointLocation } from './point-location.js';
 import { type IVec, Vec } from './vec.js';
 

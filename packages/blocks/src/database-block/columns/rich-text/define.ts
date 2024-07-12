@@ -1,10 +1,11 @@
-import { nanoid, Text } from '@blocksuite/store';
+import { Text, nanoid } from '@blocksuite/store';
+
+import type { SelectTag } from '../../data-view/utils/tags/multi-tag-select.js';
 
 import { clamp } from '../../../_common/utils/math.js';
 import { columnType } from '../../data-view/column/column-config.js';
 import { tRichText } from '../../data-view/logical/data-type.js';
 import { getTagColor } from '../../data-view/utils/tags/colors.js';
-import type { SelectTag } from '../../data-view/utils/tags/multi-tag-select.js';
 import { type RichTextCellType, toYText } from '../utils.js';
 
 export const richTextColumnType = columnType('rich-text');

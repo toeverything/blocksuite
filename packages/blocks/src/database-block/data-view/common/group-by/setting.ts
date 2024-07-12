@@ -1,9 +1,12 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { PropertyValues } from 'lit';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
+
+import type { GroupRenderProps } from './matcher.js';
 
 import {
   type Menu,
@@ -17,7 +20,6 @@ import { DataViewKanbanManager } from '../../view/presets/kanban/kanban-view-man
 import { DataViewTableManager } from '../../view/presets/table/table-view-manager.js';
 import { dataViewCssVariable } from '../css-variable.js';
 import { DeleteIcon } from '../icons/index.js';
-import type { GroupRenderProps } from './matcher.js';
 import { groupByMatcher } from './matcher.js';
 
 @customElement('data-view-group-setting')
@@ -53,11 +55,17 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor view!: DataViewTableManager | DataViewKanbanManager;
-
-  @query('.group-sort-setting')
-  accessor groupContainer!: HTMLElement;
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+    this._disposables.addFromEvent(this, 'pointerdown', e => {
+      e.stopPropagation();
+    });
+  }
 
   protected override firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -133,17 +141,11 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    this._disposables.addFromEvent(this, 'pointerdown', e => {
-      e.stopPropagation();
-    });
-  }
+  @query('.group-sort-setting')
+  accessor groupContainer!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor view!: DataViewTableManager | DataViewKanbanManager;
 }
 export const selectGroupByProperty = (
   view: DataViewTableManager | DataViewKanbanManager,

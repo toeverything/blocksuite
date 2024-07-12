@@ -1,6 +1,6 @@
-import './tool-icon-button.js';
-
 import { css, html } from 'lit';
+
+import './tool-icon-button.js';
 
 export const lineSizeButtonStyles = [
   css`

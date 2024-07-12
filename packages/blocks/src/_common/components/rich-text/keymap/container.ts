@@ -1,4 +1,5 @@
 import type { BlockElement, UIEventStateContext } from '@blocksuite/block-std';
+
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -7,8 +8,9 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 
-import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { RootBlockComponent } from '../../../../root-block/types.js';
+
+import { matchFlavours } from '../../../../_common/utils/model.js';
 import { insertLinkedNode } from '../../../../root-block/widgets/linked-doc/config.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { createDefaultDoc } from '../../../utils/init.js';

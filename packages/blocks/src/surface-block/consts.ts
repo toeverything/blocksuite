@@ -26,9 +26,9 @@ export enum ShapeStyle {
 }
 
 export enum StrokeStyle {
-  Solid = 'solid',
   Dash = 'dash',
   None = 'none',
+  Solid = 'solid',
 }
 
 export interface IModelCoord {
@@ -37,15 +37,15 @@ export interface IModelCoord {
 }
 
 export enum TextAlign {
-  Left = 'left',
   Center = 'center',
+  Left = 'left',
   Right = 'right',
 }
 
 export enum TextVerticalAlign {
-  Top = 'top',
-  Center = 'center',
   Bottom = 'bottom',
+  Center = 'center',
+  Top = 'top',
 }
 
 export enum TextResizing {
@@ -63,26 +63,26 @@ export type TextStyleProps = {
 };
 
 export enum FontWeight {
-  Light = '300',
-  Regular = '400',
-  Medium = '500',
-  SemiBold = '600',
   Bold = '700',
+  Light = '300',
+  Medium = '500',
+  Regular = '400',
+  SemiBold = '600',
 }
 
 export enum FontStyle {
-  Normal = 'normal',
   Italic = 'italic',
+  Normal = 'normal',
 }
 
 export enum FontFamily {
+  BebasNeue = 'blocksuite:surface:BebasNeue',
   Inter = 'blocksuite:surface:Inter',
   Kalam = 'blocksuite:surface:Kalam',
-  Satoshi = 'blocksuite:surface:Satoshi',
-  Poppins = 'blocksuite:surface:Poppins',
   Lora = 'blocksuite:surface:Lora',
-  BebasNeue = 'blocksuite:surface:BebasNeue',
   OrelegaOne = 'blocksuite:surface:OrelegaOne',
+  Poppins = 'blocksuite:surface:Poppins',
+  Satoshi = 'blocksuite:surface:Satoshi',
 }
 
 export const FontFamilyMap = {

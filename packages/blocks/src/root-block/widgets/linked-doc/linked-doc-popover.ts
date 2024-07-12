@@ -1,80 +1,37 @@
-import '../../../_common/components/button.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { html, LitElement } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
+import type { LinkedDocOptions } from './config.js';
+import type { LinkedDocGroup } from './config.js';
+
+import '../../../_common/components/button.js';
 import {
   cleanSpecifiedTail,
   createKeydownObserver,
 } from '../../../_common/components/utils.js';
 import { MoreHorizontalIcon } from '../../../_common/icons/edgeless.js';
-import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
-import type { LinkedDocOptions } from './config.js';
-import type { LinkedDocGroup } from './config.js';
 import { styles } from './styles.js';
 
 @customElement('affine-linked-doc-popover')
 export class LinkedDocPopover extends WithDisposable(LitElement) {
-  private get _actionGroup() {
-    return this._linkedDocGroup.map(group => {
-      return {
-        ...group,
-        items: this._getActionItems(group),
-      };
-    });
-  }
-
-  private get _flattenActionList() {
-    return this._actionGroup
-      .map(group =>
-        group.items.map(item => ({ ...item, groupName: group.name }))
-      )
-      .flat();
-  }
-
-  private get _doc() {
-    return this.editorHost.doc;
-  }
-
-  static override styles = styles;
-
-  @state()
-  private accessor _position: {
-    height: number;
-    x: string;
-    y: string;
-  } | null = null;
-
-  private _query = '';
+  private _abort = () => {
+    // remove popover dom
+    this.abortController.abort();
+    // clear input query
+    cleanSpecifiedTail(
+      this.editorHost,
+      this.inlineEditor,
+      this.triggerKey + this._query
+    );
+  };
 
   private _expanded = new Map<string, boolean>();
-
-  @state()
-  private accessor _activatedItemIndex = 0;
-
-  @state()
-  private accessor _linkedDocGroup: LinkedDocGroup[] = [];
-
-  @property({ attribute: false })
-  accessor options!: LinkedDocOptions;
-
-  @property({ attribute: false })
-  accessor triggerKey!: string;
-
-  @query('.linked-doc-popover')
-  accessor linkedDocElement: Element | null = null;
-
-  constructor(
-    private editorHost: EditorHost,
-    private inlineEditor: AffineInlineEditor,
-    private abortController = new AbortController()
-  ) {
-    super();
-  }
 
   private _getLinkedDocGroup = () => {
     return this.options.getMenus({
@@ -85,6 +42,39 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       docMetas: this._doc.collection.meta.docMetas,
     });
   };
+
+  private _query = '';
+
+  static override styles = styles;
+
+  constructor(
+    private editorHost: EditorHost,
+    private inlineEditor: AffineInlineEditor,
+    private abortController = new AbortController()
+  ) {
+    super();
+  }
+
+  private get _actionGroup() {
+    return this._linkedDocGroup.map(group => {
+      return {
+        ...group,
+        items: this._getActionItems(group),
+      };
+    });
+  }
+
+  private get _doc() {
+    return this.editorHost.doc;
+  }
+
+  private get _flattenActionList() {
+    return this._actionGroup
+      .map(group =>
+        group.items.map(item => ({ ...item, groupName: group.name }))
+      )
+      .flat();
+  }
 
   private _getActionItems(group: LinkedDocGroup) {
     const isExpanded = !!this._expanded.get(group.name);
@@ -106,17 +96,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     }
     return group.items;
   }
-
-  private _abort = () => {
-    // remove popover dom
-    this.abortController.abort();
-    // clear input query
-    cleanSpecifiedTail(
-      this.editorHost,
-      this.inlineEditor,
-      this.triggerKey + this._query
-    );
-  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -178,10 +157,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     });
   }
 
-  updatePosition(position: { height: number; x: string; y: string }) {
-    this._position = position;
-  }
-
   override render() {
     const MAX_HEIGHT = 410;
     const style = this._position
@@ -227,4 +202,30 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
         })}
     </div>`;
   }
+
+  updatePosition(position: { height: number; x: string; y: string }) {
+    this._position = position;
+  }
+
+  @state()
+  private accessor _activatedItemIndex = 0;
+
+  @state()
+  private accessor _linkedDocGroup: LinkedDocGroup[] = [];
+
+  @state()
+  private accessor _position: {
+    height: number;
+    x: string;
+    y: string;
+  } | null = null;
+
+  @query('.linked-doc-popover')
+  accessor linkedDocElement: Element | null = null;
+
+  @property({ attribute: false })
+  accessor options!: LinkedDocOptions;
+
+  @property({ attribute: false })
+  accessor triggerKey!: string;
 }

@@ -1,20 +1,20 @@
+import { WithDisposable } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
+import { LitElement, type TemplateResult, html, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { join } from 'lit/directives/join.js';
+import { type Ref, createRef, ref } from 'lit/directives/ref.js';
+
+import type { EditorMenuButton } from '../../../_common/components/toolbar/menu-button.js';
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
+import type { StrokeStyle } from '../../../surface-block/index.js';
+import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';
-import '../../edgeless/components/panel/color-panel.js';
-import '../../edgeless/components/panel/note-shadow-panel.js';
-import '../../edgeless/components/panel/note-display-mode-panel.js';
-import '../../edgeless/components/panel/scale-panel.js';
-import '../../edgeless/components/panel/size-panel.js';
-
-import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
-import { html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { join } from 'lit/directives/join.js';
-import { createRef, type Ref, ref } from 'lit/directives/ref.js';
-
-import type { EditorMenuButton } from '../../../_common/components/toolbar/menu-button.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import { NOTE_BACKGROUND_COLORS } from '../../../_common/edgeless/note/consts.js';
 import {
@@ -26,19 +26,19 @@ import {
   ShrinkIcon,
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import type { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { StrokeStyle } from '../../../surface-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
-import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
+import '../../edgeless/components/panel/color-panel.js';
 import {
   type LineStyleEvent,
   LineStylesPanel,
 } from '../../edgeless/components/panel/line-styles-panel.js';
+import '../../edgeless/components/panel/note-display-mode-panel.js';
+import '../../edgeless/components/panel/note-shadow-panel.js';
+import '../../edgeless/components/panel/scale-panel.js';
+import '../../edgeless/components/panel/size-panel.js';
 import { getTooltipWithShortcut } from '../../edgeless/components/utils.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 const SIZE_LIST = [
   {
@@ -71,25 +71,39 @@ const DisplayModeMap = {
 
 @customElement('edgeless-change-note-button')
 export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
-  private get doc() {
-    return this.edgeless.doc;
+  private _setBorderRadius = (size: number) => {
+    this.notes.forEach(note => {
+      this.doc.updateBlock(note, () => {
+        note.edgeless.style.borderRadius = size;
+      });
+    });
+  };
+
+  private _setNoteScale = (scale: number) => {
+    this.notes.forEach(note => {
+      this.doc.updateBlock(note, () => {
+        const bound = Bound.deserialize(note.xywh);
+        const oldScale = note.edgeless.scale ?? 1;
+        const ratio = scale / oldScale;
+        bound.w *= ratio;
+        bound.h *= ratio;
+        const xywh = bound.serialize();
+        note.xywh = xywh;
+        note.edgeless.scale = scale;
+      });
+    });
+  };
+
+  private _getScaleLabel(scale: number) {
+    return Math.round(scale * 100) + '%';
   }
 
-  private accessor _scalePanelRef: Ref<EditorMenuButton> = createRef();
+  private _handleNoteSlicerButtonClick() {
+    const surfaceService = this.edgeless.service;
+    if (!surfaceService) return;
 
-  private accessor _cornersPanelRef: Ref<EditorMenuButton> = createRef();
-
-  @property({ attribute: false })
-  accessor notes: NoteBlockModel[] = [];
-
-  @property({ attribute: false })
-  accessor enableNoteSlicer!: boolean;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor quickConnectButton!: TemplateResult<1>;
+    this.edgeless.slots.toggleNoteSlicer.emit();
+  }
 
   private _setBackground(background: CssVariableName) {
     this.notes.forEach(note => {
@@ -100,12 +114,25 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     } as Record<string, unknown>);
   }
 
-  private _setShadowType(shadowType: string) {
+  private _setCollapse() {
     this.notes.forEach(note => {
-      this.doc.updateBlock(note, () => {
-        note.edgeless.style.shadowType = shadowType;
-      });
+      const { collapse, collapsedHeight } = note.edgeless;
+
+      if (collapse) {
+        this.doc.updateBlock(note, () => {
+          note.edgeless.collapse = false;
+        });
+      } else if (collapsedHeight) {
+        const { xywh, edgeless } = note;
+        const bound = Bound.deserialize(xywh);
+        bound.h = collapsedHeight * (edgeless.scale ?? 1);
+        this.doc.updateBlock(note, () => {
+          note.edgeless.collapse = true;
+          note.xywh = bound.serialize();
+        });
+      }
     });
+    this.requestUpdate();
   }
 
   private _setDisplayMode(note: NoteBlockModel, newMode: NoteDisplayMode) {
@@ -139,10 +166,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     }
   }
 
-  private _setStrokeWidth(borderSize: number) {
+  private _setShadowType(shadowType: string) {
     this.notes.forEach(note => {
       this.doc.updateBlock(note, () => {
-        note.edgeless.style.borderSize = borderSize;
+        note.edgeless.style.shadowType = shadowType;
       });
     });
   }
@@ -151,6 +178,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.notes.forEach(note => {
       this.doc.updateBlock(note, () => {
         note.edgeless.style.borderStyle = borderStyle;
+      });
+    });
+  }
+
+  private _setStrokeWidth(borderSize: number) {
+    this.notes.forEach(note => {
+      this.doc.updateBlock(note, () => {
+        note.edgeless.style.borderSize = borderSize;
       });
     });
   }
@@ -165,59 +200,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     }
   }
 
-  private _setBorderRadius = (size: number) => {
-    this.notes.forEach(note => {
-      this.doc.updateBlock(note, () => {
-        note.edgeless.style.borderRadius = size;
-      });
-    });
-  };
-
-  private _setNoteScale = (scale: number) => {
-    this.notes.forEach(note => {
-      this.doc.updateBlock(note, () => {
-        const bound = Bound.deserialize(note.xywh);
-        const oldScale = note.edgeless.scale ?? 1;
-        const ratio = scale / oldScale;
-        bound.w *= ratio;
-        bound.h *= ratio;
-        const xywh = bound.serialize();
-        note.xywh = xywh;
-        note.edgeless.scale = scale;
-      });
-    });
-  };
-
-  private _setCollapse() {
-    this.notes.forEach(note => {
-      const { collapse, collapsedHeight } = note.edgeless;
-
-      if (collapse) {
-        this.doc.updateBlock(note, () => {
-          note.edgeless.collapse = false;
-        });
-      } else if (collapsedHeight) {
-        const { xywh, edgeless } = note;
-        const bound = Bound.deserialize(xywh);
-        bound.h = collapsedHeight * (edgeless.scale ?? 1);
-        this.doc.updateBlock(note, () => {
-          note.edgeless.collapse = true;
-          note.xywh = bound.serialize();
-        });
-      }
-    });
-    this.requestUpdate();
-  }
-
-  private _handleNoteSlicerButtonClick() {
-    const surfaceService = this.edgeless.service;
-    if (!surfaceService) return;
-
-    this.edgeless.slots.toggleNoteSlicer.emit();
-  }
-
-  private _getScaleLabel(scale: number) {
-    return Math.round(scale * 100) + '%';
+  private get doc() {
+    return this.edgeless.doc;
   }
 
   override render() {
@@ -404,6 +388,22 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       renderToolbarSeparator
     );
   }
+
+  private accessor _cornersPanelRef: Ref<EditorMenuButton> = createRef();
+
+  private accessor _scalePanelRef: Ref<EditorMenuButton> = createRef();
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor enableNoteSlicer!: boolean;
+
+  @property({ attribute: false })
+  accessor notes: NoteBlockModel[] = [];
+
+  @property({ attribute: false })
+  accessor quickConnectButton!: TemplateResult<1>;
 }
 
 declare global {

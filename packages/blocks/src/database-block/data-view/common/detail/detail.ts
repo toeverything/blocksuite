@@ -1,17 +1,17 @@
-import './field.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import type { DataViewManager } from '../../view/data-view-manager.js';
+import type { DetailSlotProps, DetailSlots } from '../data-source/base.js';
+
 import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import type { DataViewManager } from '../../view/data-view-manager.js';
 import { dataViewCommonStyle } from '../css-variable.js';
-import type { DetailSlotProps, DetailSlots } from '../data-source/base.js';
 import { PlusIcon } from '../icons/index.js';
+import './field.js';
 import { DetailSelection } from './selection.js';
 
 const styles = css`
@@ -60,28 +60,37 @@ const styles = css`
 
 @customElement('affine-data-view-record-detail')
 export class RecordDetail extends WithDisposable(ShadowlessElement) {
-  private get readonly() {
-    return this.view.readonly;
-  }
+  _clickAddProperty = () => {
+    popFilterableSimpleMenu(
+      this.addPropertyButton,
+      this.view.allColumnConfig.map(config => {
+        return {
+          type: 'action',
+          name: config.name,
+          icon: html` <uni-lit
+            .uni="${this.view.getIcon(config.type)}"
+          ></uni-lit>`,
+          select: () => {
+            this.view.columnAdd('end', config.type);
+          },
+        };
+      })
+    );
+  };
+
+  static override styles = styles;
+
+  detailSlots?: DetailSlots;
+
+  selection = new DetailSelection(this);
 
   private get columns() {
     return this.view.detailColumns.map(id => this.view.columnGet(id));
   }
 
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
-
-  selection = new DetailSelection(this);
-
-  @query('.add-property')
-  accessor addPropertyButton!: HTMLElement;
-
-  detailSlots?: DetailSlots;
+  private get readonly() {
+    return this.view.readonly;
+  }
 
   private renderHeader() {
     const header = this.detailSlots?.header;
@@ -125,24 +134,6 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
     this.detailSlots = this.view.detailSlots;
   }
 
-  _clickAddProperty = () => {
-    popFilterableSimpleMenu(
-      this.addPropertyButton,
-      this.view.allColumnConfig.map(config => {
-        return {
-          type: 'action',
-          name: config.name,
-          icon: html` <uni-lit
-            .uni="${this.view.getIcon(config.type)}"
-          ></uni-lit>`,
-          select: () => {
-            this.view.columnAdd('end', config.type);
-          },
-        };
-      })
-    );
-  };
-
   override render() {
     const columns = this.columns;
 
@@ -174,6 +165,15 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
       ${this.renderNote()}
     `;
   }
+
+  @query('.add-property')
+  accessor addPropertyButton!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  @property({ attribute: false })
+  accessor view!: DataViewManager;
 }
 
 declare global {

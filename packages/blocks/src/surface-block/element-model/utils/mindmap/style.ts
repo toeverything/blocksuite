@@ -1,9 +1,10 @@
+import type { ShapeElementModel } from '../../shape.js';
+import type { MindmapNode } from './layout.js';
+
 import { last } from '../../../../_common/utils/iterable.js';
 import { fitContent } from '../../../canvas-renderer/element-renderer/shape/utils.js';
 import { FontFamily, FontWeight, StrokeStyle } from '../../../consts.js';
 import { ConnectorMode } from '../../connector.js';
-import type { ShapeElementModel } from '../../shape.js';
-import type { MindmapNode } from './layout.js';
 
 export type NodeStyle = {
   radius: number;
@@ -38,8 +39,6 @@ export type ConnectorStyle = {
 };
 
 export abstract class MindmapStyleGetter {
-  abstract readonly root: NodeStyle;
-
   abstract getNodeStyle(
     node: MindmapNode,
     path: number[]
@@ -47,6 +46,8 @@ export abstract class MindmapStyleGetter {
     connector: ConnectorStyle;
     node: NodeStyle;
   };
+
+  abstract readonly root: NodeStyle;
 }
 
 export class StyleOne extends MindmapStyleGetter {
@@ -342,10 +343,10 @@ export class StyleFour extends MindmapStyleGetter {
 export const styleFour = new StyleFour();
 
 export enum MindmapStyle {
-  ONE = 1,
-  TWO = 2,
-  THREE = 3,
   FOUR = 4,
+  ONE = 1,
+  THREE = 3,
+  TWO = 2,
 }
 
 export const mindmapStyleGetters: {

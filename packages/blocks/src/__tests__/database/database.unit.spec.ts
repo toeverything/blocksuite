@@ -1,9 +1,11 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
+
 import { DocCollection, Generator, Schema } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { selectColumnModelConfig } from '../../database-block/data-view/column/presets/select/define.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
+
+import { selectColumnModelConfig } from '../../database-block/data-view/column/presets/select/define.js';
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
 import {
   type Cell,

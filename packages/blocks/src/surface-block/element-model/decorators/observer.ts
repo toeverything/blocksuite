@@ -1,6 +1,7 @@
 import type { Y } from '@blocksuite/store';
 
 import type { SurfaceElementModel } from '../base.js';
+
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const observeSymbol = Symbol('observe');

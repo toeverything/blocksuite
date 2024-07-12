@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -88,9 +88,9 @@ export class AffineCustomModal extends LitElement {
     }
   `;
 
-  options!: ModalOptions;
-
   onOpen!: (div: HTMLDivElement) => void;
+
+  options!: ModalOptions;
 
   close() {
     this.remove();

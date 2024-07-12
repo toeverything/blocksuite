@@ -10,31 +10,14 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import type { GroupElementModel } from '../../../../surface-block/element-model/group.js';
-import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
+import { Bound } from '../../../../surface-block/index.js';
 
 @customElement('edgeless-group-title-editor')
 export class EdgelessGroupTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
-  @query('rich-text')
-  accessor richText!: RichText;
-
-  @property({ attribute: false })
-  accessor group!: GroupElementModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
@@ -49,12 +32,6 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   override connectedCallback() {
     super.connectedCallback();
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
-  }
-
-  override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    await this.richText?.updateComplete;
-    return result;
   }
 
   override firstUpdated(): void {
@@ -103,6 +80,12 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
       .catch(console.error);
   }
 
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.richText?.updateComplete;
+    return result;
+  }
+
   override render() {
     const viewport = this.edgeless.service.viewport;
     const bound = Bound.deserialize(this.group.xywh);
@@ -135,6 +118,24 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
       style=${inlineEditorStyle}
     ></rich-text>`;
   }
+
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor group!: GroupElementModel;
+
+  @query('rich-text')
+  accessor richText!: RichText;
 }
 
 declare global {

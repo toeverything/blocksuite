@@ -1,3 +1,5 @@
+import type { Doc } from '@blocksuite/store';
+
 import {
   EditorHost,
   ShadowlessElement,
@@ -5,18 +7,15 @@ import {
 } from '@blocksuite/block-std';
 import { PageEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { createRef, type Ref, ref } from 'lit/directives/ref.js';
+import { type Ref, createRef, ref } from 'lit/directives/ref.js';
 
 noop(EditorHost);
 
 @customElement('page-editor')
 export class PageEditor extends WithDisposable(ShadowlessElement) {
-  get host() {
-    return this._host.value as EditorHost;
-  }
+  private _host: Ref<EditorHost> = createRef<EditorHost>();
 
   static override styles = css`
     page-editor {
@@ -49,17 +48,6 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  private _host: Ref<EditorHost> = createRef<EditorHost>();
-
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @property({ attribute: false })
-  accessor specs = PageEditorBlockSpecs;
-
-  @property({ type: Boolean })
-  accessor hasViewport = true;
-
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
@@ -90,6 +78,19 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get host() {
+    return this._host.value as EditorHost;
+  }
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @property({ type: Boolean })
+  accessor hasViewport = true;
+
+  @property({ attribute: false })
+  accessor specs = PageEditorBlockSpecs;
 }
 
 declare global {

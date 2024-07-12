@@ -1,6 +1,7 @@
 import { html } from 'lit';
 
 import type { ListBlockModel } from '../list-model.js';
+
 import { getListInfo } from './get-list-info.js';
 import { getNumberPrefix } from './get-number-prefix.js';
 import {

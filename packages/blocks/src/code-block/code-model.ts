@@ -1,5 +1,6 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import type { BundledLanguage, Highlighter, PlainTextLanguage } from 'shiki';
+
+import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
 
 import { FALLBACK_LANG } from './utils/consts.js';
 

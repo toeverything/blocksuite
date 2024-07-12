@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -38,12 +38,6 @@ export class EdgelessAlignPanel extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor value: TextAlign = TextAlign.Left;
-
-  @property({ attribute: false })
-  accessor onSelect: undefined | ((value: TextAlign) => void) = undefined;
-
   private _onSelect(value: TextAlign) {
     this.value = value;
     if (this.onSelect) {
@@ -68,6 +62,12 @@ export class EdgelessAlignPanel extends LitElement {
       `
     );
   }
+
+  @property({ attribute: false })
+  accessor onSelect: undefined | ((value: TextAlign) => void) = undefined;
+
+  @property({ attribute: false })
+  accessor value: TextAlign = TextAlign.Left;
 }
 
 declare global {

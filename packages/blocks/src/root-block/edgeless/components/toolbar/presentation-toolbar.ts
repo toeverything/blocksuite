@@ -1,11 +1,13 @@
-import './present/navigator-setting-button.js';
-
 import { cssVar } from '@toeverything/theme';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { toast } from '../../../../_common/components/toast.js';
 import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
+import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { EdgelessTool } from '../../types.js';
+
+import { toast } from '../../../../_common/components/toast.js';
 import {
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
@@ -13,36 +15,17 @@ import {
   NavigatorFullScreenIcon,
   StopAIIcon,
 } from '../../../../_common/icons/edgeless.js';
-import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { EdgelessTool } from '../../types.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
 import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';
+import './present/navigator-setting-button.js';
 
 @customElement('presentation-toolbar')
 export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
-  private get _cachedPresentHideToolbar() {
-    return !!this.edgeless.service.editPropsStore.getStorage(
-      'presentHideToolbar'
-    );
-  }
+  private _cachedIndex = -1;
 
-  private set _cachedPresentHideToolbar(value) {
-    this.edgeless.service.editPropsStore.setStorage(
-      'presentHideToolbar',
-      !!value
-    );
-  }
-
-  private get _frames(): FrameBlockModel[] {
-    return this.edgeless.service.frames;
-  }
-
-  get host() {
-    return this.edgeless.host;
-  }
+  private _timer?: ReturnType<typeof setTimeout>;
 
   static override styles = css`
     :host {
@@ -120,63 +103,28 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  @state()
-  private accessor _navigatorMode: NavigatorMode = 'fit';
-
-  @state({
-    hasChanged() {
-      return true;
-    },
-  })
-  private accessor _currentFrameIndex = 0;
-
-  private _timer?: ReturnType<typeof setTimeout>;
-
-  private _cachedIndex = -1;
-
   override type: EdgelessTool['type'] = 'frameNavigator';
-
-  @property({ attribute: false })
-  accessor containerWidth = 1920;
-
-  @property({ attribute: true, type: Boolean })
-  accessor visible = true;
-
-  @property({ type: Boolean })
-  accessor settingMenuShow = false;
-
-  @property({ type: Boolean })
-  accessor frameMenuShow = false;
-
-  get dense() {
-    return this.containerWidth < 554;
-  }
 
   constructor(edgeless: EdgelessRootBlockComponent) {
     super();
     this.edgeless = edgeless;
   }
 
-  private _nextFrame() {
-    const frames = this._frames;
-    const min = 0;
-    const max = frames.length - 1;
-    if (this._currentFrameIndex === frames.length - 1) {
-      toast(this.host, 'You have reached the last frame');
-    } else {
-      this._currentFrameIndex = clamp(this._currentFrameIndex + 1, min, max);
-    }
+  private get _cachedPresentHideToolbar() {
+    return !!this.edgeless.service.editPropsStore.getStorage(
+      'presentHideToolbar'
+    );
   }
 
-  private _previousFrame() {
-    const frames = this._frames;
-    const min = 0;
-    const max = frames.length - 1;
-    if (this._currentFrameIndex === 0) {
-      toast(this.host, 'You have reached the first frame');
-    } else {
-      this._currentFrameIndex = clamp(this._currentFrameIndex - 1, min, max);
-    }
+  private set _cachedPresentHideToolbar(value) {
+    this.edgeless.service.editPropsStore.setStorage(
+      'presentHideToolbar',
+      !!value
+    );
+  }
+
+  private get _frames(): FrameBlockModel[] {
+    return this.edgeless.service.frames;
   }
 
   private _moveToCurrentFrame() {
@@ -208,6 +156,28 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     }
   }
 
+  private _nextFrame() {
+    const frames = this._frames;
+    const min = 0;
+    const max = frames.length - 1;
+    if (this._currentFrameIndex === frames.length - 1) {
+      toast(this.host, 'You have reached the last frame');
+    } else {
+      this._currentFrameIndex = clamp(this._currentFrameIndex + 1, min, max);
+    }
+  }
+
+  private _previousFrame() {
+    const frames = this._frames;
+    const min = 0;
+    const max = frames.length - 1;
+    if (this._currentFrameIndex === 0) {
+      toast(this.host, 'You have reached the first frame');
+    } else {
+      this._currentFrameIndex = clamp(this._currentFrameIndex - 1, min, max);
+    }
+  }
+
   private _toggleFullScreen() {
     if (document.fullscreenElement) {
       clearTimeout(this._timer);
@@ -222,21 +192,6 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     setTimeout(() => this._moveToCurrentFrame(), 400);
     this.edgeless.slots.fullScreenToggled.emit();
   }
-
-  protected override updated(changedProperties: PropertyValues) {
-    if (
-      changedProperties.has('_currentFrameIndex') &&
-      this.edgelessTool.type === 'frameNavigator'
-    ) {
-      this._moveToCurrentFrame();
-    }
-  }
-
-  @property()
-  accessor setSettingMenuShow: (show: boolean) => void = () => {};
-
-  @property()
-  accessor setFrameMenuShow: (show: boolean) => void = () => {};
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
@@ -402,6 +357,51 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
       </button>
     `;
   }
+
+  protected override updated(changedProperties: PropertyValues) {
+    if (
+      changedProperties.has('_currentFrameIndex') &&
+      this.edgelessTool.type === 'frameNavigator'
+    ) {
+      this._moveToCurrentFrame();
+    }
+  }
+
+  get dense() {
+    return this.containerWidth < 554;
+  }
+
+  get host() {
+    return this.edgeless.host;
+  }
+
+  @state({
+    hasChanged() {
+      return true;
+    },
+  })
+  private accessor _currentFrameIndex = 0;
+
+  @state()
+  private accessor _navigatorMode: NavigatorMode = 'fit';
+
+  @property({ attribute: false })
+  accessor containerWidth = 1920;
+
+  @property({ type: Boolean })
+  accessor frameMenuShow = false;
+
+  @property()
+  accessor setFrameMenuShow: (show: boolean) => void = () => {};
+
+  @property()
+  accessor setSettingMenuShow: (show: boolean) => void = () => {};
+
+  @property({ type: Boolean })
+  accessor settingMenuShow = false;
+
+  @property({ attribute: true, type: Boolean })
+  accessor visible = true;
 }
 
 declare global {

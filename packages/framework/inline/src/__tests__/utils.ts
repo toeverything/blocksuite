@@ -4,7 +4,8 @@ import type {
   InlineEditor,
   InlineRange,
 } from '@blocksuite/inline';
-import { expect, type Page } from '@playwright/test';
+
+import { type Page, expect } from '@playwright/test';
 
 const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 

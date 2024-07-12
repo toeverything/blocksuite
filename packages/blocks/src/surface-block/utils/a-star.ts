@@ -1,10 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { Bound } from './bound.js';
+import type { IVec } from './vec.js';
+
 import { Graph } from './graph.js';
 import { almostEqual } from './math-utils.js';
 import { PriorityQueue } from './priority-queue.js';
-import type { IVec } from './vec.js';
 
 function cost(point: IVec, point2: IVec) {
   return Math.abs(point[0] - point2[0]) + Math.abs(point[1] - point2[1]);
@@ -37,6 +38,14 @@ function pointAlmostEqual(a: IVec, b: IVec): boolean {
 export class AStarRunner {
   private _cameFrom = new Map<IVec, { from: IVec[]; indexs: number[] }>();
 
+  private _complete = false;
+
+  private _costSoFar = new Map<IVec, number[]>();
+
+  private _current: IVec | null = null;
+
+  private _diagonalCount = new Map<IVec, number[]>();
+
   private _frontier!: PriorityQueue<
     IVec,
     [diagonalCount: number, pointPriority: number, distCost: number]
@@ -44,15 +53,7 @@ export class AStarRunner {
 
   private _graph: Graph;
 
-  private _costSoFar = new Map<IVec, number[]>();
-
-  private _diagonalCount = new Map<IVec, number[]>();
-
   private _pointPriority = new Map<IVec, number[]>();
-
-  private _current: IVec | null = null;
-
-  private _complete = false;
 
   constructor(
     points: IVec[],
@@ -97,6 +98,21 @@ export class AStarRunner {
     });
     if (cur === this._ep) neighbors.push(this._originalEp);
     return neighbors;
+  }
+
+  reset() {
+    this._cameFrom.clear();
+    this._costSoFar.clear();
+    this._diagonalCount.clear();
+    this._pointPriority.clear();
+    this._complete = false;
+    this._init();
+  }
+
+  run() {
+    while (!this._complete) {
+      this.step();
+    }
   }
 
   step() {
@@ -213,21 +229,6 @@ export class AStarRunner {
         this._complete = true;
         return;
       }
-    }
-  }
-
-  reset() {
-    this._cameFrom.clear();
-    this._costSoFar.clear();
-    this._diagonalCount.clear();
-    this._pointPriority.clear();
-    this._complete = false;
-    this._init();
-  }
-
-  run() {
-    while (!this._complete) {
-      this.step();
     }
   }
 

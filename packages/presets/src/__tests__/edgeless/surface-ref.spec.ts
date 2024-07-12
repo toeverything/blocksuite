@@ -2,6 +2,7 @@ import type {
   EdgelessRootBlockComponent,
   SurfaceRefBlockComponent,
 } from '@blocksuite/blocks';
+
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { wait } from '../utils/common.js';

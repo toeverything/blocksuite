@@ -1,6 +1,7 @@
+import type { FilterDefineType } from './matcher.js';
+
 import { tBoolean, tDate } from '../../../logical/data-type.js';
 import { tFunction } from '../../../logical/typesystem.js';
-import type { FilterDefineType } from './matcher.js';
 
 export const dateFilter = {
   before: {

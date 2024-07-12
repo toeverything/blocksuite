@@ -1,4 +1,5 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+
 import { literal } from 'lit/static-html.js';
 
 import { BookmarkBlockSchema } from './bookmark-model.js';

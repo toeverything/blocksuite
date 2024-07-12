@@ -1,6 +1,7 @@
 import type { Menu } from '../../../../../_common/components/index.js';
-import { FrameIcon } from '../../../../../_common/icons/edgeless.js';
 import type { DenseMenuBuilder } from '../common/type.js';
+
+import { FrameIcon } from '../../../../../_common/icons/edgeless.js';
 import { FrameConfig } from './config.js';
 import { createFrame } from './service.js';
 

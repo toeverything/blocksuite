@@ -1,12 +1,15 @@
-import '../../note-slicer/index.js';
-
 import type { BlockElement } from '@blocksuite/block-std';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { NoteBlockModel } from '../../../../../note-block/note-model.js';
+import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
+import type { EdgelessBlockModel } from '../../../edgeless-block-model.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../../_common/edgeless/note/consts.js';
@@ -17,10 +20,8 @@ import { matchFlavours } from '../../../../../_common/utils/model.js';
 import { getClosestBlockElementByPoint } from '../../../../../_common/utils/query.js';
 import { Point } from '../../../../../_common/utils/rect.js';
 import { handleNativeRangeAtPoint } from '../../../../../_common/utils/selection.js';
-import type { NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
-import type { EdgelessBlockModel } from '../../../edgeless-block-model.js';
+import '../../note-slicer/index.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const ACTIVE_NOTE_EXTRA_PADDING = 20;
@@ -32,19 +33,6 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-hover-color);
     }
   `;
-
-  @property({ attribute: false })
-  accessor surface!: SurfaceBlockComponent;
-
-  @property({ attribute: false })
-  accessor model!: NoteBlockModel;
-
-  @property({ attribute: false })
-  accessor display!: boolean;
-
-  get edgeless() {
-    return this.surface.edgeless;
-  }
 
   protected override firstUpdated() {
     const maskDOM = this.renderRoot!.querySelector('.affine-note-mask');
@@ -97,6 +85,19 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
       ></div>
     `;
   }
+
+  get edgeless() {
+    return this.surface.edgeless;
+  }
+
+  @property({ attribute: false })
+  accessor display!: boolean;
+
+  @property({ attribute: false })
+  accessor model!: NoteBlockModel;
+
+  @property({ attribute: false })
+  accessor surface!: SurfaceBlockComponent;
 }
 
 @customElement('edgeless-block-portal-note')
@@ -146,42 +147,45 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     }
   `;
 
-  @state()
-  private accessor _isSelected = false;
-
-  @state()
-  private accessor _editing = false;
-
-  @state()
-  private accessor _isResizing = false;
-
-  @state()
-  private accessor _isHover = false;
-
-  @state()
-  private accessor _noteFullHeight = 0;
-
-  @query('affine-note')
-  private accessor _affineNote!: HTMLDivElement;
-
-  get _zoom() {
-    return this.edgeless.service.viewport.zoom;
-  }
-
-  private get _isShowCollapsedContent() {
-    return this.model.edgeless.collapse && (this._isResizing || this._isHover);
-  }
-
-  private _hovered() {
-    if (!this._isHover && this.edgeless.service.selection.has(this.model.id)) {
-      this._isHover = true;
+  private _collapsedContent() {
+    if (!this._isShowCollapsedContent || !this._affineNote) {
+      return nothing;
     }
-  }
 
-  private _leaved() {
-    if (this._isHover) {
-      this._isHover = false;
+    const { xywh, edgeless } = this.model;
+
+    const bound = Bound.deserialize(xywh);
+    const scale = edgeless.scale ?? 1;
+    const width = bound.w / scale;
+    const height = bound.h / scale;
+
+    const rect = this._affineNote.getBoundingClientRect();
+    const zoom = this.edgeless.service.viewport.zoom;
+    this._noteFullHeight =
+      rect.height / scale / zoom + 2 * EDGELESS_BLOCK_CHILD_PADDING;
+
+    if (height >= this._noteFullHeight) {
+      return nothing;
     }
+
+    return html`
+      <div
+        style=${styleMap({
+          width: `${width}px`,
+          height: `${this._noteFullHeight - height}px`,
+          position: 'absolute',
+          left: '0px',
+          top: `${height}px`,
+          background: 'var(--affine-white)',
+          opacity: 0.5,
+          pointerEvents: 'none',
+          borderLeft: '2px var(--affine-blue) solid',
+          borderBottom: '2px var(--affine-blue) solid',
+          borderRight: '2px var(--affine-blue) solid',
+          borderRadius: '0 0 8px 8px',
+        })}
+      ></div>
+    `;
   }
 
   private _handleClickAtBackground(e: MouseEvent) {
@@ -197,6 +201,44 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     if (this.surface.doc.readonly) return;
     this._tryAddParagraph(x, y);
+  }
+
+  private _hovered() {
+    if (!this._isHover && this.edgeless.service.selection.has(this.model.id)) {
+      this._isHover = true;
+    }
+  }
+
+  private get _isShowCollapsedContent() {
+    return this.model.edgeless.collapse && (this._isResizing || this._isHover);
+  }
+
+  private _leaved() {
+    if (this._isHover) {
+      this._isHover = false;
+    }
+  }
+
+  private _setCollapse(event: MouseEvent) {
+    event.stopImmediatePropagation();
+
+    const { collapse, collapsedHeight } = this.model.edgeless;
+
+    if (collapse) {
+      this.model.doc.updateBlock(this.model, () => {
+        this.model.edgeless.collapse = false;
+      });
+    } else if (collapsedHeight) {
+      const { xywh, edgeless } = this.model;
+      const bound = Bound.deserialize(xywh);
+      bound.h = collapsedHeight * (edgeless.scale ?? 1);
+      this.model.doc.updateBlock(this.model, () => {
+        this.model.edgeless.collapse = true;
+        this.model.xywh = bound.serialize();
+      });
+    }
+
+    this.edgeless.service.selection.clear();
   }
 
   private _tryAddParagraph(x: number, y: number) {
@@ -254,67 +296,25 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     }
   }
 
-  private _setCollapse(event: MouseEvent) {
-    event.stopImmediatePropagation();
-
-    const { collapse, collapsedHeight } = this.model.edgeless;
-
-    if (collapse) {
-      this.model.doc.updateBlock(this.model, () => {
-        this.model.edgeless.collapse = false;
-      });
-    } else if (collapsedHeight) {
-      const { xywh, edgeless } = this.model;
-      const bound = Bound.deserialize(xywh);
-      bound.h = collapsedHeight * (edgeless.scale ?? 1);
-      this.model.doc.updateBlock(this.model, () => {
-        this.model.edgeless.collapse = true;
-        this.model.xywh = bound.serialize();
-      });
-    }
-
-    this.edgeless.service.selection.clear();
+  get _zoom() {
+    return this.edgeless.service.viewport.zoom;
   }
 
-  private _collapsedContent() {
-    if (!this._isShowCollapsedContent || !this._affineNote) {
-      return nothing;
-    }
+  override connectedCallback(): void {
+    super.connectedCallback();
 
-    const { xywh, edgeless } = this.model;
+    const selection = this.edgeless.service.selection;
 
-    const bound = Bound.deserialize(xywh);
-    const scale = edgeless.scale ?? 1;
-    const width = bound.w / scale;
-    const height = bound.h / scale;
-
-    const rect = this._affineNote.getBoundingClientRect();
-    const zoom = this.edgeless.service.viewport.zoom;
-    this._noteFullHeight =
-      rect.height / scale / zoom + 2 * EDGELESS_BLOCK_CHILD_PADDING;
-
-    if (height >= this._noteFullHeight) {
-      return nothing;
-    }
-
-    return html`
-      <div
-        style=${styleMap({
-          width: `${width}px`,
-          height: `${this._noteFullHeight - height}px`,
-          position: 'absolute',
-          left: '0px',
-          top: `${height}px`,
-          background: 'var(--affine-white)',
-          opacity: 0.5,
-          pointerEvents: 'none',
-          borderLeft: '2px var(--affine-blue) solid',
-          borderBottom: '2px var(--affine-blue) solid',
-          borderRight: '2px var(--affine-blue) solid',
-          borderRadius: '0 0 8px 8px',
-        })}
-      ></div>
-    `;
+    this._editing = selection.has(this.model.id) && selection.editing;
+    this._disposables.add(
+      selection.slots.updated.on(() => {
+        if (selection.has(this.model.id) && selection.editing) {
+          this._editing = true;
+        } else {
+          this._editing = false;
+        }
+      })
+    );
   }
 
   override firstUpdated() {
@@ -348,23 +348,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     });
     observer.observe(this, { childList: true, subtree: true });
     _disposables.add(() => observer.disconnect());
-  }
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    const selection = this.edgeless.service.selection;
-
-    this._editing = selection.has(this.model.id) && selection.editing;
-    this._disposables.add(
-      selection.slots.updated.on(() => {
-        if (selection.has(this.model.id) && selection.editing) {
-          this._editing = true;
-        } else {
-          this._editing = false;
-        }
-      })
-    );
   }
 
   override render() {
@@ -479,6 +462,24 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       </div>
     `;
   }
+
+  @query('affine-note')
+  private accessor _affineNote!: HTMLDivElement;
+
+  @state()
+  private accessor _editing = false;
+
+  @state()
+  private accessor _isHover = false;
+
+  @state()
+  private accessor _isResizing = false;
+
+  @state()
+  private accessor _isSelected = false;
+
+  @state()
+  private accessor _noteFullHeight = 0;
 }
 
 declare global {

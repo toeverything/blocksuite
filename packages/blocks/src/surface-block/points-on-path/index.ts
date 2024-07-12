@@ -1,8 +1,9 @@
+import type { Point } from '../rough/geometry.js';
+
 import { absolutize } from '../path-data-parser/absolutize.js';
 import { normalize } from '../path-data-parser/normalize.js';
 import { parsePath } from '../path-data-parser/parser.js';
 import { pointsOnBezierCurves, simplify } from '../points-on-curve/index.js';
-import type { Point } from '../rough/geometry.js';
 
 export function pointsOnPath(
   path: string,

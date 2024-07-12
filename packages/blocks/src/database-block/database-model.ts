@@ -1,10 +1,12 @@
 import type { MigrationRunner, Text } from '@blocksuite/store';
+
 import { BlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
 import type { InsertToPosition } from './data-view/types.js';
-import { arrayMove, insertPositionToIndex } from './data-view/utils/insert.js';
 import type { DataViewDataType } from './data-view/view/data-view.js';
 import type { Cell, Column, ColumnUpdater } from './types.js';
+
+import { arrayMove, insertPositionToIndex } from './data-view/utils/insert.js';
 
 export type DatabaseBlockProps = {
   views: DataViewDataType[];
@@ -18,79 +20,6 @@ export type DatabaseBlockProps = {
 export type SerializedCells = Record<string, Record<string, Cell>>;
 
 export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
-  getViewList() {
-    return this.views;
-  }
-
-  duplicateView(id: string): string {
-    const newId = this.doc.generateBlockId();
-    this.doc.transact(() => {
-      const index = this.views.findIndex(v => v.id === id);
-      const view = this.views[index];
-      if (view) {
-        this.views.splice(
-          index + 1,
-          0,
-          JSON.parse(JSON.stringify({ ...view, id: newId }))
-        );
-      }
-    });
-    return newId;
-  }
-
-  deleteView(id: string) {
-    this.doc.captureSync();
-    this.doc.transact(() => {
-      this.views = this.views.filter(v => v.id !== id);
-    });
-  }
-
-  updateView(
-    id: string,
-    update: (data: DataViewDataType) => Partial<DataViewDataType>
-  ) {
-    this.doc.transact(() => {
-      this.views = this.views.map(v => {
-        if (v.id !== id) {
-          return v;
-        }
-        return { ...v, ...update(v) } as DataViewDataType;
-      });
-    });
-    this.applyViewsUpdate();
-  }
-
-  moveViewTo(id: string, position: InsertToPosition) {
-    this.doc.transact(() => {
-      this.views = arrayMove(
-        this.views,
-        v => v.id === id,
-        arr => insertPositionToIndex(position, arr)
-      );
-    });
-    this.applyViewsUpdate();
-  }
-
-  applyViewsUpdate() {
-    this.doc.updateBlock(this, {
-      views: this.views,
-    });
-  }
-
-  applyColumnUpdate() {
-    this.doc.updateBlock(this, {
-      columns: this.columns,
-    });
-  }
-
-  findColumnIndex(id: Column['id']) {
-    return this.columns.findIndex(v => v.id === id);
-  }
-
-  getColumn(id: Column['id']): Column | undefined {
-    return this.columns.find(v => v.id === id);
-  }
-
   addColumn(
     position: InsertToPosition,
     column: Omit<Column, 'id'> & {
@@ -115,16 +44,30 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     return id;
   }
 
-  updateColumn(id: string, updater: ColumnUpdater) {
-    const index = this.columns.findIndex(v => v.id === id);
-    if (index == null) {
-      return;
-    }
-    this.doc.transact(() => {
-      const column = this.columns[index];
-      this.columns[index] = { ...column, ...updater(column) };
+  applyColumnUpdate() {
+    this.doc.updateBlock(this, {
+      columns: this.columns,
     });
-    return id;
+  }
+
+  applyViewsUpdate() {
+    this.doc.updateBlock(this, {
+      views: this.views,
+    });
+  }
+
+  copyCellsByColumn(fromId: Column['id'], toId: Column['id']) {
+    this.doc.transact(() => {
+      Object.keys(this.cells).forEach(rowId => {
+        const cell = this.cells[rowId][fromId];
+        if (cell) {
+          this.cells[rowId][toId] = {
+            ...cell,
+            columnId: toId,
+          };
+        }
+      });
+    });
   }
 
   deleteColumn(columnId: Column['id']) {
@@ -134,6 +77,41 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     this.doc.transact(() => {
       this.columns.splice(index, 1);
     });
+  }
+
+  deleteRows(rowIds: string[]) {
+    this.doc.transact(() => {
+      for (const rowId of rowIds) {
+        delete this.cells[rowId];
+      }
+    });
+  }
+
+  deleteView(id: string) {
+    this.doc.captureSync();
+    this.doc.transact(() => {
+      this.views = this.views.filter(v => v.id !== id);
+    });
+  }
+
+  duplicateView(id: string): string {
+    const newId = this.doc.generateBlockId();
+    this.doc.transact(() => {
+      const index = this.views.findIndex(v => v.id === id);
+      const view = this.views[index];
+      if (view) {
+        this.views.splice(
+          index + 1,
+          0,
+          JSON.parse(JSON.stringify({ ...view, id: newId }))
+        );
+      }
+    });
+    return newId;
+  }
+
+  findColumnIndex(id: Column['id']) {
+    return this.columns.findIndex(v => v.id === id);
   }
 
   getCell(rowId: BlockModel['id'], columnId: Column['id']): Cell | null {
@@ -153,6 +131,25 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     };
   }
 
+  getColumn(id: Column['id']): Column | undefined {
+    return this.columns.find(v => v.id === id);
+  }
+
+  getViewList() {
+    return this.views;
+  }
+
+  moveViewTo(id: string, position: InsertToPosition) {
+    this.doc.transact(() => {
+      this.views = arrayMove(
+        this.views,
+        v => v.id === id,
+        arr => insertPositionToIndex(position, arr)
+      );
+    });
+    this.applyViewsUpdate();
+  }
+
   updateCell(rowId: string, cell: Cell) {
     const hasRow = rowId in this.cells;
     if (!hasRow) {
@@ -166,28 +163,6 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     });
   }
 
-  deleteRows(rowIds: string[]) {
-    this.doc.transact(() => {
-      for (const rowId of rowIds) {
-        delete this.cells[rowId];
-      }
-    });
-  }
-
-  copyCellsByColumn(fromId: Column['id'], toId: Column['id']) {
-    this.doc.transact(() => {
-      Object.keys(this.cells).forEach(rowId => {
-        const cell = this.cells[rowId][fromId];
-        if (cell) {
-          this.cells[rowId][toId] = {
-            ...cell,
-            columnId: toId,
-          };
-        }
-      });
-    });
-  }
-
   updateCells(columnId: string, cells: Record<string, unknown>) {
     this.doc.transact(() => {
       Object.entries(cells).forEach(([rowId, value]) => {
@@ -197,6 +172,33 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
         };
       });
     });
+  }
+
+  updateColumn(id: string, updater: ColumnUpdater) {
+    const index = this.columns.findIndex(v => v.id === id);
+    if (index == null) {
+      return;
+    }
+    this.doc.transact(() => {
+      const column = this.columns[index];
+      this.columns[index] = { ...column, ...updater(column) };
+    });
+    return id;
+  }
+
+  updateView(
+    id: string,
+    update: (data: DataViewDataType) => Partial<DataViewDataType>
+  ) {
+    this.doc.transact(() => {
+      this.views = this.views.map(v => {
+        if (v.id !== id) {
+          return v;
+        }
+        return { ...v, ...update(v) } as DataViewDataType;
+      });
+    });
+    this.applyViewsUpdate();
   }
 }
 

@@ -1,7 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 import { getRootByEditorHost } from '../utils/query.js';
 

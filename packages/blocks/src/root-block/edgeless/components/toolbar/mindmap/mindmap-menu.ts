@@ -1,12 +1,13 @@
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { MindmapStyle } from '../../../../../surface-block/index.js';
+
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
-import { getMindMaps, type ToolbarMindmapItem } from './assets.js';
+import { type ToolbarMindmapItem, getMindMaps } from './assets.js';
 import { textRender } from './basket-elements.js';
 import { textIcon } from './icons.js';
 
@@ -19,10 +20,6 @@ const textItem: TextItem = { type: 'text', icon: textIcon, render: textRender };
 
 @customElement('edgeless-mindmap-menu')
 export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
-  get mindMaps() {
-    return getMindMaps(this.theme);
-  }
-
   static override styles = css`
     :host {
       display: flex;
@@ -76,17 +73,11 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  override type = 'mindmap' as const;
-
   draggableController!: EdgelessDraggableElementController<
     ToolbarMindmapItem | TextItem
   >;
 
-  @property({ attribute: false })
-  accessor activeStyle!: MindmapStyle;
-
-  @property({ attribute: false })
-  accessor onActiveStyleChange!: (style: MindmapStyle) => void;
+  override type = 'mindmap' as const;
 
   initDragController() {
     if (this.draggableController || !this.edgeless) return;
@@ -116,11 +107,6 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
         }
       },
     });
-  }
-
-  override updated(changedProperties: Map<PropertyKey, unknown>) {
-    if (!changedProperties.has('edgeless')) return;
-    this.initDragController();
   }
 
   override render() {
@@ -206,6 +192,21 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
       </div>
     </edgeless-slide-menu>`;
   }
+
+  override updated(changedProperties: Map<PropertyKey, unknown>) {
+    if (!changedProperties.has('edgeless')) return;
+    this.initDragController();
+  }
+
+  get mindMaps() {
+    return getMindMaps(this.theme);
+  }
+
+  @property({ attribute: false })
+  accessor activeStyle!: MindmapStyle;
+
+  @property({ attribute: false })
+  accessor onActiveStyleChange!: (style: MindmapStyle) => void;
 }
 
 declare global {

@@ -1,5 +1,6 @@
-import { keys } from '../../../../../_common/utils/iterable.js';
 import type { Template, TemplateManager } from './template-type.js';
+
+import { keys } from '../../../../../_common/utils/iterable.js';
 
 export const templates = [
   {

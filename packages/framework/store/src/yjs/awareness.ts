@@ -1,6 +1,7 @@
+import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
+
 import { Slot } from '@blocksuite/global/utils';
 import { merge } from 'merge';
-import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 
 import type { Space } from '../store/space.js';
 import type { Store } from '../store/store.js';
@@ -33,34 +34,6 @@ export interface AwarenessEvent<
 export class AwarenessStore<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
-  readonly awareness: YAwareness<RawAwarenessState<Flags>>;
-
-  readonly store: Store;
-
-  readonly slots = {
-    update: new Slot<AwarenessEvent<Flags>>(),
-  };
-
-  constructor(
-    store: Store,
-    awareness: YAwareness<RawAwarenessState<Flags>>,
-    defaultFlags: Flags
-  ) {
-    this.store = store;
-    this.awareness = awareness;
-    this.awareness.on('change', this._onAwarenessChange);
-    this.awareness.setLocalStateField('selectionV2', {});
-    this._initFlags(defaultFlags);
-  }
-
-  private _initFlags(defaultFlags: Flags) {
-    const upstreamFlags = this.awareness.getLocalState()?.flags;
-    const flags = upstreamFlags
-      ? merge(true, defaultFlags, upstreamFlags)
-      : { ...defaultFlags };
-    this.awareness.setLocalStateField('flags', flags);
-  }
-
   private _onAwarenessChange = (diff: {
     added: number[];
     removed: number[];
@@ -91,9 +64,39 @@ export class AwarenessStore<
     });
   };
 
-  setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
-    const oldFlags = this.awareness.getLocalState()?.flags ?? {};
-    this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
+  readonly awareness: YAwareness<RawAwarenessState<Flags>>;
+
+  readonly slots = {
+    update: new Slot<AwarenessEvent<Flags>>(),
+  };
+
+  readonly store: Store;
+
+  constructor(
+    store: Store,
+    awareness: YAwareness<RawAwarenessState<Flags>>,
+    defaultFlags: Flags
+  ) {
+    this.store = store;
+    this.awareness = awareness;
+    this.awareness.on('change', this._onAwarenessChange);
+    this.awareness.setLocalStateField('selectionV2', {});
+    this._initFlags(defaultFlags);
+  }
+
+  private _initFlags(defaultFlags: Flags) {
+    const upstreamFlags = this.awareness.getLocalState()?.flags;
+    const flags = upstreamFlags
+      ? merge(true, defaultFlags, upstreamFlags)
+      : { ...defaultFlags };
+    this.awareness.setLocalStateField('flags', flags);
+  }
+
+  destroy() {
+    if (this.awareness) {
+      this.awareness.off('change', this._onAwarenessChange);
+      this.slots.update.dispose();
+    }
   }
 
   getFlag<Key extends keyof Flags>(field: Key): Flags[Key] | undefined {
@@ -101,12 +104,12 @@ export class AwarenessStore<
     return flags[field];
   }
 
-  setReadonly(space: Space, value: boolean): void {
-    const flags = this.getFlag('readonly') ?? {};
-    this.setFlag('readonly', {
-      ...flags,
-      [space.id]: value,
-    } as Flags['readonly']);
+  getLocalSelection(space: Space): ReadonlyArray<Record<string, unknown>> {
+    return (this.awareness.getLocalState()?.selectionV2 ?? {})[space.id] ?? [];
+  }
+
+  getStates(): Map<number, RawAwarenessState<Flags>> {
+    return this.awareness.getStates();
   }
 
   isReadonly(space: Space): boolean {
@@ -118,6 +121,11 @@ export class AwarenessStore<
     }
   }
 
+  setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
+    const oldFlags = this.awareness.getLocalState()?.flags ?? {};
+    this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
+  }
+
   setLocalSelection(space: Space, selection: UserSelection) {
     const oldSelection = this.awareness.getLocalState()?.selectionV2 ?? {};
     this.awareness.setLocalStateField('selectionV2', {
@@ -126,18 +134,11 @@ export class AwarenessStore<
     });
   }
 
-  getLocalSelection(space: Space): ReadonlyArray<Record<string, unknown>> {
-    return (this.awareness.getLocalState()?.selectionV2 ?? {})[space.id] ?? [];
-  }
-
-  getStates(): Map<number, RawAwarenessState<Flags>> {
-    return this.awareness.getStates();
-  }
-
-  destroy() {
-    if (this.awareness) {
-      this.awareness.off('change', this._onAwarenessChange);
-      this.slots.update.dispose();
-    }
+  setReadonly(space: Space, value: boolean): void {
+    const flags = this.getFlag('readonly') ?? {};
+    this.setFlag('readonly', {
+      ...flags,
+      [space.id]: value,
+    } as Flags['readonly']);
   }
 }

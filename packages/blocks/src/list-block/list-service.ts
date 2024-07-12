@@ -1,5 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 
+import type { ListBlockModel } from './list-model.js';
+
 import { InlineManager } from '../_common/inline/inline-manager.js';
 import {
   type AffineTextAttributes,
@@ -7,7 +9,6 @@ import {
 } from '../_common/inline/presets/affine-inline-specs.js';
 import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
 import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
-import type { ListBlockModel } from './list-model.js';
 import { listPrefix, toggleStyles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 

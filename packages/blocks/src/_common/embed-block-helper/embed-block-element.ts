@@ -1,13 +1,16 @@
 import type { BlockService } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
+import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
+
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -20,7 +23,6 @@ import {
 import { Bound } from '../../surface-block/index.js';
 import { BlockComponent } from '../components/block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
-import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
 import {
   type EmbedCardStyle,
   getThemeMode,
@@ -34,40 +36,7 @@ export class EmbedBlockElement<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockComponent<Model, Service, WidgetName> {
-  get isInSurface() {
-    return this._isInSurface;
-  }
-
-  get edgeless() {
-    if (!this._isInSurface) {
-      return null;
-    }
-    return this.host.querySelector('affine-edgeless-root');
-  }
-
-  get surface() {
-    if (!this.isInSurface) return null;
-    return this.host.querySelector('affine-surface');
-  }
-
-  get bound(): Bound {
-    return Bound.deserialize(
-      (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
-    );
-  }
-
-  @query('.embed-block-container')
-  protected accessor embedBlock!: HTMLDivElement;
-
-  static override styles = styles;
-
-  private _isInSurface = false;
-
-  private _fetchAbortController = new AbortController();
-
-  get fetchAbortController() {
-    return this._fetchAbortController;
-  }
+  protected _cardStyle: EmbedCardStyle = 'horizontal';
 
   private _dragHandleOption: DragHandleOption = {
     flavour: /affine:embed-*/,
@@ -161,40 +130,15 @@ export class EmbedBlockElement<
     },
   };
 
-  protected _cardStyle: EmbedCardStyle = 'horizontal';
-
-  protected _width = EMBED_CARD_WIDTH.horizontal;
+  private _fetchAbortController = new AbortController();
 
   protected _height = EMBED_CARD_HEIGHT.horizontal;
 
-  override accessor useCaptionEditor = true;
+  private _isInSurface = false;
 
-  override accessor showBlockSelection = false;
+  protected _width = EMBED_CARD_WIDTH.horizontal;
 
-  override connectedCallback() {
-    super.connectedCallback();
-
-    if (this._fetchAbortController.signal.aborted)
-      this._fetchAbortController = new AbortController();
-
-    this.contentEditable = 'false';
-
-    const parent = this.host.doc.getParent(this.model);
-    this._isInSurface = parent?.flavour === 'affine:surface';
-
-    this.blockContainerStyles = this.isInSurface
-      ? undefined
-      : { margin: '18px 0' };
-
-    this.disposables.add(
-      AffineDragHandleWidget.registerOption(this._dragHandleOption)
-    );
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._fetchAbortController.abort();
-  }
+  static override styles = styles;
 
   renderEmbed = (children: () => TemplateResult) => {
     const theme = getThemeMode();
@@ -243,4 +187,62 @@ export class EmbedBlockElement<
       </div>
     `;
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    if (this._fetchAbortController.signal.aborted)
+      this._fetchAbortController = new AbortController();
+
+    this.contentEditable = 'false';
+
+    const parent = this.host.doc.getParent(this.model);
+    this._isInSurface = parent?.flavour === 'affine:surface';
+
+    this.blockContainerStyles = this.isInSurface
+      ? undefined
+      : { margin: '18px 0' };
+
+    this.disposables.add(
+      AffineDragHandleWidget.registerOption(this._dragHandleOption)
+    );
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._fetchAbortController.abort();
+  }
+
+  get bound(): Bound {
+    return Bound.deserialize(
+      (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
+    );
+  }
+
+  get edgeless() {
+    if (!this._isInSurface) {
+      return null;
+    }
+    return this.host.querySelector('affine-edgeless-root');
+  }
+
+  get fetchAbortController() {
+    return this._fetchAbortController;
+  }
+
+  get isInSurface() {
+    return this._isInSurface;
+  }
+
+  get surface() {
+    if (!this.isInSurface) return null;
+    return this.host.querySelector('affine-surface');
+  }
+
+  @query('.embed-block-container')
+  protected accessor embedBlock!: HTMLDivElement;
+
+  override accessor showBlockSelection = false;
+
+  override accessor useCaptionEditor = true;
 }

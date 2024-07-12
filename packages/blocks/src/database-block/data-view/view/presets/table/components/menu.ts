@@ -1,5 +1,10 @@
 import { html } from 'lit';
 
+import type { RootBlockComponent } from '../../../../../../root-block/index.js';
+import type { DataViewRenderer } from '../../../../data-view.js';
+import type { DataViewColumnManager } from '../../../data-view-manager.js';
+import type { TableSelectionController } from '../controller/selection.js';
+
 import {
   type Menu,
   popFilterableSimpleMenu,
@@ -9,17 +14,13 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../../../../../_common/icons/index.js';
-import type { RootBlockComponent } from '../../../../../../root-block/index.js';
 import { DeleteIcon } from '../../../../common/icons/index.js';
-import type { DataViewRenderer } from '../../../../data-view.js';
-import type { DataViewColumnManager } from '../../../data-view-manager.js';
-import type { TableSelectionController } from '../controller/selection.js';
 import {
-  checkboxCalcOps,
   type ColumnDataType,
+  type StatCalcOp,
+  checkboxCalcOps,
   commonCalcOps,
   numberColCalcOps,
-  type StatCalcOp,
 } from '../stat-ops.js';
 
 export const openDetail = (

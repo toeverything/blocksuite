@@ -1,5 +1,3 @@
-import './components/lang-button.js';
-
 import { WidgetElement } from '@blocksuite/block-std';
 import { sleep } from '@blocksuite/global/utils';
 import { offset } from '@floating-ui/dom';
@@ -7,9 +5,11 @@ import { computed } from '@lit-labs/preact-signals';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { HoverController } from '../../../_common/components/index.js';
 import type { CodeBlockModel } from '../../../code-block/code-model.js';
 import type { CodeBlockComponent } from '../../../code-block/index.js';
+
+import { HoverController } from '../../../_common/components/index.js';
+import './components/lang-button.js';
 
 export const AFFINE_CODE_LANGUAGE_LIST_WIDGET =
   'affine-code-language-list-widget';
@@ -19,32 +19,6 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
   CodeBlockModel,
   CodeBlockComponent
 > {
-  private _isActivated = false;
-
-  private _shouldDisplay = computed(() => {
-    const selection = this.host.selection;
-
-    const textSelection = selection.find('text');
-    const hasTextSelection =
-      !!textSelection && (!!textSelection.to || !!textSelection.from.length);
-
-    if (hasTextSelection) {
-      return false;
-    }
-
-    const blockSelections = selection.filter('block');
-    const hasMultipleBlockSelections =
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 &&
-        blockSelections[0].blockId !== this.blockElement.blockId);
-
-    if (hasMultipleBlockSelections) {
-      return false;
-    }
-
-    return true;
-  });
-
   private _hoverController = new HoverController(
     this,
     () => {
@@ -87,6 +61,32 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
       allowMultiple: true,
     }
   );
+
+  private _isActivated = false;
+
+  private _shouldDisplay = computed(() => {
+    const selection = this.host.selection;
+
+    const textSelection = selection.find('text');
+    const hasTextSelection =
+      !!textSelection && (!!textSelection.to || !!textSelection.from.length);
+
+    if (hasTextSelection) {
+      return false;
+    }
+
+    const blockSelections = selection.filter('block');
+    const hasMultipleBlockSelections =
+      blockSelections.length > 1 ||
+      (blockSelections.length === 1 &&
+        blockSelections[0].blockId !== this.blockElement.blockId);
+
+    if (hasMultipleBlockSelections) {
+      return false;
+    }
+
+    return true;
+  });
 
   override connectedCallback() {
     super.connectedCallback();

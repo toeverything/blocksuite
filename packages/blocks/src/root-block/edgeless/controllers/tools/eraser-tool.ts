@@ -1,17 +1,19 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { noop } from '@blocksuite/global/utils';
 
 import type { IPoint } from '../../../../_common/utils/index.js';
+import type { IVec2 } from '../../../../surface-block/utils/vec.js';
+
 import { buildPath } from '../../../../_common/utils/index.js';
 import {
   Bound,
+  type IVec,
+  Overlay,
   getStroke,
   getSvgPathFromStroke,
-  type IVec,
   linePolygonIntersects,
-  Overlay,
 } from '../../../../surface-block/index.js';
-import type { IVec2 } from '../../../../surface-block/utils/vec.js';
 import { deleteElements } from '../../utils/crud.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { EdgelessToolController } from './edgeless-tool.js';
@@ -32,25 +34,11 @@ type EraserTool = {
 };
 
 export class EraserToolController extends EdgelessToolController<EraserTool> {
-  private _overlay = new EraserOverlay();
-
-  private _timestamp = 0;
-
-  private _timer = 0;
-
-  private _eraserPoints: IVec[] = [];
-
-  private _prevPoint: IVec = [];
-
-  private _prevEraserPoint: IVec = [];
-
   private _erasables = new Set<BlockSuite.EdgelessModelType>();
 
   private _eraseTargets = new Set<BlockSuite.EdgelessModelType>();
 
-  override readonly tool: EraserTool = {
-    type: 'eraser',
-  };
+  private _eraserPoints: IVec[] = [];
 
   private _loop = () => {
     const now = Date.now();
@@ -87,9 +75,19 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._timer = requestAnimationFrame(this._loop);
   };
 
-  private toModelCoord(p: IPoint): IVec {
-    return this._service.viewport.toModelCoord(p.x, p.y);
-  }
+  private _overlay = new EraserOverlay();
+
+  private _prevEraserPoint: IVec = [];
+
+  private _prevPoint: IVec = [];
+
+  private _timer = 0;
+
+  private _timestamp = 0;
+
+  override readonly tool: EraserTool = {
+    type: 'eraser',
+  };
 
   private _reset() {
     cancelAnimationFrame(this._timer);
@@ -98,23 +96,45 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._eraseTargets.clear();
   }
 
-  onContainerPointerDown(): void {
+  private toModelCoord(p: IPoint): IVec {
+    return this._service.viewport.toModelCoord(p.x, p.y);
+  }
+
+  override afterModeSwitch(_newMode: EraserTool): void {
     noop();
   }
 
-  override onContainerDragStart(e: PointerEventState): void {
-    this._doc.captureSync();
+  override beforeModeSwitch() {
+    this._eraseTargets.forEach(erasable => {
+      if (isTopLevelBlock(erasable)) {
+        const ele = this._edgeless.host.view.viewFromPath(
+          'block',
+          buildPath(erasable)
+        );
+        ele && ((ele as HTMLElement).style.opacity = '1');
+      } else {
+        erasable.opacity = 1;
+      }
+    });
+    this._reset();
+  }
 
-    const { point } = e;
-    const [x, y] = this.toModelCoord(point);
-    this._eraserPoints = [[x, y]];
-    this._prevPoint = [x, y];
-    this._erasables = new Set([
-      ...this._service.elements,
-      ...this._service.blocks,
-    ]);
-    this._loop();
-    this._edgeless.surface.renderer.addOverlay(this._overlay);
+  override onContainerClick(): void {
+    noop();
+  }
+
+  override onContainerContextMenu(): void {
+    noop();
+  }
+
+  override onContainerDblClick(): void {
+    noop();
+  }
+
+  override onContainerDragEnd(): void {
+    deleteElements(this._surface, Array.from(this._eraseTargets));
+    this._reset();
+    this._doc.captureSync();
   }
 
   override onContainerDragMove(e: PointerEventState): void {
@@ -149,37 +169,19 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._prevPoint = currentPoint;
   }
 
-  override beforeModeSwitch() {
-    this._eraseTargets.forEach(erasable => {
-      if (isTopLevelBlock(erasable)) {
-        const ele = this._edgeless.host.view.viewFromPath(
-          'block',
-          buildPath(erasable)
-        );
-        ele && ((ele as HTMLElement).style.opacity = '1');
-      } else {
-        erasable.opacity = 1;
-      }
-    });
-    this._reset();
-  }
-
-  override onContainerDragEnd(): void {
-    deleteElements(this._surface, Array.from(this._eraseTargets));
-    this._reset();
+  override onContainerDragStart(e: PointerEventState): void {
     this._doc.captureSync();
-  }
 
-  override onContainerClick(): void {
-    noop();
-  }
-
-  override onContainerDblClick(): void {
-    noop();
-  }
-
-  override onContainerTripleClick(): void {
-    noop();
+    const { point } = e;
+    const [x, y] = this.toModelCoord(point);
+    this._eraserPoints = [[x, y]];
+    this._prevPoint = [x, y];
+    this._erasables = new Set([
+      ...this._service.elements,
+      ...this._service.blocks,
+    ]);
+    this._loop();
+    this._edgeless.surface.renderer.addOverlay(this._overlay);
   }
 
   override onContainerMouseMove(): void {
@@ -190,7 +192,11 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     noop();
   }
 
-  override onContainerContextMenu(): void {
+  onContainerPointerDown(): void {
+    noop();
+  }
+
+  override onContainerTripleClick(): void {
     noop();
   }
 
@@ -199,10 +205,6 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   }
 
   override onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
-
-  override afterModeSwitch(_newMode: EraserTool): void {
     noop();
   }
 }

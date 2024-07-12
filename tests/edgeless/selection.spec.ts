@@ -2,9 +2,9 @@ import { expect } from '@playwright/test';
 
 import * as actions from '../utils/actions/edgeless.js';
 import {
+  Shape,
   getNoteBoundBoxInEdgeless,
   setEdgelessTool,
-  Shape,
   switchEditorMode,
   toModelCoord,
 } from '../utils/actions/edgeless.js';

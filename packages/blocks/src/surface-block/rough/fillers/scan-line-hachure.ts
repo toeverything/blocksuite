@@ -1,5 +1,6 @@
 import type { ResolvedOptions } from '../core.js';
 import type { Line, Point } from '../geometry.js';
+
 import { rotateLines, rotatePoints } from '../geometry.js';
 
 interface EdgeEntry {

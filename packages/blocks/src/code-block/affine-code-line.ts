@@ -1,13 +1,15 @@
+import type { ThemedToken } from 'shiki';
+
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { ThemedToken } from 'shiki';
 
 import type { AffineTextAttributes } from '../_common/inline/presets/affine-inline-specs.js';
-import { getThemeMode } from '../_common/utils/query.js';
 import type { HighlightOptionsGetter } from './code-model.js';
+
+import { getThemeMode } from '../_common/utils/query.js';
 import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 import {
   highlightCache,
@@ -16,14 +18,6 @@ import {
 
 @customElement('affine-code-line')
 export class AffineCodeLine extends ShadowlessElement {
-  @property({ type: Object })
-  accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
-  };
-
-  @property({ attribute: false })
-  accessor highlightOptionsGetter: HighlightOptionsGetter | null = null;
-
   override render() {
     assertExists(
       this.highlightOptionsGetter,
@@ -65,6 +59,14 @@ export class AffineCodeLine extends ShadowlessElement {
 
     return html`<span>${vTexts}</span>`;
   }
+
+  @property({ type: Object })
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
+
+  @property({ attribute: false })
+  accessor highlightOptionsGetter: HighlightOptionsGetter | null = null;
 }
 
 declare global {

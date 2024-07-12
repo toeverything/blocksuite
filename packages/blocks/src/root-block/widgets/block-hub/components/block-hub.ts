@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
@@ -7,14 +8,18 @@ import { customElement, query, queryAll, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { DragIndicator } from '../../../../_common/components/drag-indicator.js';
+import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless/edgeless-root-block.js';
+
 import { toggleEmbedCardCreateModal } from '../../../../_common/components/embed-card/modal/index.js';
 import { BlockHubIcon, CrossIcon } from '../../../../_common/icons/index.js';
 import {
+  type DroppingType,
+  type EditingState,
+  Point,
+  Rect,
   asyncFocusRichText,
   buildPath,
   calcDropTarget,
-  type DroppingType,
-  type EditingState,
   getClosestBlockElementByPoint,
   getEdgelessRootByEditorHost,
   getHoveringNote,
@@ -22,8 +27,6 @@ import {
   getModelByBlockComponent,
   getPageRootByEditorHost,
   isInsidePageEditor,
-  Point,
-  Rect,
   stopPropagation,
 } from '../../../../_common/utils/index.js';
 import { viewPresets } from '../../../../database-block/data-view/index.js';
@@ -31,7 +34,6 @@ import {
   addImageBlocks,
   addSiblingImageBlock,
 } from '../../../../image-block/utils.js';
-import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless/edgeless-root-block.js';
 import { PageRootBlockComponent } from '../../../../root-block/page/page-root-block.js';
 import { autoScroll } from '../../../../root-block/text-selection/utils.js';
 import { getClosestNoteBlock } from '../../drag-handle/utils.js';
@@ -49,77 +51,11 @@ import { styles } from './../styles.js';
 
 @customElement('affine-block-hub')
 export class BlockHub extends WithDisposable(ShadowlessElement) {
-  private get _rootElement() {
-    const rootElement = isInsidePageEditor(this._editorHost)
-      ? (getPageRootByEditorHost(this._editorHost) as PageRootBlockComponent)
-      : (getEdgelessRootByEditorHost(
-          this._editorHost
-        ) as EdgelessRootBlockComponent);
-    return rootElement;
-  }
-
-  static override styles = styles;
-
-  /**
-   * A function that returns all blocks that are allowed to be moved to
-   */
-  @state()
-  private accessor _expanded = false;
-
-  @state()
-  private accessor _isGrabbing = false;
-
-  @state()
-  private accessor _visibleCardType: CardListType | null = null;
-
-  @state()
-  private accessor _showTooltip = true;
-
-  @state()
-  private accessor _maxHeight = 2000;
-
-  @queryAll('.card-container')
-  private accessor _blockHubCards!: NodeList & HTMLElement[];
-
-  @queryAll('.block-hub-icon-container[type]')
-  private accessor _blockHubMenus!: NodeList & HTMLElement[];
-
-  @query('.new-icon')
-  private accessor _blockHubButton!: HTMLElement;
-
-  @query('.block-hub-icons-container')
-  private accessor _blockHubIconsContainer!: HTMLElement;
-
-  @query('.block-hub-menu-container')
-  private accessor _blockHubMenuContainer!: HTMLElement;
-
-  @query('[role="menuitem"]')
-  private accessor _blockHubMenuEntry!: HTMLElement;
-
   private _currentClientX = 0;
 
   private _currentClientY = 0;
 
-  private _isCardListVisible = false;
-
-  private _indicator!: DragIndicator;
-
-  private _lastDroppingTarget: EditingState | null = null;
-
-  private _lastDroppingType: DroppingType = 'none';
-
-  private _lastDraggingFlavour: string | null = null;
-
-  private _timer: number | null = null;
-
-  private _rafID: number = 0;
-
   private _editorHost: EditorHost;
-
-  constructor(host: EditorHost) {
-    super();
-    this._editorHost = host;
-  }
 
   private _getHoveringNoteState = (point: Point) => {
     const state = {
@@ -152,35 +88,23 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     return state;
   };
 
-  /**
-   * This is currently a workaround, as the height of the _blockHubIconsContainer is determined by the height of its
-   * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
-   * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
-   */
-  private _onTransitionStart = (_: TransitionEvent) => {
-    if (this._timer) {
-      clearTimeout(this._timer);
-    }
-    if (!this._expanded) {
-      // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
-      this._blockHubMenuContainer.style.padding = '0 4px';
-      this._timer = window.setTimeout(() => {
-        this._blockHubIconsContainer.style.overflow = 'hidden';
-      }, TRANSITION_DELAY);
-    } else {
-      this._blockHubMenuContainer.style.padding = '4px';
-      this._timer = window.setTimeout(() => {
-        this._blockHubIconsContainer.style.overflow = 'unset';
-      }, TRANSITION_DELAY);
-    }
+  private _indicator!: DragIndicator;
+
+  private _isCardListVisible = false;
+
+  private _lastDraggingFlavour: string | null = null;
+
+  private _lastDroppingTarget: EditingState | null = null;
+
+  private _lastDroppingType: DroppingType = 'none';
+
+  private _onBlankMenuMouseDown = () => {
+    this._isGrabbing = true;
   };
 
-  private _hideCardList() {
-    if (this._visibleCardType) {
-      this._visibleCardType = null;
-      this._isCardListVisible = false;
-    }
-  }
+  private _onBlankMenuMouseUp = () => {
+    this._isGrabbing = false;
+  };
 
   private _onBlockHubButtonClick = (_: MouseEvent) => {
     this._expanded = !this._expanded;
@@ -189,36 +113,93 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _clearRaf() {
-    if (this._rafID) {
-      cancelAnimationFrame(this._rafID);
-      this._rafID = 0;
-    }
-  }
-
-  private _onMouseDown = (e: MouseEvent) => {
-    if (IS_FIREFOX) {
-      this._currentClientX = e.clientX;
-      this._currentClientY = e.clientY;
-    }
+  private _onBlockHubEntryMouseOver = () => {
+    this._isCardListVisible = false;
   };
 
-  private _onDragStart = (event: DragEvent) => {
-    this._showTooltip = false;
-    // DragEvent that doesn't dispatch manually, is expected to have dataTransfer property
-    assertExists(event.dataTransfer);
-    event.dataTransfer.effectAllowed = 'move';
-    const blockHubElement = event.target as HTMLElement;
+  private _onBlockHubMenuMouseOver = (e: Event) => {
+    const menu = e.currentTarget as HTMLElement;
+    const cardType = menu.getAttribute('type');
+    assertExists(cardType);
+    this._isCardListVisible = true;
+    this._visibleCardType = cardType as CardListType;
+  };
+
+  private _onCardMouseDown = (_: Event) => {
+    this._isGrabbing = true;
+  };
+
+  private _onCardMouseUp = (_: Event) => {
+    this._isGrabbing = false;
+  };
+
+  private _onClickCard = async (
+    _: MouseEvent,
+    blockHubElement: HTMLElement
+  ) => {
+    const affineType = blockHubElement.getAttribute('affine-type');
+    assertExists(affineType);
     const data: {
-      flavour: string | null;
+      flavour: string;
       type?: string;
     } = {
-      flavour: blockHubElement.getAttribute('affine-flavour'),
-      type: blockHubElement.getAttribute('affine-type') ?? undefined,
+      flavour: blockHubElement.getAttribute('affine-flavour') ?? '',
+      type: affineType ?? undefined,
     };
-    event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this._lastDraggingFlavour = data.flavour;
-    this._rootElement.selection.clear();
+    const doc = this._editorHost.doc;
+    const models = [];
+
+    const defaultNoteBlock =
+      doc.root?.children.findLast(block => block.flavour === 'affine:note') ??
+      doc.addBlock('affine:note', {}, doc.root?.id);
+
+    // add to end
+    let lastId;
+
+    // TO DO: fix image loading state for blockhub
+    if (data.flavour === 'affine:image' && data.type === 'image') {
+      const imageFiles = await getImageFilesFromLocal();
+
+      const imageService = this._editorHost.spec.getService('affine:image');
+      const maxFileSize = imageService.maxFileSize;
+
+      const blockIds = addImageBlocks(
+        this._editorHost,
+        imageFiles,
+        maxFileSize,
+        defaultNoteBlock
+      );
+
+      lastId = blockIds?.[blockIds.length - 1];
+    } else if (data.flavour === 'affine:bookmark') {
+      await toggleEmbedCardCreateModal(
+        this._editorHost,
+        'Links',
+        'The added link will be displayed as a card view.',
+        {
+          mode: 'page',
+          parentModel: defaultNoteBlock,
+        }
+      );
+    } else {
+      models.push(data);
+    }
+
+    models.forEach(model => {
+      lastId = doc.addBlock(
+        (model.flavour ?? 'affine:paragraph') as never,
+        model,
+        defaultNoteBlock
+      );
+    });
+    lastId && (await asyncFocusRichText(this._editorHost, lastId));
+  };
+
+  private _onClickOutside = (e: MouseEvent) => {
+    const target = e.target;
+    if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
+      this._hideCardList();
+    }
   };
 
   private _onDrag = (e: DragEvent) => {
@@ -323,6 +304,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._lastDroppingTarget = lastModelState;
   };
 
+  private _onDragEnd = (_: DragEvent) => {
+    this._showTooltip = true;
+    this._isGrabbing = false;
+    this._lastDraggingFlavour = null;
+    this._resetDropState();
+  };
+
   private _onDragOver = (e: DragEvent) => {
     e.preventDefault();
     return false;
@@ -336,17 +324,22 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._currentClientY = e.clientY;
   };
 
-  private _onDragEnd = (_: DragEvent) => {
-    this._showTooltip = true;
-    this._isGrabbing = false;
-    this._lastDraggingFlavour = null;
-    this._resetDropState();
-  };
-
-  private _resetDropState = () => {
-    this._lastDroppingType = 'none';
-    this._indicator.rect = null;
-    this._lastDroppingTarget = null;
+  private _onDragStart = (event: DragEvent) => {
+    this._showTooltip = false;
+    // DragEvent that doesn't dispatch manually, is expected to have dataTransfer property
+    assertExists(event.dataTransfer);
+    event.dataTransfer.effectAllowed = 'move';
+    const blockHubElement = event.target as HTMLElement;
+    const data: {
+      flavour: string | null;
+      type?: string;
+    } = {
+      flavour: blockHubElement.getAttribute('affine-flavour'),
+      type: blockHubElement.getAttribute('affine-type') ?? undefined,
+    };
+    event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
+    this._lastDraggingFlavour = data.flavour;
+    this._rootElement.selection.clear();
   };
 
   private _onDrop = async (e: DragEvent) => {
@@ -484,107 +477,80 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     rootElement.setSelection(noteId, true, focusId, point);
   };
 
-  private _onClickCard = async (
-    _: MouseEvent,
-    blockHubElement: HTMLElement
-  ) => {
-    const affineType = blockHubElement.getAttribute('affine-type');
-    assertExists(affineType);
-    const data: {
-      flavour: string;
-      type?: string;
-    } = {
-      flavour: blockHubElement.getAttribute('affine-flavour') ?? '',
-      type: affineType ?? undefined,
-    };
-    const doc = this._editorHost.doc;
-    const models = [];
-
-    const defaultNoteBlock =
-      doc.root?.children.findLast(block => block.flavour === 'affine:note') ??
-      doc.addBlock('affine:note', {}, doc.root?.id);
-
-    // add to end
-    let lastId;
-
-    // TO DO: fix image loading state for blockhub
-    if (data.flavour === 'affine:image' && data.type === 'image') {
-      const imageFiles = await getImageFilesFromLocal();
-
-      const imageService = this._editorHost.spec.getService('affine:image');
-      const maxFileSize = imageService.maxFileSize;
-
-      const blockIds = addImageBlocks(
-        this._editorHost,
-        imageFiles,
-        maxFileSize,
-        defaultNoteBlock
-      );
-
-      lastId = blockIds?.[blockIds.length - 1];
-    } else if (data.flavour === 'affine:bookmark') {
-      await toggleEmbedCardCreateModal(
-        this._editorHost,
-        'Links',
-        'The added link will be displayed as a card view.',
-        {
-          mode: 'page',
-          parentModel: defaultNoteBlock,
-        }
-      );
-    } else {
-      models.push(data);
+  private _onMouseDown = (e: MouseEvent) => {
+    if (IS_FIREFOX) {
+      this._currentClientX = e.clientX;
+      this._currentClientY = e.clientY;
     }
-
-    models.forEach(model => {
-      lastId = doc.addBlock(
-        (model.flavour ?? 'affine:paragraph') as never,
-        model,
-        defaultNoteBlock
-      );
-    });
-    lastId && (await asyncFocusRichText(this._editorHost, lastId));
-  };
-
-  private _onClickOutside = (e: MouseEvent) => {
-    const target = e.target;
-    if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
-      this._hideCardList();
-    }
-  };
-
-  private _onCardMouseDown = (_: Event) => {
-    this._isGrabbing = true;
-  };
-
-  private _onCardMouseUp = (_: Event) => {
-    this._isGrabbing = false;
-  };
-
-  private _onBlankMenuMouseDown = () => {
-    this._isGrabbing = true;
-  };
-
-  private _onBlankMenuMouseUp = () => {
-    this._isGrabbing = false;
-  };
-
-  private _onBlockHubMenuMouseOver = (e: Event) => {
-    const menu = e.currentTarget as HTMLElement;
-    const cardType = menu.getAttribute('type');
-    assertExists(cardType);
-    this._isCardListVisible = true;
-    this._visibleCardType = cardType as CardListType;
-  };
-
-  private _onBlockHubEntryMouseOver = () => {
-    this._isCardListVisible = false;
   };
 
   private _onResize = () => {
     const boundingClientRect = document.body.getBoundingClientRect();
     this._maxHeight = boundingClientRect.height - TOP_DISTANCE - BOTTOM_OFFSET;
   };
+
+  /**
+   * This is currently a workaround, as the height of the _blockHubIconsContainer is determined by the height of its
+   * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
+   * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
+   */
+  private _onTransitionStart = (_: TransitionEvent) => {
+    if (this._timer) {
+      clearTimeout(this._timer);
+    }
+    if (!this._expanded) {
+      // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
+      this._blockHubMenuContainer.style.padding = '0 4px';
+      this._timer = window.setTimeout(() => {
+        this._blockHubIconsContainer.style.overflow = 'hidden';
+      }, TRANSITION_DELAY);
+    } else {
+      this._blockHubMenuContainer.style.padding = '4px';
+      this._timer = window.setTimeout(() => {
+        this._blockHubIconsContainer.style.overflow = 'unset';
+      }, TRANSITION_DELAY);
+    }
+  };
+
+  private _rafID: number = 0;
+
+  private _resetDropState = () => {
+    this._lastDroppingType = 'none';
+    this._indicator.rect = null;
+    this._lastDroppingTarget = null;
+  };
+
+  private _timer: number | null = null;
+
+  static override styles = styles;
+
+  constructor(host: EditorHost) {
+    super();
+    this._editorHost = host;
+  }
+
+  private _clearRaf() {
+    if (this._rafID) {
+      cancelAnimationFrame(this._rafID);
+      this._rafID = 0;
+    }
+  }
+
+  private _hideCardList() {
+    if (this._visibleCardType) {
+      this._visibleCardType = null;
+      this._isCardListVisible = false;
+    }
+  }
+
+  private get _rootElement() {
+    const rootElement = isInsidePageEditor(this._editorHost)
+      ? (getPageRootByEditorHost(this._editorHost) as PageRootBlockComponent)
+      : (getEdgelessRootByEditorHost(
+          this._editorHost
+        ) as EdgelessRootBlockComponent);
+    return rootElement;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -608,6 +574,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
 
     this._onResize();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposables.dispose();
   }
 
   override firstUpdated() {
@@ -673,16 +644,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
-  }
-
-  toggleMenu() {
-    this._expanded = !this._expanded;
-    if (!this._expanded) this._hideCardList();
-  }
-
   override render() {
     const blockHubMenu = BlockHubMenu(
       this._expanded,
@@ -721,4 +682,45 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  toggleMenu() {
+    this._expanded = !this._expanded;
+    if (!this._expanded) this._hideCardList();
+  }
+
+  @query('.new-icon')
+  private accessor _blockHubButton!: HTMLElement;
+
+  @queryAll('.card-container')
+  private accessor _blockHubCards!: NodeList & HTMLElement[];
+
+  @query('.block-hub-icons-container')
+  private accessor _blockHubIconsContainer!: HTMLElement;
+
+  @query('.block-hub-menu-container')
+  private accessor _blockHubMenuContainer!: HTMLElement;
+
+  @query('[role="menuitem"]')
+  private accessor _blockHubMenuEntry!: HTMLElement;
+
+  @queryAll('.block-hub-icon-container[type]')
+  private accessor _blockHubMenus!: NodeList & HTMLElement[];
+
+  /**
+   * A function that returns all blocks that are allowed to be moved to
+   */
+  @state()
+  private accessor _expanded = false;
+
+  @state()
+  private accessor _isGrabbing = false;
+
+  @state()
+  private accessor _maxHeight = 2000;
+
+  @state()
+  private accessor _showTooltip = true;
+
+  @state()
+  private accessor _visibleCardType: CardListType | null = null;
 }

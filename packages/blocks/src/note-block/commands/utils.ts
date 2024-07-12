@@ -5,6 +5,7 @@ import type {
   InitCommandCtx,
 } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -13,16 +14,17 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 
+import type {
+  AffineInlineEditor,
+  AffineTextAttributes,
+} from '../../_common/inline/presets/affine-inline-specs.js';
+
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
 } from '../../_common/configs/text-format/consts.js';
 import { BLOCK_ID_ATTR } from '../../_common/consts.js';
-import type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-} from '../../_common/inline/presets/affine-inline-specs.js';
 
 function isActive(std: BlockSuite.Std, key: keyof AffineTextAttributes) {
   const [result] = std.command.chain().isTextStyleActive({ key }).run();

@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+
 import { assertImageOption } from 'utils/asserts.js';
 
 import { getIndexCoordinate, waitNextFrame } from './misc.js';

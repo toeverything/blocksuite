@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -58,12 +59,6 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @query('.comment-panel-container')
-  private accessor _container!: HTMLDivElement;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
   commentManager: CommentManager | null = null;
 
   private _addComment() {
@@ -107,6 +102,12 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
       </div>
     </div>`;
   }
+
+  @query('.comment-panel-container')
+  private accessor _container!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 }
 
 declare global {

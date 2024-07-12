@@ -1,9 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { DraggableShape } from './utils.js';
 
 import {
   ellipseSvg,
@@ -17,7 +19,6 @@ import {
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
-import type { DraggableShape } from './utils.js';
 import { buildVariablesObject } from './utils.js';
 
 const shapes: DraggableShape[] = [];
@@ -62,12 +63,6 @@ shapes.forEach(s => {
 export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   LitElement
 ) {
-  get shapeShadow() {
-    return this.theme === 'dark'
-      ? '0 0 7px rgba(0, 0, 0, .22)'
-      : '0 0 5px rgba(0, 0, 0, .2)';
-  }
-
   static override styles = css`
     :host {
       display: flex;
@@ -133,24 +128,9 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
 
   draggableController!: EdgelessDraggableElementController<DraggableShape>;
 
-  override type = 'shape' as const;
-
-  @property({ attribute: false })
-  accessor color!: string;
-
-  @property({ attribute: false })
-  accessor stroke!: string;
-
-  @property({ attribute: false })
-  accessor onShapeClick: (shape: DraggableShape) => void = () => {};
-
-  @state()
-  accessor readyToDrop = false;
-
-  @query('.edgeless-shape-draggable')
-  accessor shapeContainer!: HTMLDivElement;
-
   draggingShape: DraggableShape['name'] = 'roundedRect';
+
+  override type = 'shape' as const;
 
   private _setShapeOverlayLock(lock: boolean) {
     const controller = this.edgeless.tools.currentController;
@@ -261,16 +241,6 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
     );
   }
 
-  override updated(_changedProperties: Map<PropertyKey, unknown>) {
-    const controllerRequiredProps = ['edgeless', 'toolbarContainer'] as const;
-    if (
-      controllerRequiredProps.some(p => _changedProperties.has(p)) &&
-      !this.draggableController
-    ) {
-      this.initDragController();
-    }
-  }
-
   override render() {
     const { cancelled, dragOut, draggingElement } =
       this.draggableController?.states || {};
@@ -327,6 +297,37 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
       )}
     </div>`;
   }
+
+  override updated(_changedProperties: Map<PropertyKey, unknown>) {
+    const controllerRequiredProps = ['edgeless', 'toolbarContainer'] as const;
+    if (
+      controllerRequiredProps.some(p => _changedProperties.has(p)) &&
+      !this.draggableController
+    ) {
+      this.initDragController();
+    }
+  }
+
+  get shapeShadow() {
+    return this.theme === 'dark'
+      ? '0 0 7px rgba(0, 0, 0, .22)'
+      : '0 0 5px rgba(0, 0, 0, .2)';
+  }
+
+  @property({ attribute: false })
+  accessor color!: string;
+
+  @property({ attribute: false })
+  accessor onShapeClick: (shape: DraggableShape) => void = () => {};
+
+  @state()
+  accessor readyToDrop = false;
+
+  @query('.edgeless-shape-draggable')
+  accessor shapeContainer!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor stroke!: string;
 }
 
 declare global {

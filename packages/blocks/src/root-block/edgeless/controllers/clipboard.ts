@@ -4,27 +4,32 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
+
 import {
+  DisposableGroup,
   assertExists,
   assertInstanceOf,
-  DisposableGroup,
 } from '@blocksuite/global/utils';
 import {
   type BlockSnapshot,
   BlockSnapshotSchema,
   DocCollection,
-  fromJSON,
   Job,
   type SliceSnapshot,
+  fromJSON,
 } from '@blocksuite/store';
 import DOMPurify from 'dompurify';
+
+import type { EdgelessSelectableProps } from '../../../_common/edgeless/mixin/edgeless-selectable.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
+import type { IBound } from '../../../surface-block/consts.js';
+import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import {
   CANVAS_EXPORT_IGNORE_TAGS,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import type { EdgelessSelectableProps } from '../../../_common/edgeless/mixin/edgeless-selectable.js';
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
@@ -35,8 +40,6 @@ import {
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
-import type { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { IBound } from '../../../surface-block/consts.js';
 import {
   type SerializedElement,
   SurfaceGroupLikeModel,
@@ -61,7 +64,6 @@ import {
   decodeClipboardBlobs,
   encodeClipboardBlobs,
 } from '../../clipboard/utils.js';
-import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { getCloneElements, serializeElement } from '../utils/clone-utils.js';
 import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
@@ -86,42 +88,6 @@ interface CanvasExportOptions {
 }
 
 export class EdgelessClipboardController extends PageClipboard {
-  private get std() {
-    return this.host.std;
-  }
-
-  private get doc() {
-    return this.host.doc;
-  }
-
-  private get surface() {
-    return this.host.surface;
-  }
-
-  private get edgeless() {
-    return this.surface.edgeless;
-  }
-
-  private get toolManager() {
-    return this.host.tools;
-  }
-
-  private get selectionManager() {
-    return this.host.service.selection;
-  }
-
-  private get _rootService() {
-    return this.std.spec.getService('affine:page');
-  }
-
-  private get _exportManager() {
-    return this._rootService.exportManager;
-  }
-
-  constructor(public override host: EdgelessRootBlockComponent) {
-    super(host);
-  }
-
   private _initEdgelessClipboard = () => {
     this.host.handleEvent(
       'copy',
@@ -182,6 +148,37 @@ export class EdgelessClipboardController extends PageClipboard {
         };
       })
       .catch(console.error);
+  };
+
+  private _onCut = (_context: UIEventStateContext) => {
+    const { surfaceSelections, selectedElements } = this.selectionManager;
+
+    if (selectedElements.length === 0) return;
+
+    const event = _context.get('clipboardState').event;
+    event.preventDefault();
+
+    this._onCopy(_context, surfaceSelections);
+
+    if (surfaceSelections[0]?.editing) {
+      // use build-in cut handler in rich-text when cut in surface text element
+      if (isCanvasElementWithText(selectedElements[0])) return;
+      this.onPageCut(_context);
+      return;
+    }
+
+    const elements = getCloneElements(
+      this.selectionManager.selectedElements,
+      this.surface.edgeless.service.frame
+    );
+    this.doc.transact(() => {
+      deleteElements(this.surface, elements);
+    });
+
+    this.selectionManager.set({
+      editing: false,
+      elements: [],
+    });
   };
 
   private _onPaste = async (_context: UIEventStateContext) => {
@@ -352,36 +349,71 @@ export class EdgelessClipboardController extends PageClipboard {
     }
   };
 
-  private _onCut = (_context: UIEventStateContext) => {
-    const { surfaceSelections, selectedElements } = this.selectionManager;
+  constructor(public override host: EdgelessRootBlockComponent) {
+    super(host);
+  }
 
-    if (selectedElements.length === 0) return;
-
-    const event = _context.get('clipboardState').event;
-    event.preventDefault();
-
-    this._onCopy(_context, surfaceSelections);
-
-    if (surfaceSelections[0]?.editing) {
-      // use build-in cut handler in rich-text when cut in surface text element
-      if (isCanvasElementWithText(selectedElements[0])) return;
-      this.onPageCut(_context);
-      return;
+  private _checkCanContinueToCanvas(
+    host: EditorHost,
+    pathName: string,
+    editorMode: boolean
+  ) {
+    if (
+      location.pathname !== pathName ||
+      isInsidePageEditor(host) !== editorMode
+    ) {
+      throw new Error('Unable to export content to canvas');
     }
+  }
 
-    const elements = getCloneElements(
-      this.selectionManager.selectedElements,
-      this.surface.edgeless.service.frame
-    );
-    this.doc.transact(() => {
-      deleteElements(this.surface, elements);
-    });
+  private async _createAttachmentBlocks(attachments: BlockSnapshot[]) {
+    const attachmentIds = [];
+    for (const { props } of attachments) {
+      const { xywh, rotate, sourceId, name, size, type, embed, style } = props;
+      if (!(await this.host.std.collection.blobSync.get(sourceId as string))) {
+        continue;
+      }
+      const attachmentId = this.host.service.addBlock(
+        'affine:attachment',
+        {
+          xywh,
+          rotate,
+          sourceId,
+          name,
+          size,
+          type,
+          embed,
+          style,
+        },
+        this.surface.model.id
+      );
+      attachmentIds.push(attachmentId);
+    }
+    return attachmentIds;
+  }
 
-    this.selectionManager.set({
-      editing: false,
-      elements: [],
+  private _createBookmarkBlocks(bookmarks: BlockSnapshot[]) {
+    const bookmarkIds = bookmarks.map(({ props }) => {
+      const { xywh, style, url, caption, description, icon, image, title } =
+        props;
+      const bookmarkId = this.host.service.addBlock(
+        'affine:bookmark',
+        {
+          xywh,
+          style,
+          url,
+          caption,
+          description,
+          icon,
+          image,
+          title,
+        },
+        this.surface.model.id
+      );
+      return bookmarkId;
     });
-  };
+    return bookmarkIds;
+  }
 
   private _createCanvasElement(
     clipboardData: Record<string, unknown>,
@@ -497,31 +529,6 @@ export class EdgelessClipboardController extends PageClipboard {
     ];
   }
 
-  private _createNoteBlocks(
-    notes: BlockSnapshot[],
-    oldToNewIdMap: Map<string, string>
-  ) {
-    const { host } = this;
-    const noteIds = notes.map(({ id, props, children }) => {
-      delete props.index;
-      assertExists(props.xywh);
-      const noteId = host.service.addBlock(
-        'affine:note',
-        props,
-        this.doc.root!.id
-      );
-      const note = host.service.getElementById(noteId) as NoteBlockModel;
-      if (id) oldToNewIdMap.set(id, noteId);
-      assertExists(note);
-
-      children.forEach((child, index) => {
-        this.onBlockSnapshotPaste(child, this.doc, note.id, index);
-      });
-      return noteId;
-    });
-    return noteIds;
-  }
-
   private _createEdgelessTextBlocks(
     edgelessTexts: BlockSnapshot[],
     oldToNewIdMap: Map<string, string>
@@ -547,6 +554,27 @@ export class EdgelessClipboardController extends PageClipboard {
     return edgelessTextIds;
   }
 
+  private _createFigmaEmbedBlocks(figmaEmbeds: BlockSnapshot[]) {
+    const embedFigmaIds = figmaEmbeds.map(({ props }) => {
+      const { xywh, style, url, caption, title, description } = props;
+
+      const embedFigmaId = this.host.service.addBlock(
+        'affine:embed-figma',
+        {
+          xywh,
+          style,
+          url,
+          caption,
+          title,
+          description,
+        },
+        this.surface.model.id
+      );
+      return embedFigmaId;
+    });
+    return embedFigmaIds;
+  }
+
   private _createFrameBlocks(frames: BlockSnapshot[]) {
     const frameIds = frames.map(({ props }) => {
       const { xywh, title, background } = props;
@@ -562,84 +590,6 @@ export class EdgelessClipboardController extends PageClipboard {
       return frameId;
     });
     return frameIds;
-  }
-
-  private async _createImageBlocks(
-    images: BlockSnapshot[],
-    oldToNewIdMap: Map<string, string>
-  ) {
-    const imageIds = [];
-    for (const { props, id } of images) {
-      const { xywh, rotate, sourceId, size, width, height, caption } = props;
-      if (!(await this.host.std.collection.blobSync.get(sourceId as string))) {
-        continue;
-      }
-      const imageId = this.host.service.addBlock(
-        'affine:image',
-        {
-          caption,
-          sourceId,
-          xywh,
-          rotate,
-          size,
-          width,
-          height,
-        },
-        this.surface.model.id
-      );
-      if (id) oldToNewIdMap.set(id, imageId);
-      imageIds.push(imageId);
-    }
-    return imageIds;
-  }
-
-  private async _createAttachmentBlocks(attachments: BlockSnapshot[]) {
-    const attachmentIds = [];
-    for (const { props } of attachments) {
-      const { xywh, rotate, sourceId, name, size, type, embed, style } = props;
-      if (!(await this.host.std.collection.blobSync.get(sourceId as string))) {
-        continue;
-      }
-      const attachmentId = this.host.service.addBlock(
-        'affine:attachment',
-        {
-          xywh,
-          rotate,
-          sourceId,
-          name,
-          size,
-          type,
-          embed,
-          style,
-        },
-        this.surface.model.id
-      );
-      attachmentIds.push(attachmentId);
-    }
-    return attachmentIds;
-  }
-
-  private _createBookmarkBlocks(bookmarks: BlockSnapshot[]) {
-    const bookmarkIds = bookmarks.map(({ props }) => {
-      const { xywh, style, url, caption, description, icon, image, title } =
-        props;
-      const bookmarkId = this.host.service.addBlock(
-        'affine:bookmark',
-        {
-          xywh,
-          style,
-          url,
-          caption,
-          description,
-          icon,
-          image,
-          title,
-        },
-        this.surface.model.id
-      );
-      return bookmarkId;
-    });
-    return bookmarkIds;
   }
 
   private _createGithubEmbedBlocks(githubEmbeds: BlockSnapshot[]) {
@@ -688,6 +638,141 @@ export class EdgelessClipboardController extends PageClipboard {
     return embedGithubIds;
   }
 
+  private _createHtmlEmbedBlocks(htmlEmbeds: BlockSnapshot[]) {
+    const embedHtmlIds = htmlEmbeds.map(({ props }) => {
+      const { xywh, style, caption, html, design } = props;
+
+      const embedHtmlId = this.host.service.addBlock(
+        'affine:embed-html',
+        {
+          xywh,
+          style,
+          caption,
+          html,
+          design,
+        },
+        this.surface.model.id
+      );
+      return embedHtmlId;
+    });
+    return embedHtmlIds;
+  }
+
+  private async _createImageBlocks(
+    images: BlockSnapshot[],
+    oldToNewIdMap: Map<string, string>
+  ) {
+    const imageIds = [];
+    for (const { props, id } of images) {
+      const { xywh, rotate, sourceId, size, width, height, caption } = props;
+      if (!(await this.host.std.collection.blobSync.get(sourceId as string))) {
+        continue;
+      }
+      const imageId = this.host.service.addBlock(
+        'affine:image',
+        {
+          caption,
+          sourceId,
+          xywh,
+          rotate,
+          size,
+          width,
+          height,
+        },
+        this.surface.model.id
+      );
+      if (id) oldToNewIdMap.set(id, imageId);
+      imageIds.push(imageId);
+    }
+    return imageIds;
+  }
+
+  private _createLinkedDocEmbedBlocks(linkedDocEmbeds: BlockSnapshot[]) {
+    const embedLinkedDocIds = linkedDocEmbeds.map(({ props }) => {
+      const { xywh, style, caption, pageId } = props;
+
+      return this.host.service.addBlock(
+        'affine:embed-linked-doc',
+        {
+          xywh,
+          style,
+          caption,
+          pageId,
+        },
+        this.surface.model.id
+      );
+    });
+    return embedLinkedDocIds;
+  }
+
+  private _createLoomEmbedBlocks(loomEmbeds: BlockSnapshot[]) {
+    const embedLoomIds = loomEmbeds.map(({ props }) => {
+      const { xywh, style, url, caption, videoId, image, title, description } =
+        props;
+
+      const embedLoomId = this.host.service.addBlock(
+        'affine:embed-loom',
+        {
+          xywh,
+          style,
+          url,
+          caption,
+          videoId,
+          image,
+          title,
+          description,
+        },
+        this.surface.model.id
+      );
+      return embedLoomId;
+    });
+    return embedLoomIds;
+  }
+
+  private _createNoteBlocks(
+    notes: BlockSnapshot[],
+    oldToNewIdMap: Map<string, string>
+  ) {
+    const { host } = this;
+    const noteIds = notes.map(({ id, props, children }) => {
+      delete props.index;
+      assertExists(props.xywh);
+      const noteId = host.service.addBlock(
+        'affine:note',
+        props,
+        this.doc.root!.id
+      );
+      const note = host.service.getElementById(noteId) as NoteBlockModel;
+      if (id) oldToNewIdMap.set(id, noteId);
+      assertExists(note);
+
+      children.forEach((child, index) => {
+        this.onBlockSnapshotPaste(child, this.doc, note.id, index);
+      });
+      return noteId;
+    });
+    return noteIds;
+  }
+
+  private _createSyncedDocEmbedBlocks(syncedDocEmbeds: BlockSnapshot[]) {
+    const embedSyncedDocIds = syncedDocEmbeds.map(({ props }) => {
+      const { xywh, style, caption, scale, pageId } = props;
+
+      return this.host.service.addBlock(
+        'affine:embed-synced-doc',
+        {
+          xywh,
+          style,
+          caption,
+          scale,
+          pageId,
+        },
+        this.surface.model.id
+      );
+    });
+    return embedSyncedDocIds;
+  }
+
   private _createYoutubeEmbedBlocks(youtubeEmbeds: BlockSnapshot[]) {
     const embedYoutubeIds = youtubeEmbeds.map(({ props }) => {
       const {
@@ -724,274 +809,6 @@ export class EdgelessClipboardController extends PageClipboard {
       return embedYoutubeId;
     });
     return embedYoutubeIds;
-  }
-
-  private _createFigmaEmbedBlocks(figmaEmbeds: BlockSnapshot[]) {
-    const embedFigmaIds = figmaEmbeds.map(({ props }) => {
-      const { xywh, style, url, caption, title, description } = props;
-
-      const embedFigmaId = this.host.service.addBlock(
-        'affine:embed-figma',
-        {
-          xywh,
-          style,
-          url,
-          caption,
-          title,
-          description,
-        },
-        this.surface.model.id
-      );
-      return embedFigmaId;
-    });
-    return embedFigmaIds;
-  }
-
-  private _createLinkedDocEmbedBlocks(linkedDocEmbeds: BlockSnapshot[]) {
-    const embedLinkedDocIds = linkedDocEmbeds.map(({ props }) => {
-      const { xywh, style, caption, pageId } = props;
-
-      return this.host.service.addBlock(
-        'affine:embed-linked-doc',
-        {
-          xywh,
-          style,
-          caption,
-          pageId,
-        },
-        this.surface.model.id
-      );
-    });
-    return embedLinkedDocIds;
-  }
-
-  private _createSyncedDocEmbedBlocks(syncedDocEmbeds: BlockSnapshot[]) {
-    const embedSyncedDocIds = syncedDocEmbeds.map(({ props }) => {
-      const { xywh, style, caption, scale, pageId } = props;
-
-      return this.host.service.addBlock(
-        'affine:embed-synced-doc',
-        {
-          xywh,
-          style,
-          caption,
-          scale,
-          pageId,
-        },
-        this.surface.model.id
-      );
-    });
-    return embedSyncedDocIds;
-  }
-
-  private _createHtmlEmbedBlocks(htmlEmbeds: BlockSnapshot[]) {
-    const embedHtmlIds = htmlEmbeds.map(({ props }) => {
-      const { xywh, style, caption, html, design } = props;
-
-      const embedHtmlId = this.host.service.addBlock(
-        'affine:embed-html',
-        {
-          xywh,
-          style,
-          caption,
-          html,
-          design,
-        },
-        this.surface.model.id
-      );
-      return embedHtmlId;
-    });
-    return embedHtmlIds;
-  }
-
-  private _createLoomEmbedBlocks(loomEmbeds: BlockSnapshot[]) {
-    const embedLoomIds = loomEmbeds.map(({ props }) => {
-      const { xywh, style, url, caption, videoId, image, title, description } =
-        props;
-
-      const embedLoomId = this.host.service.addBlock(
-        'affine:embed-loom',
-        {
-          xywh,
-          style,
-          url,
-          caption,
-          videoId,
-          image,
-          title,
-          description,
-        },
-        this.surface.model.id
-      );
-      return embedLoomId;
-    });
-    return embedLoomIds;
-  }
-
-  private _emitSelectionChangeAfterPaste(
-    canvasElementIds: string[],
-    blockIds: string[]
-  ) {
-    const newSelected = [
-      ...canvasElementIds,
-      ...blockIds.filter(id => {
-        return isTopLevelBlock(this.doc.getBlockById(id));
-      }),
-    ];
-
-    this.selectionManager.set({
-      editing: false,
-      elements: newSelected,
-    });
-  }
-
-  private _updatePastedElementsIndex(
-    elements: BlockSuite.EdgelessModelType[],
-    originalIndexes: Map<string, string>
-  ) {
-    function compare(
-      a: BlockSuite.EdgelessModelType,
-      b: BlockSuite.EdgelessModelType
-    ) {
-      if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
-        return -1;
-      } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
-        return 1;
-      } else {
-        const aGroups = a.groups;
-        const bGroups = b.groups;
-        const minGroups = Math.min(aGroups.length, bGroups.length);
-
-        for (let i = 0; i < minGroups; ++i) {
-          if (aGroups[i] !== bGroups[i]) {
-            const aGroup = aGroups[i] ?? a;
-            const bGroup = bGroups[i] ?? b;
-
-            return aGroup.index === bGroup.index
-              ? 0
-              : aGroup.index < bGroup.index
-                ? -1
-                : 1;
-          }
-        }
-
-        if (originalIndexes.get(a.id)! < originalIndexes.get(b.id)!) return -1;
-        else if (originalIndexes.get(a.id)! > originalIndexes.get(b.id)!)
-          return 1;
-        return 0;
-      }
-    }
-
-    const idxGenerator = this.edgeless.service.layer.createIndexGenerator(true);
-    const sortedElements = elements.sort(compare);
-    sortedElements.forEach(ele => {
-      this.edgeless.service.updateElement(ele.id, {
-        index: idxGenerator(isTopLevelBlock(ele) ? ele.flavour : ele.type),
-      });
-    });
-  }
-
-  private _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
-    const edgeless = this.host;
-    const { lastMousePos } = this.toolManager;
-    const [x, y] = edgeless.service.viewport.toModelCoord(
-      lastMousePos.x,
-      lastMousePos.y
-    );
-
-    const noteProps = {
-      xywh: new Bound(
-        x,
-        y,
-        DEFAULT_NOTE_WIDTH,
-        DEFAULT_NOTE_HEIGHT
-      ).serialize(),
-    };
-
-    const noteId = edgeless.service.addBlock(
-      'affine:note',
-      noteProps,
-      this.doc.root!.id
-    );
-
-    edgeless.service.telemetryService?.track('CanvasElementAdded', {
-      control: 'canvas:paste',
-      page: 'whiteboard editor',
-      module: 'toolbar',
-      segment: 'toolbar',
-      type: 'note',
-    });
-
-    if (typeof content === 'string') {
-      splitIntoLines(content).forEach((line, idx) => {
-        edgeless.service.addBlock(
-          'affine:paragraph',
-          { text: new DocCollection.Y.Text(line) },
-          noteId,
-          idx
-        );
-      });
-    } else {
-      content.forEach((child, idx) => {
-        this.onBlockSnapshotPaste(child, this.doc, noteId, idx);
-      });
-    }
-
-    edgeless.service.selection.set({
-      elements: [noteId],
-      editing: false,
-    });
-    edgeless.tools.setEdgelessTool({ type: 'default' });
-  }
-
-  private async _pasteShapesAndBlocks(
-    elementsRawData: (SerializedElement | BlockSnapshot)[]
-  ) {
-    const { canvasElements, blockModels } =
-      await this.createElementsFromClipboardData(elementsRawData);
-    this._emitSelectionChangeAfterPaste(
-      canvasElements.map(ele => ele.id),
-      blockModels.map(block => block.id)
-    );
-  }
-
-  private async _replaceRichTextWithSvgElement(element: HTMLElement) {
-    const richList = Array.from(element.querySelectorAll('.inline-editor'));
-    await Promise.all(
-      richList.map(rich => {
-        const svgEle = this._elementToSvgElement(
-          rich.cloneNode(true) as HTMLElement,
-          rich.clientWidth,
-          rich.clientHeight + 1
-        );
-        rich.parentElement?.append(svgEle);
-        rich.remove();
-      })
-    );
-  }
-
-  private _elementToSvgElement(
-    node: HTMLElement,
-    width: number,
-    height: number
-  ) {
-    const xmlns = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(xmlns, 'svg');
-    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
-
-    svg.setAttribute('width', `${width}`);
-    svg.setAttribute('height', `${height}`);
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-
-    foreignObject.setAttribute('width', '100%');
-    foreignObject.setAttribute('height', '100%');
-    foreignObject.setAttribute('x', '0');
-    foreignObject.setAttribute('y', '0');
-    foreignObject.setAttribute('externalResourcesRequired', 'true');
-
-    svg.append(foreignObject);
-    foreignObject.append(node);
-    return svg;
   }
 
   private async _edgelessToCanvas(
@@ -1147,25 +964,202 @@ export class EdgelessClipboardController extends PageClipboard {
     return canvas;
   }
 
-  private _checkCanContinueToCanvas(
-    host: EditorHost,
-    pathName: string,
-    editorMode: boolean
+  private _elementToSvgElement(
+    node: HTMLElement,
+    width: number,
+    height: number
   ) {
-    if (
-      location.pathname !== pathName ||
-      isInsidePageEditor(host) !== editorMode
-    ) {
-      throw new Error('Unable to export content to canvas');
-    }
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(xmlns, 'svg');
+    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
+
+    svg.setAttribute('width', `${width}`);
+    svg.setAttribute('height', `${height}`);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+    foreignObject.setAttribute('width', '100%');
+    foreignObject.setAttribute('height', '100%');
+    foreignObject.setAttribute('x', '0');
+    foreignObject.setAttribute('y', '0');
+    foreignObject.setAttribute('externalResourcesRequired', 'true');
+
+    svg.append(foreignObject);
+    foreignObject.append(node);
+    return svg;
   }
 
-  override hostConnected() {
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
+  private _emitSelectionChangeAfterPaste(
+    canvasElementIds: string[],
+    blockIds: string[]
+  ) {
+    const newSelected = [
+      ...canvasElementIds,
+      ...blockIds.filter(id => {
+        return isTopLevelBlock(this.doc.getBlockById(id));
+      }),
+    ];
+
+    this.selectionManager.set({
+      editing: false,
+      elements: newSelected,
+    });
+  }
+
+  private get _exportManager() {
+    return this._rootService.exportManager;
+  }
+
+  private async _pasteShapesAndBlocks(
+    elementsRawData: (SerializedElement | BlockSnapshot)[]
+  ) {
+    const { canvasElements, blockModels } =
+      await this.createElementsFromClipboardData(elementsRawData);
+    this._emitSelectionChangeAfterPaste(
+      canvasElements.map(ele => ele.id),
+      blockModels.map(block => block.id)
+    );
+  }
+
+  private _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
+    const edgeless = this.host;
+    const { lastMousePos } = this.toolManager;
+    const [x, y] = edgeless.service.viewport.toModelCoord(
+      lastMousePos.x,
+      lastMousePos.y
+    );
+
+    const noteProps = {
+      xywh: new Bound(
+        x,
+        y,
+        DEFAULT_NOTE_WIDTH,
+        DEFAULT_NOTE_HEIGHT
+      ).serialize(),
+    };
+
+    const noteId = edgeless.service.addBlock(
+      'affine:note',
+      noteProps,
+      this.doc.root!.id
+    );
+
+    edgeless.service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:paste',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'note',
+    });
+
+    if (typeof content === 'string') {
+      splitIntoLines(content).forEach((line, idx) => {
+        edgeless.service.addBlock(
+          'affine:paragraph',
+          { text: new DocCollection.Y.Text(line) },
+          noteId,
+          idx
+        );
+      });
+    } else {
+      content.forEach((child, idx) => {
+        this.onBlockSnapshotPaste(child, this.doc, noteId, idx);
+      });
     }
-    this._init();
-    this._initEdgelessClipboard();
+
+    edgeless.service.selection.set({
+      elements: [noteId],
+      editing: false,
+    });
+    edgeless.tools.setEdgelessTool({ type: 'default' });
+  }
+
+  private async _replaceRichTextWithSvgElement(element: HTMLElement) {
+    const richList = Array.from(element.querySelectorAll('.inline-editor'));
+    await Promise.all(
+      richList.map(rich => {
+        const svgEle = this._elementToSvgElement(
+          rich.cloneNode(true) as HTMLElement,
+          rich.clientWidth,
+          rich.clientHeight + 1
+        );
+        rich.parentElement?.append(svgEle);
+        rich.remove();
+      })
+    );
+  }
+
+  private get _rootService() {
+    return this.std.spec.getService('affine:page');
+  }
+
+  private _updatePastedElementsIndex(
+    elements: BlockSuite.EdgelessModelType[],
+    originalIndexes: Map<string, string>
+  ) {
+    function compare(
+      a: BlockSuite.EdgelessModelType,
+      b: BlockSuite.EdgelessModelType
+    ) {
+      if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
+        return -1;
+      } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
+        return 1;
+      } else {
+        const aGroups = a.groups;
+        const bGroups = b.groups;
+        const minGroups = Math.min(aGroups.length, bGroups.length);
+
+        for (let i = 0; i < minGroups; ++i) {
+          if (aGroups[i] !== bGroups[i]) {
+            const aGroup = aGroups[i] ?? a;
+            const bGroup = bGroups[i] ?? b;
+
+            return aGroup.index === bGroup.index
+              ? 0
+              : aGroup.index < bGroup.index
+                ? -1
+                : 1;
+          }
+        }
+
+        if (originalIndexes.get(a.id)! < originalIndexes.get(b.id)!) return -1;
+        else if (originalIndexes.get(a.id)! > originalIndexes.get(b.id)!)
+          return 1;
+        return 0;
+      }
+    }
+
+    const idxGenerator = this.edgeless.service.layer.createIndexGenerator(true);
+    const sortedElements = elements.sort(compare);
+    sortedElements.forEach(ele => {
+      this.edgeless.service.updateElement(ele.id, {
+        index: idxGenerator(isTopLevelBlock(ele) ? ele.flavour : ele.type),
+      });
+    });
+  }
+
+  private get doc() {
+    return this.host.doc;
+  }
+
+  private get edgeless() {
+    return this.surface.edgeless;
+  }
+
+  private get selectionManager() {
+    return this.host.service.selection;
+  }
+
+  private get std() {
+    return this.host.std;
+  }
+
+  private get surface() {
+    return this.host.surface;
+  }
+
+  private get toolManager() {
+    return this.host.tools;
   }
 
   copy() {
@@ -1175,6 +1169,42 @@ export class EdgelessClipboardController extends PageClipboard {
         cancelable: true,
       })
     );
+  }
+
+  async copyAsPng(
+    blocks: BlockSuite.EdgelessBlockModelType[],
+    shapes: BlockSuite.SurfaceModelType[]
+  ) {
+    const blocksLen = blocks.length;
+    const shapesLen = shapes.length;
+
+    if (blocksLen + shapesLen === 0) return;
+    const canvas = await this.toCanvas(blocks, shapes);
+    assertExists(canvas);
+    // @ts-ignore
+    if (window.apis?.clipboard?.copyAsImageFromString) {
+      // @ts-ignore
+      await window.apis.clipboard?.copyAsImageFromString(
+        canvas.toDataURL(IMAGE_PNG)
+      );
+    } else {
+      const blob: Blob = await new Promise((resolve, reject) =>
+        canvas.toBlob(
+          blob => (blob ? resolve(blob) : reject('Canvas can not export blob')),
+          IMAGE_PNG
+        )
+      );
+      assertExists(blob);
+
+      this.std.clipboard
+        .writeToClipboard(_items => {
+          return {
+            ..._items,
+            [IMAGE_PNG]: blob,
+          };
+        })
+        .catch(console.error);
+    }
   }
 
   async createElementsFromClipboardData(
@@ -1343,6 +1373,14 @@ export class EdgelessClipboardController extends PageClipboard {
     };
   }
 
+  override hostConnected() {
+    if (this._disposables.disposed) {
+      this._disposables = new DisposableGroup();
+    }
+    this._init();
+    this._initEdgelessClipboard();
+  }
+
   async toCanvas(
     blocks: BlockSuite.EdgelessBlockModelType[],
     shapes: BlockSuite.SurfaceModelType[],
@@ -1369,42 +1407,6 @@ export class EdgelessClipboardController extends PageClipboard {
       options
     );
     return canvas;
-  }
-
-  async copyAsPng(
-    blocks: BlockSuite.EdgelessBlockModelType[],
-    shapes: BlockSuite.SurfaceModelType[]
-  ) {
-    const blocksLen = blocks.length;
-    const shapesLen = shapes.length;
-
-    if (blocksLen + shapesLen === 0) return;
-    const canvas = await this.toCanvas(blocks, shapes);
-    assertExists(canvas);
-    // @ts-ignore
-    if (window.apis?.clipboard?.copyAsImageFromString) {
-      // @ts-ignore
-      await window.apis.clipboard?.copyAsImageFromString(
-        canvas.toDataURL(IMAGE_PNG)
-      );
-    } else {
-      const blob: Blob = await new Promise((resolve, reject) =>
-        canvas.toBlob(
-          blob => (blob ? resolve(blob) : reject('Canvas can not export blob')),
-          IMAGE_PNG
-        )
-      );
-      assertExists(blob);
-
-      this.std.clipboard
-        .writeToClipboard(_items => {
-          return {
-            ..._items,
-            [IMAGE_PNG]: blob,
-          };
-        })
-        .catch(console.error);
-    }
   }
 }
 

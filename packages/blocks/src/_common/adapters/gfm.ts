@@ -6,6 +6,8 @@ Copyright (c) 2020 Titus Wormer <tituswormer@gmail.com>
 mdast-util-gfm-autolink-literal is from markdown only.
 mdast-util-gfm-footnote is not included.
 */
+import type { Processor } from 'unified';
+
 import { gfmAutolinkLiteralFromMarkdown } from 'mdast-util-gfm-autolink-literal';
 import {
   gfmStrikethroughFromMarkdown,
@@ -21,7 +23,6 @@ import { gfmStrikethrough } from 'micromark-extension-gfm-strikethrough';
 import { gfmTable } from 'micromark-extension-gfm-table';
 import { gfmTaskListItem } from 'micromark-extension-gfm-task-list-item';
 import { combineExtensions } from 'micromark-util-combine-extensions';
-import type { Processor } from 'unified';
 
 export function gfm() {
   return combineExtensions([

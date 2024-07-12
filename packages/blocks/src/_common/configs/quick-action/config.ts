@@ -1,8 +1,7 @@
-import './database-convert-view.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { createSimplePortal } from '../../components/portal.js';
@@ -18,6 +17,7 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../utils/render-linked-doc.js';
+import './database-convert-view.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {

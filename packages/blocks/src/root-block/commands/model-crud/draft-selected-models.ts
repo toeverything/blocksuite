@@ -1,6 +1,7 @@
 import type { Command } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { type DraftModel, toDraftModel } from '@blocksuite/store';
 
 export const draftSelectedModelsCommand: Command<

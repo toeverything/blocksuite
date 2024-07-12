@@ -20,16 +20,16 @@ export class AssetsManager {
     this._blob = options.blob;
   }
 
+  cleanup() {
+    this._assetsMap.clear();
+  }
+
   getAssets() {
     return this._assetsMap;
   }
 
   isEmpty() {
     return this._assetsMap.size === 0;
-  }
-
-  cleanup() {
-    this._assetsMap.clear();
   }
 
   async readFromBlob(blobId: string) {

@@ -1,27 +1,29 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { BlockModel, Text } from '@blocksuite/store';
+
 import { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel, Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { NoteBlockModel } from '../../note-block/index.js';
+import type { PageRootBlockWidgetName } from '../index.js';
+import type { RootBlockModel } from '../root-model.js';
+import type { PageRootService } from './page-root-service.js';
+
 import {
+  NoteDisplayMode,
+  type Viewport,
   asyncFocusRichText,
   buildPath,
   focusTitle,
   getDocTitleInlineEditor,
   matchFlavours,
-  NoteDisplayMode,
-  type Viewport,
 } from '../../_common/utils/index.js';
 import { getScrollContainer } from '../../_common/utils/scroll-container.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
 import { PageClipboard } from '../clipboard/index.js';
-import type { PageRootBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
-import type { RootBlockModel } from '../root-model.js';
-import type { PageRootService } from './page-root-service.js';
 
 const DOC_BLOCK_CHILD_PADDING = 24;
 const DOC_BOTTOM_PADDING = 32;
@@ -52,46 +54,7 @@ export class PageRootBlockComponent extends BlockElement<
   PageRootService,
   PageRootBlockWidgetName
 > {
-  get slots() {
-    return this.service.slots;
-  }
-
-  get rootScrollContainer() {
-    return getScrollContainer(this);
-  }
-
-  get viewportElement(): HTMLDivElement | null {
-    if (this._viewportElement) return this._viewportElement;
-    this._viewportElement = this.host.closest(
-      '.affine-page-viewport'
-    ) as HTMLDivElement | null;
-    return this._viewportElement;
-  }
-
-  get viewport(): Viewport | null {
-    if (!this.viewportElement) {
-      return null;
-    }
-    const {
-      scrollLeft,
-      scrollTop,
-      scrollWidth,
-      scrollHeight,
-      clientWidth,
-      clientHeight,
-    } = this.viewportElement;
-    const { top, left } = this.viewportElement.getBoundingClientRect();
-    return {
-      top,
-      left,
-      scrollLeft,
-      scrollTop,
-      scrollWidth,
-      scrollHeight,
-      clientWidth,
-      clientHeight,
-    };
-  }
+  private _viewportElement: HTMLDivElement | null = null;
 
   static override styles = css`
     editor-host:has(> affine-page-root, * > affine-page-root) {
@@ -148,14 +111,37 @@ export class PageRootBlockComponent extends BlockElement<
     }
   `;
 
-  private _viewportElement: HTMLDivElement | null = null;
+  clipboardController = new PageClipboard(this);
+
+  focusFirstParagraph = () => {
+    const defaultNote = this._getDefaultNoteBlock();
+    const firstText = defaultNote?.children.find(block =>
+      matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
+    );
+    if (firstText) {
+      asyncFocusRichText(this.host, firstText.id)?.catch(console.error);
+    } else {
+      const newFirstParagraphId = this.doc.addBlock(
+        'affine:paragraph',
+        {},
+        defaultNote,
+        0
+      );
+      asyncFocusRichText(this.host, newFirstParagraphId)?.catch(console.error);
+    }
+  };
 
   keyboardManager: PageKeyboardManager | null = null;
 
-  clipboardController = new PageClipboard(this);
-
-  @query('.affine-page-root-block-container')
-  accessor rootElementContainer!: HTMLDivElement;
+  prependParagraphWithText = (text: Text) => {
+    const newFirstParagraphId = this.doc.addBlock(
+      'affine:paragraph',
+      { text },
+      this._getDefaultNoteBlock(),
+      0
+    );
+    asyncFocusRichText(this.host, newFirstParagraphId)?.catch(console.error);
+  };
 
   private _createDefaultNoteBlock() {
     const { doc } = this;
@@ -192,50 +178,6 @@ export class PageRootBlockComponent extends BlockElement<
     this.disposables.add(() => {
       resizeObserver.unobserve(viewportElement);
       resizeObserver.disconnect();
-    });
-  }
-
-  prependParagraphWithText = (text: Text) => {
-    const newFirstParagraphId = this.doc.addBlock(
-      'affine:paragraph',
-      { text },
-      this._getDefaultNoteBlock(),
-      0
-    );
-    asyncFocusRichText(this.host, newFirstParagraphId)?.catch(console.error);
-  };
-
-  focusFirstParagraph = () => {
-    const defaultNote = this._getDefaultNoteBlock();
-    const firstText = defaultNote?.children.find(block =>
-      matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
-    );
-    if (firstText) {
-      asyncFocusRichText(this.host, firstText.id)?.catch(console.error);
-    } else {
-      const newFirstParagraphId = this.doc.addBlock(
-        'affine:paragraph',
-        {},
-        defaultNote,
-        0
-      );
-      asyncFocusRichText(this.host, newFirstParagraphId)?.catch(console.error);
-    }
-  };
-
-  override firstUpdated() {
-    this._initViewportResizeEffect();
-    const noteModels = this.model.children.filter(model =>
-      matchFlavours(model, ['affine:note'])
-    );
-    noteModels.forEach(note => {
-      this.disposables.add(
-        note.propsUpdated.on(({ key }) => {
-          if (key === 'displayMode') {
-            this.requestUpdate();
-          }
-        })
-      );
     });
   }
 
@@ -416,6 +358,22 @@ export class PageRootBlockComponent extends BlockElement<
     this.keyboardManager = null;
   }
 
+  override firstUpdated() {
+    this._initViewportResizeEffect();
+    const noteModels = this.model.children.filter(model =>
+      matchFlavours(model, ['affine:note'])
+    );
+    noteModels.forEach(note => {
+      this.disposables.add(
+        note.propsUpdated.on(({ key }) => {
+          if (key === 'displayMode') {
+            this.requestUpdate();
+          }
+        })
+      );
+    });
+  }
+
   override renderBlock() {
     const content = html`${repeat(
       this.model.children.filter(child => {
@@ -441,6 +399,50 @@ export class PageRootBlockComponent extends BlockElement<
       <div class="affine-page-root-block-container">${content} ${widgets}</div>
     `;
   }
+
+  get rootScrollContainer() {
+    return getScrollContainer(this);
+  }
+
+  get slots() {
+    return this.service.slots;
+  }
+
+  get viewport(): Viewport | null {
+    if (!this.viewportElement) {
+      return null;
+    }
+    const {
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    } = this.viewportElement;
+    const { top, left } = this.viewportElement.getBoundingClientRect();
+    return {
+      top,
+      left,
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    };
+  }
+
+  get viewportElement(): HTMLDivElement | null {
+    if (this._viewportElement) return this._viewportElement;
+    this._viewportElement = this.host.closest(
+      '.affine-page-viewport'
+    ) as HTMLDivElement | null;
+    return this._viewportElement;
+  }
+
+  @query('.affine-page-root-block-container')
+  accessor rootElementContainer!: HTMLDivElement;
 }
 
 declare global {

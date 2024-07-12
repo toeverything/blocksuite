@@ -1,4 +1,5 @@
 import type { AttributeRenderer } from '@blocksuite/inline';
+
 import { html } from 'lit';
 
 import type { HighlightOptionsGetter } from '../code-model.js';

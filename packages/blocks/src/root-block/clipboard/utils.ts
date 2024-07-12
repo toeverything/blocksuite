@@ -1,7 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { toast } from '../../_common/components/toast.js';
 import type { FileSnapshot } from './adapter.js';
+
+import { toast } from '../../_common/components/toast.js';
 
 const chars =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';

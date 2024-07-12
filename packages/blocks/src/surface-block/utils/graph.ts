@@ -1,7 +1,8 @@
 import type { Bound } from './bound.js';
+import type { IVec } from './vec.js';
+
 import { almostEqual, linePolygonIntersects } from './math-utils.js';
 import { isOverlap as _isOverlap } from './math-utils.js';
-import type { IVec } from './vec.js';
 
 function isOverlap(line: IVec[], line2: IVec[]) {
   if (
@@ -46,6 +47,12 @@ export class Graph {
     });
   }
 
+  private _canSkipBlock(point: IVec) {
+    return this.excludedPoints.some(excludedPoint => {
+      return arrayAlmostEqual(point, excludedPoint);
+    });
+  }
+
   private _isBlock(sp: IVec, ep: IVec) {
     return (
       this.blocks.some(block => {
@@ -69,12 +76,6 @@ export class Graph {
         return result?.length === 2;
       })
     );
-  }
-
-  private _canSkipBlock(point: IVec) {
-    return this.excludedPoints.some(excludedPoint => {
-      return arrayAlmostEqual(point, excludedPoint);
-    });
   }
 
   neighbors(curPoint: IVec): IVec[] {

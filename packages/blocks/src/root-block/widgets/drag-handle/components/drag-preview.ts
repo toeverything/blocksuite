@@ -1,6 +1,7 @@
+import type { TemplateResult } from 'lit';
+
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -9,12 +10,6 @@ import { Point } from '../../../../_common/utils/index.js';
 @customElement('affine-drag-preview')
 export class DragPreview extends ShadowlessElement {
   offset: Point;
-
-  @property({ attribute: false })
-  accessor template: TemplateResult | null = null;
-
-  @property({ attribute: false })
-  accessor onRemove: (() => void) | null = null;
 
   constructor(offset?: Point) {
     super();
@@ -55,6 +50,12 @@ export class DragPreview extends ShadowlessElement {
         }</style
       >${this.template}`;
   }
+
+  @property({ attribute: false })
+  accessor onRemove: (() => void) | null = null;
+
+  @property({ attribute: false })
+  accessor template: TemplateResult | null = null;
 }
 
 declare global {

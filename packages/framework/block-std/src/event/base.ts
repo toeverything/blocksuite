@@ -23,16 +23,16 @@ export class UIEventStateContext {
     this._map[name] = state;
   };
 
-  has = (type: UIEventStateType) => {
-    return !!this._map[type];
-  };
-
   get = <Type extends UIEventStateType = UIEventStateType>(
     type: Type
   ): MatchEvent<Type> => {
     const state = this._map[type];
     assertExists(state, `UIEventStateContext: state ${type} not found`);
     return state as MatchEvent<Type>;
+  };
+
+  has = (type: UIEventStateType) => {
+    return !!this._map[type];
   };
 
   static from(...states: UIEventState[]) {

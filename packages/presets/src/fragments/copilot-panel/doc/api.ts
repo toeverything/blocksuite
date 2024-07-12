@@ -1,4 +1,5 @@
 import type { ChatMessage } from '../chat/logic.js';
+
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import { ChatServiceKind } from '../copilot-service/service-base.js';
 

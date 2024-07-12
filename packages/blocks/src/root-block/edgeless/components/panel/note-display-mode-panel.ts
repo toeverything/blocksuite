@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -45,15 +45,6 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor displayMode!: NoteDisplayMode;
-
-  @property({ attribute: false })
-  accessor onSelect!: (displayMode: NoteDisplayMode) => void;
-
-  @property({ attribute: false })
-  accessor panelWidth = 240;
-
   private _DisplayModeIcon(mode: NoteDisplayMode) {
     switch (mode) {
       case NoteDisplayMode.DocAndEdgeless:
@@ -98,6 +89,15 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
       }
     );
   }
+
+  @property({ attribute: false })
+  accessor displayMode!: NoteDisplayMode;
+
+  @property({ attribute: false })
+  accessor onSelect!: (displayMode: NoteDisplayMode) => void;
+
+  @property({ attribute: false })
+  accessor panelWidth = 240;
 }
 
 declare global {

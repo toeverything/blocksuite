@@ -9,8 +9,12 @@ export class AsyncQueue<T> {
     this._queue = init;
   }
 
-  get length() {
-    return this._queue.length;
+  clear() {
+    this._queue = [];
+  }
+
+  find(predicate: (update: T) => boolean) {
+    return this._queue.find(predicate);
   }
 
   async next(
@@ -60,12 +64,8 @@ export class AsyncQueue<T> {
     }
   }
 
-  find(predicate: (update: T) => boolean) {
-    return this._queue.find(predicate);
-  }
-
-  clear() {
-    this._queue = [];
+  get length() {
+    return this._queue.length;
   }
 }
 

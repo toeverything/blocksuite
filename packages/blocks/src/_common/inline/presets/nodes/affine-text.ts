@@ -44,11 +44,6 @@ export function affineTextStyles(
 
 @customElement('affine-text')
 export class AffineText extends ShadowlessElement {
-  @property({ type: Object })
-  accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
-  };
-
   override render() {
     const style = this.delta.attributes
       ? affineTextStyles(this.delta.attributes)
@@ -68,6 +63,11 @@ export class AffineText extends ShadowlessElement {
       ><v-text .str=${this.delta.insert}></v-text
     ></span>`;
   }
+
+  @property({ type: Object })
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
 }
 
 declare global {

@@ -1,9 +1,9 @@
 import {
   type BundledHighlighterOptions,
   type BundledLanguage,
-  getHighlighter,
   type Highlighter,
   type PlainTextLanguage,
+  getHighlighter,
 } from 'shiki';
 
 let _highLighter: Highlighter | null = null;

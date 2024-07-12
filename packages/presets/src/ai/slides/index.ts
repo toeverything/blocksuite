@@ -5,10 +5,10 @@ import type { BlockSnapshot } from '@blocksuite/store';
 import { markdownToSnapshot } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import {
-  basicTheme,
   type PPTDoc,
   type PPTSection,
   type TemplateImage,
+  basicTheme,
 } from './template.js';
 
 export const PPTBuilder = (host: EditorHost) => {

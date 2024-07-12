@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { assertExists, noop } from '@blocksuite/global/utils';
 
 import type {
@@ -6,6 +7,8 @@ import type {
   IBound,
   IVec2,
 } from '../../../../surface-block/index.js';
+import type { EdgelessTool } from '../../types.js';
+
 import {
   Bound,
   CanvasElementType,
@@ -17,11 +20,10 @@ import {
   ShapeType,
 } from '../../../../surface-block/index.js';
 import {
-  calculateNearestLocation,
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
+  calculateNearestLocation,
 } from '../../../../surface-block/managers/connector-manager.js';
-import type { EdgelessTool } from '../../types.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 enum ConnectorToolMode {
@@ -37,9 +39,12 @@ export type ConnectorTool = {
 };
 
 export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {
-  private _mode: ConnectorToolMode = ConnectorToolMode.Dragging;
+  // Likes pressing `ESC`
+  private _allowCancel = false;
 
   private _connector: ConnectorElementModel | null = null;
+
+  private _mode: ConnectorToolMode = ConnectorToolMode.Dragging;
 
   private _source: Connection | null = null;
 
@@ -48,9 +53,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   private _sourceLocations: IVec2[] = ConnectorEndpointLocations;
 
   private _startPoint: IVec | null = null;
-
-  // Likes pressing `ESC`
-  private _allowCancel = false;
 
   readonly tool = {
     type: 'connector',
@@ -79,34 +81,25 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     ) as ConnectorElementModel;
   }
 
-  quickConnect(point: IVec, element: BlockSuite.EdgelessModelType) {
-    this._startPoint = this._service.viewport.toModelCoord(point[0], point[1]);
-    this._mode = ConnectorToolMode.Quick;
-    this._sourceBounds = Bound.deserialize(element.xywh);
-    this._sourceBounds.rotate = element.rotate;
-    this._sourceLocations =
-      element instanceof ShapeElementModel &&
-      element.shapeType === ShapeType.Triangle
-        ? ConnectorEndpointLocationsOnTriangle
-        : ConnectorEndpointLocations;
+  afterModeSwitch() {
+    noop();
+  }
 
-    this._source = {
-      id: element.id,
-      position: calculateNearestLocation(
-        this._startPoint,
-        this._sourceBounds,
-        this._sourceLocations
-      ),
-    };
-    this._allowCancel = true;
+  beforeModeSwitch(edgelessTool: EdgelessTool) {
+    if (edgelessTool.type === 'connector') return;
 
-    this._createConnector();
-
-    if (element instanceof GroupElementModel) {
-      this._surface.overlays.connector.sourceBounds = this._sourceBounds;
+    const id = this._connector?.id;
+    if (this._allowCancel && id) {
+      this._edgeless.service.removeElement(id);
     }
 
-    this.findTargetByPoint(point);
+    this._surface.overlays.connector.clear();
+    this._mode = ConnectorToolMode.Dragging;
+    this._connector = null;
+    this._source = null;
+    this._sourceBounds = null;
+    this._startPoint = null;
+    this._allowCancel = false;
   }
 
   findTargetByPoint(point: IVec) {
@@ -155,27 +148,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     noop();
   }
 
-  onContainerTripleClick() {
-    noop();
-  }
-
-  onContainerPointerDown(e: PointerEventState) {
-    this._startPoint = this._service.viewport.toModelCoord(e.x, e.y);
-    this._source = this._surface.overlays.connector.renderConnector(
-      this._startPoint
-    );
-  }
-
-  onContainerDragStart() {
-    if (this._mode === ConnectorToolMode.Quick) return;
-
-    this._createConnector();
-  }
-
-  onContainerDragMove(e: PointerEventState) {
-    this.findTargetByPoint([e.x, e.y]);
-  }
-
   onContainerDragEnd() {
     if (this._mode === ConnectorToolMode.Quick) return;
     assertExists(this._connector);
@@ -185,6 +157,16 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       elements: [this._connector.id],
       editing: false,
     });
+  }
+
+  onContainerDragMove(e: PointerEventState) {
+    this.findTargetByPoint([e.x, e.y]);
+  }
+
+  onContainerDragStart() {
+    if (this._mode === ConnectorToolMode.Quick) return;
+
+    this._createConnector();
   }
 
   onContainerMouseMove(e: PointerEventState) {
@@ -217,6 +199,17 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     noop();
   }
 
+  onContainerPointerDown(e: PointerEventState) {
+    this._startPoint = this._service.viewport.toModelCoord(e.x, e.y);
+    this._source = this._surface.overlays.connector.renderConnector(
+      this._startPoint
+    );
+  }
+
+  onContainerTripleClick() {
+    noop();
+  }
+
   onPressShiftKey(_: boolean) {
     noop();
   }
@@ -225,25 +218,34 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     noop();
   }
 
-  beforeModeSwitch(edgelessTool: EdgelessTool) {
-    if (edgelessTool.type === 'connector') return;
+  quickConnect(point: IVec, element: BlockSuite.EdgelessModelType) {
+    this._startPoint = this._service.viewport.toModelCoord(point[0], point[1]);
+    this._mode = ConnectorToolMode.Quick;
+    this._sourceBounds = Bound.deserialize(element.xywh);
+    this._sourceBounds.rotate = element.rotate;
+    this._sourceLocations =
+      element instanceof ShapeElementModel &&
+      element.shapeType === ShapeType.Triangle
+        ? ConnectorEndpointLocationsOnTriangle
+        : ConnectorEndpointLocations;
 
-    const id = this._connector?.id;
-    if (this._allowCancel && id) {
-      this._edgeless.service.removeElement(id);
+    this._source = {
+      id: element.id,
+      position: calculateNearestLocation(
+        this._startPoint,
+        this._sourceBounds,
+        this._sourceLocations
+      ),
+    };
+    this._allowCancel = true;
+
+    this._createConnector();
+
+    if (element instanceof GroupElementModel) {
+      this._surface.overlays.connector.sourceBounds = this._sourceBounds;
     }
 
-    this._surface.overlays.connector.clear();
-    this._mode = ConnectorToolMode.Dragging;
-    this._connector = null;
-    this._source = null;
-    this._sourceBounds = null;
-    this._startPoint = null;
-    this._allowCancel = false;
-  }
-
-  afterModeSwitch() {
-    noop();
+    this.findTargetByPoint(point);
   }
 }
 

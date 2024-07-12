@@ -1,4 +1,5 @@
 import type { TType } from './typesystem.js';
+
 import { typesystem } from './typesystem.js';
 
 type MatcherData<Data, Type extends TType = TType> = {
@@ -16,17 +17,8 @@ export class Matcher<Data, Type extends TType = TType> {
     ) => boolean = typesystem.isSubtype.bind(typesystem)
   ) {}
 
-  register(type: Type, data: Data) {
-    this.list.push({ type, data });
-  }
-
-  match(type: TType) {
-    for (const t of this.list) {
-      if (this._match(t.type, type)) {
-        return t.data;
-      }
-    }
-    return;
+  all(): MatcherData<Data, Type>[] {
+    return this.list;
   }
 
   allMatched(type: TType): MatcherData<Data>[] {
@@ -49,21 +41,30 @@ export class Matcher<Data, Type extends TType = TType> {
     return result;
   }
 
-  findData(f: (data: Data) => boolean): Data | undefined {
-    return this.list.find(data => f(data.data))?.data;
-  }
-
   find(
     f: (data: MatcherData<Data, Type>) => boolean
   ): MatcherData<Data, Type> | undefined {
     return this.list.find(f);
   }
 
-  all(): MatcherData<Data, Type>[] {
-    return this.list;
+  findData(f: (data: Data) => boolean): Data | undefined {
+    return this.list.find(data => f(data.data))?.data;
   }
 
   isMatched(type: Type, target: TType) {
     return this._match(type, target);
+  }
+
+  match(type: TType) {
+    for (const t of this.list) {
+      if (this._match(t.type, type)) {
+        return t.data;
+      }
+    }
+    return;
+  }
+
+  register(type: Type, data: Data) {
+    this.list.push({ type, data });
   }
 }

@@ -1,12 +1,12 @@
-import './card.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../../../../_common/components/index.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
+
+import { popMenu } from '../../../../../_common/components/index.js';
+import './card.js';
 
 const styles = css`
   affine-data-view-kanban-header {
@@ -28,11 +28,6 @@ const styles = css`
 
 @customElement('affine-data-view-kanban-header')
 export class KanbanHeader extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor view!: DataViewKanbanManager;
-
   private clickGroup = (e: MouseEvent) => {
     popMenu(e.target as HTMLElement, {
       options: {
@@ -54,6 +49,8 @@ export class KanbanHeader extends WithDisposable(ShadowlessElement) {
     });
   };
 
+  static override styles = styles;
+
   override render() {
     return html`
       <div></div>
@@ -62,6 +59,9 @@ export class KanbanHeader extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor view!: DataViewKanbanManager;
 }
 
 declare global {

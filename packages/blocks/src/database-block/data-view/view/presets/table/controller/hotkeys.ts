@@ -1,15 +1,12 @@
 import type { ReactiveController } from 'lit';
 
-import { popRowMenu } from '../components/menu.js';
 import type { DataViewTable } from '../table-view.js';
+
+import { popRowMenu } from '../components/menu.js';
 
 export class TableHotkeysController implements ReactiveController {
   constructor(private host: DataViewTable) {
     this.host.addController(this);
-  }
-
-  get selectionController() {
-    return this.host.selectionController;
   }
 
   hostConnected() {
@@ -284,5 +281,9 @@ export class TableHotkeysController implements ReactiveController {
         },
       })
     );
+  }
+
+  get selectionController() {
+    return this.host.selectionController;
   }
 }

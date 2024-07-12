@@ -6,6 +6,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { AttachmentBlockService } from './attachment-service.js';
+
 import {
   BlockComponent,
   HoverController,
@@ -25,7 +27,6 @@ import {
   type AttachmentBlockModel,
   AttachmentBlockStyles,
 } from './attachment-model.js';
-import type { AttachmentBlockService } from './attachment-service.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
 import { renderEmbedView } from './embed.js';
 import { styles } from './styles.js';
@@ -36,36 +37,15 @@ export class AttachmentBlockComponent extends BlockComponent<
   AttachmentBlockModel,
   AttachmentBlockService
 > {
-  get isInSurface() {
-    return this._isInSurface;
-  }
-
-  get edgeless() {
-    if (!this._isInSurface) {
-      return null;
-    }
-    return this.host.querySelector('affine-edgeless-root');
-  }
-
-  private get _embedView() {
-    if (this.isInSurface || !this.model.embed || !this.blobUrl) return;
-    return renderEmbedView(this.model, this.blobUrl, this.service.maxFileSize);
-  }
-
-  static override styles = styles;
-
-  @state()
-  private accessor _showOverlay = true;
-
-  private _isSelected = false;
-
   private _isDragging = false;
+
+  private _isInSurface = false;
 
   private _isResizing = false;
 
-  private readonly _themeObserver = new ThemeObserver();
+  private _isSelected = false;
 
-  private _isInSurface = false;
+  private readonly _themeObserver = new ThemeObserver();
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
     const selection = this.host.selection;
@@ -105,29 +85,32 @@ export class AttachmentBlockComponent extends BlockComponent<
     };
   });
 
-  override accessor useCaptionEditor = true;
+  static override styles = styles;
 
-  @property({ attribute: false })
-  accessor loading = false;
+  copy = () => {
+    const slice = Slice.fromModels(this.doc, [this.model]);
+    this.std.clipboard.copySlice(slice).catch(console.error);
+    toast(this.host, 'Copied to clipboard');
+  };
 
-  @property({ attribute: false })
-  accessor error = false;
+  download = () => {
+    downloadAttachmentBlob(this);
+  };
 
-  @property({ attribute: false })
-  accessor downloading = false;
+  open = () => {
+    if (!this.blobUrl) {
+      return;
+    }
+    window.open(this.blobUrl, '_blank');
+  };
 
-  @property({ attribute: false })
-  accessor blobUrl: string | undefined = undefined;
+  refreshData = () => {
+    checkAttachmentBlob(this).catch(console.error);
+  };
 
-  @property({ attribute: false })
-  accessor allowEmbed = false;
-
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
+  private get _embedView() {
+    if (this.isInSurface || !this.model.embed || !this.blobUrl) return;
+    return renderEmbedView(this.model, this.blobUrl, this.service.maxFileSize);
   }
 
   private _handleClick(event: MouseEvent) {
@@ -146,26 +129,13 @@ export class AttachmentBlockComponent extends BlockComponent<
     }
   }
 
-  copy = () => {
-    const slice = Slice.fromModels(this.doc, [this.model]);
-    this.std.clipboard.copySlice(slice).catch(console.error);
-    toast(this.host, 'Copied to clipboard');
-  };
-
-  open = () => {
-    if (!this.blobUrl) {
-      return;
-    }
-    window.open(this.blobUrl, '_blank');
-  };
-
-  download = () => {
-    downloadAttachmentBlob(this);
-  };
-
-  refreshData = () => {
-    checkAttachmentBlob(this).catch(console.error);
-  };
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -329,6 +299,37 @@ export class AttachmentBlockComponent extends BlockComponent<
       </div>
     `;
   }
+
+  get edgeless() {
+    if (!this._isInSurface) {
+      return null;
+    }
+    return this.host.querySelector('affine-edgeless-root');
+  }
+
+  get isInSurface() {
+    return this._isInSurface;
+  }
+
+  @state()
+  private accessor _showOverlay = true;
+
+  @property({ attribute: false })
+  accessor allowEmbed = false;
+
+  @property({ attribute: false })
+  accessor blobUrl: string | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor downloading = false;
+
+  @property({ attribute: false })
+  accessor error = false;
+
+  @property({ attribute: false })
+  accessor loading = false;
+
+  override accessor useCaptionEditor = true;
 }
 
 declare global {

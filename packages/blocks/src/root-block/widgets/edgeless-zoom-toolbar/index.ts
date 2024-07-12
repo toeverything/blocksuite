@@ -1,12 +1,12 @@
-import './zoom-toolbar.js';
-import './zoom-bar-toggle-button.js';
-
 import { WidgetElement } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../root-model.js';
+
+import './zoom-bar-toggle-button.js';
+import './zoom-toolbar.js';
 
 export const AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET =
   'affine-edgeless-zoom-toolbar-widget';
@@ -40,13 +40,6 @@ export class AffineEdgelessZoomToolbarWidget extends WidgetElement<
       }
     }
   `;
-
-  @state()
-  private accessor _hide = false;
-
-  get edgeless() {
-    return this.blockElement;
-  }
 
   override firstUpdated() {
     const {
@@ -82,6 +75,13 @@ export class AffineEdgelessZoomToolbarWidget extends WidgetElement<
       ></zoom-bar-toggle-button>
     `;
   }
+
+  get edgeless() {
+    return this.blockElement;
+  }
+
+  @state()
+  private accessor _hide = false;
 }
 
 declare global {

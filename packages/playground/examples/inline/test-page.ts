@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import '@shoelace-style/shoelace';
-
 import { ShadowlessElement } from '@blocksuite/block-std';
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
-  baseTextAttributes,
-  createInlineKeyDownHandler,
   type DeltaInsert,
   InlineEditor,
   KEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
+  baseTextAttributes,
+  createInlineKeyDownHandler,
 } from '@blocksuite/inline';
+import '@shoelace-style/shoelace';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -128,15 +127,6 @@ function toggleStyle(
 
 @customElement('test-rich-text')
 export class TestRichText extends ShadowlessElement {
-  @query('.rich-text-container')
-  private accessor _container!: HTMLDivElement;
-
-  @property({ attribute: false })
-  accessor inlineEditor!: InlineEditor;
-
-  @property({ attribute: false })
-  accessor undoManager!: Y.UndoManager;
-
   override firstUpdated() {
     this.contentEditable = 'true';
     this.style.outline = 'none';
@@ -230,6 +220,15 @@ export class TestRichText extends ShadowlessElement {
       <div contenteditable="false" class="v-range"></div>
       <div contenteditable="false" class="y-text"></div>`;
   }
+
+  @query('.rich-text-container')
+  private accessor _container!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor inlineEditor!: InlineEditor;
+
+  @property({ attribute: false })
+  accessor undoManager!: Y.UndoManager;
 }
 
 const TEXT_ID = 'inline-editor';
@@ -253,12 +252,6 @@ export class CustomToolbar extends ShadowlessElement {
       grid-template-rows: repeat(2, minmax(0, 1fr));
     }
   `;
-
-  @property({ attribute: false })
-  accessor inlineEditor!: InlineEditor;
-
-  @property({ attribute: false })
-  accessor undoManager!: Y.UndoManager;
 
   override firstUpdated() {
     const boldButton = this.querySelector('.bold');
@@ -361,10 +354,24 @@ export class CustomToolbar extends ShadowlessElement {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor inlineEditor!: InlineEditor;
+
+  @property({ attribute: false })
+  accessor undoManager!: Y.UndoManager;
 }
 
 @customElement('test-page')
 export class TestPage extends ShadowlessElement {
+  private _editorA: InlineEditor | null = null;
+
+  private _editorB: InlineEditor | null = null;
+
+  private _undoManagerA: Y.UndoManager | null = null;
+
+  private _undoManagerB: Y.UndoManager | null = null;
+
   static override styles = css`
     .container {
       display: grid;
@@ -393,14 +400,6 @@ export class TestPage extends ShadowlessElement {
       overflow-y: scroll;
     }
   `;
-
-  private _editorA: InlineEditor | null = null;
-
-  private _editorB: InlineEditor | null = null;
-
-  private _undoManagerA: Y.UndoManager | null = null;
-
-  private _undoManagerB: Y.UndoManager | null = null;
 
   override firstUpdated() {
     const textA = yDocA.getText(TEXT_ID);

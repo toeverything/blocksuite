@@ -4,7 +4,10 @@ import type {
   BlockSpec,
   BlockSpecSlots,
 } from '@blocksuite/block-std';
+
 import { literal, unsafeStatic } from 'lit/static-html.js';
+
+import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 
 import { RootBlockSchema } from '../root-model.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../widgets/doc-remote-selection/doc-remote-selection.js';
@@ -21,7 +24,6 @@ import { AFFINE_MODAL_WIDGET } from '../widgets/modal/modal.js';
 import { AFFINE_PIE_MENU_WIDGET } from '../widgets/pie-menu/index.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../widgets/slash-menu/index.js';
 import { AFFINE_VIEWPORT_OVERLAY_WIDGET } from '../widgets/viewport-overlay/viewport-overlay.js';
-import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import { EdgelessRootService } from './edgeless-root-service.js';
 
 export type EdgelessRootBlockWidgetName =

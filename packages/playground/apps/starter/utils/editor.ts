@@ -1,21 +1,22 @@
 import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
 import type { DocModeService, PageRootService } from '@blocksuite/blocks';
+import type { BlockCollection } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
+
 import {
   AffineFormatBarWidget,
-  createDocModeService,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
+  createDocModeService,
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   AffineEditorContainer,
-  affineFormatBarItemConfig,
   CommentPanel,
   CopilotPanel,
+  affineFormatBarItemConfig,
 } from '@blocksuite/presets';
-import type { BlockCollection } from '@blocksuite/store';
-import type { DocCollection } from '@blocksuite/store';
 
 import { CustomChatPanel } from '../../_common/components/custom-chat-panel.js';
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';

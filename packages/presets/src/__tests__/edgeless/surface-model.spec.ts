@@ -4,6 +4,7 @@ import type {
   ShapeElementModel,
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
+
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { wait } from '../utils/common.js';

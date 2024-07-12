@@ -1,11 +1,10 @@
-import '../buttons/tool-icon-button.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { clamp } from '../../../../_common/utils/math.js';
+import '../buttons/tool-icon-button.js';
 
 const MIN_SCALE = 0;
 const MAX_SCALE = 400;
@@ -18,6 +17,26 @@ function format(scale: number) {
 
 @customElement('edgeless-scale-panel')
 export class EdgelessScalePanel extends LitElement {
+  private _onKeydown = (e: KeyboardEvent) => {
+    e.stopPropagation();
+
+    if (e.key === 'Enter' && !e.isComposing) {
+      e.preventDefault();
+      const input = e.target as HTMLInputElement;
+      const scale = parseInt(input.value.trim());
+      // Handle edge case where user enters a non-number
+      if (isNaN(scale)) {
+        input.value = '';
+        return;
+      }
+
+      // Handle edge case when user enters a number that is out of range
+      this._onSelect(clamp(scale, this.minScale, this.maxScale));
+      input.value = '';
+      this._onPopperClose();
+    }
+  };
+
   static override styles = css`
     :host {
       display: flex;
@@ -50,51 +69,13 @@ export class EdgelessScalePanel extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor scale!: number;
-
-  @property({ attribute: false })
-  accessor scaleList: readonly number[] = SCALE_LIST;
-
-  @property({ attribute: false })
-  accessor onSelect: ((size: number) => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onPopperCose: (() => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor minScale: number = MIN_SCALE;
-
-  @property({ attribute: false })
-  accessor maxScale: number = MAX_SCALE;
-
-  private _onSelect(scale: number) {
-    this.onSelect?.(scale / 100);
-  }
-
   private _onPopperClose() {
     this.onPopperCose?.();
   }
 
-  private _onKeydown = (e: KeyboardEvent) => {
-    e.stopPropagation();
-
-    if (e.key === 'Enter' && !e.isComposing) {
-      e.preventDefault();
-      const input = e.target as HTMLInputElement;
-      const scale = parseInt(input.value.trim());
-      // Handle edge case where user enters a non-number
-      if (isNaN(scale)) {
-        input.value = '';
-        return;
-      }
-
-      // Handle edge case when user enters a number that is out of range
-      this._onSelect(clamp(scale, this.minScale, this.maxScale));
-      input.value = '';
-      this._onPopperClose();
-    }
-  };
+  private _onSelect(scale: number) {
+    this.onSelect?.(scale / 100);
+  }
 
   override render() {
     return html`
@@ -126,6 +107,24 @@ export class EdgelessScalePanel extends LitElement {
       />
     `;
   }
+
+  @property({ attribute: false })
+  accessor maxScale: number = MAX_SCALE;
+
+  @property({ attribute: false })
+  accessor minScale: number = MIN_SCALE;
+
+  @property({ attribute: false })
+  accessor onPopperCose: (() => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor onSelect: ((size: number) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor scale!: number;
+
+  @property({ attribute: false })
+  accessor scaleList: readonly number[] = SCALE_LIST;
 }
 
 declare global {

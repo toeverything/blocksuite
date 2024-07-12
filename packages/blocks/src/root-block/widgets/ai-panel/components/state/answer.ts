@@ -1,13 +1,14 @@
-import '../finish-tip.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { AIPanelAnswerConfig, CopyConfig } from '../../type.js';
+
 import { filterAIItemGroup } from '../../utils.js';
+import '../finish-tip.js';
 
 @customElement('ai-panel-answer')
 export class AIPanelAnswer extends WithDisposable(LitElement) {
@@ -84,18 +85,6 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor config!: AIPanelAnswerConfig;
-
-  @property({ attribute: false })
-  accessor finish = true;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor copy: CopyConfig | undefined = undefined;
-
   override render() {
     const responseGroup = filterAIItemGroup(this.host, this.config.responses);
     return html`
@@ -137,6 +126,18 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
         : nothing}
     `;
   }
+
+  @property({ attribute: false })
+  accessor config!: AIPanelAnswerConfig;
+
+  @property({ attribute: false })
+  accessor copy: CopyConfig | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor finish = true;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 }
 
 declare global {

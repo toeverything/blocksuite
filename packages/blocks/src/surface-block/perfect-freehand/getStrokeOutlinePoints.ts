@@ -1,5 +1,6 @@
-import { getStrokeRadius } from './getStrokeRadius.js';
 import type { StrokeOptions, StrokePoint } from './types.js';
+
+import { getStrokeRadius } from './getStrokeRadius.js';
 import {
   add,
   dist2,

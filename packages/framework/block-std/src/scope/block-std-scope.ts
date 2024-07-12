@@ -13,23 +13,23 @@ export interface BlockStdOptions {
 }
 
 export class BlockStdScope {
-  readonly doc: Doc;
+  readonly clipboard: Clipboard;
 
   readonly collection: DocCollection;
 
-  readonly event: UIEventDispatcher;
-
-  readonly selection: SelectionManager;
-
   readonly command: CommandManager;
 
+  readonly doc: Doc;
+
+  readonly event: UIEventDispatcher;
+
   readonly host: HTMLElement;
+
+  readonly selection: SelectionManager;
 
   readonly spec: SpecStore;
 
   readonly view: ViewStore;
-
-  readonly clipboard: Clipboard;
 
   constructor(options: BlockStdOptions) {
     this.host = options.host;

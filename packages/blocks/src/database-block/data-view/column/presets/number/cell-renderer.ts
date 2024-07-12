@@ -42,6 +42,35 @@ export class NumberCell extends BaseCellRenderer<number> {
 
 @customElement('affine-database-number-cell-editing')
 export class NumberCellEditing extends BaseCellRenderer<number> {
+  private _keydown = (e: KeyboardEvent) => {
+    const ctrlKey = IS_MAC ? e.metaKey : e.ctrlKey;
+
+    if (e.key.toLowerCase() === 'z' && ctrlKey) {
+      e.stopPropagation();
+      return;
+    }
+
+    if (e.key === 'Enter' && !e.isComposing) {
+      requestAnimationFrame(() => {
+        this.selectCurrentCell(false);
+      });
+    }
+  };
+
+  private _setValue = (str: string = this._inputEle.value) => {
+    if (!str) {
+      this.onChange(undefined);
+      return;
+    }
+    const value = Number.parseFloat(str);
+    if (Object.is(value, NaN)) {
+      this._inputEle.value = `${this.value ?? ''}`;
+      return;
+    }
+    this._inputEle.value = `${this.value ?? ''}`;
+    this.onChange(value);
+  };
+
   static override styles = css`
     affine-database-number-cell-editing {
       display: block;
@@ -69,53 +98,11 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
     }
   `;
 
-  @query('input')
-  private accessor _inputEle!: HTMLInputElement;
-
-  private _setValue = (str: string = this._inputEle.value) => {
-    if (!str) {
-      this.onChange(undefined);
-      return;
-    }
-    const value = Number.parseFloat(str);
-    if (Object.is(value, NaN)) {
-      this._inputEle.value = `${this.value ?? ''}`;
-      return;
-    }
-    this._inputEle.value = `${this.value ?? ''}`;
-    this.onChange(value);
-  };
-
-  private _keydown = (e: KeyboardEvent) => {
-    const ctrlKey = IS_MAC ? e.metaKey : e.ctrlKey;
-
-    if (e.key.toLowerCase() === 'z' && ctrlKey) {
-      e.stopPropagation();
-      return;
-    }
-
-    if (e.key === 'Enter' && !e.isComposing) {
-      requestAnimationFrame(() => {
-        this.selectCurrentCell(false);
-      });
-    }
-  };
-
   focusEnd = () => {
     const end = this._inputEle.value.length;
     this._inputEle.focus();
     this._inputEle.setSelectionRange(end, end);
   };
-
-  override onExitEditMode() {
-    this._setValue();
-  }
-
-  override firstUpdated() {
-    requestAnimationFrame(() => {
-      this.focusEnd();
-    });
-  }
 
   _blur() {
     this.selectCurrentCell(false);
@@ -125,6 +112,16 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
     if (!this.isEditing) {
       this.selectCurrentCell(true);
     }
+  }
+
+  override firstUpdated() {
+    requestAnimationFrame(() => {
+      this.focusEnd();
+    });
+  }
+
+  override onExitEditMode() {
+    this._setValue();
   }
 
   override render() {
@@ -140,6 +137,9 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
       @pointerdown="${stopPropagation}"
     />`;
   }
+
+  @query('input')
+  private accessor _inputEle!: HTMLInputElement;
 }
 
 export const numberColumnConfig = numberColumnModelConfig.renderConfig({

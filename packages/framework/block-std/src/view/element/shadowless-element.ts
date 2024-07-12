@@ -1,14 +1,9 @@
 import type { CSSResultGroup, CSSResultOrNative } from 'lit';
+
 import { CSSResult, LitElement } from 'lit';
 
 export class ShadowlessElement extends LitElement {
   static disableShadowRoot = true;
-
-  override createRenderRoot() {
-    return (this.constructor as typeof ShadowlessElement).disableShadowRoot
-      ? this
-      : super.createRenderRoot();
-  }
 
   protected static override finalizeStyles(
     styles?: CSSResultGroup
@@ -30,5 +25,11 @@ export class ShadowlessElement extends LitElement {
       elementStyles = [];
     }
     return elementStyles;
+  }
+
+  override createRenderRoot() {
+    return (this.constructor as typeof ShadowlessElement).disableShadowRoot
+      ? this
+      : super.createRenderRoot();
   }
 }

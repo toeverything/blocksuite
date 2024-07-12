@@ -1,5 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { ConnectorElementModel } from '@blocksuite/blocks';
+import type { BlockModel, DocCollection } from '@blocksuite/store';
+
 import {
   BlocksUtils,
   EmbedHtmlBlockSpec,
@@ -8,7 +10,6 @@ import {
   type ImageBlockProps,
   type TreeNode,
 } from '@blocksuite/blocks';
-import type { BlockModel, DocCollection } from '@blocksuite/store';
 
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import {
@@ -30,18 +31,6 @@ import { editImage, jpegBase64ToFile } from './edit-image.js';
 import { genHtml } from './gen-html.js';
 
 export class AIEdgelessLogic {
-  get autoGen() {
-    return this.unsub !== undefined;
-  }
-
-  get collection(): DocCollection {
-    return this.host.doc.collection;
-  }
-
-  get host() {
-    return this.getHost();
-  }
-
   private targets: Record<
     string,
     {
@@ -51,93 +40,6 @@ export class AIEdgelessLogic {
   > = {};
 
   private unsub?: () => void;
-
-  fromFrame: string = '';
-
-  constructor(private getHost: () => EditorHost) {}
-
-  toggleAutoGen = () => {
-    if (this.unsub) {
-      this.unsub();
-      this.unsub = undefined;
-      return;
-    }
-    const edgeless = getEdgelessRootFromEditor(this.host);
-    this.unsub = edgeless.surfaceBlockModel.elementUpdated.on(() => {
-      this.createImageFromFrame().catch(console.error);
-    }).dispose;
-  };
-
-  makeItReal = async () => {
-    const png = await selectedToPng(this.host);
-    if (!png) {
-      alert('Please select some shapes first');
-      return;
-    }
-    const edgelessRoot = getEdgelessRootFromEditor(this.host);
-    const { notes } = BlocksUtils.splitElements(
-      edgelessRoot.service.selection.selectedElements
-    );
-    // @ts-ignore
-    const htmlBlock: {
-      html: string;
-      design: string;
-    } = notes.flatMap(v =>
-      v.children.filter(v => {
-        if (v instanceof EmbedHtmlModel) {
-          return v.html && v.design;
-        } else {
-          return false;
-        }
-      })
-    )[0];
-    const html = await genHtml(png, htmlBlock);
-    if (!html) {
-      return;
-    }
-    edgelessRoot.doc.addBlock(
-      EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
-      { html, design: png, xywh: '[0, 400, 400, 200]' },
-      edgelessRoot.surface.model.id
-    );
-  };
-
-  htmlBlockDemo = () => {
-    const edgelessRoot = getEdgelessRootFromEditor(this.host);
-    edgelessRoot.doc.addBlock(
-      EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
-      { html: demoScript, xywh: '[0, 400, 400, 200]' },
-      edgelessRoot.surface.model.id
-    );
-  };
-
-  editImage = async () => {
-    const canvas = await selectedToCanvas(this.host);
-    if (!canvas) {
-      alert('Please select some shapes first');
-      return;
-    }
-    canvas.toBlob(blob => {
-      if (blob) {
-        const prompt =
-          (
-            document.getElementById(
-              'copilot-panel-edit-image-prompt'
-            ) as HTMLInputElement
-          )?.value ?? '';
-        editImage(prompt, canvas)
-          ?.then(b64 => {
-            if (!b64) {
-              return;
-            }
-            const imgFile = jpegBase64ToFile(b64, 'img');
-            const edgelessRoot = getEdgelessRootFromEditor(this.host);
-            edgelessRoot.addImages([imgFile]).catch(console.error);
-          })
-          .catch(console.error);
-      }
-    });
-  };
 
   createImage = async () => {
     const edgelessRoot = getEdgelessRootFromEditor(this.host);
@@ -243,6 +145,93 @@ export class AIEdgelessLogic {
     canvas.toBlob(callback);
   };
 
+  editImage = async () => {
+    const canvas = await selectedToCanvas(this.host);
+    if (!canvas) {
+      alert('Please select some shapes first');
+      return;
+    }
+    canvas.toBlob(blob => {
+      if (blob) {
+        const prompt =
+          (
+            document.getElementById(
+              'copilot-panel-edit-image-prompt'
+            ) as HTMLInputElement
+          )?.value ?? '';
+        editImage(prompt, canvas)
+          ?.then(b64 => {
+            if (!b64) {
+              return;
+            }
+            const imgFile = jpegBase64ToFile(b64, 'img');
+            const edgelessRoot = getEdgelessRootFromEditor(this.host);
+            edgelessRoot.addImages([imgFile]).catch(console.error);
+          })
+          .catch(console.error);
+      }
+    });
+  };
+
+  fromFrame: string = '';
+
+  htmlBlockDemo = () => {
+    const edgelessRoot = getEdgelessRootFromEditor(this.host);
+    edgelessRoot.doc.addBlock(
+      EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
+      { html: demoScript, xywh: '[0, 400, 400, 200]' },
+      edgelessRoot.surface.model.id
+    );
+  };
+
+  makeItReal = async () => {
+    const png = await selectedToPng(this.host);
+    if (!png) {
+      alert('Please select some shapes first');
+      return;
+    }
+    const edgelessRoot = getEdgelessRootFromEditor(this.host);
+    const { notes } = BlocksUtils.splitElements(
+      edgelessRoot.service.selection.selectedElements
+    );
+    // @ts-ignore
+    const htmlBlock: {
+      html: string;
+      design: string;
+    } = notes.flatMap(v =>
+      v.children.filter(v => {
+        if (v instanceof EmbedHtmlModel) {
+          return v.html && v.design;
+        } else {
+          return false;
+        }
+      })
+    )[0];
+    const html = await genHtml(png, htmlBlock);
+    if (!html) {
+      return;
+    }
+    edgelessRoot.doc.addBlock(
+      EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
+      { html, design: png, xywh: '[0, 400, 400, 200]' },
+      edgelessRoot.surface.model.id
+    );
+  };
+
+  toggleAutoGen = () => {
+    if (this.unsub) {
+      this.unsub();
+      this.unsub = undefined;
+      return;
+    }
+    const edgeless = getEdgelessRootFromEditor(this.host);
+    this.unsub = edgeless.surfaceBlockModel.elementUpdated.on(() => {
+      this.createImageFromFrame().catch(console.error);
+    }).dispose;
+  };
+
+  constructor(private getHost: () => EditorHost) {}
+
   convertToMindMap() {
     const blocks = getRootService(this.host).selectedBlocks;
     const toTreeNode = (block: BlockModel): TreeNode => {
@@ -287,5 +276,17 @@ export class AIEdgelessLogic {
       treeNode,
       options
     );
+  }
+
+  get autoGen() {
+    return this.unsub !== undefined;
+  }
+
+  get collection(): DocCollection {
+    return this.host.doc.collection;
+  }
+
+  get host() {
+    return this.getHost();
   }
 }

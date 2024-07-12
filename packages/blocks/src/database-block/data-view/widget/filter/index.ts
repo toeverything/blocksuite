@@ -1,9 +1,9 @@
-import './filter-bar.js';
-
 import { html } from 'lit';
 
-import { defineUniComponent } from '../../utils/uni-component/index.js';
 import type { DataViewWidgetProps } from '../types.js';
+
+import { defineUniComponent } from '../../utils/uni-component/index.js';
+import './filter-bar.js';
 
 export const widgetFilterBar = defineUniComponent(
   (props: DataViewWidgetProps) => {

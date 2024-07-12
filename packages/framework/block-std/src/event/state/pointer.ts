@@ -11,17 +11,13 @@ type PointerEventStateOptions = {
 type Point = { x: number; y: number };
 
 export class PointerEventState extends UIEventState {
-  override type = 'pointerState';
-
-  raw: PointerEvent;
-
-  point: Point;
+  button: number;
 
   containerOffset: Point;
 
-  start: Point;
-
   delta: Point;
+
+  dragging: boolean;
 
   keys: {
     shift: boolean;
@@ -29,19 +25,15 @@ export class PointerEventState extends UIEventState {
     alt: boolean;
   };
 
-  button: number;
-
-  dragging: boolean;
+  point: Point;
 
   pressure: number;
 
-  get x() {
-    return this.point.x;
-  }
+  raw: PointerEvent;
 
-  get y() {
-    return this.point.y;
-  }
+  start: Point;
+
+  override type = 'pointerState';
 
   constructor({ event, rect, startX, startY, last }: PointerEventStateOptions) {
     super(event);
@@ -64,6 +56,14 @@ export class PointerEventState extends UIEventState {
     this.button = last?.button || event.button;
     this.dragging = !!last;
     this.pressure = event.pressure;
+  }
+
+  get x() {
+    return this.point.x;
+  }
+
+  get y() {
+    return this.point.y;
   }
 }
 

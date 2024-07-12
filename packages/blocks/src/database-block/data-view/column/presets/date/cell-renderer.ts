@@ -53,36 +53,7 @@ export class DateCell extends BaseCellRenderer<number> {
 
 @customElement('affine-database-date-cell-editing')
 export class DateCellEditing extends BaseCellRenderer<number> {
-  static override styles = css`
-    affine-database-date-cell-editing {
-      width: 100%;
-      cursor: text;
-    }
-
-    .affine-database-date:focus {
-      outline: none;
-    }
-  `;
-
-  @query('input')
-  private accessor _inputEle!: HTMLInputElement;
-
-  private _prevPortalAbortController: AbortController | null = null;
-
   private _datePicker: DatePicker | null = null;
-
-  private _setValue = (str: string = this._inputEle.value) => {
-    if (str === '') {
-      this.onChange(undefined);
-      this._inputEle.value = '';
-      return;
-    }
-
-    const date = new Date(str);
-    const value = format(date, 'yyyy-MM-dd');
-    this.onChange(date.getTime());
-    this._inputEle.value = `${value ?? ''}`;
-  };
 
   private _onFocus = () => {
     if (
@@ -128,19 +99,45 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     root.style.zIndex = '1002';
   };
 
+  private _prevPortalAbortController: AbortController | null = null;
+
+  private _setValue = (str: string = this._inputEle.value) => {
+    if (str === '') {
+      this.onChange(undefined);
+      this._inputEle.value = '';
+      return;
+    }
+
+    const date = new Date(str);
+    const value = format(date, 'yyyy-MM-dd');
+    this.onChange(date.getTime());
+    this._inputEle.value = `${value ?? ''}`;
+  };
+
+  static override styles = css`
+    affine-database-date-cell-editing {
+      width: 100%;
+      cursor: text;
+    }
+
+    .affine-database-date:focus {
+      outline: none;
+    }
+  `;
+
   private _onInput(e: InputEvent) {
     if (!this._datePicker) return;
     const v = (e.target as HTMLInputElement).value;
     this._datePicker.value = v ? new Date(v).getTime() : undefined;
   }
 
+  override firstUpdated() {
+    this._inputEle.focus();
+  }
+
   override onExitEditMode() {
     this._setValue();
     this._prevPortalAbortController?.abort();
-  }
-
-  override firstUpdated() {
-    this._inputEle.focus();
   }
 
   override render() {
@@ -153,6 +150,9 @@ export class DateCellEditing extends BaseCellRenderer<number> {
       @input=${this._onInput}
     />`;
   }
+
+  @query('input')
+  private accessor _inputEle!: HTMLInputElement;
 }
 
 export const dateColumnConfig = dateColumnModelConfig.renderConfig({

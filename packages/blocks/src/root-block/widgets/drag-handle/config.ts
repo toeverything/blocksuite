@@ -67,19 +67,7 @@ export type DragHandleOption = {
 };
 
 export class DragHandleOptionsRunner {
-  get options(): DragHandleOption[] {
-    return Array.from(this.optionMap.keys());
-  }
-
   private optionMap = new Map<DragHandleOption, number>();
-
-  private _getExistingOptionWithSameFlavour(
-    option: DragHandleOption
-  ): DragHandleOption | undefined {
-    return Array.from(this.optionMap.keys()).find(
-      op => op.flavour === option.flavour
-    );
-  }
 
   private _decreaseOptionCount(option: DragHandleOption) {
     const count = this.optionMap.get(option) || 0;
@@ -88,6 +76,14 @@ export class DragHandleOptionsRunner {
     } else {
       this.optionMap.delete(option);
     }
+  }
+
+  private _getExistingOptionWithSameFlavour(
+    option: DragHandleOption
+  ): DragHandleOption | undefined {
+    return Array.from(this.optionMap.keys()).find(
+      op => op.flavour === option.flavour
+    );
   }
 
   getOption(flavour: string): DragHandleOption | undefined {
@@ -111,5 +107,9 @@ export class DragHandleOptionsRunner {
         this._decreaseOptionCount(currentOption);
       },
     };
+  }
+
+  get options(): DragHandleOption[] {
+    return Array.from(this.optionMap.keys());
   }
 }

@@ -1,5 +1,6 @@
 import type { OpSet, ResolvedOptions } from '../core.js';
 import type { Line, Point } from '../geometry.js';
+
 import { lineLength } from '../geometry.js';
 import { HachureFiller } from './hachure-filler.js';
 import { polygonHachureLines } from './scan-line-hachure.js';

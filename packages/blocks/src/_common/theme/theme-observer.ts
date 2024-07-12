@@ -1,7 +1,8 @@
 import { Slot } from '@blocksuite/global/utils';
 
 import type { CssVariablesMap } from './css-variables.js';
-import { isCssVariable, StyleVariables } from './css-variables.js';
+
+import { StyleVariables, isCssVariable } from './css-variables.js';
 
 export function extractCssVariables(element: Element): CssVariablesMap {
   const styles = window.getComputedStyle(element);
@@ -23,14 +24,29 @@ export function extractCssVariables(element: Element): CssVariablesMap {
  * Observer theme changing by `data-theme` property
  */
 export class ThemeObserver extends Slot<CssVariablesMap> {
-  private _observer?: MutationObserver;
+  private _cssVariables: CssVariablesMap | null = null;
 
   private _mode = '';
 
-  private _cssVariables: CssVariablesMap | null = null;
+  private _observer?: MutationObserver;
 
-  get cssVariables() {
-    return this._cssVariables;
+  override dispose() {
+    super.dispose();
+    this._observer?.disconnect();
+  }
+
+  getVariableValue(variable: string) {
+    if (isCssVariable(variable)) {
+      const value = this._cssVariables?.[variable];
+
+      if (value === undefined) {
+        console.error(new Error(`Cannot find css variable: ${variable}`));
+      } else {
+        return value;
+      }
+    }
+
+    return variable;
   }
 
   observe(element: HTMLElement) {
@@ -49,22 +65,7 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
     });
   }
 
-  getVariableValue(variable: string) {
-    if (isCssVariable(variable)) {
-      const value = this._cssVariables?.[variable];
-
-      if (value === undefined) {
-        console.error(new Error(`Cannot find css variable: ${variable}`));
-      } else {
-        return value;
-      }
-    }
-
-    return variable;
-  }
-
-  override dispose() {
-    super.dispose();
-    this._observer?.disconnect();
+  get cssVariables() {
+    return this._cssVariables;
   }
 }

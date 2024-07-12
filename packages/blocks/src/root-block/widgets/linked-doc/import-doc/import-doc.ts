@@ -1,19 +1,18 @@
-import '../../../../_common/components/loader.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
 import { sha } from '@blocksuite/global/utils';
 import {
   type DocCollection,
-  extMimeMap,
   type JobMiddleware,
+  extMimeMap,
 } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';
-import { html, LitElement, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { MarkdownAdapter } from '../../../../_common/adapters/markdown.js';
 import { NotionHtmlAdapter } from '../../../../_common/adapters/notion-html.js';
+import '../../../../_common/components/loader.js';
 import {
   CloseIcon,
   ExportToHTMLIcon,
@@ -178,24 +177,6 @@ export async function importNotion(collection: DocCollection, file: File) {
 export class ImportDoc extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @state()
-  accessor _loading = false;
-
-  @state()
-  accessor x = 0;
-
-  @state()
-  accessor y = 0;
-
-  @state()
-  accessor _startX = 0;
-
-  @state()
-  accessor _startY = 0;
-
-  @query('.container')
-  accessor containerEl!: HTMLElement;
-
   constructor(
     private collection: DocCollection,
     private onSuccess?: OnSuccessHandler,
@@ -214,42 +195,24 @@ export class ImportDoc extends WithDisposable(LitElement) {
     this._onMouseMove = this._onMouseMove.bind(this);
   }
 
-  private _onMouseDown(event: MouseEvent) {
-    this._startX = event.clientX - this.x;
-    this._startY = event.clientY - this.y;
-    window.addEventListener('mousemove', this._onMouseMove);
-  }
-
-  private _onMouseUp() {
-    window.removeEventListener('mousemove', this._onMouseMove);
-  }
-
-  private _onMouseMove(event: MouseEvent) {
-    this.x = event.clientX - this._startX;
-    this.y = event.clientY - this._startY;
-  }
-
-  private _onCloseClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.abortController.abort();
-  }
-
-  private _onImportSuccess(
-    pageIds: string[],
-    options: { isWorkspaceFile?: boolean; importedCount?: number } = {}
-  ) {
-    const {
-      isWorkspaceFile = false,
-      importedCount: pagesImportedCount = pageIds.length,
-    } = options;
-    this.onSuccess?.(pageIds, {
-      isWorkspaceFile,
-      importedCount: pagesImportedCount,
-    });
-  }
-
-  private _onFail(message: string) {
-    this.onFail?.(message);
+  private async _importHtml() {
+    const files = await openFileOrFiles({ acceptType: 'Html', multiple: true });
+    if (!files) return;
+    const pageIds: string[] = [];
+    for (const file of files) {
+      const text = await file.text();
+      const needLoading = file.size > SHOW_LOADING_SIZE;
+      if (needLoading) {
+        this.hidden = false;
+        this._loading = true;
+      } else {
+        this.abortController.abort();
+      }
+      const pageId = await importHtml(this.collection, text);
+      needLoading && this.abortController.abort();
+      pageIds.push(pageId);
+    }
+    this._onImportSuccess(pageIds);
   }
 
   private async _importMarkDown() {
@@ -270,26 +233,6 @@ export class ImportDoc extends WithDisposable(LitElement) {
         this.abortController.abort();
       }
       const pageId = await importMarkDown(this.collection, text, fileName);
-      needLoading && this.abortController.abort();
-      pageIds.push(pageId);
-    }
-    this._onImportSuccess(pageIds);
-  }
-
-  private async _importHtml() {
-    const files = await openFileOrFiles({ acceptType: 'Html', multiple: true });
-    if (!files) return;
-    const pageIds: string[] = [];
-    for (const file of files) {
-      const text = await file.text();
-      const needLoading = file.size > SHOW_LOADING_SIZE;
-      if (needLoading) {
-        this.hidden = false;
-        this._loading = true;
-      } else {
-        this.abortController.abort();
-      }
-      const pageId = await importHtml(this.collection, text);
       needLoading && this.abortController.abort();
       pageIds.push(pageId);
     }
@@ -333,18 +276,50 @@ export class ImportDoc extends WithDisposable(LitElement) {
     });
   }
 
+  private _onCloseClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.abortController.abort();
+  }
+
+  private _onFail(message: string) {
+    this.onFail?.(message);
+  }
+
+  private _onImportSuccess(
+    pageIds: string[],
+    options: { isWorkspaceFile?: boolean; importedCount?: number } = {}
+  ) {
+    const {
+      isWorkspaceFile = false,
+      importedCount: pagesImportedCount = pageIds.length,
+    } = options;
+    this.onSuccess?.(pageIds, {
+      isWorkspaceFile,
+      importedCount: pagesImportedCount,
+    });
+  }
+
+  private _onMouseDown(event: MouseEvent) {
+    this._startX = event.clientX - this.x;
+    this._startY = event.clientY - this.y;
+    window.addEventListener('mousemove', this._onMouseMove);
+  }
+
+  private _onMouseMove(event: MouseEvent) {
+    this.x = event.clientX - this._startX;
+    this.y = event.clientY - this._startY;
+  }
+
+  private _onMouseUp() {
+    window.removeEventListener('mousemove', this._onMouseMove);
+  }
+
   private _openLearnImportLink(event: MouseEvent) {
     event.stopPropagation();
     window.open(
       'https://affine.pro/blog/import-your-data-from-notion-into-affine',
       '_blank'
     );
-  }
-
-  override updated(changedProps: PropertyValues) {
-    if (changedProps.has('x') || changedProps.has('y')) {
-      this.containerEl.style.transform = `translate(${this.x}px, ${this.y}px)`;
-    }
   }
 
   override render() {
@@ -431,4 +406,28 @@ export class ImportDoc extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  override updated(changedProps: PropertyValues) {
+    if (changedProps.has('x') || changedProps.has('y')) {
+      this.containerEl.style.transform = `translate(${this.x}px, ${this.y}px)`;
+    }
+  }
+
+  @state()
+  accessor _loading = false;
+
+  @state()
+  accessor _startX = 0;
+
+  @state()
+  accessor _startY = 0;
+
+  @query('.container')
+  accessor containerEl!: HTMLElement;
+
+  @state()
+  accessor x = 0;
+
+  @state()
+  accessor y = 0;
 }

@@ -1,7 +1,8 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import { clickView, dblclickView } from '../utils/actions/click.js';
 import {
+  Shape,
   createConnectorElement,
   createShapeElement,
   dragBetweenViewCoords,
@@ -9,20 +10,19 @@ import {
   getFirstGroupId,
   getIds,
   getSelectedBound,
-  Shape,
   shiftClickView,
   toIdCountMap,
   toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
+  SHORT_KEY,
   copyByKeyboard,
   pasteByKeyboard,
   pressBackspace,
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from '../utils/actions/keyboard.js';

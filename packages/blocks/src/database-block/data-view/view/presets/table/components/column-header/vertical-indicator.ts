@@ -5,10 +5,11 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { DataViewTableColumnManager } from '../../table-view-manager.js';
+
 import { startDrag } from '../../../../../utils/drag.js';
 import { getResultInRange } from '../../../../../utils/utils.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../consts.js';
-import type { DataViewTableColumnManager } from '../../table-view-manager.js';
 
 type GroupRectList = {
   top: number;
@@ -53,21 +54,6 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor top!: number;
-
-  @property({ attribute: false })
-  accessor left!: number;
-
-  @property({ attribute: false })
-  accessor width!: number;
-
-  @property({ attribute: false })
-  accessor lines!: GroupRectList;
-
-  @property({ attribute: false })
-  accessor shadow = false;
-
   protected override render(): unknown {
     const containerStyle = styleMap({
       top: `${this.top}px`,
@@ -90,6 +76,21 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor left!: number;
+
+  @property({ attribute: false })
+  accessor lines!: GroupRectList;
+
+  @property({ attribute: false })
+  accessor shadow = false;
+
+  @property({ attribute: false })
+  accessor top!: number;
+
+  @property({ attribute: false })
+  accessor width!: number;
 }
 
 export const getTableGroupRects = (tableContainer: HTMLElement) => {

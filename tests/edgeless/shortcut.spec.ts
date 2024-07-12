@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  type ShapeName,
   addBasicRectShapeElement,
   assertEdgelessShapeType,
   createShapeElement,
@@ -9,7 +10,6 @@ import {
   getZoomLevel,
   locatorEdgelessToolButton,
   setEdgelessTool,
-  type ShapeName,
   switchEditorMode,
   zoomFitByKeyboard,
   zoomInByKeyboard,

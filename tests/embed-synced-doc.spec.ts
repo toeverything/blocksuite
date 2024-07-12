@@ -1,6 +1,7 @@
 import type { DatabaseBlockModel } from '@blocks/database-block/index.js';
+
 import { assertExists } from '@global/utils.js';
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 import { switchEditorMode, zoomOutByKeyboard } from 'utils/actions/edgeless.js';
 import { pressEnter, type } from 'utils/actions/keyboard.js';
 import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';

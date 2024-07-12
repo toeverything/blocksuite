@@ -3,6 +3,8 @@ import { assertExists } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 
 import {
+  Shape,
+  ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH,
   createShapeElement,
   decreaseZoomLevel,
   deleteAll,
@@ -11,10 +13,8 @@ import {
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
-  Shape,
   shiftClickView,
   switchEditorMode,
-  ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH,
   zoomByMouseWheel,
   zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';

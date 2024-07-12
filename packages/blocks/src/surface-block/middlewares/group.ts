@@ -1,6 +1,7 @@
-import { SurfaceGroupLikeModel } from '../element-model/base.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 import type { Bound } from '../utils/bound.js';
+
+import { SurfaceGroupLikeModel } from '../element-model/base.js';
 
 export const groupSizeMiddleware: SurfaceMiddleware = (
   surface: SurfaceBlockModel

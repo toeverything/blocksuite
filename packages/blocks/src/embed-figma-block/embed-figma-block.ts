@@ -3,12 +3,13 @@ import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
-import { OpenIcon } from '../_common/icons/text.js';
 import type { EmbedFigmaStyles } from './embed-figma-model.js';
 import type { EmbedFigmaModel } from './embed-figma-model.js';
 import type { EmbedFigmaBlockService } from './embed-figma-service.js';
+
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
+import { OpenIcon } from '../_common/icons/text.js';
 import { FigmaIcon, styles } from './styles.js';
 
 @customElement('affine-embed-figma-block')
@@ -16,27 +17,23 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   EmbedFigmaModel,
   EmbedFigmaBlockService
 > {
-  static override styles = styles;
-
-  @state()
-  private accessor _isSelected = false;
-
-  @state()
-  private accessor _showOverlay = true;
+  override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
 
   private _isDragging = false;
 
   private _isResizing = false;
 
-  override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
+  static override styles = styles;
 
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
+  open = () => {
+    let link = this.model.url;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  };
+
+  refreshData = () => {};
 
   private _handleClick(event: MouseEvent) {
     event.stopPropagation();
@@ -50,15 +47,13 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     this.open();
   }
 
-  open = () => {
-    let link = this.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
-  };
-
-  refreshData = () => {};
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -183,6 +178,12 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
       `
     );
   }
+
+  @state()
+  private accessor _isSelected = false;
+
+  @state()
+  private accessor _showOverlay = true;
 }
 
 declare global {

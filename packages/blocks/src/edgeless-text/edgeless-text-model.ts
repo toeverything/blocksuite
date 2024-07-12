@@ -1,5 +1,7 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import {
   FontFamily,
@@ -8,7 +10,6 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '../surface-block/consts.js';
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 type EdgelessTextProps = {
   xywh: SerializedXYWH;

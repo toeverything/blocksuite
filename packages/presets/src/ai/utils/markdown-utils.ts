@@ -1,14 +1,5 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import type { EditorHost, TextRangePoint } from '@blocksuite/block-std';
-import {
-  defaultImageProxyMiddleware,
-  MarkdownAdapter,
-  MixTextAdapter,
-  pasteMiddleware,
-  PlainTextAdapter,
-  titleMiddleware,
-} from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import type {
   BlockModel,
   BlockSnapshot,
@@ -16,6 +7,16 @@ import type {
   DraftModel,
   SliceSnapshot,
 } from '@blocksuite/store';
+
+import {
+  MarkdownAdapter,
+  MixTextAdapter,
+  PlainTextAdapter,
+  defaultImageProxyMiddleware,
+  pasteMiddleware,
+  titleMiddleware,
+} from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection, Job, type Slice } from '@blocksuite/store';
 
 const updateSnapshotText = (

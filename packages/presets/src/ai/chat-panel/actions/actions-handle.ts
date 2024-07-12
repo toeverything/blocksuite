@@ -8,11 +8,12 @@ import type {
   ImageSelection,
   SerializedXYWH,
 } from '@blocksuite/blocks';
+
 import {
   BlocksUtils,
   Bound,
-  getElementsBound,
   NoteDisplayMode,
+  getElementsBound,
 } from '@blocksuite/blocks';
 
 import {

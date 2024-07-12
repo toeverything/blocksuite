@@ -11,6 +11,14 @@ export class TemplateToolController extends EdgelessToolController<TemplateTool>
     type: 'template',
   } satisfies TemplateTool;
 
+  afterModeSwitch() {
+    noop();
+  }
+
+  beforeModeSwitch() {
+    noop();
+  }
+
   onContainerClick() {
     noop();
   }
@@ -19,19 +27,11 @@ export class TemplateToolController extends EdgelessToolController<TemplateTool>
     noop();
   }
 
-  onContainerPointerDown(): void {
-    noop();
-  }
-
   onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick() {
-    noop();
-  }
-
-  onContainerDragStart() {
+  onContainerDragEnd() {
     noop();
   }
 
@@ -39,7 +39,7 @@ export class TemplateToolController extends EdgelessToolController<TemplateTool>
     noop();
   }
 
-  onContainerDragEnd() {
+  onContainerDragStart() {
     noop();
   }
 
@@ -51,19 +51,19 @@ export class TemplateToolController extends EdgelessToolController<TemplateTool>
     noop();
   }
 
+  onContainerPointerDown(): void {
+    noop();
+  }
+
+  onContainerTripleClick() {
+    noop();
+  }
+
   onPressShiftKey(_: boolean) {
     noop();
   }
 
   onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
-
-  beforeModeSwitch() {
-    noop();
-  }
-
-  afterModeSwitch() {
     noop();
   }
 }
