@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { InlineEditor } from '@blocksuite/inline';
 
-import { assertExists, sleep } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 
@@ -11,63 +11,56 @@ import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
 import { getInlineEditorByModel } from '../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../_common/utils/selection.js';
 
+export function getQuery(inlineEditor: InlineEditor, startIndex: number) {
+  const range = getCurrentNativeRange();
+  if (!range) {
+    return null;
+  }
+  if (range.startContainer !== range.endContainer) {
+    console.warn(
+      'Failed to parse query! Current range is not collapsed.',
+      range
+    );
+    return null;
+  }
+  const textNode = range.startContainer;
+  if (textNode.nodeType !== Node.TEXT_NODE) {
+    console.warn(
+      'Failed to parse query! Current range is not a text node.',
+      range
+    );
+    return null;
+  }
+  const curIndex = inlineEditor.getInlineRange()?.index ?? 0;
+  if (curIndex < startIndex) {
+    return null;
+  }
+
+  const text = inlineEditor.yText.toString();
+  return text.slice(startIndex, curIndex);
+}
+
+interface ObserverParams {
+  target: HTMLElement;
+  signal: AbortSignal;
+  onInput?: () => void;
+  onDelete?: () => void;
+  onMove?: (step: 1 | -1) => void;
+  onConfirm?: () => void;
+  onAbort?: () => void;
+  interceptor?: (e: KeyboardEvent, next: () => void) => void;
+}
+
 export const createKeydownObserver = ({
   target,
-  inlineEditor,
-  onUpdateQuery,
+  signal,
+  onInput,
+  onDelete,
   onMove,
   onConfirm,
-  onEsc,
+  onAbort,
   interceptor = (_, next) => next(),
-  abortController,
-}: {
-  target: HTMLElement;
-  inlineEditor: InlineEditor;
-  onUpdateQuery: (val: string) => void;
-  onMove: (step: 1 | -1) => void;
-  onConfirm: () => void;
-  onEsc?: () => void;
-  interceptor?: (e: KeyboardEvent, next: () => void) => void;
-  abortController: AbortController;
-}) => {
-  let query = '';
-  const startIndex = inlineEditor?.getInlineRange()?.index ?? 0;
-
-  const updateQuery = async () => {
-    // Wait for text update
-    await sleep(0);
-    const range = getCurrentNativeRange();
-    if (!range) {
-      abortController.abort();
-      return;
-    }
-    if (range.startContainer !== range.endContainer) {
-      console.warn(
-        'Failed to parse query! Current range is not collapsed.',
-        range
-      );
-      abortController.abort();
-      return;
-    }
-    const textNode = range.startContainer;
-    if (textNode.nodeType !== Node.TEXT_NODE) {
-      console.warn(
-        'Failed to parse query! Current range is not a text node.',
-        range
-      );
-      abortController.abort();
-      return;
-    }
-    const curIndex = inlineEditor.getInlineRange()?.index ?? 0;
-    const text = inlineEditor.yText.toString();
-    const previousQuery = query;
-    query = text.slice(startIndex, curIndex);
-
-    if (query !== previousQuery) {
-      onUpdateQuery(query);
-    }
-  };
-
+}: ObserverParams) => {
   const keyDownListener = (e: KeyboardEvent) => {
     if (e.defaultPrevented) return;
 
@@ -78,14 +71,14 @@ export const createKeydownObserver = ({
         switch (e.key) {
           // Previous command
           case 'p': {
-            onMove(-1);
+            onMove?.(-1);
             e.stopPropagation();
             e.preventDefault();
             return;
           }
           // Next command
           case 'n': {
-            onMove(1);
+            onMove?.(1);
             e.stopPropagation();
             e.preventDefault();
             return;
@@ -103,7 +96,7 @@ export const createKeydownObserver = ({
 
       // Abort when press modifier key + any other key to avoid weird behavior
       // e.g. press ctrl + a to select all or press ctrl + v to paste
-      abortController.abort();
+      onAbort?.();
       return;
     }
 
@@ -114,61 +107,58 @@ export const createKeydownObserver = ({
       (!isControlledKeyboardEvent(e) && e.key.length === 1) ||
       e.isComposing
     ) {
-      updateQuery().catch(console.error);
+      requestAnimationFrame(() => onInput?.());
       return;
     }
 
     switch (e.key) {
       case 'Escape': {
-        abortController.abort();
+        onAbort?.();
         return;
       }
       case 'Backspace': {
-        if (!query.length) {
-          abortController.abort();
-        }
-        updateQuery().catch(console.error);
+        requestAnimationFrame(() => onDelete?.());
         return;
       }
       case 'Enter': {
         if (e.shiftKey) {
-          abortController.abort();
+          onAbort?.();
           return;
         }
-        onConfirm();
+        onConfirm?.();
         e.preventDefault();
         return;
       }
       case 'Tab': {
         if (e.shiftKey) {
-          onMove(-1);
+          onMove?.(-1);
         } else {
-          onMove(1);
+          onMove?.(1);
         }
         e.preventDefault();
         return;
       }
       case 'ArrowUp': {
         if (e.shiftKey) {
-          abortController.abort();
+          onAbort?.();
           return;
         }
-        onMove(-1);
+        onMove?.(-1);
         e.preventDefault();
         return;
       }
       case 'ArrowDown': {
         if (e.shiftKey) {
-          abortController.abort();
+          onAbort?.();
           return;
         }
-        onMove(1);
+        onMove?.(1);
         e.preventDefault();
         return;
       }
       case 'ArrowLeft':
       case 'ArrowRight': {
-        abortController.abort();
+        onAbort?.();
         return;
       }
       default:
@@ -183,31 +173,16 @@ export const createKeydownObserver = ({
     {
       // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
-      signal: abortController.signal,
+      signal,
     }
   );
 
   // Fix composition input
   target.addEventListener(
     'input',
-    () => {
-      updateQuery().catch(console.error);
-    },
-    {
-      signal: abortController.signal,
-    }
+    () => requestAnimationFrame(() => onInput?.()),
+    { signal }
   );
-
-  if (onEsc) {
-    const escListener = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onEsc();
-      }
-    };
-    window.addEventListener('keydown', escListener, {
-      signal: abortController.signal,
-    });
-  }
 };
 
 /**

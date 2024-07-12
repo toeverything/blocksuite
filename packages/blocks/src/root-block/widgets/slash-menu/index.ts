@@ -66,10 +66,14 @@ const showSlashMenu = debounce(
       disposables.dispose()
     );
 
-    const slashMenu = new SlashMenu();
+    const inlineEditor = getInlineEditorByModel(
+      context.rootElement.host,
+      context.model
+    );
+    if (!inlineEditor) return;
+    const slashMenu = new SlashMenu(inlineEditor, abortController);
     disposables.add(() => slashMenu.remove());
     slashMenu.context = context;
-    slashMenu.abortController = abortController;
     slashMenu.config = config;
     slashMenu.triggerKey = triggerKey;
 

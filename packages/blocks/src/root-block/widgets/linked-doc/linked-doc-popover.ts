@@ -14,6 +14,7 @@ import '../../../_common/components/button.js';
 import {
   cleanSpecifiedTail,
   createKeydownObserver,
+  getQuery,
 } from '../../../_common/components/utils.js';
 import { MoreHorizontalIcon } from '../../../_common/icons/edgeless.js';
 import { styles } from './styles.js';
@@ -43,7 +44,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     });
   };
 
-  private _query = '';
+  private _startIndex = this.inlineEditor?.getInlineRange()?.index ?? 0;
 
   static override styles = styles;
 
@@ -97,6 +98,10 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     return group.items;
   }
 
+  private get _query() {
+    return getQuery(this.inlineEditor, this._startIndex) || '';
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     const inlineEditor = this.inlineEditor;
@@ -116,13 +121,19 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
     createKeydownObserver({
       target: inlineEditor.eventSource,
-      inlineEditor,
-      onUpdateQuery: str => {
-        this._query = str;
+      signal: this.abortController.signal,
+      onInput: () => {
         this._activatedItemIndex = 0;
         this._linkedDocGroup = this._getLinkedDocGroup();
       },
-      abortController: this.abortController,
+      onDelete: () => {
+        const curIndex = inlineEditor.getInlineRange()?.index ?? 0;
+        if (curIndex < this._startIndex) {
+          this.abortController.abort();
+        }
+        this._activatedItemIndex = 0;
+        this._linkedDocGroup = this._getLinkedDocGroup();
+      },
       onMove: step => {
         const itemLen = this._flattenActionList.length;
         this._activatedItemIndex =
@@ -151,7 +162,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
           .action()
           ?.catch(console.error);
       },
-      onEsc: () => {
+      onAbort: () => {
         this.abortController.abort();
       },
     });

@@ -6,6 +6,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import type {
   SlashMenuActionItem,
   SlashMenuContext,
@@ -20,6 +21,7 @@ import { createLitPortal } from '../../../_common/components/portal.js';
 import {
   cleanSpecifiedTail,
   createKeydownObserver,
+  getQuery,
 } from '../../../_common/components/utils.js';
 import { ArrowDownIcon } from '../../../_common/icons/index.js';
 import {
@@ -77,16 +79,15 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
   private _itemPathMap = new Map<SlashMenuItem, number[]>();
 
-  private _query = '';
-
   private _queryState: 'off' | 'on' | 'no_result' = 'off';
 
-  private _updateFilteredItems = (query: string) => {
+  private _startIndex = this.inlineEditor?.getInlineRange()?.index ?? 0;
+
+  private _updateFilteredItems = () => {
     this._filteredItems = [];
 
-    const searchStr = query.toLowerCase();
+    const searchStr = this._query.toLowerCase();
     if (searchStr === '' || searchStr.endsWith(' ')) {
-      this._query = searchStr;
       this._queryState = searchStr === '' ? 'off' : 'no_result';
       return;
     }
@@ -129,17 +130,25 @@ export class SlashMenu extends WithDisposable(LitElement) {
       );
     });
 
-    this._query = query;
     this._queryState = this._filteredItems.length === 0 ? 'no_result' : 'on';
   };
 
   static override styles = styles;
 
-  abortController = new AbortController();
-
   updatePosition = (position: { x: string; y: string; height: number }) => {
     this._position = position;
   };
+
+  constructor(
+    private inlineEditor: AffineInlineEditor,
+    private abortController = new AbortController()
+  ) {
+    super();
+  }
+
+  private get _query() {
+    return getQuery(this.inlineEditor, this._startIndex) || '';
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -157,9 +166,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
       e.preventDefault();
     });
 
-    const { model } = this.context;
-
-    const inlineEditor = getInlineEditorByModel(this.host, model);
+    const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor, 'RichText InlineEditor not found');
 
     /**
@@ -174,8 +181,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
      */
     createKeydownObserver({
       target: inlineEditor.eventSource,
-      inlineEditor,
-      abortController: this.abortController,
+      signal: this.abortController.signal,
       interceptor: (event, next) => {
         const { key, isComposing, code } = event;
         if (key === this.triggerKey) {
@@ -202,11 +208,15 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
         next();
       },
-      onUpdateQuery: query => {
-        this._updateFilteredItems(query);
+      onInput: () => this._updateFilteredItems(),
+      onDelete: () => {
+        const curIndex = inlineEditor.getInlineRange()?.index ?? 0;
+        if (curIndex < this._startIndex) {
+          this.abortController.abort();
+        }
+        this._updateFilteredItems();
       },
-      onMove: () => {},
-      onConfirm: () => {},
+      onAbort: () => this.abortController.abort(),
     });
   }
 
