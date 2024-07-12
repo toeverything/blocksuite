@@ -1,31 +1,28 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline';
 import type { Text } from '@blocksuite/store';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { RichText } from '../../../_common/components/index.js';
-import { getViewportElement } from '../../../_common/utils/query.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
+
+import { getViewportElement } from '../../../_common/utils/query.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
-  get topContenteditableElement() {
-    const databaseBlock =
-      this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.topContenteditableElement;
-  }
+  private _onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Enter' && !event.isComposing) {
+      // prevent insert v-line
+      event.preventDefault();
+      // insert new row
+      this.onPressEnterKey?.();
+      return;
+    }
+  };
 
   static override styles = css`
     .affine-database-title {
@@ -66,34 +63,6 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       color: var(--affine-placeholder-color);
     }
   `;
-
-  @query('rich-text')
-  private accessor richText!: RichText;
-
-  @state()
-  private accessor isActive = false;
-
-  @property({ attribute: false })
-  accessor titleText!: Text;
-
-  @property({ attribute: false })
-  accessor readonly!: boolean;
-
-  @property({ attribute: false })
-  accessor onPressEnterKey: (() => void) | undefined = undefined;
-
-  @state()
-  accessor isComposing = false;
-
-  private _onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.isComposing) {
-      // prevent insert v-line
-      event.preventDefault();
-      // insert new row
-      this.onPressEnterKey?.();
-      return;
-    }
-  };
 
   override firstUpdated() {
     // for title placeholder
@@ -167,6 +136,39 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       <div class="database-title" style="float:left;height: 0;">Untitled</div>
     </div>`;
   }
+
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    return databaseBlock?.topContenteditableElement;
+  }
+
+  @state()
+  private accessor isActive = false;
+
+  @state()
+  accessor isComposing = false;
+
+  @property({ attribute: false })
+  accessor onPressEnterKey: (() => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor readonly!: boolean;
+
+  @query('rich-text')
+  private accessor richText!: RichText;
+
+  @property({ attribute: false })
+  accessor titleText!: Text;
 }
 
 declare global {

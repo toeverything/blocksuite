@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
+
 import { isInsidePageEditor } from '../../../_common/utils/query.js';
 
 export function filterAIItemGroup(

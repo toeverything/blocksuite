@@ -5,29 +5,30 @@ import type {
   DisposableClass,
   InitCommandCtx,
 } from '@blocksuite/block-std';
-import { assertExists, type Constructor } from '@blocksuite/global/utils';
 import type { LitElement, TemplateResult } from 'lit';
 
-export class PeekableController {
-  constructor(
-    private target: LitElement & {
-      std: BlockStdScope;
-    }
-  ) {}
+import { type Constructor, assertExists } from '@blocksuite/global/utils';
 
+export class PeekableController {
   private getRootService = () => {
     return this.target.std.spec.getService('affine:page');
   };
-
-  get peekable() {
-    return !!this.getRootService().peekViewService;
-  }
 
   peek = (template?: TemplateResult) => {
     return Promise.resolve<void>(
       this.getRootService().peekViewService?.peek(this.target, template)
     );
   };
+
+  constructor(
+    private target: LitElement & {
+      std: BlockStdScope;
+    }
+  ) {}
+
+  get peekable() {
+    return !!this.getRootService().peekViewService;
+  }
 }
 
 export interface PeekViewService {

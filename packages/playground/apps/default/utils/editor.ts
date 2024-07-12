@@ -1,9 +1,10 @@
 import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
 import type { DocModeService, PageRootService } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
-import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BlockCollection } from '@blocksuite/store';
 import type { DocCollection } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
+import { AffineEditorContainer } from '@blocksuite/presets';
 
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';

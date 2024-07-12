@@ -2,6 +2,7 @@ import type {
   GroupElementModel,
   MindmapElementModel,
 } from '@blocksuite/blocks';
+
 import {
   type EdgelessRootBlockComponent,
   NoteDisplayMode,

@@ -3,10 +3,11 @@ import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { isCssVariable } from '../_common/theme/css-variables.js';
-import { wrapFontFamily } from '../surface-block/utils/font.js';
 import type { EdgelessTextBlockModel } from './edgeless-text-model.js';
 import type { EdgelessTextBlockService } from './edgeless-text-service.js';
+
+import { isCssVariable } from '../_common/theme/css-variables.js';
+import { wrapFontFamily } from '../surface-block/utils/font.js';
 
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
@@ -16,28 +17,6 @@ export class EdgelessTextBlockComponent extends BlockElement<
   EdgelessTextBlockModel,
   EdgelessTextBlockService
 > {
-  tryFocusEnd() {
-    const paragraphOrLists = Array.from(
-      this.querySelectorAll<BlockElement>('affine-paragraph, affine-list')
-    );
-    const last = paragraphOrLists.at(-1);
-    if (last) {
-      this.host.selection.setGroup('note', [
-        this.host.selection.create('text', {
-          from: {
-            blockId: last.blockId,
-            index: last.model.text?.length ?? 0,
-            length: 0,
-          },
-          to: null,
-        }),
-      ]);
-    }
-  }
-
-  @query('.affine-block-children-container')
-  accessor childrenContainer!: HTMLDivElement;
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -99,6 +78,28 @@ export class EdgelessTextBlockComponent extends BlockElement<
       </div>
     `;
   }
+
+  tryFocusEnd() {
+    const paragraphOrLists = Array.from(
+      this.querySelectorAll<BlockElement>('affine-paragraph, affine-list')
+    );
+    const last = paragraphOrLists.at(-1);
+    if (last) {
+      this.host.selection.setGroup('note', [
+        this.host.selection.create('text', {
+          from: {
+            blockId: last.blockId,
+            index: last.model.text?.length ?? 0,
+            length: 0,
+          },
+          to: null,
+        }),
+      ]);
+    }
+  }
+
+  @query('.affine-block-children-container')
+  accessor childrenContainer!: HTMLDivElement;
 }
 
 declare global {

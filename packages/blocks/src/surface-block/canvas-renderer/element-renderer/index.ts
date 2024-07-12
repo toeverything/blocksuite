@@ -1,5 +1,6 @@
 import type { IBound, RoughCanvas, SurfaceElementModel } from '../../index.js';
 import type { Renderer } from '../renderer.js';
+
 import { brush } from './brush/index.js';
 import { connector } from './connector/index.js';
 import { group } from './group/index.js';

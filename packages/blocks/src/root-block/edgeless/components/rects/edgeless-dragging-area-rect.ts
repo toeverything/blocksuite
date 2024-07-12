@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -15,9 +15,6 @@ export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
       pointer-events: none;
     }
   `;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 
   protected override firstUpdated() {
     this._disposables.add(
@@ -39,6 +36,9 @@ export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
       <div class="affine-edgeless-dragging-area" style=${styleMap(style)}></div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {

@@ -1,23 +1,27 @@
-import '../../../../_common/components/toolbar/icon-button.js';
-import '../../../../_common/components/toolbar/toolbar.js';
-import '../../../../_common/components/toolbar/menu-button.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { createLitPortal } from '../../../../_common/components/index.js';
 import type { EditorIconButton } from '../../../../_common/components/toolbar/icon-button.js';
-import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
 import type { CodeToolbarItem, CodeToolbarMoreItem } from '../types.js';
+
+import { createLitPortal } from '../../../../_common/components/index.js';
+import '../../../../_common/components/toolbar/icon-button.js';
+import '../../../../_common/components/toolbar/menu-button.js';
+import '../../../../_common/components/toolbar/toolbar.js';
+import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
 import { CodeToolbarItemRenderer, MoreMenuRenderer } from '../utils.js';
 
 @customElement('affine-code-toolbar')
 export class AffineCodeToolbar extends WithDisposable(LitElement) {
+  private _currentOpenMenu: AbortController | null = null;
+
+  private _popMenuAbortController: AbortController | null = null;
+
   static override styles = css`
     :host {
       position: absolute;
@@ -40,27 +44,12 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
     }
   `;
 
-  @state()
-  private accessor _moreMenuOpen = false;
-
-  @query('.code-toolbar-button.more')
-  private accessor _moreButton!: EditorIconButton;
-
-  private _popMenuAbortController: AbortController | null = null;
-
-  private _currentOpenMenu: AbortController | null = null;
-
-  @property({ attribute: false })
-  accessor blockElement!: CodeBlockComponent;
-
-  @property({ attribute: false })
-  accessor items!: CodeToolbarItem[];
-
-  @property({ attribute: false })
-  accessor moreItems!: CodeToolbarMoreItem[];
-
-  @property({ attribute: false })
-  accessor onActiveStatusChange: (active: boolean) => void = noop;
+  closeCurrentMenu = () => {
+    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
+      this._currentOpenMenu.abort();
+      this._currentOpenMenu = null;
+    }
+  };
 
   private _toggleMoreMenu() {
     if (
@@ -120,13 +109,6 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
     this._moreMenuOpen = true;
   }
 
-  closeCurrentMenu = () => {
-    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
-      this._currentOpenMenu.abort();
-      this._currentOpenMenu = null;
-    }
-  };
-
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.closeCurrentMenu();
@@ -157,6 +139,24 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
       </editor-toolbar>
     `;
   }
+
+  @query('.code-toolbar-button.more')
+  private accessor _moreButton!: EditorIconButton;
+
+  @state()
+  private accessor _moreMenuOpen = false;
+
+  @property({ attribute: false })
+  accessor blockElement!: CodeBlockComponent;
+
+  @property({ attribute: false })
+  accessor items!: CodeToolbarItem[];
+
+  @property({ attribute: false })
+  accessor moreItems!: CodeToolbarMoreItem[];
+
+  @property({ attribute: false })
+  accessor onActiveStatusChange: (active: boolean) => void = noop;
 }
 
 declare global {

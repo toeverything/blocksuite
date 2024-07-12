@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -9,6 +10,7 @@ import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-
 import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
 import type { EmbedLoomModel } from '../../../../embed-loom-block/embed-loom-model.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
+
 import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
 
@@ -22,21 +24,6 @@ type EmbedCardModel =
 @customElement('embed-card-edit-modal')
 export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
-
-  @state()
-  private accessor _titleInputValue = '';
-
-  @property({ attribute: false })
-  accessor model!: EmbedCardModel;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @query('.embed-card-modal-input.title')
-  accessor titleInput!: HTMLInputElement;
-
-  @query('.embed-card-modal-input.description')
-  accessor descInput!: HTMLTextAreaElement;
 
   private _handleInput(e: InputEvent) {
     const target = e.target as HTMLInputElement;
@@ -124,6 +111,21 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @state()
+  private accessor _titleInputValue = '';
+
+  @query('.embed-card-modal-input.description')
+  accessor descInput!: HTMLTextAreaElement;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor model!: EmbedCardModel;
+
+  @query('.embed-card-modal-input.title')
+  accessor titleInput!: HTMLInputElement;
 }
 
 export function toggleEmbedCardEditModal(

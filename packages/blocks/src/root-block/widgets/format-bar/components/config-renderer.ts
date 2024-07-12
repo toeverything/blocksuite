@@ -1,11 +1,11 @@
+import { type TemplateResult, html } from 'lit';
+
+import type { AffineFormatBarWidget } from '../format-bar.js';
+
 import '../../../../_common/components/toolbar/icon-button.js';
 import '../../../../_common/components/toolbar/separator.js';
-
-import { html, type TemplateResult } from 'lit';
-
 import { renderToolbarSeparator } from '../../../../_common/components/toolbar/separator.js';
 import { isFormatSupported } from '../../../../note-block/commands/utils.js';
-import type { AffineFormatBarWidget } from '../format-bar.js';
 import { HighlightButton } from './highlight/highlight-button.js';
 import { ParagraphButton } from './paragraph-button.js';
 

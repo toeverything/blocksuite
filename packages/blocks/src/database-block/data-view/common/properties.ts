@@ -5,12 +5,13 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
-import { createPopup } from '../../../_common/components/index.js';
-import { ArrowLeftBigIcon } from '../../../_common/icons/index.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
 } from '../view/data-view-manager.js';
+
+import { createPopup } from '../../../_common/components/index.js';
+import { ArrowLeftBigIcon } from '../../../_common/icons/index.js';
 
 const show = html`<svg
   width="24"
@@ -159,14 +160,33 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     }
   `;
 
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
+  clickChangeAll = (allShow: boolean) => {
+    this.view.columnsWithoutFilter.forEach(id => {
+      if (this.view.columnGetType(id) !== 'title') {
+        this.view.columnUpdateHide(id, allShow);
+      }
+    });
+  };
 
-  @property({ attribute: false })
-  accessor onBack: (() => void) | undefined = undefined;
-
-  @query('.properties-group')
-  accessor groupContainer!: HTMLElement;
+  renderColumn = (column: DataViewColumnManager) => {
+    const isTitle = column.type === 'title';
+    const icon = column.hide ? hidden : show;
+    const changeVisible = () => {
+      if (column.type !== 'title') {
+        column.updateHide(!column.hide);
+      }
+    };
+    const classList = classMap({
+      'property-item-op-icon': true,
+      disabled: isTitle,
+    });
+    return html` <div class="property-item">
+      <div class="property-item-drag-bar"></div>
+      <uni-lit class="property-item-icon" .uni="${column.icon}"></uni-lit>
+      <div class="property-item-name">${column.name}</div>
+      <div class="${classList}" @click="${changeVisible}">${icon}</div>
+    </div>`;
+  };
 
   private itemsGroup() {
     return this.view.columnsWithoutFilter.map(id => this.view.columnGet(id));
@@ -210,34 +230,6 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     });
   }
 
-  renderColumn = (column: DataViewColumnManager) => {
-    const isTitle = column.type === 'title';
-    const icon = column.hide ? hidden : show;
-    const changeVisible = () => {
-      if (column.type !== 'title') {
-        column.updateHide(!column.hide);
-      }
-    };
-    const classList = classMap({
-      'property-item-op-icon': true,
-      disabled: isTitle,
-    });
-    return html` <div class="property-item">
-      <div class="property-item-drag-bar"></div>
-      <uni-lit class="property-item-icon" .uni="${column.icon}"></uni-lit>
-      <div class="property-item-name">${column.name}</div>
-      <div class="${classList}" @click="${changeVisible}">${icon}</div>
-    </div>`;
-  };
-
-  clickChangeAll = (allShow: boolean) => {
-    this.view.columnsWithoutFilter.forEach(id => {
-      if (this.view.columnGetType(id) !== 'title') {
-        this.view.columnUpdateHide(id, allShow);
-      }
-    });
-  };
-
   override render() {
     const items = this.itemsGroup();
     const isAllShowed = items.every(v => !v.hide);
@@ -263,6 +255,15 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       </div>
     `;
   }
+
+  @query('.properties-group')
+  accessor groupContainer!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor onBack: (() => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor view!: DataViewManager;
 }
 
 declare global {

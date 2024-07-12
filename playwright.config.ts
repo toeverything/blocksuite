@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import type { PlaywrightWorkerOptions } from '@playwright/test';
+
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({

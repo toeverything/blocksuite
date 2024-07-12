@@ -1,6 +1,7 @@
+import type { StrokeOptions } from './types.js';
+
 import { getStrokeOutlinePoints } from './getStrokeOutlinePoints.js';
 import { getStrokePoints } from './getStrokePoints.js';
-import type { StrokeOptions } from './types.js';
 
 /**
  * ## getStroke

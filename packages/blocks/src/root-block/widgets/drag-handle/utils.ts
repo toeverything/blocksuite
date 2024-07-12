@@ -1,17 +1,23 @@
 import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import {
   type BaseSelection,
   PathFinder,
   type PointerEventState,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
+
+import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../../_common/consts.js';
 import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
   type BlockComponent,
   type EmbedCardStyle,
+  Point,
+  Rect,
   findClosestBlockElement,
   getClosestBlockElementByElement,
   getClosestBlockElementByPoint,
@@ -20,12 +26,8 @@ import {
   getRectByBlockElement,
   isInsidePageEditor,
   matchFlavours,
-  Point,
-  Rect,
 } from '../../../_common/utils/index.js';
-import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
   DRAG_HANDLE_CONTAINER_HEIGHT,

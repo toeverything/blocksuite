@@ -1,6 +1,7 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { AwarenessSource } from '@blocksuite/sync';
 import type { Awareness } from 'y-protocols/awareness';
+
+import { assertExists } from '@blocksuite/global/utils';
 import {
   applyAwarenessUpdate,
   encodeAwarenessUpdate,
@@ -11,10 +12,6 @@ import type { WebSocketMessage } from './types';
 type AwarenessChanges = Record<'added' | 'updated' | 'removed', number[]>;
 
 export class WebSocketAwarenessSource implements AwarenessSource {
-  awareness: Awareness | null = null;
-
-  constructor(readonly ws: WebSocket) {}
-
   private _onAwareness = (changes: AwarenessChanges, origin: unknown) => {
     if (origin === 'remote') return;
 
@@ -62,6 +59,10 @@ export class WebSocketAwarenessSource implements AwarenessSource {
       );
     }
   };
+
+  awareness: Awareness | null = null;
+
+  constructor(readonly ws: WebSocket) {}
 
   connect(awareness: Awareness): void {
     this.awareness = awareness;

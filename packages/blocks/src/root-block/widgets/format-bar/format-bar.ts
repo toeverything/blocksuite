@@ -1,30 +1,31 @@
-import '../../../_common/components/button.js';
-import '../../../_common/components/toolbar/toolbar.js';
-
 import type {
   BaseSelection,
   BlockElement,
   CursorSelection,
 } from '@blocksuite/block-std';
+
 import { WidgetElement } from '@blocksuite/block-std';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import {
+  type Placement,
+  type ReferenceElement,
   autoUpdate,
   computePosition,
   inline,
   offset,
-  type Placement,
-  type ReferenceElement,
   shift,
 } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
+import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
+
+import '../../../_common/components/button.js';
 import {
   HoverController,
   type RichText,
 } from '../../../_common/components/index.js';
-import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
+import '../../../_common/components/toolbar/toolbar.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootElement } from '../../../root-block/utils/guard.js';
@@ -42,141 +43,15 @@ export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
-  static override styles = formatBarStyle;
-
-  private get _selectionManager() {
-    return this.host.selection;
-  }
-
-  get displayType() {
-    return this._displayType;
-  }
-
-  get selectedBlockElements() {
-    return this._selectedBlockElements;
-  }
-
-  get nativeRange() {
-    const sl = document.getSelection();
-    if (!sl || sl.rangeCount === 0) return null;
-    return sl.getRangeAt(0);
-  }
-
-  @state()
-  private accessor _dragging = false;
-
-  @state()
-  private accessor _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
-
-  @state()
-  private accessor _selectedBlockElements: BlockElement[] = [];
-
-  private _lastCursor: CursorSelection | undefined = undefined;
-
   private _abortController = new AbortController();
-
-  private _placement: Placement = 'top';
 
   private _floatDisposables: DisposableGroup | null = null;
 
-  @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
-  accessor formatBarElement: HTMLElement | null = null;
+  private _lastCursor: CursorSelection | undefined = undefined;
 
-  @state()
-  accessor configItems: FormatBarConfigItem[] = [];
+  private _placement: Placement = 'top';
 
-  private _shouldDisplay() {
-    const readonly = this.doc.awarenessStore.isReadonly(
-      this.doc.blockCollection
-    );
-    if (readonly) return false;
-
-    if (
-      this.displayType === 'block' &&
-      this._selectedBlockElements?.[0]?.flavour === 'affine:surface-ref'
-    ) {
-      return false;
-    }
-
-    if (
-      this.displayType === 'block' &&
-      this._selectedBlockElements.length === 1
-    ) {
-      const selectedBlock = this._selectedBlockElements[0];
-      if (
-        !matchFlavours(selectedBlock.model, [
-          'affine:paragraph',
-          'affine:list',
-          'affine:code',
-          'affine:image',
-        ])
-      ) {
-        return false;
-      }
-    }
-
-    if (this.displayType === 'none' || this._dragging) {
-      return false;
-    }
-
-    // if the selection is on an embed (ex. linked page), we should not display the format bar
-    if (
-      this.displayType === 'text' &&
-      this._selectedBlockElements.length === 1
-    ) {
-      const isEmbed = () => {
-        const [element] = this._selectedBlockElements;
-        const richText = element.querySelector<RichText>('rich-text');
-        const inline = richText?.inlineEditor;
-        if (!richText || !inline) {
-          return false;
-        }
-        const range = inline.getInlineRange();
-        if (!range || range.length > 1) {
-          return false;
-        }
-        const deltas = inline.getDeltasByInlineRange(range);
-        if (deltas.length > 2) {
-          return false;
-        }
-        const delta = deltas?.[1]?.[0];
-        if (!delta) {
-          return false;
-        }
-
-        return inline.isEmbed(delta);
-      };
-
-      if (isEmbed()) {
-        return false;
-      }
-    }
-
-    // todo: refactor later that ai panel & format bar should not depend on each other
-    // do not display if AI panel is open
-    const rootBlockId = this.host.doc.root?.id;
-    const aiPanel = rootBlockId
-      ? this.host.view.getWidget('affine-ai-panel-widget', rootBlockId)
-      : null;
-
-    // @ts-ignore
-    if (aiPanel && aiPanel?.state !== 'hidden') {
-      return false;
-    }
-
-    return true;
-  }
-
-  private _selectionEqual(
-    target: BaseSelection | undefined,
-    current: BaseSelection | undefined
-  ) {
-    if (target === current || (target && current && target.equals(current))) {
-      return true;
-    }
-
-    return false;
-  }
+  static override styles = formatBarStyle;
 
   private _calculatePlacement() {
     const rootElement = this.blockElement;
@@ -424,9 +299,188 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
   }
 
-  reset() {
-    this._displayType = 'none';
-    this._selectedBlockElements = [];
+  private _selectionEqual(
+    target: BaseSelection | undefined,
+    current: BaseSelection | undefined
+  ) {
+    if (target === current || (target && current && target.equals(current))) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private get _selectionManager() {
+    return this.host.selection;
+  }
+
+  private _shouldDisplay() {
+    const readonly = this.doc.awarenessStore.isReadonly(
+      this.doc.blockCollection
+    );
+    if (readonly) return false;
+
+    if (
+      this.displayType === 'block' &&
+      this._selectedBlockElements?.[0]?.flavour === 'affine:surface-ref'
+    ) {
+      return false;
+    }
+
+    if (
+      this.displayType === 'block' &&
+      this._selectedBlockElements.length === 1
+    ) {
+      const selectedBlock = this._selectedBlockElements[0];
+      if (
+        !matchFlavours(selectedBlock.model, [
+          'affine:paragraph',
+          'affine:list',
+          'affine:code',
+          'affine:image',
+        ])
+      ) {
+        return false;
+      }
+    }
+
+    if (this.displayType === 'none' || this._dragging) {
+      return false;
+    }
+
+    // if the selection is on an embed (ex. linked page), we should not display the format bar
+    if (
+      this.displayType === 'text' &&
+      this._selectedBlockElements.length === 1
+    ) {
+      const isEmbed = () => {
+        const [element] = this._selectedBlockElements;
+        const richText = element.querySelector<RichText>('rich-text');
+        const inline = richText?.inlineEditor;
+        if (!richText || !inline) {
+          return false;
+        }
+        const range = inline.getInlineRange();
+        if (!range || range.length > 1) {
+          return false;
+        }
+        const deltas = inline.getDeltasByInlineRange(range);
+        if (deltas.length > 2) {
+          return false;
+        }
+        const delta = deltas?.[1]?.[0];
+        if (!delta) {
+          return false;
+        }
+
+        return inline.isEmbed(delta);
+      };
+
+      if (isEmbed()) {
+        return false;
+      }
+    }
+
+    // todo: refactor later that ai panel & format bar should not depend on each other
+    // do not display if AI panel is open
+    const rootBlockId = this.host.doc.root?.id;
+    const aiPanel = rootBlockId
+      ? this.host.view.getWidget('affine-ai-panel-widget', rootBlockId)
+      : null;
+
+    // @ts-ignore
+    if (aiPanel && aiPanel?.state !== 'hidden') {
+      return false;
+    }
+
+    return true;
+  }
+
+  addBlockTypeSwitch(config: {
+    flavour: BlockSuite.Flavour;
+    icon: ParagraphActionConfigItem['icon'];
+    type?: string;
+    name?: string;
+  }) {
+    const { flavour, type, icon } = config;
+    return this.addParagraphAction({
+      id: `${flavour}/${type ?? ''}`,
+      icon,
+      flavour,
+      name: config.name ?? camelCaseToWords(type ?? flavour),
+      action: chain => {
+        chain
+          .updateBlockType({
+            flavour,
+            props: type != null ? { type } : undefined,
+          })
+          .run();
+      },
+    });
+  }
+
+  addDivider() {
+    this.configItems.push({ type: 'divider' });
+    return this;
+  }
+
+  addHighlighterDropdown() {
+    this.configItems.push({ type: 'highlighter-dropdown' });
+    return this;
+  }
+
+  addInlineAction(config: Omit<InlineActionConfigItem, 'type'>) {
+    this.configItems.push({ ...config, type: 'inline-action' });
+    return this;
+  }
+
+  addParagraphAction(config: Omit<ParagraphActionConfigItem, 'type'>) {
+    this.configItems.push({ ...config, type: 'paragraph-action' });
+    return this;
+  }
+
+  addParagraphDropdown() {
+    this.configItems.push({ type: 'paragraph-dropdown' });
+    return this;
+  }
+
+  addRawConfigItems(configItems: FormatBarConfigItem[], index?: number) {
+    if (index === undefined) {
+      this.configItems.push(...configItems);
+    } else {
+      this.configItems.splice(index, 0, ...configItems);
+    }
+    return this;
+  }
+
+  addTextStyleToggle(config: {
+    icon: InlineActionConfigItem['icon'];
+    key: Exclude<
+      keyof AffineTextAttributes,
+      'color' | 'background' | 'reference'
+    >;
+    action: InlineActionConfigItem['action'];
+  }) {
+    const { key } = config;
+    return this.addInlineAction({
+      id: key,
+      name: camelCaseToWords(key),
+      icon: config.icon,
+      isActive: chain => {
+        const [result] = chain.isTextStyleActive({ key }).run();
+        return result;
+      },
+      action: config.action,
+      showWhen: chain => {
+        const [result] = isFormatSupported(chain).run();
+        return result;
+      },
+    });
+  }
+
+  clearConfig() {
+    this.configItems = [];
+    return this;
   }
 
   override connectedCallback() {
@@ -456,110 +510,11 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
   }
 
-  override updated() {
-    if (!this._shouldDisplay()) {
-      if (this._floatDisposables) {
-        this._floatDisposables.dispose();
-      }
-      return;
-    }
-
-    this._floatDisposables = new DisposableGroup();
-    this._listenFloatingElement();
-  }
-
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._abortController.abort();
     this.reset();
     this._lastCursor = undefined;
-  }
-
-  addDivider() {
-    this.configItems.push({ type: 'divider' });
-    return this;
-  }
-
-  addHighlighterDropdown() {
-    this.configItems.push({ type: 'highlighter-dropdown' });
-    return this;
-  }
-
-  addParagraphDropdown() {
-    this.configItems.push({ type: 'paragraph-dropdown' });
-    return this;
-  }
-
-  addInlineAction(config: Omit<InlineActionConfigItem, 'type'>) {
-    this.configItems.push({ ...config, type: 'inline-action' });
-    return this;
-  }
-
-  addParagraphAction(config: Omit<ParagraphActionConfigItem, 'type'>) {
-    this.configItems.push({ ...config, type: 'paragraph-action' });
-    return this;
-  }
-
-  addTextStyleToggle(config: {
-    icon: InlineActionConfigItem['icon'];
-    key: Exclude<
-      keyof AffineTextAttributes,
-      'color' | 'background' | 'reference'
-    >;
-    action: InlineActionConfigItem['action'];
-  }) {
-    const { key } = config;
-    return this.addInlineAction({
-      id: key,
-      name: camelCaseToWords(key),
-      icon: config.icon,
-      isActive: chain => {
-        const [result] = chain.isTextStyleActive({ key }).run();
-        return result;
-      },
-      action: config.action,
-      showWhen: chain => {
-        const [result] = isFormatSupported(chain).run();
-        return result;
-      },
-    });
-  }
-
-  addBlockTypeSwitch(config: {
-    flavour: BlockSuite.Flavour;
-    icon: ParagraphActionConfigItem['icon'];
-    type?: string;
-    name?: string;
-  }) {
-    const { flavour, type, icon } = config;
-    return this.addParagraphAction({
-      id: `${flavour}/${type ?? ''}`,
-      icon,
-      flavour,
-      name: config.name ?? camelCaseToWords(type ?? flavour),
-      action: chain => {
-        chain
-          .updateBlockType({
-            flavour,
-            props: type != null ? { type } : undefined,
-          })
-          .run();
-      },
-    });
-  }
-
-  addRawConfigItems(configItems: FormatBarConfigItem[], index?: number) {
-    if (index === undefined) {
-      this.configItems.push(...configItems);
-    } else {
-      this.configItems.splice(index, 0, ...configItems);
-    }
-    return this;
-  }
-
-  clearConfig() {
-    this.configItems = [];
-    return this;
   }
 
   override render() {
@@ -577,6 +532,52 @@ export class AffineFormatBarWidget extends WidgetElement {
       </editor-toolbar>
     `;
   }
+
+  reset() {
+    this._displayType = 'none';
+    this._selectedBlockElements = [];
+  }
+
+  override updated() {
+    if (!this._shouldDisplay()) {
+      if (this._floatDisposables) {
+        this._floatDisposables.dispose();
+      }
+      return;
+    }
+
+    this._floatDisposables = new DisposableGroup();
+    this._listenFloatingElement();
+  }
+
+  get displayType() {
+    return this._displayType;
+  }
+
+  get nativeRange() {
+    const sl = document.getSelection();
+    if (!sl || sl.rangeCount === 0) return null;
+    return sl.getRangeAt(0);
+  }
+
+  get selectedBlockElements() {
+    return this._selectedBlockElements;
+  }
+
+  @state()
+  private accessor _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
+
+  @state()
+  private accessor _dragging = false;
+
+  @state()
+  private accessor _selectedBlockElements: BlockElement[] = [];
+
+  @state()
+  accessor configItems: FormatBarConfigItem[] = [];
+
+  @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
+  accessor formatBarElement: HTMLElement | null = null;
 }
 
 function camelCaseToWords(s: string) {

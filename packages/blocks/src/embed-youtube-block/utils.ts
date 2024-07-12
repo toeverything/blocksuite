@@ -1,12 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import { isAbortError } from '../_common/utils/helper.js';
 import type { EmbedYoutubeBlockComponent } from './embed-youtube-block.js';
 import type {
   EmbedYoutubeBlockUrlData,
   EmbedYoutubeModel,
 } from './embed-youtube-model.js';
+
+import { isAbortError } from '../_common/utils/helper.js';
 
 export async function queryEmbedYoutubeData(
   embedYoutubeModel: EmbedYoutubeModel,

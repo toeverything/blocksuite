@@ -1,12 +1,12 @@
-import '../buttons/tool-icon-button.js';
-
 import { Slot } from '@blocksuite/global/utils';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { ShapeStyle } from '../../../../surface-block/index.js';
 import type { ShapeTool } from '../../controllers/tools/shape-tool.js';
+
+import { ShapeStyle } from '../../../../surface-block/index.js';
+import '../buttons/tool-icon-button.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 
 @customElement('edgeless-shape-panel')
@@ -19,12 +19,6 @@ export class EdgelessShapePanel extends LitElement {
       gap: 8px;
     }
   `;
-
-  @property({ attribute: false })
-  accessor selectedShape: ShapeTool['shapeType'] | null | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor shapeStyle: ShapeStyle = ShapeStyle.Scribbled;
 
   slots = {
     select: new Slot<ShapeTool['shapeType']>(),
@@ -61,6 +55,12 @@ export class EdgelessShapePanel extends LitElement {
         </edgeless-tool-icon-button>`
     );
   }
+
+  @property({ attribute: false })
+  accessor selectedShape: ShapeTool['shapeType'] | null | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor shapeStyle: ShapeStyle = ShapeStyle.Scribbled;
 }
 
 declare global {

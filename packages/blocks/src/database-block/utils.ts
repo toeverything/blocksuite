@@ -1,5 +1,14 @@
 import { nanoid } from '@blocksuite/store';
 
+import type {
+  ColumnMeta,
+  DataViewDataType,
+  ViewMeta,
+} from './data-view/index.js';
+import type { DataViewTypes } from './data-view/view/data-view.js';
+import type { Column } from './data-view/view/presets/table/types.js';
+import type { DatabaseBlockModel } from './database-model.js';
+
 import { databaseBlockAllColumnMap } from './columns/index.js';
 import { titlePureColumnConfig } from './columns/title/define.js';
 import { multiSelectColumnModelConfig } from './data-view/column/presets/multi-select/define.js';
@@ -8,16 +17,8 @@ import { selectColumnModelConfig } from './data-view/column/presets/select/defin
 import { textColumnModelConfig } from './data-view/column/presets/text/define.js';
 import { groupByMatcher } from './data-view/common/group-by/matcher.js';
 import { defaultGroupBy } from './data-view/common/view-manager.js';
-import type {
-  ColumnMeta,
-  DataViewDataType,
-  ViewMeta,
-} from './data-view/index.js';
 import { columnPresets } from './data-view/index.js';
 import { getTagColor } from './data-view/utils/tags/colors.js';
-import type { DataViewTypes } from './data-view/view/data-view.js';
-import type { Column } from './data-view/view/presets/table/types.js';
-import type { DatabaseBlockModel } from './database-model.js';
 
 const initMap: Record<
   DataViewTypes,
@@ -53,8 +54,8 @@ const initMap: Record<
     const getWeight = (column: Column) => {
       if (
         [
-          selectColumnModelConfig.type as string,
           multiSelectColumnModelConfig.type,
+          selectColumnModelConfig.type as string,
         ].includes(column.type)
       ) {
         return 3;

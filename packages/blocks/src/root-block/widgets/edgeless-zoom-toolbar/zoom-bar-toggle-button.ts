@@ -1,15 +1,18 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { offset } from '@floating-ui/dom';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { createLitPortal } from '../../../_common/components/portal.js';
 import { MoreIcon } from '../../../_common/icons/edgeless.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('zoom-bar-toggle-button')
 export class ZoomBarToggleButton extends WithDisposable(LitElement) {
+  private _abortController: AbortController | null = null;
+
   static override styles = css`
     :host {
       display: flex;
@@ -23,17 +26,6 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
       bottom: initial;
     }
   `;
-
-  @query('.toggle-button')
-  private accessor _toggleButton!: HTMLElement;
-
-  @state()
-  private accessor _showPopper = false;
-
-  private _abortController: AbortController | null = null;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _closeZoomMenu() {
     if (this._abortController && !this._abortController.signal.aborted) {
@@ -106,6 +98,15 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  @state()
+  private accessor _showPopper = false;
+
+  @query('.toggle-button')
+  private accessor _toggleButton!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {

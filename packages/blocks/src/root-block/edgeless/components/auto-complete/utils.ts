@@ -3,23 +3,24 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { Connection } from '../../../../surface-block/element-model/connector.js';
-import {
-  GroupElementModel,
-  ShapeElementModel,
-} from '../../../../surface-block/element-model/index.js';
 import type {
   ShapeStyle,
   ShapeType,
 } from '../../../../surface-block/element-model/shape.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
+import {
+  GroupElementModel,
+  ShapeElementModel,
+} from '../../../../surface-block/element-model/index.js';
 import {
   Bound,
-  normalizeDegAngle,
   type Options,
   Overlay,
   type RoughCanvas,
   type XYWH,
+  normalizeDegAngle,
 } from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 
 export enum Direction {

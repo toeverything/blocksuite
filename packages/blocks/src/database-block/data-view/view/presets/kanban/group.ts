@@ -1,17 +1,17 @@
-import './card.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
-import { AddCursorIcon } from '../../../../../_common/icons/index.js';
-import { GroupTitle } from '../../../common/group-by/group-title.js';
 import type { GroupData } from '../../../common/group-by/helper.js';
 import type { DataViewRenderer } from '../../../data-view.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
+
+import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
+import { AddCursorIcon } from '../../../../../_common/icons/index.js';
+import { GroupTitle } from '../../../common/group-by/group-title.js';
+import './card.js';
 
 const styles = css`
   affine-data-view-kanban-group {
@@ -95,17 +95,6 @@ const styles = css`
 
 @customElement('affine-data-view-kanban-group')
 export class KanbanGroup extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor dataViewEle!: DataViewRenderer;
-
-  @property({ attribute: false })
-  accessor view!: DataViewKanbanManager;
-
-  @property({ attribute: false })
-  accessor group!: GroupData;
-
   private clickAddCard = () => {
     const id = this.view.addCard('end', this.group.key);
     requestAnimationFrame(() => {
@@ -161,6 +150,8 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     ]);
   };
 
+  static override styles = styles;
+
   override render() {
     const cards = this.group.rows;
     return html`
@@ -200,6 +191,15 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor dataViewEle!: DataViewRenderer;
+
+  @property({ attribute: false })
+  accessor group!: GroupData;
+
+  @property({ attribute: false })
+  accessor view!: DataViewKanbanManager;
 }
 
 declare global {

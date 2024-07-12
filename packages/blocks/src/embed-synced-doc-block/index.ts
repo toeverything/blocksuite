@@ -1,8 +1,9 @@
 import { noop } from '@blocksuite/global/utils';
 
-import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block.js';
 import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
 import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
+
+import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block.js';
 
 noop(EmbedSyncedDocBlockComponent);
 

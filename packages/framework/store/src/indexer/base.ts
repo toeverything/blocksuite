@@ -1,5 +1,6 @@
-import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
+
+import { DisposableGroup, Slot, assertExists } from '@blocksuite/global/utils';
 import { YArrayEvent, YMapEvent, YTextEvent } from 'yjs';
 
 import type { YBlock } from '../store/doc/block.js';
@@ -22,8 +23,6 @@ export type IndexBlockEvent =
     };
 
 export class BlockIndexer {
-  private readonly _doc: BlockSuiteDoc;
-
   private readonly _collectionSlots: {
     docAdded: Slot<string>;
     docRemoved: Slot<string>;
@@ -31,108 +30,7 @@ export class BlockIndexer {
 
   private _disposables = new DisposableGroup();
 
-  slots = {
-    docRemoved: new Slot<DocId>(),
-    /**
-     * Note: sys:children update will not trigger event
-     */
-    blockUpdated: new Slot<IndexBlockEvent>(),
-    refreshIndex: new Slot(),
-  };
-
-  constructor(
-    doc: BlockSuiteDoc,
-    {
-      immediately = false,
-      slots,
-    }: {
-      readonly slots: {
-        docAdded: Slot<string>;
-        docRemoved: Slot<string>;
-      };
-      immediately?: boolean;
-    }
-  ) {
-    this._doc = doc;
-    this._collectionSlots = slots;
-
-    if (immediately) {
-      this._initIndex();
-      return;
-    }
-    // lazy init
-    setTimeout(() => {
-      this._initIndex();
-    }, 0);
-  }
-
-  private _initIndex() {
-    const doc = this._doc;
-    const share = doc.share;
-    if (!share.has('meta')) {
-      throw new Error(
-        'Failed to initialize indexer: collection meta not found'
-      );
-    }
-
-    let disposeMap: Record<string, (() => void) | null> = {};
-    this._disposables.add(() => {
-      Object.values(disposeMap).forEach(fn => fn?.());
-      disposeMap = {};
-    });
-
-    Array.from(doc.spaces.keys())
-      .map(docId => ({ docId, doc: this._getDoc(docId) }))
-      .forEach(({ docId, doc }) => {
-        assertExists(doc, `Failed to find doc '${docId}'`);
-        if (disposeMap[docId]) {
-          console.warn(
-            `Duplicated docAdded event! ${docId} already observed`,
-            disposeMap
-          );
-          return;
-        }
-        const dispose = this._indexDoc(docId, doc);
-        disposeMap[docId] = dispose;
-      });
-
-    this._collectionSlots.docAdded.on(docId => {
-      const doc = this._getDoc(docId);
-      assertExists(doc, `Failed to find doc '${docId}'`);
-      if (disposeMap[docId]) {
-        // It's possible because the `docAdded` event is emitted once a new block is added to the doc
-        return;
-      }
-      const dispose = this._indexDoc(docId, doc);
-      disposeMap[docId] = dispose;
-    });
-    this._collectionSlots.docRemoved.on(docId => {
-      disposeMap[docId]?.();
-      disposeMap[docId] = null;
-      this.slots.docRemoved.emit(docId);
-    });
-  }
-
-  private _indexDoc(docId: string, yDoc: Y.Doc) {
-    const yBlocks = yDoc.getMap<YBlock>('blocks');
-    yBlocks.forEach((block, blockId) => {
-      this._indexBlock({ action: 'add', docId, blockId, block });
-    });
-
-    const observer = (
-      events: Y.YEvent<Y.AbstractType<unknown>>[],
-      transaction: Y.Transaction
-    ) => this._yDocObserver(events, transaction, { docId, yDoc: yBlocks });
-
-    yBlocks.observeDeep(observer);
-    return () => {
-      yBlocks.unobserveDeep(observer);
-    };
-  }
-
-  private _indexBlock(indexEvent: IndexBlockEvent) {
-    this.slots.blockUpdated.emit(indexEvent);
-  }
+  private readonly _doc: BlockSuiteDoc;
 
   private _yDocObserver = (
     events: Y.YEvent<Y.AbstractType<unknown>>[],
@@ -204,16 +102,119 @@ export class BlockIndexer {
     });
   };
 
+  slots = {
+    docRemoved: new Slot<DocId>(),
+    /**
+     * Note: sys:children update will not trigger event
+     */
+    blockUpdated: new Slot<IndexBlockEvent>(),
+    refreshIndex: new Slot(),
+  };
+
+  constructor(
+    doc: BlockSuiteDoc,
+    {
+      immediately = false,
+      slots,
+    }: {
+      readonly slots: {
+        docAdded: Slot<string>;
+        docRemoved: Slot<string>;
+      };
+      immediately?: boolean;
+    }
+  ) {
+    this._doc = doc;
+    this._collectionSlots = slots;
+
+    if (immediately) {
+      this._initIndex();
+      return;
+    }
+    // lazy init
+    setTimeout(() => {
+      this._initIndex();
+    }, 0);
+  }
+
   private _getDoc(docId: DocId): Y.Doc | undefined {
     return this._doc.spaces.get(docId) as Y.Doc | undefined;
+  }
+
+  private _indexBlock(indexEvent: IndexBlockEvent) {
+    this.slots.blockUpdated.emit(indexEvent);
+  }
+
+  private _indexDoc(docId: string, yDoc: Y.Doc) {
+    const yBlocks = yDoc.getMap<YBlock>('blocks');
+    yBlocks.forEach((block, blockId) => {
+      this._indexBlock({ action: 'add', docId, blockId, block });
+    });
+
+    const observer = (
+      events: Y.YEvent<Y.AbstractType<unknown>>[],
+      transaction: Y.Transaction
+    ) => this._yDocObserver(events, transaction, { docId, yDoc: yBlocks });
+
+    yBlocks.observeDeep(observer);
+    return () => {
+      yBlocks.unobserveDeep(observer);
+    };
+  }
+
+  private _initIndex() {
+    const doc = this._doc;
+    const share = doc.share;
+    if (!share.has('meta')) {
+      throw new Error(
+        'Failed to initialize indexer: collection meta not found'
+      );
+    }
+
+    let disposeMap: Record<string, (() => void) | null> = {};
+    this._disposables.add(() => {
+      Object.values(disposeMap).forEach(fn => fn?.());
+      disposeMap = {};
+    });
+
+    Array.from(doc.spaces.keys())
+      .map(docId => ({ docId, doc: this._getDoc(docId) }))
+      .forEach(({ docId, doc }) => {
+        assertExists(doc, `Failed to find doc '${docId}'`);
+        if (disposeMap[docId]) {
+          console.warn(
+            `Duplicated docAdded event! ${docId} already observed`,
+            disposeMap
+          );
+          return;
+        }
+        const dispose = this._indexDoc(docId, doc);
+        disposeMap[docId] = dispose;
+      });
+
+    this._collectionSlots.docAdded.on(docId => {
+      const doc = this._getDoc(docId);
+      assertExists(doc, `Failed to find doc '${docId}'`);
+      if (disposeMap[docId]) {
+        // It's possible because the `docAdded` event is emitted once a new block is added to the doc
+        return;
+      }
+      const dispose = this._indexDoc(docId, doc);
+      disposeMap[docId] = dispose;
+    });
+    this._collectionSlots.docRemoved.on(docId => {
+      disposeMap[docId]?.();
+      disposeMap[docId] = null;
+      this.slots.docRemoved.emit(docId);
+    });
+  }
+
+  dispose() {
+    this._disposables.dispose();
   }
 
   refreshIndex() {
     this.slots.refreshIndex.emit();
     this._initIndex();
-  }
-
-  dispose() {
-    this._disposables.dispose();
   }
 }

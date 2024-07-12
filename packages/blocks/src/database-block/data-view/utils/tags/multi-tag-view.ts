@@ -44,15 +44,6 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @query('.affine-select-cell-container')
-  accessor selectContainer!: HTMLElement;
-
-  @property({ attribute: false })
-  accessor value: string[] = [];
-
-  @property({ attribute: false })
-  accessor options: SelectTag[] = [];
-
   override render() {
     const values = this.value;
     const map = new Map<string, SelectTag>(this.options?.map(v => [v.id, v]));
@@ -73,6 +64,15 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor options: SelectTag[] = [];
+
+  @query('.affine-select-cell-container')
+  accessor selectContainer!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor value: string[] = [];
 }
 
 declare global {

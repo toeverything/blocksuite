@@ -1,9 +1,9 @@
-import * as process from 'node:process';
-
 import type {
   PlaywrightTestConfig,
   PlaywrightWorkerOptions,
 } from '@playwright/test';
+
+import * as process from 'node:process';
 
 const config: PlaywrightTestConfig = {
   fullyParallel: true,

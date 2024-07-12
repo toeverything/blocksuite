@@ -2,11 +2,12 @@ import { Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
-import { Text } from '../../reactive/text.js';
 import type { BlockModel } from '../../schema/base.js';
 import type { IdGenerator } from '../../utils/id-generator.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../../yjs/index.js';
 import type { DocCollection } from '../collection.js';
+
+import { Text } from '../../reactive/text.js';
 import { Space } from '../space.js';
 import { DocCRUD } from './crud.js';
 import { type BlockSelector, BlockViewType, type YBlock } from './index.js';
@@ -39,86 +40,33 @@ export type GetDocOptions = {
 };
 
 export class BlockCollection extends Space<FlatBlockMap> {
-  get readonly() {
-    return this.awarenessStore.isReadonly(this);
-  }
-
-  get ready() {
-    return this._ready;
-  }
-
-  get history() {
-    return this._history;
-  }
-
-  get crud() {
-    return this._docCRUD;
-  }
-
-  get collection() {
-    return this._collection;
-  }
-
-  get docSync() {
-    return this.collection.docSync;
-  }
-
-  get awarenessSync() {
-    return this.collection.awarenessSync;
-  }
-
-  get blobSync() {
-    return this.collection.blobSync;
-  }
-
-  get schema() {
-    return this.collection.schema;
-  }
-
-  get meta() {
-    return this.collection.meta.getDocMeta(this.id);
-  }
-
-  get isEmpty() {
-    return this._yBlocks.size === 0;
-  }
-
-  get canUndo() {
-    if (this.readonly) {
-      return false;
-    }
-    return this._history.canUndo();
-  }
-
-  get canRedo() {
-    if (this.readonly) {
-      return false;
-    }
-    return this._history.canRedo();
-  }
-
-  get Text() {
-    return Text;
-  }
-
   private readonly _collection: DocCollection;
 
-  private readonly _idGenerator: IdGenerator;
-
   private readonly _docCRUD: DocCRUD;
-
-  private _history!: Y.UndoManager;
-
-  /** Indicate whether the block tree is ready */
-  private _ready = false;
-
-  private _shouldTransact = true;
 
   private _docMap = {
     undefined: new WeakMap<BlockSelector, Doc>(),
     true: new WeakMap<BlockSelector, Doc>(),
     false: new WeakMap<BlockSelector, Doc>(),
   };
+
+  // doc/space container.
+  private _handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
+    events.forEach(event => this._handleYEvent(event));
+  };
+
+  private _history!: Y.UndoManager;
+
+  private _historyObserver = () => {
+    this.slots.historyUpdated.emit();
+  };
+
+  private readonly _idGenerator: IdGenerator;
+
+  /** Indicate whether the block tree is ready */
+  private _ready = false;
+
+  private _shouldTransact = true;
 
   readonly slots = {
     historyUpdated: new Slot(),
@@ -151,22 +99,17 @@ export class BlockCollection extends Space<FlatBlockMap> {
     return (readonly?.toString() as 'true' | 'false') ?? 'undefined';
   }
 
-  private _initYBlocks() {
-    const { _yBlocks } = this;
-    _yBlocks.observeDeep(this._handleYEvents);
-    this._history = new Y.UndoManager([_yBlocks], {
-      trackedOrigins: new Set([this._ySpaceDoc.clientID]),
-    });
-
-    this._history.on('stack-cleared', this._historyObserver);
-    this._history.on('stack-item-added', this._historyObserver);
-    this._history.on('stack-item-popped', this._historyObserver);
-    this._history.on('stack-item-updated', this._historyObserver);
+  private _handleVersion() {
+    // Initialization from empty yDoc, indicating that the document is new.
+    if (!this.collection.meta.hasVersion) {
+      this.collection.meta.writeVersion(this.collection);
+    } else {
+      // Initialization from existing yDoc, indicating that the document is loaded from storage.
+      if (this.awarenessStore.getFlag('enable_legacy_validation')) {
+        this.collection.meta.validateVersion(this.collection);
+      }
+    }
   }
-
-  private _historyObserver = () => {
-    this.slots.historyUpdated.emit();
-  };
 
   private _handleYBlockAdd(id: string) {
     this.slots.yBlockUpdated.emit({ type: 'add', id });
@@ -198,23 +141,41 @@ export class BlockCollection extends Space<FlatBlockMap> {
     });
   }
 
-  // Handle all the events that happen at _any_ level (potentially deep inside the structure).
-  // So, we apply a listener at the top level for the flat structure of the current
-  // doc/space container.
-  private _handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
-    events.forEach(event => this._handleYEvent(event));
-  };
+  private _initYBlocks() {
+    const { _yBlocks } = this;
+    _yBlocks.observeDeep(this._handleYEvents);
+    this._history = new Y.UndoManager([_yBlocks], {
+      trackedOrigins: new Set([this._ySpaceDoc.clientID]),
+    });
 
-  private _handleVersion() {
-    // Initialization from empty yDoc, indicating that the document is new.
-    if (!this.collection.meta.hasVersion) {
-      this.collection.meta.writeVersion(this.collection);
-    } else {
-      // Initialization from existing yDoc, indicating that the document is loaded from storage.
-      if (this.awarenessStore.getFlag('enable_legacy_validation')) {
-        this.collection.meta.validateVersion(this.collection);
-      }
+    this._history.on('stack-cleared', this._historyObserver);
+    this._history.on('stack-item-added', this._historyObserver);
+    this._history.on('stack-item-popped', this._historyObserver);
+    this._history.on('stack-item-updated', this._historyObserver);
+  }
+
+  /** Capture current operations to undo stack synchronously. */
+  captureSync() {
+    this._history.stopCapturing();
+  }
+
+  clearSelector(selector: BlockSelector, readonly?: boolean) {
+    const readonlyKey = this._getReadonlyKey(readonly);
+
+    this._docMap[readonlyKey].delete(selector);
+  }
+
+  dispose() {
+    this.slots.historyUpdated.dispose();
+
+    if (this.ready) {
+      this._yBlocks.unobserveDeep(this._handleYEvents);
+      this._yBlocks.clear();
     }
+  }
+
+  generateBlockId() {
+    return this._idGenerator();
   }
 
   getDoc({ selector = defaultBlockSelector, readonly }: GetDocOptions = {}) {
@@ -235,54 +196,6 @@ export class BlockCollection extends Space<FlatBlockMap> {
     this._docMap[readonlyKey].set(selector, doc);
 
     return doc;
-  }
-
-  clearSelector(selector: BlockSelector, readonly?: boolean) {
-    const readonlyKey = this._getReadonlyKey(readonly);
-
-    this._docMap[readonlyKey].delete(selector);
-  }
-
-  withoutTransact(callback: () => void) {
-    this._shouldTransact = false;
-    callback();
-    this._shouldTransact = true;
-  }
-
-  override transact(
-    fn: () => void,
-    shouldTransact: boolean = this._shouldTransact
-  ) {
-    super.transact(fn, shouldTransact);
-  }
-
-  undo() {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    this._history.undo();
-  }
-
-  redo() {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    this._history.redo();
-  }
-
-  /** Capture current operations to undo stack synchronously. */
-  captureSync() {
-    this._history.stopCapturing();
-  }
-
-  resetHistory() {
-    this._history.clear();
-  }
-
-  generateBlockId() {
-    return this._idGenerator();
   }
 
   override load(initFn?: () => void): this {
@@ -309,13 +222,101 @@ export class BlockCollection extends Space<FlatBlockMap> {
     return this;
   }
 
-  dispose() {
-    this.slots.historyUpdated.dispose();
-
-    if (this.ready) {
-      this._yBlocks.unobserveDeep(this._handleYEvents);
-      this._yBlocks.clear();
+  redo() {
+    if (this.readonly) {
+      console.error('cannot modify data in readonly mode');
+      return;
     }
+    this._history.redo();
+  }
+
+  resetHistory() {
+    this._history.clear();
+  }
+
+  override transact(
+    fn: () => void,
+    shouldTransact: boolean = this._shouldTransact
+  ) {
+    super.transact(fn, shouldTransact);
+  }
+
+  undo() {
+    if (this.readonly) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
+    this._history.undo();
+  }
+
+  withoutTransact(callback: () => void) {
+    this._shouldTransact = false;
+    callback();
+    this._shouldTransact = true;
+  }
+
+  get Text() {
+    return Text;
+  }
+
+  // Handle all the events that happen at _any_ level (potentially deep inside the structure).
+  // So, we apply a listener at the top level for the flat structure of the current
+  get awarenessSync() {
+    return this.collection.awarenessSync;
+  }
+
+  get blobSync() {
+    return this.collection.blobSync;
+  }
+
+  get canRedo() {
+    if (this.readonly) {
+      return false;
+    }
+    return this._history.canRedo();
+  }
+
+  get canUndo() {
+    if (this.readonly) {
+      return false;
+    }
+    return this._history.canUndo();
+  }
+
+  get collection() {
+    return this._collection;
+  }
+
+  get crud() {
+    return this._docCRUD;
+  }
+
+  get docSync() {
+    return this.collection.docSync;
+  }
+
+  get history() {
+    return this._history;
+  }
+
+  get isEmpty() {
+    return this._yBlocks.size === 0;
+  }
+
+  get meta() {
+    return this.collection.meta.getDocMeta(this.id);
+  }
+
+  get readonly() {
+    return this.awarenessStore.isReadonly(this);
+  }
+
+  get ready() {
+    return this._ready;
+  }
+
+  get schema() {
+    return this.collection.schema;
   }
 }
 

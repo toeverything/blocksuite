@@ -1,21 +1,22 @@
-import '../../../../../_common/components/toolbar/icon-button.js';
-import '../../../../../_common/components/toolbar/menu-button.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
-import { ref, type RefOrCallback } from 'lit/directives/ref.js';
+import { type RefOrCallback, ref } from 'lit/directives/ref.js';
+
+import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
+import type { AffineFormatBarWidget } from '../../format-bar.js';
 
 import { whenHover } from '../../../../../_common/components/hover/index.js';
+import '../../../../../_common/components/toolbar/icon-button.js';
+import '../../../../../_common/components/toolbar/menu-button.js';
 import {
   ArrowDownIcon,
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
   TextForegroundDuotoneIcon,
 } from '../../../../../_common/icons/index.js';
-import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
-import type { AffineFormatBarWidget } from '../../format-bar.js';
 import { backgroundConfig, foregroundConfig } from './consts.js';
 
 enum HighlightType {

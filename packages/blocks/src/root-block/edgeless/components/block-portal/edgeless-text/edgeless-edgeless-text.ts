@@ -1,16 +1,16 @@
-import '../../../../../edgeless-text/edgeless-text-block.js';
-
-import { css, html, type PropertyValueMap } from 'lit';
+import { type PropertyValueMap, css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import { matchFlavours } from '../../../../../_common/utils/model.js';
 import type { EdgelessTextBlockComponent } from '../../../../../edgeless-text/edgeless-text-block.js';
+import type { EdgelessTextBlockModel } from '../../../../../edgeless-text/edgeless-text-model.js';
+
+import { matchFlavours } from '../../../../../_common/utils/model.js';
+import '../../../../../edgeless-text/edgeless-text-block.js';
 import {
   EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
   EDGELESS_TEXT_BLOCK_MIN_WIDTH,
 } from '../../../../../edgeless-text/edgeless-text-block.js';
-import type { EdgelessTextBlockModel } from '../../../../../edgeless-text/edgeless-text-model.js';
 import { Bound } from '../../../../../surface-block/utils/bound.js';
 import {
   DefaultModeDragType,
@@ -21,22 +21,6 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 @customElement('edgeless-block-portal-edgeless-text')
 export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<EdgelessTextBlockModel> {
-  static override styles = css`
-    .edgeless-text-block-container[data-max-width='false'] .inline-editor span {
-      word-break: normal !important;
-      overflow-wrap: normal !important;
-    }
-  `;
-
-  @query('.edgeless-text-block-container')
-  private accessor _textContainer!: HTMLDivElement;
-
-  @query('affine-edgeless-text')
-  private accessor _edgelessText!: EdgelessTextBlockComponent;
-
-  @state()
-  private accessor _editing = false;
-
   private _horizontalResizing = false;
 
   private _resizeObserver = new ResizeObserver(() => {
@@ -51,6 +35,13 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
 
     this._updateH();
   });
+
+  static override styles = css`
+    .edgeless-text-block-container[data-max-width='false'] .inline-editor span {
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+    }
+  `;
 
   private _updateH() {
     const bound = Bound.deserialize(this.model.xywh);
@@ -76,14 +67,6 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
     this.edgeless.doc.updateBlock(this.model, {
       xywh: bound.serialize(),
     });
-  }
-
-  get dragMoving() {
-    const controller = this.edgeless.tools.currentController;
-    return (
-      controller instanceof DefaultToolController &&
-      controller.dragType === DefaultModeDragType.ContentMoving
-    );
   }
 
   checkWidthOverflow(width: number) {
@@ -264,6 +247,23 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
       </div>
     `;
   }
+
+  get dragMoving() {
+    const controller = this.edgeless.tools.currentController;
+    return (
+      controller instanceof DefaultToolController &&
+      controller.dragType === DefaultModeDragType.ContentMoving
+    );
+  }
+
+  @query('affine-edgeless-text')
+  private accessor _edgelessText!: EdgelessTextBlockComponent;
+
+  @state()
+  private accessor _editing = false;
+
+  @query('.edgeless-text-block-container')
+  private accessor _textContainer!: HTMLDivElement;
 }
 
 declare global {

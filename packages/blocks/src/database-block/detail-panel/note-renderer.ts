@@ -1,26 +1,24 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+
+import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
+import type { DataViewManager } from '../data-view/view/data-view-manager.js';
+import type { DatabaseBlockModel } from '../database-model.js';
 
 import {
   asyncFocusRichText,
   createDefaultDoc,
   matchFlavours,
 } from '../../_common/utils/index.js';
-import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
-import type { DataViewManager } from '../data-view/view/data-view-manager.js';
-import type { DatabaseBlockModel } from '../database-model.js';
 
 @customElement('database-datasource-note-renderer')
 export class NoteRenderer
   extends WithDisposable(ShadowlessElement)
   implements DetailSlotProps
 {
-  get databaseBlock(): DatabaseBlockModel {
-    return this.model;
-  }
-
   static override styles = css`
     database-datasource-note-renderer {
       width: 100%;
@@ -29,20 +27,43 @@ export class NoteRenderer
     }
   `;
 
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
+  addNote() {
+    const collection = this.host?.std.collection;
+    if (!collection) {
+      return;
+    }
+    if (!this.databaseBlock.notes) {
+      this.databaseBlock.notes = {};
+    }
+    const note = createDefaultDoc(collection);
+    if (note) {
+      this.databaseBlock.notes[this.rowId] = note.id;
+      this.requestUpdate();
+      requestAnimationFrame(() => {
+        const block = note.root?.children
+          .find(child => child.flavour === 'affine:note')
+          ?.children.find(block =>
+            matchFlavours(block, [
+              'affine:paragraph',
+              'affine:list',
+              'affine:code',
+            ])
+          );
+        if (this.subHost && block) {
+          asyncFocusRichText(this.subHost, block.id)?.catch(console.error);
+        }
+      });
+    }
+  }
 
-  @property({ attribute: false })
-  accessor rowId!: string;
-
-  @property({ attribute: false })
-  accessor model!: DatabaseBlockModel;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @query('editor-host')
-  accessor subHost!: EditorHost;
+  override connectedCallback() {
+    super.connectedCallback();
+    this.databaseBlock.propsUpdated.on(({ key }) => {
+      if (key === 'notes') {
+        this.requestUpdate();
+      }
+    });
+  }
 
   protected override render(): unknown {
     if (
@@ -82,41 +103,22 @@ export class NoteRenderer
     return html`${host.renderSpecPortal(page, host.specs)} `;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.databaseBlock.propsUpdated.on(({ key }) => {
-      if (key === 'notes') {
-        this.requestUpdate();
-      }
-    });
+  get databaseBlock(): DatabaseBlockModel {
+    return this.model;
   }
 
-  addNote() {
-    const collection = this.host?.std.collection;
-    if (!collection) {
-      return;
-    }
-    if (!this.databaseBlock.notes) {
-      this.databaseBlock.notes = {};
-    }
-    const note = createDefaultDoc(collection);
-    if (note) {
-      this.databaseBlock.notes[this.rowId] = note.id;
-      this.requestUpdate();
-      requestAnimationFrame(() => {
-        const block = note.root?.children
-          .find(child => child.flavour === 'affine:note')
-          ?.children.find(block =>
-            matchFlavours(block, [
-              'affine:paragraph',
-              'affine:list',
-              'affine:code',
-            ])
-          );
-        if (this.subHost && block) {
-          asyncFocusRichText(this.subHost, block.id)?.catch(console.error);
-        }
-      });
-    }
-  }
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor model!: DatabaseBlockModel;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  @query('editor-host')
+  accessor subHost!: EditorHost;
+
+  @property({ attribute: false })
+  accessor view!: DataViewManager;
 }

@@ -7,6 +7,12 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import type { InsertToPosition } from '../../../../../types.js';
+import type {
+  DataViewTableColumnManager,
+  DataViewTableManager,
+} from '../../table-view-manager.js';
+
 import { popMenu } from '../../../../../../../_common/components/index.js';
 import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
 import {
@@ -17,16 +23,11 @@ import {
   DatabaseMoveRight,
   DeleteIcon,
 } from '../../../../../common/icons/index.js';
-import type { InsertToPosition } from '../../../../../types.js';
 import { startDrag } from '../../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../../../utils/insert.js';
 import { getResultInRange } from '../../../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import type {
-  DataViewTableColumnManager,
-  DataViewTableManager,
-} from '../../table-view-manager.js';
 import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 import {
@@ -37,32 +38,43 @@ import {
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
-  private get readonly() {
-    return this.tableViewManager.readonly;
-  }
-
-  static override styles = css`
-    affine-database-header-column {
-      display: flex;
+  private _clickColumn = () => {
+    if (this.tableViewManager.readonly) {
+      return;
     }
+    this.popMenu();
+  };
 
-    .affine-database-header-column-grabbing * {
-      cursor: grabbing;
+  private _clickTypeIcon = (event: MouseEvent) => {
+    if (this.tableViewManager.readonly) {
+      return;
     }
-  `;
-
-  private widthDragBar = createRef();
-
-  private drawWidthDragBarTask = 0;
-
-  @property({ attribute: false })
-  accessor tableViewManager!: DataViewTableManager;
-
-  @property({ attribute: false })
-  accessor column!: DataViewTableColumnManager;
-
-  @property({ attribute: false })
-  accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
+    if (this.column.type === 'title') {
+      return;
+    }
+    event.stopPropagation();
+    popMenu(this, {
+      options: {
+        input: {
+          search: true,
+          placeholder: 'Search',
+        },
+        items: this.tableViewManager.allColumnConfig.map(config => {
+          return {
+            type: 'action',
+            name: config.name,
+            isSelected: config.type === this.column.type,
+            icon: html` <uni-lit
+              .uni="${this.tableViewManager.getIcon(config.type)}"
+            ></uni-lit>`,
+            select: () => {
+              this.column.updateType?.(config.type);
+            },
+          };
+        }),
+      },
+    });
+  };
 
   private _columnsOffset = (header: Element, _scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
@@ -140,6 +152,46 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     };
   };
+
+  private _contextMenu = (e: MouseEvent) => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
+    e.preventDefault();
+    this.popMenu(e.target as HTMLElement);
+  };
+
+  private _enterWidthDragBar = () => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
+    if (this.drawWidthDragBarTask) {
+      cancelAnimationFrame(this.drawWidthDragBarTask);
+      this.drawWidthDragBarTask = 0;
+    }
+    this.drawWidthDragBar();
+  };
+
+  private _leaveWidthDragBar = () => {
+    cancelAnimationFrame(this.drawWidthDragBarTask);
+    this.drawWidthDragBarTask = 0;
+    getVerticalIndicator().remove();
+  };
+
+  private drawWidthDragBar = () => {
+    const tableContainer = getTableContainer(this);
+    const tableRect = tableContainer.getBoundingClientRect();
+    const rectList = getTableGroupRects(tableContainer);
+    getVerticalIndicator().display(
+      0,
+      tableRect.top,
+      rectList,
+      this.getBoundingClientRect().right
+    );
+    this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
+  };
+
+  private drawWidthDragBarTask = 0;
 
   private moveColumn = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
@@ -235,19 +287,20 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private _clickColumn = () => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    this.popMenu();
-  };
+  private widthDragBar = createRef();
 
-  private _contextMenu = (e: MouseEvent) => {
-    if (this.tableViewManager.readonly) {
-      return;
+  static override styles = css`
+    affine-database-header-column {
+      display: flex;
     }
-    e.preventDefault();
-    this.popMenu(e.target as HTMLElement);
+
+    .affine-database-header-column-grabbing * {
+      cursor: grabbing;
+    }
+  `;
+
+  editTitle = () => {
+    this._clickColumn();
   };
 
   private popMenu(ele?: HTMLElement) {
@@ -362,66 +415,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     });
   }
 
-  private _clickTypeIcon = (event: MouseEvent) => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    if (this.column.type === 'title') {
-      return;
-    }
-    event.stopPropagation();
-    popMenu(this, {
-      options: {
-        input: {
-          search: true,
-          placeholder: 'Search',
-        },
-        items: this.tableViewManager.allColumnConfig.map(config => {
-          return {
-            type: 'action',
-            name: config.name,
-            isSelected: config.type === this.column.type,
-            icon: html` <uni-lit
-              .uni="${this.tableViewManager.getIcon(config.type)}"
-            ></uni-lit>`,
-            select: () => {
-              this.column.updateType?.(config.type);
-            },
-          };
-        }),
-      },
-    });
-  };
-
-  private drawWidthDragBar = () => {
-    const tableContainer = getTableContainer(this);
-    const tableRect = tableContainer.getBoundingClientRect();
-    const rectList = getTableGroupRects(tableContainer);
-    getVerticalIndicator().display(
-      0,
-      tableRect.top,
-      rectList,
-      this.getBoundingClientRect().right
-    );
-    this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
-  };
-
-  private _enterWidthDragBar = () => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    if (this.drawWidthDragBarTask) {
-      cancelAnimationFrame(this.drawWidthDragBarTask);
-      this.drawWidthDragBarTask = 0;
-    }
-    this.drawWidthDragBar();
-  };
-
-  private _leaveWidthDragBar = () => {
-    cancelAnimationFrame(this.drawWidthDragBarTask);
-    this.drawWidthDragBarTask = 0;
-    getVerticalIndicator().remove();
-  };
+  private get readonly() {
+    return this.tableViewManager.readonly;
+  }
 
   private widthDragStart(event: PointerEvent) {
     startDragWidthAdjustmentBar(
@@ -465,10 +461,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       );
     }
   }
-
-  editTitle = () => {
-    this._clickColumn();
-  };
 
   override render() {
     const column = this.column;
@@ -516,6 +508,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor column!: DataViewTableColumnManager;
+
+  @property({ attribute: false })
+  accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
+
+  @property({ attribute: false })
+  accessor tableViewManager!: DataViewTableManager;
 }
 
 type ColumnOffset = {

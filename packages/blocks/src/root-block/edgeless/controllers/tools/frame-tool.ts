@@ -1,9 +1,11 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { IPoint } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
+
 import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
@@ -12,9 +14,9 @@ type FrameTool = {
 };
 
 export class FrameToolController extends EdgelessToolController<FrameTool> {
-  private _startPoint: IVec | null = null;
-
   private _frame: FrameBlockModel | null = null;
+
+  private _startPoint: IVec | null = null;
 
   readonly tool = {
     type: 'frame',
@@ -24,14 +26,41 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
     return this._service.viewport.toModelCoord(p.x, p.y);
   }
 
-  override onContainerPointerDown(): void {
+  override afterModeSwitch(): void {
     noop();
   }
 
-  override onContainerDragStart(e: PointerEventState): void {
-    this._doc.captureSync();
-    const { point } = e;
-    this._startPoint = this._toModelCoord(point);
+  override beforeModeSwitch(): void {
+    noop();
+  }
+
+  override onContainerClick(): void {
+    noop();
+  }
+
+  override onContainerContextMenu(): void {
+    noop();
+  }
+
+  override onContainerDblClick(): void {
+    noop();
+  }
+
+  override onContainerDragEnd(): void {
+    if (this._frame) {
+      const frame = this._frame;
+      this._doc.transact(() => {
+        frame.pop('xywh');
+      });
+      this._edgeless.tools.setEdgelessTool({ type: 'default' });
+      this._edgeless.service.selection.set({
+        elements: [this._frame.id],
+        editing: false,
+      });
+      this._doc.captureSync();
+    }
+    this._frame = null;
+    this._startPoint = null;
   }
 
   override onContainerDragMove(e: PointerEventState): void {
@@ -67,33 +96,10 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
     });
   }
 
-  override onContainerDragEnd(): void {
-    if (this._frame) {
-      const frame = this._frame;
-      this._doc.transact(() => {
-        frame.pop('xywh');
-      });
-      this._edgeless.tools.setEdgelessTool({ type: 'default' });
-      this._edgeless.service.selection.set({
-        elements: [this._frame.id],
-        editing: false,
-      });
-      this._doc.captureSync();
-    }
-    this._frame = null;
-    this._startPoint = null;
-  }
-
-  override onContainerClick(): void {
-    noop();
-  }
-
-  override onContainerDblClick(): void {
-    noop();
-  }
-
-  override onContainerTripleClick(): void {
-    noop();
+  override onContainerDragStart(e: PointerEventState): void {
+    this._doc.captureSync();
+    const { point } = e;
+    this._startPoint = this._toModelCoord(point);
   }
 
   override onContainerMouseMove(): void {
@@ -104,7 +110,11 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
     noop();
   }
 
-  override onContainerContextMenu(): void {
+  override onContainerPointerDown(): void {
+    noop();
+  }
+
+  override onContainerTripleClick(): void {
     noop();
   }
 
@@ -113,14 +123,6 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   }
 
   override onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
-
-  override beforeModeSwitch(): void {
-    noop();
-  }
-
-  override afterModeSwitch(): void {
     noop();
   }
 }

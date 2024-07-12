@@ -3,10 +3,11 @@ import { html, nothing } from 'lit';
 import { customElement, property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { renderLinkedDocInCard } from '../../_common/utils/render-linked-doc.js';
 import type { SurfaceRefRenderer } from '../../surface-ref-block/surface-ref-renderer.js';
 import type { SurfaceRefBlockService } from '../../surface-ref-block/surface-ref-service.js';
 import type { EmbedSyncedDocBlockComponent } from '../embed-synced-doc-block.js';
+
+import { renderLinkedDocInCard } from '../../_common/utils/render-linked-doc.js';
 import { cardStyles } from '../styles.js';
 import { getSyncedDocIcons } from '../utils.js';
 
@@ -14,56 +15,17 @@ import { getSyncedDocIcons } from '../utils.js';
 export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
   static override styles = cardStyles;
 
-  @property({ attribute: false })
-  accessor block!: EmbedSyncedDocBlockComponent;
+  cleanUpSurfaceRefRenderer = () => {
+    if (this.surfaceRefRenderer) {
+      this.surfaceRefService.removeRenderer(this.surfaceRefRenderer.id);
+    }
+  };
 
-  @property({ attribute: false })
-  accessor isError = false;
-
-  @property({ attribute: false })
-  accessor isNoteContentEmpty = false;
-
-  @property({ attribute: false })
-  accessor isBannerEmpty = false;
-
-  @property({ attribute: false })
-  accessor surfaceRefService!: SurfaceRefBlockService;
-
-  @property({ attribute: false })
-  accessor surfaceRefRenderer: SurfaceRefRenderer | null = null;
-
-  @queryAsync('.affine-embed-synced-doc-card-banner.render')
-  accessor bannerContainer!: Promise<HTMLDivElement>;
-
-  @queryAsync('.affine-embed-synced-doc-content-note.render')
-  accessor noteContainer!: Promise<HTMLDivElement>;
-
-  get std() {
-    return this.block.std;
-  }
-
-  get host() {
-    return this.block.host;
-  }
-
-  get model() {
-    return this.block.model;
-  }
-
-  get path() {
-    return this.block.path;
-  }
-
-  get linkedDoc() {
-    return this.block.syncedDoc;
-  }
-
-  get editorMode() {
-    return this.block.editorMode;
-  }
-
-  get blockState() {
-    return this.block.blockState;
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (!this.block.isInSurface) {
+      this._selectBlock();
+    }
   }
 
   private _isDocEmpty() {
@@ -86,19 +48,6 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
     });
     selectionManager.setGroup('note', [blockSelection]);
   }
-
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    if (!this.block.isInSurface) {
-      this._selectBlock();
-    }
-  }
-
-  cleanUpSurfaceRefRenderer = () => {
-    if (this.surfaceRefRenderer) {
-      this.surfaceRefService.removeRenderer(this.surfaceRefRenderer.id);
-    }
-  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -123,7 +72,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
         syncedDoc.slots.blockUpdated.on(payload => {
           if (
             payload.type === 'update' &&
-            ['xywh', 'caption', ''].includes(payload.props.key)
+            ['', 'caption', 'xywh'].includes(payload.props.key)
           ) {
             return;
           }
@@ -260,6 +209,58 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get blockState() {
+    return this.block.blockState;
+  }
+
+  get editorMode() {
+    return this.block.editorMode;
+  }
+
+  get host() {
+    return this.block.host;
+  }
+
+  get linkedDoc() {
+    return this.block.syncedDoc;
+  }
+
+  get model() {
+    return this.block.model;
+  }
+
+  get path() {
+    return this.block.path;
+  }
+
+  get std() {
+    return this.block.std;
+  }
+
+  @queryAsync('.affine-embed-synced-doc-card-banner.render')
+  accessor bannerContainer!: Promise<HTMLDivElement>;
+
+  @property({ attribute: false })
+  accessor block!: EmbedSyncedDocBlockComponent;
+
+  @property({ attribute: false })
+  accessor isBannerEmpty = false;
+
+  @property({ attribute: false })
+  accessor isError = false;
+
+  @property({ attribute: false })
+  accessor isNoteContentEmpty = false;
+
+  @queryAsync('.affine-embed-synced-doc-content-note.render')
+  accessor noteContainer!: Promise<HTMLDivElement>;
+
+  @property({ attribute: false })
+  accessor surfaceRefRenderer: SurfaceRefRenderer | null = null;
+
+  @property({ attribute: false })
+  accessor surfaceRefService!: SurfaceRefBlockService;
 }
 
 declare global {

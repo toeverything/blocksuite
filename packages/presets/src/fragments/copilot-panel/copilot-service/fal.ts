@@ -3,10 +3,10 @@ import { html } from 'lit';
 
 import { jpegBase64ToFile } from '../edgeless/edit-image.js';
 import {
-  createVendor,
   FastImage2ImageServiceKind,
   Image2ImageServiceKind,
   Text2ImageServiceKind,
+  createVendor,
 } from './service-base.js';
 
 export const falVendor = createVendor<{

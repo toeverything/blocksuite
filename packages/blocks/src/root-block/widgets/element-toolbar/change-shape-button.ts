@@ -1,18 +1,19 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../edgeless/components/panel/stroke-style-panel.js';
-import '../../edgeless/components/panel/color-panel.js';
-import '../../edgeless/components/panel/shape-style-panel.js';
-import '../../edgeless/components/panel/shape-panel.js';
-import './change-text-menu.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
+import type { LineStyleEvent } from '../../edgeless/components/panel/line-styles-panel.js';
+import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';
+import type { ShapeTool } from '../../edgeless/controllers/tools/shape-tool.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   AddTextIcon,
@@ -21,14 +22,13 @@ import {
   ScribbledStyleIcon,
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { LineWidth } from '../../../_common/types.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import { FontFamily } from '../../../surface-block/consts.js';
 import {
   FILL_COLORS,
-  ShapeType,
   STROKE_COLORS,
+  ShapeType,
 } from '../../../surface-block/elements/shape/consts.js';
 import {
   type ShapeElementModel,
@@ -36,21 +36,21 @@ import {
   StrokeStyle,
 } from '../../../surface-block/index.js';
 import { lineSizeButtonStyles } from '../../edgeless/components/buttons/line-size-button.js';
-import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
+import '../../edgeless/components/panel/color-panel.js';
 import {
   GET_DEFAULT_LINE_COLOR,
   isTransparent,
 } from '../../edgeless/components/panel/color-panel.js';
-import type { LineStyleEvent } from '../../edgeless/components/panel/line-styles-panel.js';
-import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';
-import type { ShapeTool } from '../../edgeless/controllers/tools/shape-tool.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import '../../edgeless/components/panel/shape-panel.js';
+import '../../edgeless/components/panel/shape-style-panel.js';
+import '../../edgeless/components/panel/stroke-style-panel.js';
 import {
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
   SHAPE_TEXT_COLOR_PURE_WHITE,
 } from '../../edgeless/utils/consts.js';
 import { mountShapeTextEditor } from '../../edgeless/utils/text.js';
+import './change-text-menu.js';
 
 function getMostCommonShape(
   elements: ShapeElementModel[]
@@ -110,18 +110,9 @@ function getMostCommonShapeStyle(elements: ShapeElementModel[]): ShapeStyle {
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   static override styles = [lineSizeButtonStyles];
 
-  get service() {
-    return this.edgeless.service;
+  private _addText() {
+    mountShapeTextEditor(this.elements[0], this.edgeless);
   }
-
-  @query('edgeless-shape-panel')
-  private accessor _shapePanel!: EdgelessShapePanel;
-
-  @property({ attribute: false })
-  accessor elements: ShapeElementModel[] = [];
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _getTextColor(fillColor: CssVariableName) {
     // When the shape is filled with black color, the text color should be white.
@@ -150,26 +141,16 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     );
   }
 
-  private _setShapeStrokeWidth(strokeWidth: number) {
-    this.elements.forEach(ele =>
-      this.service.updateElement(ele.id, { strokeWidth })
-    );
-  }
-
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
     this.elements.forEach(ele =>
       this.service.updateElement(ele.id, { strokeStyle })
     );
   }
 
-  private _setShapeStyles({ type, value }: LineStyleEvent) {
-    if (type === 'size') {
-      this._setShapeStrokeWidth(value);
-      return;
-    }
-    if (type === 'lineStyle') {
-      this._setShapeStrokeStyle(value);
-    }
+  private _setShapeStrokeWidth(strokeWidth: number) {
+    this.elements.forEach(ele =>
+      this.service.updateElement(ele.id, { strokeWidth })
+    );
   }
 
   private _setShapeStyle(shapeStyle: ShapeStyle) {
@@ -181,8 +162,14 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _addText() {
-    mountShapeTextEditor(this.elements[0], this.edgeless);
+  private _setShapeStyles({ type, value }: LineStyleEvent) {
+    if (type === 'size') {
+      this._setShapeStrokeWidth(value);
+      return;
+    }
+    if (type === 'lineStyle') {
+      this._setShapeStrokeStyle(value);
+    }
   }
 
   private _showAddButtonOrTextMenu() {
@@ -359,6 +346,19 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       renderToolbarSeparator
     );
   }
+
+  get service() {
+    return this.edgeless.service;
+  }
+
+  @query('edgeless-shape-panel')
+  private accessor _shapePanel!: EdgelessShapePanel;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor elements: ShapeElementModel[] = [];
 }
 
 declare global {

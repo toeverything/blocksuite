@@ -1,5 +1,6 @@
 import type { BlockModel } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { BLOCK_ID_ATTR } from '../consts.js';
@@ -60,15 +61,6 @@ export class Loader extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor hostModel: BlockModel | null = null;
-
-  @property({ attribute: false })
-  accessor radius: string | number = '8px';
-
-  @property({ attribute: false })
-  accessor width: string | number = '150px';
-
   constructor() {
     super();
   }
@@ -96,6 +88,15 @@ export class Loader extends LitElement {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor hostModel: BlockModel | null = null;
+
+  @property({ attribute: false })
+  accessor radius: string | number = '8px';
+
+  @property({ attribute: false })
+  accessor width: string | number = '150px';
 }
 
 declare global {

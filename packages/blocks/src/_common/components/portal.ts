@@ -1,18 +1,18 @@
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { Slot, assertExists } from '@blocksuite/global/utils';
 import {
-  autoUpdate,
   type AutoUpdateOptions,
-  computePosition,
   type ComputePositionConfig,
   type ComputePositionReturn,
   type ReferenceElement,
+  autoUpdate,
+  computePosition,
 } from '@floating-ui/dom';
 import {
-  html,
   LitElement,
-  render,
   type RenderOptions,
   type TemplateResult,
+  html,
+  render,
 } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -36,20 +36,6 @@ import { customElement, property } from 'lit/decorators.js';
 export class Portal extends LitElement {
   private _portalRoot: HTMLElement | null = null;
 
-  @property({ attribute: false })
-  accessor container = document.body;
-
-  @property({ attribute: false })
-  accessor template = html``;
-
-  @property({ attribute: false })
-  accessor shadowDom: boolean | ShadowRootInit = true;
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._portalRoot?.remove();
-  }
-
   override createRenderRoot() {
     const portalRoot = document.createElement('div');
     const renderRoot = this.shadowDom
@@ -64,9 +50,23 @@ export class Portal extends LitElement {
     return renderRoot;
   }
 
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._portalRoot?.remove();
+  }
+
   override render() {
     return this.template;
   }
+
+  @property({ attribute: false })
+  accessor container = document.body;
+
+  @property({ attribute: false })
+  accessor shadowDom: boolean | ShadowRootInit = true;
+
+  @property({ attribute: false })
+  accessor template = html``;
 }
 
 declare global {

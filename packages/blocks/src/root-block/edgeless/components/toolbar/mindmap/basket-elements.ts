@@ -1,9 +1,13 @@
-import { assertInstanceOf } from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { LayoutType } from '../../../../../surface-block/element-model/utils/mindmap/layout.js';
+import { assertInstanceOf } from '@blocksuite/global/utils';
+import { DocCollection } from '@blocksuite/store';
+
 import type { MindmapStyle } from '../../../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+import type { EdgelessRootService } from '../../../edgeless-root-service.js';
+
+import { LayoutType } from '../../../../../surface-block/element-model/utils/mindmap/layout.js';
 import {
   Bound,
   CanvasElementType,
@@ -11,8 +15,6 @@ import {
   type ShapeElementModel,
   TextElementModel,
 } from '../../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import type { EdgelessRootService } from '../../../edgeless-root-service.js';
 import { mountTextElementEditor } from '../../../utils/text.js';
 
 export type ConfigProperty = 'x' | 'y' | 'r' | 's' | 'z' | 'o';

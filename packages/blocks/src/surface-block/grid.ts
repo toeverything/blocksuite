@@ -45,41 +45,13 @@ function rangeFromElementExternal<T extends BlockSuite.EdgelessModelType>(
 }
 
 export class GridManager<T extends BlockSuite.EdgelessModelType> {
-  get isEmpty() {
-    return this._grids.size === 0;
-  }
-
-  private _grids = new Map<string, Set<T>>();
-
   private _elementToGrids = new Map<T, Set<Set<T>>>();
-
-  private _externalGrids = new Map<string, Set<T>>();
 
   private _externalElementToGrids = new Map<T, Set<Set<T>>>();
 
-  private _createGrid(row: number, col: number) {
-    const id = row + '|' + col;
-    const elements = new Set<T>();
-    this._grids.set(id, elements);
-    return elements;
-  }
+  private _externalGrids = new Map<string, Set<T>>();
 
-  private _createExternalGrid(row: number, col: number) {
-    const id = row + '|' + col;
-    const elements = new Set<T>();
-    this._externalGrids.set(id, elements);
-    return elements;
-  }
-
-  private _getGrid(row: number, col: number) {
-    const id = row + '|' + col;
-    return this._grids.get(id);
-  }
-
-  private _getExternalGrid(row: number, col: number) {
-    const id = row + '|' + col;
-    return this._externalGrids.get(id);
-  }
+  private _grids = new Map<string, Set<T>>();
 
   private _addToExternalGrids(element: T) {
     const range = rangeFromElementExternal(element);
@@ -103,6 +75,30 @@ export class GridManager<T extends BlockSuite.EdgelessModelType> {
         grids.add(grid);
       }
     }
+  }
+
+  private _createExternalGrid(row: number, col: number) {
+    const id = row + '|' + col;
+    const elements = new Set<T>();
+    this._externalGrids.set(id, elements);
+    return elements;
+  }
+
+  private _createGrid(row: number, col: number) {
+    const id = row + '|' + col;
+    const elements = new Set<T>();
+    this._grids.set(id, elements);
+    return elements;
+  }
+
+  private _getExternalGrid(row: number, col: number) {
+    const id = row + '|' + col;
+    return this._externalGrids.get(id);
+  }
+
+  private _getGrid(row: number, col: number) {
+    const id = row + '|' + col;
+    return this._grids.get(id);
   }
 
   private _removeFromExternalGrids(element: T) {
@@ -141,11 +137,6 @@ export class GridManager<T extends BlockSuite.EdgelessModelType> {
     return results;
   }
 
-  update(element: T) {
-    this.remove(element);
-    this.add(element);
-  }
-
   add(element: T) {
     this._addToExternalGrids(element);
 
@@ -165,17 +156,6 @@ export class GridManager<T extends BlockSuite.EdgelessModelType> {
     }
   }
 
-  remove(element: T) {
-    const grids = this._elementToGrids.get(element);
-    if (grids) {
-      for (const grid of grids) {
-        grid.delete(element);
-      }
-    }
-
-    this._removeFromExternalGrids(element);
-  }
-
   boundHasChanged(a: IBound, b: IBound) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(a);
     const [minRow2, maxRow2, minCol2, maxCol2] = rangeFromBound(b);
@@ -185,55 +165,6 @@ export class GridManager<T extends BlockSuite.EdgelessModelType> {
       minCol !== minCol2 ||
       maxCol !== maxCol2
     );
-  }
-
-  search(bound: IBound, strict?: boolean, getSet?: false): T[];
-  search(bound: IBound, strict: boolean | undefined, getSet: true): Set<T>;
-  search(bound: IBound, strict = false, getSet: boolean = false): T[] | Set<T> {
-    const results: Set<T> = this._searchExternal(bound, strict);
-    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
-    const b = Bound.from(bound);
-
-    for (let i = minRow; i <= maxRow; i++) {
-      for (let j = minCol; j <= maxCol; j++) {
-        const gridElements = this._getGrid(i, j);
-        if (!gridElements) continue;
-        for (const element of gridElements) {
-          if (
-            strict
-              ? b.contains(element.elementBound)
-              : intersects(element.elementBound, bound)
-          ) {
-            results.add(element);
-          }
-        }
-      }
-    }
-
-    if (getSet) return results;
-
-    // sort elements in set based on index
-    const sorted = Array.from(results).sort(compare);
-
-    return sorted;
-  }
-
-  pick(x: number, y: number): T[] {
-    const row = getGridIndex(x);
-    const col = getGridIndex(y);
-    const gridElements = this._getGrid(row, col);
-    if (!gridElements) return [];
-
-    const results: T[] = [];
-    for (const element of gridElements) {
-      if (
-        isPointIn(getBoundsWithRotation(Bound.deserialize(element.xywh)), x, y)
-      ) {
-        results.push(element);
-      }
-    }
-
-    return results;
   }
 
   /**
@@ -272,5 +203,74 @@ export class GridManager<T extends BlockSuite.EdgelessModelType> {
     }
 
     return false;
+  }
+
+  pick(x: number, y: number): T[] {
+    const row = getGridIndex(x);
+    const col = getGridIndex(y);
+    const gridElements = this._getGrid(row, col);
+    if (!gridElements) return [];
+
+    const results: T[] = [];
+    for (const element of gridElements) {
+      if (
+        isPointIn(getBoundsWithRotation(Bound.deserialize(element.xywh)), x, y)
+      ) {
+        results.push(element);
+      }
+    }
+
+    return results;
+  }
+
+  remove(element: T) {
+    const grids = this._elementToGrids.get(element);
+    if (grids) {
+      for (const grid of grids) {
+        grid.delete(element);
+      }
+    }
+
+    this._removeFromExternalGrids(element);
+  }
+
+  search(bound: IBound, strict?: boolean, getSet?: false): T[];
+  search(bound: IBound, strict: boolean | undefined, getSet: true): Set<T>;
+  search(bound: IBound, strict = false, getSet: boolean = false): T[] | Set<T> {
+    const results: Set<T> = this._searchExternal(bound, strict);
+    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
+    const b = Bound.from(bound);
+
+    for (let i = minRow; i <= maxRow; i++) {
+      for (let j = minCol; j <= maxCol; j++) {
+        const gridElements = this._getGrid(i, j);
+        if (!gridElements) continue;
+        for (const element of gridElements) {
+          if (
+            strict
+              ? b.contains(element.elementBound)
+              : intersects(element.elementBound, bound)
+          ) {
+            results.add(element);
+          }
+        }
+      }
+    }
+
+    if (getSet) return results;
+
+    // sort elements in set based on index
+    const sorted = Array.from(results).sort(compare);
+
+    return sorted;
+  }
+
+  update(element: T) {
+    this.remove(element);
+    this.add(element);
+  }
+
+  get isEmpty() {
+    return this._grids.size === 0;
   }
 }

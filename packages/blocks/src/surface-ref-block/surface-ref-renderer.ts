@@ -1,31 +1,21 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+
 import type { NoteBlockModel } from '../note-block/index.js';
-import { Renderer } from '../surface-block/index.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
+
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
+import { Renderer } from '../surface-block/index.js';
 import { getSurfaceBlock } from './utils.js';
 
 export class SurfaceRefRenderer {
-  get surfaceService() {
-    return this.std.spec.getService('affine:surface');
-  }
-
-  get surfaceRenderer() {
-    return this._surfaceRenderer;
-  }
-
-  get surfaceModel() {
-    return this._surfaceModel;
-  }
-
-  private readonly _surfaceRenderer: Renderer;
+  protected _disposables = new DisposableGroup();
 
   private _surfaceModel: SurfaceBlockModel | null = null;
 
-  protected _disposables = new DisposableGroup();
+  private readonly _surfaceRenderer: Renderer;
 
   slots = {
     surfaceRendererInit: new Slot(),
@@ -62,10 +52,6 @@ export class SurfaceRefRenderer {
     });
   }
 
-  private _initSurfaceRenderer() {
-    this.slots.surfaceRendererInit.emit();
-  }
-
   private _initSurfaceModel() {
     const init = () => {
       const model = getSurfaceBlock(this.doc);
@@ -92,6 +78,21 @@ export class SurfaceRefRenderer {
     }
   }
 
+  private _initSurfaceRenderer() {
+    this.slots.surfaceRendererInit.emit();
+  }
+
+  getModel(id: string): BlockSuite.EdgelessModelType | null {
+    return (
+      (this.doc.getBlockById(id) as Exclude<
+        BlockSuite.EdgelessBlockModelType,
+        NoteBlockModel
+      >) ??
+      this._surfaceModel?.getElementById(id) ??
+      null
+    );
+  }
+
   mount() {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
@@ -107,14 +108,15 @@ export class SurfaceRefRenderer {
     this.slots.unmounted.emit();
   }
 
-  getModel(id: string): BlockSuite.EdgelessModelType | null {
-    return (
-      (this.doc.getBlockById(id) as Exclude<
-        BlockSuite.EdgelessBlockModelType,
-        NoteBlockModel
-      >) ??
-      this._surfaceModel?.getElementById(id) ??
-      null
-    );
+  get surfaceModel() {
+    return this._surfaceModel;
+  }
+
+  get surfaceRenderer() {
+    return this._surfaceRenderer;
+  }
+
+  get surfaceService() {
+    return this.std.spec.getService('affine:surface');
   }
 }

@@ -1,7 +1,13 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { render } from 'lit';
+
+import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import type { RootBlockComponent } from '../root-block/types.js';
+import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
+import type { ImageBlockComponent } from './image-block.js';
 
 import {
   FileDropManager,
@@ -13,9 +19,6 @@ import {
   getEdgelessRootByElement,
   isInsideEdgelessEditor,
 } from '../_common/utils/query.js';
-import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import type { RootBlockComponent } from '../root-block/types.js';
-import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -25,57 +28,11 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
-import type { ImageBlockComponent } from './image-block.js';
 import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
 import { addSiblingImageBlock } from './utils.js';
 
 export class ImageBlockService extends BlockService<ImageBlockModel> {
-  get rootElement(): RootBlockComponent {
-    const rootModel = this.doc.root;
-    assertExists(rootModel);
-
-    const rootElement = this.std.view.viewFromPath('block', [
-      rootModel.id,
-    ]) as RootBlockComponent | null;
-    assertExists(rootElement);
-    return rootElement;
-  }
-
-  static setImageProxyURL = setImageProxyMiddlewareURL;
-
-  private _fileDropOptions: FileDropOptions = {
-    flavour: this.flavour,
-    onDrop: async ({ files, targetModel, place, point }) => {
-      const imageFiles = files.filter(file => file.type.startsWith('image/'));
-      if (!imageFiles.length) return false;
-
-      if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
-        addSiblingImageBlock(
-          this.host as EditorHost,
-          imageFiles,
-          this.maxFileSize,
-          targetModel,
-          place
-        );
-      } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
-        const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
-        point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
-        await edgelessRoot.addImages(imageFiles, point);
-
-        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
-          control: 'canvas:drop',
-          page: 'whiteboard editor',
-          module: 'toolbar',
-          segment: 'toolbar',
-          type: 'image',
-        });
-      }
-
-      return true;
-    },
-  };
-
   private _dragHandleOption: DragHandleOption = {
     flavour: ImageBlockSchema.model.flavour,
     edgeless: true,
@@ -161,9 +118,43 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
     },
   };
 
-  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
+  private _fileDropOptions: FileDropOptions = {
+    flavour: this.flavour,
+    onDrop: async ({ files, targetModel, place, point }) => {
+      const imageFiles = files.filter(file => file.type.startsWith('image/'));
+      if (!imageFiles.length) return false;
+
+      if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
+        addSiblingImageBlock(
+          this.host as EditorHost,
+          imageFiles,
+          this.maxFileSize,
+          targetModel,
+          place
+        );
+      } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
+        const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+        point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
+        await edgelessRoot.addImages(imageFiles, point);
+
+        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
+          control: 'canvas:drop',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'image',
+        });
+      }
+
+      return true;
+    },
+  };
+
+  static setImageProxyURL = setImageProxyMiddlewareURL;
 
   fileDropManager!: FileDropManager;
+
+  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
 
   override mounted(): void {
     super.mounted();
@@ -175,5 +166,16 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
+  }
+
+  get rootElement(): RootBlockComponent {
+    const rootModel = this.doc.root;
+    assertExists(rootModel);
+
+    const rootElement = this.std.view.viewFromPath('block', [
+      rootModel.id,
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
+    return rootElement;
   }
 }

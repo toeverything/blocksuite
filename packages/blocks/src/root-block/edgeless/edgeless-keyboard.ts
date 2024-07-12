@@ -1,5 +1,9 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
+import type { ShapeElementModel } from '../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
+import type { EdgelessTool } from './types.js';
+
 import {
   getNearestTranslation,
   isElementOutsideViewport,
@@ -11,7 +15,6 @@ import { EdgelessTextBlockComponent } from '../../edgeless-text/edgeless-text-bl
 import { EdgelessTextBlockModel } from '../../edgeless-text/edgeless-text-model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
-import type { ShapeElementModel } from '../../surface-block/index.js';
 import {
   Bound,
   ConnectorElementModel,
@@ -24,8 +27,6 @@ import { CopilotSelectionController } from './controllers/tools/copilot-tool.js'
 import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
 import { EdgelessBlockModel } from './edgeless-block-model.js';
-import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
-import type { EdgelessTool } from './types.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
@@ -494,64 +495,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     );
   }
 
-  private _space(event: KeyboardEvent) {
-    /*
-    Call this function with a check for !event.repeat to consider only the first keydown (not repeat). This way, you can use onPressSpaceBar in a tool to determine if the space bar is pressed or not.
-  */
-
-    const edgeless = this.rootElement;
-    const selection = edgeless.service.selection;
-    const currentTool = edgeless.edgelessTool;
-    const type = currentTool.type;
-
-    const isKeyDown = event.type === 'keydown';
-
-    if (isKeyDown) {
-      edgeless.tools.spaceBar = true;
-    } else {
-      edgeless.tools.spaceBar = false;
-    }
-
-    if (edgeless.service.tool.dragging) {
-      return; // Don't do anything if currently dragging
-    }
-
-    const revertToPrevTool = (ev: KeyboardEvent) => {
-      if (ev.code === 'Space') {
-        this._setEdgelessTool(edgeless, currentTool);
-        document.removeEventListener('keyup', revertToPrevTool, false);
-      }
-    };
-
-    if (isKeyDown) {
-      if (type === 'pan' || (type === 'default' && selection.editing)) {
-        return;
-      }
-      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
-
-      edgeless.dispatcher.disposables.addFromEvent(
-        document,
-        'keyup',
-        revertToPrevTool
-      );
-    }
-  }
-
-  private _shift(event: KeyboardEvent) {
-    const edgeless = this.rootElement;
-
-    if (event.repeat) return;
-
-    const shiftKeyPressed =
-      event.key.toLowerCase() === 'shift' && event.shiftKey;
-
-    if (shiftKeyPressed) {
-      edgeless.slots.pressShiftKeyUpdated.emit(true);
-    } else {
-      edgeless.slots.pressShiftKeyUpdated.emit(false);
-    }
-  }
-
   private _delete() {
     const edgeless = this.rootElement;
 
@@ -569,18 +512,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     edgeless.service.selection.set(
       edgeless.service.selection.surfaceSelections
     );
-  }
-
-  private _setEdgelessTool(
-    edgeless: EdgelessRootBlockComponent,
-    edgelessTool: EdgelessTool,
-    ignoreActiveState = false
-  ) {
-    // when editing, should not update mouse mode by shortcut
-    if (!ignoreActiveState && edgeless.service.selection.editing) {
-      return;
-    }
-    edgeless.tools.setEdgelessTool(edgelessTool);
   }
 
   private _move(key: string, shift = false) {
@@ -687,5 +618,75 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         element['xywh'] = bound.serialize();
       }
     });
+  }
+
+  private _setEdgelessTool(
+    edgeless: EdgelessRootBlockComponent,
+    edgelessTool: EdgelessTool,
+    ignoreActiveState = false
+  ) {
+    // when editing, should not update mouse mode by shortcut
+    if (!ignoreActiveState && edgeless.service.selection.editing) {
+      return;
+    }
+    edgeless.tools.setEdgelessTool(edgelessTool);
+  }
+
+  private _shift(event: KeyboardEvent) {
+    const edgeless = this.rootElement;
+
+    if (event.repeat) return;
+
+    const shiftKeyPressed =
+      event.key.toLowerCase() === 'shift' && event.shiftKey;
+
+    if (shiftKeyPressed) {
+      edgeless.slots.pressShiftKeyUpdated.emit(true);
+    } else {
+      edgeless.slots.pressShiftKeyUpdated.emit(false);
+    }
+  }
+
+  private _space(event: KeyboardEvent) {
+    /*
+    Call this function with a check for !event.repeat to consider only the first keydown (not repeat). This way, you can use onPressSpaceBar in a tool to determine if the space bar is pressed or not.
+  */
+
+    const edgeless = this.rootElement;
+    const selection = edgeless.service.selection;
+    const currentTool = edgeless.edgelessTool;
+    const type = currentTool.type;
+
+    const isKeyDown = event.type === 'keydown';
+
+    if (isKeyDown) {
+      edgeless.tools.spaceBar = true;
+    } else {
+      edgeless.tools.spaceBar = false;
+    }
+
+    if (edgeless.service.tool.dragging) {
+      return; // Don't do anything if currently dragging
+    }
+
+    const revertToPrevTool = (ev: KeyboardEvent) => {
+      if (ev.code === 'Space') {
+        this._setEdgelessTool(edgeless, currentTool);
+        document.removeEventListener('keyup', revertToPrevTool, false);
+      }
+    };
+
+    if (isKeyDown) {
+      if (type === 'pan' || (type === 'default' && selection.editing)) {
+        return;
+      }
+      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+
+      edgeless.dispatcher.disposables.addFromEvent(
+        document,
+        'keyup',
+        revertToPrevTool
+      );
+    }
   }
 }

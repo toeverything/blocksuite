@@ -1,33 +1,33 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import {
+  ConnectorMode,
+  Shape,
   addBasicConnectorElement,
   assertEdgelessConnectorToolMode,
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
   changeConnectorStrokeWidth,
-  ConnectorMode,
+  edgelessCommonSetup as commonSetup,
   createConnectorElement,
   createShapeElement,
   deleteAllConnectors,
   dragBetweenViewCoords,
-  edgelessCommonSetup as commonSetup,
   locatorComponentToolbar,
   pickColorAtPoints,
   rotateElementByHandle,
   setEdgelessTool,
-  Shape,
   toModelCoord,
   toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
+  SHORT_KEY,
   clickView,
   moveView,
   pressBackspace,
   redoByClick,
   selectAllByKeyboard,
-  SHORT_KEY,
   type,
   undoByClick,
   waitNextFrame,

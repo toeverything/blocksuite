@@ -1,27 +1,27 @@
-import './default/default-tool-button.js';
-// import './lasso/lasso-tool-button.js';
-import './connector/connector-tool-button.js';
-import './frame/frame-tool-button.js';
-// import './present/present-button.js';
-import './note/note-tool-button.js';
-import './brush/brush-tool-button.js';
-import './eraser/eraser-tool-button.js';
-import './shape/shape-tool-button.js';
-// import './text/text-tool-button.js';
-import './template/template-tool-button.js';
-// import './image/image-tool-button.js';
-import './note/note-senior-button.js';
-import './mindmap/mindmap-tool-button.js';
-import './link/link-tool-button.js';
-
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 import type { Menu } from '../../../../_common/components/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../types.js';
+
+import './brush/brush-tool-button.js';
 import { buildConnectorDenseMenu } from './connector/connector-dense-menu.js';
+// import './lasso/lasso-tool-button.js';
+import './connector/connector-tool-button.js';
+import './default/default-tool-button.js';
+import './eraser/eraser-tool-button.js';
 import { buildFrameDenseMenu } from './frame/frame-dense-menu.js';
+import './frame/frame-tool-button.js';
 import { buildLinkDenseMenu } from './link/link-dense-menu.js';
+import './link/link-tool-button.js';
+import './mindmap/mindmap-tool-button.js';
+// import './image/image-tool-button.js';
+import './note/note-senior-button.js';
+// import './present/present-button.js';
+import './note/note-tool-button.js';
+import './shape/shape-tool-button.js';
+// import './text/text-tool-button.js';
+import './template/template-tool-button.js';
 
 export interface QuickTool {
   type?: EdgelessTool['type'];

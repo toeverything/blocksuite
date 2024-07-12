@@ -1,23 +1,50 @@
-import './components/link-node.js';
-
 import { assertExists } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import type { RootBlockComponent } from '../../../../../root-block/index.js';
+
 import { PenIcon } from '../../../../../_common/icons/index.js';
 import { isValidUrl, normalizeUrl } from '../../../../../_common/utils/url.js';
-import type { RootBlockComponent } from '../../../../../root-block/index.js';
 import { HostContextKey } from '../../../../context/host-context.js';
 import { stopPropagation } from '../../../utils/event.js';
 import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
+import './components/link-node.js';
 import { linkColumnModelConfig } from './define.js';
 
 @customElement('affine-database-link-cell')
 export class LinkCell extends BaseCellRenderer<string> {
+  private _onClick = (event: Event) => {
+    event.stopPropagation();
+    const value = this.value ?? '';
+
+    if (!value || !isValidUrl(value)) {
+      this.selectCurrentCell(true);
+      return;
+    }
+
+    if (isValidUrl(value)) {
+      const target = event.target as HTMLElement;
+      const link = target.querySelector<HTMLAnchorElement>('.link-node');
+      if (link) {
+        event.preventDefault();
+        link.click();
+      }
+      return;
+    }
+  };
+
+  private _onEdit = (e: Event) => {
+    e.stopPropagation();
+    this.selectCurrentCell(true);
+  };
+
+  private preValue?: string;
+
   static override styles = css`
     affine-database-link-cell {
       width: 100%;
@@ -76,36 +103,44 @@ export class LinkCell extends BaseCellRenderer<string> {
     }
   `;
 
-  private preValue?: string;
-
-  private _onClick = (event: Event) => {
-    event.stopPropagation();
-    const value = this.value ?? '';
-
-    if (!value || !isValidUrl(value)) {
-      this.selectCurrentCell(true);
-      return;
-    }
-
-    if (isValidUrl(value)) {
-      const target = event.target as HTMLElement;
-      const link = target.querySelector<HTMLAnchorElement>('.link-node');
-      if (link) {
-        event.preventDefault();
-        link.click();
-      }
-      return;
-    }
-  };
-
-  private _onEdit = (e: Event) => {
+  openDoc = (e: MouseEvent) => {
     e.stopPropagation();
-    this.selectCurrentCell(true);
+    if (!this.docId) {
+      return;
+    }
+    const std = this.std;
+    const rootId = std?.doc.root?.id;
+    if (!rootId) {
+      return;
+    }
+    const rootElement = std?.view.viewFromPath('block', [
+      rootId,
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
+
+    rootElement.slots.docLinkClicked.emit({ docId: this.docId });
   };
 
-  get std() {
-    const host = this.view.getContext(HostContextKey);
-    return host?.std;
+  override render() {
+    const linkText = this.value ?? '';
+    const docName =
+      this.docId && this.std?.collection.getDoc(this.docId)?.meta?.title;
+    return html`
+      <div class="affine-database-link" @click="${this._onClick}">
+        ${docName
+          ? html`<span
+              class="data-view-link-column-linked-doc"
+              @click="${this.openDoc}"
+              >${docName}</span
+            >`
+          : html`<affine-database-link-node
+              .link="${linkText}"
+            ></affine-database-link-node>`}
+        <div class="affine-database-link-icon" @click="${this._onEdit}">
+          ${PenIcon}
+        </div>
+      </div>
+    `;
   }
 
   override updated() {
@@ -136,52 +171,42 @@ export class LinkCell extends BaseCellRenderer<string> {
     }
   }
 
-  openDoc = (e: MouseEvent) => {
-    e.stopPropagation();
-    if (!this.docId) {
-      return;
-    }
-    const std = this.std;
-    const rootId = std?.doc.root?.id;
-    if (!rootId) {
-      return;
-    }
-    const rootElement = std?.view.viewFromPath('block', [
-      rootId,
-    ]) as RootBlockComponent | null;
-    assertExists(rootElement);
-
-    rootElement.slots.docLinkClicked.emit({ docId: this.docId });
-  };
+  get std() {
+    const host = this.view.getContext(HostContextKey);
+    return host?.std;
+  }
 
   @state()
   accessor docId: string | undefined = undefined;
-
-  override render() {
-    const linkText = this.value ?? '';
-    const docName =
-      this.docId && this.std?.collection.getDoc(this.docId)?.meta?.title;
-    return html`
-      <div class="affine-database-link" @click="${this._onClick}">
-        ${docName
-          ? html`<span
-              class="data-view-link-column-linked-doc"
-              @click="${this.openDoc}"
-              >${docName}</span
-            >`
-          : html`<affine-database-link-node
-              .link="${linkText}"
-            ></affine-database-link-node>`}
-        <div class="affine-database-link-icon" @click="${this._onEdit}">
-          ${PenIcon}
-        </div>
-      </div>
-    `;
-  }
 }
 
 @customElement('affine-database-link-cell-editing')
 export class LinkCellEditing extends BaseCellRenderer<string> {
+  private _focusEnd = () => {
+    const end = this._container.value.length;
+    this._container.focus();
+    this._container.setSelectionRange(end, end);
+  };
+
+  private _onKeydown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.isComposing) {
+      this._setValue();
+      setTimeout(() => {
+        this.selectCurrentCell(false);
+      });
+    }
+  };
+
+  private _setValue = (value: string = this._container.value) => {
+    let url = value;
+    if (isValidUrl(value)) {
+      url = normalizeUrl(value);
+    }
+
+    this.onChange(url);
+    this._container.value = url;
+  };
+
   static override styles = css`
     affine-database-link-cell-editing {
       width: 100%;
@@ -208,34 +233,6 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
     }
   `;
 
-  @query('.affine-database-link-editing')
-  private accessor _container!: HTMLInputElement;
-
-  private _focusEnd = () => {
-    const end = this._container.value.length;
-    this._container.focus();
-    this._container.setSelectionRange(end, end);
-  };
-
-  private _setValue = (value: string = this._container.value) => {
-    let url = value;
-    if (isValidUrl(value)) {
-      url = normalizeUrl(value);
-    }
-
-    this.onChange(url);
-    this._container.value = url;
-  };
-
-  private _onKeydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.isComposing) {
-      this._setValue();
-      setTimeout(() => {
-        this.selectCurrentCell(false);
-      });
-    }
-  };
-
   override firstUpdated() {
     this._focusEnd();
   }
@@ -254,6 +251,9 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
       @pointerdown=${stopPropagation}
     />`;
   }
+
+  @query('.affine-database-link-editing')
+  private accessor _container!: HTMLInputElement;
 }
 
 export const linkColumnConfig = linkColumnModelConfig.renderConfig({

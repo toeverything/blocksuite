@@ -1,15 +1,15 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 import { waitNextFrame } from 'utils/actions/misc.js';
 
 import { dblclickView } from '../utils/actions/click.js';
 import {
+  Shape,
   addNote,
   autoFit,
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
   setEdgelessTool,
-  Shape,
   toViewCoord,
   triggerComponentToolbarAction,
   zoomOutByKeyboard,

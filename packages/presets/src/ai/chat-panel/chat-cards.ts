@@ -1,17 +1,20 @@
 import type { BaseSelection, EditorHost } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/block-std';
 import type { CopilotSelectionController } from '@blocksuite/blocks';
+import type { BlockModel } from '@blocksuite/store';
+
+import { WithDisposable } from '@blocksuite/block-std';
 import {
   type ImageBlockModel,
   type NoteBlockModel,
   NoteDisplayMode,
 } from '@blocksuite/blocks';
 import { debounce } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { ChatContextValue } from './chat-context.js';
 
 import {
   CurrentSelectionIcon,
@@ -25,7 +28,6 @@ import {
   getTextContentFromBlockModels,
   selectedToCanvas,
 } from '../utils/selection-utils.js';
-import type { ChatContextValue } from './chat-context.js';
 
 const cardsStyles = css`
   .card-wrapper {
@@ -191,29 +193,46 @@ export class ChatCards extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor chatContextValue!: ChatContextValue;
-
-  @property({ attribute: false })
-  accessor updateContext!: (context: Partial<ChatContextValue>) => void;
-
-  @property({ attribute: false })
-  accessor selectionValue: BaseSelection[] = [];
-
-  @state()
-  accessor text: string = '';
-
-  @state()
-  accessor markdown: string = '';
-
-  @state()
-  accessor images: File[] = [];
-
-  @state()
-  accessor caption: string = '';
+  private async _handleDocSelection() {
+    const notes = this.host.doc
+      .getBlocksByFlavour('affine:note')
+      .filter(
+        note =>
+          (note.model as NoteBlockModel).displayMode !==
+          NoteDisplayMode.EdgelessOnly
+      )
+      .map(note => note.model as NoteBlockModel);
+    const selectedModels = notes.reduce((acc, note) => {
+      acc.push(...note.children);
+      return acc;
+    }, [] as BlockModel[]);
+    const text = await getTextContentFromBlockModels(
+      this.host,
+      selectedModels,
+      'plain-text'
+    );
+    const markdown = await getTextContentFromBlockModels(
+      this.host,
+      selectedModels,
+      'markdown'
+    );
+    const blobs = await Promise.all(
+      selectedModels.map(async s => {
+        if (s.flavour !== 'affine:image') return null;
+        const sourceId = (s as ImageBlockModel)?.sourceId;
+        if (!sourceId) return null;
+        const blob = await (sourceId
+          ? this.host.doc.blobSync.get(sourceId)
+          : null);
+        if (!blob) return null;
+        return new File([blob], sourceId);
+      }) ?? []
+    );
+    const images = blobs.filter((blob): blob is File => !!blob);
+    this.text = text;
+    this.markdown = markdown;
+    this.images = images;
+  }
 
   private _onEdgelessCopilotAreaUpdated() {
     if (!this.host.closest('edgeless-editor')) return;
@@ -269,57 +288,6 @@ export class ChatCards extends WithDisposable(LitElement) {
     }
   }
 
-  private async _handleDocSelection() {
-    const notes = this.host.doc
-      .getBlocksByFlavour('affine:note')
-      .filter(
-        note =>
-          (note.model as NoteBlockModel).displayMode !==
-          NoteDisplayMode.EdgelessOnly
-      )
-      .map(note => note.model as NoteBlockModel);
-    const selectedModels = notes.reduce((acc, note) => {
-      acc.push(...note.children);
-      return acc;
-    }, [] as BlockModel[]);
-    const text = await getTextContentFromBlockModels(
-      this.host,
-      selectedModels,
-      'plain-text'
-    );
-    const markdown = await getTextContentFromBlockModels(
-      this.host,
-      selectedModels,
-      'markdown'
-    );
-    const blobs = await Promise.all(
-      selectedModels.map(async s => {
-        if (s.flavour !== 'affine:image') return null;
-        const sourceId = (s as ImageBlockModel)?.sourceId;
-        if (!sourceId) return null;
-        const blob = await (sourceId
-          ? this.host.doc.blobSync.get(sourceId)
-          : null);
-        if (!blob) return null;
-        return new File([blob], sourceId);
-      }) ?? []
-    );
-    const images = blobs.filter((blob): blob is File => !!blob);
-    this.text = text;
-    this.markdown = markdown;
-    this.images = images;
-  }
-
-  protected override async updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('selectionValue')) {
-      await this._updateState();
-    }
-
-    if (_changedProperties.has('host')) {
-      this._onEdgelessCopilotAreaUpdated();
-    }
-  }
-
   protected override render() {
     return html`<div class="cards-container">
       ${repeat(
@@ -350,6 +318,40 @@ export class ChatCards extends WithDisposable(LitElement) {
       )}
     </div>`;
   }
+
+  protected override async updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('selectionValue')) {
+      await this._updateState();
+    }
+
+    if (_changedProperties.has('host')) {
+      this._onEdgelessCopilotAreaUpdated();
+    }
+  }
+
+  @state()
+  accessor caption: string = '';
+
+  @property({ attribute: false })
+  accessor chatContextValue!: ChatContextValue;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @state()
+  accessor images: File[] = [];
+
+  @state()
+  accessor markdown: string = '';
+
+  @property({ attribute: false })
+  accessor selectionValue: BaseSelection[] = [];
+
+  @state()
+  accessor text: string = '';
+
+  @property({ attribute: false })
+  accessor updateContext!: (context: Partial<ChatContextValue>) => void;
 }
 
 declare global {

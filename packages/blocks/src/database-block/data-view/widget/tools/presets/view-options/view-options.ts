@@ -1,6 +1,9 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import type { DataViewKanbanManager } from '../../../../view/presets/kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../../../../view/presets/table/table-view-manager.js';
+
 import { popMenu } from '../../../../../../_common/components/index.js';
 import {
   ArrowRightSmallIcon,
@@ -18,8 +21,6 @@ import {
   InfoIcon,
 } from '../../../../common/icons/index.js';
 import { popPropertiesSetting } from '../../../../common/properties.js';
-import type { DataViewKanbanManager } from '../../../../view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../../../view/presets/table/table-view-manager.js';
 import { popFilterModal } from '../../../filter/filter-modal.js';
 import { WidgetBase } from '../../../widget-base.js';
 
@@ -51,25 +52,16 @@ const styles = css`
 export class DataViewHeaderToolsViewOptions extends WidgetBase {
   static override styles = styles;
 
-  override accessor view!: DataViewTableManager | DataViewKanbanManager;
-
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
-  }
+  clickMoreAction = (e: MouseEvent) => {
+    e.stopPropagation();
+    this.openMoreAction(e.target as HTMLElement);
+  };
 
   openMoreAction = (target: HTMLElement) => {
     this.showToolBar(true);
     popViewOptions(target, this.view, () => {
       this.showToolBar(false);
     });
-  };
-
-  clickMoreAction = (e: MouseEvent) => {
-    e.stopPropagation();
-    this.openMoreAction(e.target as HTMLElement);
   };
 
   override render() {
@@ -83,6 +75,15 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
       ${MoreHorizontalIcon}
     </div>`;
   }
+
+  showToolBar(show: boolean) {
+    const tools = this.closest('data-view-header-tools');
+    if (tools) {
+      tools.showToolBar = show;
+    }
+  }
+
+  override accessor view!: DataViewTableManager | DataViewKanbanManager;
 }
 
 declare global {

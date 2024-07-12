@@ -1,13 +1,13 @@
-import '../../../../_common/components/button.js';
-import '../../../../_common/components/tooltip/tooltip.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EmbedCardStyle } from '../../../../_common/types.js';
+
+import '../../../../_common/components/button.js';
+import '../../../../_common/components/tooltip/tooltip.js';
 
 @customElement('card-style-panel')
 export class CardStylePanel extends WithDisposable(LitElement) {
@@ -28,19 +28,6 @@ export class CardStylePanel extends WithDisposable(LitElement) {
       border: 1px solid var(--affine-brand-color);
     }
   `;
-
-  @property({ attribute: false })
-  accessor value!: EmbedCardStyle;
-
-  @property({ attribute: false })
-  accessor options!: {
-    style: EmbedCardStyle;
-    Icon: TemplateResult<1>;
-    tooltip: string;
-  }[];
-
-  @property({ attribute: false })
-  accessor onSelect!: (value: EmbedCardStyle) => void;
 
   override render() {
     const options = this.options;
@@ -67,6 +54,19 @@ export class CardStylePanel extends WithDisposable(LitElement) {
       `
     );
   }
+
+  @property({ attribute: false })
+  accessor onSelect!: (value: EmbedCardStyle) => void;
+
+  @property({ attribute: false })
+  accessor options!: {
+    style: EmbedCardStyle;
+    Icon: TemplateResult<1>;
+    tooltip: string;
+  }[];
+
+  @property({ attribute: false })
+  accessor value!: EmbedCardStyle;
 }
 
 declare global {

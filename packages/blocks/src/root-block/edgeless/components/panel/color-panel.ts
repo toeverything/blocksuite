@@ -1,10 +1,11 @@
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { TransparentIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+
+import { TransparentIcon } from '../../../../_common/icons/index.js';
 import { createZodUnion } from '../../../../_common/utils/index.js';
 import { getThemeMode } from '../../../../_common/utils/query.js';
 
@@ -55,12 +56,12 @@ export function isTransparent(color: CssVariableName) {
 
 function isSameColorWithBackground(color: CssVariableName) {
   return [
+    '--affine-note-background-black',
+    '--affine-note-background-white',
     '--affine-palette-line-black',
     '--affine-palette-line-white',
     '--affine-palette-shape-black',
     '--affine-palette-shape-white',
-    '--affine-note-background-black',
-    '--affine-note-background-white',
   ].includes(color.toLowerCase());
 }
 
@@ -186,15 +187,6 @@ export class EdgelessColorButton extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor color!: CssVariableName;
-
-  @property({ attribute: false })
-  accessor hollowCircle: boolean | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor letter: boolean | undefined = undefined;
-
   override render() {
     const { color, hollowCircle, letter } = this;
     const additionIcon = AdditionIcon(color, !!hollowCircle);
@@ -214,6 +206,15 @@ export class EdgelessColorButton extends LitElement {
       ${additionIcon}
     </div>`;
   }
+
+  @property({ attribute: false })
+  accessor color!: CssVariableName;
+
+  @property({ attribute: false })
+  accessor hollowCircle: boolean | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor letter: boolean | undefined = undefined;
 }
 
 export const colorContainerStyles = css`
@@ -262,18 +263,6 @@ export class EdgelessColorPanel extends LitElement {
     ${colorContainerStyles}
   `;
 
-  @property({ attribute: false })
-  accessor value: CssVariableName | null = null;
-
-  @property({ attribute: false })
-  accessor options = LINE_COLORS;
-
-  @property({ attribute: false })
-  accessor showLetterMark = false;
-
-  @property({ attribute: false })
-  accessor hollowCircle = false;
-
   onSelect(value: CssVariableName) {
     this.dispatchEvent(
       new ColorEvent('select', {
@@ -307,6 +296,18 @@ export class EdgelessColorPanel extends LitElement {
       }
     );
   }
+
+  @property({ attribute: false })
+  accessor hollowCircle = false;
+
+  @property({ attribute: false })
+  accessor options = LINE_COLORS;
+
+  @property({ attribute: false })
+  accessor showLetterMark = false;
+
+  @property({ attribute: false })
+  accessor value: CssVariableName | null = null;
 }
 
 @customElement('edgeless-text-color-icon')
@@ -320,9 +321,6 @@ export class EdgelessTextColorIcon extends LitElement {
       height: 20px;
     }
   `;
-
-  @property({ attribute: false })
-  accessor color!: CssVariableName;
 
   override render() {
     return html`
@@ -350,6 +348,9 @@ export class EdgelessTextColorIcon extends LitElement {
       </svg>
     `;
   }
+
+  @property({ attribute: false })
+  accessor color!: CssVariableName;
 }
 
 declare global {

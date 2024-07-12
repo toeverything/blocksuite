@@ -1,11 +1,11 @@
+import type { GetManualChunk } from 'rollup';
+import type { Plugin } from 'vite';
+
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { cpus } from 'node:os';
 import path, { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import type { GetManualChunk } from 'rollup';
-import type { Plugin } from 'vite';
 import { defineConfig, loadEnv } from 'vite';
 import istanbul from 'vite-plugin-istanbul';
 import wasm from 'vite-plugin-wasm';
@@ -151,7 +151,7 @@ export default ({ mode }) => {
         cache: false,
         maxParallelFileOps: Math.max(1, cpus().length - 1),
         onwarn(warning, defaultHandler) {
-          if (['SOURCEMAP_ERROR', 'EVAL'].includes(warning.code)) {
+          if (['EVAL', 'SOURCEMAP_ERROR'].includes(warning.code)) {
             return;
           }
 

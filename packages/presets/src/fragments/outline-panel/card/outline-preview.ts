@@ -1,4 +1,3 @@
-import { WithDisposable } from '@blocksuite/block-std';
 import type {
   AffineTextAttributes,
   AttachmentBlockModel,
@@ -9,10 +8,12 @@ import type {
   ListBlockModel,
   ParagraphBlockModel,
 } from '@blocksuite/blocks';
+import type { DeltaInsert } from '@blocksuite/inline';
+
+import { WithDisposable } from '@blocksuite/block-std';
 import { BlocksUtils } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
-import type { DeltaInsert } from '@blocksuite/inline';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import { SmallLinkedDocIcon } from '../../_common/icons.js';
@@ -140,25 +141,6 @@ const styles = css`
 `;
 
 export class OutlineBlockPreview extends WithDisposable(LitElement) {
-  static override styles = styles;
-
-  private _textDisposables: DisposableGroup | null = null;
-
-  @property({ attribute: false })
-  accessor block!: ValuesOf<BlockSuite.BlockModels>;
-
-  @property({ attribute: false })
-  accessor showPreviewIcon!: boolean;
-
-  @property({ attribute: false })
-  accessor enableNotesSorting!: boolean;
-
-  @property({ attribute: false })
-  accessor disabledIcon = false;
-
-  @property({ attribute: false })
-  accessor cardNumber!: number;
-
   private _clearTextDisposables = () => {
     this._textDisposables?.dispose();
     this._textDisposables = null;
@@ -174,9 +156,13 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
     this._textDisposables.add(this.block.propsUpdated.on(this._updateElement));
   };
 
+  private _textDisposables: DisposableGroup | null = null;
+
   private _updateElement = () => {
     this.requestUpdate();
   };
+
+  static override styles = styles;
 
   private _TextBlockPreview(block: ParagraphBlockModel | ListBlockModel) {
     const deltas: DeltaInsert<AffineTextAttributes>[] =
@@ -223,19 +209,10 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
     this._clearTextDisposables();
   }
 
-  override updated() {
-    this.updateComplete
-      .then(() => {
-        if (
-          BlocksUtils.matchFlavours(this.block, [
-            'affine:paragraph',
-            'affine:list',
-          ])
-        ) {
-          this._setTextDisposables(this.block);
-        }
-      })
-      .catch(console.error);
+  override render() {
+    return html`<div class="outline-block-preview">
+      ${this.renderBlockByFlavour()}
+    </div>`;
   }
 
   renderBlockByFlavour() {
@@ -319,11 +296,35 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
     }
   }
 
-  override render() {
-    return html`<div class="outline-block-preview">
-      ${this.renderBlockByFlavour()}
-    </div>`;
+  override updated() {
+    this.updateComplete
+      .then(() => {
+        if (
+          BlocksUtils.matchFlavours(this.block, [
+            'affine:paragraph',
+            'affine:list',
+          ])
+        ) {
+          this._setTextDisposables(this.block);
+        }
+      })
+      .catch(console.error);
   }
+
+  @property({ attribute: false })
+  accessor block!: ValuesOf<BlockSuite.BlockModels>;
+
+  @property({ attribute: false })
+  accessor cardNumber!: number;
+
+  @property({ attribute: false })
+  accessor disabledIcon = false;
+
+  @property({ attribute: false })
+  accessor enableNotesSorting!: boolean;
+
+  @property({ attribute: false })
+  accessor showPreviewIcon!: boolean;
 }
 
 declare global {

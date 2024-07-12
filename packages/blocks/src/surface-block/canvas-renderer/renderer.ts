@@ -1,10 +1,11 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
-import { requestConnectedFrame } from '../../_common/utils/event.js';
-import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import type { IBound } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
+
+import { requestConnectedFrame } from '../../_common/utils/event.js';
+import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import { RoughCanvas } from '../rough/canvas.js';
 import { intersects } from '../utils/math-utils.js';
 import { getBoundsWithRotation } from '../utils/math-utils.js';
@@ -19,12 +20,12 @@ export abstract class Overlay {
 
   constructor() {}
 
-  abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
-
   setRenderer(renderer: Renderer | null) {
     // @ts-ignore
     this._renderer = renderer;
   }
+
+  abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
 }
 
 type EnvProvider = {
@@ -40,17 +41,13 @@ type RendererOptions = {
 };
 
 export class Renderer extends Viewport {
-  get stackingCanvas() {
-    return this._stackingCanvas;
-  }
-
-  private _stackingCanvas: HTMLCanvasElement[] = [];
+  private _disposables = new DisposableGroup();
 
   private _overlays = new Set<Overlay>();
 
   private _shouldUpdate = false;
 
-  private _disposables = new DisposableGroup();
+  private _stackingCanvas: HTMLCanvasElement[] = [];
 
   canvas: HTMLCanvasElement;
 
@@ -79,22 +76,31 @@ export class Renderer extends Viewport {
     }
   }
 
-  private _initViewport() {
-    let sizeUpdatedRafId: number | null = null;
+  /**
+   * Specifying the actual size gives better results and more consistent behavior across browsers.
+   *
+   * Make sure the main canvas and the offscreen canvas or layer canvas are the same size.
+   *
+   * It is not recommended to set width and height to 100%.
+   */
+  private _canvasSizeUpdater(dpr = window.devicePixelRatio) {
+    const { _width, _height } = this;
+    const width = `${_width}px`;
+    const height = `${_height}px`;
+    const actualWidth = Math.ceil(_width * dpr);
+    const actualHeight = Math.ceil(_height * dpr);
 
-    this.viewportUpdated.on(() => {
-      this._shouldUpdate = true;
-    });
-
-    this.sizeUpdated.on(() => {
-      if (sizeUpdatedRafId) return;
-      sizeUpdatedRafId = requestConnectedFrame(() => {
-        sizeUpdatedRafId = null;
-        this._resetSize();
-        this._render();
-        this._shouldUpdate = false;
-      }, this._el);
-    });
+    return {
+      filter({ width, height }: HTMLCanvasElement) {
+        return width !== actualWidth || height !== actualHeight;
+      },
+      update(canvas: HTMLCanvasElement) {
+        canvas.style.width = width;
+        canvas.style.height = height;
+        canvas.width = actualWidth;
+        canvas.height = actualHeight;
+      },
+    };
   }
 
   private _initStackingCanvas(onCreated?: (canvas: HTMLCanvasElement) => void) {
@@ -146,41 +152,22 @@ export class Renderer extends Viewport {
     updateStackingCanvas();
   }
 
-  /**
-   * Specifying the actual size gives better results and more consistent behavior across browsers.
-   *
-   * Make sure the main canvas and the offscreen canvas or layer canvas are the same size.
-   *
-   * It is not recommended to set width and height to 100%.
-   */
-  private _canvasSizeUpdater(dpr = window.devicePixelRatio) {
-    const { _width, _height } = this;
-    const width = `${_width}px`;
-    const height = `${_height}px`;
-    const actualWidth = Math.ceil(_width * dpr);
-    const actualHeight = Math.ceil(_height * dpr);
+  private _initViewport() {
+    let sizeUpdatedRafId: number | null = null;
 
-    return {
-      filter({ width, height }: HTMLCanvasElement) {
-        return width !== actualWidth || height !== actualHeight;
-      },
-      update(canvas: HTMLCanvasElement) {
-        canvas.style.width = width;
-        canvas.style.height = height;
-        canvas.width = actualWidth;
-        canvas.height = actualHeight;
-      },
-    };
-  }
+    this.viewportUpdated.on(() => {
+      this._shouldUpdate = true;
+    });
 
-  private _resetSize() {
-    const sizeUpdater = this._canvasSizeUpdater();
-
-    sizeUpdater.update(this.canvas);
-
-    this._stackingCanvas.forEach(sizeUpdater.update);
-
-    this._shouldUpdate = true;
+    this.sizeUpdated.on(() => {
+      if (sizeUpdatedRafId) return;
+      sizeUpdatedRafId = requestConnectedFrame(() => {
+        sizeUpdatedRafId = null;
+        this._resetSize();
+        this._render();
+        this._shouldUpdate = false;
+      }, this._el);
+    });
   }
 
   private _loop() {
@@ -287,11 +274,19 @@ export class Renderer extends Viewport {
     ctx.restore();
   }
 
-  getVariableColor(val: string) {
-    return this.provider.getVariableColor?.(val) ?? val;
+  private _resetSize() {
+    const sizeUpdater = this._canvasSizeUpdater();
+
+    sizeUpdater.update(this.canvas);
+
+    this._stackingCanvas.forEach(sizeUpdater.update);
+
+    this._shouldUpdate = true;
   }
 
-  refresh() {
+  addOverlay(overlay: Overlay) {
+    overlay.setRenderer(this);
+    this._overlays.add(overlay);
     this._shouldUpdate = true;
   }
 
@@ -305,6 +300,10 @@ export class Renderer extends Viewport {
 
     this._resetSize();
     this._loop();
+  }
+
+  override dispose(): void {
+    super.dispose();
   }
 
   getCanvasByBound(
@@ -335,9 +334,11 @@ export class Renderer extends Viewport {
     return canvas;
   }
 
-  addOverlay(overlay: Overlay) {
-    overlay.setRenderer(this);
-    this._overlays.add(overlay);
+  getVariableColor(val: string) {
+    return this.provider.getVariableColor?.(val) ?? val;
+  }
+
+  refresh() {
     this._shouldUpdate = true;
   }
 
@@ -351,7 +352,7 @@ export class Renderer extends Viewport {
     this._shouldUpdate = true;
   }
 
-  override dispose(): void {
-    super.dispose();
+  get stackingCanvas() {
+    return this._stackingCanvas;
   }
 }

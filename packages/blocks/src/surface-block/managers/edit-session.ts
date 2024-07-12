@@ -1,4 +1,5 @@
 import type { BlockService } from '@blocksuite/block-std';
+
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { isPlainObject, recursive } from 'merge';
 import { z } from 'zod';
@@ -171,6 +172,8 @@ export type SerializedViewport = z.infer<
 >;
 
 export class EditPropsStore {
+  private _disposables = new DisposableGroup();
+
   private _lastProps: LastProps = {
     connector: {
       frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
@@ -225,8 +228,6 @@ export class EditPropsStore {
     },
   };
 
-  private _disposables = new DisposableGroup();
-
   slots = {
     lastPropsUpdated: new Slot<{
       type: LastPropsKey;
@@ -246,6 +247,10 @@ export class EditPropsStore {
         this._lastProps = result.data;
       }
     }
+  }
+
+  private _getStorage<T extends StoragePropsKey>(key: T) {
+    return isSessionProp(key) ? sessionStorage : localStorage;
   }
 
   private _getStorageKey<T extends StoragePropsKey>(key: T) {
@@ -272,31 +277,6 @@ export class EditPropsStore {
     }
   }
 
-  private _getStorage<T extends StoragePropsKey>(key: T) {
-    return isSessionProp(key) ? sessionStorage : localStorage;
-  }
-
-  getLastProps<T extends LastPropsKey>(type: T) {
-    return this._lastProps[type] as LastProps[T];
-  }
-
-  recordLastProps(
-    type: BlockSuite.EdgelessModelKeyType,
-    recordProps: Partial<LastProps[LastPropsKey]>
-  ) {
-    if (!isLastPropType(type)) return;
-
-    const props = this._lastProps[type];
-    const overrideProps = extractProps(
-      recordProps,
-      LastPropsSchema.shape[type]
-    );
-    if (Object.keys(overrideProps).length === 0) return;
-
-    recursive(props, overrideProps);
-    this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
-  }
-
   applyLastProps(
     type: BlockSuite.EdgelessModelKeyType,
     props: Record<string, unknown>
@@ -307,14 +287,13 @@ export class EditPropsStore {
     deepAssign(props, lastProps);
   }
 
-  setStorage<T extends StoragePropsKey>(key: T, value: StorageProps[T]) {
-    const oldValue = this.getStorage(key);
-    this._getStorage(key).setItem(
-      this._getStorageKey(key),
-      JSON.stringify(value)
-    );
-    if (oldValue === value) return;
-    this.slots.storageUpdated.emit({ key, value });
+  dispose() {
+    this._disposables.dispose();
+    this.slots.lastPropsUpdated.dispose();
+  }
+
+  getLastProps<T extends LastPropsKey>(type: T) {
+    return this._lastProps[type] as LastProps[T];
   }
 
   getStorage<T extends StoragePropsKey>(key: T) {
@@ -338,9 +317,31 @@ export class EditPropsStore {
     }
   }
 
-  dispose() {
-    this._disposables.dispose();
-    this.slots.lastPropsUpdated.dispose();
+  recordLastProps(
+    type: BlockSuite.EdgelessModelKeyType,
+    recordProps: Partial<LastProps[LastPropsKey]>
+  ) {
+    if (!isLastPropType(type)) return;
+
+    const props = this._lastProps[type];
+    const overrideProps = extractProps(
+      recordProps,
+      LastPropsSchema.shape[type]
+    );
+    if (Object.keys(overrideProps).length === 0) return;
+
+    recursive(props, overrideProps);
+    this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
+  }
+
+  setStorage<T extends StoragePropsKey>(key: T, value: StorageProps[T]) {
+    const oldValue = this.getStorage(key);
+    this._getStorage(key).setItem(
+      this._getStorageKey(key),
+      JSON.stringify(value)
+    );
+    if (oldValue === value) return;
+    this.slots.storageUpdated.emit({ key, value });
   }
 }
 

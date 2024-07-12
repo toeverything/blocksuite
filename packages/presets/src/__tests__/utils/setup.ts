@@ -1,6 +1,7 @@
+import type { BlockCollection } from '@blocksuite/store';
+
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockCollection } from '@blocksuite/store';
 import { DocCollection, Text } from '@blocksuite/store';
 import { Generator, Schema } from '@blocksuite/store';
 

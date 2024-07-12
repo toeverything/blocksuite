@@ -1,4 +1,5 @@
 import type { BlockSnapshot } from '@blocksuite/store';
+
 import { MemoryBlobCRUD } from '@blocksuite/store';
 import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';

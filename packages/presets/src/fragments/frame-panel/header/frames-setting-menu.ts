@@ -1,7 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/block-std';
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
-import { css, html, LitElement, type PropertyValues } from 'lit';
+
+import { WithDisposable } from '@blocksuite/block-std';
+import { LitElement, type PropertyValues, css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 const styles = css`
@@ -68,36 +69,6 @@ const styles = css`
 `;
 
 export class FramesSettingMenu extends WithDisposable(LitElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent | null;
-
-  @property({ attribute: false })
-  accessor editorHost!: EditorHost;
-
-  @state()
-  accessor blackBackground = false;
-
-  @state()
-  accessor fillScreen = false;
-
-  @state()
-  accessor hideToolbar = false;
-
-  private get _rootService() {
-    return this.editorHost.spec.getService('affine:page');
-  }
-
-  private _tryRestoreSettings() {
-    const { editPropsStore } = this._rootService;
-    const blackBackground = editPropsStore.getStorage('presentBlackBackground');
-
-    this.blackBackground = blackBackground ?? true;
-    this.fillScreen = editPropsStore.getStorage('presentFillScreen') ?? false;
-    this.hideToolbar = editPropsStore.getStorage('presentHideToolbar') ?? false;
-  }
-
   private _onBlackBackgroundChange = (checked: boolean) => {
     this.blackBackground = checked;
     this.edgeless?.slots.navigatorSettingUpdated.emit({
@@ -127,6 +98,21 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     );
   };
 
+  static override styles = styles;
+
+  private get _rootService() {
+    return this.editorHost.spec.getService('affine:page');
+  }
+
+  private _tryRestoreSettings() {
+    const { editPropsStore } = this._rootService;
+    const blackBackground = editPropsStore.getStorage('presentBlackBackground');
+
+    this.blackBackground = blackBackground ?? true;
+    this.fillScreen = editPropsStore.getStorage('presentFillScreen') ?? false;
+    this.hideToolbar = editPropsStore.getStorage('presentHideToolbar') ?? false;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._tryRestoreSettings();
@@ -134,34 +120,6 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
-  }
-
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('edgeless')) {
-      if (this.edgeless) {
-        this.disposables.add(
-          this.edgeless.slots.navigatorSettingUpdated.on(
-            ({ blackBackground, hideToolbar }) => {
-              if (
-                blackBackground !== undefined &&
-                blackBackground !== this.blackBackground
-              ) {
-                this.blackBackground = blackBackground;
-              }
-
-              if (
-                hideToolbar !== undefined &&
-                hideToolbar !== this.hideToolbar
-              ) {
-                this.hideToolbar = hideToolbar;
-              }
-            }
-          )
-        );
-      } else {
-        this.disposables.dispose();
-      }
-    }
   }
 
   override render() {
@@ -209,6 +167,49 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
       </div>
     </div>`;
   }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('edgeless')) {
+      if (this.edgeless) {
+        this.disposables.add(
+          this.edgeless.slots.navigatorSettingUpdated.on(
+            ({ blackBackground, hideToolbar }) => {
+              if (
+                blackBackground !== undefined &&
+                blackBackground !== this.blackBackground
+              ) {
+                this.blackBackground = blackBackground;
+              }
+
+              if (
+                hideToolbar !== undefined &&
+                hideToolbar !== this.hideToolbar
+              ) {
+                this.hideToolbar = hideToolbar;
+              }
+            }
+          )
+        );
+      } else {
+        this.disposables.dispose();
+      }
+    }
+  }
+
+  @state()
+  accessor blackBackground = false;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent | null;
+
+  @property({ attribute: false })
+  accessor editorHost!: EditorHost;
+
+  @state()
+  accessor fillScreen = false;
+
+  @state()
+  accessor hideToolbar = false;
 }
 
 declare global {

@@ -1,7 +1,8 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
@@ -12,18 +13,6 @@ const BLOCKSUITE_DATABASE = 'blocksuite/database';
 const TEXT = 'text/plain';
 
 export class TableClipboardController implements ReactiveController {
-  private get readonly() {
-    return this.host.view.readonly;
-  }
-
-  private get std() {
-    return this.host.std;
-  }
-
-  constructor(public host: DataViewTable) {
-    host.addController(this);
-  }
-
   private _onCopy = (
     _context: UIEventStateContext,
     tableSelection: TableViewSelection,
@@ -109,6 +98,18 @@ export class TableClipboardController implements ReactiveController {
 
     return true;
   };
+
+  constructor(public host: DataViewTable) {
+    host.addController(this);
+  }
+
+  private get readonly() {
+    return this.host.view.readonly;
+  }
+
+  private get std() {
+    return this.host.std;
+  }
 
   hostConnected() {
     this.host.disposables.add(

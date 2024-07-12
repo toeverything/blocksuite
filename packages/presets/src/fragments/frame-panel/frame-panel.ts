@@ -1,18 +1,18 @@
-import './header/frame-panel-header.js';
-import './body/frame-panel-body.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { FramePreview } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, type PropertyValues, unsafeCSS } from 'lit';
+import { type PropertyValues, css, html, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../index.js';
+
+import './body/frame-panel-body.js';
 import { FramePanelBody } from './body/frame-panel-body.js';
 import { FrameCard } from './card/frame-card.js';
 import { FrameCardTitle } from './card/frame-card-title.js';
 import { FrameCardTitleEditor } from './card/frame-card-title-editor.js';
+import './header/frame-panel-header.js';
 import { FramePanelHeader } from './header/frame-panel-header.js';
 import { FramesSettingMenu } from './header/frames-setting-menu.js';
 
@@ -69,27 +69,9 @@ const styles = css`
 `;
 
 export class FramePanel extends WithDisposable(ShadowlessElement) {
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get host() {
-    return this.editor.host;
-  }
-
-  get edgeless() {
-    return this.editor.querySelector('affine-edgeless-root');
-  }
-
-  static override styles = styles;
-
   private _editorDisposables: DisposableGroup | null = null;
 
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-
-  @property({ attribute: false })
-  accessor fitPadding: number[] = [50, 380, 50, 50];
+  static override styles = styles;
 
   private _clearEditorDisposables() {
     this._editorDisposables?.dispose();
@@ -115,12 +97,6 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
           .catch(console.error);
       })
     );
-  }
-
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('editor')) {
-      this._setEditorDisposables();
-    }
   }
 
   override connectedCallback() {
@@ -150,6 +126,30 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
       ></frame-panel-body>
     </div>`;
   }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('editor')) {
+      this._setEditorDisposables();
+    }
+  }
+
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get edgeless() {
+    return this.editor.querySelector('affine-edgeless-root');
+  }
+
+  get host() {
+    return this.editor.host;
+  }
+
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
+
+  @property({ attribute: false })
+  accessor fitPadding: number[] = [50, 380, 50, 50];
 }
 
 declare global {

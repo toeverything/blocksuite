@@ -1,5 +1,6 @@
 import type { TextElementModel } from '../../../element-model/text.js';
 import type { Renderer } from '../../renderer.js';
+
 import {
   deltaInsertsToChunks,
   getFontString,

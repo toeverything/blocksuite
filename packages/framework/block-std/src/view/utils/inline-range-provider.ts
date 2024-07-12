@@ -1,4 +1,4 @@
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { Slot, assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
   type InlineRange,

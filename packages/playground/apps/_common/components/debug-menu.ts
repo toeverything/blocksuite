@@ -1,48 +1,33 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
-import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
-import '@shoelace-style/shoelace/dist/components/divider/divider.js';
-import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
-import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
-import '@shoelace-style/shoelace/dist/components/icon/icon.js';
-import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
-import '@shoelace-style/shoelace/dist/components/menu/menu.js';
-import '@shoelace-style/shoelace/dist/components/select/select.js';
-import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
-import '@shoelace-style/shoelace/dist/components/tab/tab.js';
-import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/themes/light.css';
-import '@shoelace-style/shoelace/dist/themes/dark.css';
-import './left-side-panel.js';
-import './side-panel.js';
-
-import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
-import {
-  type AffineTextAttributes,
-  BlocksUtils,
-  ColorVariables,
-  defaultImageProxyMiddleware,
-  extractCssVariables,
-  FontFamilyVariables,
-  HtmlTransformer,
-  MarkdownTransformer,
-  NotionHtmlAdapter,
-  openFileOrFiles,
-  type SerializedXYWH,
-  SizeVariables,
-  StyleVariables,
-  type SurfaceBlockComponent,
-  type TreeNode,
-  ZipTransformer,
-} from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type {
   AffineEditorContainer,
   CommentPanel,
   CopilotPanel,
 } from '@blocksuite/presets';
+import type { SlDropdown } from '@shoelace-style/shoelace';
+import type { Pane } from 'tweakpane';
+
+import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
+import {
+  type AffineTextAttributes,
+  BlocksUtils,
+  ColorVariables,
+  FontFamilyVariables,
+  HtmlTransformer,
+  MarkdownTransformer,
+  NotionHtmlAdapter,
+  type SerializedXYWH,
+  SizeVariables,
+  StyleVariables,
+  type SurfaceBlockComponent,
+  type TreeNode,
+  ZipTransformer,
+  defaultImageProxyMiddleware,
+  extractCssVariables,
+  openFileOrFiles,
+} from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockModel,
   type DocCollection,
@@ -50,20 +35,36 @@ import {
   Text,
   Utils,
 } from '@blocksuite/store';
-import type { SlDropdown } from '@shoelace-style/shoelace';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
+import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
+import '@shoelace-style/shoelace/dist/components/divider/divider.js';
+import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
+import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
+import '@shoelace-style/shoelace/dist/components/menu/menu.js';
+import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
+import '@shoelace-style/shoelace/dist/components/select/select.js';
+import '@shoelace-style/shoelace/dist/components/tab/tab.js';
+import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
+import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
+import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '@shoelace-style/shoelace/dist/themes/light.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
-import type { Pane } from 'tweakpane';
 
-import { getEdgelessService } from '../../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
 import type { CustomChatPanel } from './custom-chat-panel.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
 import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 import type { SidePanel } from './side-panel.js';
+
+import { getEdgelessService } from '../../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
+import './left-side-panel.js';
+import './side-panel.js';
 
 const basePath = import.meta.env.DEV
   ? '/node_modules/@shoelace-style/shoelace/dist'
@@ -175,29 +176,13 @@ function getDarkModeConfig(): boolean {
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
-  get mode() {
-    return this.editor.mode;
-  }
+  private _darkModeChange = (e: MediaQueryListEvent) => {
+    this._setThemeMode(!!e.matches);
+  };
 
-  set mode(value: 'page' | 'edgeless') {
-    this.editor.mode = value;
-  }
+  private _showStyleDebugMenu = false;
 
-  get host() {
-    return this.editor.host;
-  }
-
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get rootService() {
-    return this.host.spec.getService('affine:page');
-  }
-
-  get command() {
-    return this.host.command;
-  }
+  private _styleMenu!: Pane;
 
   static override styles = css`
     :root {
@@ -210,85 +195,18 @@ export class DebugMenu extends ShadowlessElement {
     }
   `;
 
-  @state()
-  private accessor _canUndo = false;
+  private _addNote() {
+    const rootModel = this.doc.root;
+    if (!rootModel) return;
+    const rootId = rootModel.id;
 
-  @state()
-  private accessor _canRedo = false;
+    this.doc.captureSync();
 
-  @state()
-  private accessor _hasOffset = false;
+    const count = rootModel.children.length;
+    const xywh: SerializedXYWH = `[0,${count * 60},800,95]`;
 
-  private _styleMenu!: Pane;
-
-  private _showStyleDebugMenu = false;
-
-  @state()
-  private accessor _dark = getDarkModeConfig();
-
-  @property({ attribute: false })
-  accessor collection!: DocCollection;
-
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-
-  @property({ attribute: false })
-  accessor outlinePanel!: CustomOutlinePanel;
-
-  @property({ attribute: false })
-  accessor framePanel!: CustomFramePanel;
-
-  @property({ attribute: false })
-  accessor chatPanel!: CustomChatPanel;
-
-  @property({ attribute: false })
-  accessor copilotPanel!: CopilotPanel;
-
-  @property({ attribute: false })
-  accessor commentPanel!: CommentPanel;
-
-  @property({ attribute: false })
-  accessor sidePanel!: SidePanel;
-
-  @property({ attribute: false })
-  accessor leftSidePanel!: LeftSidePanel;
-
-  @property({ attribute: false })
-  accessor docsPanel!: DocsPanel;
-
-  @property({ attribute: false })
-  accessor readonly = false;
-
-  @query('#block-type-dropdown')
-  accessor blockTypeDropdown!: SlDropdown;
-
-  private _switchEditorMode() {
-    const { docModeService } = this.editor.host.spec.getService('affine:page');
-    this.mode = docModeService.toggleMode();
-  }
-
-  private _toggleOutlinePanel() {
-    this.outlinePanel.toggleDisplay();
-  }
-
-  private _toggleFramePanel() {
-    this.framePanel.toggleDisplay();
-  }
-
-  private _toggleChatPanel() {
-    this.chatPanel.toggleDisplay();
-  }
-
-  private _toggleCopilotPanel() {
-    this.sidePanel.toggle(this.copilotPanel);
-  }
-
-  private _toggleDocsPanel() {
-    this.leftSidePanel.toggle(this.docsPanel);
-  }
-
-  private _toggleCommentPanel() {
-    document.body.append(this.commentPanel);
+    const noteId = this.doc.addBlock('affine:note', { xywh }, rootId);
+    this.doc.addBlock('affine:paragraph', {}, noteId);
   }
 
   private _createMindMap() {
@@ -336,34 +254,16 @@ export class DebugMenu extends ShadowlessElement {
     );
   }
 
-  private _switchOffsetMode() {
-    this._hasOffset = !this._hasOffset;
-  }
-
-  private _addNote() {
-    const rootModel = this.doc.root;
-    if (!rootModel) return;
-    const rootId = rootModel.id;
-
-    this.doc.captureSync();
-
-    const count = rootModel.children.length;
-    const xywh: SerializedXYWH = `[0,${count * 60},800,95]`;
-
-    const noteId = this.doc.addBlock('affine:note', { xywh }, rootId);
-    this.doc.addBlock('affine:paragraph', {}, noteId);
-  }
-
-  private _exportPdf() {
-    this.rootService.exportManager.exportPdf().catch(console.error);
-  }
-
   private _exportHtml() {
     HtmlTransformer.exportDoc(this.doc).catch(console.error);
   }
 
   private _exportMarkDown() {
     MarkdownTransformer.exportDoc(this.doc).catch(console.error);
+  }
+
+  private _exportPdf() {
+    this.rootService.exportManager.exportPdf().catch(console.error);
   }
 
   private _exportPng() {
@@ -382,6 +282,21 @@ export class DebugMenu extends ShadowlessElement {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  private async _importNotionHTML() {
+    const file = await openFileOrFiles({ acceptType: 'Html', multiple: false });
+    if (!file) return;
+    const job = new Job({
+      collection: this.collection,
+      middlewares: [defaultImageProxyMiddleware],
+    });
+    const htmlAdapter = new NotionHtmlAdapter(job);
+    await htmlAdapter.toDoc({
+      file: await file.text(),
+      pageId: this.collection.idGenerator(),
+      assets: job.assetsManager,
+    });
   }
 
   private _importSnapshot() {
@@ -428,59 +343,21 @@ export class DebugMenu extends ShadowlessElement {
     input.click();
   }
 
-  private async _importNotionHTML() {
-    const file = await openFileOrFiles({ acceptType: 'Html', multiple: false });
-    if (!file) return;
-    const job = new Job({
-      collection: this.collection,
-      middlewares: [defaultImageProxyMiddleware],
-    });
-    const htmlAdapter = new NotionHtmlAdapter(job);
-    await htmlAdapter.toDoc({
-      file: await file.text(),
-      pageId: this.collection.idGenerator(),
-      assets: job.assetsManager,
-    });
-  }
+  private _insertTransitionStyle(classKey: string, duration: number) {
+    const $html = document.documentElement;
+    const $style = document.createElement('style');
+    const slCSSKeys = ['sl-transition-x-fast'];
+    $style.innerHTML = `html.${classKey} * { transition: all ${duration}ms 0ms linear !important; } :root { ${slCSSKeys.map(
+      key => `--${key}: ${duration}ms`
+    )} }`;
 
-  private _shareUrl() {
-    const base64 = Utils.encodeCollectionAsYjsUpdateV2(this.collection);
-    const url = new URL(window.location.toString());
-    url.searchParams.set('init', base64);
-    window.history.pushState({}, '', url);
-  }
+    $html.append($style);
+    $html.classList.add(classKey);
 
-  private async _toggleStyleDebugMenu() {
-    if (!styleDebugMenuLoaded) {
-      styleDebugMenuLoaded = true;
-      const { Pane } = await import('tweakpane');
-      this._styleMenu = new Pane({ title: 'Waiting' });
-      this._styleMenu.hidden = true;
-      this._styleMenu.element.style.width = '650';
-      initStyleDebugMenu(this._styleMenu, document.documentElement.style);
-    }
-
-    this._showStyleDebugMenu = !this._showStyleDebugMenu;
-    this._showStyleDebugMenu
-      ? (this._styleMenu.hidden = false)
-      : (this._styleMenu.hidden = true);
-  }
-
-  private _toggleReadonly() {
-    const doc = this.doc;
-    doc.awarenessStore.setReadonly(doc.blockCollection, !doc.readonly);
-  }
-
-  private _shareSelection() {
-    const selection = this.editor.host?.selection.value;
-    if (!selection || selection.length === 0) {
-      return;
-    }
-    const json = selection.map(sel => sel.toJSON());
-    const hash = lz.compressToEncodedURIComponent(JSON.stringify(json));
-    const url = new URL(window.location.toString());
-    url.searchParams.set('sel', hash);
-    window.history.pushState({}, '', url);
+    setTimeout(() => {
+      $style.remove();
+      $html.classList.remove(classKey);
+    }, duration);
   }
 
   private _setThemeMode(dark: boolean) {
@@ -502,38 +379,81 @@ export class DebugMenu extends ShadowlessElement {
     }
   }
 
-  private _insertTransitionStyle(classKey: string, duration: number) {
-    const $html = document.documentElement;
-    const $style = document.createElement('style');
-    const slCSSKeys = ['sl-transition-x-fast'];
-    $style.innerHTML = `html.${classKey} * { transition: all ${duration}ms 0ms linear !important; } :root { ${slCSSKeys.map(
-      key => `--${key}: ${duration}ms`
-    )} }`;
+  private _shareSelection() {
+    const selection = this.editor.host?.selection.value;
+    if (!selection || selection.length === 0) {
+      return;
+    }
+    const json = selection.map(sel => sel.toJSON());
+    const hash = lz.compressToEncodedURIComponent(JSON.stringify(json));
+    const url = new URL(window.location.toString());
+    url.searchParams.set('sel', hash);
+    window.history.pushState({}, '', url);
+  }
 
-    $html.append($style);
-    $html.classList.add(classKey);
+  private _shareUrl() {
+    const base64 = Utils.encodeCollectionAsYjsUpdateV2(this.collection);
+    const url = new URL(window.location.toString());
+    url.searchParams.set('init', base64);
+    window.history.pushState({}, '', url);
+  }
 
-    setTimeout(() => {
-      $style.remove();
-      $html.classList.remove(classKey);
-    }, duration);
+  private _switchEditorMode() {
+    const { docModeService } = this.editor.host.spec.getService('affine:page');
+    this.mode = docModeService.toggleMode();
+  }
+
+  private _switchOffsetMode() {
+    this._hasOffset = !this._hasOffset;
+  }
+
+  private _toggleChatPanel() {
+    this.chatPanel.toggleDisplay();
+  }
+
+  private _toggleCommentPanel() {
+    document.body.append(this.commentPanel);
+  }
+
+  private _toggleCopilotPanel() {
+    this.sidePanel.toggle(this.copilotPanel);
   }
 
   private _toggleDarkMode() {
     this._setThemeMode(!this._dark);
   }
 
-  private _darkModeChange = (e: MediaQueryListEvent) => {
-    this._setThemeMode(!!e.matches);
-  };
+  private _toggleDocsPanel() {
+    this.leftSidePanel.toggle(this.docsPanel);
+  }
 
-  override createRenderRoot() {
-    this._setThemeMode(this._dark);
+  private _toggleFramePanel() {
+    this.framePanel.toggleDisplay();
+  }
 
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    matchMedia.addEventListener('change', this._darkModeChange);
+  private _toggleOutlinePanel() {
+    this.outlinePanel.toggleDisplay();
+  }
 
-    return this;
+  private _toggleReadonly() {
+    const doc = this.doc;
+    doc.awarenessStore.setReadonly(doc.blockCollection, !doc.readonly);
+  }
+
+  private async _toggleStyleDebugMenu() {
+    if (!styleDebugMenuLoaded) {
+      styleDebugMenuLoaded = true;
+      const { Pane } = await import('tweakpane');
+      this._styleMenu = new Pane({ title: 'Waiting' });
+      this._styleMenu.hidden = true;
+      this._styleMenu.element.style.width = '650';
+      initStyleDebugMenu(this._styleMenu, document.documentElement.style);
+    }
+
+    this._showStyleDebugMenu = !this._showStyleDebugMenu;
+    this._showStyleDebugMenu
+      ? (this._styleMenu.hidden = false)
+      : (this._styleMenu.hidden = true);
   }
 
   override connectedCallback() {
@@ -561,6 +481,15 @@ export class DebugMenu extends ShadowlessElement {
     readSelectionFromURL().catch(console.error);
   }
 
+  override createRenderRoot() {
+    this._setThemeMode(this._dark);
+
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    matchMedia.addEventListener('change', this._darkModeChange);
+
+    return this;
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
 
@@ -577,29 +506,6 @@ export class DebugMenu extends ShadowlessElement {
     this.editor.slots.editorModeSwitched.on(() => {
       this.requestUpdate();
     });
-  }
-
-  override update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('_hasOffset')) {
-      const appRoot = document.getElementById('app');
-      if (!appRoot) return;
-      const style: Partial<CSSStyleDeclaration> = this._hasOffset
-        ? {
-            margin: '60px 40px 240px 40px',
-            overflow: 'auto',
-            height: '400px',
-            boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.2)',
-          }
-        : {
-            margin: '0',
-            overflow: 'initial',
-            // edgeless needs the container height
-            height: '100%',
-            boxShadow: 'initial',
-          };
-      Object.assign(appRoot.style, style);
-    }
-    super.update(changedProperties);
   }
 
   override render() {
@@ -773,6 +679,101 @@ export class DebugMenu extends ShadowlessElement {
       </div>
     `;
   }
+
+  override update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('_hasOffset')) {
+      const appRoot = document.getElementById('app');
+      if (!appRoot) return;
+      const style: Partial<CSSStyleDeclaration> = this._hasOffset
+        ? {
+            margin: '60px 40px 240px 40px',
+            overflow: 'auto',
+            height: '400px',
+            boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.2)',
+          }
+        : {
+            margin: '0',
+            overflow: 'initial',
+            // edgeless needs the container height
+            height: '100%',
+            boxShadow: 'initial',
+          };
+      Object.assign(appRoot.style, style);
+    }
+    super.update(changedProperties);
+  }
+
+  get command() {
+    return this.host.command;
+  }
+
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get host() {
+    return this.editor.host;
+  }
+
+  get mode() {
+    return this.editor.mode;
+  }
+
+  set mode(value: 'page' | 'edgeless') {
+    this.editor.mode = value;
+  }
+
+  get rootService() {
+    return this.host.spec.getService('affine:page');
+  }
+
+  @state()
+  private accessor _canRedo = false;
+
+  @state()
+  private accessor _canUndo = false;
+
+  @state()
+  private accessor _dark = getDarkModeConfig();
+
+  @state()
+  private accessor _hasOffset = false;
+
+  @query('#block-type-dropdown')
+  accessor blockTypeDropdown!: SlDropdown;
+
+  @property({ attribute: false })
+  accessor chatPanel!: CustomChatPanel;
+
+  @property({ attribute: false })
+  accessor collection!: DocCollection;
+
+  @property({ attribute: false })
+  accessor commentPanel!: CommentPanel;
+
+  @property({ attribute: false })
+  accessor copilotPanel!: CopilotPanel;
+
+  @property({ attribute: false })
+  accessor docsPanel!: DocsPanel;
+
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
+
+  @property({ attribute: false })
+  accessor framePanel!: CustomFramePanel;
+
+  @property({ attribute: false })
+  accessor leftSidePanel!: LeftSidePanel;
+
+  @property({ attribute: false })
+  accessor outlinePanel!: CustomOutlinePanel;
+
+  @property({ attribute: false })
+  accessor readonly = false;
+
+  @property({ attribute: false })
+  accessor sidePanel!: SidePanel;
 }
 
 declare global {

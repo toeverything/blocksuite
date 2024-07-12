@@ -1,9 +1,13 @@
 import type { BlockElement } from '@blocksuite/block-std';
+
 import { assertExists, isEqual } from '@blocksuite/global/utils';
 import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
+
+import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
+import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 
 import {
   asyncSetInlineRange,
@@ -11,8 +15,6 @@ import {
 } from '../../../../_common/utils/index.js';
 import { getStandardLanguage } from '../../../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../../../code-block/utils/consts.js';
-import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
-import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 import {
   convertToDivider,
   convertToList,

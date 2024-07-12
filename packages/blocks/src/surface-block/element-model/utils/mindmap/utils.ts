@@ -2,6 +2,7 @@ import { assertType } from '@blocksuite/global/utils';
 
 import type { MindmapElementModel } from '../../mindmap.js';
 import type { ShapeElementModel } from '../../shape.js';
+
 import { LayoutType, type MindmapNode } from './layout.js';
 
 export function getHoveredArea(

@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import { waitNextFrame } from './actions/misc.js';
 import { assertAlmostEqual } from './asserts.js';

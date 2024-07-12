@@ -1,7 +1,8 @@
+import type { DataViewWidget, DataViewWidgetProps } from '../types.js';
+
 import { ExpandDatabaseBlockModal } from '../../../widgets/expand/index.js';
 import { createUniComponentFromWebComponent } from '../../utils/uni-component/index.js';
 import { map } from '../../utils/uni-component/operation.js';
-import type { DataViewWidget, DataViewWidgetProps } from '../types.js';
 import { DataViewHeaderToolsFilter } from './presets/filter/filter.js';
 import { DataViewHeaderToolsSearch } from './presets/search/search.js';
 import { DataViewHeaderToolsAddRow } from './presets/table-add-row/add-row.js';

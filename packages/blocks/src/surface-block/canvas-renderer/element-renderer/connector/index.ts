@@ -3,21 +3,22 @@ import type {
   LocalConnectorElementModel,
   PointStyle,
 } from '../../../element-model/connector.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
+import type { PointLocation } from '../../../utils/point-location.js';
+import type { Renderer } from '../../renderer.js';
+
 import {
   ConnectorMode,
   isConnectorWithLabel,
 } from '../../../element-model/connector.js';
-import type { RoughCanvas } from '../../../rough/canvas.js';
 import { getBezierParameters } from '../../../utils/curve.js';
-import type { PointLocation } from '../../../utils/point-location.js';
-import type { Renderer } from '../../renderer.js';
 import {
+  type TextDelta,
   deltaInsertsToChunks,
   getFontString,
   getLineHeight,
   getTextWidth,
   isRTL,
-  type TextDelta,
   wrapTextDeltas,
 } from '../text/utils.js';
 import {

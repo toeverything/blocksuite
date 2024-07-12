@@ -2,9 +2,9 @@ import { expect, test } from 'vitest';
 import * as Y from 'yjs';
 
 import {
-  defineBlockSchema,
   Schema,
   type SchemaToModel,
+  defineBlockSchema,
 } from '../schema/index.js';
 import { Block, type YBlock } from '../store/doc/block.js';
 import { DocCollection, Generator } from '../store/index.js';

@@ -1,9 +1,4 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import '../../../_common/components/tooltip/tooltip.js';
-
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 import type {
   CodeBlockComponent,
@@ -14,6 +9,11 @@ import type {
   CodeToolbarMoreItem,
   MoreItem,
 } from './types.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
+import '../../../_common/components/tooltip/tooltip.js';
 
 export const duplicateCodeBlock = (model: CodeBlockModel) => {
   const keys = model.keys as (keyof typeof model)[];

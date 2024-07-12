@@ -1,11 +1,13 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { IS_FIREFOX } from '@blocksuite/global/env';
-import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange, VLine } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 
+import { IS_FIREFOX } from '@blocksuite/global/env';
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 import type { SelectionPosition } from '../types.js';
+
 import { matchFlavours } from './model.js';
 import {
   asyncGetRichTextByModel,

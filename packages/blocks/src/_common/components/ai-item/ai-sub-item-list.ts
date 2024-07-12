@@ -1,15 +1,27 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
+import type { AIItemConfig, AISubItemConfig } from './types.js';
 
 import { EnterIcon } from '../../icons/ai.js';
 import { menuItemStyles } from './styles.js';
-import type { AIItemConfig, AISubItemConfig } from './types.js';
 
 @customElement('ai-sub-item-list')
 export class AISubItemList extends WithDisposable(LitElement) {
+  private _handleClick = (subItem: AISubItemConfig) => {
+    if (subItem.handler) {
+      // TODO: add parameters to ai handler
+      subItem.handler(this.host);
+    }
+
+    this.abortController.abort();
+    this.onClick?.();
+  };
+
   static override styles = css`
     .ai-sub-menu {
       display: flex;
@@ -38,28 +50,6 @@ export class AISubItemList extends WithDisposable(LitElement) {
     ${menuItemStyles}
   `;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor item!: AIItemConfig;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  @property({ attribute: false })
-  accessor onClick: (() => void) | undefined;
-
-  private _handleClick = (subItem: AISubItemConfig) => {
-    if (subItem.handler) {
-      // TODO: add parameters to ai handler
-      subItem.handler(this.host);
-    }
-
-    this.abortController.abort();
-    this.onClick?.();
-  };
-
   override render() {
     if (!this.item.subItem || this.item.subItem.length <= 0) return nothing;
     return html`<div class="ai-sub-menu">
@@ -75,6 +65,18 @@ export class AISubItemList extends WithDisposable(LitElement) {
       )}
     </div>`;
   }
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor item!: AIItemConfig;
+
+  @property({ attribute: false })
+  accessor onClick: (() => void) | undefined;
 }
 
 declare global {

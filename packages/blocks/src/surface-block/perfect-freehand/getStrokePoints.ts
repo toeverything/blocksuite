@@ -1,4 +1,5 @@
 import type { StrokeOptions, StrokePoint } from './types.js';
+
 import { add, dist, isEqual, lrp, sub, uni } from './vec.js';
 
 /**

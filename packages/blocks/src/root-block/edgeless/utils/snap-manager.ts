@@ -1,16 +1,17 @@
-import { Point } from '../../../_common/utils/rect.js';
 import type { SurfaceBlockComponent } from '../../../index.js';
 import type {
   ConnectorElementModel,
   SurfaceBlockModel,
 } from '../../../surface-block/index.js';
+import type { EdgelessRootService } from '../edgeless-root-service.js';
+
+import { Point } from '../../../_common/utils/rect.js';
 import {
   Bound,
+  Overlay,
   deserializeXYWH,
   getBoundsWithRotation,
-  Overlay,
 } from '../../../surface-block/index.js';
-import type { EdgelessRootService } from '../edgeless-root-service.js';
 import { isConnectable, isTopLevelBlock } from '../utils/query.js';
 
 interface Distance {
@@ -25,26 +26,7 @@ interface Distance {
 const ALIGN_THRESHOLD = 5;
 
 export class EdgelessSnapManager extends Overlay {
-  private get _surface() {
-    const surfaceModel = this._rootService.doc.getBlockByFlavour(
-      'affine:surface'
-    )[0] as SurfaceBlockModel;
-
-    return this._rootService.std.view.getBlock(
-      surfaceModel.id
-    ) as SurfaceBlockComponent;
-  }
-
   private _alignableBounds: Bound[] = [];
-
-  /**
-   * This variable holds reference lines that are calculated
-   * based on the self-alignment of the graphics. This alignment is determined
-   * according to various aspects of the graphic itself, such as the center, edges,
-   * corners, etc. It essentially represents the guidelines for the positioning
-   * and alignment within the individual graphic elements.
-   */
-  private _intraGraphicAlignLines: [Point, Point][] = [];
 
   /**
    * This variable contains reference lines that are
@@ -55,128 +37,17 @@ export class EdgelessSnapManager extends Overlay {
    */
   private _distributedAlignLines: [Point, Point][] = [];
 
+  /**
+   * This variable holds reference lines that are calculated
+   * based on the self-alignment of the graphics. This alignment is determined
+   * according to various aspects of the graphic itself, such as the center, edges,
+   * corners, etc. It essentially represents the guidelines for the positioning
+   * and alignment within the individual graphic elements.
+   */
+  private _intraGraphicAlignLines: [Point, Point][] = [];
+
   constructor(private _rootService: EdgelessRootService) {
     super();
-  }
-
-  private _getBoundsWithRotationByAlignable(
-    alignable: BlockSuite.EdgelessModelType
-  ) {
-    const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
-    const [x, y, w, h] = deserializeXYWH(alignable.xywh);
-    return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
-  }
-
-  private _calculateClosestDistances(bound: Bound, other: Bound): Distance {
-    // Calculate center-to-center and center-to-side distances
-    const centerXDistance = other.center[0] - bound.center[0];
-    const centerYDistance = other.center[1] - bound.center[1];
-
-    // Calculate center-to-side distances
-    const leftDistance = other.minX - bound.center[0];
-    const rightDistance = other.maxX - bound.center[0];
-    const topDistance = other.minY - bound.center[1];
-    const bottomDistance = other.maxY - bound.center[1];
-
-    // Calculate side-to-side distances
-    const leftToLeft = other.minX - bound.minX;
-    const leftToRight = other.maxX - bound.minX;
-    const rightToLeft = other.minX - bound.maxX;
-    const rightToRight = other.maxX - bound.maxX;
-
-    const topToTop = other.minY - bound.minY;
-    const topToBottom = other.maxY - bound.minY;
-    const bottomToTop = other.minY - bound.maxY;
-    const bottomToBottom = other.maxY - bound.maxY;
-
-    const xDistances = [
-      centerXDistance,
-      leftDistance,
-      rightDistance,
-      leftToLeft,
-      leftToRight,
-      rightToLeft,
-      rightToRight,
-    ];
-
-    const yDistances = [
-      centerYDistance,
-      topDistance,
-      bottomDistance,
-      topToTop,
-      topToBottom,
-      bottomToTop,
-      bottomToBottom,
-    ];
-
-    // Get absolute distances
-    const xDistancesAbs = xDistances.map(Math.abs);
-    const yDistancesAbs = yDistances.map(Math.abs);
-
-    // Get closest distances
-    const closestX = Math.min(...xDistancesAbs);
-    const closestY = Math.min(...yDistancesAbs);
-
-    const indexX = xDistancesAbs.indexOf(closestX);
-    const indexY = yDistancesAbs.indexOf(closestY);
-
-    // the x and y distances will be useful for locating the align point
-    return {
-      absXDistance: closestX,
-      absYDistance: closestY,
-      xDistance: xDistances[indexX],
-      yDistance: yDistances[indexY],
-      indexX,
-      indexY,
-    };
-  }
-
-  // Update X align point
-  private _updateXAlignPoint(
-    rst: { dx: number; dy: number },
-    bound: Bound,
-    other: Bound,
-    distance: Distance
-  ) {
-    const index = distance.indexX;
-    rst.dx = distance.xDistance;
-    const alignPointX = [
-      other.center[0],
-      other.minX,
-      other.maxX,
-      bound.minX + rst.dx,
-      bound.minX + rst.dx,
-      bound.maxX + rst.dx,
-      bound.maxX + rst.dx,
-    ][index];
-    this._intraGraphicAlignLines[0] = [
-      new Point(alignPointX, bound.center[1]),
-      new Point(alignPointX, other.center[1]),
-    ];
-  }
-
-  // Update Y align point
-  private _updateYAlignPoint(
-    rst: { dx: number; dy: number },
-    bound: Bound,
-    other: Bound,
-    distance: Distance
-  ) {
-    const index = distance.indexY;
-    rst.dy = distance.yDistance;
-    const alignPointY = [
-      other.center[1],
-      other.minY,
-      other.maxY,
-      bound.minY + rst.dy,
-      bound.minY + rst.dy,
-      bound.maxY + rst.dy,
-      bound.maxY + rst.dy,
-    ][index];
-    this._intraGraphicAlignLines[1] = [
-      new Point(bound.center[0], alignPointY),
-      new Point(other.center[0], alignPointY),
-    ];
   }
 
   private _alignDistributeHorizontally(
@@ -324,55 +195,138 @@ export class EdgelessSnapManager extends Overlay {
     }
   }
 
+  private _calculateClosestDistances(bound: Bound, other: Bound): Distance {
+    // Calculate center-to-center and center-to-side distances
+    const centerXDistance = other.center[0] - bound.center[0];
+    const centerYDistance = other.center[1] - bound.center[1];
+
+    // Calculate center-to-side distances
+    const leftDistance = other.minX - bound.center[0];
+    const rightDistance = other.maxX - bound.center[0];
+    const topDistance = other.minY - bound.center[1];
+    const bottomDistance = other.maxY - bound.center[1];
+
+    // Calculate side-to-side distances
+    const leftToLeft = other.minX - bound.minX;
+    const leftToRight = other.maxX - bound.minX;
+    const rightToLeft = other.minX - bound.maxX;
+    const rightToRight = other.maxX - bound.maxX;
+
+    const topToTop = other.minY - bound.minY;
+    const topToBottom = other.maxY - bound.minY;
+    const bottomToTop = other.minY - bound.maxY;
+    const bottomToBottom = other.maxY - bound.maxY;
+
+    const xDistances = [
+      centerXDistance,
+      leftDistance,
+      rightDistance,
+      leftToLeft,
+      leftToRight,
+      rightToLeft,
+      rightToRight,
+    ];
+
+    const yDistances = [
+      centerYDistance,
+      topDistance,
+      bottomDistance,
+      topToTop,
+      topToBottom,
+      bottomToTop,
+      bottomToBottom,
+    ];
+
+    // Get absolute distances
+    const xDistancesAbs = xDistances.map(Math.abs);
+    const yDistancesAbs = yDistances.map(Math.abs);
+
+    // Get closest distances
+    const closestX = Math.min(...xDistancesAbs);
+    const closestY = Math.min(...yDistancesAbs);
+
+    const indexX = xDistancesAbs.indexOf(closestX);
+    const indexY = yDistancesAbs.indexOf(closestY);
+
+    // the x and y distances will be useful for locating the align point
+    return {
+      absXDistance: closestX,
+      absYDistance: closestY,
+      xDistance: xDistances[indexX],
+      yDistance: yDistances[indexY],
+      indexX,
+      indexY,
+    };
+  }
+
   private _draw() {
     this._surface.refresh();
   }
 
-  setupAlignables(alignables: BlockSuite.EdgelessModelType[]): Bound {
-    if (alignables.length === 0) return new Bound();
-
-    const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
-      const connectors = this._rootService.getConnectors(el);
-
-      if (connectors.length > 0) {
-        prev = prev.concat(connectors);
-      }
-
-      return prev;
-    }, [] as ConnectorElementModel[]);
-
-    const { viewport } = this._rootService;
-    const viewportBounds = Bound.from(viewport.viewportBounds);
-    this._surface.renderer.addOverlay(this);
-    const canvasElements = this._rootService.elements;
-    const excludes = [...alignables, ...connectors];
-    this._alignableBounds = [];
-    (
-      [
-        ...this._rootService.blocks,
-        ...canvasElements,
-      ] as BlockSuite.EdgelessModelType[]
-    ).forEach(alignable => {
-      const bounds = this._getBoundsWithRotationByAlignable(alignable);
-      if (
-        viewportBounds.isOverlapWithBound(bounds) &&
-        !excludes.includes(alignable)
-      ) {
-        this._alignableBounds.push(bounds);
-      }
-    });
-
-    return alignables.reduce((prev, element) => {
-      const bounds = this._getBoundsWithRotationByAlignable(element);
-      return prev.unite(bounds);
-    }, Bound.deserialize(alignables[0].xywh));
+  private _getBoundsWithRotationByAlignable(
+    alignable: BlockSuite.EdgelessModelType
+  ) {
+    const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
+    const [x, y, w, h] = deserializeXYWH(alignable.xywh);
+    return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
   }
 
-  cleanupAlignables() {
-    this._alignableBounds = [];
-    this._intraGraphicAlignLines = [];
-    this._distributedAlignLines = [];
-    this._surface.renderer.removeOverlay(this);
+  private get _surface() {
+    const surfaceModel = this._rootService.doc.getBlockByFlavour(
+      'affine:surface'
+    )[0] as SurfaceBlockModel;
+
+    return this._rootService.std.view.getBlock(
+      surfaceModel.id
+    ) as SurfaceBlockComponent;
+  }
+
+  // Update X align point
+  private _updateXAlignPoint(
+    rst: { dx: number; dy: number },
+    bound: Bound,
+    other: Bound,
+    distance: Distance
+  ) {
+    const index = distance.indexX;
+    rst.dx = distance.xDistance;
+    const alignPointX = [
+      other.center[0],
+      other.minX,
+      other.maxX,
+      bound.minX + rst.dx,
+      bound.minX + rst.dx,
+      bound.maxX + rst.dx,
+      bound.maxX + rst.dx,
+    ][index];
+    this._intraGraphicAlignLines[0] = [
+      new Point(alignPointX, bound.center[1]),
+      new Point(alignPointX, other.center[1]),
+    ];
+  }
+
+  // Update Y align point
+  private _updateYAlignPoint(
+    rst: { dx: number; dy: number },
+    bound: Bound,
+    other: Bound,
+    distance: Distance
+  ) {
+    const index = distance.indexY;
+    rst.dy = distance.yDistance;
+    const alignPointY = [
+      other.center[1],
+      other.minY,
+      other.maxY,
+      bound.minY + rst.dy,
+      bound.minY + rst.dy,
+      bound.maxY + rst.dy,
+      bound.maxY + rst.dy,
+    ][index];
+    this._intraGraphicAlignLines[1] = [
+      new Point(bound.center[0], alignPointY),
+      new Point(other.center[0], alignPointY),
+    ];
   }
 
   align(bound: Bound): { dx: number; dy: number } {
@@ -406,6 +360,13 @@ export class EdgelessSnapManager extends Overlay {
     }
     this._draw();
     return rst;
+  }
+
+  cleanupAlignables() {
+    this._alignableBounds = [];
+    this._intraGraphicAlignLines = [];
+    this._distributedAlignLines = [];
+    this._surface.renderer.removeOverlay(this);
   }
 
   override render(ctx: CanvasRenderingContext2D) {
@@ -457,5 +418,45 @@ export class EdgelessSnapManager extends Overlay {
       }
       ctx.stroke(new Path2D(d));
     });
+  }
+
+  setupAlignables(alignables: BlockSuite.EdgelessModelType[]): Bound {
+    if (alignables.length === 0) return new Bound();
+
+    const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
+      const connectors = this._rootService.getConnectors(el);
+
+      if (connectors.length > 0) {
+        prev = prev.concat(connectors);
+      }
+
+      return prev;
+    }, [] as ConnectorElementModel[]);
+
+    const { viewport } = this._rootService;
+    const viewportBounds = Bound.from(viewport.viewportBounds);
+    this._surface.renderer.addOverlay(this);
+    const canvasElements = this._rootService.elements;
+    const excludes = [...alignables, ...connectors];
+    this._alignableBounds = [];
+    (
+      [
+        ...this._rootService.blocks,
+        ...canvasElements,
+      ] as BlockSuite.EdgelessModelType[]
+    ).forEach(alignable => {
+      const bounds = this._getBoundsWithRotationByAlignable(alignable);
+      if (
+        viewportBounds.isOverlapWithBound(bounds) &&
+        !excludes.includes(alignable)
+      ) {
+        this._alignableBounds.push(bounds);
+      }
+    });
+
+    return alignables.reduce((prev, element) => {
+      const bounds = this._getBoundsWithRotationByAlignable(element);
+      return prev.unite(bounds);
+    }, Bound.deserialize(alignables[0].xywh));
   }
 }

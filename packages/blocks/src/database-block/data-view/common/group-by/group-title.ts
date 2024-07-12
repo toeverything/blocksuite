@@ -1,10 +1,11 @@
 import { nothing } from 'lit';
 import { html } from 'lit/static-html.js';
 
-import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import { MoreHorizontalIcon, PlusIcon } from '../icons/index.js';
 import type { GroupData } from './helper.js';
 import type { GroupRenderProps } from './matcher.js';
+
+import { renderUniLit } from '../../utils/uni-component/uni-component.js';
+import { MoreHorizontalIcon, PlusIcon } from '../icons/index.js';
 
 function GroupHeaderCount(group: GroupData) {
   const cards = group.rows;

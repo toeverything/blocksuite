@@ -4,6 +4,7 @@ import type {
   TextSelection,
 } from '@blocksuite/block-std';
 import type { AffineAIPanelWidget } from '@blocksuite/blocks';
+
 import { isInsideEdgelessEditor } from '@blocksuite/blocks';
 import { type BlockModel, Slice } from '@blocksuite/store';
 

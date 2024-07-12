@@ -3,6 +3,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { EmbedBlockModel } from '../../../../../_common/embed-block-helper/index.js';
+
 import { Bound } from '../../../../../surface-block/index.js';
 import { isEmbedHtmlBlock } from '../../../utils/query.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';

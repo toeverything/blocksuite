@@ -1,11 +1,12 @@
-import {
-  asyncFocusRichText,
-  handleNativeRangeAtPoint,
-  type NoteChildrenFlavour,
-  type Point,
-} from '../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
+
+import {
+  type NoteChildrenFlavour,
+  type Point,
+  asyncFocusRichText,
+  handleNativeRangeAtPoint,
+} from '../../../_common/utils/index.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,

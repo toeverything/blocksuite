@@ -1,8 +1,7 @@
-import './utils/declare-test-window.js';
-
 import { expect } from '@playwright/test';
 
 import {
+  SHORT_KEY,
   addNoteByClick,
   captureHistory,
   click,
@@ -25,7 +24,6 @@ import {
   redoByClick,
   redoByKeyboard,
   setSelection,
-  SHORT_KEY,
   switchEditorMode,
   switchReadonly,
   toggleDarkMode,
@@ -46,6 +44,7 @@ import {
   assertTitle,
   defaultStore,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 import { getFormatBar } from './utils/query.js';
 

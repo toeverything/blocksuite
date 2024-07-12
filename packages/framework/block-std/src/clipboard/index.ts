@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type {
   BaseAdapter,
   BlockSnapshot,
@@ -6,6 +5,8 @@ import type {
   JobMiddleware,
   Slice,
 } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { Job } from '@blocksuite/store';
 import * as lz from 'lz-string';
 
@@ -20,24 +21,8 @@ type AdapterMap = Map<
 >;
 
 export class Clipboard {
-  get configs() {
-    return this._getJob().adapterConfigs;
-  }
-
-  private _jobMiddlewares: JobMiddleware[] = [];
-
   private _adapterMap: AdapterMap = new Map();
 
-  constructor(public std: BlockSuite.Std) {}
-
-  private _getJob() {
-    return new Job({
-      middlewares: this._jobMiddlewares,
-      collection: this.std.collection,
-    });
-  }
-
-  // Gated by https://developer.mozilla.org/en-US/docs/Glossary/Transient_activation
   // Need to be cloned to a map for later use
   private _getDataByType = (clipboardData: DataTransfer) => {
     const data = new Map<string, string | File[]>();
@@ -60,16 +45,6 @@ export class Clipboard {
       return '';
     };
   };
-
-  private async _getClipboardItem(slice: Slice, type: string) {
-    const job = this._getJob();
-    const adapterItem = this._adapterMap.get(type);
-    assertExists(adapterItem);
-    const { adapter } = adapterItem;
-    const adapterInstance = new adapter(job);
-    const { file } = await adapterInstance.fromSlice(slice);
-    return file;
-  }
 
   private _getSnapshotByPriority = async (
     getItem: (type: string) => string | File[],
@@ -121,28 +96,48 @@ export class Clipboard {
     return null;
   };
 
-  use = (middleware: JobMiddleware) => {
-    this._jobMiddlewares.push(middleware);
-  };
-
-  unuse = (middleware: JobMiddleware) => {
-    this._jobMiddlewares = this._jobMiddlewares.filter(m => m !== middleware);
-  };
-
-  registerAdapter = <T extends BaseAdapter>(
-    mimeType: string,
-    adapter: AdapterConstructor<T>,
-    priority = 0
-  ) => {
-    this._adapterMap.set(mimeType, { adapter, priority });
-  };
-
-  unregisterAdapter = (mimeType: string) => {
-    this._adapterMap.delete(mimeType);
-  };
+  private _jobMiddlewares: JobMiddleware[] = [];
 
   copy = async (slice: Slice) => {
     return this.copySlice(slice);
+  };
+
+  // Gated by https://developer.mozilla.org/en-US/docs/Glossary/Transient_activation
+  copySlice = async (slice: Slice) => {
+    const adapterKeys = Array.from(this._adapterMap.keys());
+
+    await this.writeToClipboard(async _items => {
+      const items = { ..._items };
+
+      await Promise.all(
+        adapterKeys.map(async type => {
+          const item = await this._getClipboardItem(slice, type);
+          if (typeof item === 'string') {
+            items[type] = item;
+          }
+        })
+      );
+      return items;
+    });
+  };
+
+  duplicateSlice = async (
+    slice: Slice,
+    doc: Doc,
+    parent?: string,
+    index?: number,
+    type = 'BLOCKSUITE/SNAPSHOT'
+  ) => {
+    const items = {
+      [type]: await this._getClipboardItem(slice, type),
+    };
+
+    await this._getSnapshotByPriority(
+      type => (items[type] as string | File[]) ?? '',
+      doc,
+      parent,
+      index
+    );
   };
 
   paste = async (
@@ -176,6 +171,68 @@ export class Clipboard {
       return slice;
     }
   };
+
+  pasteBlockSnapshot = async (
+    snapshot: BlockSnapshot,
+    doc: Doc,
+    parent?: string,
+    index?: number
+  ) => {
+    return this._getJob().snapshotToBlock(snapshot, doc, parent, index);
+  };
+
+  registerAdapter = <T extends BaseAdapter>(
+    mimeType: string,
+    adapter: AdapterConstructor<T>,
+    priority = 0
+  ) => {
+    this._adapterMap.set(mimeType, { adapter, priority });
+  };
+
+  unregisterAdapter = (mimeType: string) => {
+    this._adapterMap.delete(mimeType);
+  };
+
+  unuse = (middleware: JobMiddleware) => {
+    this._jobMiddlewares = this._jobMiddlewares.filter(m => m !== middleware);
+  };
+
+  use = (middleware: JobMiddleware) => {
+    this._jobMiddlewares.push(middleware);
+  };
+
+  constructor(public std: BlockSuite.Std) {}
+
+  private async _getClipboardItem(slice: Slice, type: string) {
+    const job = this._getJob();
+    const adapterItem = this._adapterMap.get(type);
+    assertExists(adapterItem);
+    const { adapter } = adapterItem;
+    const adapterInstance = new adapter(job);
+    const { file } = await adapterInstance.fromSlice(slice);
+    return file;
+  }
+
+  private _getJob() {
+    return new Job({
+      middlewares: this._jobMiddlewares,
+      collection: this.std.collection,
+    });
+  }
+
+  readFromClipboard(clipboardData: DataTransfer) {
+    const items = clipboardData.getData('text/html');
+    const domParser = new DOMParser();
+    const doc = domParser.parseFromString(items, 'text/html');
+    const dom = doc.querySelector<HTMLDivElement>('[data-blocksuite-snapshot]');
+    assertExists(dom);
+    const json = JSON.parse(
+      lz.decompressFromEncodedURIComponent(
+        dom.dataset.blocksuiteSnapshot as string
+      )
+    );
+    return json;
+  }
 
   async writeToClipboard(
     updateItems: (
@@ -224,63 +281,7 @@ export class Clipboard {
     await navigator.clipboard.write([new ClipboardItem(clipboardItems)]);
   }
 
-  readFromClipboard(clipboardData: DataTransfer) {
-    const items = clipboardData.getData('text/html');
-    const domParser = new DOMParser();
-    const doc = domParser.parseFromString(items, 'text/html');
-    const dom = doc.querySelector<HTMLDivElement>('[data-blocksuite-snapshot]');
-    assertExists(dom);
-    const json = JSON.parse(
-      lz.decompressFromEncodedURIComponent(
-        dom.dataset.blocksuiteSnapshot as string
-      )
-    );
-    return json;
+  get configs() {
+    return this._getJob().adapterConfigs;
   }
-
-  pasteBlockSnapshot = async (
-    snapshot: BlockSnapshot,
-    doc: Doc,
-    parent?: string,
-    index?: number
-  ) => {
-    return this._getJob().snapshotToBlock(snapshot, doc, parent, index);
-  };
-
-  copySlice = async (slice: Slice) => {
-    const adapterKeys = Array.from(this._adapterMap.keys());
-
-    await this.writeToClipboard(async _items => {
-      const items = { ..._items };
-
-      await Promise.all(
-        adapterKeys.map(async type => {
-          const item = await this._getClipboardItem(slice, type);
-          if (typeof item === 'string') {
-            items[type] = item;
-          }
-        })
-      );
-      return items;
-    });
-  };
-
-  duplicateSlice = async (
-    slice: Slice,
-    doc: Doc,
-    parent?: string,
-    index?: number,
-    type = 'BLOCKSUITE/SNAPSHOT'
-  ) => {
-    const items = {
-      [type]: await this._getClipboardItem(slice, type),
-    };
-
-    await this._getSnapshotByPriority(
-      type => (items[type] as string | File[]) ?? '',
-      doc,
-      parent,
-      index
-    );
-  };
 }

@@ -1,6 +1,3 @@
-import { curveToBezier } from '../points-on-curve/curve-to-bezier.js';
-import { pointsOnBezierCurves } from '../points-on-curve/index.js';
-import { pointsOnPath } from '../points-on-path/index.js';
 import type {
   Config,
   Drawable,
@@ -10,6 +7,10 @@ import type {
   ResolvedOptions,
 } from './core.js';
 import type { Point } from './geometry.js';
+
+import { curveToBezier } from '../points-on-curve/curve-to-bezier.js';
+import { pointsOnBezierCurves } from '../points-on-curve/index.js';
+import { pointsOnPath } from '../points-on-path/index.js';
 import { randomSeed } from './math.js';
 import {
   arc,
@@ -59,14 +60,18 @@ export class RoughGenerator {
     }
   }
 
-  private _o(options?: Options): ResolvedOptions {
-    return options
-      ? Object.assign({}, this.defaultOptions, options)
-      : this.defaultOptions;
+  static newSeed(): number {
+    return randomSeed();
   }
 
   private _d(shape: string, sets: OpSet[], options: ResolvedOptions): Drawable {
     return { shape, sets: sets || [], options: options || this.defaultOptions };
+  }
+
+  private _o(options?: Options): ResolvedOptions {
+    return options
+      ? Object.assign({}, this.defaultOptions, options)
+      : this.defaultOptions;
   }
 
   private fillSketch(drawing: OpSet, o: ResolvedOptions): PathInfo {
@@ -80,83 +85,6 @@ export class RoughGenerator {
       strokeWidth: fweight,
       fill: NOS,
     };
-  }
-
-  line(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    options?: Options
-  ): Drawable {
-    const o = this._o(options);
-    return this._d('line', [line(x1, y1, x2, y2, o)], o);
-  }
-
-  rectangle(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    options?: Options
-  ): Drawable {
-    const o = this._o(options);
-    const paths = [];
-    const outline = rectangle(x, y, width, height, o);
-    if (o.fill) {
-      const points: Point[] = [
-        [x, y],
-        [x + width, y],
-        [x + width, y + height],
-        [x, y + height],
-      ];
-      if (o.fillStyle === 'solid') {
-        paths.push(solidFillPolygon([points], o));
-      } else {
-        paths.push(patternFillPolygons([points], o));
-      }
-    }
-    if (o.stroke !== NOS) {
-      paths.push(outline);
-    }
-    return this._d('rectangle', paths, o);
-  }
-
-  ellipse(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    options?: Options
-  ): Drawable {
-    const o = this._o(options);
-    const paths: OpSet[] = [];
-    const ellipseParams = generateEllipseParams(width, height, o);
-    const ellipseResponse = ellipseWithParams(x, y, o, ellipseParams);
-    if (o.fill) {
-      if (o.fillStyle === 'solid') {
-        const shape = ellipseWithParams(x, y, o, ellipseParams).opset;
-        shape.type = 'fillPath';
-        paths.push(shape);
-      } else {
-        paths.push(patternFillPolygons([ellipseResponse.estimatedPoints], o));
-      }
-    }
-    if (o.stroke !== NOS) {
-      paths.push(ellipseResponse.opset);
-    }
-    return this._d('ellipse', paths, o);
-  }
-
-  circle(x: number, y: number, diameter: number, options?: Options): Drawable {
-    const ret = this.ellipse(x, y, diameter, diameter, options);
-    ret.shape = 'circle';
-    return ret;
-  }
-
-  linearPath(points: Point[], options?: Options): Drawable {
-    const o = this._o(options);
-    return this._d('linearPath', [linearPath(points, false, o)], o);
   }
 
   arc(
@@ -199,6 +127,12 @@ export class RoughGenerator {
     return this._d('arc', paths, o);
   }
 
+  circle(x: number, y: number, diameter: number, options?: Options): Drawable {
+    const ret = this.ellipse(x, y, diameter, diameter, options);
+    ret.shape = 'circle';
+    return ret;
+  }
+
   curve(points: Point[], options?: Options): Drawable {
     const o = this._o(options);
     const paths: OpSet[] = [];
@@ -222,21 +156,68 @@ export class RoughGenerator {
     return this._d('curve', paths, o);
   }
 
-  polygon(points: Point[], options?: Options): Drawable {
+  ellipse(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    options?: Options
+  ): Drawable {
     const o = this._o(options);
     const paths: OpSet[] = [];
-    const outline = linearPath(points, true, o);
+    const ellipseParams = generateEllipseParams(width, height, o);
+    const ellipseResponse = ellipseWithParams(x, y, o, ellipseParams);
     if (o.fill) {
       if (o.fillStyle === 'solid') {
-        paths.push(solidFillPolygon([points], o));
+        const shape = ellipseWithParams(x, y, o, ellipseParams).opset;
+        shape.type = 'fillPath';
+        paths.push(shape);
       } else {
-        paths.push(patternFillPolygons([points], o));
+        paths.push(patternFillPolygons([ellipseResponse.estimatedPoints], o));
       }
     }
     if (o.stroke !== NOS) {
-      paths.push(outline);
+      paths.push(ellipseResponse.opset);
     }
-    return this._d('polygon', paths, o);
+    return this._d('ellipse', paths, o);
+  }
+
+  line(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    options?: Options
+  ): Drawable {
+    const o = this._o(options);
+    return this._d('line', [line(x1, y1, x2, y2, o)], o);
+  }
+
+  linearPath(points: Point[], options?: Options): Drawable {
+    const o = this._o(options);
+    return this._d('linearPath', [linearPath(points, false, o)], o);
+  }
+
+  opsToPath(drawing: OpSet, fixedDecimals?: number): string {
+    let path = '';
+    for (const item of drawing.ops) {
+      const data =
+        typeof fixedDecimals === 'number' && fixedDecimals >= 0
+          ? item.data.map(d => +d.toFixed(fixedDecimals))
+          : item.data;
+      switch (item.op) {
+        case 'move':
+          path += `M${data[0]} ${data[1]} `;
+          break;
+        case 'bcurveTo':
+          path += `C${data[0]} ${data[1]}, ${data[2]} ${data[3]}, ${data[4]} ${data[5]} `;
+          break;
+        case 'lineTo':
+          path += `L${data[0]} ${data[1]} `;
+          break;
+      }
+    }
+    return path.trim();
   }
 
   path(d: string, options?: Options): Drawable {
@@ -279,26 +260,50 @@ export class RoughGenerator {
     return this._d('path', paths, o);
   }
 
-  opsToPath(drawing: OpSet, fixedDecimals?: number): string {
-    let path = '';
-    for (const item of drawing.ops) {
-      const data =
-        typeof fixedDecimals === 'number' && fixedDecimals >= 0
-          ? item.data.map(d => +d.toFixed(fixedDecimals))
-          : item.data;
-      switch (item.op) {
-        case 'move':
-          path += `M${data[0]} ${data[1]} `;
-          break;
-        case 'bcurveTo':
-          path += `C${data[0]} ${data[1]}, ${data[2]} ${data[3]}, ${data[4]} ${data[5]} `;
-          break;
-        case 'lineTo':
-          path += `L${data[0]} ${data[1]} `;
-          break;
+  polygon(points: Point[], options?: Options): Drawable {
+    const o = this._o(options);
+    const paths: OpSet[] = [];
+    const outline = linearPath(points, true, o);
+    if (o.fill) {
+      if (o.fillStyle === 'solid') {
+        paths.push(solidFillPolygon([points], o));
+      } else {
+        paths.push(patternFillPolygons([points], o));
       }
     }
-    return path.trim();
+    if (o.stroke !== NOS) {
+      paths.push(outline);
+    }
+    return this._d('polygon', paths, o);
+  }
+
+  rectangle(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    options?: Options
+  ): Drawable {
+    const o = this._o(options);
+    const paths = [];
+    const outline = rectangle(x, y, width, height, o);
+    if (o.fill) {
+      const points: Point[] = [
+        [x, y],
+        [x + width, y],
+        [x + width, y + height],
+        [x, y + height],
+      ];
+      if (o.fillStyle === 'solid') {
+        paths.push(solidFillPolygon([points], o));
+      } else {
+        paths.push(patternFillPolygons([points], o));
+      }
+    }
+    if (o.stroke !== NOS) {
+      paths.push(outline);
+    }
+    return this._d('rectangle', paths, o);
   }
 
   toPaths(drawable: Drawable): PathInfo[] {
@@ -333,9 +338,5 @@ export class RoughGenerator {
       }
     }
     return paths;
-  }
-
-  static newSeed(): number {
-    return randomSeed();
   }
 }

@@ -1,8 +1,9 @@
 import { noop } from '@blocksuite/global/utils';
 
-import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block.js';
 import type { EmbedLinkedDocModel } from './embed-linked-doc-model.js';
 import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
+
+import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block.js';
 noop(EmbedLinkedDocBlockComponent);
 
 export * from './embed-linked-doc-block.js';

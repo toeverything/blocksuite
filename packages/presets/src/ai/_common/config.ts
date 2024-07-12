@@ -3,13 +3,14 @@ import type {
   CopilotSelectionController,
   EdgelessElementToolbarWidget,
 } from '@blocksuite/blocks';
+import type { TemplateResult } from 'lit';
+
 import {
   type AIItemGroupConfig,
   type AISubItemConfig,
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   matchFlavours,
 } from '@blocksuite/blocks';
-import type { TemplateResult } from 'lit';
 
 import { actionToHandler } from '../actions/doc-handler.js';
 import { actionToHandler as edgelessActionToHandler } from '../actions/edgeless-handler.js';

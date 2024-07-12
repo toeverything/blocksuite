@@ -1,5 +1,6 @@
-import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import type { AffineAIPanelState } from '@blocksuite/blocks';
+
+import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import {
   type AffineAIPanelWidgetConfig,
   BlocksUtils,
@@ -9,7 +10,7 @@ import {
   ParagraphBlockComponent,
 } from '@blocksuite/blocks';
 import { type BlockSelector, BlockViewType, type Doc } from '@blocksuite/store';
-import { css, html, LitElement, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -72,6 +73,59 @@ type TextRendererOptions = {
 
 @customElement('ai-answer-text')
 export class AIAnswerText extends WithDisposable(LitElement) {
+  private _answers: string[] = [];
+
+  private _clearTimer = () => {
+    if (this._timer) {
+      clearInterval(this._timer);
+      this._timer = null;
+    }
+  };
+
+  private _doc!: Doc;
+
+  private _selector: BlockSelector = block =>
+    BlocksUtils.matchFlavours(block.model, [
+      'affine:page',
+      'affine:note',
+      'affine:surface',
+      'affine:paragraph',
+      'affine:code',
+      'affine:list',
+      'affine:divider',
+    ])
+      ? BlockViewType.Display
+      : BlockViewType.Hidden;
+
+  private _timer?: ReturnType<typeof setInterval> | null = null;
+
+  private _updateDoc = () => {
+    if (this._answers.length > 0) {
+      const latestAnswer = this._answers.pop();
+      this._answers = [];
+      if (latestAnswer) {
+        markDownToDoc(this.host, latestAnswer)
+          .then(doc => {
+            this._doc = doc.blockCollection.getDoc({
+              selector: this._selector,
+            });
+            this.disposables.add(() => {
+              doc.blockCollection.clearSelector(this._selector);
+            });
+            this._doc.awarenessStore.setReadonly(
+              this._doc.blockCollection,
+              true
+            );
+            this.requestUpdate();
+            if (this.state !== 'generating') {
+              this._clearTimer();
+            }
+          })
+          .catch(console.error);
+      }
+    }
+  };
+
   static override styles = css`
     .ai-answer-text-editor.affine-page-viewport {
       background: transparent;
@@ -143,88 +197,11 @@ export class AIAnswerText extends WithDisposable(LitElement) {
     ${customHeadingStyles}
   `;
 
-  @query('.ai-answer-text-container')
-  private accessor _container!: HTMLDivElement;
-
-  private _doc!: Doc;
-
-  private _answers: string[] = [];
-
-  private _timer?: ReturnType<typeof setInterval> | null = null;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor answer!: string;
-
-  @property({ attribute: false })
-  accessor options!: TextRendererOptions;
-
-  @property({ attribute: false })
-  accessor state: AffineAIPanelState | undefined = undefined;
-
   private _onWheel(e: MouseEvent) {
     e.stopPropagation();
     if (this.state === 'generating') {
       e.preventDefault();
     }
-  }
-
-  private _clearTimer = () => {
-    if (this._timer) {
-      clearInterval(this._timer);
-      this._timer = null;
-    }
-  };
-
-  private _selector: BlockSelector = block =>
-    BlocksUtils.matchFlavours(block.model, [
-      'affine:page',
-      'affine:note',
-      'affine:surface',
-      'affine:paragraph',
-      'affine:code',
-      'affine:list',
-      'affine:divider',
-    ])
-      ? BlockViewType.Display
-      : BlockViewType.Hidden;
-
-  private _updateDoc = () => {
-    if (this._answers.length > 0) {
-      const latestAnswer = this._answers.pop();
-      this._answers = [];
-      if (latestAnswer) {
-        markDownToDoc(this.host, latestAnswer)
-          .then(doc => {
-            this._doc = doc.blockCollection.getDoc({
-              selector: this._selector,
-            });
-            this.disposables.add(() => {
-              doc.blockCollection.clearSelector(this._selector);
-            });
-            this._doc.awarenessStore.setReadonly(
-              this._doc.blockCollection,
-              true
-            );
-            this.requestUpdate();
-            if (this.state !== 'generating') {
-              this._clearTimer();
-            }
-          })
-          .catch(console.error);
-      }
-    }
-  };
-
-  override shouldUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('answer')) {
-      this._answers.push(this.answer);
-      return false;
-    }
-
-    return true;
   }
 
   override connectedCallback() {
@@ -240,14 +217,6 @@ export class AIAnswerText extends WithDisposable(LitElement) {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._clearTimer();
-  }
-
-  override updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
-    requestAnimationFrame(() => {
-      if (!this._container) return;
-      this._container.scrollTop = this._container.scrollHeight;
-    });
   }
 
   override render() {
@@ -273,6 +242,38 @@ export class AIAnswerText extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  override shouldUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('answer')) {
+      this._answers.push(this.answer);
+      return false;
+    }
+
+    return true;
+  }
+
+  override updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+    requestAnimationFrame(() => {
+      if (!this._container) return;
+      this._container.scrollTop = this._container.scrollHeight;
+    });
+  }
+
+  @query('.ai-answer-text-container')
+  private accessor _container!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor answer!: string;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor options!: TextRendererOptions;
+
+  @property({ attribute: false })
+  accessor state: AffineAIPanelState | undefined = undefined;
 }
 
 declare global {

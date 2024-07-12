@@ -1,17 +1,17 @@
-import '../toolbar/separator.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { autoPlacement, offset, type Placement, size } from '@floating-ui/dom';
-import { html, LitElement, nothing } from 'lit';
+import { type Placement, autoPlacement, offset, size } from '@floating-ui/dom';
+import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+
+import type { FilterableListItem, FilterableListOptions } from './types.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../consts.js';
 import { DoneIcon } from '../../icons/database.js';
 import { SearchIcon } from '../../icons/text.js';
 import { type AdvancedPortalOptions, createLitPortal } from '../portal.js';
+import '../toolbar/separator.js';
 import { filterableListStyles } from './styles.js';
-import type { FilterableListItem, FilterableListOptions } from './types.js';
 
 export * from './types.js';
 
@@ -20,69 +20,6 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
   LitElement
 ) {
   static override styles = filterableListStyles;
-
-  @query('#filter-input')
-  private accessor _filterInput!: HTMLInputElement;
-
-  @query('.filterable-item.focussed')
-  private accessor _focussedItem!: HTMLElement | null;
-
-  @state()
-  private accessor _filterText = '';
-
-  @state()
-  private accessor _curFocusIndex = 0;
-
-  @property({ attribute: false })
-  accessor placement: Placement | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor abortController: AbortController | null = null;
-
-  @property({ attribute: false })
-  accessor listFilter:
-    | ((a: FilterableListItem<Props>, b: FilterableListItem<Props>) => number)
-    | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor options!: FilterableListOptions<Props>;
-
-  private _filterItems() {
-    const searchFilter = !this._filterText
-      ? this.options.items
-      : this.options.items.filter(
-          item =>
-            item.name.startsWith(this._filterText.toLowerCase()) ||
-            item.aliases?.some(alias =>
-              alias.startsWith(this._filterText.toLowerCase())
-            )
-        );
-    return searchFilter.sort((a, b) => {
-      const isActiveA = this.options.active?.(a);
-      const isActiveB = this.options.active?.(b);
-
-      if (isActiveA && !isActiveB) return -Infinity;
-      if (!isActiveA && isActiveB) return Infinity;
-
-      return this.listFilter?.(a, b) ?? Infinity;
-    });
-  }
-
-  private _select(item: FilterableListItem) {
-    this.abortController?.abort();
-    this.options.onSelect(item);
-  }
-
-  private _scrollFocusedItemIntoView() {
-    this.updateComplete
-      .then(() => {
-        this._focussedItem?.scrollIntoView({
-          block: 'nearest',
-          inline: 'start',
-        });
-      })
-      .catch(console.error);
-  }
 
   private _buildContent(items: FilterableListItem<Props>[]) {
     return items.map((item, idx) => {
@@ -107,6 +44,43 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
         </icon-button>
       `;
     });
+  }
+
+  private _filterItems() {
+    const searchFilter = !this._filterText
+      ? this.options.items
+      : this.options.items.filter(
+          item =>
+            item.name.startsWith(this._filterText.toLowerCase()) ||
+            item.aliases?.some(alias =>
+              alias.startsWith(this._filterText.toLowerCase())
+            )
+        );
+    return searchFilter.sort((a, b) => {
+      const isActiveA = this.options.active?.(a);
+      const isActiveB = this.options.active?.(b);
+
+      if (isActiveA && !isActiveB) return -Infinity;
+      if (!isActiveA && isActiveB) return Infinity;
+
+      return this.listFilter?.(a, b) ?? Infinity;
+    });
+  }
+
+  private _scrollFocusedItemIntoView() {
+    this.updateComplete
+      .then(() => {
+        this._focussedItem?.scrollIntoView({
+          block: 'nearest',
+          inline: 'start',
+        });
+      })
+      .catch(console.error);
+  }
+
+  private _select(item: FilterableListItem) {
+    this.abortController?.abort();
+    this.options.onSelect(item);
   }
 
   override connectedCallback() {
@@ -176,6 +150,32 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
       </div>
     `;
   }
+
+  @state()
+  private accessor _curFocusIndex = 0;
+
+  @query('#filter-input')
+  private accessor _filterInput!: HTMLInputElement;
+
+  @state()
+  private accessor _filterText = '';
+
+  @query('.filterable-item.focussed')
+  private accessor _focussedItem!: HTMLElement | null;
+
+  @property({ attribute: false })
+  accessor abortController: AbortController | null = null;
+
+  @property({ attribute: false })
+  accessor listFilter:
+    | ((a: FilterableListItem<Props>, b: FilterableListItem<Props>) => number)
+    | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor options!: FilterableListOptions<Props>;
+
+  @property({ attribute: false })
+  accessor placement: Placement | undefined = undefined;
 }
 
 export function showPopFilterableList({

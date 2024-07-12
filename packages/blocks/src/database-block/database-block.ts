@@ -1,11 +1,14 @@
-import './components/title/index.js';
-
 import { RangeManager } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
+
+import type { NoteBlockComponent } from '../note-block/index.js';
+import type { AffineInnerModalWidget } from '../root-block/index.js';
+import type { DatabaseBlockModel } from './database-model.js';
+import type { DatabaseBlockService } from './database-service.js';
 
 import {
   BlockComponent,
@@ -18,8 +21,6 @@ import {
   MoreHorizontalIcon,
 } from '../_common/icons/index.js';
 import { Rect } from '../_common/utils/index.js';
-import type { NoteBlockComponent } from '../note-block/index.js';
-import type { AffineInnerModalWidget } from '../root-block/index.js';
 import {
   AffineDragHandleWidget,
   EdgelessRootBlockComponent,
@@ -29,24 +30,23 @@ import {
   getDropResult,
 } from '../root-block/widgets/drag-handle/utils.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
+import './components/title/index.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 import { dataViewCommonStyle } from './data-view/common/css-variable.js';
 import {
-  DatabaseSelection,
   DataView,
   type DataViewExpose,
   type DataViewProps,
   type DataViewSelection,
   type DataViewWidget,
   type DataViewWidgetProps,
+  DatabaseSelection,
+  type ViewSource,
   defineUniComponent,
   renderUniLit,
-  type ViewSource,
   widgetPresets,
 } from './data-view/index.js';
-import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
-import type { DatabaseBlockService } from './database-service.js';
 import { DatabaseBlockViewSource } from './view-source.js';
 
 @customElement('affine-database')
@@ -54,127 +54,13 @@ export class DatabaseBlockComponent extends BlockComponent<
   DatabaseBlockModel,
   DatabaseBlockService
 > {
-  override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>('affine-note');
-      return note;
-    }
-    return this.rootElement;
-  }
-
-  get view() {
-    return this.dataView.expose;
-  }
-
-  get dataSource(): DatabaseBlockDataSource {
-    if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDataSource(this.host, {
-        pageId: this.host.doc.id,
-        blockId: this.model.id,
-      });
-    }
-    return this._dataSource;
-  }
-
-  get viewSource(): ViewSource {
-    if (!this._viewSource) {
-      this._viewSource = new DatabaseBlockViewSource(this.model);
-    }
-    return this._viewSource;
-  }
-
-  get getFlag() {
-    return this.host.doc.awarenessStore.getFlag.bind(
-      this.host.doc.awarenessStore
-    );
-  }
-
-  get innerModalWidget() {
-    return this.rootElement!.widgetElements[
-      AFFINE_INNER_MODAL_WIDGET
-    ] as AffineInnerModalWidget;
-  }
-
-  static override styles = css`
-    ${unsafeCSS(dataViewCommonStyle('affine-database'))}
-    affine-database {
-      display: block;
-      border-radius: 8px;
-      background-color: var(--affine-background-primary-color);
-      padding: 8px;
-      margin: 8px -8px -8px;
-    }
-
-    .database-block-selected {
-      background-color: var(--affine-hover-color);
-      border-radius: 4px;
-    }
-
-    .database-ops {
-      margin-top: 4px;
-      padding: 2px;
-      border-radius: 4px;
-      display: flex;
-      cursor: pointer;
-    }
-
-    .database-ops svg {
-      width: 16px;
-      height: 16px;
-      color: var(--affine-icon-color);
-    }
-
-    .database-ops:hover {
-      background-color: var(--affine-hover-color);
-    }
-  `;
-
-  private dataView = new DataView();
-
-  private _dataSource?: DatabaseBlockDataSource;
-
-  private _viewSource?: ViewSource;
-
-  indicator = new DragIndicator();
-
-  toolsWidget: DataViewWidget = widgetPresets.createTools({
-    table: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-      widgetPresets.tools.tableAddRow,
-    ],
-    kanban: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-    ],
-  });
-
-  headerWidget: DataViewWidget = defineUniComponent(
-    (props: DataViewWidgetProps) => {
-      return html`
-        <div style="margin-bottom: 16px;display:flex;flex-direction: column">
-          <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
-            ${this.renderTitle(props.viewMethods)} ${this.renderDatabaseOps()}
-          </div>
-          <div
-            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
-          >
-            <div style="flex:1">
-              ${renderUniLit(widgetPresets.viewBar, props)}
-            </div>
-            ${renderUniLit(this.toolsWidget, props)}
-          </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
-        </div>
-      `;
-    }
-  );
-
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
+  _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
+    return {
+      dispose: this.host.event.bindHotkey(hotkeys, {
+        path: this.topContenteditableElement?.path ?? this.path,
+      }),
+    };
+  };
 
   private _clickDatabaseOps = (e: MouseEvent) => {
     popMenu(e.currentTarget as HTMLElement, {
@@ -226,14 +112,19 @@ export class DatabaseBlockComponent extends BlockComponent<
     });
   };
 
-  private renderDatabaseOps() {
-    if (this.doc.readonly) {
-      return nothing;
-    }
-    return html` <div class="database-ops" @click="${this._clickDatabaseOps}">
-      ${MoreHorizontalIcon}
-    </div>`;
-  }
+  private _dataSource?: DatabaseBlockDataSource;
+
+  _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
+    return {
+      dispose: this.host.event.add(name, handler, {
+        path: this.path,
+      }),
+    };
+  };
+
+  private _viewSource?: ViewSource;
+
+  private dataView = new DataView();
 
   private renderTitle = (dataViewMethod: DataViewExpose) => {
     const addRow = () => dataViewMethod.addRow?.('start');
@@ -244,6 +135,67 @@ export class DatabaseBlockComponent extends BlockComponent<
       .onPressEnterKey="${addRow}"
     ></affine-database-title>`;
   };
+
+  static override styles = css`
+    ${unsafeCSS(dataViewCommonStyle('affine-database'))}
+    affine-database {
+      display: block;
+      border-radius: 8px;
+      background-color: var(--affine-background-primary-color);
+      padding: 8px;
+      margin: 8px -8px -8px;
+    }
+
+    .database-block-selected {
+      background-color: var(--affine-hover-color);
+      border-radius: 4px;
+    }
+
+    .database-ops {
+      margin-top: 4px;
+      padding: 2px;
+      border-radius: 4px;
+      display: flex;
+      cursor: pointer;
+    }
+
+    .database-ops svg {
+      width: 16px;
+      height: 16px;
+      color: var(--affine-icon-color);
+    }
+
+    .database-ops:hover {
+      background-color: var(--affine-hover-color);
+    }
+  `;
+
+  getRootService = () => {
+    return this.std.spec.getService('affine:page');
+  };
+
+  headerWidget: DataViewWidget = defineUniComponent(
+    (props: DataViewWidgetProps) => {
+      return html`
+        <div style="margin-bottom: 16px;display:flex;flex-direction: column">
+          <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
+            ${this.renderTitle(props.viewMethods)} ${this.renderDatabaseOps()}
+          </div>
+          <div
+            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
+          >
+            <div style="flex:1">
+              ${renderUniLit(widgetPresets.viewBar, props)}
+            </div>
+            ${renderUniLit(this.toolsWidget, props)}
+          </div>
+          ${renderUniLit(widgetPresets.filterBar, props)}
+        </div>
+      `;
+    }
+  );
+
+  indicator = new DragIndicator();
 
   onDrag = (evt: MouseEvent, id: string): (() => void) => {
     const result = getDropResult(evt);
@@ -281,6 +233,47 @@ export class DatabaseBlockComponent extends BlockComponent<
     this.indicator.remove();
     return () => {};
   };
+
+  selectionUpdated = new Slot<DataViewSelection | undefined>();
+
+  setSelection = (selection: DataViewSelection | undefined) => {
+    this.selection.setGroup(
+      'note',
+      selection
+        ? [
+            new DatabaseSelection({
+              blockId: this.blockId,
+              viewSelection: selection,
+            }),
+          ]
+        : []
+    );
+  };
+
+  toolsWidget: DataViewWidget = widgetPresets.createTools({
+    table: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+      widgetPresets.tools.tableAddRow,
+    ],
+    kanban: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+    ],
+  });
+
+  private renderDatabaseOps() {
+    if (this.doc.readonly) {
+      return nothing;
+    }
+    return html` <div class="database-ops" @click="${this._clickDatabaseOps}">
+      ${MoreHorizontalIcon}
+    </div>`;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -355,40 +348,6 @@ export class DatabaseBlockComponent extends BlockComponent<
     );
   }
 
-  setSelection = (selection: DataViewSelection | undefined) => {
-    this.selection.setGroup(
-      'note',
-      selection
-        ? [
-            new DatabaseSelection({
-              blockId: this.blockId,
-              viewSelection: selection,
-            }),
-          ]
-        : []
-    );
-  };
-
-  _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
-    return {
-      dispose: this.host.event.bindHotkey(hotkeys, {
-        path: this.topContenteditableElement?.path ?? this.path,
-      }),
-    };
-  };
-
-  _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
-    return {
-      dispose: this.host.event.add(name, handler, {
-        path: this.path,
-      }),
-    };
-  };
-
-  getRootService = () => {
-    return this.std.spec.getService('affine:page');
-  };
-
   override renderBlock() {
     const peekViewService = this.getRootService().peekViewService;
     return html`
@@ -416,6 +375,47 @@ export class DatabaseBlockComponent extends BlockComponent<
         })}
       </div>
     `;
+  }
+
+  get dataSource(): DatabaseBlockDataSource {
+    if (!this._dataSource) {
+      this._dataSource = new DatabaseBlockDataSource(this.host, {
+        pageId: this.host.doc.id,
+        blockId: this.model.id,
+      });
+    }
+    return this._dataSource;
+  }
+
+  get getFlag() {
+    return this.host.doc.awarenessStore.getFlag.bind(
+      this.host.doc.awarenessStore
+    );
+  }
+
+  get innerModalWidget() {
+    return this.rootElement!.widgetElements[
+      AFFINE_INNER_MODAL_WIDGET
+    ] as AffineInnerModalWidget;
+  }
+
+  override get topContenteditableElement() {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
+      const note = this.closest<NoteBlockComponent>('affine-note');
+      return note;
+    }
+    return this.rootElement;
+  }
+
+  get view() {
+    return this.dataView.expose;
+  }
+
+  get viewSource(): ViewSource {
+    if (!this._viewSource) {
+      this._viewSource = new DatabaseBlockViewSource(this.model);
+    }
+    return this._viewSource;
   }
 }
 

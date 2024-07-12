@@ -1,8 +1,9 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
-import { computed, SignalWatcher } from '@lit-labs/preact-signals';
-import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
+import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { type PropertyValues, type TemplateResult, nothing, render } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { when } from 'lit/directives/when.js';
@@ -10,153 +11,41 @@ import { html } from 'lit/static-html.js';
 
 import type { EventName, UIEventHandler } from '../../event/index.js';
 import type { BlockService } from '../../service/index.js';
-import { WithDisposable } from '../utils/with-disposable.js';
 import type { EditorHost } from './lit-host.js';
-import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
+
+import { WithDisposable } from '../utils/with-disposable.js';
+import { ShadowlessElement } from './shadowless-element.js';
 
 export class BlockElement<
   Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends SignalWatcher(WithDisposable(ShadowlessElement)) {
-  get parentBlockElement(): BlockElement {
-    const el = this.parentElement;
-    // TODO(mirone/#6534): find a better way to get block element from a node
-    return el?.closest('[data-block-id]') as BlockElement;
-  }
-
-  get childBlockElements() {
-    const childModels = this.model.children;
-    return childModels
-      .map(child => {
-        return this.std.view.getBlock(child.id);
-      })
-      .filter((x): x is BlockElement => !!x);
-  }
-
-  get rootElement(): BlockElement | null {
-    const rootId = this.doc.root?.id;
-    if (!rootId) {
-      return null;
-    }
-    const rootElement = this.host.view.getBlock(rootId);
-    return rootElement ?? null;
-  }
-
-  get topContenteditableElement(): BlockElement | null {
-    return this.rootElement;
-  }
-
-  get flavour(): string {
-    return this.model.flavour;
-  }
-
-  get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
-    return Object.keys(this.widgets).reduce((mapping, key) => {
-      return {
-        ...mapping,
-        [key]: this.host.view.viewFromPath('widget', [...this.path, key]),
-      };
-    }, {});
-  }
-
-  get selection() {
-    return this.host.selection;
-  }
-
-  get std() {
-    return this.host.std;
-  }
-
-  get blockId() {
-    return this.dataset.blockId as string;
-  }
-
-  get isVersionMismatch() {
-    const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
-    assertExists(
-      schema,
-      `Cannot find schema for flavour ${this.model.flavour}`
-    );
-    const expectedVersion = schema.version;
-    const actualVersion = this.model.version;
-    if (expectedVersion !== actualVersion) {
-      console.warn(
-        `Version mismatch for block ${this.model.id}, expected ${expectedVersion}, actual ${actualVersion}`
-      );
-      return true;
-    }
-
-    return false;
-  }
-
-  @state()
-  protected accessor _renderers: Array<(content: unknown) => unknown> = [
-    this.renderBlock,
-    this._renderMismatchBlock,
-    this._renderViewType,
-  ];
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor model!: Model;
-
-  @property({ attribute: false })
-  accessor content: TemplateResult | null = null;
-
-  @property({ attribute: false })
-  accessor viewType: BlockViewType = BlockViewType.Display;
-
-  @property({
-    attribute: false,
-    hasChanged(value, oldValue) {
-      if (!value || !oldValue) {
-        return value !== oldValue;
-      }
-      // Is empty object
-      if (!Object.keys(value).length && !Object.keys(oldValue).length) {
-        return false;
-      }
-      return value !== oldValue;
-    },
-  })
-  accessor widgets!: Record<WidgetName, TemplateResult>;
-
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @property({ attribute: false })
-  accessor dirty = false;
-
-  get selected() {
-    const selectedSignal = computed(() => {
-      const selection = this.std.selection.value.find(selection => {
-        return selection.blockId === this.blockId;
-      });
-
-      if (!selection) {
-        return null;
-      }
-
-      return selection;
-    });
-    return selectedSignal.value;
-  }
-
-  service!: Service;
+  handleEvent = (
+    name: EventName,
+    handler: UIEventHandler,
+    options?: { global?: boolean; flavour?: boolean }
+  ) => {
+    assertExists(this.path, 'Cannot bind block level hotkey without path');
+    const config = {
+      flavour: options?.global
+        ? undefined
+        : options?.flavour
+          ? this.model.flavour
+          : undefined,
+      path: options?.global || options?.flavour ? undefined : this.path,
+    };
+    this._disposables.add(this.host.event.add(name, handler, config));
+  };
 
   path!: string[];
 
-  private _renderViewType(content: unknown) {
-    return choose(this.viewType, [
-      [BlockViewType.Display, () => content],
-      [BlockViewType.Hidden, () => nothing],
-      [BlockViewType.Bypass, () => this.renderChildren(this.model)],
-    ]);
-  }
+  renderChildren = (model: BlockModel): TemplateResult => {
+    return this.host.renderChildren(model);
+  };
+
+  service!: Service;
 
   private _renderMismatchBlock(content: unknown) {
     return when(
@@ -175,57 +64,17 @@ export class BlockElement<
     );
   }
 
-  protected override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    await Promise.all(this.childBlockElements.map(el => el.updateComplete));
-    return result;
+  private _renderViewType(content: unknown) {
+    return choose(this.viewType, [
+      [BlockViewType.Display, () => content],
+      [BlockViewType.Hidden, () => nothing],
+      [BlockViewType.Bypass, () => this.renderChildren(this.model)],
+    ]);
   }
 
-  protected override update(changedProperties: PropertyValues): void {
-    // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
-    // We can restore this state through the `dirty` property.
-    if (this.dirty) {
-      // Here we made some hacks by referring to the source code of Lit.
-      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/lit-element/src/lit-element.ts#L162-L163
-      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1586-L1589
-      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1509-L1512
-      //@ts-ignore
-      this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>
-        //@ts-ignore
-        this.__propertyToAttribute(p, this[p as keyof this])
-      ) as undefined;
-      //@ts-ignore
-      this._$changedProperties = new Map();
-      this.isUpdatePending = false;
-      //@ts-ignore
-      this.__childPart = render(nothing, this.renderRoot);
-
-      this.updateComplete
-        .then(() => {
-          this.dirty = false;
-        })
-        .catch(console.error);
-    } else {
-      super.update(changedProperties);
-    }
+  addRenderer(renderer: (content: unknown) => unknown) {
+    this._renderers.push(renderer);
   }
-
-  handleEvent = (
-    name: EventName,
-    handler: UIEventHandler,
-    options?: { global?: boolean; flavour?: boolean }
-  ) => {
-    assertExists(this.path, 'Cannot bind block level hotkey without path');
-    const config = {
-      flavour: options?.global
-        ? undefined
-        : options?.flavour
-          ? this.model.flavour
-          : undefined,
-      path: options?.global || options?.flavour ? undefined : this.path,
-    };
-    this._disposables.add(this.host.event.add(name, handler, config));
-  };
 
   bindHotKey(
     keymap: Record<string, UIEventHandler>,
@@ -244,10 +93,6 @@ export class BlockElement<
     this._disposables.add(dispose);
     return dispose;
   }
-
-  renderChildren = (model: BlockModel): TemplateResult => {
-    return this.host.renderChildren(model);
-  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -286,6 +131,19 @@ export class BlockElement<
     });
   }
 
+  protected override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await Promise.all(this.childBlockElements.map(el => el.updateComplete));
+    return result;
+  }
+
+  override render() {
+    return this._renderers.reduce(
+      (acc, cur) => cur.call(this, acc),
+      nothing as unknown
+    );
+  }
+
   renderBlock(): unknown {
     return nothing;
   }
@@ -311,14 +169,158 @@ export class BlockElement<
     `;
   }
 
-  addRenderer(renderer: (content: unknown) => unknown) {
-    this._renderers.push(renderer);
+  protected override update(changedProperties: PropertyValues): void {
+    // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
+    // We can restore this state through the `dirty` property.
+    if (this.dirty) {
+      // Here we made some hacks by referring to the source code of Lit.
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/lit-element/src/lit-element.ts#L162-L163
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1586-L1589
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1509-L1512
+      //@ts-ignore
+      this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>
+        //@ts-ignore
+        this.__propertyToAttribute(p, this[p as keyof this])
+      ) as undefined;
+      //@ts-ignore
+      this._$changedProperties = new Map();
+      this.isUpdatePending = false;
+      //@ts-ignore
+      this.__childPart = render(nothing, this.renderRoot);
+
+      this.updateComplete
+        .then(() => {
+          this.dirty = false;
+        })
+        .catch(console.error);
+    } else {
+      super.update(changedProperties);
+    }
   }
 
-  override render() {
-    return this._renderers.reduce(
-      (acc, cur) => cur.call(this, acc),
-      nothing as unknown
-    );
+  get blockId() {
+    return this.dataset.blockId as string;
   }
+
+  get childBlockElements() {
+    const childModels = this.model.children;
+    return childModels
+      .map(child => {
+        return this.std.view.getBlock(child.id);
+      })
+      .filter((x): x is BlockElement => !!x);
+  }
+
+  get flavour(): string {
+    return this.model.flavour;
+  }
+
+  get isVersionMismatch() {
+    const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
+    assertExists(
+      schema,
+      `Cannot find schema for flavour ${this.model.flavour}`
+    );
+    const expectedVersion = schema.version;
+    const actualVersion = this.model.version;
+    if (expectedVersion !== actualVersion) {
+      console.warn(
+        `Version mismatch for block ${this.model.id}, expected ${expectedVersion}, actual ${actualVersion}`
+      );
+      return true;
+    }
+
+    return false;
+  }
+
+  get parentBlockElement(): BlockElement {
+    const el = this.parentElement;
+    // TODO(mirone/#6534): find a better way to get block element from a node
+    return el?.closest('[data-block-id]') as BlockElement;
+  }
+
+  get rootElement(): BlockElement | null {
+    const rootId = this.doc.root?.id;
+    if (!rootId) {
+      return null;
+    }
+    const rootElement = this.host.view.getBlock(rootId);
+    return rootElement ?? null;
+  }
+
+  get selected() {
+    const selectedSignal = computed(() => {
+      const selection = this.std.selection.value.find(selection => {
+        return selection.blockId === this.blockId;
+      });
+
+      if (!selection) {
+        return null;
+      }
+
+      return selection;
+    });
+    return selectedSignal.value;
+  }
+
+  get selection() {
+    return this.host.selection;
+  }
+
+  get std() {
+    return this.host.std;
+  }
+
+  get topContenteditableElement(): BlockElement | null {
+    return this.rootElement;
+  }
+
+  get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
+    return Object.keys(this.widgets).reduce((mapping, key) => {
+      return {
+        ...mapping,
+        [key]: this.host.view.viewFromPath('widget', [...this.path, key]),
+      };
+    }, {});
+  }
+
+  @state()
+  protected accessor _renderers: Array<(content: unknown) => unknown> = [
+    this.renderBlock,
+    this._renderMismatchBlock,
+    this._renderViewType,
+  ];
+
+  @property({ attribute: false })
+  accessor content: TemplateResult | null = null;
+
+  @property({ attribute: false })
+  accessor dirty = false;
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor model!: Model;
+
+  @property({ attribute: false })
+  accessor viewType: BlockViewType = BlockViewType.Display;
+
+  @property({
+    attribute: false,
+    hasChanged(value, oldValue) {
+      if (!value || !oldValue) {
+        return value !== oldValue;
+      }
+      // Is empty object
+      if (!Object.keys(value).length && !Object.keys(oldValue).length) {
+        return false;
+      }
+      return value !== oldValue;
+    },
+  })
+  accessor widgets!: Record<WidgetName, TemplateResult>;
 }

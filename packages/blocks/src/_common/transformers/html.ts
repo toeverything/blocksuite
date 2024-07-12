@@ -1,4 +1,5 @@
 import type { Doc } from '@blocksuite/store';
+
 import { Job } from '@blocksuite/store';
 
 import { HtmlAdapter } from '../adapters/index.js';

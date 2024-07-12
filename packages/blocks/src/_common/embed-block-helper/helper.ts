@@ -2,16 +2,18 @@ import type {
   BaseBlockTransformer,
   InternalPrimitives,
 } from '@blocksuite/store';
+
 import { defineBlockSchema } from '@blocksuite/store';
 
-import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
-import { isAbortError } from '../utils/helper.js';
 import type { EmbedBlockModel } from './embed-block-model.js';
 import type {
   EmbedProps,
   LinkPreviewData,
   LinkPreviewResponseData,
 } from './types.js';
+
+import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
+import { isAbortError } from '../utils/helper.js';
 
 export function createEmbedBlockSchema<
   Props extends object,
@@ -57,16 +59,6 @@ export function createEmbedBlockSchema<
 
 export class LinkPreviewer {
   private _endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
-
-  private _getStringFromHTML(html: string) {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.textContent;
-  }
-
-  setEndpoint = (endpoint: string) => {
-    this._endpoint = endpoint;
-  };
 
   query = async (
     url: string,
@@ -128,4 +120,14 @@ export class LinkPreviewer {
       };
     }
   };
+
+  setEndpoint = (endpoint: string) => {
+    this._endpoint = endpoint;
+  };
+
+  private _getStringFromHTML(html: string) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent;
+  }
 }

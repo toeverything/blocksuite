@@ -5,6 +5,7 @@ import type {
 } from '@blocksuite/inline';
 
 import type { AffineTextAttributes } from '../../inline/presets/affine-inline-specs.js';
+
 import { isStrictUrl } from '../../utils/url.js';
 
 const EDGE_IGNORED_ATTRIBUTES = ['code', 'link'] as const;

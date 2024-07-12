@@ -37,157 +37,6 @@ type RenderOption = {
 
 @customElement('affine-multi-tag-select')
 export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
-  private get color() {
-    if (!this._currentColor) {
-      this._currentColor = getTagColor();
-    }
-    return this._currentColor;
-  }
-
-  get isSingleMode() {
-    return this.mode === 'single';
-  }
-
-  private get selectedTag() {
-    return this.filteredOptions[this.selectedIndex];
-  }
-
-  static override styles = styles;
-
-  private filteredOptions: Array<RenderOption> = [];
-
-  @query('.select-input')
-  private accessor _selectInput!: HTMLInputElement;
-
-  @state()
-  private accessor text = '';
-
-  @state()
-  private accessor selectedIndex = 0;
-
-  private _currentColor: string | undefined = undefined;
-
-  @property()
-  accessor mode: 'multi' | 'single' = 'multi';
-
-  @property({ attribute: false })
-  accessor options: SelectTag[] = [];
-
-  @property({ attribute: false })
-  accessor onOptionsChange!: (options: SelectTag[]) => void;
-
-  @property({ attribute: false })
-  accessor value: string[] = [];
-
-  @property({ attribute: false })
-  accessor onChange!: (value: string[]) => void;
-
-  @property({ attribute: false })
-  accessor editComplete!: () => void;
-
-  private clearColor() {
-    this._currentColor = undefined;
-  }
-
-  private _onDeleteSelected = (selectedValue: string[], value: string) => {
-    const filteredValue = selectedValue.filter(item => item !== value);
-    this.onChange(filteredValue);
-  };
-
-  private _onInput = (event: KeyboardEvent) => {
-    this.text = (event.target as HTMLInputElement).value;
-  };
-
-  private optionsIdMap() {
-    return Object.fromEntries(this.options.map(v => [v.id, v]));
-  }
-
-  private getTagGroup(tag: SelectTag, map = this.optionsIdMap()): SelectTag[] {
-    const result = [];
-    let parentId = tag.parentId;
-    while (parentId) {
-      const parent = map[parentId];
-      result.unshift(parent);
-      parentId = parent.parentId;
-    }
-    return result;
-  }
-
-  private _onInputKeydown = (event: KeyboardEvent) => {
-    event.stopPropagation();
-    const inputValue = this.text.trim();
-    if (event.key === 'Backspace' && inputValue === '') {
-      this._onDeleteSelected(this.value, this.value[this.value.length - 1]);
-    } else if (event.key === 'Enter' && !event.isComposing) {
-      this.selectedTag?.select();
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      this.setSelectedOption(this.selectedIndex - 1);
-    } else if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      this.setSelectedOption(this.selectedIndex + 1);
-    } else if (event.key === 'Escape') {
-      this.editComplete();
-    } else if (event.key === 'Tab') {
-      event.preventDefault();
-      const selectTag = this.selectedTag;
-      if (selectTag) {
-        this.text = this.getTagFullName(selectTag, selectTag.group);
-      }
-    }
-  };
-
-  private setSelectedOption(index: number) {
-    this.selectedIndex = rangeWrap(index, 0, this.filteredOptions.length);
-  }
-
-  private _onSelect = (id: string) => {
-    const isExist = this.value.findIndex(item => item === id) > -1;
-    if (isExist) {
-      // this.editComplete();
-      return;
-    }
-
-    const isSelected = this.value.indexOf(id) > -1;
-    if (!isSelected) {
-      const newValue = this.isSingleMode ? [id] : [...this.value, id];
-      this.onChange(newValue);
-      if (this.isSingleMode) {
-        setTimeout(() => {
-          this.editComplete();
-        }, 4);
-      }
-    }
-    this.text = '';
-  };
-
-  private _createOption = () => {
-    const value = this.text.trim();
-    if (value === '') return;
-    const groupInfo = this.getGroupInfoByFullName(value);
-    if (!groupInfo) {
-      return;
-    }
-    const name = groupInfo.name;
-    const tagColor = this.color;
-    this.clearColor();
-    const newSelect: SelectTag = {
-      id: nanoid(),
-      value: name,
-      color: tagColor,
-      parentId: groupInfo.parent?.id,
-    };
-    this.newTags([newSelect]);
-    const newValue = this.isSingleMode
-      ? [newSelect.id]
-      : [...this.value, newSelect.id];
-    this.onChange(newValue);
-    this.text = '';
-    if (this.isSingleMode) {
-      this.editComplete();
-    }
-  };
-
   private _clickItemOption = (e: MouseEvent, id: string) => {
     e.stopPropagation();
     const option = this.options.find(v => v.id === id);
@@ -246,30 +95,110 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private getTagFullName(tag: SelectTag, group: SelectTag[]) {
-    return [...group, tag].map(v => v.value).join('/');
-  }
-
-  private getGroupInfoByFullName(name: string) {
-    const strings = name.split('/');
-    const names = strings.slice(0, -1);
-    const result: SelectTag[] = [];
-    for (const text of names) {
-      const parent = result[result.length - 1];
-      const tag = this.options.find(
-        v => v.parentId === parent?.id && v.value === text
-      );
-      if (!tag) {
-        return;
-      }
-      result.push(tag);
+  private _createOption = () => {
+    const value = this.text.trim();
+    if (value === '') return;
+    const groupInfo = this.getGroupInfoByFullName(value);
+    if (!groupInfo) {
+      return;
     }
-    return {
-      name: strings[strings.length - 1],
-      group: result,
-      parent: result[result.length - 1],
+    const name = groupInfo.name;
+    const tagColor = this.color;
+    this.clearColor();
+    const newSelect: SelectTag = {
+      id: nanoid(),
+      value: name,
+      color: tagColor,
+      parentId: groupInfo.parent?.id,
     };
-  }
+    this.newTags([newSelect]);
+    const newValue = this.isSingleMode
+      ? [newSelect.id]
+      : [...this.value, newSelect.id];
+    this.onChange(newValue);
+    this.text = '';
+    if (this.isSingleMode) {
+      this.editComplete();
+    }
+  };
+
+  private _currentColor: string | undefined = undefined;
+
+  private _onDeleteSelected = (selectedValue: string[], value: string) => {
+    const filteredValue = selectedValue.filter(item => item !== value);
+    this.onChange(filteredValue);
+  };
+
+  private _onInput = (event: KeyboardEvent) => {
+    this.text = (event.target as HTMLInputElement).value;
+  };
+
+  private _onInputKeydown = (event: KeyboardEvent) => {
+    event.stopPropagation();
+    const inputValue = this.text.trim();
+    if (event.key === 'Backspace' && inputValue === '') {
+      this._onDeleteSelected(this.value, this.value[this.value.length - 1]);
+    } else if (event.key === 'Enter' && !event.isComposing) {
+      this.selectedTag?.select();
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.setSelectedOption(this.selectedIndex - 1);
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.setSelectedOption(this.selectedIndex + 1);
+    } else if (event.key === 'Escape') {
+      this.editComplete();
+    } else if (event.key === 'Tab') {
+      event.preventDefault();
+      const selectTag = this.selectedTag;
+      if (selectTag) {
+        this.text = this.getTagFullName(selectTag, selectTag.group);
+      }
+    }
+  };
+
+  private _onSelect = (id: string) => {
+    const isExist = this.value.findIndex(item => item === id) > -1;
+    if (isExist) {
+      // this.editComplete();
+      return;
+    }
+
+    const isSelected = this.value.indexOf(id) > -1;
+    if (!isSelected) {
+      const newValue = this.isSingleMode ? [id] : [...this.value, id];
+      this.onChange(newValue);
+      if (this.isSingleMode) {
+        setTimeout(() => {
+          this.editComplete();
+        }, 4);
+      }
+    }
+    this.text = '';
+  };
+
+  private filteredOptions: Array<RenderOption> = [];
+
+  static override styles = styles;
+
+  changeTag = (tag: SelectTag) => {
+    this.onOptionsChange(this.options.map(v => (v.id === tag.id ? tag : v)));
+  };
+
+  deleteTag = (id: string) => {
+    this.onOptionsChange(
+      this.options
+        .filter(v => v.id !== id)
+        .map(v => ({
+          ...v,
+          parentId: v.parentId === id ? undefined : v.parentId,
+        }))
+    );
+  };
+
+  newTags = (tags: SelectTag[]) => {
+    this.onOptionsChange([...tags, ...this.options]);
+  };
 
   private _filterOptions() {
     const map = this.optionsIdMap();
@@ -311,6 +240,65 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     return options;
   }
 
+  private clearColor() {
+    this._currentColor = undefined;
+  }
+
+  private get color() {
+    if (!this._currentColor) {
+      this._currentColor = getTagColor();
+    }
+    return this._currentColor;
+  }
+
+  private getGroupInfoByFullName(name: string) {
+    const strings = name.split('/');
+    const names = strings.slice(0, -1);
+    const result: SelectTag[] = [];
+    for (const text of names) {
+      const parent = result[result.length - 1];
+      const tag = this.options.find(
+        v => v.parentId === parent?.id && v.value === text
+      );
+      if (!tag) {
+        return;
+      }
+      result.push(tag);
+    }
+    return {
+      name: strings[strings.length - 1],
+      group: result,
+      parent: result[result.length - 1],
+    };
+  }
+
+  private getTagFullName(tag: SelectTag, group: SelectTag[]) {
+    return [...group, tag].map(v => v.value).join('/');
+  }
+
+  private getTagGroup(tag: SelectTag, map = this.optionsIdMap()): SelectTag[] {
+    const result = [];
+    let parentId = tag.parentId;
+    while (parentId) {
+      const parent = map[parentId];
+      result.unshift(parent);
+      parentId = parent.parentId;
+    }
+    return result;
+  }
+
+  private optionsIdMap() {
+    return Object.fromEntries(this.options.map(v => [v.id, v]));
+  }
+
+  private get selectedTag() {
+    return this.filteredOptions[this.selectedIndex];
+  }
+
+  private setSelectedOption(index: number) {
+    this.selectedIndex = rangeWrap(index, 0, this.filteredOptions.length);
+  }
+
   protected override firstUpdated() {
     requestAnimationFrame(() => {
       this._selectInput.focus();
@@ -326,25 +314,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
       e.stopPropagation();
     });
   }
-
-  newTags = (tags: SelectTag[]) => {
-    this.onOptionsChange([...tags, ...this.options]);
-  };
-
-  deleteTag = (id: string) => {
-    this.onOptionsChange(
-      this.options
-        .filter(v => v.id !== id)
-        .map(v => ({
-          ...v,
-          parentId: v.parentId === id ? undefined : v.parentId,
-        }))
-    );
-  };
-
-  changeTag = (tag: SelectTag) => {
-    this.onOptionsChange(this.options.map(v => (v.id === tag.id ? tag : v)));
-  };
 
   override render() {
     this.filteredOptions = this._filterOptions();
@@ -452,6 +421,37 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get isSingleMode() {
+    return this.mode === 'single';
+  }
+
+  @query('.select-input')
+  private accessor _selectInput!: HTMLInputElement;
+
+  @property({ attribute: false })
+  accessor editComplete!: () => void;
+
+  @property()
+  accessor mode: 'multi' | 'single' = 'multi';
+
+  @property({ attribute: false })
+  accessor onChange!: (value: string[]) => void;
+
+  @property({ attribute: false })
+  accessor onOptionsChange!: (options: SelectTag[]) => void;
+
+  @property({ attribute: false })
+  accessor options: SelectTag[] = [];
+
+  @state()
+  private accessor selectedIndex = 0;
+
+  @state()
+  private accessor text = '';
+
+  @property({ attribute: false })
+  accessor value: string[] = [];
 }
 
 declare global {

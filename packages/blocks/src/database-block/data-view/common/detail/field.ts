@@ -5,16 +5,17 @@ import { classMap } from 'lit/directives/class-map.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../../../_common/components/index.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
 } from '../../column/index.js';
-import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
 } from '../../view/data-view-manager.js';
+
+import { popMenu } from '../../../../_common/components/index.js';
+import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { inputConfig, typeConfig } from '../column-menu.js';
 import {
   DatabaseDuplicate,
@@ -25,118 +26,7 @@ import {
 
 @customElement('affine-data-view-record-field')
 export class RecordField extends WithDisposable(ShadowlessElement) {
-  private get readonly() {
-    return this.view.readonly;
-  }
-
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
-  }
-
-  static override styles = css`
-    affine-data-view-record-field {
-      display: flex;
-      gap: 12px;
-    }
-
-    .field-left {
-      padding: 6px;
-      display: flex;
-      height: max-content;
-      align-items: center;
-      gap: 6px;
-      font-size: var(--data-view-cell-text-size);
-      line-height: var(--data-view-cell-text-line-height);
-      color: var(--affine-text-secondary-color);
-      width: 160px;
-      border-radius: 4px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .field-left:hover {
-      background-color: var(--affine-hover-color);
-    }
-
-    affine-data-view-record-field .icon {
-      display: flex;
-      align-items: center;
-      width: 16px;
-      height: 16px;
-    }
-
-    affine-data-view-record-field .icon svg {
-      width: 16px;
-      height: 16px;
-      fill: var(--affine-icon-color);
-    }
-
-    .filed-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .field-content {
-      padding: 6px 8px;
-      border-radius: 4px;
-      flex: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      border: 1px solid transparent;
-    }
-
-    .field-content .affine-database-number {
-      text-align: left;
-      justify-content: start;
-    }
-
-    .field-content:hover {
-      background-color: var(--affine-hover-color);
-    }
-
-    .field-content.is-editing {
-      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
-    }
-
-    .field-content.is-focus {
-      border: 1px solid var(--affine-primary-color);
-    }
-    .field-content.empty::before {
-      content: 'Empty';
-      color: var(--affine-text-disable-color);
-      font-size: 14px;
-      line-height: 22px;
-    }
-  `;
-
   private _cell = createRef<DataViewCellLifeCycle>();
-
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
-
-  @property({ attribute: false })
-  accessor column!: DataViewColumnManager;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
-
-  @state()
-  accessor isFocus = false;
-
-  @state()
-  accessor editing = false;
-
-  changeEditing = (editing: boolean) => {
-    const selection = this.closest('affine-data-view-record-detail')?.selection;
-    if (selection) {
-      selection.selection = {
-        propertyId: this.column.id,
-        isEditing: editing,
-      };
-    }
-  };
 
   _click = (e: MouseEvent) => {
     e.stopPropagation();
@@ -228,6 +118,98 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     });
   };
 
+  static override styles = css`
+    affine-data-view-record-field {
+      display: flex;
+      gap: 12px;
+    }
+
+    .field-left {
+      padding: 6px;
+      display: flex;
+      height: max-content;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
+      color: var(--affine-text-secondary-color);
+      width: 160px;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .field-left:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    affine-data-view-record-field .icon {
+      display: flex;
+      align-items: center;
+      width: 16px;
+      height: 16px;
+    }
+
+    affine-data-view-record-field .icon svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--affine-icon-color);
+    }
+
+    .filed-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .field-content {
+      padding: 6px 8px;
+      border-radius: 4px;
+      flex: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border: 1px solid transparent;
+    }
+
+    .field-content .affine-database-number {
+      text-align: left;
+      justify-content: start;
+    }
+
+    .field-content:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    .field-content.is-editing {
+      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
+    }
+
+    .field-content.is-focus {
+      border: 1px solid var(--affine-primary-color);
+    }
+    .field-content.empty::before {
+      content: 'Empty';
+      color: var(--affine-text-disable-color);
+      font-size: 14px;
+      line-height: 22px;
+    }
+  `;
+
+  changeEditing = (editing: boolean) => {
+    const selection = this.closest('affine-data-view-record-detail')?.selection;
+    if (selection) {
+      selection.selection = {
+        propertyId: this.column.id,
+        isEditing: editing,
+      };
+    }
+  };
+
+  private get readonly() {
+    return this.view.readonly;
+  }
+
   override render() {
     const column = this.column;
 
@@ -262,6 +244,25 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
+
+  @property({ attribute: false })
+  accessor column!: DataViewColumnManager;
+
+  @state()
+  accessor editing = false;
+
+  @state()
+  accessor isFocus = false;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  @property({ attribute: false })
+  accessor view!: DataViewManager;
 }
 
 declare global {

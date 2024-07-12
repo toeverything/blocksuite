@@ -1,15 +1,16 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { Doc } from '@blocksuite/store';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import {
   type AffineAIPanelWidgetConfig,
   EdgelessEditorBlockSpecs,
 } from '@blocksuite/blocks';
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
-import type { Doc } from '@blocksuite/store';
 import { DocCollection, Schema } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { createRef, type Ref, ref } from 'lit/directives/ref.js';
+import { type Ref, createRef, ref } from 'lit/directives/ref.js';
 
 import { getAIPanel } from '../ai-panel.js';
 import { PPTBuilder } from '../slides/index.js';
@@ -50,28 +51,29 @@ export const createSlidesRenderer: (
 
 @customElement('ai-slides-renderer')
 export class AISlidesRenderer extends WithDisposable(LitElement) {
-  static override styles = css``;
+  private _doc!: Doc;
 
   private _editorContainer: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
 
-  private _doc!: Doc;
+  static override styles = css``;
 
-  @query('editor-host')
-  private accessor _editorHost!: EditorHost;
+  override connectedCallback(): void {
+    super.connectedCallback();
 
-  @property({ attribute: false })
-  accessor text!: string;
+    const schema = new Schema().register(AffineSchemas);
+    const collection = new DocCollection({ schema, id: 'SLIDES_PREVIEW' });
+    collection.meta.initialize();
+    collection.start();
+    const doc = collection.createDoc();
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
+    doc.load(() => {
+      const pageBlockId = doc.addBlock('affine:page', {});
+      doc.addBlock('affine:surface', {}, pageBlockId);
+    });
 
-  @property({ attribute: false })
-  accessor ctx:
-    | {
-        get(): Record<string, unknown>;
-        set(data: Record<string, unknown>): void;
-      }
-    | undefined = undefined;
+    doc.resetHistory();
+    this._doc = doc;
+  }
 
   protected override firstUpdated() {
     requestAnimationFrame(() => {
@@ -208,23 +210,22 @@ export class AISlidesRenderer extends WithDisposable(LitElement) {
       </div>`;
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
+  @query('editor-host')
+  private accessor _editorHost!: EditorHost;
 
-    const schema = new Schema().register(AffineSchemas);
-    const collection = new DocCollection({ schema, id: 'SLIDES_PREVIEW' });
-    collection.meta.initialize();
-    collection.start();
-    const doc = collection.createDoc();
+  @property({ attribute: false })
+  accessor ctx:
+    | {
+        get(): Record<string, unknown>;
+        set(data: Record<string, unknown>): void;
+      }
+    | undefined = undefined;
 
-    doc.load(() => {
-      const pageBlockId = doc.addBlock('affine:page', {});
-      doc.addBlock('affine:surface', {}, pageBlockId);
-    });
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 
-    doc.resetHistory();
-    this._doc = doc;
-  }
+  @property({ attribute: false })
+  accessor text!: string;
 }
 
 declare global {

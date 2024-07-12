@@ -33,23 +33,15 @@ const TextSelectionSchema = z.object({
 });
 
 export class TextSelection extends BaseSelection {
-  get start(): TextRangePoint {
-    return this.reverse ? this.to ?? this.from : this.from;
-  }
-
-  get end(): TextRangePoint {
-    return this.reverse ? this.from : this.to ?? this.from;
-  }
+  static override group = 'note';
 
   static override type = 'text';
 
-  static override group = 'note';
-
   from: TextRangePoint;
 
-  to: TextRangePoint | null;
-
   reverse: boolean;
+
+  to: TextRangePoint | null;
 
   constructor({ from, to, reverse }: TextSelectionProps) {
     super({
@@ -60,6 +52,15 @@ export class TextSelection extends BaseSelection {
     this.to = this._equalPoint(from, to) ? null : to;
 
     this.reverse = !!reverse;
+  }
+
+  static override fromJSON(json: Record<string, unknown>): TextSelection {
+    TextSelectionSchema.parse(json);
+    return new TextSelection({
+      from: json.from as TextRangePoint,
+      to: json.to as TextRangePoint | null,
+      reverse: !!json.reverse,
+    });
   }
 
   private _equalPoint(
@@ -90,6 +91,14 @@ export class TextSelection extends BaseSelection {
     return false;
   }
 
+  isCollapsed(): boolean {
+    return this.to === null && this.from.length === 0;
+  }
+
+  isInSameBlock(): boolean {
+    return this.to === null || this.from.blockId === this.to.blockId;
+  }
+
   override toJSON(): Record<string, unknown> {
     return {
       type: 'text',
@@ -99,21 +108,12 @@ export class TextSelection extends BaseSelection {
     };
   }
 
-  isCollapsed(): boolean {
-    return this.to === null && this.from.length === 0;
+  get end(): TextRangePoint {
+    return this.reverse ? this.from : this.to ?? this.from;
   }
 
-  isInSameBlock(): boolean {
-    return this.to === null || this.from.blockId === this.to.blockId;
-  }
-
-  static override fromJSON(json: Record<string, unknown>): TextSelection {
-    TextSelectionSchema.parse(json);
-    return new TextSelection({
-      from: json.from as TextRangePoint,
-      to: json.to as TextRangePoint | null,
-      reverse: !!json.reverse,
-    });
+  get start(): TextRangePoint {
+    return this.reverse ? this.to ?? this.from : this.from;
   }
 }
 

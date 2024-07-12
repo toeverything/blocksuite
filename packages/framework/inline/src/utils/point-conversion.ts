@@ -1,6 +1,7 @@
 import type { VElement, VLine } from '../components/index.js';
-import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DomPoint, TextPoint } from '../types.js';
+
+import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import {
   isInlineRoot,
   isNativeTextInVText,

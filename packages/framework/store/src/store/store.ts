@@ -13,6 +13,8 @@ import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
 import type { IdGenerator } from '../utils/id-generator.js';
+import type { Space } from './space.js';
+
 import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
@@ -21,17 +23,17 @@ import {
 } from '../utils/id-generator.js';
 import { AwarenessStore, type RawAwarenessState } from '../yjs/awareness.js';
 import { BlockSuiteDoc } from '../yjs/index.js';
-import type { Space } from './space.js';
 
 export type SerializedStore = Record<string, Record<string, unknown>>;
 
 export enum Generator {
   /**
-   * Default mode, generator for the unpredictable id
+   * **Warning**: This generator mode will crash the collaborative feature
+   *  if multiple clients are adding new blocks.
+   * Use this mode only if you know what you're doing.
    */
-  NanoID = 'nanoID',
+  AutoIncrement = 'autoIncrement',
 
-  UUIDv4 = 'uuidV4',
   /**
    * This generator is trying to fix the real-time collaboration on debug mode.
    * This will make generator predictable and won't make conflict
@@ -39,11 +41,10 @@ export enum Generator {
    */
   AutoIncrementByClientId = 'autoIncrementByClientId',
   /**
-   * **Warning**: This generator mode will crash the collaborative feature
-   *  if multiple clients are adding new blocks.
-   * Use this mode only if you know what you're doing.
+   * Default mode, generator for the unpredictable id
    */
-  AutoIncrement = 'autoIncrement',
+  NanoID = 'nanoID',
+  UUIDv4 = 'uuidV4',
 }
 
 export interface StoreOptions<
@@ -81,21 +82,21 @@ const FLAGS_PRESET = {
 } satisfies BlockSuiteFlags;
 
 export class Store {
-  readonly id: string;
-
-  readonly doc: BlockSuiteDoc;
-
-  readonly spaces = new Map<string, Space>();
-
   readonly awarenessStore: AwarenessStore;
-
-  readonly idGenerator: IdGenerator;
-
-  readonly docSync: DocEngine;
 
   readonly awarenessSync: AwarenessEngine;
 
   readonly blobSync: BlobEngine;
+
+  readonly doc: BlockSuiteDoc;
+
+  readonly docSync: DocEngine;
+
+  readonly id: string;
+
+  readonly idGenerator: IdGenerator;
+
+  readonly spaces = new Map<string, Space>();
 
   constructor(
     {

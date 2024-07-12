@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -34,21 +34,6 @@ const styles = css`
 export class PieNodeCenter extends LitElement {
   static override styles = [PieNode.styles, styles];
 
-  @property({ attribute: false })
-  accessor isActive!: boolean;
-
-  @property({ attribute: false })
-  accessor hoveredNode!: PieNode | null;
-
-  @property({ attribute: false })
-  accessor node!: PieNode;
-
-  @property({ attribute: false })
-  accessor onMouseEnter!: (ev: MouseEvent) => void;
-
-  @property({ attribute: false })
-  accessor rotatorAngle: number | null = null;
-
   protected override render() {
     const [x, y] = this.node.position;
 
@@ -79,6 +64,21 @@ export class PieNodeCenter extends LitElement {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor hoveredNode!: PieNode | null;
+
+  @property({ attribute: false })
+  accessor isActive!: boolean;
+
+  @property({ attribute: false })
+  accessor node!: PieNode;
+
+  @property({ attribute: false })
+  accessor onMouseEnter!: (ev: MouseEvent) => void;
+
+  @property({ attribute: false })
+  accessor rotatorAngle: number | null = null;
 }
 
 declare global {

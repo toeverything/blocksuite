@@ -1,40 +1,38 @@
-import './database-header-column.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
+  type Middleware,
   autoUpdate,
   computePosition,
-  type Middleware,
   shift,
 } from '@floating-ui/dom';
-import { nothing, type TemplateResult } from 'lit';
+import { type TemplateResult, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import type { DataViewTableManager } from '../../table-view-manager.js';
+
 import { AddCursorIcon } from '../../../../../../../_common/icons/index.js';
 import { getScrollContainer } from '../../../../../../../_common/utils/scroll-container.js';
 import { renderTemplate } from '../../../../../utils/uni-component/render-template.js';
-import type { DataViewTableManager } from '../../table-view-manager.js';
+import './database-header-column.js';
 import { styles } from './styles.js';
 
 @customElement('affine-database-column-header')
 export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
-  private get readonly() {
-    return this.tableViewManager.readonly;
-  }
-
-  static override styles = styles;
+  private _onAddColumn = () => {
+    if (this.readonly) return;
+    this.tableViewManager.columnAdd('end');
+    requestAnimationFrame(() => {
+      this.editLastColumnTitle();
+    });
+  };
 
   private addColumnPositionRef = createRef();
 
-  @property({ attribute: false })
-  accessor tableViewManager!: DataViewTableManager;
-
-  @property({ attribute: false })
-  accessor renderGroupHeader: (() => TemplateResult) | undefined;
+  static override styles = styles;
 
   addColumnButton = renderTemplate(() => {
     if (this.readonly) return nothing;
@@ -47,13 +45,38 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     </div>`;
   });
 
-  private _onAddColumn = () => {
-    if (this.readonly) return;
-    this.tableViewManager.columnAdd('end');
-    requestAnimationFrame(() => {
-      this.editLastColumnTitle();
-    });
+  editLastColumnTitle = () => {
+    const columns = this.querySelectorAll('affine-database-header-column');
+    const column = columns.item(columns.length - 1);
+    column.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    column.editTitle();
   };
+
+  updateAddButton = () => {
+    const referenceEl = this.addColumnPositionRef.value;
+    if (!referenceEl) {
+      return;
+    }
+    computePosition(referenceEl, this.addColumnButton, {
+      middleware: [
+        shift({
+          boundary: this.closest('affine-database-table') ?? this,
+          padding: -20,
+        }),
+      ],
+    })
+      .then(({ x, y }) => {
+        Object.assign(this.addColumnButton.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+      })
+      .catch(console.error);
+  };
+
+  private get readonly() {
+    return this.tableViewManager.readonly;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -121,38 +144,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  updateAddButton = () => {
-    const referenceEl = this.addColumnPositionRef.value;
-    if (!referenceEl) {
-      return;
-    }
-    computePosition(referenceEl, this.addColumnButton, {
-      middleware: [
-        shift({
-          boundary: this.closest('affine-database-table') ?? this,
-          padding: -20,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        Object.assign(this.addColumnButton.style, {
-          left: `${x}px`,
-          top: `${y}px`,
-        });
-      })
-      .catch(console.error);
-  };
-
-  editLastColumnTitle = () => {
-    const columns = this.querySelectorAll('affine-database-header-column');
-    const column = columns.item(columns.length - 1);
-    column.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    column.editTitle();
-  };
-
-  @query('.scale-div')
-  accessor scaleDiv!: HTMLDivElement;
-
   getScale() {
     return this.scaleDiv?.getBoundingClientRect().width ?? 1;
   }
@@ -189,6 +180,15 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor renderGroupHeader: (() => TemplateResult) | undefined;
+
+  @query('.scale-div')
+  accessor scaleDiv!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor tableViewManager!: DataViewTableManager;
 }
 
 declare global {

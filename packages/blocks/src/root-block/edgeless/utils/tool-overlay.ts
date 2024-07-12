@@ -1,7 +1,9 @@
-import { DisposableGroup, noop, Slot } from '@blocksuite/global/utils';
+import { DisposableGroup, Slot, noop } from '@blocksuite/global/utils';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { ShapeStyle } from '../../../surface-block/element-model/shape.js';
+import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
+
 import { shapeMethods } from '../../../surface-block/element-model/shape.js';
 import {
   Bound,
@@ -10,7 +12,6 @@ import {
   type RoughCanvas,
   type XYWH,
 } from '../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import {
   NOTE_OVERLAY_CORNER_RADIUS,
   NOTE_OVERLAY_HEIGHT,
@@ -79,13 +80,13 @@ const drawGeneralShape = (
 };
 
 export abstract class Shape {
-  xywh: XYWH;
-
-  type: string;
-
   options: Options;
 
   shapeStyle: ShapeStyle;
+
+  type: string;
+
+  xywh: XYWH;
 
   constructor(
     xywh: XYWH,
@@ -214,19 +215,15 @@ export class ShapeFactory {
 }
 
 class ToolOverlay extends Overlay {
-  get computedStyle() {
-    return getComputedStyle(this.edgeless);
-  }
+  protected disposables!: DisposableGroup;
 
   protected edgeless: EdgelessRootBlockComponent;
 
-  protected disposables!: DisposableGroup;
+  globalAlpha: number;
 
   x: number;
 
   y: number;
-
-  globalAlpha: number;
 
   constructor(edgeless: EdgelessRootBlockComponent) {
     super();
@@ -251,16 +248,20 @@ class ToolOverlay extends Overlay {
     );
   }
 
-  isTransparent(color: string): boolean {
-    return color.includes('transparent');
-  }
-
   dispose(): void {
     this.disposables.dispose();
   }
 
+  isTransparent(color: string): boolean {
+    return color.includes('transparent');
+  }
+
   render(_ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {
     noop();
+  }
+
+  get computedStyle() {
+    return getComputedStyle(this.edgeless);
   }
 }
 
@@ -319,18 +320,18 @@ export class ShapeOverlay extends ToolOverlay {
     );
   }
 
+  private _getRealFillColor(color: string) {
+    const realFillColor = this.computedStyle.getPropertyValue(color as string);
+    if (!this.isTransparent(color)) return realFillColor;
+
+    return 'transparent';
+  }
+
   private _getRealStrokeColor(color: string) {
     const realStrokeColor = this.computedStyle.getPropertyValue(
       color as string
     );
     if (!this.isTransparent(color)) return realStrokeColor;
-
-    return 'transparent';
-  }
-
-  private _getRealFillColor(color: string) {
-    const realFillColor = this.computedStyle.getPropertyValue(color as string);
-    if (!this.isTransparent(color)) return realFillColor;
 
     return 'transparent';
   }
@@ -352,9 +353,9 @@ export class ShapeOverlay extends ToolOverlay {
 }
 
 export class NoteOverlay extends ToolOverlay {
-  text = '';
-
   backgroundColor = 'transparent';
+
+  text = '';
 
   constructor(
     edgeless: EdgelessRootBlockComponent,
@@ -456,13 +457,13 @@ export class NoteOverlay extends ToolOverlay {
 }
 
 export class DraggingNoteOverlay extends NoteOverlay {
+  height: number;
+
   slots: {
     draggingNoteUpdated: Slot<{ xywh: XYWH }>;
   };
 
   width: number;
-
-  height: number;
 
   constructor(
     edgeless: EdgelessRootBlockComponent,

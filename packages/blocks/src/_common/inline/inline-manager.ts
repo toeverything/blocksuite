@@ -1,16 +1,17 @@
 import type { InlineEditor, KeyboardBindingContext } from '@blocksuite/inline';
+import type { Y } from '@blocksuite/store';
+
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
-  baseTextAttributes,
   type DeltaInsert,
-  getDefaultAttributeRenderer,
   type InlineRange,
   KEYBOARD_ALLOW_DEFAULT,
   type KeyboardBindingHandler,
+  baseTextAttributes,
+  getDefaultAttributeRenderer,
 } from '@blocksuite/inline';
-import type { Y } from '@blocksuite/store';
-import { z, type ZodObject, type ZodTypeAny } from 'zod';
+import { type ZodObject, type ZodTypeAny, z } from 'zod';
 
 export type InlineSpecs<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
@@ -44,27 +45,18 @@ export type InlineMarkdownMatch<
 export class InlineManager<
   in out TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
-  private _specs: InlineSpecs<TextAttributes>[] = [];
-
-  get specs() {
-    return this._specs;
-  }
-
   private _markdownMatches: InlineMarkdownMatch<TextAttributes>[] = [];
 
-  get markdownMatches() {
-    return this._markdownMatches;
-  }
+  private _specs: InlineSpecs<TextAttributes>[] = [];
 
-  registerSpecs(specs: InlineSpecs<TextAttributes>[]): void {
-    this._specs = specs;
-  }
-
-  registerMarkdownMatches(
-    markdownMatches: InlineMarkdownMatch<TextAttributes>[]
-  ): void {
-    this._markdownMatches = markdownMatches;
-  }
+  embedChecker = (delta: DeltaInsert<TextAttributes>) => {
+    for (const spec of this._specs) {
+      if (spec.embed && spec.match(delta)) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   markdownShortcutHandler = (
     context: KeyboardBindingContext<TextAttributes>,
@@ -85,15 +77,6 @@ export class InlineManager<
     }
 
     return KEYBOARD_ALLOW_DEFAULT;
-  };
-
-  embedChecker = (delta: DeltaInsert<TextAttributes>) => {
-    for (const spec of this._specs) {
-      if (spec.embed && spec.match(delta)) {
-        return true;
-      }
-    }
-    return false;
   };
 
   getRenderer(): AttributeRenderer<TextAttributes> {
@@ -126,5 +109,23 @@ export class InlineManager<
         >;
       }, defaultSchema);
     return schema;
+  }
+
+  registerMarkdownMatches(
+    markdownMatches: InlineMarkdownMatch<TextAttributes>[]
+  ): void {
+    this._markdownMatches = markdownMatches;
+  }
+
+  registerSpecs(specs: InlineSpecs<TextAttributes>[]): void {
+    this._specs = specs;
+  }
+
+  get markdownMatches() {
+    return this._markdownMatches;
+  }
+
+  get specs() {
+    return this._specs;
   }
 }

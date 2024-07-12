@@ -9,13 +9,13 @@ const SurfaceSelectionSchema = z.object({
 });
 
 export class SurfaceSelection extends BaseSelection {
-  static override type = 'surface';
-
   static override group = 'edgeless';
 
-  readonly elements: string[];
+  static override type = 'surface';
 
   readonly editing: boolean;
+
+  readonly elements: string[];
 
   readonly inoperable: boolean;
 
@@ -30,34 +30,6 @@ export class SurfaceSelection extends BaseSelection {
     this.elements = elements;
     this.editing = editing;
     this.inoperable = inoperable;
-  }
-
-  isEmpty() {
-    return this.elements.length === 0 && !this.editing;
-  }
-
-  override equals(other: BaseSelection): boolean {
-    if (other instanceof SurfaceSelection) {
-      return (
-        this.blockId === other.blockId &&
-        this.elements.length === other.elements.length &&
-        this.elements.every((id, idx) => id === other.elements[idx]) &&
-        this.editing === other.editing &&
-        this.inoperable === other.inoperable
-      );
-    }
-
-    return false;
-  }
-
-  override toJSON(): Record<string, unknown> {
-    return {
-      type: 'surface',
-      blockId: this.blockId,
-      elements: this.elements,
-      editing: this.editing,
-      inoperable: this.inoperable,
-    };
   }
 
   static override fromJSON(
@@ -77,6 +49,34 @@ export class SurfaceSelection extends BaseSelection {
       json.editing as boolean,
       (json.inoperable as boolean) || false
     );
+  }
+
+  override equals(other: BaseSelection): boolean {
+    if (other instanceof SurfaceSelection) {
+      return (
+        this.blockId === other.blockId &&
+        this.elements.length === other.elements.length &&
+        this.elements.every((id, idx) => id === other.elements[idx]) &&
+        this.editing === other.editing &&
+        this.inoperable === other.inoperable
+      );
+    }
+
+    return false;
+  }
+
+  isEmpty() {
+    return this.elements.length === 0 && !this.editing;
+  }
+
+  override toJSON(): Record<string, unknown> {
+    return {
+      type: 'surface',
+      blockId: this.blockId,
+      elements: this.elements,
+      editing: this.editing,
+      inoperable: this.inoperable,
+    };
   }
 }
 

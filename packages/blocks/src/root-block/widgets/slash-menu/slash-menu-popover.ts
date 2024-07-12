@@ -1,10 +1,20 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { autoPlacement, offset } from '@floating-ui/dom';
-import { html, LitElement, nothing, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type {
+  SlashMenuActionItem,
+  SlashMenuContext,
+  SlashMenuGroupDivider,
+  SlashMenuItem,
+  SlashMenuStaticConfig,
+  SlashMenuStaticItem,
+  SlashSubMenu,
+} from './config.js';
 
 import { createLitPortal } from '../../../_common/components/portal.js';
 import {
@@ -20,15 +30,6 @@ import {
   isFuzzyMatch,
   substringMatchScore,
 } from '../../../_common/utils/string.js';
-import type {
-  SlashMenuActionItem,
-  SlashMenuContext,
-  SlashMenuGroupDivider,
-  SlashMenuItem,
-  SlashMenuStaticConfig,
-  SlashMenuStaticItem,
-  SlashSubMenu,
-} from './config.js';
 import { slashItemToolTipStyle, styles } from './styles.js';
 import {
   getFirstNotDividerItem,
@@ -46,43 +47,18 @@ type InnerSlashMenuContext = SlashMenuContext & {
 
 @customElement('affine-slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
-  get host() {
-    return this.context.rootElement.host;
-  }
-
-  static override styles = styles;
-
-  @state()
-  private accessor _filteredItems: (SlashMenuActionItem | SlashSubMenu)[] = [];
-
-  @state()
-  private accessor _position: {
-    x: string;
-    y: string;
-    height: number;
-  } | null = null;
-
-  private _innerSlashMenuContext!: InnerSlashMenuContext;
-
-  private _itemPathMap = new Map<SlashMenuItem, number[]>();
-
-  private _query = '';
-
-  private _queryState: 'off' | 'on' | 'no_result' = 'off';
-
-  @property({ attribute: false })
-  accessor context!: SlashMenuContext;
-
-  @property({ attribute: false })
-  accessor config!: SlashMenuStaticConfig;
-
-  @property({ attribute: false })
-  accessor triggerKey!: string;
-
-  @query('inner-slash-menu')
-  accessor slashMenuElement!: HTMLElement;
-
-  abortController = new AbortController();
+  private _handleClickItem = (item: SlashMenuActionItem) => {
+    // Need to remove the search string
+    // We must to do clean the slash string before we do the action
+    // Otherwise, the action may change the model and cause the slash string to be changed
+    cleanSpecifiedTail(
+      this.host,
+      this.context.model,
+      this.triggerKey + this._query
+    );
+    item.action(this.context)?.catch(console.error);
+    this.abortController.abort();
+  };
 
   private _initItemPathMap = () => {
     const traverse = (item: SlashMenuStaticItem, path: number[]) => {
@@ -96,6 +72,14 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
     this.config.items.forEach((item, index) => traverse(item, [index]));
   };
+
+  private _innerSlashMenuContext!: InnerSlashMenuContext;
+
+  private _itemPathMap = new Map<SlashMenuItem, number[]>();
+
+  private _query = '';
+
+  private _queryState: 'off' | 'on' | 'no_result' = 'off';
 
   private _updateFilteredItems = (query: string) => {
     this._filteredItems = [];
@@ -149,17 +133,12 @@ export class SlashMenu extends WithDisposable(LitElement) {
     this._queryState = this._filteredItems.length === 0 ? 'no_result' : 'on';
   };
 
-  private _handleClickItem = (item: SlashMenuActionItem) => {
-    // Need to remove the search string
-    // We must to do clean the slash string before we do the action
-    // Otherwise, the action may change the model and cause the slash string to be changed
-    cleanSpecifiedTail(
-      this.host,
-      this.context.model,
-      this.triggerKey + this._query
-    );
-    item.action(this.context)?.catch(console.error);
-    this.abortController.abort();
+  static override styles = styles;
+
+  abortController = new AbortController();
+
+  updatePosition = (position: { x: string; y: string; height: number }) => {
+    this._position = position;
   };
 
   override connectedCallback() {
@@ -231,10 +210,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
     });
   }
 
-  updatePosition = (position: { x: string; y: string; height: number }) => {
-    this._position = position;
-  };
-
   override render() {
     const slashMenuStyles = this._position
       ? {
@@ -262,50 +237,43 @@ export class SlashMenu extends WithDisposable(LitElement) {
       >
       </inner-slash-menu>`;
   }
+
+  get host() {
+    return this.context.rootElement.host;
+  }
+
+  @state()
+  private accessor _filteredItems: (SlashMenuActionItem | SlashSubMenu)[] = [];
+
+  @state()
+  private accessor _position: {
+    x: string;
+    y: string;
+    height: number;
+  } | null = null;
+
+  @property({ attribute: false })
+  accessor config!: SlashMenuStaticConfig;
+
+  @property({ attribute: false })
+  accessor context!: SlashMenuContext;
+
+  @query('inner-slash-menu')
+  accessor slashMenuElement!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor triggerKey!: string;
 }
 
 @customElement('inner-slash-menu')
 export class InnerSlashMenu extends WithDisposable(LitElement) {
-  static override styles = styles;
-
-  @state()
-  private accessor _activeItem!: SlashMenuActionItem | SlashSubMenu;
+  private _closeSubMenu = () => {
+    this._subMenuAbortController?.abort();
+    this._subMenuAbortController = null;
+    this._currentSubMenu = null;
+  };
 
   private _currentSubMenu: SlashSubMenu | null = null;
-
-  private _subMenuAbortController: AbortController | null = null;
-
-  @property({ attribute: false })
-  accessor context!: InnerSlashMenuContext;
-
-  @property({ attribute: false })
-  accessor menu!: SlashMenuStaticItem[];
-
-  @property({ attribute: false })
-  accessor depth: number = 0;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  @property({ attribute: false })
-  accessor mainMenuStyle: Parameters<typeof styleMap>[0] | null = null;
-
-  private _scrollToItem(item: SlashMenuStaticItem) {
-    const shadowRoot = this.shadowRoot;
-    if (!shadowRoot) {
-      return;
-    }
-
-    const text = isGroupDivider(item) ? item.groupName : item.name;
-
-    const ele = shadowRoot.querySelector(`icon-button[text="${text}"]`);
-    if (!ele) {
-      return;
-    }
-    ele.scrollIntoView({
-      block: 'nearest',
-    });
-  }
 
   private _openSubMenu = (item: SlashSubMenu) => {
     if (item === this._currentSubMenu) return;
@@ -349,16 +317,6 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
     subMenuElement.focus();
   };
 
-  private _closeSubMenu = () => {
-    this._subMenuAbortController?.abort();
-    this._subMenuAbortController = null;
-    this._currentSubMenu = null;
-  };
-
-  private _renderGroupItem = (item: SlashMenuGroupDivider) => {
-    return html`<div class="slash-menu-group-name">${item.groupName}</div>`;
-  };
-
   private _renderActionItem = (item: SlashMenuActionItem) => {
     const { name, icon, description, tooltip, customTemplate } = item;
 
@@ -395,6 +353,17 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
     </icon-button>`;
   };
 
+  private _renderGroupItem = (item: SlashMenuGroupDivider) => {
+    return html`<div class="slash-menu-group-name">${item.groupName}</div>`;
+  };
+
+  private _renderItem = (item: SlashMenuStaticItem) => {
+    if (isGroupDivider(item)) return this._renderGroupItem(item);
+    else if (isActionItem(item)) return this._renderActionItem(item);
+    else if (isSubMenuItem(item)) return this._renderSubMenuItem(item);
+    else throw new Error('Unreachable');
+  };
+
   private _renderSubMenuItem = (item: SlashSubMenu) => {
     const { name, icon, description } = item;
 
@@ -426,12 +395,26 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
     </icon-button>`;
   };
 
-  private _renderItem = (item: SlashMenuStaticItem) => {
-    if (isGroupDivider(item)) return this._renderGroupItem(item);
-    else if (isActionItem(item)) return this._renderActionItem(item);
-    else if (isSubMenuItem(item)) return this._renderSubMenuItem(item);
-    else throw new Error('Unreachable');
-  };
+  private _subMenuAbortController: AbortController | null = null;
+
+  static override styles = styles;
+
+  private _scrollToItem(item: SlashMenuStaticItem) {
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) {
+      return;
+    }
+
+    const text = isGroupDivider(item) ? item.groupName : item.name;
+
+    const ele = shadowRoot.querySelector(`icon-button[text="${text}"]`);
+    if (!ele) {
+      return;
+    }
+    ele.scrollIntoView({
+      block: 'nearest',
+    });
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -535,17 +518,6 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  override willUpdate(changedProperties: PropertyValues<this>) {
-    if (changedProperties.has('menu') && this.menu.length !== 0) {
-      const firstItem = getFirstNotDividerItem(this.menu);
-      assertExists(firstItem);
-      this._activeItem = firstItem;
-
-      // this case happen on query updated
-      this._subMenuAbortController?.abort();
-    }
-  }
-
   override render() {
     if (this.menu.length === 0) return nothing;
 
@@ -559,4 +531,33 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
       ${this.menu.map(this._renderItem)}
     </div>`;
   }
+
+  override willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has('menu') && this.menu.length !== 0) {
+      const firstItem = getFirstNotDividerItem(this.menu);
+      assertExists(firstItem);
+      this._activeItem = firstItem;
+
+      // this case happen on query updated
+      this._subMenuAbortController?.abort();
+    }
+  }
+
+  @state()
+  private accessor _activeItem!: SlashMenuActionItem | SlashSubMenu;
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @property({ attribute: false })
+  accessor context!: InnerSlashMenuContext;
+
+  @property({ attribute: false })
+  accessor depth: number = 0;
+
+  @property({ attribute: false })
+  accessor mainMenuStyle: Parameters<typeof styleMap>[0] | null = null;
+
+  @property({ attribute: false })
+  accessor menu!: SlashMenuStaticItem[];
 }

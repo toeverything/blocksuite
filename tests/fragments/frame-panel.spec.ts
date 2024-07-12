@@ -2,11 +2,11 @@ import { expect } from '@playwright/test';
 import { dragBetweenCoords } from 'utils/actions/drag.js';
 
 import {
+  Shape,
   addBasicShapeElement,
   addNote,
   edgelessCommonSetup,
   setEdgelessTool,
-  Shape,
   toggleFramePanel,
 } from '../utils/actions/edgeless.js';
 import { waitNextFrame } from '../utils/actions/index.js';

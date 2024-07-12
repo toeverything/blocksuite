@@ -1,4 +1,4 @@
-import { type ActionEventType, AIProvider } from '../provider.js';
+import { AIProvider, type ActionEventType } from '../provider.js';
 
 export function reportResponse(event: ActionEventType) {
   const lastAction = AIProvider.actionHistory.at(-1);

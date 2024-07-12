@@ -1,7 +1,14 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
-import { Slice, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
+
+import { assertExists } from '@blocksuite/global/utils';
+import { Slice, Text } from '@blocksuite/store';
+
+import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
+import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
+import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
+import type { RootBlockComponent } from '../../types.js';
+import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { toast } from '../../../_common/components/toast.js';
@@ -18,8 +25,8 @@ import {
   FrameIcon,
   HeadingIcon,
   ImageIcon20,
-  LinkedDocIcon,
   LinkIcon,
+  LinkedDocIcon,
   NewDocIcon,
   NowIcon,
   PasteIcon,
@@ -38,22 +45,17 @@ import {
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
-import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
 import { GroupingIcon } from '../../../database-block/data-view/common/icons/index.js';
 import { viewPresets } from '../../../database-block/data-view/index.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
 import { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
-import type { RootBlockComponent } from '../../types.js';
-import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips/index.js';
 import {
   createConversionItem,
@@ -129,7 +131,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
     // ---------------------------------------------------------
     { groupName: 'Basic' },
     ...textConversionConfigs
-      .filter(i => i.type && ['text', 'h1', 'h2', 'h3'].includes(i.type))
+      .filter(i => i.type && ['h1', 'h2', 'h3', 'text'].includes(i.type))
       .map(createConversionItem),
     {
       name: 'Other Headings',
@@ -183,7 +185,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       })),
 
     ...textConversionConfigs
-      .filter(i => i.type && ['quote', 'divider'].includes(i.type))
+      .filter(i => i.type && ['divider', 'quote'].includes(i.type))
       .map<SlashMenuActionItem>(config => ({
         ...createConversionItem(config),
         showWhen: ({ model }) =>
@@ -201,7 +203,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
     // ---------------------------------------------------------
     { groupName: 'Style' },
     ...textFormatConfigs
-      .filter(i => !['Link', 'Code'].includes(i.name))
+      .filter(i => !['Code', 'Link'].includes(i.name))
       .map<SlashMenuActionItem>(({ name, icon, id }) => ({
         name,
         icon,

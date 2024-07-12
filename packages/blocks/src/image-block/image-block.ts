@@ -1,19 +1,19 @@
-import './components/image-card.js';
-import './components/page-image-block.js';
-import './components/edgeless-image-block.js';
-
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BlockComponent } from '../_common/components/block-component.js';
-import { Peekable } from '../_common/components/index.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import type { ImageBlockEdgelessComponent } from './components/edgeless-image-block.js';
 import type { AffineImageCard } from './components/image-card.js';
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
 import type { ImageBlockModel } from './image-model.js';
 import type { ImageBlockService } from './image-service.js';
+
+import { BlockComponent } from '../_common/components/block-component.js';
+import { Peekable } from '../_common/components/index.js';
+import { Bound } from '../surface-block/utils/bound.js';
+import './components/edgeless-image-block.js';
+import './components/image-card.js';
+import './components/page-image-block.js';
 import {
   copyImageBlob,
   downloadImageBlob,
@@ -28,83 +28,11 @@ export class ImageBlockComponent extends BlockComponent<
   ImageBlockModel,
   ImageBlockService
 > {
-  get isInSurface() {
-    return this._isInSurface;
-  }
-
-  get edgeless() {
-    if (!this._isInSurface) {
-      return null;
-    }
-    return this.host.querySelector('affine-edgeless-root');
-  }
-
-  private get _imageElement() {
-    const imageElement = this.isInSurface
-      ? this._edgelessImage
-      : this._pageImage;
-    return imageElement;
-  }
-
-  get resizeImg() {
-    return this._imageElement?.resizeImg;
-  }
-
-  get imageCard() {
-    return this._imageCard;
-  }
-
-  @query('affine-image-block-card')
-  private accessor _imageCard: AffineImageCard | null = null;
-
-  @query('affine-page-image')
-  private accessor _pageImage: ImageBlockPageComponent | null = null;
-
-  @query('affine-edgeless-image')
-  private accessor _edgelessImage: ImageBlockEdgelessComponent | null = null;
-
   private _isInSurface = false;
 
-  override accessor useCaptionEditor = true;
-
-  @property({ attribute: false })
-  accessor loading = false;
-
-  @property({ attribute: false })
-  accessor error = false;
-
-  @property({ attribute: false })
-  accessor downloading = false;
-
-  @property({ attribute: false })
-  accessor retryCount = 0;
-
-  @property({ attribute: false })
-  accessor blob: Blob | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor blobUrl: string | undefined = undefined;
-
-  @state()
-  accessor lastSourceId!: string;
-
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _handleClick(event: MouseEvent) {
-    // the peek view need handle shift + click
-    if (event.shiftKey) return;
-
-    event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
-  }
+  convertToCardView = () => {
+    turnImageIntoCardView(this).catch(console.error);
+  };
 
   copy = () => {
     copyImageBlob(this).catch(console.error);
@@ -131,9 +59,30 @@ export class ImageBlockComponent extends BlockComponent<
     resetImageSize(this).catch(console.error);
   };
 
-  convertToCardView = () => {
-    turnImageIntoCardView(this).catch(console.error);
-  };
+  private _handleClick(event: MouseEvent) {
+    // the peek view need handle shift + click
+    if (event.shiftKey) return;
+
+    event.stopPropagation();
+    if (!this.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private get _imageElement() {
+    const imageElement = this.isInSurface
+      ? this._edgelessImage
+      : this._pageImage;
+    return imageElement;
+  }
+
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -161,10 +110,6 @@ export class ImageBlockComponent extends BlockComponent<
       URL.revokeObjectURL(this.blobUrl);
     }
     super.disconnectedCallback();
-  }
-
-  override updated() {
-    this._imageCard?.requestUpdate();
   }
 
   override renderBlock() {
@@ -209,6 +154,61 @@ export class ImageBlockComponent extends BlockComponent<
       ${this.isInSurface ? nothing : Object.values(this.widgets)}
     `;
   }
+
+  override updated() {
+    this._imageCard?.requestUpdate();
+  }
+
+  get edgeless() {
+    if (!this._isInSurface) {
+      return null;
+    }
+    return this.host.querySelector('affine-edgeless-root');
+  }
+
+  get imageCard() {
+    return this._imageCard;
+  }
+
+  get isInSurface() {
+    return this._isInSurface;
+  }
+
+  get resizeImg() {
+    return this._imageElement?.resizeImg;
+  }
+
+  @query('affine-edgeless-image')
+  private accessor _edgelessImage: ImageBlockEdgelessComponent | null = null;
+
+  @query('affine-image-block-card')
+  private accessor _imageCard: AffineImageCard | null = null;
+
+  @query('affine-page-image')
+  private accessor _pageImage: ImageBlockPageComponent | null = null;
+
+  @property({ attribute: false })
+  accessor blob: Blob | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor blobUrl: string | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor downloading = false;
+
+  @property({ attribute: false })
+  accessor error = false;
+
+  @state()
+  accessor lastSourceId!: string;
+
+  @property({ attribute: false })
+  accessor loading = false;
+
+  @property({ attribute: false })
+  accessor retryCount = 0;
+
+  override accessor useCaptionEditor = true;
 }
 
 declare global {

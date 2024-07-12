@@ -1,7 +1,9 @@
 import type { TemplateResult } from 'lit';
+
 import { html } from 'lit';
 
 import type { Menu } from '../../../_common/components/menu/menu.js';
+
 import { ArrowLeftBigIcon } from '../common/icons/index.js';
 
 export const menuTitleItem = (

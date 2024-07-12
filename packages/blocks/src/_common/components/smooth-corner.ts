@@ -1,5 +1,5 @@
 import { getSvgPath } from 'figma-squircle';
-import { css, html, LitElement, svg, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html, svg } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 /**
@@ -43,15 +43,7 @@ import { customElement, property, state } from 'lit/decorators.js';
  */
 @customElement('smooth-corner')
 export class SmoothCorner extends LitElement {
-  get _path() {
-    // return curvePath(this._points);
-    return getSvgPath({
-      width: this.width,
-      height: this.height,
-      cornerRadius: this.borderRadius, // defaults to 0
-      cornerSmoothing: this.smooth, // cornerSmoothing goes from 0 to 1
-    });
-  }
+  private _resizeObserver: ResizeObserver | null = null;
 
   static override styles = css`
     :host {
@@ -75,50 +67,6 @@ export class SmoothCorner extends LitElement {
     }
   `;
 
-  private _resizeObserver: ResizeObserver | null = null;
-
-  /**
-   * Equal to the border-radius
-   */
-  @property({ type: Number })
-  accessor borderRadius = 0;
-
-  /**
-   * From 0 to 1
-   */
-  @property({ type: Number })
-  accessor smooth: number = 0;
-
-  /**
-   * Border width of the element in px
-   */
-  @property({ type: Number })
-  accessor borderWidth: number = 2;
-
-  /**
-   * Border color of the element
-   */
-  @property({ type: String })
-  accessor borderColor: string = 'black';
-
-  /**
-   * Background color of the element
-   */
-  @property({ type: String })
-  accessor bgColor: string = 'white';
-
-  /**
-   * Background opacity of the element
-   */
-  @property({ type: Number })
-  accessor bgOpacity: number = 1;
-
-  @state()
-  accessor width: number = 0;
-
-  @state()
-  accessor height: number = 0;
-
   constructor() {
     super();
     this._resizeObserver = new ResizeObserver(entries => {
@@ -141,6 +89,16 @@ export class SmoothCorner extends LitElement {
     >
       ${path}
     </svg>`;
+  }
+
+  get _path() {
+    // return curvePath(this._points);
+    return getSvgPath({
+      width: this.width,
+      height: this.height,
+      cornerRadius: this.borderRadius, // defaults to 0
+      cornerSmoothing: this.smooth, // cornerSmoothing goes from 0 to 1
+    });
   }
 
   override connectedCallback(): void {
@@ -177,6 +135,48 @@ export class SmoothCorner extends LitElement {
         <slot></slot>
       </div>`;
   }
+
+  /**
+   * Background color of the element
+   */
+  @property({ type: String })
+  accessor bgColor: string = 'white';
+
+  /**
+   * Background opacity of the element
+   */
+  @property({ type: Number })
+  accessor bgOpacity: number = 1;
+
+  /**
+   * Border color of the element
+   */
+  @property({ type: String })
+  accessor borderColor: string = 'black';
+
+  /**
+   * Equal to the border-radius
+   */
+  @property({ type: Number })
+  accessor borderRadius = 0;
+
+  /**
+   * Border width of the element in px
+   */
+  @property({ type: Number })
+  accessor borderWidth: number = 2;
+
+  @state()
+  accessor height: number = 0;
+
+  /**
+   * From 0 to 1
+   */
+  @property({ type: Number })
+  accessor smooth: number = 0;
+
+  @state()
+  accessor width: number = 0;
 }
 
 declare global {

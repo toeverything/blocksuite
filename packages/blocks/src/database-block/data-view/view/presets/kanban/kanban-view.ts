@@ -1,26 +1,26 @@
-import './group.js';
-import './header.js';
-import './controller/drag.js';
-import '../../../common/group-by/define.js';
-
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
 
+import type { GroupHelper } from '../../../common/group-by/helper.js';
+import type { DataViewKanbanManager } from './kanban-view-manager.js';
+import type { KanbanViewSelectionWithType } from './types.js';
+
 import { popMenu } from '../../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../../_common/icons/index.js';
-import type { GroupHelper } from '../../../common/group-by/helper.js';
+import '../../../common/group-by/define.js';
 import { renderUniLit } from '../../../utils/uni-component/uni-component.js';
 import { DataViewBase } from '../../data-view-base.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
+import './controller/drag.js';
 import { KanbanDragController } from './controller/drag.js';
 import { KanbanHotkeysController } from './controller/hotkeys.js';
 import { KanbanSelectionController } from './controller/selection.js';
+import './group.js';
 import { KanbanGroup } from './group.js';
-import type { DataViewKanbanManager } from './kanban-view-manager.js';
-import type { KanbanViewSelectionWithType } from './types.js';
+import './header.js';
 
 const styles = css`
   affine-data-view-kanban {
@@ -97,20 +97,59 @@ export class DataViewKanban extends DataViewBase<
   DataViewKanbanManager,
   KanbanViewSelectionWithType
 > {
-  static override styles = styles;
-
   private dragController = new KanbanDragController(this);
 
-  selectionController = new KanbanSelectionController(this);
-
-  hotkeysController = new KanbanHotkeysController(this);
+  static override styles = styles;
 
   clipboardController = new KanbanClipboardController(this);
 
-  @query('.affine-data-view-kanban-groups')
-  accessor groups!: HTMLElement;
-
   groupHelper?: GroupHelper;
+
+  hotkeysController = new KanbanHotkeysController(this);
+
+  onWheel = (event: WheelEvent) => {
+    if (event.metaKey || event.ctrlKey) {
+      return;
+    }
+    const ele = event.currentTarget;
+    if (ele instanceof HTMLElement) {
+      if (ele.scrollWidth === ele.clientWidth) {
+        return;
+      }
+      event.stopPropagation();
+    }
+  };
+
+  renderAddGroup = () => {
+    const addGroup = this.groupHelper?.addGroup;
+    if (!addGroup) {
+      return;
+    }
+    const add = (e: MouseEvent) => {
+      const ele = e.currentTarget as HTMLElement;
+      popMenu(ele, {
+        options: {
+          input: {
+            onComplete: text => {
+              const column = this.groupHelper?.column;
+              if (column) {
+                column.updateData(() => addGroup(text, column.data) as never);
+              }
+            },
+          },
+          items: [],
+        },
+      });
+    };
+    return html` <div
+      style="height: 32px;width: 100px;flex-shrink:0;display:flex;align-items:center;"
+      @click="${add}"
+    >
+      <div class="add-group-icon">${AddCursorIcon}</div>
+    </div>`;
+  };
+
+  selectionController = new KanbanSelectionController(this);
 
   override connectedCallback() {
     super.connectedCallback();
@@ -159,47 +198,29 @@ export class DataViewKanban extends DataViewBase<
     });
   }
 
-  renderAddGroup = () => {
-    const addGroup = this.groupHelper?.addGroup;
-    if (!addGroup) {
-      return;
-    }
-    const add = (e: MouseEvent) => {
-      const ele = e.currentTarget as HTMLElement;
-      popMenu(ele, {
-        options: {
-          input: {
-            onComplete: text => {
-              const column = this.groupHelper?.column;
-              if (column) {
-                column.updateData(() => addGroup(text, column.data) as never);
-              }
-            },
-          },
-          items: [],
-        },
-      });
-    };
-    return html` <div
-      style="height: 32px;width: 100px;flex-shrink:0;display:flex;align-items:center;"
-      @click="${add}"
-    >
-      <div class="add-group-icon">${AddCursorIcon}</div>
-    </div>`;
-  };
+  focusFirstCell(): void {
+    this.selectionController.focusFirstCell();
+  }
 
-  onWheel = (event: WheelEvent) => {
-    if (event.metaKey || event.ctrlKey) {
-      return;
+  getSelection() {
+    return this.selectionController.selection;
+  }
+
+  hideIndicator(): void {
+    this.dragController.dropPreview.remove();
+  }
+
+  moveTo(id: string, evt: MouseEvent): void {
+    const position = this.dragController.getInsertPosition(evt);
+    if (position) {
+      position.group.group.helper.moveCardTo(
+        id,
+        '',
+        position.group.group.key,
+        position.position
+      );
     }
-    const ele = event.currentTarget;
-    if (ele instanceof HTMLElement) {
-      if (ele.scrollWidth === ele.clientWidth) {
-        return;
-      }
-      event.stopPropagation();
-    }
-  };
+  }
 
   override render() {
     this.groupHelper = this.view.groupHelper;
@@ -233,33 +254,12 @@ export class DataViewKanban extends DataViewBase<
     `;
   }
 
-  focusFirstCell(): void {
-    this.selectionController.focusFirstCell();
-  }
-
-  getSelection() {
-    return this.selectionController.selection;
-  }
-
-  hideIndicator(): void {
-    this.dragController.dropPreview.remove();
-  }
-
-  moveTo(id: string, evt: MouseEvent): void {
-    const position = this.dragController.getInsertPosition(evt);
-    if (position) {
-      position.group.group.helper.moveCardTo(
-        id,
-        '',
-        position.group.group.key,
-        position.position
-      );
-    }
-  }
-
   showIndicator(evt: MouseEvent): boolean {
     return this.dragController.shooIndicator(evt, undefined) != null;
   }
+
+  @query('.affine-data-view-kanban-groups')
+  accessor groups!: HTMLElement;
 }
 
 declare global {

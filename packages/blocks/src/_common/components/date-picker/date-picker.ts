@@ -1,11 +1,11 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { isSameDay, isSameMonth, isToday } from 'date-fns';
 import {
-  html,
   LitElement,
-  nothing,
   type PropertyValues,
   type TemplateResult,
+  html,
+  nothing,
 } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -50,48 +50,14 @@ type NavActionArg = {
  */
 @customElement('date-picker')
 export class DatePicker extends WithDisposable(LitElement) {
-  get year() {
-    return this._cursor.getFullYear();
-  }
+  /** current active month */
+  private _cursor = new Date();
 
-  get month() {
-    return this._cursor.getMonth();
-  }
+  private _maxYear = 2099;
 
-  get date() {
-    return this._cursor.getDate();
-  }
+  private _minYear = 1970;
 
-  get day() {
-    return this._cursor.getDay();
-  }
-
-  get yearLabel() {
-    return this.year;
-  }
-
-  get monthLabel() {
-    return months[this.month];
-  }
-
-  get dayLabel() {
-    return days[this.day];
-  }
-
-  get cardWidth() {
-    const colNum = 7;
-    return this.size * colNum + this.padding * 2 + this.gapH * (colNum - 1);
-  }
-
-  get cardHeight() {
-    const rowNum = 7;
-    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
-  }
-
-  get minHeight() {
-    const rowNum = 8;
-    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
-  }
+  static override styles = datePickerStyle;
 
   get _cardStyle() {
     return {
@@ -102,153 +68,6 @@ export class DatePicker extends WithDisposable(LitElement) {
       'min-height': `${this.cardHeight}px`,
       padding: `${this.padding}px`,
     };
-  }
-
-  static override styles = datePickerStyle;
-
-  /** current active month */
-  private _cursor = new Date();
-
-  /** web-accessibility for month select */
-  @property({ attribute: false })
-  private accessor _monthCursor = 0;
-
-  @property({ attribute: false })
-  private accessor _yearCursor = 0;
-
-  @property({ attribute: false })
-  private accessor _monthPickYearCursor = 0;
-
-  /** date matrix */
-  @property({ attribute: false })
-  private accessor _matrix: DateCell[][] = [];
-
-  @property({ attribute: false })
-  private accessor _yearMatrix: number[] = [];
-
-  @property({ attribute: false })
-  private accessor _mode: 'date' | 'month' | 'year' = 'date';
-
-  private _maxYear = 2099;
-
-  private _minYear = 1970;
-
-  /** Checked date timestamp */
-  @property({ type: Number })
-  accessor value: number | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onChange: ((value: Date) => void) | undefined = undefined;
-
-  /** card padding in px */
-  @property({ type: Number })
-  accessor padding = 20;
-
-  /** cell size in px */
-  @property({ type: Number })
-  accessor size = 28;
-
-  /** horizontal gap between cells in px */
-  @property({ type: Number })
-  accessor gapH = 10;
-
-  /** vertical gap between cells in px */
-  @property({ type: Number })
-  accessor gapV = 8;
-
-  private _moveMonth(offset: number) {
-    this._cursor.setMonth(this._cursor.getMonth() + offset);
-    this._getMatrix();
-  }
-
-  private _modeDecade(offset: number) {
-    this._yearCursor = clamp(
-      this._minYear,
-      this._maxYear,
-      this._yearCursor + offset
-    );
-    this._getYearMatrix();
-  }
-
-  private _onChange(date: Date, emit = true) {
-    this._cursor = date;
-    this.value = date.getTime();
-    this._getMatrix();
-    emit && this.onChange?.(date);
-  }
-
-  private _getMatrix() {
-    this._matrix = getMonthMatrix(this._cursor).map(row => {
-      return row.map(date => {
-        const tabIndex = isSameDay(date, this._cursor) ? 0 : -1;
-        return {
-          date,
-          label: date.getDate().toString(),
-          isToday: isToday(date),
-          notCurrentMonth: !isSameMonth(date, this._cursor),
-          selected: this.value ? isSameDay(date, toDate(this.value)) : false,
-          tabIndex,
-        } satisfies DateCell;
-      });
-    });
-  }
-
-  private _getYearMatrix() {
-    // every decade has 12 years
-    const no = Math.floor((this._yearCursor - this._minYear) / 12);
-    const decade = no * 12;
-    const start = this._minYear + decade;
-    const end = start + 12;
-    this._yearMatrix = Array.from(
-      { length: end - start },
-      (_, i) => start + i
-    ).filter(v => v >= this._minYear && v <= this._maxYear);
-  }
-
-  private _switchMode<T>(map: Record<typeof this._mode, T>) {
-    return (map[this._mode] as T) ?? nothing;
-  }
-
-  /** Actions */
-  private _navAction(
-    prev: NavActionArg | NavActionArg['action'],
-    curr: NavActionArg | NavActionArg['action'],
-    slot?: TemplateResult
-  ) {
-    const onPrev = typeof prev === 'function' ? prev : prev.action;
-    const onNext = typeof curr === 'function' ? curr : curr.action;
-    const prevDisable = typeof prev === 'function' ? false : prev.disable;
-    const nextDisable = typeof curr === 'function' ? false : curr.disable;
-    const classes = classMap({
-      'date-picker-header__action': true,
-      'with-slot': !!slot,
-    });
-    return html`<div class=${classes}>
-      <button
-        aria-label="previous month"
-        class="date-picker-small-action interactive left"
-        @click=${onPrev}
-        ?disabled=${prevDisable}
-      >
-        ${arrowLeftIcon}
-      </button>
-      ${slot ?? nothing}
-      <button
-        aria-label="next month"
-        class="date-picker-small-action interactive right"
-        @click=${onNext}
-        ?disabled=${nextDisable}
-      >
-        ${arrowLeftIcon}
-      </button>
-    </div>`;
-  }
-
-  /** Week header */
-  private _dayHeaderRenderer() {
-    return html`<div class="days-header">
-      ${days.map(day => html`<div class="date-cell">${day}</div>`)}
-    </div>`;
   }
 
   /** Cell */
@@ -318,6 +137,50 @@ export class DatePicker extends WithDisposable(LitElement) {
       </div>`;
   }
 
+  /** Week header */
+  private _dayHeaderRenderer() {
+    return html`<div class="days-header">
+      ${days.map(day => html`<div class="date-cell">${day}</div>`)}
+    </div>`;
+  }
+
+  private _getMatrix() {
+    this._matrix = getMonthMatrix(this._cursor).map(row => {
+      return row.map(date => {
+        const tabIndex = isSameDay(date, this._cursor) ? 0 : -1;
+        return {
+          date,
+          label: date.getDate().toString(),
+          isToday: isToday(date),
+          notCurrentMonth: !isSameMonth(date, this._cursor),
+          selected: this.value ? isSameDay(date, toDate(this.value)) : false,
+          tabIndex,
+        } satisfies DateCell;
+      });
+    });
+  }
+
+  private _getYearMatrix() {
+    // every decade has 12 years
+    const no = Math.floor((this._yearCursor - this._minYear) / 12);
+    const decade = no * 12;
+    const start = this._minYear + decade;
+    const end = start + 12;
+    this._yearMatrix = Array.from(
+      { length: end - start },
+      (_, i) => start + i
+    ).filter(v => v >= this._minYear && v <= this._maxYear);
+  }
+
+  private _modeDecade(offset: number) {
+    this._yearCursor = clamp(
+      this._minYear,
+      this._maxYear,
+      this._yearCursor + offset
+    );
+    this._getYearMatrix();
+  }
+
   private _monthContent() {
     return html` <div class="date-picker-header">
         <button
@@ -368,6 +231,57 @@ export class DatePicker extends WithDisposable(LitElement) {
       </div>`;
   }
 
+  private _moveMonth(offset: number) {
+    this._cursor.setMonth(this._cursor.getMonth() + offset);
+    this._getMatrix();
+  }
+
+  /** Actions */
+  private _navAction(
+    prev: NavActionArg | NavActionArg['action'],
+    curr: NavActionArg | NavActionArg['action'],
+    slot?: TemplateResult
+  ) {
+    const onPrev = typeof prev === 'function' ? prev : prev.action;
+    const onNext = typeof curr === 'function' ? curr : curr.action;
+    const prevDisable = typeof prev === 'function' ? false : prev.disable;
+    const nextDisable = typeof curr === 'function' ? false : curr.disable;
+    const classes = classMap({
+      'date-picker-header__action': true,
+      'with-slot': !!slot,
+    });
+    return html`<div class=${classes}>
+      <button
+        aria-label="previous month"
+        class="date-picker-small-action interactive left"
+        @click=${onPrev}
+        ?disabled=${prevDisable}
+      >
+        ${arrowLeftIcon}
+      </button>
+      ${slot ?? nothing}
+      <button
+        aria-label="next month"
+        class="date-picker-small-action interactive right"
+        @click=${onNext}
+        ?disabled=${nextDisable}
+      >
+        ${arrowLeftIcon}
+      </button>
+    </div>`;
+  }
+
+  private _onChange(date: Date, emit = true) {
+    this._cursor = date;
+    this.value = date.getTime();
+    this._getMatrix();
+    emit && this.onChange?.(date);
+  }
+
+  private _switchMode<T>(map: Record<typeof this._mode, T>) {
+    return (map[this._mode] as T) ?? nothing;
+  }
+
   private _yearContent() {
     const startYear = this._yearMatrix[0];
     const endYear = this._yearMatrix[this._yearMatrix.length - 1];
@@ -413,77 +327,18 @@ export class DatePicker extends WithDisposable(LitElement) {
       </div>`;
   }
 
-  /**
-   * Focus on date-cell
-   */
-  focusDateCell() {
-    const lastEl = this.shadowRoot?.querySelector(
-      'button.date-cell[tabindex="0"]'
-    ) as HTMLElement;
-    lastEl?.focus();
-  }
-
-  /**
-   * check if date-cell is focused
-   * @returns
-   */
-  isDateCellFocused() {
-    const focused = this.shadowRoot?.activeElement as HTMLElement;
-    return focused?.classList.contains('date-cell');
-  }
-
-  focusMonthCell() {
-    const lastEl = this.shadowRoot?.querySelector(
-      'button.month-cell[tabindex="0"]'
-    ) as HTMLElement;
-    lastEl?.focus();
-  }
-
-  isMonthCellFocused() {
-    const focused = this.shadowRoot?.activeElement as HTMLElement;
-    return focused?.classList.contains('month-cell');
-  }
-
-  focusYearCell() {
-    const lastEl = this.shadowRoot?.querySelector(
-      'button.year-cell[tabindex="0"]'
-    ) as HTMLElement;
-    lastEl?.focus();
-  }
-
-  isYearCellFocused() {
-    const focused = this.shadowRoot?.activeElement as HTMLElement;
-    return focused?.classList.contains('year-cell');
-  }
-
-  openMonthSelector() {
-    this._monthCursor = this.month;
-    this._monthPickYearCursor = this.year;
-    this._mode = 'month';
-  }
-
   closeMonthSelector() {
     this._mode = 'date';
-  }
-
-  toggleMonthSelector() {
-    if (this._mode === 'month') this.closeMonthSelector();
-    else this.openMonthSelector();
-  }
-
-  openYearSelector() {
-    this._yearCursor = clamp(this._minYear, this._maxYear, this.year);
-    this._mode = 'year';
-    this._getYearMatrix();
   }
 
   closeYearSelector() {
     this._mode = 'date';
   }
 
-  toggleYearSelector() {
-    if (this._mode === 'year') this.closeYearSelector();
-    else this.openYearSelector();
+  override connectedCallback(): void {
+    super.connectedCallback();
+    if (this.value) this._cursor = toDate(this.value);
+    this._getMatrix();
   }
 
   override firstUpdated(): void {
@@ -554,18 +409,59 @@ export class DatePicker extends WithDisposable(LitElement) {
     );
   }
 
-  override updated(_changedProperties: PropertyValues): void {
-    if (_changedProperties.has('value')) {
-      // this._getMatrix();
-      if (this.value) this._onChange(toDate(this.value), false);
-      else this._getMatrix();
-    }
+  /**
+   * Focus on date-cell
+   */
+  focusDateCell() {
+    const lastEl = this.shadowRoot?.querySelector(
+      'button.date-cell[tabindex="0"]'
+    ) as HTMLElement;
+    lastEl?.focus();
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-    if (this.value) this._cursor = toDate(this.value);
-    this._getMatrix();
+  focusMonthCell() {
+    const lastEl = this.shadowRoot?.querySelector(
+      'button.month-cell[tabindex="0"]'
+    ) as HTMLElement;
+    lastEl?.focus();
+  }
+
+  focusYearCell() {
+    const lastEl = this.shadowRoot?.querySelector(
+      'button.year-cell[tabindex="0"]'
+    ) as HTMLElement;
+    lastEl?.focus();
+  }
+
+  /**
+   * check if date-cell is focused
+   * @returns
+   */
+  isDateCellFocused() {
+    const focused = this.shadowRoot?.activeElement as HTMLElement;
+    return focused?.classList.contains('date-cell');
+  }
+
+  isMonthCellFocused() {
+    const focused = this.shadowRoot?.activeElement as HTMLElement;
+    return focused?.classList.contains('month-cell');
+  }
+
+  isYearCellFocused() {
+    const focused = this.shadowRoot?.activeElement as HTMLElement;
+    return focused?.classList.contains('year-cell');
+  }
+
+  openMonthSelector() {
+    this._monthCursor = this.month;
+    this._monthPickYearCursor = this.year;
+    this._mode = 'month';
+  }
+
+  openYearSelector() {
+    this._yearCursor = clamp(this._minYear, this._maxYear, this.year);
+    this._mode = 'year';
+    this._getYearMatrix();
   }
 
   override render() {
@@ -586,6 +482,110 @@ export class DatePicker extends WithDisposable(LitElement) {
       </div>
     </div>`;
   }
+
+  toggleMonthSelector() {
+    if (this._mode === 'month') this.closeMonthSelector();
+    else this.openMonthSelector();
+  }
+
+  toggleYearSelector() {
+    if (this._mode === 'year') this.closeYearSelector();
+    else this.openYearSelector();
+  }
+
+  override updated(_changedProperties: PropertyValues): void {
+    if (_changedProperties.has('value')) {
+      // this._getMatrix();
+      if (this.value) this._onChange(toDate(this.value), false);
+      else this._getMatrix();
+    }
+  }
+
+  get cardHeight() {
+    const rowNum = 7;
+    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
+  }
+
+  get cardWidth() {
+    const colNum = 7;
+    return this.size * colNum + this.padding * 2 + this.gapH * (colNum - 1);
+  }
+
+  get date() {
+    return this._cursor.getDate();
+  }
+
+  get day() {
+    return this._cursor.getDay();
+  }
+
+  get dayLabel() {
+    return days[this.day];
+  }
+
+  get minHeight() {
+    const rowNum = 8;
+    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
+  }
+
+  get month() {
+    return this._cursor.getMonth();
+  }
+
+  get monthLabel() {
+    return months[this.month];
+  }
+
+  get year() {
+    return this._cursor.getFullYear();
+  }
+
+  get yearLabel() {
+    return this.year;
+  }
+
+  /** date matrix */
+  @property({ attribute: false })
+  private accessor _matrix: DateCell[][] = [];
+
+  @property({ attribute: false })
+  private accessor _mode: 'date' | 'month' | 'year' = 'date';
+
+  /** web-accessibility for month select */
+  @property({ attribute: false })
+  private accessor _monthCursor = 0;
+
+  @property({ attribute: false })
+  private accessor _monthPickYearCursor = 0;
+
+  @property({ attribute: false })
+  private accessor _yearCursor = 0;
+
+  @property({ attribute: false })
+  private accessor _yearMatrix: number[] = [];
+
+  /** horizontal gap between cells in px */
+  @property({ type: Number })
+  accessor gapH = 10;
+
+  /** vertical gap between cells in px */
+  @property({ type: Number })
+  accessor gapV = 8;
+
+  @property({ attribute: false })
+  accessor onChange: ((value: Date) => void) | undefined = undefined;
+
+  /** card padding in px */
+  @property({ type: Number })
+  accessor padding = 20;
+
+  /** cell size in px */
+  @property({ type: Number })
+  accessor size = 28;
+
+  /** Checked date timestamp */
+  @property({ type: Number })
+  accessor value: number | undefined = undefined;
 }
 
 declare global {

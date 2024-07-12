@@ -1,14 +1,15 @@
-import '../../../_common/components/ai-item/ai-item-list.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
+import '../../../_common/components/ai-item/ai-item-list.js';
 import { scrollbarStyle } from '../../../_common/components/utils.js';
 import { on, stopPropagation } from '../../../_common/utils/event.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-copilot-panel')
 export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
@@ -35,21 +36,6 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
       background-color: var(--affine-black-30);
     }
   `;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor groups!: AIItemGroupConfig[];
-
-  @property({ attribute: false })
-  accessor entry: 'toolbar' | 'selection' | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onClick: (() => void) | undefined = undefined;
 
   private _getChain() {
     return this.edgeless.service.std.command.chain();
@@ -91,6 +77,21 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor entry: 'toolbar' | 'selection' | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor groups!: AIItemGroupConfig[];
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor onClick: (() => void) | undefined = undefined;
 }
 
 declare global {

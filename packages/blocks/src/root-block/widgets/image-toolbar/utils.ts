@@ -1,13 +1,6 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import '../../../_common/components/tooltip/tooltip.js';
-
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
-import { getBlockProps } from '../../../_common/utils/block-props.js';
-import { isInsidePageEditor } from '../../../_common/utils/query.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type {
   CommonItem,
@@ -16,6 +9,13 @@ import type {
   MoreItem,
   MoreMenuConfigItem,
 } from './type.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
+import '../../../_common/components/tooltip/tooltip.js';
+import { getBlockProps } from '../../../_common/utils/block-props.js';
+import { isInsidePageEditor } from '../../../_common/utils/query.js';
 
 export function ConfigRenderer(
   blockElement: ImageBlockComponent,

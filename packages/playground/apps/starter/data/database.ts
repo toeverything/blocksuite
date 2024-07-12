@@ -1,9 +1,9 @@
 import {
-  columnPresets,
   type DatabaseBlockModel,
-  databaseViewAddView,
   type ListType,
   type ParagraphType,
+  columnPresets,
+  databaseViewAddView,
   richTextColumnConfig,
   viewPresets,
 } from '@blocksuite/blocks';

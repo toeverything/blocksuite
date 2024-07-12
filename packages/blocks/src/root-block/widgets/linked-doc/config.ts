@@ -1,7 +1,10 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { DocMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
+
+import { assertExists } from '@blocksuite/global/utils';
+
+import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 import { toast } from '../../../_common/components/toast.js';
 import {
@@ -10,7 +13,6 @@ import {
   LinkedEdgelessIcon,
   NewDocIcon,
 } from '../../../_common/icons/index.js';
-import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import { createDefaultDoc } from '../../../_common/utils/init.js';
 import { isFuzzyMatch } from '../../../_common/utils/string.js';

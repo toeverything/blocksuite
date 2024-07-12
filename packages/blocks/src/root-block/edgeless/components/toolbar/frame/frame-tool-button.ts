@@ -1,17 +1,17 @@
-import '../../buttons/tool-icon-button.js';
-import './frame-menu.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { EdgelessTool } from '../../../types.js';
 
 import {
   ArrowUpIcon,
   LargeFrameIcon,
 } from '../../../../../_common/icons/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
-import type { EdgelessTool } from '../../../types.js';
+import '../../buttons/tool-icon-button.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
+import './frame-menu.js';
 
 @customElement('edgeless-frame-tool-button')
 export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {

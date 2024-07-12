@@ -4,18 +4,23 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+
 import { FrameBlockModel } from '../../../../../frame-block/index.js';
 import {
   Bound,
   type SerializedXYWH,
 } from '../../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const NESTED_FRAME_OFFSET = 4;
 
 @customElement('edgeless-frame-title')
 export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
+  private _cachedHeight = 0;
+
+  private _cachedWidth = 0;
+
   static override styles = css`
     .affine-frame-title {
       position: absolute;
@@ -35,36 +40,14 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @state()
-  private accessor _editing = false;
-
-  @state()
-  private accessor _isNavigator = false;
-
-  @query('.affine-frame-title')
-  private accessor _frameTitleEl!: HTMLDivElement;
-
-  @state()
-  private accessor _nestedFrame = false;
-
-  @state()
-  private accessor _frameTitle = '';
-
-  @state()
-  private accessor _xywh: SerializedXYWH | null = null;
-
-  private _cachedWidth = 0;
-
-  private _cachedHeight = 0;
-
-  @property({ attribute: false })
-  accessor frame!: FrameBlockModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor zoom!: number;
+  private _isInsideFrame() {
+    return this.edgeless.service.layer.framesGrid.has(
+      this.frame.elementBound,
+      true,
+      true,
+      new Set([this.frame])
+    );
+  }
 
   private _updateFrameTitleSize() {
     const { _nestedFrame, zoom } = this;
@@ -82,15 +65,6 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
           : -(height + NESTED_FRAME_OFFSET / zoom))
       },${width},${height}]`;
     }
-  }
-
-  private _isInsideFrame() {
-    return this.edgeless.service.layer.framesGrid.has(
-      this.frame.elementBound,
-      true,
-      true,
-      new Set([this.frame])
-    );
   }
 
   override connectedCallback() {
@@ -148,29 +122,6 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     this._xywh = this.frame.xywh;
   }
 
-  override updated(_changedProperties: Map<string, unknown>) {
-    if (this.style.display !== 'block' || !this._frameTitleEl) {
-      return;
-    }
-
-    let sizeChanged = false;
-    if (
-      this._cachedWidth === 0 ||
-      this._cachedHeight === 0 ||
-      _changedProperties.has('_frameTitle') ||
-      _changedProperties.has('_nestedFrame') ||
-      _changedProperties.has('_xywh')
-    ) {
-      this._cachedWidth = this._frameTitleEl.clientWidth;
-      this._cachedHeight = this._frameTitleEl.clientHeight;
-      sizeChanged = true;
-    }
-
-    if (sizeChanged || _changedProperties.has('zoom')) {
-      this._updateFrameTitleSize();
-    }
-  }
-
   override render() {
     const model = this.frame;
     const bound = Bound.deserialize(model.xywh);
@@ -219,6 +170,56 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
         : nothing}
     `;
   }
+
+  override updated(_changedProperties: Map<string, unknown>) {
+    if (this.style.display !== 'block' || !this._frameTitleEl) {
+      return;
+    }
+
+    let sizeChanged = false;
+    if (
+      this._cachedWidth === 0 ||
+      this._cachedHeight === 0 ||
+      _changedProperties.has('_frameTitle') ||
+      _changedProperties.has('_nestedFrame') ||
+      _changedProperties.has('_xywh')
+    ) {
+      this._cachedWidth = this._frameTitleEl.clientWidth;
+      this._cachedHeight = this._frameTitleEl.clientHeight;
+      sizeChanged = true;
+    }
+
+    if (sizeChanged || _changedProperties.has('zoom')) {
+      this._updateFrameTitleSize();
+    }
+  }
+
+  @state()
+  private accessor _editing = false;
+
+  @state()
+  private accessor _frameTitle = '';
+
+  @query('.affine-frame-title')
+  private accessor _frameTitleEl!: HTMLDivElement;
+
+  @state()
+  private accessor _isNavigator = false;
+
+  @state()
+  private accessor _nestedFrame = false;
+
+  @state()
+  private accessor _xywh: SerializedXYWH | null = null;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor frame!: FrameBlockModel;
+
+  @property({ attribute: false })
+  accessor zoom!: number;
 }
 
 @customElement('edgeless-block-portal-frame')
@@ -255,17 +256,16 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
+  override connectedCallback(): void {
+    super.connectedCallback();
 
-  @property({ attribute: false })
-  accessor frames!: FrameBlockModel[];
-
-  @property({ attribute: false })
-  accessor startIndex!: number;
-
-  @property({ attribute: false })
-  accessor visibleFrames!: Set<FrameBlockModel>;
+    this._disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
+        // if zoom changed we need to re-render the frame titles
+        this.requestUpdate();
+      })
+    );
+  }
 
   protected override render() {
     const { visibleFrames, edgeless, startIndex } = this;
@@ -299,16 +299,17 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 
-    this._disposables.add(
-      this.edgeless.service.viewport.viewportUpdated.on(() => {
-        // if zoom changed we need to re-render the frame titles
-        this.requestUpdate();
-      })
-    );
-  }
+  @property({ attribute: false })
+  accessor frames!: FrameBlockModel[];
+
+  @property({ attribute: false })
+  accessor startIndex!: number;
+
+  @property({ attribute: false })
+  accessor visibleFrames!: Set<FrameBlockModel>;
 }
 
 declare global {

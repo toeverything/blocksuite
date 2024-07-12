@@ -1,38 +1,14 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import '../../edgeless/components/panel/card-style-panel.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
-import { isPeekable, peek } from '../../../_common/components/index.js';
-import { toast } from '../../../_common/components/toast.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import type { Action } from '../../../_common/components/toolbar/utils.js';
-import {
-  EMBED_CARD_HEIGHT,
-  EMBED_CARD_WIDTH,
-} from '../../../_common/consts.js';
-import {
-  CaptionIcon,
-  CenterPeekIcon,
-  CopyIcon,
-  EditIcon,
-  ExpandFullSmallIcon,
-  OpenIcon,
-  PaletteIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
-import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
-import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import type {
   BookmarkBlockComponent,
   BookmarkBlockModel,
@@ -62,8 +38,34 @@ import type {
   EmbedYoutubeBlockComponent,
   EmbedYoutubeModel,
 } from '../../../embed-youtube-block/index.js';
-import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EmbedOptions } from '../../root-service.js';
+
+import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
+import { isPeekable, peek } from '../../../_common/components/index.js';
+import { toast } from '../../../_common/components/toast.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
+import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '../../../_common/consts.js';
+import {
+  CaptionIcon,
+  CenterPeekIcon,
+  CopyIcon,
+  EditIcon,
+  ExpandFullSmallIcon,
+  OpenIcon,
+  PaletteIcon,
+  SmallArrowDownIcon,
+} from '../../../_common/icons/index.js';
+import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
+import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
+import { Bound } from '../../../surface-block/index.js';
+import '../../edgeless/components/panel/card-style-panel.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
@@ -71,239 +73,9 @@ import {
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../edgeless/utils/query.js';
-import type { EmbedOptions } from '../../root-service.js';
 
 @customElement('edgeless-change-embed-card-button')
 export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
-  static override styles = css`
-    .affine-link-preview {
-      display: flex;
-      justify-content: flex-start;
-      width: 140px;
-      padding: var(--1, 0px);
-      border-radius: var(--1, 0px);
-      opacity: var(--add, 1);
-      user-select: none;
-      cursor: pointer;
-
-      color: var(--affine-link-color);
-      font-feature-settings:
-        'clig' off,
-        'liga' off;
-      font-family: var(--affine-font-family);
-      font-size: var(--affine-font-sm);
-      font-style: normal;
-      font-weight: 400;
-      text-decoration: none;
-      text-wrap: nowrap;
-    }
-
-    .affine-link-preview > span {
-      display: inline-block;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-
-      text-overflow: ellipsis;
-      overflow: hidden;
-      opacity: var(--add, 1);
-    }
-  `;
-
-  private get _doc() {
-    return this.model.doc;
-  }
-
-  private get std() {
-    return this.edgeless.std;
-  }
-
-  private get _rootService() {
-    return this.std.spec.getService('affine:page');
-  }
-
-  private get _blockElement() {
-    const blockSelection =
-      this.edgeless.service.selection.surfaceSelections.filter(sel =>
-        sel.elements.includes(this.model.id)
-      );
-    if (blockSelection.length !== 1) {
-      return;
-    }
-
-    const blockElement = this.std.view.getBlock(blockSelection[0].blockId) as
-      | BookmarkBlockComponent
-      | EmbedGithubBlockComponent
-      | EmbedYoutubeBlockComponent
-      | EmbedFigmaBlockComponent
-      | EmbedLinkedDocBlockComponent
-      | EmbedSyncedDocBlockComponent
-      | EmbedLoomBlockComponent
-      | null;
-    assertExists(blockElement);
-
-    return blockElement;
-  }
-
-  private get _canShowUrlOptions() {
-    return (
-      'url' in this.model &&
-      (isBookmarkBlock(this.model) ||
-        isEmbedGithubBlock(this.model) ||
-        isEmbedLinkedDocBlock(this.model))
-    );
-  }
-
-  private get _canShowFullScreenButton() {
-    return isEmbedHtmlBlock(this.model);
-  }
-
-  private get _isCardView() {
-    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
-      return true;
-    }
-    return this._embedOptions?.viewType === 'card';
-  }
-
-  private get _isEmbedView() {
-    return (
-      !isBookmarkBlock(this.model) &&
-      (isEmbedSyncedDocBlock(this.model) ||
-        this._embedOptions?.viewType === 'embed')
-    );
-  }
-
-  private get _canConvertToEmbedView() {
-    const block = this._blockElement;
-
-    // synced doc entry controlled by awareness flag
-    if (!!block && isEmbedLinkedDocBlock(block.model)) {
-      const isSyncedDocEnabled = block.doc.awarenessStore.getFlag(
-        'enable_synced_doc_block'
-      );
-      if (!isSyncedDocEnabled) {
-        return false;
-      }
-    }
-
-    return (
-      (block && 'convertToEmbed' in block) ||
-      this._embedOptions?.viewType === 'embed'
-    );
-  }
-
-  private get _canShowCardStylePanel() {
-    return (
-      isBookmarkBlock(this.model) ||
-      isEmbedGithubBlock(this.model) ||
-      isEmbedLinkedDocBlock(this.model)
-    );
-  }
-
-  private get _getCardStyleOptions(): {
-    style: EmbedCardStyle;
-    Icon: TemplateResult<1>;
-    tooltip: string;
-  }[] {
-    const {
-      EmbedCardHorizontalIcon,
-      EmbedCardListIcon,
-      EmbedCardVerticalIcon,
-      EmbedCardCubeIcon,
-    } = getEmbedCardIcons();
-    return [
-      {
-        style: 'horizontal',
-        Icon: EmbedCardHorizontalIcon,
-        tooltip: 'Large horizontal style',
-      },
-      {
-        style: 'list',
-        Icon: EmbedCardListIcon,
-        tooltip: 'Small horizontal style',
-      },
-      {
-        style: 'vertical',
-        Icon: EmbedCardVerticalIcon,
-        tooltip: 'Large vertical style',
-      },
-      {
-        style: 'cube',
-        Icon: EmbedCardCubeIcon,
-        tooltip: 'Small vertical style',
-      },
-    ];
-  }
-
-  private get _embedViewButtonDisabled() {
-    if (this._doc.readonly) {
-      return true;
-    }
-    return (
-      isEmbedLinkedDocBlock(this.model) &&
-      (!!this._blockElement?.closest('affine-embed-synced-doc-block') ||
-        this.model.pageId === this._doc.id)
-    );
-  }
-
-  get _openButtonDisabled() {
-    return (
-      isEmbedLinkedDocBlock(this.model) && this.model.pageId === this._doc.id
-    );
-  }
-
-  @state()
-  private accessor _embedScale = 1;
-
-  private _embedOptions: EmbedOptions | null = null;
-
-  @property({ attribute: false })
-  accessor model!:
-    | BookmarkBlockModel
-    | EmbedGithubModel
-    | EmbedYoutubeModel
-    | EmbedFigmaModel
-    | EmbedLinkedDocModel
-    | EmbedSyncedDocModel
-    | EmbedHtmlModel
-    | EmbedLoomModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor quickConnectButton!: TemplateResult<1>;
-
-  private _open = () => {
-    this._blockElement?.open();
-  };
-
-  private _peek = () => {
-    if (!this._blockElement) return;
-    peek(this._blockElement);
-  };
-
-  private _showCaption() {
-    this._blockElement?.captionEditor.show();
-  }
-
-  private _copyUrl = () => {
-    if (!('url' in this.model)) {
-      return;
-    }
-
-    navigator.clipboard.writeText(this.model.url).catch(console.error);
-    toast(this.std.host as EditorHost, 'Copied link to clipboard');
-    this.edgeless.service.selection.clear();
-  };
-
-  private _setCardStyle(style: EmbedCardStyle) {
-    const bounds = Bound.deserialize(this.model.xywh);
-    bounds.w = EMBED_CARD_WIDTH[style];
-    bounds.h = EMBED_CARD_HEIGHT[style];
-    const xywh = bounds.serialize();
-    this.model.doc.updateBlock(this.model, { style, xywh });
-  }
-
   private _convertToCardView = () => {
     if (this._isCardView) {
       return;
@@ -403,6 +175,18 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._doc.deleteBlock(this.model);
   };
 
+  private _copyUrl = () => {
+    if (!('url' in this.model)) {
+      return;
+    }
+
+    navigator.clipboard.writeText(this.model.url).catch(console.error);
+    toast(this.std.host as EditorHost, 'Copied link to clipboard');
+    this.edgeless.service.selection.clear();
+  };
+
+  private _embedOptions: EmbedOptions | null = null;
+
   private _getScale = () => {
     if (isEmbedSyncedDocBlock(this.model)) {
       return this.model.scale ?? 1;
@@ -414,24 +198,181 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return bound.h / EMBED_CARD_HEIGHT[this.model.style];
   };
 
-  private _setEmbedScale(scale: number) {
-    if (isEmbedHtmlBlock(this.model)) return;
+  private _open = () => {
+    this._blockElement?.open();
+  };
 
-    const bound = Bound.deserialize(this.model.xywh);
-    if (isEmbedSyncedDocBlock(this.model)) {
-      const oldScale = this.model.scale ?? 1;
-      const ratio = scale / oldScale;
-      bound.w *= ratio;
-      bound.h *= ratio;
-      const xywh = bound.serialize();
-      this.model.doc.updateBlock(this.model, { scale, xywh });
-    } else {
-      bound.h = EMBED_CARD_HEIGHT[this.model.style] * scale;
-      bound.w = EMBED_CARD_WIDTH[this.model.style] * scale;
-      const xywh = bound.serialize();
-      this.model.doc.updateBlock(this.model, { xywh });
+  private _peek = () => {
+    if (!this._blockElement) return;
+    peek(this._blockElement);
+  };
+
+  static override styles = css`
+    .affine-link-preview {
+      display: flex;
+      justify-content: flex-start;
+      width: 140px;
+      padding: var(--1, 0px);
+      border-radius: var(--1, 0px);
+      opacity: var(--add, 1);
+      user-select: none;
+      cursor: pointer;
+
+      color: var(--affine-link-color);
+      font-feature-settings:
+        'clig' off,
+        'liga' off;
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-sm);
+      font-style: normal;
+      font-weight: 400;
+      text-decoration: none;
+      text-wrap: nowrap;
     }
-    this._embedScale = scale;
+
+    .affine-link-preview > span {
+      display: inline-block;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+
+      text-overflow: ellipsis;
+      overflow: hidden;
+      opacity: var(--add, 1);
+    }
+  `;
+
+  private get _blockElement() {
+    const blockSelection =
+      this.edgeless.service.selection.surfaceSelections.filter(sel =>
+        sel.elements.includes(this.model.id)
+      );
+    if (blockSelection.length !== 1) {
+      return;
+    }
+
+    const blockElement = this.std.view.getBlock(blockSelection[0].blockId) as
+      | BookmarkBlockComponent
+      | EmbedGithubBlockComponent
+      | EmbedYoutubeBlockComponent
+      | EmbedFigmaBlockComponent
+      | EmbedLinkedDocBlockComponent
+      | EmbedSyncedDocBlockComponent
+      | EmbedLoomBlockComponent
+      | null;
+    assertExists(blockElement);
+
+    return blockElement;
+  }
+
+  private get _canConvertToEmbedView() {
+    const block = this._blockElement;
+
+    // synced doc entry controlled by awareness flag
+    if (!!block && isEmbedLinkedDocBlock(block.model)) {
+      const isSyncedDocEnabled = block.doc.awarenessStore.getFlag(
+        'enable_synced_doc_block'
+      );
+      if (!isSyncedDocEnabled) {
+        return false;
+      }
+    }
+
+    return (
+      (block && 'convertToEmbed' in block) ||
+      this._embedOptions?.viewType === 'embed'
+    );
+  }
+
+  private get _canShowCardStylePanel() {
+    return (
+      isBookmarkBlock(this.model) ||
+      isEmbedGithubBlock(this.model) ||
+      isEmbedLinkedDocBlock(this.model)
+    );
+  }
+
+  private get _canShowFullScreenButton() {
+    return isEmbedHtmlBlock(this.model);
+  }
+
+  private get _canShowUrlOptions() {
+    return (
+      'url' in this.model &&
+      (isBookmarkBlock(this.model) ||
+        isEmbedGithubBlock(this.model) ||
+        isEmbedLinkedDocBlock(this.model))
+    );
+  }
+
+  private get _doc() {
+    return this.model.doc;
+  }
+
+  private get _embedViewButtonDisabled() {
+    if (this._doc.readonly) {
+      return true;
+    }
+    return (
+      isEmbedLinkedDocBlock(this.model) &&
+      (!!this._blockElement?.closest('affine-embed-synced-doc-block') ||
+        this.model.pageId === this._doc.id)
+    );
+  }
+
+  private get _getCardStyleOptions(): {
+    style: EmbedCardStyle;
+    Icon: TemplateResult<1>;
+    tooltip: string;
+  }[] {
+    const {
+      EmbedCardHorizontalIcon,
+      EmbedCardListIcon,
+      EmbedCardVerticalIcon,
+      EmbedCardCubeIcon,
+    } = getEmbedCardIcons();
+    return [
+      {
+        style: 'horizontal',
+        Icon: EmbedCardHorizontalIcon,
+        tooltip: 'Large horizontal style',
+      },
+      {
+        style: 'list',
+        Icon: EmbedCardListIcon,
+        tooltip: 'Small horizontal style',
+      },
+      {
+        style: 'vertical',
+        Icon: EmbedCardVerticalIcon,
+        tooltip: 'Large vertical style',
+      },
+      {
+        style: 'cube',
+        Icon: EmbedCardCubeIcon,
+        tooltip: 'Small vertical style',
+      },
+    ];
+  }
+
+  private get _isCardView() {
+    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
+      return true;
+    }
+    return this._embedOptions?.viewType === 'card';
+  }
+
+  private get _isEmbedView() {
+    return (
+      !isBookmarkBlock(this.model) &&
+      (isEmbedSyncedDocBlock(this.model) ||
+        this._embedOptions?.viewType === 'embed')
+    );
+  }
+
+  get _openButtonDisabled() {
+    return (
+      isEmbedLinkedDocBlock(this.model) && this.model.pageId === this._doc.id
+    );
   }
 
   private _openMenuButton() {
@@ -503,17 +444,40 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     `;
   }
 
-  private get _viewType(): 'inline' | 'embed' | 'card' {
-    if (this._isCardView) {
-      return 'card';
-    }
+  private get _rootService() {
+    return this.std.spec.getService('affine:page');
+  }
 
-    if (this._isEmbedView) {
-      return 'embed';
-    }
+  private _setCardStyle(style: EmbedCardStyle) {
+    const bounds = Bound.deserialize(this.model.xywh);
+    bounds.w = EMBED_CARD_WIDTH[style];
+    bounds.h = EMBED_CARD_HEIGHT[style];
+    const xywh = bounds.serialize();
+    this.model.doc.updateBlock(this.model, { style, xywh });
+  }
 
-    // unreachable
-    return 'inline';
+  private _setEmbedScale(scale: number) {
+    if (isEmbedHtmlBlock(this.model)) return;
+
+    const bound = Bound.deserialize(this.model.xywh);
+    if (isEmbedSyncedDocBlock(this.model)) {
+      const oldScale = this.model.scale ?? 1;
+      const ratio = scale / oldScale;
+      bound.w *= ratio;
+      bound.h *= ratio;
+      const xywh = bound.serialize();
+      this.model.doc.updateBlock(this.model, { scale, xywh });
+    } else {
+      bound.h = EMBED_CARD_HEIGHT[this.model.style] * scale;
+      bound.w = EMBED_CARD_WIDTH[this.model.style] * scale;
+      const xywh = bound.serialize();
+      this.model.doc.updateBlock(this.model, { xywh });
+    }
+    this._embedScale = scale;
+  }
+
+  private _showCaption() {
+    this._blockElement?.captionEditor.show();
   }
 
   private _viewMenuButton() {
@@ -575,6 +539,23 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
 
     return nothing;
+  }
+
+  private get _viewType(): 'inline' | 'embed' | 'card' {
+    if (this._isCardView) {
+      return 'card';
+    }
+
+    if (this._isEmbedView) {
+      return 'embed';
+    }
+
+    // unreachable
+    return 'inline';
+  }
+
+  private get std() {
+    return this.edgeless.std;
   }
 
   override connectedCallback() {
@@ -702,6 +683,26 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       renderToolbarSeparator
     );
   }
+
+  @state()
+  private accessor _embedScale = 1;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor model!:
+    | BookmarkBlockModel
+    | EmbedGithubModel
+    | EmbedYoutubeModel
+    | EmbedFigmaModel
+    | EmbedLinkedDocModel
+    | EmbedSyncedDocModel
+    | EmbedHtmlModel
+    | EmbedLoomModel;
+
+  @property({ attribute: false })
+  accessor quickConnectButton!: TemplateResult<1>;
 }
 
 declare global {

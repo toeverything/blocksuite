@@ -1,5 +1,6 @@
-import { type Constructor, DisposableGroup } from '@blocksuite/global/utils';
 import type { LitElement } from 'lit';
+
+import { type Constructor, DisposableGroup } from '@blocksuite/global/utils';
 
 // See https://lit.dev/docs/composition/mixins/#mixins-in-typescript
 // This definition should be exported, see https://github.com/microsoft/TypeScript/issues/30355#issuecomment-839834550
@@ -31,10 +32,6 @@ export function WithDisposable<T extends Constructor<LitElement>>(
   class DerivedClass extends SuperClass {
     protected _disposables = new DisposableGroup();
 
-    get disposables() {
-      return this._disposables;
-    }
-
     override connectedCallback() {
       super.connectedCallback();
       if (this._disposables.disposed) {
@@ -45,6 +42,10 @@ export function WithDisposable<T extends Constructor<LitElement>>(
     override disconnectedCallback() {
       super.disconnectedCallback();
       this._disposables.dispose();
+    }
+
+    get disposables() {
+      return this._disposables;
     }
   }
   return DerivedClass as unknown as T & Constructor<DisposableClass>;

@@ -1,4 +1,5 @@
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
+
 import { Text } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 

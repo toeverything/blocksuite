@@ -1,7 +1,5 @@
-import '../buttons/tool-icon-button.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -12,6 +10,7 @@ import {
   NoteShadowSampleIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { getThemeMode } from '../../../../_common/utils/query.js';
+import '../buttons/tool-icon-button.js';
 
 const TOOLBAR_SHADOWS_LIGHT = [
   '',
@@ -70,15 +69,6 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor value!: string;
-
-  @property({ attribute: false })
-  accessor background!: string;
-
-  @property({ attribute: false })
-  accessor onSelect!: (value: string) => void;
-
   override render() {
     const mode = getThemeMode();
     const SHADOWS =
@@ -116,6 +106,15 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
           </div>`
     );
   }
+
+  @property({ attribute: false })
+  accessor background!: string;
+
+  @property({ attribute: false })
+  accessor onSelect!: (value: string) => void;
+
+  @property({ attribute: false })
+  accessor value!: string;
 }
 
 declare global {

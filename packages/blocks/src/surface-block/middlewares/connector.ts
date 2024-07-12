@@ -1,6 +1,7 @@
 import type { ConnectorElementModel } from '../index.js';
-import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
+
+import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 
 export const connectorMiddleware: SurfaceMiddleware = (
   surface: SurfaceBlockModel

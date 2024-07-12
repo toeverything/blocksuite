@@ -3,6 +3,7 @@ import type {
   EdgelessElementToolbarWidget,
   EdgelessRootBlockComponent,
 } from '@blocksuite/blocks';
+
 import {
   EdgelessCopilotToolbarEntry,
   type EdgelessCopilotWidget,

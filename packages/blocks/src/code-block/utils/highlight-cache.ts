@@ -1,9 +1,9 @@
 import type { ThemedToken } from 'shiki';
 
 class LRUCache<K, V> {
-  private maxSize: number;
-
   private cache: Map<K, V>;
+
+  private maxSize: number;
 
   constructor(maxSize: number) {
     this.maxSize = maxSize;

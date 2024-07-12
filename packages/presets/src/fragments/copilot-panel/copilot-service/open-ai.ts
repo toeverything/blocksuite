@@ -2,14 +2,15 @@ import { html } from 'lit';
 import { OpenAI } from 'openai';
 
 import type { ChatMessage } from '../chat/logic.js';
+
 import { pngBase64ToFile } from '../edgeless/edit-image.js';
 import {
   ChatServiceKind,
-  createVendor,
   EmbeddingServiceKind,
   Image2TextServiceKind,
   Text2ImageServiceKind,
   TextServiceKind,
+  createVendor,
 } from './service-base.js';
 
 export const openaiVendor = createVendor<{

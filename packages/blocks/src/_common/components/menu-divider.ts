@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -27,12 +27,6 @@ export class MenuDivider extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor vertical = false;
-
-  @property({ attribute: false })
-  accessor dividerMargin = 7;
-
   override render() {
     const dividerStyles = styleMap({
       '--divider-margin': `${this.dividerMargin}px`,
@@ -42,6 +36,12 @@ export class MenuDivider extends LitElement {
       style=${dividerStyles}
     ></div>`;
   }
+
+  @property({ attribute: false })
+  accessor dividerMargin = 7;
+
+  @property({ attribute: false })
+  accessor vertical = false;
 }
 
 declare global {

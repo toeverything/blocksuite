@@ -1,14 +1,16 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { toast } from '../_common/components/toast.js';
-import { humanFileSize } from '../_common/utils/math.js';
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { AttachmentBlockComponent } from './attachment-block.js';
 import type {
   AttachmentBlockModel,
   AttachmentBlockProps,
 } from './attachment-model.js';
+
+import { toast } from '../_common/components/toast.js';
+import { humanFileSize } from '../_common/utils/math.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 import { allowEmbed } from './embed.js';
 

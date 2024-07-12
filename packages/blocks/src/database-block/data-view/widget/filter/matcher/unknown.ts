@@ -1,6 +1,7 @@
+import type { FilterDefineType } from './matcher.js';
+
 import { tBoolean } from '../../../logical/data-type.js';
 import { tFunction, tUnknown } from '../../../logical/typesystem.js';
-import type { FilterDefineType } from './matcher.js';
 
 export const unknownFilter = {
   isNotEmpty: {

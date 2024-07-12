@@ -3,9 +3,12 @@ import type {
   CommandKeyToData,
   InitCommandCtx,
 } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
+
+import type { AffineFormatBarWidget } from './format-bar.js';
 
 import { toast } from '../../../_common/components/index.js';
 import { createSimplePortal } from '../../../_common/components/portal.js';
@@ -27,8 +30,8 @@ import {
   Heading5Icon,
   Heading6Icon,
   ItalicIcon,
-  LinkedDocIcon,
   LinkIcon,
+  LinkedDocIcon,
   MoreVerticalIcon,
   NumberedListIcon,
   QuoteIcon,
@@ -42,7 +45,6 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
-import type { AffineFormatBarWidget } from './format-bar.js';
 
 export type DividerConfigItem = {
   type: 'divider';

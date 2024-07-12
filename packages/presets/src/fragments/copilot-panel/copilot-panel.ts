@@ -1,36 +1,25 @@
-import './chat/chat.js';
-import './edgeless/edgeless.js';
-import './copilot-service/index.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { css, html, type TemplateResult } from 'lit';
+import { type TemplateResult, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineEditorContainer } from '../../index.js';
 import type { AllAction } from './chat/logic.js';
+import type { AIEdgelessLogic } from './edgeless/logic.js';
+
+import './chat/chat.js';
 import { copilotConfig } from './copilot-service/copilot-config.js';
+import './copilot-service/index.js';
 import { CreateNewService } from './copilot-service/index.js';
 import { allKindService } from './copilot-service/service-base.js';
-import type { AIEdgelessLogic } from './edgeless/logic.js';
+import './edgeless/edgeless.js';
 import { AddCursorIcon, StarIcon } from './icons.js';
 import { AILogic } from './logic.js';
 import { getSurfaceElementFromEditor } from './utils/selection-utils.js';
 
 @customElement('copilot-panel')
 export class CopilotPanel extends WithDisposable(ShadowlessElement) {
-  get host() {
-    return this.editor.host;
-  }
-
-  get logic() {
-    if (!this.aiLogic) {
-      this.aiLogic = new AILogic(() => this.host);
-    }
-    return this.aiLogic;
-  }
-
   static override styles = css`
     copilot-panel {
       width: 100%;
@@ -122,11 +111,6 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-
-  editorWithAI?: AIEdgelessLogic;
-
   aiLogic?: AILogic;
 
   config = () => {
@@ -178,6 +162,8 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     `;
   };
 
+  editorWithAI?: AIEdgelessLogic;
+
   // eslint-disable-next-line @typescript-eslint/member-ordering
   panels: Record<
     string,
@@ -203,9 +189,6 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       render: this.config,
     },
   };
-
-  @state()
-  accessor currentPanel: keyof typeof this.panels = 'Chat';
 
   override connectedCallback() {
     super.connectedCallback();
@@ -257,6 +240,23 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get host() {
+    return this.editor.host;
+  }
+
+  get logic() {
+    if (!this.aiLogic) {
+      this.aiLogic = new AILogic(() => this.host);
+    }
+    return this.aiLogic;
+  }
+
+  @state()
+  accessor currentPanel: keyof typeof this.panels = 'Chat';
+
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
 }
 
 declare global {

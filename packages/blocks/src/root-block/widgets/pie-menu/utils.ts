@@ -1,6 +1,4 @@
 import type { IVec } from '../../../surface-block/index.js';
-import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
-import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessTool } from '../../edgeless/types.js';
 import type {
   ActionFunction,
@@ -13,6 +11,9 @@ import type {
   PieRootNodeModel,
   PieSubmenuNodeModel,
 } from './base.js';
+
+import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
+import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 export function updateShapeOverlay(rootElement: EdgelessRootBlockComponent) {
   const controller = rootElement.tools.currentController;

@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { BlockElement } from '@blocksuite/block-std';
+
 import {
   type EdgelessRootBlockComponent,
-  generateKeyBetween,
   type NoteBlockModel,
+  generateKeyBetween,
 } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
 

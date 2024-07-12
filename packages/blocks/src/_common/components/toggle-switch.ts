@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 const styles = css`
@@ -56,12 +56,6 @@ const styles = css`
 export class ToggleSwitch extends LitElement {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor on = false;
-
-  @property({ attribute: false })
-  accessor onChange: ((on: boolean) => void) | undefined = undefined;
-
   private _toggleSwitch() {
     this.on = !this.on;
     if (this.onChange) {
@@ -81,6 +75,12 @@ export class ToggleSwitch extends LitElement {
       </label>
     `;
   }
+
+  @property({ attribute: false })
+  accessor on = false;
+
+  @property({ attribute: false })
+  accessor onChange: ((on: boolean) => void) | undefined = undefined;
 }
 
 declare global {

@@ -1,11 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { isAbortError } from '../_common/utils/helper.js';
 import type { EmbedLoomBlockComponent } from './embed-loom-block.js';
 import type {
   EmbedLoomBlockUrlData,
   EmbedLoomModel,
 } from './embed-loom-model.js';
+
+import { isAbortError } from '../_common/utils/helper.js';
 
 const LoomOEmbedEndpoint = 'https://www.loom.com/v1/oembed';
 

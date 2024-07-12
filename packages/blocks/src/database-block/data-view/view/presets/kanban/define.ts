@@ -1,5 +1,6 @@
 import type { FilterGroup } from '../../../common/ast.js';
 import type { GroupBy, GroupProperty, Sort } from '../../../common/types.js';
+
 import { type BasicViewDataType, viewType } from '../../data-view.js';
 import { DataViewKanbanManager } from './kanban-view-manager.js';
 

@@ -1,4 +1,3 @@
-import { assertExists, sha } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type {
   FromBlockSnapshotPayload,
@@ -10,19 +9,21 @@ import type {
   ToBlockSnapshotPayload,
   ToDocSnapshotPayload,
 } from '@blocksuite/store';
+import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
+
+import { assertExists, sha } from '@blocksuite/global/utils';
 import {
-  type AssetsManager,
   ASTWalker,
+  type AssetsManager,
   BaseAdapter,
   type BlockSnapshot,
   BlockSnapshotSchema,
   type DocSnapshot,
+  type SliceSnapshot,
   getAssetName,
   nanoid,
-  type SliceSnapshot,
 } from '@blocksuite/store';
 import { format } from 'date-fns/format';
-import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
@@ -30,10 +31,11 @@ import { unified } from 'unified';
 import type { SerializedCells } from '../../database-block/database-model.js';
 import type { Column } from '../../database-block/types.js';
 import type { AffineTextAttributes } from '../inline/presets/affine-inline-specs.js';
+
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { remarkGfm } from './gfm.js';
-import { createText, fetchable, fetchImage, isNullish } from './utils.js';
+import { createText, fetchImage, fetchable, isNullish } from './utils.js';
 
 export type Markdown = string;
 
@@ -56,6 +58,348 @@ type MarkdownToSliceSnapshotPayload = {
 };
 
 export class MarkdownAdapter extends BaseAdapter<Markdown> {
+  private _traverseMarkdown = (
+    markdown: MarkdownAST,
+    snapshot: BlockSnapshot,
+    assets?: AssetsManager
+  ) => {
+    const walker = new ASTWalker<MarkdownAST, BlockSnapshot>();
+    walker.setONodeTypeGuard(
+      (node): node is MarkdownAST =>
+        !Array.isArray(node) &&
+        'type' in (node as object) &&
+        (node as MarkdownAST).type !== undefined
+    );
+    walker.setEnter(async (o, context) => {
+      switch (o.node.type) {
+        case 'html': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid(),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: o.node.value,
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'code': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid(),
+                flavour: 'affine:code',
+                props: {
+                  language: o.node.lang ?? 'Plain Text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: o.node.value,
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'paragraph': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid(),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: this._mdastToDelta(o.node),
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'heading': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid(),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: `h${o.node.depth}`,
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: this._mdastToDelta(o.node),
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'blockquote': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid(),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: 'quote',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: this._mdastToDelta(o.node),
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          context.skipAllChildren();
+          break;
+        }
+        case 'list': {
+          context.setNodeContext('mdast:list:ordered', o.node.ordered);
+          break;
+        }
+        case 'listItem': {
+          context.openNode(
+            {
+              type: 'block',
+              id: nanoid(),
+              flavour: 'affine:list',
+              props: {
+                type:
+                  o.node.checked !== null
+                    ? 'todo'
+                    : context.getNodeContext('mdast:list:ordered')
+                      ? 'numbered'
+                      : 'bulleted',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta:
+                    o.node.children[0] &&
+                    o.node.children[0].type === 'paragraph'
+                      ? this._mdastToDelta(o.node.children[0])
+                      : [],
+                },
+                checked: o.node.checked ?? false,
+                collapsed: false,
+              },
+              children: [],
+            },
+            'children'
+          );
+          if (o.node.children[0] && o.node.children[0].type === 'paragraph') {
+            context.skipChildren(1);
+          }
+          break;
+        }
+        case 'thematicBreak': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid(),
+                flavour: 'affine:divider',
+                props: {},
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'image': {
+          let blobId = '';
+          if (!assets) {
+            break;
+          }
+          if (!fetchable(o.node.url)) {
+            const imageURL = o.node.url;
+            assets.getAssets().forEach((_value, key) => {
+              const imageName = getAssetName(assets.getAssets(), key);
+              if (decodeURIComponent(imageURL).includes(imageName)) {
+                blobId = key;
+              }
+            });
+          } else {
+            const res = await fetchImage(
+              o.node.url,
+              undefined,
+              this.configs.get('imageProxy') as string
+            );
+            const clonedRes = res.clone();
+            const file = new File(
+              [await res.blob()],
+              getFilenameFromContentDisposition(
+                res.headers.get('Content-Disposition') ?? ''
+              ) ??
+                (o.node.url.split('/').at(-1) ?? 'image') +
+                  '.' +
+                  (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png'),
+              {
+                type: res.headers.get('Content-Type') ?? '',
+              }
+            );
+            blobId = await sha(await clonedRes.arrayBuffer());
+            assets?.getAssets().set(blobId, file);
+            await assets?.writeToBlob(blobId);
+          }
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid(),
+                flavour: 'affine:image',
+                props: {
+                  sourceId: blobId,
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'table': {
+          const viewsColumns = o.node.children[0].children.map(() => {
+            return {
+              id: nanoid(),
+              hide: false,
+              width: 180,
+            };
+          });
+          const cells = Object.create(null);
+          o.node.children.slice(1).forEach(row => {
+            const rowId = nanoid();
+            cells[rowId] = Object.create(null);
+            row.children.slice(1).forEach((cell, index) => {
+              cells[rowId][viewsColumns[index + 1].id] = {
+                columnId: viewsColumns[index + 1].id,
+                value: createText(
+                  cell.children
+                    .map(child => ('value' in child ? child.value : ''))
+                    .join('')
+                ),
+              };
+            });
+          });
+          const columns = o.node.children[0].children.map((_child, index) => {
+            return {
+              type: index === 0 ? 'title' : 'rich-text',
+              name: _child.children
+                .map(child => ('value' in child ? child.value : ''))
+                .join(''),
+              data: {},
+              id: viewsColumns[index].id,
+            };
+          });
+          context.openNode(
+            {
+              type: 'block',
+              id: nanoid(),
+              flavour: 'affine:database',
+              props: {
+                views: [
+                  {
+                    id: nanoid(),
+                    name: 'Table View',
+                    mode: 'table',
+                    columns: [],
+                    filter: {
+                      type: 'group',
+                      op: 'and',
+                      conditions: [],
+                    },
+                    header: {
+                      titleColumn: viewsColumns[0]?.id,
+                      iconColumn: 'type',
+                    },
+                  },
+                ],
+                title: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+                cells,
+                columns,
+              },
+              children: [],
+            },
+            'children'
+          );
+          context.setNodeContext('affine:table:rowid', Object.keys(cells));
+          context.skipChildren(1);
+          break;
+        }
+        case 'tableRow': {
+          context
+            .openNode({
+              type: 'block',
+              id:
+                (
+                  context.getNodeContext('affine:table:rowid') as Array<string>
+                ).shift() ?? nanoid(),
+              flavour: 'affine:paragraph',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: this._mdastToDelta(o.node.children[0]),
+                },
+                type: 'text',
+              },
+              children: [],
+            })
+            .closeNode();
+          context.skipAllChildren();
+          break;
+        }
+      }
+    });
+    walker.setLeave((o, context) => {
+      switch (o.node.type) {
+        case 'listItem': {
+          context.closeNode();
+          break;
+        }
+        case 'table': {
+          context.closeNode();
+          break;
+        }
+      }
+    });
+    return walker.walk(markdown, snapshot);
+  };
+
   private _traverseSnapshot = async (
     snapshot: BlockSnapshot,
     markdown: MarkdownAST,
@@ -519,348 +863,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     };
   };
 
-  private _traverseMarkdown = (
-    markdown: MarkdownAST,
-    snapshot: BlockSnapshot,
-    assets?: AssetsManager
-  ) => {
-    const walker = new ASTWalker<MarkdownAST, BlockSnapshot>();
-    walker.setONodeTypeGuard(
-      (node): node is MarkdownAST =>
-        !Array.isArray(node) &&
-        'type' in (node as object) &&
-        (node as MarkdownAST).type !== undefined
-    );
-    walker.setEnter(async (o, context) => {
-      switch (o.node.type) {
-        case 'html': {
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:paragraph',
-                props: {
-                  type: 'text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: o.node.value,
-                      },
-                    ],
-                  },
-                },
-                children: [],
-              },
-              'children'
-            )
-            .closeNode();
-          break;
-        }
-        case 'code': {
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:code',
-                props: {
-                  language: o.node.lang ?? 'Plain Text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [
-                      {
-                        insert: o.node.value,
-                      },
-                    ],
-                  },
-                },
-                children: [],
-              },
-              'children'
-            )
-            .closeNode();
-          break;
-        }
-        case 'paragraph': {
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:paragraph',
-                props: {
-                  type: 'text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: this._mdastToDelta(o.node),
-                  },
-                },
-                children: [],
-              },
-              'children'
-            )
-            .closeNode();
-          break;
-        }
-        case 'heading': {
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:paragraph',
-                props: {
-                  type: `h${o.node.depth}`,
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: this._mdastToDelta(o.node),
-                  },
-                },
-                children: [],
-              },
-              'children'
-            )
-            .closeNode();
-          break;
-        }
-        case 'blockquote': {
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:paragraph',
-                props: {
-                  type: 'quote',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: this._mdastToDelta(o.node),
-                  },
-                },
-                children: [],
-              },
-              'children'
-            )
-            .closeNode();
-          context.skipAllChildren();
-          break;
-        }
-        case 'list': {
-          context.setNodeContext('mdast:list:ordered', o.node.ordered);
-          break;
-        }
-        case 'listItem': {
-          context.openNode(
-            {
-              type: 'block',
-              id: nanoid(),
-              flavour: 'affine:list',
-              props: {
-                type:
-                  o.node.checked !== null
-                    ? 'todo'
-                    : context.getNodeContext('mdast:list:ordered')
-                      ? 'numbered'
-                      : 'bulleted',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta:
-                    o.node.children[0] &&
-                    o.node.children[0].type === 'paragraph'
-                      ? this._mdastToDelta(o.node.children[0])
-                      : [],
-                },
-                checked: o.node.checked ?? false,
-                collapsed: false,
-              },
-              children: [],
-            },
-            'children'
-          );
-          if (o.node.children[0] && o.node.children[0].type === 'paragraph') {
-            context.skipChildren(1);
-          }
-          break;
-        }
-        case 'thematicBreak': {
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:divider',
-                props: {},
-                children: [],
-              },
-              'children'
-            )
-            .closeNode();
-          break;
-        }
-        case 'image': {
-          let blobId = '';
-          if (!assets) {
-            break;
-          }
-          if (!fetchable(o.node.url)) {
-            const imageURL = o.node.url;
-            assets.getAssets().forEach((_value, key) => {
-              const imageName = getAssetName(assets.getAssets(), key);
-              if (decodeURIComponent(imageURL).includes(imageName)) {
-                blobId = key;
-              }
-            });
-          } else {
-            const res = await fetchImage(
-              o.node.url,
-              undefined,
-              this.configs.get('imageProxy') as string
-            );
-            const clonedRes = res.clone();
-            const file = new File(
-              [await res.blob()],
-              getFilenameFromContentDisposition(
-                res.headers.get('Content-Disposition') ?? ''
-              ) ??
-                (o.node.url.split('/').at(-1) ?? 'image') +
-                  '.' +
-                  (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png'),
-              {
-                type: res.headers.get('Content-Type') ?? '',
-              }
-            );
-            blobId = await sha(await clonedRes.arrayBuffer());
-            assets?.getAssets().set(blobId, file);
-            await assets?.writeToBlob(blobId);
-          }
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:image',
-                props: {
-                  sourceId: blobId,
-                },
-                children: [],
-              },
-              'children'
-            )
-            .closeNode();
-          break;
-        }
-        case 'table': {
-          const viewsColumns = o.node.children[0].children.map(() => {
-            return {
-              id: nanoid(),
-              hide: false,
-              width: 180,
-            };
-          });
-          const cells = Object.create(null);
-          o.node.children.slice(1).forEach(row => {
-            const rowId = nanoid();
-            cells[rowId] = Object.create(null);
-            row.children.slice(1).forEach((cell, index) => {
-              cells[rowId][viewsColumns[index + 1].id] = {
-                columnId: viewsColumns[index + 1].id,
-                value: createText(
-                  cell.children
-                    .map(child => ('value' in child ? child.value : ''))
-                    .join('')
-                ),
-              };
-            });
-          });
-          const columns = o.node.children[0].children.map((_child, index) => {
-            return {
-              type: index === 0 ? 'title' : 'rich-text',
-              name: _child.children
-                .map(child => ('value' in child ? child.value : ''))
-                .join(''),
-              data: {},
-              id: viewsColumns[index].id,
-            };
-          });
-          context.openNode(
-            {
-              type: 'block',
-              id: nanoid(),
-              flavour: 'affine:database',
-              props: {
-                views: [
-                  {
-                    id: nanoid(),
-                    name: 'Table View',
-                    mode: 'table',
-                    columns: [],
-                    filter: {
-                      type: 'group',
-                      op: 'and',
-                      conditions: [],
-                    },
-                    header: {
-                      titleColumn: viewsColumns[0]?.id,
-                      iconColumn: 'type',
-                    },
-                  },
-                ],
-                title: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [],
-                },
-                cells,
-                columns,
-              },
-              children: [],
-            },
-            'children'
-          );
-          context.setNodeContext('affine:table:rowid', Object.keys(cells));
-          context.skipChildren(1);
-          break;
-        }
-        case 'tableRow': {
-          context
-            .openNode({
-              type: 'block',
-              id:
-                (
-                  context.getNodeContext('affine:table:rowid') as Array<string>
-                ).shift() ?? nanoid(),
-              flavour: 'affine:paragraph',
-              props: {
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: this._mdastToDelta(o.node.children[0]),
-                },
-                type: 'text',
-              },
-              children: [],
-            })
-            .closeNode();
-          context.skipAllChildren();
-          break;
-        }
-      }
-    });
-    walker.setLeave((o, context) => {
-      switch (o.node.type) {
-        case 'listItem': {
-          context.closeNode();
-          break;
-        }
-        case 'table': {
-          context.closeNode();
-          break;
-        }
-      }
-    });
-    return walker.walk(markdown, snapshot);
-  };
-
   private _astToMarkdown(ast: Root) {
     return unified()
       .use(remarkGfm)
@@ -869,10 +871,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       })
       .stringify(ast)
       .replace(/&#x20;\n/g, ' \n');
-  }
-
-  private _markdownToAst(markdown: Markdown) {
-    return unified().use(remarkParse).use(remarkGfm).parse(markdown);
   }
 
   private _deltaToMdAST(
@@ -942,6 +940,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     });
   }
 
+  private _markdownToAst(markdown: Markdown) {
+    return unified().use(remarkParse).use(remarkGfm).parse(markdown);
+  }
+
   private _mdastToDelta(ast: MarkdownAST): DeltaInsert[] {
     switch (ast.type) {
       case 'text': {
@@ -991,22 +993,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       : [];
   }
 
-  async fromDocSnapshot({
-    snapshot,
-    assets,
-  }: FromDocSnapshotPayload): Promise<FromDocSnapshotResult<Markdown>> {
-    let buffer = '';
-    const { file, assetsIds } = await this.fromBlockSnapshot({
-      snapshot: snapshot.blocks,
-      assets,
-    });
-    buffer += file;
-    return {
-      file: buffer,
-      assetsIds,
-    };
-  }
-
   async fromBlockSnapshot({
     snapshot,
     assets,
@@ -1022,6 +1008,22 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     );
     return {
       file: this._astToMarkdown(ast),
+      assetsIds,
+    };
+  }
+
+  async fromDocSnapshot({
+    snapshot,
+    assets,
+  }: FromDocSnapshotPayload): Promise<FromDocSnapshotResult<Markdown>> {
+    let buffer = '';
+    const { file, assetsIds } = await this.fromBlockSnapshot({
+      snapshot: snapshot.blocks,
+      assets,
+    });
+    buffer += file;
+    return {
+      file: buffer,
       assetsIds,
     };
   }
@@ -1051,6 +1053,30 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       file: markdown,
       assetsIds: sliceAssetsIds,
     };
+  }
+
+  async toBlockSnapshot(
+    payload: ToBlockSnapshotPayload<Markdown>
+  ): Promise<BlockSnapshot> {
+    const markdownAst = this._markdownToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid(),
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [],
+    };
+    return this._traverseMarkdown(
+      markdownAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
+    );
   }
 
   async toDocSnapshot(
@@ -1110,30 +1136,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         ],
       },
     };
-  }
-
-  async toBlockSnapshot(
-    payload: ToBlockSnapshotPayload<Markdown>
-  ): Promise<BlockSnapshot> {
-    const markdownAst = this._markdownToAst(payload.file);
-    const blockSnapshotRoot = {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [],
-    };
-    return this._traverseMarkdown(
-      markdownAst,
-      blockSnapshotRoot as BlockSnapshot,
-      payload.assets
-    );
   }
 
   async toSliceSnapshot(

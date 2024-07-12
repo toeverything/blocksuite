@@ -1,21 +1,22 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import './portal/note.js';
-import './portal/generic-block.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
-import { css, html, type TemplateResult } from 'lit';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { type TemplateResult, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
+import { literal, html as staticHtml, unsafeStatic } from 'lit/static-html.js';
 
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { EdgelessBlockModel } from '../root-block/edgeless/edgeless-block-model.js';
 import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
+
+import './portal/generic-block.js';
+import './portal/note.js';
 
 const portalMap = {
   'affine:note': 'surface-ref-note-portal',
@@ -28,10 +29,6 @@ const getPortalTag = (model: BlockModel) => {
 
 @customElement('surface-ref-portal')
 export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
-  get surfaceService() {
-    return this.host.std.spec.getService('affine:surface');
-  }
-
   static override styles = css`
     .surface-blocks-portal {
       pointer-events: none;
@@ -55,23 +52,28 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @property({ attribute: false })
-  accessor refModel!: GroupElementModel | FrameBlockModel;
-
-  @property({ attribute: false })
-  accessor renderModel!: (model: BlockModel) => TemplateResult;
-
-  @query('.surface-blocks-portal')
-  accessor portal!: HTMLDivElement;
-
-  @query('.stacking-canvas')
-  accessor canvasSlot!: HTMLDivElement;
+  setViewport = (viewport: {
+    translateX: number;
+    translateY: number;
+    zoom: number;
+  }) => {
+    this.requestUpdate();
+    this.updateComplete
+      .then(() => {
+        this.portal?.style.setProperty(
+          'transform',
+          `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
+        );
+        this.portal?.style.setProperty('transform-origin', '0 0');
+        this.canvasSlot?.style.setProperty(
+          '--stacking-canvas-transform',
+          `scale(${
+            1 / viewport.zoom
+          }) translate(${-viewport.translateX}px, ${-viewport.translateY}px)`
+        );
+      })
+      .catch(console.error);
+  };
 
   private _getBlocksInFrame(model: FrameBlockModel): EdgelessBlockModel[] {
     const bound = model.elementBound;
@@ -129,41 +131,40 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  setStackingCanvas(canvases: HTMLCanvasElement[]) {
-    if (this.canvasSlot) {
-      this.canvasSlot.replaceChildren(...canvases);
-    }
-  }
-
-  setViewport = (viewport: {
-    translateX: number;
-    translateY: number;
-    zoom: number;
-  }) => {
-    this.requestUpdate();
-    this.updateComplete
-      .then(() => {
-        this.portal?.style.setProperty(
-          'transform',
-          `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
-        );
-        this.portal?.style.setProperty('transform-origin', '0 0');
-        this.canvasSlot?.style.setProperty(
-          '--stacking-canvas-transform',
-          `scale(${
-            1 / viewport.zoom
-          }) translate(${-viewport.translateX}px, ${-viewport.translateY}px)`
-        );
-      })
-      .catch(console.error);
-  };
-
   override render() {
     return html`<div class="surface-blocks-portal">
       <div class="stacking-canvas"></div>
       ${this._renderEdgelessBlocks()}
     </div>`;
   }
+
+  setStackingCanvas(canvases: HTMLCanvasElement[]) {
+    if (this.canvasSlot) {
+      this.canvasSlot.replaceChildren(...canvases);
+    }
+  }
+
+  get surfaceService() {
+    return this.host.std.spec.getService('affine:surface');
+  }
+
+  @query('.stacking-canvas')
+  accessor canvasSlot!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @query('.surface-blocks-portal')
+  accessor portal!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor refModel!: GroupElementModel | FrameBlockModel;
+
+  @property({ attribute: false })
+  accessor renderModel!: (model: BlockModel) => TemplateResult;
 }
 
 declare global {

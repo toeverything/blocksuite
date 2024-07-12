@@ -1,3 +1,5 @@
+import type { FilterDefineType } from './matcher.js';
+
 import { tBoolean, tTag } from '../../../logical/data-type.js';
 import {
   tArray,
@@ -5,7 +7,6 @@ import {
   tTypeRef,
   tTypeVar,
 } from '../../../logical/typesystem.js';
-import type { FilterDefineType } from './matcher.js';
 
 export const tagFilter = {
   isOneOf: {

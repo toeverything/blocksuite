@@ -1,19 +1,21 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
+
 import { Job } from '@blocksuite/store';
 
-import { groupBy } from '../../../_common/utils/iterable.js';
-import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import type { SerializedConnectorElement } from '../../../surface-block/element-model/connector.js';
 import type { SerializedGroupElement } from '../../../surface-block/element-model/group.js';
 import type { SerializedMindmapElement } from '../../../surface-block/element-model/mindmap.js';
 import type { NodeDetail } from '../../../surface-block/element-model/utils/mindmap/layout.js';
+import type { EdgelessFrameManager } from '../frame-manager.js';
+
+import { groupBy } from '../../../_common/utils/iterable.js';
+import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import {
   ConnectorElementModel,
   GroupElementModel,
   MindmapElementModel,
 } from '../../../surface-block/index.js';
 import { EdgelessBlockModel } from '../edgeless-block-model.js';
-import type { EdgelessFrameManager } from '../frame-manager.js';
 import { isFrameBlock } from '../utils/query.js';
 
 export function getCloneElements(

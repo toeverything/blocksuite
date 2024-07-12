@@ -2,12 +2,13 @@ import { assertExists } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
 import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import { isAbortError } from '../_common/utils/helper.js';
 import type { EmbedGithubBlockComponent } from './embed-github-block.js';
 import type {
   EmbedGithubBlockUrlData,
   EmbedGithubModel,
 } from './embed-github-model.js';
+
+import { isAbortError } from '../_common/utils/helper.js';
 import {
   GithubIssueClosedFailureIcon,
   GithubIssueClosedSuccessIcon,

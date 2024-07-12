@@ -12,26 +12,6 @@ type SliceData = {
 };
 
 export class Slice {
-  get content() {
-    return this.data.content;
-  }
-
-  get pageVersion() {
-    return this.data.pageVersion;
-  }
-
-  get workspaceVersion() {
-    return this.data.workspaceVersion;
-  }
-
-  get workspaceId() {
-    return this.data.workspaceId;
-  }
-
-  get docId() {
-    return this.data.pageId;
-  }
-
   constructor(readonly data: SliceData) {}
 
   static fromModels(doc: Doc, models: DraftModel[]) {
@@ -46,5 +26,25 @@ export class Slice {
       pageVersion,
       workspaceVersion,
     });
+  }
+
+  get content() {
+    return this.data.content;
+  }
+
+  get docId() {
+    return this.data.pageId;
+  }
+
+  get pageVersion() {
+    return this.data.pageVersion;
+  }
+
+  get workspaceId() {
+    return this.data.workspaceId;
+  }
+
+  get workspaceVersion() {
+    return this.data.workspaceVersion;
   }
 }

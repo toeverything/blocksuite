@@ -1,15 +1,12 @@
 import type { BlockSpec, BlockSpecSlots } from '@blocksuite/block-std';
-import { assertExists, type DisposableGroup } from '@blocksuite/global/utils';
+
+import { type DisposableGroup, assertExists } from '@blocksuite/global/utils';
 
 export class SpecBuilder {
   private readonly _value: BlockSpec[];
 
   constructor(spec: BlockSpec[]) {
     this._value = [...spec];
-  }
-
-  get value() {
-    return this._value;
   }
 
   setup<Flavour extends BlockSuite.ServiceKeys>(
@@ -29,5 +26,9 @@ export class SpecBuilder {
         disposableGroup
       );
     };
+  }
+
+  get value() {
+    return this._value;
   }
 }

@@ -6,11 +6,11 @@ type KeyboardEventStateOptions = {
 };
 
 export class KeyboardEventState extends UIEventState {
-  override type = 'keyboardState';
+  composing: boolean;
 
   raw: KeyboardEvent;
 
-  composing: boolean;
+  override type = 'keyboardState';
 
   constructor({ event, composing }: KeyboardEventStateOptions) {
     super(event);

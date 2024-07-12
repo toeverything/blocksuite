@@ -1,5 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { Job } from '@blocksuite/store';
 
 import { MarkdownAdapter } from '../adapters/index.js';

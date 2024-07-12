@@ -1,17 +1,19 @@
+import type { CSSResult } from 'lit';
+
 import { assertExists } from '@blocksuite/global/utils';
 import {
-  arrow,
   type ComputePositionReturn,
+  type Placement,
+  arrow,
   flip,
   offset,
-  type Placement,
 } from '@floating-ui/dom';
-import type { CSSResult } from 'lit';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { HoverOptions } from '../hover/controller.js';
+
 import { HoverController } from '../hover/index.js';
 
 const styles = css`
@@ -117,55 +119,7 @@ const updateArrowStyles = ({
  */
 @customElement('affine-tooltip')
 export class Tooltip extends LitElement {
-  static override styles = css`
-    :host {
-      display: none;
-    }
-  `;
-
   private _hoverController!: HoverController;
-
-  @property({ attribute: 'tip-position' })
-  accessor placement: Placement = 'top';
-
-  @property({ attribute: false })
-  accessor zIndex: number | string = 'var(--affine-z-index-popover)';
-
-  @property({ attribute: false })
-  accessor tooltipStyle: CSSResult = css``;
-
-  /**
-   * changes the placement of the floating element in order to keep it in view,
-   * with the ability to flip to any placement.
-   *
-   * See https://floating-ui.com/docs/flip
-   */
-  @property({ attribute: false })
-  accessor autoFlip = true;
-
-  /**
-   * Show a triangle arrow pointing to the reference element.
-   */
-  @property({ attribute: false })
-  accessor arrow = true;
-
-  /**
-   * Default is `4px`
-   *
-   * See https://floating-ui.com/docs/offset
-   */
-  @property({ attribute: false })
-  accessor offset = 4;
-
-  /**
-   * Allow the tooltip to be interactive.
-   * eg. allow the user to select text in the tooltip.
-   */
-  @property({ attribute: false })
-  accessor allowInteractive = false;
-
-  @property({ attribute: false })
-  accessor hoverOptions: Partial<HoverOptions> = {};
 
   private _setUpHoverController = () => {
     this._hoverController = new HoverController(
@@ -237,6 +191,12 @@ export class Tooltip extends LitElement {
     }, 0);
   };
 
+  static override styles = css`
+    :host {
+      display: none;
+    }
+  `;
+
   private _getStyles() {
     return css`
       ${styles}
@@ -270,6 +230,48 @@ export class Tooltip extends LitElement {
   getPortal() {
     return this._hoverController.portal;
   }
+
+  /**
+   * Allow the tooltip to be interactive.
+   * eg. allow the user to select text in the tooltip.
+   */
+  @property({ attribute: false })
+  accessor allowInteractive = false;
+
+  /**
+   * Show a triangle arrow pointing to the reference element.
+   */
+  @property({ attribute: false })
+  accessor arrow = true;
+
+  /**
+   * changes the placement of the floating element in order to keep it in view,
+   * with the ability to flip to any placement.
+   *
+   * See https://floating-ui.com/docs/flip
+   */
+  @property({ attribute: false })
+  accessor autoFlip = true;
+
+  @property({ attribute: false })
+  accessor hoverOptions: Partial<HoverOptions> = {};
+
+  /**
+   * Default is `4px`
+   *
+   * See https://floating-ui.com/docs/offset
+   */
+  @property({ attribute: false })
+  accessor offset = 4;
+
+  @property({ attribute: 'tip-position' })
+  accessor placement: Placement = 'top';
+
+  @property({ attribute: false })
+  accessor tooltipStyle: CSSResult = css``;
+
+  @property({ attribute: false })
+  accessor zIndex: number | string = 'var(--affine-z-index-popover)';
 }
 
 declare global {

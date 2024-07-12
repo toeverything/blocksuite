@@ -1,22 +1,23 @@
-import '../declare-test-window.js';
-
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type { IPoint, NoteDisplayMode } from '@blocks/_common/types.js';
 import type { NoteBlockModel } from '@blocks/note-block/index.js';
 import type { IVec } from '@blocks/surface-block/index.js';
-import { assertExists, sleep } from '@global/utils/index.js';
 import type { Locator, Page } from '@playwright/test';
+
+import { assertExists, sleep } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 
 import type { Bound } from '../asserts.js';
+
+import '../declare-test-window.js';
 import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
+  SHIFT_KEY,
+  SHORT_KEY,
   pressBackspace,
   pressEnter,
   selectAllByKeyboard,
-  SHIFT_KEY,
-  SHORT_KEY,
   type,
 } from './keyboard.js';
 import {
@@ -45,11 +46,11 @@ const AWAIT_TIMEOUT = 500;
 export const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 export type Point = { x: number; y: number };
 export enum Shape {
-  Square = 'Square',
-  Ellipse = 'Ellipse',
   Diamond = 'Diamond',
-  Triangle = 'Triangle',
+  Ellipse = 'Ellipse',
   'Rounded rectangle' = 'Rounded rectangle',
+  Square = 'Square',
+  Triangle = 'Triangle',
 }
 
 export enum LassoMode {

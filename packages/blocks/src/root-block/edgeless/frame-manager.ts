@@ -1,12 +1,14 @@
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { EdgelessRootService } from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
-import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+
+import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import { EdgelessBlockModel } from './edgeless-block-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';
@@ -27,14 +29,9 @@ export function removeContainedFrames(frames: FrameBlockModel[]) {
 export class FrameOverlay extends Overlay {
   bound: Bound | null = null;
 
-  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {
-    if (!this.bound) return;
-    const { x, y, w, h } = this.bound;
-    ctx.beginPath();
-    ctx.strokeStyle = '#1E96EB';
-    ctx.lineWidth = 2;
-    ctx.roundRect(x, y, w, h, 8);
-    ctx.stroke();
+  clear() {
+    this.bound = null;
+    this._renderer.refresh();
   }
 
   highlight(frame: FrameBlockModel) {
@@ -44,9 +41,14 @@ export class FrameOverlay extends Overlay {
     this._renderer.refresh();
   }
 
-  clear() {
-    this.bound = null;
-    this._renderer.refresh();
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {
+    if (!this.bound) return;
+    const { x, y, w, h } = this.bound;
+    ctx.beginPath();
+    ctx.strokeStyle = '#1E96EB';
+    ctx.lineWidth = 2;
+    ctx.roundRect(x, y, w, h, 8);
+    ctx.stroke();
   }
 }
 
@@ -64,32 +66,6 @@ export class EdgelessFrameManager {
   private _disposable = new DisposableGroup();
 
   constructor(private _rootService: EdgelessRootService) {}
-
-  selectFrame(eles: BlockSuite.EdgelessModelType[]) {
-    const frames = this._rootService.frames;
-    if (frames.length === 0) return null;
-
-    const selectedFrames = eles.filter(ele => isFrameBlock(ele));
-    const bound = edgelessElementsBound(eles);
-    for (let i = frames.length - 1; i >= 0; i--) {
-      const frame = frames[i];
-      if (selectedFrames.includes(frame)) continue;
-      if (Bound.deserialize(frame.xywh).contains(bound)) {
-        return frame;
-      }
-    }
-    return null;
-  }
-
-  getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
-    const bound = Bound.deserialize(frame.xywh);
-    const elements: BlockSuite.EdgelessModelType[] =
-      this._rootService.layer.canvasGrid.search(bound, true);
-
-    return elements.concat(
-      getBlocksInFrame(this._rootService.doc, frame, fullyContained)
-    );
-  }
 
   createFrameOnSelected() {
     const frames = this._rootService.frames;
@@ -130,6 +106,32 @@ export class EdgelessFrameManager {
 
   dispose() {
     this._disposable.dispose();
+  }
+
+  getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
+    const bound = Bound.deserialize(frame.xywh);
+    const elements: BlockSuite.EdgelessModelType[] =
+      this._rootService.layer.canvasGrid.search(bound, true);
+
+    return elements.concat(
+      getBlocksInFrame(this._rootService.doc, frame, fullyContained)
+    );
+  }
+
+  selectFrame(eles: BlockSuite.EdgelessModelType[]) {
+    const frames = this._rootService.frames;
+    if (frames.length === 0) return null;
+
+    const selectedFrames = eles.filter(ele => isFrameBlock(ele));
+    const bound = edgelessElementsBound(eles);
+    for (let i = frames.length - 1; i >= 0; i--) {
+      const frame = frames[i];
+      if (selectedFrames.includes(frame)) continue;
+      if (Bound.deserialize(frame.xywh).contains(bound)) {
+        return frame;
+      }
+    }
+    return null;
   }
 }
 

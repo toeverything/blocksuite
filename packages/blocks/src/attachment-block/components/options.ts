@@ -1,15 +1,17 @@
-import '../../_common/components/toolbar/icon-button.js';
-import '../../_common/components/toolbar/menu-button.js';
-import '../../_common/components/toolbar/separator.js';
-import '../../_common/components/toolbar/toolbar.js';
-
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { AttachmentBlockComponent } from '../attachment-block.js';
+import type { AttachmentBlockModel } from '../attachment-model.js';
+
 import { createLitPortal } from '../../_common/components/portal.js';
+import '../../_common/components/toolbar/icon-button.js';
+import '../../_common/components/toolbar/menu-button.js';
+import '../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../_common/components/toolbar/separator.js';
+import '../../_common/components/toolbar/toolbar.js';
 import { renderActions } from '../../_common/components/toolbar/utils.js';
 import {
   CaptionIcon,
@@ -23,8 +25,6 @@ import {
   SmallArrowDownIcon,
   // ViewIcon,
 } from '../../_common/icons/index.js';
-import type { AttachmentBlockComponent } from '../attachment-block.js';
-import type { AttachmentBlockModel } from '../attachment-model.js';
 import { allowEmbed, convertToEmbed } from '../embed.js';
 import { cloneAttachmentProperties } from '../utils.js';
 import { RenameModal } from './rename-model.js';

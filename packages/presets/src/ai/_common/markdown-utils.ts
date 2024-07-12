@@ -1,8 +1,9 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import { MarkdownAdapter } from '@blocksuite/blocks';
 import { titleMiddleware } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
 
 export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
