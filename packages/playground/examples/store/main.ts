@@ -12,9 +12,10 @@ function initDoc() {
   const workspace = new DocCollection({ schema });
   workspace.meta.initialize();
   const doc = workspace.createDoc({ id: 'doc:home' });
-  doc.load();
-  const rootId = doc.addBlock('todo:root');
-  doc.addBlock('todo:container', {}, rootId);
+  doc.load(() => {
+    const rootId = doc.addBlock('todo:root');
+    doc.addBlock('todo:container', {}, rootId);
+  });
   return doc;
 }
 
