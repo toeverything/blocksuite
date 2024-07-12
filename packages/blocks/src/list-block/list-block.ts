@@ -35,6 +35,8 @@ export class ListBlockComponent extends BlockComponent<
       this._toggleChildren();
       return;
     } else if (this.model.type === 'todo') {
+      if (this.doc.readonly) return;
+
       this.doc.captureSync();
       const checkedPropObj = { checked: !this.model.checked };
       this.doc.updateBlock(this.model, checkedPropObj);
