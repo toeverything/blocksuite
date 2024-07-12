@@ -56,7 +56,7 @@ module.exports = {
     'plugin:wc/recommended',
     'plugin:lit/recommended',
     'plugin:perfectionist/recommended-natural',
-    'prettier',
+    'plugin:prettier/recommended',
   ],
   ignorePatterns: [
     '**/dist/*',

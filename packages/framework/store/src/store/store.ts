@@ -13,39 +13,15 @@ import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
 import type { IdGenerator } from '../utils/id-generator.js';
-import type { Space } from './space.js';
+import type { BlockCollection } from './doc/index.js';
+import type { Generator } from './id.js';
 
-import {
-  createAutoIncrementIdGenerator,
-  createAutoIncrementIdGeneratorByClientId,
-  nanoid,
-  uuidv4,
-} from '../utils/id-generator.js';
+import { nanoid } from '../utils/id-generator.js';
 import { AwarenessStore, type RawAwarenessState } from '../yjs/awareness.js';
 import { BlockSuiteDoc } from '../yjs/index.js';
+import { pickIdGenerator } from './id.js';
 
 export type SerializedStore = Record<string, Record<string, unknown>>;
-
-export enum Generator {
-  /**
-   * **Warning**: This generator mode will crash the collaborative feature
-   *  if multiple clients are adding new blocks.
-   * Use this mode only if you know what you're doing.
-   */
-  AutoIncrement = 'autoIncrement',
-
-  /**
-   * This generator is trying to fix the real-time collaboration on debug mode.
-   * This will make generator predictable and won't make conflict
-   * @link https://docs.yjs.dev/api/faq#i-get-a-new-clientid-for-every-session-is-there-a-way-to-make-it-static-for-a-peer-accessing-the-doc
-   */
-  AutoIncrementByClientId = 'autoIncrementByClientId',
-  /**
-   * Default mode, generator for the unpredictable id
-   */
-  NanoID = 'nanoID',
-  UUIDv4 = 'uuidV4',
-}
 
 export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
@@ -82,6 +58,10 @@ const FLAGS_PRESET = {
   readonly: {},
 } satisfies BlockSuiteFlags;
 
+export interface StackItem {
+  meta: Map<'cursor-location' | 'selection-state', unknown>;
+}
+
 export class Store {
   readonly awarenessStore: AwarenessStore;
 
@@ -97,7 +77,7 @@ export class Store {
 
   readonly idGenerator: IdGenerator;
 
-  readonly spaces = new Map<string, Space>();
+  readonly spaces = new Map<string, BlockCollection>();
 
   constructor(
     {
@@ -119,7 +99,6 @@ export class Store {
     this.id = id || '';
     this.doc = new BlockSuiteDoc({ guid: id });
     this.awarenessStore = new AwarenessStore(
-      this,
       new Awareness<RawAwarenessState>(this.doc),
       merge(true, FLAGS_PRESET, defaultFlags)
     );
@@ -140,38 +119,14 @@ export class Store {
       logger
     );
 
-    if (typeof idGenerator === 'function') {
-      this.idGenerator = idGenerator;
-    } else {
-      switch (idGenerator) {
-        case Generator.AutoIncrement: {
-          this.idGenerator = createAutoIncrementIdGenerator();
-          break;
-        }
-        case Generator.AutoIncrementByClientId: {
-          this.idGenerator = createAutoIncrementIdGeneratorByClientId(
-            this.doc.clientID
-          );
-          break;
-        }
-        case Generator.UUIDv4: {
-          this.idGenerator = uuidv4;
-          break;
-        }
-        case Generator.NanoID:
-        default: {
-          this.idGenerator = nanoid;
-          break;
-        }
-      }
-    }
+    this.idGenerator = pickIdGenerator(idGenerator, this.doc.clientID);
   }
 
-  addSpace(space: Space) {
-    this.spaces.set(space.id, space);
+  addSpace(blockCollection: BlockCollection) {
+    this.spaces.set(blockCollection.id, blockCollection);
   }
 
-  removeSpace(space: Space) {
-    this.spaces.delete(space.id);
+  removeSpace(blockCollection: BlockCollection) {
+    this.spaces.delete(blockCollection.id);
   }
 }

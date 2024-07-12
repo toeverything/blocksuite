@@ -8,13 +8,11 @@ import type { AwarenessStore, BlockSuiteDoc } from '../../yjs/index.js';
 import type { DocCollection } from '../collection.js';
 
 import { Text } from '../../reactive/text.js';
-import { Space } from '../space.js';
 import { DocCRUD } from './crud.js';
 import { type BlockSelector, BlockViewType, type YBlock } from './index.js';
 import { Doc } from './index.js';
 
 export type YBlocks = Y.Map<YBlock>;
-type FlatBlockMap = Record<string, YBlock>;
 
 /** JSON-serializable properties of a block */
 export type BlockSysProps = {
@@ -39,7 +37,7 @@ export type GetDocOptions = {
   readonly?: boolean;
 };
 
-export class BlockCollection extends Space<FlatBlockMap> {
+export class BlockCollection {
   private readonly _collection: DocCollection;
 
   private readonly _docCRUD: DocCRUD;
@@ -63,10 +61,57 @@ export class BlockCollection extends Space<FlatBlockMap> {
 
   private readonly _idGenerator: IdGenerator;
 
+  private _initSubDoc = () => {
+    let subDoc = this.rootDoc.spaces.get(this.id);
+    if (!subDoc) {
+      subDoc = new Y.Doc({
+        guid: this.id,
+      });
+      this.rootDoc.spaces.set(this.id, subDoc);
+      this._loaded = true;
+      this._onLoadSlot.emit();
+    } else {
+      this._loaded = false;
+      this.rootDoc.on('subdocs', this._onSubdocEvent);
+    }
+
+    return subDoc;
+  };
+
+  private _loaded!: boolean;
+
+  private _onLoadSlot = new Slot();
+
+  private _onSubdocEvent = ({ loaded }: { loaded: Set<Y.Doc> }): void => {
+    const result = Array.from(loaded).find(
+      doc => doc.guid === this._ySpaceDoc.guid
+    );
+    if (!result) {
+      return;
+    }
+    this.rootDoc.off('subdocs', this._onSubdocEvent);
+    this._loaded = true;
+    this._onLoadSlot.emit();
+  };
+
   /** Indicate whether the block tree is ready */
   private _ready = false;
 
   private _shouldTransact = true;
+
+  protected readonly _yBlocks: Y.Map<YBlock>;
+
+  /**
+   * @internal Used for convenient access to the underlying Yjs map,
+   * can be used interchangeably with ySpace
+   */
+  protected readonly _ySpaceDoc: Y.Doc;
+
+  readonly awarenessStore: AwarenessStore;
+
+  readonly id: string;
+
+  readonly rootDoc: BlockSuiteDoc;
 
   readonly slots = {
     historyUpdated: new Slot(),
@@ -89,7 +134,13 @@ export class BlockCollection extends Space<FlatBlockMap> {
     awarenessStore,
     idGenerator = uuidv4,
   }: DocOptions) {
-    super(id, doc, awarenessStore);
+    this.id = id;
+    this.rootDoc = doc;
+    this.awarenessStore = awarenessStore;
+
+    this._ySpaceDoc = this._initSubDoc();
+
+    this._yBlocks = this._ySpaceDoc.getMap('blocks');
     this._collection = collection;
     this._idGenerator = idGenerator;
     this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
@@ -159,10 +210,20 @@ export class BlockCollection extends Space<FlatBlockMap> {
     this._history.stopCapturing();
   }
 
+  clear() {
+    this._yBlocks.clear();
+  }
+
   clearSelector(selector: BlockSelector, readonly?: boolean) {
     const readonlyKey = this._getReadonlyKey(readonly);
 
     this._docMap[readonlyKey].delete(selector);
+  }
+
+  destroy() {
+    this._ySpaceDoc.destroy();
+    this._onLoadSlot.dispose();
+    this._loaded = false;
   }
 
   dispose() {
@@ -198,12 +259,12 @@ export class BlockCollection extends Space<FlatBlockMap> {
     return doc;
   }
 
-  override load(initFn?: () => void): this {
+  load(initFn?: () => void): this {
     if (this.ready) {
       return this;
     }
 
-    super.load();
+    this._ySpaceDoc.load();
 
     if ((this.collection.meta.docs?.length ?? 0) <= 1) {
       this._handleVersion();
@@ -230,17 +291,35 @@ export class BlockCollection extends Space<FlatBlockMap> {
     this._history.redo();
   }
 
+  remove() {
+    this.destroy();
+    this.rootDoc.spaces.delete(this.id);
+  }
+
   resetHistory() {
     this._history.clear();
   }
 
-  override transact(
-    fn: () => void,
-    shouldTransact: boolean = this._shouldTransact
-  ) {
-    super.transact(fn, shouldTransact);
+  /**
+   * If `shouldTransact` is `false`, the transaction will not be push to the history stack.
+   */
+  transact(fn: () => void, shouldTransact: boolean = this._shouldTransact) {
+    this._ySpaceDoc.transact(
+      () => {
+        try {
+          fn();
+        } catch (e) {
+          console.error(
+            `An error occurred while Y.doc ${this._ySpaceDoc.guid} transacting:`
+          );
+          console.error(e);
+        }
+      },
+      shouldTransact ? this.rootDoc.clientID : null
+    );
   }
 
+  // Handle all the events that happen at _any_ level (potentially deep inside the structure).
   undo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
@@ -259,7 +338,6 @@ export class BlockCollection extends Space<FlatBlockMap> {
     return Text;
   }
 
-  // Handle all the events that happen at _any_ level (potentially deep inside the structure).
   // So, we apply a listener at the top level for the flat structure of the current
   get awarenessSync() {
     return this.collection.awarenessSync;
@@ -303,6 +381,10 @@ export class BlockCollection extends Space<FlatBlockMap> {
     return this._yBlocks.size === 0;
   }
 
+  get loaded() {
+    return this._loaded;
+  }
+
   get meta() {
     return this.collection.meta.getDocMeta(this.id);
   }
@@ -317,6 +399,14 @@ export class BlockCollection extends Space<FlatBlockMap> {
 
   get schema() {
     return this.collection.schema;
+  }
+
+  get spaceDoc() {
+    return this._ySpaceDoc;
+  }
+
+  get yBlocks() {
+    return this._yBlocks;
   }
 }
 

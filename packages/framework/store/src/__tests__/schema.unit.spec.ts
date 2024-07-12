@@ -7,8 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { type BlockModel, defineBlockSchema } from '../schema/base.js';
 import { SchemaValidateError } from '../schema/error.js';
 import { Schema } from '../schema/index.js';
-import { DocCollection } from '../store/index.js';
-import { Generator } from '../store/store.js';
+import { DocCollection, Generator } from '../store/index.js';
 import {
   DividerBlockSchema,
   ListBlockSchema,

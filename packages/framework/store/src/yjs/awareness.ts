@@ -4,8 +4,7 @@ import { Slot } from '@blocksuite/global/utils';
 import { type Signal, signal } from '@preact/signals-core';
 import { merge } from 'merge';
 
-import type { Space } from '../store/space.js';
-import type { Store } from '../store/store.js';
+import type { BlockCollection } from '../store/index.js';
 
 export interface UserInfo {
   name: string;
@@ -75,15 +74,11 @@ export class AwarenessStore<
     update: new Slot<AwarenessEvent<Flags>>(),
   };
 
-  readonly store: Store;
-
   constructor(
-    store: Store,
     awareness: YAwareness<RawAwarenessState<Flags>>,
     defaultFlags: Flags
   ) {
     this._flags = signal<Flags>(defaultFlags);
-    this.store = store;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
     this.awareness.setLocalStateField('selectionV2', {});
@@ -109,18 +104,23 @@ export class AwarenessStore<
     return this._flags.value[field];
   }
 
-  getLocalSelection(space: Space): ReadonlyArray<Record<string, unknown>> {
-    return (this.awareness.getLocalState()?.selectionV2 ?? {})[space.id] ?? [];
+  getLocalSelection(
+    blockCollection: BlockCollection
+  ): ReadonlyArray<Record<string, unknown>> {
+    return (
+      (this.awareness.getLocalState()?.selectionV2 ?? {})[blockCollection.id] ??
+      []
+    );
   }
 
   getStates(): Map<number, RawAwarenessState<Flags>> {
     return this.awareness.getStates();
   }
 
-  isReadonly(space: Space): boolean {
+  isReadonly(blockCollection: BlockCollection): boolean {
     const rd = this.getFlag('readonly');
     if (rd && typeof rd === 'object') {
-      return Boolean((rd as Record<string, boolean>)[space.id]);
+      return Boolean((rd as Record<string, boolean>)[blockCollection.id]);
     } else {
       return false;
     }
@@ -131,19 +131,22 @@ export class AwarenessStore<
     this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
   }
 
-  setLocalSelection(space: Space, selection: UserSelection) {
+  setLocalSelection(
+    blockCollection: BlockCollection,
+    selection: UserSelection
+  ) {
     const oldSelection = this.awareness.getLocalState()?.selectionV2 ?? {};
     this.awareness.setLocalStateField('selectionV2', {
       ...oldSelection,
-      [space.id]: selection,
+      [blockCollection.id]: selection,
     });
   }
 
-  setReadonly(space: Space, value: boolean): void {
+  setReadonly(blockCollection: BlockCollection, value: boolean): void {
     const flags = this.getFlag('readonly') ?? {};
     this.setFlag('readonly', {
       ...flags,
-      [space.id]: value,
+      [blockCollection.id]: value,
     } as Flags['readonly']);
   }
 }
