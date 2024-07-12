@@ -3,7 +3,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
-import { DocCollection, Generator, Schema } from '../index.js';
+import { DocCollection, IdGeneratorType, Schema } from '../index.js';
 // Use manual per-module import/export to support vitest environment on Node.js
 import {
   NoteBlockSchema,
@@ -18,7 +18,7 @@ export const BlockSchemas = [
 ];
 
 function createTestOptions() {
-  const idGenerator = Generator.AutoIncrement;
+  const idGenerator = IdGeneratorType.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
   return { id: 'test-collection', idGenerator, schema };

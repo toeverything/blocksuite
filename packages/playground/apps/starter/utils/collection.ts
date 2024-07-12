@@ -5,10 +5,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import {
   DocCollection,
   type DocCollectionOptions,
-  Generator,
+  IdGeneratorType,
   Job,
   Schema,
-  type StoreOptions,
 } from '@blocksuite/store';
 import {
   type BlobSource,
@@ -31,9 +30,11 @@ export function createStarterDocCollection() {
   const collectionId = room ?? 'starter';
   const schema = new Schema();
   schema.register(AffineSchemas);
-  const idGenerator = isE2E ? Generator.AutoIncrement : Generator.NanoID;
+  const idGenerator = isE2E
+    ? IdGeneratorType.AutoIncrement
+    : IdGeneratorType.NanoID;
 
-  let docSources: StoreOptions['docSources'];
+  let docSources: DocCollectionOptions['docSources'];
   if (room) {
     docSources = {
       main: new BroadcastChannelDocSource(`broadcast-channel-${room}`),
@@ -44,7 +45,7 @@ export function createStarterDocCollection() {
   const blobSources = {
     main: new MemoryBlobSource(),
     shadows: [] as BlobSource[],
-  } satisfies StoreOptions['blobSources'];
+  } satisfies DocCollectionOptions['blobSources'];
   if (blobSourceArgs.includes('mock')) {
     blobSources.shadows.push(new MockServerBlobSource(collectionId));
   }

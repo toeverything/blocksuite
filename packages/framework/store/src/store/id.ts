@@ -6,7 +6,7 @@ import {
   uuidv4,
 } from '../utils/id-generator.js';
 
-export enum Generator {
+export enum IdGeneratorType {
   /**
    * **Warning**: This generator mode will crash the collaborative feature
    *  if multiple clients are adding new blocks.
@@ -29,7 +29,7 @@ export enum Generator {
 }
 
 export function pickIdGenerator(
-  idGenerator: Generator | IdGenerator | undefined,
+  idGenerator: IdGeneratorType | IdGenerator | undefined,
   clientId: number
 ) {
   if (typeof idGenerator === 'function') {
@@ -37,16 +37,16 @@ export function pickIdGenerator(
   }
 
   switch (idGenerator) {
-    case Generator.AutoIncrement: {
+    case IdGeneratorType.AutoIncrement: {
       return createAutoIncrementIdGenerator();
     }
-    case Generator.AutoIncrementByClientId: {
+    case IdGeneratorType.AutoIncrementByClientId: {
       return createAutoIncrementIdGeneratorByClientId(clientId);
     }
-    case Generator.UUIDv4: {
+    case IdGeneratorType.UUIDv4: {
       return uuidv4;
     }
-    case Generator.NanoID:
+    case IdGeneratorType.NanoID:
     default: {
       return nanoid;
     }

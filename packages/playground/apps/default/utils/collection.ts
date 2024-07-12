@@ -3,10 +3,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import {
   DocCollection,
   type DocCollectionOptions,
-  Generator,
+  IdGeneratorType,
   Job,
   Schema,
-  type StoreOptions,
   Text,
 } from '@blocksuite/store';
 import {
@@ -22,15 +21,15 @@ import { WebSocketDocSource } from '../../_common/sync/websocket/doc';
 const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 
 export async function createDefaultDocCollection() {
-  const idGenerator: Generator = Generator.NanoID;
+  const idGenerator: IdGeneratorType = IdGeneratorType.NanoID;
   const schema = new Schema();
   schema.register(AffineSchemas);
 
   const params = new URLSearchParams(location.search);
-  let docSources: StoreOptions['docSources'] = {
+  let docSources: DocCollectionOptions['docSources'] = {
     main: new IndexedDBDocSource(),
   };
-  let awarenessSources: StoreOptions['awarenessSources'];
+  let awarenessSources: DocCollectionOptions['awarenessSources'];
   const room = params.get('room');
   if (room) {
     const ws = new WebSocket(new URL(`/room/${room}`, BASE_WEBSOCKET_URL));

@@ -4,7 +4,7 @@ import { type Doc, Job } from '@blocksuite/store';
 import {
   DocCollection,
   type DocCollectionOptions,
-  Generator,
+  IdGeneratorType,
   Schema,
 } from '@blocksuite/store';
 import { LitElement, css, html, nothing } from 'lit';
@@ -101,7 +101,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     const options: DocCollectionOptions = {
       id: 'MINI_MINDMAP_TEMPORARY',
       schema,
-      idGenerator: Generator.NanoID,
+      idGenerator: IdGeneratorType.NanoID,
       awarenessSources: [],
     };
 

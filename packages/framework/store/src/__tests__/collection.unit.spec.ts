@@ -11,7 +11,7 @@ import type { DocMeta } from '../store/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 
 import { COLLECTION_VERSION, PAGE_VERSION } from '../consts.js';
-import { DocCollection, Generator, Schema } from '../index.js';
+import { DocCollection, IdGeneratorType, Schema } from '../index.js';
 import {
   NoteBlockSchema,
   ParagraphBlockSchema,
@@ -26,7 +26,7 @@ export const BlockSchemas = [
 ] as BlockSchemaType[];
 
 function createTestOptions() {
-  const idGenerator = Generator.AutoIncrement;
+  const idGenerator = IdGeneratorType.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
   return { id: 'test-collection', idGenerator, schema };

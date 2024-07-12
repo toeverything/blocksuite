@@ -7,7 +7,7 @@ import {
   defineBlockSchema,
 } from '../schema/index.js';
 import { Block, type YBlock } from '../store/doc/block.js';
-import { DocCollection, Generator } from '../store/index.js';
+import { DocCollection, IdGeneratorType } from '../store/index.js';
 
 const pageSchema = defineBlockSchema({
   flavour: 'page',
@@ -24,7 +24,7 @@ const pageSchema = defineBlockSchema({
 type RootModel = SchemaToModel<typeof pageSchema>;
 
 function createTestOptions() {
-  const idGenerator = Generator.AutoIncrement;
+  const idGenerator = IdGeneratorType.AutoIncrement;
   const schema = new Schema();
   schema.register([pageSchema]);
   return { id: 'test-collection', idGenerator, schema };

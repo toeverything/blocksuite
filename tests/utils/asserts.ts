@@ -14,7 +14,7 @@ import type {
 } from '@blocks/index.js';
 import type { InlineRootElement } from '@inline/inline-editor.js';
 import type { Locator } from '@playwright/test';
-import type { BlockModel, SerializedStore } from '@store/index.js';
+import type { BlockModel } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
 
 import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
@@ -62,7 +62,7 @@ import { currentEditorIndex } from './multiple-editor.js';
 
 export { assertExists };
 
-export const defaultStore: SerializedStore = {
+export const defaultStore = {
   meta: {
     pages: [
       {
@@ -414,12 +414,15 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
   expect(actual).toEqual(resultObj);
 }
 
-export async function assertStore(page: Page, expected: SerializedStore) {
-  const actual = (await page.evaluate(() => {
+export async function assertStore(
+  page: Page,
+  expected: Record<string, unknown>
+) {
+  const actual = await page.evaluate(() => {
     const json = window.collection.doc.toJSON();
     delete json.meta.pages[0].createDate;
     return json;
-  })) as SerializedStore;
+  });
   expect(actual).toEqual(expected);
 }
 
@@ -594,7 +597,7 @@ export async function assertBlockTypes(page: Page, blockTypes: string[]) {
 export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
     window.collection.doc.toJSON()
-  )) as SerializedStore;
+  )) as Record<string, Record<string, unknown>>;
   const titleNode = jsonDoc['doc:home']['0'] as Record<string, unknown>;
 
   const markdownVisitor = (node: Record<string, unknown>): string => {
