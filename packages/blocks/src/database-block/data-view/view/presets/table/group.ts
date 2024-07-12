@@ -1,7 +1,6 @@
-import type { PropertyValues } from 'lit';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { css, html } from 'lit';
+import { SignalWatcher } from '@lit-labs/preact-signals';
+import { type PropertyValues, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -54,7 +53,9 @@ const styles = css`
 `;
 
 @customElement('affine-data-view-table-group')
-export class TableGroup extends WithDisposable(ShadowlessElement) {
+export class TableGroup extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   private clickAddRow = () => {
     this.view.rowAdd('end', this.group?.key);
     requestAnimationFrame(() => {

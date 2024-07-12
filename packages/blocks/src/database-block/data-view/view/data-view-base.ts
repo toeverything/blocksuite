@@ -7,6 +7,7 @@ import type { Disposable, Slot } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { property } from 'lit/decorators.js';
 
 import type { DataSource } from '../common/data-source/base.js';
@@ -21,7 +22,7 @@ export abstract class DataViewBase<
     T extends DataViewManager = DataViewManager,
     Selection extends DataViewSelection = DataViewSelection,
   >
-  extends WithDisposable(ShadowlessElement)
+  extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements DataViewProps<T, Selection>, DataViewExpose
 {
   addRow?(position: InsertToPosition): void;

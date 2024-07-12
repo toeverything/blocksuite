@@ -224,6 +224,7 @@ export class DataViewHeaderViews extends WidgetBase {
       }
       return html`<div
         class="database-view-button dv-icon-16 dv-hover"
+        data-testid="database-add-view-button"
         @click="${this._addViewMenu}"
       >
         ${AddCursorIcon}

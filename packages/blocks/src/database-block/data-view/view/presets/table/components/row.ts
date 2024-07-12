@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -15,7 +16,7 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { openDetail, popRowMenu } from './menu.js';
 
 @customElement('data-view-table-row')
-export class TableRow extends WithDisposable(ShadowlessElement) {
+export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   private _clickDragHandler = () => {
     if (this.view.readonly) {
       return;
@@ -172,21 +173,23 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
   protected override render(): unknown {
     const view = this.view;
     return html`
-      <div class="data-view-table-left-bar">
-        <div
-          class="data-view-table-view-drag-handler"
-          @click=${this._clickDragHandler}
-          style="width: 8px;height: 100%;display:flex;align-items:center;justify-content:center;cursor:grab;"
-        >
-          <div
-            class="show-on-hover-row"
-            style="width: 4px;
+      ${view.readonly
+        ? nothing
+        : html`<div class="data-view-table-left-bar">
+            <div
+              class="data-view-table-view-drag-handler"
+              @click=${this._clickDragHandler}
+              style="width: 8px;height: 100%;display:flex;align-items:center;justify-content:center;cursor:grab;"
+            >
+              <div
+                class="show-on-hover-row"
+                style="width: 4px;
             border-radius: 2px;
             height: 12px;
             background-color: var(--affine-placeholder-color);"
-          ></div>
-        </div>
-      </div>
+              ></div>
+            </div>
+          </div>`}
       ${repeat(
         view.columnManagerList,
         v => v.id,

@@ -1,5 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -47,7 +48,9 @@ import {
 } from './vertical-indicator.js';
 
 @customElement('affine-database-header-column')
-export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
+export class DatabaseHeaderColumn extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   private _clickColumn = () => {
     if (this.tableViewManager.readonly) {
       return;

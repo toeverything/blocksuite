@@ -1,5 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';
@@ -14,7 +15,9 @@ import type { DataViewTableColumnManager } from '../table-view-manager.js';
 import { renderUniLit } from '../../../../utils/uni-component/index.js';
 
 @customElement('affine-database-cell-container')
-export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
+export class DatabaseCellContainer extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   private _cell = createRef<DataViewCellLifeCycle>();
 
   static override styles = css`

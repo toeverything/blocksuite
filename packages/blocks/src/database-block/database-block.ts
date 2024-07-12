@@ -1,9 +1,8 @@
 import { RangeManager } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
-import { css, nothing, unsafeCSS } from 'lit';
+import { css, html, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { html } from 'lit/static-html.js';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { AffineInnerModalWidget } from '../root-block/index.js';

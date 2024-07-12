@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { type PropertyValues, type TemplateResult, css, html } from 'lit';
 import {
   customElement,
@@ -11,7 +12,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 @customElement('component-overflow')
-export class Overflow extends WithDisposable(ShadowlessElement) {
+export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   static override styles = css`
     component-overflow {
       display: flex;

@@ -684,7 +684,7 @@ export class TableSelectionController implements ReactiveController {
     const dragToFill = this.dragToFillDraggable;
 
     if (!div || !dragToFill) return;
-    if (focus && !isRowSelection) {
+    if (focus && !isRowSelection && !this.host.view.readonly) {
       // Check if row is removed.
       const rows = this.rows(groupKey) ?? [];
       if (rows.length <= focus.rowIndex) return;
@@ -780,7 +780,7 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const div = this.areaSelectionElement;
     if (!div) return;
-    if (!rowSelection && !columnSelection) {
+    if ((!rowSelection && !columnSelection) || this.host.view.readonly) {
       div.style.display = 'none';
       return;
     }

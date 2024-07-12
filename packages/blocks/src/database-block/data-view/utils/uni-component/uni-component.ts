@@ -2,6 +2,7 @@ import type { LitElement, PropertyValues, TemplateResult } from 'lit';
 import type { Ref } from 'lit/directives/ref.js';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -111,6 +112,7 @@ export const createUniComponentFromWebComponent = <
     return {
       update: props => {
         Object.assign(ins, props);
+        ins.requestUpdate();
       },
       unmount: () => {
         ins.remove();
@@ -124,7 +126,7 @@ export const createUniComponentFromWebComponent = <
 class UniAnyRender<
   T,
   Expose extends NonNullable<unknown>,
-> extends ShadowlessElement {
+> extends SignalWatcher(ShadowlessElement) {
   override render() {
     return this.renderTemplate(this.props, this.expose);
   }
@@ -150,6 +152,7 @@ export const defineUniComponent = <T, Expose extends NonNullable<unknown>>(
     return {
       update: props => {
         ins.props = props;
+        ins.requestUpdate();
       },
       unmount: () => {
         ins.remove();

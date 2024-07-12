@@ -5,6 +5,7 @@ import {
   computePosition,
   shift,
 } from '@floating-ui/dom';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { type TemplateResult, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -21,7 +22,9 @@ import './database-header-column.js';
 import { styles } from './styles.js';
 
 @customElement('affine-database-column-header')
-export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
+export class DatabaseColumnHeader extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   private _onAddColumn = () => {
     if (this.readonly) return;
     this.tableViewManager.columnAdd('end');
@@ -153,7 +156,9 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     return html`
       ${this.renderGroupHeader?.()}
       <div class="affine-database-column-header database-row">
-        <div class="data-view-table-left-bar"></div>
+        ${this.readonly
+          ? nothing
+          : html`<div class="data-view-table-left-bar"></div>`}
         ${repeat(
           this.tableViewManager.columnManagerList,
           column => column.id,

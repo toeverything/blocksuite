@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { property } from 'lit/decorators.js';
 
 import type {
@@ -11,7 +12,7 @@ export abstract class BaseCellRenderer<
     Value,
     Data extends Record<string, unknown> = Record<string, unknown>,
   >
-  extends WithDisposable(ShadowlessElement)
+  extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements DataViewCellLifeCycle, CellRenderProps<Data, Value>
 {
   beforeEnterEditMode(): boolean {
