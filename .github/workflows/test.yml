@@ -55,6 +55,7 @@ jobs:
   root-level-e2e-test:
     name: Playground E2E test
     runs-on: ubuntu-latest
+    environment: Test
     strategy:
       fail-fast: false
       matrix:
@@ -118,6 +119,7 @@ jobs:
 
   unit-test:
     name: Unit test
+    environment: Test
     runs-on: ubuntu-latest
 
     steps:
@@ -148,6 +150,7 @@ jobs:
 
   integration-test:
     name: Integration test
+    environment: Test
     runs-on: ubuntu-latest
 
     steps:
@@ -169,6 +172,7 @@ jobs:
 
   inline-e2e-test:
     name: Inline Editor E2E test
+    environment: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
