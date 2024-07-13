@@ -56,7 +56,7 @@ export class AffineLink extends ShadowlessElement {
   );
 
   static override styles = css`
-    affine-link > a:hover [data-v-text='true'] {
+    affine-link a:hover [data-v-text='true'] {
       text-decoration: underline;
     }
   `;
@@ -73,22 +73,36 @@ export class AffineLink extends ShadowlessElement {
   }
 
   override render() {
-    const style = this.delta.attributes
-      ? affineTextStyles(this.delta.attributes, {
-          color: 'var(--affine-link-color)',
-          fill: 'var(--affine-link-color)',
-          'text-decoration': 'none',
-          cursor: 'pointer',
-        })
+    const linkStyles = {
+      color: 'var(--affine-link-color)',
+      fill: 'var(--affine-link-color)',
+      'text-decoration': 'none',
+      cursor: 'pointer',
+    };
+    if (this.delta.attributes && this.delta.attributes?.code) {
+      const codeStyle = affineTextStyles(this.delta.attributes);
+      return html`<code style=${codeStyle}
+        ><a
+      ${ref(this._whenHover.setReference)}
+      href=${this.link}
+      style=${styleMap(linkStyles)}
+      rel="noopener noreferrer"
+      target="_blank"
+      @mouseup=${this._onMouseUp}
+      ><v-text .str=${this.delta.insert}></v-text
+    ></a></v-text></code>`;
+    }
+
+    const styles = this.delta.attributes
+      ? affineTextStyles(this.delta.attributes, linkStyles)
       : styleMap({});
 
     return html`<a
       ${ref(this._whenHover.setReference)}
       href=${this.link}
-      affine-link
       rel="noopener noreferrer"
       target="_blank"
-      style=${style}
+      style=${styles}
       @mouseup=${this._onMouseUp}
       ><v-text .str=${this.delta.insert}></v-text
     ></a>`;
