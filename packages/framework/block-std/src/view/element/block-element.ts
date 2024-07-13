@@ -22,6 +22,18 @@ export class BlockElement<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends SignalWatcher(WithDisposable(ShadowlessElement)) {
+  private _selected = computed(() => {
+    const selection = this.std.selection.value.find(selection => {
+      return selection.blockId === this.model.id;
+    });
+
+    if (!selection) {
+      return null;
+    }
+
+    return selection;
+  });
+
   handleEvent = (
     name: EventName,
     handler: UIEventHandler,
@@ -249,18 +261,7 @@ export class BlockElement<
   }
 
   get selected() {
-    const selectedSignal = computed(() => {
-      const selection = this.std.selection.value.find(selection => {
-        return selection.blockId === this.blockId;
-      });
-
-      if (!selection) {
-        return null;
-      }
-
-      return selection;
-    });
-    return selectedSignal.value;
+    return this._selected.value;
   }
 
   get selection() {

@@ -47,25 +47,19 @@ export class ParagraphBlockComponent extends BlockComponent<
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+
     this._displayPlaceholder = computed(() => {
       const textSelection = this.host.selection.find('text');
       const isCollapsed = textSelection?.isCollapsed() ?? false;
-      if (
-        !this._placeholderContainer ||
-        !this._richTextElement ||
-        !this.inlineEditor
-      )
-        return false;
 
       if (
         this.doc.readonly ||
-        this.inlineEditor.yTextLength > 0 ||
-        this.inlineEditor.isComposing ||
+        (this.inlineEditor?.yTextLength ?? 0) > 0 ||
+        this.inlineEditor?.isComposing ||
         !this.selected ||
         !isCollapsed ||
         this._isInDatabase()
       ) {
-        this._placeholderContainer.classList.remove('visible');
         return false;
       }
       return true;
@@ -164,9 +158,6 @@ export class ParagraphBlockComponent extends BlockComponent<
     }
     return this.rootElement;
   }
-
-  @query('.affine-paragraph-placeholder')
-  private accessor _placeholderContainer: HTMLElement | null = null;
 
   @query('rich-text')
   private accessor _richTextElement: RichText | null = null;
