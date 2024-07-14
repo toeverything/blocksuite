@@ -473,16 +473,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         },
       });
     }
-
-    const parent = this.blockElement.doc.getParent(this.blockElement.model);
-    assertExists(parent);
-    this.disposables.add(
-      parent.childrenUpdated.on(() => {
-        const children = parent.children;
-        if (children.includes(this.blockElement.model)) return;
-        this.abortController.abort();
-      })
-    );
   }
 
   protected override firstUpdated() {

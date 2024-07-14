@@ -20,6 +20,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getPageSnapshot,
   initEmptyParagraphState,
   waitNextFrame,
 } from './utils/actions/misc.js';
@@ -681,155 +682,41 @@ test.describe('linked page popover', () => {
   });
 });
 
-test.describe.skip('linked page with clipboard', () => {
-  test('paste subpage should paste as linked page', async ({ page }) => {
+test.describe('linked page with clipboard', () => {
+  test('paste linked page should paste as linked page', async ({
+    page,
+  }, testInfo) => {
     await enterPlaygroundRoom(page);
-    const { paragraphId } = await initEmptyParagraphState(page);
+    await initEmptyParagraphState(page);
     await focusRichText(page);
 
-    const { createLinkedDoc, createSubpage } = getLinkedDocPopover(page);
+    const { createLinkedDoc } = getLinkedDocPopover(page);
 
-    await createSubpage('page0');
     await createLinkedDoc('page1');
 
     await selectAllByKeyboard(page);
     await copyByKeyboard(page);
     await focusRichText(page);
     await pasteByKeyboard(page);
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:paragraph
-  prop:text={
-    <>
-      <text
-        insert=" "
-        reference={
-          Object {
-            "pageId": "3",
-            "type": "Subpage",
-          }
-        }
-      />
-      <text
-        insert=" "
-        reference={
-          Object {
-            "pageId": "8",
-            "type": "LinkedPage",
-          }
-        }
-      />
-      <text
-        insert=" "
-        reference={
-          Object {
-            "pageId": "3",
-            "type": "LinkedPage",
-          }
-        }
-      />
-      <text
-        insert=" "
-        reference={
-          Object {
-            "pageId": "8",
-            "type": "LinkedPage",
-          }
-        }
-      />
-    </>
-  }
-  prop:type="text"
-/>`,
-      paragraphId
-    );
+    const json = await getPageSnapshot(page, true);
+    expect(json).toMatchSnapshot(`${testInfo.title}.json`);
   });
 
-  test('duplicated subpage should paste as linked page', async ({ page }) => {
+  test('duplicated linked page should paste as linked page', async ({
+    page,
+  }, testInfo) => {
     await enterPlaygroundRoom(page);
-    const { noteId } = await initEmptyParagraphState(page);
+    await initEmptyParagraphState(page);
     await focusRichText(page);
 
-    const { createLinkedDoc, createSubpage } = getLinkedDocPopover(page);
+    const { createLinkedDoc } = getLinkedDocPopover(page);
 
     await createLinkedDoc('page0');
-    await createSubpage('page1');
 
     await type(page, '/duplicate');
     await pressEnter(page);
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert=" "
-          reference={
-            Object {
-              "pageId": "3",
-              "type": "LinkedPage",
-            }
-          }
-        />
-        <text
-          insert=" "
-          reference={
-            Object {
-              "pageId": "8",
-              "type": "LinkedPage",
-            }
-          }
-        />
-      </>
-    }
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert=" "
-          reference={
-            Object {
-              "pageId": "3",
-              "type": "LinkedPage",
-            }
-          }
-        />
-        <text
-          insert=" "
-          reference={
-            Object {
-              "pageId": "8",
-              "type": "Subpage",
-            }
-          }
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-      noteId
-    );
+    const json = await getPageSnapshot(page, true);
+    expect(json).toMatchSnapshot(`${testInfo.title}.json`);
   });
 });
 

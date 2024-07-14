@@ -8,6 +8,7 @@ export default defineConfig({
   timeout: 40000,
   fullyParallel: true,
   snapshotDir: 'tests/snapshots',
+  snapshotPathTemplate: 'tests/snapshots/{testFilePath}/{arg}{ext}',
   webServer: {
     command: 'pnpm dev',
     port: 5173,

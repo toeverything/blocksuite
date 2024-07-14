@@ -76,11 +76,6 @@ import {
 import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 
-test.beforeEach(({ page }, testInfo) => {
-  page;
-  testInfo.snapshotSuffix = '';
-});
-
 test(scoped`clipboard copy paste`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -492,7 +487,7 @@ test('paste a non-nested list to a non-nested list', async ({ page }) => {
 
 test('copy a nested list by clicking button, the clipboard data should be complete', async ({
   page,
-}) => {
+}, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -520,11 +515,11 @@ test('copy a nested list by clicking button, the clipboard data should be comple
   const text = await getClipboardText(page);
   const html = await getClipboardHTML(page);
   const snapshot = await getClipboardSnapshot(page);
-  expect(text).toMatchSnapshot('clipboard.md');
+  expect(text).toMatchSnapshot(`${testInfo.title}-clipboard.md`);
   expect(JSON.stringify(snapshot.snapshot.content, null, 2)).toMatchSnapshot(
-    'clipboard.json'
+    `${testInfo.title}-clipboard.json`
   );
-  expect(html).toMatchSnapshot('clipboard.html');
+  expect(html).toMatchSnapshot(`${testInfo.title}-clipboard.html`);
 });
 
 test('paste a nested list to a nested list', async ({ page }) => {

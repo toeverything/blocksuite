@@ -1032,6 +1032,18 @@ export async function getClipboardSnapshot(page: Page) {
   return json;
 }
 
+export async function getPageSnapshot(page: Page, toJSON?: boolean) {
+  const json = await page.evaluate(async () => {
+    const { job, doc } = window;
+    const snapshot = await job.docToSnapshot(doc);
+    return snapshot.blocks;
+  });
+  if (toJSON) {
+    return JSON.stringify(json, null, 2);
+  }
+  return json;
+}
+
 export async function setSelection(
   page: Page,
   anchorBlockId: number,
