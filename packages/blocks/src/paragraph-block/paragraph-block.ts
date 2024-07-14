@@ -73,7 +73,7 @@ export class ParagraphBlockComponent extends BlockComponent<
   }
 
   override renderBlock(): TemplateResult<1> {
-    const { type } = this.model;
+    const { type$ } = this.model;
     const children = html`<div
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
@@ -83,7 +83,7 @@ export class ParagraphBlockComponent extends BlockComponent<
 
     return html`
       <div class="affine-paragraph-block-container">
-        <div class="affine-paragraph-rich-text-wrapper ${type}">
+        <div class="affine-paragraph-rich-text-wrapper ${type$.value}">
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}

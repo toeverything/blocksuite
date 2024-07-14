@@ -1,3 +1,4 @@
+import type { Signal } from '@preact/signals-core';
 import type * as Y from 'yjs';
 
 import { type Disposable, Slot } from '@blocksuite/global/utils';
@@ -151,6 +152,9 @@ export function defineBlockSchema({
   return schema;
 }
 
+type SignaledProps<Props> = Props & {
+  [P in keyof Props & string as `${P}$`]: Signal<Props[P]>;
+};
 /**
  * The MagicProps function is used to append the props to the class.
  * For example:
@@ -173,7 +177,8 @@ const modelLabel = Symbol('model_label');
 // @ts-ignore
 export class BlockModel<
   Props extends object = object,
-> extends MagicProps()<Props> {
+  PropsSignal extends object = SignaledProps<Props>,
+> extends MagicProps()<PropsSignal> {
   private _children = signal<string[]>([]);
 
   private _onCreated: Disposable;

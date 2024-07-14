@@ -1,4 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
+import { effect, signal } from '@preact/signals-core';
+import { createMutex } from 'lib0/mutex.js';
 import * as Y from 'yjs';
 
 import type { Schema } from '../../schema/index.js';
@@ -32,9 +34,18 @@ export class Block {
     return createYProxy(value, {
       onChange: () => {
         this.options.onChange?.(this, name, value);
+        const signalKey = `${name}$`;
+        if (signalKey in this.model) {
+          this._mutex(() => {
+            // @ts-ignore
+            this.model[signalKey].value = this.model[name];
+          });
+        }
       },
     });
   };
+
+  private readonly _mutex = createMutex();
 
   private readonly _stashed = new Set<string | number>();
 
@@ -94,6 +105,14 @@ export class Block {
           this._byPassUpdate(() => {
             // @ts-ignore
             this.model[keyName] = proxy;
+            const signalKey = `${keyName}$`;
+            this._mutex(() => {
+              // @ts-ignore
+              if (signalKey in this.model) {
+                // @ts-ignore
+                this.model[signalKey].value = y2Native(value);
+              }
+            });
           });
           this.options.onChange?.(this, keyName, value);
           return;
@@ -103,6 +122,11 @@ export class Block {
           this._byPassUpdate(() => {
             // @ts-ignore
             delete this.model[keyName];
+            // @ts-ignore
+            if (`${keyName}$` in this.model) {
+              // @ts-ignore
+              this.model[`${keyName}$`].value = undefined;
+            }
           });
           this.options.onChange?.(this, keyName, undefined);
           return;
@@ -125,11 +149,32 @@ export class Block {
   }
 
   private _createModel(props: UnRecord) {
+    const _mutex = this._mutex;
     const schema = this.schema.flavourSchemaMap.get(this.flavour);
     assertExists(schema, `Cannot find schema for flavour ${this.flavour}`);
 
     const model = schema.model.toModel?.() ?? new BlockModel<object>();
-    Object.assign(model, props);
+    const signalWithProps = Object.entries(props).reduce(
+      (acc, [key, value]) => {
+        const data = signal(value);
+        const dispose = effect(() => {
+          const value = data.value;
+          if (!this.model) return;
+          _mutex(() => {
+            // @ts-ignore
+            this.model[key] = value;
+          });
+        });
+        model.deleted.once(dispose);
+        return {
+          ...acc,
+          [`${key}$`]: data,
+          [key]: value,
+        };
+      },
+      {} as Record<string, unknown>
+    );
+    Object.assign(model, signalWithProps);
 
     model.id = this.id;
     model.version = this.version;
@@ -140,7 +185,7 @@ export class Block {
     model.stash = this.stash;
     model.pop = this.pop;
 
-    return new Proxy(model, {
+    const proxy = new Proxy(model, {
       has: (target, p) => {
         return Reflect.has(target, p);
       },
@@ -151,6 +196,7 @@ export class Block {
           model.keys.includes(p)
         ) {
           if (this._stashed.has(p)) {
+            setValue(target, p, value);
             const result = Reflect.set(target, p, value, receiver);
             this.options.onChange?.(this, p, value);
             return result;
@@ -159,6 +205,7 @@ export class Block {
           const yValue = native2Y(value);
           this.yBlock.set(`prop:${p}`, yValue);
           const proxy = this._getPropsProxy(p, yValue);
+          setValue(target, p, value);
           return Reflect.set(target, p, proxy, receiver);
         }
 
@@ -174,11 +221,20 @@ export class Block {
           model.keys.includes(p)
         ) {
           this.yBlock.delete(`prop:${p}`);
+          setValue(target, p, undefined);
         }
 
         return Reflect.deleteProperty(target, p);
       },
     });
+
+    function setValue(target: BlockModel, p: string, value: unknown) {
+      _mutex(() => {
+        // @ts-ignore
+        target[`${p}$`].value = value;
+      });
+    }
+    return proxy;
   }
 
   private _parseYBlock() {
