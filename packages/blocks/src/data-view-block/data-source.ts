@@ -52,7 +52,7 @@ export class BlockQueryDataSource extends BaseDataSource {
       this.columnMetaMap.set(property.columnMeta.type, property.columnMeta);
     }
     for (const collection of this.workspace.docs.values()) {
-      for (const block of collection.getDoc().blocks.values()) {
+      for (const block of Object.values(collection.getDoc().blocks.peek())) {
         if (this.meta.selector(block)) {
           this.blockMap.set(block.id, block);
         }

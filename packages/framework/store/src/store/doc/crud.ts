@@ -308,8 +308,9 @@ export class DocCRUD {
     const yBlock = this._yBlocks.get(id);
     if (!yBlock) return;
 
-    const yChildren = Y.Array.from(children);
-    yBlock.set('sys:children', yChildren);
+    const yChildrenArray = yBlock.get('sys:children') as Y.Array<string>;
+    yChildrenArray.delete(0, yChildrenArray.length);
+    yChildrenArray.push(children);
   }
 
   get root(): string | null {

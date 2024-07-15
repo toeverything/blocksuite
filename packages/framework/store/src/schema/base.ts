@@ -179,6 +179,17 @@ export class BlockModel<
   Props extends object = object,
   PropsSignal extends object = SignaledProps<Props>,
 > extends MagicProps()<PropsSignal> {
+  private _childModels = computed(() => {
+    const value: BlockModel[] = [];
+    this._children.value.map(id => {
+      const block = this.page.getBlock$(id);
+      if (block) {
+        value.push(block.model);
+      }
+    });
+    return value;
+  });
+
   private _children = signal<string[]>([]);
 
   private _onCreated: Disposable;
@@ -238,6 +249,11 @@ export class BlockModel<
       this.yBlock.get('sys:children').observe(event => {
         this._children.value = event.target.toArray();
       });
+      this.yBlock.observe(event => {
+        if (event.keysChanged.has('sys:children')) {
+          this._children.value = this.yBlock.get('sys:children').toArray();
+        }
+      });
     });
     this._onDeleted = this.deleted.once(() => {
       this._onCreated.dispose();
@@ -268,14 +284,7 @@ export class BlockModel<
   }
 
   get children() {
-    const value: BlockModel[] = [];
-    this._children.value.forEach(id => {
-      const block = this.page.getBlock(id);
-      if (block) {
-        value.push(block.model);
-      }
-    });
-    return value;
+    return this._childModels.value;
   }
 
   get doc() {

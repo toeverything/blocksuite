@@ -216,7 +216,7 @@ export function isEmptyDoc(doc: Doc | null, mode: DocMode) {
     return notes.every(note => isEmptyNote(note));
   } else {
     const surface = getSurfaceBlock(doc);
-    if (surface?.elementModels.length || doc.blocks.size > 2) {
+    if (surface?.elementModels.length || doc.blockSize > 2) {
       return false;
     }
     return true;

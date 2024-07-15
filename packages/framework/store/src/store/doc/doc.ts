@@ -1,4 +1,5 @@
 import { type Disposable, Slot, assertExists } from '@blocksuite/global/utils';
+import { signal } from '@preact/signals-core';
 
 import type { BlockModel, Schema } from '../../schema/index.js';
 import type { BlockOptions } from './block.js';
@@ -27,7 +28,7 @@ type DocOptions = {
 export class Doc {
   protected readonly _blockCollection: BlockCollection;
 
-  protected readonly _blocks = new Map<string, Block>();
+  protected readonly _blocks = signal<Record<string, Block>>({});
 
   protected readonly _crud: DocCRUD;
 
@@ -93,9 +94,10 @@ export class Doc {
     this._readonly = readonly;
 
     this._yBlocks.forEach((_, id) => {
-      if (!this._blocks.has(id)) {
-        this._onBlockAdded(id, true);
+      if (id in this._blocks.peek()) {
+        return;
       }
+      this._onBlockAdded(id, true);
     });
 
     this._disposeBlockUpdated = this._blockCollection.slots.yBlockUpdated.on(
@@ -139,7 +141,7 @@ export class Doc {
 
   private _onBlockAdded(id: string, init = false) {
     try {
-      if (this._blocks.has(id)) {
+      if (id in this._blocks.peek()) {
         return;
       }
       const yBlock = this._yBlocks.get(id);
@@ -166,7 +168,10 @@ export class Doc {
 
       block.blockViewType = this._selector(block, this);
 
-      this._blocks.set(id, block);
+      this._blocks.value = {
+        ...this._blocks.value,
+        [id]: block,
+      };
       block.model.created.emit();
 
       if (block.model.role === 'root') {
@@ -203,7 +208,9 @@ export class Doc {
         model: block.model,
       });
 
-      this._blocks.delete(id);
+      const { [id]: _, ...blocks } = this._blocks.peek();
+      this._blocks.value = blocks;
+
       block.model.deleted.emit();
       block.model.dispose();
     } catch (e) {
@@ -355,7 +362,11 @@ export class Doc {
   }
 
   getBlock(id: string) {
-    return this._blocks.get(id);
+    return this._blocks.peek()[id];
+  }
+
+  getBlock$(id: string) {
+    return this._blocks.value[id];
   }
 
   /**
@@ -377,14 +388,14 @@ export class Doc {
   }
 
   getBlocks() {
-    return Array.from(this._blocks.values()).map(block => block.model);
+    return Object.values(this._blocks.peek()).map(block => block.model);
   }
 
   getBlocksByFlavour(blockFlavour: string | string[]) {
     const flavours =
       typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
 
-    return Array.from(this._blocks.values()).filter(({ flavour }) =>
+    return Object.values(this._blocks.peek()).filter(({ flavour }) =>
       flavours.includes(flavour)
     );
   }
@@ -409,7 +420,7 @@ export class Doc {
     const parentId = this._crud.getParent(targetId);
     if (!parentId) return null;
 
-    const parent = this._blocks.get(parentId);
+    const parent = this._blocks.peek()[parentId];
     if (!parent) return null;
 
     return parent.model;
@@ -435,7 +446,7 @@ export class Doc {
   }
 
   hasBlock(id: string) {
-    return this._blocks.has(id);
+    return id in this._blocks.peek();
   }
 
   /**
@@ -540,6 +551,10 @@ export class Doc {
     return this._blockCollection;
   }
 
+  get blockSize() {
+    return Object.values(this._blocks.peek()).length;
+  }
+
   get blocks() {
     return this._blocks;
   }
@@ -581,7 +596,7 @@ export class Doc {
   }
 
   get isEmpty() {
-    return this._blocks.size === 0;
+    return Object.values(this._blocks.peek()).length === 0;
   }
 
   get loaded() {
