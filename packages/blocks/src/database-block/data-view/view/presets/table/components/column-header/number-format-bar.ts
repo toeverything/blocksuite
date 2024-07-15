@@ -55,10 +55,11 @@ export class DatabaseNumberFormatBar extends WithDisposable(LitElement) {
       position: relative;
 
       user-select: none;
-      & svg {
-        width: 16px;
-        height: 16px;
-      }
+    }
+
+    .number-format-toolbar-button svg {
+      width: 16px;
+      height: 16px;
     }
 
     .number-formatting-sample {
