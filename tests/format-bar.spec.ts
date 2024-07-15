@@ -1654,10 +1654,7 @@ test.describe('more menu button', () => {
     await assertRichTexts(page, ['123', '456456', '789']);
   });
 
-  // fixme: Copy and paste is broken(ctrl-c/ctrl-v).
-  test.skip('should be able to perform the duplicate action', async ({
-    page,
-  }) => {
+  test('should be able to perform the duplicate action', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await initThreeParagraphs(page);
