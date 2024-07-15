@@ -203,8 +203,6 @@ export class BlockModel<
     }, new Map<string, number>())
   );
 
-  childrenUpdated = new Slot();
-
   created = new Slot();
 
   deleted = new Slot();
@@ -269,7 +267,6 @@ export class BlockModel<
     this.created.dispose();
     this.deleted.dispose();
     this.propsUpdated.dispose();
-    this.childrenUpdated.dispose();
   }
 
   firstChild(): BlockModel | null {

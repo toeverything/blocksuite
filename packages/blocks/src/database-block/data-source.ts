@@ -48,7 +48,6 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     this._model = host.doc.collection
       .getDoc(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
-    this._model.childrenUpdated.pipe(this.slots.update);
     this.setContext(HostContextKey, host);
   }
 

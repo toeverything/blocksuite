@@ -16,7 +16,6 @@ import { allKindService } from './copilot-service/service-base.js';
 import './edgeless/edgeless.js';
 import { AddCursorIcon, StarIcon } from './icons.js';
 import { AILogic } from './logic.js';
-import { getSurfaceElementFromEditor } from './utils/selection-utils.js';
 
 @customElement('copilot-panel')
 export class CopilotPanel extends WithDisposable(ShadowlessElement) {
@@ -192,11 +191,6 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.disposables.add(
-      getSurfaceElementFromEditor(this.host).model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
   }
 
   override render() {

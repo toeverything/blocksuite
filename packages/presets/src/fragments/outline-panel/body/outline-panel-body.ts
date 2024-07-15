@@ -384,7 +384,6 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     this.doc.updateBlock(this.doc.root, {
       children: newChildren,
     });
-    this.doc.root.childrenUpdated.emit();
   }
 
   private _scrollToBlock(e: ClickBlockEvent) {
@@ -476,23 +475,8 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   }
 
   private _setDocDisposables() {
-    const { slots, root } = this.doc;
-    const slotsForUpdate = root
-      ? [root.childrenUpdated, slots.blockUpdated]
-      : [slots.blockUpdated];
-
-    slots.rootAdded.on(rootId => {
-      const root = this.doc.getBlockById(rootId);
-      if (!root) return;
-      this._clearDocDisposables();
-      this._docDisposables = new DisposableGroup();
-      this._docDisposables.add(
-        root.childrenUpdated.on(() => {
-          this._updateNotes();
-          this._updateNoticeVisibility();
-        })
-      );
-    });
+    const { slots } = this.doc;
+    const slotsForUpdate = [slots.blockUpdated];
 
     slotsForUpdate.forEach(slot => {
       this._clearDocDisposables();
