@@ -169,7 +169,7 @@ test(
   }
 );
 
-test.skip(
+test(
   scoped`clipboard paste end with image, the cursor should be controlled by up/down keys`,
   async ({ page }) => {
     test.info().annotations.push({
@@ -183,7 +183,7 @@ test.skip(
     // set up clipboard data using html
     const clipData = {
       'text/html': `<p>Lorem Ipsum placeholder text.</p>
-    <figure ><img src='/test-card-1.png' /></figure>
+    <figure ><img src='https://placehold.co/600x400' /></figure>
     `,
     };
     await page.evaluate(
@@ -199,13 +199,16 @@ test.skip(
       },
       { clipData }
     );
+    const str = 'Lorem Ipsum placeholder text.';
     await waitEmbedLoaded(page);
     await assertRichImage(page, 1);
+    await pressEscape(page);
     await pressArrowUp(page, 1);
     await pasteContent(page, clipData);
     await assertRichImage(page, 2);
-    await assertText(page, 'Lorem Ipsum placeholder text.');
+    await assertText(page, str + str);
     await pressArrowDown(page, 1);
+    await pressEscape(page);
     await pasteContent(page, clipData);
     await assertRichImage(page, 3);
     await assertText(page, 'Lorem Ipsum placeholder text.', 1);

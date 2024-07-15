@@ -22,11 +22,30 @@ import type { QuickSearchService } from '../../root-service.js';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
 
-const findLast = (snapshot: BlockSnapshot): BlockSnapshot => {
-  if (snapshot.children && snapshot.children.length > 0) {
-    return findLast(snapshot.children[snapshot.children.length - 1]);
+function findLastMatchingNode(
+  root: BlockSnapshot[],
+  fn: (node: BlockSnapshot) => boolean
+): BlockSnapshot | null {
+  let lastMatchingNode: BlockSnapshot | null = null;
+
+  function traverse(node: BlockSnapshot) {
+    if (fn(node)) {
+      lastMatchingNode = node;
+    }
+    if (node.children) {
+      for (const child of node.children) {
+        traverse(child);
+      }
+    }
   }
-  return snapshot;
+
+  root.forEach(traverse);
+  return lastMatchingNode;
+}
+
+// find last child that has text as prop
+const findLast = (snapshot: SliceSnapshot): BlockSnapshot | null => {
+  return findLastMatchingNode(snapshot.content, node => !!node.props.text);
 };
 
 class PointState {
@@ -175,9 +194,7 @@ class PasteTr {
       return;
     }
     this.firstSnapshot = this.snapshot.content[0];
-    this.lastSnapshot = findLast(
-      this.snapshot.content[this.snapshot.content.length - 1]
-    );
+    this.lastSnapshot = findLast(this.snapshot) ?? this.firstSnapshot;
   };
 
   private readonly endPointState: PointState;
@@ -371,7 +388,7 @@ class PasteTr {
     this.endPointState = new PointState(std, end);
 
     this.firstSnapshot = snapshot.content[0];
-    this.lastSnapshot = findLast(snapshot.content[snapshot.content.length - 1]);
+    this.lastSnapshot = findLast(snapshot) ?? this.firstSnapshot;
     if (
       this.firstSnapshot !== this.lastSnapshot &&
       this.lastSnapshot.props.text
