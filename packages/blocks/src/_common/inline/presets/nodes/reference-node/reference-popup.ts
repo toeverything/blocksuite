@@ -4,6 +4,7 @@ import type { InlineRange } from '@blocksuite/inline';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
+import { effect } from '@lit-labs/preact-signals';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
@@ -279,9 +280,8 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       this.blockElement.model
     );
     assertExists(parent);
-
-    this.disposables.add(
-      parent.childrenUpdated.on(() => {
+    this._disposables.add(
+      effect(() => {
         const children = parent.children;
         if (children.includes(this.blockElement.model)) return;
         this.abortController.abort();

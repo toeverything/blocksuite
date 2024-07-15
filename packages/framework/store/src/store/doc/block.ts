@@ -88,10 +88,6 @@ export class Block {
 
     this.model = this._createModel(props);
 
-    this.yChildren.observe(() => {
-      this.model.childrenUpdated.emit();
-    });
-
     this.yBlock.observe(event => {
       event.keysChanged.forEach(key => {
         const type = event.changes.keys.get(key);
