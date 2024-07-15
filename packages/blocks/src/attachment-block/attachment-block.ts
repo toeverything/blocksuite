@@ -6,6 +6,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EdgelessRootService } from '../root-block/index.js';
 import type { AttachmentBlockService } from './attachment-service.js';
 
 import {
@@ -191,16 +192,30 @@ export class AttachmentBlockComponent extends BlockComponent<
     });
 
     if (this.isInSurface) {
-      this.edgeless?.slots.elementResizeStart.on(() => {
-        this._isResizing = true;
-        this._showOverlay = true;
-      });
+      if (this.rootService) {
+        this._disposables.add(
+          this.rootService?.slots.elementResizeStart.on(() => {
+            this._isResizing = true;
+            this._showOverlay = true;
+          })
+        );
 
-      this.edgeless?.slots.elementResizeEnd.on(() => {
-        this._isResizing = false;
-        this._showOverlay =
-          this._isResizing || this._isDragging || !this._isSelected;
-      });
+        this._disposables.add(
+          this.rootService.slots.elementResizeEnd.on(() => {
+            this._isResizing = false;
+            this._showOverlay =
+              this._isResizing || this._isDragging || !this._isSelected;
+          })
+        );
+
+        this._disposables.add(
+          this.rootService.layer.slots.layerUpdated.on(() => {
+            this.requestUpdate();
+          })
+        );
+      }
+
+      this.style.position = 'absolute';
     }
   }
 
@@ -229,12 +244,12 @@ export class AttachmentBlockComponent extends BlockComponent<
       width: '100%',
       margin: '18px 0px',
     });
+
     if (this.isInSurface) {
       const width = EMBED_CARD_WIDTH[cardStyle];
       const height = EMBED_CARD_HEIGHT[cardStyle];
       const bound = Bound.deserialize(
-        (this.edgeless?.service.getElementById(this.model.id) ?? this.model)
-          .xywh
+        (this.rootService?.getElementById(this.model.id) ?? this.model).xywh
       );
       const scaleX = bound.w / width;
       const scaleY = bound.h / height;
@@ -244,6 +259,12 @@ export class AttachmentBlockComponent extends BlockComponent<
         transform: `scale(${scaleX}, ${scaleY})`,
         transformOrigin: '0 0',
       });
+
+      this.style.width = `${bound.w}px`;
+      this.style.height = `${bound.h}px`;
+      this.style.left = `${bound.x}px`;
+      this.style.top = `${bound.y}px`;
+      this.style.zIndex = `${this.toZIndex()}`;
     }
 
     const embedView = this._embedView;
@@ -300,15 +321,24 @@ export class AttachmentBlockComponent extends BlockComponent<
     `;
   }
 
-  get edgeless() {
-    if (!this._isInSurface) {
-      return null;
-    }
-    return this.host.querySelector('affine-edgeless-root');
+  toZIndex() {
+    return this.rootService?.layer.getZIndex(this.model) ?? 1;
   }
 
   get isInSurface() {
     return this._isInSurface;
+  }
+
+  get rootService() {
+    const service = this.host.spec.getService(
+      'affine:page'
+    ) as EdgelessRootService;
+
+    if (!service.surface) {
+      return null;
+    }
+
+    return service;
   }
 
   @state()

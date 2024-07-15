@@ -943,12 +943,16 @@ export async function assertEdgelessNonSelectedRect(page: Page) {
   await expect(rect).toBeHidden();
 }
 
-export async function assertSelectionInNote(page: Page, noteId: string) {
-  const closestNoteId = await page.evaluate(() => {
+export async function assertSelectionInNote(
+  page: Page,
+  noteId: string,
+  blockNote: string = 'affine-note'
+) {
+  const closestNoteId = await page.evaluate(blockNote => {
     const selection = window.getSelection();
-    const note = selection?.anchorNode?.parentElement?.closest('affine-note');
+    const note = selection?.anchorNode?.parentElement?.closest(blockNote);
     return note?.getAttribute('data-block-id');
-  });
+  }, blockNote);
   expect(closestNoteId).toEqual(noteId);
 }
 
@@ -959,11 +963,10 @@ export async function assertEdgelessNoteBackground(
 ) {
   const editor = getEditorLocator(page);
   const backgroundColor = await editor
-    .locator(`affine-note[data-block-id="${noteId}"]`)
+    .locator(`affine-edgeless-note[data-block-id="${noteId}"]`)
     .evaluate(ele => {
-      const noteWrapper = ele
-        .closest<HTMLDivElement>('.edgeless-block-portal-note')
-        ?.querySelector<HTMLDivElement>('.note-background');
+      const noteWrapper =
+        ele?.querySelector<HTMLDivElement>('.note-background');
       if (!noteWrapper) {
         throw new Error(`Could not find note: ${noteId}`);
       }

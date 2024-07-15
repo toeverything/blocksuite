@@ -89,7 +89,7 @@ export function getPointWithTangent(
         ? getBezierTangent(bezierParameters, 1)
         : getBezierTangent(bezierParameters, 0);
   }
-  clone.tangent = tangent ?? [];
+  clone.tangent = tangent ?? [0, 0];
 
   return clone;
 }

@@ -1,5 +1,6 @@
 export * from './clipboard/index.js';
 export * from './command/index.js';
+export * from './edgeless/index.js';
 export * from './event/index.js';
 export * from './scope/index.js';
 export * from './selection/index.js';

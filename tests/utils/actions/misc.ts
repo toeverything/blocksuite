@@ -251,6 +251,7 @@ export function expectConsoleMessage(
       ignoredLog(message);
       return;
     }
+
     const sameType = message.type() === type;
     const textMatch =
       logPrefixOrRegex instanceof RegExp

@@ -159,7 +159,7 @@ export class PieMenu extends WithDisposable(LitElement) {
    * Position of the active node relative to the view
    */
   getActiveNodeRelPos(): IVec {
-    const position = [...this.position]; // use the menus position at start which will be the position of the root node
+    const position: IVec = [...this.position]; // use the menus position at start which will be the position of the root node
 
     for (const node of this.selectionChain) {
       position[0] += node.position[0];
@@ -179,7 +179,7 @@ export class PieMenu extends WithDisposable(LitElement) {
   }
 
   getNodeRelPos(node: PieNode): IVec {
-    const position = [...this.position];
+    const position: IVec = [...this.position];
     let cur: PieNode | null = node;
 
     while (cur !== null) {

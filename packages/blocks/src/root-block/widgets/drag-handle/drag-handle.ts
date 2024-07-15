@@ -694,8 +694,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       if (!target) return false;
 
       const isTargetEdgelessContainer =
-        target.classList.contains('edgeless') &&
-        target.classList.contains('affine-block-children-container');
+        target.classList.contains('edgeless-container');
       if (!isTargetEdgelessContainer) return false;
 
       const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)

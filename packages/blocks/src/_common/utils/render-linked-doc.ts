@@ -396,8 +396,8 @@ async function renderEdgelessAbstract(
   ).map(element => Bound.deserialize(element.xywh));
   const bound = getCommonBound(bounds);
   if (bound) {
-    renderer.onResize();
-    renderer.setViewportByBound(bound);
+    renderer.viewport.onResize();
+    renderer.viewport.setViewportByBound(bound);
   } else {
     card.isBannerEmpty = true;
   }

@@ -27,7 +27,7 @@ export function updateLayersZIndex(layers: Layer[], startIdx: number) {
 }
 
 export function getElementIndex(indexable: BlockSuite.EdgelessModelType) {
-  const groups = indexable.groups;
+  const groups = indexable.groups as BlockSuite.SurfaceGroupLikeModelType[];
 
   if (groups.length > 1) {
     return (
@@ -95,8 +95,8 @@ export function compare(
   } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
     return 1;
   } else {
-    const aGroups = a.groups;
-    const bGroups = b.groups;
+    const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModelType[];
+    const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModelType[];
     const minGroups = Math.min(aGroups.length, bGroups.length);
 
     for (let i = 0; i < minGroups; ++i) {

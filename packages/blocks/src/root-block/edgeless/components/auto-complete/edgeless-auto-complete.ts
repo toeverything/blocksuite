@@ -341,8 +341,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       connector
     );
 
-    const rootElementContainer = this.edgeless.rootElementContainer;
-    rootElementContainer.append(autoCompletePanel);
+    this.edgeless.append(autoCompletePanel);
   }
 
   private _generateElementOnClick(type: Direction) {

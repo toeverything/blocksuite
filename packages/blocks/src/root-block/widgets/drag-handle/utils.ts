@@ -161,9 +161,7 @@ export const getClosestNoteBlock = (
 ) => {
   return isInsidePageEditor(editorHost)
     ? findClosestBlockElement(rootElement, point, 'affine-note')
-    : getHoveringNote(point)
-        ?.closest('edgeless-block-portal-note')
-        ?.querySelector('affine-note');
+    : getHoveringNote(point)?.closest('affine-edgeless-note');
 };
 
 export const getClosestBlockByPoint = (
@@ -188,7 +186,10 @@ export const getClosestBlockByPoint = (
 
   const closestBlockElement = (
     blockElement &&
-    PathFinder.includes(blockElement.path, closestNoteBlock.path)
+    PathFinder.includes(
+      blockElement.path,
+      (closestNoteBlock as BlockElement).path
+    )
       ? blockElement
       : findClosestBlockElement(
           closestNoteBlock as BlockElement,

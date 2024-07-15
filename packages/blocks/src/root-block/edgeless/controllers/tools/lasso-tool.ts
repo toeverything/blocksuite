@@ -28,7 +28,7 @@ class LassoOverlay extends Overlay {
 
   render(ctx: CanvasRenderingContext2D): void {
     const path = new Path2D(this.d);
-    const { zoom } = this._renderer;
+    const { zoom } = this._renderer.viewport;
     ctx.save();
     const primaryColor = this._renderer.getVariableColor(
       '--affine-primary-color'
@@ -68,7 +68,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   private _lassoPoints: IVec[] = [];
 
-  private _lastPoint: IVec = [];
+  private _lastPoint: IVec = [0, 0];
 
   private _loop = () => {
     const path =
@@ -297,8 +297,8 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
         this.selection.selectedElements.map(el => el.id)
       );
 
-      const a = [x, y];
-      const b = [x, y];
+      const a: IVec = [x, y];
+      const b: IVec = [x, y];
       this._lassoPoints = [a, b];
       this._lastPoint = b;
       this._overlay.startPoint = a;

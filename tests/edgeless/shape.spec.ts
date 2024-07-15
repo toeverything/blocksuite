@@ -292,7 +292,7 @@ test('hovering on shape should not have effect on underlying block', async ({
 
   await switchEditorMode(page);
 
-  const block = page.locator('.edgeless-block-portal-note');
+  const block = page.locator('affine-edgeless-note');
   const blockBox = await block.boundingBox();
   if (blockBox === null) throw new Error('Unexpected box value: box is null');
 

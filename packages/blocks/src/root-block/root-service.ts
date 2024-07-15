@@ -188,7 +188,7 @@ export class RootService extends BlockService<RootBlockModel> {
 
       edgelessRoot.service.viewport.smoothZoom(1);
       const surface = edgelessRoot.surface;
-      const center = Vec.toVec(surface.renderer.center);
+      const center = Vec.toVec(surface.renderer.viewport.center);
       const cardId = edgelessRoot.service.addBlock(
         flavour,
         {

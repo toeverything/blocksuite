@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -117,20 +116,18 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     });
 
     if (this.isInSurface) {
-      const surface = this.surface;
-      assertExists(surface);
       this.disposables.add(
         this.model.propsUpdated.on(() => {
           this.requestUpdate();
         })
       );
 
-      this.edgeless?.slots.elementResizeStart.on(() => {
+      this.rootService?.slots.elementResizeStart.on(() => {
         this._isResizing = true;
         this._showOverlay = true;
       });
 
-      this.edgeless?.slots.elementResizeEnd.on(() => {
+      this.rootService?.slots.elementResizeEnd.on(() => {
         this._isResizing = false;
         this._showOverlay =
           this._isResizing || this._isDragging || !this._isSelected;

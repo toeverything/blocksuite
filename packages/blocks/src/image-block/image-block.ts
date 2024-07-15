@@ -103,6 +103,11 @@ export class ImageBlockComponent extends BlockComponent<
         this.refreshData();
       }
     });
+
+    if (this._isInSurface) {
+      this.style.position = 'absolute';
+      this.style.transformOrigin = 'center';
+    }
   }
 
   override disconnectedCallback() {
@@ -113,22 +118,20 @@ export class ImageBlockComponent extends BlockComponent<
   }
 
   override renderBlock() {
-    let containerStyleMap = styleMap({
+    const containerStyleMap = styleMap({
       position: 'relative',
       width: '100%',
     });
 
     if (this.isInSurface) {
-      const { id, xywh, rotate } = this.model;
-      const bound = Bound.deserialize(
-        this.edgeless?.service.getElementById(id)?.xywh ?? xywh
-      );
-      containerStyleMap = styleMap({
-        width: `${bound.w}px`,
-        height: `${bound.h}px`,
-        transform: `rotate(${rotate}deg)`,
-        transformOrigin: 'center',
-      });
+      const { xywh, rotate } = this.model;
+      const bound = Bound.deserialize(xywh);
+
+      this.style.left = `${bound.x}px`;
+      this.style.top = `${bound.y}px`;
+      this.style.width = `${bound.w}px`;
+      this.style.height = `${bound.h}px`;
+      this.style.transformOrigin = `rotate(${rotate}deg)`;
     }
 
     return html`
@@ -157,13 +160,6 @@ export class ImageBlockComponent extends BlockComponent<
 
   override updated() {
     this._imageCard?.requestUpdate();
-  }
-
-  get edgeless() {
-    if (!this._isInSurface) {
-      return null;
-    }
-    return this.host.querySelector('affine-edgeless-root');
   }
 
   get imageCard() {

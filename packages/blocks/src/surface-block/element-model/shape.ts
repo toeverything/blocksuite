@@ -3,7 +3,7 @@ import { DocCollection, type Y } from '@blocksuite/store';
 import type { IBound, SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
 import type { PointLocation } from '../utils/point-location.js';
-import type { IVec2 } from '../utils/vec.js';
+import type { IVec } from '../utils/vec.js';
 
 import {
   DEFAULT_ROUGHNESS,
@@ -83,11 +83,11 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
     return shapeMethods[this.shapeType].containedByBounds(bounds, this);
   }
 
-  override getNearestPoint(point: IVec2): IVec2 {
-    return shapeMethods[this.shapeType].getNearestPoint(point, this) as IVec2;
+  override getNearestPoint(point: IVec): IVec {
+    return shapeMethods[this.shapeType].getNearestPoint(point, this) as IVec;
   }
 
-  override getRelativePointLocation(point: IVec2): PointLocation {
+  override getRelativePointLocation(point: IVec): PointLocation {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
   }
 
@@ -98,7 +98,7 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
     });
   }
 
-  override intersectWithLine(start: IVec2, end: IVec2) {
+  override intersectWithLine(start: IVec, end: IVec) {
     return shapeMethods[this.shapeType].intersectWithLine(start, end, this);
   }
 

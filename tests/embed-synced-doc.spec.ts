@@ -121,10 +121,10 @@ test.describe('Embed synced doc', () => {
     await zoomOutByKeyboard(page);
 
     // Double click on note to enter edit status
-    const notePortal = page.locator('.edgeless-block-portal-note');
-    const notePortalBox = await notePortal.boundingBox();
-    assertExists(notePortalBox);
-    await page.mouse.dblclick(notePortalBox.x + 10, notePortalBox.y + 10);
+    const noteBlock = page.locator('affine-edgeless-note');
+    const noteBlockBox = await noteBlock.boundingBox();
+    assertExists(noteBlockBox);
+    await page.mouse.dblclick(noteBlockBox.x + 10, noteBlockBox.y + 10);
     await waitNextFrame(page, 200);
 
     // Drag the embed synced doc to whiteboard
@@ -139,11 +139,11 @@ test.describe('Embed synced doc', () => {
     await page.mouse.up();
 
     // Check the height of the embed synced doc portal, it should be the same as the embed synced doc in note
-    const EmbedSyncedDocPortal = page.locator('.edgeless-block-portal-embed');
-    const EmbedSyncedDocPortalBox = await EmbedSyncedDocPortal.boundingBox();
-    const border = 2;
-    assertExists(EmbedSyncedDocPortalBox);
-    expect(EmbedSyncedDocPortalBox.height).toBeCloseTo(height + border, 1);
+    const EmbedSyncedDocBlock = page.locator('affine-embed-synced-doc-block');
+    const EmbedSyncedDocBlockBox = await EmbedSyncedDocBlock.boundingBox();
+    const border = 0;
+    assertExists(EmbedSyncedDocBlockBox);
+    expect(EmbedSyncedDocBlockBox.height).toBeCloseTo(height + border, 1);
   });
 
   test('nested embed synced doc should be rendered as card when depth >=1', async ({

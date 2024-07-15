@@ -4,7 +4,7 @@ import type { IPoint } from '../../../_common/types.js';
 
 import { clamp } from '../../../_common/utils/math.js';
 import { Bound } from '../../../surface-block/utils/bound.js';
-import { type IVec2, Vec } from '../../../surface-block/utils/vec.js';
+import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 
 function cutoff(value: number, ref: number, sign: number) {
   if (sign > 0 && value > ref) return ref;
@@ -52,9 +52,9 @@ export class Viewport {
     top: number;
   }>();
 
-  viewportMoved = new Slot<IVec2>();
+  viewportMoved = new Slot<IVec>();
 
-  viewportUpdated = new Slot<{ zoom: number; center: IVec2 }>();
+  viewportUpdated = new Slot<{ zoom: number; center: IVec }>();
 
   applyDeltaCenter(deltaX: number, deltaY: number) {
     this.setCenter(this.centerX + deltaX, this.centerY + deltaY);
@@ -91,7 +91,7 @@ export class Viewport {
     this._center.y = centerY;
     this.viewportUpdated.emit({
       zoom: this.zoom,
-      center: Vec.toVec(this.center) as IVec2,
+      center: Vec.toVec(this.center) as IVec,
     });
   }
 
@@ -127,7 +127,7 @@ export class Viewport {
       if (cofficient === 1) {
         this.smoothTranslate(newCenter[0], newCenter[1]);
       } else {
-        const center = [this.centerX, this.centerY];
+        const center: IVec = [this.centerX, this.centerY];
         const focusPoint = Vec.mul(
           Vec.sub(newCenter, Vec.mul(center, cofficient)),
           1 / (1 - cofficient)
@@ -152,7 +152,7 @@ export class Viewport {
       this.ZOOM_MIN,
       (this.height - (pt + pb)) / bound.h
     );
-    const center = [
+    const center: IVec = [
       bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2,
       bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2,
     ];
@@ -174,7 +174,7 @@ export class Viewport {
     this.setCenter(newCenter[0], newCenter[1]);
     this.viewportUpdated.emit({
       zoom: this.zoom,
-      center: Vec.toVec(this.center) as IVec2,
+      center: Vec.toVec(this.center) as IVec,
     });
   }
 
@@ -265,12 +265,12 @@ export class Viewport {
     return new Bound(x, y, w / this.zoom, h / this.zoom);
   }
 
-  toModelCoord(viewX: number, viewY: number): IVec2 {
+  toModelCoord(viewX: number, viewY: number): IVec {
     const { viewportX, viewportY, zoom, scale } = this;
     return [viewportX + viewX / zoom / scale, viewportY + viewY / zoom / scale];
   }
 
-  toModelCoordFromClientCoord([x, y]: IVec2): IVec2 {
+  toModelCoordFromClientCoord([x, y]: IVec): IVec {
     const { left, top } = this;
     return this.toModelCoord(x - left, y - top);
   }
@@ -282,7 +282,7 @@ export class Viewport {
     return new Bound(x, y, w * this.zoom, h * this.zoom);
   }
 
-  toViewCoord(modelX: number, modelY: number): IVec2 {
+  toViewCoord(modelX: number, modelY: number): IVec {
     const { viewportX, viewportY, zoom, scale } = this;
     return [
       (modelX - viewportX) * zoom * scale,
@@ -290,7 +290,7 @@ export class Viewport {
     ];
   }
 
-  toViewCoordFromClientCoord([x, y]: IVec2): IVec2 {
+  toViewCoordFromClientCoord([x, y]: IVec): IVec {
     const { left, top } = this;
     return [x - left, y - top];
   }

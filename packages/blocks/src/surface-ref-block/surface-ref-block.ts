@@ -239,7 +239,9 @@ export class SurfaceRefBlockComponent extends BlockElement<
     )
       return;
 
+    this._surfaceRefRenderer.viewport.setContainer(this.container);
     this.surfaceRenderer.attach(this.container);
+
     if (this.portal.isUpdatePending) {
       this.portal.updateComplete
         .then(() => {
@@ -383,13 +385,13 @@ export class SurfaceRefBlockComponent extends BlockElement<
     this.requestUpdate();
     this.updateComplete
       .then(() => {
-        this.surfaceRenderer.onResize();
-        this.surfaceRenderer.setViewportByBound(
+        this.surfaceRenderer.viewport.onResize();
+        this.surfaceRenderer.viewport.setViewportByBound(
           Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
         );
 
         // update portal transform
-        this.portal?.setViewport(this.surfaceRenderer);
+        this.portal?.setViewport(this.surfaceRenderer.viewport);
       })
       .catch(console.error);
   }
@@ -416,7 +418,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     renderer: Renderer
   ) {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
-    const { zoom } = renderer;
+    const { zoom } = renderer.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
     const flavourOrType =
       'flavour' in referencedModel

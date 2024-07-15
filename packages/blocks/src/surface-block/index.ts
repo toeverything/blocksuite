@@ -78,7 +78,7 @@ export {
   toRadian,
 } from './utils/math-utils.js';
 export { PointLocation } from './utils/point-location.js';
-export { type IVec, type IVec2, Vec } from './utils/vec.js';
+export { type IVec, type IVec3, Vec } from './utils/vec.js';
 export * from './utils/xywh.js';
 
 declare global {

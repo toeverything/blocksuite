@@ -8,11 +8,14 @@ import {
 } from '../../root-block/edgeless/edgeless-root-spec.js';
 import { EdgelessSurfaceBlockSpec } from '../../surface-block/surface-spec.js';
 import { EdgelessSurfaceRefBlockSpec } from '../../surface-ref-block/surface-ref-spec.js';
-import { CommonFirstPartyBlockSpecs } from './../common.js';
+import {
+  CommonFirstPartyBlockSpecs,
+  EdgelessFirstPartyBlockSpecs,
+} from '../common.js';
 
 export const EdgelessEditorBlockSpecs: BlockSpec[] = [
   EdgelessRootBlockSpec,
-  ...CommonFirstPartyBlockSpecs,
+  ...EdgelessFirstPartyBlockSpecs,
   EdgelessSurfaceBlockSpec,
   EdgelessSurfaceRefBlockSpec,
   FrameBlockSpec,

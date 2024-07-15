@@ -1,5 +1,5 @@
 import type { Bound } from './bound.js';
-import type { IVec } from './vec.js';
+import type { IVec, IVec3 } from './vec.js';
 
 import { almostEqual, linePolygonIntersects } from './math-utils.js';
 import { isOverlap as _isOverlap } from './math-utils.js';
@@ -21,20 +21,20 @@ function isOverlap(line: IVec[], line2: IVec[]) {
   return false;
 }
 
-function arrayAlmostEqual(point: IVec, point2: IVec) {
+function arrayAlmostEqual(point: IVec | IVec3, point2: IVec | IVec3) {
   return almostEqual(point[0], point2[0]) && almostEqual(point[1], point2[1]);
 }
 
-export class Graph {
-  private _xMap = new Map<number, IVec[]>();
+export class Graph<V extends IVec | IVec3 = IVec> {
+  private _xMap = new Map<number, V[]>();
 
-  private _yMap = new Map<number, IVec[]>();
+  private _yMap = new Map<number, V[]>();
 
   constructor(
-    private points: IVec[],
+    private points: V[],
     private blocks: Bound[] = [],
     private expandedBlocks: Bound[] = [],
-    private excludedPoints: IVec[] = []
+    private excludedPoints: V[] = []
   ) {
     const xMap = this._xMap;
     const yMap = this._yMap;
@@ -47,49 +47,53 @@ export class Graph {
     });
   }
 
-  private _canSkipBlock(point: IVec) {
+  private _canSkipBlock(point: IVec | IVec3) {
     return this.excludedPoints.some(excludedPoint => {
       return arrayAlmostEqual(point, excludedPoint);
     });
   }
 
-  private _isBlock(sp: IVec, ep: IVec) {
+  private _isBlock(sp: IVec | IVec3, ep: IVec | IVec3) {
     return (
       this.blocks.some(block => {
-        const rst = linePolygonIntersects(sp, ep, block.points);
+        const rst = linePolygonIntersects(sp as IVec, ep as IVec, block.points);
         return (
           rst?.length === 2 ||
-          block.isPointInBound(sp, 0) ||
-          block.isPointInBound(ep, 0) ||
+          block.isPointInBound(sp as IVec, 0) ||
+          block.isPointInBound(ep as IVec, 0) ||
           [
             block.leftLine,
             block.upperLine,
             block.rightLine,
             block.lowerLine,
           ].some(line => {
-            return isOverlap(line, [sp, ep]);
+            return isOverlap(line, [sp, ep] as IVec[]);
           })
         );
       }) ||
       this.expandedBlocks.some(block => {
-        const result = linePolygonIntersects(sp, ep, block.expand(-0.5).points);
+        const result = linePolygonIntersects(
+          sp as IVec,
+          ep as IVec,
+          block.expand(-0.5).points
+        );
         return result?.length === 2;
       })
     );
   }
 
-  neighbors(curPoint: IVec): IVec[] {
+  neighbors(curPoint: V): V[] {
     const [x, y] = curPoint;
-    const neighbors = new Set<IVec>();
+    const neighbors = new Set<V>();
     const xPoints = this._xMap.get(x);
     const yPoints = this._yMap.get(y);
     if (xPoints) {
       let plusMin = Infinity;
       let minusMin = Infinity;
-      let plusPoint: IVec | undefined;
-      let minusPoint: IVec | undefined;
+      let plusPoint: V | undefined;
+      let minusPoint: V | undefined;
       xPoints.forEach(point => {
-        if (arrayAlmostEqual(point, curPoint)) return;
+        if (arrayAlmostEqual(point, curPoint as unknown as IVec)) return;
         const dif = point[1] - curPoint[1];
         if (dif > 0 && dif < plusMin) {
           plusMin = dif;
@@ -115,8 +119,8 @@ export class Graph {
     if (yPoints) {
       let plusMin = Infinity;
       let minusMin = Infinity;
-      let plusPoint: IVec | undefined;
-      let minusPoint: IVec | undefined;
+      let plusPoint: V | undefined;
+      let minusPoint: V | undefined;
       yPoints.forEach(point => {
         if (arrayAlmostEqual(point, curPoint)) return;
         const dif = point[0] - curPoint[0];

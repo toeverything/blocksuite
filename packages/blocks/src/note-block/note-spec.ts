@@ -12,3 +12,11 @@ export const NoteBlockSpec: BlockSpec = {
     component: literal`affine-note`,
   },
 };
+
+export const EdgelessNoteBlockSpec: BlockSpec = {
+  schema: NoteBlockSchema,
+  service: NoteBlockService,
+  view: {
+    component: literal`affine-edgeless-note`,
+  },
+};

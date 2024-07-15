@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -117,8 +116,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     );
 
     if (this.isInSurface) {
-      const surface = this.surface;
-      assertExists(surface);
       this.disposables.add(
         this.model.propsUpdated.on(() => {
           this.requestUpdate();

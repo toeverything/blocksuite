@@ -68,7 +68,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       assertExists(edgelessRoot);
 
       const surface = edgelessRoot.surface;
-      const center = Vec.toVec(surface.renderer.center);
+      const center = Vec.toVec(surface.renderer.viewport.center);
       edgelessRoot.service.addBlock(
         flavour,
         {

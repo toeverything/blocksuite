@@ -1,4 +1,8 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type {
+  EditorHost,
+  IEdgelessElement,
+  IHitTestOptions,
+} from '@blocksuite/block-std';
 import type { Y } from '@blocksuite/store';
 
 import { DisposableGroup } from '@blocksuite/global/utils';
@@ -34,6 +38,8 @@ import {
   yfield,
 } from './decorators.js';
 
+export type { IHitTestOptions } from '@blocksuite/block-std';
+
 export type ModelToProps<
   T extends SurfaceElementModel,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,56 +53,6 @@ export type IBaseProps = {
   index: string;
   seed: number;
 };
-
-export interface IHitTestOptions {
-  expand?: number;
-
-  /**
-   * If true, the transparent area of the element will be ignored during hit test.
-   * Otherwise, the transparent area will be considered as filled area.
-   *
-   * Default is true.
-   */
-  ignoreTransparent?: boolean;
-
-  all?: boolean;
-  zoom?: number;
-}
-
-export interface IEdgelessElement {
-  id: string;
-  xywh: SerializedXYWH;
-  /**
-   * In some cases, you need to draw something related to the element, but it does not belong to the element itself.
-   * And it is also interactive, you can select element by clicking on it. E.g. the title of the group element.
-   * In this case, we need to store this kind of external xywh in order to do hit test. This property should not be synced to the doc.
-   * This property should be updated every time it gets rendered.
-   */
-  externalXYWH: SerializedXYWH | undefined;
-  externalBound: Bound | null;
-  rotate: number;
-  connectable: boolean;
-  index: string;
-
-  /**
-   * The bound of the element after rotation.
-   * The bound without rotation should be created by `Bound.deserialize(this.xywh)`.
-   */
-  elementBound: Bound;
-  group: SurfaceGroupLikeModel<IBaseProps> | null;
-  groups: SurfaceGroupLikeModel<IBaseProps>[];
-  containedByBounds(bounds: Bound): boolean;
-  getNearestPoint(point: IVec): IVec;
-  intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
-  getRelativePointLocation(point: IVec): PointLocation;
-  hitTest(
-    x: number,
-    y: number,
-    options: IHitTestOptions,
-    host: EditorHost
-  ): boolean;
-  boxSelect(bound: Bound): boolean;
-}
 
 export type SerializedElement = Record<string, unknown> & {
   type: string;

@@ -1,3 +1,5 @@
+import type { IVec } from '../utils/vec.js';
+
 /**
  * The options object for `getStroke` or `getStrokePoints`.
  * @param points An array of points (as `[x, y, pressure]` or `{x, y, pressure}`). Pressure is optional in both cases.
@@ -36,9 +38,9 @@ export interface StrokeOptions {
  * The points returned by `getStrokePoints`, and the input for `getStrokeOutlinePoints`.
  */
 export interface StrokePoint {
-  point: number[];
+  point: IVec;
   pressure: number;
   distance: number;
-  vector: number[];
+  vector: IVec;
   runningLength: number;
 }

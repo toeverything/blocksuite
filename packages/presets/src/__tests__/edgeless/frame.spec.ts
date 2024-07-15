@@ -29,7 +29,7 @@ describe('frame', () => {
     await wait();
 
     const titleDom = document.querySelector(
-      `edgeless-frame-title[data-frame-title-id="${frame}"] > .affine-frame-title`
+      `affine-frame[data-block-id="${frame}"] .affine-frame-title`
     );
     const rect = titleDom?.getBoundingClientRect();
 
@@ -52,7 +52,7 @@ describe('frame', () => {
     );
     await wait();
     const nestedTitle = document.querySelector(
-      `edgeless-frame-title[data-frame-title-id="${nestedFrame}"] .affine-frame-title`
+      `affine-frame[data-block-id="${nestedFrame}"] .affine-frame-title`
     );
     const nestedTitleRect = nestedTitle!.getBoundingClientRect()!;
     const [nestedTitleX, nestedTitleY] = service.viewport.toModelCoord(

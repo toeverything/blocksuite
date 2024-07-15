@@ -34,12 +34,7 @@ import {
   moveSubtree,
   showMergeIndicator,
 } from '../../../../surface-block/element-model/utils/mindmap/utils.js';
-import {
-  Bound,
-  type IVec,
-  type IVec2,
-  Vec,
-} from '../../../../surface-block/index.js';
+import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import { intersects } from '../../../../surface-block/utils/math-utils.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
@@ -446,7 +441,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
       const hoveredMindmap = this._edgeless.service
         .pickElement(x, y, { all: true, expand: 40 })
-        .filter(el => el.group?.type === 'mindmap' && el !== current)
+        .filter(
+          el =>
+            (el.group as BlockSuite.SurfaceElementModelType)?.type ===
+              'mindmap' && el !== current
+        )
         .map(el => ({
           element: el as ShapeElementModel,
           node: (el.group as MindmapElementModel).getNode(el.id)!,
@@ -508,9 +507,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     if (!connector || !bounds) return;
     bounds = bounds.clone();
     const center = connector.getNearestPoint(
-      Vec.add(bounds.center, delta) as IVec2
+      Vec.add(bounds.center, delta) as IVec
     );
-    const distance = connector.getOffsetDistanceByPoint(center as IVec2);
+    const distance = connector.getOffsetDistanceByPoint(center as IVec);
     bounds.center = center;
     this._service.updateElement(connector.id, {
       labelXYWH: bounds.toXYWH(),
@@ -695,8 +694,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
                 buildPath(selected)
               );
               if (blockElement) {
-                const rect = blockElement.getBoundingClientRect();
-                const offsetY = 16 * this.zoom;
+                const rect = blockElement
+                  .querySelector('.affine-block-children-container')!
+                  .getBoundingClientRect();
+
+                const offsetY = 8 * this.zoom;
                 const offsetX = 2 * this.zoom;
                 const x = clamp(
                   e.raw.clientX,

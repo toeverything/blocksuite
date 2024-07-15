@@ -164,6 +164,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     )
       return;
 
+    this.surfaceRenderer.viewport.setContainer(this.container);
     this.surfaceRenderer.attach(this.container);
     if (this.blocksPortal.isUpdatePending) {
       this.blocksPortal.updateComplete
@@ -197,12 +198,12 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     // and set viewport after element's size has been updated
     this.updateComplete
       .then(() => {
-        this.surfaceRenderer.onResize();
-        this.surfaceRenderer.setViewportByBound(
+        this.surfaceRenderer.viewport.onResize();
+        this.surfaceRenderer.viewport.setViewportByBound(
           Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
         );
 
-        this.blocksPortal?.setViewport(this.surfaceRenderer);
+        this.blocksPortal?.setViewport(this.surfaceRenderer.viewport);
       })
       .catch(console.error);
   }

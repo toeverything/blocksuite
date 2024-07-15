@@ -19,17 +19,11 @@ import type { EdgelessPortalBase } from './edgeless-portal-base.js';
 import { requestThrottledConnectFrame } from '../../../../_common/utils/event.js';
 import { last } from '../../../../_common/utils/iterable.js';
 import { EdgelessBlockModel } from '../../edgeless-block-model.js';
-import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
+import { getBackgroundGrid } from '../../utils/query.js';
 import '../presentation/edgeless-navigator-black-background.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../rects/edgeless-selected-rect.js';
 import './attachment/edgeless-attachment.js';
-import './bookmark/edgeless-bookmark.js';
-import './edgeless-text/edgeless-edgeless-text.js';
-import './embed/edgeless-embed.js';
-import './frame/edgeless-frame.js';
-import './image/edgeless-image.js';
-import './note/edgeless-note.js';
 
 export type AutoConnectElement =
   | NoteBlockModel
@@ -145,20 +139,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
   }
 
-  private _updateNoteSlicer() {
-    const { edgeless } = this;
-    const { selectedElements } = edgeless.service.selection;
-    if (
-      !edgeless.service.selection.editing &&
-      selectedElements.length === 1 &&
-      isNoteBlock(selectedElements[0])
-    ) {
-      this._slicerAnchorNote = selectedElements[0];
-    } else {
-      this._slicerAnchorNote = null;
-    }
-  }
-
   /**
    * @returns true if the visible elements have changed
    */
@@ -243,13 +223,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.service.selection.slots.updated.on(() => {
-        this._enableNoteSlicer = false;
-        this._updateNoteSlicer();
-      })
-    );
-
-    _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
         this._isResizing = true;
       })
@@ -258,12 +231,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     _disposables.add(
       edgeless.slots.elementResizeEnd.on(() => {
         this._isResizing = false;
-      })
-    );
-
-    _disposables.add(
-      edgeless.slots.toggleNoteSlicer.on(() => {
-        this._enableNoteSlicer = !this._enableNoteSlicer;
       })
     );
   }
@@ -352,17 +319,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
 
-      ${readonly || this._isResizing || !this._enableNoteSlicer
+      ${readonly || this._isResizing
         ? nothing
-        : html`<note-slicer
-            .edgeless=${edgeless}
-            .anchorNote=${this._slicerAnchorNote}
-          ></note-slicer>`}
+        : html`<note-slicer .edgeless=${edgeless}></note-slicer>`}
 
-      <edgeless-selected-rect
-        .edgeless=${edgeless}
-        .autoCompleteOff=${this._enableNoteSlicer}
-      ></edgeless-selected-rect>
+      <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
 
       <edgeless-navigator-black-background
         .edgeless=${edgeless}
@@ -384,13 +345,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   }
 
   @state()
-  private accessor _enableNoteSlicer = false;
-
-  @state()
   private accessor _isResizing = false;
-
-  @state()
-  private accessor _slicerAnchorNote: NoteBlockModel | null = null;
 
   @query('.canvas-slot')
   accessor canvasSlot!: HTMLDivElement;

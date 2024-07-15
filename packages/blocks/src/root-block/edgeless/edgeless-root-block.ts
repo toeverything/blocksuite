@@ -4,7 +4,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { BlockElement } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists, throttle } from '@blocksuite/global/utils';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -13,15 +13,12 @@ import type {
   ImageBlockModel,
   ImageBlockProps,
 } from '../../image-block/image-model.js';
-import type {
-  IndexedCanvasUpdateEvent,
-  SurfaceBlockComponent,
-} from '../../surface-block/surface-block.js';
+import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { RootBlockModel } from '../root-model.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
-import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
+import type { EdgelessSelectedRect } from './components/rects/edgeless-selected-rect.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
@@ -41,8 +38,8 @@ import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
   isPinchEvent,
-  on,
   requestConnectedFrame,
+  requestThrottledConnectFrame,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
 import {
@@ -52,13 +49,16 @@ import {
 import {
   Bound,
   type IBound,
-  type IVec2,
+  type IVec,
   Vec,
   normalizeWheelDeltaY,
   serializeXYWH,
 } from '../../surface-block/index.js';
 import '../../surface-block/surface-block.js';
-import './components/block-portal/frame/edgeless-frame.js';
+import './components/note-slicer/index.js';
+import './components/presentation/edgeless-navigator-black-background.js';
+import './components/rects/edgeless-dragging-area-rect.js';
+import './components/rects/edgeless-selected-rect.js';
 import './components/toolbar/edgeless-toolbar.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { calcBoundByOrigin, readImageSize } from './components/utils.js';
@@ -87,7 +87,7 @@ import {
   DEFAULT_NOTE_OFFSET_Y,
   DEFAULT_NOTE_WIDTH,
 } from './utils/consts.js';
-import { isCanvasElement } from './utils/query.js';
+import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 export interface EdgelessViewport {
   left: number;
   top: number;
@@ -105,6 +105,20 @@ export class EdgelessRootBlockComponent extends BlockElement<
   EdgelessRootService,
   EdgelessRootBlockWidgetName
 > {
+  private _refreshLayerViewport = requestThrottledConnectFrame(() => {
+    const { zoom, translateX, translateY } = this.service.viewport;
+    const { gap } = getBackgroundGrid(zoom, true);
+
+    this.background.style.setProperty(
+      'background-position',
+      `${translateX}px ${translateY}px`
+    );
+    this.background.style.setProperty('background-size', `${gap}px ${gap}px`);
+
+    this.layer.style.setProperty('transform', this._getLayerViewport());
+    this.layer.dataset.scale = zoom.toString();
+  }, this);
+
   private _resizeObserver: ResizeObserver | null = null;
 
   private readonly _themeObserver = new ThemeObserver();
@@ -126,7 +140,16 @@ export class EdgelessRootBlockComponent extends BlockElement<
       height: 100%;
     }
 
-    .affine-edgeless-layer {
+    .edgeless-background {
+      height: 100%;
+      background-color: var(--affine-background-primary-color);
+      background-image: radial-gradient(
+        var(--affine-edgeless-grid-color) 1px,
+        var(--affine-background-primary-color) 1px
+      );
+    }
+
+    .edgeless-layer {
       position: absolute;
       top: 0;
       left: 0;
@@ -161,6 +184,16 @@ export class EdgelessRootBlockComponent extends BlockElement<
   keyboardManager: EdgelessPageKeyboardManager | null = null;
 
   mouseRoot!: HTMLElement;
+
+  private _getLayerViewport(negative = false) {
+    const { translateX, translateY, zoom } = this.service.viewport;
+
+    if (negative) {
+      return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
+    }
+
+    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+  }
 
   private _handleToolbarFlag() {
     const createToolbar = () => {
@@ -275,36 +308,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
     );
   }
 
-  private _initSurface() {
-    const appendIndexedCanvasToPortal = (
-      canvases: HTMLCanvasElement[] = this.surface.renderer.stackingCanvas
-    ) => {
-      this.rootElementContainer.setSlotContent(canvases);
-    };
-
-    this._disposables.add(
-      on(this.surface, 'indexedcanvasupdate', e => {
-        appendIndexedCanvasToPortal(
-          (e as IndexedCanvasUpdateEvent).detail.content
-        );
-      })
-    );
-
-    this._disposables.add(
-      this.std.event.slots.editorHostPanned.on(() => {
-        this.service.viewport.onResize();
-      })
-    );
-
-    if (this.rootElementContainer.isUpdatePending) {
-      this.rootElementContainer.updateComplete
-        .then(() => appendIndexedCanvasToPortal())
-        .catch(console.error);
-    } else {
-      appendIndexedCanvasToPortal();
-    }
-  }
-
   private _initTools() {
     const tools = [
       DefaultToolController,
@@ -338,7 +341,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
       const viewport =
         service.editPropsStore.getStorage('viewport') ??
         service.getFitToScreenData();
-
       if ('xywh' in viewport) {
         const bound = Bound.deserialize(viewport.xywh);
         service.viewport.setViewportByBound(bound, viewport.padding);
@@ -404,7 +406,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     );
   }
 
-  async addAttachments(files: File[], point?: IVec2): Promise<string[]> {
+  async addAttachments(files: File[], point?: IVec): Promise<string[]> {
     if (!files.length) return [];
 
     const attachmentService = this.host.spec.getService('affine:attachment');
@@ -509,7 +511,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   async addImages(
     files: File[],
-    point?: IVec2,
+    point?: IVec,
     inTopLeft?: boolean
   ): Promise<string[]> {
     const imageFiles = [...files].filter(file =>
@@ -709,6 +711,18 @@ export class EdgelessRootBlockComponent extends BlockElement<
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
     this._initTools();
+
+    this._disposables.add(
+      this.slots.elementResizeStart.on(() => {
+        this._isResizing = true;
+      })
+    );
+
+    this._disposables.add(
+      this.slots.elementResizeEnd.on(() => {
+        this._isResizing = false;
+      })
+    );
   }
 
   override disconnectedCallback() {
@@ -730,7 +744,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     this._initPixelRatioChangeEffect();
     this._initFontLoader();
     this._initRemoteCursor();
-    this._initSurface();
+    // this._initSurface();
 
     this._initViewport();
     this._initWheelEvent();
@@ -744,6 +758,14 @@ export class EdgelessRootBlockComponent extends BlockElement<
       this._handleToolbarFlag();
       this.requestUpdate();
     }, this);
+
+    this._disposables.add(
+      this.service.viewport.viewportUpdated.on(() => {
+        this._refreshLayerViewport();
+      })
+    );
+
+    this._refreshLayerViewport();
   }
 
   getElementsBound(): IBound | null {
@@ -760,10 +782,32 @@ export class EdgelessRootBlockComponent extends BlockElement<
       ([_, widget]) => widget
     );
 
-    return html`${this.host.renderModel(this.surfaceBlockModel)}
-      <edgeless-block-portal-container .edgeless=${this}>
-      </edgeless-block-portal-container>
-      <div class="widgets-container">${widgets}</div> `;
+    return html`
+      <div class="edgeless-background edgeless-container">
+        <div class="edgeless-layer">
+          ${this.renderChildren(this.model)}${this.renderChildren(
+            this.surfaceBlockModel
+          )}
+        </div>
+      </div>
+
+      <!-- need to be converted to widget -->
+      <edgeless-dragging-area-rect
+        .edgeless=${this}
+      ></edgeless-dragging-area-rect>
+
+      ${this._isResizing
+        ? nothing
+        : html`<note-slicer .edgeless=${this}></note-slicer>`}
+
+      <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
+      <edgeless-navigator-black-background
+        .edgeless=${this}
+      ></edgeless-navigator-black-background>
+      <!-- end -->
+
+      <div class="widgets-container">${widgets}</div>
+    `;
   }
 
   /*
@@ -845,16 +889,22 @@ export class EdgelessRootBlockComponent extends BlockElement<
     return this._viewportElement;
   }
 
-  @query('.affine-edgeless-layer')
-  accessor edgelessLayer!: HTMLDivElement;
+  @state()
+  private accessor _isResizing = false;
+
+  @query('.edgeless-background')
+  accessor background!: HTMLDivElement;
 
   @state()
   accessor edgelessTool: EdgelessTool = {
     type: localStorage.defaultTool ?? 'default',
   };
 
-  @query('edgeless-block-portal-container')
-  accessor rootElementContainer!: EdgelessBlockPortalContainer;
+  @query('.edgeless-layer')
+  accessor layer!: HTMLDivElement;
+
+  @query('edgeless-selected-rect')
+  accessor selectedRect!: EdgelessSelectedRect;
 
   @query('affine-surface')
   accessor surface!: SurfaceBlockComponent;

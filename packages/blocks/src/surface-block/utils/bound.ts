@@ -119,12 +119,14 @@ export class Bound implements IBound {
 
   intersectLine(sp: IVec, ep: IVec, infinite = false) {
     const rst: IVec[] = [];
-    [
-      [this.tl, this.tr],
-      [this.tl, this.bl],
-      [this.tr, this.br],
-      [this.bl, this.br],
-    ].forEach(([p1, p2]) => {
+    (
+      [
+        [this.tl, this.tr],
+        [this.tl, this.bl],
+        [this.tr, this.br],
+        [this.bl, this.br],
+      ] as IVec[][]
+    ).forEach(([p1, p2]) => {
       const p = lineIntersects(sp, ep, p1, p2, infinite);
       if (p) rst.push(p);
     });
@@ -354,7 +356,7 @@ export function getElementsBound(bounds: IBound[]): Bound {
   return new Bound(minX, minY, maxX - minX, maxY - minY);
 }
 
-export function getBoundFromPoints(points: number[][]) {
+export function getBoundFromPoints(points: IVec[]) {
   const { minX, minY, width, height } = getBoundsFromPoints(points);
   return new Bound(minX, minY, width, height);
 }

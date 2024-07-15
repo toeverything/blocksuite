@@ -396,7 +396,7 @@ export async function assertEdgelessLassoToolMode(page: Page, mode: LassoMode) {
 }
 
 export async function getEdgelessBlockChild(page: Page) {
-  const block = page.locator('.edgeless-block-portal-note');
+  const block = page.locator('affine-edgeless-note');
   const blockBox = await block.boundingBox();
   if (blockBox === null) throw new Error('Missing edgeless block child rect');
   return blockBox;
@@ -633,7 +633,9 @@ export async function pickColorAtPoints(page: Page, points: number[][]) {
 
 export async function getNoteBoundBoxInEdgeless(page: Page, noteId: string) {
   const editor = getEditorLocator(page);
-  const note = editor.locator(`affine-note[data-block-id="${noteId}"]`);
+  const note = editor.locator(
+    `affine-edgeless-note[data-block-id="${noteId}"]`
+  );
   const bound = await note.boundingBox();
   if (!bound) {
     throw new Error(`Missing note: ${noteId}`);
@@ -668,7 +670,7 @@ export async function activeNoteInEdgeless(page: Page, noteId: string) {
 
 export async function selectNoteInEdgeless(page: Page, noteId: string) {
   const bound = await getNoteBoundBoxInEdgeless(page, noteId);
-  await page.mouse.click(bound.x, bound.y);
+  await page.mouse.click(bound.x + bound.width / 2, bound.y + bound.height / 2);
 }
 
 export function locatorNoteDisplayModeButton(

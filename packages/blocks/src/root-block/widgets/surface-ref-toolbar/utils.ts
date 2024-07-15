@@ -34,7 +34,7 @@ export const edgelessToBlob = async (
       undefined,
       isBlock ? [edgelessElement] : undefined,
       isBlock ? undefined : [edgelessElement],
-      { zoom: options.surfaceRenderer.zoom }
+      { zoom: options.surfaceRenderer.viewport.zoom }
     )
     .then(canvas => {
       assertExists(canvas);

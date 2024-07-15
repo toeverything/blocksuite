@@ -2,9 +2,10 @@
 // Credits to tldraw
 // import { almostEqual } from './math-utils.js';
 
-export type IVec2 = [number, number];
+export type IVec = [number, number];
 
-export type IVec = number[];
+export type IVec3 = [number, number, number];
+
 export class Vec {
   /**
    * Absolute value of a vector.
@@ -20,7 +21,7 @@ export class Vec {
    * @param A
    * @param B
    */
-  static add = (A: number[], B: number[]): number[] => {
+  static add = (A: number[], B: number[]): IVec => {
     return [A[0] + B[0], A[1] + B[1]];
   };
 
@@ -29,7 +30,7 @@ export class Vec {
    * @param A
    * @param B
    */
-  static addScalar = (A: number[], n: number): number[] => {
+  static addScalar = (A: number[], n: number): IVec => {
     return [A[0] + n, A[1] + n];
   };
 
@@ -48,7 +49,7 @@ export class Vec {
    * @param pc
    * @param p2
    */
-  static ang3 = (p1: number[], pc: number[], p2: number[]): number => {
+  static ang3 = (p1: IVec, pc: IVec, p2: IVec): number => {
     // this,
     const v1 = Vec.vec(pc, p1);
     const v2 = Vec.vec(pc, p2);
@@ -60,7 +61,7 @@ export class Vec {
    * @param A
    * @param B
    */
-  static angle = (A: number[], B: number[]): number => {
+  static angle = (A: IVec, B: IVec): number => {
     return Math.atan2(B[1] - A[1], B[0] - A[0]);
   };
 
@@ -97,7 +98,7 @@ export class Vec {
    * @param A
    * @param B
    */
-  static dist2 = (A: number[], B: number[]): number => {
+  static dist2 = (A: IVec, B: IVec): number => {
     return Vec.len2(Vec.sub(A, B));
   };
 
@@ -128,9 +129,9 @@ export class Vec {
    * @returns
    */
   static distanceToLineSegment = (
-    A: number[],
-    B: number[],
-    P: number[],
+    A: IVec,
+    B: IVec,
+    P: IVec,
     clamp = true
   ): number => {
     return Vec.dist(P, Vec.nearestPointOnLineSegment(A, B, P, clamp));
@@ -143,11 +144,7 @@ export class Vec {
    * @param P A point not on the line to test.
    * @returns
    */
-  static distanceToLineThroughPoint = (
-    A: number[],
-    u: number[],
-    P: number[]
-  ): number => {
+  static distanceToLineThroughPoint = (A: IVec, u: IVec, P: IVec): number => {
     return Vec.dist(P, Vec.nearestPointOnLineThroughPoint(A, u, P));
   };
 
@@ -156,7 +153,7 @@ export class Vec {
    * @param A
    * @param n
    */
-  static div = (A: number[], n: number): number[] => {
+  static div = (A: IVec, n: number): IVec => {
     return [A[0] / n, A[1] / n];
   };
 
@@ -165,7 +162,7 @@ export class Vec {
    * @param A
    * @param n
    */
-  static divV = (A: number[], B: number[]): number[] => {
+  static divV = (A: IVec, B: IVec): IVec => {
     return [A[0] / B[0], A[1] / B[1]];
   };
 
@@ -200,13 +197,7 @@ export class Vec {
    * @param to Ending value
    * @param s Strength
    */
-  static int = (
-    A: number[],
-    B: number[],
-    from: number,
-    to: number,
-    s = 1
-  ): number[] => {
+  static int = (A: IVec, B: IVec, from: number, to: number, s = 1): IVec => {
     const t = (Vec.clamp(from, to) - from) / (to - from);
     return Vec.add(Vec.mul(A, 1 - t), Vec.mul(B, s));
   };
@@ -257,7 +248,7 @@ export class Vec {
    * @param B
    * @param t scalar
    */
-  static lrp = (A: number[], B: number[], t: number): number[] => {
+  static lrp = (A: IVec, B: IVec, t: number): IVec => {
     return Vec.add(A, Vec.mul(Vec.sub(B, A), t));
   };
 
@@ -273,7 +264,7 @@ export class Vec {
    * @param A
    * @param B
    */
-  static med = (A: number[], B: number[]): number[] => {
+  static med = (A: IVec, B: IVec): IVec => {
     return Vec.mul(Vec.add(A, B), 0.5);
   };
 
@@ -289,7 +280,7 @@ export class Vec {
    * @param A
    * @param n
    */
-  static mul = (A: number[], n: number): number[] => {
+  static mul = (A: IVec, n: number): IVec => {
     return [A[0] * n, A[1] * n];
   };
 
@@ -298,7 +289,7 @@ export class Vec {
    * @param A
    * @param B
    */
-  static mulV = (A: number[], B: number[]): number[] => {
+  static mulV = (A: IVec, B: IVec): IVec => {
     return [A[0] * B[0], A[1] * B[1]];
   };
 
@@ -332,11 +323,11 @@ export class Vec {
    * @returns
    */
   static nearestPointOnLineSegment = (
-    A: number[],
-    B: number[],
-    P: number[],
+    A: IVec,
+    B: IVec,
+    P: IVec,
     clamp = true
-  ): number[] => {
+  ): IVec => {
     const u = Vec.uni(Vec.sub(B, A));
     const C = Vec.add(A, Vec.mul(u, Vec.pry(Vec.sub(P, A), u)));
 
@@ -357,11 +348,7 @@ export class Vec {
    * @param P A point not on the line to test.
    * @returns
    */
-  static nearestPointOnLineThroughPoint = (
-    A: number[],
-    u: number[],
-    P: number[]
-  ): number[] => {
+  static nearestPointOnLineThroughPoint = (A: IVec, u: IVec, P: IVec): IVec => {
     return Vec.add(A, Vec.mul(u, Vec.pry(Vec.sub(P, A), u)));
   };
 
@@ -377,7 +364,7 @@ export class Vec {
    * Get normalized / unit vector.
    * @param A
    */
-  static normalize = (A: number[]): number[] => {
+  static normalize = (A: IVec): IVec => {
     return Vec.uni(A);
   };
 
@@ -388,7 +375,7 @@ export class Vec {
    * @param d
    * @returns
    */
-  static nudge = (A: number[], B: number[], d: number): number[] => {
+  static nudge = (A: IVec, B: IVec, d: number): number[] => {
     if (Vec.isEqual(A, B)) return A;
     return Vec.add(A, Vec.mul(Vec.uni(Vec.sub(B, A)), d));
   };
@@ -407,7 +394,7 @@ export class Vec {
    * Perpendicular rotation of a vector A
    * @param A
    */
-  static per = (A: number[]): number[] => {
+  static per = (A: IVec): IVec => {
     return [A[1], -A[0]];
   };
 
@@ -423,7 +410,7 @@ export class Vec {
    * @param B The second point.
    * @param steps The number of points to return.
    */
-  static pointsBetween = (A: number[], B: number[], steps = 6): number[][] => {
+  static pointsBetween = (A: IVec, B: IVec, steps = 6): number[][] => {
     return Array.from({ length: steps }).map((_, i) => {
       const t = i / (steps - 1);
       const k = Math.min(1, 0.5 + Math.abs(0.5 - t));
@@ -450,7 +437,7 @@ export class Vec {
    * @param A
    * @param r rotation in radians
    */
-  static rot = (A: number[], r = 0): number[] => {
+  static rot = (A: number[], r = 0): IVec => {
     return [
       A[0] * Math.cos(r) - A[1] * Math.sin(r),
       A[0] * Math.sin(r) + A[1] * Math.cos(r),
@@ -463,7 +450,7 @@ export class Vec {
    * @param C center
    * @param r rotation in radians
    */
-  static rotWith = (A: number[], C: number[], r = 0): number[] => {
+  static rotWith = (A: IVec, C: IVec, r = 0): IVec => {
     if (r === 0) return A;
 
     const s = Math.sin(r);
@@ -493,7 +480,7 @@ export class Vec {
    * @param A
    * @param B
    */
-  static sub = (A: number[], B: number[]): number[] => {
+  static sub = (A: IVec, B: IVec): IVec => {
     return [A[0] - B[0], A[1] - B[1]];
   };
 
@@ -502,7 +489,7 @@ export class Vec {
    * @param A
    * @param B
    */
-  static subScalar = (A: number[], n: number): number[] => {
+  static subScalar = (A: IVec, n: number): IVec => {
     return [A[0] - n, A[1] - n];
   };
 
@@ -512,7 +499,7 @@ export class Vec {
    * @param B
    * @returns
    */
-  static tangent = (A: number[], B: number[]): number[] => {
+  static tangent = (A: IVec, B: IVec): IVec => {
     return Vec.uni(Vec.sub(A, B));
   };
 
@@ -540,13 +527,13 @@ export class Vec {
     return [+a[0].toPrecision(n), +a[1].toPrecision(n)];
   };
 
-  static toVec = (v: { x: number; y: number }) => [v.x, v.y];
+  static toVec = (v: { x: number; y: number }): IVec => [v.x, v.y];
 
   /**
    * Get normalized / unit vector.
    * @param A
    */
-  static uni = (A: number[]): number[] => {
+  static uni = (A: IVec): IVec => {
     return Vec.div(A, Vec.len(A));
   };
 
@@ -555,7 +542,7 @@ export class Vec {
    * @param A
    * @param B
    */
-  static vec = (A: number[], B: number[]): number[] => {
+  static vec = (A: IVec, B: IVec): IVec => {
     // A, B as vectors get the vector from A to B
     return [B[0] - A[0], B[1] - A[1]];
   };
@@ -583,7 +570,9 @@ export class Vec {
   static clampV(A: number[], min: number, max: number): number[];
 
   static clampV(A: number[], min: number, max?: number): number[] {
-    return A.map(n => (max ? Vec.clamp(n, min, max) : Vec.clamp(n, min)));
+    return A.map(n =>
+      max !== undefined ? Vec.clamp(n, min, max) : Vec.clamp(n, min)
+    );
   }
 
   /**

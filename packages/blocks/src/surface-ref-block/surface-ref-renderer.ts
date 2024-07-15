@@ -7,6 +7,7 @@ import type { NoteBlockModel } from '../note-block/index.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
+import { Viewport } from '../root-block/edgeless/utils/viewport.js';
 import { Renderer } from '../surface-block/index.js';
 import { getSurfaceBlock } from './utils.js';
 
@@ -16,6 +17,8 @@ export class SurfaceRefRenderer {
   private _surfaceModel: SurfaceBlockModel | null = null;
 
   private readonly _surfaceRenderer: Renderer;
+
+  private readonly _viewport: Viewport;
 
   slots = {
     surfaceRendererInit: new Slot(),
@@ -36,7 +39,9 @@ export class SurfaceRefRenderer {
     }
   ) {
     const themeObserver = new ThemeObserver();
+    const viewport = new Viewport();
     const renderer = new Renderer({
+      viewport,
       layerManager: this.surfaceService.layer,
       enableStackingCanvas: options.enableStackingCanvas,
       provider: {
@@ -47,6 +52,7 @@ export class SurfaceRefRenderer {
 
     themeObserver.observe(document.documentElement);
     this._surfaceRenderer = renderer;
+    this._viewport = viewport;
     this.slots.unmounted.once(() => {
       themeObserver.dispose();
     });
@@ -118,5 +124,9 @@ export class SurfaceRefRenderer {
 
   get surfaceService() {
     return this.std.spec.getService('affine:surface');
+  }
+
+  get viewport() {
+    return this._viewport;
   }
 }

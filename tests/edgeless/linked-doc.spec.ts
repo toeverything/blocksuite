@@ -45,7 +45,7 @@ test.describe('note to linked doc', () => {
 
     await triggerComponentToolbarAction(page, 'openLinkedDoc');
     await waitNextFrame(page, 200);
-    const noteBlock = page.locator('affine-note');
+    const noteBlock = page.locator('affine-edgeless-note');
     assertExists(noteBlock);
     const noteContent = await noteBlock.innerText();
     expect(noteContent).toBe('Hello\nWorld');

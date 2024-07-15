@@ -7,11 +7,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { IPoint } from '../../../../_common/types.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
+import type { EdgelessTextBlockComponent } from '../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
 import type { EmbedHtmlModel } from '../../../../embed-html-block/embed-html-model.js';
 import type { EmbedSyncedDocModel } from '../../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { EdgelessBlockPortalEdgelessText } from '../block-portal/edgeless-text/edgeless-edgeless-text.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
@@ -840,9 +840,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       direction === HandleDirection.Left ||
       direction === HandleDirection.Right
     ) {
-      const textPortal = this.edgeless.rootElementContainer.getPortalElement(
+      const textPortal = this.edgeless.host.view.getBlock(
         element.id
-      ) as EdgelessBlockPortalEdgelessText | null;
+      ) as EdgelessTextBlockComponent | null;
       if (!textPortal) return;
 
       if (!textPortal.checkWidthOverflow(bound.w)) return;
@@ -1431,7 +1431,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @state()
   private accessor _shiftKey = false;
 
-  @property({ attribute: false })
+  @state()
   accessor autoCompleteOff = false;
 
   @property({ attribute: false })

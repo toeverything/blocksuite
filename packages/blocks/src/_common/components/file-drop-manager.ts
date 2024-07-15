@@ -4,7 +4,7 @@ import type { BlockModel } from '@blocksuite/store';
 
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { IVec2 } from '../../surface-block/index.js';
+import type { IVec } from '../../surface-block/index.js';
 import type { DragIndicator } from './drag-indicator.js';
 
 import {
@@ -21,7 +21,7 @@ export type onDropProps = {
   files: File[];
   targetModel: BlockModel | null;
   place: 'before' | 'after';
-  point: IVec2;
+  point: IVec;
 };
 
 export type FileDropOptions = {

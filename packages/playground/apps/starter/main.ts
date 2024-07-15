@@ -31,12 +31,12 @@ async function main() {
     });
 
     // test if blocksuite can run in a web worker, SEE: tests/worker.spec.ts
-    window.testWorker = new Worker(
-      new URL('./utils/test-worker.ts', import.meta.url),
-      {
-        type: 'module',
-      }
-    );
+    // window.testWorker = new Worker(
+    //   new URL('./utils/test-worker.ts', import.meta.url),
+    //   {
+    //     type: 'module',
+    //   }
+    // );
 
     return;
   }

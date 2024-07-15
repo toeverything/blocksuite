@@ -16,7 +16,7 @@ import {
   CanvasElementType,
   type ConnectorElementModel,
   type IModelCoord,
-  type IVec2,
+  type IVec,
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,
@@ -48,9 +48,8 @@ export function mountTextElementEditor(
   const textEditor = new EdgelessTextEditor();
   textEditor.edgeless = edgeless;
   textEditor.element = textElement;
-  const rootElementContainer = edgeless.rootElementContainer;
 
-  rootElementContainer.append(textEditor);
+  edgeless.append(textEditor);
   textEditor.updateComplete
     .then(() => {
       textEditor.inlineEditor?.focusIndex(cursorIndex);
@@ -91,9 +90,8 @@ export function mountShapeTextEditor(
   shapeEditor.element = updatedElement;
   shapeEditor.edgeless = edgeless;
   shapeEditor.mountEditor = mountShapeTextEditor;
-  const rootElementContainer = edgeless.rootElementContainer;
 
-  rootElementContainer.append(shapeEditor);
+  edgeless.append(shapeEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [shapeElement.id],
     editing: true,
@@ -108,7 +106,7 @@ export function mountFrameTitleEditor(
   frameEditor.frameModel = frame;
   frameEditor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.append(frameEditor);
+  edgeless.append(frameEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [frame.id],
     editing: true,
@@ -123,7 +121,7 @@ export function mountGroupTitleEditor(
   groupEditor.group = group;
   groupEditor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.append(groupEditor);
+  edgeless.append(groupEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [group.id],
     editing: true,
@@ -163,7 +161,7 @@ export function addText(
 export function mountConnectorLabelEditor(
   connector: ConnectorElementModel,
   edgeless: EdgelessRootBlockComponent,
-  point?: IVec2
+  point?: IVec
 ) {
   let text = connector.text;
   if (!text) {
@@ -174,7 +172,7 @@ export function mountConnectorLabelEditor(
 
     if (point) {
       const center = connector.getNearestPoint(point);
-      const distance = connector.getOffsetDistanceByPoint(center as IVec2);
+      const distance = connector.getOffsetDistanceByPoint(center as IVec);
       const bounds = Bound.fromXYWH(connector.labelXYWH || [0, 0, 16, 16]);
       bounds.center = center;
       connector.labelOffset.distance = distance;
@@ -186,7 +184,7 @@ export function mountConnectorLabelEditor(
   editor.connector = connector;
   editor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.append(editor);
+  edgeless.append(editor);
   editor.updateComplete
     .then(() => {
       editor.inlineEditor?.focusEnd();

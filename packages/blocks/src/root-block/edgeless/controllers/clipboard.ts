@@ -53,11 +53,7 @@ import {
 import { ConnectorElementModel } from '../../../surface-block/index.js';
 import { compare } from '../../../surface-block/managers/layer-utils.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
-import {
-  type IVec,
-  type IVec2,
-  Vec,
-} from '../../../surface-block/utils/vec.js';
+import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import {
@@ -204,7 +200,7 @@ export class EdgelessClipboardController extends PageClipboard {
     if (!data) return;
 
     const { lastMousePos } = this.toolManager;
-    const point: IVec2 = [lastMousePos.x, lastMousePos.y];
+    const point: IVec = [lastMousePos.x, lastMousePos.y];
 
     if (isPureFileInClipboard(data)) {
       const files = data.files;
@@ -1105,8 +1101,8 @@ export class EdgelessClipboardController extends PageClipboard {
       } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
         return 1;
       } else {
-        const aGroups = a.groups;
-        const bGroups = b.groups;
+        const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModelType[];
+        const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModelType[];
         const minGroups = Math.min(aGroups.length, bGroups.length);
 
         for (let i = 0; i < minGroups; ++i) {

@@ -8,6 +8,7 @@ import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EdgelessRootService } from '../../root-block/index.js';
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
 
@@ -162,23 +163,24 @@ export class EmbedBlockElement<
       `;
     }
 
-    const surface = this.surface;
-    assertExists(surface);
-
     const width = this._width;
     const height = this._height;
-    const bound = Bound.deserialize(
-      (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
-    );
+    const bound = Bound.deserialize(this.model.xywh);
     const scaleX = bound.w / width;
     const scaleY = bound.h / height;
+
+    this.style.left = `${bound.x}px`;
+    this.style.top = `${bound.y}px`;
+    this.style.width = `${width}px`;
+    this.style.height = `${height}px`;
+    this.style.zIndex = `${this.toZIndex()}`;
 
     return html`
       <div
         class="embed-block-container"
         style=${styleMap({
-          width: `${width}px`,
-          height: `${height}px`,
+          width: `100%`,
+          height: `100%`,
           transform: `scale(${scaleX}, ${scaleY})`,
           transformOrigin: '0 0',
         })}
@@ -206,6 +208,16 @@ export class EmbedBlockElement<
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
+
+    if (this.isInSurface) {
+      this.style.position = 'absolute';
+      this.rootService &&
+        this._disposables.add(
+          this.rootService.layer.slots.layerUpdated.on(() => {
+            this.requestUpdate();
+          })
+        );
+    }
   }
 
   override disconnectedCallback(): void {
@@ -213,17 +225,13 @@ export class EmbedBlockElement<
     this._fetchAbortController.abort();
   }
 
-  get bound(): Bound {
-    return Bound.deserialize(
-      (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
-    );
+  toZIndex() {
+    // @ts-ignore
+    return this.rootService?.layer.getZIndex(this.model) ?? 1;
   }
 
-  get edgeless() {
-    if (!this._isInSurface) {
-      return null;
-    }
-    return this.host.querySelector('affine-edgeless-root');
+  get bound(): Bound {
+    return Bound.deserialize(this.model.xywh);
   }
 
   get fetchAbortController() {
@@ -234,9 +242,16 @@ export class EmbedBlockElement<
     return this._isInSurface;
   }
 
-  get surface() {
-    if (!this.isInSurface) return null;
-    return this.host.querySelector('affine-surface');
+  get rootService() {
+    const service = this.host.spec.getService(
+      'affine:page'
+    ) as EdgelessRootService;
+
+    if (!service?.surface) {
+      return null;
+    }
+
+    return service;
   }
 
   @query('.embed-block-container')

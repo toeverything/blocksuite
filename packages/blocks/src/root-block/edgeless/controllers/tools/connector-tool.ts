@@ -5,7 +5,7 @@ import { assertExists, noop } from '@blocksuite/global/utils';
 import type {
   ConnectorMode,
   IBound,
-  IVec2,
+  IVec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessTool } from '../../types.js';
 
@@ -15,7 +15,6 @@ import {
   type Connection,
   type ConnectorElementModel,
   GroupElementModel,
-  type IVec,
   ShapeElementModel,
   ShapeType,
 } from '../../../../surface-block/index.js';
@@ -50,7 +49,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
   private _sourceBounds: IBound | null = null;
 
-  private _sourceLocations: IVec2[] = ConnectorEndpointLocations;
+  private _sourceLocations: IVec[] = ConnectorEndpointLocations;
 
   private _startPoint: IVec | null = null;
 

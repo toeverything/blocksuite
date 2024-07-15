@@ -4,12 +4,12 @@ import type { BlockModel } from '@blocksuite/store';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
-import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { GroupElementModel } from '../element-model/group.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
+import { FrameBlockModel } from '../../frame-block/frame-model.js';
 import { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import {
@@ -809,7 +809,8 @@ export class LayerManager {
     element: BlockSuite.EdgelessModelType,
     direction: ReorderingDirection
   ): string {
-    const group = element.group;
+    const group =
+      (element.group as BlockSuite.SurfaceGroupLikeModelType) || null;
     const isFrameBlock =
       (element as FrameBlockModel).flavour === 'affine:frame';
 
@@ -871,6 +872,25 @@ export class LayerManager {
           return generateKeyBetween(pre2?.index ?? null, pre.index);
         }
     }
+  }
+
+  getZIndex(element: BlockSuite.EdgelessModelType): number {
+    if (element instanceof FrameBlockModel) {
+      const lastLayer = last(this.layers);
+      const frameIndex = this.frames.indexOf(element);
+
+      return lastLayer
+        ? lastLayer.zIndex + lastLayer.elements.length + frameIndex
+        : frameIndex;
+    }
+
+    // @ts-ignore
+    const layer = this.layers.find(layer => layer.set.has(element));
+
+    if (!layer) return -1;
+
+    // @ts-ignore
+    return layer.zIndex + layer.elements.indexOf(element);
   }
 
   update(

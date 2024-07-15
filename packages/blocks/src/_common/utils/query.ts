@@ -448,7 +448,7 @@ function isImage({ tagName }: Element) {
 }
 
 function isNote({ tagName }: Element) {
-  return tagName === 'AFFINE-NOTE';
+  return tagName === 'AFFINE-NOTE' || tagName === 'AFFINE-EDGELESS-NOTE';
 }
 
 function isSurface({ tagName }: Element) {

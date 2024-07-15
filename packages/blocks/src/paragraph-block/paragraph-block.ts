@@ -152,7 +152,7 @@ export class ParagraphBlockComponent extends BlockComponent<
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {
       const el = this.closest<BlockElement>(
-        'affine-note, affine-edgeless-text'
+        'affine-note, affine-edgeless-note, affine-edgeless-text'
       );
       return el;
     }

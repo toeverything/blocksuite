@@ -19,16 +19,29 @@ import { ConnectionOverlay } from './managers/connector-manager.js';
 import { Bound } from './utils/bound.js';
 import { normalizeWheelDeltaY } from './utils/index.js';
 
-export type IndexedCanvasUpdateEvent = CustomEvent<{
-  content: HTMLCanvasElement[];
-}>;
-
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockElement<
   SurfaceBlockModel,
   SurfaceBlockService
 > {
   private _cachedViewport = new Bound();
+
+  private _initCanvasTransform = () => {
+    const refresh = () => {
+      this._surfaceContainer.style.setProperty(
+        '--canvas-transform',
+        this._getReversedTransform()
+      );
+    };
+
+    this._disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
+        refresh();
+      })
+    );
+
+    refresh();
+  };
 
   private _initThemeObserver = () => {
     this.themeObserver.observe(document.documentElement);
@@ -48,17 +61,20 @@ export class SurfaceBlockComponent extends BlockElement<
 
   static override styles = css`
     .affine-edgeless-surface-block-container {
-      position: absolute;
       width: 100%;
       height: 100%;
     }
 
     .affine-edgeless-surface-block-container canvas {
+      left: 0;
+      top: 0;
       width: 100%;
       height: 100%;
-      position: relative;
+      position: absolute;
       z-index: 1;
       pointer-events: none;
+      transform-origin: 0 0;
+      transform: var(--canvas-transform);
     }
 
     edgeless-block-portal-container {
@@ -112,14 +128,10 @@ export class SurfaceBlockComponent extends BlockElement<
 
   readonly themeObserver = new ThemeObserver();
 
-  private _emitStackingCanvasUpdate() {
-    const evt = new CustomEvent('indexedcanvasupdate', {
-      detail: {
-        content: this._renderer.stackingCanvas,
-      },
-    }) as IndexedCanvasUpdateEvent;
+  private _getReversedTransform() {
+    const { translateX, translateY, zoom } = this.edgeless.service.viewport;
 
-    this.dispatchEvent(evt);
+    return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
   }
 
   private _initOverlay() {
@@ -137,6 +149,7 @@ export class SurfaceBlockComponent extends BlockElement<
     const service = this.edgeless.service!;
 
     this._renderer = new Renderer({
+      viewport: service.viewport,
       layerManager: service.layer,
       enableStackingCanvas: true,
       provider: {
@@ -146,10 +159,6 @@ export class SurfaceBlockComponent extends BlockElement<
       },
       onStackingCanvasCreated(canvas) {
         canvas.className = 'indexable-canvas';
-
-        canvas.style.setProperty('transform-origin', '0 0');
-        canvas.style.setProperty('position', 'absolute');
-        canvas.style.setProperty('pointer-events', 'none');
       },
     });
 
@@ -170,18 +179,20 @@ export class SurfaceBlockComponent extends BlockElement<
         this._renderer.refresh();
       })
     );
-    this._disposables.add(this._renderer.sync(this.edgeless.service.viewport));
     this._disposables.add(() => {
       this._renderer.dispose();
     });
     this._disposables.add(
-      this._renderer.stackingCanvasUpdated.on(() => {
-        this._emitStackingCanvasUpdate();
-      })
-    );
-    this._disposables.add(
-      this.std.event.slots.editorHostPanned.on(() => {
-        this._renderer.onResize();
+      this._renderer.stackingCanvasUpdated.on(payload => {
+        if (payload.added.length) {
+          this._surfaceContainer.append(...payload.added);
+        }
+
+        if (payload.removed.length) {
+          payload.removed.forEach(canvas => {
+            canvas.remove();
+          });
+        }
       })
     );
   }
@@ -206,6 +217,8 @@ export class SurfaceBlockComponent extends BlockElement<
     if (!this._isEdgeless) return;
 
     this._renderer.attach(this._surfaceContainer);
+    this._surfaceContainer.append(...this._renderer.stackingCanvas);
+    this._initCanvasTransform();
   }
 
   fitToViewport(bound: Bound) {
@@ -223,19 +236,21 @@ export class SurfaceBlockComponent extends BlockElement<
 
   /** @internal Only for testing */
   initDefaultGestureHandler() {
-    const { _renderer } = this;
+    const { _renderer, edgeless } = this;
+    const { viewport } = edgeless.service;
+
     _renderer.canvas.addEventListener('wheel', e => {
       e.preventDefault();
       // pan
       if (!e.ctrlKey) {
-        const dx = e.deltaX / _renderer.zoom;
-        const dy = e.deltaY / _renderer.zoom;
-        _renderer.setCenter(_renderer.centerX + dx, _renderer.centerY + dy);
+        const dx = e.deltaX / viewport.zoom;
+        const dy = e.deltaY / viewport.zoom;
+        viewport.setCenter(viewport.centerX + dx, viewport.centerY + dy);
       }
       // zoom
       else {
         const zoom = normalizeWheelDeltaY(e.deltaY);
-        _renderer.setZoom(zoom);
+        viewport.setZoom(zoom);
       }
     });
   }

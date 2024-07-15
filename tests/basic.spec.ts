@@ -408,11 +408,11 @@ test('when no note block, click editing area auto add a new note block', async (
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await page.locator('affine-note').click({ force: true });
+  await page.locator('affine-edgeless-note').click({ force: true });
   await pressBackspace(page);
   await switchEditorMode(page);
   let note = await page.evaluate(() => {
-    return document.querySelector('affine-note');
+    return document.querySelector('affine-edgeless-note');
   });
   expect(note).toBeNull();
   await click(page, { x: 200, y: 280 });

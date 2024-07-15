@@ -3,12 +3,11 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
 import type { IPoint } from '../../../../_common/utils/index.js';
-import type { IVec2 } from '../../../../surface-block/utils/vec.js';
+import type { IVec } from '../../../../surface-block/utils/vec.js';
 
 import { buildPath } from '../../../../_common/utils/index.js';
 import {
   Bound,
-  type IVec,
   Overlay,
   getStroke,
   getSvgPathFromStroke,
@@ -77,9 +76,9 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
 
   private _overlay = new EraserOverlay();
 
-  private _prevEraserPoint: IVec = [];
+  private _prevEraserPoint: IVec = [0, 0];
 
-  private _prevPoint: IVec = [];
+  private _prevPoint: IVec = [0, 0];
 
   private _timer = 0;
 
@@ -156,8 +155,8 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       } else {
         if (
           erasable.intersectWithLine(
-            this._prevPoint as IVec2,
-            currentPoint as IVec2
+            this._prevPoint as IVec,
+            currentPoint as IVec
           )
         ) {
           this._eraseTargets.add(erasable);

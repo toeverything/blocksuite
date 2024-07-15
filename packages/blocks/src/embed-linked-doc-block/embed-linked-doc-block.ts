@@ -61,13 +61,16 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       bound.w = EMBED_CARD_WIDTH[style];
       bound.h = EMBED_CARD_HEIGHT[style];
 
-      const edgeless = this.edgeless;
-      assertExists(edgeless);
+      const edgelessService = this.rootService;
 
-      const newId = edgeless.service.addBlock(
+      if (!edgelessService) {
+        return;
+      }
+
+      const newId = edgelessService.addBlock(
         'affine:embed-synced-doc',
         { pageId, xywh: bound.serialize(), caption },
-        edgeless.surface.model
+        edgelessService.surface
       );
 
       this.std.command.exec('reassociateConnectors', {
@@ -75,7 +78,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
         newId,
       });
 
-      edgeless.service.selection.set({
+      edgelessService.selection.set({
         editing: false,
         elements: [newId],
       });
@@ -285,9 +288,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     });
 
     if (this.isInSurface) {
-      const surface = this.surface;
-      assertExists(surface);
-
       this.disposables.add(
         this.model.propsUpdated.on(() => {
           this.requestUpdate();

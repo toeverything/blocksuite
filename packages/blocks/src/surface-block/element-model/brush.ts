@@ -1,4 +1,4 @@
-import type { IVec2 } from '../utils/vec.js';
+import type { IVec, IVec3 } from '../utils/vec.js';
 import type { SerializedXYWH } from '../utils/xywh.js';
 
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
@@ -45,16 +45,16 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
     return points.some(point => bounds.containsPoint(point));
   }
 
-  override getNearestPoint(point: IVec2): IVec2 {
+  override getNearestPoint(point: IVec): IVec {
     const { x, y } = this;
 
     return polyLineNearestPoint(
       this.points.map(p => Vec.add(p, [x, y])),
       point
-    ) as IVec2;
+    ) as IVec;
   }
 
-  override getRelativePointLocation(position: IVec2): PointLocation {
+  override getRelativePointLocation(position: IVec): PointLocation {
     const point = Bound.deserialize(this.xywh).getRelativePoint(position);
     return new PointLocation(point);
   }
@@ -70,7 +70,7 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
     return hit;
   }
 
-  override intersectWithLine(start: IVec2, end: IVec2) {
+  override intersectWithLine(start: IVec, end: IVec) {
     const tl = [this.x, this.y];
     const points = getPointsFromBoundsWithRotation(this, _ =>
       this.points.map(point => Vec.add(point, tl))
@@ -155,7 +155,7 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   @watch((_, instance: BrushElementModel) => {
     instance['_local'].delete('commands');
   })
-  @derive((points: number[][], instance: BrushElementModel) => {
+  @derive((points: IVec[], instance: BrushElementModel) => {
     const lineWidth = instance.lineWidth;
     const bound = getBoundFromPoints(points);
     const boundWidthLineWidth = inflateBound(bound, lineWidth);
@@ -164,9 +164,9 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
       xywh: boundWidthLineWidth.serialize(),
     };
   })
-  @convert((points: number[][], instance: BrushElementModel) => {
+  @convert((points: (IVec | IVec3)[], instance: BrushElementModel) => {
     const lineWidth = instance.lineWidth;
-    const bound = getBoundFromPoints(points);
+    const bound = getBoundFromPoints(points as IVec[]);
     const boundWidthLineWidth = inflateBound(bound, lineWidth);
     const relativePoints = points.map(([x, y, pressure]) => [
       x - boundWidthLineWidth.x,
@@ -177,7 +177,7 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
     return relativePoints;
   })
   @yfield()
-  accessor points: number[][] = [];
+  accessor points: (IVec | IVec3)[] = [];
 
   @yfield(0)
   accessor rotate: number = 0;
