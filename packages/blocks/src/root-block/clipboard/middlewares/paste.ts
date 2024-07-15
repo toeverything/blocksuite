@@ -226,13 +226,13 @@ class PasteTr {
 
     for (const blockSnapshot of this.snapshot.content) {
       if (blockSnapshot.props.text) {
-        const delta = await this._transformLinkDelta(
+        const [delta, transformed] = await this._transformLinkDelta(
           this._textFromSnapshot(blockSnapshot).delta,
           linkToDocId,
           quickSearchService
         );
         const model = this.std.doc.getBlockById(blockSnapshot.id);
-        if (model) {
+        if (transformed && model) {
           this.std.doc.captureSync();
           this.std.doc.transact(() => {
             const text = model.text as Text;
@@ -247,11 +247,14 @@ class PasteTr {
     if (!fromPointStateText) {
       return;
     }
-    const delta = await this._transformLinkDelta(
+    const [delta, transformed] = await this._transformLinkDelta(
       fromPointStateText.toDelta(),
       linkToDocId,
       quickSearchService
     );
+    if (!transformed) {
+      return;
+    }
     this.std.doc.captureSync();
     this.std.doc.transact(() => {
       fromPointStateText.clear();
@@ -406,7 +409,8 @@ class PasteTr {
     delta: DeltaOperation[],
     linkToDocId: Map<string, string | null>,
     quickSearchService: QuickSearchService
-  ) {
+  ): Promise<[DeltaOperation[], boolean]> {
+    let transformed = false;
     const needToConvert = new Map<DeltaOperation, string>();
     for (const op of delta) {
       if (op.attributes?.link) {
@@ -440,6 +444,7 @@ class PasteTr {
             type: 'doc',
             other: 'existing doc',
           });
+        transformed = true;
         return {
           ...op,
           attributes: {
@@ -455,7 +460,7 @@ class PasteTr {
         ...op,
       };
     });
-    return newDelta;
+    return [newDelta, transformed];
   }
 
   merge() {
