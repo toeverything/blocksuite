@@ -11,12 +11,7 @@ import {
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  AffineEditorContainer,
-  CommentPanel,
-  CopilotPanel,
-  affineFormatBarItemConfig,
-} from '@blocksuite/presets';
+import { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
 
 import { CustomChatPanel } from '../../_common/components/custom-chat-panel.js';
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
@@ -41,11 +36,6 @@ function setDocModeFromUrlParams(service: DocModeService) {
 
 function configureFormatBar(formatBar: AffineFormatBarWidget) {
   toolbarDefaultConfig(formatBar);
-
-  formatBar.addRawConfigItems(
-    [affineFormatBarItemConfig, { type: 'divider' }],
-    0
-  );
 }
 
 export async function mountDefaultDocEditor(collection: DocCollection) {
@@ -102,9 +92,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const framePanel = new CustomFramePanel();
   framePanel.editor = editor;
 
-  const copilotPanelPanel = new CopilotPanel();
-  copilotPanelPanel.editor = editor;
-
   const sidePanel = new SidePanel();
 
   const leftSidePanel = new LeftSidePanel();
@@ -123,7 +110,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   debugMenu.editor = editor;
   debugMenu.outlinePanel = outlinePanel;
   debugMenu.framePanel = framePanel;
-  debugMenu.copilotPanel = copilotPanelPanel;
   debugMenu.sidePanel = sidePanel;
   debugMenu.leftSidePanel = leftSidePanel;
   debugMenu.docsPanel = docsPanel;

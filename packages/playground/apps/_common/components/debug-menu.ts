@@ -1,17 +1,12 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { DeltaInsert } from '@blocksuite/inline/types';
-import type {
-  AffineEditorContainer,
-  CommentPanel,
-  CopilotPanel,
-} from '@blocksuite/presets';
+import type { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import type { Pane } from 'tweakpane';
 
 import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
 import {
   type AffineTextAttributes,
-  BlocksUtils,
   ColorVariables,
   FontFamilyVariables,
   HtmlTransformer,
@@ -21,20 +16,13 @@ import {
   SizeVariables,
   StyleVariables,
   type SurfaceBlockComponent,
-  type TreeNode,
   ZipTransformer,
   defaultImageProxyMiddleware,
   extractCssVariables,
   openFileOrFiles,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  type BlockModel,
-  type DocCollection,
-  Job,
-  Text,
-  Utils,
-} from '@blocksuite/store';
+import { type DocCollection, Job, Text, Utils } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
@@ -62,7 +50,6 @@ import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 import type { SidePanel } from './side-panel.js';
 
-import { getEdgelessService } from '../../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
 import './left-side-panel.js';
 import './side-panel.js';
 
@@ -207,51 +194,6 @@ export class DebugMenu extends ShadowlessElement {
 
     const noteId = this.doc.addBlock('affine:note', { xywh }, rootId);
     this.doc.addBlock('affine:paragraph', {}, noteId);
-  }
-
-  private _createMindMap() {
-    const [_, ctx] = this.command
-      .chain()
-      .getSelectedBlocks({
-        types: ['block'],
-      })
-      .run();
-    const blocks = ctx.selectedBlocks;
-    if (!blocks) return;
-
-    const toTreeNode = (block: BlockModel): TreeNode => {
-      return {
-        text: block.text?.toString() ?? '',
-        children: block.children.map(toTreeNode),
-      };
-    };
-    const texts: BlockModel[] = [];
-    const others: BlockModel[] = [];
-    blocks.forEach(v => {
-      if (v.model.flavour === 'affine:paragraph') {
-        texts.push(v.model);
-      } else {
-        others.push(v.model);
-      }
-    });
-    let node: TreeNode;
-    if (texts.length === 1) {
-      node = {
-        text: texts[0].text?.toString() ?? '',
-        children: others.map(v => toTreeNode(v)),
-      };
-    } else if (blocks.length === 1) {
-      node = toTreeNode(blocks[0].model);
-    } else {
-      node = {
-        text: 'Root',
-        children: blocks.map(v => toTreeNode(v.model)),
-      };
-    }
-    BlocksUtils.mindMap.drawInEdgeless(
-      getEdgelessService(this.editor.host),
-      node
-    );
   }
 
   private _exportHtml() {
@@ -413,10 +355,6 @@ export class DebugMenu extends ShadowlessElement {
 
   private _toggleCommentPanel() {
     document.body.append(this.commentPanel);
-  }
-
-  private _toggleCopilotPanel() {
-    this.sidePanel.toggle(this.copilotPanel);
   }
 
   private _toggleDarkMode() {
@@ -630,9 +568,6 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._toggleChatPanel}">
                 Toggle Chat Panel
               </sl-menu-item>
-              <sl-menu-item @click="${this._createMindMap}">
-                Create Mind Map
-              </sl-menu-item>
               <sl-menu-item @click="${this._toggleCommentPanel}">
                 Toggle Comment Panel
               </sl-menu-item>
@@ -643,16 +578,6 @@ export class DebugMenu extends ShadowlessElement {
           <sl-tooltip content="Switch Editor" placement="bottom" hoist>
             <sl-button size="small" @click="${this._switchEditorMode}">
               <sl-icon name="repeat"></sl-icon>
-            </sl-button>
-          </sl-tooltip>
-
-          <sl-tooltip
-            content="🚧 Toggle Copilot Panel"
-            placement="bottom"
-            hoist
-          >
-            <sl-button size="small" @click="${this._toggleCopilotPanel}">
-              <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
@@ -750,9 +675,6 @@ export class DebugMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   accessor commentPanel!: CommentPanel;
-
-  @property({ attribute: false })
-  accessor copilotPanel!: CopilotPanel;
 
   @property({ attribute: false })
   accessor docsPanel!: DocsPanel;
