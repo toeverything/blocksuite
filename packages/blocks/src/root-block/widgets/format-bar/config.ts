@@ -446,7 +446,9 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
         </editor-icon-button>
       `}
     >
-      <div slot data-orientation="vertical">${renderActions(actions)}</div>
+      <div slot data-size="large" data-orientation="vertical">
+        ${renderActions(actions)}
+      </div>
     </editor-menu-button>
   `;
 }

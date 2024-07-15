@@ -128,7 +128,8 @@ export const linkPopupStyle = css`
   .affine-link-preview {
     display: flex;
     justify-content: flex-start;
-    width: 140px;
+    min-width: 60px;
+    max-width: 140px;
     padding: var(--1, 0px);
     border-radius: var(--1, 0px);
     opacity: var(--add, 1);

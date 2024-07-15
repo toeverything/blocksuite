@@ -123,7 +123,7 @@ export class EditorMenuContent extends LitElement {
       min-height: 36px;
     }
 
-    ::slotted([slot]) {
+    ::slotted([slot][data-size]) {
       min-width: 146px;
     }
 
@@ -132,7 +132,7 @@ export class EditorMenuContent extends LitElement {
     }
 
     ::slotted([slot][data-size='large']) {
-      min-width: 184px;
+      min-width: 176px;
     }
 
     ::slotted([slot][data-orientation='vertical']) {

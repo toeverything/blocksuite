@@ -80,7 +80,7 @@ export class AffineImageToolbar extends LitElement {
             '--packed-height': '4px',
           })}
         >
-          <div slot data-size="small" data-orientation="vertical">
+          <div slot data-size="large" data-orientation="vertical">
             ${MoreMenuRenderer(
               this.blockElement,
               this._popMenuAbortController,

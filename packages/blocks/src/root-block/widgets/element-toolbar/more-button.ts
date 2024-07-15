@@ -475,7 +475,12 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot class="more-actions-container" data-orientation="vertical">
+        <div
+          slot
+          class="more-actions-container"
+          data-size="large"
+          data-orientation="vertical"
+        >
           ${actions}
         </div>
       </editor-menu-button>
