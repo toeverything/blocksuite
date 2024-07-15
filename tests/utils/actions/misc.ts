@@ -930,26 +930,6 @@ export async function pasteContent(
   await waitNextFrame(page);
 }
 
-export async function pasteBlocks(page: Page, json: unknown) {
-  const createHTMLStringForCustomData = (data: string, type: string) => {
-    return `<blocksuite style="display: none" data-type="${type}" data-clipboard="${data.replace(
-      /"/g,
-      '&quot;'
-    )}"></blocksuite>`;
-  };
-  const stringifiesData = JSON.stringify(json);
-
-  const customClipboardFragment = createHTMLStringForCustomData(
-    stringifiesData,
-    'blocksuite/page'
-  );
-
-  await pasteContent(page, {
-    'text/html': customClipboardFragment,
-    'blocksuite/page': stringifiesData,
-  });
-}
-
 export async function getClipboardHTML(page: Page) {
   const dataInClipboard = await page.evaluate(async () => {
     function format(node: HTMLElement, level: number) {
@@ -1381,19 +1361,6 @@ export async function getCurrentThemeCSSPropertyValue(
         .themeObserver.cssVariables?.[property];
     }, property);
   return value;
-}
-
-// FIXME(mirone): remove this function
-export async function getCopyClipItemsInPage(page: Page) {
-  const clipItems = await page.evaluate(() => {
-    return (
-      document
-        .getElementsByTagName('affine-page-root')[0]
-        // @ts-ignore
-        .clipboard['_copyBlocksInPage']()
-    );
-  });
-  return clipItems;
 }
 
 export async function scrollToTop(page: Page) {

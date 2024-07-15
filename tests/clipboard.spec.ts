@@ -18,12 +18,12 @@ import {
   getClipboardHTML,
   getClipboardSnapshot,
   getClipboardText,
-  getCopyClipItemsInPage,
   getCurrentEditorDocId,
   getEdgelessSelectedRectModel,
   getEditorLocator,
   getInlineSelectionIndex,
   getInlineSelectionText,
+  getPageSnapshot,
   getRichTextBoundingBox,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseWithParagraphState,
@@ -31,7 +31,6 @@ import {
   initEmptyParagraphState,
   initThreeParagraphs,
   mockQuickSearch,
-  pasteBlocks,
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
@@ -60,7 +59,6 @@ import {
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
-  assertClipData,
   assertClipItems,
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRectModel,
@@ -430,23 +428,18 @@ test(scoped`copy & paste outside editor`, async ({ page }) => {
   await assertRichTexts(page, ['123']);
 });
 
-test.skip('should keep first line format when pasted into a new line', async ({
+test('should keep first line format when pasted into a new line', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  const pasteBlocksContent = [
-    {
-      flavour: 'affine:list',
-      type: 'todo',
-      text: [{ insert: 'aaa' }],
-      children: [],
-    },
-  ];
+  const clipData = `
+- [ ] aaa
+`;
 
-  await pasteBlocks(page, pasteBlocksContent);
+  await pasteContent(page, { 'text/plain': clipData });
   await waitNextFrame(page);
   await assertRichTexts(page, ['aaa']);
   await assertBlockTypes(page, ['todo']);
@@ -774,9 +767,9 @@ test(
   }
 );
 
-test.skip('cut will delete all content, and copy will reappear content', async ({
+test('cut will delete all content, and copy will reappear content', async ({
   page,
-}) => {
+}, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -802,114 +795,16 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 
   await cutByKeyboard(page);
   await waitNextFrame(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:list
-      prop:checked={false}
-      prop:collapsed={false}
-      prop:type="bulleted"
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_after-cut.json`
   );
   await waitNextFrame(page);
   await focusRichText(page);
 
-  const pesteBlocksContent = [
-    {
-      flavour: 'affine:list',
-      type: 'bulleted',
-      text: [{ insert: '1' }],
-      children: [
-        {
-          flavour: 'affine:list',
-          type: 'bulleted',
-          text: [{ insert: '2' }],
-          children: [],
-        },
-        {
-          flavour: 'affine:list',
-          type: 'bulleted',
-          text: [{ insert: '3' }],
-          children: [],
-        },
-      ],
-    },
-    {
-      flavour: 'affine:list',
-      type: 'bulleted',
-      text: [{ insert: '4' }],
-      children: [],
-    },
-  ];
-
-  await pasteBlocks(page, pesteBlocksContent);
+  await pasteByKeyboard(page);
   await waitNextFrame(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:list
-      prop:checked={false}
-      prop:collapsed={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:collapsed={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:collapsed={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-    <affine:list
-      prop:checked={false}
-      prop:collapsed={false}
-      prop:text="4"
-      prop:type="bulleted"
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_after-paste.json`
   );
 });
 
@@ -1375,7 +1270,7 @@ test(scoped`clipboard copy multi selection`, async ({ page }) => {
   await assertRichTexts(page, ['abc', 'defbc', 'dcursor']);
 });
 
-test.skip(scoped`clipboard copy nested items`, async ({ page }) => {
+test(scoped`clipboard copy nested items`, async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -1393,77 +1288,27 @@ test.skip(scoped`clipboard copy nested items`, async ({ page }) => {
   await type(page, 'jkl');
   await setSelection(page, 2, 1, 3, 1);
   await waitNextFrame(page);
-  const clipItems = await getCopyClipItemsInPage(page);
+  await copyByKeyboard(page);
 
-  const blockJson = [
-    {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: [{ insert: 'bc' }],
-      children: [
-        {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [{ insert: 'd' }],
-          children: [],
-        },
-      ],
-    },
-  ];
-  const htmlText =
-    `<p>bc</p><div style="padding-left: 26px"><p>d</p></div>` +
-    `<blocksuite style="display: none" data-type="blocksuite/page" data-clipboard="${JSON.stringify(
-      blockJson
-    ).replace(/"/g, '&quot;')}"></blocksuite>`;
-  const expectClipItems = [
-    { mimeType: 'text/plain', data: 'bcd' },
-    {
-      mimeType: 'text/html',
-      data: htmlText,
-    },
-    {
-      mimeType: 'blocksuite/page',
-      data: JSON.stringify(blockJson),
-    },
-  ];
-  assertClipData(clipItems, expectClipItems, 'text/plain');
-  assertClipData(clipItems, expectClipItems, 'text/html');
-  assertClipData(clipItems, expectClipItems, 'blocksuite/page');
+  const text = await getClipboardText(page);
+  const html = await getClipboardHTML(page);
+  const snapshot = await getClipboardSnapshot(page);
+  expect(text).toMatchSnapshot(`${testInfo.title}-clipboard.md`);
+  expect(JSON.stringify(snapshot.snapshot.content, null, 2)).toMatchSnapshot(
+    `${testInfo.title}-clipboard.json`
+  );
+  expect(html).toMatchSnapshot(`${testInfo.title}-clipboard.html`);
 
   await setSelection(page, 4, 1, 5, 1);
   await waitNextFrame(page);
-  const clipItems2 = await getCopyClipItemsInPage(page);
-  const blockJson2 = [
-    {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: [{ insert: 'hi' }],
-      children: [],
-    },
-    {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: [{ insert: 'j' }],
-      children: [],
-    },
-  ];
-  const htmlText2 =
-    `<p>hi</p><p>j</p>` +
-    `<blocksuite style="display: none" data-type="blocksuite/page" data-clipboard="${JSON.stringify(
-      blockJson2
-    ).replace(/"/g, '&quot;')}"></blocksuite>`;
-  const expectClipItems2 = [
-    { mimeType: 'text/plain', data: 'hi\nj' },
-    {
-      mimeType: 'text/html',
-      data: htmlText2,
-    },
-    {
-      mimeType: 'blocksuite/page',
-      data: JSON.stringify(blockJson2),
-    },
-  ];
-  assertClipData(clipItems2, expectClipItems2, 'text/plain');
-  assertClipData(clipItems2, expectClipItems2, 'text/html');
-  assertClipData(clipItems2, expectClipItems2, 'blocksuite/page');
+  await copyByKeyboard(page);
+
+  const text2 = await getClipboardText(page);
+  const html2 = await getClipboardHTML(page);
+  const snapshot2 = await getClipboardSnapshot(page);
+  expect(text2).toMatchSnapshot(`${testInfo.title}-clipboard2.md`);
+  expect(JSON.stringify(snapshot2.snapshot.content, null, 2)).toMatchSnapshot(
+    `${testInfo.title}-clipboard2.json`
+  );
+  expect(html2).toMatchSnapshot(`${testInfo.title}-clipboard2.html`);
 });
