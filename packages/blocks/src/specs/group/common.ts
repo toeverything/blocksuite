@@ -13,7 +13,10 @@ import { EmbedSyncedDocBlockSpec } from '../../embed-synced-doc-block/embed-sync
 import { EmbedYoutubeBlockSpec } from '../../embed-youtube-block/index.js';
 import { ImageBlockSpec } from '../../image-block/image-spec.js';
 import { ListBlockSpec } from '../../list-block/list-spec.js';
-import { NoteBlockSpec } from '../../note-block/note-spec.js';
+import {
+  EdgelessNoteBlockSpec,
+  NoteBlockSpec,
+} from '../../note-block/note-spec.js';
 import { ParagraphBlockSpec } from '../../paragraph-block/paragraph-spec.js';
 
 export {
@@ -23,6 +26,7 @@ export {
   DataViewBlockSpec,
   DatabaseBlockSpec,
   DividerBlockSpec,
+  EdgelessNoteBlockSpec,
   EmbedFigmaBlockSpec,
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
