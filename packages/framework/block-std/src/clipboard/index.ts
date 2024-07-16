@@ -5,10 +5,13 @@ import type {
   JobMiddleware,
   Slice,
 } from '@blocksuite/store';
+import type { RootContentMap } from 'hast';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { Job } from '@blocksuite/store';
 import * as lz from 'lz-string';
+import rehypeParse from 'rehype-parse';
+import { unified } from 'unified';
 
 type AdapterConstructor<T extends BaseAdapter> = new (job: Job) => T;
 
@@ -19,6 +22,38 @@ type AdapterMap = Map<
     priority: number;
   }
 >;
+
+type HastUnionType<
+  K extends keyof RootContentMap,
+  V extends RootContentMap[K],
+> = V;
+
+export function onlyContainImgElement(
+  ast: HastUnionType<keyof RootContentMap, RootContentMap[keyof RootContentMap]>
+): 'yes' | 'no' | 'maybe' {
+  if (ast.type === 'element') {
+    switch (ast.tagName) {
+      case 'html':
+      case 'body':
+        return ast.children.map(onlyContainImgElement).reduce((a, b) => {
+          if (a === 'no' || b === 'no') {
+            return 'no';
+          }
+          if (a === 'maybe' && b === 'maybe') {
+            return 'maybe';
+          }
+          return 'yes';
+        }, 'maybe');
+      case 'img':
+        return 'yes';
+      case 'head':
+        return 'maybe';
+      default:
+        return 'no';
+    }
+  }
+  return 'maybe';
+}
 
 export class Clipboard {
   private _adapterMap: AdapterMap = new Map();
@@ -31,6 +66,26 @@ export class Clipboard {
         data.set(type, Array.from(clipboardData.files));
       } else {
         data.set(type, clipboardData.getData(type));
+      }
+    }
+    if (data.get('Files') && data.get('text/html')) {
+      const htmlAst = unified()
+        .use(rehypeParse)
+        .parse(data.get('text/html') as string);
+
+      const isImgOnly =
+        htmlAst.children.map(onlyContainImgElement).reduce((a, b) => {
+          if (a === 'no' || b === 'no') {
+            return 'no';
+          }
+          if (a === 'maybe' && b === 'maybe') {
+            return 'maybe';
+          }
+          return 'yes';
+        }, 'maybe') === 'yes';
+
+      if (isImgOnly) {
+        data.delete('text/html');
       }
     }
     return (type: string) => {
