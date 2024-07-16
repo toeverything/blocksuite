@@ -2,7 +2,6 @@ import { BlockElement, RangeManager } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import type { EdgelessBlockPortalContainer } from '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
 import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
@@ -11,7 +10,6 @@ import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { isInsideEdgelessEditor } from '../_common/utils/index.js';
 import { values } from '../_common/utils/iterable.js';
 import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
-import '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
 import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
 import { ConnectorElementModel } from './element-model/index.js';
@@ -279,9 +277,6 @@ export class SurfaceBlockComponent extends BlockElement<
 
   @query('.affine-edgeless-surface-block-container')
   private accessor _surfaceContainer!: HTMLElement;
-
-  @query('edgeless-block-portal-container')
-  accessor portal!: EdgelessBlockPortalContainer;
 }
 
 declare global {

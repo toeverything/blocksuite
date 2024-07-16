@@ -211,6 +211,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   private _groupToElements = new Map<string, string[]>();
 
+  protected _surfaceBlockModel = true;
+
   elementAdded = new Slot<{ id: string; local: boolean }>();
 
   elementRemoved = new Slot<{

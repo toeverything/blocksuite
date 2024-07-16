@@ -24,32 +24,21 @@ export abstract class EdgelessBlockElement<
   }
 
   getRenderingRect() {
-    const { xywh } = this.model as BlockModel<{
+    const { xywh$ } = this.model as BlockModel<{
       xywh: SerializedXYWH;
       index: string;
     }>;
 
-    if (!xywh) {
+    if (!xywh$) {
       throw new Error('Edgeless block should have at least `xywh` property.');
     }
 
-    const [x, y, w, h] = JSON.parse(xywh);
+    const [x, y, w, h] = JSON.parse(xywh$.value);
 
     return { x, y, w, h, zIndex: this.toZIndex() };
   }
 
   override renderBlock() {
-    const { xywh, index } = this.model as BlockModel<{
-      xywh: SerializedXYWH;
-      index: string;
-    }>;
-
-    if (!xywh || !index) {
-      throw new Error(
-        'Edgeless block should have at least `xywh` and `index` properties.'
-      );
-    }
-
     const { x, y, w, h, zIndex } = this.getRenderingRect();
 
     this.style.left = `${x}px`;
@@ -109,16 +98,16 @@ export function toEdgelessBlockElement<
       h: number | string;
       zIndex: string;
     } {
-      const { xywh } = this.model as BlockModel<{
+      const { xywh$ } = this.model as BlockModel<{
         xywh: SerializedXYWH;
         index: string;
       }>;
 
-      if (!xywh) {
+      if (!xywh$) {
         throw new Error('Edgeless block should have at least `xywh` property.');
       }
 
-      const [x, y, w, h] = JSON.parse(xywh);
+      const [x, y, w, h] = JSON.parse(xywh$.value);
 
       return { x, y, w, h, zIndex: this.toZIndex() };
     }

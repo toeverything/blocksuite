@@ -153,21 +153,27 @@ export class EdgelessBlockModel<
   }
 
   get group(): IEdgelessElement | null {
-    const surface = this.doc.getBlocksByFlavour('affine:surface')[0]?.model;
+    // FIXME: make surface a official supported block
+    const surface = this.doc
+      .getBlocks()
+      // @ts-ignore
+      .find(block => block['_surfaceBlockModel']);
 
     if (!surface) return null;
 
-    // FIXME: make surface a official supported block
     // @ts-ignore
     return surface.getGroup(this.id) ?? null;
   }
 
   get groups(): IEdgelessElement[] {
-    const surface = this.doc.getBlocksByFlavour('affine:surface')[0]?.model;
+    // FIXME: make surface a official supported block
+    const surface = this.doc
+      .getBlocks()
+      // @ts-ignore
+      .find(block => block['_surfaceBlockModel']);
 
     if (!surface) return [];
 
-    // FIXME: make surface a official supported block
     // @ts-ignore
     return surface.getGroups(this.id);
   }
