@@ -26,10 +26,12 @@ export type {
 } from './_common/components/index.js';
 export {
   HoverController,
+  Peekable,
   PeekableController,
   RichText,
   Tooltip,
   createLitPortal,
+  peek,
   scrollbarStyle,
   toast,
 } from './_common/components/index.js';

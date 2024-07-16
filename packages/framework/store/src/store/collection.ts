@@ -64,6 +64,7 @@ const FLAGS_PRESET = {
   enable_lasso_tool: false,
   enable_edgeless_text: true,
   enable_ai_onboarding: false,
+  enable_ai_chat_block: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

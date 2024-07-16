@@ -188,7 +188,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   private _embedOptions: EmbedOptions | null = null;
 
   private _getScale = () => {
-    if (isEmbedSyncedDocBlock(this.model)) {
+    if ('scale' in this.model) {
       return this.model.scale ?? 1;
     } else if (isEmbedHtmlBlock(this.model)) {
       return 1;
@@ -460,7 +460,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     if (isEmbedHtmlBlock(this.model)) return;
 
     const bound = Bound.deserialize(this.model.xywh);
-    if (isEmbedSyncedDocBlock(this.model)) {
+    if ('scale' in this.model) {
       const oldScale = this.model.scale ?? 1;
       const ratio = scale / oldScale;
       bound.w *= ratio;
@@ -635,17 +635,19 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           `
         : nothing,
 
-      html`
-        <editor-icon-button
-          arai-label="Add caption"
-          .tooltip=${'Add caption'}
-          class="change-embed-card-button caption"
-          ?disabled=${this._doc.readonly}
-          @click=${this._showCaption}
-        >
-          ${CaptionIcon}
-        </editor-icon-button>
-      `,
+      'caption' in model
+        ? html`
+            <editor-icon-button
+              arai-label="Add caption"
+              .tooltip=${'Add caption'}
+              class="change-embed-card-button caption"
+              ?disabled=${this._doc.readonly}
+              @click=${this._showCaption}
+            >
+              ${CaptionIcon}
+            </editor-icon-button>
+          `
+        : nothing,
 
       this.quickConnectButton,
 

@@ -10,5 +10,6 @@ declare type BlockSuiteFlags = {
   enable_lasso_tool: boolean;
   enable_edgeless_text: boolean;
   enable_ai_onboarding: boolean;
+  enable_ai_chat_block: boolean;
   readonly: Record<string, boolean>;
 };

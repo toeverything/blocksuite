@@ -580,6 +580,9 @@ importers:
       openai:
         specifier: ^4.47.2
         version: 4.47.2
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
 
 packages:
 
