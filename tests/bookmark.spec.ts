@@ -7,6 +7,7 @@ import {
   SHORT_KEY,
   activeNoteInEdgeless,
   copyByKeyboard,
+  dragBlockToPoint,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
@@ -33,6 +34,7 @@ import {
   assertBlockFlavour,
   assertBlockSelections,
   assertExists,
+  assertParentBlockFlavour,
   assertRichTextInlineRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
@@ -645,4 +647,26 @@ test('indent bookmark block to list', async ({ page }) => {
 
   await pressShiftTab(page);
   await assertBlockChildrenIds(page, '1', ['3', '5']);
+});
+
+test('bookmark can be dragged from note to surface top level block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await page.waitForTimeout(100);
+  await type(page, '/link', 100);
+  await pressEnter(page);
+  await page.waitForTimeout(100);
+  await type(page, inputUrl);
+  await pressEnter(page);
+
+  await switchEditorMode(page);
+  await page.mouse.dblclick(450, 450);
+
+  await dragBlockToPoint(page, '4', { x: 200, y: 200 });
+
+  await waitNextFrame(page);
+  await assertParentBlockFlavour(page, '5', 'affine:surface');
 });

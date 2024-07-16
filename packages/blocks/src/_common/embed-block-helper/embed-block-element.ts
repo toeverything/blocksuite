@@ -2,13 +2,12 @@ import type { BlockService } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessRootService } from '../../root-block/index.js';
+import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
 
@@ -26,6 +25,7 @@ import { BlockComponent } from '../components/block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
 import {
   type EmbedCardStyle,
+  Point,
   getThemeMode,
   matchFlavours,
 } from '../utils/index.js';
@@ -71,20 +71,19 @@ export class EmbedBlockElement<
         startDragging([blockComponent], state);
         return true;
       } else if (isInSurface && isDraggingByDragHandle) {
-        const embedPortal = blockComponent.closest(
-          '.edgeless-block-portal-embed'
-        );
-        assertExists(embedPortal);
-        const dragPreviewEl = embedPortal.cloneNode() as HTMLElement;
-        dragPreviewEl.style.transform = '';
-        dragPreviewEl.style.left = '0';
-        dragPreviewEl.style.top = '0';
+        const edgelessService = editorHost.std.spec.getService(
+          'affine:page'
+        ) as EdgelessRootService;
+        const zoom = edgelessService?.viewport.zoom ?? 1;
+        const dragPreviewEl = document.createElement('div');
+        const bound = Bound.deserialize(blockComponent.model.xywh);
+        const offset = new Point(bound.x * zoom, bound.y * zoom);
         render(
           blockComponent.host.renderModel(blockComponent.model),
           dragPreviewEl
         );
 
-        startDragging([blockComponent], state, dragPreviewEl);
+        startDragging([blockComponent], state, dragPreviewEl, offset);
         return true;
       }
       return false;
@@ -103,8 +102,7 @@ export class EmbedBlockElement<
       const isInSurface = blockComponent.isInSurface;
       const target = captureEventTarget(state.raw.target);
       const isTargetEdgelessContainer =
-        target?.classList.contains('edgeless') &&
-        target?.classList.contains('affine-block-children-container');
+        target?.classList.contains('edgeless-container');
 
       if (isInSurface) {
         const style = blockComponent._cardStyle;

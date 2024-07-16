@@ -460,6 +460,36 @@ export async function assertBlockChildrenFlavours(
   expect(actual).toEqual(flavours);
 }
 
+export async function assertParentBlockId(
+  page: Page,
+  blockId: string,
+  parentId: string
+) {
+  const actual = await page.evaluate(
+    ({ blockId }) => {
+      const model = window.doc?.getBlock(blockId).model;
+      return model.doc.getParent(model)?.id;
+    },
+    { blockId }
+  );
+  expect(actual).toEqual(parentId);
+}
+
+export async function assertParentBlockFlavour(
+  page: Page,
+  blockId: string,
+  flavour: string
+) {
+  const actual = await page.evaluate(
+    ({ blockId }) => {
+      const model = window.doc?.getBlock(blockId).model;
+      return model.doc.getParent(model)?.flavour;
+    },
+    { blockId }
+  );
+  expect(actual).toEqual(flavour);
+}
+
 export async function assertClassName(
   page: Page,
   selector: string,

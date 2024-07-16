@@ -1169,7 +1169,7 @@ export async function getBlockModel<Model extends BlockModel>(
   blockId: string
 ) {
   const result: BlockModel | null | undefined = await page.evaluate(blockId => {
-    return window.doc?.getBlockById(blockId);
+    return window.doc?.getBlock(blockId).model;
   }, blockId);
   expect(result).not.toBeNull();
   return result as Model;

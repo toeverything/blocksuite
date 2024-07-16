@@ -1,10 +1,11 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { BlockService } from '@blocksuite/block-std';
+import { BlockService, Bound } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
 import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import type { RootBlockComponent } from '../root-block/types.js';
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import type { ImageBlockComponent } from './image-block.js';
@@ -14,11 +15,9 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { setImageProxyMiddlewareURL } from '../_common/transformers/middlewares.js';
+import { Point } from '../_common/utils/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
-import {
-  getEdgelessRootByElement,
-  isInsideEdgelessEditor,
-} from '../_common/utils/query.js';
+import { isInsideEdgelessEditor } from '../_common/utils/query.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -65,13 +64,16 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
         startDragging([blockComponent], state);
         return true;
       } else if (isInSurface && isDraggingByDragHandle) {
-        const edgelessRoot = getEdgelessRootByElement(blockComponent);
-        const scale = edgelessRoot ? edgelessRoot.service.viewport.zoom : 1;
+        const edgelessService = editorHost.std.spec.getService(
+          'affine:page'
+        ) as EdgelessRootService;
+        const scale = edgelessService.viewport.zoom || 1;
         const width = blockComponent.getBoundingClientRect().width;
+        const bound = Bound.deserialize(blockComponent.model.xywh);
+        const zoom = edgelessService.viewport.zoom || 1;
+        const offset = new Point(bound.x * zoom, bound.y * zoom);
 
         const dragPreviewEl = document.createElement('div');
-        dragPreviewEl.classList.add('affine-block-element');
-        dragPreviewEl.style.border = '2px solid var(--affine-border-color)';
         dragPreviewEl.style.borderRadius = '4px';
         dragPreviewEl.style.overflow = 'hidden';
         dragPreviewEl.style.width = `${width / scale}px`;
@@ -80,7 +82,7 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
           dragPreviewEl
         );
 
-        startDragging([blockComponent], state, dragPreviewEl);
+        startDragging([blockComponent], state, dragPreviewEl, offset);
         return true;
       }
       return false;
@@ -99,8 +101,7 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
       const isInSurface = blockComponent.isInSurface;
       const target = captureEventTarget(state.raw.target);
       const isTargetEdgelessContainer =
-        target?.classList.contains('edgeless') &&
-        target?.classList.contains('affine-block-children-container');
+        target?.classList.contains('edgeless-container');
 
       if (isInSurface) {
         return convertDragPreviewEdgelessToDoc({

@@ -1,11 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { BlockService } from '@blocksuite/block-std';
+import { BlockService, Bound } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 import { render } from 'lit';
 
 import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import type { RootBlockComponent } from '../root-block/types.js';
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import type { AttachmentBlockComponent } from './attachment-block.js';
@@ -15,6 +16,7 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import { Point } from '../_common/utils/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { isInsideEdgelessEditor } from '../_common/utils/query.js';
 import {
@@ -65,20 +67,19 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
         startDragging([blockComponent], state);
         return true;
       } else if (isInSurface && isDraggingByDragHandle) {
-        const attachmentPortal = blockComponent.closest(
-          '.edgeless-block-portal-attachment'
-        );
-        assertExists(attachmentPortal);
-        const dragPreviewEl = attachmentPortal.cloneNode() as HTMLElement;
-        dragPreviewEl.style.transform = '';
-        dragPreviewEl.style.left = '0';
-        dragPreviewEl.style.top = '0';
+        const edgelessService = editorHost.std.spec.getService(
+          'affine:page'
+        ) as EdgelessRootService;
+        const zoom = edgelessService?.viewport.zoom ?? 1;
+        const dragPreviewEl = document.createElement('div');
+        const bound = Bound.deserialize(blockComponent.model.xywh);
+        const offset = new Point(bound.x * zoom, bound.y * zoom);
         render(
           blockComponent.host.renderModel(blockComponent.model),
           dragPreviewEl
         );
 
-        startDragging([blockComponent], state, dragPreviewEl);
+        startDragging([blockComponent], state, dragPreviewEl, offset);
         return true;
       }
       return false;
@@ -97,8 +98,7 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
       const isInSurface = blockComponent.isInSurface;
       const target = captureEventTarget(state.raw.target);
       const isTargetEdgelessContainer =
-        target?.classList.contains('edgeless') &&
-        target?.classList.contains('affine-block-children-container');
+        target?.classList.contains('edgeless-container');
 
       if (isInSurface) {
         const style = blockComponent.model.style;

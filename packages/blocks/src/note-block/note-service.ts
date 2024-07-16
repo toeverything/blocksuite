@@ -1,6 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 import { render } from 'lit';
 
+import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import type { EdgelessNoteBlockComponent } from './note-edgeless-block.js';
 
@@ -47,10 +48,14 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
       ) {
         return false;
       }
+      const edgelessService = editorHost.std.spec.getService(
+        'affine:page'
+      ) as EdgelessRootService;
+      const zoom = edgelessService?.viewport.zoom ?? 1;
       const noteComponent = anchorComponent as EdgelessNoteBlockComponent;
       const dragPreviewEl = document.createElement('div');
       const bound = Bound.deserialize(noteComponent.model.xywh);
-      const offset = new Point(bound.x, bound.y);
+      const offset = new Point(bound.x * zoom, bound.y * zoom);
 
       render(
         noteComponent.host.renderModel(noteComponent.model),

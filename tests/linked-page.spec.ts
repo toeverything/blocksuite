@@ -1,8 +1,9 @@
-import { expect } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
+import { switchEditorMode } from 'utils/actions/edgeless.js';
 import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';
 
 import { addNewPage, switchToPage } from './utils/actions/click.js';
-import { dragBetweenIndices } from './utils/actions/drag.js';
+import { dragBetweenIndices, dragBlockToPoint } from './utils/actions/drag.js';
 import {
   copyByKeyboard,
   pasteByKeyboard,
@@ -21,15 +22,41 @@ import {
   focusRichText,
   focusTitle,
   getPageSnapshot,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   waitNextFrame,
 } from './utils/actions/misc.js';
 import {
+  assertExists,
+  assertParentBlockFlavour,
   assertRichTexts,
   assertStoreMatchJSX,
   assertTitle,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
+
+async function createAndConvertToEmbedLinkedDoc(page: Page) {
+  const { createLinkedDoc } = getLinkedDocPopover(page);
+  const linkedDoc = await createLinkedDoc('page1');
+  const lickedDocBox = await linkedDoc.boundingBox();
+  assertExists(lickedDocBox);
+  await page.mouse.move(
+    lickedDocBox.x + lickedDocBox.width / 2,
+    lickedDocBox.y + lickedDocBox.height / 2
+  );
+
+  await waitNextFrame(page, 200);
+  const referencePopup = page.locator('.affine-reference-popover-container');
+  await expect(referencePopup).toBeVisible();
+
+  const switchButton = page.getByRole('button', { name: 'Switch view' });
+  await switchButton.click();
+
+  const embedLinkedDocBtn = page.getByRole('button', { name: 'Card view' });
+  await expect(embedLinkedDocBtn).toBeVisible();
+  await embedLinkedDocBtn.click();
+  await waitNextFrame(page, 200);
+}
 
 test.describe('multiple page', () => {
   test('should create and switch page work', async ({ page }) => {
@@ -793,4 +820,21 @@ test('add reference node before the other reference node', async ({ page }) => {
   expect(await firstRefNode.textContent()).toEqual(
     expect.stringContaining('ccc')
   );
+});
+
+test('linked doc can be dragged from note to surface top level block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await createAndConvertToEmbedLinkedDoc(page);
+
+  await switchEditorMode(page);
+  await page.mouse.dblclick(450, 450);
+
+  await dragBlockToPoint(page, '9', { x: 200, y: 200 });
+
+  await waitNextFrame(page);
+  await assertParentBlockFlavour(page, '10', 'affine:surface');
 });

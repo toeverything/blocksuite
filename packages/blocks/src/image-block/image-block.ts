@@ -131,7 +131,7 @@ export class ImageBlockComponent extends BlockComponent<
       this.style.top = `${bound.y}px`;
       this.style.width = `${bound.w}px`;
       this.style.height = `${bound.h}px`;
-      this.style.transformOrigin = `rotate(${rotate}deg)`;
+      this.style.transform = `rotate(${rotate}deg)`;
     }
 
     return html`
