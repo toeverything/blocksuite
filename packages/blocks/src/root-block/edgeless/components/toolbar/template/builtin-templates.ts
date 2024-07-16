@@ -1,13 +1,12 @@
-import type { Template, TemplateManager } from './template-type.js';
+import type {
+  Template,
+  TemplateCategory,
+  TemplateManager,
+} from './template-type.js';
 
 import { keys } from '../../../../../_common/utils/iterable.js';
 
-export const templates = [
-  {
-    name: 'Paws and pals',
-    templates: () => import('./templates/stickers.js').then(val => val.default),
-  },
-];
+export const templates: TemplateCategory[] = [];
 
 function lcs(text1: string, text2: string) {
   const dp: number[][] = Array.from(

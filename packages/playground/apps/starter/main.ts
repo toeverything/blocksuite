@@ -5,6 +5,7 @@ import * as editor from '@blocksuite/presets';
 import '@blocksuite/presets/themes/affine.css';
 import * as store from '@blocksuite/store';
 
+import { setupEdgelessTemplate } from '../_common/setup.js';
 import '../dev-format.js';
 import {
   createStarterDocCollection,
@@ -14,6 +15,8 @@ import { mountDefaultDocEditor } from './utils/editor.js';
 
 async function main() {
   if (window.collection) return;
+
+  setupEdgelessTemplate();
 
   const params = new URLSearchParams(location.search);
   const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
