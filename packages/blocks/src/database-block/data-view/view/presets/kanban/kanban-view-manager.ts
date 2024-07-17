@@ -167,6 +167,16 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     return true;
   }
 
+  override rowGetNext(rowId: string): string {
+    const index = this.rows.indexOf(rowId);
+    return this.rows[index + 1];
+  }
+
+  override rowGetPrev(rowId: string): string {
+    const index = this.rows.indexOf(rowId);
+    return this.rows[index - 1];
+  }
+
   override rowMove(rowId: string, position: InsertToPosition): void {
     this.dataSource.rowMove(rowId, position);
   }

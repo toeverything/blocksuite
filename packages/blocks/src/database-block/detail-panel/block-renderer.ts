@@ -15,6 +15,7 @@ export class BlockRenderer
 {
   static override styles = css`
     database-datasource-block-renderer {
+      padding-top: 36px;
       padding-bottom: 16px;
       display: flex;
       flex-direction: column;

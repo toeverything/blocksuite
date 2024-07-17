@@ -79,6 +79,10 @@ export interface DataViewManager {
 
   rowAdd(insertPosition: InsertToPosition): string;
 
+  rowGetPrev(rowId: string): string;
+
+  rowGetNext(rowId: string): string;
+
   columnAdd(toAfterOfColumn: InsertToPosition, type?: string): string;
 
   columnDelete(columnId: string): void;
@@ -480,6 +484,10 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
   abstract get isDeleted(): boolean;
 
   abstract isShow(rowId: string): boolean;
+
+  abstract rowGetNext(rowId: string): string;
+
+  abstract rowGetPrev(rowId: string): string;
 
   abstract get type(): string;
 
