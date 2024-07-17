@@ -35,6 +35,7 @@ export const renameStyles = css`
     border: none;
     outline: none;
     background: transparent;
+    color: var(--affine-text-primary-color);
     ${INPUT_FONT_BASE}
   }
 

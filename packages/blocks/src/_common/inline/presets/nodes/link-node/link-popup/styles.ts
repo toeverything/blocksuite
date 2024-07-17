@@ -31,6 +31,7 @@ const editLinkStyle = css`
     padding: 0;
     border: none;
     background: transparent;
+    color: var(--affine-text-primary-color);
     ${INPUT_FONT_BASE}
   }
   .affine-link-edit-popover input::placeholder {
@@ -176,6 +177,7 @@ export const linkPopupStyle = css`
     border-width: 1px;
     border-style: solid;
     border-color: transparent;
+    color: var(--affine-text-primary-color);
     ${INPUT_FONT_BASE}
   }
   .affine-link-popover-input::placeholder {

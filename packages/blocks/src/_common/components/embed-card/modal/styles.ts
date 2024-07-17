@@ -50,6 +50,7 @@ export const embedCardModalStyles = css`
     border-radius: 8px;
     border: 1px solid var(--affine-border-color);
     background: var(--affine-white-10);
+    color: var(--affine-text-primary-color);
     ${INPUT_FONT_BASE}
   }
   input.embed-card-modal-input {
