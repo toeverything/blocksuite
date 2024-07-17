@@ -25,7 +25,9 @@ import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
 
 @customElement('affine-embed-linked-doc-block')
-@Peekable()
+@Peekable({
+  enableOn: ({ doc }: EmbedLinkedDocBlockComponent) => !doc.readonly,
+})
 export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   EmbedLinkedDocModel,
   EmbedLinkedDocBlockService

@@ -9,7 +9,7 @@ import type { LitElement, TemplateResult } from 'lit';
 
 import { type Constructor, assertExists } from '@blocksuite/global/utils';
 
-export class PeekableController {
+export class PeekableController<T extends PeekableClass> {
   private getRootService = () => {
     return this.target.std.spec.getService('affine:page');
   };
@@ -21,13 +21,15 @@ export class PeekableController {
   };
 
   constructor(
-    private target: LitElement & {
-      std: BlockStdScope;
-    }
+    private target: T,
+    private enable?: (e: T) => boolean
   ) {}
 
   get peekable() {
-    return !!this.getRootService().peekViewService;
+    return (
+      !!this.getRootService().peekViewService &&
+      (this.enable ? this.enable(this.target) : true)
+    );
   }
 }
 
@@ -63,12 +65,16 @@ export interface PeekViewService {
 
 type PeekableAction = 'double-click' | 'shift-click';
 
-type PeekableOptions = {
+type PeekableOptions<T extends PeekableClass> = {
   /**
    * Action to bind to the peekable element. default to ['double-click', 'shift-click']
    * false means do not bind any action.
    */
-  action: PeekableAction | PeekableAction[] | false;
+  action?: PeekableAction | PeekableAction[] | false;
+  /**
+   * It will check the block is enable to peek or not
+   */
+  enableOn?: (block: T) => boolean;
   /**
    * Selector inside of the peekable element to bind the action
    */
@@ -77,9 +83,7 @@ type PeekableOptions = {
 
 const symbol = Symbol('peekable');
 
-type PeekableClass = Constructor<
-  { std: BlockStdScope } & DisposableClass & LitElement
->;
+type PeekableClass = { std: BlockStdScope } & DisposableClass & LitElement;
 
 export const isPeekable = <Element extends LitElement>(e: Element): boolean => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,13 +104,17 @@ export const peek = <Element extends LitElement>(
  * Note: This class must be syntactically below the `@customElement` decorator (it will be applied before customElement).
  */
 export const Peekable =
-  <C extends PeekableClass>(
-    options: PeekableOptions = {
+  <T extends PeekableClass, C extends Constructor<PeekableClass>>(
+    options: PeekableOptions<T> = {
       action: ['double-click', 'shift-click'],
     }
   ) =>
   (Class: C, context: ClassDecoratorContext) => {
     assertExists(context.kind === 'class');
+
+    if (options.action === undefined)
+      options.action = ['double-click', 'shift-click'];
+
     const actions = Array.isArray(options.action)
       ? options.action
       : options.action
@@ -114,7 +122,7 @@ export const Peekable =
         : [];
 
     const derivedClass = class extends Class {
-      [symbol]: PeekableController = new PeekableController(this);
+      [symbol] = new PeekableController(this as unknown as T, options.enableOn);
 
       override connectedCallback() {
         super.connectedCallback();

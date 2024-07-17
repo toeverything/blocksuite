@@ -36,7 +36,9 @@ import './components/embed-synced-doc-card.js';
 import { blockStyles } from './styles.js';
 
 @customElement('affine-embed-synced-doc-block')
-@Peekable()
+@Peekable({
+  enableOn: ({ doc }: EmbedSyncedDocBlockComponent) => !doc.readonly,
+})
 export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   EmbedSyncedDocModel,
   EmbedSyncedDocBlockService
