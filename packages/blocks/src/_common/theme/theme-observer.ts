@@ -54,7 +54,8 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
     this._cssVariables = extractCssVariables(element);
     this._observer = new MutationObserver(() => {
       const mode = element.dataset.theme;
-      if (this._mode !== mode) {
+      if (mode && this._mode !== mode) {
+        this._mode = mode;
         this._cssVariables = extractCssVariables(element);
         this.emit(this._cssVariables);
       }
@@ -67,5 +68,9 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
 
   get cssVariables() {
     return this._cssVariables;
+  }
+
+  get mode() {
+    return this._mode;
   }
 }
