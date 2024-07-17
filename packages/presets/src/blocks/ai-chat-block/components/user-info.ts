@@ -2,6 +2,10 @@ import { baseTheme } from '@toeverything/theme';
 import { LitElement, type TemplateResult, css, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { ChatMessage } from '../types.js';
+
+import { AffineAIIcon } from '../../_common/icon.js';
+
 @customElement('user-info')
 export class UserInfo extends LitElement {
   static override styles = css`
@@ -90,4 +94,20 @@ declare global {
   interface HTMLElementTagNameMap {
     'user-info': UserInfo;
   }
+}
+
+export function UserInfoTemplate(message: ChatMessage) {
+  const isUser = 'role' in message && message.role === 'user';
+
+  const userInfoTemplate = isUser
+    ? html`<user-info
+        .userName=${message.userName ?? 'You'}
+        .avatarUrl=${message.avatarUrl}
+      ></user-info>`
+    : html`<user-info
+        .userName=${'AFFiNE AI'}
+        .avatarIcon=${AffineAIIcon}
+      ></user-info>`;
+
+  return userInfoTemplate;
 }
