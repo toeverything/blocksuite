@@ -1,7 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
@@ -259,7 +258,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       | EmbedSyncedDocBlockComponent
       | EmbedLoomBlockComponent
       | null;
-    assertExists(blockElement);
+
+    if (!blockElement) return;
 
     return blockElement;
   }
