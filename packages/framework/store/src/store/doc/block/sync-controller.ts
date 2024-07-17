@@ -80,15 +80,6 @@ export class SyncController {
         }
       });
     });
-
-    this.yBlock.observeDeep(evtArr => {
-      const evt = evtArr[0];
-      // filter out events from itself
-      // as this event is triggered in observe function
-      if (!evt || evt.currentTarget === evt.target) return;
-
-      this.onChange?.('', undefined);
-    });
   };
 
   private readonly _stashed = new Set<string | number>();
