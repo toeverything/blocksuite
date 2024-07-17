@@ -1,6 +1,7 @@
-import { LitElement, css, html } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import { ImageLoadingFailedIcon, LoadingIcon } from '../../_common/icon.js';
 import './image-placeholder.js';
@@ -62,8 +63,42 @@ export class ChatImage extends LitElement {
   accessor status!: 'loading' | 'error' | 'success';
 }
 
+@customElement('chat-images')
+export class ChatImages extends LitElement {
+  static override styles = css`
+    .images-container {
+      display: flex;
+      width: 100%;
+      gap: 8px;
+      flex-direction: column;
+    }
+  `;
+
+  override render() {
+    if (!this.attachments || this.attachments.length === 0) {
+      return nothing;
+    }
+
+    return html`<div class="images-container">
+      ${repeat(
+        this.attachments,
+        attachment => attachment,
+        attachment =>
+          html`<chat-image
+            .imageUrl=${attachment}
+            .status=${'success'}
+          ></chat-image>`
+      )}
+    </div>`;
+  }
+
+  @property({ attribute: false })
+  accessor attachments: string[] | undefined;
+}
+
 declare global {
   interface HTMLElementTagNameMap {
     'chat-image': ChatImage;
+    'chat-images': ChatImages;
   }
 }

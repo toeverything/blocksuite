@@ -65,7 +65,7 @@ const customHeadingStyles = css`
   }
 `;
 
-type TextRendererOptions = {
+export type TextRendererOptions = {
   maxHeight?: number;
   customHeading?: boolean;
 };

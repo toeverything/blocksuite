@@ -1,7 +1,7 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
-export const styles = css`
+export const AIChatBlockStyles = css`
   .affine-ai-chat-block-container {
     display: flex;
     flex-direction: column;
@@ -17,17 +17,11 @@ export const styles = css`
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     border-radius: 8px;
 
-    .ai-chat-messages,
-    .ai-chat-message,
-    .ai-chat-block-button {
-      display: flex;
-      width: 100%;
-    }
-
-    .ai-chat-messages {
-      flex-direction: column;
+    .ai-chat-messages-container {
+      display: block;
       flex: 1 0 0;
-      gap: 24px;
+      width: 100%;
+      box-sizing: border-box;
       -webkit-mask-image: linear-gradient(
         0deg,
         rgba(255, 255, 255, 0) -10.62%,
@@ -41,25 +35,9 @@ export const styles = css`
       overflow: hidden;
     }
 
-    .ai-chat-message {
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .ai-chat-content,
-    .images-container {
+    .ai-chat-block-button {
       display: flex;
       width: 100%;
-      gap: 8px;
-      flex-direction: column;
-    }
-
-    .ai-chat-content {
-      padding-left: 34px;
-      font-weight: 400;
-    }
-
-    .ai-chat-block-button {
       height: 22px;
       flex-direction: row;
       align-items: center;

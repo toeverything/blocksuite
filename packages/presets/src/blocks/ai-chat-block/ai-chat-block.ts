@@ -1,21 +1,23 @@
 import { BlockElement } from '@blocksuite/block-std';
-import { Peekable, peek } from '@blocksuite/blocks';
+import { Peekable } from '@blocksuite/blocks';
 import { computed } from '@lit-labs/preact-signals';
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 
 import type { AIChatBlockModel } from './ai-chat-model.js';
 
-import { AffineAIIcon, ChatWithAIIcon } from '../_common/icon.js';
-import './components/chat-image.js';
-import './components/text-renderer.js';
+import { ChatWithAIIcon } from '../_common/icon.js';
+import './components/ai-chat-messages.js';
+import './components/chat-images.js';
 import './components/user-info.js';
-import { styles } from './styles.js';
-import { type ChatMessage, ChatMessagesSchema } from './types.js';
+import './components/chat-block-peek-view.js';
+import { AIChatBlockStyles } from './styles.js';
+import { ChatMessagesSchema } from './types.js';
 
 @customElement('affine-ai-chat')
-@Peekable()
+@Peekable({
+  enableOn: ({ doc }: AIChatBlockComponent) => !doc.readonly,
+})
 export class AIChatBlockComponent extends BlockElement<AIChatBlockModel> {
   // Deserialize messages from JSON string and verify the type using zod
   private _deserializeChatMessages = computed(() => {
@@ -32,44 +34,27 @@ export class AIChatBlockComponent extends BlockElement<AIChatBlockModel> {
     }
   });
 
-  private _openChatBlock = () => {
-    peek(this);
-  };
-
-  static override styles = styles;
-
-  ChatImages(attachments: string[] | undefined) {
-    if (!attachments || attachments.length === 0) {
-      return nothing;
+  private _openChatBlock = async () => {
+    if (!this._peekViewService) {
+      return;
     }
 
-    return html`<div class="images-container">
-      ${repeat(
-        attachments,
-        attachment => attachment,
-        attachment =>
-          html`<chat-image
-            .imageUrl=${attachment}
-            .status=${'success'}
-          ></chat-image>`
-      )}
-    </div>`;
+    const messages = this._deserializeChatMessages.value;
+    const peekViewTemplate = html`<ai-chat-block-peek-view
+      .messages=${messages}
+      .host=${this.host}
+    ></ai-chat-block-peek-view>`;
+    await this._peekViewService.peek(this, peekViewTemplate);
+  };
+
+  static override styles = AIChatBlockStyles;
+
+  get _peekViewService() {
+    return this._rootService.peekViewService;
   }
 
-  UserInfo(message: ChatMessage) {
-    const isUser = 'role' in message && message.role === 'user';
-
-    const userInfoTemplate = isUser
-      ? html`<user-info
-          .userName=${message.userName ?? 'You'}
-          .avatarUrl=${message.avatarUrl}
-        ></user-info>`
-      : html`<user-info
-          .userName=${'AFFiNE AI'}
-          .avatarIcon=${AffineAIIcon}
-        ></user-info>`;
-
-    return userInfoTemplate;
+  get _rootService() {
+    return this.host.std.spec.getService('affine:page');
   }
 
   override renderBlock() {
@@ -79,25 +64,13 @@ export class AIChatBlockComponent extends BlockElement<AIChatBlockModel> {
     };
 
     return html`<div class="affine-ai-chat-block-container">
-      <div class="ai-chat-messages">
-        ${repeat(
-          messages,
-          message => message.id,
-          message => html`
-            <div class="ai-chat-message">
-              ${this.UserInfo(message)}
-              <div class="ai-chat-content">
-                ${this.ChatImages(message.attachments)}
-                <text-renderer
-                  .host=${this.host}
-                  .answer=${message.content}
-                  .options=${textRendererOptions}
-                  .state=${'finished'}
-                ></text-renderer>
-              </div>
-            </div>
-          `
-        )}
+      <div class="ai-chat-messages-container">
+        <ai-chat-messages
+          .host=${this.host}
+          .messages=${messages}
+          .textRendererOptions=${textRendererOptions}
+          .withMask=${true}
+        ></ai-chat-messages>
       </div>
       <div class="ai-chat-block-button" @click=${this._openChatBlock}>
         ${ChatWithAIIcon} <span>AI chat block</span>
