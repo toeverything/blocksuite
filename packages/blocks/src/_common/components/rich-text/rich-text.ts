@@ -261,8 +261,14 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    assertExists(this._yText, 'rich-text need yText to init.');
-    assertExists(this._yText.doc, 'yText should be bind to yDoc.');
+    if (!this._yText) {
+      console.error('rich-text need yText to init.');
+      return;
+    }
+    if (!this._yText.doc) {
+      console.error('yText should be bind to yDoc.');
+      return;
+    }
 
     if (!this.undoManager) {
       this.undoManager = new DocCollection.Y.UndoManager(this._yText, {
