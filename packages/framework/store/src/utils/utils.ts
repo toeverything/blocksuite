@@ -5,7 +5,7 @@ import * as Y from 'yjs';
 
 import type { BlockModel } from '../schema/base.js';
 import type { BlockSchema } from '../schema/base.js';
-import type { YBlock } from '../store/doc/block.js';
+import type { YBlock } from '../store/doc/block/index.js';
 import type { BlockProps, YBlocks } from '../store/doc/block-collection.js';
 import type { DocCollection } from '../store/index.js';
 

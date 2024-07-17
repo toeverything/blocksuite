@@ -5,7 +5,7 @@ import { type Disposable, Slot } from '@blocksuite/global/utils';
 import { computed, signal } from '@preact/signals-core';
 import { z } from 'zod';
 
-import type { YBlock } from '../store/doc/block.js';
+import type { YBlock } from '../store/doc/block/index.js';
 import type { Doc } from '../store/index.js';
 import type { BaseBlockTransformer } from '../transformer/base.js';
 

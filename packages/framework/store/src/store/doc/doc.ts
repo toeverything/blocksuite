@@ -2,12 +2,12 @@ import { type Disposable, Slot, assertExists } from '@blocksuite/global/utils';
 import { signal } from '@preact/signals-core';
 
 import type { BlockModel, Schema } from '../../schema/index.js';
-import type { BlockOptions } from './block.js';
+import type { BlockOptions } from './block/index.js';
 import type { BlockCollection, BlockProps } from './block-collection.js';
 import type { DocCRUD } from './crud.js';
 
 import { syncBlockProps } from '../../utils/utils.js';
-import { Block } from './block.js';
+import { Block } from './block/index.js';
 
 export enum BlockViewType {
   Bypass = 'bypass',
@@ -40,7 +40,6 @@ export class Doc {
 
   protected readonly _selector: BlockSelector;
 
-  // @ts-ignore
   readonly slots: BlockCollection['slots'] & {
     /** This is always triggered after `doc.load` is called. */
     ready: Slot;
@@ -73,11 +72,6 @@ export class Doc {
           props: { key: string };
         }
     >;
-  } = {
-    ready: new Slot(),
-    rootAdded: new Slot(),
-    rootDeleted: new Slot(),
-    blockUpdated: new Slot(),
   };
 
   constructor({
@@ -88,6 +82,16 @@ export class Doc {
     readonly,
   }: DocOptions) {
     this._blockCollection = blockCollection;
+
+    this.slots = {
+      ready: new Slot(),
+      rootAdded: new Slot(),
+      rootDeleted: new Slot(),
+      blockUpdated: new Slot(),
+      historyUpdated: this._blockCollection.slots.historyUpdated,
+      yBlockUpdated: this._blockCollection.slots.yBlockUpdated,
+    };
+
     this._crud = crud;
     this._schema = schema;
     this._selector = selector;
@@ -114,12 +118,6 @@ export class Doc {
         }
       }
     );
-
-    this.slots = {
-      ...this.slots,
-      historyUpdated: this._blockCollection.slots.historyUpdated,
-      yBlockUpdated: this._blockCollection.slots.yBlockUpdated,
-    };
   }
 
   private _getSiblings<T>(

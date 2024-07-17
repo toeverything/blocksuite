@@ -7,7 +7,7 @@ import {
   type SchemaToModel,
   defineBlockSchema,
 } from '../schema/index.js';
-import { Block, type YBlock } from '../store/doc/block.js';
+import { Block, type YBlock } from '../store/doc/block/index.js';
 import { DocCollection, IdGeneratorType } from '../store/index.js';
 
 const pageSchema = defineBlockSchema({

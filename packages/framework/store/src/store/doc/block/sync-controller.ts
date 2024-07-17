@@ -3,91 +3,42 @@ import { effect, signal } from '@preact/signals-core';
 import { createMutex } from 'lib0/mutex.js';
 import * as Y from 'yjs';
 
-import type { Schema } from '../../schema/index.js';
+import type { Doc } from '../doc.js';
+import type { YBlock } from './types.js';
 
-import { Boxed, type UnRecord, y2Native } from '../../reactive/index.js';
-import { createYProxy, native2Y } from '../../reactive/index.js';
-import { BlockModel, internalPrimitives } from '../../schema/base.js';
-import { BlockViewType, type Doc } from './doc.js';
+import {
+  Boxed,
+  type UnRecord,
+  createYProxy,
+  native2Y,
+  y2Native,
+} from '../../../reactive/index.js';
+import {
+  BlockModel,
+  type Schema,
+  internalPrimitives,
+} from '../../../schema/index.js';
 
-export type YBlock = Y.Map<unknown> & {
-  get(prop: 'sys:id'): string;
-  get(prop: 'sys:flavour'): string;
-  get(prop: 'sys:children'): Y.Array<string>;
-  get<T = unknown>(prop: string): T;
-};
-
-export type BlockOptions = {
-  onChange?: (block: Block, key: string, value: unknown) => void;
-};
-
-export class Block {
+/**
+ * @internal
+ * SyncController is responsible for syncing the block data with Yjs.
+ * It creates a proxy model that syncs with Yjs and provides a reactive interface.
+ * It also handles the stashing and popping of props.
+ * It will also provide signals for block props.
+ *
+ */
+export class SyncController {
   private _byPassProxy: boolean = false;
 
-  private _byPassUpdate = (fn: () => void) => {
+  private readonly _byPassUpdate = (fn: () => void) => {
     this._byPassProxy = true;
     fn();
     this._byPassProxy = false;
   };
 
-  private _getPropsProxy = (name: string, value: unknown) => {
-    return createYProxy(value, {
-      onChange: () => {
-        this.options.onChange?.(this, name, value);
-        const signalKey = `${name}$`;
-        if (signalKey in this.model) {
-          this._mutex(() => {
-            // @ts-ignore
-            this.model[signalKey].value = this.model[name];
-          });
-        }
-      },
-    });
-  };
-
   private readonly _mutex = createMutex();
 
-  private readonly _stashed = new Set<string | number>();
-
-  blockViewType: BlockViewType = BlockViewType.Display;
-
-  readonly flavour: string;
-
-  readonly id: string;
-
-  readonly model: BlockModel;
-
-  pop = (prop: string) => {
-    if (!this._stashed.has(prop)) return;
-    this._popProp(prop);
-  };
-
-  stash = (prop: string) => {
-    if (this._stashed.has(prop)) return;
-
-    this._stashed.add(prop);
-    this._stashProp(prop);
-  };
-
-  readonly version: number;
-
-  readonly yChildren: Y.Array<string[]>;
-
-  constructor(
-    readonly schema: Schema,
-    readonly yBlock: YBlock,
-    readonly doc?: Doc,
-    readonly options: BlockOptions = {}
-  ) {
-    const { id, flavour, version, yChildren, props } = this._parseYBlock();
-
-    this.id = id;
-    this.flavour = flavour;
-    this.yChildren = yChildren;
-    this.version = version;
-
-    this.model = this._createModel(props);
-
+  private readonly _observeYBlockChanges = () => {
     this.yBlock.observe(event => {
       event.keysChanged.forEach(key => {
         const type = event.changes.keys.get(key);
@@ -110,7 +61,7 @@ export class Block {
               }
             });
           });
-          this.options.onChange?.(this, keyName, value);
+          this.onChange?.(keyName, value);
           return;
         }
         if (type.action === 'delete') {
@@ -124,7 +75,7 @@ export class Block {
               this.model[`${keyName}$`].value = undefined;
             }
           });
-          this.options.onChange?.(this, keyName, undefined);
+          this.onChange?.(keyName, undefined);
           return;
         }
       });
@@ -136,12 +87,50 @@ export class Block {
       // as this event is triggered in observe function
       if (!evt || evt.currentTarget === evt.target) return;
 
-      this.options.onChange?.(this, '', undefined);
+      this.onChange?.('', undefined);
     });
+  };
 
-    if (doc) {
-      this.model.doc = doc;
-    }
+  private readonly _stashed = new Set<string | number>();
+
+  readonly flavour: string;
+
+  readonly id: string;
+
+  readonly model: BlockModel;
+
+  readonly pop = (prop: string) => {
+    if (!this._stashed.has(prop)) return;
+    this._popProp(prop);
+  };
+
+  readonly stash = (prop: string) => {
+    if (this._stashed.has(prop)) return;
+
+    this._stashed.add(prop);
+    this._stashProp(prop);
+  };
+
+  readonly version: number;
+
+  readonly yChildren: Y.Array<string[]>;
+
+  constructor(
+    readonly schema: Schema,
+    readonly yBlock: YBlock,
+    readonly doc?: Doc,
+    readonly onChange?: (key: string, value: unknown) => void
+  ) {
+    const { id, flavour, version, yChildren, props } = this._parseYBlock();
+
+    this.id = id;
+    this.flavour = flavour;
+    this.yChildren = yChildren;
+    this.version = version;
+
+    this.model = this._createModel(props);
+
+    this._observeYBlockChanges();
   }
 
   private _createModel(props: UnRecord) {
@@ -180,6 +169,9 @@ export class Block {
     model.yBlock = this.yBlock;
     model.stash = this.stash;
     model.pop = this.pop;
+    if (this.doc) {
+      model.doc = this.doc;
+    }
 
     const proxy = new Proxy(model, {
       has: (target, p) => {
@@ -194,7 +186,7 @@ export class Block {
           if (this._stashed.has(p)) {
             setValue(target, p, value);
             const result = Reflect.set(target, p, value, receiver);
-            this.options.onChange?.(this, p, value);
+            this.onChange?.(p, value);
             return result;
           }
 
@@ -231,6 +223,21 @@ export class Block {
       });
     }
     return proxy;
+  }
+
+  private _getPropsProxy(name: string, value: unknown) {
+    return createYProxy(value, {
+      onChange: () => {
+        this.onChange?.(name, value);
+        const signalKey = `${name}$`;
+        if (signalKey in this.model) {
+          this._mutex(() => {
+            // @ts-ignore
+            this.model[signalKey].value = this.model[name];
+          });
+        }
+      },
+    });
   }
 
   private _parseYBlock() {
@@ -320,12 +327,12 @@ export class Block {
               },
               set: (target, p, value, receiver) => {
                 const result = Reflect.set(target, p, value, receiver);
-                this.options.onChange?.(this, prop, value);
+                this.onChange?.(prop, value);
                 return result;
               },
               deleteProperty: (target, p) => {
                 const result = Reflect.deleteProperty(target, p);
-                this.options.onChange?.(this, prop, undefined);
+                this.onChange?.(prop, undefined);
                 return result;
               },
             });
@@ -341,12 +348,12 @@ export class Block {
                   return Reflect.set(target, p, value, receiver);
                 }
                 const result = Reflect.set(target, p, value, receiver);
-                this.options.onChange?.(this, prop, value);
+                this.onChange?.(prop, value);
                 return result;
               },
               deleteProperty: (target, p) => {
                 const result = Reflect.deleteProperty(target, p);
-                this.options.onChange?.(this, p as string, undefined);
+                this.onChange?.(p as string, undefined);
                 return result;
               },
             });

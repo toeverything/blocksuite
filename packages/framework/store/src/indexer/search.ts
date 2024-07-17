@@ -9,7 +9,7 @@ import {
 import FlexSearch from 'flexsearch';
 import { Text as YText } from 'yjs';
 
-import type { YBlock } from '../store/doc/block.js';
+import type { YBlock } from '../store/doc/block/index.js';
 import type { YBlocks } from '../store/doc/block-collection.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 
