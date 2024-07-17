@@ -197,6 +197,16 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     return id;
   }
 
+  override rowGetNext(rowId: string): string {
+    const index = this.rows.indexOf(rowId);
+    return this.rows[index + 1];
+  }
+
+  override rowGetPrev(rowId: string): string {
+    const index = this.rows.indexOf(rowId);
+    return this.rows[index - 1];
+  }
+
   override rowMove(
     rowId: string,
     position: InsertToPosition,
