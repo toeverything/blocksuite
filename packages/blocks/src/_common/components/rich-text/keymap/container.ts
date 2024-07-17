@@ -82,9 +82,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     if (firstLineEnd !== -1 && inlineRange.index > firstLineEnd) {
       return '';
     }
-    const [leafStart, offsetStart] = inlineEditor.getTextPoint(
-      inlineRange.index
-    );
+    const textPoint = inlineEditor.getTextPoint(inlineRange.index);
+    if (!textPoint) return '';
+    const [leafStart, offsetStart] = textPoint;
     return leafStart.textContent
       ? leafStart.textContent.slice(0, offsetStart)
       : '';

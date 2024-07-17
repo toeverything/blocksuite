@@ -102,9 +102,9 @@ export class AffineLinkedDocWidget extends WidgetElement {
       return;
     }
 
-    const [leafStart, offsetStart] = inlineEditor.getTextPoint(
-      inlineRange.index
-    );
+    const textPoint = inlineEditor.getTextPoint(inlineRange.index);
+    if (!textPoint) return;
+    const [leafStart, offsetStart] = textPoint;
     const prefixText = leafStart.textContent
       ? leafStart.textContent.slice(0, offsetStart)
       : '';

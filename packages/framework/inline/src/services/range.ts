@@ -370,19 +370,19 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     return selection;
   }
 
-  getTextPoint(rangeIndex: InlineRange['index']): TextPoint {
+  getTextPoint(rangeIndex: InlineRange['index']): TextPoint | null {
     const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
 
     let index = 0;
     for (const vLine of vLines) {
       const texts = getTextNodesFromElement(vLine);
       if (texts.length === 0) {
-        throw new Error('text node in v-text not found');
+        return null;
       }
 
       for (const text of texts) {
         if (!text.textContent) {
-          throw new Error('text element should have textContent');
+          return null;
         }
         if (index + text.textContent.length >= rangeIndex) {
           return [text, rangeIndex - index];
@@ -393,7 +393,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
       index += 1;
     }
 
-    throw new Error('failed to find leaf');
+    return null;
   }
 
   get inlineRangeProvider() {
