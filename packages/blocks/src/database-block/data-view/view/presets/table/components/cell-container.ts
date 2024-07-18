@@ -11,6 +11,7 @@ import type {
 } from '../../../../column/index.js';
 import type { DataViewManager } from '../../../data-view-manager.js';
 import type { DataViewTableColumnManager } from '../table-view-manager.js';
+import type { TableViewSelection } from '../types.js';
 
 import { renderUniLit } from '../../../../utils/uni-component/index.js';
 
@@ -43,15 +44,28 @@ export class DatabaseCellContainer extends SignalWatcher(
     if (this.view.readonly) {
       return;
     }
-    if (this.selectionView) {
-      this.selectionView.selection = {
-        groupKey: this.groupKey,
-        focus: {
-          rowIndex: this.rowIndex,
-          columnIndex: this.columnIndex,
-        },
-        isEditing: editing,
-      };
+    const selectionView = this.selectionView;
+    if (selectionView) {
+      const selection = selectionView.selection;
+      if (selection && this.isSelected(selection) && editing) {
+        selectionView.selection = {
+          groupKey: this.groupKey,
+          focus: {
+            rowIndex: this.rowIndex,
+            columnIndex: this.columnIndex,
+          },
+          isEditing: true,
+        };
+      } else {
+        selectionView.selection = {
+          groupKey: this.groupKey,
+          focus: {
+            rowIndex: this.rowIndex,
+            columnIndex: this.columnIndex,
+          },
+          isEditing: false,
+        };
+      }
     }
   };
 
@@ -74,6 +88,16 @@ export class DatabaseCellContainer extends SignalWatcher(
         this.selectCurrentCell(!this.column.readonly);
       }
     });
+  }
+
+  isSelected(selection: TableViewSelection) {
+    if (selection.groupKey !== this.groupKey) {
+      return;
+    }
+    if (selection.focus.columnIndex !== this.columnIndex) {
+      return;
+    }
+    return selection.focus.rowIndex === this.rowIndex;
   }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */

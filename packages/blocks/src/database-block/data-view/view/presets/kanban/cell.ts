@@ -14,6 +14,7 @@ import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,
 } from './kanban-view-manager.js';
+import type { KanbanViewSelection } from './types.js';
 
 import { renderUniLit } from '../../../utils/uni-component/uni-component.js';
 
@@ -62,18 +63,30 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   selectCurrentCell = (editing: boolean) => {
-    const selectionElement = this.closest(
+    const selectionView = this.closest(
       'affine-data-view-kanban'
     )?.selectionController;
-    if (!selectionElement) return;
-
-    selectionElement.selection = {
-      selectionType: 'cell',
-      groupKey: this.groupKey,
-      cardId: this.cardId,
-      columnId: this.column.id,
-      isEditing: editing,
-    };
+    if (!selectionView) return;
+    if (selectionView) {
+      const selection = selectionView.selection;
+      if (selection && this.isSelected(selection) && editing) {
+        selectionView.selection = {
+          selectionType: 'cell',
+          groupKey: this.groupKey,
+          cardId: this.cardId,
+          columnId: this.column.id,
+          isEditing: true,
+        };
+      } else {
+        selectionView.selection = {
+          selectionType: 'cell',
+          groupKey: this.groupKey,
+          cardId: this.cardId,
+          columnId: this.column.id,
+          isEditing: false,
+        };
+      }
+    }
   };
 
   override connectedCallback() {
@@ -93,6 +106,18 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
         this.selectCurrentCell(!this.column.readonly);
       }
     });
+  }
+
+  isSelected(selection: KanbanViewSelection) {
+    if (
+      selection.selectionType !== 'cell' ||
+      selection.groupKey !== this.groupKey
+    ) {
+      return;
+    }
+    return (
+      selection.cardId === this.cardId && selection.columnId === this.column.id
+    );
   }
 
   override render() {
