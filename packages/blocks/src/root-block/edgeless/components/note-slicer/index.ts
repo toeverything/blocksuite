@@ -250,6 +250,10 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   get _zoom() {
+    if (!this.edgeless.service?.viewport) {
+      console.error('Viewport is not found, something went wrong.');
+      return 1;
+    }
     return this.edgeless.service.viewport.zoom;
   }
 
