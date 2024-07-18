@@ -1,14 +1,8 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import {
-  type Middleware,
-  autoUpdate,
-  computePosition,
-  shift,
-} from '@floating-ui/dom';
+import { type Middleware, autoUpdate, computePosition } from '@floating-ui/dom';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { type TemplateResult, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -17,7 +11,6 @@ import type { DataViewTableManager } from '../../table-view-manager.js';
 
 import { AddCursorIcon } from '../../../../../../../_common/icons/index.js';
 import { getScrollContainer } from '../../../../../../../_common/utils/scroll-container.js';
-import { renderTemplate } from '../../../../../utils/uni-component/render-template.js';
 import './database-header-column.js';
 import { styles } from './styles.js';
 
@@ -25,56 +18,23 @@ import { styles } from './styles.js';
 export class DatabaseColumnHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
-  private _onAddColumn = () => {
+  private _onAddColumn = (e: MouseEvent) => {
     if (this.readonly) return;
     this.tableViewManager.columnAdd('end');
+    const ele = e.currentTarget as HTMLElement;
     requestAnimationFrame(() => {
       this.editLastColumnTitle();
+      ele.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     });
   };
 
-  private addColumnPositionRef = createRef();
-
   static override styles = styles;
-
-  addColumnButton = renderTemplate(() => {
-    if (this.readonly) return nothing;
-
-    return html` <div
-      @click="${this._onAddColumn}"
-      class="header-add-column-button dv-hover"
-    >
-      ${AddCursorIcon}
-    </div>`;
-  });
 
   editLastColumnTitle = () => {
     const columns = this.querySelectorAll('affine-database-header-column');
     const column = columns.item(columns.length - 1);
     column.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     column.editTitle();
-  };
-
-  updateAddButton = () => {
-    const referenceEl = this.addColumnPositionRef.value;
-    if (!referenceEl) {
-      return;
-    }
-    computePosition(referenceEl, this.addColumnButton, {
-      middleware: [
-        shift({
-          boundary: this.closest('affine-database-table') ?? this,
-          padding: -20,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        Object.assign(this.addColumnButton.style, {
-          left: `${x}px`,
-          top: `${y}px`,
-        });
-      })
-      .catch(console.error);
   };
 
   private get readonly() {
@@ -108,43 +68,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
       });
       this.disposables.add(cancel);
     }
-    if (group) {
-      this.disposables.addFromEvent(group, 'mouseenter', () => {
-        this.addColumnButton.style.visibility = 'visible';
-      });
-      this.disposables.addFromEvent(group, 'mouseleave', () => {
-        this.addColumnButton.style.visibility = 'hidden';
-      });
-      this.disposables.addFromEvent(this.addColumnButton, 'mouseenter', () => {
-        this.addColumnButton.style.visibility = 'visible';
-      });
-      this.disposables.addFromEvent(this.addColumnButton, 'mouseleave', () => {
-        this.addColumnButton.style.visibility = 'hidden';
-      });
-      this.addColumnButton.style.visibility = 'hidden';
-      this.addColumnButton.style.transition = 'visibility 0.2s';
-      this.addColumnButton.style.marginLeft = '20px';
-      this.addColumnButton.style.position = 'absolute';
-      this.addColumnButton.style.zIndex = '1';
-      this.closest('affine-data-view-renderer')?.append(this.addColumnButton);
-      requestAnimationFrame(() => {
-        const referenceEl = this.addColumnPositionRef.value;
-        if (!referenceEl) {
-          return;
-        }
-        const cleanup = autoUpdate(
-          referenceEl,
-          this.addColumnButton,
-          this.updateAddButton
-        );
-        this.disposables.add({
-          dispose: () => {
-            cleanup();
-            this.addColumnButton.remove();
-          },
-        });
-      });
-    }
   }
 
   getScale() {
@@ -152,7 +75,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
   }
 
   override render() {
-    this.updateAddButton();
     return html`
       ${this.renderGroupHeader?.()}
       <div class="affine-database-column-header database-row">
@@ -180,7 +102,12 @@ export class DatabaseColumnHeader extends SignalWatcher(
         <div
           style="background-color: var(--affine-border-color);width: 1px;"
         ></div>
-        <div style="height: 0;" ${ref(this.addColumnPositionRef)}></div>
+        <div
+          @click="${this._onAddColumn}"
+          class="header-add-column-button dv-hover"
+        >
+          ${AddCursorIcon}
+        </div>
         <div class="scale-div" style="width: 1px;height: 1px;"></div>
       </div>
     `;

@@ -102,7 +102,7 @@ export const getTableGroupRects = (tableContainer: HTMLElement) => {
     const groupRect = group.getBoundingClientRect();
     const top =
       group
-        .querySelector('affine-database-column-header')
+        .querySelector('.affine-database-column-header')
         ?.getBoundingClientRect().top ?? groupRect.top;
     const bottom =
       group

@@ -399,7 +399,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                   const pre = this.previousElementSibling;
                   if (pre instanceof DatabaseHeaderColumn) {
                     pre.editTitle();
-                    pre.scrollIntoView();
+                    pre.scrollIntoView({ inline: 'nearest', block: 'nearest' });
                   }
                 })
                 .catch(console.error);
@@ -419,7 +419,10 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                   const next = this.nextElementSibling;
                   if (next instanceof DatabaseHeaderColumn) {
                     next.editTitle();
-                    next.scrollIntoView();
+                    next.scrollIntoView({
+                      inline: 'nearest',
+                      block: 'nearest',
+                    });
                   }
                 })
                 .catch(console.error);
@@ -625,8 +628,8 @@ function numberFormatConfig(
 ): NormalMenu {
   return {
     type: 'custom',
-    render: html`<affine-database-number-format-bar
-      .column=${column}
+    render: html` <affine-database-number-format-bar
+      .column="${column}"
     ></affine-database-number-format-bar>`,
   };
 }
