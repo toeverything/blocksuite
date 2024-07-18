@@ -1,6 +1,6 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 
-import { Job } from '@blocksuite/store';
+import { type BlockSnapshot, Job } from '@blocksuite/store';
 
 import type { SerializedConnectorElement } from '../../../surface-block/element-model/connector.js';
 import type { SerializedGroupElement } from '../../../surface-block/element-model/group.js';
@@ -9,7 +9,10 @@ import type { NodeDetail } from '../../../surface-block/element-model/utils/mind
 import type { EdgelessFrameManager } from '../frame-manager.js';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
-import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
+import {
+  type SerializedElement,
+  SurfaceGroupLikeModel,
+} from '../../../surface-block/element-model/base.js';
 import {
   ConnectorElementModel,
   GroupElementModel,
@@ -48,7 +51,7 @@ export async function prepareCloneData(
       return data;
     })
   );
-  return res.filter(d => !!d);
+  return res.filter((d): d is SerializedElement | BlockSnapshot => !!d);
 }
 
 export async function serializeElement(
@@ -58,6 +61,9 @@ export async function serializeElement(
 ) {
   if (element instanceof EdgelessBlockModel) {
     const snapshot = await job.blockToSnapshot(element);
+    if (!snapshot) {
+      return;
+    }
     return { ...snapshot };
   } else if (element instanceof ConnectorElementModel) {
     return serializeConnector(element, elements);

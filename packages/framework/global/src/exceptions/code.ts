@@ -5,6 +5,8 @@ export enum ErrorCode {
   ValueNotEqual,
   MigrationError,
   SchemaValidateError,
+  TransformerError,
+  InlineEditorError,
 
   // Fatal error should be greater than 10000
   DefaultFatalError = 10000,

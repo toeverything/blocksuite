@@ -759,7 +759,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
 
             if (counter === 1) {
               const syncedSnapshot = await this.job.docToSnapshot(syncedDoc);
-              await walker.walkONode(syncedSnapshot.blocks);
+              if (syncedSnapshot) {
+                await walker.walkONode(syncedSnapshot.blocks);
+              }
             } else {
               // TODO(@L-Sun) may be use the nested content
               context

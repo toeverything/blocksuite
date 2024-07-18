@@ -25,9 +25,11 @@ const autoIdentifyLink = (ctx: HookContext<AffineTextAttributes>) => {
     return;
   }
 
-  const { line, lineIndex, rangeIndexRelatedToLine } = ctx.inlineEditor.getLine(
-    ctx.inlineRange.index
-  );
+  const lineInfo = ctx.inlineEditor.getLine(ctx.inlineRange.index);
+  if (!lineInfo) {
+    return;
+  }
+  const { line, lineIndex, rangeIndexRelatedToLine } = lineInfo;
 
   if (lineIndex !== 0) {
     return;

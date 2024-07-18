@@ -37,6 +37,10 @@ test('snapshot 1 importing', async () => {
     snapshotFile
   );
 
+  if (!newDoc) {
+    throw new Error('Failed to import snapshot');
+  }
+
   editor.doc = newDoc;
   await wait();
 
@@ -88,6 +92,10 @@ test('snapshot 2 importing', async () => {
     window.editor.doc.collection,
     snapshotFile
   );
+
+  if (!newDoc) {
+    throw new Error('Failed to import snapshot');
+  }
 
   editor.doc = newDoc;
   await wait();

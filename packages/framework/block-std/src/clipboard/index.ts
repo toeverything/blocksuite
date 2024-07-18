@@ -264,8 +264,11 @@ export class Clipboard {
     assertExists(adapterItem);
     const { adapter } = adapterItem;
     const adapterInstance = new adapter(job);
-    const { file } = await adapterInstance.fromSlice(slice);
-    return file;
+    const result = await adapterInstance.fromSlice(slice);
+    if (!result) {
+      return;
+    }
+    return result.file;
   }
 
   private _getJob() {

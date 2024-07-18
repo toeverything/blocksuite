@@ -13,6 +13,9 @@ export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
   });
   const markdownAdapter = new MarkdownAdapter(job);
   const markdown = await markdownAdapter.fromSlice(slice);
+  if (!markdown) {
+    return '';
+  }
 
   return markdown.file;
 }
@@ -66,7 +69,9 @@ export async function insertFromMarkdown(
       parent,
       (index ?? 0) + i
     );
-    models.push(model);
+    if (model) {
+      models.push(model);
+    }
   }
 
   return models;

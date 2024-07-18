@@ -258,7 +258,7 @@ export class TemplateJob {
         snapshot.flavour as MergeBlockFlavour
       )
         ? null
-        : await job.snapshotToModelData(snapshot);
+        : (await job.snapshotToModelData(snapshot)) ?? null;
 
       modelDataList.push({
         flavour: snapshot.flavour,
