@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
 import { BlockElement, WidgetElement } from '@blocksuite/block-std';
-import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
+import { assertInstanceOf } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -63,7 +63,9 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
     const { x: startX, y: startY } = state.start;
 
     const { left: initScrollX, top: initScrollY } = this._initialScrollOffset;
-    assertExists(this._viewport, 'viewport should exist');
+    if (!this._viewport) {
+      return;
+    }
     const { scrollLeft, scrollTop, scrollWidth, scrollHeight } = this._viewport;
 
     const { x: initConX, y: initConY } = this._initialContainerOffset;
@@ -120,7 +122,9 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
   static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
 
   private get _allBlocksWithRect(): BlockInfo[] {
-    assertExists(this._viewport, 'viewport should exist');
+    if (!this._viewport) {
+      return [];
+    }
     const { scrollLeft, scrollTop } = this._viewport;
 
     const getAllNodeFromTree = (): BlockElement[] => {
@@ -181,7 +185,7 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
 
   private get _viewport() {
     const rootElement = this.blockElement;
-    assertExists(rootElement);
+    if (!rootElement) return;
     return rootElement.viewport;
   }
 
@@ -198,7 +202,9 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
         const { button } = state.raw;
         if (button !== 0) return;
         if (isDragArea(state)) {
-          assertExists(this._viewport, 'viewport should exist');
+          if (!this._viewport) {
+            return;
+          }
           this._dragging = true;
           const { scrollLeft, scrollTop } = this._viewport;
           this._initialScrollOffset = {
