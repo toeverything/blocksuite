@@ -158,14 +158,6 @@ export class AffineEditorContainer
     }
   }
 
-  override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    const editor = this.editor;
-    assertExists(editor);
-    await editor.updateComplete;
-    return result;
-  }
-
   override render() {
     if (!this.rootModel) return nothing;
 
