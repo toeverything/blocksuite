@@ -36,7 +36,11 @@ export function tryConvertBlock(
     return KEYBOARD_ALLOW_DEFAULT;
   }
 
-  const { lineIndex, rangeIndexRelatedToLine } = inline.getLine(range.index);
+  const lineInfo = inline.getLine(range.index);
+  if (!lineInfo) {
+    return KEYBOARD_ALLOW_DEFAULT;
+  }
+  const { lineIndex, rangeIndexRelatedToLine } = lineInfo;
   if (lineIndex !== 0 || rangeIndexRelatedToLine > prefixText.length) {
     return KEYBOARD_ALLOW_DEFAULT;
   }
