@@ -1,7 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
 
 import type { ListBlockModel } from '../../../list-block/index.js';
@@ -129,7 +128,7 @@ export function handleBlockEndEnter(
   //   bbb
   const id = doc.addBlock(flavour, blockProps, parent, index + 1);
   const newModel = doc.getBlockById(id);
-  assertExists(newModel);
+  if (!newModel) return;
   doc.moveBlocks(model.children, newModel);
 
   // 4. If the target block is a numbered list, update the prefix of next siblings
@@ -275,7 +274,7 @@ export function handleMultiBlockIndent(
   const indentModels = models.slice(firstIndentIndex);
   indentModels.forEach(model => {
     const parent = doc.getParent(model);
-    assertExists(parent);
+    if (!parent) return;
     // Only indent the model which parent is not in the `indentModels`
     // When parent is in the `indentModels`, it means the parent has been indented
     // And the model should be indented with its parent
@@ -372,8 +371,7 @@ export function handleMultiBlockOutdent(
   for (let i = outdentModels.length - 1; i >= 0; i--) {
     const model = outdentModels[i];
     const parent = doc.getParent(model);
-    assertExists(parent);
-    if (!outdentModels.includes(parent)) {
+    if (parent && !outdentModels.includes(parent)) {
       handleUnindent(editorHost, model);
     }
   }
@@ -401,8 +399,7 @@ export function handleRemoveAllIndentForMultiBlocks(
   for (let i = models.length - 1; i >= 0; i--) {
     const model = models[i];
     const parent = doc.getParent(model);
-    assertExists(parent);
-    if (!matchFlavours(parent, ['affine:note'])) {
+    if (parent && !matchFlavours(parent, ['affine:note'])) {
       handleRemoveAllIndent(editorHost, model);
     }
   }
@@ -585,7 +582,7 @@ function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
   const doc = model.doc;
   const text = model.text;
   const parent = doc.getParent(model);
-  assertExists(parent);
+  if (!parent) return false;
   const titleElement = getDocTitleByEditorHost(
     editorHost
   ) as HTMLTextAreaElement | null;
@@ -616,7 +613,7 @@ function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
   // Preserve at least one block to be able to focus on container click
   if (doc.getNext(model) || model.children.length > 0) {
     const parent = doc.getParent(model);
-    assertExists(parent);
+    if (!parent) return false;
     doc.deleteBlock(model, {
       bringChildrenTo: parent,
     });
@@ -670,7 +667,7 @@ function handleParagraphDeleteActions(
       editorHost,
       previousSibling
     );
-    assertExists(previousSiblingElement);
+    if (!previousSiblingElement) return false;
     const selection = editorHost.selection.create('block', {
       blockId: previousSiblingElement.blockId,
     });
@@ -859,7 +856,7 @@ function handleParagraphBlockForwardDelete(
           editorHost,
           nextSibling
         );
-        assertExists(nextSiblingComponent);
+        if (!nextSiblingComponent) return false;
         editorHost.selection.setGroup('note', [
           editorHost.selection.create('block', {
             blockId: nextSiblingComponent.blockId,
