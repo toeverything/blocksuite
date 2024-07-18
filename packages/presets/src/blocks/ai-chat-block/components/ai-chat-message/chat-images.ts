@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { ImageLoadingFailedIcon, LoadingIcon } from '../../_common/icon.js';
+import { ImageLoadingFailedIcon, LoadingIcon } from '../../../_common/icon.js';
 import './image-placeholder.js';
 
 @customElement('chat-image')

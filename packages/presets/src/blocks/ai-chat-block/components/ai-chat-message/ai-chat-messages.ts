@@ -4,7 +4,7 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { ChatMessage } from '../types.js';
+import type { ChatMessage } from '../../types.js';
 import type { TextRendererOptions } from './text-renderer.js';
 
 import './chat-images.js';
@@ -23,7 +23,7 @@ export class AIChatMessage extends LitElement {
     }
 
     .ai-chat-content {
-      display: flex;
+      display: block;
       width: calc(100% - 34px);
       padding-left: 34px;
       font-weight: 400;

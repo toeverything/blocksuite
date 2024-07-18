@@ -2,11 +2,13 @@ import type { EditorHost } from '@blocksuite/block-std';
 
 import { baseTheme } from '@toeverything/theme';
 import { LitElement, css, html, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
-import type { ChatMessage } from '../types.js';
+import type { ChatMessage } from '../../types.js';
 
-import './ai-chat-messages.js';
+import { SmallHintIcon } from '../../../_common/icon.js';
+import '../ai-chat-message/ai-chat-messages.js';
+import './chat-block-input.js';
 import './date-time.js';
 
 @customElement('ai-chat-block-peek-view')
@@ -18,7 +20,7 @@ export class AIChatBlockPeekView extends LitElement {
     }
 
     .ai-chat-block-peek-view-container {
-      gap: 24px;
+      gap: 8px;
       width: 100%;
       height: 100%;
       display: flex;
@@ -31,7 +33,7 @@ export class AIChatBlockPeekView extends LitElement {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
-    .ai-chat-message-container {
+    .ai-chat-messages-container {
       display: flex;
       align-items: center;
       justify-content: start;
@@ -49,41 +51,72 @@ export class AIChatBlockPeekView extends LitElement {
       scrollbar-width: none; /* Firefox */
     }
 
-    .ai-chat-message-container::-webkit-scrollbar {
+    .new-chat-messages-container {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 450px;
+    }
+
+    .ai-chat-messages-container::-webkit-scrollbar {
       display: none;
     }
 
-    .ai-chat-input {
-      height: 128px;
+    .peek-view-footer {
+      padding: 0 12px;
       width: 100%;
+      height: 20px;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      color: var(--affine-text-secondary-color);
+      font-size: var(--affine-font-xs);
     }
   `;
 
+  override firstUpdated() {
+    // first time render, scroll ai-chat-messages-container to bottom
+    requestAnimationFrame(() => {
+      if (this._chatMessagesContainer) {
+        this._chatMessagesContainer.scrollTop =
+          this._chatMessagesContainer.scrollHeight;
+      }
+    });
+  }
+
   override render() {
-    const { host, messages } = this;
+    const { host, historyMessages } = this;
     const textRendererOptions = {
       customHeading: true,
     };
-    const latestMessageCreatedAt = messages[messages.length - 1].createdAt;
+    const latestMessageCreatedAt =
+      historyMessages[historyMessages.length - 1].createdAt;
 
     return html`<div class="ai-chat-block-peek-view-container">
-      <div class="ai-chat-message-container">
+      <div class="ai-chat-messages-container">
         <ai-chat-messages
           .host=${host}
-          .messages=${messages}
+          .messages=${historyMessages}
           .textRendererOptions=${textRendererOptions}
         ></ai-chat-messages>
         <date-time .date=${latestMessageCreatedAt}></date-time>
+        <div class="new-chat-messages-container"></div>
       </div>
-      <div class="ai-chat-input"></div>
+      <chat-block-input></chat-block-input>
+      <div class="peek-view-footer">
+        ${SmallHintIcon}
+        <div>AI outputs can be misleading or wrong</div>
+      </div>
     </div> `;
   }
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
+  @query('.ai-chat-messages-container')
+  accessor _chatMessagesContainer!: HTMLDivElement;
 
   @property({ attribute: false })
-  accessor messages: ChatMessage[] = [];
+  accessor historyMessages: ChatMessage[] = [];
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 }
 
 declare global {

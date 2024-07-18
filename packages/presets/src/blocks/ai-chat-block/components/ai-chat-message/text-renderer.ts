@@ -15,7 +15,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
 
-import { markDownToDoc } from '../../_common/utils.js';
+import { markDownToDoc } from '../../../_common/utils.js';
 
 const textBlockStyles = css`
   ${ParagraphBlockComponent.styles}

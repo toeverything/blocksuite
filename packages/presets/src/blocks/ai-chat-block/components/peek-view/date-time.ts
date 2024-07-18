@@ -1,7 +1,7 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { formatDate } from '../../_common/utils.js';
+import { formatDate } from '../../../_common/utils.js';
 
 @customElement('date-time')
 export class DateTime extends LitElement {

@@ -2,9 +2,9 @@ import { baseTheme } from '@toeverything/theme';
 import { LitElement, type TemplateResult, css, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { ChatMessage } from '../types.js';
+import type { ChatMessage } from '../../types.js';
 
-import { AffineAIIcon } from '../../_common/icon.js';
+import { AffineAIIcon } from '../../../_common/icon.js';
 
 @customElement('user-info')
 export class UserInfo extends LitElement {
