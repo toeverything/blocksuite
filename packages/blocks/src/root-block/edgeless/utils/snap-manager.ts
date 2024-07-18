@@ -46,6 +46,14 @@ export class EdgelessSnapManager extends Overlay {
    */
   private _intraGraphicAlignLines: [Point, Point][] = [];
 
+  cleanupAlignables = () => {
+    this._alignableBounds = [];
+    this._intraGraphicAlignLines = [];
+    this._distributedAlignLines = [];
+    // FIXME: not sure why renderer can be undefined sometimes
+    this._surface.renderer?.removeOverlay(this);
+  };
+
   constructor(private _rootService: EdgelessRootService) {
     super();
   }
@@ -360,13 +368,6 @@ export class EdgelessSnapManager extends Overlay {
     }
     this._draw();
     return rst;
-  }
-
-  cleanupAlignables() {
-    this._alignableBounds = [];
-    this._intraGraphicAlignLines = [];
-    this._distributedAlignLines = [];
-    this._surface.renderer.removeOverlay(this);
   }
 
   override render(ctx: CanvasRenderingContext2D) {
