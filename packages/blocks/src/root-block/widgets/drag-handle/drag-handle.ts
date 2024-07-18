@@ -546,6 +546,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (selections.length > 0 && includeTextSelection(selections)) {
       const range = getCurrentNativeRange();
       if (!range) return [];
+      if (!this._rangeManager) return [];
       blockElements = this._rangeManager.getSelectedBlockElementsByRange(
         range,
         {
@@ -921,7 +922,11 @@ export class AffineDragHandleWidget extends WidgetElement<
     // Should set BlockSelection for the blocks in native range
     if (selections.length > 0 && includeTextSelection(selections)) {
       const nativeSelection = document.getSelection();
-      if (nativeSelection && nativeSelection.rangeCount > 0) {
+      if (
+        nativeSelection &&
+        nativeSelection.rangeCount > 0 &&
+        this._rangeManager
+      ) {
         const range = nativeSelection.getRangeAt(0);
         const blockElements =
           this._rangeManager.getSelectedBlockElementsByRange(range, {
@@ -1498,7 +1503,6 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private get _rangeManager() {
-    assertExists(this.host.rangeManager);
     return this.host.rangeManager;
   }
 
