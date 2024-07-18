@@ -150,6 +150,16 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     return frameBound.isOverlapWithBound(eleBound);
   };
 
+  private _renderModel = (model: BlockModel) => {
+    const selector = this._getSelector(model);
+    this._disposables.add(() => {
+      doc.blockCollection.clearSelector(selector);
+    });
+    const doc = model.doc.blockCollection.getDoc({ selector });
+    const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
+    return this.host.renderSpecPortal(doc, previewSpec.value);
+  };
+
   private _surfaceRefRenderer!: SurfaceRefRenderer;
 
   private _surfaceRefRendererId: string = nanoid();
@@ -206,16 +216,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
         this.blocksPortal?.setViewport(this.surfaceRenderer.viewport);
       })
       .catch(console.error);
-  }
-
-  private _renderModel(model: BlockModel) {
-    const selector = this._getSelector(model);
-    this._disposables.add(() => {
-      doc.blockCollection.clearSelector(selector);
-    });
-    const doc = model.doc.blockCollection.getDoc({ selector });
-    const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
-    return this.host.renderSpecPortal(doc, previewSpec.value);
   }
 
   private _renderSurfaceContent(referencedModel: FrameBlockModel) {
