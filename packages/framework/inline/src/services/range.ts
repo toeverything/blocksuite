@@ -24,15 +24,20 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     if (!selection) {
       return;
     }
-    const newRange = this.toDomRange(inlineRange);
+    try {
+      const newRange = this.toDomRange(inlineRange);
 
-    if (!newRange) {
-      return;
+      if (!newRange) {
+        return;
+      }
+
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+      this.editor.slots.inlineRangeApply.emit(newRange);
+    } catch (error) {
+      console.error('failed to apply inline range');
+      console.error(error);
     }
-
-    selection.removeAllRanges();
-    selection.addRange(newRange);
-    this.editor.slots.inlineRangeApply.emit(newRange);
   };
 
   private _inlineRange: InlineRange | null = null;
@@ -72,7 +77,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
   getInlineRangeFromElement = (element: Element): InlineRange | null => {
     const range = document.createRange();
-    const text = element.querySelector('[data-v-text');
+    const text = element.querySelector('[data-v-text]');
     if (!text) {
       return null;
     }
