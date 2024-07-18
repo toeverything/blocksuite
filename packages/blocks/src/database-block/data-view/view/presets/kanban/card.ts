@@ -11,8 +11,10 @@ import type {
   DataViewKanbanManager,
 } from './kanban-view-manager.js';
 
-import { NewEditIcon } from '../../../../../_common/icons/index.js';
-import { MoreHorizontalIcon } from '../../../common/icons/index.js';
+import {
+  CenterPeekIcon,
+  MoreHorizontalIcon,
+} from '../../../common/icons/index.js';
 import './cell.js';
 import { openDetail, popCardMenu } from './menu.js';
 
@@ -225,7 +227,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     }
     return html`
       <div class="card-ops">
-        <div class="card-op" @click="${this.clickEdit}">${NewEditIcon}</div>
+        <div class="card-op" @click="${this.clickEdit}">${CenterPeekIcon}</div>
         <div class="card-op" @click="${this.clickMore}">
           ${MoreHorizontalIcon}
         </div>

@@ -10,8 +10,10 @@ import type { DataViewRenderer } from '../../../../data-view.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 import type { TableViewSelection } from '../types.js';
 
-import { NewEditIcon } from '../../../../../../_common/icons/index.js';
-import { MoreHorizontalIcon } from '../../../../common/icons/index.js';
+import {
+  CenterPeekIcon,
+  MoreHorizontalIcon,
+} from '../../../../common/icons/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { openDetail, popRowMenu } from './menu.js';
 
@@ -261,7 +263,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
             column.dataViewManager.header.titleColumn === column.id
               ? html`<div class="row-ops">
                   <div class="row-op" @click="${clickDetail}">
-                    ${NewEditIcon}
+                    ${CenterPeekIcon}
                   </div>
                   ${!view.readonly
                     ? html`<div class="row-op" @click="${openMenu}">
