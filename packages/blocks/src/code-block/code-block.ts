@@ -2,7 +2,6 @@ import type { BlockElement } from '@blocksuite/block-std';
 import type { BundledLanguage, Highlighter } from 'shiki';
 
 import { getInlineRangeProvider } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
   type InlineRangeProvider,
@@ -117,7 +116,7 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
   private _updateLineNumbers() {
     const lineNumbersContainer =
       this.querySelector<HTMLElement>('#line-numbers');
-    assertExists(lineNumbersContainer);
+    if (!lineNumbersContainer) return;
 
     const next = this.model.wrap
       ? generateLineNumberRender()
@@ -395,7 +394,7 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
       }
     }
 
-    assertExists(this._richTextElement);
+    if (!this._richTextElement) return;
     this._richTextResizeObserver.disconnect();
     this._richTextResizeObserver.observe(this._richTextElement);
   }
