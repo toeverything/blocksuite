@@ -168,10 +168,10 @@ function setNewTop(y: number, editableContainer: Element, zoom = 1) {
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
 export function focusTitle(editorHost: EditorHost, index = Infinity, len = 0) {
-  // TODO support SelectionPosition
-
   const titleInlineEditor = getDocTitleInlineEditor(editorHost);
-  assertExists(titleInlineEditor);
+  if (!titleInlineEditor) {
+    return;
+  }
 
   if (index > titleInlineEditor.yText.length) {
     index = titleInlineEditor.yText.length;
