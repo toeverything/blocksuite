@@ -645,13 +645,13 @@ export class EdgelessRootService extends RootService {
   override unmounted() {
     super.unmounted();
 
-    this._layer.dispose();
-    this._selection.dispose();
+    this._layer?.dispose();
+    this._selection?.dispose();
+    this.viewport?.dispose();
+    this.tool?.dispose();
+    this._frame?.dispose();
     this.selectionManager.set([]);
-    this.viewport.dispose();
-    this.tool.dispose();
     this.disposables.dispose();
-    this._frame.dispose();
   }
 
   updateElement(id: string, props: Record<string, unknown>) {
