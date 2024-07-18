@@ -36,6 +36,62 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
+  private _load = async () => {
+    this._loading = true;
+    this.isError = false;
+    this.isNoteContentEmpty = true;
+    this.isBannerEmpty = true;
+
+    const linkedDoc = this.linkedDoc;
+    if (!linkedDoc) {
+      this._loading = false;
+      return;
+    }
+
+    if (!linkedDoc.loaded) {
+      try {
+        linkedDoc.load();
+      } catch (e) {
+        console.error(e);
+        this.isError = true;
+      }
+    }
+
+    if (!this.isError && !linkedDoc.root) {
+      await new Promise<void>(resolve => {
+        linkedDoc.slots.rootAdded.once(() => {
+          resolve();
+        });
+      });
+    }
+
+    this._loading = false;
+
+    if (!this.isError) {
+      // renderLinkedDocInCard(this);
+      const cardStyle = this.model.style;
+      if (cardStyle === 'horizontal' || cardStyle === 'vertical') {
+        renderLinkedDocInCard(this);
+      }
+    }
+  };
+
+  private _selectBlock = () => {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  };
+
+  private _setDocUpdatedAt = () => {
+    const meta = this.doc.collection.meta.getDocMeta(this.model.pageId);
+    if (meta) {
+      const date = meta.updatedDate || meta.createDate;
+      this._docUpdatedAt = new Date(date);
+    }
+  };
+
   override _width = EMBED_CARD_WIDTH.horizontal;
 
   static override styles = styles;
@@ -166,64 +222,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
   }
 
-  private async _load() {
-    this._loading = true;
-    this.isError = false;
-    this.isNoteContentEmpty = true;
-    this.isBannerEmpty = true;
-
-    const linkedDoc = this.linkedDoc;
-    if (!linkedDoc) {
-      this._loading = false;
-      return;
-    }
-
-    if (!linkedDoc.loaded) {
-      try {
-        linkedDoc.load();
-      } catch (e) {
-        console.error(e);
-        this.isError = true;
-      }
-    }
-
-    if (!this.isError && !linkedDoc.root) {
-      await new Promise<void>(resolve => {
-        linkedDoc.slots.rootAdded.once(() => {
-          resolve();
-        });
-      });
-    }
-
-    this._loading = false;
-
-    if (!this.isError) {
-      // renderLinkedDocInCard(this);
-      const cardStyle = this.model.style;
-      if (cardStyle === 'horizontal' || cardStyle === 'vertical') {
-        renderLinkedDocInCard(this);
-      }
-    }
-  }
-
   private get _rootService() {
     return this.std.spec.getService('affine:page');
-  }
-
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _setDocUpdatedAt() {
-    const meta = this.doc.collection.meta.getDocMeta(this.model.pageId);
-    if (meta) {
-      const date = meta.updatedDate || meta.createDate;
-      this._docUpdatedAt = new Date(date);
-    }
   }
 
   override connectedCallback() {
