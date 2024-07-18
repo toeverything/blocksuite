@@ -32,6 +32,7 @@ export const styles = css`
 
     .database-cell {
         min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
+        user-select: none;
     }
 
     .database-cell.add-column-button {
