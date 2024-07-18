@@ -12,5 +12,12 @@ export function serializeXYWH(
 }
 
 export function deserializeXYWH(xywh: string): XYWH {
-  return JSON.parse(xywh) as XYWH;
+  try {
+    return JSON.parse(xywh) as XYWH;
+  } catch (e) {
+    console.error('Failed to deserialize xywh', xywh);
+    console.error(e);
+
+    return [0, 0, 0, 0];
+  }
 }
