@@ -319,7 +319,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     if (model) {
       const index = insertPositionToIndex(position, this._model.children);
       const target = this._model.children[index];
-      if (target.id === rowId) {
+      if (target?.id === rowId) {
         return;
       }
       this.doc.moveBlocks([model], this._model, target);
