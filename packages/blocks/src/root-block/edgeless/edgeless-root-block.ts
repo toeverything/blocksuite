@@ -129,6 +129,8 @@ export class EdgelessRootBlockComponent extends BlockElement<
     affine-edgeless-root {
       -webkit-user-select: none;
       user-select: none;
+      display: block;
+      height: 100%;
     }
 
     .widgets-container {
