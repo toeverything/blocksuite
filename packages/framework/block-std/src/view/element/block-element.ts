@@ -137,7 +137,7 @@ export class BlockElement<
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    this.service.specSlots.viewDisconnected.emit({
+    this.service?.specSlots.viewDisconnected.emit({
       service: this.service,
       component: this,
     });
