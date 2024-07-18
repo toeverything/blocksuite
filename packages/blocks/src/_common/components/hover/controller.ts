@@ -114,7 +114,9 @@ export class HoverController implements ReactiveController {
 
   private _portal?: HTMLDivElement;
 
-  private _setReference?: (element?: Element | undefined) => void;
+  private _setReference: (element?: Element | undefined) => void = () => {
+    console.error('setReference is not ready');
+  };
 
   static globalAbortController?: AbortController;
 
@@ -226,9 +228,6 @@ export class HoverController implements ReactiveController {
   }
 
   get setReference() {
-    if (!this._setReference) {
-      throw new Error('setReference is not ready');
-    }
     return this._setReference;
   }
 }
