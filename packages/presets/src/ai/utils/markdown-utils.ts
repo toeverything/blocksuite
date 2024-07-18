@@ -76,6 +76,9 @@ export async function getContentFromSlice(
     middlewares: [titleMiddleware],
   });
   const snapshot = await job.sliceToSnapshot(slice);
+  if (!snapshot) {
+    return '';
+  }
   processTextInSnapshot(snapshot, host);
   const adapter =
     type === 'markdown' ? new MarkdownAdapter(job) : new PlainTextAdapter(job);
@@ -92,6 +95,9 @@ export async function getPlainTextFromSlice(host: EditorHost, slice: Slice) {
     middlewares: [titleMiddleware],
   });
   const snapshot = await job.sliceToSnapshot(slice);
+  if (!snapshot) {
+    return '';
+  }
   processTextInSnapshot(snapshot, host);
   const plainTextAdapter = new PlainTextAdapter(job);
   const plainText = await plainTextAdapter.fromSliceSnapshot({
@@ -154,7 +160,9 @@ export async function insertFromMarkdown(
       parent,
       (index ?? 0) + i
     );
-    models.push(model);
+    if (model) {
+      models.push(model);
+    }
   }
 
   return models;

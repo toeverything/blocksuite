@@ -1,9 +1,8 @@
-import { Slot } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { ErrorCode } from '@blocksuite/global/exceptions';
+import { Slot, assertExists } from '@blocksuite/global/utils';
 
 import type { BlockModel, BlockSchemaType } from '../schema/index.js';
-import type { DocCollection, DocMeta } from '../store/index.js';
-import type { Doc } from '../store/index.js';
+import type { Doc, DocCollection, DocMeta } from '../store/index.js';
 import type {
   BeforeExportPayload,
   BeforeImportPayload,
@@ -48,83 +47,122 @@ export class Job {
     afterExport: new Slot<FinalPayload>(),
   };
 
-  blockToSnapshot = async (model: DraftModel): Promise<BlockSnapshot> => {
-    const snapshot = await this._blockToSnapshot(model);
-    BlockSnapshotSchema.parse(snapshot);
+  blockToSnapshot = async (
+    model: DraftModel
+  ): Promise<BlockSnapshot | undefined> => {
+    try {
+      const snapshot = await this._blockToSnapshot(model);
+      BlockSnapshotSchema.parse(snapshot);
 
-    return snapshot;
-  };
-
-  collectionInfoToSnapshot = (): CollectionInfoSnapshot => {
-    this._slots.beforeExport.emit({
-      type: 'info',
-    });
-    const collectionMeta = this._getCollectionMeta();
-    const snapshot: CollectionInfoSnapshot = {
-      type: 'info',
-      id: this._collection.id,
-      ...collectionMeta,
-    };
-    this._slots.afterExport.emit({
-      type: 'info',
-      snapshot,
-    });
-    CollectionInfoSnapshotSchema.parse(snapshot);
-
-    return snapshot;
-  };
-
-  docToSnapshot = async (doc: Doc): Promise<DocSnapshot> => {
-    this._slots.beforeExport.emit({
-      type: 'page',
-      page: doc,
-    });
-    const rootModel = doc.root;
-    const meta = this._exportDocMeta(doc);
-    assertExists(rootModel, 'Root block not found in doc');
-    const blocks = await this.blockToSnapshot(rootModel);
-    const docSnapshot: DocSnapshot = {
-      type: 'page',
-      meta,
-      blocks,
-    };
-    this._slots.afterExport.emit({
-      type: 'page',
-      page: doc,
-      snapshot: docSnapshot,
-    });
-    DocSnapshotSchema.parse(docSnapshot);
-
-    return docSnapshot;
-  };
-
-  sliceToSnapshot = async (slice: Slice): Promise<SliceSnapshot> => {
-    this._slots.beforeExport.emit({
-      type: 'slice',
-      slice,
-    });
-    const { content, pageVersion, workspaceVersion, pageId, workspaceId } =
-      slice.data;
-    const contentSnapshot = [];
-    for (const block of content) {
-      contentSnapshot.push(await this.blockToSnapshot(block));
+      return snapshot;
+    } catch (error) {
+      console.error(`Error when transforming block to snapshot:`);
+      console.error(error);
+      return;
     }
-    const snapshot: SliceSnapshot = {
-      type: 'slice',
-      workspaceId,
-      pageId,
-      pageVersion,
-      workspaceVersion,
-      content: contentSnapshot,
-    };
-    this._slots.afterExport.emit({
-      type: 'slice',
-      slice,
-      snapshot,
-    });
-    SliceSnapshotSchema.parse(snapshot);
+  };
 
-    return snapshot;
+  collectionInfoToSnapshot = (): CollectionInfoSnapshot | undefined => {
+    try {
+      this._slots.beforeExport.emit({
+        type: 'info',
+      });
+      const collectionMeta = this._getCollectionMeta();
+      const snapshot: CollectionInfoSnapshot = {
+        type: 'info',
+        id: this._collection.id,
+        ...collectionMeta,
+      };
+      this._slots.afterExport.emit({
+        type: 'info',
+        snapshot,
+      });
+      CollectionInfoSnapshotSchema.parse(snapshot);
+
+      return snapshot;
+    } catch (error) {
+      console.error(`Error when transforming collection info to snapshot:`);
+      console.error(error);
+      return;
+    }
+  };
+
+  docToSnapshot = async (doc: Doc): Promise<DocSnapshot | undefined> => {
+    try {
+      this._slots.beforeExport.emit({
+        type: 'page',
+        page: doc,
+      });
+      const rootModel = doc.root;
+      const meta = this._exportDocMeta(doc);
+      assertExists(
+        rootModel,
+        'Root block not found in doc',
+        ErrorCode.TransformerError
+      );
+      const blocks = await this.blockToSnapshot(rootModel);
+      if (!blocks) {
+        return;
+      }
+      const docSnapshot: DocSnapshot = {
+        type: 'page',
+        meta,
+        blocks,
+      };
+      this._slots.afterExport.emit({
+        type: 'page',
+        page: doc,
+        snapshot: docSnapshot,
+      });
+      DocSnapshotSchema.parse(docSnapshot);
+
+      return docSnapshot;
+    } catch (error) {
+      console.error(`Error when transforming doc to snapshot:`);
+      console.error(error);
+      return;
+    }
+  };
+
+  sliceToSnapshot = async (
+    slice: Slice
+  ): Promise<SliceSnapshot | undefined> => {
+    try {
+      this._slots.beforeExport.emit({
+        type: 'slice',
+        slice,
+      });
+      const { content, pageVersion, workspaceVersion, pageId, workspaceId } =
+        slice.data;
+      const contentSnapshot = [];
+      for (const block of content) {
+        const blockSnapshot = await this.blockToSnapshot(block);
+        if (!blockSnapshot) {
+          return;
+        }
+        contentSnapshot.push(blockSnapshot);
+      }
+      const snapshot: SliceSnapshot = {
+        type: 'slice',
+        workspaceId,
+        pageId,
+        pageVersion,
+        workspaceVersion,
+        content: contentSnapshot,
+      };
+      this._slots.afterExport.emit({
+        type: 'slice',
+        slice,
+        snapshot,
+      });
+      SliceSnapshotSchema.parse(snapshot);
+
+      return snapshot;
+    } catch (error) {
+      console.error(`Error when transforming slice to snapshot:`);
+      console.error(error);
+      return;
+    }
   };
 
   snapshotToBlock = async (
@@ -132,49 +170,67 @@ export class Job {
     doc: Doc,
     parent?: string,
     index?: number
-  ): Promise<BlockModel> => {
-    BlockSnapshotSchema.parse(snapshot);
-    const model = await this._snapshotToBlock(snapshot, doc, parent, index);
+  ): Promise<BlockModel | undefined> => {
+    try {
+      BlockSnapshotSchema.parse(snapshot);
+      const model = await this._snapshotToBlock(snapshot, doc, parent, index);
 
-    return model;
+      return model;
+    } catch (error) {
+      console.error(`Error when transforming snapshot to block:`);
+      console.error(error);
+      return;
+    }
   };
 
-  snapshotToDoc = async (snapshot: DocSnapshot): Promise<Doc> => {
-    this._slots.beforeImport.emit({
-      type: 'page',
-      snapshot,
-    });
-    DocSnapshotSchema.parse(snapshot);
-    const { meta, blocks } = snapshot;
-    const doc = this._collection.createDoc({ id: meta.id });
-    doc.load();
-    await this.snapshotToBlock(blocks, doc);
-    this._slots.afterImport.emit({
-      type: 'page',
-      snapshot,
-      page: doc,
-    });
+  snapshotToDoc = async (snapshot: DocSnapshot): Promise<Doc | undefined> => {
+    try {
+      this._slots.beforeImport.emit({
+        type: 'page',
+        snapshot,
+      });
+      DocSnapshotSchema.parse(snapshot);
+      const { meta, blocks } = snapshot;
+      const doc = this._collection.createDoc({ id: meta.id });
+      doc.load();
+      await this.snapshotToBlock(blocks, doc);
+      this._slots.afterImport.emit({
+        type: 'page',
+        snapshot,
+        page: doc,
+      });
 
-    return doc;
+      return doc;
+    } catch (error) {
+      console.error(`Error when transforming snapshot to doc:`);
+      console.error(error);
+      return;
+    }
   };
 
   snapshotToModelData = async (snapshot: BlockSnapshot) => {
-    const { children, flavour, props, id } = snapshot;
+    try {
+      const { children, flavour, props, id } = snapshot;
 
-    const schema = this._getSchema(flavour);
-    const snapshotLeaf = {
-      id,
-      flavour,
-      props,
-    };
-    const transformer = this._getTransformer(schema);
-    const modelData = await transformer.fromSnapshot({
-      json: snapshotLeaf,
-      assets: this._assetsManager,
-      children,
-    });
+      const schema = this._getSchema(flavour);
+      const snapshotLeaf = {
+        id,
+        flavour,
+        props,
+      };
+      const transformer = this._getTransformer(schema);
+      const modelData = await transformer.fromSnapshot({
+        json: snapshotLeaf,
+        assets: this._assetsManager,
+        children,
+      });
 
-    return modelData;
+      return modelData;
+    } catch (error) {
+      console.error(`Error when transforming snapshot to model data:`);
+      console.error(error);
+      return;
+    }
   };
 
   snapshotToSlice = async (
@@ -182,39 +238,50 @@ export class Job {
     doc: Doc,
     parent?: string,
     index?: number
-  ): Promise<Slice> => {
-    this._slots.beforeImport.emit({
-      type: 'slice',
-      snapshot,
-    });
-    SliceSnapshotSchema.parse(snapshot);
-    const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
-      snapshot;
-    const contentBlocks: BlockModel[] = [];
-    for (const [i, block] of content.entries()) {
-      contentBlocks.push(
-        await this._snapshotToBlock(block, doc, parent, (index ?? 0) + i)
-      );
-    }
-    const slice = new Slice({
-      content: contentBlocks.map(block => toDraftModel(block)),
-      pageVersion,
-      workspaceVersion,
-      workspaceId,
-      pageId,
-    });
-    this._slots.afterImport.emit({
-      type: 'slice',
-      snapshot,
-      slice,
-    });
+  ): Promise<Slice | undefined> => {
+    try {
+      this._slots.beforeImport.emit({
+        type: 'slice',
+        snapshot,
+      });
+      SliceSnapshotSchema.parse(snapshot);
+      const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
+        snapshot;
+      const contentBlocks: BlockModel[] = [];
+      for (const [i, block] of content.entries()) {
+        contentBlocks.push(
+          await this._snapshotToBlock(block, doc, parent, (index ?? 0) + i)
+        );
+      }
+      const slice = new Slice({
+        content: contentBlocks.map(block => toDraftModel(block)),
+        pageVersion,
+        workspaceVersion,
+        workspaceId,
+        pageId,
+      });
+      this._slots.afterImport.emit({
+        type: 'slice',
+        snapshot,
+        slice,
+      });
 
-    return slice;
+      return slice;
+    } catch (error) {
+      console.error(`Error when transforming snapshot to slice:`);
+      console.error(error);
+      return;
+    }
   };
 
   walk = (snapshot: DocSnapshot, callback: (block: BlockSnapshot) => void) => {
     const walk = (block: BlockSnapshot) => {
-      callback(block);
+      try {
+        callback(block);
+      } catch (error) {
+        console.error(`Error when walking snapshot:`);
+        console.error(error);
+      }
 
       if (block.children) {
         block.children.forEach(walk);
@@ -271,7 +338,7 @@ export class Job {
   private _exportDocMeta(doc: Doc): DocSnapshot['meta'] {
     const docMeta = doc.meta;
 
-    assertExists(docMeta);
+    assertExists(docMeta, 'Doc meta not found', ErrorCode.TransformerError);
     return {
       id: docMeta.id,
       title: docMeta.title,
@@ -283,9 +350,17 @@ export class Job {
   private _getCollectionMeta() {
     const { meta } = this._collection;
     const { pageVersion, workspaceVersion, docs } = meta;
-    assertExists(pageVersion);
-    assertExists(workspaceVersion);
-    assertExists(docs);
+    assertExists(
+      pageVersion,
+      'Page version not found',
+      ErrorCode.TransformerError
+    );
+    assertExists(
+      workspaceVersion,
+      'Workspace version not found',
+      ErrorCode.TransformerError
+    );
+    assertExists(docs, 'Docs not found', ErrorCode.TransformerError);
     return {
       pageVersion,
       workspaceVersion,
@@ -296,7 +371,11 @@ export class Job {
 
   private _getSchema(flavour: string) {
     const schema = this._collection.schema.flavourSchemaMap.get(flavour);
-    assertExists(schema, `Flavour schema not found for ${flavour}`);
+    assertExists(
+      schema,
+      `Flavour schema not found for ${flavour}`,
+      ErrorCode.TransformerError
+    );
     return schema;
   }
 
@@ -343,7 +422,11 @@ export class Job {
     }
 
     const model = doc.getBlockById(id);
-    assertExists(model);
+    assertExists(
+      model,
+      `Block not found by id ${id}`,
+      ErrorCode.TransformerError
+    );
     this._slots.afterImport.emit({
       type: 'block',
       snapshot,

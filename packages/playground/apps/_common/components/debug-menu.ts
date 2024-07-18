@@ -254,25 +254,27 @@ export class DebugMenu extends ShadowlessElement {
       try {
         const docs = await ZipTransformer.importDocs(this.collection, file);
         for (const doc of docs) {
-          const noteBlock = window.doc.getBlockByFlavour('affine:note');
-          window.doc.addBlock(
-            'affine:paragraph',
-            {
-              type: 'text',
-              text: new Text([
-                {
-                  insert: ' ',
-                  attributes: {
-                    reference: {
-                      type: 'LinkedPage',
-                      pageId: doc.id,
+          if (doc) {
+            const noteBlock = window.doc.getBlockByFlavour('affine:note');
+            window.doc.addBlock(
+              'affine:paragraph',
+              {
+                type: 'text',
+                text: new Text([
+                  {
+                    insert: ' ',
+                    attributes: {
+                      reference: {
+                        type: 'LinkedPage',
+                        pageId: doc.id,
+                      },
                     },
-                  },
-                } as DeltaInsert<AffineTextAttributes>,
-              ]),
-            },
-            noteBlock[0].id
-          );
+                  } as DeltaInsert<AffineTextAttributes>,
+                ]),
+              },
+              noteBlock[0].id
+            );
+          }
         }
         this.requestUpdate();
       } catch (e) {

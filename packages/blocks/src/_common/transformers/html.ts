@@ -9,6 +9,9 @@ async function exportDoc(doc: Doc) {
   const job = new Job({ collection: doc.collection });
   const snapshot = await job.docToSnapshot(doc);
   const adapter = new HtmlAdapter(job);
+  if (!snapshot) {
+    return;
+  }
   const htmlResult = await adapter.fromDocSnapshot({
     snapshot,
     assets: job.assetsManager,

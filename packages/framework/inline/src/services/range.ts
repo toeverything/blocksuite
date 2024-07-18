@@ -24,15 +24,20 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     if (!selection) {
       return;
     }
-    const newRange = this.toDomRange(inlineRange);
+    try {
+      const newRange = this.toDomRange(inlineRange);
 
-    if (!newRange) {
-      return;
+      if (!newRange) {
+        return;
+      }
+
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+      this.editor.slots.inlineRangeApply.emit(newRange);
+    } catch (error) {
+      console.error('failed to apply inline range');
+      console.error(error);
     }
-
-    selection.removeAllRanges();
-    selection.addRange(newRange);
-    this.editor.slots.inlineRangeApply.emit(newRange);
   };
 
   private _inlineRange: InlineRange | null = null;
@@ -72,7 +77,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
   getInlineRangeFromElement = (element: Element): InlineRange | null => {
     const range = document.createRange();
-    const text = element.querySelector('[data-v-text');
+    const text = element.querySelector('[data-v-text]');
     if (!text) {
       return null;
     }
@@ -94,7 +99,8 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
     const range = this.toDomRange(inlineRange);
     if (!range) {
-      throw new Error('failed to convert inline range to domRange');
+      console.error('failed to convert inline range to domRange');
+      return false;
     }
 
     // check case 1:
@@ -141,7 +147,8 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
     const range = this.toDomRange(inlineRange);
     if (!range) {
-      throw new Error('failed to convert inline range to domRange');
+      console.error('failed to convert inline range to domRange');
+      return false;
     }
 
     // check case 2:
@@ -259,7 +266,8 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
    */
   setInlineRange = (inlineRange: InlineRange | null, sync = true): void => {
     if (!this.isValidInlineRange(inlineRange)) {
-      throw new Error('invalid inline range');
+      console.error('invalid inline range');
+      return;
     }
 
     if (this.inlineRangeProvider) {
@@ -333,7 +341,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     line: VLine;
     lineIndex: number;
     rangeIndexRelatedToLine: number;
-  } {
+  } | null {
     const lineElements = Array.from(
       this.rootElement.querySelectorAll('v-line')
     );
@@ -353,7 +361,8 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
       beforeIndex += lineElement.vTextLength + 1;
     }
 
-    throw new Error('failed to find line');
+    console.error('failed to find line');
+    return null;
   }
 
   getNativeRange(): Range | null {

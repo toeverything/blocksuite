@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -18,6 +18,9 @@ export class VElement<
 
   override render() {
     const inlineEditor = getInlineEditorInsideRoot(this);
+    if (!inlineEditor) {
+      return nothing;
+    }
     const attributeRenderer = inlineEditor.attributeService.attributeRenderer;
 
     const isEmbed = inlineEditor.isEmbed(this.delta);

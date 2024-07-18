@@ -172,6 +172,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
             );
           }
 
+          if (!doc) {
+            break;
+          }
+
           window.doc.addBlock(
             'affine:paragraph',
             {

@@ -13,6 +13,7 @@ import {
   BlockComponent,
   DragIndicator,
   popMenu,
+  toast,
 } from '../_common/components/index.js';
 import {
   CopyIcon,
@@ -78,7 +79,12 @@ export class DatabaseBlockComponent extends BlockComponent<
             name: 'Copy',
             select: () => {
               const slice = Slice.fromModels(this.doc, [this.model]);
-              this.std.clipboard.copySlice(slice).catch(console.error);
+              this.std.clipboard
+                .copySlice(slice)
+                .then(() => {
+                  toast(this.host, 'Copied to clipboard');
+                })
+                .catch(console.error);
             },
           },
           // {

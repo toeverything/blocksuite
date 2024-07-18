@@ -404,6 +404,10 @@ export class DatePicker extends WithDisposable(LitElement) {
               this.focusDateCell();
           });
         }
+
+        if (e.key === 'Escape') {
+          this.onEscape?.(toDate(this.value));
+        }
       },
       true
     );
@@ -574,6 +578,9 @@ export class DatePicker extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor onChange: ((value: Date) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor onEscape: ((value: Date) => void) | undefined = undefined;
 
   /** card padding in px */
   @property({ type: Number })

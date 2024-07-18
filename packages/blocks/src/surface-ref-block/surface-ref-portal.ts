@@ -29,6 +29,59 @@ const getPortalTag = (model: BlockModel) => {
 
 @customElement('surface-ref-portal')
 export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
+  private _getBlocksInFrame = (
+    model: FrameBlockModel
+  ): EdgelessBlockModel[] => {
+    const bound = model.elementBound;
+    const candidates =
+      this.surfaceService?.layer.blocksGrid.search(bound) ?? [];
+
+    return candidates;
+  };
+
+  private _renderEdgelessBlocks = () => {
+    const refModel = this.refModel;
+    const blocks =
+      'flavour' in refModel
+        ? this._getBlocksInFrame(refModel)
+        : this._getBlocksInGroup(refModel);
+    const blockLayers = (this.surfaceService?.layer.layers.filter(
+      layer => layer.type === 'block'
+    ) ?? []) as BlockLayer[];
+    let currentLayerIdx = 0;
+    let currentIdxOffset = 0;
+
+    return repeat(
+      blocks,
+      model => model.id,
+      (model, index) => {
+        const tag = literal`${unsafeStatic(getPortalTag(model))}`;
+
+        let currentLayer = blockLayers[currentLayerIdx];
+        if (!blockLayers[currentLayerIdx].set.has(model)) {
+          while (!currentLayer.set.has(model)) {
+            currentLayer = blockLayers[++currentLayerIdx];
+          }
+
+          currentIdxOffset = 0;
+        }
+
+        const zIndex = currentLayer.zIndex + currentIdxOffset++;
+
+        return staticHtml`<${tag}
+          .index=${index}
+          .model=${model}
+          .doc=${this.doc}
+          .host=${this.host}
+          .renderModel=${this.renderModel}
+          style=${styleMap({
+            'z-index': zIndex,
+          })}
+        ></${tag}>`;
+      }
+    );
+  };
+
   static override styles = css`
     .surface-blocks-portal {
       pointer-events: none;
@@ -75,60 +128,10 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
   };
 
-  private _getBlocksInFrame(model: FrameBlockModel): EdgelessBlockModel[] {
-    const bound = model.elementBound;
-    const candidates = this.surfaceService.layer.blocksGrid.search(bound);
-
-    return candidates;
-  }
-
   private _getBlocksInGroup(model: GroupElementModel): EdgelessBlockModel[] {
     return Array.from(model.childIds)
       .map(id => this.doc.getBlockById(id) as EdgelessBlockModel)
       .filter(el => el);
-  }
-
-  private _renderEdgelessBlocks() {
-    const refModel = this.refModel;
-    const blocks =
-      'flavour' in refModel
-        ? this._getBlocksInFrame(refModel)
-        : this._getBlocksInGroup(refModel);
-    const blockLayers = this.surfaceService.layer.layers.filter(
-      layer => layer.type === 'block'
-    ) as BlockLayer[];
-    let currentLayerIdx = 0;
-    let currentIdxOffset = 0;
-
-    return repeat(
-      blocks,
-      model => model.id,
-      (model, index) => {
-        const tag = literal`${unsafeStatic(getPortalTag(model))}`;
-
-        let currentLayer = blockLayers[currentLayerIdx];
-        if (!blockLayers[currentLayerIdx].set.has(model)) {
-          while (!currentLayer.set.has(model)) {
-            currentLayer = blockLayers[++currentLayerIdx];
-          }
-
-          currentIdxOffset = 0;
-        }
-
-        const zIndex = currentLayer.zIndex + currentIdxOffset++;
-
-        return staticHtml`<${tag}
-          .index=${index}
-          .model=${model}
-          .doc=${this.doc}
-          .host=${this.host}
-          .renderModel=${this.renderModel}
-          style=${styleMap({
-            'z-index': zIndex,
-          })}
-        ></${tag}>`;
-      }
-    );
   }
 
   override render() {

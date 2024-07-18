@@ -57,27 +57,48 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
   }
 
   async fromBlock(mode: DraftModel) {
-    const blockSnapshot = await this.job.blockToSnapshot(mode);
-    return this.fromBlockSnapshot({
-      snapshot: blockSnapshot,
-      assets: this.job.assetsManager,
-    });
+    try {
+      const blockSnapshot = await this.job.blockToSnapshot(mode);
+      if (!blockSnapshot) return;
+      return await this.fromBlockSnapshot({
+        snapshot: blockSnapshot,
+        assets: this.job.assetsManager,
+      });
+    } catch (error) {
+      console.error('Cannot convert block to snapshot');
+      console.error(error);
+      return;
+    }
   }
 
   async fromDoc(doc: Doc) {
-    const docSnapshot = await this.job.docToSnapshot(doc);
-    return this.fromDocSnapshot({
-      snapshot: docSnapshot,
-      assets: this.job.assetsManager,
-    });
+    try {
+      const docSnapshot = await this.job.docToSnapshot(doc);
+      if (!docSnapshot) return;
+      return await this.fromDocSnapshot({
+        snapshot: docSnapshot,
+        assets: this.job.assetsManager,
+      });
+    } catch (error) {
+      console.error('Cannot convert doc to snapshot');
+      console.error(error);
+      return;
+    }
   }
 
   async fromSlice(slice: Slice) {
-    const sliceSnapshot = await this.job.sliceToSnapshot(slice);
-    return this.fromSliceSnapshot({
-      snapshot: sliceSnapshot,
-      assets: this.job.assetsManager,
-    });
+    try {
+      const sliceSnapshot = await this.job.sliceToSnapshot(slice);
+      if (!sliceSnapshot) return;
+      return await this.fromSliceSnapshot({
+        snapshot: sliceSnapshot,
+        assets: this.job.assetsManager,
+      });
+    } catch (error) {
+      console.error('Cannot convert slice to snapshot');
+      console.error(error);
+      return;
+    }
   }
 
   async toBlock(
@@ -86,13 +107,27 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     parent?: string,
     index?: number
   ) {
-    const snapshot = await this.toBlockSnapshot(payload);
-    return this.job.snapshotToBlock(snapshot, doc, parent, index);
+    try {
+      const snapshot = await this.toBlockSnapshot(payload);
+      if (!snapshot) return;
+      return await this.job.snapshotToBlock(snapshot, doc, parent, index);
+    } catch (error) {
+      console.error('Cannot convert block snapshot to block');
+      console.error(error);
+      return;
+    }
   }
 
   async toDoc(payload: ToDocSnapshotPayload<AdapterTarget>) {
-    const snapshot = await this.toDocSnapshot(payload);
-    return this.job.snapshotToDoc(snapshot);
+    try {
+      const snapshot = await this.toDocSnapshot(payload);
+      if (!snapshot) return;
+      return await this.job.snapshotToDoc(snapshot);
+    } catch (error) {
+      console.error('Cannot convert doc snapshot to doc');
+      console.error(error);
+      return;
+    }
   }
 
   async toSlice(
@@ -101,9 +136,15 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     parent?: string,
     index?: number
   ) {
-    const snapshot = await this.toSliceSnapshot(payload);
-    if (!snapshot) return;
-    return this.job.snapshotToSlice(snapshot, doc, parent, index);
+    try {
+      const snapshot = await this.toSliceSnapshot(payload);
+      if (!snapshot) return;
+      return await this.job.snapshotToSlice(snapshot, doc, parent, index);
+    } catch (error) {
+      console.error('Cannot convert slice snapshot to slice');
+      console.error(error);
+      return;
+    }
   }
 
   get configs() {
