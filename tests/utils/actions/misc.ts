@@ -26,6 +26,7 @@ import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   SHORT_KEY,
   pressEnter,
+  pressEscape,
   pressSpace,
   pressTab,
   type,
@@ -643,11 +644,14 @@ export async function initDatabaseDynamicRowWithData(
   const editorHost = getEditorHostLocator(page);
   if (addRow) {
     await initDatabaseRow(page);
+    await pressEscape(page);
   }
-  await focusDatabaseTitle(page);
+  // await focusDatabaseTitle(page);
   const lastRow = editorHost.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
+  await waitNextFrame(page);
+  await pressEnter(page);
   await waitNextFrame(page);
   await type(page, data);
   await pressEnter(page);
