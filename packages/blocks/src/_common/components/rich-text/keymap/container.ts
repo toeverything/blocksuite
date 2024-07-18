@@ -1,7 +1,6 @@
 import type { BlockElement, UIEventStateContext } from '@blocksuite/block-std';
 
 import { IS_MAC } from '@blocksuite/global/env';
-import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
   type InlineEditor,
@@ -77,7 +76,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
   const _getPrefixText = (inlineEditor: InlineEditor) => {
     const inlineRange = inlineEditor.getInlineRange();
-    assertExists(inlineRange);
+    if (!inlineRange) return '';
     const firstLineEnd = inlineEditor.yTextString.search(/\n/);
     if (firstLineEnd !== -1 && inlineRange.index > firstLineEnd) {
       return '';
@@ -145,7 +144,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       const inlineEditor = _getInlineEditor();
       const inlineRange = inlineEditor.getInlineRange();
-      assertExists(inlineRange);
+      if (!inlineRange) return;
       if (
         !tryConvertBlock(
           blockElement,
@@ -167,7 +166,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       const state = ctx.get('keyboardState');
       const inlineEditor = _getInlineEditor();
       const inlineRange = inlineEditor.getInlineRange();
-      assertExists(inlineRange);
+      if (!inlineRange) return;
       hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw, true);
       _preventDefault(ctx);
 
@@ -212,7 +211,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (textModels && textModels.length === 1) {
           const inlineEditor = _getInlineEditor();
           const inlineRange = inlineEditor.getInlineRange();
-          assertExists(inlineRange);
+          if (!inlineRange) return;
           handleIndent(blockElement.host, model, inlineRange.index);
           _preventDefault(ctx);
 
@@ -256,7 +255,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (textModels && textModels.length === 1) {
           const inlineEditor = _getInlineEditor();
           const inlineRange = inlineEditor.getInlineRange();
-          assertExists(inlineRange);
+          if (!inlineRange) return;
           if (inlineRange.index === 0) {
             handleRemoveAllIndent(blockElement.host, model, inlineRange.index);
             _preventDefault(ctx);
@@ -303,7 +302,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (textModels && textModels.length === 1) {
           const inlineEditor = _getInlineEditor();
           const inlineRange = inlineEditor.getInlineRange();
-          assertExists(inlineRange);
+          if (!inlineRange) return;
           handleUnindent(blockElement.host, model, inlineRange.index);
           _preventDefault(ctx);
 
@@ -333,7 +332,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       // Auto delete bracket right
       if (matchFlavours(blockElement.model, ['affine:code'])) {
         const inlineRange = inlineEditor.getInlineRange();
-        assertExists(inlineRange);
+        if (!inlineRange) return;
         const left = inlineEditor.yText.toString()[inlineRange.index - 1];
         const right = inlineEditor.yText.toString()[inlineRange.index];
         if (bracketPairs[leftBrackets.indexOf(left)]?.right === right) {
@@ -380,7 +379,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
     const inlineEditor = _getInlineEditor();
     const inlineRange = inlineEditor.getInlineRange();
-    assertExists(inlineRange);
+    if (!inlineRange) return;
 
     const prefixText = _getPrefixText(inlineEditor);
 
@@ -403,12 +402,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
   function tryConvertToLinkedDoc() {
     const root = model.doc.root;
-    assertExists(root);
+    if (!root) return false;
     const docBlock = blockElement.host.view.viewFromPath(
       'block',
       buildPath(model.doc.root)
     );
-    assertExists(docBlock);
+    if (!docBlock) return false;
     const linkedDocWidgetEle = blockElement.host.view.getWidget(
       'affine-linked-doc-widget',
       root.id
@@ -417,7 +416,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
     const inlineEditor = _getInlineEditor();
     const inlineRange = inlineEditor.getInlineRange();
-    assertExists(inlineRange);
+    if (!inlineRange) return false;
     const text = inlineEditor.yText.toString();
     const left = text[inlineRange.index - 1];
     const right = text[inlineRange.index + inlineRange.length];
@@ -464,7 +463,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
         const inlineEditor = _getInlineEditor();
         const inlineRange = inlineEditor.getInlineRange();
-        assertExists(inlineRange);
+        if (!inlineRange) return;
         const selectedText = inlineEditor.yText
           .toString()
           .slice(inlineRange.index, inlineRange.index + inlineRange.length);
@@ -496,7 +495,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (!matchFlavours(blockElement.model, ['affine:code'])) return;
         const inlineEditor = _getInlineEditor();
         const inlineRange = inlineEditor.getInlineRange();
-        assertExists(inlineRange);
+        if (!inlineRange) return;
         const left = inlineEditor.yText.toString()[inlineRange.index - 1];
         const right = inlineEditor.yText.toString()[inlineRange.index];
         if (pair.left === left && pair.right === right) {
@@ -522,7 +521,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       _preventDefault(ctx);
       const inlineEditor = _getInlineEditor();
       const inlineRange = inlineEditor.getInlineRange();
-      assertExists(inlineRange);
+      if (!inlineRange) return;
       inlineEditor.formatText(inlineRange, { code: true });
 
       inlineEditor.setInlineRange({
