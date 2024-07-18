@@ -90,7 +90,11 @@ export class AffineLinkedDocWidget extends WidgetElement {
   private _onKeyDown = (ctx: UIEventStateContext) => {
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
-    if (isControlledKeyboardEvent(event) || event.key.length !== 1) return;
+    // FIXME: Event can be undefined sometimes for unknown reason
+    // Need to investigate
+    // Maybe related to the lifecycle of the widget
+    if (!event || isControlledKeyboardEvent(event) || event.key.length !== 1)
+      return;
     const inlineEditor = this.getInlineEditor(event);
     if (!inlineEditor) return;
     const inlineRange = inlineEditor.getInlineRange();
