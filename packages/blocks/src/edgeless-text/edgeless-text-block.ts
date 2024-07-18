@@ -36,6 +36,10 @@ export class EdgelessTextBlockComponent extends EdgelessBlockElement<
   private _resizeObserver = new ResizeObserver(() => {
     const rect = this._textContainer.getBoundingClientRect();
     const bound = Bound.deserialize(this.model.xywh);
+    if (!this.rootService) {
+      console.error('rootService is not ready in edgeless-text-block');
+      return;
+    }
     if (
       (this._editing && !this.model.hasMaxWidth) ||
       rect.width > bound.w * this.rootService.zoom
