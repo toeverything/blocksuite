@@ -67,6 +67,9 @@ export async function importMarkDown(
     file: text,
     assets: job.assetsManager,
   });
+  if (!page) {
+    return;
+  }
   return page.id;
 }
 
@@ -81,6 +84,9 @@ export async function importHtml(collection: DocCollection, text: string) {
     assets: job.assetsManager,
   });
   const page = await job.snapshotToDoc(snapshot);
+  if (!page) {
+    return;
+  }
   return page.id;
 }
 
@@ -163,7 +169,9 @@ export async function importNotion(collection: DocCollection, file: File) {
         pageMap,
         assets: job.assetsManager,
       });
-      pageIds.push(page.id);
+      if (page) {
+        pageIds.push(page.id);
+      }
     });
     promises.push(...pagePromises);
     return promises;
@@ -210,7 +218,9 @@ export class ImportDoc extends WithDisposable(LitElement) {
       }
       const pageId = await importHtml(this.collection, text);
       needLoading && this.abortController.abort();
-      pageIds.push(pageId);
+      if (pageId) {
+        pageIds.push(pageId);
+      }
     }
     this._onImportSuccess(pageIds);
   }
@@ -234,7 +244,9 @@ export class ImportDoc extends WithDisposable(LitElement) {
       }
       const pageId = await importMarkDown(this.collection, text, fileName);
       needLoading && this.abortController.abort();
-      pageIds.push(pageId);
+      if (pageId) {
+        pageIds.push(pageId);
+      }
     }
     this._onImportSuccess(pageIds);
   }

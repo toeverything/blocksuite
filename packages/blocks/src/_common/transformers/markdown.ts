@@ -12,6 +12,9 @@ async function exportDoc(doc: Doc) {
   const snapshot = await job.docToSnapshot(doc);
 
   const adapter = new MarkdownAdapter(job);
+  if (!snapshot) {
+    return;
+  }
 
   const markdownResult = await adapter.fromDocSnapshot({
     snapshot,
