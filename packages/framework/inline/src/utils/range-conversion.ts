@@ -1,5 +1,7 @@
 import type * as Y from 'yjs';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 import type { InlineRange } from '../types.js';
 
 import { VElement } from '../components/v-element.js';
@@ -267,7 +269,10 @@ export function inlineRangeToDomRange(
 
     const texts = getTextNodesFromElement(lineElements[i]);
     if (texts.length === 0) {
-      throw new Error('text node in v-text not found');
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
+        'text node in v-text not found'
+      );
     }
 
     for (const text of texts) {
@@ -303,18 +308,25 @@ export function inlineRangeToDomRange(
   if (isInEmbedElement(startText)) {
     const anchorVElement = startText.parentElement?.closest('v-element');
     if (!anchorVElement) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
         'failed to find vElement for a text note in an embed element'
       );
     }
     const nextSibling = anchorVElement.nextElementSibling;
     if (!nextSibling) {
-      throw new Error('failed to find nextSibling sibling of an embed element');
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
+        'failed to find nextSibling sibling of an embed element'
+      );
     }
 
     const texts = getTextNodesFromElement(nextSibling);
     if (texts.length === 0) {
-      throw new Error('text node in v-text not found');
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
+        'text node in v-text not found'
+      );
     }
     if (nextSibling instanceof VElement) {
       startText = texts[texts.length - 1];
@@ -328,18 +340,25 @@ export function inlineRangeToDomRange(
   if (isInEmbedElement(endText)) {
     const focusVElement = endText.parentElement?.closest('v-element');
     if (!focusVElement) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
         'failed to find vElement for a text note in an embed element'
       );
     }
     const nextSibling = focusVElement.nextElementSibling;
     if (!nextSibling) {
-      throw new Error('failed to find nextSibling sibling of an embed element');
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
+        'failed to find nextSibling sibling of an embed element'
+      );
     }
 
     const texts = getTextNodesFromElement(nextSibling);
     if (texts.length === 0) {
-      throw new Error('text node in v-text not found');
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
+        'text node in v-text not found'
+      );
     }
     endText = texts[0];
     focusOffset = 0;
