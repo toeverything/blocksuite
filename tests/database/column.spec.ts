@@ -193,8 +193,9 @@ test.describe('switch column type', () => {
     await assertDatabaseCellNumber(page, {
       text: '',
     });
-
-    await initDatabaseDynamicRowWithData(page, '123abc');
+    await pressEnter(page);
+    await type(page, '123abc');
+    await pressEscape(page);
     expect((await cell.textContent())?.trim()).toBe('123');
   });
 
@@ -211,9 +212,12 @@ test.describe('switch column type', () => {
     // Therefore, for the time being, here is to detect whether there is '.affine-database-rich-text'
     const cell = getFirstColumnCell(page, 'affine-database-rich-text');
     expect(await cell.count()).toBe(1);
-
-    await initDatabaseDynamicRowWithData(page, '123');
-    await initDatabaseDynamicRowWithData(page, 'abc');
+    await pressEnter(page);
+    await type(page, '123');
+    await pressEscape(page);
+    await pressEnter(page);
+    await type(page, 'abc');
+    await pressEscape(page);
     await assertDatabaseCellRichTexts(page, { text: '123abc123abc' });
   });
 
@@ -275,7 +279,9 @@ test.describe('switch column type', () => {
     });
 
     await switchColumnType(page, 'Text');
-    await initDatabaseDynamicRowWithData(page, 'abc');
+    await pressEnter(page);
+    await type(page, 'abc');
+    await pressEscape(page);
     await assertDatabaseCellRichTexts(page, { text: '123abc' });
 
     await switchColumnType(page, 'Number');
@@ -418,7 +424,9 @@ test.describe('switch column type', () => {
 
     const linkText = 'http://example.com';
     const cell = getFirstColumnCell(page, 'affine-database-link');
-    await initDatabaseDynamicRowWithData(page, linkText);
+    await pressEnter(page);
+    await type(page, linkText);
+    await pressEscape(page);
     const link = cell.locator('affine-database-link-node > a');
     const linkContent = link.locator('.link-node-text');
     await expect(link).toHaveAttribute('href', linkText);
