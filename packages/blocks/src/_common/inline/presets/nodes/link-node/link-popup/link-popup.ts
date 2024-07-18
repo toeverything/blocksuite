@@ -142,6 +142,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
   };
 
   private _viewTemplate = () => {
+    if (!this._rootService) {
+      return nothing;
+    }
+
     this._embedOptions = this._rootService.getEmbedBlockOptions(
       this.currentLink
     );
@@ -235,6 +239,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     }
 
     const blockElement = this.blockElement;
+    if (!blockElement) return;
     const url = this.currentLink;
     const title = this.currentText;
     const props = {
@@ -267,6 +272,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const url = this.currentLink;
 
     const blockElement = this.blockElement;
+    if (!blockElement) return;
     const doc = blockElement.doc;
     const parent = doc.getParent(blockElement.model);
     assertExists(parent);
@@ -287,19 +293,21 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   private _copyUrl() {
     navigator.clipboard.writeText(this.currentLink).catch(console.error);
+    if (!this.host) return;
     toast(this.host, 'Copied link to clipboard');
     this.abortController.abort();
   }
 
   private get _isBookmarkAllowed() {
     const blockElement = this.blockElement;
+    if (!blockElement) return false;
     const schema = blockElement.doc.schema;
     const parent = blockElement.doc.getParent(blockElement.model);
-    assertExists(parent);
+    if (!parent) return false;
     const bookmarkSchema = schema.flavourSchemaMap.get('affine:bookmark');
-    assertExists(bookmarkSchema);
+    if (!bookmarkSchema) return false;
     const parentSchema = schema.flavourSchemaMap.get(parent.flavour);
-    assertExists(parentSchema);
+    if (!parentSchema) return false;
 
     try {
       schema.validateSchema(bookmarkSchema, parentSchema);
@@ -358,9 +366,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
         reference: null,
       });
       this.inlineEditor.setInlineRange(this.targetInlineRange);
-      const textSelection = this.host.selection.find('text');
+      const textSelection = this.host?.selection.find('text');
       assertExists(textSelection);
-      this.host.rangeManager?.syncTextSelectionToRange(textSelection);
+      this.host?.rangeManager?.syncTextSelectionToRange(textSelection);
     } else if (this.type === 'edit') {
       const text = this.textInput?.value ?? link;
       this.inlineEditor.insertText(this.targetInlineRange, text, {
@@ -371,9 +379,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
         index: this.targetInlineRange.index,
         length: text.length,
       });
-      const textSelection = this.host.selection.find('text');
+      const textSelection = this.host?.selection.find('text');
       assertExists(textSelection);
-      this.host.rangeManager?.syncTextSelectionToRange(textSelection);
+      this.host?.rangeManager?.syncTextSelectionToRange(textSelection);
     }
 
     this.abortController.abort();
@@ -388,7 +396,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private get _rootService() {
-    return this.std.spec.getService('affine:page');
+    return this.std?.spec.getService('affine:page');
   }
 
   private _updateConfirmBtn() {
@@ -499,7 +507,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
                 class="affine-link-popover-overlay-mask"
                 @click=${() => {
                   this.abortController.abort();
-                  this.host.selection.clear();
+                  this.host?.selection.clear();
                 }}
               ></div>
             `}
@@ -562,7 +570,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
       `[${BLOCK_ID_ATTR}]`
     );
-    assertExists(blockElement);
+    if (!blockElement) {
+      return null;
+    }
     return blockElement;
   }
 
@@ -580,11 +590,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   get host() {
-    return this.blockElement.host;
+    return this.blockElement?.host;
   }
 
   get std() {
-    return this.blockElement.std;
+    return this.blockElement?.std;
   }
 
   @property({ attribute: false })

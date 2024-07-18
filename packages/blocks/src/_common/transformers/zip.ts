@@ -21,10 +21,12 @@ async function exportDocs(collection: DocCollection, docs: Doc[]) {
   const collectionInfo = job.collectionInfoToSnapshot();
   zip.file('info.json', JSON.stringify(collectionInfo, null, 2));
 
-  snapshots.forEach(snapshot => {
-    const snapshotName = `${snapshot.meta.id}.snapshot.json`;
-    zip.file(snapshotName, JSON.stringify(snapshot, null, 2));
-  });
+  snapshots
+    .filter((snapshot): snapshot is DocSnapshot => !!snapshot)
+    .forEach(snapshot => {
+      const snapshotName = `${snapshot.meta.id}.snapshot.json`;
+      zip.file(snapshotName, JSON.stringify(snapshot, null, 2));
+    });
 
   const assets = zip.folder('assets');
   assertExists(assets);

@@ -1,18 +1,21 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import type { InlineEditor, InlineRootElement } from '../inline-editor.js';
 
 import { INLINE_ROOT_ATTR } from '../consts.js';
 
-export function getInlineEditorInsideRoot(element: Element): InlineEditor {
+export function getInlineEditorInsideRoot(
+  element: Element
+): InlineEditor | null {
   const rootElement = element.closest(
     `[${INLINE_ROOT_ATTR}]`
   ) as InlineRootElement;
-  assertExists(rootElement, 'element must be inside a v-root');
+  if (!rootElement) {
+    console.error('element must be inside a v-root');
+    return null;
+  }
   const inlineEditor = rootElement.inlineEditor;
-  assertExists(
-    inlineEditor,
-    'element must be inside a v-root with inline-editor'
-  );
+  if (!inlineEditor) {
+    console.error('element must be inside a v-root with inline-editor');
+    return null;
+  }
   return inlineEditor;
 }

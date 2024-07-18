@@ -1017,6 +1017,9 @@ export async function getPageSnapshot(page: Page, toJSON?: boolean) {
   const json = await page.evaluate(async () => {
     const { job, doc } = window;
     const snapshot = await job.docToSnapshot(doc);
+    if (!snapshot) {
+      throw new Error('Failed to get snapshot');
+    }
     return snapshot.blocks;
   });
   if (toJSON) {
