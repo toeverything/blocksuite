@@ -64,7 +64,7 @@ export class WidgetElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.std.view.deleteWidget(this);
+    this.std?.view.deleteWidget(this);
     this.service.specSlots.widgetDisconnected.emit({
       service: this.blockElement.service,
       component: this,
@@ -81,7 +81,7 @@ export class WidgetElement<
   }
 
   get std() {
-    return this.host.std;
+    return this.host?.std;
   }
 
   @property({ attribute: false })
