@@ -265,6 +265,11 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
+      // FIXME: find a better way to get rid of empty check
+      if (!this.service || !this.service.selection || !this.service.viewport) {
+        console.error('Service not ready');
+        return;
+      }
       this.service.selection.set(this.service.selection.surfaceSelections);
       this.service.viewport.onResize();
     });
