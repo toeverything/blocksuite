@@ -247,6 +247,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     const setRemoteCursor = (pos: { x: number; y: number }) => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestConnectedFrame(() => {
+        if (!this.service?.viewport) return;
         const cursorPosition = this.service.viewport.toModelCoord(pos.x, pos.y);
         this.service.selection.setCursor({
           x: cursorPosition[0],
