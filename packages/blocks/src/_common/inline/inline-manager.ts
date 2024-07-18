@@ -58,6 +58,38 @@ export class InlineManager<
     return false;
   };
 
+  getRenderer = (): AttributeRenderer<TextAttributes> => {
+    const defaultRenderer = getDefaultAttributeRenderer<TextAttributes>();
+
+    const renderer: AttributeRenderer<TextAttributes> = (delta, selected) => {
+      // Priority increases from front to back
+      for (const spec of this._specs.toReversed()) {
+        if (spec.match(delta)) {
+          return spec.renderer(delta, selected);
+        }
+      }
+      return defaultRenderer(delta, selected);
+    };
+    return renderer;
+  };
+
+  getSchema = (): ZodObject<Record<keyof TextAttributes, ZodTypeAny>> => {
+    const defaultSchema = baseTextAttributes as unknown as ZodObject<
+      Record<keyof TextAttributes, ZodTypeAny>
+    >;
+
+    const schema: ZodObject<Record<keyof TextAttributes, ZodTypeAny>> =
+      this._specs.reduce((acc, cur) => {
+        const currentSchema = z.object({
+          [cur.name]: cur.schema,
+        }) as ZodObject<Record<keyof TextAttributes, ZodTypeAny>>;
+        return acc.merge(currentSchema) as ZodObject<
+          Record<keyof TextAttributes, ZodTypeAny>
+        >;
+      }, defaultSchema);
+    return schema;
+  };
+
   markdownShortcutHandler = (
     context: KeyboardBindingContext<TextAttributes>,
     undoManager: Y.UndoManager
@@ -79,38 +111,6 @@ export class InlineManager<
     return KEYBOARD_ALLOW_DEFAULT;
   };
 
-  getRenderer(): AttributeRenderer<TextAttributes> {
-    const defaultRenderer = getDefaultAttributeRenderer<TextAttributes>();
-
-    const renderer: AttributeRenderer<TextAttributes> = (delta, selected) => {
-      // Priority increases from front to back
-      for (const spec of this._specs.toReversed()) {
-        if (spec.match(delta)) {
-          return spec.renderer(delta, selected);
-        }
-      }
-      return defaultRenderer(delta, selected);
-    };
-    return renderer;
-  }
-
-  getSchema(): ZodObject<Record<keyof TextAttributes, ZodTypeAny>> {
-    const defaultSchema = baseTextAttributes as unknown as ZodObject<
-      Record<keyof TextAttributes, ZodTypeAny>
-    >;
-
-    const schema: ZodObject<Record<keyof TextAttributes, ZodTypeAny>> =
-      this._specs.reduce((acc, cur) => {
-        const currentSchema = z.object({
-          [cur.name]: cur.schema,
-        }) as ZodObject<Record<keyof TextAttributes, ZodTypeAny>>;
-        return acc.merge(currentSchema) as ZodObject<
-          Record<keyof TextAttributes, ZodTypeAny>
-        >;
-      }, defaultSchema);
-    return schema;
-  }
-
   registerMarkdownMatches(
     markdownMatches: InlineMarkdownMatch<TextAttributes>[]
   ): void {
@@ -118,6 +118,9 @@ export class InlineManager<
   }
 
   registerSpecs(specs: InlineSpecs<TextAttributes>[]): void {
+    if (!Array.isArray(specs)) {
+      return;
+    }
     this._specs = specs;
   }
 
