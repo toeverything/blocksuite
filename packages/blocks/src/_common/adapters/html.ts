@@ -511,6 +511,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         }
         case 'body':
         case 'div':
+        case 'span':
         case 'footer': {
           if (
             // Check if it is a paragraph like div
