@@ -1,8 +1,7 @@
-import './database-convert-view.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { createSimplePortal } from '../../components/portal.js';
@@ -10,7 +9,7 @@ import { toast } from '../../components/toast.js';
 import {
   CopyIcon,
   DatabaseTableViewIcon20,
-  FontLinkedDocIcon,
+  LinkedDocIcon,
 } from '../../icons/index.js';
 import {
   convertSelectedBlocksToLinkedDoc,
@@ -18,6 +17,7 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../utils/render-linked-doc.js';
+import './database-convert-view.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {
@@ -49,6 +49,7 @@ export const quickActionConfig: QuickActionConfig[] = [
             toast(host, 'Copied to clipboard');
           },
         })
+        .draftSelectedModels()
         .copySelectedModels()
         .run();
     },
@@ -102,7 +103,7 @@ export const quickActionConfig: QuickActionConfig[] = [
   {
     id: 'convert-to-linked-doc',
     name: 'Create Linked Doc',
-    icon: FontLinkedDocIcon,
+    icon: LinkedDocIcon,
     hotkey: `Mod-Shift-l`,
     showWhen: host => {
       const [_, ctx] = host.std.command

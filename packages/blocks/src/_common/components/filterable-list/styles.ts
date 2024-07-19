@@ -1,32 +1,30 @@
-import { baseTheme } from '@toeverything/theme';
-import { css, unsafeCSS } from 'lit';
+import { css } from 'lit';
 
+import { PANEL_BASE } from '../../styles.js';
 import { scrollbarStyle } from '../utils.js';
+
 export const filterableListStyles = css`
   :host {
-    background: var(--affine-background-overlay-panel-color);
-    color: var(--affine-text-primary-color);
-    box-shadow: var(--affine-menu-shadow);
-    border-radius: 12px;
+    ${PANEL_BASE}
 
-    display: flex;
     flex-direction: column;
+    padding: 0;
 
     max-height: 100%;
-    width: 230px;
     pointer-events: auto;
     overflow: hidden;
     z-index: var(--affine-z-index-popover);
   }
 
   .affine-filterable-list {
-    box-sizing: border-box;
     display: flex;
-    height: 100%;
-    overflow: hidden;
     flex-direction: column;
-    border-radius: 8px;
+    align-items: stretch;
+    justify-content: center;
+    width: 230px;
     padding: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .affine-filterable-list.flipped {
@@ -34,34 +32,33 @@ export const filterableListStyles = css`
   }
 
   .items-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     flex: 1;
     overflow-y: scroll;
     padding-top: 5px;
     padding-left: 4px;
     padding-right: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
   }
 
-  .divider {
-    height: 1px;
-    background-color: var(--affine-divider-color);
+  editor-toolbar-separator {
     margin: 8px 0;
-    flex-shrink: 0;
   }
 
   .input-wrapper {
     display: flex;
-    margin-left: 4px;
+    align-items: center;
     border-radius: 4px;
     padding: 4px 10px;
     gap: 4px;
-    border: 1px solid transparent;
+    border-width: 1px;
+    border-style: solid;
+    border-color: transparent;
   }
 
   .input-wrapper:focus-within {
-    border: 1px solid var(--affine-blue-600);
+    border-color: var(--affine-blue-700);
     box-shadow: var(--affine-active-shadow);
   }
 
@@ -85,7 +82,7 @@ export const filterableListStyles = css`
   }
 
   .filterable-item.focussed {
-    color: var(--affine-blue-600);
+    color: var(--affine-blue-700);
     background: var(--affine-hover-color-filled);
   }
 
@@ -96,12 +93,9 @@ export const filterableListStyles = css`
     width: 140px;
     border-radius: 8px;
     padding-top: 2px;
-    border: none;
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-sm);
-    box-sizing: border-box;
+    border: transparent;
+    background: transparent;
     color: inherit;
-    background: var(--affine-background-overlay-panel-color);
   }
 
   #filter-input:focus {
@@ -111,11 +105,5 @@ export const filterableListStyles = css`
   #filter-input::placeholder {
     color: var(--affine-placeholder-color);
     font-size: var(--affine-font-sm);
-  }
-
-  .search-icon {
-    display: flex;
-    align-items: center;
-    color: var(--affine-icon-color);
   }
 `;

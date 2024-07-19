@@ -1,12 +1,12 @@
-import './filter-group.js';
-import './filter-root.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { createPopup } from '../../../../_common/components/index.js';
 import type { FilterGroup, Variable } from '../../common/ast.js';
+
+import { createPopup } from '../../../../_common/components/index.js';
+import './filter-group.js';
+import './filter-root.js';
 
 @customElement('advanced-filter-modal')
 export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
@@ -66,24 +66,6 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor isRoot = false;
-
-  @property({ attribute: false })
-  accessor data!: FilterGroup;
-
-  @property({ attribute: false })
-  accessor vars!: Variable[];
-
-  @property({ attribute: false })
-  accessor setData!: (filter: FilterGroup) => void;
-
-  @property({ attribute: false })
-  accessor onDelete!: () => void;
-
-  @property({ attribute: false })
-  accessor onBack!: () => void;
-
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'mouseover', e => {
@@ -134,6 +116,24 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor data!: FilterGroup;
+
+  @property({ attribute: false })
+  accessor isRoot = false;
+
+  @property({ attribute: false })
+  accessor onBack!: () => void;
+
+  @property({ attribute: false })
+  accessor onDelete!: () => void;
+
+  @property({ attribute: false })
+  accessor setData!: (filter: FilterGroup) => void;
+
+  @property({ attribute: false })
+  accessor vars!: Variable[];
 }
 
 declare global {

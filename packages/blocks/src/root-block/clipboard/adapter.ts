@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
@@ -15,6 +14,8 @@ import type {
   DocSnapshot,
   SliceSnapshot,
 } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { BaseAdapter } from '@blocksuite/store';
 
 import { decodeClipboardBlobs, encodeClipboardBlobs } from './utils.js';
@@ -28,27 +29,15 @@ export type FileSnapshot = {
 export class ClipboardAdapter extends BaseAdapter<string> {
   static MIME = 'BLOCKSUITE/SNAPSHOT';
 
-  override fromDocSnapshot(
-    _payload: FromDocSnapshotPayload
-  ): Promise<FromDocSnapshotResult<string>> {
-    throw new Error('not implemented');
-  }
-
-  override toDocSnapshot(
-    _payload: ToDocSnapshotPayload<string>
-  ): Promise<DocSnapshot> {
-    throw new Error('not implemented');
-  }
-
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<string>> {
     throw new Error('not implemented');
   }
 
-  override toBlockSnapshot(
-    _payload: ToBlockSnapshotPayload<string>
-  ): Promise<BlockSnapshot> {
+  override fromDocSnapshot(
+    _payload: FromDocSnapshotPayload
+  ): Promise<FromDocSnapshotResult<string>> {
     throw new Error('not implemented');
   }
 
@@ -67,6 +56,18 @@ export class ClipboardAdapter extends BaseAdapter<string> {
       }),
       assetsIds: [],
     };
+  }
+
+  override toBlockSnapshot(
+    _payload: ToBlockSnapshotPayload<string>
+  ): Promise<BlockSnapshot> {
+    throw new Error('not implemented');
+  }
+
+  override toDocSnapshot(
+    _payload: ToDocSnapshotPayload<string>
+  ): Promise<DocSnapshot> {
+    throw new Error('not implemented');
   }
 
   override toSliceSnapshot(

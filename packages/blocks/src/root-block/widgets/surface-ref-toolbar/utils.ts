@@ -1,10 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 
-import { isTopLevelBlock } from '../../../root-block/edgeless/utils/query.js';
 import type { Renderer } from '../../../surface-block/canvas-renderer/renderer.js';
-import { Bound } from '../../../surface-block/utils/bound.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
+
+import { isTopLevelBlock } from '../../../root-block/edgeless/utils/query.js';
+import { Bound } from '../../../surface-block/utils/bound.js';
 
 export const edgelessToBlob = async (
   host: EditorHost,
@@ -32,7 +34,7 @@ export const edgelessToBlob = async (
       undefined,
       isBlock ? [edgelessElement] : undefined,
       isBlock ? undefined : [edgelessElement],
-      { zoom: options.surfaceRenderer.zoom }
+      { zoom: options.surfaceRenderer.viewport.zoom }
     )
     .then(canvas => {
       assertExists(canvas);

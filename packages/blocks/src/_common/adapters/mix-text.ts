@@ -1,6 +1,7 @@
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { Job } from '@blocksuite/store';
 import type { AssetsManager } from '@blocksuite/store';
+
 import {
   ASTWalker,
   BaseAdapter,
@@ -13,10 +14,10 @@ import {
   type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
-  nanoid,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
+  nanoid,
 } from '@blocksuite/store';
 
 import { NoteDisplayMode } from '../types.js';
@@ -83,6 +84,16 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     };
   }
 
+  async fromBlockSnapshot({
+    snapshot,
+  }: FromBlockSnapshotPayload): Promise<FromBlockSnapshotResult<MixText>> {
+    const { mixtext } = await this._traverseSnapshot(snapshot);
+    return {
+      file: mixtext,
+      assetsIds: [],
+    };
+  }
+
   async fromDocSnapshot({
     snapshot,
     assets,
@@ -102,16 +113,6 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     };
   }
 
-  async fromBlockSnapshot({
-    snapshot,
-  }: FromBlockSnapshotPayload): Promise<FromBlockSnapshotResult<MixText>> {
-    const { mixtext } = await this._traverseSnapshot(snapshot);
-    return {
-      file: mixtext,
-      assetsIds: [],
-    };
-  }
-
   async fromSliceSnapshot({
     snapshot,
   }: FromSliceSnapshotPayload): Promise<FromSliceSnapshotResult<MixText>> {
@@ -126,6 +127,41 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     return {
       file: mixtext,
       assetsIds: sliceAssetsIds,
+    };
+  }
+
+  toBlockSnapshot(payload: ToBlockSnapshotPayload<MixText>): BlockSnapshot {
+    payload.file = payload.file.replaceAll('\r', '');
+    return {
+      type: 'block',
+      id: nanoid(),
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: payload.file.split('\n').map((line): BlockSnapshot => {
+        return {
+          type: 'block',
+          id: nanoid(),
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: line,
+                },
+              ],
+            },
+          },
+          children: [],
+        };
+      }),
     };
   }
 
@@ -199,45 +235,9 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     };
   }
 
-  toBlockSnapshot(payload: ToBlockSnapshotPayload<MixText>): BlockSnapshot {
-    payload.file = payload.file.replaceAll('\r', '');
-    return {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: payload.file.split('\n').map((line): BlockSnapshot => {
-        return {
-          type: 'block',
-          id: nanoid(),
-          flavour: 'affine:paragraph',
-          props: {
-            type: 'text',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: line,
-                },
-              ],
-            },
-          },
-          children: [],
-        };
-      }),
-    };
-  }
-
   async toSliceSnapshot(
     payload: MixTextToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
-    this._markdownAdapter.applyConfigs(this.configs);
     if (payload.file.trim().length === 0) {
       return null;
     }

@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 import { getFormatBar } from 'utils/query.js';
 
 import {
@@ -38,6 +38,28 @@ import {
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
+const getToggleIcon = (page: Page) => page.locator('.toggle-icon');
+
+async function isToggleIconVisible(toggleIcon: Locator) {
+  const connected = await toggleIcon.isVisible();
+  if (!connected) return false;
+  const element = await toggleIcon.elementHandle();
+  if (!element) return false;
+  const opacity = await element.evaluate(node => {
+    // https://stackoverflow.com/questions/11365296/how-do-i-get-the-opacity-of-an-element-using-javascript
+    return window.getComputedStyle(node).getPropertyValue('opacity');
+  });
+  if (!opacity || typeof opacity !== 'string') {
+    throw new Error('opacity is not a string');
+  }
+  const isVisible = opacity !== '0';
+  return isVisible;
+}
+
+async function assertToggleIconVisible(toggleIcon: Locator, expected = true) {
+  expect(await isToggleIconVisible(toggleIcon)).toBe(expected);
+}
+
 test('add new bulleted list', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -52,6 +74,25 @@ test('add new bulleted list', async ({ page }) => {
 
   await assertRichTexts(page, ['aa', 'aa', '']);
   await assertBlockCount(page, 'list', 3);
+});
+
+test('add new todo list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page, 0);
+  await updateBlockType(page, 'affine:list', 'todo');
+  await focusRichText(page, 0);
+
+  await type(page, 'aa');
+  await assertRichTexts(page, ['aa']);
+
+  const checkBox = page.locator('.affine-list-block__prefix');
+  await expect(page.locator('.affine-list--checked')).toHaveCount(0);
+  await checkBox.click();
+  await expect(page.locator('.affine-list--checked')).toHaveCount(1);
+  await checkBox.click();
+  await expect(page.locator('.affine-list--checked')).toHaveCount(0);
 });
 
 test('add new toggle list', async ({ page }) => {
@@ -768,28 +809,6 @@ test('should not convert to a list when pressing space at the second line', asyn
 });
 
 test.describe('toggle list', () => {
-  const getToggleIcon = (page: Page) => page.locator('.toggle-icon');
-
-  async function isToggleIconVisible(toggleIcon: Locator) {
-    const connected = await toggleIcon.isVisible();
-    if (!connected) return false;
-    const element = await toggleIcon.elementHandle();
-    if (!element) return false;
-    const opacity = await element.evaluate(node => {
-      // https://stackoverflow.com/questions/11365296/how-do-i-get-the-opacity-of-an-element-using-javascript
-      return window.getComputedStyle(node).getPropertyValue('opacity');
-    });
-    if (!opacity || typeof opacity !== 'string') {
-      throw new Error('opacity is not a string');
-    }
-    const isVisible = opacity !== '0';
-    return isVisible;
-  }
-
-  async function assertToggleIconVisible(toggleIcon: Locator, expected = true) {
-    expect(await isToggleIconVisible(toggleIcon)).toBe(expected);
-  }
-
   test('click toggle icon should collapsed list', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const { noteId } = await initEmptyParagraphState(page);
@@ -939,7 +958,9 @@ test.describe('toggle list', () => {
     await waitNextFrame(page, 300);
     await assertToggleIconVisible(toggleIcon, false);
   });
+});
 
+test.describe('readonly', () => {
   test('can expand toggle in readonly mode', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -963,5 +984,30 @@ test.describe('toggle list', () => {
 
     await toggleIcon.click();
     await expect(prefixes).toHaveCount(2);
+  });
+
+  test('can not modify todo list in readonly mode', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    const checkBox = page.locator('.affine-list-block__prefix');
+
+    {
+      await type(page, '[] todo');
+      await switchReadonly(page);
+      await expect(page.locator('.affine-list--checked')).toHaveCount(0);
+      await checkBox.click();
+      await expect(page.locator('.affine-list--checked')).toHaveCount(0);
+    }
+
+    {
+      await switchReadonly(page, false);
+      await checkBox.click();
+      await switchReadonly(page);
+      await expect(page.locator('.affine-list--checked')).toHaveCount(1);
+      await checkBox.click();
+      await expect(page.locator('.affine-list--checked')).toHaveCount(1);
+    }
   });
 });

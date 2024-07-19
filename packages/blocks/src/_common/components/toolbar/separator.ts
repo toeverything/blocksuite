@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElement('editor-toolbar-separator')
@@ -9,6 +9,7 @@ export class EditorToolbarSeparator extends LitElement {
       align-items: center;
       justify-content: center;
       align-self: stretch;
+      flex-shrink: 0;
 
       width: 4px;
     }
@@ -22,7 +23,7 @@ export class EditorToolbarSeparator extends LitElement {
     }
 
     :host([data-orientation='horizontal']) {
-      height: var(--height, 4px);
+      height: 8px;
       width: unset;
     }
 

@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -30,12 +30,6 @@ export class EdgelessShapeStylePanel extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor value!: ShapeStyle;
-
-  @property({ attribute: false })
-  accessor onSelect: undefined | ((value: ShapeStyle) => void) = undefined;
-
   private _onSelect(value: ShapeStyle) {
     this.value = value;
     if (this.onSelect) {
@@ -60,6 +54,12 @@ export class EdgelessShapeStylePanel extends LitElement {
         </edgeless-tool-icon-button>`
     );
   }
+
+  @property({ attribute: false })
+  accessor onSelect: undefined | ((value: ShapeStyle) => void) = undefined;
+
+  @property({ attribute: false })
+  accessor value!: ShapeStyle;
 }
 
 declare global {

@@ -11,19 +11,11 @@ export class MindmapToolController extends EdgelessToolController<MindmapTool> {
     type: 'mindmap',
   } as MindmapTool;
 
-  override onContainerPointerDown(): void {
+  override afterModeSwitch(): void {
     noop();
   }
 
-  override onContainerDragStart(): void {
-    noop();
-  }
-
-  override onContainerDragMove(): void {
-    noop();
-  }
-
-  override onContainerDragEnd(): void {
+  override beforeModeSwitch(): void {
     noop();
   }
 
@@ -31,11 +23,23 @@ export class MindmapToolController extends EdgelessToolController<MindmapTool> {
     noop();
   }
 
+  override onContainerContextMenu(): void {
+    noop();
+  }
+
   override onContainerDblClick(): void {
     noop();
   }
 
-  override onContainerTripleClick(): void {
+  override onContainerDragEnd(): void {
+    noop();
+  }
+
+  override onContainerDragMove(): void {
+    noop();
+  }
+
+  override onContainerDragStart(): void {
     noop();
   }
 
@@ -47,7 +51,11 @@ export class MindmapToolController extends EdgelessToolController<MindmapTool> {
     noop();
   }
 
-  override onContainerContextMenu(): void {
+  override onContainerPointerDown(): void {
+    noop();
+  }
+
+  override onContainerTripleClick(): void {
     noop();
   }
 
@@ -56,14 +64,6 @@ export class MindmapToolController extends EdgelessToolController<MindmapTool> {
   }
 
   override onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
-
-  override beforeModeSwitch(): void {
-    noop();
-  }
-
-  override afterModeSwitch(): void {
     noop();
   }
 }

@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
 const styles = css`
@@ -57,12 +57,6 @@ const styles = css`
 export class OutlineNotePreviewSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor showPreviewIcon!: boolean;
-
-  @property({ attribute: false })
-  accessor toggleShowPreviewIcon!: (on: boolean) => void;
-
   override render() {
     return html`<div
       class="note-preview-setting-menu-container"
@@ -82,6 +76,12 @@ export class OutlineNotePreviewSettingMenu extends WithDisposable(LitElement) {
       </div>
     </div>`;
   }
+
+  @property({ attribute: false })
+  accessor showPreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  accessor toggleShowPreviewIcon!: (on: boolean) => void;
 }
 
 declare global {

@@ -1,4 +1,4 @@
-import type { nothing, TemplateResult } from 'lit';
+import type { TemplateResult, nothing } from 'lit';
 
 import type {
   AIError,

@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -7,12 +8,13 @@ import {
   BlockViewType,
   type Doc,
 } from '@blocksuite/store';
-import { css, render, type TemplateResult } from 'lit';
+import { type TemplateResult, css, render } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
+
 import { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import {
   getElementProps,
@@ -214,7 +216,7 @@ export function isEmptyDoc(doc: Doc | null, mode: DocMode) {
     return notes.every(note => isEmptyNote(note));
   } else {
     const surface = getSurfaceBlock(doc);
-    if (surface?.elementModels.length || doc.blocks.size > 2) {
+    if (surface?.elementModels.length || doc.blockSize > 2) {
       return false;
     }
     return true;
@@ -394,8 +396,8 @@ async function renderEdgelessAbstract(
   ).map(element => Bound.deserialize(element.xywh));
   const bound = getCommonBound(bounds);
   if (bound) {
-    renderer.onResize();
-    renderer.setViewportByBound(bound);
+    renderer.viewport.onResize();
+    renderer.viewport.setViewportByBound(bound);
   } else {
     card.isBannerEmpty = true;
   }

@@ -1,6 +1,11 @@
+import type { IVec, IVec3 } from '../../../utils/vec.js';
+
 import { getStroke } from '../../../perfect-freehand/getStroke.js';
 
-export function getSolidStrokePoints(points: number[][], lineWidth: number) {
+export function getSolidStrokePoints(
+  points: (IVec | IVec3)[],
+  lineWidth: number
+) {
   return getStroke(points, {
     size: lineWidth,
     thinning: 0.6,

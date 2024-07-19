@@ -1,5 +1,7 @@
-import { getStrokeRadius } from './getStrokeRadius.js';
+import type { IVec } from '../utils/vec.js';
 import type { StrokeOptions, StrokePoint } from './types.js';
+
+import { getStrokeRadius } from './getStrokeRadius.js';
 import {
   add,
   dist2,
@@ -39,7 +41,7 @@ const FIXED_PI = PI + 0.0001;
 export function getStrokeOutlinePoints(
   points: StrokePoint[],
   options: Partial<StrokeOptions> = {} as Partial<StrokeOptions>
-): number[][] {
+): IVec[] {
   const {
     size = 16,
     smoothing = 0.5,
@@ -83,8 +85,8 @@ export function getStrokeOutlinePoints(
   const minDistance = Math.pow(size * smoothing, 2);
 
   // Our collected left and right points
-  const leftPts: number[][] = [];
-  const rightPts: number[][] = [];
+  const leftPts: IVec[] = [];
+  const rightPts: IVec[] = [];
 
   // Previous pressure (start with average of first five pressures,
   // in order to prevent fat starts for every line. Drawn lines
@@ -289,16 +291,16 @@ export function getStrokeOutlinePoints(
     may have dots for very short lines.
   */
 
-  const firstPoint = points[0].point.slice(0, 2);
+  const firstPoint = points[0].point.slice(0, 2) as IVec;
 
   const lastPoint =
     points.length > 1
-      ? points[points.length - 1].point.slice(0, 2)
+      ? (points[points.length - 1].point.slice(0, 2) as IVec)
       : add(points[0].point, [1, 1]);
 
-  const startCap: number[][] = [];
+  const startCap: IVec[] = [];
 
-  const endCap: number[][] = [];
+  const endCap: IVec[] = [];
 
   /*
     Draw a dot for very short or completed strokes
@@ -316,7 +318,7 @@ export function getStrokeOutlinePoints(
         uni(per(sub(firstPoint, lastPoint))),
         -(firstRadius || radius)
       );
-      const dotPts: number[][] = [];
+      const dotPts: IVec[] = [];
       for (let step = 1 / 13, t = step; t <= 1; t += step) {
         dotPts.push(rotAround(start, firstPoint, FIXED_PI * 2 * t));
       }

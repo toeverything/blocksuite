@@ -1,11 +1,10 @@
-import '../../_common/components/ask-ai-button.js';
-
 import {
   type AffineFormatBarWidget,
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
+import '../../_common/components/ask-ai-button.js';
 import { AIItemGroups } from '../../_common/config.js';
 
 export function setupFormatBarEntry(formatBar: AffineFormatBarWidget) {

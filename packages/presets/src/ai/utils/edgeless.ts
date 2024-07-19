@@ -3,11 +3,12 @@ import type {
   EdgelessCopilotWidget,
   EdgelessRootService,
 } from '@blocksuite/blocks';
+
 import {
   AFFINE_EDGELESS_COPILOT_WIDGET,
-  matchFlavours,
   MindmapElementModel,
   type ShapeElementModel,
+  matchFlavours,
 } from '@blocksuite/blocks';
 
 export function mindMapToMarkdown(mindmap: MindmapElementModel) {

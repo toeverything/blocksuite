@@ -1,13 +1,13 @@
+import type { BlockCollection } from '@blocksuite/store';
+
 import { AffineSchemas, TestUtils } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockCollection } from '@blocksuite/store';
 import {
   DocCollection,
   type DocCollectionOptions,
-  Generator,
+  IdGeneratorType,
   Job,
   Schema,
-  type StoreOptions,
 } from '@blocksuite/store';
 import {
   type BlobSource,
@@ -17,8 +17,9 @@ import {
   MemoryBlobSource,
 } from '@blocksuite/sync';
 
-import { MockServerBlobSource } from '../../_common/sync/blob/mock-server.js';
 import type { InitFn } from '../data/utils.js';
+
+import { MockServerBlobSource } from '../../_common/sync/blob/mock-server.js';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room');
@@ -29,12 +30,14 @@ export function createStarterDocCollection() {
   const collectionId = room ?? 'starter';
   const schema = new Schema();
   schema.register(AffineSchemas);
-  const idGenerator = isE2E ? Generator.AutoIncrement : Generator.NanoID;
+  const idGenerator = isE2E
+    ? IdGeneratorType.AutoIncrement
+    : IdGeneratorType.NanoID;
 
-  let docSources: StoreOptions['docSources'];
+  let docSources: DocCollectionOptions['docSources'];
   if (room) {
     docSources = {
-      main: new BroadcastChannelDocSource(),
+      main: new BroadcastChannelDocSource(`broadcast-channel-${room}`),
     };
   }
   const id = room ?? `starter-${Math.random().toString(16).slice(2, 8)}`;
@@ -42,7 +45,7 @@ export function createStarterDocCollection() {
   const blobSources = {
     main: new MemoryBlobSource(),
     shadows: [] as BlobSource[],
-  } satisfies StoreOptions['blobSources'];
+  } satisfies DocCollectionOptions['blobSources'];
   if (blobSourceArgs.includes('mock')) {
     blobSources.shadows.push(new MockServerBlobSource(collectionId));
   }

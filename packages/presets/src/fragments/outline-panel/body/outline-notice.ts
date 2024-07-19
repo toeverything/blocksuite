@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import { SmallCloseIcon, SortingIcon } from '../../_common/icons.js';
@@ -82,15 +82,6 @@ const styles = css`
 export class OutlineNotice extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor noticeVisible!: boolean;
-
-  @property({ attribute: false })
-  accessor toggleNotesSorting!: () => void;
-
-  @property({ attribute: false })
-  accessor setNoticeVisibility!: (visibility: boolean) => void;
-
   private _handleNoticeButtonClick() {
     this.toggleNotesSorting();
     this.setNoticeVisibility(false);
@@ -125,6 +116,15 @@ export class OutlineNotice extends WithDisposable(LitElement) {
       </div>
     </div>`;
   }
+
+  @property({ attribute: false })
+  accessor noticeVisible!: boolean;
+
+  @property({ attribute: false })
+  accessor setNoticeVisibility!: (visibility: boolean) => void;
+
+  @property({ attribute: false })
+  accessor toggleNotesSorting!: () => void;
 }
 
 declare global {

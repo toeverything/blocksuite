@@ -1,6 +1,7 @@
 import type { EdgelessTextBlockComponent } from '@blocks/edgeless-text/edgeless-text-block.js';
+
 import { Bound } from '@blocks/surface-block/utils/bound.js';
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import {
   captureHistory,
@@ -142,15 +143,19 @@ test.describe('edgeless text block', () => {
       delay: 100,
     });
     await waitNextFrame(page);
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 50, 55));
+    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 50, 56));
+
     await type(page, 'aaaaaa');
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 71, 55));
+    await waitNextFrame(page, 1500);
+    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 71, 56));
+
     await type(page, '\nbbb');
     // width not changed
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 71, 88));
+    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 71, 90));
     await type(page, '\nccccccc');
+
     // width changed
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 79, 121));
+    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 79, 124));
   });
 
   test('edgeless text width fixed when drag moving', async ({ page }) => {
@@ -226,5 +231,22 @@ test.describe('edgeless text block', () => {
     await type(page, 'sss\n');
     await assertBlockTextContent(page, 5, 'asss');
     await assertBlockTextContent(page, 7, 'b');
+  });
+
+  test('edgeless text should not blur after pressing backspace', async ({
+    page,
+  }) => {
+    // https://github.com/toeverything/blocksuite/pull/7555
+
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await type(page, 'a');
+    await assertBlockTextContent(page, 5, 'a');
+    await pressBackspace(page);
+    await type(page, 'b');
+    await assertBlockTextContent(page, 5, 'b');
   });
 });

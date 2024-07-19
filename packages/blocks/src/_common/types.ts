@@ -49,14 +49,14 @@ export type Connectable = Exclude<
 >;
 
 export enum LineWidth {
-  Two = 2,
+  Eight = 8,
   // Thin
   Four = 4,
   Six = 6,
-  Eight = 8,
   // Thick
   Ten = 10,
   Twelve = 12,
+  Two = 2,
 }
 
 export enum LassoMode {
@@ -78,8 +78,8 @@ export type NoteChildrenFlavour =
 
 export enum NoteDisplayMode {
   DocAndEdgeless = 'both',
-  EdgelessOnly = 'edgeless',
   DocOnly = 'doc',
+  EdgelessOnly = 'edgeless',
 }
 
 export interface Viewport {

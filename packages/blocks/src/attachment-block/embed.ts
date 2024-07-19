@@ -1,10 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
+
+import type { ImageBlockProps } from '../image-block/image-model.js';
+import type { AttachmentBlockModel } from './attachment-model.js';
 
 import { withTempBlobData } from '../_common/utils/filesys.js';
-import type { ImageBlockProps } from '../image-block/image-model.js';
 import { transformModel } from '../root-block/utils/operations/model.js';
-import type { AttachmentBlockModel } from './attachment-model.js';
 
 type EmbedConfig = {
   name: string;

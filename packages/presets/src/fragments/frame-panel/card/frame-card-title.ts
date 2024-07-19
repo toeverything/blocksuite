@@ -1,8 +1,9 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { FrameBlockModel } from '@blocksuite/blocks';
-import { DisposableGroup } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
-import { css, html, type PropertyValues } from 'lit';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { DisposableGroup } from '@blocksuite/global/utils';
+import { type PropertyValues, css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 
 import { FrameCardTitleEditor } from './frame-card-title-editor.js';
@@ -55,27 +56,9 @@ const styles = css`
 `;
 
 export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  private _titleDisposables: DisposableGroup | null = null;
-
-  @property({ attribute: false })
-  accessor frame!: FrameBlockModel;
-
-  @property({ attribute: false })
-  accessor cardIndex!: number;
-
-  @query('.frame-card-title-container')
-  accessor titleContainer!: HTMLElement;
-
-  @query('.frame-card-title-container .card-index')
-  accessor titleIndexElement!: HTMLElement;
-
-  @query('.frame-card-title-container .card-title')
-  accessor titleContentElement!: HTMLElement;
-
-  private _updateElement = () => {
-    this.requestUpdate();
+  private _clearTitleDisposables = () => {
+    this._titleDisposables?.dispose();
+    this._titleDisposables = null;
   };
 
   private _mountTitleEditor = (e: MouseEvent) => {
@@ -90,10 +73,13 @@ export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
     this.titleContainer.append(titleEditor);
   };
 
-  private _clearTitleDisposables = () => {
-    this._titleDisposables?.dispose();
-    this._titleDisposables = null;
+  private _titleDisposables: DisposableGroup | null = null;
+
+  private _updateElement = () => {
+    this.requestUpdate();
   };
+
+  static override styles = styles;
 
   private _setFrameDisposables(title: Y.Text) {
     this._clearTitleDisposables();
@@ -104,12 +90,6 @@ export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
         title.unobserve(this._updateElement);
       },
     });
-  }
-
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('frame')) {
-      this._setFrameDisposables(this.frame.title.yText);
-    }
   }
 
   override connectedCallback() {
@@ -139,6 +119,27 @@ export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
       </div>
     </div>`;
   }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('frame')) {
+      this._setFrameDisposables(this.frame.title.yText);
+    }
+  }
+
+  @property({ attribute: false })
+  accessor cardIndex!: number;
+
+  @property({ attribute: false })
+  accessor frame!: FrameBlockModel;
+
+  @query('.frame-card-title-container')
+  accessor titleContainer!: HTMLElement;
+
+  @query('.frame-card-title-container .card-title')
+  accessor titleContentElement!: HTMLElement;
+
+  @query('.frame-card-title-container .card-index')
+  accessor titleIndexElement!: HTMLElement;
 }
 
 declare global {

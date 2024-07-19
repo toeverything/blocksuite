@@ -1,4 +1,5 @@
 import type { ColumnMeta } from '../data-view/index.js';
+
 import { columnPresets } from '../data-view/index.js';
 import { richTextColumnConfig } from './rich-text/cell-renderer.js';
 import { titleColumnConfig } from './title/cell-renderer.js';

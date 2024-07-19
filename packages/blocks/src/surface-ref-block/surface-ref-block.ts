@@ -1,36 +1,37 @@
-import './surface-ref-portal.js';
-
 import { PathFinder } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
-import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
+import { type Disposable, assertExists, noop } from '@blocksuite/global/utils';
 import {
+  type PropertyDeclaration,
+  type TemplateResult,
   css,
   html,
   nothing,
-  type PropertyDeclaration,
-  type TemplateResult,
 } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
+import type { FrameBlockModel } from '../frame-block/index.js';
+import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
+import type { SurfaceBlockModel } from '../surface-block/index.js';
+import type { SurfaceRefBlockModel } from './surface-ref-model.js';
+import type { SurfaceRefRenderer } from './surface-ref-renderer.js';
+import type { SurfaceRefBlockService } from './surface-ref-service.js';
+
 import { Peekable } from '../_common/components/peekable.js';
+import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import {
   EdgelessModeIcon,
   FrameIcon,
   MoreDeleteIcon,
 } from '../_common/icons/index.js';
 import { requestConnectedFrame } from '../_common/utils/event.js';
-import type { FrameBlockModel } from '../frame-block/index.js';
 import { getBackgroundGrid } from '../root-block/edgeless/utils/query.js';
-import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
-import type { SurfaceBlockModel } from '../surface-block/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
-import type { SurfaceRefBlockModel } from './surface-ref-model.js';
+import './surface-ref-portal.js';
 import { SurfaceRefPortal } from './surface-ref-portal.js';
-import type { SurfaceRefRenderer } from './surface-ref-renderer.js';
-import type { SurfaceRefBlockService } from './surface-ref-service.js';
 import { noContentPlaceholder } from './utils.js';
 
 noop(SurfaceRefPortal);
@@ -59,25 +60,11 @@ export class SurfaceRefBlockComponent extends BlockElement<
   SurfaceRefBlockModel,
   SurfaceRefBlockService
 > {
-  get isInSurface() {
-    return this._isInSurface;
-  }
+  private _isInSurface = false;
 
-  private get _shouldRender() {
-    return (
-      this.isConnected &&
-      this.parentElement &&
-      !this.parentBlockElement.closest('affine-surface-ref')
-    );
-  }
+  private _referencedModel: RefElementModel | null = null;
 
-  get surfaceRenderer() {
-    return this._surfaceRefRenderer.surfaceRenderer;
-  }
-
-  get referenceModel() {
-    return this._referencedModel;
-  }
+  private _surfaceRefRenderer!: SurfaceRefRenderer;
 
   static override styles = css`
     .affine-surface-ref {
@@ -244,27 +231,6 @@ export class SurfaceRefBlockComponent extends BlockElement<
     }
   `;
 
-  @state()
-  private accessor _surfaceModel: SurfaceBlockModel | null = null;
-
-  @state()
-  private accessor _focused: boolean = false;
-
-  private _surfaceRefRenderer!: SurfaceRefRenderer;
-
-  private _referencedModel: RefElementModel | null = null;
-
-  private _isInSurface = false;
-
-  @query('.ref-canvas-container')
-  accessor container!: HTMLDivElement;
-
-  @query('surface-ref-portal')
-  accessor portal!: SurfaceRefPortal;
-
-  @query('affine-surface-ref > block-caption-editor')
-  accessor captionElement!: BlockCaptionEditor;
-
   private _attachRenderer() {
     if (
       this._surfaceRefRenderer?.surfaceRenderer.canvas.isConnected ||
@@ -273,7 +239,9 @@ export class SurfaceRefBlockComponent extends BlockElement<
     )
       return;
 
+    this._surfaceRefRenderer.viewport.setContainer(this.container);
     this.surfaceRenderer.attach(this.container);
+
     if (this.portal.isUpdatePending) {
       this.portal.updateComplete
         .then(() => {
@@ -287,6 +255,16 @@ export class SurfaceRefBlockComponent extends BlockElement<
         this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
       );
     }
+  }
+
+  private _deleteThis() {
+    this.doc.deleteBlock(this.model);
+  }
+
+  private _focusBlock() {
+    this.selection.update(() => {
+      return [this.selection.create('block', { blockId: this.blockId })];
+    });
   }
 
   private _initHotkey() {
@@ -407,25 +385,15 @@ export class SurfaceRefBlockComponent extends BlockElement<
     this.requestUpdate();
     this.updateComplete
       .then(() => {
-        this.surfaceRenderer.onResize();
-        this.surfaceRenderer.setViewportByBound(
+        this.surfaceRenderer.viewport.onResize();
+        this.surfaceRenderer.viewport.setViewportByBound(
           Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
         );
 
         // update portal transform
-        this.portal?.setViewport(this.surfaceRenderer);
+        this.portal?.setViewport(this.surfaceRenderer.viewport);
       })
       .catch(console.error);
-  }
-
-  private _deleteThis() {
-    this.doc.deleteBlock(this.model);
-  }
-
-  private _focusBlock() {
-    this.selection.update(() => {
-      return [this.selection.create('block', { blockId: this.blockId })];
-    });
   }
 
   private _renderMask(referencedModel: RefElementModel, flavourOrType: string) {
@@ -445,33 +413,12 @@ export class SurfaceRefBlockComponent extends BlockElement<
     `;
   }
 
-  private _renderRefPlaceholder(model: SurfaceRefBlockModel) {
-    return html`<div class="ref-placeholder">
-      <div class="placeholder-image">${noContentPlaceholder}</div>
-      <div class="placeholder-text">
-        No Such
-        ${NO_CONTENT_TITLE[model.refFlavour ?? 'DEFAULT'] ??
-        NO_CONTENT_TITLE.DEFAULT}
-      </div>
-      <div class="placeholder-action">
-        <button class="delete-button" type="button" @click=${this._deleteThis}>
-          <span class="icon">${MoreDeleteIcon}</span
-          ><span>Delete this block</span>
-        </button>
-      </div>
-      <div class="placeholder-reason">
-        ${NO_CONTENT_REASON[model.refFlavour ?? 'DEFAULT'] ??
-        NO_CONTENT_REASON.DEFAULT}
-      </div>
-    </div>`;
-  }
-
   private _renderRefContent(
     referencedModel: RefElementModel,
     renderer: Renderer
   ) {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
-    const { zoom } = renderer;
+    const { zoom } = renderer.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
     const flavourOrType =
       'flavour' in referencedModel
@@ -509,19 +456,39 @@ export class SurfaceRefBlockComponent extends BlockElement<
     </div>`;
   }
 
-  override requestUpdate(
-    name?: PropertyKey | undefined,
-    oldValue?: unknown,
-    options?: PropertyDeclaration<unknown, unknown> | undefined
-  ): void {
-    super.requestUpdate(name, oldValue, options);
+  private _renderRefPlaceholder(model: SurfaceRefBlockModel) {
+    return html`<div class="ref-placeholder">
+      <div class="placeholder-image">${noContentPlaceholder}</div>
+      <div class="placeholder-text">
+        No Such
+        ${NO_CONTENT_TITLE[model.refFlavour ?? 'DEFAULT'] ??
+        NO_CONTENT_TITLE.DEFAULT}
+      </div>
+      <div class="placeholder-action">
+        <button class="delete-button" type="button" @click=${this._deleteThis}>
+          <span class="icon">${MoreDeleteIcon}</span
+          ><span>Delete this block</span>
+        </button>
+      </div>
+      <div class="placeholder-reason">
+        ${NO_CONTENT_REASON[model.refFlavour ?? 'DEFAULT'] ??
+        NO_CONTENT_REASON.DEFAULT}
+      </div>
+    </div>`;
+  }
 
-    this._surfaceRefRenderer?.surfaceRenderer?.refresh();
-    this.portal?.requestUpdate();
+  private get _shouldRender() {
+    return (
+      this.isConnected &&
+      this.parentElement &&
+      !this.parentBlockElement.closest('affine-surface-ref')
+    );
   }
 
   override connectedCallback() {
     super.connectedCallback();
+
+    bindContainerHotkey(this);
 
     this.contentEditable = 'false';
 
@@ -579,25 +546,6 @@ export class SurfaceRefBlockComponent extends BlockElement<
     this._initSelection();
   }
 
-  override updated() {
-    if (!this._shouldRender) return;
-
-    this._attachRenderer();
-  }
-
-  viewInEdgeless() {
-    if (!this._referencedModel) return;
-
-    const viewport = {
-      xywh: this._referencedModel.xywh,
-      padding: [60, 20, 20, 20] as [number, number, number, number],
-    };
-    const pageService = this.std.spec.getService('affine:page');
-
-    pageService.editPropsStore.setStorage('viewport', viewport);
-    pageService.docModeService.setMode('edgeless');
-  }
-
   override render() {
     if (!this._shouldRender) return;
 
@@ -626,6 +574,63 @@ export class SurfaceRefBlockComponent extends BlockElement<
       ${Object.values(this.widgets)}
     `;
   }
+
+  override requestUpdate(
+    name?: PropertyKey | undefined,
+    oldValue?: unknown,
+    options?: PropertyDeclaration<unknown, unknown> | undefined
+  ): void {
+    super.requestUpdate(name, oldValue, options);
+
+    this._surfaceRefRenderer?.surfaceRenderer?.refresh();
+    this.portal?.requestUpdate();
+  }
+
+  override updated() {
+    if (!this._shouldRender) return;
+
+    this._attachRenderer();
+  }
+
+  viewInEdgeless() {
+    if (!this._referencedModel) return;
+
+    const viewport = {
+      xywh: this._referencedModel.xywh,
+      padding: [60, 20, 20, 20] as [number, number, number, number],
+    };
+    const pageService = this.std.spec.getService('affine:page');
+
+    pageService.editPropsStore.setStorage('viewport', viewport);
+    pageService.docModeService.setMode('edgeless');
+  }
+
+  get isInSurface() {
+    return this._isInSurface;
+  }
+
+  get referenceModel() {
+    return this._referencedModel;
+  }
+
+  get surfaceRenderer() {
+    return this._surfaceRefRenderer.surfaceRenderer;
+  }
+
+  @state()
+  private accessor _focused: boolean = false;
+
+  @state()
+  private accessor _surfaceModel: SurfaceBlockModel | null = null;
+
+  @query('affine-surface-ref > block-caption-editor')
+  accessor captionElement!: BlockCaptionEditor;
+
+  @query('.ref-canvas-container')
+  accessor container!: HTMLDivElement;
+
+  @query('surface-ref-portal')
+  accessor portal!: SurfaceRefPortal;
 }
 
 declare global {

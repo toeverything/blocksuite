@@ -1,4 +1,5 @@
 import type { Y } from '@blocksuite/store';
+
 import { DocCollection } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';

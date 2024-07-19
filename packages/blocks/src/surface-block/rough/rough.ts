@@ -1,5 +1,6 @@
-import { RoughCanvas } from './canvas.js';
 import type { Config } from './core.js';
+
+import { RoughCanvas } from './canvas.js';
 import { RoughGenerator } from './generator.js';
 import { RoughSVG } from './svg.js';
 

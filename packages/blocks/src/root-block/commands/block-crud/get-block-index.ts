@@ -1,5 +1,6 @@
 import type { Command } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 
 export const getBlockIndexCommand: Command<

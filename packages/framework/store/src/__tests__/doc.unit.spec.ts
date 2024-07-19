@@ -6,7 +6,7 @@ import {
   type BlockSelector,
   BlockViewType,
   DocCollection,
-  Generator,
+  IdGeneratorType,
 } from '../store/index.js';
 import {
   DividerBlockSchema,
@@ -26,7 +26,7 @@ const BlockSchemas = [
 ];
 
 function createTestOptions() {
-  const idGenerator = Generator.AutoIncrement;
+  const idGenerator = IdGeneratorType.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
   return { id: 'test-collection', idGenerator, schema };

@@ -1,3 +1,5 @@
+import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
+
 import {
   CancelWrapIcon,
   CaptionIcon,
@@ -7,7 +9,6 @@ import {
   WrapIcon,
 } from '../../../_common/icons/text.js';
 import { isInsidePageEditor } from '../../../_common/utils/query.js';
-import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
 import { duplicateCodeBlock } from './utils.js';
 
 export const defaultItems: CodeToolbarItem[] = [

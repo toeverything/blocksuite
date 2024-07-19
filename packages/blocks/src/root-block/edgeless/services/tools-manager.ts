@@ -5,23 +5,25 @@ import type {
   UIEventHandler,
   UIEventState,
 } from '@blocksuite/block-std';
+
 import { IS_MAC } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
-import {
-  isMiddleButtonPressed,
-  isRightButtonPressed,
-  NoteDisplayMode,
-} from '../../../_common/utils/index.js';
 import type { Bound } from '../../../surface-block/utils/bound.js';
-import { CopilotSelectionController } from '../controllers/tools/copilot-tool.js';
 import type { EdgelessToolController } from '../controllers/tools/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessRootService } from '../edgeless-root-service.js';
 import type { EdgelessTool } from '../types.js';
+import type { EdgelessSelectionState } from './selection-manager.js';
+
+import {
+  NoteDisplayMode,
+  isMiddleButtonPressed,
+  isRightButtonPressed,
+} from '../../../_common/utils/index.js';
+import { CopilotSelectionController } from '../controllers/tools/copilot-tool.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { isNoteBlock } from '../utils/query.js';
-import type { EdgelessSelectionState } from './selection-manager.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Constructor<T = object> = new (...args: any[]) => T;
@@ -43,202 +45,38 @@ export interface SelectionArea {
 }
 
 export class EdgelessToolsManager {
-  get dragging() {
-    return this._dragging;
-  }
-
-  get selection() {
-    return this.service.selection;
-  }
-
-  get lastMousePos() {
-    return this._lastMousePos;
-  }
-
-  get edgelessTool() {
-    return this._edgelessTool;
-  }
-
-  set edgelessTool(mode: EdgelessTool) {
-    this._edgelessTool = mode;
-    // sync mouse mode
-    this._controllers[this._edgelessTool.type].tool = this._edgelessTool;
-  }
-
-  get currentController() {
-    return this._controllers[this.edgelessTool.type];
-  }
-
-  get controllers() {
-    return this._controllers;
-  }
-
-  get draggingArea() {
-    if (!this.currentController.draggingArea) return null;
-
-    const { start, end } = this.currentController.draggingArea;
-    const minX = Math.min(start.x, end.x);
-    const minY = Math.min(start.y, end.y);
-    const maxX = Math.max(start.x, end.x);
-    const maxY = Math.max(start.y, end.y);
-    return new DOMRect(minX, minY, maxX - minX, maxY - minY);
-  }
-
-  set spaceBar(pressed: boolean) {
-    this._spaceBar = pressed;
-    this.currentController.onPressSpaceBar(pressed);
-  }
-
-  get spaceBar() {
-    return this._spaceBar;
-  }
-
-  set shiftKey(pressed: boolean) {
-    this._shiftKey = pressed;
-    this.currentController.onPressShiftKey(pressed);
-  }
-
-  get shiftKey() {
-    return this._shiftKey;
-  }
-
-  get doc() {
-    return this.service.doc;
-  }
-
-  get service() {
-    return this._service;
-  }
-
-  get container() {
-    return this._container;
-  }
-
-  get dispatcher() {
-    return this.container.dispatcher;
-  }
-
-  private _edgelessTool: EdgelessTool = this._getToolFromLocalStorage();
+  private _add = (name: EventName, fn: UIEventHandler) => {
+    this._disposables.add(this.dispatcher.add(name, fn));
+  };
 
   private _container!: EdgelessRootBlockComponent;
-
-  private _service!: EdgelessRootService;
 
   private _controllers: Record<
     EdgelessTool['type'] | string,
     EdgelessToolController
   > = {};
 
-  private _mounted = false;
+  protected readonly _disposables = new DisposableGroup();
+
+  private _dragging = false;
+
+  private _edgelessTool: EdgelessTool = this._getToolFromLocalStorage();
 
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
 
-  // pressed shift key
-  private _shiftKey = false;
+  private _mounted = false;
 
-  private _spaceBar = false;
-
-  private _dragging = false;
-
-  protected readonly _disposables = new DisposableGroup();
-
-  constructor(service: EdgelessRootService) {
-    this._service = service;
-  }
-
-  private _updateLastMousePos(e: PointerEventState) {
-    this._lastMousePos = {
-      x: e.x,
-      y: e.y,
-    };
-  }
-
-  private _getToolFromLocalStorage(): EdgelessTool {
-    const type = localStorage.defaultTool;
-    if (type === 'pan') return { type: 'pan', panning: false };
-    return { type: 'default' };
-  }
-
-  private _initMouseAndWheelEvents() {
-    this._add('dragStart', ctx => {
-      this._dragging = true;
-      const event = ctx.get('pointerState');
-      this._onContainerDragStart(event);
-    });
-    this._add('dragMove', ctx => {
-      const event = ctx.get('pointerState');
-      this._onContainerDragMove(event);
-    });
-    this._add('dragEnd', ctx => {
-      this._dragging = false;
-      const event = ctx.get('pointerState');
-      this._onContainerDragEnd(event);
-    });
-    this._add('click', ctx => {
-      const event = ctx.get('pointerState');
-      this._onContainerClick(event);
-    });
-    this._add('doubleClick', ctx => {
-      const event = ctx.get('pointerState');
-      this._onContainerDblClick(event);
-    });
-    this._add('tripleClick', ctx => {
-      const event = ctx.get('pointerState');
-      this._onContainerTripleClick(event);
-    });
-    this._add('pointerMove', ctx => {
-      const event = ctx.get('pointerState');
-      this._onContainerPointerMove(event);
-    });
-    this._add('pointerDown', ctx => {
-      const event = ctx.get('pointerState');
-      this._onContainerPointerDown(event);
-    });
-    this._add('pointerUp', ctx => {
-      const event = ctx.get('pointerState');
-      this._onContainerPointerUp(event);
-    });
-    this._add('pointerOut', ctx => {
-      const event = ctx.get('pointerState');
-      this._onContainerPointerOut(event);
-    });
-    this._add('contextMenu', ctx => {
-      const event = ctx.get('defaultState');
-      this._onContainerContextMenu(event);
-    });
-  }
-
-  private _add = (name: EventName, fn: UIEventHandler) => {
-    this._disposables.add(this.dispatcher.add(name, fn));
+  private _onContainerClick = (e: PointerEventState) => {
+    return this.currentController.onContainerClick(e);
   };
 
-  private _onContainerDragStart = (e: PointerEventState) => {
-    // only allow pan tool in readonly mode
-    if (this.doc.readonly && this.edgelessTool.type !== 'pan') return;
-    // do nothing when holding right-key and not in pan mode
-    if (
-      e.button === 2 &&
-      this.edgelessTool.type !== 'pan' &&
-      this.edgelessTool.type !== 'copilot'
-    )
-      return;
-
-    return this.currentController.onContainerDragStart(e);
+  private _onContainerContextMenu = (e: UIEventState) => {
+    e.event.preventDefault();
   };
 
-  private _onContainerDragMove = (e: PointerEventState) => {
-    // only allow pan tool in readonly mode
-    if (this.doc.readonly && this.edgelessTool.type !== 'pan') return;
-    // do nothing when holding right-key and not in pan mode
-    if (
-      e.button === 2 &&
-      this.edgelessTool.type !== 'pan' &&
-      this.edgelessTool.type !== 'copilot'
-    )
-      return;
-
-    return this.currentController.onContainerDragMove(e);
+  private _onContainerDblClick = (e: PointerEventState) => {
+    return this.currentController.onContainerDblClick(e);
   };
 
   private _onContainerDragEnd = (e: PointerEventState) => {
@@ -255,29 +93,32 @@ export class EdgelessToolsManager {
     return this.currentController.onContainerDragEnd(e);
   };
 
-  private _onContainerClick = (e: PointerEventState) => {
-    return this.currentController.onContainerClick(e);
+  private _onContainerDragMove = (e: PointerEventState) => {
+    // only allow pan tool in readonly mode
+    if (this.doc.readonly && this.edgelessTool.type !== 'pan') return;
+    // do nothing when holding right-key and not in pan mode
+    if (
+      e.button === 2 &&
+      this.edgelessTool.type !== 'pan' &&
+      this.edgelessTool.type !== 'copilot'
+    )
+      return;
+
+    return this.currentController.onContainerDragMove(e);
   };
 
-  private _onContainerDblClick = (e: PointerEventState) => {
-    return this.currentController.onContainerDblClick(e);
-  };
+  private _onContainerDragStart = (e: PointerEventState) => {
+    // only allow pan tool in readonly mode
+    if (this.doc.readonly && this.edgelessTool.type !== 'pan') return;
+    // do nothing when holding right-key and not in pan mode
+    if (
+      e.button === 2 &&
+      this.edgelessTool.type !== 'pan' &&
+      this.edgelessTool.type !== 'copilot'
+    )
+      return;
 
-  private _onContainerTripleClick = (e: PointerEventState) => {
-    return this.currentController.onContainerTripleClick(e);
-  };
-
-  private _onContainerPointerMove = (e: PointerEventState) => {
-    this._updateLastMousePos(e);
-    return this._controllers[this.edgelessTool.type].onContainerMouseMove(e);
-  };
-
-  private _onContainerPointerOut = (e: PointerEventState) => {
-    return this._controllers[this.edgelessTool.type].onContainerMouseOut(e);
-  };
-
-  private _onContainerContextMenu = (e: UIEventState) => {
-    e.event.preventDefault();
+    return this.currentController.onContainerDragStart(e);
   };
 
   private _onContainerPointerDown = (e: PointerEventState) => {
@@ -332,55 +173,27 @@ export class EdgelessToolsManager {
     return this.currentController.onContainerPointerDown(e);
   };
 
+  private _onContainerPointerMove = (e: PointerEventState) => {
+    this._updateLastMousePos(e);
+    return this._controllers[this.edgelessTool.type].onContainerMouseMove(e);
+  };
+
+  private _onContainerPointerOut = (e: PointerEventState) => {
+    return this._controllers[this.edgelessTool.type].onContainerMouseOut(e);
+  };
+
   private _onContainerPointerUp = (_ev: PointerEventState) => {};
 
-  private _isDocOnlyNote(selectedId: string) {
-    const selected = this.service.doc.getBlockById(selectedId);
-    if (!selected) return false;
+  private _onContainerTripleClick = (e: PointerEventState) => {
+    return this.currentController.onContainerTripleClick(e);
+  };
 
-    return (
-      isNoteBlock(selected) && selected.displayMode === NoteDisplayMode.DocOnly
-    );
-  }
+  private _service!: EdgelessRootService;
 
-  mount(container: EdgelessRootBlockComponent) {
-    this._container = container;
-    this._mounted = true;
+  // pressed shift key
+  private _shiftKey = false;
 
-    Object.values(this._controllers).forEach(controller => {
-      controller.mount(container);
-    });
-
-    this._initMouseAndWheelEvents();
-  }
-
-  register(Tool: EdgelessToolConstructor) {
-    const tool = new Tool(this.service);
-
-    this._controllers[tool.tool.type] = tool;
-
-    if (this._mounted) {
-      tool.mount(this.container);
-    }
-  }
-
-  getHoverState(): EdgelessHoverState | null {
-    if (!this.currentController.enableHover) {
-      return null;
-    }
-    const { x, y } = this._lastMousePos;
-    const [modelX, modelY] = this.service.viewport.toModelCoord(x, y);
-    const hovered = this.service.pickElement(modelX, modelY);
-
-    if (!hovered || this.selection?.editing) {
-      return null;
-    }
-
-    return {
-      rect: this.service.viewport.toViewBound(edgelessElementsBound([hovered])),
-      content: hovered,
-    };
-  }
+  private _spaceBar = false;
 
   setEdgelessTool = (
     edgelessTool: EdgelessTool,
@@ -460,15 +273,8 @@ export class EdgelessToolsManager {
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };
 
-  switchToDefaultMode(state: EdgelessSelectionState) {
-    this.setEdgelessTool({ type: 'default' }, state);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  clear() {}
-
-  dispose() {
-    this._disposables.dispose();
+  constructor(service: EdgelessRootService) {
+    this._service = service;
   }
 
   static create(
@@ -482,5 +288,201 @@ export class EdgelessToolsManager {
     });
 
     return manager;
+  }
+
+  private _getToolFromLocalStorage(): EdgelessTool {
+    const type = localStorage.defaultTool;
+    if (type === 'pan') return { type: 'pan', panning: false };
+    return { type: 'default' };
+  }
+
+  private _initMouseAndWheelEvents() {
+    this._add('dragStart', ctx => {
+      this._dragging = true;
+      const event = ctx.get('pointerState');
+      this._onContainerDragStart(event);
+    });
+    this._add('dragMove', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerDragMove(event);
+    });
+    this._add('dragEnd', ctx => {
+      this._dragging = false;
+      const event = ctx.get('pointerState');
+      this._onContainerDragEnd(event);
+    });
+    this._add('click', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerClick(event);
+    });
+    this._add('doubleClick', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerDblClick(event);
+    });
+    this._add('tripleClick', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerTripleClick(event);
+    });
+    this._add('pointerMove', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerPointerMove(event);
+    });
+    this._add('pointerDown', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerPointerDown(event);
+    });
+    this._add('pointerUp', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerPointerUp(event);
+    });
+    this._add('pointerOut', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerPointerOut(event);
+    });
+    this._add('contextMenu', ctx => {
+      const event = ctx.get('defaultState');
+      this._onContainerContextMenu(event);
+    });
+  }
+
+  private _isDocOnlyNote(selectedId: string) {
+    const selected = this.service.doc.getBlockById(selectedId);
+    if (!selected) return false;
+
+    return (
+      isNoteBlock(selected) && selected.displayMode === NoteDisplayMode.DocOnly
+    );
+  }
+
+  private _updateLastMousePos(e: PointerEventState) {
+    this._lastMousePos = {
+      x: e.x,
+      y: e.y,
+    };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  clear() {}
+
+  dispose() {
+    this._disposables.dispose();
+  }
+
+  getHoverState(): EdgelessHoverState | null {
+    if (!this.currentController.enableHover) {
+      return null;
+    }
+    const { x, y } = this._lastMousePos;
+    const [modelX, modelY] = this.service.viewport.toModelCoord(x, y);
+    const hovered = this.service.pickElement(modelX, modelY);
+
+    if (!hovered || this.selection?.editing) {
+      return null;
+    }
+
+    return {
+      rect: this.service.viewport.toViewBound(edgelessElementsBound([hovered])),
+      content: hovered,
+    };
+  }
+
+  mount(container: EdgelessRootBlockComponent) {
+    this._container = container;
+    this._mounted = true;
+
+    Object.values(this._controllers).forEach(controller => {
+      controller.mount(container);
+    });
+
+    this._initMouseAndWheelEvents();
+  }
+
+  register(Tool: EdgelessToolConstructor) {
+    const tool = new Tool(this.service);
+
+    this._controllers[tool.tool.type] = tool;
+
+    if (this._mounted) {
+      tool.mount(this.container);
+    }
+  }
+
+  switchToDefaultMode(state: EdgelessSelectionState) {
+    this.setEdgelessTool({ type: 'default' }, state);
+  }
+
+  get container() {
+    return this._container;
+  }
+
+  get controllers() {
+    return this._controllers;
+  }
+
+  get currentController() {
+    return this._controllers[this.edgelessTool.type];
+  }
+
+  get dispatcher() {
+    return this.container.dispatcher;
+  }
+
+  get doc() {
+    return this.service.doc;
+  }
+
+  get dragging() {
+    return this._dragging;
+  }
+
+  get draggingArea() {
+    if (!this.currentController.draggingArea) return null;
+
+    const { start, end } = this.currentController.draggingArea;
+    const minX = Math.min(start.x, end.x);
+    const minY = Math.min(start.y, end.y);
+    const maxX = Math.max(start.x, end.x);
+    const maxY = Math.max(start.y, end.y);
+    return new DOMRect(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  get edgelessTool() {
+    return this._edgelessTool;
+  }
+
+  set edgelessTool(mode: EdgelessTool) {
+    this._edgelessTool = mode;
+    // sync mouse mode
+    this._controllers[this._edgelessTool.type].tool = this._edgelessTool;
+  }
+
+  get lastMousePos() {
+    return this._lastMousePos;
+  }
+
+  get selection() {
+    return this.service.selection;
+  }
+
+  get service() {
+    return this._service;
+  }
+
+  set shiftKey(pressed: boolean) {
+    this._shiftKey = pressed;
+    this.currentController.onPressShiftKey(pressed);
+  }
+
+  get shiftKey() {
+    return this._shiftKey;
+  }
+
+  set spaceBar(pressed: boolean) {
+    this._spaceBar = pressed;
+    this.currentController.onPressSpaceBar(pressed);
+  }
+
+  get spaceBar() {
+    return this._spaceBar;
   }
 }

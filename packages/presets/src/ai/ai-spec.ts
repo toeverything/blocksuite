@@ -1,4 +1,5 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+
 import {
   AFFINE_AI_PANEL_WIDGET,
   AFFINE_EDGELESS_COPILOT_WIDGET,

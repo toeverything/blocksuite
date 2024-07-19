@@ -1,5 +1,3 @@
-import './latex-node.js';
-
 import {
   EdgelessEditorBlockSpecs,
   type InlineMarkdownMatch,
@@ -16,6 +14,8 @@ import { html } from 'lit';
 import { z } from 'zod';
 
 import type { TextAttributesWithLatex } from './latex-node.js';
+
+import './latex-node.js';
 
 const latexSpec: InlineSpecs<TextAttributesWithLatex> = {
   name: 'latex',

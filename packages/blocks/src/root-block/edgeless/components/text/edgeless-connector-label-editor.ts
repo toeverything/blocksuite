@@ -1,5 +1,3 @@
-import '../../../../_common/components/rich-text/rich-text.js';
-
 import {
   RangeManager,
   ShadowlessElement,
@@ -12,6 +10,9 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
+import '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { almostEqual } from '../../../../_common/utils/math.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
@@ -20,7 +21,6 @@ import {
   type ConnectorElementModel,
   Vec,
 } from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 const HORIZONTAL_PADDING = 2;
 const VERTICAL_PADDING = 2;
@@ -30,14 +30,33 @@ const BORDER_WIDTH = 1;
 export class EdgelessConnectorLabelEditor extends WithDisposable(
   ShadowlessElement
 ) {
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
+  private _isComposition = false;
 
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
+  private _keeping = false;
+
+  private _resizeObserver: ResizeObserver | null = null;
+
+  private _updateLabelRect = () => {
+    const { connector, edgeless } = this;
+    if (!connector || !edgeless) return;
+
+    const newWidth = this.inlineEditorContainer.scrollWidth;
+    const newHeight = this.inlineEditorContainer.scrollHeight;
+    const center = connector.getPointByOffsetDistance(
+      connector.labelOffset.distance
+    );
+    const bounds = Bound.fromCenter(center, newWidth, newHeight);
+    const labelXYWH = bounds.toXYWH();
+
+    if (
+      !connector.labelXYWH ||
+      labelXYWH.some((p, i) => !almostEqual(p, connector.labelXYWH![i]))
+    ) {
+      edgeless.service.updateElement(connector.id, {
+        labelXYWH,
+      });
+    }
+  };
 
   static override styles = css`
     .edgeless-connector-label-editor {
@@ -71,47 +90,6 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       }
     }
   `;
-
-  private _keeping = false;
-
-  private _isComposition = false;
-
-  private _resizeObserver: ResizeObserver | null = null;
-
-  @query('rich-text')
-  accessor richText!: RichText;
-
-  @property({ attribute: false })
-  accessor connector!: ConnectorElementModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  private _updateLabelRect = () => {
-    const { connector, edgeless } = this;
-    if (!connector || !edgeless) return;
-
-    const newWidth = this.inlineEditorContainer.scrollWidth;
-    const newHeight = this.inlineEditorContainer.scrollHeight;
-    const center = connector.getPointByOffsetDistance(
-      connector.labelOffset.distance
-    );
-    const bounds = Bound.fromCenter(center, newWidth, newHeight);
-    const labelXYWH = bounds.toXYWH();
-
-    if (
-      !connector.labelXYWH ||
-      labelXYWH.some((p, i) => !almostEqual(p, connector.labelXYWH![i]))
-    ) {
-      edgeless.service.updateElement(connector.id, {
-        labelXYWH,
-      });
-    }
-  };
-
-  setKeeping(keeping: boolean) {
-    this._keeping = keeping;
-  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -311,6 +289,28 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       </div>
     `;
   }
+
+  setKeeping(keeping: boolean) {
+    this._keeping = keeping;
+  }
+
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
+  @property({ attribute: false })
+  accessor connector!: ConnectorElementModel;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @query('rich-text')
+  accessor richText!: RichText;
 }
 
 declare global {

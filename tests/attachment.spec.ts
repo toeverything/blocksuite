@@ -1,14 +1,18 @@
 import { sleep } from '@global/utils.js';
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
+import { switchEditorMode } from 'utils/actions/edgeless.js';
 
-import { popImageMoreMenu } from './utils/actions/drag.js';
+import { dragBlockToPoint, popImageMoreMenu } from './utils/actions/drag.js';
 import {
+  SHORT_KEY,
+  pressArrowDown,
   pressArrowUp,
   pressBackspace,
   pressEnter,
   pressEscape,
+  pressShiftTab,
+  pressTab,
   redoByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/keyboard.js';
@@ -16,14 +20,18 @@ import {
   captureHistory,
   enterPlaygroundRoom,
   focusRichText,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   resetHistory,
   waitNextFrame,
 } from './utils/actions/misc.js';
 import {
+  assertBlockChildrenIds,
   assertBlockCount,
+  assertBlockFlavour,
   assertBlockSelections,
   assertKeyboardWorkInInput,
+  assertParentBlockFlavour,
   assertRichImage,
   assertRichTextInlineRange,
   assertStoreMatchJSX,
@@ -38,13 +46,9 @@ const FILE_SIZE = 45801;
 function getAttachment(page: Page) {
   const attachment = page.locator('affine-attachment');
   const loading = attachment.locator('.affine-attachment-card.loading');
-  const options = page.locator('.affine-attachment-options');
-  const turnToEmbedBtn = options
-    .locator('icon-button')
-    .filter({ hasText: 'Turn into Embed view' });
-  const renameBtn = options
-    .locator('icon-button')
-    .filter({ hasText: 'Rename' });
+  const toolbar = page.locator('.affine-attachment-toolbar');
+  const switchViewButton = toolbar.getByRole('button', { name: 'Switch view' });
+  const renameBtn = toolbar.getByRole('button', { name: 'Rename' });
   const renameInput = page.locator('.affine-attachment-rename-container input');
 
   const insertAttachment = async () => {
@@ -79,8 +83,8 @@ function getAttachment(page: Page) {
   return {
     // locators
     attachment,
-    options,
-    turnToEmbedBtn,
+    toolbar,
+    switchViewButton,
     renameBtn,
     renameInput,
 
@@ -95,13 +99,14 @@ function getAttachment(page: Page) {
       attachment.locator('.affine-attachment-content-info').innerText(),
 
     turnToEmbed: async () => {
-      await expect(turnToEmbedBtn).toBeVisible();
-      await turnToEmbedBtn.click();
+      await expect(switchViewButton).toBeVisible();
+      await switchViewButton.click();
+      await page.getByRole('button', { name: 'Embed view' }).click();
       await assertRichImage(page, 1);
     },
     rename: async (newName: string) => {
       await attachment.hover();
-      await expect(options).toBeVisible();
+      await expect(toolbar).toBeVisible();
       await renameBtn.click();
       await page.keyboard.press(`${SHORT_KEY}+a`, { delay: 50 });
       await pressBackspace(page);
@@ -660,4 +665,81 @@ test('cancel file picker with input element resolves', async ({ page }) => {
 
   await expect(attachment).toHaveCount(0);
   await expect(inputFile).toHaveCount(0);
+});
+
+test('indent attachment block to paragraph', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const { insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await pressEnter(page);
+  await insertAttachment();
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+  await assertBlockFlavour(page, '1', 'affine:note');
+  await assertBlockFlavour(page, '2', 'affine:paragraph');
+  await assertBlockFlavour(page, '4', 'affine:attachment');
+
+  await focusRichText(page);
+  await pressArrowDown(page);
+  await assertBlockSelections(page, ['4']);
+  await pressTab(page);
+  await assertBlockChildrenIds(page, '1', ['2']);
+  await assertBlockChildrenIds(page, '2', ['4']);
+
+  await pressShiftTab(page);
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+});
+
+test('indent attachment block to list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const { insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await type(page, '- a');
+  await pressEnter(page);
+  await insertAttachment();
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await assertBlockChildrenIds(page, '1', ['3', '5']);
+  await assertBlockFlavour(page, '1', 'affine:note');
+  await assertBlockFlavour(page, '3', 'affine:list');
+  await assertBlockFlavour(page, '5', 'affine:attachment');
+
+  await focusRichText(page);
+  await pressArrowDown(page);
+  await assertBlockSelections(page, ['5']);
+  await pressTab(page);
+  await assertBlockChildrenIds(page, '1', ['3']);
+  await assertBlockChildrenIds(page, '3', ['5']);
+
+  await pressShiftTab(page);
+  await assertBlockChildrenIds(page, '1', ['3', '5']);
+});
+
+test('attachment can be dragged from note to surface top level block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  const { insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await insertAttachment();
+
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await switchEditorMode(page);
+  await page.mouse.dblclick(450, 450);
+
+  await dragBlockToPoint(page, '4', { x: 200, y: 200 });
+
+  await waitNextFrame(page);
+  await assertParentBlockFlavour(page, '5', 'affine:surface');
 });

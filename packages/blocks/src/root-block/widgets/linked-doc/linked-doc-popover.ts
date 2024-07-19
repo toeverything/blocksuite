@@ -1,60 +1,52 @@
-import '../../../_common/components/button.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { html, LitElement } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  cleanSpecifiedTail,
-  createKeydownObserver,
-} from '../../../_common/components/utils.js';
 import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import type { LinkedDocOptions } from './config.js';
 import type { LinkedDocGroup } from './config.js';
+
+import '../../../_common/components/button.js';
+import {
+  cleanSpecifiedTail,
+  createKeydownObserver,
+  getQuery,
+} from '../../../_common/components/utils.js';
+import { MoreHorizontalIcon } from '../../../_common/icons/edgeless.js';
 import { styles } from './styles.js';
 
 @customElement('affine-linked-doc-popover')
 export class LinkedDocPopover extends WithDisposable(LitElement) {
-  private get _flattenActionList() {
-    return this._actionGroup
-      .map(group =>
-        group.items.map(item => ({ ...item, groupName: group.name }))
-      )
-      .flat();
-  }
+  private _abort = () => {
+    // remove popover dom
+    this.abortController.abort();
+    // clear input query
+    cleanSpecifiedTail(
+      this.editorHost,
+      this.inlineEditor,
+      this.triggerKey + this._query
+    );
+  };
 
-  private get _doc() {
-    return this.editorHost.doc;
-  }
+  private _expanded = new Map<string, boolean>();
+
+  private _getLinkedDocGroup = () => {
+    return this.options.getMenus({
+      editorHost: this.editorHost,
+      query: this._query,
+      abort: this._abort,
+      inlineEditor: this.inlineEditor,
+      docMetas: this._doc.collection.meta.docMetas,
+    });
+  };
+
+  private _startIndex = this.inlineEditor?.getInlineRange()?.index ?? 0;
 
   static override styles = styles;
-
-  @state()
-  private accessor _position: {
-    height: number;
-    x: string;
-    y: string;
-  } | null = null;
-
-  @state()
-  private accessor _query = '';
-
-  @state()
-  private accessor _activatedItemIndex = 0;
-
-  private _actionGroup: LinkedDocGroup[] = [];
-
-  @property({ attribute: false })
-  accessor options!: LinkedDocOptions;
-
-  @property({ attribute: false })
-  accessor triggerKey!: string;
-
-  @query('.linked-doc-popover')
-  accessor linkedDocElement: Element | null = null;
 
   constructor(
     private editorHost: EditorHost,
@@ -64,13 +56,50 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     super();
   }
 
-  private _updateActionList() {
-    this._actionGroup = this.options.getMenus({
-      editorHost: this.editorHost,
-      query: this._query,
-      inlineEditor: this.inlineEditor,
-      docMetas: this._doc.collection.meta.docMetas,
+  private get _actionGroup() {
+    return this._linkedDocGroup.map(group => {
+      return {
+        ...group,
+        items: this._getActionItems(group),
+      };
     });
+  }
+
+  private get _doc() {
+    return this.editorHost.doc;
+  }
+
+  private get _flattenActionList() {
+    return this._actionGroup
+      .map(group =>
+        group.items.map(item => ({ ...item, groupName: group.name }))
+      )
+      .flat();
+  }
+
+  private _getActionItems(group: LinkedDocGroup) {
+    const isExpanded = !!this._expanded.get(group.name);
+    if (isExpanded) {
+      return group.items;
+    }
+    const isOverflow =
+      !!group.maxDisplay && group.items.length > group.maxDisplay;
+    if (isOverflow) {
+      return group.items.slice(0, group.maxDisplay).concat({
+        key: `${group.name} More`,
+        name: group.overflowText || 'more',
+        icon: MoreHorizontalIcon,
+        action: () => {
+          this._expanded.set(group.name, true);
+          this.requestUpdate();
+        },
+      });
+    }
+    return group.items;
+  }
+
+  private get _query() {
+    return getQuery(this.inlineEditor, this._startIndex) || '';
   }
 
   override connectedCallback() {
@@ -79,10 +108,10 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     assertExists(inlineEditor, 'RichText InlineEditor not found');
 
     // init
-    this._updateActionList();
+    this._linkedDocGroup = this._getLinkedDocGroup();
     this._disposables.add(
       this._doc.collection.slots.docUpdated.on(() => {
-        this._updateActionList();
+        this._linkedDocGroup = this._getLinkedDocGroup();
       })
     );
     this._disposables.addFromEvent(this, 'mousedown', e => {
@@ -92,13 +121,19 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
     createKeydownObserver({
       target: inlineEditor.eventSource,
-      inlineEditor,
-      onUpdateQuery: str => {
-        this._query = str;
+      signal: this.abortController.signal,
+      onInput: () => {
         this._activatedItemIndex = 0;
-        this._updateActionList();
+        this._linkedDocGroup = this._getLinkedDocGroup();
       },
-      abortController: this.abortController,
+      onDelete: () => {
+        const curIndex = inlineEditor.getInlineRange()?.index ?? 0;
+        if (curIndex < this._startIndex) {
+          this.abortController.abort();
+        }
+        this._activatedItemIndex = 0;
+        this._linkedDocGroup = this._getLinkedDocGroup();
+      },
       onMove: step => {
         const itemLen = this._flattenActionList.length;
         this._activatedItemIndex =
@@ -123,28 +158,18 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
         });
       },
       onConfirm: () => {
-        this.abortController.abort();
-        cleanSpecifiedTail(
-          this.editorHost,
-          this.inlineEditor,
-          this.triggerKey + this._query
-        );
         this._flattenActionList[this._activatedItemIndex]
           .action()
           ?.catch(console.error);
       },
-      onEsc: () => {
+      onAbort: () => {
         this.abortController.abort();
       },
     });
   }
 
-  updatePosition(position: { height: number; x: string; y: string }) {
-    this._position = position;
-  }
-
   override render() {
-    const MAX_HEIGHT = 396;
+    const MAX_HEIGHT = 410;
     const style = this._position
       ? styleMap({
           transform: `translate(${this._position.x}, ${this._position.y})`,
@@ -174,12 +199,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
                   text=${name}
                   hover=${this._activatedItemIndex === curIdx}
                   @click=${() => {
-                    this.abortController.abort();
-                    cleanSpecifiedTail(
-                      this.editorHost,
-                      this.inlineEditor,
-                      this.triggerKey + this._query
-                    );
                     action()?.catch(console.error);
                   }}
                   @mousemove=${() => {
@@ -194,4 +213,30 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
         })}
     </div>`;
   }
+
+  updatePosition(position: { height: number; x: string; y: string }) {
+    this._position = position;
+  }
+
+  @state()
+  private accessor _activatedItemIndex = 0;
+
+  @state()
+  private accessor _linkedDocGroup: LinkedDocGroup[] = [];
+
+  @state()
+  private accessor _position: {
+    height: number;
+    x: string;
+    y: string;
+  } | null = null;
+
+  @query('.linked-doc-popover')
+  accessor linkedDocElement: Element | null = null;
+
+  @property({ attribute: false })
+  accessor options!: LinkedDocOptions;
+
+  @property({ attribute: false })
+  accessor triggerKey!: string;
 }

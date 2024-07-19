@@ -12,15 +12,16 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
+import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { RootBlockModel } from '../../root-model.js';
+import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
+
 import {
   MOUSE_BUTTON,
   requestConnectedFrame,
 } from '../../../_common/utils/event.js';
 import { Bound, getElementsBound } from '../../../surface-block/index.js';
-import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../root-model.js';
-import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 
@@ -31,29 +32,13 @@ export class EdgelessCopilotWidget extends WidgetElement<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
-  get visible() {
-    return !!(
-      this._visible &&
-      this._selectionRect.width &&
-      this._selectionRect.height
-    );
-  }
+  private _clickOutsideOff: (() => void) | null = null;
 
-  get selectionRect() {
-    return this._selectionRect;
-  }
+  private _copilotPanel!: EdgelessCopilotPanel | null;
 
-  get selectionModelRect() {
-    return this._selectionModelRect;
-  }
+  private _listenClickOutsideId: number | null = null;
 
-  get edgeless() {
-    return this.blockElement;
-  }
-
-  set visible(visible: boolean) {
-    this._visible = visible;
-  }
+  private _selectionModelRect!: DOMRect;
 
   static override styles = css`
     .copilot-selection-rect {
@@ -64,78 +49,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
     }
   `;
 
-  @state()
-  private accessor _selectionRect: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } = { x: 0, y: 0, width: 0, height: 0 };
-
-  @state()
-  private accessor _visible = false;
-
-  private _selectionModelRect!: DOMRect;
-
-  private _clickOutsideOff: (() => void) | null = null;
-
-  private _listenClickOutsideId: number | null = null;
-
-  private _copilotPanel!: EdgelessCopilotPanel | null;
-
-  @query('.copilot-selection-rect')
-  accessor selectionElem!: HTMLDivElement;
-
   groups: AIItemGroupConfig[] = [];
-
-  private _updateSelection(rect: DOMRect) {
-    this._selectionModelRect = rect;
-
-    const zoom = this.edgeless.service.viewport.zoom;
-    const [x, y] = this.edgeless.service.viewport.toViewCoord(
-      rect.left,
-      rect.top
-    );
-    const [width, height] = [rect.width * zoom, rect.height * zoom];
-
-    this._selectionRect = { x, y, width, height };
-  }
-
-  private _watchClickOutside() {
-    this._clickOutsideOff?.();
-
-    const { width, height } = this._selectionRect;
-
-    if (width && height) {
-      this._listenClickOutsideId &&
-        cancelAnimationFrame(this._listenClickOutsideId);
-      this._listenClickOutsideId = requestConnectedFrame(() => {
-        if (!this.isConnected) {
-          return;
-        }
-
-        const off = this.blockElement.dispatcher.add('pointerDown', ctx => {
-          const e = ctx.get('pointerState').raw;
-          const aiPanel = this.host.view.getWidget(
-            AFFINE_AI_PANEL_WIDGET,
-            this.doc.root!.id
-          ) as AffineAIPanelWidget;
-
-          if (
-            e.button === MOUSE_BUTTON.MAIN &&
-            !this.contains(e.target as HTMLElement) &&
-            (!aiPanel || aiPanel.state === 'hidden')
-          ) {
-            off();
-            this._visible = false;
-            this.hideCopilotPanel();
-          }
-        });
-        this._listenClickOutsideId = null;
-        this._clickOutsideOff = off;
-      }, this);
-    }
-  }
 
   private _showCopilotPanel() {
     requestConnectedFrame(() => {
@@ -199,32 +113,53 @@ export class EdgelessCopilotWidget extends WidgetElement<
     }, this);
   }
 
-  determineInsertionBounds(width = 800, height = 95) {
-    const elements = this.edgeless.service.selection.selectedElements;
-    const offsetY = 20 / this.edgeless.service.viewport.zoom;
-    const bounds = new Bound(0, 0, width, height);
-    if (elements.length) {
-      const { x, y, h } = getElementsBound(
-        elements.map(ele => ele.elementBound)
-      );
-      bounds.x = x;
-      bounds.y = y + h + offsetY;
-    } else {
-      const { x, y, height: h } = this.selectionModelRect;
-      bounds.x = x;
-      bounds.y = y + h + offsetY;
+  private _updateSelection(rect: DOMRect) {
+    this._selectionModelRect = rect;
+
+    const zoom = this.edgeless.service.viewport.zoom;
+    const [x, y] = this.edgeless.service.viewport.toViewCoord(
+      rect.left,
+      rect.top
+    );
+    const [width, height] = [rect.width * zoom, rect.height * zoom];
+
+    this._selectionRect = { x, y, width, height };
+  }
+
+  private _watchClickOutside() {
+    this._clickOutsideOff?.();
+
+    const { width, height } = this._selectionRect;
+
+    if (width && height) {
+      this._listenClickOutsideId &&
+        cancelAnimationFrame(this._listenClickOutsideId);
+      this._listenClickOutsideId = requestConnectedFrame(() => {
+        if (!this.isConnected) {
+          return;
+        }
+
+        const off = this.blockElement.dispatcher.add('pointerDown', ctx => {
+          const e = ctx.get('pointerState').raw;
+          const aiPanel = this.host.view.getWidget(
+            AFFINE_AI_PANEL_WIDGET,
+            this.doc.root!.id
+          ) as AffineAIPanelWidget;
+
+          if (
+            e.button === MOUSE_BUTTON.MAIN &&
+            !this.contains(e.target as HTMLElement) &&
+            (!aiPanel || aiPanel.state === 'hidden')
+          ) {
+            off();
+            this._visible = false;
+            this.hideCopilotPanel();
+          }
+        });
+        this._listenClickOutsideId = null;
+        this._clickOutsideOff = off;
+      }, this);
     }
-    return bounds;
-  }
-
-  hideCopilotPanel() {
-    this._copilotPanel?.hide();
-    this._copilotPanel = null;
-    this._clickOutsideOff = null;
-  }
-
-  lockToolbar(disabled: boolean) {
-    this.edgeless.slots.toolbarLocked.emit(disabled);
   }
 
   override connectedCallback(): void {
@@ -267,6 +202,34 @@ export class EdgelessCopilotWidget extends WidgetElement<
     );
   }
 
+  determineInsertionBounds(width = 800, height = 95) {
+    const elements = this.edgeless.service.selection.selectedElements;
+    const offsetY = 20 / this.edgeless.service.viewport.zoom;
+    const bounds = new Bound(0, 0, width, height);
+    if (elements.length) {
+      const { x, y, h } = getElementsBound(
+        elements.map(ele => ele.elementBound)
+      );
+      bounds.x = x;
+      bounds.y = y + h + offsetY;
+    } else {
+      const { x, y, height: h } = this.selectionModelRect;
+      bounds.x = x;
+      bounds.y = y + h + offsetY;
+    }
+    return bounds;
+  }
+
+  hideCopilotPanel() {
+    this._copilotPanel?.hide();
+    this._copilotPanel = null;
+    this._clickOutsideOff = null;
+  }
+
+  lockToolbar(disabled: boolean) {
+    this.edgeless.slots.toolbarLocked.emit(disabled);
+  }
+
   override render() {
     if (!this._visible) return nothing;
 
@@ -284,6 +247,44 @@ export class EdgelessCopilotWidget extends WidgetElement<
       ></div>
     </div>`;
   }
+
+  get edgeless() {
+    return this.blockElement;
+  }
+
+  get selectionModelRect() {
+    return this._selectionModelRect;
+  }
+
+  get selectionRect() {
+    return this._selectionRect;
+  }
+
+  get visible() {
+    return !!(
+      this._visible &&
+      this._selectionRect.width &&
+      this._selectionRect.height
+    );
+  }
+
+  set visible(visible: boolean) {
+    this._visible = visible;
+  }
+
+  @state()
+  private accessor _selectionRect: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } = { x: 0, y: 0, width: 0, height: 0 };
+
+  @state()
+  private accessor _visible = false;
+
+  @query('.copilot-selection-rect')
+  accessor selectionElem!: HTMLDivElement;
 }
 
 declare global {

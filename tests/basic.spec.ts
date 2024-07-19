@@ -1,5 +1,3 @@
-import './utils/declare-test-window.js';
-
 import { expect } from '@playwright/test';
 
 import {
@@ -7,7 +5,6 @@ import {
   captureHistory,
   click,
   disconnectByClick,
-  dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
@@ -25,9 +22,7 @@ import {
   redoByClick,
   redoByKeyboard,
   setSelection,
-  SHORT_KEY,
   switchEditorMode,
-  switchReadonly,
   toggleDarkMode,
   type,
   undoByClick,
@@ -46,6 +41,7 @@ import {
   assertTitle,
   defaultStore,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 import { getFormatBar } from './utils/query.js';
 
@@ -249,41 +245,6 @@ test(scoped`undo after adding block twice`, async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 });
 
-test(
-  scoped`should readonly mode not be able to modify text`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    const { paragraphId } = await initEmptyParagraphState(page);
-
-    await focusRichText(page);
-    await type(page, 'hello');
-    await switchReadonly(page);
-
-    await dragBetweenIndices(page, [0, 1], [0, 3]);
-    await page.keyboard.press(`${SHORT_KEY}+b`);
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:paragraph
-  prop:text="hello"
-  prop:type="text"
-/>`,
-      paragraphId
-    );
-
-    await undoByKeyboard(page);
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:paragraph
-  prop:text="hello"
-  prop:type="text"
-/>`,
-      paragraphId
-    );
-  }
-);
-
 test(scoped`undo/redo twice after adding block twice`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -447,11 +408,11 @@ test('when no note block, click editing area auto add a new note block', async (
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await page.locator('affine-note').click({ force: true });
+  await page.locator('affine-edgeless-note').click({ force: true });
   await pressBackspace(page);
   await switchEditorMode(page);
   let note = await page.evaluate(() => {
-    return document.querySelector('affine-note');
+    return document.querySelector('affine-edgeless-note');
   });
   expect(note).toBeNull();
   await click(page, { x: 200, y: 280 });

@@ -1,24 +1,27 @@
-import './utils/declare-test-window.js';
-
 import type { Page } from '@playwright/test';
+
 import { expect } from '@playwright/test';
 import { getEmbedCardToolbar } from 'utils/query.js';
 
 import {
+  SHORT_KEY,
   activeNoteInEdgeless,
   copyByKeyboard,
+  dragBlockToPoint,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   pasteByKeyboard,
+  pressArrowDown,
   pressArrowRight,
   pressArrowUp,
   pressBackspace,
   pressEnter,
+  pressShiftTab,
+  pressTab,
   selectAllByKeyboard,
   setInlineRangeInSelectedRichText,
-  SHORT_KEY,
   switchEditorMode,
   type,
   waitForInlineEditorStateUpdated,
@@ -26,12 +29,16 @@ import {
 } from './utils/actions/index.js';
 import {
   assertAlmostEqual,
+  assertBlockChildrenIds,
   assertBlockCount,
+  assertBlockFlavour,
   assertBlockSelections,
   assertExists,
+  assertParentBlockFlavour,
   assertRichTextInlineRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 
 const inputUrl = 'http://localhost';
@@ -585,4 +592,81 @@ test.describe('embed card toolbar', () => {
     assertAlmostEqual(horizontalStyleBookmarkBox.width, 752, 2);
     assertAlmostEqual(horizontalStyleBookmarkBox.height, 116, 2);
   });
+});
+
+test('indent bookmark block to paragraph', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await pressEnter(page);
+  await type(page, '/link', 100);
+  await pressEnter(page);
+  await type(page, inputUrl);
+  await pressEnter(page);
+
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+  await assertBlockFlavour(page, '1', 'affine:note');
+  await assertBlockFlavour(page, '2', 'affine:paragraph');
+  await assertBlockFlavour(page, '4', 'affine:bookmark');
+
+  await focusRichText(page);
+  await pressArrowDown(page);
+  await assertBlockSelections(page, ['4']);
+  await pressTab(page);
+  await assertBlockChildrenIds(page, '1', ['2']);
+  await assertBlockChildrenIds(page, '2', ['4']);
+
+  await pressShiftTab(page);
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+});
+
+test('indent bookmark block to list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '- a');
+  await pressEnter(page);
+  await type(page, '/link', 100);
+  await pressEnter(page);
+  await type(page, inputUrl);
+  await pressEnter(page);
+
+  await assertBlockChildrenIds(page, '1', ['3', '5']);
+  await assertBlockFlavour(page, '1', 'affine:note');
+  await assertBlockFlavour(page, '3', 'affine:list');
+  await assertBlockFlavour(page, '5', 'affine:bookmark');
+
+  await focusRichText(page);
+  await pressArrowDown(page);
+  await assertBlockSelections(page, ['5']);
+  await pressTab(page);
+  await assertBlockChildrenIds(page, '1', ['3']);
+  await assertBlockChildrenIds(page, '3', ['5']);
+
+  await pressShiftTab(page);
+  await assertBlockChildrenIds(page, '1', ['3', '5']);
+});
+
+test('bookmark can be dragged from note to surface top level block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await page.waitForTimeout(100);
+  await type(page, '/link', 100);
+  await pressEnter(page);
+  await page.waitForTimeout(100);
+  await type(page, inputUrl);
+  await pressEnter(page);
+
+  await switchEditorMode(page);
+  await page.mouse.dblclick(450, 450);
+
+  await dragBlockToPoint(page, '4', { x: 200, y: 200 });
+
+  await waitNextFrame(page);
+  await assertParentBlockFlavour(page, '5', 'affine:surface');
 });

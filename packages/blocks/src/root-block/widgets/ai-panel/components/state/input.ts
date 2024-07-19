@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { AIStarIcon } from '../../../../../_common/icons/ai.js';
@@ -8,6 +8,36 @@ import { stopPropagation } from '../../../../../_common/utils/event.js';
 
 @customElement('ai-panel-input')
 export class AIPanelInput extends WithDisposable(LitElement) {
+  private _onInput = () => {
+    this._textarea.style.height = 'auto';
+    this._textarea.style.height = this._textarea.scrollHeight + 'px';
+
+    this.onInput?.(this._textarea.value);
+    const value = this._textarea.value.trim();
+    if (value.length > 0) {
+      this._arrow.dataset.active = '';
+      this._hasContent = true;
+    } else {
+      delete this._arrow.dataset.active;
+      this._hasContent = false;
+    }
+  };
+
+  private _onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      this._sendToAI();
+    }
+  };
+
+  private _sendToAI = () => {
+    const value = this._textarea.value.trim();
+    if (value.length === 0) return;
+
+    this.onFinish?.(value);
+    this.remove();
+  };
+
   static override styles = css`
     :host {
       width: 100%;
@@ -86,57 +116,6 @@ export class AIPanelInput extends WithDisposable(LitElement) {
     }
   `;
 
-  @query('.arrow')
-  private accessor _arrow!: HTMLDivElement;
-
-  @query('textarea')
-  private accessor _textarea!: HTMLTextAreaElement;
-
-  @state()
-  private accessor _hasContent = false;
-
-  @property({ attribute: false })
-  accessor onFinish: ((input: string) => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onInput: ((input: string) => void) | undefined = undefined;
-
-  private _sendToAI = () => {
-    const value = this._textarea.value.trim();
-    if (value.length === 0) return;
-
-    this.onFinish?.(value);
-    this.remove();
-  };
-
-  private _onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-      e.preventDefault();
-      this._sendToAI();
-    }
-  };
-
-  private _onInput = () => {
-    this._textarea.style.height = 'auto';
-    this._textarea.style.height = this._textarea.scrollHeight + 'px';
-
-    this.onInput?.(this._textarea.value);
-    const value = this._textarea.value.trim();
-    if (value.length > 0) {
-      this._arrow.dataset.active = '';
-      this._hasContent = true;
-    } else {
-      delete this._arrow.dataset.active;
-      this._hasContent = false;
-    }
-  };
-
-  override updated(_changedProperties: Map<PropertyKey, unknown>): void {
-    const result = super.updated(_changedProperties);
-    this._textarea.style.height = this._textarea.scrollHeight + 'px';
-    return result;
-  }
-
   override render() {
     this.updateComplete
       .then(() => {
@@ -175,6 +154,27 @@ export class AIPanelInput extends WithDisposable(LitElement) {
       </div>
     </div>`;
   }
+
+  override updated(_changedProperties: Map<PropertyKey, unknown>): void {
+    const result = super.updated(_changedProperties);
+    this._textarea.style.height = this._textarea.scrollHeight + 'px';
+    return result;
+  }
+
+  @query('.arrow')
+  private accessor _arrow!: HTMLDivElement;
+
+  @state()
+  private accessor _hasContent = false;
+
+  @query('textarea')
+  private accessor _textarea!: HTMLTextAreaElement;
+
+  @property({ attribute: false })
+  accessor onFinish: ((input: string) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor onInput: ((input: string) => void) | undefined = undefined;
 }
 
 declare global {

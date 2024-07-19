@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
@@ -38,29 +38,11 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor fontFamily = FontFamily.Inter;
-
-  @property({ attribute: false })
-  accessor fontWeight = FontWeight.Regular;
-
-  @property({ attribute: false })
-  accessor fontStyle = FontStyle.Normal;
-
-  @property({ attribute: false })
-  accessor onSelect:
-    | ((fontWeight: FontWeight, fontStyle: FontStyle) => void)
-    | undefined;
-
-  private _onSelect(
+  private _isActive(
     fontWeight: FontWeight,
     fontStyle: FontStyle = FontStyle.Normal
   ) {
-    this.fontWeight = fontWeight;
-    this.fontStyle = fontStyle;
-    if (this.onSelect) {
-      this.onSelect(fontWeight, fontStyle);
-    }
+    return this.fontWeight === fontWeight && this.fontStyle === fontStyle;
   }
 
   private _isDisabled(
@@ -80,11 +62,15 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
     return !fontFace;
   }
 
-  private _isActive(
+  private _onSelect(
     fontWeight: FontWeight,
     fontStyle: FontStyle = FontStyle.Normal
   ) {
-    return this.fontWeight === fontWeight && this.fontStyle === fontStyle;
+    this.fontWeight = fontWeight;
+    this.fontStyle = fontStyle;
+    if (this.onSelect) {
+      this.onSelect(fontWeight, fontStyle);
+    }
   }
 
   override render() {
@@ -161,11 +147,24 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
       () => html`
         <edgeless-menu-divider
           data-orientation="horizontal"
-          style="--height: 8px"
         ></edgeless-menu-divider>
       `
     );
   }
+
+  @property({ attribute: false })
+  accessor fontFamily = FontFamily.Inter;
+
+  @property({ attribute: false })
+  accessor fontStyle = FontStyle.Normal;
+
+  @property({ attribute: false })
+  accessor fontWeight = FontWeight.Regular;
+
+  @property({ attribute: false })
+  accessor onSelect:
+    | ((fontWeight: FontWeight, fontStyle: FontStyle) => void)
+    | undefined;
 }
 
 declare global {

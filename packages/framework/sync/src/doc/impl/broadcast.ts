@@ -14,20 +14,6 @@ type ChannelMessage =
     };
 
 export class BroadcastChannelDocSource implements DocSource {
-  name = 'broadcast-channel';
-
-  channel = new BroadcastChannel(this.channelName);
-
-  docMap = new Map<string, Uint8Array>();
-
-  constructor(readonly channelName: string = 'blocksuite:doc') {
-    this.channel.addEventListener('message', this._onMessage);
-
-    this.channel.postMessage({
-      type: 'init',
-    });
-  }
-
   private _onMessage = (event: MessageEvent<ChannelMessage>) => {
     if (event.data.type === 'init') {
       for (const [docId, data] of this.docMap) {
@@ -48,6 +34,20 @@ export class BroadcastChannelDocSource implements DocSource {
       this.docMap.set(docId, data);
     }
   };
+
+  channel = new BroadcastChannel(this.channelName);
+
+  docMap = new Map<string, Uint8Array>();
+
+  name = 'broadcast-channel';
+
+  constructor(readonly channelName: string = 'blocksuite:doc') {
+    this.channel.addEventListener('message', this._onMessage);
+
+    this.channel.postMessage({
+      type: 'init',
+    });
+  }
 
   pull(docId: string, state: Uint8Array) {
     const update = this.docMap.get(docId);

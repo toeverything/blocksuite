@@ -1,6 +1,7 @@
 import type { TemplateResult } from 'lit';
 
 import type { NoteChildrenFlavour } from '../../../../../_common/utils/index.js';
+
 import {
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,

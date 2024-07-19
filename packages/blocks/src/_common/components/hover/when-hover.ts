@@ -1,6 +1,7 @@
+import type { HoverMiddleware, WhenHoverOptions } from './types.js';
+
 import { dedupe, delayHide, delayShow } from './middlewares/basic.js';
 import { safeBridge, safeTriangle } from './middlewares/safe-area.js';
-import type { HoverMiddleware, WhenHoverOptions } from './types.js';
 
 /**
  * Call the `whenHoverChange` callback when the element is hovered.

@@ -18,6 +18,7 @@ import {
   pressArrowDown,
   pressArrowUp,
   pressEnter,
+  pressEscape,
   pressTab,
   scrollToBottom,
   scrollToTop,
@@ -93,7 +94,7 @@ test('should format quick bar show when clicking drag handle', async ({
   if (!box) {
     throw new Error("formatBar doesn't exist");
   }
-  assertAlmostEqual(box.x, 222.5, 5);
+  assertAlmostEqual(box.x, 251, 5);
   assertAlmostEqual(box.y - dragHandleRect.y, -55.5, 5);
 });
 
@@ -819,26 +820,6 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertRichTextInlineRange(page, 0, 0, 3);
 });
 
-test('should format quick bar be able to copy', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  // drag only the `456` paragraph
-  await dragBetweenIndices(page, [1, 0], [1, 3]);
-
-  const { copyBtn } = getFormatBar(page);
-  await expect(copyBtn).toBeVisible();
-  await assertRichTextInlineRange(page, 1, 0, 3);
-  await copyBtn.click();
-  await assertRichTextInlineRange(page, 1, 0, 3);
-
-  await focusRichText(page, 1);
-  await pasteByKeyboard(page);
-  await waitNextFrame(page);
-
-  await assertRichTexts(page, ['123', '456456', '789']);
-});
-
 test('should format quick bar show when double click text', async ({
   page,
 }) => {
@@ -996,7 +977,7 @@ test('should format quick bar work in single block selection', async ({
   const selectionRect = await blockSelections.boundingBox();
   assertExists(formatRect);
   assertExists(selectionRect);
-  assertAlmostEqual(formatRect.x - selectionRect.x, 118.5, 10);
+  assertAlmostEqual(formatRect.x - selectionRect.x, 147.5, 10);
   assertAlmostEqual(formatRect.y - selectionRect.y, 33, 10);
 
   const boldBtn = formatBar.getByTestId('bold');
@@ -1089,7 +1070,7 @@ test('should format quick bar work in multiple block selection', async ({
   }
   const rect = await blockSelections.first().boundingBox();
   assertExists(rect);
-  assertAlmostEqual(box.x - rect.x, 118.5, 10);
+  assertAlmostEqual(box.x - rect.x, 147.5, 10);
   assertAlmostEqual(box.y - rect.y, 99, 10);
 
   await formatBarController.boldBtn.click();
@@ -1292,7 +1273,7 @@ test('should format quick bar show after convert to code block', async ({
     { x: 0, y: 0 }
   );
   await expect(formatBarController.formatBar).toBeVisible();
-  await formatBarController.assertBoundingBox(222.5, 343);
+  await formatBarController.assertBoundingBox(251, 343);
 
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
@@ -1649,4 +1630,63 @@ test('create linked doc from block selection with format bar', async ({
   </affine:note>
 </affine:page>`
   );
+});
+
+test.describe('more menu button', () => {
+  test('should be able to perform the copy action', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    // drag only the `456` paragraph
+    await dragBetweenIndices(page, [1, 0], [1, 3]);
+
+    const { openMoreMenu, copyBtn } = getFormatBar(page);
+    await openMoreMenu();
+    await expect(copyBtn).toBeVisible();
+    await assertRichTextInlineRange(page, 1, 0, 3);
+    await copyBtn.click();
+    await assertRichTextInlineRange(page, 1, 0, 3);
+
+    await focusRichText(page, 1);
+    await pasteByKeyboard(page);
+    await waitNextFrame(page);
+
+    await assertRichTexts(page, ['123', '456456', '789']);
+  });
+
+  test('should be able to perform the duplicate action', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+
+    await focusRichText(page, 1);
+    await pressEscape(page);
+
+    const { openMoreMenu, duplicateBtn } = getFormatBar(page);
+    await openMoreMenu();
+    await expect(duplicateBtn).toBeVisible();
+    await duplicateBtn.click();
+
+    await waitNextFrame(page);
+
+    await assertRichTexts(page, ['123', '456', '456', '789']);
+  });
+
+  test('should be able to perform the delete action', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+
+    await focusRichText(page, 1);
+    await pressEscape(page);
+
+    const { openMoreMenu, deleteBtn } = getFormatBar(page);
+    await openMoreMenu();
+    await expect(deleteBtn).toBeVisible();
+    await deleteBtn.click();
+
+    await waitNextFrame(page);
+
+    await assertRichTexts(page, ['123', '789']);
+  });
 });

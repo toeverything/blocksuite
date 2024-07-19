@@ -1,4 +1,5 @@
 import type { ViewMeta } from '../data-view/index.js';
+
 import { viewPresets } from '../data-view/index.js';
 
 export const databaseBlockViews: ViewMeta[] = [

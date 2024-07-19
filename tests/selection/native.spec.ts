@@ -2,6 +2,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  SHORT_KEY,
   activeEmbed,
   activeNoteInEdgeless,
   addNoteByClick,
@@ -44,7 +45,6 @@ import {
   scrollToTop,
   selectAllByKeyboard,
   setInlineRangeInInlineEditor,
-  SHORT_KEY,
   switchEditorMode,
   type,
   undoByKeyboard,

@@ -10,9 +10,9 @@ import type { PieMenuSchema } from './base.js';
  */
 
 export class PieManager {
-  private static schemas = new Set<PieMenuSchema>();
-
   private static registeredSchemas: Record<string, PieMenuSchema> = {};
+
+  private static schemas = new Set<PieMenuSchema>();
 
   static settings = {
     /**
@@ -44,6 +44,23 @@ export class PieManager {
     open: new Slot<PieMenuSchema>(),
   };
 
+  private static _getSchema(id: string) {
+    const schema = this.registeredSchemas[id];
+    assertExists(schema);
+    return schema;
+  }
+
+  private static _register(schema: PieMenuSchema) {
+    const { id } = schema;
+
+    assertNotExists(
+      this.registeredSchemas[id],
+      `Menu with id '${id}' already exists. Please provide a unique id`
+    );
+
+    this.registeredSchemas[id] = schema;
+  }
+
   private static _setupTriggers(rootElement: EdgelessRootBlockComponent) {
     Object.values(this.registeredSchemas).forEach(schema => {
       const { trigger } = schema;
@@ -62,25 +79,16 @@ export class PieManager {
     });
   }
 
-  private static _register(schema: PieMenuSchema) {
-    const { id } = schema;
-
-    assertNotExists(
-      this.registeredSchemas[id],
-      `Menu with id '${id}' already exists. Please provide a unique id`
-    );
-
-    this.registeredSchemas[id] = schema;
-  }
-
-  private static _getSchema(id: string) {
-    const schema = this.registeredSchemas[id];
-    assertExists(schema);
-    return schema;
-  }
-
   static add(schema: PieMenuSchema) {
     return this.schemas.add(schema);
+  }
+
+  static dispose() {
+    this.registeredSchemas = {};
+  }
+
+  static open(id: PieMenuId) {
+    this.slots.open.emit(this._getSchema(id));
   }
 
   static remove(schema: PieMenuSchema) {
@@ -90,13 +98,5 @@ export class PieManager {
   static setup({ rootElement }: { rootElement: EdgelessRootBlockComponent }) {
     this.schemas.forEach(schema => this._register(schema));
     this._setupTriggers(rootElement);
-  }
-
-  static dispose() {
-    this.registeredSchemas = {};
-  }
-
-  static open(id: PieMenuId) {
-    this.slots.open.emit(this._getSchema(id));
   }
 }

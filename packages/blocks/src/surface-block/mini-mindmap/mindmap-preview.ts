@@ -4,13 +4,16 @@ import { type Doc, Job } from '@blocksuite/store';
 import {
   DocCollection,
   type DocCollectionOptions,
-  Generator,
+  IdGeneratorType,
   Schema,
 } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { MindmapElementModel } from '../element-model/mindmap.js';
+import type { SurfaceBlockModel } from '../surface-model.js';
 
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
 import {
@@ -19,9 +22,7 @@ import {
   MindmapStyleThree,
   MindmapStyleTwo,
 } from '../../_common/icons/edgeless.js';
-import type { MindmapElementModel } from '../element-model/mindmap.js';
 import { MindmapStyle } from '../element-model/utils/mindmap/style.js';
-import type { SurfaceBlockModel } from '../surface-model.js';
 import { MindmapRootBlock } from './mindmap-root-block.js';
 import { MiniMindmapSchema, MiniMindmapSpecs } from './spec.js';
 import { MindmapSurfaceBlock } from './surface-block.js';
@@ -88,39 +89,11 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor answer!: string;
-
-  @property({ attribute: false })
-  accessor templateShow = true;
-
-  @property({ attribute: false })
-  accessor height = 400;
-
-  @property({ attribute: false })
-  accessor ctx!: {
-    get(): Record<string, unknown>;
-    set(data: Record<string, unknown>): void;
-  };
-
-  @property({ attribute: false })
-  accessor mindmapStyle: MindmapStyle | undefined = undefined;
-
-  @query('editor-host')
-  accessor portalHost!: EditorHost;
-
   doc!: Doc;
-
-  surface!: SurfaceBlockModel;
 
   mindmapId!: string;
 
-  get _mindmap() {
-    return this.surface.getElementById(this.mindmapId) as MindmapElementModel;
-  }
+  surface!: SurfaceBlockModel;
 
   private _createTemporaryDoc() {
     const schema = new Schema();
@@ -128,7 +101,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     const options: DocCollectionOptions = {
       id: 'MINI_MINDMAP_TEMPORARY',
       schema,
-      idGenerator: Generator.NanoID,
+      idGenerator: IdGeneratorType.NanoID,
       awarenessSources: [],
     };
 
@@ -148,8 +121,8 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     };
   }
 
-  private _toMindmapNode(answer: string, doc: Doc) {
-    return markdownToMindmap(answer, doc);
+  get _mindmap() {
+    return this.surface.getElementById(this.mindmapId) as MindmapElementModel;
   }
 
   private _switchStyle(style: MindmapStyle) {
@@ -166,6 +139,10 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       style,
     });
     this.requestUpdate();
+  }
+
+  private _toMindmapNode(answer: string, doc: Doc) {
+    return markdownToMindmap(answer, doc);
   }
 
   override connectedCallback(): void {
@@ -228,6 +205,30 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
         : nothing}
     </div>`;
   }
+
+  @property({ attribute: false })
+  accessor answer!: string;
+
+  @property({ attribute: false })
+  accessor ctx!: {
+    get(): Record<string, unknown>;
+    set(data: Record<string, unknown>): void;
+  };
+
+  @property({ attribute: false })
+  accessor height = 400;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor mindmapStyle: MindmapStyle | undefined = undefined;
+
+  @query('editor-host')
+  accessor portalHost!: EditorHost;
+
+  @property({ attribute: false })
+  accessor templateShow = true;
 }
 
 type Node = {

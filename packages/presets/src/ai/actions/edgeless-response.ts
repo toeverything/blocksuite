@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  AffineAIPanelWidget,
   AIItemConfig,
+  AffineAIPanelWidget,
   EdgelessCopilotWidget,
   EdgelessElementToolbarWidget,
   EdgelessRootService,
@@ -9,17 +9,20 @@ import type {
   ShapeElementModel,
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
+import type { TemplateResult } from 'lit';
+
 import {
   DeleteIcon,
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EmbedHtmlBlockSpec,
-  fitContent,
   ImageBlockModel,
   InsertBelowIcon,
   NoteDisplayMode,
   ResetIcon,
+  fitContent,
 } from '@blocksuite/blocks';
-import type { TemplateResult } from 'lit';
+
+import type { CtxRecord } from './types.js';
 
 import { AIPenIcon, ChatWithAIIcon } from '../_common/icons.js';
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
@@ -40,7 +43,6 @@ import {
   getEdgelessService,
 } from '../utils/selection-utils.js';
 import { EXCLUDING_INSERT_ACTIONS, generatingStages } from './consts.js';
-import type { CtxRecord } from './types.js';
 
 type FinishConfig = Exclude<
   AffineAIPanelWidget['config'],

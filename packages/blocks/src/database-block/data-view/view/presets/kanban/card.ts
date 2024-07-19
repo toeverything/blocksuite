@@ -1,5 +1,3 @@
-import './cell.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -7,13 +5,17 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import { NewEditIcon } from '../../../../../_common/icons/index.js';
-import { MoreHorizontalIcon } from '../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../data-view.js';
 import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,
 } from './kanban-view-manager.js';
+
+import {
+  CenterPeekIcon,
+  MoreHorizontalIcon,
+} from '../../../common/icons/index.js';
+import './cell.js';
 import { openDetail, popCardMenu } from './menu.js';
 
 const styles = css`
@@ -119,102 +121,6 @@ const styles = css`
 
 @customElement('affine-data-view-kanban-card')
 export class KanbanCard extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor dataViewEle!: DataViewRenderer;
-
-  @property({ attribute: false })
-  accessor view!: DataViewKanbanManager;
-
-  @property({ attribute: false })
-  accessor groupKey!: string;
-
-  @property({ attribute: false })
-  accessor cardId!: string;
-
-  @state()
-  accessor isFocus = false;
-
-  private renderTitle() {
-    const title = this.view.getHeaderTitle(this.cardId);
-    if (!title) {
-      return;
-    }
-    return html` <div class="card-header-title">
-      <affine-data-view-kanban-cell
-        .contentOnly="${true}"
-        data-column-id="${title.id}"
-        .view="${this.view}"
-        .groupKey="${this.groupKey}"
-        .column="${title}"
-        .cardId="${this.cardId}"
-      ></affine-data-view-kanban-cell>
-    </div>`;
-  }
-
-  private renderIcon() {
-    const icon = this.view.getHeaderIcon(this.cardId);
-    if (!icon) {
-      return;
-    }
-    return html` <div class="card-header-icon">
-      ${icon.getValue(this.cardId)}
-    </div>`;
-  }
-
-  private renderHeader(columns: DataViewKanbanColumnManager[]) {
-    if (!this.view.hasHeader(this.cardId)) {
-      return '';
-    }
-    const classList = classMap({
-      'card-header': true,
-      'has-divider': columns.length > 0,
-    });
-    return html`
-      <div class="${classList}">${this.renderTitle()} ${this.renderIcon()}</div>
-    `;
-  }
-
-  private renderBody(columns: DataViewKanbanColumnManager[]) {
-    if (columns.length === 0) {
-      return '';
-    }
-    return html` <div class="card-body">
-      ${repeat(
-        columns,
-        v => v.id,
-        column => {
-          if (this.view.isInHeader(column.id)) {
-            return '';
-          }
-          return html` <affine-data-view-kanban-cell
-            .contentOnly="${false}"
-            data-column-id="${column.id}"
-            .view="${this.view}"
-            .groupKey="${this.groupKey}"
-            .column="${column}"
-            .cardId="${this.cardId}"
-          ></affine-data-view-kanban-cell>`;
-        }
-      )}
-    </div>`;
-  }
-
-  private renderOps() {
-    if (this.view.readonly) {
-      return;
-    }
-    return html`
-      <div class="card-ops">
-        <div class="card-op" @click="${this.clickEdit}">${NewEditIcon}</div>
-        <div class="card-op" @click="${this.clickMore}">
-          ${MoreHorizontalIcon}
-        </div>
-      </div>
-    `;
-  }
-
   private clickEdit = (e: MouseEvent) => {
     e.stopPropagation();
     const selection = this.getSelection();
@@ -222,10 +128,6 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       openDetail(this.dataViewEle, this.cardId, selection);
     }
   };
-
-  private getSelection() {
-    return this.closest('affine-data-view-kanban')?.selectionController;
-  }
 
   private clickMore = (e: MouseEvent) => {
     e.stopPropagation();
@@ -259,14 +161,96 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
           },
         ],
       };
-      popCardMenu(
-        this.dataViewEle,
-        e.target as HTMLElement,
-        this.cardId,
-        selection
-      );
+      const target = e.target as HTMLElement;
+      const ref = target.closest('affine-data-view-kanban-cell') ?? this;
+      popCardMenu(this.dataViewEle, ref, this.cardId, selection);
     }
   };
+
+  static override styles = styles;
+
+  private getSelection() {
+    return this.closest('affine-data-view-kanban')?.selectionController;
+  }
+
+  private renderBody(columns: DataViewKanbanColumnManager[]) {
+    if (columns.length === 0) {
+      return '';
+    }
+    return html` <div class="card-body">
+      ${repeat(
+        columns,
+        v => v.id,
+        column => {
+          if (this.view.isInHeader(column.id)) {
+            return '';
+          }
+          return html` <affine-data-view-kanban-cell
+            .contentOnly="${false}"
+            data-column-id="${column.id}"
+            .view="${this.view}"
+            .groupKey="${this.groupKey}"
+            .column="${column}"
+            .cardId="${this.cardId}"
+          ></affine-data-view-kanban-cell>`;
+        }
+      )}
+    </div>`;
+  }
+
+  private renderHeader(columns: DataViewKanbanColumnManager[]) {
+    if (!this.view.hasHeader(this.cardId)) {
+      return '';
+    }
+    const classList = classMap({
+      'card-header': true,
+      'has-divider': columns.length > 0,
+    });
+    return html`
+      <div class="${classList}">${this.renderTitle()} ${this.renderIcon()}</div>
+    `;
+  }
+
+  private renderIcon() {
+    const icon = this.view.getHeaderIcon(this.cardId);
+    if (!icon) {
+      return;
+    }
+    return html` <div class="card-header-icon">
+      ${icon.getValue(this.cardId)}
+    </div>`;
+  }
+
+  private renderOps() {
+    if (this.view.readonly) {
+      return;
+    }
+    return html`
+      <div class="card-ops">
+        <div class="card-op" @click="${this.clickEdit}">${CenterPeekIcon}</div>
+        <div class="card-op" @click="${this.clickMore}">
+          ${MoreHorizontalIcon}
+        </div>
+      </div>
+    `;
+  }
+
+  private renderTitle() {
+    const title = this.view.getHeaderTitle(this.cardId);
+    if (!title) {
+      return;
+    }
+    return html` <div class="card-header-title">
+      <affine-data-view-kanban-cell
+        .contentOnly="${true}"
+        data-column-id="${title.id}"
+        .view="${this.view}"
+        .groupKey="${this.groupKey}"
+        .column="${title}"
+        .cardId="${this.cardId}"
+      ></affine-data-view-kanban-cell>
+    </div>`;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -318,6 +302,21 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       ${this.renderOps()}
     `;
   }
+
+  @property({ attribute: false })
+  accessor cardId!: string;
+
+  @property({ attribute: false })
+  accessor dataViewEle!: DataViewRenderer;
+
+  @property({ attribute: false })
+  accessor groupKey!: string;
+
+  @state()
+  accessor isFocus = false;
+
+  @property({ attribute: false })
+  accessor view!: DataViewKanbanManager;
 }
 
 declare global {

@@ -1,6 +1,9 @@
 import { expect } from '@playwright/test';
 
 import {
+  MODIFIER_KEY,
+  SHIFT_KEY,
+  SHORT_KEY,
   cutByKeyboard,
   dragBetweenIndices,
   dragOverTitle,
@@ -11,7 +14,6 @@ import {
   initEmptyParagraphState,
   initThreeParagraphs,
   inlineCode,
-  MODIFIER_KEY,
   pasteByKeyboard,
   pressArrowDown,
   pressArrowLeft,
@@ -27,8 +29,6 @@ import {
   redoByKeyboard,
   resetHistory,
   setInlineRangeInSelectedRichText,
-  SHIFT_KEY,
-  SHORT_KEY,
   strikethrough,
   type,
   undoByClick,

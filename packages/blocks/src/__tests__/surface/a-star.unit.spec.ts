@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
+import type { IVec, IVec3 } from '../../surface-block/utils/vec.js';
+
 import { AStarRunner } from '../../surface-block/utils/a-star.js';
 import { almostEqual } from '../../surface-block/utils/math-utils.js';
-import type { IVec } from '../../surface-block/utils/vec.js';
 
-function mergePath(points: IVec[]) {
+function mergePath(points: IVec3[]) {
   if (points.length === 0) return points;
-  const rst: IVec[] = [points[0]];
+  const rst: IVec3[] = [points[0]];
   for (let i = 1; i < points.length - 1; i++) {
     const cur = points[i];
     const last = points[i - 1];
@@ -35,11 +36,11 @@ describe('a* algorithm', () => {
    *                  ------------------- 0
    */
   it('width is greater than height', () => {
-    const sp = [0, 0, 0];
-    const ep = [200, 100, 0];
-    const osp = [-1, 0, 0];
-    const oep = [201, 100, 0];
-    const points = [
+    const sp: IVec3 = [0, 0, 0];
+    const ep: IVec3 = [200, 100, 0];
+    const osp: IVec3 = [-1, 0, 0];
+    const oep: IVec3 = [201, 100, 0];
+    const points: IVec3[] = [
       sp,
       ep,
       [100, 0, 0],
@@ -49,10 +50,10 @@ describe('a* algorithm', () => {
       [200, 50, 0],
       [0, 100, 0],
       [100, 100, 0],
-    ];
+    ] as IVec3[];
     const aStar = new AStarRunner(points, sp, ep, osp, oep);
     aStar.run();
-    let path = aStar.path;
+    let path: IVec[] | IVec3[] = aStar.path;
     path.pop();
     path.shift();
     path = mergePath(path);
@@ -79,11 +80,11 @@ describe('a* algorithm', () => {
    *      0
    */
   it('height is greater than width', () => {
-    const sp = [0, 0, 0];
-    const ep = [100, 200, 0];
-    const osp = [0, -1, 0];
-    const oep = [100, 201, 0];
-    const points = [
+    const sp: IVec3 = [0, 0, 0];
+    const ep: IVec3 = [100, 200, 0];
+    const osp: IVec3 = [0, -1, 0];
+    const oep: IVec3 = [100, 201, 0];
+    const points: IVec3[] = [
       sp,
       [50, 0, 0],
       [100, 0, 0],

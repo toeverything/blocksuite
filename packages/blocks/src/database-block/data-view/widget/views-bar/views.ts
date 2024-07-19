@@ -1,8 +1,8 @@
-import '../../common/component/overflow/overflow.js';
-
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+
+import type { SingleViewSource } from '../../common/index.js';
 
 import {
   popFilterableSimpleMenu,
@@ -15,68 +15,13 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../../../_common/icons/index.js';
+import '../../common/component/overflow/overflow.js';
 import { DeleteIcon } from '../../common/icons/index.js';
-import type { SingleViewSource } from '../../common/index.js';
 import { renderUniLit } from '../../utils/uni-component/index.js';
 import { WidgetBase } from '../widget-base.js';
 
 @customElement('data-view-header-views')
 export class DataViewHeaderViews extends WidgetBase {
-  get readonly() {
-    return this.viewSource.readonly;
-  }
-
-  static override styles = css`
-    data-view-header-views {
-      height: 32px;
-      display: flex;
-      user-select: none;
-      gap: 4px;
-    }
-    data-view-header-views::-webkit-scrollbar-thumb {
-      width: 1px;
-    }
-
-    .database-view-button {
-      height: 100%;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      color: var(--affine-text-secondary-color);
-      white-space: nowrap;
-    }
-
-    .database-view-button .name {
-      align-items: center;
-      height: 22px;
-      max-width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .database-view-button .icon {
-      margin-right: 6px;
-      display: block;
-    }
-
-    .database-view-button .icon svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .database-view-button.active {
-      color: var(--affine-text-primary-color);
-      background-color: var(--affine-hover-color-filled);
-    }
-  `;
-
-  private getRenderer(view: SingleViewSource) {
-    return this.viewSource.getViewMeta(view.view.mode).renderer;
-  }
-
   _addViewMenu = (event: MouseEvent) => {
     popFilterableSimpleMenu(
       event.target as HTMLElement,
@@ -138,6 +83,53 @@ export class DataViewHeaderViews extends WidgetBase {
       },
     ]);
   };
+
+  static override styles = css`
+    data-view-header-views {
+      height: 32px;
+      display: flex;
+      user-select: none;
+      gap: 4px;
+    }
+    data-view-header-views::-webkit-scrollbar-thumb {
+      width: 1px;
+    }
+
+    .database-view-button {
+      height: 100%;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      color: var(--affine-text-secondary-color);
+      white-space: nowrap;
+    }
+
+    .database-view-button .name {
+      align-items: center;
+      height: 22px;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .database-view-button .icon {
+      margin-right: 6px;
+      display: block;
+    }
+
+    .database-view-button .icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .database-view-button.active {
+      color: var(--affine-text-primary-color);
+      background-color: var(--affine-hover-color-filled);
+    }
+  `;
 
   openViewOption = (target: HTMLElement, id: string) => {
     if (this.readonly) {
@@ -224,23 +216,6 @@ export class DataViewHeaderViews extends WidgetBase {
     });
   };
 
-  _clickView(event: MouseEvent, id: string) {
-    if (this.viewSource.currentViewId !== id) {
-      this.viewSource.selectView(id);
-      return;
-    }
-    this.openViewOption(event.target as HTMLElement, id);
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.viewSource.updateSlot.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
   renderMore = (count: number) => {
     const views = this.viewSource.views;
     if (count === views.length) {
@@ -249,6 +224,7 @@ export class DataViewHeaderViews extends WidgetBase {
       }
       return html`<div
         class="database-view-button dv-icon-16 dv-hover"
+        data-testid="database-add-view-button"
         @click="${this._addViewMenu}"
       >
         ${AddCursorIcon}
@@ -283,6 +259,27 @@ export class DataViewHeaderViews extends WidgetBase {
     });
   };
 
+  _clickView(event: MouseEvent, id: string) {
+    if (this.viewSource.currentViewId !== id) {
+      this.viewSource.selectView(id);
+      return;
+    }
+    this.openViewOption(event.target as HTMLElement, id);
+  }
+
+  private getRenderer(view: SingleViewSource) {
+    return this.viewSource.getViewMeta(view.view.mode).renderer;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.viewSource.updateSlot.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
   override render() {
     return html`
       <component-overflow
@@ -290,6 +287,10 @@ export class DataViewHeaderViews extends WidgetBase {
         .renderMore="${this.renderMore}"
       ></component-overflow>
     `;
+  }
+
+  get readonly() {
+    return this.viewSource.readonly;
   }
 }
 

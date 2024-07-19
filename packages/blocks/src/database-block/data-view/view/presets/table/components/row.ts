@@ -1,27 +1,54 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { NewEditIcon } from '../../../../../../_common/icons/index.js';
-import { MoreHorizontalIcon } from '../../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 import type { TableViewSelection } from '../types.js';
+
+import {
+  CenterPeekIcon,
+  MoreHorizontalIcon,
+} from '../../../../common/icons/index.js';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { openDetail, popRowMenu } from './menu.js';
 
 @customElement('data-view-table-row')
-export class TableRow extends WithDisposable(ShadowlessElement) {
-  get selectionController() {
-    return this.closest('affine-database-table')?.selectionController;
-  }
-
-  get groupKey() {
-    return this.closest('affine-data-view-table-group')?.group?.key;
-  }
+export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
+  private _clickDragHandler = () => {
+    if (this.view.readonly) {
+      return;
+    }
+    const selectionController = this.selectionController;
+    if (selectionController) {
+      if (
+        selectionController.isRowSelected(this.groupKey, this.rowIndex) &&
+        selectionController.selection
+      ) {
+        selectionController.selection = {
+          ...selectionController.selection,
+          rowsSelection: undefined,
+        };
+      } else {
+        selectionController.selection = {
+          groupKey: this.groupKey,
+          rowsSelection: {
+            start: this.rowIndex,
+            end: this.rowIndex,
+          },
+          focus: {
+            rowIndex: this.rowIndex,
+            columnIndex: 0,
+          },
+          isEditing: false,
+        };
+      }
+    }
+  };
 
   static override styles = css`
     .data-view-table-row {
@@ -100,64 +127,71 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor dataViewEle!: DataViewRenderer;
+  contextMenu = (e: MouseEvent) => {
+    if (this.view.readonly) {
+      return;
+    }
+    const selection = this.selectionController;
+    if (!selection) {
+      return;
+    }
+    e.preventDefault();
+    const ele = e.target as HTMLElement;
+    const cell = ele.closest('affine-database-cell-container');
+    const columnIndex = cell?.columnIndex ?? 0;
+    selection.selection = {
+      groupKey: this.groupKey,
+      rowsSelection: {
+        start: this.rowIndex,
+        end: this.rowIndex,
+      },
+      focus: {
+        rowIndex: this.rowIndex,
+        columnIndex: columnIndex,
+      },
+      isEditing: false,
+    };
+    const target =
+      cell ??
+      (e.target as HTMLElement).closest('.database-cell') ?? // for last add btn cell
+      (e.target as HTMLElement);
 
-  @property({ attribute: false })
-  accessor view!: DataViewTableManager;
+    popRowMenu(this.dataViewEle, target, this.rowId, selection);
+  };
 
-  @property({ attribute: false })
-  accessor rowIndex!: number;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
-
-  private _clickDragHandler = () => {
-    const selectionController = this.selectionController;
-    if (selectionController) {
-      if (
-        selectionController.isRowSelected(this.groupKey, this.rowIndex) &&
-        selectionController.selection
-      ) {
-        selectionController.selection = {
-          ...selectionController.selection,
-          rowsSelection: undefined,
-        };
-      } else {
-        selectionController.selection = {
-          groupKey: this.groupKey,
-          rowsSelection: {
-            start: this.rowIndex,
-            end: this.rowIndex,
-          },
-          focus: {
-            rowIndex: this.rowIndex,
-            columnIndex: 0,
-          },
-          isEditing: false,
-        };
-      }
+  setSelection = (selection?: Omit<TableViewSelection, 'viewId' | 'type'>) => {
+    if (this.selectionController) {
+      this.selectionController.selection = selection;
     }
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
+    // eslint-disable-next-line wc/no-self-class
+    this.classList.add('affine-database-block-row', 'database-row');
+  }
 
   protected override render(): unknown {
     const view = this.view;
     return html`
-      <div class="data-view-table-left-bar">
-        <div
-          class="data-view-table-view-drag-handler"
-          @click=${this._clickDragHandler}
-          style="width: 8px;height: 100%;display:flex;align-items:center;justify-content:center;cursor:grab;"
-        >
-          <div
-            class="show-on-hover-row"
-            style="width: 4px;
+      ${view.readonly
+        ? nothing
+        : html`<div class="data-view-table-left-bar">
+            <div
+              class="data-view-table-view-drag-handler"
+              @click=${this._clickDragHandler}
+              style="width: 8px;height: 100%;display:flex;align-items:center;justify-content:center;cursor:grab;"
+            >
+              <div
+                class="show-on-hover-row"
+                style="width: 4px;
             border-radius: 2px;
             height: 12px;
             background-color: var(--affine-placeholder-color);"
-          ></div>
-        </div>
-      </div>
+              ></div>
+            </div>
+          </div>`}
       ${repeat(
         view.columnManagerList,
         v => v.id,
@@ -225,10 +259,11 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               >
               </affine-database-cell-container>
             </div>
-            ${column.dataViewManager.header.titleColumn === column.id
+            ${!column.readonly &&
+            column.dataViewManager.header.titleColumn === column.id
               ? html`<div class="row-ops">
                   <div class="row-op" @click="${clickDetail}">
-                    ${NewEditIcon}
+                    ${CenterPeekIcon}
                   </div>
                   ${!view.readonly
                     ? html`<div class="row-op" @click="${openMenu}">
@@ -244,47 +279,25 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  setSelection = (selection?: Omit<TableViewSelection, 'viewId' | 'type'>) => {
-    if (this.selectionController) {
-      this.selectionController.selection = selection;
-    }
-  };
-
-  contextMenu = (e: MouseEvent) => {
-    const selection = this.selectionController;
-    if (!selection) {
-      return;
-    }
-    e.preventDefault();
-    const ele = e.target as HTMLElement;
-    const cell = ele.closest('affine-database-cell-container');
-    const columnIndex = cell?.columnIndex ?? 0;
-    selection.selection = {
-      groupKey: this.groupKey,
-      rowsSelection: {
-        start: this.rowIndex,
-        end: this.rowIndex,
-      },
-      focus: {
-        rowIndex: this.rowIndex,
-        columnIndex: columnIndex,
-      },
-      isEditing: false,
-    };
-    const target =
-      cell ??
-      (e.target as HTMLElement).closest('.database-cell') ?? // for last add btn cell
-      (e.target as HTMLElement);
-
-    popRowMenu(this.dataViewEle, target, this.rowId, selection);
-  };
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
-    // eslint-disable-next-line wc/no-self-class
-    this.classList.add('affine-database-block-row', 'database-row');
+  get groupKey() {
+    return this.closest('affine-data-view-table-group')?.group?.key;
   }
+
+  get selectionController() {
+    return this.closest('affine-database-table')?.selectionController;
+  }
+
+  @property({ attribute: false })
+  accessor dataViewEle!: DataViewRenderer;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  @property({ attribute: false })
+  accessor rowIndex!: number;
+
+  @property({ attribute: false })
+  accessor view!: DataViewTableManager;
 }
 
 declare global {

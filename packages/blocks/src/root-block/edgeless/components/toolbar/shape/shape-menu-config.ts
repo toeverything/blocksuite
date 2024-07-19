@@ -1,5 +1,7 @@
 import type { TemplateResult } from 'lit';
 
+import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
+
 import {
   DiamondIcon,
   EllipseIcon,
@@ -13,7 +15,6 @@ import {
   TriangleIcon,
 } from '../../../../../_common/icons/index.js';
 import { ShapeType } from '../../../../../surface-block/index.js';
-import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
 
 const { Rect, Ellipse, Triangle, Diamond } = ShapeType;
 

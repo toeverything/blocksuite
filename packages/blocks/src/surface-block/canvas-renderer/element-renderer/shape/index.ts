@@ -4,8 +4,9 @@ import type {
   ShapeType,
 } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import { Bound } from '../../../utils/bound.js';
 import type { Renderer } from '../../renderer.js';
+
+import { Bound } from '../../../utils/bound.js';
 import {
   deltaInsertsToChunks,
   getFontMetrics,

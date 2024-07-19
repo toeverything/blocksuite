@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import '../declare-test-window.js';
-
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
@@ -9,23 +7,28 @@ import type {
   RichText,
   ThemeObserver,
 } from '@blocks/index.js';
-import { assertExists } from '@global/utils.js';
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { DocsPanel } from '@playground/apps/_common/components/docs-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
-import { expect } from '@playwright/test';
+import type { AffineEditorContainer } from '@presets/editors/index.js';
 import type { BlockModel } from '@store/schema/index.js';
+
+import { assertExists } from '@global/utils.js';
+import { expect } from '@playwright/test';
+import { uuidv4 } from '@store/utils/id-generator.js';
 import lz from 'lz-string';
 
+import '../declare-test-window.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
+  SHORT_KEY,
   pressEnter,
+  pressEscape,
   pressSpace,
   pressTab,
-  SHORT_KEY,
   type,
 } from './keyboard.js';
 
@@ -42,7 +45,7 @@ const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
 const RICH_TEXT_SELECTOR = '.inline-editor';
 
 function generateRandomRoomId() {
-  return `playwright-${Math.random().toFixed(8).substring(2)}`;
+  return `playwright-${uuidv4()}`;
 }
 
 export const getSelectionRect = async (page: Page): Promise<DOMRect> => {
@@ -171,6 +174,7 @@ async function initEmptyEditor({
           });
         }
       } else {
+        collection.meta.initialize();
         const doc = collection.createDoc({ id: 'doc:home' });
         window.doc = doc;
         waitForMountPageEditor(doc).catch(console.error);
@@ -239,15 +243,16 @@ export function expectConsoleMessage(
   page.on('console', (message: ConsoleMessage) => {
     if (
       [
-        '[vite] connecting...',
-        '[vite] connected.',
-        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
         '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
+        '[vite] connected.',
+        '[vite] connecting...',
+        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
       ].includes(message.text())
     ) {
       ignoredLog(message);
       return;
     }
+
     const sameType = message.type() === type;
     const textMatch =
       logPrefixOrRegex instanceof RegExp
@@ -306,7 +311,16 @@ export async function enterPlaygroundRoom(
     multiEditor,
   });
 
-  // await readyPromise;
+  const locator = page.locator('affine-editor-container');
+  await locator.isVisible();
+  await page.evaluate(async () => {
+    const dom = document.querySelector<AffineEditorContainer>(
+      'affine-editor-container'
+    );
+    if (dom) {
+      await dom.updateComplete;
+    }
+  });
 
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
@@ -630,11 +644,14 @@ export async function initDatabaseDynamicRowWithData(
   const editorHost = getEditorHostLocator(page);
   if (addRow) {
     await initDatabaseRow(page);
+    await pressEscape(page);
   }
-  await focusDatabaseTitle(page);
+  // await focusDatabaseTitle(page);
   const lastRow = editorHost.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
+  await waitNextFrame(page);
+  await pressEnter(page);
   await waitNextFrame(page);
   await type(page, data);
   await pressEnter(page);
@@ -917,26 +934,6 @@ export async function pasteContent(
   await waitNextFrame(page);
 }
 
-export async function pasteBlocks(page: Page, json: unknown) {
-  const createHTMLStringForCustomData = (data: string, type: string) => {
-    return `<blocksuite style="display: none" data-type="${type}" data-clipboard="${data.replace(
-      /"/g,
-      '&quot;'
-    )}"></blocksuite>`;
-  };
-  const stringifiesData = JSON.stringify(json);
-
-  const customClipboardFragment = createHTMLStringForCustomData(
-    stringifiesData,
-    'blocksuite/page'
-  );
-
-  await pasteContent(page, {
-    'text/html': customClipboardFragment,
-    'blocksuite/page': stringifiesData,
-  });
-}
-
 export async function getClipboardHTML(page: Page) {
   const dataInClipboard = await page.evaluate(async () => {
     function format(node: HTMLElement, level: number) {
@@ -1017,6 +1014,21 @@ export async function getClipboardSnapshot(page: Page) {
   );
   assertExists(dataInClipboard);
   const json = JSON.parse(dataInClipboard as string);
+  return json;
+}
+
+export async function getPageSnapshot(page: Page, toJSON?: boolean) {
+  const json = await page.evaluate(async () => {
+    const { job, doc } = window;
+    const snapshot = await job.docToSnapshot(doc);
+    if (!snapshot) {
+      throw new Error('Failed to get snapshot');
+    }
+    return snapshot.blocks;
+  });
+  if (toJSON) {
+    return JSON.stringify(json, null, 2);
+  }
   return json;
 }
 
@@ -1164,7 +1176,7 @@ export async function getBlockModel<Model extends BlockModel>(
   blockId: string
 ) {
   const result: BlockModel | null | undefined = await page.evaluate(blockId => {
-    return window.doc?.getBlockById(blockId);
+    return window.doc?.getBlock(blockId).model;
   }, blockId);
   expect(result).not.toBeNull();
   return result as Model;
@@ -1356,19 +1368,6 @@ export async function getCurrentThemeCSSPropertyValue(
         .themeObserver.cssVariables?.[property];
     }, property);
   return value;
-}
-
-// FIXME(mirone): remove this function
-export async function getCopyClipItemsInPage(page: Page) {
-  const clipItems = await page.evaluate(() => {
-    return (
-      document
-        .getElementsByTagName('affine-page-root')[0]
-        // @ts-ignore
-        .clipboard['_copyBlocksInPage']()
-    );
-  });
-  return clipItems;
 }
 
 export async function scrollToTop(page: Page) {

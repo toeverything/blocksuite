@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  Shape,
   createConnectorElement,
   createNote,
   createShapeElement,
@@ -8,15 +9,14 @@ import {
   deleteAll,
   getAllSortedIds,
   getTypeById,
-  Shape,
   switchEditorMode,
   toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
+  edgelessCommonSetup as commonSetup,
   copyByKeyboard,
   cutByKeyboard,
-  edgelessCommonSetup as commonSetup,
   enterPlaygroundRoom,
   expectConsoleMessage,
   focusTitle,

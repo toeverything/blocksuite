@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  type ShapeName,
   addBasicRectShapeElement,
   assertEdgelessShapeType,
   createShapeElement,
@@ -9,7 +10,6 @@ import {
   getZoomLevel,
   locatorEdgelessToolButton,
   setEdgelessTool,
-  type ShapeName,
   switchEditorMode,
   zoomFitByKeyboard,
   zoomInByKeyboard,
@@ -281,9 +281,9 @@ test.describe('delete', () => {
     const box1 = await getEdgelessSelectedRect(page);
     await page.mouse.click(box1.x + 10, box1.y + 10);
     await pressBackspace(page);
-    await assertBlockCount(page, 'note', 1);
+    await assertBlockCount(page, 'edgeless-note', 1);
     await pressForwardDelete(page);
-    await assertBlockCount(page, 'note', 1);
+    await assertBlockCount(page, 'edgeless-note', 1);
   });
 });
 

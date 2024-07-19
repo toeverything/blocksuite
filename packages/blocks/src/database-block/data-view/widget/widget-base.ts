@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { property } from 'lit/decorators.js';
 
 import type { DataSource } from '../common/data-source/base.js';
@@ -8,9 +9,12 @@ import type { DataViewManager } from '../view/data-view-manager.js';
 import type { DataViewWidgetProps } from './types.js';
 
 export class WidgetBase
-  extends WithDisposable(ShadowlessElement)
+  extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements DataViewWidgetProps
 {
+  @property({ attribute: false })
+  accessor dataSource!: DataSource;
+
   @property({ attribute: false })
   accessor view!: DataViewManager;
 
@@ -19,7 +23,4 @@ export class WidgetBase
 
   @property({ attribute: false })
   accessor viewSource!: ViewSource;
-
-  @property({ attribute: false })
-  accessor dataSource!: DataSource;
 }

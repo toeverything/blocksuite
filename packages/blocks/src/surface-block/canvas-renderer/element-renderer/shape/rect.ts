@@ -1,6 +1,7 @@
 import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
+
 import { drawGeneralShape } from './utils.js';
 
 /**
@@ -80,9 +81,9 @@ export function rect(
   ctx.setTransform(
     ctx
       .getTransform()
-      .translateSelf(-cx, -cy)
-      .rotateSelf(-rotate)
       .translateSelf(cx, cy)
+      .rotateSelf(-rotate)
+      .translateSelf(-cx, -cy)
       .translateSelf(-renderOffset, -renderOffset)
       .translateSelf(cx, cy)
       .rotateSelf(rotate)

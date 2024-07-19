@@ -1,11 +1,10 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertType } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { assertType } from '@blocksuite/global/utils';
 
 import type { TextConversionConfig } from '../../../_common/configs/text-conversion.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
-import { isInsideBlockByFlavour } from '../../../_common/utils/index.js';
-import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import type {
   SlashMenuActionItem,
   SlashMenuContext,
@@ -15,6 +14,9 @@ import type {
   SlashMenuStaticItem,
   SlashSubMenu,
 } from './config.js';
+
+import { isInsideBlockByFlavour } from '../../../_common/utils/index.js';
+import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import { slashMenuToolTips } from './tooltips/index.js';
 
 export function isGroupDivider(

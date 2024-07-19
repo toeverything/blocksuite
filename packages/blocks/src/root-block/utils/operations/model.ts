@@ -1,5 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
 
 /**

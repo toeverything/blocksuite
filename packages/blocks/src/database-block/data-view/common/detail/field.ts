@@ -5,16 +5,17 @@ import { classMap } from 'lit/directives/class-map.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../../../_common/components/index.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
 } from '../../column/index.js';
-import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
 } from '../../view/data-view-manager.js';
+
+import { popMenu } from '../../../../_common/components/index.js';
+import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { inputConfig, typeConfig } from '../column-menu.js';
 import {
   DatabaseDuplicate,
@@ -25,13 +26,101 @@ import {
 
 @customElement('affine-data-view-record-field')
 export class RecordField extends WithDisposable(ShadowlessElement) {
-  private get readonly() {
-    return this.view.readonly;
-  }
+  private _cell = createRef<DataViewCellLifeCycle>();
 
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
-  }
+  _click = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (this.readonly) return;
+
+    this.changeEditing(true);
+  };
+
+  _clickLeft = (e: MouseEvent) => {
+    if (this.readonly) return;
+    const ele = e.currentTarget as HTMLElement;
+    const columns = this.view.detailColumns;
+    popMenu(ele, {
+      options: {
+        input: inputConfig(this.column),
+        items: [
+          {
+            type: 'group',
+            name: 'Column Prop Group ',
+            children: () => [typeConfig(this.column, this.view)],
+          },
+          {
+            type: 'action',
+            name: 'Duplicate Column',
+            icon: DatabaseDuplicate,
+            hide: () => !this.column.duplicate || this.column.type === 'title',
+            select: () => {
+              this.column.duplicate?.();
+            },
+          },
+          {
+            type: 'action',
+            name: 'Move Up',
+            icon: html` <div
+              style="transform: rotate(90deg);display:flex;align-items:center;"
+            >
+              ${DatabaseMoveLeft}
+            </div>`,
+            hide: () => columns.findIndex(v => v === this.column.id) === 0,
+            select: () => {
+              const index = columns.findIndex(v => v === this.column.id);
+              const targetId = columns[index - 1];
+              if (!targetId) {
+                return;
+              }
+              this.view.columnMove(this.column.id, {
+                id: targetId,
+                before: true,
+              });
+            },
+          },
+          {
+            type: 'action',
+            name: 'Move Down',
+            icon: html` <div
+              style="transform: rotate(90deg);display:flex;align-items:center;"
+            >
+              ${DatabaseMoveRight}
+            </div>`,
+            hide: () =>
+              columns.findIndex(v => v === this.column.id) ===
+              columns.length - 1,
+            select: () => {
+              const index = columns.findIndex(v => v === this.column.id);
+              const targetId = columns[index + 1];
+              if (!targetId) {
+                return;
+              }
+              this.view.columnMove(this.column.id, {
+                id: targetId,
+                before: false,
+              });
+            },
+          },
+          {
+            type: 'group',
+            name: 'operation',
+            children: () => [
+              {
+                type: 'action',
+                name: 'Delete Column',
+                icon: DeleteIcon,
+                hide: () => !this.column.delete || this.column.type === 'title',
+                select: () => {
+                  this.column.delete?.();
+                },
+                class: 'delete-item',
+              },
+            ],
+          },
+        ],
+      },
+    });
+  };
 
   static override styles = css`
     affine-data-view-record-field {
@@ -111,23 +200,6 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  private _cell = createRef<DataViewCellLifeCycle>();
-
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
-
-  @property({ attribute: false })
-  accessor column!: DataViewColumnManager;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
-
-  @state()
-  accessor isFocus = false;
-
-  @state()
-  accessor editing = false;
-
   changeEditing = (editing: boolean) => {
     const selection = this.closest('affine-data-view-record-detail')?.selection;
     if (selection) {
@@ -138,95 +210,9 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  _click = (e: MouseEvent) => {
-    e.stopPropagation();
-    if (this.readonly) return;
-
-    this.changeEditing(true);
-  };
-
-  _clickLeft = (e: MouseEvent) => {
-    if (this.readonly) return;
-    const ele = e.currentTarget as HTMLElement;
-    const columns = this.view.detailColumns;
-    popMenu(ele, {
-      options: {
-        input: inputConfig(this.column),
-        items: [
-          typeConfig(this.column, this.view),
-          {
-            type: 'action',
-            name: 'Duplicate Column',
-            icon: DatabaseDuplicate,
-            hide: () => !this.column.duplicate || this.column.type === 'title',
-            select: () => {
-              this.column.duplicate?.();
-            },
-          },
-          {
-            type: 'action',
-            name: 'Move Up',
-            icon: html` <div
-              style="transform: rotate(90deg);display:flex;align-items:center;"
-            >
-              ${DatabaseMoveLeft}
-            </div>`,
-            hide: () => columns.findIndex(v => v === this.column.id) === 0,
-            select: () => {
-              const index = columns.findIndex(v => v === this.column.id);
-              const targetId = columns[index - 1];
-              if (!targetId) {
-                return;
-              }
-              this.view.columnMove(this.column.id, {
-                id: targetId,
-                before: true,
-              });
-            },
-          },
-          {
-            type: 'action',
-            name: 'Move Down',
-            icon: html` <div
-              style="transform: rotate(90deg);display:flex;align-items:center;"
-            >
-              ${DatabaseMoveRight}
-            </div>`,
-            hide: () =>
-              columns.findIndex(v => v === this.column.id) ===
-              columns.length - 1,
-            select: () => {
-              const index = columns.findIndex(v => v === this.column.id);
-              const targetId = columns[index + 1];
-              if (!targetId) {
-                return;
-              }
-              this.view.columnMove(this.column.id, {
-                id: targetId,
-                before: false,
-              });
-            },
-          },
-          {
-            type: 'group',
-            name: 'operation',
-            children: () => [
-              {
-                type: 'action',
-                name: 'Delete Column',
-                icon: DeleteIcon,
-                hide: () => !this.column.delete || this.column.type === 'title',
-                select: () => {
-                  this.column.delete?.();
-                },
-                class: 'delete-item',
-              },
-            ],
-          },
-        ],
-      },
-    });
-  };
+  private get readonly() {
+    return this.view.readonly;
+  }
 
   override render() {
     const column = this.column;
@@ -262,6 +248,25 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
+
+  @property({ attribute: false })
+  accessor column!: DataViewColumnManager;
+
+  @state()
+  accessor editing = false;
+
+  @state()
+  accessor isFocus = false;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  @property({ attribute: false })
+  accessor view!: DataViewManager;
 }
 
 declare global {

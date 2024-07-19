@@ -1,8 +1,9 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 
 import { clickView, moveView } from '../utils/actions/click.js';
 import { dragBetweenCoords } from '../utils/actions/drag.js';
 import {
+  Shape,
   addNote,
   changeEdgelessNoteBackground,
   changeShapeFillColor,
@@ -12,7 +13,6 @@ import {
   dragBetweenViewCoords,
   edgelessCommonSetup,
   getEdgelessSelectedRectModel,
-  Shape,
   switchEditorMode,
   toViewCoord,
   triggerComponentToolbarAction,
@@ -146,17 +146,17 @@ test.describe('auto-complete', () => {
       await noteButton.click();
       await waitNextFrame(page);
 
-      const portalNote = page.locator('.edgeless-block-portal-note');
+      const edgelessNote = page.locator('affine-edgeless-note');
 
-      expect(await portalNote.locator('affine-note').count()).toBe(1);
-      const [x, y] = await toViewCoord(page, [240, 0]);
+      expect(await edgelessNote.count()).toBe(1);
+      const [x, y] = await toViewCoord(page, [240, 20]);
       await page.mouse.click(x, y);
       await page.keyboard.type('hello');
       await waitNextFrame(page);
       await assertRichTexts(page, ['hello']);
 
       const noteId = await page.evaluate(() => {
-        const note = document.body.querySelector('affine-note');
+        const note = document.body.querySelector('affine-edgeless-note');
         return note?.getAttribute('data-block-id');
       });
       assertExists(noteId);
@@ -166,7 +166,7 @@ test.describe('auto-complete', () => {
         '--affine-note-background-green'
       );
 
-      const rect = await portalNote.boundingBox();
+      const rect = await edgelessNote.boundingBox();
       assertExists(rect);
 
       // blur note block
@@ -214,13 +214,13 @@ test.describe('auto-complete', () => {
       await waitNextFrame(page);
 
       const noteId2 = await page.evaluate(() => {
-        const note = document.body.querySelectorAll('affine-note')[1];
+        const note = document.body.querySelectorAll('affine-edgeless-note')[1];
         return note?.getAttribute('data-block-id');
       });
       assertExists(noteId2);
       await assertEdgelessNoteBackground(page, noteId, noteColor);
 
-      expect(await portalNote.locator('affine-note').count()).toBe(2);
+      expect(await edgelessNote.count()).toBe(2);
     });
 
     test('drag on right auto-complete button to add frame', async ({

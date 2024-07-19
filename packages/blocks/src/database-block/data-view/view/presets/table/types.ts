@@ -1,5 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { TemplateResult } from 'lit';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 export type ColumnType = string;
 

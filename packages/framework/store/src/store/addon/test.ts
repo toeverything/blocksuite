@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { JSXElement } from '../../utils/jsx.js';
+
 import { serializeYDoc, yDocToJSXNode } from '../../utils/jsx.js';
 import { addOnFactory } from './shared.js';
 

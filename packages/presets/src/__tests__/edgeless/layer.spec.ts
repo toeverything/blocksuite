@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import {
   type EdgelessRootBlockComponent,
-  generateKeyBetween,
   type NoteBlockModel,
+  generateKeyBetween,
 } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -260,11 +262,11 @@ test('blocks should rerender when their z-index changed', async () => {
   const assertBlockElementsContent = () => {
     const blockElements = Array.from(
       document.querySelectorAll(
-        '.affine-edgeless-layer > edgeless-block-portal-note'
+        'affine-edgeless-root .edgeless-layer > [data-block-id]'
       )
     );
 
-    expect(blockElements.length).toBe(4);
+    expect(blockElements.length).toBe(5);
 
     blockElements.forEach(element => {
       expect(element.children.length).toBeGreaterThan(0);
@@ -470,13 +472,12 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
   await wait();
 
   surface = getSurface(doc, editor);
-  expect(
-    getSurface(doc, editor).edgeless.rootElementContainer.canvasSlot.children
-      .length
-  ).toBe(1);
+  const edgeless = getDocRootBlock(doc, editor, 'edgeless');
+  expect(edgeless.querySelectorAll('.indexable-canvas').length).toBe(1);
 
-  const indexedCanvas = getSurface(doc, editor).edgeless.rootElementContainer
-    .canvasSlot.children[0] as HTMLCanvasElement;
+  const indexedCanvas = getSurface(doc, editor).edgeless.querySelectorAll(
+    '.indexable-canvas'
+  )[0] as HTMLCanvasElement;
 
   expect(indexedCanvas.width).toBe(surface.renderer.canvas.width);
   expect(indexedCanvas.height).toBe(surface.renderer.canvas.height);
@@ -484,7 +485,7 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
   expect(indexedCanvas.height).not.toBe(0);
 });
 
-test('the actual rendering order of blocks should satisfy the logic order of their indexes', async () => {
+test('the actual rendering z-index should satisfy the logic order of their indexes', async () => {
   editor.mode = 'page';
 
   await wait();
@@ -522,22 +523,26 @@ test('the actual rendering order of blocks should satisfy the logic order of the
 
   const edgeless = getDocRootBlock(doc, editor, 'edgeless');
   const blocks = Array.from(
-    edgeless.rootElementContainer.layer.querySelectorAll(
-      '[data-portal-block-id]'
-    )
+    edgeless.querySelectorAll('.edgeless-layer > [data-block-id]')
   ) as BlockElement[];
 
-  expect(blocks.length).toBe(indexes.length);
-  blocks.forEach((block, index) => {
-    if (index === blocks.length - 1) return;
+  expect(blocks.length).toBe(indexes.length + 1);
 
-    const prevModel = block.model;
-    const model = blocks[index + 1].model;
+  blocks
+    .filter(block => block.flavour !== 'affine:surface')
+    .forEach((block, index) => {
+      if (index === blocks.length - 1) return;
 
-    expect(
-      service.layer.compare(prevModel as any, model as any)
-    ).toBeLessThanOrEqual(0);
-  });
+      const model = block.model as BlockModel<{ index: string }>;
+      const nextModel = blocks[index + 1].model as BlockModel<{
+        index: string;
+      }>;
+
+      const zIndex = Number(block.style.zIndex);
+      const nextZIndex = Number(blocks[index + 1].style.zIndex);
+
+      expect(model.index <= nextModel.index).equals(zIndex <= nextZIndex);
+    });
 });
 
 describe('index generator', () => {

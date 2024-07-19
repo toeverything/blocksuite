@@ -1,10 +1,8 @@
-import './utils/declare-test-window.js';
+import type { Page } from '@playwright/test';
 
+import { expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-
-import type { Page } from '@playwright/test';
-import { expect } from '@playwright/test';
 
 import {
   activeEmbed,
@@ -37,6 +35,7 @@ import {
   assertRichTextInlineRange,
   assertRichTexts,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { test } from './utils/playwright.js';
 
 async function focusCaption(page: Page) {
@@ -412,4 +411,18 @@ test('press backspace after image block can select image block', async ({
   await pressBackspace(page);
   await assertBlockSelections(page, ['2']);
   await assertBlockCount(page, 'paragraph', 0);
+});
+
+test('press enter when image is selected should move next paragraph and should placeholder', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await assertRichImage(page, 1);
+
+  await activeEmbed(page);
+  await pressEnter(page);
+
+  const placeholder = page.locator('.affine-paragraph-placeholder.visible');
+  await expect(placeholder).toBeVisible();
 });

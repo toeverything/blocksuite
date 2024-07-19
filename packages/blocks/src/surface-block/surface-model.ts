@@ -1,25 +1,27 @@
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { MigrationRunner, Y } from '@blocksuite/store';
+
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import {
   BlockModel,
   Boxed,
-  defineBlockSchema,
   DocCollection,
   Text,
+  defineBlockSchema,
 } from '@blocksuite/store';
+
+import type {
+  Connection,
+  ConnectorElementModel,
+} from './element-model/connector.js';
 
 import {
   type IBaseProps,
   SurfaceGroupLikeModel,
 } from './element-model/base.js';
-import type {
-  Connection,
-  ConnectorElementModel,
-} from './element-model/connector.js';
 import {
+  type ElementModelMap,
   createElementModel,
   createModelFromProps,
-  type ElementModelMap,
   propsToY,
 } from './element-model/index.js';
 import { connectorMiddleware } from './middlewares/connector.js';
@@ -190,6 +192,10 @@ export type SurfaceMiddleware = (
 ) => () => void;
 
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
+  private _connectorToElements = new Map<string, string[]>();
+
+  private _disposables: DisposableGroup = new DisposableGroup();
+
   private _elementModels = new Map<
     string,
     {
@@ -199,15 +205,24 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     }
   >();
 
-  private _disposables: DisposableGroup = new DisposableGroup();
-
-  private _groupToElements = new Map<string, string[]>();
+  private _elementToConnector = new Map<string, string[]>();
 
   private _elementToGroup = new Map<string, string>();
 
-  private _connectorToElements = new Map<string, string[]>();
+  private _groupToElements = new Map<string, string[]>();
 
-  private _elementToConnector = new Map<string, string[]>();
+  protected _surfaceBlockModel = true;
+
+  elementAdded = new Slot<{ id: string; local: boolean }>();
+
+  elementRemoved = new Slot<{
+    id: string;
+    type: string;
+    model: BlockSuite.SurfaceElementModelType;
+    local: boolean;
+  }>();
+
+  elementUpdated = new Slot<ElementUpdatedData>();
 
   /**
    * Hooks is used to attach extra logic when calling `addElement`、`updateElement`(or assign property directly) and `removeElement`.
@@ -222,33 +237,9 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     }>(),
   };
 
-  elementUpdated = new Slot<ElementUpdatedData>();
-
-  elementAdded = new Slot<{ id: string; local: boolean }>();
-
-  elementRemoved = new Slot<{
-    id: string;
-    type: string;
-    model: BlockSuite.SurfaceElementModelType;
-    local: boolean;
-  }>();
-
-  get elementModels() {
-    const models: BlockSuite.SurfaceElementModelType[] = [];
-    this._elementModels.forEach(model => models.push(model.model));
-    return models;
-  }
-
   constructor() {
     super();
     this.created.once(() => this._init());
-  }
-
-  private _init() {
-    this._initElementModels();
-    this._watchGroupRelationChange();
-    this._watchConnectorRelationChange();
-    this._applyMiddlewares();
   }
 
   private _applyMiddlewares() {
@@ -257,6 +248,13 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       groupRelationMiddleware(this, this.hooks),
       groupSizeMiddleware(this, this.hooks),
     ].forEach(disposable => this._disposables.add(disposable));
+  }
+
+  private _init() {
+    this._initElementModels();
+    this._watchGroupRelationChange();
+    this._watchConnectorRelationChange();
+    this._applyMiddlewares();
   }
 
   private _initElementModels() {
@@ -331,6 +329,95 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this._disposables.add(() => {
       elementsYMap.unobserve(onElementsMapChange);
+    });
+  }
+
+  private _watchConnectorRelationChange() {
+    const addConnector = (targetId: string, connectorId: string) => {
+      const connectors = this._elementToConnector.get(targetId);
+
+      if (!connectors) {
+        this._elementToConnector.set(targetId, [connectorId]);
+      } else {
+        connectors.push(connectorId);
+      }
+
+      this._connectorToElements.set(
+        connectorId,
+        (this._connectorToElements.get(connectorId) || []).concat(targetId)
+      );
+    };
+    const removeConnector = (targetId: string, connectorId: string) => {
+      if (this._elementToConnector.has(targetId)) {
+        const connectors = this._elementToConnector.get(targetId)!;
+        const index = connectors.indexOf(connectorId);
+
+        if (index !== -1) {
+          connectors.splice(index, 1);
+          connectors.length === 0 && this._elementToConnector.delete(targetId);
+        }
+      }
+
+      if (this._connectorToElements.has(connectorId)) {
+        const elements = this._connectorToElements.get(connectorId)!;
+        const index = elements.indexOf(targetId);
+
+        if (index !== -1) {
+          elements.splice(index, 1);
+          elements.length === 0 &&
+            this._connectorToElements.delete(connectorId);
+        }
+      }
+    };
+
+    const updateConnectorMap = (
+      element: BlockSuite.SurfaceElementModelType,
+      type: 'add' | 'remove'
+    ) => {
+      if (element.type !== 'connector') return;
+
+      const connector = element as ConnectorElementModel;
+      const connected = [connector.source.id, connector.target.id];
+      const action = type === 'add' ? addConnector : removeConnector;
+
+      connected.forEach(id => {
+        id && action(id, connector.id);
+      });
+    };
+
+    this.elementModels.forEach(model => updateConnectorMap(model, 'add'));
+
+    this.elementUpdated.on(({ id, oldValues }) => {
+      const element = this.getElementById(id)!;
+
+      if (
+        element.type !== 'connector' ||
+        (!oldValues['source'] && !oldValues['target'])
+      )
+        return;
+
+      const oldConnected = [
+        (oldValues['source'] as Connection)?.id,
+        (oldValues['target'] as Connection)?.id,
+      ];
+
+      oldConnected.forEach(id => {
+        id && removeConnector(id, element.id);
+      });
+
+      updateConnectorMap(element, 'add');
+    });
+
+    this.elementAdded.on(id =>
+      updateConnectorMap(this.getElementById(id.id)!, 'add')
+    );
+
+    this.elementRemoved.on(({ id, type }) => {
+      if (type === 'connector') {
+        const connected = [...(this._connectorToElements.get(id) || [])];
+
+        connected.forEach(connectedId => removeConnector(connectedId, id));
+      }
     });
   }
 
@@ -425,160 +512,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     );
   }
 
-  private _watchConnectorRelationChange() {
-    const addConnector = (targetId: string, connectorId: string) => {
-      const connectors = this._elementToConnector.get(targetId);
-
-      if (!connectors) {
-        this._elementToConnector.set(targetId, [connectorId]);
-      } else {
-        connectors.push(connectorId);
-      }
-
-      this._connectorToElements.set(
-        connectorId,
-        (this._connectorToElements.get(connectorId) || []).concat(targetId)
-      );
-    };
-    const removeConnector = (targetId: string, connectorId: string) => {
-      if (this._elementToConnector.has(targetId)) {
-        const connectors = this._elementToConnector.get(targetId)!;
-        const index = connectors.indexOf(connectorId);
-
-        if (index !== -1) {
-          connectors.splice(index, 1);
-          connectors.length === 0 && this._elementToConnector.delete(targetId);
-        }
-      }
-
-      if (this._connectorToElements.has(connectorId)) {
-        const elements = this._connectorToElements.get(connectorId)!;
-        const index = elements.indexOf(targetId);
-
-        if (index !== -1) {
-          elements.splice(index, 1);
-          elements.length === 0 &&
-            this._connectorToElements.delete(connectorId);
-        }
-      }
-    };
-
-    const updateConnectorMap = (
-      element: BlockSuite.SurfaceElementModelType,
-      type: 'add' | 'remove'
-    ) => {
-      if (element.type !== 'connector') return;
-
-      const connector = element as ConnectorElementModel;
-      const connected = [connector.source.id, connector.target.id];
-      const action = type === 'add' ? addConnector : removeConnector;
-
-      connected.forEach(id => {
-        id && action(id, connector.id);
-      });
-    };
-
-    this.elementModels.forEach(model => updateConnectorMap(model, 'add'));
-
-    this.elementUpdated.on(({ id, oldValues }) => {
-      const element = this.getElementById(id)!;
-
-      if (
-        element.type !== 'connector' ||
-        (!oldValues['source'] && !oldValues['target'])
-      )
-        return;
-
-      const oldConnected = [
-        (oldValues['source'] as Connection)?.id,
-        (oldValues['target'] as Connection)?.id,
-      ];
-
-      oldConnected.forEach(id => {
-        id && removeConnector(id, element.id);
-      });
-
-      updateConnectorMap(element, 'add');
-    });
-
-    this.elementAdded.on(id =>
-      updateConnectorMap(this.getElementById(id.id)!, 'add')
-    );
-
-    this.elementRemoved.on(({ id, type }) => {
-      if (type === 'connector') {
-        const connected = [...(this._connectorToElements.get(id) || [])];
-
-        connected.forEach(connectedId => removeConnector(connectedId, id));
-      }
-    });
-  }
-
-  override dispose(): void {
-    super.dispose();
-
-    this._disposables.dispose();
-
-    this.elementAdded.dispose();
-    this.elementRemoved.dispose();
-    this.elementUpdated.dispose();
-
-    this._elementModels.forEach(({ unmount }) => unmount());
-    this._elementModels.clear();
-
-    this.hooks.update.dispose();
-    this.hooks.remove.dispose();
-  }
-
-  isInMindmap(id: string) {
-    const group = this.getGroup(id);
-
-    return group?.type === 'mindmap';
-  }
-
-  getConnectors(id: string) {
-    return (this._elementToConnector.get(id) || []).map(
-      id => this.getElementById(id)!
-    ) as ConnectorElementModel[];
-  }
-
-  getGroup<
-    T extends
-      SurfaceGroupLikeModel<IBaseProps> = SurfaceGroupLikeModel<IBaseProps>,
-  >(id: string): T | null {
-    return this._elementToGroup.has(id)
-      ? (this.getElementById(this._elementToGroup.get(id)!) as T)
-      : null;
-  }
-
-  getGroups(id: string): SurfaceGroupLikeModel<IBaseProps>[] {
-    const groups: SurfaceGroupLikeModel<IBaseProps>[] = [];
-    let group = this.getGroup(id);
-
-    while (group) {
-      groups.push(group);
-      group = this.getGroup(group.id);
-    }
-
-    return groups;
-  }
-
-  getElementsByType<K extends keyof ElementModelMap>(
-    type: K
-  ): ElementModelMap[K][] {
-    return this.elementModels.filter(
-      model => model.type === type
-    ) as ElementModelMap[K][];
-  }
-
-  hasElementById(id: string): boolean {
-    return this._elementModels.has(id);
-  }
-
-  getElementById(id: string): BlockSuite.SurfaceElementModelType | null {
-    return this._elementModels.get(id)?.model ?? null;
-  }
-
   addElement<T extends object = Record<string, unknown>>(
     props: Partial<T> & { type: string }
   ) {
@@ -602,6 +535,71 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     });
 
     return id;
+  }
+
+  override dispose(): void {
+    super.dispose();
+
+    this._disposables.dispose();
+
+    this.elementAdded.dispose();
+    this.elementRemoved.dispose();
+    this.elementUpdated.dispose();
+
+    this._elementModels.forEach(({ unmount }) => unmount());
+    this._elementModels.clear();
+
+    this.hooks.update.dispose();
+    this.hooks.remove.dispose();
+  }
+
+  getConnectors(id: string) {
+    return (this._elementToConnector.get(id) || []).map(
+      id => this.getElementById(id)!
+    ) as ConnectorElementModel[];
+  }
+
+  getElementById(id: string): BlockSuite.SurfaceElementModelType | null {
+    return this._elementModels.get(id)?.model ?? null;
+  }
+
+  getElementsByType<K extends keyof ElementModelMap>(
+    type: K
+  ): ElementModelMap[K][] {
+    return this.elementModels.filter(
+      model => model.type === type
+    ) as ElementModelMap[K][];
+  }
+
+  getGroup<
+    T extends
+      SurfaceGroupLikeModel<IBaseProps> = SurfaceGroupLikeModel<IBaseProps>,
+  >(id: string): T | null {
+    return this._elementToGroup.has(id)
+      ? (this.getElementById(this._elementToGroup.get(id)!) as T)
+      : null;
+  }
+
+  getGroups(id: string): SurfaceGroupLikeModel<IBaseProps>[] {
+    const groups: SurfaceGroupLikeModel<IBaseProps>[] = [];
+    let group = this.getGroup(id);
+
+    while (group) {
+      groups.push(group);
+      group = this.getGroup(group.id);
+    }
+
+    return groups;
+  }
+
+  hasElementById(id: string): boolean {
+    return this._elementModels.has(id);
+  }
+
+  isInMindmap(id: string) {
+    const group = this.getGroup(id);
+
+    return group?.type === 'mindmap';
   }
 
   removeElement(id: string) {
@@ -666,5 +664,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
         elementModel[key] = value;
       });
     });
+  }
+
+  get elementModels() {
+    const models: BlockSuite.SurfaceElementModelType[] = [];
+    this._elementModels.forEach(model => models.push(model.model));
+    return models;
   }
 }

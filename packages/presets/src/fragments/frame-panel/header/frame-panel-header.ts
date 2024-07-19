@@ -1,15 +1,15 @@
-import './frames-setting-menu.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/block-std';
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
 import type { NavigatorMode } from '@blocksuite/blocks';
+
+import { WithDisposable } from '@blocksuite/block-std';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { css, html, LitElement, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SmallFrameNavigatorIcon } from '../../_common/icons.js';
+import './frames-setting-menu.js';
 
 const styles = css`
   :host {
@@ -100,34 +100,12 @@ const styles = css`
 `;
 
 export class FramePanelHeader extends WithDisposable(LitElement) {
-  get rootService() {
-    return this.editorHost.spec.getService('affine:page');
-  }
-
-  static override styles = styles;
-
-  @state()
-  private accessor _settingPopperShow = false;
-
-  @query('.all-frames-setting-button')
-  private accessor _frameSettingButton!: HTMLDivElement;
-
-  @query('.frames-setting-container')
-  private accessor _frameSettingMenu!: HTMLDivElement;
-
-  private _framesSettingMenuPopper: ReturnType<
-    typeof createButtonPopper
-  > | null = null;
-
-  private _navigatorMode: NavigatorMode = 'fit';
+  private _clearEdgelessDisposables = () => {
+    this._edgelessDisposables?.dispose();
+    this._edgelessDisposables = null;
+  };
 
   private _edgelessDisposables: DisposableGroup | null = null;
-
-  @property({ attribute: false })
-  accessor editorHost!: EditorHost;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent | null;
 
   private _enterPresentationMode = () => {
     if (!this.edgeless) {
@@ -146,18 +124,11 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
     }, 100);
   };
 
-  private _tryLoadNavigatorStateLocalRecord() {
-    this._navigatorMode = this.editorHost.spec
-      .getService('affine:page')
-      .editPropsStore.getStorage('presentFillScreen')
-      ? 'fill'
-      : 'fit';
-  }
+  private _framesSettingMenuPopper: ReturnType<
+    typeof createButtonPopper
+  > | null = null;
 
-  private _clearEdgelessDisposables = () => {
-    this._edgelessDisposables?.dispose();
-    this._edgelessDisposables = null;
-  };
+  private _navigatorMode: NavigatorMode = 'fit';
 
   private _setEdgelessDisposables = () => {
     if (!this.edgeless) return;
@@ -171,9 +142,26 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
     );
   };
 
+  static override styles = styles;
+
+  private _tryLoadNavigatorStateLocalRecord() {
+    this._navigatorMode = this.editorHost.spec
+      .getService('affine:page')
+      .editPropsStore.getStorage('presentFillScreen')
+      ? 'fill'
+      : 'fit';
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._tryLoadNavigatorStateLocalRecord();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this._edgelessDisposables) {
+      this._clearEdgelessDisposables();
+    }
   }
 
   override firstUpdated() {
@@ -185,27 +173,12 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
       ({ display }) => {
         this._settingPopperShow = display === 'show';
       },
-      14,
-      -100
+      {
+        mainAxis: 14,
+        crossAxis: -100,
+      }
     );
     disposables.add(this._framesSettingMenuPopper);
-  }
-
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('edgeless')) {
-      if (this.edgeless) {
-        this._setEdgelessDisposables();
-      } else {
-        this._clearEdgelessDisposables();
-      }
-    }
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    if (this._edgelessDisposables) {
-      this._clearEdgelessDisposables();
-    }
   }
 
   override render() {
@@ -238,6 +211,35 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
       </div>
     </div>`;
   }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('edgeless')) {
+      if (this.edgeless) {
+        this._setEdgelessDisposables();
+      } else {
+        this._clearEdgelessDisposables();
+      }
+    }
+  }
+
+  get rootService() {
+    return this.editorHost.spec.getService('affine:page');
+  }
+
+  @query('.all-frames-setting-button')
+  private accessor _frameSettingButton!: HTMLDivElement;
+
+  @query('.frames-setting-container')
+  private accessor _frameSettingMenu!: HTMLDivElement;
+
+  @state()
+  private accessor _settingPopperShow = false;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent | null;
+
+  @property({ attribute: false })
+  accessor editorHost!: EditorHost;
 }
 
 declare global {

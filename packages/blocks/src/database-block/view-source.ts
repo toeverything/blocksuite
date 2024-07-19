@@ -4,33 +4,14 @@ import type { SingleViewSource, ViewSource } from './data-view/common/index.js';
 import type { InsertToPosition } from './data-view/types.js';
 import type { DataViewTypes, ViewMeta } from './data-view/view/data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
+
 import { databaseViewAddView } from './utils.js';
 import { databaseBlockViewMap, databaseBlockViews } from './views/index.js';
 
 export class DatabaseBlockViewSource implements ViewSource {
-  get currentViewId(): string {
-    return this.currentId ?? this.model.views[0].id;
-  }
-
-  get views(): SingleViewSource[] {
-    return this.model.views.map(v => this.viewGet(v.id));
-  }
-
-  get currentView(): SingleViewSource {
-    return this.viewGet(this.currentViewId);
-  }
-
-  get readonly(): boolean {
-    return this.model.doc.readonly;
-  }
-
-  get allViewMeta(): ViewMeta[] {
-    return databaseBlockViews;
-  }
+  private currentId?: string;
 
   private viewMap = new Map<string, SingleViewSource>();
-
-  private currentId?: string;
 
   updateSlot = new Slot<{
     viewId?: string;
@@ -42,6 +23,19 @@ export class DatabaseBlockViewSource implements ViewSource {
     this.model.views.forEach(v => {
       this.updateSlot.emit({ viewId: v.id });
     });
+  }
+
+  duplicate(id: string): void {
+    const newId = this.model.duplicateView(id);
+    this.selectView(newId);
+  }
+
+  getViewMeta(type: string): ViewMeta {
+    return databaseBlockViewMap[type];
+  }
+
+  moveTo(id: string, position: InsertToPosition): void {
+    this.model.moveViewTo(id, position);
   }
 
   selectView(id: string): void {
@@ -119,16 +113,23 @@ export class DatabaseBlockViewSource implements ViewSource {
     return result;
   }
 
-  duplicate(id: string): void {
-    const newId = this.model.duplicateView(id);
-    this.selectView(newId);
+  get allViewMeta(): ViewMeta[] {
+    return databaseBlockViews;
   }
 
-  moveTo(id: string, position: InsertToPosition): void {
-    this.model.moveViewTo(id, position);
+  get currentView(): SingleViewSource {
+    return this.viewGet(this.currentViewId);
   }
 
-  getViewMeta(type: string): ViewMeta {
-    return databaseBlockViewMap[type];
+  get currentViewId(): string {
+    return this.currentId ?? this.model.views[0].id;
+  }
+
+  get readonly(): boolean {
+    return this.model.doc.readonly;
+  }
+
+  get views(): SingleViewSource[] {
+    return this.model.views.map(v => this.viewGet(v.id));
   }
 }

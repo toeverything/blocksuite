@@ -1,8 +1,9 @@
-import { expect } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
+import { switchEditorMode } from 'utils/actions/edgeless.js';
 import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';
 
 import { addNewPage, switchToPage } from './utils/actions/click.js';
-import { dragBetweenIndices } from './utils/actions/drag.js';
+import { dragBetweenIndices, dragBlockToPoint } from './utils/actions/drag.js';
 import {
   copyByKeyboard,
   pasteByKeyboard,
@@ -20,15 +21,42 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getPageSnapshot,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   waitNextFrame,
 } from './utils/actions/misc.js';
 import {
+  assertExists,
+  assertParentBlockFlavour,
   assertRichTexts,
   assertStoreMatchJSX,
   assertTitle,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
+
+async function createAndConvertToEmbedLinkedDoc(page: Page) {
+  const { createLinkedDoc } = getLinkedDocPopover(page);
+  const linkedDoc = await createLinkedDoc('page1');
+  const lickedDocBox = await linkedDoc.boundingBox();
+  assertExists(lickedDocBox);
+  await page.mouse.move(
+    lickedDocBox.x + lickedDocBox.width / 2,
+    lickedDocBox.y + lickedDocBox.height / 2
+  );
+
+  await waitNextFrame(page, 200);
+  const referencePopup = page.locator('.affine-reference-popover-container');
+  await expect(referencePopup).toBeVisible();
+
+  const switchButton = page.getByRole('button', { name: 'Switch view' });
+  await switchButton.click();
+
+  const embedLinkedDocBtn = page.getByRole('button', { name: 'Card view' });
+  await expect(embedLinkedDocBtn).toBeVisible();
+  await embedLinkedDocBtn.click();
+  await waitNextFrame(page, 200);
+}
 
 test.describe('multiple page', () => {
   test('should create and switch page work', async ({ page }) => {
@@ -644,157 +672,78 @@ test.describe('linked page popover', () => {
     await expect(linkedDocPopover).toBeHidden();
     await assertExistRefText('page2');
   });
+
+  test('should more docs works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+
+    await (async () => {
+      for (let index = 0; index < 10; index++) {
+        const newPage = await addNewPage(page);
+        await switchToPage(page, newPage.id);
+        await focusTitle(page);
+        await type(page, 'page' + index);
+      }
+    })();
+
+    await switchToPage(page);
+    await focusRichText(page);
+    await type(page, '@');
+
+    const { pageBtn, linkedDocPopover } = getLinkedDocPopover(page);
+    await expect(linkedDocPopover).toBeVisible();
+    await expect(pageBtn).toHaveText([
+      ...Array.from({ length: 6 }, (_, index) => `page${index}`),
+      '4 more docs',
+      'Create "Untitled" doc',
+      'Import',
+    ]);
+
+    const moreNode = page.locator(`icon-button[data-id="Link to Doc More"]`);
+    await moreNode.click();
+    await expect(pageBtn).toHaveText([
+      ...Array.from({ length: 10 }, (_, index) => `page${index}`),
+      'Create "Untitled" doc',
+      'Import',
+    ]);
+  });
 });
 
-test.describe.skip('linked page with clipboard', () => {
-  test('paste subpage should paste as linked page', async ({ page }) => {
+test.describe('linked page with clipboard', () => {
+  test('paste linked page should paste as linked page', async ({
+    page,
+  }, testInfo) => {
     await enterPlaygroundRoom(page);
-    const { paragraphId } = await initEmptyParagraphState(page);
+    await initEmptyParagraphState(page);
     await focusRichText(page);
 
-    const { createLinkedDoc, createSubpage } = getLinkedDocPopover(page);
+    const { createLinkedDoc } = getLinkedDocPopover(page);
 
-    await createSubpage('page0');
     await createLinkedDoc('page1');
 
     await selectAllByKeyboard(page);
     await copyByKeyboard(page);
     await focusRichText(page);
     await pasteByKeyboard(page);
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:paragraph
-  prop:text={
-    <>
-      <text
-        insert=" "
-        reference={
-          Object {
-            "pageId": "3",
-            "type": "Subpage",
-          }
-        }
-      />
-      <text
-        insert=" "
-        reference={
-          Object {
-            "pageId": "8",
-            "type": "LinkedPage",
-          }
-        }
-      />
-      <text
-        insert=" "
-        reference={
-          Object {
-            "pageId": "3",
-            "type": "LinkedPage",
-          }
-        }
-      />
-      <text
-        insert=" "
-        reference={
-          Object {
-            "pageId": "8",
-            "type": "LinkedPage",
-          }
-        }
-      />
-    </>
-  }
-  prop:type="text"
-/>`,
-      paragraphId
-    );
+    const json = await getPageSnapshot(page, true);
+    expect(json).toMatchSnapshot(`${testInfo.title}.json`);
   });
 
-  test('duplicated subpage should paste as linked page', async ({ page }) => {
+  test('duplicated linked page should paste as linked page', async ({
+    page,
+  }, testInfo) => {
     await enterPlaygroundRoom(page);
-    const { noteId } = await initEmptyParagraphState(page);
+    await initEmptyParagraphState(page);
     await focusRichText(page);
 
-    const { createLinkedDoc, createSubpage } = getLinkedDocPopover(page);
+    const { createLinkedDoc } = getLinkedDocPopover(page);
 
     await createLinkedDoc('page0');
-    await createSubpage('page1');
 
     await type(page, '/duplicate');
     await pressEnter(page);
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert=" "
-          reference={
-            Object {
-              "pageId": "3",
-              "type": "LinkedPage",
-            }
-          }
-        />
-        <text
-          insert=" "
-          reference={
-            Object {
-              "pageId": "8",
-              "type": "LinkedPage",
-            }
-          }
-        />
-      </>
-    }
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert=" "
-          reference={
-            Object {
-              "pageId": "3",
-              "type": "LinkedPage",
-            }
-          }
-        />
-        <text
-          insert=" "
-          reference={
-            Object {
-              "pageId": "8",
-              "type": "Subpage",
-            }
-          }
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-      noteId
-    );
+    const json = await getPageSnapshot(page, true);
+    expect(json).toMatchSnapshot(`${testInfo.title}.json`);
   });
 });
 
@@ -871,4 +820,21 @@ test('add reference node before the other reference node', async ({ page }) => {
   expect(await firstRefNode.textContent()).toEqual(
     expect.stringContaining('ccc')
   );
+});
+
+test('linked doc can be dragged from note to surface top level block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await createAndConvertToEmbedLinkedDoc(page);
+
+  await switchEditorMode(page);
+  await page.mouse.dblclick(450, 450);
+
+  await dragBlockToPoint(page, '9', { x: 200, y: 200 });
+
+  await waitNextFrame(page);
+  await assertParentBlockFlavour(page, '10', 'affine:surface');
 });

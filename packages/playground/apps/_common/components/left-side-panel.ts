@@ -18,6 +18,14 @@ export class LeftSidePanel extends ShadowlessElement {
 
   currentContent: HTMLElement | null = null;
 
+  hideContent() {
+    if (this.currentContent) {
+      this.style.display = 'none';
+      this.currentContent.remove();
+      this.currentContent = null;
+    }
+  }
+
   protected override render(): unknown {
     return html``;
   }
@@ -29,14 +37,6 @@ export class LeftSidePanel extends ShadowlessElement {
     this.style.display = 'block';
     this.currentContent = ele;
     this.append(ele);
-  }
-
-  hideContent() {
-    if (this.currentContent) {
-      this.style.display = 'none';
-      this.currentContent.remove();
-      this.currentContent = null;
-    }
   }
 
   toggle(ele: HTMLElement) {

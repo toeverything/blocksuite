@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { AIStarIconWithAnimation } from '../_common/icons.js';
@@ -45,9 +45,6 @@ export class AILoading extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor stopGenerating!: () => void;
-
   override render() {
     return html`
       <div class="generating-tip">
@@ -56,6 +53,9 @@ export class AILoading extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor stopGenerating!: () => void;
 }
 
 declare global {

@@ -1,15 +1,16 @@
 import type {
+  AIItemConfig,
   AffineAIPanelWidget,
   AffineSlashMenuActionItem,
   AffineSlashMenuContext,
   AffineSlashMenuItem,
   AffineSlashSubMenu,
-  AIItemConfig,
 } from '@blocksuite/blocks';
+
 import {
   AFFINE_AI_PANEL_WIDGET,
-  AffineSlashMenuWidget,
   AIStarIcon,
+  AffineSlashMenuWidget,
   MoreHorizontalIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -96,14 +97,14 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
     },
 
     ...AIItems.filter(({ name }) =>
-      ['Fix spelling', 'Fix grammar'].includes(name)
+      ['Fix grammar', 'Fix spelling'].includes(name)
     ).map(item => ({
       ...actionItemWrapper(item),
       name: `${item.name} from above`,
     })),
 
     ...AIItems.filter(({ name }) =>
-      ['Summarize', 'Continue writing'].includes(name)
+      ['Continue writing', 'Summarize'].includes(name)
     ).map(actionItemWrapper),
 
     {
@@ -112,16 +113,16 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
       subMenu: [
         { groupName: 'Action with above' },
         ...AIItems.filter(({ name }) =>
-          ['Translate to', 'Change tone to'].includes(name)
+          ['Change tone to', 'Translate to'].includes(name)
         ).map(subMenuWrapper),
 
         ...AIItems.filter(({ name }) =>
           [
+            'Find actions',
+            'Generate outline',
             'Improve writing',
             'Make it longer',
             'Make it shorter',
-            'Generate outline',
-            'Find actions',
           ].includes(name)
         ).map(actionItemWrapper),
       ],

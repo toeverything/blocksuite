@@ -1,6 +1,7 @@
+import type { Doc } from 'yjs';
+
 import { type Logger, Slot } from '@blocksuite/global/utils';
 import { isEqual } from '@blocksuite/global/utils';
-import type { Doc } from 'yjs';
 import {
   applyUpdate,
   encodeStateAsUpdate,
@@ -8,13 +9,14 @@ import {
   mergeUpdates,
 } from 'yjs';
 
+import type { DocSource } from './source.js';
+
 import {
   PriorityAsyncQueue,
   SharedPriorityTarget,
 } from '../utils/async-queue.js';
 import { MANUALLY_STOP, throwIfAborted } from '../utils/throw-if-aborted.js';
 import { DocPeerStep } from './consts.js';
-import type { DocSource } from './source.js';
 
 export interface DocPeerStatus {
   step: DocPeerStep;
@@ -51,22 +53,6 @@ export interface DocPeerStatus {
  *
  */
 export class SyncPeer {
-  get name() {
-    return this.source.name;
-  }
-
-  private set status(s: DocPeerStatus) {
-    if (!isEqual(s, this._status)) {
-      this.logger.debug(`doc-peer:${this.name} status change`, s);
-      this._status = s;
-      this.onStatusChange.emit(s);
-    }
-  }
-
-  get status() {
-    return this._status;
-  }
-
   private _status: DocPeerStatus = {
     step: DocPeerStep.LoadingRootDoc,
     totalDocs: 1,
@@ -75,9 +61,57 @@ export class SyncPeer {
     pendingPushUpdates: 0,
   };
 
-  readonly onStatusChange = new Slot<DocPeerStatus>();
-
   readonly abort = new AbortController();
+
+  // handle updates from storage
+  handleStorageUpdates = (id: string, data: Uint8Array) => {
+    this.state.pullUpdatesQueue.push({
+      id,
+      data,
+    });
+    this.updateSyncStatus();
+  };
+
+  // handle subdocs changes, append new subdocs to queue, remove subdocs from queue
+  handleSubdocsUpdate = ({
+    added,
+    removed,
+  }: {
+    added: Set<Doc>;
+    removed: Set<Doc>;
+  }) => {
+    for (const subdoc of added) {
+      this.state.subdocsLoadQueue.push({ id: subdoc.guid, doc: subdoc });
+    }
+
+    for (const subdoc of removed) {
+      this.disconnectDoc(subdoc);
+      this.state.subdocsLoadQueue.remove(doc => doc.doc === subdoc);
+    }
+    this.updateSyncStatus();
+  };
+
+  // handle updates from ydoc
+  handleYDocUpdates = (update: Uint8Array, origin: string, doc: Doc) => {
+    // don't push updates from storage
+    if (origin === this.name) {
+      return;
+    }
+
+    const exist = this.state.pushUpdatesQueue.find(({ id }) => id === doc.guid);
+    if (exist) {
+      exist.data.push(update);
+    } else {
+      this.state.pushUpdatesQueue.push({
+        id: doc.guid,
+        data: [update],
+      });
+    }
+
+    this.updateSyncStatus();
+  };
+
+  readonly onStatusChange = new Slot<DocPeerStatus>();
 
   readonly state: {
     connectedDocs: Map<string, Doc>;
@@ -115,62 +149,44 @@ export class SyncPeer {
     });
   }
 
-  /**
-   * stop sync
-   *
-   * DocPeer is one-time use, this peer should be discarded after call stop().
-   */
-  stop() {
-    this.logger.debug(`doc-peer:${this.name} stop`);
-    this.abort.abort(MANUALLY_STOP);
+  private set status(s: DocPeerStatus) {
+    if (!isEqual(s, this._status)) {
+      this.logger.debug(`doc-peer:${this.name} status change`, s);
+      this._status = s;
+      this.onStatusChange.emit(s);
+    }
   }
 
-  /**
-   * auto retry after 5 seconds if sync failed
-   */
-  async syncRetryLoop(abort: AbortSignal) {
-    while (abort.aborted === false) {
-      try {
-        await this.sync(abort);
-      } catch (err) {
-        if (err === MANUALLY_STOP || abort.aborted) {
-          return;
-        }
+  async connectDoc(doc: Doc, abort: AbortSignal) {
+    const { data: docData, state: inStorageState } =
+      (await this.source.pull(doc.guid, encodeStateVector(doc))) ?? {};
+    throwIfAborted(abort);
 
-        this.logger.error(`doc-peer:${this.name} sync error`, err);
-      }
-      try {
-        this.logger.error(`doc-peer:${this.name} retry after 5 seconds`);
-        this.status = {
-          step: DocPeerStep.Retrying,
-          totalDocs: 1,
-          loadedDocs: 0,
-          pendingPullUpdates: 0,
-          pendingPushUpdates: 0,
-        };
-        await Promise.race([
-          new Promise<void>(resolve => {
-            setTimeout(resolve, 5 * 1000);
-          }),
-          new Promise((_, reject) => {
-            // exit if manually stopped
-            if (abort.aborted) {
-              reject(abort.reason);
-            }
-            abort.addEventListener('abort', () => {
-              reject(abort.reason);
-            });
-          }),
-        ]);
-      } catch (err) {
-        if (err === MANUALLY_STOP || abort.aborted) {
-          return;
-        }
-
-        // should never reach here
-        throw err;
-      }
+    if (docData && docData.length > 0) {
+      applyUpdate(doc, docData, 'load');
     }
+
+    // diff root doc and in-storage, save updates to pendingUpdates
+    this.state.pushUpdatesQueue.push({
+      id: doc.guid,
+      data: [encodeStateAsUpdate(doc, inStorageState)],
+    });
+
+    this.state.connectedDocs.set(doc.guid, doc);
+
+    // start listen root doc changes
+    doc.on('update', this.handleYDocUpdates);
+
+    // mark rootDoc as loaded
+    doc.emit('sync', [true, doc]);
+
+    this.updateSyncStatus();
+  }
+
+  disconnectDoc(doc: Doc) {
+    doc.off('update', this.handleYDocUpdates);
+    this.state.connectedDocs.delete(doc.guid);
+    this.updateSyncStatus();
   }
 
   initState() {
@@ -180,6 +196,16 @@ export class SyncPeer {
     this.state.subdocsLoadQueue.clear();
     this.state.pushingUpdate = false;
     this.state.subdocLoading = false;
+  }
+
+  /**
+   * stop sync
+   *
+   * DocPeer is one-time use, this peer should be discarded after call stop().
+   */
+  stop() {
+    this.logger.debug(`doc-peer:${this.name} stop`);
+    this.abort.abort(MANUALLY_STOP);
   }
 
   /**
@@ -292,85 +318,53 @@ export class SyncPeer {
     }
   }
 
-  async connectDoc(doc: Doc, abort: AbortSignal) {
-    const { data: docData, state: inStorageState } =
-      (await this.source.pull(doc.guid, encodeStateVector(doc))) ?? {};
-    throwIfAborted(abort);
+  /**
+   * auto retry after 5 seconds if sync failed
+   */
+  async syncRetryLoop(abort: AbortSignal) {
+    while (abort.aborted === false) {
+      try {
+        await this.sync(abort);
+      } catch (err) {
+        if (err === MANUALLY_STOP || abort.aborted) {
+          return;
+        }
 
-    if (docData && docData.length > 0) {
-      applyUpdate(doc, docData, 'load');
+        this.logger.error(`doc-peer:${this.name} sync error`, err);
+      }
+      try {
+        this.logger.error(`doc-peer:${this.name} retry after 5 seconds`);
+        this.status = {
+          step: DocPeerStep.Retrying,
+          totalDocs: 1,
+          loadedDocs: 0,
+          pendingPullUpdates: 0,
+          pendingPushUpdates: 0,
+        };
+        await Promise.race([
+          new Promise<void>(resolve => {
+            setTimeout(resolve, 5 * 1000);
+          }),
+          new Promise((_, reject) => {
+            // exit if manually stopped
+            if (abort.aborted) {
+              reject(abort.reason);
+            }
+            abort.addEventListener('abort', () => {
+              reject(abort.reason);
+            });
+          }),
+        ]);
+      } catch (err) {
+        if (err === MANUALLY_STOP || abort.aborted) {
+          return;
+        }
+
+        // should never reach here
+        throw err;
+      }
     }
-
-    // diff root doc and in-storage, save updates to pendingUpdates
-    this.state.pushUpdatesQueue.push({
-      id: doc.guid,
-      data: [encodeStateAsUpdate(doc, inStorageState)],
-    });
-
-    this.state.connectedDocs.set(doc.guid, doc);
-
-    // start listen root doc changes
-    doc.on('update', this.handleYDocUpdates);
-
-    // mark rootDoc as loaded
-    doc.emit('sync', [true, doc]);
-
-    this.updateSyncStatus();
   }
-
-  disconnectDoc(doc: Doc) {
-    doc.off('update', this.handleYDocUpdates);
-    this.state.connectedDocs.delete(doc.guid);
-    this.updateSyncStatus();
-  }
-
-  // handle updates from ydoc
-  handleYDocUpdates = (update: Uint8Array, origin: string, doc: Doc) => {
-    // don't push updates from storage
-    if (origin === this.name) {
-      return;
-    }
-
-    const exist = this.state.pushUpdatesQueue.find(({ id }) => id === doc.guid);
-    if (exist) {
-      exist.data.push(update);
-    } else {
-      this.state.pushUpdatesQueue.push({
-        id: doc.guid,
-        data: [update],
-      });
-    }
-
-    this.updateSyncStatus();
-  };
-
-  // handle subdocs changes, append new subdocs to queue, remove subdocs from queue
-  handleSubdocsUpdate = ({
-    added,
-    removed,
-  }: {
-    added: Set<Doc>;
-    removed: Set<Doc>;
-  }) => {
-    for (const subdoc of added) {
-      this.state.subdocsLoadQueue.push({ id: subdoc.guid, doc: subdoc });
-    }
-
-    for (const subdoc of removed) {
-      this.disconnectDoc(subdoc);
-      this.state.subdocsLoadQueue.remove(doc => doc.doc === subdoc);
-    }
-    this.updateSyncStatus();
-  };
-
-  // handle updates from storage
-  handleStorageUpdates = (id: string, data: Uint8Array) => {
-    this.state.pullUpdatesQueue.push({
-      id,
-      data,
-    });
-    this.updateSyncStatus();
-  };
 
   updateSyncStatus() {
     let step;
@@ -400,6 +394,30 @@ export class SyncPeer {
     };
   }
 
+  async waitForLoaded(abort?: AbortSignal) {
+    if (this.status.step > DocPeerStep.Loaded) {
+      return;
+    } else {
+      return Promise.race([
+        new Promise<void>(resolve => {
+          this.onStatusChange.on(status => {
+            if (status.step > DocPeerStep.Loaded) {
+              resolve();
+            }
+          });
+        }),
+        new Promise((_, reject) => {
+          if (abort?.aborted) {
+            reject(abort?.reason);
+          }
+          abort?.addEventListener('abort', () => {
+            reject(abort.reason);
+          });
+        }),
+      ]);
+    }
+  }
+
   async waitForSynced(abort?: AbortSignal) {
     if (this.status.step >= DocPeerStep.Synced) {
       return;
@@ -424,27 +442,11 @@ export class SyncPeer {
     }
   }
 
-  async waitForLoaded(abort?: AbortSignal) {
-    if (this.status.step > DocPeerStep.Loaded) {
-      return;
-    } else {
-      return Promise.race([
-        new Promise<void>(resolve => {
-          this.onStatusChange.on(status => {
-            if (status.step > DocPeerStep.Loaded) {
-              resolve();
-            }
-          });
-        }),
-        new Promise((_, reject) => {
-          if (abort?.aborted) {
-            reject(abort?.reason);
-          }
-          abort?.addEventListener('abort', () => {
-            reject(abort.reason);
-          });
-        }),
-      ]);
-    }
+  get name() {
+    return this.source.name;
+  }
+
+  get status() {
+    return this._status;
   }
 }

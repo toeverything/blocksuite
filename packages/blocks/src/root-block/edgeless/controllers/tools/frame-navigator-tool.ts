@@ -1,6 +1,7 @@
 import { noop } from '@blocksuite/global/utils';
 
 import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
+
 import { EdgelessToolController } from './edgeless-tool.js';
 
 type FrameNavigatorTool = {
@@ -13,19 +14,11 @@ export class PresentToolController extends EdgelessToolController<FrameNavigator
     type: 'frameNavigator',
   } as FrameNavigatorTool;
 
-  override onContainerPointerDown(): void {
+  override afterModeSwitch(): void {
     noop();
   }
 
-  override onContainerDragStart(): void {
-    noop();
-  }
-
-  override onContainerDragMove(): void {
-    noop();
-  }
-
-  override onContainerDragEnd(): void {
+  override beforeModeSwitch(): void {
     noop();
   }
 
@@ -33,11 +26,23 @@ export class PresentToolController extends EdgelessToolController<FrameNavigator
     noop();
   }
 
+  override onContainerContextMenu(): void {
+    noop();
+  }
+
   override onContainerDblClick(): void {
     noop();
   }
 
-  override onContainerTripleClick(): void {
+  override onContainerDragEnd(): void {
+    noop();
+  }
+
+  override onContainerDragMove(): void {
+    noop();
+  }
+
+  override onContainerDragStart(): void {
     noop();
   }
 
@@ -49,7 +54,11 @@ export class PresentToolController extends EdgelessToolController<FrameNavigator
     noop();
   }
 
-  override onContainerContextMenu(): void {
+  override onContainerPointerDown(): void {
+    noop();
+  }
+
+  override onContainerTripleClick(): void {
     noop();
   }
 
@@ -58,14 +67,6 @@ export class PresentToolController extends EdgelessToolController<FrameNavigator
   }
 
   override onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
-
-  override beforeModeSwitch(): void {
-    noop();
-  }
-
-  override afterModeSwitch(): void {
     noop();
   }
 }

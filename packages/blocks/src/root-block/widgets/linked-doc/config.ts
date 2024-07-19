@@ -1,30 +1,36 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { DocMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { assertExists } from '@blocksuite/global/utils';
+
+import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
+
 import { toast } from '../../../_common/components/toast.js';
 import {
-  DocIcon,
   ImportIcon,
+  LinkedDocIcon,
+  LinkedEdgelessIcon,
   NewDocIcon,
 } from '../../../_common/icons/index.js';
-import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import { createDefaultDoc } from '../../../_common/utils/init.js';
 import { isFuzzyMatch } from '../../../_common/utils/string.js';
 import { showImportModal } from './import-doc/index.js';
 
+interface MenuCtx {
+  editorHost: EditorHost;
+  query: string;
+  abort: () => void;
+  inlineEditor: AffineInlineEditor;
+  docMetas: DocMeta[];
+}
+
 export type LinkedDocOptions = {
   triggerKeys: string[];
   ignoreBlockTypes: BlockSuite.Flavour[];
   convertTriggerKey: boolean;
-  getMenus: (ctx: {
-    editorHost: EditorHost;
-    query: string;
-    inlineEditor: AffineInlineEditor;
-    docMetas: DocMeta[];
-  }) => LinkedDocGroup[];
+  getMenus: (ctx: MenuCtx) => LinkedDocGroup[];
 };
 
 export type LinkedDocItem = {
@@ -38,8 +44,12 @@ export type LinkedDocItem = {
 
 export type LinkedDocGroup = {
   name: string;
-  styles?: string;
   items: LinkedDocItem[];
+  styles?: string;
+  // maximum quantity displayed by default
+  maxDisplay?: number;
+  // copywriting when display quantity exceeds
+  overflowText?: string;
 };
 
 const DEFAULT_DOC_NAME = 'Untitled';
@@ -64,13 +74,15 @@ export function insertLinkedNode({
   });
 }
 
-export const getMenus: (ctx: {
-  editorHost: EditorHost;
-  query: string;
-  inlineEditor: AffineInlineEditor;
-  docMetas: DocMeta[];
-}) => LinkedDocGroup[] = ({ editorHost, query, inlineEditor, docMetas }) => {
+export const getMenus: (ctx: MenuCtx) => LinkedDocGroup[] = ({
+  editorHost,
+  query,
+  abort,
+  inlineEditor,
+  docMetas,
+}) => {
   const doc = editorHost.doc;
+  const { docModeService } = editorHost.std.spec.getService('affine:page');
   const docName = query || DEFAULT_DOC_NAME;
   const displayDocName =
     docName.slice(0, DISPLAY_NAME_LENGTH) +
@@ -79,16 +91,20 @@ export const getMenus: (ctx: {
   const filteredDocList = docMetas
     .filter(({ id }) => id !== doc.id)
     .filter(({ title }) => isFuzzyMatch(title, query));
+  const MAX_DOCS = 6;
 
   return [
     {
       name: 'Link to Doc',
-      styles: 'overflow-y: scroll; max-height: 224px;',
       items: filteredDocList.map(doc => ({
         key: doc.id,
         name: doc.title || DEFAULT_DOC_NAME,
-        icon: DocIcon,
+        icon:
+          docModeService.getMode(doc.id) === 'edgeless'
+            ? LinkedEdgelessIcon
+            : LinkedDocIcon,
         action: () => {
+          abort();
           insertLinkedNode({
             inlineEditor,
             docId: doc.id,
@@ -103,6 +119,8 @@ export const getMenus: (ctx: {
             });
         },
       })),
+      maxDisplay: MAX_DOCS,
+      overflowText: `${filteredDocList.length - MAX_DOCS} more docs`,
     },
     {
       name: 'New Doc',
@@ -112,6 +130,7 @@ export const getMenus: (ctx: {
           name: `Create "${displayDocName}" doc`,
           icon: NewDocIcon,
           action: () => {
+            abort();
             const docName = query;
             const newDoc = createDefaultDoc(doc.collection, {
               title: docName,
@@ -140,6 +159,7 @@ export const getMenus: (ctx: {
           name: 'Import',
           icon: ImportIcon,
           action: () => {
+            abort();
             const onSuccess = (
               docIds: string[],
               options: {

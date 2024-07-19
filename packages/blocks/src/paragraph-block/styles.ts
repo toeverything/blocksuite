@@ -15,8 +15,7 @@ export const paragraphBlockStyles = css`
     position: relative;
   }
 
-  affine-paragraph code,
-  a[affine-link] {
+  affine-paragraph code {
     font-size: calc(var(--affine-font-base) - 3px);
     padding: 0px 4px 2px;
   }
@@ -30,8 +29,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
 
-  .h1 code,
-  .h1 a[affine-link] {
+  .h1 code {
     font-size: calc(var(--affine-font-base) + 10px);
     padding: 0px 4px;
   }
@@ -45,8 +43,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
 
-  .h2 code,
-  .h2 a[affine-link] {
+  .h2 code {
     font-size: calc(var(--affine-font-base) + 8px);
     padding: 0px 4px;
   }
@@ -60,8 +57,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
 
-  .h3 code,
-  .h3 a[affine-link] {
+  .h3 code {
     font-size: calc(var(--affine-font-base) + 6px);
     padding: 0px 4px;
   }
@@ -74,8 +70,7 @@ export const paragraphBlockStyles = css`
     margin-top: 12px;
     margin-bottom: 10px;
   }
-  .h4 code,
-  .h4 a[affine-link] {
+  .h4 code {
     font-size: calc(var(--affine-font-base) + 4px);
     padding: 0px 4px;
   }
@@ -88,8 +83,7 @@ export const paragraphBlockStyles = css`
     margin-top: 12px;
     margin-bottom: 10px;
   }
-  .h5 code,
-  .h5 a[affine-link] {
+  .h5 code {
     font-size: calc(var(--affine-font-base) + 2px);
     padding: 0px 4px;
   }
@@ -103,8 +97,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
 
-  .h6 code,
-  .h6 a[affine-link] {
+  .h6 code {
     font-size: var(--affine-font-base);
     padding: 0px 4px 2px;
   }

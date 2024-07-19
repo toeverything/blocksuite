@@ -32,6 +32,7 @@ export const styles = css`
 
     .database-cell {
         min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
+        user-select: none;
     }
 
     .database-cell.add-column-button {
@@ -71,7 +72,7 @@ export const styles = css`
         overflow: hidden;
         color: var(--affine-text-secondary-color);
         font-size: 14px;
-        position: absolute;
+        position: relative;
     }
 
     .affine-database-column-type-icon {

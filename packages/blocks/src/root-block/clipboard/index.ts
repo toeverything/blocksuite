@@ -1,7 +1,8 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/block-std';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockSnapshot, Doc } from '@blocksuite/store';
+
+import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 
 import {
   AttachmentAdapter,
@@ -18,25 +19,16 @@ import { ClipboardAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
 export class PageClipboard {
-  private get _std() {
-    return this.host.std;
-  }
-
-  protected _disposables = new DisposableGroup();
-
-  host: BlockElement;
-
-  constructor(host: BlockElement) {
-    this.host = host;
-  }
-
   private _copySelected = (onCopy?: () => void) => {
     return this._std.command
       .chain()
       .with({ onCopy })
       .getSelectedModels()
+      .draftSelectedModels()
       .copySelectedModels();
   };
+
+  protected _disposables = new DisposableGroup();
 
   protected _init = () => {
     this._std.clipboard.registerAdapter(
@@ -88,19 +80,25 @@ export class PageClipboard {
     });
   };
 
-  hostConnected() {
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
-    this.host.handleEvent('copy', this.onPageCopy);
-    this.host.handleEvent('paste', this.onPagePaste);
-    this.host.handleEvent('cut', this.onPageCut);
-    this._init();
-  }
+  host: BlockElement;
 
-  hostDisconnected() {
-    this._disposables.dispose();
-  }
+  onBlockSnapshotPaste = (
+    snapshot: BlockSnapshot,
+    doc: Doc,
+    parent?: string,
+    index?: number
+  ) => {
+    this._std.command
+      .chain()
+      .inline((_ctx, next) => {
+        this._std.clipboard
+          .pasteBlockSnapshot(snapshot, doc, parent, index)
+          .catch(console.error);
+
+        return next();
+      })
+      .run();
+  };
 
   onPageCopy: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
@@ -165,23 +163,27 @@ export class PageClipboard {
       .run();
   };
 
-  onBlockSnapshotPaste = (
-    snapshot: BlockSnapshot,
-    doc: Doc,
-    parent?: string,
-    index?: number
-  ) => {
-    this._std.command
-      .chain()
-      .inline((_ctx, next) => {
-        this._std.clipboard
-          .pasteBlockSnapshot(snapshot, doc, parent, index)
-          .catch(console.error);
+  constructor(host: BlockElement) {
+    this.host = host;
+  }
 
-        return next();
-      })
-      .run();
-  };
+  private get _std() {
+    return this.host.std;
+  }
+
+  hostConnected() {
+    if (this._disposables.disposed) {
+      this._disposables = new DisposableGroup();
+    }
+    this.host.handleEvent('copy', this.onPageCopy);
+    this.host.handleEvent('paste', this.onPagePaste);
+    this.host.handleEvent('cut', this.onPageCut);
+    this._init();
+  }
+
+  hostDisconnected() {
+    this._disposables.dispose();
+  }
 }
 
 export { copyMiddleware, pasteMiddleware };

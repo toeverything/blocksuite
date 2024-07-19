@@ -1,11 +1,12 @@
 import type { SerializedXYWH } from '@blocksuite/blocks';
+
 import {
   Boxed,
   type DocCollection,
-  nanoid,
-  native2Y,
   Text,
   type Y,
+  nanoid,
+  native2Y,
 } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';

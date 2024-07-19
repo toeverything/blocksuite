@@ -2,16 +2,17 @@ import type {
   ConnectorElementModel,
   LocalConnectorElementModel,
 } from '../../../element-model/connector.js';
-import { ConnectorMode } from '../../../element-model/connector.js';
 import type { PointLocation } from '../../../index.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
+import type { Renderer } from '../../renderer.js';
+
+import { ConnectorMode } from '../../../element-model/connector.js';
 import {
   type BezierCurveParameters,
   getBezierParameters,
   getBezierTangent,
 } from '../../../utils/curve.js';
 import { type IVec, Vec } from '../../../utils/vec.js';
-import type { Renderer } from '../../renderer.js';
 
 type ConnectorEnd = 'Front' | 'Rear';
 
@@ -88,7 +89,7 @@ export function getPointWithTangent(
         ? getBezierTangent(bezierParameters, 1)
         : getBezierTangent(bezierParameters, 0);
   }
-  clone.tangent = tangent ?? [];
+  clone.tangent = tangent ?? [0, 0];
 
   return clone;
 }

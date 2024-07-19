@@ -1,9 +1,10 @@
 import { assertEquals } from '@blocksuite/global/utils';
-import { css, html, LitElement, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { ColorUnit } from '../../../edgeless/components/panel/color-panel.js';
 import type { PieNode } from '../node.js';
+
+import { ColorUnit } from '../../../edgeless/components/panel/color-panel.js';
 import { isSubmenuNode } from '../utils.js';
 
 const styles = css`
@@ -23,18 +24,6 @@ const styles = css`
 @customElement('pie-node-content')
 export class PieNodeContent extends LitElement {
   static override styles = styles;
-
-  @query('.node-content')
-  private accessor _nodeContentElement!: HTMLDivElement;
-
-  @property({ attribute: false })
-  accessor node!: PieNode;
-
-  @property({ attribute: false })
-  accessor isActive!: boolean;
-
-  @property({ attribute: false })
-  accessor hoveredNode!: PieNode | null;
 
   private _renderCenterNodeContent() {
     if (isSubmenuNode(this.node.model) && !this.isActive) {
@@ -75,6 +64,21 @@ export class PieNodeContent extends LitElement {
     return this.node.icon;
   }
 
+  protected override render() {
+    const content = this.node.isCenterNode()
+      ? this._renderCenterNodeContent()
+      : this._renderChildNodeContent();
+
+    return html`
+      <div
+        active="${this.isActive.toString()}"
+        class="node-content ${this.node.isCenterNode() ? 'center' : 'child'}"
+      >
+        ${content}
+      </div>
+    `;
+  }
+
   protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
 
@@ -98,20 +102,17 @@ export class PieNodeContent extends LitElement {
     });
   }
 
-  protected override render() {
-    const content = this.node.isCenterNode()
-      ? this._renderCenterNodeContent()
-      : this._renderChildNodeContent();
+  @query('.node-content')
+  private accessor _nodeContentElement!: HTMLDivElement;
 
-    return html`
-      <div
-        active="${this.isActive.toString()}"
-        class="node-content ${this.node.isCenterNode() ? 'center' : 'child'}"
-      >
-        ${content}
-      </div>
-    `;
-  }
+  @property({ attribute: false })
+  accessor hoveredNode!: PieNode | null;
+
+  @property({ attribute: false })
+  accessor isActive!: boolean;
+
+  @property({ attribute: false })
+  accessor node!: PieNode;
 }
 
 declare global {

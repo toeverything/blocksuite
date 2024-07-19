@@ -1,10 +1,11 @@
 import { nanoid } from '@blocksuite/store';
 
 import type { RichTextCellType } from '../../../database-block/columns/utils.js';
+import type { SelectTag } from '../../../database-block/data-view/utils/tags/multi-tag-select.js';
+
 import { columnType } from '../../../database-block/data-view/column/column-config.js';
 import { tRichText } from '../../../database-block/data-view/logical/data-type.js';
 import { getTagColor } from '../../../database-block/data-view/utils/tags/colors.js';
-import type { SelectTag } from '../../../database-block/data-view/utils/tags/multi-tag-select.js';
 
 export const richTextColumnType = columnType('rich-text');
 

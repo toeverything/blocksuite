@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { Slot, throttle } from '@blocksuite/global/utils';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
@@ -7,8 +8,6 @@ import { matchFlavours } from '../../../_common/utils/model.js';
 import { buildPath } from '../../../_common/utils/query.js';
 
 export class NoteResizeObserver {
-  private _observer: ResizeObserver;
-
   /**
    * Observation will fire when observation starts if Element is being rendered, and Element’s size is not 0,0.
    * https://w3c.github.io/csswg-drafts/resize-observer/#resize-observer-interface
@@ -19,18 +18,7 @@ export class NoteResizeObserver {
 
   private _lastRects = new Map<string, DOMRectReadOnly>();
 
-  slots = {
-    resize: new Slot<Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>>(),
-  };
-
-  constructor() {
-    this._observer = new ResizeObserver(
-      throttle<ResizeObserverEntry[][], typeof this._onResize>(
-        this._onResize,
-        1000 / 60
-      )
-    );
-  }
+  private _observer: ResizeObserver;
 
   private _onResize = (entries: ResizeObserverEntry[]) => {
     const resizedNotes = new Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>();
@@ -56,6 +44,26 @@ export class NoteResizeObserver {
       this.slots.resize.emit(resizedNotes);
     }
   };
+
+  slots = {
+    resize: new Slot<Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>>(),
+  };
+
+  constructor() {
+    this._observer = new ResizeObserver(
+      throttle<ResizeObserverEntry[][], typeof this._onResize>(
+        this._onResize,
+        1000 / 60
+      )
+    );
+  }
+
+  dispose() {
+    this._observer.disconnect();
+    this.slots.resize.dispose();
+    this._cachedElements.clear();
+    this._lastRects.clear();
+  }
 
   resetListener(editorHost: EditorHost) {
     const doc = editorHost.doc;
@@ -95,12 +103,5 @@ export class NoteResizeObserver {
       if (!element) return;
       this._observer.unobserve(element);
     });
-  }
-
-  dispose() {
-    this._observer.disconnect();
-    this.slots.resize.dispose();
-    this._cachedElements.clear();
-    this._lastRects.clear();
   }
 }

@@ -1,70 +1,41 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
 import type { Block } from '@blocksuite/store';
 import type { Doc } from '@blocksuite/store';
+
+import { type Disposable, Slot, assertExists } from '@blocksuite/global/utils';
+
+import type { Column } from '../database-block/index.js';
+import type { BlockMeta } from './block-meta/base.js';
+import type { DataViewBlockModel } from './data-view-model.js';
 
 import { databaseBlockAllColumnMap } from '../database-block/columns/index.js';
 import {
   BaseDataSource,
   type ColumnConfig,
   type ColumnMeta,
+  type DetailSlots,
+  type InsertToPosition,
   columnPresets,
   createUniComponentFromWebComponent,
-  type DetailSlots,
   insertPositionToIndex,
-  type InsertToPosition,
 } from '../database-block/data-view/index.js';
 import { BlockRenderer } from '../database-block/detail-panel/block-renderer.js';
-import type { Column } from '../database-block/index.js';
-import type { BlockMeta } from './block-meta/base.js';
 import { blockMetaMap } from './block-meta/index.js';
 import { queryBlockAllColumnMap, queryBlockColumns } from './columns/index.js';
-import type { DataViewBlockModel } from './data-view-model.js';
 
 export type BlockQueryDataSourceConfig = {
   type: keyof typeof blockMetaMap;
 };
 
 export class BlockQueryDataSource extends BaseDataSource {
-  get workspace() {
-    return this.host.doc.collection;
-  }
-
-  private get blocks() {
-    return [...this.blockMap.values()];
-  }
-
-  get rows(): string[] {
-    return this.blocks.map(v => v.id);
-  }
-
-  get properties(): string[] {
-    return [
-      ...this.meta.properties.map(v => v.key),
-      ...this.block.columns.map(v => v.id),
-    ];
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
-    return queryBlockColumns.map(v => v.model);
-  }
-
-  override get detailSlots(): DetailSlots {
-    return {
-      ...super.detailSlots,
-      header: createUniComponentFromWebComponent(BlockRenderer),
-    };
-  }
-
-  private meta: BlockMeta;
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private columnMetaMap = new Map<string, ColumnMeta<any, any, any>>();
 
-  docDisposeMap = new Map<string, () => void>();
+  private meta: BlockMeta;
 
   blockMap = new Map<string, Block>();
+
+  docDisposeMap = new Map<string, () => void>();
 
   slots = {
     update: new Slot(),
@@ -81,7 +52,7 @@ export class BlockQueryDataSource extends BaseDataSource {
       this.columnMetaMap.set(property.columnMeta.type, property.columnMeta);
     }
     for (const collection of this.workspace.docs.values()) {
-      for (const block of collection.getDoc().blocks.values()) {
+      for (const block of Object.values(collection.getDoc().blocks.peek())) {
         if (this.meta.selector(block)) {
           this.blockMap.set(block.id, block);
         }
@@ -101,6 +72,10 @@ export class BlockQueryDataSource extends BaseDataSource {
     });
   }
 
+  private get blocks() {
+    return [...this.blockMap.values()];
+  }
+
   private getProperty(propertyId: string) {
     const property = this.meta.properties.find(v => v.key === propertyId);
     assertExists(property, `property ${propertyId} not found`);
@@ -113,27 +88,6 @@ export class BlockQueryDataSource extends BaseDataSource {
       i++;
     }
     return `Column ${i}`;
-  }
-
-  getViewColumn(id: string) {
-    return this.block.columns.find(v => v.id === id);
-  }
-
-  listenToDoc(doc: Doc) {
-    this.docDisposeMap.set(
-      doc.id,
-      doc.slots.blockUpdated.on(v => {
-        if (v.type === 'add') {
-          const blockById = doc.getBlock(v.id);
-          if (blockById && this.meta.selector(blockById)) {
-            this.blockMap.set(v.id, blockById);
-          }
-        } else if (v.type === 'delete') {
-          this.blockMap.delete(v.id);
-        }
-        this.slots.update.emit();
-      }).dispose
-    );
   }
 
   cellChangeValue(rowId: string, propertyId: string, value: unknown): void {
@@ -163,6 +117,78 @@ export class BlockQueryDataSource extends BaseDataSource {
       return this.getProperty(propertyId)?.get(block.model);
     }
     return;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getPropertyMeta(type: string): ColumnMeta<any, any, any> {
+    const meta = this.columnMetaMap.get(type);
+    if (meta) {
+      return meta;
+    }
+    return queryBlockAllColumnMap[type];
+  }
+
+  getViewColumn(id: string) {
+    return this.block.columns.find(v => v.id === id);
+  }
+
+  listenToDoc(doc: Doc) {
+    this.docDisposeMap.set(
+      doc.id,
+      doc.slots.blockUpdated.on(v => {
+        if (v.type === 'add') {
+          const blockById = doc.getBlock(v.id);
+          if (blockById && this.meta.selector(blockById)) {
+            this.blockMap.set(v.id, blockById);
+          }
+        } else if (v.type === 'delete') {
+          this.blockMap.delete(v.id);
+        }
+        this.slots.update.emit();
+      }).dispose
+    );
+  }
+
+  override onCellUpdate(
+    rowId: string,
+    propertyId: string,
+    callback: () => void
+  ): Disposable {
+    const viewColumn = this.getViewColumn(propertyId);
+    if (viewColumn) {
+      return this.block.propsUpdated.on(callback);
+    }
+    const block = this.blockMap.get(rowId);
+    assertExists(block, `block ${rowId} not found`);
+    return this.getProperty(propertyId).updated(block.model, callback);
+  }
+
+  propertyAdd(
+    insertToPosition: InsertToPosition,
+    type: string | undefined
+  ): string {
+    const doc = this.block.doc;
+    doc.captureSync();
+    const column = databaseBlockAllColumnMap[
+      type ?? columnPresets.multiSelectColumnConfig.type
+    ].model.create(this.newColumnName());
+
+    const id = doc.generateBlockId();
+    if (this.block.columns.some(v => v.id === id)) {
+      return id;
+    }
+    doc.transact(() => {
+      const col: Column = {
+        ...column,
+        id,
+      };
+      this.block.columns.splice(
+        insertPositionToIndex(insertToPosition, this.block.columns),
+        0,
+        col
+      );
+    });
+    return id;
   }
 
   propertyChangeData(propertyId: string, data: Record<string, unknown>): void {
@@ -217,6 +243,10 @@ export class BlockQueryDataSource extends BaseDataSource {
     }
   }
 
+  propertyDuplicate(_columnId: string): string {
+    throw new Error('Method not implemented.');
+  }
+
   propertyGetData(propertyId: string): Record<string, unknown> {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
@@ -229,13 +259,11 @@ export class BlockQueryDataSource extends BaseDataSource {
     );
   }
 
-  override propertyGetReadonly(propertyId: string): boolean {
-    const viewColumn = this.getViewColumn(propertyId);
-    if (viewColumn) {
-      return false;
+  override propertyGetDefaultWidth(propertyId: string): number {
+    if (this.propertyGetType(propertyId) === 'title') {
+      return 260;
     }
-    if (propertyId === 'type') return true;
-    return this.getProperty(propertyId)?.set == null;
+    return super.propertyGetDefaultWidth(propertyId);
   }
 
   propertyGetName(propertyId: string): string {
@@ -249,6 +277,15 @@ export class BlockQueryDataSource extends BaseDataSource {
     return this.getProperty(propertyId)?.name ?? '';
   }
 
+  override propertyGetReadonly(propertyId: string): boolean {
+    const viewColumn = this.getViewColumn(propertyId);
+    if (viewColumn) {
+      return false;
+    }
+    if (propertyId === 'type') return true;
+    return this.getProperty(propertyId)?.set == null;
+  }
+
   propertyGetType(propertyId: string): string {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
@@ -260,10 +297,6 @@ export class BlockQueryDataSource extends BaseDataSource {
     return this.getProperty(propertyId).columnMeta.type;
   }
 
-  propertyDuplicate(_columnId: string): string {
-    throw new Error('Method not implemented.');
-  }
-
   rowAdd(_insertPosition: InsertToPosition | number): string {
     throw new Error('Method not implemented.');
   }
@@ -272,63 +305,32 @@ export class BlockQueryDataSource extends BaseDataSource {
     throw new Error('Method not implemented.');
   }
 
-  override propertyGetDefaultWidth(propertyId: string): number {
-    if (this.propertyGetType(propertyId) === 'title') {
-      return 260;
-    }
-    return super.propertyGetDefaultWidth(propertyId);
-  }
-
-  override onCellUpdate(
-    rowId: string,
-    propertyId: string,
-    callback: () => void
-  ): Disposable {
-    const viewColumn = this.getViewColumn(propertyId);
-    if (viewColumn) {
-      return this.block.propsUpdated.on(callback);
-    }
-    const block = this.blockMap.get(rowId);
-    assertExists(block, `block ${rowId} not found`);
-    return this.getProperty(propertyId).updated(block.model, callback);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getPropertyMeta(type: string): ColumnMeta<any, any, any> {
-    const meta = this.columnMetaMap.get(type);
-    if (meta) {
-      return meta;
-    }
-    return queryBlockAllColumnMap[type];
-  }
-
   rowMove(_rowId: string, _position: InsertToPosition): void {}
 
-  propertyAdd(
-    insertToPosition: InsertToPosition,
-    type: string | undefined
-  ): string {
-    const doc = this.block.doc;
-    doc.captureSync();
-    const column = databaseBlockAllColumnMap[
-      type ?? columnPresets.multiSelectColumnConfig.type
-    ].model.create(this.newColumnName());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
+    return queryBlockColumns.map(v => v.model);
+  }
 
-    const id = doc.generateBlockId();
-    if (this.block.columns.some(v => v.id === id)) {
-      return id;
-    }
-    doc.transact(() => {
-      const col: Column = {
-        ...column,
-        id,
-      };
-      this.block.columns.splice(
-        insertPositionToIndex(insertToPosition, this.block.columns),
-        0,
-        col
-      );
-    });
-    return id;
+  override get detailSlots(): DetailSlots {
+    return {
+      ...super.detailSlots,
+      header: createUniComponentFromWebComponent(BlockRenderer),
+    };
+  }
+
+  get properties(): string[] {
+    return [
+      ...this.meta.properties.map(v => v.key),
+      ...this.block.columns.map(v => v.id),
+    ];
+  }
+
+  get rows(): string[] {
+    return this.blocks.map(v => v.id);
+  }
+
+  get workspace() {
+    return this.host.doc.collection;
   }
 }

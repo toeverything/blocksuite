@@ -1,8 +1,9 @@
 import { noop } from '@blocksuite/global/utils';
 
-import { EmbedFigmaBlockComponent } from './embed-figma-block.js';
 import type { EmbedFigmaModel } from './embed-figma-model.js';
 import type { EmbedFigmaBlockService } from './embed-figma-service.js';
+
+import { EmbedFigmaBlockComponent } from './embed-figma-block.js';
 noop(EmbedFigmaBlockComponent);
 
 export * from './embed-figma-block.js';

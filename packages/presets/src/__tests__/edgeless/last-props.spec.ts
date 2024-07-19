@@ -5,6 +5,7 @@ import type {
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/blocks';
+
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { getDocRootBlock } from '../utils/edgeless.js';

@@ -8,7 +8,15 @@ Adapter works as a bridge between different formats of data and the BlockSuite [
 
 ```ts
 export abstract class BaseAdapter<AdapterTarget = unknown> {
-  protected configs: Map<string, unknown> = new Map();
+  job: Job;
+
+  constructor(job: Job) {
+    this.job = job;
+  }
+
+  get configs() {
+    return this.job.adapterConfigs;
+  }
 
   abstract fromDocSnapshot(
     payload: FromDocSnapshotPayload
@@ -28,10 +36,6 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
   abstract toSliceSnapshot(
     payload: ToSliceSnapshotPayload<AdapterTarget>
   ): Promise<SliceSnapshot | null>;
-
-  applyConfigs(configs: Map<string, unknown>) {
-    this.configs = new Map([...configs]);
-  }
 }
 ```
 
@@ -39,20 +43,22 @@ Methods `fromDocSnapshot`, `fromBlockSnapshot`, `fromSliceSnapshot` are used to 
 
 Method `toSliceSnapshot` can return `null` if the target format cannot be converted to a slice using this adapter. It enables some components like clipboard to determine whether the adapter can handle the data. If not, it will try other adapters according to the priority.
 
-These six core methods are expected to be purely functional. They should not have any side effects. If you need to do some side effects, you can use the `applyConfigs` method to apply the configurations.
+These six core methods are expected to be purely functional. They should not have any side effects. If you need to change the behaviour of the adapter according to the job context, you can add it to `job.adapterConfigs` using job middlewares.
 
 ## Use Adapter
 
 Sample usage:
 
 ```ts
-const job = new Job({ collection: doc.collection });
+const middleware: JobMiddleware = ({ adapterConfigs }) => {
+  // You can set the adapter configs here.
+  adapterConfigs.set('title:deadbeef', 'test');
+};
+
+const job = new Job({ collection: doc.collection, middlewares: [middleware] });
 const snapshot = await job.docToSnapshot(doc);
 
-const adapter = new MarkdownAdapter();
-// Sometimes jobs have some middlewares which needs to modify adapter's configs.
-// Apply the configs to the adapter.
-adapter.applyConfigs(job.adapterConfigs);
+const adapter = new MarkdownAdapter(job);
 
 const markdownResult = await adapter.fromDocSnapshot({
   snapshot,

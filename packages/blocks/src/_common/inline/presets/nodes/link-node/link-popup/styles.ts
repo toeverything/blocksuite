@@ -1,7 +1,6 @@
-import { baseTheme } from '@toeverything/theme';
-import { css, unsafeCSS } from 'lit';
+import { css } from 'lit';
 
-import { PANEL_BASE } from '../../../../../styles.js';
+import { INPUT_FONT_BASE, PANEL_BASE } from '../../../../../styles.js';
 
 const editLinkStyle = css`
   .affine-link-edit-popover {
@@ -21,19 +20,19 @@ const editLinkStyle = css`
   }
 
   .affine-link-edit-popover label {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-sm);
     box-sizing: border-box;
     color: var(--affine-icon-color);
+    ${INPUT_FONT_BASE}
+    font-weight: 400;
   }
 
   .affine-link-edit-popover input {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-base);
-    box-sizing: border-box;
     color: inherit;
+    padding: 0;
     border: none;
     background: transparent;
+    color: var(--affine-text-primary-color);
+    ${INPUT_FONT_BASE}
   }
   .affine-link-edit-popover input::placeholder {
     color: var(--affine-placeholder-color);
@@ -57,18 +56,16 @@ const editLinkStyle = css`
     user-select: none;
     box-sizing: border-box;
 
-    font-size: var(--affine-font-xs);
-    font-weight: 400;
-    line-height: 20px;
-
     border: 1px solid var(--affine-border-color);
+    box-sizing: border-box;
+
     outline: none;
     border-radius: 4px;
     background: transparent;
   }
   .affine-edit-area:focus-within {
-    border: 1px solid var(--affine-blue-700);
-    box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
+    border-color: var(--affine-blue-700);
+    box-shadow: var(--affine-active-shadow);
   }
 
   .affine-edit-area.text {
@@ -104,11 +101,6 @@ export const linkPopupStyle = css`
   }
 
   .affine-link-popover-container {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-base);
-    font-style: normal;
-    line-height: 24px;
-    color: var(--affine-text-primary-color);
     z-index: var(--affine-z-index-popover);
     animation: affine-popover-fade-in 0.2s ease;
     position: absolute;
@@ -137,7 +129,8 @@ export const linkPopupStyle = css`
   .affine-link-preview {
     display: flex;
     justify-content: flex-start;
-    width: 140px;
+    min-width: 60px;
+    max-width: 140px;
     padding: var(--1, 0px);
     border-radius: var(--1, 0px);
     opacity: var(--add, 1);
@@ -170,6 +163,8 @@ export const linkPopupStyle = css`
     ${PANEL_BASE}
     gap: 12px;
     padding: 12px;
+
+    color: var(--affine-text-primary-color);
   }
 
   .affine-link-popover-input {
@@ -182,35 +177,15 @@ export const linkPopupStyle = css`
     border-width: 1px;
     border-style: solid;
     border-color: transparent;
+    color: var(--affine-text-primary-color);
+    ${INPUT_FONT_BASE}
   }
   .affine-link-popover-input::placeholder {
     color: var(--affine-placeholder-color);
   }
   .affine-link-popover-input:focus {
     border-color: var(--affine-blue-700);
-    box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
-  }
-
-  .affine-link-popover-dividing-line {
-    margin: 0 6px;
-    width: 1px;
-    height: 20px;
-    background-color: var(--affine-border-color);
-  }
-
-  .affine-link-popover-view-selector {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 2px;
-    border-radius: 6px;
-    background: var(--affine-hover-color);
-  }
-  .affine-link-popover-view-selector > icon-button {
-    padding: 0px;
-  }
-  .affine-link-popover-view-selector .current-view {
-    background: var(--affine-background-overlay-panel-color);
+    box-shadow: var(--affine-active-shadow);
   }
 
   ${editLinkStyle}

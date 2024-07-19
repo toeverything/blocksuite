@@ -1,17 +1,17 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EmbedGithubStyles } from './embed-github-model.js';
+import type { EmbedGithubBlockService } from './embed-github-service.js';
+
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import type { EmbedGithubStyles } from './embed-github-model.js';
 import { type EmbedGithubModel, githubUrlRegex } from './embed-github-model.js';
-import type { EmbedGithubBlockService } from './embed-github-service.js';
 import { GithubIcon, styles } from './styles.js';
 import {
   getGithubStatusIcon,
@@ -24,40 +24,9 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   EmbedGithubModel,
   EmbedGithubBlockService
 > {
-  static override styles = styles;
-
-  @state()
-  private accessor _isSelected = false;
-
   override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
 
-  @property({ attribute: false })
-  accessor loading = false;
-
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.open();
-  }
-
-  private _handleAssigneeClick(assignee: string) {
-    const link = `https://www.github.com/${assignee}`;
-    window.open(link, '_blank');
-  }
+  static override styles = styles;
 
   open = () => {
     let link = this.model.url;
@@ -78,6 +47,31 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       console.error
     );
   };
+
+  private _handleAssigneeClick(assignee: string) {
+    const link = `https://www.github.com/${assignee}`;
+    window.open(link, '_blank');
+  }
+
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (!this.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.open();
+  }
+
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -122,8 +116,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     );
 
     if (this.isInSurface) {
-      const surface = this.surface;
-      assertExists(surface);
       this.disposables.add(
         this.model.propsUpdated.on(() => {
           this.requestUpdate();
@@ -288,6 +280,12 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       `
     );
   }
+
+  @state()
+  private accessor _isSelected = false;
+
+  @property({ attribute: false })
+  accessor loading = false;
 }
 
 declare global {

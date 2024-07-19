@@ -1,10 +1,11 @@
-import { groupBy } from '../../../_common/utils/iterable.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
+
+import { groupBy } from '../../../_common/utils/iterable.js';
 import { edgelessElementsBound } from './bound-utils.js';
 import { getCloneElements, prepareCloneData } from './clone-utils.js';
 import { getElementsWithoutGroup } from './group.js';

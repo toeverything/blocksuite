@@ -1,10 +1,12 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type {
   ClientRectObject,
   Middleware,
   Placement,
   VirtualElement,
 } from '@floating-ui/dom';
+import type { TemplateResult } from 'lit';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   autoUpdate,
   computePosition,
@@ -12,7 +14,6 @@ import {
   offset,
   shift,
 } from '@floating-ui/dom';
-import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -31,14 +32,14 @@ import { rangeWrap } from '../../utils/math.js';
 type MenuCommon = {
   hide?: () => boolean;
 };
-type GroupMenu = MenuCommon & {
+export type GroupMenu = MenuCommon & {
   type: 'group';
   name: string;
-  children: () => NormalMenu[];
+  children: () => Menu[];
 };
 // eslint-disable-next-line @typescript-eslint/ban-types
 type MenuClass = (string & {}) | 'delete-item';
-type NormalMenu = MenuCommon &
+export type NormalMenu = MenuCommon &
   (
     | {
         type: 'action';
@@ -140,194 +141,39 @@ const isSelectableItem = (item: Item): item is SelectItem => {
 
 @customElement('affine-menu')
 export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
-  private get minIndex() {
-    return this.isSearchMode ? 0 : -1;
-  }
+  private _checked: Record<string, boolean> = {};
 
-  private get selectedIndex(): number | undefined {
-    return this._selectedIndex;
-  }
+  private _clickContainer = (e: MouseEvent) => {
+    e.stopPropagation();
+    this.focusInput();
+  };
 
-  private set selectedIndex(index: number | undefined) {
-    const old =
-      this._selectedIndex != null
-        ? this.selectableItems[this._selectedIndex]
-        : undefined;
-    old?.onHover?.(false);
-    if (index == null) {
-      this._selectedIndex = index;
+  private _complete = () => {
+    this.options.onComplete?.();
+    this.close();
+  };
+
+  private _inputText = (e: InputEvent) => {
+    const target = e.target as HTMLInputElement;
+    this.text = target.value;
+  };
+
+  private _mouseEnter = (index?: number) => {
+    if (this._isConsciousChoice()) {
       return;
     }
-    const newIndex = rangeWrap(
-      index ?? this.minIndex,
-      this.minIndex,
-      this.selectableItems.length
-    );
-    this._selectedIndex = newIndex;
-    this.selectableItems[newIndex]?.onHover?.(true);
-  }
-
-  private get text() {
-    return this._text ?? this.options.input?.initValue ?? '';
-  }
-
-  private set text(value: string) {
-    this._text = value;
-  }
-
-  private get selectedItem(): SelectItem | undefined {
-    return this.selectedIndex != null
-      ? this.selectableItems[this.selectedIndex]
-      : undefined;
-  }
-
-  private get isSearchMode() {
-    return this.options.input?.search;
-  }
-
-  static override styles = css`
-    affine-menu {
-      font-family: var(--affine-font-family);
-      display: flex;
-      flex-direction: column;
-      user-select: none;
-      min-width: 276px;
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
-      background-color: var(--affine-background-overlay-panel-color);
-      padding: 8px;
-      position: absolute;
-      z-index: 999;
+    if (index !== this.selectedIndex) {
+      this.selectedIndex = index;
+      this.clearSubMenu();
+      this.selectedItem?.mouseEnter?.();
     }
-
-    affine-menu * {
-      box-sizing: border-box;
-    }
-
-    .affine-menu-body {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .affine-menu-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-    }
-
-    .affine-menu-header .icon {
-    }
-    .affine-menu-header input {
-      flex: 1;
-      border-radius: 4px;
-      outline: none;
-      font-size: 14px;
-      line-height: 22px;
-      padding: 5px 12px;
-      border: 1px solid var(--affine-border-color);
-    }
-
-    .affine-menu-header input::placeholder {
-      color: var(--affine-placeholder-color);
-    }
-
-    .affine-menu-header input:focus {
-      border: 1px solid var(--affine-primary-color);
-    }
-
-    .affine-menu-action {
-      padding: 4px 12px;
-      cursor: pointer;
-      display: flex;
-      gap: 4px;
-      border-radius: 4px;
-    }
-
-    .affine-menu-action svg {
-      width: 20px;
-      height: 20px;
-      color: var(--affine-icon-color);
-      fill: var(--affine-icon-color);
-    }
-
-    .affine-menu-action .icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .affine-menu-action .content {
-      border-radius: 4px;
-      cursor: pointer;
-      white-space: nowrap;
-      justify-content: space-between;
-      display: flex;
-      align-items: center;
-      font-size: 14px;
-      line-height: 22px;
-      flex: 1;
-      gap: 8px;
-    }
-
-    .affine-menu-action.selected {
-      background-color: var(--affine-hover-color);
-    }
-
-    .affine-menu-action.selected.delete-item {
-      background-color: var(--affine-background-error-color);
-      color: var(--affine-error-color);
-    }
-
-    .affine-menu-action.selected.delete-item .icon > svg {
-      color: var(--affine-error-color);
-    }
-
-    .affine-menu-action.selected-item {
-      color: var(--affine-text-emphasis-color);
-    }
-
-    .affine-menu-action.selected-item svg {
-      color: var(--affine-text-emphasis-color);
-      fill: currentColor;
-    }
-
-    .database-menu-component-action-button:hover {
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .no-results {
-      font-size: 12px;
-      line-height: 20px;
-      color: var(--affine-text-secondary-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 8px;
-    }
-
-    .affine-menu-action-text {
-      flex: 1;
-      padding: 0 4px;
-    }
-  `;
-
-  @state()
-  private accessor _text: string | undefined = undefined;
-
-  @state()
-  private accessor _selectedIndex: number | undefined = undefined;
-
-  private subMenu?: HTMLElement;
-
-  private inputRef = createRef<HTMLInputElement>();
+  };
 
   private allItems: Array<Item & { index?: number }> = [];
 
-  private selectableItems!: Array<SelectItem>;
+  private initTime = 0;
 
-  private _checked: Record<string, boolean> = {};
+  private inputRef = createRef<HTMLInputElement>();
 
   private processMap: {
     [K in Menu['type']]: (menu: GetMenuByType<K>) => Item[];
@@ -487,28 +333,216 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     },
   };
 
-  private initTime = 0;
+  private selectableItems!: Array<SelectItem>;
 
-  @property({ attribute: false })
-  accessor options!: MenuOptions;
+  private subMenu?: HTMLElement;
 
-  private setChecked(name: string, checked: boolean) {
-    this._checked[name] = checked;
-    this.requestUpdate();
+  static override styles = css`
+    affine-menu {
+      font-family: var(--affine-font-family);
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      min-width: 276px;
+      box-shadow: var(--affine-shadow-2);
+      border-radius: 8px;
+      background-color: var(--affine-background-overlay-panel-color);
+      padding: 8px;
+      position: absolute;
+      z-index: 999;
+    }
+
+    affine-menu * {
+      box-sizing: border-box;
+    }
+
+    .affine-menu-body {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .affine-menu-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+    }
+
+    /* .affine-menu-header .icon {
+    } */
+    .affine-menu-header input {
+      flex: 1;
+      border-radius: 4px;
+      outline: none;
+      font-size: 14px;
+      line-height: 22px;
+      padding: 5px 12px;
+      border: 1px solid var(--affine-border-color);
+    }
+
+    .affine-menu-header input::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+
+    .affine-menu-header input:focus {
+      border: 1px solid var(--affine-primary-color);
+    }
+
+    .affine-menu-action {
+      padding: 4px 12px;
+      cursor: pointer;
+      display: flex;
+      gap: 4px;
+      border-radius: 4px;
+    }
+
+    .affine-menu-action svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .affine-menu-action .icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--affine-icon-color);
+      fill: var(--affine-icon-color);
+    }
+
+    .affine-menu-action .content {
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      justify-content: space-between;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      line-height: 22px;
+      flex: 1;
+      gap: 8px;
+    }
+
+    .affine-menu-action.selected {
+      background-color: var(--affine-hover-color);
+    }
+
+    .affine-menu-action.selected.delete-item {
+      background-color: var(--affine-background-error-color);
+      color: var(--affine-error-color);
+    }
+
+    .affine-menu-action.selected.delete-item .icon > svg {
+      color: var(--affine-error-color);
+    }
+
+    .affine-menu-action.selected-item {
+      color: var(--affine-text-emphasis-color);
+    }
+
+    .affine-menu-action.selected-item .icon {
+      color: var(--affine-text-emphasis-color);
+      fill: currentColor;
+    }
+
+    .database-menu-component-action-button:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .no-results {
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--affine-text-secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .affine-menu-action-text {
+      flex: 1;
+      padding: 0 4px;
+    }
+  `;
+
+  mouseEnterHeader = () => {
+    if (this.isSearchMode) {
+      return;
+    }
+    this._mouseEnter(-1);
+  };
+
+  private _isConsciousChoice() {
+    return Date.now() < this.initTime + 100;
   }
 
-  private getChecked(name: string): boolean {
-    return this._checked[name];
+  private clearSubMenu() {
+    this.subMenu?.remove();
+    this.subMenu = undefined;
+    this.focusInput();
   }
 
   private close() {
     this.options.onClose?.();
   }
 
-  private _inputText = (e: InputEvent) => {
-    const target = e.target as HTMLInputElement;
-    this.text = target.value;
-  };
+  private focusInput() {
+    this.inputRef.value?.focus();
+  }
+
+  private getChecked(name: string): boolean {
+    return this._checked[name];
+  }
+
+  private get isSearchMode() {
+    return this.options.input?.search;
+  }
+
+  private get minIndex() {
+    return this.isSearchMode ? 0 : -1;
+  }
+
+  private process(menu: Menu): Item[] {
+    if (this.show(menu)) {
+      return this.processMap[menu.type](menu as never);
+    } else {
+      return [];
+    }
+  }
+
+  private get selectedIndex(): number | undefined {
+    return this._selectedIndex;
+  }
+
+  private set selectedIndex(index: number | undefined) {
+    const old =
+      this._selectedIndex != null
+        ? this.selectableItems[this._selectedIndex]
+        : undefined;
+    old?.onHover?.(false);
+    if (index == null) {
+      this._selectedIndex = index;
+      return;
+    }
+    const newIndex = rangeWrap(
+      index ?? this.minIndex,
+      this.minIndex,
+      this.selectableItems.length
+    );
+    this._selectedIndex = newIndex;
+    this.selectableItems[newIndex]?.onHover?.(true);
+  }
+
+  private get selectedItem(): SelectItem | undefined {
+    return this.selectedIndex != null
+      ? this.selectableItems[this.selectedIndex]
+      : undefined;
+  }
+
+  private setChecked(name: string, checked: boolean) {
+    this._checked[name] = checked;
+    this.requestUpdate();
+  }
 
   private show(item: Menu): boolean {
     if (this.isSearchMode) {
@@ -525,51 +559,21 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     return !item.hide?.();
   }
 
-  private process(menu: Menu): Item[] {
-    if (this.show(menu)) {
-      return this.processMap[menu.type](menu as never);
-    } else {
-      return [];
-    }
-  }
-
-  private _complete = () => {
-    this.options.onComplete?.();
-    this.close();
-  };
-
-  private focusInput() {
-    this.inputRef.value?.focus();
-  }
-
-  private _clickContainer = (e: MouseEvent) => {
-    e.stopPropagation();
-    this.focusInput();
-  };
-
-  private _mouseEnter = (index?: number) => {
-    if (this._isConsciousChoice()) {
-      return;
-    }
-    if (index !== this.selectedIndex) {
-      this.selectedIndex = index;
-      this.clearSubMenu();
-      this.selectedItem?.mouseEnter?.();
-    }
-  };
-
-  private _isConsciousChoice() {
-    return Date.now() < this.initTime + 100;
-  }
-
-  private clearSubMenu() {
-    this.subMenu?.remove();
-    this.subMenu = undefined;
-    this.focusInput();
-  }
-
   private showHeader() {
     return !this.isSearchMode || !!this.text;
+  }
+
+  private get text() {
+    return this._text ?? this.options.input?.initValue ?? '';
+  }
+
+  private set text(value: string) {
+    this._text = value;
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.selectedItem?.onHover?.(false);
   }
 
   override firstUpdated() {
@@ -619,18 +623,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       });
     }
   }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.selectedItem?.onHover?.(false);
-  }
-
-  mouseEnterHeader = () => {
-    if (this.isSearchMode) {
-      return;
-    }
-    this._mouseEnter(-1);
-  };
 
   processItems() {
     this.allItems = [];
@@ -742,6 +734,15 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @state()
+  private accessor _selectedIndex: number | undefined = undefined;
+
+  @state()
+  private accessor _text: string | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor options!: MenuOptions;
 }
 
 declare global {

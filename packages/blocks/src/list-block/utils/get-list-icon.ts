@@ -1,6 +1,7 @@
 import { html } from 'lit';
 
 import type { ListBlockModel } from '../list-model.js';
+
 import { getListInfo } from './get-list-info.js';
 import { getNumberPrefix } from './get-number-prefix.js';
 import {
@@ -37,7 +38,7 @@ export function ListIcon(
     case 'todo':
       return html`<div
         contenteditable="false"
-        class="affine-list-block__prefix affine-list-block__todo-prefix"
+        class=${`affine-list-block__prefix affine-list-block__todo-prefix ${model.doc.readonly ? 'readonly' : ''}`}
         @click=${onClick}
       >
         ${model.checked ? checkboxChecked() : checkboxUnchecked()}

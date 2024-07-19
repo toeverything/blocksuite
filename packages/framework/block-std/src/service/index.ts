@@ -1,5 +1,6 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
 import type { BlockStdScope } from '../scope/index.js';
@@ -12,13 +13,13 @@ export interface BlockServiceOptions {
 }
 
 export class BlockService<_Model extends BlockModel = BlockModel> {
-  readonly std: BlockStdScope;
+  readonly disposables = new DisposableGroup();
 
   readonly flavour: string;
 
-  readonly disposables = new DisposableGroup();
-
   readonly specSlots: BlockSpecSlots;
+
+  readonly std: BlockStdScope;
 
   constructor(options: BlockServiceOptions) {
     this.flavour = options.flavour;
@@ -26,39 +27,21 @@ export class BlockService<_Model extends BlockModel = BlockModel> {
     this.specSlots = options.slots;
   }
 
-  get collection() {
-    return this.std.collection;
-  }
-
-  get doc() {
-    return this.std.doc;
-  }
-
-  get host() {
-    return this.std.host;
-  }
-
-  get selectionManager() {
-    return this.std.selection;
-  }
-
-  get uiEventDispatcher() {
-    return this.std.event;
+  bindHotKey(
+    keymap: Record<string, UIEventHandler>,
+    options?: { global: boolean }
+  ) {
+    this.disposables.add(
+      this.uiEventDispatcher.bindHotkey(keymap, {
+        flavour: options?.global ? undefined : this.flavour,
+      })
+    );
   }
 
   // life cycle start
   dispose() {
     this.disposables.dispose();
   }
-
-  mounted() {
-    this.specSlots.mounted.emit({ service: this });
-  }
-
-  unmounted() {
-    this.specSlots.unmounted.emit({ service: this });
-  }
-  // life cycle end
 
   // event handlers start
   handleEvent(
@@ -73,15 +56,33 @@ export class BlockService<_Model extends BlockModel = BlockModel> {
     );
   }
 
-  bindHotKey(
-    keymap: Record<string, UIEventHandler>,
-    options?: { global: boolean }
-  ) {
-    this.disposables.add(
-      this.uiEventDispatcher.bindHotkey(keymap, {
-        flavour: options?.global ? undefined : this.flavour,
-      })
-    );
+  mounted() {
+    this.specSlots.mounted.emit({ service: this });
+  }
+
+  unmounted() {
+    this.specSlots.unmounted.emit({ service: this });
+  }
+
+  get collection() {
+    return this.std.collection;
+  }
+
+  get doc() {
+    return this.std.doc;
+  }
+
+  get host() {
+    return this.std.host;
+  }
+  // life cycle end
+
+  get selectionManager() {
+    return this.std.selection;
+  }
+
+  get uiEventDispatcher() {
+    return this.std.event;
   }
   // event handlers end
 }

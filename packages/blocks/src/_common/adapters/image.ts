@@ -1,5 +1,6 @@
-import { sha } from '@blocksuite/global/utils';
 import type { AssetsManager } from '@blocksuite/store';
+
+import { sha } from '@blocksuite/global/utils';
 import {
   BaseAdapter,
   type BlockSnapshot,
@@ -10,10 +11,10 @@ import {
   type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
-  nanoid,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
+  nanoid,
 } from '@blocksuite/store';
 
 export type Image = File[];
@@ -29,15 +30,15 @@ type ImageToSliceSnapshotPayload = {
 };
 
 export class ImageAdapter extends BaseAdapter<Image> {
-  override fromDocSnapshot(
-    _payload: FromDocSnapshotPayload
-  ): Promise<FromDocSnapshotResult<Image>> {
-    throw new Error('Method not implemented.');
-  }
-
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<Image>> {
+    throw new Error('Method not implemented.');
+  }
+
+  override fromDocSnapshot(
+    _payload: FromDocSnapshotPayload
+  ): Promise<FromDocSnapshotResult<Image>> {
     throw new Error('Method not implemented.');
   }
 
@@ -62,15 +63,15 @@ export class ImageAdapter extends BaseAdapter<Image> {
     return Promise.resolve({ file: images, assetsIds: [] });
   }
 
-  override toDocSnapshot(
-    _payload: ToDocSnapshotPayload<Image>
-  ): Promise<DocSnapshot> {
-    throw new Error('Method not implemented.');
-  }
-
   override toBlockSnapshot(
     _payload: ToBlockSnapshotPayload<Image>
   ): Promise<BlockSnapshot> {
+    throw new Error('Method not implemented.');
+  }
+
+  override toDocSnapshot(
+    _payload: ToDocSnapshotPayload<Image>
+  ): Promise<DocSnapshot> {
     throw new Error('Method not implemented.');
   }
 

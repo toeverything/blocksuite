@@ -1,14 +1,16 @@
-import './components/bookmark-card.js';
-
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BlockComponent } from '../_common/components/block-component.js';
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { Bound } from '../surface-block/utils/bound.js';
+import type { EdgelessRootService } from '../root-block/index.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import type { BookmarkBlockService } from './bookmark-service.js';
+
+import { BlockComponent } from '../_common/components/block-component.js';
+import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import { Bound } from '../surface-block/utils/bound.js';
+import './components/bookmark-card.js';
 import { refreshBookmarkUrlData } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -16,31 +18,9 @@ export class BookmarkBlockComponent extends BlockComponent<
   BookmarkBlockModel,
   BookmarkBlockService
 > {
-  get isInSurface() {
-    return this._isInSurface;
-  }
-
-  get edgeless() {
-    if (!this._isInSurface) {
-      return null;
-    }
-    return this.host.querySelector('affine-edgeless-root');
-  }
-
-  private _isInSurface = false;
-
   private _fetchAbortController?: AbortController;
 
-  override accessor useCaptionEditor = true;
-
-  @property({ attribute: false })
-  accessor loading = false;
-
-  @property({ attribute: false })
-  accessor error = false;
-
-  @query('bookmark-card')
-  accessor bookmarkCard!: HTMLElement;
+  private _isInSurface = false;
 
   open = () => {
     let link = this.model.url;
@@ -58,6 +38,8 @@ export class BookmarkBlockComponent extends BlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    bindContainerHotkey(this);
 
     this._fetchAbortController = new AbortController();
 
@@ -81,6 +63,16 @@ export class BookmarkBlockComponent extends BlockComponent<
         }
       })
     );
+
+    if (this._isInSurface) {
+      this.rootService &&
+        this._disposables.add(
+          this.rootService.layer.slots.layerUpdated.on(() => {
+            this.requestUpdate();
+          })
+        );
+      this.style.position = 'absolute';
+    }
   }
 
   override disconnectedCallback(): void {
@@ -101,17 +93,23 @@ export class BookmarkBlockComponent extends BlockComponent<
       const width = EMBED_CARD_WIDTH[style];
       const height = EMBED_CARD_HEIGHT[style];
       const bound = Bound.deserialize(
-        (this.edgeless?.service.getElementById(this.model.id) ?? this.model)
-          .xywh
+        (this.rootService?.getElementById(this.model.id) ?? this.model).xywh
       );
       const scaleX = bound.w / width;
       const scaleY = bound.h / height;
+
       containerStyleMap = styleMap({
-        width: `${width}px`,
-        height: `${height}px`,
+        width: `100%`,
+        height: `100%`,
         transform: `scale(${scaleX}, ${scaleY})`,
         transformOrigin: '0 0',
       });
+
+      this.style.left = `${bound.x}px`;
+      this.style.top = `${bound.y}px`;
+      this.style.width = `${width}px`;
+      this.style.height = `${height}px`;
+      this.style.zIndex = `${this.toZIndex()}`;
     }
 
     return html`
@@ -124,6 +122,37 @@ export class BookmarkBlockComponent extends BlockComponent<
       </div>
     `;
   }
+
+  toZIndex() {
+    return this.rootService?.layer.getZIndex(this.model) ?? 1;
+  }
+
+  get isInSurface() {
+    return this._isInSurface;
+  }
+
+  get rootService() {
+    const edgelessService = this.host.spec.getService(
+      'affine:page'
+    ) as EdgelessRootService;
+
+    if (!edgelessService.surface) {
+      return null;
+    }
+
+    return edgelessService;
+  }
+
+  @query('bookmark-card')
+  accessor bookmarkCard!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor error = false;
+
+  @property({ attribute: false })
+  accessor loading = false;
+
+  override accessor useCaptionEditor = true;
 }
 
 declare global {

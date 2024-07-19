@@ -1,3 +1,6 @@
+import type { ImageBlockComponent } from '../../../image-block/image-block.js';
+import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
+
 import { BookmarkIcon } from '../../../_common/icons/edgeless.js';
 import {
   CaptionIcon,
@@ -6,8 +9,6 @@ import {
   DownloadIcon,
   DuplicateIcon,
 } from '../../../_common/icons/text.js';
-import type { ImageBlockComponent } from '../../../image-block/image-block.js';
-import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
 import { duplicate } from './utils.js';
 
 export const commonConfig: ImageConfigItem[] = [

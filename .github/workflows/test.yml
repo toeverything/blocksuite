@@ -19,8 +19,62 @@ on:
       - 'packages/docs/**'
 
 jobs:
+  lint:
+    name: Run linters
+    environment: Style Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        id: pnpm-install
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run type check
+        run: pnpm build:packages && pnpm build:playground
+        env:
+          NODE_OPTIONS: --max-old-space-size=16384
+
+      - name: Run ESLint
+        # ESLint will save the cache files on cwd by default,
+        # so the lint command uses node_modules for caching.
+        # Refs: https://eslint.org/docs/latest/user-guide/command-line-interface#--cache-location
+        # By using eslint-plugin-prettier, eslint will lint the prettier rules as well.
+        run: pnpm lint
+
+      - name: Run lit-lint
+        run: pnpm lit-lint
+
+      - name: Run circular imports detect
+        run: pnpm circular
+
   test-node:
     name: Node.js Environment Compatibility
+    environment: Lightweight Test
+    needs: [lint]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,9 +106,98 @@ jobs:
       - name: Test Node.js environment compatibility
         run: pnpm test:node
 
+  unit-test:
+    name: Unit test
+    environment: Lightweight Test
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run type test
+        run: pnpm test:type
+
+      - name: Run unit test
+        run: pnpm test:unit:coverage
+
+      - name: Upload unit test coverage results
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./.coverage/block-std/lcov.info,./.coverage/blocks/lcov.info,./.coverage/global/lcov.info,./.coverage/inline/lcov.info,./.coverage/store/lcov.info
+          flags: unittest
+          name: blocksuite
+          fail_ci_if_error: false
+
+  integration-test:
+    name: Integration test
+    needs: [unit-test, test-node]
+    environment: Integration Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run integration test
+        run: pnpm test:integration
+
+  inline-e2e-test:
+    name: Inline Editor E2E test
+    needs: [unit-test, test-node]
+    environment: Integration Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        id: pnpm-install
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run inline editor playwright test
+        run: pnpm --filter=@blocksuite/inline test:e2e
+
+      - name: Upload test results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results-main
+          path: ./test-results
+          if-no-files-found: ignore
+
   root-level-e2e-test:
     name: Playground E2E test
     runs-on: ubuntu-latest
+    needs: [integration-test, inline-e2e-test]
+    environment: Playground E2E Test
     strategy:
       fail-fast: false
       matrix:
@@ -107,88 +250,6 @@ jobs:
           flags: e2etest
           name: blocksuite
           fail_ci_if_error: false
-
-      - name: Upload test results
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results-main
-          path: ./test-results
-          if-no-files-found: ignore
-
-  unit-test:
-    name: Unit test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run type test
-        run: pnpm test:type
-
-      - name: Run unit test
-        run: pnpm test:unit:coverage
-
-      - name: Upload unit test coverage results
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./.coverage/block-std/lcov.info,./.coverage/blocks/lcov.info,./.coverage/global/lcov.info,./.coverage/inline/lcov.info,./.coverage/store/lcov.info
-          flags: unittest
-          name: blocksuite
-          fail_ci_if_error: false
-
-  integration-test:
-    name: Integration test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install playwright browsers
-        run: npx playwright install chromium
-
-      - name: Run integration test
-        run: pnpm test:integration
-
-  inline-e2e-test:
-    name: Inline Editor E2E test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install playwright browsers
-        run: npx playwright install chromium
-
-      - name: Run inline editor playwright test
-        run: pnpm --filter=@blocksuite/inline test:e2e
 
       - name: Upload test results
         if: ${{ failure() }}

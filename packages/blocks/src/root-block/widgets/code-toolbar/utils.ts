@@ -1,4 +1,4 @@
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 import type {
   CodeBlockComponent,
@@ -9,6 +9,11 @@ import type {
   CodeToolbarMoreItem,
   MoreItem,
 } from './types.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
+import '../../../_common/components/tooltip/tooltip.js';
 
 export const duplicateCodeBlock = (model: CodeBlockModel) => {
   const keys = model.keys as (keyof typeof model)[];
@@ -36,17 +41,15 @@ export function CodeToolbarItemRenderer(
       switch (item.type) {
         case 'action':
           return html`
-            <icon-button
+            <editor-icon-button
               class="code-toolbar-button ${item.name}"
               data-testid=${item.name}
-              size="24px"
+              .tooltip=${item.tooltip}
+              .tooltipOffset=${4}
               @click=${() => item.action(codeBlock, onClick)}
             >
               ${item.icon}
-              <affine-tooltip tip-position="top" .offset=${5}
-                >${item.tooltip}</affine-tooltip
-              >
-            </icon-button>
+            </editor-icon-button>
           `;
         case 'custom':
           return item.render(codeBlock, onClick);
@@ -80,23 +83,25 @@ export function MoreMenuRenderer(
               ? moreItem.icon(blockElement)
               : moreItem.icon;
           const buttonClass = `menu-item ${name.toLocaleLowerCase().split(' ').join('-')}`;
-          template = html`<div class=${buttonClass}>
-            <icon-button
-              width="183px"
-              height="30px"
-              text=${name}
+          template = html`
+            <editor-menu-action
+              class=${buttonClass}
               @click=${(e: MouseEvent) => {
                 e.stopPropagation();
                 moreItem.action(blockElement, abortController);
               }}
             >
-              ${icon}
-            </icon-button>
-          </div>`;
+              ${icon} ${name}
+            </editor-menu-action>
+          `;
           break;
         }
         case 'divider': {
-          template = html`<div class="divider"></div>`;
+          template = html`
+            <editor-toolbar-separator
+              data-orientation="horizontal"
+            ></editor-toolbar-separator>
+          `;
           break;
         }
         default:

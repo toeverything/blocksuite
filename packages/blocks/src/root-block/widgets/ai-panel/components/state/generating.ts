@@ -1,15 +1,15 @@
-import '../generating-placeholder.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
+import type { AIPanelGeneratingConfig } from '../../type.js';
 
 import {
   AIStarIconWithAnimation,
   AIStopIcon,
 } from '../../../../../_common/icons/ai.js';
-import type { AIPanelGeneratingConfig } from '../../type.js';
+import '../generating-placeholder.js';
 
 @customElement('ai-panel-generating')
 export class AIPanelGenerating extends WithDisposable(LitElement) {
@@ -71,22 +71,6 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor config!: AIPanelGeneratingConfig;
-
-  @property({ attribute: false })
-  accessor loadingProgress: number = 1;
-
-  @property({ attribute: false })
-  accessor withAnswer!: boolean;
-
-  @property({ attribute: false })
-  accessor stopGenerating!: () => void;
-
-  updateLoadingProgress(progress: number) {
-    this.loadingProgress = progress;
-  }
-
   override render() {
     const {
       generatingIcon = AIStarIconWithAnimation,
@@ -112,6 +96,22 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  updateLoadingProgress(progress: number) {
+    this.loadingProgress = progress;
+  }
+
+  @property({ attribute: false })
+  accessor config!: AIPanelGeneratingConfig;
+
+  @property({ attribute: false })
+  accessor loadingProgress: number = 1;
+
+  @property({ attribute: false })
+  accessor stopGenerating!: () => void;
+
+  @property({ attribute: false })
+  accessor withAnswer!: boolean;
 }
 
 declare global {

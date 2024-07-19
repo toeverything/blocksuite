@@ -1,4 +1,5 @@
 import type { BlockElement } from '@blocksuite/block-std';
+
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -12,56 +13,15 @@ import { customElement, property } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { AffineTextAttributes } from '../../affine-inline-specs.js';
+
 import { HoverController } from '../../../../components/hover/index.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
-import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import { affineTextStyles } from '../affine-text.js';
 import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';
 
 @customElement('affine-link')
 export class AffineLink extends ShadowlessElement {
-  get link() {
-    const link = this.delta.attributes?.link;
-    if (!link) {
-      return '';
-    }
-    return link;
-  }
-
-  get inlineEditor() {
-    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
-      `[${INLINE_ROOT_ATTR}]`
-    );
-    assertExists(inlineRoot);
-    return inlineRoot.inlineEditor;
-  }
-
-  get selfInlineRange() {
-    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
-    assertExists(selfInlineRange);
-    return selfInlineRange;
-  }
-
-  get blockElement() {
-    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
-      `[${BLOCK_ID_ATTR}]`
-    );
-    assertExists(blockElement);
-    return blockElement;
-  }
-
-  get std() {
-    const std = this.blockElement.std;
-    assertExists(std);
-    return std;
-  }
-
-  static override styles = css`
-    affine-link > a:hover [data-v-text='true'] {
-      text-decoration: underline;
-    }
-  `;
-
   private _whenHover = new HoverController(
     this,
     ({ abortController }) => {
@@ -95,18 +55,12 @@ export class AffineLink extends ShadowlessElement {
     { enterDelay: 500 }
   );
 
-  @property({ type: Object })
-  accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
-  };
+  static override styles = css`
+    affine-link a:hover [data-v-text='true'] {
+      text-decoration: underline;
+    }
+  `;
 
-  // Workaround for links not working in contenteditable div
-  // see also https://stackoverflow.com/questions/12059211/how-to-make-clickable-anchor-in-contenteditable-div
-  //
-  // Note: We cannot use JS to directly open a new page as this may be blocked by the browser.
-  //
-  // Please also note that when readonly mode active,
-  // this workaround is not necessary and links work normally.
   // see https://github.com/toeverything/AFFiNE/issues/1540
   private _onMouseUp() {
     const anchorElement = this.querySelector('a');
@@ -119,26 +73,88 @@ export class AffineLink extends ShadowlessElement {
   }
 
   override render() {
-    const style = this.delta.attributes
-      ? affineTextStyles(this.delta.attributes, {
-          color: 'var(--affine-link-color)',
-          fill: 'var(--affine-link-color)',
-          'text-decoration': 'none',
-          cursor: 'pointer',
-        })
+    const linkStyles = {
+      color: 'var(--affine-link-color)',
+      fill: 'var(--affine-link-color)',
+      'text-decoration': 'none',
+      cursor: 'pointer',
+    };
+    if (this.delta.attributes && this.delta.attributes?.code) {
+      const codeStyle = affineTextStyles(this.delta.attributes);
+      return html`<code style=${codeStyle}
+        ><a
+      ${ref(this._whenHover.setReference)}
+      href=${this.link}
+      style=${styleMap(linkStyles)}
+      rel="noopener noreferrer"
+      target="_blank"
+      @mouseup=${this._onMouseUp}
+      ><v-text .str=${this.delta.insert}></v-text
+    ></a></v-text></code>`;
+    }
+
+    const styles = this.delta.attributes
+      ? affineTextStyles(this.delta.attributes, linkStyles)
       : styleMap({});
 
     return html`<a
       ${ref(this._whenHover.setReference)}
       href=${this.link}
-      affine-link
       rel="noopener noreferrer"
       target="_blank"
-      style=${style}
+      style=${styles}
       @mouseup=${this._onMouseUp}
       ><v-text .str=${this.delta.insert}></v-text
     ></a>`;
   }
+
+  get blockElement() {
+    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    assertExists(blockElement);
+    return blockElement;
+  }
+
+  get inlineEditor() {
+    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    assertExists(inlineRoot);
+    return inlineRoot.inlineEditor;
+  }
+
+  get link() {
+    const link = this.delta.attributes?.link;
+    if (!link) {
+      return '';
+    }
+    return link;
+  }
+
+  get selfInlineRange() {
+    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
+    assertExists(selfInlineRange);
+    return selfInlineRange;
+  }
+
+  // Workaround for links not working in contenteditable div
+  // see also https://stackoverflow.com/questions/12059211/how-to-make-clickable-anchor-in-contenteditable-div
+  //
+  // Note: We cannot use JS to directly open a new page as this may be blocked by the browser.
+  //
+  // Please also note that when readonly mode active,
+  // this workaround is not necessary and links work normally.
+  get std() {
+    const std = this.blockElement.std;
+    assertExists(std);
+    return std;
+  }
+
+  @property({ type: Object })
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
 }
 
 declare global {

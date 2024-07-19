@@ -1,11 +1,14 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../../frame-block/index.js';
+import type { GroupElementModel } from '../../../surface-block/element-model/group.js';
+import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
+
 import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { FontFamily } from '../../../surface-block/consts.js';
-import type { GroupElementModel } from '../../../surface-block/element-model/group.js';
 import { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
 import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {
@@ -13,7 +16,7 @@ import {
   CanvasElementType,
   type ConnectorElementModel,
   type IModelCoord,
-  type IVec2,
+  type IVec,
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,
@@ -24,7 +27,6 @@ import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-titl
 import { EdgelessGroupTitleEditor } from '../components/text/edgeless-group-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
-import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import {
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
@@ -46,9 +48,8 @@ export function mountTextElementEditor(
   const textEditor = new EdgelessTextEditor();
   textEditor.edgeless = edgeless;
   textEditor.element = textElement;
-  const rootElementContainer = edgeless.rootElementContainer;
 
-  rootElementContainer.append(textEditor);
+  edgeless.append(textEditor);
   textEditor.updateComplete
     .then(() => {
       textEditor.inlineEditor?.focusIndex(cursorIndex);
@@ -89,9 +90,8 @@ export function mountShapeTextEditor(
   shapeEditor.element = updatedElement;
   shapeEditor.edgeless = edgeless;
   shapeEditor.mountEditor = mountShapeTextEditor;
-  const rootElementContainer = edgeless.rootElementContainer;
 
-  rootElementContainer.append(shapeEditor);
+  edgeless.append(shapeEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [shapeElement.id],
     editing: true,
@@ -106,7 +106,7 @@ export function mountFrameTitleEditor(
   frameEditor.frameModel = frame;
   frameEditor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.append(frameEditor);
+  edgeless.append(frameEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [frame.id],
     editing: true,
@@ -121,7 +121,7 @@ export function mountGroupTitleEditor(
   groupEditor.group = group;
   groupEditor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.append(groupEditor);
+  edgeless.append(groupEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [group.id],
     editing: true,
@@ -161,7 +161,7 @@ export function addText(
 export function mountConnectorLabelEditor(
   connector: ConnectorElementModel,
   edgeless: EdgelessRootBlockComponent,
-  point?: IVec2
+  point?: IVec
 ) {
   let text = connector.text;
   if (!text) {
@@ -172,7 +172,7 @@ export function mountConnectorLabelEditor(
 
     if (point) {
       const center = connector.getNearestPoint(point);
-      const distance = connector.getOffsetDistanceByPoint(center as IVec2);
+      const distance = connector.getOffsetDistanceByPoint(center as IVec);
       const bounds = Bound.fromXYWH(connector.labelXYWH || [0, 0, 16, 16]);
       bounds.center = center;
       connector.labelOffset.distance = distance;
@@ -184,7 +184,7 @@ export function mountConnectorLabelEditor(
   editor.connector = connector;
   editor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.append(editor);
+  edgeless.append(editor);
   editor.updateComplete
     .then(() => {
       editor.inlineEditor?.focusEnd();

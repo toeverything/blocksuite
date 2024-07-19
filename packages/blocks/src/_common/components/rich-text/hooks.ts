@@ -5,6 +5,7 @@ import type {
 } from '@blocksuite/inline';
 
 import type { AffineTextAttributes } from '../../inline/presets/affine-inline-specs.js';
+
 import { isStrictUrl } from '../../utils/url.js';
 
 const EDGE_IGNORED_ATTRIBUTES = ['code', 'link'] as const;
@@ -24,9 +25,11 @@ const autoIdentifyLink = (ctx: HookContext<AffineTextAttributes>) => {
     return;
   }
 
-  const { line, lineIndex, rangeIndexRelatedToLine } = ctx.inlineEditor.getLine(
-    ctx.inlineRange.index
-  );
+  const lineInfo = ctx.inlineEditor.getLine(ctx.inlineRange.index);
+  if (!lineInfo) {
+    return;
+  }
+  const { line, lineIndex, rangeIndexRelatedToLine } = lineInfo;
 
   if (lineIndex !== 0) {
     return;

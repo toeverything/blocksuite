@@ -1,10 +1,11 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
+import { LitElement, type PropertyValues, css, html, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
+
 import { OutlineNotice } from './body/outline-notice.js';
 import { OutlinePanelBody } from './body/outline-panel-body.js';
 import { OutlineNoteCard } from './card/outline-card.js';
@@ -57,45 +58,33 @@ const styles = css`
   }
 `;
 export class OutlinePanel extends WithDisposable(LitElement) {
-  get doc() {
-    return this.editor.doc;
-  }
+  private _editorDisposables: DisposableGroup | null = null;
 
-  get host() {
-    return this.editor.host;
-  }
-
-  get edgeless() {
-    return this.editor.querySelector('affine-edgeless-root');
-  }
-
-  get mode() {
-    return this.editor.mode;
-  }
-
-  static override styles = styles;
-
-  @state()
-  private accessor _showPreviewIcon = false;
-
-  @state()
-  private accessor _enableNotesSorting = false;
-
-  @state()
-  private accessor _noticeVisible = false;
+  private _setNoticeVisibility = (visibility: boolean) => {
+    this._noticeVisible = visibility;
+  };
 
   private _settings: OutlineSettingsDataType = {
     showIcons: false,
     enableSorting: false,
   };
 
-  private _editorDisposables: DisposableGroup | null = null;
+  private _toggleNotesSorting = () => {
+    this._enableNotesSorting = !this._enableNotesSorting;
+    this._updateAndSaveSettings({ enableSorting: this._enableNotesSorting });
+  };
 
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
+  private _toggleShowPreviewIcon = (on: boolean) => {
+    this._showPreviewIcon = on;
+    this._updateAndSaveSettings({ showIcons: on });
+  };
 
-  @property({ attribute: false })
-  accessor fitPadding!: number[];
+  static override styles = styles;
+
+  private _clearEditorDisposables() {
+    this._editorDisposables?.dispose();
+    this._editorDisposables = null;
+  }
 
   private _loadSettingsFromLocalStorage() {
     const settings = localStorage.getItem(outlineSettingsKey);
@@ -108,32 +97,6 @@ export class OutlinePanel extends WithDisposable(LitElement) {
 
   private _saveSettingsToLocalStorage() {
     localStorage.setItem(outlineSettingsKey, JSON.stringify(this._settings));
-  }
-
-  private _updateAndSaveSettings(
-    newSettings: Partial<OutlineSettingsDataType>
-  ) {
-    this._settings = { ...this._settings, ...newSettings };
-    this._saveSettingsToLocalStorage();
-  }
-
-  private _toggleShowPreviewIcon = (on: boolean) => {
-    this._showPreviewIcon = on;
-    this._updateAndSaveSettings({ showIcons: on });
-  };
-
-  private _toggleNotesSorting = () => {
-    this._enableNotesSorting = !this._enableNotesSorting;
-    this._updateAndSaveSettings({ enableSorting: this._enableNotesSorting });
-  };
-
-  private _setNoticeVisibility = (visibility: boolean) => {
-    this._noticeVisible = visibility;
-  };
-
-  private _clearEditorDisposables() {
-    this._editorDisposables?.dispose();
-    this._editorDisposables = null;
   }
 
   private _setEditorDisposables() {
@@ -159,10 +122,11 @@ export class OutlinePanel extends WithDisposable(LitElement) {
     );
   }
 
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('editor')) {
-      this._setEditorDisposables();
-    }
+  private _updateAndSaveSettings(
+    newSettings: Partial<OutlineSettingsDataType>
+  ) {
+    this._settings = { ...this._settings, ...newSettings };
+    this._saveSettingsToLocalStorage();
   }
 
   override connectedCallback() {
@@ -206,6 +170,43 @@ export class OutlinePanel extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('editor')) {
+      this._setEditorDisposables();
+    }
+  }
+
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get edgeless() {
+    return this.editor.querySelector('affine-edgeless-root');
+  }
+
+  get host() {
+    return this.editor.host;
+  }
+
+  get mode() {
+    return this.editor.mode;
+  }
+
+  @state()
+  private accessor _enableNotesSorting = false;
+
+  @state()
+  private accessor _noticeVisible = false;
+
+  @state()
+  private accessor _showPreviewIcon = false;
+
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
+
+  @property({ attribute: false })
+  accessor fitPadding!: number[];
 }
 
 declare global {

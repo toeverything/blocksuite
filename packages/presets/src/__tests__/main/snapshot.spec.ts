@@ -1,4 +1,5 @@
 import type { SurfaceBlockModel } from '@blocksuite/blocks';
+
 import { beforeEach, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -35,6 +36,10 @@ test('snapshot 1 importing', async () => {
     window.editor.doc.collection,
     snapshotFile
   );
+
+  if (!newDoc) {
+    throw new Error('Failed to import snapshot');
+  }
 
   editor.doc = newDoc;
   await wait();
@@ -87,6 +92,10 @@ test('snapshot 2 importing', async () => {
     window.editor.doc.collection,
     snapshotFile
   );
+
+  if (!newDoc) {
+    throw new Error('Failed to import snapshot');
+  }
 
   editor.doc = newDoc;
   await wait();

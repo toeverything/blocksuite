@@ -18,6 +18,7 @@ export const styles = css`
     padding: 12px 8px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);

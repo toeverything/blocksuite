@@ -1,5 +1,6 @@
-import { assertExists, assertType, Slot } from '@blocksuite/global/utils';
 import type { BlockModel, Y } from '@blocksuite/store';
+
+import { Slot, assertExists, assertType } from '@blocksuite/global/utils';
 import {
   type BlockSnapshot,
   type DocSnapshot,
@@ -9,9 +10,10 @@ import {
 } from '@blocksuite/store';
 
 import type { ConnectorElementModel } from '../../../surface-block/index.js';
-import { Bound, getCommonBound } from '../../../surface-block/index.js';
 import type { SurfaceBlockModel } from '../../../surface-block/surface-model.js';
 import type { SurfaceBlockTransformer } from '../../../surface-block/surface-transformer.js';
+
+import { Bound, getCommonBound } from '../../../surface-block/index.js';
 
 /**
  * Those block contains other block's id
@@ -58,15 +60,13 @@ export type TemplateJobConfig = {
 };
 
 export class TemplateJob {
-  static middlewares: ((job: TemplateJob) => void)[] = [];
-
   private _template: DocSnapshot | null = null;
+
+  static middlewares: ((job: TemplateJob) => void)[] = [];
 
   job: Job;
 
   model: SurfaceBlockModel;
-
-  type: TemplateType;
 
   slots = {
     beforeInsert: new Slot<
@@ -79,6 +79,8 @@ export class TemplateJob {
     >(),
   };
 
+  type: TemplateType;
+
   constructor({ model, type, middlewares }: TemplateJobConfig) {
     this.job = new Job({ collection: model.doc.collection, middlewares: [] });
     this.model = model;
@@ -90,43 +92,12 @@ export class TemplateJob {
     TemplateJob.middlewares.forEach(middleware => middleware(this));
   }
 
-  private _mergeSurfaceElements(
-    from: Record<string, Record<string, unknown>>,
-    to: Y.Map<Y.Map<unknown>>
-  ) {
-    const schema =
-      this.model.doc.collection.schema.flavourSchemaMap.get('affine:surface');
-    const surfaceTransformer =
-      schema?.transformer?.() as SurfaceBlockTransformer;
-
-    this.model.doc.transact(() => {
-      const defered: [string, Record<string, unknown>][] = [];
-
-      Object.entries(from).forEach(([id, val]) => {
-        if (['connector', 'group'].includes(val.type as string)) {
-          defered.push([id, val]);
-        } else {
-          to.set(id, surfaceTransformer.elementFromJSON(val));
-        }
-      });
-
-      defered.forEach(([key, val]) => {
-        to.set(key, surfaceTransformer.elementFromJSON(val));
-      });
-    });
-  }
-
-  private _mergeProps(from: BlockSnapshot, to: BlockModel) {
-    switch (from.flavour as MergeBlockFlavour) {
-      case 'affine:page':
-        break;
-      case 'affine:surface':
-        this._mergeSurfaceElements(
-          from.props.elements as Record<string, Record<string, unknown>>,
-          (to as SurfaceBlockModel).elements.getValue()!
-        );
-        break;
-    }
+  static create(options: {
+    model: SurfaceBlockModel;
+    type: string;
+    middlewares: ((job: TemplateJob) => void)[];
+  }) {
+    return new TemplateJob(options);
   }
 
   private _getMergeBlockId(modelData: BlockSnapshot) {
@@ -177,83 +148,6 @@ export class TemplateJob {
     });
 
     return getCommonBound(bounds);
-  }
-
-  private async _jsonToModelData(json: BlockSnapshot) {
-    const job = this.job;
-    const defered: {
-      snapshot: BlockSnapshot;
-      parent?: string;
-      index?: number;
-    }[] = [];
-    const modelDataList: {
-      flavour: string;
-      json: BlockSnapshot;
-      modelData: SnapshotReturn<object> | null;
-      parent?: string;
-      index?: number;
-    }[] = [];
-    const toModel = async (
-      snapshot: BlockSnapshot,
-      parent?: string,
-      index?: number,
-      defer: boolean = true
-    ) => {
-      if (
-        defer &&
-        DEFERED_BLOCK.includes(
-          snapshot.flavour as (typeof DEFERED_BLOCK)[number]
-        )
-      ) {
-        defered.push({
-          snapshot,
-          parent,
-          index,
-        });
-        return;
-      }
-
-      const slotData = {
-        blockJson: snapshot,
-        parent,
-        index,
-      };
-
-      this.slots.beforeInsert.emit({ type: 'block', data: slotData });
-
-      /**
-       * merge block should not be converted to model data
-       */
-      const modelData = MERGE_BLOCK.includes(
-        snapshot.flavour as MergeBlockFlavour
-      )
-        ? null
-        : await job.snapshotToModelData(snapshot);
-
-      modelDataList.push({
-        flavour: snapshot.flavour,
-        json: snapshot,
-        modelData,
-        parent,
-        index,
-      });
-
-      if (snapshot.children) {
-        let index = 0;
-        for (const child of snapshot.children) {
-          await toModel(child, snapshot.id, index);
-          ++index;
-        }
-      }
-    };
-
-    await toModel(json);
-
-    for (const json of defered) {
-      await toModel(json.snapshot, json.parent, json.index, false);
-    }
-
-    return modelDataList;
   }
 
   private _insertToDoc(
@@ -315,20 +209,120 @@ export class TemplateJob {
     deferInserting.forEach(data => insert(data, false));
   }
 
-  walk(callback: (block: BlockSnapshot, template: DocSnapshot) => void) {
-    if (!this._template) {
-      throw new Error('Template not loaded, please call insertTemplate first');
-    }
+  private async _jsonToModelData(json: BlockSnapshot) {
+    const job = this.job;
+    const defered: {
+      snapshot: BlockSnapshot;
+      parent?: string;
+      index?: number;
+    }[] = [];
+    const modelDataList: {
+      flavour: string;
+      json: BlockSnapshot;
+      modelData: SnapshotReturn<object> | null;
+      parent?: string;
+      index?: number;
+    }[] = [];
+    const toModel = async (
+      snapshot: BlockSnapshot,
+      parent?: string,
+      index?: number,
+      defer: boolean = true
+    ) => {
+      if (
+        defer &&
+        DEFERED_BLOCK.includes(
+          snapshot.flavour as (typeof DEFERED_BLOCK)[number]
+        )
+      ) {
+        defered.push({
+          snapshot,
+          parent,
+          index,
+        });
+        return;
+      }
 
-    const iterate = (block: BlockSnapshot, template: DocSnapshot) => {
-      callback(block, template);
+      const slotData = {
+        blockJson: snapshot,
+        parent,
+        index,
+      };
 
-      if (block.children) {
-        block.children.forEach(child => iterate(child, template));
+      this.slots.beforeInsert.emit({ type: 'block', data: slotData });
+
+      /**
+       * merge block should not be converted to model data
+       */
+      const modelData = MERGE_BLOCK.includes(
+        snapshot.flavour as MergeBlockFlavour
+      )
+        ? null
+        : (await job.snapshotToModelData(snapshot)) ?? null;
+
+      modelDataList.push({
+        flavour: snapshot.flavour,
+        json: snapshot,
+        modelData,
+        parent,
+        index,
+      });
+
+      if (snapshot.children) {
+        let index = 0;
+        for (const child of snapshot.children) {
+          await toModel(child, snapshot.id, index);
+          ++index;
+        }
       }
     };
 
-    iterate(this._template.blocks, this._template);
+    await toModel(json);
+
+    for (const json of defered) {
+      await toModel(json.snapshot, json.parent, json.index, false);
+    }
+
+    return modelDataList;
+  }
+
+  private _mergeProps(from: BlockSnapshot, to: BlockModel) {
+    switch (from.flavour as MergeBlockFlavour) {
+      case 'affine:page':
+        break;
+      case 'affine:surface':
+        this._mergeSurfaceElements(
+          from.props.elements as Record<string, Record<string, unknown>>,
+          (to as SurfaceBlockModel).elements.getValue()!
+        );
+        break;
+    }
+  }
+
+  private _mergeSurfaceElements(
+    from: Record<string, Record<string, unknown>>,
+    to: Y.Map<Y.Map<unknown>>
+  ) {
+    const schema =
+      this.model.doc.collection.schema.flavourSchemaMap.get('affine:surface');
+    const surfaceTransformer =
+      schema?.transformer?.() as SurfaceBlockTransformer;
+
+    this.model.doc.transact(() => {
+      const defered: [string, Record<string, unknown>][] = [];
+
+      Object.entries(from).forEach(([id, val]) => {
+        if (['connector', 'group'].includes(val.type as string)) {
+          defered.push([id, val]);
+        } else {
+          to.set(id, surfaceTransformer.elementFromJSON(val));
+        }
+      });
+
+      defered.forEach(([key, val]) => {
+        to.set(key, surfaceTransformer.elementFromJSON(val));
+      });
+    });
   }
 
   async insertTemplate(template: unknown) {
@@ -353,11 +347,19 @@ export class TemplateJob {
     return templateBound;
   }
 
-  static create(options: {
-    model: SurfaceBlockModel;
-    type: string;
-    middlewares: ((job: TemplateJob) => void)[];
-  }) {
-    return new TemplateJob(options);
+  walk(callback: (block: BlockSnapshot, template: DocSnapshot) => void) {
+    if (!this._template) {
+      throw new Error('Template not loaded, please call insertTemplate first');
+    }
+
+    const iterate = (block: BlockSnapshot, template: DocSnapshot) => {
+      callback(block, template);
+
+      if (block.children) {
+        block.children.forEach(child => iterate(child, template));
+      }
+    };
+
+    iterate(this._template.blocks, this._template);
   }
 }

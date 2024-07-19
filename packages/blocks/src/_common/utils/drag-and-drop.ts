@@ -1,7 +1,9 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { EditingState } from '../types.js';
+
 import { matchFlavours } from './model.js';
 import {
   type BlockComponent,

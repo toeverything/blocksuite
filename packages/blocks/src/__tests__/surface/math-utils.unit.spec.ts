@@ -1,6 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { describe, expect, it } from 'vitest';
 
+import type { IVec } from '../../surface-block/index.js';
+
 import {
   almostEqual,
   isPointOnLineSegment,
@@ -39,7 +41,7 @@ describe('Line', () => {
 
   it('lineEllipseIntersects', () => {
     const rst = lineEllipseIntersects([0, -5], [0, 5], [0, 0], 1, 1);
-    const expected = [
+    const expected: IVec[] = [
       [0, 1],
       [0, -1],
     ];
@@ -96,11 +98,11 @@ describe('Line', () => {
   });
 
   it('isPointOnLineSegment', () => {
-    const line = [
+    const line: IVec[] = [
       [0, 0],
       [1, 0],
     ];
-    const point = [0.5, 0];
+    const point: IVec = [0.5, 0];
     expect(isPointOnLineSegment(point, line)).toBe(true);
     expect(isPointOnLineSegment([0.01, 0], line)).toBe(true);
     expect(isPointOnLineSegment([-0.01, 0], line)).toBe(false);
@@ -109,7 +111,7 @@ describe('Line', () => {
   });
 
   it('rotatePoints', () => {
-    const points = [
+    const points: IVec[] = [
       [0, 0],
       [1, 0],
       [1, 1],
@@ -132,7 +134,7 @@ describe('Line', () => {
   });
 
   it('polygonGetPointTangent', () => {
-    const points = [
+    const points: IVec[] = [
       [0, 0],
       [1, 0],
       [1, 1],

@@ -1,5 +1,7 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
 import { NOTE_WIDTH } from '../_common/consts.js';
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import {
@@ -9,7 +11,6 @@ import {
 import { NoteDisplayMode } from '../_common/types.js';
 import { StrokeStyle } from '../surface-block/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
@@ -85,11 +86,9 @@ export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
     return this.displayMode !== NoteDisplayMode.DocOnly;
   }
 
-  override hitTest(x: number, y: number): boolean {
+  override boxSelect(bound: Bound): boolean {
     if (!this._isSelectable()) return false;
-
-    const bound = Bound.deserialize(this.xywh);
-    return bound.isPointInBound([x, y], 0);
+    return super.boxSelect(bound);
   }
 
   override containedByBounds(bounds: Bound): boolean {
@@ -97,9 +96,11 @@ export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
     return super.containedByBounds(bounds);
   }
 
-  override boxSelect(bound: Bound): boolean {
+  override hitTest(x: number, y: number): boolean {
     if (!this._isSelectable()) return false;
-    return super.boxSelect(bound);
+
+    const bound = Bound.deserialize(this.xywh);
+    return bound.isPointInBound([x, y], 0);
   }
 }
 

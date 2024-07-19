@@ -1,4 +1,5 @@
 import type { IPoint } from './index.js';
+
 import { clamp } from './math.js';
 
 export class Point {
@@ -11,47 +12,11 @@ export class Point {
     this.y = y;
   }
 
-  set(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-
-  equals({ x, y }: Point) {
-    return this.x === x && this.y === y;
-  }
-
-  add(point: IPoint): Point {
-    return new Point(this.x + point.x, this.y + point.y);
-  }
-
-  scale(factor: number): Point {
-    return new Point(this.x * factor, this.y * factor);
-  }
-
-  subtract(point: IPoint): Point {
-    return new Point(this.x - point.x, this.y - point.y);
-  }
-
   /**
-   * Returns a copy of the point.
+   * Restrict a value to a certain interval.
    */
-  clone() {
-    return new Point(this.x, this.y);
-  }
-
-  cross(point: IPoint): number {
-    return this.x * point.y - this.y * point.x;
-  }
-
-  lerp(point: IPoint, t: number): Point {
-    return new Point(
-      this.x + (point.x - this.x) * t,
-      this.y + (point.y - this.y) * t
-    );
-  }
-
-  toArray() {
-    return [this.x, this.y];
+  static clamp(p: Point, min: Point, max: Point) {
+    return new Point(clamp(p.x, min.x, max.x), clamp(p.y, min.y, max.y));
   }
 
   static from(point: IPoint | number[] | number, y?: number) {
@@ -65,13 +30,6 @@ export class Point {
   }
 
   /**
-   * Compares and returns the minimum of two points.
-   */
-  static min(a: Point, b: Point) {
-    return new Point(Math.min(a.x, b.x), Math.min(a.y, b.y));
-  }
-
-  /**
    * Compares and returns the maximum of two points.
    */
   static max(a: Point, b: Point) {
@@ -79,19 +37,62 @@ export class Point {
   }
 
   /**
-   * Restrict a value to a certain interval.
+   * Compares and returns the minimum of two points.
    */
-  static clamp(p: Point, min: Point, max: Point) {
-    return new Point(clamp(p.x, min.x, max.x), clamp(p.y, min.y, max.y));
+  static min(a: Point, b: Point) {
+    return new Point(Math.min(a.x, b.x), Math.min(a.y, b.y));
+  }
+
+  add(point: IPoint): Point {
+    return new Point(this.x + point.x, this.y + point.y);
+  }
+
+  /**
+   * Returns a copy of the point.
+   */
+  clone() {
+    return new Point(this.x, this.y);
+  }
+
+  cross(point: IPoint): number {
+    return this.x * point.y - this.y * point.x;
+  }
+
+  equals({ x, y }: Point) {
+    return this.x === x && this.y === y;
+  }
+
+  lerp(point: IPoint, t: number): Point {
+    return new Point(
+      this.x + (point.x - this.x) * t,
+      this.y + (point.y - this.y) * t
+    );
+  }
+
+  scale(factor: number): Point {
+    return new Point(this.x * factor, this.y * factor);
+  }
+
+  set(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  subtract(point: IPoint): Point {
+    return new Point(this.x - point.x, this.y - point.y);
+  }
+
+  toArray() {
+    return [this.x, this.y];
   }
 }
 
 export class Rect {
-  // `[left, top]`
-  min: Point;
-
   // `[right, bottom]`
   max: Point;
+
+  // `[left, top]`
+  min: Point;
 
   constructor(left: number, top: number, right: number, bottom: number) {
     const [minX, maxX] = left <= right ? [left, right] : [right, left];
@@ -100,12 +101,126 @@ export class Rect {
     this.max = new Point(maxX, maxY);
   }
 
-  get width() {
-    return this.max.x - this.min.x;
+  static fromDOM(dom: Element) {
+    return Rect.fromDOMRect(dom.getBoundingClientRect());
   }
 
-  set width(w: number) {
-    this.max.x = this.min.x + w;
+  static fromDOMRect({ left, top, right, bottom }: DOMRect) {
+    return Rect.fromLTRB(left, top, right, bottom);
+  }
+
+  static fromLTRB(left: number, top: number, right: number, bottom: number) {
+    return new Rect(left, top, right, bottom);
+  }
+
+  static fromLWTH(left: number, width: number, top: number, height: number) {
+    return new Rect(left, top, left + width, top + height);
+  }
+
+  static fromPoint(point: Point) {
+    return Rect.fromPoints(point.clone(), point);
+  }
+
+  static fromPoints(start: Point, end: Point) {
+    const width = Math.abs(end.x - start.x);
+    const height = Math.abs(end.y - start.y);
+    const left = Math.min(end.x, start.x);
+    const top = Math.min(end.y, start.y);
+    return Rect.fromLWTH(left, width, top, height);
+  }
+
+  static fromXY(x: number, y: number) {
+    return Rect.fromPoint(new Point(x, y));
+  }
+
+  center() {
+    return new Point(
+      (this.left + this.right) / 2,
+      (this.top + this.bottom) / 2
+    );
+  }
+
+  clamp(p: Point) {
+    return Point.clamp(p, this.min, this.max);
+  }
+
+  clone() {
+    const { left, top, right, bottom } = this;
+    return new Rect(left, top, right, bottom);
+  }
+
+  contains({ min, max }: Rect) {
+    return this.isPointIn(min) && this.isPointIn(max);
+  }
+
+  equals({ min, max }: Rect) {
+    return this.min.equals(min) && this.max.equals(max);
+  }
+
+  extend_with(point: Point) {
+    this.min = Point.min(this.min, point);
+    this.max = Point.max(this.max, point);
+  }
+
+  extend_with_x(x: number) {
+    this.min.x = Math.min(this.min.x, x);
+    this.max.x = Math.max(this.max.x, x);
+  }
+
+  extend_with_y(y: number) {
+    this.min.y = Math.min(this.min.y, y);
+    this.max.y = Math.max(this.max.y, y);
+  }
+
+  intersect(other: Rect) {
+    return Rect.fromPoints(
+      Point.max(this.min, other.min),
+      Point.min(this.max, other.max)
+    );
+  }
+
+  intersects({ left, top, right, bottom }: Rect) {
+    return (
+      this.left <= right &&
+      left <= this.right &&
+      this.top <= bottom &&
+      top <= this.bottom
+    );
+  }
+
+  isPointDown({ x, y }: Point) {
+    return this.bottom < y && this.left <= x && this.right >= x;
+  }
+
+  isPointIn({ x, y }: Point) {
+    return (
+      this.left <= x && x <= this.right && this.top <= y && y <= this.bottom
+    );
+  }
+
+  isPointLeft({ x, y }: Point) {
+    return x < this.left && this.top <= y && this.bottom >= y;
+  }
+
+  isPointRight({ x, y }: Point) {
+    return x > this.right && this.top <= y && this.bottom >= y;
+  }
+
+  isPointUp({ x, y }: Point) {
+    return y < this.top && this.left <= x && this.right >= x;
+  }
+
+  toDOMRect() {
+    const { left, top, width, height } = this;
+    return new DOMRect(left, top, width, height);
+  }
+
+  get bottom() {
+    return this.max.y;
+  }
+
+  set bottom(y: number) {
+    this.max.y = y;
   }
 
   get height() {
@@ -124,14 +239,6 @@ export class Rect {
     this.min.x = x;
   }
 
-  get top() {
-    return this.min.y;
-  }
-
-  set top(y: number) {
-    this.min.y = y;
-  }
-
   get right() {
     return this.max.x;
   }
@@ -140,125 +247,19 @@ export class Rect {
     this.max.x = x;
   }
 
-  get bottom() {
-    return this.max.y;
+  get top() {
+    return this.min.y;
   }
 
-  set bottom(y: number) {
-    this.max.y = y;
+  set top(y: number) {
+    this.min.y = y;
   }
 
-  center() {
-    return new Point(
-      (this.left + this.right) / 2,
-      (this.top + this.bottom) / 2
-    );
+  get width() {
+    return this.max.x - this.min.x;
   }
 
-  extend_with(point: Point) {
-    this.min = Point.min(this.min, point);
-    this.max = Point.max(this.max, point);
-  }
-
-  extend_with_x(x: number) {
-    this.min.x = Math.min(this.min.x, x);
-    this.max.x = Math.max(this.max.x, x);
-  }
-
-  extend_with_y(y: number) {
-    this.min.y = Math.min(this.min.y, y);
-    this.max.y = Math.max(this.max.y, y);
-  }
-
-  equals({ min, max }: Rect) {
-    return this.min.equals(min) && this.max.equals(max);
-  }
-
-  contains({ min, max }: Rect) {
-    return this.isPointIn(min) && this.isPointIn(max);
-  }
-
-  intersects({ left, top, right, bottom }: Rect) {
-    return (
-      this.left <= right &&
-      left <= this.right &&
-      this.top <= bottom &&
-      top <= this.bottom
-    );
-  }
-
-  isPointIn({ x, y }: Point) {
-    return (
-      this.left <= x && x <= this.right && this.top <= y && y <= this.bottom
-    );
-  }
-
-  isPointDown({ x, y }: Point) {
-    return this.bottom < y && this.left <= x && this.right >= x;
-  }
-
-  isPointUp({ x, y }: Point) {
-    return y < this.top && this.left <= x && this.right >= x;
-  }
-
-  isPointLeft({ x, y }: Point) {
-    return x < this.left && this.top <= y && this.bottom >= y;
-  }
-
-  isPointRight({ x, y }: Point) {
-    return x > this.right && this.top <= y && this.bottom >= y;
-  }
-
-  intersect(other: Rect) {
-    return Rect.fromPoints(
-      Point.max(this.min, other.min),
-      Point.min(this.max, other.max)
-    );
-  }
-
-  clamp(p: Point) {
-    return Point.clamp(p, this.min, this.max);
-  }
-
-  clone() {
-    const { left, top, right, bottom } = this;
-    return new Rect(left, top, right, bottom);
-  }
-
-  toDOMRect() {
-    const { left, top, width, height } = this;
-    return new DOMRect(left, top, width, height);
-  }
-
-  static fromLTRB(left: number, top: number, right: number, bottom: number) {
-    return new Rect(left, top, right, bottom);
-  }
-
-  static fromLWTH(left: number, width: number, top: number, height: number) {
-    return new Rect(left, top, left + width, top + height);
-  }
-
-  static fromXY(x: number, y: number) {
-    return Rect.fromPoint(new Point(x, y));
-  }
-
-  static fromPoint(point: Point) {
-    return Rect.fromPoints(point.clone(), point);
-  }
-
-  static fromPoints(start: Point, end: Point) {
-    const width = Math.abs(end.x - start.x);
-    const height = Math.abs(end.y - start.y);
-    const left = Math.min(end.x, start.x);
-    const top = Math.min(end.y, start.y);
-    return Rect.fromLWTH(left, width, top, height);
-  }
-
-  static fromDOMRect({ left, top, right, bottom }: DOMRect) {
-    return Rect.fromLTRB(left, top, right, bottom);
-  }
-
-  static fromDOM(dom: Element) {
-    return Rect.fromDOMRect(dom.getBoundingClientRect());
+  set width(w: number) {
+    this.max.x = this.min.x + w;
   }
 }

@@ -1,5 +1,6 @@
-import { FontFamily, FontWeight } from '../../../consts.js';
 import type { GroupElementModel } from '../../../element-model/group.js';
+
+import { FontFamily, FontWeight } from '../../../consts.js';
 import { Bound } from '../../../utils/bound.js';
 import {
   getFontString,

@@ -1,9 +1,11 @@
+import type { IVec } from '../utils/vec.js';
+
 /**
  * Negate a vector.
  * @param A
  * @internal
  */
-export function neg(A: number[]) {
+export function neg(A: IVec): IVec {
   return [-A[0], -A[1]];
 }
 
@@ -13,7 +15,7 @@ export function neg(A: number[]) {
  * @param B
  * @internal
  */
-export function add(A: number[], B: number[]) {
+export function add(A: IVec, B: IVec): IVec {
   return [A[0] + B[0], A[1] + B[1]];
 }
 
@@ -23,7 +25,7 @@ export function add(A: number[], B: number[]) {
  * @param B
  * @internal
  */
-export function sub(A: number[], B: number[]) {
+export function sub(A: IVec, B: IVec): IVec {
   return [A[0] - B[0], A[1] - B[1]];
 }
 
@@ -33,7 +35,7 @@ export function sub(A: number[], B: number[]) {
  * @param n
  * @internal
  */
-export function mul(A: number[], n: number) {
+export function mul(A: IVec, n: number): IVec {
   return [A[0] * n, A[1] * n];
 }
 
@@ -43,7 +45,7 @@ export function mul(A: number[], n: number) {
  * @param n
  * @internal
  */
-export function div(A: number[], n: number) {
+export function div(A: IVec, n: number): IVec {
   return [A[0] / n, A[1] / n];
 }
 
@@ -52,7 +54,7 @@ export function div(A: number[], n: number) {
  * @param A
  * @internal
  */
-export function per(A: number[]) {
+export function per(A: IVec): IVec {
   return [A[1], -A[0]];
 }
 
@@ -62,7 +64,7 @@ export function per(A: number[]) {
  * @param B
  * @internal
  */
-export function dpr(A: number[], B: number[]) {
+export function dpr(A: IVec, B: IVec) {
   return A[0] * B[0] + A[1] * B[1];
 }
 
@@ -72,7 +74,7 @@ export function dpr(A: number[], B: number[]) {
  * @param B
  * @internal
  */
-export function isEqual(A: number[], B: number[]) {
+export function isEqual(A: IVec, B: IVec) {
   return A[0] === B[0] && A[1] === B[1];
 }
 
@@ -81,7 +83,7 @@ export function isEqual(A: number[], B: number[]) {
  * @param A
  * @internal
  */
-export function len(A: number[]) {
+export function len(A: IVec) {
   return Math.hypot(A[0], A[1]);
 }
 
@@ -90,7 +92,7 @@ export function len(A: number[]) {
  * @param A
  * @internal
  */
-export function len2(A: number[]) {
+export function len2(A: IVec) {
   return A[0] * A[0] + A[1] * A[1];
 }
 
@@ -100,7 +102,7 @@ export function len2(A: number[]) {
  * @param B
  * @internal
  */
-export function dist2(A: number[], B: number[]) {
+export function dist2(A: IVec, B: IVec) {
   return len2(sub(A, B));
 }
 
@@ -109,7 +111,7 @@ export function dist2(A: number[], B: number[]) {
  * @param A
  * @internal
  */
-export function uni(A: number[]) {
+export function uni(A: IVec) {
   return div(A, len(A));
 }
 
@@ -119,7 +121,7 @@ export function uni(A: number[]) {
  * @param B
  * @internal
  */
-export function dist(A: number[], B: number[]) {
+export function dist(A: IVec, B: IVec) {
   return Math.hypot(A[1] - B[1], A[0] - B[0]);
 }
 
@@ -129,7 +131,7 @@ export function dist(A: number[], B: number[]) {
  * @param B
  * @internal
  */
-export function med(A: number[], B: number[]) {
+export function med(A: IVec, B: IVec) {
   return mul(add(A, B), 0.5);
 }
 
@@ -140,7 +142,7 @@ export function med(A: number[], B: number[]) {
  * @param r rotation in radians
  * @internal
  */
-export function rotAround(A: number[], C: number[], r: number) {
+export function rotAround(A: IVec, C: IVec, r: number): IVec {
   const s = Math.sin(r);
   const c = Math.cos(r);
 
@@ -160,7 +162,7 @@ export function rotAround(A: number[], C: number[], r: number) {
  * @param t scalar
  * @internal
  */
-export function lrp(A: number[], B: number[], t: number) {
+export function lrp(A: IVec, B: IVec, t: number) {
   return add(A, mul(sub(B, A), t));
 }
 
@@ -171,6 +173,6 @@ export function lrp(A: number[], B: number[], t: number) {
  * @param c
  * @internal
  */
-export function prj(A: number[], B: number[], c: number) {
+export function prj(A: IVec, B: IVec, c: number) {
   return add(A, mul(B, c));
 }

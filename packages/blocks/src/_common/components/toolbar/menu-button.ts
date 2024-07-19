@@ -1,15 +1,17 @@
-import './icon-button.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+
+import type { EditorIconButton } from './icon-button.js';
 
 import { PANEL_BASE } from '../../styles.js';
 import { createButtonPopper } from '../../utils/button-popper.js';
-import type { EditorIconButton } from './icon-button.js';
+import './icon-button.js';
 
 @customElement('editor-menu-button')
 export class EditorMenuButton extends WithDisposable(LitElement) {
+  private _popper!: ReturnType<typeof createButtonPopper>;
+
   static override styles = css`
     :host {
       display: flex;
@@ -17,47 +19,18 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       justify-content: center;
       gap: 8px;
     }
-
-    ::slotted([slot]) {
-      display: flex;
-      align-items: center;
-      align-self: stretch;
-      gap: 8px;
-      min-height: 36px;
-    }
-
-    ::slotted([slot][data-size='small']) {
-      min-width: 164px;
-    }
-
-    ::slotted([slot][data-size='large']) {
-      min-width: 184px;
-    }
-
-    ::slotted([slot][data-orientation='vertical']) {
-      flex-direction: column;
-      align-items: stretch;
-      gap: unset;
-      min-height: unset;
-    }
   `;
-
-  @query('editor-icon-button')
-  private accessor _trigger!: EditorIconButton;
-
-  @query('editor-menu-content')
-  private accessor _content!: EditorMenuContent;
-
-  private _popper!: ReturnType<typeof createButtonPopper>;
-
-  @property({ attribute: false })
-  accessor button!: string | TemplateResult<1>;
-
-  @property({ attribute: false })
-  accessor contentPadding: string | undefined = undefined;
 
   close() {
     this._popper?.hide();
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.tabIndex = 0;
+    if (this.contentPadding) {
+      this.style.setProperty('--content-padding', this.contentPadding);
+    }
   }
 
   override firstUpdated() {
@@ -67,7 +40,10 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       ({ display }) => {
         this._trigger.showTooltip = display === 'hidden';
       },
-      12
+      {
+        mainAxis: 12,
+        ignoreShift: true,
+      }
     );
     this._disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
       e.stopPropagation();
@@ -84,14 +60,6 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
     this._disposables.add(this._popper);
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.tabIndex = 0;
-    if (this.contentPadding) {
-      this.style.setProperty('--content-padding', this.contentPadding);
-    }
-  }
-
   override render() {
     return html`
       ${this.button}
@@ -100,21 +68,78 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       </editor-menu-content>
     `;
   }
+
+  @query('editor-menu-content')
+  private accessor _content!: EditorMenuContent;
+
+  @query('editor-icon-button')
+  private accessor _trigger!: EditorIconButton;
+
+  @property({ attribute: false })
+  accessor button!: string | TemplateResult<1>;
+
+  @property({ attribute: false })
+  accessor contentPadding: string | undefined = undefined;
 }
 
 @customElement('editor-menu-content')
 export class EditorMenuContent extends LitElement {
   static override styles = css`
     :host {
+      --packed-height: 6px;
+      --offset-height: calc(-1 * var(--packed-height));
       display: none;
       outline: none;
+    }
+
+    :host::before,
+    :host::after {
+      content: '';
+      display: block;
+      position: absolute;
+      height: var(--packed-height);
+      width: 100%;
+    }
+
+    :host::before {
+      top: var(--offset-height);
+    }
+
+    :host::after {
+      bottom: var(--offset-height);
     }
 
     :host([data-show]) {
       ${PANEL_BASE}
       justify-content: center;
-      gap: 8px;
       padding: var(--content-padding, 0 6px);
+    }
+
+    ::slotted([slot]) {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      gap: 8px;
+      min-height: 36px;
+    }
+
+    ::slotted([slot][data-size]) {
+      min-width: 146px;
+    }
+
+    ::slotted([slot][data-size='small']) {
+      min-width: 164px;
+    }
+
+    ::slotted([slot][data-size='large']) {
+      min-width: 176px;
+    }
+
+    ::slotted([slot][data-orientation='vertical']) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: unset;
+      min-height: unset;
     }
   `;
 
@@ -140,6 +165,7 @@ export class EditorMenuAction extends LitElement {
       gap: 8px;
       color: var(--affine-text-primary-color);
       font-weight: 400;
+      min-height: 30px; // 22 + 8
     }
 
     :host(:hover),
@@ -151,7 +177,8 @@ export class EditorMenuAction extends LitElement {
       pointer-events: none;
     }
 
-    :host(:hover.delete) {
+    :host(:hover.delete),
+    :host(:hover.delete) ::slotted(svg) {
       background-color: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }

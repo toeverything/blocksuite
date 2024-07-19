@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 
 import {
@@ -12,36 +13,25 @@ import { getClosestRootBlockComponent } from '../root-block/utils/query.js';
 export class ImageResizeManager {
   private _activeComponent: BlockComponent | null = null;
 
-  private _imageContainer: HTMLElement | null = null;
+  private _dragMoveTarget = 'right';
 
   private _imageCenterX = 0;
 
-  private _dragMoveTarget = 'right';
+  private _imageContainer: HTMLElement | null = null;
 
   private _zoom = 1;
 
-  onStart(e: PointerEventState) {
-    const eventTarget = e.raw.target as HTMLElement;
-    this._activeComponent = getClosestBlockElementByElement(
-      eventTarget
-    ) as BlockComponent;
-
-    const rootElement = getClosestRootBlockComponent(this._activeComponent);
-    if (rootElement && isEdgelessPage(rootElement)) {
-      this._zoom = rootElement.service.viewport.zoom;
-    } else {
-      this._zoom = 1;
-    }
-
-    this._imageContainer = eventTarget.closest('.resizable-img');
+  onEnd() {
+    assertExists(this._activeComponent);
     assertExists(this._imageContainer);
-    const rect = this._imageContainer.getBoundingClientRect() as DOMRect;
-    this._imageCenterX = rect.left + rect.width / 2;
-    if (eventTarget.className.includes('right')) {
-      this._dragMoveTarget = 'right';
-    } else {
-      this._dragMoveTarget = 'left';
-    }
+
+    const dragModel = getModelByElement(this._activeComponent);
+    dragModel.page.captureSync();
+    const { width, height } = this._imageContainer.getBoundingClientRect();
+    dragModel.page.updateBlock(dragModel, {
+      width: width / this._zoom,
+      height: height / this._zoom,
+    });
   }
 
   onMove(e: PointerEventState) {
@@ -78,16 +68,27 @@ export class ImageResizeManager {
     });
   }
 
-  onEnd() {
-    assertExists(this._activeComponent);
-    assertExists(this._imageContainer);
+  onStart(e: PointerEventState) {
+    const eventTarget = e.raw.target as HTMLElement;
+    this._activeComponent = getClosestBlockElementByElement(
+      eventTarget
+    ) as BlockComponent;
 
-    const dragModel = getModelByElement(this._activeComponent);
-    dragModel.page.captureSync();
-    const { width, height } = this._imageContainer.getBoundingClientRect();
-    dragModel.page.updateBlock(dragModel, {
-      width: width / this._zoom,
-      height: height / this._zoom,
-    });
+    const rootElement = getClosestRootBlockComponent(this._activeComponent);
+    if (rootElement && isEdgelessPage(rootElement)) {
+      this._zoom = rootElement.service.viewport.zoom;
+    } else {
+      this._zoom = 1;
+    }
+
+    this._imageContainer = eventTarget.closest('.resizable-img');
+    assertExists(this._imageContainer);
+    const rect = this._imageContainer.getBoundingClientRect() as DOMRect;
+    this._imageCenterX = rect.left + rect.width / 2;
+    if (eventTarget.className.includes('right')) {
+      this._dragMoveTarget = 'right';
+    } else {
+      this._dragMoveTarget = 'left';
+    }
   }
 }

@@ -1,5 +1,6 @@
 import type { Slot } from '@blocksuite/global/utils';
 import type { BundledLanguage } from 'shiki';
+
 import { bundledLanguagesInfo, isPlainLang } from 'shiki';
 
 import { PLAIN_TEXT_LANG_INFO, type StrictLanguageInfo } from './consts.js';

@@ -1,16 +1,15 @@
-import './components/fullscreen-toolbar.js';
-
-import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EmbedHtmlModel, EmbedHtmlStyles } from './embed-html-model.js';
+import type { EmbedHtmlBlockService } from './embed-html-service.js';
+
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
-import type { EmbedHtmlModel, EmbedHtmlStyles } from './embed-html-model.js';
-import type { EmbedHtmlBlockService } from './embed-html-service.js';
+import './components/fullscreen-toolbar.js';
 import { HtmlIcon, styles } from './styles.js';
 
 @customElement('affine-embed-html-block')
@@ -18,30 +17,23 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
   EmbedHtmlModel,
   EmbedHtmlBlockService
 > {
-  static override styles = styles;
-
-  @state()
-  private accessor _isSelected = false;
-
-  @state()
-  private accessor _showOverlay = true;
+  override _cardStyle: (typeof EmbedHtmlStyles)[number] = 'html';
 
   private _isDragging = false;
 
   private _isResizing = false;
 
-  override _cardStyle: (typeof EmbedHtmlStyles)[number] = 'html';
+  static override styles = styles;
 
-  @query('.embed-html-block-iframe-wrapper')
-  accessor iframeWrapper!: HTMLDivElement;
+  close = () => {
+    document.exitFullscreen().catch(console.error);
+  };
 
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
+  open = () => {
+    this.iframeWrapper?.requestFullscreen().catch(console.error);
+  };
+
+  refreshData = () => {};
 
   private _handleClick(event: MouseEvent) {
     event.stopPropagation();
@@ -55,15 +47,13 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
     this.open();
   }
 
-  open = () => {
-    this.iframeWrapper?.requestFullscreen().catch(console.error);
-  };
-
-  close = () => {
-    document.exitFullscreen().catch(console.error);
-  };
-
-  refreshData = () => {};
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -86,20 +76,18 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
     });
 
     if (this.isInSurface) {
-      const surface = this.surface;
-      assertExists(surface);
       this.disposables.add(
         this.model.propsUpdated.on(() => {
           this.requestUpdate();
         })
       );
 
-      this.edgeless?.slots.elementResizeStart.on(() => {
+      this.rootService?.slots.elementResizeStart.on(() => {
         this._isResizing = true;
         this._showOverlay = true;
       });
 
-      this.edgeless?.slots.elementResizeEnd.on(() => {
+      this.rootService?.slots.elementResizeEnd.on(() => {
         this._isResizing = false;
         this._showOverlay =
           this._isResizing || this._isDragging || !this._isSelected;
@@ -176,6 +164,15 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
       `;
     });
   }
+
+  @state()
+  private accessor _isSelected = false;
+
+  @state()
+  private accessor _showOverlay = true;
+
+  @query('.embed-html-block-iframe-wrapper')
+  accessor iframeWrapper!: HTMLDivElement;
 }
 
 declare global {

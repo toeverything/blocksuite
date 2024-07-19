@@ -1,17 +1,17 @@
-import '../../../utils/tags/multi-tag-select.js';
-import '../../../utils/tags/multi-tag-view.js';
-
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import type { SelectColumnData } from '../../types.js';
+
+import '../../../utils/tags/multi-tag-select.js';
 import {
-  popTagSelect,
   type SelectTag,
+  popTagSelect,
 } from '../../../utils/tags/multi-tag-select.js';
+import '../../../utils/tags/multi-tag-view.js';
 import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
-import type { SelectColumnData } from '../../types.js';
 import { selectColumnModelConfig } from './define.js';
 
 @customElement('affine-database-select-cell')
@@ -32,14 +32,22 @@ export class SelectCellEditing extends BaseCellRenderer<
   string,
   SelectColumnData
 > {
-  get _options(): SelectTag[] {
-    return this.column.data.options;
-  }
+  _editComplete = () => {
+    this.selectCurrentCell(false);
+  };
 
-  get _value() {
-    const value = this.value;
-    return value ? [value] : [];
-  }
+  _onChange = ([id]: string[]) => {
+    this.onChange(id);
+  };
+
+  _onOptionsChange = (options: SelectTag[]) => {
+    this.column.updateData(data => {
+      return {
+        ...data,
+        options,
+      };
+    });
+  };
 
   private popTagSelect = () => {
     this._disposables.add({
@@ -58,22 +66,14 @@ export class SelectCellEditing extends BaseCellRenderer<
     });
   };
 
-  _onChange = ([id]: string[]) => {
-    this.onChange(id);
-  };
+  get _options(): SelectTag[] {
+    return this.column.data.options;
+  }
 
-  _editComplete = () => {
-    this.selectCurrentCell(false);
-  };
-
-  _onOptionsChange = (options: SelectTag[]) => {
-    this.column.updateData(data => {
-      return {
-        ...data,
-        options,
-      };
-    });
-  };
+  get _value() {
+    const value = this.value;
+    return value ? [value] : [];
+  }
 
   override firstUpdated() {
     this.popTagSelect();

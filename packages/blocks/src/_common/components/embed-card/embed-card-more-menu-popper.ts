@@ -1,9 +1,9 @@
-import './../button.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
+import type { EmbedToolbarBlockElement } from './type.js';
 
 import {
   isEmbedLinkedDocBlock,
@@ -20,7 +20,7 @@ import {
 import { getBlockProps } from '../../utils/block-props.js';
 import { isPeekable, peek } from '../peekable.js';
 import { toast } from '../toast.js';
-import type { EmbedToolbarBlockElement } from './type.js';
+import './../button.js';
 
 @customElement('embed-card-more-menu')
 export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
@@ -68,40 +68,15 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor block!: EmbedToolbarBlockElement;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  private get _model() {
-    return this.block.model;
-  }
-
-  private get _std() {
-    return this.block.std;
-  }
-
-  private get _doc() {
-    return this.block.doc;
-  }
-
-  get _openButtonDisabled() {
-    return (
-      isEmbedLinkedDocBlock(this._model) && this._model.pageId === this._doc.id
-    );
-  }
-
-  private _open() {
-    this.block.open();
-    this.abortController.abort();
-  }
-
   private async _copyBlock() {
     const slice = Slice.fromModels(this._doc, [this._model]);
     await this._std.clipboard.copySlice(slice);
     toast(this.block.host, 'Copied link to clipboard');
     this.abortController.abort();
+  }
+
+  private get _doc() {
+    return this.block.doc;
   }
 
   private _duplicateBlock() {
@@ -122,17 +97,36 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _refreshData() {
-    this.block.refreshData();
+  private get _model() {
+    return this.block.model;
+  }
+
+  private _open() {
+    this.block.open();
     this.abortController.abort();
+  }
+
+  get _openButtonDisabled() {
+    return (
+      isEmbedLinkedDocBlock(this._model) && this._model.pageId === this._doc.id
+    );
+  }
+
+  private _peek() {
+    peek(this.block);
   }
 
   private _peekable() {
     return isPeekable(this.block);
   }
 
-  private _peek() {
-    peek(this.block);
+  private _refreshData() {
+    this.block.refreshData();
+    this.abortController.abort();
+  }
+
+  private get _std() {
+    return this.block.std;
   }
 
   override render() {
@@ -216,6 +210,12 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @property({ attribute: false })
+  accessor block!: EmbedToolbarBlockElement;
 }
 
 declare global {

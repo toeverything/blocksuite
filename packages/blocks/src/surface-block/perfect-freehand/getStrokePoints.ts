@@ -1,4 +1,6 @@
+import type { IVec, IVec3 } from '../utils/vec.js';
 import type { StrokeOptions, StrokePoint } from './types.js';
+
 import { add, dist, isEqual, lrp, sub, uni } from './vec.js';
 
 /**
@@ -16,7 +18,7 @@ import { add, dist, isEqual, lrp, sub, uni } from './vec.js';
  * @param options.last Whether to handle the points as a completed stroke.
  */
 export function getStrokePoints<
-  T extends number[],
+  T extends IVec | IVec3,
   K extends { x: number; y: number; pressure?: number },
 >(points: (T | K)[], options = {} as StrokeOptions): StrokePoint[] {
   const { streamline = 0.5, size = 16, last: isComplete = false } = options;
@@ -28,9 +30,11 @@ export function getStrokePoints<
   const t = 0.15 + (1 - streamline) * 0.85;
 
   // Whatever the input is, make sure that the points are in number[][].
-  let pts = Array.isArray(points[0])
+  let pts: (IVec3 | IVec)[] = Array.isArray(points[0])
     ? (points as T[])
-    : (points as K[]).map(({ x, y, pressure = 0.5 }) => [x, y, pressure]);
+    : (points as K[]).map(
+        ({ x, y, pressure = 0.5 }) => [x, y, pressure] as IVec3
+      );
 
   // Add extra points between the two, to help avoid "dash" lines
   // for strokes with tapered start and ends. Don't mutate the
@@ -39,14 +43,17 @@ export function getStrokePoints<
     const last = pts[1];
     pts = pts.slice(0, -1);
     for (let i = 1; i < 5; i++) {
-      pts.push(lrp(pts[0], last, i / 4));
+      pts.push(lrp(pts[0] as IVec, last as IVec, i / 4));
     }
   }
 
   // If there's only one point, add another point at a 1pt offset.
   // Don't mutate the input array!
   if (pts.length === 1) {
-    pts = [...pts, [...add(pts[0], [1, 1]), ...pts[0].slice(2)]];
+    pts = [
+      ...pts,
+      [...add(pts[0] as IVec, [1, 1]), ...pts[0].slice(2)] as IVec,
+    ];
   }
 
   // The strokePoints array will hold the points for the stroke.
@@ -54,7 +61,7 @@ export function getStrokePoints<
   const strokePoints: StrokePoint[] = [
     {
       point: [pts[0][0], pts[0][1]],
-      pressure: pts[0][2] >= 0 ? pts[0][2] : 0.25,
+      pressure: (pts[0][2] ?? -1) >= 0 ? pts[0][2]! : 0.25,
       vector: [1, 1],
       distance: 0,
       runningLength: 0,
@@ -79,11 +86,11 @@ export function getStrokePoints<
       isComplete && i === max
         ? // If we're at the last point, and `options.last` is true,
           // then add the actual input point.
-          pts[i].slice(0, 2)
+          (pts[i].slice(0, 2) as IVec)
         : // Otherwise, using the t calculated from the streamline
           // option, interpolate a new point between the previous
           // point the current point.
-          lrp(prev.point, pts[i], t);
+          lrp(prev.point, pts[i] as IVec, t);
 
     // If the new point is the same as the previous point, skip ahead.
     if (isEqual(prev.point, point)) continue;
@@ -106,7 +113,7 @@ export function getStrokePoints<
       // The adjusted point
       point,
       // The input pressure (or .5 if not specified)
-      pressure: pts[i][2] >= 0 ? pts[i][2] : 0.5,
+      pressure: (pts[i][2] ?? -1) >= 0 ? pts[i][2]! : 0.5,
       // The vector from the current point to the previous point
       vector: uni(sub(prev.point, point)),
       // The distance between the current point and the previous point

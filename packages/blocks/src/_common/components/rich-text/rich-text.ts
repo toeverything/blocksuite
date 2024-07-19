@@ -1,15 +1,16 @@
+import type { Y } from '@blocksuite/store';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type AttributeRenderer,
-  createInlineKeyDownHandler,
   type DeltaInsert,
   InlineEditor,
   type InlineRange,
   type InlineRangeProvider,
   type KeyboardBindingContext,
+  createInlineKeyDownHandler,
 } from '@blocksuite/inline';
-import type { Y } from '@blocksuite/store';
 import { DocCollection, Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -20,6 +21,7 @@ import type {
   AffineInlineEditor,
   AffineTextAttributes,
 } from '../../inline/presets/affine-inline-specs.js';
+
 import { onVBeforeinput, onVCompositionEnd } from './hooks.js';
 
 interface RichTextStackItem {
@@ -28,18 +30,84 @@ interface RichTextStackItem {
 
 @customElement('rich-text')
 export class RichText extends WithDisposable(ShadowlessElement) {
-  get inlineEditorContainer() {
-    assertExists(this._inlineEditorContainer);
-    return this._inlineEditorContainer;
-  }
+  #verticalScrollContainer: HTMLElement | null = null;
 
-  get inlineEditor() {
-    return this._inlineEditor;
-  }
+  private _inlineEditor: AffineInlineEditor | null = null;
 
-  private get _yText() {
-    return this.yText instanceof Text ? this.yText.yText : this.yText;
-  }
+  private _onCopy = (e: ClipboardEvent) => {
+    const inlineEditor = this.inlineEditor;
+    assertExists(inlineEditor);
+
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
+
+    const text = inlineEditor.yTextString.slice(
+      inlineRange.index,
+      inlineRange.index + inlineRange.length
+    );
+
+    e.clipboardData?.setData('text/plain', text);
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  private _onCut = (e: ClipboardEvent) => {
+    const inlineEditor = this.inlineEditor;
+    assertExists(inlineEditor);
+
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
+
+    const text = inlineEditor.yTextString.slice(
+      inlineRange.index,
+      inlineRange.index + inlineRange.length
+    );
+    inlineEditor.deleteText(inlineRange);
+    inlineEditor.setInlineRange({
+      index: inlineRange.index,
+      length: 0,
+    });
+
+    e.clipboardData?.setData('text/plain', text);
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  private _onPaste = (e: ClipboardEvent) => {
+    const inlineEditor = this.inlineEditor;
+    assertExists(inlineEditor);
+
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
+
+    const text = e.clipboardData
+      ?.getData('text/plain')
+      ?.replace(/\r?\n|\r/g, '\n');
+    if (!text) return;
+
+    inlineEditor.insertText(inlineRange, text);
+    inlineEditor.setInlineRange({
+      index: inlineRange.index + text.length,
+      length: 0,
+    });
+
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  private _onStackItemAdded = (event: { stackItem: RichTextStackItem }) => {
+    const inlineRange = this.inlineEditor?.getInlineRange();
+    if (inlineRange) {
+      event.stackItem.meta.set('richtext-v-range', inlineRange);
+    }
+  };
+
+  private _onStackItemPopped = (event: { stackItem: RichTextStackItem }) => {
+    const inlineRange = event.stackItem.meta.get('richtext-v-range');
+    if (inlineRange && this.inlineEditor?.isValidInlineRange(inlineRange)) {
+      this.inlineEditor?.setInlineRange(inlineRange);
+    }
+  };
 
   static override styles = css`
     rich-text {
@@ -73,68 +141,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       white-space: pre !important;
     }
   `;
-
-  @query('.inline-editor')
-  private accessor _inlineEditorContainer!: HTMLDivElement;
-
-  private _inlineEditor: AffineInlineEditor | null = null;
-
-  @property({ attribute: false })
-  accessor yText!: Y.Text | Text;
-
-  @property({ attribute: false })
-  accessor attributesSchema: z.ZodSchema | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor attributeRenderer: AttributeRenderer | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor inlineEventSource: HTMLElement | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor markdownShortcutHandler:
-    | (<TextAttributes extends AffineTextAttributes = AffineTextAttributes>(
-        context: KeyboardBindingContext<TextAttributes>,
-        undoManager: Y.UndoManager
-      ) => boolean)
-    | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor readonly = false;
-
-  @property({ attribute: false })
-  accessor inlineRangeProvider: InlineRangeProvider | undefined = undefined;
-
-  // rich-text will create a undoManager if it is not provided.
-  @property({ attribute: false })
-  accessor undoManager!: Y.UndoManager;
-
-  // If it is true rich-text will prevent events related to clipboard bubbling up and handle them by itself.
-  @property({ attribute: false })
-  accessor enableClipboard = true;
-
-  // If it is true rich-text will handle undo/redo by itself. (including v-range restore)
-  // It will listen ctrl+z/ctrl+shift+z and call undoManager.undo/redo, keydown event will not
-  // bubble up if pressed ctrl+z/ctrl+shift+z.
-  @property({ attribute: false })
-  accessor enableUndoRedo = true;
-
-  @property({ attribute: false })
-  accessor enableAutoScrollHorizontally = true;
-
-  @property({ attribute: false })
-  accessor wrapText = true;
-
-  // `attributesSchema` will be overwritten to `z.object({})` if `enableFormat` is false.
-  @property({ attribute: false })
-  accessor enableFormat = true;
-
-  @property({ attribute: false })
-  accessor verticalScrollContainerGetter:
-    | (() => HTMLElement | null)
-    | undefined = undefined;
-
-  #verticalScrollContainer: HTMLElement | null = null;
 
   private _init() {
     if (this._inlineEditor) {
@@ -241,81 +247,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  private _onStackItemAdded = (event: { stackItem: RichTextStackItem }) => {
-    const inlineRange = this.inlineEditor?.getInlineRange();
-    if (inlineRange) {
-      event.stackItem.meta.set('richtext-v-range', inlineRange);
-    }
-  };
-
-  private _onStackItemPopped = (event: { stackItem: RichTextStackItem }) => {
-    const inlineRange = event.stackItem.meta.get('richtext-v-range');
-    if (inlineRange && this.inlineEditor?.isValidInlineRange(inlineRange)) {
-      this.inlineEditor?.setInlineRange(inlineRange);
-    }
-  };
-
-  private _onCopy = (e: ClipboardEvent) => {
-    const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor);
-
-    const inlineRange = inlineEditor.getInlineRange();
-    if (!inlineRange) return;
-
-    const text = inlineEditor.yTextString.slice(
-      inlineRange.index,
-      inlineRange.index + inlineRange.length
-    );
-
-    e.clipboardData?.setData('text/plain', text);
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  private _onCut = (e: ClipboardEvent) => {
-    const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor);
-
-    const inlineRange = inlineEditor.getInlineRange();
-    if (!inlineRange) return;
-
-    const text = inlineEditor.yTextString.slice(
-      inlineRange.index,
-      inlineRange.index + inlineRange.length
-    );
-    inlineEditor.deleteText(inlineRange);
-    inlineEditor.setInlineRange({
-      index: inlineRange.index,
-      length: 0,
-    });
-
-    e.clipboardData?.setData('text/plain', text);
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  private _onPaste = (e: ClipboardEvent) => {
-    const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor);
-
-    const inlineRange = inlineEditor.getInlineRange();
-    if (!inlineRange) return;
-
-    const text = e.clipboardData
-      ?.getData('text/plain')
-      ?.replace(/\r?\n|\r/g, '\n');
-    if (!text) return;
-
-    inlineEditor.insertText(inlineRange, text);
-    inlineEditor.setInlineRange({
-      index: inlineRange.index + text.length,
-      length: 0,
-    });
-
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   private _unmount() {
     if (this.inlineEditor?.mounted) {
       this.inlineEditor.unmount();
@@ -323,24 +254,21 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     this._inlineEditor = null;
   }
 
-  @property({ attribute: false })
-  accessor embedChecker: <
-    TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-  >(
-    delta: DeltaInsert<TextAttributes>
-  ) => boolean = () => false;
-
-  override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    await this.inlineEditor?.waitForUpdate();
-    return result;
+  private get _yText() {
+    return this.yText instanceof Text ? this.yText.yText : this.yText;
   }
 
   override connectedCallback() {
     super.connectedCallback();
 
-    assertExists(this._yText, 'rich-text need yText to init.');
-    assertExists(this._yText.doc, 'yText should be bind to yDoc.');
+    if (!this._yText) {
+      console.error('rich-text need yText to init.');
+      return;
+    }
+    if (!this._yText.doc) {
+      console.error('yText should be bind to yDoc.');
+      return;
+    }
 
     if (!this.undoManager) {
       this.undoManager = new DocCollection.Y.UndoManager(this._yText, {
@@ -392,10 +320,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
   }
 
-  override updated(changedProperties: Map<string | number | symbol, unknown>) {
-    if (this._inlineEditor && changedProperties.has('readonly')) {
-      this._inlineEditor.setReadonly(this.readonly);
-    }
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.inlineEditor?.waitForUpdate();
+    return result;
   }
 
   override render() {
@@ -410,6 +338,86 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       class=${classes}
     ></div>`;
   }
+
+  override updated(changedProperties: Map<string | number | symbol, unknown>) {
+    if (this._inlineEditor && changedProperties.has('readonly')) {
+      this._inlineEditor.setReadonly(this.readonly);
+    }
+  }
+
+  // If it is true rich-text will handle undo/redo by itself. (including v-range restore)
+  // It will listen ctrl+z/ctrl+shift+z and call undoManager.undo/redo, keydown event will not
+  get inlineEditor() {
+    return this._inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    assertExists(this._inlineEditorContainer);
+    return this._inlineEditorContainer;
+  }
+
+  @query('.inline-editor')
+  private accessor _inlineEditorContainer!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor attributeRenderer: AttributeRenderer | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor attributesSchema: z.ZodSchema | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor embedChecker: <
+    TextAttributes extends AffineTextAttributes = AffineTextAttributes,
+  >(
+    delta: DeltaInsert<TextAttributes>
+  ) => boolean = () => false;
+
+  @property({ attribute: false })
+  accessor enableAutoScrollHorizontally = true;
+
+  // If it is true rich-text will prevent events related to clipboard bubbling up and handle them by itself.
+  @property({ attribute: false })
+  accessor enableClipboard = true;
+
+  // `attributesSchema` will be overwritten to `z.object({})` if `enableFormat` is false.
+  @property({ attribute: false })
+  accessor enableFormat = true;
+
+  // bubble up if pressed ctrl+z/ctrl+shift+z.
+  @property({ attribute: false })
+  accessor enableUndoRedo = true;
+
+  @property({ attribute: false })
+  accessor inlineEventSource: HTMLElement | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor inlineRangeProvider: InlineRangeProvider | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor markdownShortcutHandler:
+    | (<TextAttributes extends AffineTextAttributes = AffineTextAttributes>(
+        context: KeyboardBindingContext<TextAttributes>,
+        undoManager: Y.UndoManager
+      ) => boolean)
+    | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor readonly = false;
+
+  // rich-text will create a undoManager if it is not provided.
+  @property({ attribute: false })
+  accessor undoManager!: Y.UndoManager;
+
+  @property({ attribute: false })
+  accessor verticalScrollContainerGetter:
+    | (() => HTMLElement | null)
+    | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor wrapText = true;
+
+  @property({ attribute: false })
+  accessor yText!: Y.Text | Text;
 }
 
 declare global {

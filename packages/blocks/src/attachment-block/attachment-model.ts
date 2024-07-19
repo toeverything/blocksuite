@@ -1,8 +1,9 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
+import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import { AttachmentBlockTransformer } from './attachment-transformer.js';
 
 /**
@@ -74,7 +75,13 @@ export const AttachmentBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    parent: ['affine:note', 'affine:surface', 'affine:edgeless-text'],
+    parent: [
+      'affine:note',
+      'affine:surface',
+      'affine:edgeless-text',
+      'affine:paragraph',
+      'affine:list',
+    ],
   },
   transformer: () => new AttachmentBlockTransformer(),
   toModel: () => new AttachmentBlockModel(),

@@ -1,40 +1,46 @@
-import { baseTheme } from '@toeverything/theme';
-import { css, unsafeCSS } from 'lit';
+import { css } from 'lit';
+
+import { INPUT_FONT_BASE, PANEL_BASE } from '../../_common/styles.js';
 
 export const renameStyles = css`
   .affine-attachment-rename-container {
+    ${PANEL_BASE}
     position: relative;
     display: flex;
     align-items: center;
+    width: 320px;
     gap: 12px;
-    width: 340px;
-
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    color: var(--affine-text-primary-color);
-    border-radius: 8px;
     padding: 12px;
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
     z-index: var(--affine-z-index-popover);
   }
 
   .affine-attachment-rename-input-wrapper {
-    flex: 1;
     display: flex;
-    align-items: center;
+    min-width: 280px;
+    height: 30px;
+    box-sizing: border-box;
     padding: 4px 10px;
-    gap: 8px;
+    background: var(--affine-white-10);
+    border-radius: 4px;
+    border: 1px solid var(--affine-border-color);
+  }
 
-    border-radius: 8px;
-    border: var(--affine-border-color) solid 1px;
+  .affine-attachment-rename-input-wrapper:focus-within {
+    border-color: var(--affine-blue-700);
+    box-shadow: var(--affine-active-shadow);
   }
 
   .affine-attachment-rename-input-wrapper input {
-    width: 100%;
     flex: 1;
     border: none;
     outline: none;
     background: transparent;
+    color: var(--affine-text-primary-color);
+    ${INPUT_FONT_BASE}
+  }
+
+  .affine-attachment-rename-input-wrapper input::placeholder {
+    color: var(--affine-placeholder-color);
   }
 
   .affine-attachment-rename-extension {
@@ -92,27 +98,5 @@ export const moreMenuStyles = css`
 export const styles = css`
   :host {
     z-index: 1;
-  }
-
-  .affine-attachment-options {
-    display: flex;
-    align-items: center;
-    padding: 4px 8px;
-    gap: 4px;
-    border-radius: 8px;
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
-  }
-
-  .affine-attachment-options .divider {
-    width: 1px;
-    margin: 0 1.5px;
-    height: 24px;
-    background-color: var(--affine-border-color);
-  }
-
-  .affine-attachment-options > div[hidden],
-  icon-button[hidden] {
-    display: none;
   }
 `;

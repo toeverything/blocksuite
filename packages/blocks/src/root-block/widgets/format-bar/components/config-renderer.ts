@@ -1,7 +1,11 @@
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
-import { isFormatSupported } from '../../../../note-block/commands/utils.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
+
+import '../../../../_common/components/toolbar/icon-button.js';
+import '../../../../_common/components/toolbar/separator.js';
+import { renderToolbarSeparator } from '../../../../_common/components/toolbar/separator.js';
+import { isFormatSupported } from '../../../../note-block/commands/utils.js';
 import { HighlightButton } from './highlight/highlight-button.js';
 import { ParagraphButton } from './paragraph-button.js';
 
@@ -26,7 +30,7 @@ export function ConfigRenderer(formatBar: AffineFormatBarWidget) {
       let template: TemplateResult | null = null;
       switch (item.type) {
         case 'divider':
-          template = html`<div class="divider"></div>`;
+          template = renderToolbarSeparator();
           break;
         case 'highlighter-dropdown': {
           template = HighlightButton(formatBar);
@@ -36,18 +40,19 @@ export function ConfigRenderer(formatBar: AffineFormatBarWidget) {
           template = ParagraphButton(formatBar);
           break;
         case 'inline-action': {
-          template = html`<icon-button
-            size="32px"
-            data-testid=${item.id}
-            ?active=${item.isActive(formatBar.std.command.chain(), formatBar)}
-            @click=${() => {
-              item.action(formatBar.std.command.chain(), formatBar);
-              formatBar.requestUpdate();
-            }}
-          >
-            ${typeof item.icon === 'function' ? item.icon() : item.icon}
-            <affine-tooltip>${item.name}</affine-tooltip>
-          </icon-button>`;
+          template = html`
+            <editor-icon-button
+              data-testid=${item.id}
+              ?active=${item.isActive(formatBar.std.command.chain(), formatBar)}
+              .tooltip=${item.name}
+              @click=${() => {
+                item.action(formatBar.std.command.chain(), formatBar);
+                formatBar.requestUpdate();
+              }}
+            >
+              ${typeof item.icon === 'function' ? item.icon() : item.icon}
+            </editor-icon-button>
+          `;
           break;
         }
         case 'custom': {

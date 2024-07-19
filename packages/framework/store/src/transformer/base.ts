@@ -1,9 +1,10 @@
 import type { BlockModel, InternalPrimitives } from '../schema/index.js';
-import { internalPrimitives } from '../schema/index.js';
 import type { AssetsManager } from './assets.js';
 import type { DraftModel } from './draft.js';
-import { fromJSON, toJSON } from './json.js';
 import type { BlockSnapshot } from './type.js';
+
+import { internalPrimitives } from '../schema/index.js';
+import { fromJSON, toJSON } from './json.js';
 
 type BlockSnapshotLeaf = Pick<
   BlockSnapshot,

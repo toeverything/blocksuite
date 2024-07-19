@@ -1,4 +1,5 @@
 import type { Doc } from '@blocksuite/store';
+
 import { html } from 'lit';
 
 import type { SurfaceBlockModel } from '../surface-block/index.js';

@@ -1,4 +1,5 @@
 import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
+
 import * as Y from 'yjs';
 
 export interface OptionalAttributes {
@@ -12,14 +13,6 @@ export type DeltaOperation = {
 } & OptionalAttributes;
 
 export class Text {
-  get length() {
-    return this._yText.length;
-  }
-
-  get yText() {
-    return this._yText;
-  }
-
   private readonly _yText: Y.Text;
 
   constructor(input?: Y.Text | string | DeltaInsert[]) {
@@ -42,6 +35,12 @@ export class Text {
     }
   }
 
+  static fromDelta(delta: DeltaOperation[]) {
+    const result = new Y.Text();
+    result.applyDelta(delta);
+    return new Text(result);
+  }
+
   private _transact(callback: () => void) {
     const doc = this._yText.doc;
     if (!doc) {
@@ -54,8 +53,170 @@ export class Text {
     }, doc.clientID);
   }
 
+  applyDelta(delta: DeltaOperation[]) {
+    this._transact(() => {
+      this._yText?.applyDelta(delta);
+    });
+  }
+
+  clear() {
+    if (!this._yText.length) {
+      return;
+    }
+    this._transact(() => {
+      this._yText.delete(0, this._yText.length);
+    });
+  }
+
   clone() {
     return new Text(this._yText.clone());
+  }
+
+  delete(index: number, length: number) {
+    if (length === 0) {
+      return;
+    }
+    if (index < 0 || length < 0 || index + length > this._yText.length) {
+      throw new Error(
+        'Failed to delete text! Index or length out of range, index: ' +
+          index +
+          ', length: ' +
+          length +
+          ', text length: ' +
+          this._yText.length
+      );
+    }
+    this._transact(() => {
+      this._yText.delete(index, length);
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  format(index: number, length: number, format: any) {
+    if (length === 0) {
+      return;
+    }
+    if (index < 0 || length < 0 || index + length > this._yText.length) {
+      throw new Error(
+        'Failed to format text! Index or length out of range, index: ' +
+          index +
+          ', length: ' +
+          length +
+          ', text length: ' +
+          this._yText.length
+      );
+    }
+    this._transact(() => {
+      this._yText.format(index, length, format);
+    });
+  }
+
+  insert(content: string, index: number, attributes?: Record<string, unknown>) {
+    if (!content.length) {
+      return;
+    }
+    if (index < 0 || index > this._yText.length) {
+      throw new Error(
+        'Failed to insert text! Index or length out of range, index: ' +
+          index +
+          ', length: ' +
+          length +
+          ', text length: ' +
+          this._yText.length
+      );
+    }
+    this._transact(() => {
+      this._yText.insert(index, content, attributes);
+    });
+  }
+
+  join(other: Text) {
+    if (!other.toDelta().length) {
+      return;
+    }
+    this._transact(() => {
+      const yOther = other._yText;
+      const delta: DeltaOperation[] = yOther.toDelta();
+      delta.unshift({ retain: this._yText.length });
+      this._yText.applyDelta(delta);
+    });
+  }
+
+  replace(
+    index: number,
+    length: number,
+    content: string,
+    attributes?: BaseTextAttributes
+  ) {
+    if (index < 0 || length < 0 || index + length > this._yText.length) {
+      throw new Error(
+        'Failed to replace text! The length of the text is' +
+          this._yText.length +
+          ', but you are trying to replace from' +
+          index +
+          'to' +
+          index +
+          length
+      );
+    }
+    this._transact(() => {
+      this._yText.delete(index, length);
+      this._yText.insert(index, content, attributes);
+    });
+  }
+
+  sliceToDelta(begin: number, end?: number): DeltaOperation[] {
+    const result: DeltaOperation[] = [];
+    if (end && begin >= end) {
+      return result;
+    }
+
+    if (begin === 0 && end === 0) {
+      return [];
+    }
+
+    const delta = this.toDelta();
+    if (begin < 1 && !end) {
+      return delta;
+    }
+
+    if (delta && delta instanceof Array) {
+      let charNum = 0;
+      for (let i = 0; i < delta.length; i++) {
+        const content = delta[i];
+        let contentText: string = content.insert || '';
+        const contentLen = contentText.length;
+
+        const isLastOp = end && charNum + contentLen > end;
+        const isFirstOp = charNum + contentLen > begin && result.length === 0;
+        if (isFirstOp && isLastOp) {
+          contentText = contentText.slice(begin - charNum, end - charNum);
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+          break;
+        } else if (isFirstOp || isLastOp) {
+          contentText = isLastOp
+            ? contentText.slice(0, end - charNum)
+            : contentText.slice(begin - charNum);
+
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+        } else {
+          result.length > 0 && result.push(content);
+        }
+
+        if (end && charNum + contentLen > end) {
+          break;
+        }
+
+        charNum = charNum + contentLen;
+      }
+    }
+    return result;
   }
 
   /**
@@ -120,179 +281,19 @@ export class Text {
     return rightText;
   }
 
-  insert(content: string, index: number, attributes?: Record<string, unknown>) {
-    if (!content.length) {
-      return;
-    }
-    if (index < 0 || index > this._yText.length) {
-      throw new Error(
-        'Failed to insert text! Index or length out of range, index: ' +
-          index +
-          ', length: ' +
-          length +
-          ', text length: ' +
-          this._yText.length
-      );
-    }
-    this._transact(() => {
-      this._yText.insert(index, content, attributes);
-    });
-  }
-
-  join(other: Text) {
-    if (!other.toDelta().length) {
-      return;
-    }
-    this._transact(() => {
-      const yOther = other._yText;
-      const delta: DeltaOperation[] = yOther.toDelta();
-      delta.unshift({ retain: this._yText.length });
-      this._yText.applyDelta(delta);
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  format(index: number, length: number, format: any) {
-    if (length === 0) {
-      return;
-    }
-    if (index < 0 || length < 0 || index + length > this._yText.length) {
-      throw new Error(
-        'Failed to format text! Index or length out of range, index: ' +
-          index +
-          ', length: ' +
-          length +
-          ', text length: ' +
-          this._yText.length
-      );
-    }
-    this._transact(() => {
-      this._yText.format(index, length, format);
-    });
-  }
-
-  delete(index: number, length: number) {
-    if (length === 0) {
-      return;
-    }
-    if (index < 0 || length < 0 || index + length > this._yText.length) {
-      throw new Error(
-        'Failed to delete text! Index or length out of range, index: ' +
-          index +
-          ', length: ' +
-          length +
-          ', text length: ' +
-          this._yText.length
-      );
-    }
-    this._transact(() => {
-      this._yText.delete(index, length);
-    });
-  }
-
-  replace(
-    index: number,
-    length: number,
-    content: string,
-    attributes?: BaseTextAttributes
-  ) {
-    if (index < 0 || length < 0 || index + length > this._yText.length) {
-      throw new Error(
-        'Failed to replace text! The length of the text is' +
-          this._yText.length +
-          ', but you are trying to replace from' +
-          index +
-          'to' +
-          index +
-          length
-      );
-    }
-    this._transact(() => {
-      this._yText.delete(index, length);
-      this._yText.insert(index, content, attributes);
-    });
-  }
-
-  clear() {
-    if (!this._yText.length) {
-      return;
-    }
-    this._transact(() => {
-      this._yText.delete(0, this._yText.length);
-    });
-  }
-
-  applyDelta(delta: DeltaOperation[]) {
-    this._transact(() => {
-      this._yText?.applyDelta(delta);
-    });
-  }
-
   toDelta(): DeltaOperation[] {
     return this._yText?.toDelta() || [];
-  }
-
-  sliceToDelta(begin: number, end?: number): DeltaOperation[] {
-    const result: DeltaOperation[] = [];
-    if (end && begin >= end) {
-      return result;
-    }
-
-    if (begin === 0 && end === 0) {
-      return [];
-    }
-
-    const delta = this.toDelta();
-    if (begin < 1 && !end) {
-      return delta;
-    }
-
-    if (delta && delta instanceof Array) {
-      let charNum = 0;
-      for (let i = 0; i < delta.length; i++) {
-        const content = delta[i];
-        let contentText: string = content.insert || '';
-        const contentLen = contentText.length;
-
-        const isLastOp = end && charNum + contentLen > end;
-        const isFirstOp = charNum + contentLen > begin && result.length === 0;
-        if (isFirstOp && isLastOp) {
-          contentText = contentText.slice(begin - charNum, end - charNum);
-          result.push({
-            ...content,
-            insert: contentText,
-          });
-          break;
-        } else if (isFirstOp || isLastOp) {
-          contentText = isLastOp
-            ? contentText.slice(0, end - charNum)
-            : contentText.slice(begin - charNum);
-
-          result.push({
-            ...content,
-            insert: contentText,
-          });
-        } else {
-          result.length > 0 && result.push(content);
-        }
-
-        if (end && charNum + contentLen > end) {
-          break;
-        }
-
-        charNum = charNum + contentLen;
-      }
-    }
-    return result;
   }
 
   toString() {
     return this._yText?.toString() || '';
   }
 
-  static fromDelta(delta: DeltaOperation[]) {
-    const result = new Y.Text();
-    result.applyDelta(delta);
-    return new Text(result);
+  get length() {
+    return this._yText.length;
+  }
+
+  get yText() {
+    return this._yText;
   }
 }

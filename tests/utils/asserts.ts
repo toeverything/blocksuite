@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import './declare-test-window.js';
-
 import type {
   BlockElement,
   EditorHost,
 } from '@block-std/view/element/index.js';
-import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
   AffineInlineEditor,
@@ -15,13 +12,15 @@ import type {
   RichText,
   RootBlockModel,
 } from '@blocks/index.js';
-import { assertExists } from '@global/utils/index.js';
 import type { InlineRootElement } from '@inline/inline-editor.js';
 import type { Locator } from '@playwright/test';
-import { expect, type Page } from '@playwright/test';
-import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';
-import type { BlockModel, SerializedStore } from '@store/index.js';
+import type { BlockModel } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
+
+import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
+import { assertExists } from '@global/utils/index.js';
+import { type Page, expect } from '@playwright/test';
+import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
@@ -41,11 +40,11 @@ import {
   toIdCountMap,
 } from './actions/edgeless.js';
 import {
+  SHORT_KEY,
   pressArrowLeft,
   pressArrowRight,
   pressBackspace,
   redoByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './actions/keyboard.js';
@@ -57,12 +56,13 @@ import {
   getEditorLocator,
   inlineEditorInnerTextToString,
 } from './actions/misc.js';
+import './declare-test-window.js';
 import { getStringFromRichText } from './inline-editor.js';
 import { currentEditorIndex } from './multiple-editor.js';
 
 export { assertExists };
 
-export const defaultStore: SerializedStore = {
+export const defaultStore = {
   meta: {
     pages: [
       {
@@ -414,12 +414,15 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
   expect(actual).toEqual(resultObj);
 }
 
-export async function assertStore(page: Page, expected: SerializedStore) {
-  const actual = (await page.evaluate(() => {
+export async function assertStore(
+  page: Page,
+  expected: Record<string, unknown>
+) {
+  const actual = await page.evaluate(() => {
     const json = window.collection.doc.toJSON();
     delete json.meta.pages[0].createDate;
     return json;
-  })) as SerializedStore;
+  });
   expect(actual).toEqual(expected);
 }
 
@@ -455,6 +458,36 @@ export async function assertBlockChildrenFlavours(
     { blockId }
   );
   expect(actual).toEqual(flavours);
+}
+
+export async function assertParentBlockId(
+  page: Page,
+  blockId: string,
+  parentId: string
+) {
+  const actual = await page.evaluate(
+    ({ blockId }) => {
+      const model = window.doc?.getBlock(blockId).model;
+      return model.doc.getParent(model)?.id;
+    },
+    { blockId }
+  );
+  expect(actual).toEqual(parentId);
+}
+
+export async function assertParentBlockFlavour(
+  page: Page,
+  blockId: string,
+  flavour: string
+) {
+  const actual = await page.evaluate(
+    ({ blockId }) => {
+      const model = window.doc?.getBlock(blockId).model;
+      return model.doc.getParent(model)?.flavour;
+    },
+    { blockId }
+  );
+  expect(actual).toEqual(flavour);
 }
 
 export async function assertClassName(
@@ -594,7 +627,7 @@ export async function assertBlockTypes(page: Page, blockTypes: string[]) {
 export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
     window.collection.doc.toJSON()
-  )) as SerializedStore;
+  )) as Record<string, Record<string, unknown>>;
   const titleNode = jsonDoc['doc:home']['0'] as Record<string, unknown>;
 
   const markdownVisitor = (node: Record<string, unknown>): string => {
@@ -940,12 +973,16 @@ export async function assertEdgelessNonSelectedRect(page: Page) {
   await expect(rect).toBeHidden();
 }
 
-export async function assertSelectionInNote(page: Page, noteId: string) {
-  const closestNoteId = await page.evaluate(() => {
+export async function assertSelectionInNote(
+  page: Page,
+  noteId: string,
+  blockNote: string = 'affine-note'
+) {
+  const closestNoteId = await page.evaluate(blockNote => {
     const selection = window.getSelection();
-    const note = selection?.anchorNode?.parentElement?.closest('affine-note');
+    const note = selection?.anchorNode?.parentElement?.closest(blockNote);
     return note?.getAttribute('data-block-id');
-  });
+  }, blockNote);
   expect(closestNoteId).toEqual(noteId);
 }
 
@@ -956,11 +993,10 @@ export async function assertEdgelessNoteBackground(
 ) {
   const editor = getEditorLocator(page);
   const backgroundColor = await editor
-    .locator(`affine-note[data-block-id="${noteId}"]`)
+    .locator(`affine-edgeless-note[data-block-id="${noteId}"]`)
     .evaluate(ele => {
-      const noteWrapper = ele
-        .closest<HTMLDivElement>('.edgeless-block-portal-note')
-        ?.querySelector<HTMLDivElement>('.note-background');
+      const noteWrapper =
+        ele?.querySelector<HTMLDivElement>('.note-background');
       if (!noteWrapper) {
         throw new Error(`Could not find note: ${noteId}`);
       }

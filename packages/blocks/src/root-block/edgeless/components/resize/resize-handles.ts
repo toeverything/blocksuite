@@ -3,14 +3,14 @@ import { html, nothing } from 'lit';
 import type { IVec } from '../../../../surface-block/index.js';
 
 export enum HandleDirection {
-  Left = 'left',
-  Top = 'top',
-  Right = 'right',
   Bottom = 'bottom',
-  TopLeft = 'top-left',
   BottomLeft = 'bottom-left',
-  TopRight = 'top-right',
   BottomRight = 'bottom-right',
+  Left = 'left',
+  Right = 'right',
+  Top = 'top',
+  TopLeft = 'top-left',
+  TopRight = 'top-right',
 }
 
 function ResizeHandle(
@@ -37,7 +37,7 @@ function ResizeHandle(
 
     const { clientX, clientY } = e;
     const target = e.target as HTMLElement;
-    const point = [clientX, clientY];
+    const point: IVec = [clientX, clientY];
 
     updateCursor(true, { type, point, target });
   };

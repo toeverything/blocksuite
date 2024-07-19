@@ -1,12 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { Bound } from './bound.js';
+import type { IVec3 } from './vec.js';
+
 import { Graph } from './graph.js';
 import { almostEqual } from './math-utils.js';
 import { PriorityQueue } from './priority-queue.js';
-import type { IVec } from './vec.js';
 
-function cost(point: IVec, point2: IVec) {
+function cost(point: IVec3, point2: IVec3) {
   return Math.abs(point[0] - point2[0]) + Math.abs(point[1] - point2[1]);
 }
 
@@ -20,46 +21,46 @@ function compare(a: [number, number, number], b: [number, number, number]) {
   else return 0;
 }
 
-function heuristic(a: IVec, b: IVec): number {
+function heuristic(a: IVec3, b: IVec3): number {
   return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
 }
 
-function getDiagonalCount(a: IVec, last: IVec, last2: IVec): number {
+function getDiagonalCount(a: IVec3, last: IVec3, last2: IVec3): number {
   if (almostEqual(a[0], last[0]) && almostEqual(a[0], last2[0])) return 0;
   if (almostEqual(a[1], last[1]) && almostEqual(a[1], last2[1])) return 0;
   return 1;
 }
 
-function pointAlmostEqual(a: IVec, b: IVec): boolean {
+function pointAlmostEqual(a: IVec3, b: IVec3): boolean {
   return almostEqual(a[0], b[0], 0.02) && almostEqual(a[1], b[1], 0.02);
 }
 
 export class AStarRunner {
-  private _cameFrom = new Map<IVec, { from: IVec[]; indexs: number[] }>();
-
-  private _frontier!: PriorityQueue<
-    IVec,
-    [diagonalCount: number, pointPriority: number, distCost: number]
-  >;
-
-  private _graph: Graph;
-
-  private _costSoFar = new Map<IVec, number[]>();
-
-  private _diagonalCount = new Map<IVec, number[]>();
-
-  private _pointPriority = new Map<IVec, number[]>();
-
-  private _current: IVec | null = null;
+  private _cameFrom = new Map<IVec3, { from: IVec3[]; indexs: number[] }>();
 
   private _complete = false;
 
+  private _costSoFar = new Map<IVec3, number[]>();
+
+  private _current: IVec3 | null = null;
+
+  private _diagonalCount = new Map<IVec3, number[]>();
+
+  private _frontier!: PriorityQueue<
+    IVec3,
+    [diagonalCount: number, pointPriority: number, distCost: number]
+  >;
+
+  private _graph: Graph<IVec3>;
+
+  private _pointPriority = new Map<IVec3, number[]>();
+
   constructor(
-    points: IVec[],
-    private _sp: IVec,
-    private _ep: IVec,
-    private _originalSp: IVec,
-    private _originalEp: IVec,
+    points: IVec3[],
+    private _sp: IVec3,
+    private _ep: IVec3,
+    private _originalSp: IVec3,
+    private _originalEp: IVec3,
     blocks: Bound[] = [],
     expandBlocks: Bound[] = []
   ) {
@@ -78,13 +79,13 @@ export class AStarRunner {
     this._diagonalCount.set(this._sp, [0]);
     this._pointPriority.set(this._sp, [0]);
     this._frontier = new PriorityQueue<
-      IVec,
+      IVec3,
       [diagonalCount: number, pointPriority: number, distCost: number]
     >(compare);
     this._frontier.enqueue(this._sp, [0, 0, 0]);
   }
 
-  private _neighbors(cur: IVec) {
+  private _neighbors(cur: IVec3) {
     const neighbors = this._graph.neighbors(cur);
     const cameFroms = this._cameFrom.get(cur);
     assertExists(cameFroms);
@@ -97,6 +98,21 @@ export class AStarRunner {
     });
     if (cur === this._ep) neighbors.push(this._originalEp);
     return neighbors;
+  }
+
+  reset() {
+    this._cameFrom.clear();
+    this._costSoFar.clear();
+    this._diagonalCount.clear();
+    this._pointPriority.clear();
+    this._complete = false;
+    this._init();
+  }
+
+  run() {
+    while (!this._complete) {
+      this.step();
+    }
   }
 
   step() {
@@ -216,24 +232,9 @@ export class AStarRunner {
     }
   }
 
-  reset() {
-    this._cameFrom.clear();
-    this._costSoFar.clear();
-    this._diagonalCount.clear();
-    this._pointPriority.clear();
-    this._complete = false;
-    this._init();
-  }
-
-  run() {
-    while (!this._complete) {
-      this.step();
-    }
-  }
-
   get path() {
-    const result: IVec[] = [];
-    let current: null | IVec = this._complete
+    const result: IVec3[] = [];
+    let current: null | IVec3 = this._complete
       ? this._originalEp
       : this._current;
     const nextIndexs = [0];
@@ -251,7 +252,7 @@ export class AStarRunner {
 }
 
 function findAllMinimalIndexs(
-  data: IVec,
+  data: number[],
   isLess: (a: number, b: number) => boolean,
   isEqual: (a: number, b: number) => boolean
 ) {
@@ -270,7 +271,7 @@ function findAllMinimalIndexs(
 }
 
 function findAllMaximalIndexs(
-  data: IVec,
+  data: number[],
   isGreat: (a: number, b: number) => boolean,
   isEqual: (a: number, b: number) => boolean
 ) {

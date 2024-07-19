@@ -3,6 +3,8 @@ import { assertExists } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 
 import {
+  Shape,
+  ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH,
   createShapeElement,
   decreaseZoomLevel,
   deleteAll,
@@ -11,10 +13,8 @@ import {
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
-  Shape,
   shiftClickView,
   switchEditorMode,
-  ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH,
   zoomByMouseWheel,
   zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
@@ -55,7 +55,7 @@ test('switch to edgeless mode', async ({ page }) => {
   await assertRichTextInlineRange(page, 0, 5, 0);
 
   await switchEditorMode(page);
-  const locator = page.locator('edgeless-block-portal-container');
+  const locator = page.locator('affine-edgeless-root .edgeless-layer');
   await expect(locator).toHaveCount(1);
   await assertRichTexts(page, ['hello']);
   await waitNextFrame(page);
@@ -71,10 +71,10 @@ test('can zoom viewport', async ({ page }) => {
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
 
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
 
   await page.mouse.click(CENTER_X, CENTER_Y);
-  const original = [80, 402.5, NOTE_WIDTH, 91];
+  const original = [80, 402.5, NOTE_WIDTH, 92];
   await assertEdgelessSelectedRect(page, original);
   await assertZoomLevel(page, 100);
 
@@ -102,10 +102,10 @@ test('zoom by mouse', async ({ page }) => {
   await zoomResetByKeyboard(page);
   await assertZoomLevel(page, 100);
 
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
 
   await page.mouse.click(CENTER_X, CENTER_Y);
-  const original = [80, 402.5, NOTE_WIDTH, 91];
+  const original = [80, 402.5, NOTE_WIDTH, 92];
   await assertEdgelessSelectedRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);

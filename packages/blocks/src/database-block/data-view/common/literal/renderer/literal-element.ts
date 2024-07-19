@@ -10,13 +10,13 @@ export abstract class LiteralElement<T = unknown, Type extends TType = TType>
   implements LiteralViewProps<T, Type>
 {
   @property({ attribute: false })
+  accessor onChange!: (value?: T) => void;
+
+  @property({ attribute: false })
   accessor type!: Type;
 
   @property({ attribute: false })
   accessor value: T | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onChange!: (value?: T) => void;
 }
 
 @customElement('data-view-literal-boolean-view')

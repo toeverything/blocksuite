@@ -1,5 +1,7 @@
 import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange, NativePoint } from '../types.js';
+import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
+
 import {
   type BaseTextAttributes,
   isInEmbedElement,
@@ -8,26 +10,11 @@ import {
 } from '../utils/index.js';
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { transformInput } from '../utils/transform-input.js';
-import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
 export class EventService<TextAttributes extends BaseTextAttributes> {
-  get isComposing() {
-    return this._isComposing;
-  }
-
-  get inlineRangeProvider() {
-    return this.editor.inlineRangeProvider;
-  }
-
-  private _isComposing = false;
-
-  private _previousAnchor: NativePoint | null = null;
-
-  private _previousFocus: NativePoint | null = null;
-
   private _compositionInlineRange: InlineRange | null = null;
 
-  constructor(readonly editor: InlineEditor<TextAttributes>) {}
+  private _isComposing = false;
 
   private _isRangeCompletelyInRoot = (range: Range) => {
     const rootElement = this.editor.rootElement;
@@ -47,6 +34,240 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
         rootRange.comparePoint(range.endContainer, range.startOffset) >= 0 &&
         rootRange.comparePoint(range.startContainer, range.endOffset) <= 0
       );
+    }
+  };
+
+  private _onBeforeInput = (event: InputEvent) => {
+    const range = this.editor.rangeService.getNativeRange();
+    if (
+      this.editor.isReadonly ||
+      this._isComposing ||
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
+    )
+      return;
+
+    let inlineRange = this.editor.toInlineRange(range);
+    if (!inlineRange) return;
+
+    let ifHandleTargetRange = true;
+
+    if (event.inputType.startsWith('delete')) {
+      if (
+        isInEmbedGap(range.commonAncestorContainer) &&
+        inlineRange.length === 0 &&
+        inlineRange.index > 0
+      ) {
+        inlineRange = {
+          index: inlineRange.index - 1,
+          length: 1,
+        };
+        ifHandleTargetRange = false;
+      } else if (
+        isInEmptyLine(range.commonAncestorContainer) &&
+        inlineRange.length === 0 &&
+        inlineRange.index > 0
+      ) {
+        // do not use target range when deleting across lines
+        // https://github.com/toeverything/blocksuite/issues/5381
+        inlineRange = {
+          index: inlineRange.index - 1,
+          length: 1,
+        };
+        ifHandleTargetRange = false;
+      }
+    }
+
+    if (ifHandleTargetRange) {
+      const targetRanges = event.getTargetRanges();
+      if (targetRanges.length > 0) {
+        const staticRange = targetRanges[0];
+        const range = document.createRange();
+        range.setStart(staticRange.startContainer, staticRange.startOffset);
+        range.setEnd(staticRange.endContainer, staticRange.endOffset);
+        const targetInlineRange = this.editor.toInlineRange(range);
+
+        if (!isMaybeInlineRangeEqual(inlineRange, targetInlineRange)) {
+          inlineRange = targetInlineRange;
+        }
+      }
+    }
+
+    if (!inlineRange) return;
+
+    event.preventDefault();
+
+    const ctx: BeforeinputHookCtx<TextAttributes> = {
+      inlineEditor: this.editor,
+      raw: event,
+      inlineRange,
+      data: event.data ?? event.dataTransfer?.getData('text/plain') ?? null,
+      attributes: {} as TextAttributes,
+    };
+    this.editor.hooks.beforeinput?.(ctx);
+
+    transformInput<TextAttributes>(
+      ctx.raw.inputType,
+      ctx.data,
+      ctx.attributes,
+      ctx.inlineRange,
+      this.editor as InlineEditor
+    );
+
+    this.editor.slots.inputting.emit();
+  };
+
+  private _onClick = (event: MouseEvent) => {
+    // select embed element when click on it
+    if (event.target instanceof Node && isInEmbedElement(event.target)) {
+      const selection = document.getSelection();
+      if (!selection) return;
+      if (event.target instanceof HTMLElement) {
+        const vElement = event.target.closest('v-element');
+        if (vElement) {
+          selection.selectAllChildren(vElement);
+        }
+      } else {
+        const vElement = event.target.parentElement?.closest('v-element');
+        if (vElement) {
+          selection.selectAllChildren(vElement);
+        }
+      }
+    }
+  };
+
+  private _onCompositionEnd = async (event: CompositionEvent) => {
+    this._isComposing = false;
+    if (!this.editor.rootElement.isConnected) return;
+
+    const range = this.editor.rangeService.getNativeRange();
+    if (
+      this.editor.isReadonly ||
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
+    )
+      return;
+
+    this.editor.rerenderWholeEditor();
+    await this.editor.waitForUpdate();
+
+    const inlineRange = this._compositionInlineRange;
+    if (!inlineRange) return;
+
+    event.preventDefault();
+
+    const ctx: CompositionEndHookCtx<TextAttributes> = {
+      inlineEditor: this.editor,
+      raw: event,
+      inlineRange,
+      data: event.data,
+      attributes: {} as TextAttributes,
+    };
+    this.editor.hooks.compositionEnd?.(ctx);
+
+    const { inlineRange: newInlineRange, data: newData } = ctx;
+    if (newData && newData.length > 0) {
+      this.editor.insertText(newInlineRange, newData, ctx.attributes);
+      this.editor.setInlineRange(
+        {
+          index: newInlineRange.index + newData.length,
+          length: 0,
+        },
+        false
+      );
+    }
+
+    this.editor.slots.inputting.emit();
+  };
+
+  private _onCompositionStart = () => {
+    this._isComposing = true;
+    // embeds is not editable and it will break IME
+    const embeds = this.editor.rootElement.querySelectorAll(
+      '[data-v-embed="true"]'
+    );
+    embeds.forEach(embed => {
+      embed.removeAttribute('contenteditable');
+    });
+
+    const range = this.editor.rangeService.getNativeRange();
+    if (range) {
+      this._compositionInlineRange = this.editor.toInlineRange(range);
+    } else {
+      this._compositionInlineRange = null;
+    }
+  };
+
+  private _onCompositionUpdate = () => {
+    if (!this.editor.rootElement.isConnected) return;
+
+    const range = this.editor.rangeService.getNativeRange();
+    if (
+      this.editor.isReadonly ||
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
+    )
+      return;
+
+    this.editor.slots.inputting.emit();
+  };
+
+  private _onKeyDown = (event: KeyboardEvent) => {
+    const inlineRange = this.editor.getInlineRange();
+    if (!inlineRange) return;
+
+    this.editor.slots.keydown.emit(event);
+
+    if (
+      !event.shiftKey &&
+      (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+    ) {
+      if (inlineRange.length !== 0) return;
+
+      const prevent = () => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+
+      const deltas = this.editor.getDeltasByInlineRange(inlineRange);
+      if (deltas.length === 2) {
+        if (event.key === 'ArrowLeft' && this.editor.isEmbed(deltas[0][0])) {
+          prevent();
+          this.editor.setInlineRange({
+            index: inlineRange.index - 1,
+            length: 1,
+          });
+        } else if (
+          event.key === 'ArrowRight' &&
+          this.editor.isEmbed(deltas[1][0])
+        ) {
+          prevent();
+          this.editor.setInlineRange({
+            index: inlineRange.index,
+            length: 1,
+          });
+        }
+      } else if (deltas.length === 1) {
+        const delta = deltas[0][0];
+        if (this.editor.isEmbed(delta)) {
+          if (event.key === 'ArrowLeft' && inlineRange.index - 1 >= 0) {
+            prevent();
+            this.editor.setInlineRange({
+              index: inlineRange.index - 1,
+              length: 1,
+            });
+          } else if (
+            event.key === 'ArrowRight' &&
+            inlineRange.index + 1 <= this.editor.yTextLength
+          ) {
+            prevent();
+            this.editor.setInlineRange({
+              index: inlineRange.index,
+              length: 1,
+            });
+          }
+        }
+      }
     }
   };
 
@@ -112,243 +333,9 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     }
   };
 
-  private _onCompositionStart = () => {
-    this._isComposing = true;
-    // embeds is not editable and it will break IME
-    const embeds = this.editor.rootElement.querySelectorAll(
-      '[data-v-embed="true"]'
-    );
-    embeds.forEach(embed => {
-      embed.removeAttribute('contenteditable');
-    });
+  private _previousAnchor: NativePoint | null = null;
 
-    const range = this.editor.rangeService.getNativeRange();
-    if (range) {
-      this._compositionInlineRange = this.editor.toInlineRange(range);
-    } else {
-      this._compositionInlineRange = null;
-    }
-  };
-
-  private _onCompositionUpdate = () => {
-    if (!this.editor.rootElement.isConnected) return;
-
-    const range = this.editor.rangeService.getNativeRange();
-    if (
-      this.editor.isReadonly ||
-      !range ||
-      !this._isRangeCompletelyInRoot(range)
-    )
-      return;
-
-    this.editor.slots.inputting.emit();
-  };
-
-  private _onCompositionEnd = async (event: CompositionEvent) => {
-    this._isComposing = false;
-    if (!this.editor.rootElement.isConnected) return;
-
-    const range = this.editor.rangeService.getNativeRange();
-    if (
-      this.editor.isReadonly ||
-      !range ||
-      !this._isRangeCompletelyInRoot(range)
-    )
-      return;
-
-    this.editor.rerenderWholeEditor();
-    await this.editor.waitForUpdate();
-
-    const inlineRange = this._compositionInlineRange;
-    if (!inlineRange) return;
-
-    event.preventDefault();
-
-    const ctx: CompositionEndHookCtx<TextAttributes> = {
-      inlineEditor: this.editor,
-      raw: event,
-      inlineRange,
-      data: event.data,
-      attributes: {} as TextAttributes,
-    };
-    this.editor.hooks.compositionEnd?.(ctx);
-
-    const { inlineRange: newInlineRange, data: newData } = ctx;
-    if (newData && newData.length > 0) {
-      this.editor.insertText(newInlineRange, newData, ctx.attributes);
-      this.editor.setInlineRange(
-        {
-          index: newInlineRange.index + newData.length,
-          length: 0,
-        },
-        false
-      );
-    }
-
-    this.editor.slots.inputting.emit();
-  };
-
-  private _onBeforeInput = (event: InputEvent) => {
-    const range = this.editor.rangeService.getNativeRange();
-    if (
-      this.editor.isReadonly ||
-      this._isComposing ||
-      !range ||
-      !this._isRangeCompletelyInRoot(range)
-    )
-      return;
-
-    const tmpInlineRange = this.editor.toInlineRange(range);
-    if (!tmpInlineRange) return;
-
-    let ifHandleTargetRange = true;
-
-    if (event.inputType.startsWith('delete')) {
-      if (
-        isInEmbedGap(range.commonAncestorContainer) &&
-        tmpInlineRange.length === 0 &&
-        tmpInlineRange.index > 0
-      ) {
-        this.editor.setInlineRange({
-          index: tmpInlineRange.index - 1,
-          length: 1,
-        });
-        ifHandleTargetRange = false;
-      } else if (
-        isInEmptyLine(range.commonAncestorContainer) &&
-        tmpInlineRange.length === 0 &&
-        tmpInlineRange.index > 0
-      ) {
-        // do not use target range when deleting across lines
-        // https://github.com/toeverything/blocksuite/issues/5381
-        this.editor.setInlineRange({
-          index: tmpInlineRange.index - 1,
-          length: 1,
-        });
-        ifHandleTargetRange = false;
-      }
-    }
-
-    if (ifHandleTargetRange) {
-      const targetRanges = event.getTargetRanges();
-      if (targetRanges.length > 0) {
-        const staticRange = targetRanges[0];
-        const range = document.createRange();
-        range.setStart(staticRange.startContainer, staticRange.startOffset);
-        range.setEnd(staticRange.endContainer, staticRange.endOffset);
-        const inlineRange = this.editor.toInlineRange(range);
-
-        if (
-          !isMaybeInlineRangeEqual(this.editor.getInlineRange(), inlineRange)
-        ) {
-          this.editor.setInlineRange(inlineRange, false);
-        }
-      }
-    }
-
-    const inlineRange = this.editor.getInlineRange();
-    if (!inlineRange) return;
-
-    event.preventDefault();
-
-    const ctx: BeforeinputHookCtx<TextAttributes> = {
-      inlineEditor: this.editor,
-      raw: event,
-      inlineRange: inlineRange,
-      data: event.data ?? event.dataTransfer?.getData('text/plain') ?? null,
-      attributes: {} as TextAttributes,
-    };
-    this.editor.hooks.beforeinput?.(ctx);
-
-    const { raw: newEvent, data, inlineRange: newInlineRange } = ctx;
-    transformInput<TextAttributes>(
-      newEvent.inputType,
-      data,
-      ctx.attributes,
-      newInlineRange,
-      this.editor as InlineEditor
-    );
-
-    this.editor.slots.inputting.emit();
-  };
-
-  private _onKeyDown = (event: KeyboardEvent) => {
-    const inlineRange = this.editor.getInlineRange();
-    if (!inlineRange) return;
-
-    this.editor.slots.keydown.emit(event);
-
-    if (
-      !event.shiftKey &&
-      (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
-    ) {
-      if (inlineRange.length !== 0) return;
-
-      const prevent = () => {
-        event.preventDefault();
-        event.stopPropagation();
-      };
-
-      const deltas = this.editor.getDeltasByInlineRange(inlineRange);
-      if (deltas.length === 2) {
-        if (event.key === 'ArrowLeft' && this.editor.isEmbed(deltas[0][0])) {
-          prevent();
-          this.editor.setInlineRange({
-            index: inlineRange.index - 1,
-            length: 1,
-          });
-        } else if (
-          event.key === 'ArrowRight' &&
-          this.editor.isEmbed(deltas[1][0])
-        ) {
-          prevent();
-          this.editor.setInlineRange({
-            index: inlineRange.index,
-            length: 1,
-          });
-        }
-      } else if (deltas.length === 1) {
-        const delta = deltas[0][0];
-        if (this.editor.isEmbed(delta)) {
-          if (event.key === 'ArrowLeft' && inlineRange.index - 1 >= 0) {
-            prevent();
-            this.editor.setInlineRange({
-              index: inlineRange.index - 1,
-              length: 1,
-            });
-          } else if (
-            event.key === 'ArrowRight' &&
-            inlineRange.index + 1 <= this.editor.yTextLength
-          ) {
-            prevent();
-            this.editor.setInlineRange({
-              index: inlineRange.index,
-              length: 1,
-            });
-          }
-        }
-      }
-    }
-  };
-
-  private _onClick = (event: MouseEvent) => {
-    // select embed element when click on it
-    if (event.target instanceof Node && isInEmbedElement(event.target)) {
-      const selection = document.getSelection();
-      if (!selection) return;
-      if (event.target instanceof HTMLElement) {
-        const vElement = event.target.closest('v-element');
-        if (vElement) {
-          selection.selectAllChildren(vElement);
-        }
-      } else {
-        const vElement = event.target.parentElement?.closest('v-element');
-        if (vElement) {
-          selection.selectAllChildren(vElement);
-        }
-      }
-    }
-  };
+  private _previousFocus: NativePoint | null = null;
 
   mount = () => {
     const eventSource = this.editor.eventSource;
@@ -391,4 +378,14 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     );
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
+
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
+
+  get inlineRangeProvider() {
+    return this.editor.inlineRangeProvider;
+  }
+
+  get isComposing() {
+    return this._isComposing;
+  }
 }

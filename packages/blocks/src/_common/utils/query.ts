@@ -3,23 +3,25 @@ import type {
   EditorHost,
   ViewStore,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import type { RootBlockComponent } from '../../index.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
-import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
-  BLOCK_ID_ATTR as ATTR,
-} from '../consts.js';
 import type { AbstractEditor } from '../types.js';
+import type { Point, Rect } from './rect.js';
+
+import {
+  BLOCK_ID_ATTR as ATTR,
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
+} from '../consts.js';
 import { clamp } from './math.js';
 import { matchFlavours } from './model.js';
-import type { Point, Rect } from './rect.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 
@@ -446,7 +448,7 @@ function isImage({ tagName }: Element) {
 }
 
 function isNote({ tagName }: Element) {
-  return tagName === 'AFFINE-NOTE';
+  return tagName === 'AFFINE-NOTE' || tagName === 'AFFINE-EDGELESS-NOTE';
 }
 
 function isSurface({ tagName }: Element) {
@@ -820,7 +822,9 @@ export function getDropRectByPoint(
 
   if (isDatabase) {
     const table = getDatabaseBlockTableElement(element);
-    assertExists(table);
+    if (!table) {
+      return result;
+    }
     let bounds = table.getBoundingClientRect();
     if (model.isEmpty.value) {
       result.flag = DropFlags.EmptyDatabase;

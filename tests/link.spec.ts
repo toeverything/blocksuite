@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
+
 import { expect } from '@playwright/test';
 
 import {
+  SHORT_KEY,
   cutByKeyboard,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -15,7 +17,6 @@ import {
   pressTab,
   selectAllByKeyboard,
   setSelection,
-  SHORT_KEY,
   switchReadonly,
   type,
   waitNextFrame,
@@ -510,7 +511,8 @@ test('convert link to card', async ({ page }) => {
   await linkLocator.hover();
   await waitNextFrame(page);
   await expect(linkPopoverLocator).toBeVisible();
-  await expect(linkToCardBtn).not.toBeVisible();
+  await page.getByRole('button', { name: 'Switch view' }).click();
+  await expect(linkToCardBtn).toBeVisible();
   await expect(linkToEmbedBtn).not.toBeVisible();
 });
 

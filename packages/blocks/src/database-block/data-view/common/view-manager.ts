@@ -1,6 +1,7 @@
 import type { ColumnMeta } from '../column/column-config.js';
-import { groupByMatcher } from './group-by/matcher.js';
 import type { GroupBy } from './types.js';
+
+import { groupByMatcher } from './group-by/matcher.js';
 
 export const defaultGroupBy = (
   columnMeta: ColumnMeta,

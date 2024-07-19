@@ -181,6 +181,23 @@ export class Typesystem {
     return result;
   }
 
+  instance(
+    context: Record<string, TType>,
+    realArgs: TType[],
+    realRt: TType,
+    template: TFunction
+  ): TFunction {
+    const ctx = { ...context };
+    template.args.forEach((arg, i) => {
+      const realArg = realArgs[i];
+      if (realArg) {
+        this.isSubtype(arg, realArg, ctx);
+      }
+    });
+    this.isSubtype(realRt, template.rt);
+    return this.subst(ctx, template);
+  }
+
   isDataType(t: TType): t is TDataType {
     return t.type === 'data';
   }
@@ -256,23 +273,6 @@ export class Typesystem {
       rt: subst(template.rt),
     });
     return result;
-  }
-
-  instance(
-    context: Record<string, TType>,
-    realArgs: TType[],
-    realRt: TType,
-    template: TFunction
-  ): TFunction {
-    const ctx = { ...context };
-    template.args.forEach((arg, i) => {
-      const realArg = realArgs[i];
-      if (realArg) {
-        this.isSubtype(arg, realArg, ctx);
-      }
-    });
-    this.isSubtype(realRt, template.rt);
-    return this.subst(ctx, template);
   }
 }
 

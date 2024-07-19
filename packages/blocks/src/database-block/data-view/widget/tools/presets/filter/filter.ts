@@ -1,11 +1,11 @@
-import '../../../filter/filter-group.js';
-
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { FilterGroup } from '../../../../common/ast.js';
+
 import { FilterIcon } from '../../../../common/icons/index.js';
 import { popCreateFilter } from '../../../../common/ref/ref.js';
+import '../../../filter/filter-group.js';
 import { WidgetBase } from '../../../widget-base.js';
 
 const styles = css`
@@ -32,9 +32,7 @@ const styles = css`
 
 @customElement('data-view-header-tools-filter')
 export class DataViewHeaderToolsFilter extends WidgetBase {
-  private get readonly() {
-    return this.view.readonly;
-  }
+  static override styles = styles;
 
   private get _filter() {
     return this.view.filter;
@@ -43,8 +41,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
   private set _filter(filter: FilterGroup) {
     this.view.updateFilter(filter);
   }
-
-  static override styles = styles;
 
   private addFilter(event: MouseEvent) {
     if (!this._filter.conditions.length && !this.view.filterVisible) {
@@ -67,6 +63,10 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     this.view.filterSetVisible(!this.view.filterVisible);
   }
 
+  private get readonly() {
+    return this.view.readonly;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
@@ -74,13 +74,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
         this.requestUpdate();
       })
     );
-  }
-
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
   }
 
   override render() {
@@ -91,6 +84,13 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     >
       ${FilterIcon} Filter
     </div>`;
+  }
+
+  showToolBar(show: boolean) {
+    const tools = this.closest('data-view-header-tools');
+    if (tools) {
+      tools.showToolBar = show;
+    }
   }
 }
 

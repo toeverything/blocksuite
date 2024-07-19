@@ -1,5 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { BlockElement, WidgetElement } from './element/index.js';
 
@@ -8,16 +9,32 @@ export class ViewStore {
 
   private readonly _widgetMap = new Map<string, WidgetElement>();
 
-  constructor(public std: BlockSuite.Std) {}
-
-  setBlock = (node: BlockElement) => {
-    this._blockMap.set(node.model.id, node);
+  calculatePath = (model: BlockModel): string[] => {
+    const path: string[] = [];
+    let current: BlockModel | null = model;
+    while (current) {
+      path.push(current.id);
+      current = this.std.doc.getParent(current);
+    }
+    return path.reverse();
   };
 
-  setWidget = (node: WidgetElement) => {
+  deleteBlock = (node: BlockElement) => {
+    this._blockMap.delete(node.id);
+  };
+
+  deleteWidget = (node: WidgetElement) => {
     const id = node.dataset.widgetId as string;
     const widgetIndex = `${node.model.id}|${id}`;
-    this._widgetMap.set(widgetIndex, node);
+    this._widgetMap.delete(widgetIndex);
+  };
+
+  fromPath = (path: string | undefined | null): BlockElement | null => {
+    const id = path ?? this.std.doc.root?.id;
+    if (!id) {
+      return null;
+    }
+    return this._blockMap.get(id) ?? null;
   };
 
   getBlock = (id: string): BlockElement | null => {
@@ -32,47 +49,15 @@ export class ViewStore {
     return this._widgetMap.get(widgetIndex) ?? null;
   };
 
-  deleteBlock = (node: BlockElement) => {
-    this._blockMap.delete(node.id);
+  setBlock = (node: BlockElement) => {
+    this._blockMap.set(node.model.id, node);
   };
 
-  deleteWidget = (node: WidgetElement) => {
+  setWidget = (node: WidgetElement) => {
     const id = node.dataset.widgetId as string;
     const widgetIndex = `${node.model.id}|${id}`;
-    this._widgetMap.delete(widgetIndex);
+    this._widgetMap.set(widgetIndex, node);
   };
-
-  calculatePath = (model: BlockModel): string[] => {
-    const path: string[] = [];
-    let current: BlockModel | null = model;
-    while (current) {
-      path.push(current.id);
-      current = this.std.doc.getParent(current);
-    }
-    return path.reverse();
-  };
-
-  fromPath = (path: string | undefined | null): BlockElement | null => {
-    const id = path ?? this.std.doc.root?.id;
-    if (!id) {
-      return null;
-    }
-    return this._blockMap.get(id) ?? null;
-  };
-
-  viewFromPath(type: 'block', path: string[]): null | BlockElement;
-  viewFromPath(type: 'widget', path: string[]): null | WidgetElement;
-  viewFromPath(
-    type: 'block' | 'widget',
-    path: string[]
-  ): null | BlockElement | WidgetElement {
-    if (type === 'block') {
-      return this.fromPath(path[path.length - 1]);
-    }
-    const temp = path.slice(-2) as [string, string];
-    const widgetId = temp.join('|');
-    return this._widgetMap.get(widgetId) ?? null;
-  }
 
   walkThrough = (
     fn: (
@@ -108,10 +93,28 @@ export class ViewStore {
     });
   };
 
+  constructor(public std: BlockSuite.Std) {}
+
   mount() {}
 
   unmount() {
     this._blockMap.clear();
     this._widgetMap.clear();
+  }
+
+  viewFromPath(type: 'block', path: string[]): null | BlockElement;
+
+  viewFromPath(type: 'widget', path: string[]): null | WidgetElement;
+
+  viewFromPath(
+    type: 'block' | 'widget',
+    path: string[]
+  ): null | BlockElement | WidgetElement {
+    if (type === 'block') {
+      return this.fromPath(path[path.length - 1]);
+    }
+    const temp = path.slice(-2) as [string, string];
+    const widgetId = temp.join('|');
+    return this._widgetMap.get(widgetId) ?? null;
   }
 }

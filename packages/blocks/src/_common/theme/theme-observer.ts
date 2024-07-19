@@ -1,7 +1,8 @@
 import { Slot } from '@blocksuite/global/utils';
 
 import type { CssVariablesMap } from './css-variables.js';
-import { isCssVariable, StyleVariables } from './css-variables.js';
+
+import { StyleVariables, isCssVariable } from './css-variables.js';
 
 export function extractCssVariables(element: Element): CssVariablesMap {
   const styles = window.getComputedStyle(element);
@@ -23,30 +24,15 @@ export function extractCssVariables(element: Element): CssVariablesMap {
  * Observer theme changing by `data-theme` property
  */
 export class ThemeObserver extends Slot<CssVariablesMap> {
-  private _observer?: MutationObserver;
+  private _cssVariables: CssVariablesMap | null = null;
 
   private _mode = '';
 
-  private _cssVariables: CssVariablesMap | null = null;
+  private _observer?: MutationObserver;
 
-  get cssVariables() {
-    return this._cssVariables;
-  }
-
-  observe(element: HTMLElement) {
+  override dispose() {
+    super.dispose();
     this._observer?.disconnect();
-    this._cssVariables = extractCssVariables(element);
-    this._observer = new MutationObserver(() => {
-      const mode = element.dataset.theme;
-      if (this._mode !== mode) {
-        this._cssVariables = extractCssVariables(element);
-        this.emit(this._cssVariables);
-      }
-    });
-    this._observer.observe(element, {
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
   }
 
   getVariableValue(variable: string) {
@@ -63,8 +49,28 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
     return variable;
   }
 
-  override dispose() {
-    super.dispose();
+  observe(element: HTMLElement) {
     this._observer?.disconnect();
+    this._cssVariables = extractCssVariables(element);
+    this._observer = new MutationObserver(() => {
+      const mode = element.dataset.theme;
+      if (mode && this._mode !== mode) {
+        this._mode = mode;
+        this._cssVariables = extractCssVariables(element);
+        this.emit(this._cssVariables);
+      }
+    });
+    this._observer.observe(element, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  }
+
+  get cssVariables() {
+    return this._cssVariables;
+  }
+
+  get mode() {
+    return this._mode;
   }
 }

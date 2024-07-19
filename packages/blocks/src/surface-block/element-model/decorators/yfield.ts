@@ -1,4 +1,5 @@
 import type { SurfaceElementModel } from '../base.js';
+
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
 import { getDeriveProperties, updateDerivedProp } from './derive.js';

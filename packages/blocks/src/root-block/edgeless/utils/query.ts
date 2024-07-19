@@ -15,24 +15,25 @@ import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtu
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
+import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
 import type { PointLocation } from '../../../surface-block/index.js';
+import type { EdgelessBlockModel } from '../edgeless-block-model.js';
+import type { EdgelessTool } from '../types.js';
+
 import {
   Bound,
   type CanvasElementWithText,
-  clamp,
   ConnectorElementModel,
-  deserializeXYWH,
-  getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
   MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
+  clamp,
+  deserializeXYWH,
+  getQuadBoundsWithRotation,
 } from '../../../surface-block/index.js';
-import type { EdgelessBlockModel } from '../edgeless-block-model.js';
-import type { EdgelessTool } from '../types.js';
 import { getElementsWithoutGroup } from './group.js';
-import type { Viewport } from './viewport.js';
 
 export function isMindmapNode(
   element: EdgelessBlockModel | BlockSuite.EdgelessModelType | null

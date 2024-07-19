@@ -1,43 +1,23 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { EventName, UIEventHandler } from '../../event/index.js';
 import type { BlockService } from '../../service/index.js';
-import { WithDisposable } from '../utils/with-disposable.js';
 import type { BlockElement } from './block-element.js';
 import type { EditorHost } from './lit-host.js';
+
+import { WithDisposable } from '../utils/with-disposable.js';
 
 export class WidgetElement<
   Model extends BlockModel = BlockModel,
   B extends BlockElement = BlockElement,
   S extends BlockService = BlockService,
 > extends SignalWatcher(WithDisposable(LitElement)) {
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @property({ attribute: false })
-  accessor model!: Model;
-
-  path!: string[];
-
-  service!: S;
-
   blockElement!: B;
-
-  get flavour(): string {
-    assertExists(this.blockElement);
-    return this.blockElement.model.flavour;
-  }
-
-  get std() {
-    return this.host.std;
-  }
 
   handleEvent = (
     name: EventName,
@@ -50,6 +30,10 @@ export class WidgetElement<
       })
     );
   };
+
+  path!: string[];
+
+  service!: S;
 
   bindHotKey(
     keymap: Record<string, UIEventHandler>,
@@ -80,7 +64,7 @@ export class WidgetElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.std.view.deleteWidget(this);
+    this.std?.view.deleteWidget(this);
     this.service.specSlots.widgetDisconnected.emit({
       service: this.blockElement.service,
       component: this,
@@ -90,4 +74,22 @@ export class WidgetElement<
   override render(): unknown {
     return null;
   }
+
+  get flavour(): string {
+    assertExists(this.blockElement);
+    return this.blockElement.model.flavour;
+  }
+
+  get std() {
+    return this.host?.std;
+  }
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor model!: Model;
 }

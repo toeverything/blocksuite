@@ -1,9 +1,10 @@
 import { Slot } from '@blocksuite/store';
 
 import type { IPoint } from '../../../_common/types.js';
+
 import { clamp } from '../../../_common/utils/math.js';
 import { Bound } from '../../../surface-block/utils/bound.js';
-import { type IVec2, Vec } from '../../../surface-block/utils/vec.js';
+import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 
 function cutoff(value: number, ref: number, sign: number) {
   if (sign > 0 && value > ref) return ref;
@@ -18,140 +19,31 @@ export const ZOOM_STEP = 0.25;
 export const ZOOM_INITIAL = 1.0;
 
 export class Viewport {
-  get left() {
-    return this._left;
-  }
+  protected _center: IPoint = { x: 0, y: 0 };
 
-  get top() {
-    return this._top;
-  }
+  protected _cumulativeParentScale = 1;
 
-  get width() {
-    return this._width;
-  }
+  protected _el!: HTMLElement;
 
-  get height() {
-    return this._height;
-  }
-
-  get centerX() {
-    return this._center.x;
-  }
-
-  get centerY() {
-    return this._center.y;
-  }
-
-  get center() {
-    return this._center;
-  }
-
-  get zoom() {
-    return this._zoom;
-  }
-
-  /**
-   * @deprecated
-   */
-  get cumulativeParentScale() {
-    return this._cumulativeParentScale;
-  }
-
-  get viewportX() {
-    const { centerX, width, zoom } = this;
-    return centerX - width / 2 / zoom;
-  }
-
-  get viewportY() {
-    const { centerY, height, zoom } = this;
-    return centerY - height / 2 / zoom;
-  }
-
-  get translateX() {
-    return -this.viewportX * this.zoom;
-  }
-
-  get translateY() {
-    return -this.viewportY * this.zoom;
-  }
-
-  get viewportMinXY() {
-    const { centerX, centerY, width, height, zoom } = this;
-    return {
-      x: centerX - width / 2 / zoom,
-      y: centerY - height / 2 / zoom,
-    };
-  }
-
-  get viewportMaxXY() {
-    const { centerX, centerY, width, height, zoom } = this;
-    return {
-      x: centerX + width / 2 / zoom,
-      y: centerY + height / 2 / zoom,
-    };
-  }
-
-  get viewportBounds() {
-    const { viewportMinXY, viewportMaxXY } = this;
-
-    return Bound.from({
-      ...viewportMinXY,
-      w: (viewportMaxXY.x - viewportMinXY.x) / this._cumulativeParentScale,
-      h: (viewportMaxXY.y - viewportMinXY.y) / this._cumulativeParentScale,
-    });
-  }
-
-  get boundingClientRect() {
-    return this._el.getBoundingClientRect();
-  }
-
-  /**
-   * Note this is different from the zoom property.
-   * The editor itself may be scaled by outer container which is common in nested editor scenarios.
-   * This property is used to calculate the scale of the editor.
-   */
-  get scale() {
-    return this.boundingClientRect.width / this._el.offsetWidth;
-  }
-
-  // Does not allow the user to move and zoom the canvas in copilot tool
-  get locked() {
-    return this._locked;
-  }
-
-  set locked(locked: boolean) {
-    this._locked = locked;
-  }
-
-  private _syncFlag = false;
+  protected _height = 0;
 
   protected _left = 0;
+
+  protected _locked = false;
+
+  protected _rafId: number | null = null;
+
+  private _syncFlag = false;
 
   protected _top = 0;
 
   protected _width = 0;
 
-  protected _height = 0;
-
-  protected _center: IPoint = { x: 0, y: 0 };
-
   protected _zoom: number = 1.0;
-
-  protected _rafId: number | null = null;
-
-  protected _el!: HTMLElement;
-
-  protected _cumulativeParentScale = 1;
-
-  protected _locked = false;
 
   ZOOM_MAX = ZOOM_MAX;
 
   ZOOM_MIN = ZOOM_MIN;
-
-  viewportUpdated = new Slot<{ zoom: number; center: IVec2 }>();
-
-  viewportMoved = new Slot<IVec2>();
 
   sizeUpdated = new Slot<{
     width: number;
@@ -159,6 +51,28 @@ export class Viewport {
     left: number;
     top: number;
   }>();
+
+  viewportMoved = new Slot<IVec>();
+
+  viewportUpdated = new Slot<{ zoom: number; center: IVec }>();
+
+  applyDeltaCenter(deltaX: number, deltaY: number) {
+    this.setCenter(this.centerX + deltaX, this.centerY + deltaY);
+  }
+
+  dispose() {
+    this.sizeUpdated.dispose();
+    this.viewportMoved.dispose();
+    this.viewportUpdated.dispose();
+  }
+
+  isInViewport(bound: Bound) {
+    const viewportBounds = Bound.from(this.viewportBounds);
+    return (
+      viewportBounds.contains(bound) ||
+      viewportBounds.isIntersectWithBound(bound)
+    );
+  }
 
   onResize() {
     const { centerX, centerY, zoom, width: oldWidth, height: oldHeight } = this;
@@ -172,6 +86,15 @@ export class Viewport {
     );
   }
 
+  setCenter(centerX: number, centerY: number) {
+    this._center.x = centerX;
+    this._center.y = centerY;
+    this.viewportUpdated.emit({
+      zoom: this.zoom,
+      center: Vec.toVec(this.center) as IVec,
+    });
+  }
+
   setContainer(container: HTMLElement) {
     const rect = container.getBoundingClientRect();
 
@@ -180,80 +103,17 @@ export class Viewport {
     this.setRect(rect.left, rect.top, rect.width, rect.height);
   }
 
-  toViewCoordFromClientCoord([x, y]: IVec2): IVec2 {
-    const { left, top } = this;
-    return [x - left, y - top];
-  }
-
-  toModelCoordFromClientCoord([x, y]: IVec2): IVec2 {
-    const { left, top } = this;
-    return this.toModelCoord(x - left, y - top);
-  }
-
-  toModelCoord(viewX: number, viewY: number): IVec2 {
-    const { viewportX, viewportY, zoom, scale } = this;
-    return [viewportX + viewX / zoom / scale, viewportY + viewY / zoom / scale];
-  }
-
-  toViewCoord(modelX: number, modelY: number): IVec2 {
-    const { viewportX, viewportY, zoom, scale } = this;
-    return [
-      (modelX - viewportX) * zoom * scale,
-      (modelY - viewportY) * zoom * scale,
-    ];
-  }
-
-  toModelBound(bound: Bound) {
-    const { w, h } = bound;
-    const [x, y] = this.toModelCoord(bound.x, bound.y);
-
-    return new Bound(x, y, w / this.zoom, h / this.zoom);
-  }
-
-  toViewBound(bound: Bound) {
-    const { w, h } = bound;
-    const [x, y] = this.toViewCoord(bound.x, bound.y);
-
-    return new Bound(x, y, w * this.zoom, h * this.zoom);
-  }
-
-  setCenter(centerX: number, centerY: number) {
-    this._center.x = centerX;
-    this._center.y = centerY;
-    this.viewportUpdated.emit({
-      zoom: this.zoom,
-      center: Vec.toVec(this.center) as IVec2,
+  setRect(left: number, top: number, width: number, height: number) {
+    this._left = left;
+    this._top = top;
+    this._width = width;
+    this._height = height;
+    this.sizeUpdated.emit({
+      left,
+      top,
+      width,
+      height,
     });
-  }
-
-  setZoom(zoom: number, focusPoint?: IPoint) {
-    const prevZoom = this.zoom;
-    focusPoint = (focusPoint ?? this._center) as IPoint;
-    this._zoom = clamp(zoom, this.ZOOM_MIN, this.ZOOM_MAX);
-    const newZoom = this.zoom;
-
-    const offset = Vec.sub(Vec.toVec(this.center), Vec.toVec(focusPoint));
-    const newCenter = Vec.add(
-      Vec.toVec(focusPoint),
-      Vec.mul(offset, prevZoom / newZoom)
-    );
-    this.setCenter(newCenter[0], newCenter[1]);
-    this.viewportUpdated.emit({
-      zoom: this.zoom,
-      center: Vec.toVec(this.center) as IVec2,
-    });
-  }
-
-  applyDeltaCenter(deltaX: number, deltaY: number) {
-    this.setCenter(this.centerX + deltaX, this.centerY + deltaY);
-  }
-
-  isInViewport(bound: Bound) {
-    const viewportBounds = Bound.from(this.viewportBounds);
-    return (
-      viewportBounds.contains(bound) ||
-      viewportBounds.isIntersectWithBound(bound)
-    );
   }
 
   setViewport(
@@ -267,7 +127,7 @@ export class Viewport {
       if (cofficient === 1) {
         this.smoothTranslate(newCenter[0], newCenter[1]);
       } else {
-        const center = [this.centerX, this.centerY];
+        const center: IVec = [this.centerX, this.centerY];
         const focusPoint = Vec.mul(
           Vec.sub(newCenter, Vec.mul(center, cofficient)),
           1 / (1 - cofficient)
@@ -292,7 +152,7 @@ export class Viewport {
       this.ZOOM_MIN,
       (this.height - (pt + pb)) / bound.h
     );
-    const center = [
+    const center: IVec = [
       bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2,
       bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2,
     ];
@@ -300,35 +160,22 @@ export class Viewport {
     this.setViewport(zoom, center, smooth);
   }
 
-  setRect(left: number, top: number, width: number, height: number) {
-    this._left = left;
-    this._top = top;
-    this._width = width;
-    this._height = height;
-    this.sizeUpdated.emit({
-      left,
-      top,
-      width,
-      height,
+  setZoom(zoom: number, focusPoint?: IPoint) {
+    const prevZoom = this.zoom;
+    focusPoint = (focusPoint ?? this._center) as IPoint;
+    this._zoom = clamp(zoom, this.ZOOM_MIN, this.ZOOM_MAX);
+    const newZoom = this.zoom;
+
+    const offset = Vec.sub(Vec.toVec(this.center), Vec.toVec(focusPoint));
+    const newCenter = Vec.add(
+      Vec.toVec(focusPoint),
+      Vec.mul(offset, prevZoom / newZoom)
+    );
+    this.setCenter(newCenter[0], newCenter[1]);
+    this.viewportUpdated.emit({
+      zoom: this.zoom,
+      center: Vec.toVec(this.center) as IVec,
     });
-  }
-
-  smoothZoom(zoom: number, focusPoint?: IPoint) {
-    const delta = zoom - this.zoom;
-    if (this._rafId) cancelAnimationFrame(this._rafId);
-
-    const innerSmoothZoom = () => {
-      this._rafId = requestAnimationFrame(() => {
-        const sign = delta > 0 ? 1 : -1;
-        const total = 10;
-        const step = delta / total;
-        const nextZoom = cutoff(this.zoom + step, zoom, sign);
-
-        this.setZoom(nextZoom, focusPoint);
-        if (nextZoom != zoom) innerSmoothZoom();
-      });
-    };
-    innerSmoothZoom();
   }
 
   smoothTranslate(x: number, y: number) {
@@ -352,6 +199,24 @@ export class Viewport {
       });
     };
     innerSmoothTranslate();
+  }
+
+  smoothZoom(zoom: number, focusPoint?: IPoint) {
+    const delta = zoom - this.zoom;
+    if (this._rafId) cancelAnimationFrame(this._rafId);
+
+    const innerSmoothZoom = () => {
+      this._rafId = requestAnimationFrame(() => {
+        const sign = delta > 0 ? 1 : -1;
+        const total = 10;
+        const step = delta / total;
+        const nextZoom = cutoff(this.zoom + step, zoom, sign);
+
+        this.setZoom(nextZoom, focusPoint);
+        if (nextZoom != zoom) innerSmoothZoom();
+      });
+    };
+    innerSmoothZoom();
   }
 
   sync(viewport: Viewport) {
@@ -393,9 +258,145 @@ export class Viewport {
     };
   }
 
-  dispose() {
-    this.sizeUpdated.dispose();
-    this.viewportMoved.dispose();
-    this.viewportUpdated.dispose();
+  toModelBound(bound: Bound) {
+    const { w, h } = bound;
+    const [x, y] = this.toModelCoord(bound.x, bound.y);
+
+    return new Bound(x, y, w / this.zoom, h / this.zoom);
+  }
+
+  toModelCoord(viewX: number, viewY: number): IVec {
+    const { viewportX, viewportY, zoom, scale } = this;
+    return [viewportX + viewX / zoom / scale, viewportY + viewY / zoom / scale];
+  }
+
+  toModelCoordFromClientCoord([x, y]: IVec): IVec {
+    const { left, top } = this;
+    return this.toModelCoord(x - left, y - top);
+  }
+
+  toViewBound(bound: Bound) {
+    const { w, h } = bound;
+    const [x, y] = this.toViewCoord(bound.x, bound.y);
+
+    return new Bound(x, y, w * this.zoom, h * this.zoom);
+  }
+
+  toViewCoord(modelX: number, modelY: number): IVec {
+    const { viewportX, viewportY, zoom, scale } = this;
+    return [
+      (modelX - viewportX) * zoom * scale,
+      (modelY - viewportY) * zoom * scale,
+    ];
+  }
+
+  toViewCoordFromClientCoord([x, y]: IVec): IVec {
+    const { left, top } = this;
+    return [x - left, y - top];
+  }
+
+  get boundingClientRect() {
+    return this._el.getBoundingClientRect();
+  }
+
+  get center() {
+    return this._center;
+  }
+
+  get centerX() {
+    return this._center.x;
+  }
+
+  get centerY() {
+    return this._center.y;
+  }
+
+  /**
+   * @deprecated
+   */
+  get cumulativeParentScale() {
+    return this._cumulativeParentScale;
+  }
+
+  get height() {
+    return this._height;
+  }
+
+  get left() {
+    return this._left;
+  }
+
+  // Does not allow the user to move and zoom the canvas in copilot tool
+  get locked() {
+    return this._locked;
+  }
+
+  set locked(locked: boolean) {
+    this._locked = locked;
+  }
+
+  /**
+   * Note this is different from the zoom property.
+   * The editor itself may be scaled by outer container which is common in nested editor scenarios.
+   * This property is used to calculate the scale of the editor.
+   */
+  get scale() {
+    return this.boundingClientRect.width / this._el.offsetWidth;
+  }
+
+  get top() {
+    return this._top;
+  }
+
+  get translateX() {
+    return -this.viewportX * this.zoom;
+  }
+
+  get translateY() {
+    return -this.viewportY * this.zoom;
+  }
+
+  get viewportBounds() {
+    const { viewportMinXY, viewportMaxXY } = this;
+
+    return Bound.from({
+      ...viewportMinXY,
+      w: (viewportMaxXY.x - viewportMinXY.x) / this._cumulativeParentScale,
+      h: (viewportMaxXY.y - viewportMinXY.y) / this._cumulativeParentScale,
+    });
+  }
+
+  get viewportMaxXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX + width / 2 / zoom,
+      y: centerY + height / 2 / zoom,
+    };
+  }
+
+  get viewportMinXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX - width / 2 / zoom,
+      y: centerY - height / 2 / zoom,
+    };
+  }
+
+  get viewportX() {
+    const { centerX, width, zoom } = this;
+    return centerX - width / 2 / zoom;
+  }
+
+  get viewportY() {
+    const { centerY, height, zoom } = this;
+    return centerY - height / 2 / zoom;
+  }
+
+  get width() {
+    return this._width;
+  }
+
+  get zoom() {
+    return this._zoom;
   }
 }

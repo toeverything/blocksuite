@@ -1,6 +1,7 @@
 import type { GroupElementModel } from '../../../element-model/group.js';
-import { Bound } from '../../../utils/bound.js';
 import type { Renderer } from '../../renderer.js';
+
+import { Bound } from '../../../utils/bound.js';
 import { titleRenderParams } from './utils.js';
 
 export function group(
@@ -32,7 +33,7 @@ function renderTitle(
   ctx: CanvasRenderingContext2D,
   renderer: Renderer
 ) {
-  const zoom = renderer.zoom;
+  const zoom = renderer.viewport.zoom;
   const {
     titleWidth,
     text,

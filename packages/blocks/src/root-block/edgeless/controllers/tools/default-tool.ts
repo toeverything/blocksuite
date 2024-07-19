@@ -1,5 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
+
+import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
+import type { FrameBlockModel } from '../../../../frame-block/index.js';
+import type { NoteBlockModel } from '../../../../note-block/note-model.js';
+import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
+import type { EdgelessTool } from '../../types.js';
 
 import {
   asyncFocusRichText,
@@ -10,9 +17,6 @@ import {
   resetNativeSelection,
 } from '../../../../_common/utils/index.js';
 import { clamp } from '../../../../_common/utils/math.js';
-import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import {
   type IHitTestOptions,
   SurfaceGroupLikeModel,
@@ -25,21 +29,14 @@ import {
   ShapeElementModel,
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
-import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
 import {
   hideTargetConnector,
   moveSubtree,
   showMergeIndicator,
 } from '../../../../surface-block/element-model/utils/mindmap/utils.js';
-import {
-  Bound,
-  type IVec,
-  type IVec2,
-  Vec,
-} from '../../../../surface-block/index.js';
+import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import { intersects } from '../../../../surface-block/utils/math-utils.js';
-import type { EdgelessTool } from '../../types.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { prepareCloneData } from '../../utils/clone-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
@@ -60,20 +57,20 @@ import {
 import { EdgelessToolController } from './edgeless-tool.js';
 
 export enum DefaultModeDragType {
+  /** press alt/option key to clone selected  */
+  AltCloning = 'alt-cloning',
+  /** Moving connector label */
+  ConnectorLabelMoving = 'connector-label-moving',
   /** Moving selected contents */
   ContentMoving = 'content-moving',
-  /** Expanding the dragging area, select the content covered inside */
-  Selecting = 'selecting',
   /** Native range dragging inside active note block */
   NativeEditing = 'native-editing',
   /** Default void state */
   None = 'none',
   /** Dragging preview */
   PreviewDragging = 'preview-dragging',
-  /** press alt/option key to clone selected  */
-  AltCloning = 'alt-cloning',
-  /** Moving connector label */
-  ConnectorLabelMoving = 'connector-label-moving',
+  /** Expanding the dragging area, select the content covered inside */
+  Selecting = 'selecting',
 }
 
 type DefaultTool = {
@@ -81,44 +78,61 @@ type DefaultTool = {
 };
 
 export class DefaultToolController extends EdgelessToolController<DefaultTool> {
-  private _dragStartPos: IVec = [0, 0];
+  private _alignBound = new Bound();
+
+  private _autoPanTimer: number | null = null;
+
+  private _clearDisposable = () => {
+    if (this._disposables) {
+      this._disposables.dispose();
+      this._disposables = null;
+    }
+  };
+
+  private _clearLastSelection = () => {
+    if (this.edgelessSelectionManager.empty) {
+      this.edgelessSelectionManager.clearLast();
+    }
+  };
+
+  private _clearMindMapHoverState: (() => void)[] = [];
+
+  private _clearSelectingState = () => {
+    this._stopAutoPanning();
+    this._clearDisposable();
+
+    this._dragging = false;
+    this._wheeling = false;
+    this._dragStartPos = [0, 0];
+    this._dragLastPos = [0, 0];
+    this._dragStartModelCoord = [0, 0];
+    this._dragLastModelCoord = [0, 0];
+    this._edgeless.slots.draggingAreaUpdated.emit();
+
+    // Move Selection with space
+    this._moveSelectionDragStartTemp = [0, 0];
+    this._moveSelectionStartPos = [0, 0];
+  };
+
+  private _disposables: DisposableGroup | null = null;
+
+  private _dragLastModelCoord: IVec = [0, 0];
 
   private _dragLastPos: IVec = [0, 0];
 
   private _dragStartModelCoord: IVec = [0, 0];
 
-  private _dragLastModelCoord: IVec = [0, 0];
-
-  private _lock = false;
-
-  // Do not select the text, when click again after activating the note.
-  private _isDoubleClickedOnMask = false;
-
-  private _alignBound = new Bound();
-
-  private _selectedBounds: Bound[] = [];
-
-  private _toBeMoved: BlockSuite.EdgelessModelType[] = [];
-
-  private _autoPanTimer: number | null = null;
+  private _dragStartPos: IVec = [0, 0];
 
   private _dragging = false;
 
-  private _wheeling = false;
-
-  private _disposables: DisposableGroup | null = null;
-
-  // For moving selection with space with mouse
-  private _moveSelectionStartPos: IVec = [0, 0];
-
-  private _moveSelectionDragStartTemp: IVec = [0, 0];
-
-  // For moving the connector label
-  private _selectedConnector: ConnectorElementModel | null = null;
-
-  private _selectedConnectorLabelBounds: Bound | null = null;
-
-  private _clearMindMapHoverState: (() => void)[] = [];
+  private _draggingSingleMindmap: null | {
+    mindmap: MindmapElementModel;
+    node: MindmapNode;
+    startElementBound: Bound;
+    clear?: () => void;
+    detach?: boolean;
+  } = null;
 
   private _hoveredMindMap: null | {
     mindmap: MindmapElementModel;
@@ -129,80 +143,108 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     >['mergeInfo'];
   } = null;
 
-  private _draggingSingleMindmap: null | {
-    mindmap: MindmapElementModel;
-    node: MindmapNode;
-    startElementBound: Bound;
-    clear?: () => void;
-    detach?: boolean;
-  } = null;
+  // Do not select the text, when click again after activating the note.
+  private _isDoubleClickedOnMask = false;
+
+  private _lock = false;
+
+  private _moveSelectionDragStartTemp: IVec = [0, 0];
+
+  // For moving selection with space with mouse
+  private _moveSelectionStartPos: IVec = [0, 0];
+
+  private _panViewport = (delta: IVec) => {
+    const { viewport } = this._service;
+    viewport.applyDeltaCenter(delta[0], delta[1]);
+  };
+
+  private _selectedBounds: Bound[] = [];
+
+  // For moving the connector label
+  private _selectedConnector: ConnectorElementModel | null = null;
+
+  private _selectedConnectorLabelBounds: Bound | null = null;
+
+  private _startAutoPanning = (delta: IVec) => {
+    this._panViewport(delta);
+    this._stopAutoPanning();
+
+    this._autoPanTimer = window.setInterval(() => {
+      this._panViewport(delta);
+      this._updateSelectingState();
+    }, 30);
+  };
+
+  private _stopAutoPanning = () => {
+    if (this._autoPanTimer) {
+      clearTimeout(this._autoPanTimer);
+      this._autoPanTimer = null;
+    }
+  };
+
+  private _toBeMoved: BlockSuite.EdgelessModelType[] = [];
+
+  private _updateSelectingState = () => {
+    const { tools, service } = this._edgeless;
+    const { selection } = service;
+
+    if (tools.spaceBar) {
+      /* Move the selection if space is pressed */
+      const [moveCurX, moveCurY] = this._dragLastPos;
+      const zoom = service.viewport.zoom;
+
+      const dx = (moveCurX - this._moveSelectionStartPos[0]) / zoom;
+      const dy = (moveCurY - this._moveSelectionStartPos[1]) / zoom;
+
+      const [startX, startY] = service.viewport.toModelCoord(
+        this._moveSelectionDragStartTemp[0],
+        this._moveSelectionDragStartTemp[1]
+      );
+      this._dragStartModelCoord[0] = startX + dx;
+      this._dragStartModelCoord[1] = startY + dy;
+    }
+
+    const startX = this._dragStartModelCoord[0];
+    const startY = this._dragStartModelCoord[1];
+
+    // Should convert the last drag position to model coordinate
+    const [curX, curY] = service.viewport.toModelCoord(
+      this._dragLastPos[0],
+      this._dragLastPos[1]
+    );
+
+    const x = Math.min(startX, curX);
+    const y = Math.min(startY, curY);
+
+    const w = Math.abs(startX - curX);
+    const h = Math.abs(startY - curY);
+    const bound = new Bound(x, y, w, h);
+
+    const elements = service.pickElementsByBound(bound);
+
+    const set = new Set(
+      tools.shiftKey ? [...elements, ...selection.selectedElements] : elements
+    );
+
+    this.edgelessSelectionManager.set({
+      elements: Array.from(set).map(element => element.id),
+      editing: false,
+    });
+
+    // Record the last model coordinate for dragging area updating
+    this._dragLastModelCoord = [curX, curY];
+    this._edgeless.slots.draggingAreaUpdated.emit();
+  };
+
+  private _wheeling = false;
+
+  dragType = DefaultModeDragType.None;
+
+  override enableHover = true;
 
   readonly tool = {
     type: 'default',
   } as DefaultTool;
-
-  override enableHover = true;
-
-  dragType = DefaultModeDragType.None;
-
-  override get draggingArea() {
-    if (this.dragType === DefaultModeDragType.Selecting) {
-      const [startX, startY] = this._service.viewport.toViewCoord(
-        this._dragStartModelCoord[0],
-        this._dragStartModelCoord[1]
-      );
-      const [endX, endY] = this._service.viewport.toViewCoord(
-        this._dragLastModelCoord[0],
-        this._dragLastModelCoord[1]
-      );
-      return {
-        start: new DOMPoint(startX, startY),
-        end: new DOMPoint(endX, endY),
-      };
-    }
-    return null;
-  }
-
-  get edgelessSelectionManager() {
-    return this._edgeless.service.selection;
-  }
-
-  get zoom() {
-    return this._edgeless.service.viewport.zoom;
-  }
-
-  get readonly() {
-    return this._edgeless.doc.readonly;
-  }
-
-  private _pick(x: number, y: number, options?: IHitTestOptions) {
-    const service = this._service;
-    const modelPos = service.viewport.toModelCoord(x, y);
-    const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
-
-    if (group instanceof MindmapElementModel) {
-      const picked = service.pickElement(modelPos[0], modelPos[1], {
-        ...((options ?? {}) as IHitTestOptions),
-        all: true,
-      });
-
-      let pickedIdx = picked.length - 1;
-
-      while (pickedIdx >= 0) {
-        const element = picked[pickedIdx];
-        if (element === group) {
-          pickedIdx -= 1;
-          continue;
-        }
-
-        break;
-      }
-
-      return picked[pickedIdx] ?? null;
-    }
-
-    return group;
-  }
 
   private _addEmptyParagraphBlock(
     block: NoteBlockModel | EdgelessTextBlockModel
@@ -217,11 +259,25 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  private _isDraggable(element: BlockSuite.EdgelessModelType) {
-    return !(
-      element instanceof ConnectorElementModel &&
-      !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
-    );
+  private async _cloneContent() {
+    this._lock = true;
+    const { _edgeless } = this;
+    const { clipboardController } = _edgeless;
+
+    const snapshot = await prepareCloneData(this._toBeMoved, _edgeless.std);
+
+    const bound = edgelessElementsBound(this._toBeMoved);
+    const { canvasElements, blockModels } =
+      await clipboardController.createElementsFromClipboardData(
+        snapshot,
+        bound.center
+      );
+
+    this._toBeMoved = [...canvasElements, ...blockModels];
+    this.edgelessSelectionManager.set({
+      elements: this._toBeMoved.map(e => e.id),
+      editing: false,
+    });
   }
 
   private _determineDragType(e: PointerEventState): DefaultModeDragType {
@@ -292,131 +348,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  private async _cloneContent() {
-    this._lock = true;
-    const { _edgeless } = this;
-    const { clipboardController } = _edgeless;
-
-    const snapshot = await prepareCloneData(this._toBeMoved, _edgeless.std);
-
-    const bound = edgelessElementsBound(this._toBeMoved);
-    const { canvasElements, blockModels } =
-      await clipboardController.createElementsFromClipboardData(
-        snapshot,
-        bound.center
-      );
-
-    this._toBeMoved = [...canvasElements, ...blockModels];
-    this.edgelessSelectionManager.set({
-      elements: this._toBeMoved.map(e => e.id),
-      editing: false,
-    });
-  }
-
-  private _updateSelectingState = () => {
-    const { tools, service } = this._edgeless;
-    const { selection } = service;
-
-    if (tools.spaceBar) {
-      /* Move the selection if space is pressed */
-      const [moveCurX, moveCurY] = this._dragLastPos;
-      const zoom = service.viewport.zoom;
-
-      const dx = (moveCurX - this._moveSelectionStartPos[0]) / zoom;
-      const dy = (moveCurY - this._moveSelectionStartPos[1]) / zoom;
-
-      const [startX, startY] = service.viewport.toModelCoord(
-        this._moveSelectionDragStartTemp[0],
-        this._moveSelectionDragStartTemp[1]
-      );
-      this._dragStartModelCoord[0] = startX + dx;
-      this._dragStartModelCoord[1] = startY + dy;
-    }
-
-    const startX = this._dragStartModelCoord[0];
-    const startY = this._dragStartModelCoord[1];
-
-    // Should convert the last drag position to model coordinate
-    const [curX, curY] = service.viewport.toModelCoord(
-      this._dragLastPos[0],
-      this._dragLastPos[1]
-    );
-
-    const x = Math.min(startX, curX);
-    const y = Math.min(startY, curY);
-
-    const w = Math.abs(startX - curX);
-    const h = Math.abs(startY - curY);
-    const bound = new Bound(x, y, w, h);
-
-    const elements = service.pickElementsByBound(bound);
-
-    const set = new Set(
-      tools.shiftKey ? [...elements, ...selection.selectedElements] : elements
-    );
-
-    this.edgelessSelectionManager.set({
-      elements: Array.from(set).map(element => element.id),
-      editing: false,
-    });
-
-    // Record the last model coordinate for dragging area updating
-    this._dragLastModelCoord = [curX, curY];
-    this._edgeless.slots.draggingAreaUpdated.emit();
-  };
-
-  private _panViewport = (delta: IVec) => {
-    const { viewport } = this._service;
-    viewport.applyDeltaCenter(delta[0], delta[1]);
-  };
-
-  private _stopAutoPanning = () => {
-    if (this._autoPanTimer) {
-      clearTimeout(this._autoPanTimer);
-      this._autoPanTimer = null;
-    }
-  };
-
-  private _clearLastSelection = () => {
-    if (this.edgelessSelectionManager.empty) {
-      this.edgelessSelectionManager.clearLast();
-    }
-  };
-
-  private _clearDisposable = () => {
-    if (this._disposables) {
-      this._disposables.dispose();
-      this._disposables = null;
-    }
-  };
-
-  private _startAutoPanning = (delta: IVec) => {
-    this._panViewport(delta);
-    this._stopAutoPanning();
-
-    this._autoPanTimer = window.setInterval(() => {
-      this._panViewport(delta);
-      this._updateSelectingState();
-    }, 30);
-  };
-
-  private _clearSelectingState = () => {
-    this._stopAutoPanning();
-    this._clearDisposable();
-
-    this._dragging = false;
-    this._wheeling = false;
-    this._dragStartPos = [0, 0];
-    this._dragLastPos = [0, 0];
-    this._dragStartModelCoord = [0, 0];
-    this._dragLastModelCoord = [0, 0];
-    this._edgeless.slots.draggingAreaUpdated.emit();
-
-    // Move Selection with space
-    this._moveSelectionDragStartTemp = [0, 0];
-    this._moveSelectionStartPos = [0, 0];
-  };
-
   private _filterConnectedConnector() {
     this._toBeMoved = this._toBeMoved.filter(ele => {
       if (
@@ -433,6 +364,188 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
       return true;
     });
+  }
+
+  private _isDraggable(element: BlockSuite.EdgelessModelType) {
+    return !(
+      element instanceof ConnectorElementModel &&
+      !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
+    );
+  }
+
+  private _moveContent(
+    [dx, dy]: IVec,
+    alignBound: Bound,
+    shifted?: boolean,
+    shouldClone?: boolean
+  ) {
+    alignBound.x += dx;
+    alignBound.y += dy;
+
+    const alignRst = this._edgeless.service.snap.align(alignBound);
+    const delta = [dx + alignRst.dx, dy + alignRst.dy];
+
+    if (shifted) {
+      const angle = Math.abs(Math.atan2(delta[1], delta[0]));
+      const direction =
+        angle < Math.PI / 4 || angle > 3 * (Math.PI / 4) ? 'x' : 'y';
+      delta[direction === 'x' ? 1 : 0] = 0;
+    }
+
+    this._toBeMoved.forEach((element, index) => {
+      const isGraphicElement = isCanvasElement(element);
+
+      if (isGraphicElement && !this._isDraggable(element)) return;
+
+      let bound = this._selectedBounds[index];
+      if (shouldClone) bound = bound.clone();
+
+      bound.x += delta[0];
+      bound.y += delta[1];
+
+      if (isGraphicElement) {
+        if (!this._lock) {
+          this._lock = true;
+          this._doc.captureSync();
+        }
+
+        if (element instanceof ConnectorElementModel) {
+          element.moveTo(bound);
+        }
+
+        this._service.updateElement(element.id, {
+          xywh: bound.serialize(),
+        });
+      } else {
+        this._service.updateElement(element.id, {
+          xywh: bound.serialize(),
+        });
+      }
+    });
+
+    if (this._draggingSingleMindmap) {
+      const {
+        node: currentNode,
+        mindmap: currentMindmap,
+        startElementBound,
+      } = this._draggingSingleMindmap;
+      const current = currentNode.element;
+      const subtree = currentMindmap.getNode(current.id)!;
+      const [x, y] = this._service.viewport.toModelCoord(
+        this._dragLastPos[0],
+        this._dragLastPos[1]
+      );
+
+      this._clearMindMapHoverState.forEach(fn => fn());
+      this._clearMindMapHoverState = [];
+
+      const hoveredMindmap = this._edgeless.service
+        .pickElement(x, y, { all: true, expand: 40 })
+        .filter(
+          el =>
+            (el.group as BlockSuite.SurfaceElementModelType)?.type ===
+              'mindmap' && el !== current
+        )
+        .map(el => ({
+          element: el as ShapeElementModel,
+          node: (el.group as MindmapElementModel).getNode(el.id)!,
+          mindmap: el.group as MindmapElementModel,
+        }))[0];
+
+      if (hoveredMindmap) {
+        const { node, element, mindmap } = hoveredMindmap;
+        element.opacity = 0.8;
+
+        const { clear, mergeInfo } =
+          showMergeIndicator(mindmap, node, subtree, [x, y]) ?? {};
+        clear && this._clearMindMapHoverState.push(clear);
+        const clearHide = hideTargetConnector(currentMindmap, subtree);
+        clearHide && this._clearMindMapHoverState.push(clearHide);
+
+        const layoutType = mergeInfo?.layoutType;
+
+        this._clearMindMapHoverState.push(() => {
+          element.opacity = 1;
+        });
+        currentMindmap.layout(subtree, false, layoutType ?? undefined);
+        this._hoveredMindMap = {
+          node,
+          mindmap,
+          mergeInfo,
+        };
+      } else {
+        const bound = new Bound(x, y, 40, 40);
+
+        if (
+          !(
+            intersects(startElementBound, bound) ||
+            startElementBound.contains(bound)
+          ) &&
+          currentMindmap.tree.id !== currentNode.id
+        ) {
+          const clearHide = hideTargetConnector(currentMindmap, subtree);
+          clearHide && this._clearMindMapHoverState.push(clearHide);
+          this._draggingSingleMindmap.detach = true;
+        } else {
+          this._draggingSingleMindmap.detach = false;
+        }
+
+        currentMindmap.layout(subtree, false);
+        this._hoveredMindMap = null;
+      }
+    }
+
+    const frame = this._edgeless.service.frame.selectFrame(this._toBeMoved);
+    frame
+      ? this._surface.overlays.frame.highlight(frame as FrameBlockModel)
+      : this._surface.overlays.frame.clear();
+  }
+
+  private _moveLabel(delta: IVec) {
+    const connector = this._selectedConnector;
+    let bounds = this._selectedConnectorLabelBounds;
+    if (!connector || !bounds) return;
+    bounds = bounds.clone();
+    const center = connector.getNearestPoint(
+      Vec.add(bounds.center, delta) as IVec
+    );
+    const distance = connector.getOffsetDistanceByPoint(center as IVec);
+    bounds.center = center;
+    this._service.updateElement(connector.id, {
+      labelXYWH: bounds.toXYWH(),
+      labelOffset: {
+        distance,
+      },
+    });
+  }
+
+  private _pick(x: number, y: number, options?: IHitTestOptions) {
+    const service = this._service;
+    const modelPos = service.viewport.toModelCoord(x, y);
+    const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
+
+    if (group instanceof MindmapElementModel) {
+      const picked = service.pickElement(modelPos[0], modelPos[1], {
+        ...((options ?? {}) as IHitTestOptions),
+        all: true,
+      });
+
+      let pickedIdx = picked.length - 1;
+
+      while (pickedIdx >= 0) {
+        const element = picked[pickedIdx];
+        if (element === group) {
+          pickedIdx -= 1;
+          continue;
+        }
+
+        break;
+      }
+
+      return picked[pickedIdx] ?? null;
+    }
+
+    return group;
   }
 
   private initializeDragState(
@@ -515,149 +628,16 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  private _moveContent(
-    [dx, dy]: IVec,
-    alignBound: Bound,
-    shifted?: boolean,
-    shouldClone?: boolean
-  ) {
-    alignBound.x += dx;
-    alignBound.y += dy;
-
-    const alignRst = this._edgeless.service.snap.align(alignBound);
-    const delta = [dx + alignRst.dx, dy + alignRst.dy];
-
-    if (shifted) {
-      const angle = Math.abs(Math.atan2(delta[1], delta[0]));
-      const direction =
-        angle < Math.PI / 4 || angle > 3 * (Math.PI / 4) ? 'x' : 'y';
-      delta[direction === 'x' ? 1 : 0] = 0;
-    }
-
-    this._toBeMoved.forEach((element, index) => {
-      const isGraphicElement = isCanvasElement(element);
-
-      if (isGraphicElement && !this._isDraggable(element)) return;
-
-      let bound = this._selectedBounds[index];
-      if (shouldClone) bound = bound.clone();
-
-      bound.x += delta[0];
-      bound.y += delta[1];
-
-      if (isGraphicElement) {
-        if (!this._lock) {
-          this._lock = true;
-          this._doc.captureSync();
-        }
-
-        if (element instanceof ConnectorElementModel) {
-          element.moveTo(bound);
-        }
-
-        this._service.updateElement(element.id, {
-          xywh: bound.serialize(),
-        });
-      } else {
-        this._service.updateElement(element.id, {
-          xywh: bound.serialize(),
-        });
-      }
-    });
-
-    if (this._draggingSingleMindmap) {
-      const {
-        node: currentNode,
-        mindmap: currentMindmap,
-        startElementBound,
-      } = this._draggingSingleMindmap;
-      const current = currentNode.element;
-      const subtree = currentMindmap.getNode(current.id)!;
-      const [x, y] = this._service.viewport.toModelCoord(
-        this._dragLastPos[0],
-        this._dragLastPos[1]
-      );
-
-      this._clearMindMapHoverState.forEach(fn => fn());
-      this._clearMindMapHoverState = [];
-
-      const hoveredMindmap = this._edgeless.service
-        .pickElement(x, y, { all: true, expand: 40 })
-        .filter(el => el.group?.type === 'mindmap' && el !== current)
-        .map(el => ({
-          element: el as ShapeElementModel,
-          node: (el.group as MindmapElementModel).getNode(el.id)!,
-          mindmap: el.group as MindmapElementModel,
-        }))[0];
-
-      if (hoveredMindmap) {
-        const { node, element, mindmap } = hoveredMindmap;
-        element.opacity = 0.8;
-
-        const { clear, mergeInfo } =
-          showMergeIndicator(mindmap, node, subtree, [x, y]) ?? {};
-        clear && this._clearMindMapHoverState.push(clear);
-        const clearHide = hideTargetConnector(currentMindmap, subtree);
-        clearHide && this._clearMindMapHoverState.push(clearHide);
-
-        const layoutType = mergeInfo?.layoutType;
-
-        this._clearMindMapHoverState.push(() => {
-          element.opacity = 1;
-        });
-        currentMindmap.layout(subtree, false, layoutType ?? undefined);
-        this._hoveredMindMap = {
-          node,
-          mindmap,
-          mergeInfo,
-        };
-      } else {
-        const bound = new Bound(x, y, 40, 40);
-
-        if (
-          !(
-            intersects(startElementBound, bound) ||
-            startElementBound.contains(bound)
-          ) &&
-          currentMindmap.tree.id !== currentNode.id
-        ) {
-          const clearHide = hideTargetConnector(currentMindmap, subtree);
-          clearHide && this._clearMindMapHoverState.push(clearHide);
-          this._draggingSingleMindmap.detach = true;
-        } else {
-          this._draggingSingleMindmap.detach = false;
-        }
-
-        currentMindmap.layout(subtree, false);
-        this._hoveredMindMap = null;
-      }
-    }
-
-    const frame = this._edgeless.service.frame.selectFrame(this._toBeMoved);
-    frame
-      ? this._surface.overlays.frame.highlight(frame as FrameBlockModel)
-      : this._surface.overlays.frame.clear();
+  afterModeSwitch() {
+    noop();
   }
 
-  private _moveLabel(delta: IVec) {
-    const connector = this._selectedConnector;
-    let bounds = this._selectedConnectorLabelBounds;
-    if (!connector || !bounds) return;
-    bounds = bounds.clone();
-    const center = connector.getNearestPoint(
-      Vec.add(bounds.center, delta) as IVec2
-    );
-    const distance = connector.getOffsetDistanceByPoint(center as IVec2);
-    bounds.center = center;
-    this._service.updateElement(connector.id, {
-      labelXYWH: bounds.toXYWH(),
-      labelOffset: {
-        distance,
-      },
-    });
-  }
-
-  onContainerPointerDown(): void {
+  beforeModeSwitch(edgelessTool?: EdgelessTool) {
+    if (edgelessTool?.type === 'pan') {
+      this._clearLastSelection();
+    }
+    this._stopAutoPanning();
+    this._clearDisposable();
     noop();
   }
 
@@ -714,8 +694,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
                 buildPath(selected)
               );
               if (blockElement) {
-                const rect = blockElement.getBoundingClientRect();
-                const offsetY = 16 * this.zoom;
+                const rect = blockElement
+                  .querySelector('.affine-block-children-container')!
+                  .getBoundingClientRect();
+
+                const offsetY = 8 * this.zoom;
                 const offsetX = 2 * this.zoom;
                 const x = clamp(
                   e.raw.clientX,
@@ -842,126 +825,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  onContainerTripleClick() {
-    if (this._isDoubleClickedOnMask) return;
-  }
-
-  async onContainerDragStart(e: PointerEventState) {
-    if (this.edgelessSelectionManager.editing) return;
-    // Determine the drag type based on the current state and event
-    let dragType = this._determineDragType(e);
-
-    const elements = this.edgelessSelectionManager.selectedElements;
-    const toBeMoved = new Set(elements);
-    elements.forEach(element => {
-      if (isFrameBlock(element)) {
-        this._edgeless.service.frame
-          .getElementsInFrame(element)
-          .forEach(ele => toBeMoved.add(ele));
-      } else if (
-        element.group instanceof MindmapElementModel &&
-        elements.length > 1
-      ) {
-        element.group.descendants().forEach(ele => toBeMoved.add(ele));
-      } else if (element instanceof SurfaceGroupLikeModel) {
-        element.descendants().forEach(ele => toBeMoved.add(ele));
-      }
-    });
-    this._toBeMoved = Array.from(toBeMoved);
-
-    // If alt key is pressed and content is moving, clone the content
-    if (e.keys.alt && dragType === DefaultModeDragType.ContentMoving) {
-      dragType = DefaultModeDragType.AltCloning;
-      await this._cloneContent();
-    }
-    this._filterConnectedConnector();
-
-    // Connector needs to be updated first
-    this._toBeMoved.sort((a, _) =>
-      a instanceof ConnectorElementModel ? -1 : 1
-    );
-
-    // Set up drag state
-    this.initializeDragState(e, dragType);
-
-    // stash the state
-    if (
-      this._toBeMoved.length === 1 &&
-      this._toBeMoved[0].group instanceof MindmapElementModel
-    ) {
-      const mindmap = this._toBeMoved[0].group as MindmapElementModel;
-      this._draggingSingleMindmap = {
-        mindmap,
-        node: mindmap.getNode(this._toBeMoved[0].id)!,
-        clear: mindmap.stashTree(this._toBeMoved[0].id),
-        startElementBound: mindmap.elementBound,
-      };
-    } else {
-      this._toBeMoved.forEach(ele => {
-        ele.stash('xywh');
-
-        if (ele instanceof ConnectorElementModel) {
-          ele.stash('labelXYWH');
-        }
-      });
-    }
-  }
-
-  onContainerDragMove(e: PointerEventState) {
-    const { viewport } = this._service;
-    const zoom = viewport.zoom;
-    switch (this.dragType) {
-      case DefaultModeDragType.Selecting: {
-        // Record the last drag pointer position for auto panning and view port updating
-        this._dragLastPos = [e.x, e.y];
-
-        this._updateSelectingState();
-        const moveDelta = calPanDelta(viewport, e);
-        if (moveDelta) {
-          this._startAutoPanning(moveDelta);
-        } else {
-          this._stopAutoPanning();
-        }
-        break;
-      }
-      case DefaultModeDragType.AltCloning:
-      case DefaultModeDragType.ContentMoving: {
-        if (
-          this._toBeMoved.every(ele => {
-            return !this._isDraggable(ele);
-          })
-        ) {
-          return;
-        }
-
-        if (this._wheeling) {
-          this._wheeling = false;
-          this._dragStartPos = [...this._dragLastPos];
-        } else {
-          this._dragLastPos = [e.x, e.y];
-        }
-
-        const dx = (e.x - this._dragStartPos[0]) / zoom;
-        const dy = (e.y - this._dragStartPos[1]) / zoom;
-        const alignBound = this._alignBound.clone();
-        const shifted = e.keys.shift || this._edgeless.tools.shiftKey;
-
-        this._moveContent([dx, dy], alignBound, shifted, true);
-        break;
-      }
-      case DefaultModeDragType.ConnectorLabelMoving: {
-        const dx = (e.x - this._dragStartPos[0]) / zoom;
-        const dy = (e.y - this._dragStartPos[1]) / zoom;
-        this._moveLabel([dx, dy]);
-        break;
-      }
-      case DefaultModeDragType.NativeEditing: {
-        // TODO reset if drag out of note
-        break;
-      }
-    }
-  }
-
   onContainerDragEnd() {
     // mindmap
     if (this._draggingSingleMindmap) {
@@ -1035,12 +898,136 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this.dragType = DefaultModeDragType.None;
   }
 
+  onContainerDragMove(e: PointerEventState) {
+    const { viewport } = this._service;
+    const zoom = viewport.zoom;
+    switch (this.dragType) {
+      case DefaultModeDragType.Selecting: {
+        // Record the last drag pointer position for auto panning and view port updating
+        this._dragLastPos = [e.x, e.y];
+
+        this._updateSelectingState();
+        const moveDelta = calPanDelta(viewport, e);
+        if (moveDelta) {
+          this._startAutoPanning(moveDelta);
+        } else {
+          this._stopAutoPanning();
+        }
+        break;
+      }
+      case DefaultModeDragType.AltCloning:
+      case DefaultModeDragType.ContentMoving: {
+        if (
+          this._toBeMoved.every(ele => {
+            return !this._isDraggable(ele);
+          })
+        ) {
+          return;
+        }
+
+        if (this._wheeling) {
+          this._wheeling = false;
+          this._dragStartPos = [...this._dragLastPos];
+        } else {
+          this._dragLastPos = [e.x, e.y];
+        }
+
+        const dx = (e.x - this._dragStartPos[0]) / zoom;
+        const dy = (e.y - this._dragStartPos[1]) / zoom;
+        const alignBound = this._alignBound.clone();
+        const shifted = e.keys.shift || this._edgeless.tools.shiftKey;
+
+        this._moveContent([dx, dy], alignBound, shifted, true);
+        break;
+      }
+      case DefaultModeDragType.ConnectorLabelMoving: {
+        const dx = (e.x - this._dragStartPos[0]) / zoom;
+        const dy = (e.y - this._dragStartPos[1]) / zoom;
+        this._moveLabel([dx, dy]);
+        break;
+      }
+      case DefaultModeDragType.NativeEditing: {
+        // TODO reset if drag out of note
+        break;
+      }
+    }
+  }
+
+  async onContainerDragStart(e: PointerEventState) {
+    if (this.edgelessSelectionManager.editing) return;
+    // Determine the drag type based on the current state and event
+    let dragType = this._determineDragType(e);
+
+    const elements = this.edgelessSelectionManager.selectedElements;
+    const toBeMoved = new Set(elements);
+    elements.forEach(element => {
+      if (isFrameBlock(element)) {
+        this._edgeless.service.frame
+          .getElementsInFrame(element)
+          .forEach(ele => toBeMoved.add(ele));
+      } else if (
+        element.group instanceof MindmapElementModel &&
+        elements.length > 1
+      ) {
+        element.group.descendants().forEach(ele => toBeMoved.add(ele));
+      } else if (element instanceof SurfaceGroupLikeModel) {
+        element.descendants().forEach(ele => toBeMoved.add(ele));
+      }
+    });
+    this._toBeMoved = Array.from(toBeMoved);
+
+    // If alt key is pressed and content is moving, clone the content
+    if (e.keys.alt && dragType === DefaultModeDragType.ContentMoving) {
+      dragType = DefaultModeDragType.AltCloning;
+      await this._cloneContent();
+    }
+    this._filterConnectedConnector();
+
+    // Connector needs to be updated first
+    this._toBeMoved.sort((a, _) =>
+      a instanceof ConnectorElementModel ? -1 : 1
+    );
+
+    // Set up drag state
+    this.initializeDragState(e, dragType);
+
+    // stash the state
+    if (
+      this._toBeMoved.length === 1 &&
+      this._toBeMoved[0].group instanceof MindmapElementModel
+    ) {
+      const mindmap = this._toBeMoved[0].group as MindmapElementModel;
+      this._draggingSingleMindmap = {
+        mindmap,
+        node: mindmap.getNode(this._toBeMoved[0].id)!,
+        clear: mindmap.stashTree(this._toBeMoved[0].id),
+        startElementBound: mindmap.elementBound,
+      };
+    } else {
+      this._toBeMoved.forEach(ele => {
+        ele.stash('xywh');
+
+        if (ele instanceof ConnectorElementModel) {
+          ele.stash('labelXYWH');
+        }
+      });
+    }
+  }
+
   onContainerMouseMove() {
     noop();
   }
 
   onContainerMouseOut(_: PointerEventState) {
     noop();
+  }
+
+  onContainerPointerDown(): void {
+    noop();
+  }
+
+  onContainerTripleClick() {
+    if (this._isDoubleClickedOnMask) return;
   }
 
   onPressShiftKey(_: boolean) {
@@ -1068,17 +1055,34 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  beforeModeSwitch(edgelessTool?: EdgelessTool) {
-    if (edgelessTool?.type === 'pan') {
-      this._clearLastSelection();
+  override get draggingArea() {
+    if (this.dragType === DefaultModeDragType.Selecting) {
+      const [startX, startY] = this._service.viewport.toViewCoord(
+        this._dragStartModelCoord[0],
+        this._dragStartModelCoord[1]
+      );
+      const [endX, endY] = this._service.viewport.toViewCoord(
+        this._dragLastModelCoord[0],
+        this._dragLastModelCoord[1]
+      );
+      return {
+        start: new DOMPoint(startX, startY),
+        end: new DOMPoint(endX, endY),
+      };
     }
-    this._stopAutoPanning();
-    this._clearDisposable();
-    noop();
+    return null;
   }
 
-  afterModeSwitch() {
-    noop();
+  get edgelessSelectionManager() {
+    return this._edgeless.service.selection;
+  }
+
+  get readonly() {
+    return this._edgeless.doc.readonly;
+  }
+
+  get zoom() {
+    return this._edgeless.service.viewport.zoom;
   }
 }
 

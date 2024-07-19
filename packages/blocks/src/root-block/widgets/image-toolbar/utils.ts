@@ -1,11 +1,6 @@
-import '../../../_common/components/button.js';
-import '../../../_common/components/tooltip/tooltip.js';
-
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
-import { getBlockProps } from '../../../_common/utils/block-props.js';
-import { isInsidePageEditor } from '../../../_common/utils/query.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type {
   CommonItem,
@@ -14,6 +9,13 @@ import type {
   MoreItem,
   MoreMenuConfigItem,
 } from './type.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
+import '../../../_common/components/tooltip/tooltip.js';
+import { getBlockProps } from '../../../_common/utils/block-props.js';
+import { isInsidePageEditor } from '../../../_common/utils/query.js';
 
 export function ConfigRenderer(
   blockElement: ImageBlockComponent,
@@ -31,15 +33,16 @@ export function ConfigRenderer(
         case 'common': {
           const defaultItem = item as CommonItem;
           const buttonClass = `image-toolbar-button ${defaultItem.name.toLocaleLowerCase()}`;
-          template = html`<div class=${buttonClass}>
-            <icon-button
-              size="24px"
+          template = html`
+            <editor-icon-button
+              class=${buttonClass}
+              .tooltip=${defaultItem.tooltip}
+              .tooltipOffset=${4}
               @click=${() => defaultItem.action(blockElement, abortController)}
             >
               ${defaultItem.icon}
-              <affine-tooltip>${defaultItem.tooltip}</affine-tooltip>
-            </icon-button>
-          </div>`;
+            </editor-icon-button>
+          `;
           break;
         }
         case 'custom': {
@@ -72,23 +75,25 @@ export function MoreMenuRenderer(
         case 'more': {
           const moreItem = item as MoreItem;
           const buttonClass = `menu-item ${moreItem.name.toLocaleLowerCase()}`;
-          template = html`<div class=${buttonClass}>
-            <icon-button
-              width="183px"
-              height="30px"
-              text=${moreItem.name}
+          template = html`
+            <editor-menu-action
+              class=${buttonClass}
               @click=${(e: MouseEvent) => {
                 e.stopPropagation();
                 moreItem.action(blockElement, abortController);
               }}
             >
-              ${moreItem.icon}
-            </icon-button>
-          </div>`;
+              ${moreItem.icon} ${moreItem.name}
+            </editor-menu-action>
+          `;
           break;
         }
         case 'divider': {
-          template = html`<div class="divider"></div>`;
+          template = html`
+            <editor-toolbar-separator
+              data-orientation="horizontal"
+            ></editor-toolbar-separator>
+          `;
           break;
         }
         default:

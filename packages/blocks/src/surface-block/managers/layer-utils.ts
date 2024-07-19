@@ -1,8 +1,9 @@
 import type { Doc } from '@blocksuite/store';
 
-import { SurfaceGroupLikeModel } from '../element-model/base.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';
+
+import { SurfaceGroupLikeModel } from '../element-model/base.js';
 
 export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {
   const layer = layers[layerIndex];
@@ -26,7 +27,7 @@ export function updateLayersZIndex(layers: Layer[], startIdx: number) {
 }
 
 export function getElementIndex(indexable: BlockSuite.EdgelessModelType) {
-  const groups = indexable.groups;
+  const groups = indexable.groups as BlockSuite.SurfaceGroupLikeModelType[];
 
   if (groups.length > 1) {
     return (
@@ -94,8 +95,8 @@ export function compare(
   } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
     return 1;
   } else {
-    const aGroups = a.groups;
-    const bGroups = b.groups;
+    const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModelType[];
+    const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModelType[];
     const minGroups = Math.min(aGroups.length, bGroups.length);
 
     for (let i = 0; i < minGroups; ++i) {

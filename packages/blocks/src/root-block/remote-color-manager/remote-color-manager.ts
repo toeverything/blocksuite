@@ -3,14 +3,6 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { multiPlayersColor } from './color-picker.js';
 
 export class RemoteColorManager {
-  private get awareness() {
-    return this.host.doc.collection.awarenessStore;
-  }
-
-  private get rootService() {
-    return this.host.spec.getService('affine:page');
-  }
-
   constructor(readonly host: EditorHost) {
     const sessionColor =
       this.rootService.editPropsStore.getStorage('remoteColor');
@@ -22,6 +14,14 @@ export class RemoteColorManager {
     const pickColor = multiPlayersColor.pick();
     this.awareness.awareness.setLocalStateField('color', pickColor);
     this.rootService.editPropsStore.setStorage('remoteColor', pickColor);
+  }
+
+  private get awareness() {
+    return this.host.doc.collection.awarenessStore;
+  }
+
+  private get rootService() {
+    return this.host.spec.getService('affine:page');
   }
 
   get(id: number) {

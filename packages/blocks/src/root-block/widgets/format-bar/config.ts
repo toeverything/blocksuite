@@ -1,9 +1,18 @@
-import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
+import type {
+  Chain,
+  CommandKeyToData,
+  InitCommandCtx,
+} from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { Slice } from '@blocksuite/store';
+import { type TemplateResult, html } from 'lit';
+
+import type { AffineFormatBarWidget } from './format-bar.js';
 
 import { toast } from '../../../_common/components/index.js';
 import { createSimplePortal } from '../../../_common/components/portal.js';
+import { renderActions } from '../../../_common/components/toolbar/utils.js';
 import { DATABASE_CONVERT_WHITE_LIST } from '../../../_common/configs/quick-action/database-convert-view.js';
 import {
   BoldIcon,
@@ -12,7 +21,8 @@ import {
   CodeIcon,
   CopyIcon,
   DatabaseTableViewIcon20,
-  FontLinkedDocIcon,
+  DeleteIcon,
+  DuplicateIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -21,6 +31,8 @@ import {
   Heading6Icon,
   ItalicIcon,
   LinkIcon,
+  LinkedDocIcon,
+  MoreVerticalIcon,
   NumberedListIcon,
   QuoteIcon,
   StrikethroughIcon,
@@ -33,7 +45,6 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
-import type { AffineFormatBarWidget } from './format-bar.js';
 
 export type DividerConfigItem = {
   type: 'divider';
@@ -126,26 +137,8 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     .addHighlighterDropdown()
     .addDivider()
     .addInlineAction({
-      id: 'copy',
-      name: 'Copy',
-      icon: CopyIcon,
-      isActive: () => false,
-      action: chain => {
-        chain
-          .getSelectedModels()
-          .with({
-            onCopy: () => {
-              toast(toolbar.host, 'Copied to clipboard');
-            },
-          })
-          .copySelectedModels()
-          .run();
-      },
-      showWhen: () => true,
-    })
-    .addInlineAction({
       id: 'convert-to-database',
-      name: 'Group as Database',
+      name: 'Create Database',
       icon: DatabaseTableViewIcon20,
       isActive: () => false,
       action: () => {
@@ -156,23 +149,51 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         });
       },
       showWhen: chain => {
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['block', 'text'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || selectedModels.length === 0) return false;
+        const middleware = (count = 0) => {
+          return (
+            ctx: CommandKeyToData<'selectedBlocks'>,
+            next: () => void
+          ) => {
+            const { selectedBlocks } = ctx;
+            if (!selectedBlocks || selectedBlocks.length === count) return;
 
-        return selectedModels.every(block =>
-          DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
-        );
+            const allowed = selectedBlocks.every(block =>
+              DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
+            );
+            if (!allowed) return;
+
+            next();
+          };
+        };
+        let [result] = chain
+          .getTextSelection()
+          .getSelectedBlocks({
+            types: ['text'],
+          })
+          .inline(middleware(1))
+          .run();
+
+        if (result) return true;
+
+        [result] = chain
+          .tryAll(chain => [
+            chain.getBlockSelections(),
+            chain.getImageSelections(),
+          ])
+          .getSelectedBlocks({
+            types: ['block', 'image'],
+          })
+          .inline(middleware(0))
+          .run();
+
+        return result;
       },
     })
+    .addDivider()
     .addInlineAction({
       id: 'convert-to-linked-doc',
       name: 'Create Linked Doc',
-      icon: FontLinkedDocIcon,
+      icon: LinkedDocIcon,
       isActive: () => false,
       action: (chain, formatBar) => {
         const [_, ctx] = chain
@@ -302,4 +323,132 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
       name: 'Quote',
       icon: QuoteIcon,
     });
+}
+
+export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
+  const actions = [
+    [
+      {
+        type: 'copy',
+        name: 'Copy',
+        icon: CopyIcon,
+        disabled: toolbar.doc.readonly,
+        handler: () => {
+          toolbar.std.command
+            .chain()
+            .getSelectedModels()
+            .with({
+              onCopy: () => {
+                toast(toolbar.host, 'Copied to clipboard');
+              },
+            })
+            .draftSelectedModels()
+            .copySelectedModels()
+            .run();
+        },
+      },
+      {
+        type: 'duplicate',
+        name: 'Duplicate',
+        icon: DuplicateIcon,
+        disabled: toolbar.doc.readonly,
+        handler: () => {
+          toolbar.std.doc.captureSync();
+          toolbar.std.command
+            .chain()
+            .try(cmd => [
+              cmd
+                .getTextSelection()
+                .inline<'currentSelectionPath'>((ctx, next) => {
+                  const textSelection = ctx.currentTextSelection;
+                  assertExists(textSelection);
+                  const end = textSelection.to ?? textSelection.from;
+                  next({ currentSelectionPath: end.blockId });
+                }),
+              cmd
+                .getBlockSelections()
+                .inline<'currentSelectionPath'>((ctx, next) => {
+                  const currentBlockSelections = ctx.currentBlockSelections;
+                  assertExists(currentBlockSelections);
+                  const blockSelection = currentBlockSelections.at(-1);
+                  if (!blockSelection) {
+                    return;
+                  }
+                  next({ currentSelectionPath: blockSelection.blockId });
+                }),
+            ])
+            .getBlockIndex()
+            .getSelectedModels()
+            .draftSelectedModels()
+            .inline((ctx, next) => {
+              if (!ctx.draftedModels) {
+                return next();
+              }
+
+              assertExists(ctx.parentBlock);
+
+              toolbar.std.clipboard
+                .duplicateSlice(
+                  Slice.fromModels(ctx.std.doc, ctx.draftedModels),
+                  ctx.std.doc,
+                  ctx.parentBlock?.model.id,
+                  ctx.blockIndex ? ctx.blockIndex + 1 : undefined
+                )
+                .catch(console.error);
+
+              return next();
+            })
+            .run();
+        },
+      },
+    ],
+    [
+      {
+        type: 'delete',
+        name: 'Delete',
+        icon: DeleteIcon,
+        disabled: toolbar.doc.readonly,
+        handler: () => {
+          // remove text
+          const [result] = toolbar.std.command
+            .chain()
+            .getTextSelection()
+            .deleteText()
+            .run();
+
+          if (result) {
+            return;
+          }
+
+          // remove blocks
+          toolbar.std.command
+            .chain()
+            .tryAll(chain => [
+              chain.getBlockSelections(),
+              chain.getImageSelections(),
+            ])
+            .getSelectedModels()
+            .deleteSelectedModels()
+            .run();
+
+          toolbar.reset();
+        },
+      },
+    ],
+  ];
+
+  return html`
+    <editor-menu-button
+      .contentPadding=${'8px'}
+      .button=${html`
+        <editor-icon-button aria-label="More" .tooltip=${'More'}>
+          ${MoreVerticalIcon}
+        </editor-icon-button>
+      `}
+    >
+      <div slot data-size="large" data-orientation="vertical">
+        ${renderActions(actions)}
+      </div>
+    </editor-menu-button>
+  `;
 }

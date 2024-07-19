@@ -8,6 +8,11 @@ import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
 import { numberColumnModelConfig } from './define.js';
+import {
+  type NumberFormat,
+  formatNumber,
+  parseNumber,
+} from './utils/formatter.js';
 
 @customElement('affine-database-number-cell')
 export class NumberCell extends BaseCellRenderer<number> {
@@ -33,15 +38,69 @@ export class NumberCell extends BaseCellRenderer<number> {
     }
   `;
 
+  private _getFormattedString() {
+    const enableNewFormatting = this.view.getFlag().enable_number_formatting;
+    const decimals = (this.column.data.decimal as number) ?? 0;
+    const formatMode = (this.column.data.format ?? 'number') as NumberFormat;
+    return this.value
+      ? enableNewFormatting
+        ? formatNumber(this.value, formatMode, decimals)
+        : this.value.toString()
+      : '';
+  }
+
   override render() {
     return html` <div class="affine-database-number number">
-      ${this.value ?? ''}
+      ${this._getFormattedString()}
     </div>`;
   }
 }
 
 @customElement('affine-database-number-cell-editing')
 export class NumberCellEditing extends BaseCellRenderer<number> {
+  private _getFormattedString = (value: number) => {
+    const enableNewFormatting = this.view.getFlag().enable_number_formatting;
+    const decimals = (this.column.data.decimal as number) ?? 0;
+    const formatMode = (this.column.data.format ?? 'number') as NumberFormat;
+    return enableNewFormatting
+      ? formatNumber(value, formatMode, decimals)
+      : value.toString();
+  };
+
+  private _keydown = (e: KeyboardEvent) => {
+    const ctrlKey = IS_MAC ? e.metaKey : e.ctrlKey;
+
+    if (e.key.toLowerCase() === 'z' && ctrlKey) {
+      e.stopPropagation();
+      return;
+    }
+
+    if (e.key === 'Enter' && !e.isComposing) {
+      requestAnimationFrame(() => {
+        this.selectCurrentCell(false);
+      });
+    }
+  };
+
+  private _setValue = (str: string = this._inputEle.value) => {
+    if (!str) {
+      this.onChange(undefined);
+      return;
+    }
+
+    const enableNewFormatting = this.view.getFlag().enable_number_formatting;
+    const value = enableNewFormatting ? parseNumber(str) : parseFloat(str);
+    if (isNaN(value)) {
+      this._inputEle.value = this.value
+        ? this._getFormattedString(this.value)
+        : '';
+      return;
+    }
+
+    this._inputEle.value = this._getFormattedString(value);
+    this.onChange(value);
+  };
+
   static override styles = css`
     affine-database-number-cell-editing {
       display: block;
@@ -69,53 +128,11 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
     }
   `;
 
-  @query('input')
-  private accessor _inputEle!: HTMLInputElement;
-
-  private _setValue = (str: string = this._inputEle.value) => {
-    if (!str) {
-      this.onChange(undefined);
-      return;
-    }
-    const value = Number.parseFloat(str);
-    if (Object.is(value, NaN)) {
-      this._inputEle.value = `${this.value ?? ''}`;
-      return;
-    }
-    this._inputEle.value = `${this.value ?? ''}`;
-    this.onChange(value);
-  };
-
-  private _keydown = (e: KeyboardEvent) => {
-    const ctrlKey = IS_MAC ? e.metaKey : e.ctrlKey;
-
-    if (e.key.toLowerCase() === 'z' && ctrlKey) {
-      e.stopPropagation();
-      return;
-    }
-
-    if (e.key === 'Enter' && !e.isComposing) {
-      requestAnimationFrame(() => {
-        this.selectCurrentCell(false);
-      });
-    }
-  };
-
   focusEnd = () => {
     const end = this._inputEle.value.length;
     this._inputEle.focus();
     this._inputEle.setSelectionRange(end, end);
   };
-
-  override onExitEditMode() {
-    this._setValue();
-  }
-
-  override firstUpdated() {
-    requestAnimationFrame(() => {
-      this.focusEnd();
-    });
-  }
 
   _blur() {
     this.selectCurrentCell(false);
@@ -127,12 +144,23 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
     }
   }
 
+  override firstUpdated() {
+    requestAnimationFrame(() => {
+      this.focusEnd();
+    });
+  }
+
+  override onExitEditMode() {
+    this._setValue();
+  }
+
   override render() {
-    const value = `${this.value ?? ''}`;
+    const formatted = this.value ? this._getFormattedString(this.value) : '';
+
     return html`<input
       type="text"
       autocomplete="off"
-      .value="${value}"
+      .value="${formatted}"
       @keydown="${this._keydown}"
       @blur="${this._blur}"
       @focus="${this._focus}"
@@ -140,6 +168,9 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
       @pointerdown="${stopPropagation}"
     />`;
   }
+
+  @query('input')
+  private accessor _inputEle!: HTMLInputElement;
 }
 
 export const numberColumnConfig = numberColumnModelConfig.renderConfig({

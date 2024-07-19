@@ -1,11 +1,15 @@
-import './auto-complete-panel.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing } from 'lit';
+import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { NoteBlockModel } from '../../../../note-block/index.js';
+import type { ConnectorElementModel } from '../../../../surface-block/element-model/connector.js';
+import type { ShapeType } from '../../../../surface-block/element-model/shape.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
 import {
   AutoCompleteArrowIcon,
@@ -14,14 +18,11 @@ import {
   NoteAutoCompleteIcon,
 } from '../../../../_common/icons/index.js';
 import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
-import type { NoteBlockModel } from '../../../../note-block/index.js';
-import type { ConnectorElementModel } from '../../../../surface-block/element-model/connector.js';
 import {
   type Connection,
   ConnectorMode,
 } from '../../../../surface-block/element-model/connector.js';
 import { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
-import type { ShapeType } from '../../../../surface-block/element-model/shape.js';
 import { shapeMethods } from '../../../../surface-block/element-model/shape.js';
 import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
 import { ShapeElementModel } from '../../../../surface-block/index.js';
@@ -34,28 +35,27 @@ import {
   Vec,
 } from '../../../../surface-block/index.js';
 import { ConnectorPathGenerator } from '../../../../surface-block/managers/connector-manager.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
 import { DEFAULT_CONNECTOR_COLOR } from '../panel/color-panel.js';
-import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
+import './auto-complete-panel.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
 import {
-  createEdgelessElement,
   Direction,
+  MAIN_GAP,
+  createEdgelessElement,
   getPosition,
   isShape,
-  MAIN_GAP,
   nextBound,
 } from './utils.js';
 
 class AutoCompleteOverlay extends Overlay {
   linePoints: IVec[] = [];
 
-  stroke = '';
-
   renderShape: ((ctx: CanvasRenderingContext2D) => void) | null = null;
+
+  stroke = '';
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
     if (this.linePoints.length && this.renderShape) {
@@ -76,14 +76,68 @@ class AutoCompleteOverlay extends Overlay {
 
 @customElement('edgeless-auto-complete')
 export class EdgelessAutoComplete extends WithDisposable(LitElement) {
-  private get _surface() {
-    return this.edgeless.surface;
-  }
+  private _autoCompleteOverlay: AutoCompleteOverlay = new AutoCompleteOverlay();
 
-  get canShowAutoComplete() {
-    const { current } = this;
-    return isShape(current) || isNoteBlock(current);
-  }
+  private _onPointerDown = (e: PointerEvent, type: Direction) => {
+    const { service } = this.edgeless;
+    const viewportRect = service.viewport.boundingClientRect;
+    const start = service.viewport.toModelCoord(
+      e.clientX - viewportRect.left,
+      e.clientY - viewportRect.top
+    );
+
+    if (!this.edgeless.dispatcher) return;
+
+    let connector: ConnectorElementModel | null;
+
+    this._disposables.addFromEvent(document, 'pointermove', e => {
+      const point = service.viewport.toModelCoord(
+        e.clientX - viewportRect.left,
+        e.clientY - viewportRect.top
+      );
+      if (Vec.dist(start, point) > 8 && !this._isMoving) {
+        if (!this.canShowAutoComplete) return;
+        this._isMoving = true;
+        const { startPosition } = getPosition(type);
+        connector = this._addConnector(
+          {
+            id: this.current.id,
+            position: startPosition,
+          },
+          {
+            position: point,
+          }
+        );
+      }
+      if (this._isMoving) {
+        assertExists(connector);
+        const otherSideId = connector.source.id;
+
+        connector.target = this._surface.overlays.connector.renderConnector(
+          point,
+          otherSideId ? [otherSideId] : []
+        );
+      }
+    });
+
+    this._disposables.addFromEvent(document, 'pointerup', e => {
+      if (!this._isMoving) {
+        this._generateElementOnClick(type);
+      } else if (connector && !connector.target.id) {
+        this.edgeless.service.selection.clear();
+        this._createAutoCompletePanel(e, connector);
+      }
+
+      this._isMoving = false;
+      this._surface.overlays.connector.clear();
+      this._disposables.dispose();
+      this._disposables = new DisposableGroup();
+    });
+  };
+
+  private _pathGenerator!: ConnectorPathGenerator;
+
+  private _timer: ReturnType<typeof setTimeout> | null = null;
 
   static override styles = css`
     .edgeless-auto-complete-container {
@@ -160,105 +214,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
   `;
 
-  @state()
-  private accessor _isHover = true;
-
-  @state()
-  private accessor _isMoving = false;
-
-  private _timer: ReturnType<typeof setTimeout> | null = null;
-
-  private _autoCompleteOverlay: AutoCompleteOverlay = new AutoCompleteOverlay();
-
-  private _pathGenerator!: ConnectorPathGenerator;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor selectedRect!: SelectedRect;
-
-  @property({ attribute: false })
-  accessor current!: ShapeElementModel | NoteBlockModel;
-
-  private _createAutoCompletePanel(
-    e: PointerEvent,
-    connector: ConnectorElementModel
-  ) {
-    if (!this.canShowAutoComplete) return;
-
-    const position = this.edgeless.service.viewport.toModelCoord(
-      e.clientX,
-      e.clientY
-    );
-    const autoCompletePanel = new EdgelessAutoCompletePanel(
-      position,
-      this.edgeless,
-      this.current,
-      connector
-    );
-
-    const rootElementContainer = this.edgeless.rootElementContainer;
-    rootElementContainer.append(autoCompletePanel);
-  }
-
-  private _onPointerDown = (e: PointerEvent, type: Direction) => {
-    const { service } = this.edgeless;
-    const viewportRect = service.viewport.boundingClientRect;
-    const start = service.viewport.toModelCoord(
-      e.clientX - viewportRect.left,
-      e.clientY - viewportRect.top
-    );
-
-    if (!this.edgeless.dispatcher) return;
-
-    let connector: ConnectorElementModel | null;
-
-    this._disposables.addFromEvent(document, 'pointermove', e => {
-      const point = service.viewport.toModelCoord(
-        e.clientX - viewportRect.left,
-        e.clientY - viewportRect.top
-      );
-      if (Vec.dist(start, point) > 8 && !this._isMoving) {
-        if (!this.canShowAutoComplete) return;
-        this._isMoving = true;
-        const { startPosition } = getPosition(type);
-        connector = this._addConnector(
-          {
-            id: this.current.id,
-            position: startPosition,
-          },
-          {
-            position: point,
-          }
-        );
-      }
-      if (this._isMoving) {
-        assertExists(connector);
-        const otherSideId = connector.source.id;
-
-        connector.target = this._surface.overlays.connector.renderConnector(
-          point,
-          otherSideId ? [otherSideId] : []
-        );
-      }
-    });
-
-    this._disposables.addFromEvent(document, 'pointerup', e => {
-      if (!this._isMoving) {
-        this._generateElementOnClick(type);
-      } else if (connector && !connector.target.id) {
-        this.edgeless.service.selection.clear();
-        this._createAutoCompletePanel(e, connector);
-      }
-
-      this._isMoving = false;
-      this._surface.overlays.connector.clear();
-      this._disposables.dispose();
-      this._disposables = new DisposableGroup();
-    });
-  };
-
   private _addConnector(source: Connection, target: Connection) {
     const { current, edgeless } = this;
 
@@ -282,6 +237,111 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       target,
     });
     return edgeless.service.getElementById(id) as ConnectorElementModel;
+  }
+
+  private _addMindmapNode(
+    direction: LayoutType.LEFT | LayoutType.RIGHT,
+    target: 'sibling' | 'child'
+  ) {
+    const mindmap = this.current.group;
+
+    if (!(mindmap instanceof MindmapElementModel)) return;
+
+    const parentNode =
+      target === 'sibling'
+        ? mindmap.getParentNode(this.current.id) ?? this.current
+        : this.current;
+
+    const newNode = mindmap.addNode(
+      parentNode.id,
+      target === 'sibling' ? this.current.id : undefined,
+      undefined,
+      undefined,
+      direction
+    );
+
+    requestAnimationFrame(() => {
+      mountShapeTextEditor(
+        this.edgeless.service.getElementById(newNode) as ShapeElementModel,
+        this.edgeless
+      );
+    });
+  }
+
+  private _computeLine(
+    type: Direction,
+    curShape: ShapeElementModel,
+    nextBound: Bound
+  ) {
+    const startBound = this.current.elementBound;
+    const { startPosition, endPosition } = getPosition(type);
+    const nextShape = {
+      xywh: nextBound.serialize(),
+      rotate: curShape.rotate,
+      shapeType: curShape.shapeType,
+    };
+    const startPoint = curShape.getRelativePointLocation(startPosition);
+    const endPoint = curShape.getRelativePointLocation.call(
+      nextShape,
+      endPosition
+    );
+
+    return this._pathGenerator.generateOrthogonalConnectorPath({
+      startBound,
+      endBound: nextBound,
+      startPoint,
+      endPoint,
+    });
+  }
+
+  private _computeNextBound(type: Direction) {
+    if (isShape(this.current)) {
+      const connectedShapes = this._getConnectedElements(this.current).filter(
+        e => e instanceof ShapeElementModel
+      ) as ShapeElementModel[];
+      return nextBound(type, this.current, connectedShapes);
+    } else {
+      const bound = this.current.elementBound;
+      switch (type) {
+        case Direction.Right: {
+          bound.x += bound.w + MAIN_GAP;
+          break;
+        }
+        case Direction.Bottom: {
+          bound.y += bound.h + MAIN_GAP;
+          break;
+        }
+        case Direction.Left: {
+          bound.x -= bound.w + MAIN_GAP;
+          break;
+        }
+        case Direction.Top: {
+          bound.y -= bound.h + MAIN_GAP;
+          break;
+        }
+      }
+      return bound;
+    }
+  }
+
+  private _createAutoCompletePanel(
+    e: PointerEvent,
+    connector: ConnectorElementModel
+  ) {
+    if (!this.canShowAutoComplete) return;
+
+    const position = this.edgeless.service.viewport.toModelCoord(
+      e.clientX,
+      e.clientY
+    );
+    const autoCompletePanel = new EdgelessAutoCompletePanel(
+      position,
+      this.edgeless,
+      this.current,
+      connector
+    );
+
+    this.edgeless.append(autoCompletePanel);
   }
 
   private _generateElementOnClick(type: Direction) {
@@ -324,53 +384,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     this.removeOverlay();
   }
 
-  private _addMindmapNode(
-    direction: LayoutType.LEFT | LayoutType.RIGHT,
-    target: 'sibling' | 'child'
-  ) {
-    const mindmap = this.current.group;
-
-    if (!(mindmap instanceof MindmapElementModel)) return;
-
-    const parentNode =
-      target === 'sibling'
-        ? mindmap.getParentNode(this.current.id) ?? this.current
-        : this.current;
-
-    const newNode = mindmap.addNode(
-      parentNode.id,
-      target === 'sibling' ? this.current.id : undefined,
-      undefined,
-      undefined,
-      direction
-    );
-
-    requestAnimationFrame(() => {
-      mountShapeTextEditor(
-        this.edgeless.service.getElementById(newNode) as ShapeElementModel,
-        this.edgeless
-      );
-    });
-  }
-
-  private _showNextShape(
-    current: ShapeElementModel,
-    bound: Bound,
-    path: IVec[],
-    targetType: ShapeType
-  ) {
-    const { surface } = this.edgeless;
-    surface.renderer.addOverlay(this._autoCompleteOverlay);
-
-    this._autoCompleteOverlay.stroke =
-      this._surface.themeObserver.getVariableValue(current.strokeColor);
-    this._autoCompleteOverlay.linePoints = path;
-    this._autoCompleteOverlay.renderShape = ctx => {
-      shapeMethods[targetType].draw(ctx, { ...bound, rotate: current.rotate });
-    };
-    surface.refresh();
-  }
-
   private _getConnectedElements(element: ShapeElementModel) {
     const service = this.edgeless.service;
 
@@ -388,62 +401,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
       return prev;
     }, [] as ShapeElementModel[]);
-  }
-
-  private _computeNextBound(type: Direction) {
-    if (isShape(this.current)) {
-      const connectedShapes = this._getConnectedElements(this.current).filter(
-        e => e instanceof ShapeElementModel
-      ) as ShapeElementModel[];
-      return nextBound(type, this.current, connectedShapes);
-    } else {
-      const bound = this.current.elementBound;
-      switch (type) {
-        case Direction.Right: {
-          bound.x += bound.w + MAIN_GAP;
-          break;
-        }
-        case Direction.Bottom: {
-          bound.y += bound.h + MAIN_GAP;
-          break;
-        }
-        case Direction.Left: {
-          bound.x -= bound.w + MAIN_GAP;
-          break;
-        }
-        case Direction.Top: {
-          bound.y -= bound.h + MAIN_GAP;
-          break;
-        }
-      }
-      return bound;
-    }
-  }
-
-  private _computeLine(
-    type: Direction,
-    curShape: ShapeElementModel,
-    nextBound: Bound
-  ) {
-    const startBound = this.current.elementBound;
-    const { startPosition, endPosition } = getPosition(type);
-    const nextShape = {
-      xywh: nextBound.serialize(),
-      rotate: curShape.rotate,
-      shapeType: curShape.shapeType,
-    };
-    const startPoint = curShape.getRelativePointLocation(startPosition);
-    const endPoint = curShape.getRelativePointLocation.call(
-      nextShape,
-      endPosition
-    );
-
-    return this._pathGenerator.generateOrthogonalConnectorPath({
-      startBound,
-      endBound: nextBound,
-      startPoint,
-      endPoint,
-    });
   }
 
   private _getMindmapButtons():
@@ -485,74 +442,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
 
     return result;
-  }
-
-  private _renderMindMapButtons() {
-    const mindmapButtons = this._getMindmapButtons();
-
-    if (!mindmapButtons) {
-      return;
-    }
-
-    const { selectedRect } = this;
-    const { zoom } = this.edgeless.service.viewport;
-    const width = 72;
-    const height = 44;
-    const buttonMargin = height / 2;
-
-    return mindmapButtons.map(type => {
-      let transform = '';
-
-      const [position, target, layout] = type;
-      const isLeftLayout = layout === LayoutType.LEFT;
-      const icon = target === 'child' ? MindMapChildIcon : MindMapSiblingIcon;
-
-      switch (position) {
-        case Direction.Bottom:
-          transform += `translate(${selectedRect.width / 2}px, ${
-            selectedRect.height + buttonMargin
-          }px)`;
-          isLeftLayout && (transform += `scale(-1)`);
-          break;
-        case Direction.Right:
-          transform += `translate(${selectedRect.width + buttonMargin}px, ${
-            selectedRect.height / 2
-          }px)`;
-          break;
-        case Direction.Left:
-          transform += `translate(${-buttonMargin}px, ${
-            selectedRect.height / 2
-          }px)`;
-
-          transform += `scale(-1)`;
-          break;
-      }
-
-      transform += `translate(${-width / 2}px, ${-height / 2}px)`;
-
-      const arrowWrapperClasses = classMap({
-        'edgeless-auto-complete-arrow-wrapper': true,
-        hidden: position === Direction.Left && zoom >= 1.5,
-        mindmap: true,
-      });
-
-      return html`<div
-        class=${arrowWrapperClasses}
-        style=${styleMap({
-          transform,
-          transformOrigin: 'left top',
-        })}
-      >
-        <div
-          class="edgeless-auto-complete-arrow"
-          @pointerdown=${() => {
-            this._addMindmapNode(layout, target);
-          }}
-        >
-          ${icon}
-        </div>
-      </div>`;
-    });
   }
 
   private _renderArrow() {
@@ -644,6 +533,96 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return Arrows;
   }
 
+  private _renderMindMapButtons() {
+    const mindmapButtons = this._getMindmapButtons();
+
+    if (!mindmapButtons) {
+      return;
+    }
+
+    const { selectedRect } = this;
+    const { zoom } = this.edgeless.service.viewport;
+    const width = 72;
+    const height = 44;
+    const buttonMargin = height / 2;
+
+    return mindmapButtons.map(type => {
+      let transform = '';
+
+      const [position, target, layout] = type;
+      const isLeftLayout = layout === LayoutType.LEFT;
+      const icon = target === 'child' ? MindMapChildIcon : MindMapSiblingIcon;
+
+      switch (position) {
+        case Direction.Bottom:
+          transform += `translate(${selectedRect.width / 2}px, ${
+            selectedRect.height + buttonMargin
+          }px)`;
+          isLeftLayout && (transform += `scale(-1)`);
+          break;
+        case Direction.Right:
+          transform += `translate(${selectedRect.width + buttonMargin}px, ${
+            selectedRect.height / 2
+          }px)`;
+          break;
+        case Direction.Left:
+          transform += `translate(${-buttonMargin}px, ${
+            selectedRect.height / 2
+          }px)`;
+
+          transform += `scale(-1)`;
+          break;
+      }
+
+      transform += `translate(${-width / 2}px, ${-height / 2}px)`;
+
+      const arrowWrapperClasses = classMap({
+        'edgeless-auto-complete-arrow-wrapper': true,
+        hidden: position === Direction.Left && zoom >= 1.5,
+        mindmap: true,
+      });
+
+      return html`<div
+        class=${arrowWrapperClasses}
+        style=${styleMap({
+          transform,
+          transformOrigin: 'left top',
+        })}
+      >
+        <div
+          class="edgeless-auto-complete-arrow"
+          @pointerdown=${() => {
+            this._addMindmapNode(layout, target);
+          }}
+        >
+          ${icon}
+        </div>
+      </div>`;
+    });
+  }
+
+  private _showNextShape(
+    current: ShapeElementModel,
+    bound: Bound,
+    path: IVec[],
+    targetType: ShapeType
+  ) {
+    const { surface } = this.edgeless;
+    surface.renderer.addOverlay(this._autoCompleteOverlay);
+
+    this._autoCompleteOverlay.stroke =
+      this._surface.themeObserver.getVariableValue(current.strokeColor);
+    this._autoCompleteOverlay.linePoints = path;
+    this._autoCompleteOverlay.renderShape = ctx => {
+      shapeMethods[targetType].draw(ctx, { ...bound, rotate: current.rotate });
+    };
+    surface.refresh();
+  }
+
+  private get _surface() {
+    return this.edgeless.surface;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
     this._pathGenerator = new ConnectorPathGenerator({
@@ -712,6 +691,26 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       ${isMindMap ? this._renderMindMapButtons() : this._renderArrow()}
     </div>`;
   }
+
+  get canShowAutoComplete() {
+    const { current } = this;
+    return isShape(current) || isNoteBlock(current);
+  }
+
+  @state()
+  private accessor _isHover = true;
+
+  @state()
+  private accessor _isMoving = false;
+
+  @property({ attribute: false })
+  accessor current!: ShapeElementModel | NoteBlockModel;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor selectedRect!: SelectedRect;
 }
 
 declare global {

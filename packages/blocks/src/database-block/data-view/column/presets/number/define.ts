@@ -1,5 +1,7 @@
 import { Text } from '@blocksuite/store';
 
+import type { NumberFormat } from './utils/formatter.js';
+
 import { clamp } from '../../../../../_common/utils/math.js';
 import { tNumber } from '../../../logical/data-type.js';
 import { columnType } from '../../column-config.js';
@@ -15,11 +17,12 @@ export const numberColumnModelConfig = numberColumnType.modelConfig<
   number,
   {
     decimal: number;
+    format: NumberFormat;
   }
 >({
   name: 'Number',
   type: () => tNumber.create(),
-  defaultData: () => ({ decimal: 0 }),
+  defaultData: () => ({ decimal: 0, format: 'number' }),
   cellToString: data => data?.toString() ?? '',
   cellFromString: data => {
     const num = data ? Number(data) : NaN;

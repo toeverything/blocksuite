@@ -1,20 +1,20 @@
-import '../../buttons/tool-icon-button.js';
-import '../common/slide-menu.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { NoteTool } from '../../../controllers/tools/note-tool.js';
+import type { EdgelessTool } from '../../../types.js';
+
 import { AttachmentIcon, LinkIcon } from '../../../../../_common/icons/text.js';
 import {
-  getImageFilesFromLocal,
   type NoteChildrenFlavour,
+  getImageFilesFromLocal,
   openFileOrFiles,
 } from '../../../../../_common/utils/index.js';
 import { ImageIcon } from '../../../../../image-block/styles.js';
-import type { NoteTool } from '../../../controllers/tools/note-tool.js';
-import type { EdgelessTool } from '../../../types.js';
+import '../../buttons/tool-icon-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { NOTE_MENU_ITEMS } from './note-menu-config.js';
 
@@ -51,28 +51,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  @state()
-  private accessor _imageLoading = false;
-
   override type: EdgelessTool['type'] = 'affine:note';
-
-  @property({ attribute: false })
-  accessor childFlavour!: NoteChildrenFlavour;
-
-  @property({ attribute: false })
-  accessor childType!: string | null;
-
-  @property({ attribute: false })
-  accessor tip!: string;
-
-  @property({ attribute: false })
-  accessor onChange!: (
-    props: Partial<{
-      childFlavour: NoteTool['childFlavour'];
-      childType: string | null;
-      tip: string;
-    }>
-  ) => void;
 
   private async _addImages() {
     this._imageLoading = true;
@@ -112,6 +91,10 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
       .catch(console.error);
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+  }
+
   override firstUpdated() {
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(tool => {
@@ -121,10 +104,6 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
         this.tip = tool.tip;
       })
     );
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
   }
 
   override render() {
@@ -206,6 +185,27 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
       </edgeless-slide-menu>
     `;
   }
+
+  @state()
+  private accessor _imageLoading = false;
+
+  @property({ attribute: false })
+  accessor childFlavour!: NoteChildrenFlavour;
+
+  @property({ attribute: false })
+  accessor childType!: string | null;
+
+  @property({ attribute: false })
+  accessor onChange!: (
+    props: Partial<{
+      childFlavour: NoteTool['childFlavour'];
+      childType: string | null;
+      tip: string;
+    }>
+  ) => void;
+
+  @property({ attribute: false })
+  accessor tip!: string;
 }
 
 declare global {

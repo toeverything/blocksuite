@@ -1,4 +1,5 @@
 import type { SurfaceElementModel } from '../base.js';
+
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 type WatchFn<T extends SurfaceElementModel = SurfaceElementModel> = (

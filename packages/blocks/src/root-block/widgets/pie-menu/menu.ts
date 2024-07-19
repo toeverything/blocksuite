@@ -1,18 +1,19 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertEquals, assertExists, Slot } from '@blocksuite/global/utils';
-import { html, LitElement, nothing } from 'lit';
+import { Slot, assertEquals, assertExists } from '@blocksuite/global/utils';
+import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  type IVec,
-  toDegree,
-  toRadian,
-  Vec,
-} from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { PieMenuSchema, PieNodeModel } from './base.js';
 import type { AffinePieMenuWidget } from './index.js';
+
+import {
+  type IVec,
+  Vec,
+  toDegree,
+  toRadian,
+} from '../../../surface-block/index.js';
 import { PieNode } from './node.js';
 import { PieManager } from './pie-manager.js';
 import { pieMenuStyles } from './styles.js';
@@ -28,76 +29,6 @@ import {
 
 @customElement('affine-pie-menu')
 export class PieMenu extends WithDisposable(LitElement) {
-  get hoveredNode() {
-    return this._hoveredNode;
-  }
-
-  get rootNode() {
-    const node = this.selectionChain[0];
-    assertExists(node, 'No root node');
-    return node;
-  }
-
-  get activeNode() {
-    const node = this.selectionChain[this.selectionChain.length - 1];
-    assertExists(node, 'Required atLeast 1 node active');
-    return node;
-  }
-
-  static override styles = pieMenuStyles;
-
-  private _hoveredNode: PieNode | null = null;
-
-  private _openSubmenuTimeout?: NodeJS.Timeout;
-
-  slots = {
-    pointerAngleUpdated: new Slot<number | null>(),
-    requestNodeUpdate: new Slot(),
-  };
-
-  @property({ attribute: false })
-  accessor rootElement!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor widgetElement!: AffinePieMenuWidget;
-
-  @property({ attribute: false })
-  accessor schema!: PieMenuSchema;
-
-  @property({ attribute: false })
-  accessor position!: IVec;
-
-  selectionChain: PieNode[] = [];
-
-  abortController = new AbortController();
-
-  private _setupEvents() {
-    this._disposables.addFromEvent(
-      this.widgetElement,
-      'pointermove',
-      this._handlePointerMove
-    );
-
-    this._disposables.addFromEvent(document, 'keydown', this._handleKeyDown);
-  }
-
-  private selectChildWithIndex = (index: number) => {
-    const activeNode = this.activeNode;
-    if (!activeNode || isNaN(index)) return;
-
-    const node = activeNode.querySelector(
-      `& > affine-pie-node[index='${index}']`
-    );
-
-    if (node instanceof PieNode && !isColorNode(node.model)) {
-      // colors are more than 9 may be another method ?
-      if (isSubmenuNode(node.model)) this.openSubmenu(node);
-      else node.select();
-
-      if (isCommandNode(node.model)) this.close();
-    }
-  };
-
   private _handleKeyDown = (ev: KeyboardEvent) => {
     const { key } = ev;
     if (key === 'Escape') {
@@ -133,6 +64,38 @@ export class PieMenu extends WithDisposable(LitElement) {
     } else {
       this.slots.pointerAngleUpdated.emit(null); // acts like a abort signal
     }
+  };
+
+  private _hoveredNode: PieNode | null = null;
+
+  private _openSubmenuTimeout?: NodeJS.Timeout;
+
+  private selectChildWithIndex = (index: number) => {
+    const activeNode = this.activeNode;
+    if (!activeNode || isNaN(index)) return;
+
+    const node = activeNode.querySelector(
+      `& > affine-pie-node[index='${index}']`
+    );
+
+    if (node instanceof PieNode && !isColorNode(node.model)) {
+      // colors are more than 9 may be another method ?
+      if (isSubmenuNode(node.model)) this.openSubmenu(node);
+      else node.select();
+
+      if (isCommandNode(node.model)) this.close();
+    }
+  };
+
+  static override styles = pieMenuStyles;
+
+  abortController = new AbortController();
+
+  selectionChain: PieNode[] = [];
+
+  slots = {
+    pointerAngleUpdated: new Slot<number | null>(),
+    requestNodeUpdate: new Slot(),
   };
 
   private _createNodeTree(nodeSchema: PieNodeModel): PieNode {
@@ -171,33 +134,37 @@ export class PieMenu extends WithDisposable(LitElement) {
     return node;
   }
 
+  private _setupEvents() {
+    this._disposables.addFromEvent(
+      this.widgetElement,
+      'pointermove',
+      this._handlePointerMove
+    );
+
+    this._disposables.addFromEvent(document, 'keydown', this._handleKeyDown);
+  }
+
   close() {
     this.abortController.abort();
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this._setupEvents();
+    const root = this._createNodeTree(this.schema.root);
+    this.selectionChain.push(root);
   }
 
   /**
    * Position of the active node relative to the view
    */
   getActiveNodeRelPos(): IVec {
-    const position = [...this.position]; // use the menus position at start which will be the position of the root node
+    const position: IVec = [...this.position]; // use the menus position at start which will be the position of the root node
 
     for (const node of this.selectionChain) {
       position[0] += node.position[0];
       position[1] += node.position[1];
     }
-    return position;
-  }
-
-  getNodeRelPos(node: PieNode): IVec {
-    const position = [...this.position];
-    let cur: PieNode | null = node;
-
-    while (cur !== null) {
-      position[0] += cur.position[0];
-      position[1] += cur.position[1];
-      cur = cur.containerNode;
-    }
-
     return position;
   }
 
@@ -211,12 +178,35 @@ export class PieMenu extends WithDisposable(LitElement) {
     return Vec.len2([dx, dy]);
   }
 
-  isChildOfActiveNode(node: PieNode) {
-    return node.containerNode === this.activeNode;
+  getNodeRelPos(node: PieNode): IVec {
+    const position: IVec = [...this.position];
+    let cur: PieNode | null = node;
+
+    while (cur !== null) {
+      position[0] += cur.position[0];
+      position[1] += cur.position[1];
+      cur = cur.containerNode;
+    }
+
+    return position;
   }
 
   isActiveNode(node: PieNode) {
     return this.activeNode === node;
+  }
+
+  isChildOfActiveNode(node: PieNode) {
+    return node.containerNode === this.activeNode;
+  }
+
+  openSubmenu(submenu: PieNode) {
+    assertEquals(submenu.model.type, 'submenu', 'Need node of type submenu');
+
+    if (isNodeWithAction(submenu.model)) submenu.select();
+
+    this.selectionChain.push(submenu);
+    this.setHovered(null);
+    this.slots.requestNodeUpdate.emit();
   }
 
   popSelectionChainTo(node: PieNode) {
@@ -231,6 +221,21 @@ export class PieMenu extends WithDisposable(LitElement) {
     }
     this.requestUpdate();
     this.slots.requestNodeUpdate.emit();
+  }
+
+  override render() {
+    const [x, y] = this.position;
+    const menuStyles = {
+      transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
+    };
+
+    return html` <div class="pie-menu-container">
+      <div class="overlay" @click="${() => this.abortController.abort()}"></div>
+
+      <div style="${styleMap(menuStyles)}" class="pie-menu">
+        ${this.rootNode ?? nothing}
+      </div>
+    </div>`;
   }
 
   selectHovered() {
@@ -260,35 +265,31 @@ export class PieMenu extends WithDisposable(LitElement) {
     }
   }
 
-  openSubmenu(submenu: PieNode) {
-    assertEquals(submenu.model.type, 'submenu', 'Need node of type submenu');
-
-    if (isNodeWithAction(submenu.model)) submenu.select();
-
-    this.selectionChain.push(submenu);
-    this.setHovered(null);
-    this.slots.requestNodeUpdate.emit();
+  get activeNode() {
+    const node = this.selectionChain[this.selectionChain.length - 1];
+    assertExists(node, 'Required atLeast 1 node active');
+    return node;
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-    this._setupEvents();
-    const root = this._createNodeTree(this.schema.root);
-    this.selectionChain.push(root);
+  get hoveredNode() {
+    return this._hoveredNode;
   }
 
-  override render() {
-    const [x, y] = this.position;
-    const menuStyles = {
-      transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
-    };
-
-    return html` <div class="pie-menu-container">
-      <div class="overlay" @click="${() => this.abortController.abort()}"></div>
-
-      <div style="${styleMap(menuStyles)}" class="pie-menu">
-        ${this.rootNode ?? nothing}
-      </div>
-    </div>`;
+  get rootNode() {
+    const node = this.selectionChain[0];
+    assertExists(node, 'No root node');
+    return node;
   }
+
+  @property({ attribute: false })
+  accessor position!: IVec;
+
+  @property({ attribute: false })
+  accessor rootElement!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor schema!: PieMenuSchema;
+
+  @property({ attribute: false })
+  accessor widgetElement!: AffinePieMenuWidget;
 }

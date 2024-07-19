@@ -1,11 +1,12 @@
 import type { BlockElement } from '@blocksuite/block-std';
 
+import type { ListType } from '../../../../list-block/index.js';
+
 import {
   asyncFocusRichText,
   getInlineEditorByModel,
   matchFlavours,
 } from '../../../../_common/utils/index.js';
-import type { ListType } from '../../../../list-block/index.js';
 
 function addSpace(element: BlockElement, index: number) {
   element.model.text?.insert(' ', index);

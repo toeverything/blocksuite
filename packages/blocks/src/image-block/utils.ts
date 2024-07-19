@@ -1,15 +1,17 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
+
+import type { AttachmentBlockProps } from '../attachment-block/attachment-model.js';
+import type { ImageBlockComponent } from './image-block.js';
+import type { ImageBlockModel, ImageBlockProps } from './image-model.js';
 
 import { downloadBlob, withTempBlobData } from '../_common/utils/filesys.js';
 import { humanFileSize } from '../_common/utils/math.js';
-import type { AttachmentBlockProps } from '../attachment-block/attachment-model.js';
 import { readImageSize } from '../root-block/edgeless/components/utils.js';
 import { transformModel } from '../root-block/utils/operations/model.js';
 import { toast } from './../_common/components/toast.js';
-import type { ImageBlockComponent } from './image-block.js';
-import type { ImageBlockModel, ImageBlockProps } from './image-model.js';
 
 const MAX_RETRY_COUNT = 3;
 const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
@@ -76,11 +78,7 @@ async function getImageBlob(model: ImageBlockModel) {
 
   if (!blob.type) {
     const buffer = await blob.arrayBuffer();
-
-    // Switch to the original file-type package after https://github.com/sindresorhus/file-type/issues/578 is fixed
-    // The [@sgtpooki/file-type](https://github.com/sgtpooki/file-type) is a fork of the original file-type package
-    // Please check the commit before updating the package
-    const FileType = await import('@sgtpooki/file-type');
+    const FileType = await import('file-type');
     const fileType = await FileType.fileTypeFromBuffer(buffer);
     if (!fileType?.mime.startsWith('image/')) {
       return null;

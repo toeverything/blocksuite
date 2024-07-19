@@ -1,15 +1,15 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+
+import type { EmbedLoomStyles } from './embed-loom-model.js';
+import type { EmbedLoomBlockService } from './embed-loom-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import type { EmbedLoomStyles } from './embed-loom-model.js';
 import { type EmbedLoomModel, loomUrlRegex } from './embed-loom-model.js';
-import type { EmbedLoomBlockService } from './embed-loom-service.js';
 import { LoomIcon, styles } from './styles.js';
 import { refreshEmbedLoomUrlData } from './utils.js';
 
@@ -18,42 +18,13 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
   EmbedLoomModel,
   EmbedLoomBlockService
 > {
-  static override styles = styles;
-
-  @state()
-  private accessor _isSelected = false;
-
-  @state()
-  private accessor _showOverlay = true;
+  override _cardStyle: (typeof EmbedLoomStyles)[number] = 'video';
 
   private _isDragging = false;
 
   private _isResizing = false;
 
-  override _cardStyle: (typeof EmbedLoomStyles)[number] = 'video';
-
-  @property({ attribute: false })
-  accessor loading = false;
-
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.open();
-  }
+  static override styles = styles;
 
   open = () => {
     let link = this.model.url;
@@ -68,6 +39,26 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
       console.error
     );
   };
+
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (!this.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.open();
+  }
+
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      blockId: this.blockId,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -118,20 +109,18 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
     });
 
     if (this.isInSurface) {
-      const surface = this.surface;
-      assertExists(surface);
       this.disposables.add(
         this.model.propsUpdated.on(() => {
           this.requestUpdate();
         })
       );
 
-      this.edgeless?.slots.elementResizeStart.on(() => {
+      this.rootService?.slots.elementResizeStart.on(() => {
         this._isResizing = true;
         this._showOverlay = true;
       });
 
-      this.edgeless?.slots.elementResizeEnd.on(() => {
+      this.rootService?.slots.elementResizeEnd.on(() => {
         this._isResizing = false;
         this._showOverlay =
           this._isResizing || this._isDragging || !this._isSelected;
@@ -218,6 +207,15 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
       `
     );
   }
+
+  @state()
+  private accessor _isSelected = false;
+
+  @state()
+  private accessor _showOverlay = true;
+
+  @property({ attribute: false })
+  accessor loading = false;
 }
 
 declare global {

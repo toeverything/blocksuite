@@ -1,15 +1,27 @@
-import '../../surface-block/surface-block.js';
-import './components/block-portal/frame/edgeless-frame.js';
-import './components/toolbar/edgeless-toolbar.js';
-
 import type { SurfaceSelection } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import { BlockElement } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists, throttle } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+
+import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
+import type {
+  ImageBlockModel,
+  ImageBlockProps,
+} from '../../image-block/image-model.js';
+import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
+import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import type { FontLoader } from '../font-loader/font-loader.js';
+import type { RootBlockModel } from '../root-model.js';
+import type { EdgelessRootBlockWidgetName } from '../types.js';
+import type { EdgelessSelectedRect } from './components/rects/edgeless-selected-rect.js';
+import type { EdgelessRootService } from './edgeless-root-service.js';
+import type { EdgelessToolConstructor } from './services/tools-manager.js';
+import type { EdgelessTool } from './types.js';
 
 import { toast } from '../../_common/components/toast.js';
 import {
@@ -19,43 +31,35 @@ import {
 } from '../../_common/consts.js';
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import {
+  type IPoint,
+  NoteDisplayMode,
+  Point,
+  type Viewport,
   asyncFocusRichText,
   handleNativeRangeAtPoint,
-  type IPoint,
   isPinchEvent,
-  NoteDisplayMode,
-  on,
-  Point,
   requestConnectedFrame,
-  type Viewport,
+  requestThrottledConnectFrame,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
-import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
 import {
   setAttachmentUploaded,
   setAttachmentUploading,
 } from '../../attachment-block/utils.js';
-import type {
-  ImageBlockModel,
-  ImageBlockProps,
-} from '../../image-block/image-model.js';
 import {
   Bound,
   type IBound,
-  type IVec2,
+  type IVec,
+  Vec,
   normalizeWheelDeltaY,
   serializeXYWH,
-  Vec,
 } from '../../surface-block/index.js';
-import type {
-  IndexedCanvasUpdateEvent,
-  SurfaceBlockComponent,
-} from '../../surface-block/surface-block.js';
-import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import type { FontLoader } from '../font-loader/font-loader.js';
-import type { RootBlockModel } from '../root-model.js';
-import type { EdgelessRootBlockWidgetName } from '../types.js';
-import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
+import '../../surface-block/surface-block.js';
+import './components/note-slicer/index.js';
+import './components/presentation/edgeless-navigator-black-background.js';
+import './components/rects/edgeless-dragging-area-rect.js';
+import './components/rects/edgeless-selected-rect.js';
+import './components/toolbar/edgeless-toolbar.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { calcBoundByOrigin, readImageSize } from './components/utils.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
@@ -76,9 +80,6 @@ import {
   TextToolController,
 } from './controllers/tools/index.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
-import type { EdgelessRootService } from './edgeless-root-service.js';
-import type { EdgelessToolConstructor } from './services/tools-manager.js';
-import type { EdgelessTool } from './types.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -86,7 +87,7 @@ import {
   DEFAULT_NOTE_OFFSET_Y,
   DEFAULT_NOTE_WIDTH,
 } from './utils/consts.js';
-import { isCanvasElement } from './utils/query.js';
+import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 export interface EdgelessViewport {
   left: number;
   top: number;
@@ -104,59 +105,32 @@ export class EdgelessRootBlockComponent extends BlockElement<
   EdgelessRootService,
   EdgelessRootBlockWidgetName
 > {
-  get tools() {
-    return this.service.tool;
-  }
+  private _refreshLayerViewport = requestThrottledConnectFrame(() => {
+    const { zoom, translateX, translateY } = this.service.viewport;
+    const { gap } = getBackgroundGrid(zoom, true);
 
-  get dispatcher() {
-    return this.service?.uiEventDispatcher;
-  }
+    this.background.style.setProperty(
+      'background-position',
+      `${translateX}px ${translateY}px`
+    );
+    this.background.style.setProperty('background-size', `${gap}px ${gap}px`);
 
-  get slots() {
-    return this.service.slots;
-  }
+    this.layer.style.setProperty('transform', this._getLayerViewport());
+    this.layer.dataset.scale = zoom.toString();
+  }, this);
 
-  get viewportElement(): HTMLElement {
-    if (this._viewportElement) return this._viewportElement;
-    this._viewportElement = this.host.closest(
-      '.affine-edgeless-viewport'
-    ) as HTMLElement | null;
-    assertExists(this._viewportElement);
-    return this._viewportElement;
-  }
+  private _resizeObserver: ResizeObserver | null = null;
 
-  get viewport(): Viewport {
-    const {
-      scrollLeft,
-      scrollTop,
-      scrollWidth,
-      scrollHeight,
-      clientWidth,
-      clientHeight,
-    } = this.viewportElement;
-    const { top, left } = this.viewportElement.getBoundingClientRect();
-    return {
-      top,
-      left,
-      scrollLeft,
-      scrollTop,
-      scrollWidth,
-      scrollHeight,
-      clientWidth,
-      clientHeight,
-    };
-  }
+  private readonly _themeObserver = new ThemeObserver();
 
-  get surfaceBlockModel() {
-    return this.model.children.find(
-      child => child.flavour === 'affine:surface'
-    ) as SurfaceBlockModel;
-  }
+  private _viewportElement: HTMLElement | null = null;
 
   static override styles = css`
     affine-edgeless-root {
       -webkit-user-select: none;
       user-select: none;
+      display: block;
+      height: 100%;
     }
 
     .widgets-container {
@@ -168,7 +142,16 @@ export class EdgelessRootBlockComponent extends BlockElement<
       height: 100%;
     }
 
-    .affine-edgeless-layer {
+    .edgeless-background {
+      height: 100%;
+      background-color: var(--affine-background-primary-color);
+      background-image: radial-gradient(
+        var(--affine-edgeless-grid-color) 1px,
+        var(--affine-background-primary-color) 1px
+      );
+    }
+
+    .edgeless-layer {
       position: absolute;
       top: 0;
       left: 0;
@@ -182,18 +165,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     }
   `;
 
-  private _viewportElement: HTMLElement | null = null;
-
-  private readonly _themeObserver = new ThemeObserver();
-
-  private _resizeObserver: ResizeObserver | null = null;
-
-  /**
-   * Disable components
-   *
-   * Toolbar is not allowed to display in `syncd doc block`.
-   */
-  disableComponents = false;
+  clipboardController = new EdgelessClipboardController(this);
 
   /**
    * Shared components
@@ -202,27 +174,28 @@ export class EdgelessRootBlockComponent extends BlockElement<
     toolbar: null as EdgelessToolbar | null,
   };
 
+  /**
+   * Disable components
+   *
+   * Toolbar is not allowed to display in `syncd doc block`.
+   */
+  disableComponents = false;
+
+  fontLoader!: FontLoader;
+
   keyboardManager: EdgelessPageKeyboardManager | null = null;
 
   mouseRoot!: HTMLElement;
 
-  @state()
-  accessor edgelessTool: EdgelessTool = {
-    type: localStorage.defaultTool ?? 'default',
-  };
+  private _getLayerViewport(negative = false) {
+    const { translateX, translateY, zoom } = this.service.viewport;
 
-  @query('edgeless-block-portal-container')
-  accessor rootElementContainer!: EdgelessBlockPortalContainer;
+    if (negative) {
+      return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
+    }
 
-  @query('.affine-edgeless-layer')
-  accessor edgelessLayer!: HTMLDivElement;
-
-  clipboardController = new EdgelessClipboardController(this);
-
-  @query('affine-surface')
-  accessor surface!: SurfaceBlockComponent;
-
-  fontLoader!: FontLoader;
+    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+  }
 
   private _handleToolbarFlag() {
     const createToolbar = () => {
@@ -235,6 +208,74 @@ export class EdgelessRootBlockComponent extends BlockElement<
     if (!this.components.toolbar) {
       createToolbar();
     }
+  }
+
+  private _initFontLoader() {
+    const fontLoader = this.service?.fontLoader;
+    assertExists(fontLoader);
+
+    fontLoader.ready
+      .then(() => {
+        this.surface.refresh();
+      })
+      .catch(console.error);
+  }
+
+  private _initPixelRatioChangeEffect() {
+    let media: MediaQueryList;
+
+    const onPixelRatioChange = () => {
+      if (media) {
+        this.service.viewport.onResize();
+        media.removeEventListener('change', onPixelRatioChange);
+      }
+
+      media = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+      media.addEventListener('change', onPixelRatioChange);
+    };
+
+    onPixelRatioChange();
+
+    this._disposables.add(() => {
+      media?.removeEventListener('change', onPixelRatioChange);
+    });
+  }
+
+  private _initRemoteCursor() {
+    let rafId: number | null = null;
+
+    const setRemoteCursor = (pos: { x: number; y: number }) => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestConnectedFrame(() => {
+        if (!this.service?.viewport) return;
+        const cursorPosition = this.service.viewport.toModelCoord(pos.x, pos.y);
+        this.service.selection.setCursor({
+          x: cursorPosition[0],
+          y: cursorPosition[1],
+        });
+        rafId = null;
+      }, this);
+    };
+
+    this.handleEvent('pointerMove', e => {
+      const pointerEvent = e.get('pointerState');
+      setRemoteCursor(pointerEvent);
+    });
+  }
+
+  private _initResizeEffect() {
+    const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
+      // FIXME: find a better way to get rid of empty check
+      if (!this.service || !this.service.selection || !this.service.viewport) {
+        console.error('Service not ready');
+        return;
+      }
+      this.service.selection.set(this.service.selection.surfaceSelections);
+      this.service.viewport.onResize();
+    });
+
+    resizeObserver.observe(this.viewportElement);
+    this._resizeObserver = resizeObserver;
   }
 
   private _initSlotEffects() {
@@ -275,132 +316,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
     );
   }
 
-  private _initResizeEffect() {
-    const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
-      this.service.selection.set(this.service.selection.surfaceSelections);
-      this.service.viewport.onResize();
-    });
-
-    resizeObserver.observe(this.viewportElement);
-    this._resizeObserver = resizeObserver;
-  }
-
-  private _initPixelRatioChangeEffect() {
-    let media: MediaQueryList;
-
-    const onPixelRatioChange = () => {
-      if (media) {
-        this.service.viewport.onResize();
-        media.removeEventListener('change', onPixelRatioChange);
-      }
-
-      media = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
-      media.addEventListener('change', onPixelRatioChange);
-    };
-
-    onPixelRatioChange();
-
-    this._disposables.add(() => {
-      media?.removeEventListener('change', onPixelRatioChange);
-    });
-  }
-
-  private _initFontLoader() {
-    const fontLoader = this.service?.fontLoader;
-    assertExists(fontLoader);
-
-    fontLoader.ready
-      .then(() => {
-        this.surface.refresh();
-      })
-      .catch(console.error);
-  }
-
-  private _initRemoteCursor() {
-    let rafId: number | null = null;
-
-    const setRemoteCursor = (pos: { x: number; y: number }) => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestConnectedFrame(() => {
-        const cursorPosition = this.service.viewport.toModelCoord(pos.x, pos.y);
-        this.service.selection.setCursor({
-          x: cursorPosition[0],
-          y: cursorPosition[1],
-        });
-        rafId = null;
-      }, this);
-    };
-
-    this.handleEvent('pointerMove', e => {
-      const pointerEvent = e.get('pointerState');
-      setRemoteCursor(pointerEvent);
-    });
-  }
-
-  private _initSurface() {
-    const appendIndexedCanvasToPortal = (
-      canvases: HTMLCanvasElement[] = this.surface.renderer.stackingCanvas
-    ) => {
-      this.rootElementContainer.setSlotContent(canvases);
-    };
-
-    this._disposables.add(
-      on(this.surface, 'indexedcanvasupdate', e => {
-        appendIndexedCanvasToPortal(
-          (e as IndexedCanvasUpdateEvent).detail.content
-        );
-      })
-    );
-
-    this._disposables.add(
-      this.std.event.slots.editorHostPanned.on(() => {
-        this.service.viewport.onResize();
-      })
-    );
-
-    if (this.rootElementContainer.isUpdatePending) {
-      this.rootElementContainer.updateComplete
-        .then(() => appendIndexedCanvasToPortal())
-        .catch(console.error);
-    } else {
-      appendIndexedCanvasToPortal();
-    }
-  }
-
-  private _initViewport() {
-    const { service } = this;
-
-    service.viewport.setContainer(this);
-
-    const run = () => {
-      const viewport =
-        service.editPropsStore.getStorage('viewport') ??
-        service.getFitToScreenData();
-
-      if ('xywh' in viewport) {
-        const bound = Bound.deserialize(viewport.xywh);
-        service.viewport.setViewportByBound(bound, viewport.padding);
-      } else {
-        const { zoom, centerX, centerY } = viewport;
-        service.viewport.setViewport(zoom, [centerX, centerY]);
-      }
-    };
-
-    if (this.surface.isUpdatePending) {
-      this.surface.updateComplete.then(run).catch(console.error);
-    } else {
-      run();
-    }
-
-    this._disposables.add(() => {
-      service.editPropsStore.setStorage('viewport', {
-        centerX: service.viewport.centerX,
-        centerY: service.viewport.centerY,
-        zoom: service.viewport.zoom,
-      });
-    });
-  }
-
   private _initTools() {
     const tools = [
       DefaultToolController,
@@ -423,6 +338,39 @@ export class EdgelessRootBlockComponent extends BlockElement<
       this.service.registerTool(tool);
     });
     this.service.tool.mount(this);
+  }
+
+  private _initViewport() {
+    const { service } = this;
+
+    service.viewport.setContainer(this);
+
+    const run = () => {
+      const viewport =
+        service.editPropsStore.getStorage('viewport') ??
+        service.getFitToScreenData();
+      if ('xywh' in viewport) {
+        const bound = Bound.deserialize(viewport.xywh);
+        service.viewport.setViewportByBound(bound, viewport.padding);
+      } else {
+        const { zoom, centerX, centerY } = viewport;
+        service.viewport.setViewport(zoom, [centerX, centerY]);
+      }
+    };
+
+    if (this.surface.isUpdatePending) {
+      this.surface.updateComplete.then(run).catch(console.error);
+    } else {
+      run();
+    }
+
+    this._disposables.add(() => {
+      service.editPropsStore.setStorage('viewport', {
+        centerX: service.viewport.centerX,
+        centerY: service.viewport.centerY,
+        zoom: service.viewport.zoom,
+      });
+    });
   }
 
   private _initWheelEvent() {
@@ -466,204 +414,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     );
   }
 
-  /**
-   * Adds a new note with the given point on the affine-editor-container.
-   *
-   * @param: point Point
-   * @returns: The id of new note
-   */
-  addNoteWithPoint(
-    point: IPoint,
-    options: {
-      width?: number;
-      height?: number;
-      parentId?: string;
-      noteIndex?: number;
-      offsetX?: number;
-      offsetY?: number;
-      scale?: number;
-    } = {}
-  ) {
-    const {
-      width = DEFAULT_NOTE_WIDTH,
-      height = DEFAULT_NOTE_HEIGHT,
-      offsetX = DEFAULT_NOTE_OFFSET_X,
-      offsetY = DEFAULT_NOTE_OFFSET_Y,
-      parentId = this.doc.root?.id,
-      noteIndex: noteIndex,
-      scale = 1,
-    } = options;
-    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
-    const blockId = this.service.addBlock(
-      'affine:note',
-      {
-        xywh: serializeXYWH(
-          x - offsetX * scale,
-          y - offsetY * scale,
-          width,
-          height
-        ),
-        displayMode: NoteDisplayMode.EdgelessOnly,
-      },
-      parentId,
-      noteIndex
-    );
-
-    this.service.telemetryService?.track('CanvasElementAdded', {
-      control: 'canvas:draw',
-      page: 'whiteboard editor',
-      module: 'toolbar',
-      segment: 'toolbar',
-      type: 'note',
-    });
-
-    return blockId;
-  }
-
-  /**
-   * Adds a new note with the given blocks and point.
-   * @param blocks Array\<Partial\<BlockModel\>\>
-   * @param point Point
-   */
-  addNewNote(
-    blocks: Array<Partial<BlockModel>>,
-    point: IPoint,
-    options?: {
-      width?: number;
-      height?: number;
-      parentId?: string;
-      noteIndex?: number;
-      offsetX?: number;
-      offsetY?: number;
-    }
-  ): {
-    noteId: string;
-    ids: string[];
-  } {
-    this.doc.captureSync();
-    const { left, top } = this.service.viewport;
-    point.x -= left;
-    point.y -= top;
-    const noteId = this.addNoteWithPoint(point, options);
-    const ids = this.doc.addBlocks(
-      blocks.map(({ flavour, ...blockProps }) => {
-        assertExists(flavour);
-        return {
-          flavour,
-          blockProps,
-        };
-      }),
-      noteId
-    );
-    return {
-      noteId,
-      ids,
-    };
-  }
-
-  addImage(model: Partial<ImageBlockModel>, point: IPoint) {
-    const options = {
-      width: model.width ?? 0,
-      height: model.height ?? 0,
-    };
-    {
-      delete model.width;
-      delete model.height;
-    }
-    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
-    const bound = new Bound(x, y, options.width, options.height);
-    return this.service.addBlock(
-      'affine:image',
-      { ...model, xywh: bound.serialize() },
-      this.surface.model
-    );
-  }
-
-  async addImages(
-    files: File[],
-    point?: IVec2,
-    inTopLeft?: boolean
-  ): Promise<string[]> {
-    const imageFiles = [...files].filter(file =>
-      file.type.startsWith('image/')
-    );
-    if (!imageFiles.length) return [];
-
-    const imageService = this.host.spec.getService('affine:image');
-    const maxFileSize = imageService.maxFileSize;
-    const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
-    if (isSizeExceeded) {
-      toast(
-        this.host,
-        `You can only upload files less than ${humanFileSize(
-          maxFileSize,
-          true,
-          0
-        )}`
-      );
-      return [];
-    }
-
-    let { x, y } = this.service.viewport.center;
-    if (point) [x, y] = this.service.viewport.toModelCoord(...point);
-
-    const dropInfos: { point: Point; blockId: string }[] = [];
-
-    const IMAGE_STACK_GAP = 32;
-
-    // create image cards without image data
-    imageFiles.map((file, index) => {
-      const point = new Point(
-        x + index * IMAGE_STACK_GAP,
-        y + index * IMAGE_STACK_GAP
-      );
-      const center = Vec.toVec(point);
-      const bound = calcBoundByOrigin(center, inTopLeft);
-      const blockId = this.service.addBlock(
-        'affine:image',
-        {
-          size: file.size,
-          xywh: bound.serialize(),
-        },
-        this.surface.model
-      );
-      dropInfos.push({ point, blockId });
-    });
-
-    // upload image data and update the image model
-    const uploadPromises = imageFiles.map(async (file, index) => {
-      const { point, blockId } = dropInfos[index];
-
-      const sourceId = await this.doc.blobSync.set(file);
-      const imageSize = await readImageSize(file);
-
-      const center = Vec.toVec(point);
-      const bound = calcBoundByOrigin(
-        center,
-        inTopLeft,
-        imageSize.width,
-        imageSize.height
-      );
-
-      this.doc.withoutTransact(() => {
-        this.service.updateElement(blockId, {
-          sourceId,
-          ...imageSize,
-          xywh: bound.serialize(),
-        } satisfies Partial<ImageBlockProps>);
-      });
-    });
-    await Promise.all(uploadPromises);
-
-    const blockIds = dropInfos.map(info => info.blockId);
-    this.service.selection.set({
-      elements: blockIds,
-      editing: false,
-    });
-    return blockIds;
-  }
-
-  async addAttachments(files: File[], point?: IVec2): Promise<string[]> {
+  async addAttachments(files: File[], point?: IVec): Promise<string[]> {
     if (!files.length) return [];
 
     const attachmentService = this.host.spec.getService('affine:attachment');
@@ -748,6 +499,325 @@ export class EdgelessRootBlockComponent extends BlockElement<
     return blockIds;
   }
 
+  addImage(model: Partial<ImageBlockModel>, point: IPoint) {
+    const options = {
+      width: model.width ?? 0,
+      height: model.height ?? 0,
+    };
+    {
+      delete model.width;
+      delete model.height;
+    }
+    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
+    const bound = new Bound(x, y, options.width, options.height);
+    return this.service.addBlock(
+      'affine:image',
+      { ...model, xywh: bound.serialize() },
+      this.surface.model
+    );
+  }
+
+  async addImages(
+    files: File[],
+    point?: IVec,
+    inTopLeft?: boolean
+  ): Promise<string[]> {
+    const imageFiles = [...files].filter(file =>
+      file.type.startsWith('image/')
+    );
+    if (!imageFiles.length) return [];
+
+    const imageService = this.host.spec.getService('affine:image');
+    const maxFileSize = imageService.maxFileSize;
+    const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
+    if (isSizeExceeded) {
+      toast(
+        this.host,
+        `You can only upload files less than ${humanFileSize(
+          maxFileSize,
+          true,
+          0
+        )}`
+      );
+      return [];
+    }
+
+    let { x, y } = this.service.viewport.center;
+    if (point) [x, y] = this.service.viewport.toModelCoord(...point);
+
+    const dropInfos: { point: Point; blockId: string }[] = [];
+
+    const IMAGE_STACK_GAP = 32;
+
+    // create image cards without image data
+    imageFiles.map((file, index) => {
+      const point = new Point(
+        x + index * IMAGE_STACK_GAP,
+        y + index * IMAGE_STACK_GAP
+      );
+      const center = Vec.toVec(point);
+      const bound = calcBoundByOrigin(center, inTopLeft);
+      const blockId = this.service.addBlock(
+        'affine:image',
+        {
+          size: file.size,
+          xywh: bound.serialize(),
+        },
+        this.surface.model
+      );
+      dropInfos.push({ point, blockId });
+    });
+
+    // upload image data and update the image model
+    const uploadPromises = imageFiles.map(async (file, index) => {
+      const { point, blockId } = dropInfos[index];
+
+      const sourceId = await this.doc.blobSync.set(file);
+      const imageSize = await readImageSize(file);
+
+      const center = Vec.toVec(point);
+      const bound = calcBoundByOrigin(
+        center,
+        inTopLeft,
+        imageSize.width,
+        imageSize.height
+      );
+
+      this.doc.withoutTransact(() => {
+        this.service.updateElement(blockId, {
+          sourceId,
+          ...imageSize,
+          xywh: bound.serialize(),
+        } satisfies Partial<ImageBlockProps>);
+      });
+    });
+    await Promise.all(uploadPromises);
+
+    const blockIds = dropInfos.map(info => info.blockId);
+    this.service.selection.set({
+      elements: blockIds,
+      editing: false,
+    });
+    return blockIds;
+  }
+
+  /**
+   * Adds a new note with the given blocks and point.
+   * @param blocks Array\<Partial\<BlockModel\>\>
+   * @param point Point
+   */
+  addNewNote(
+    blocks: Array<Partial<BlockModel>>,
+    point: IPoint,
+    options?: {
+      width?: number;
+      height?: number;
+      parentId?: string;
+      noteIndex?: number;
+      offsetX?: number;
+      offsetY?: number;
+    }
+  ): {
+    noteId: string;
+    ids: string[];
+  } {
+    this.doc.captureSync();
+    const { left, top } = this.service.viewport;
+    point.x -= left;
+    point.y -= top;
+    const noteId = this.addNoteWithPoint(point, options);
+    const ids = this.doc.addBlocks(
+      blocks.map(({ flavour, ...blockProps }) => {
+        assertExists(flavour);
+        return {
+          flavour,
+          blockProps,
+        };
+      }),
+      noteId
+    );
+    return {
+      noteId,
+      ids,
+    };
+  }
+
+  /**
+   * Adds a new note with the given point on the affine-editor-container.
+   *
+   * @param: point Point
+   * @returns: The id of new note
+   */
+  addNoteWithPoint(
+    point: IPoint,
+    options: {
+      width?: number;
+      height?: number;
+      parentId?: string;
+      noteIndex?: number;
+      offsetX?: number;
+      offsetY?: number;
+      scale?: number;
+    } = {}
+  ) {
+    const {
+      width = DEFAULT_NOTE_WIDTH,
+      height = DEFAULT_NOTE_HEIGHT,
+      offsetX = DEFAULT_NOTE_OFFSET_X,
+      offsetY = DEFAULT_NOTE_OFFSET_Y,
+      parentId = this.doc.root?.id,
+      noteIndex: noteIndex,
+      scale = 1,
+    } = options;
+    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
+    const blockId = this.service.addBlock(
+      'affine:note',
+      {
+        xywh: serializeXYWH(
+          x - offsetX * scale,
+          y - offsetY * scale,
+          width,
+          height
+        ),
+        displayMode: NoteDisplayMode.EdgelessOnly,
+      },
+      parentId,
+      noteIndex
+    );
+
+    this.service.telemetryService?.track('CanvasElementAdded', {
+      control: 'canvas:draw',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'note',
+    });
+
+    return blockId;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.clipboardController.hostConnected();
+
+    this.keyboardManager = new EdgelessPageKeyboardManager(this);
+
+    this.handleEvent('selectionChange', () => {
+      const surface = this.host.selection.value.find(
+        (sel): sel is SurfaceSelection => sel.is('surface')
+      );
+      if (!surface) return;
+
+      const el = this.service.getElementById(surface.elements[0]);
+      if (isCanvasElement(el)) {
+        return true;
+      }
+
+      return;
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this.mouseRoot = this.parentElement!;
+    this._initTools();
+
+    this._disposables.add(
+      this.slots.elementResizeStart.on(() => {
+        this._isResizing = true;
+      })
+    );
+
+    this._disposables.add(
+      this.slots.elementResizeEnd.on(() => {
+        this._isResizing = false;
+      })
+    );
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.clipboardController.hostDisconnected();
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+      this._resizeObserver = null;
+    }
+
+    this.keyboardManager = null;
+    this.components.toolbar?.remove();
+    this.components.toolbar = null;
+  }
+
+  override firstUpdated() {
+    this._initSlotEffects();
+    this._initResizeEffect();
+    this._initPixelRatioChangeEffect();
+    this._initFontLoader();
+    this._initRemoteCursor();
+    // this._initSurface();
+
+    this._initViewport();
+    this._initWheelEvent();
+
+    if (this.doc.readonly) {
+      this.tools.setEdgelessTool({ type: 'pan', panning: true });
+    }
+
+    if (this.disableComponents) return;
+    requestConnectedFrame(() => {
+      this._handleToolbarFlag();
+      this.requestUpdate();
+    }, this);
+
+    this._disposables.add(
+      this.service.viewport.viewportUpdated.on(() => {
+        this._refreshLayerViewport();
+      })
+    );
+
+    this._refreshLayerViewport();
+  }
+
+  getElementsBound(): IBound | null {
+    const { service } = this;
+    return edgelessElementsBound([...service.elements, ...service.blocks]);
+  }
+
+  override renderBlock() {
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
+
+    const widgets = repeat(
+      Object.entries(this.widgets),
+      ([id]) => id,
+      ([_, widget]) => widget
+    );
+
+    return html`
+      <div class="edgeless-background edgeless-container">
+        <div class="edgeless-layer">
+          ${this.renderChildren(this.model)}${this.renderChildren(
+            this.surfaceBlockModel
+          )}
+        </div>
+      </div>
+
+      <!-- need to be converted to widget -->
+      <edgeless-dragging-area-rect
+        .edgeless=${this}
+      ></edgeless-dragging-area-rect>
+
+      ${this._isResizing
+        ? nothing
+        : html`<note-slicer .edgeless=${this}></note-slicer>`}
+
+      <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
+      <edgeless-navigator-black-background
+        .edgeless=${this}
+      ></edgeless-navigator-black-background>
+      <!-- end -->
+
+      <div class="widgets-container">${widgets}</div>
+    `;
+  }
+
   /*
    * Set selection state by giving noteId & blockId.
    * Not supports surface elements.
@@ -778,85 +848,74 @@ export class EdgelessRootBlockComponent extends BlockElement<
     });
   }
 
-  getElementsBound(): IBound | null {
-    const { service } = this;
-    return edgelessElementsBound([...service.elements, ...service.blocks]);
+  get dispatcher() {
+    return this.service?.uiEventDispatcher;
   }
 
-  override firstUpdated() {
-    this._initSlotEffects();
-    this._initResizeEffect();
-    this._initPixelRatioChangeEffect();
-    this._initFontLoader();
-    this._initRemoteCursor();
-    this._initSurface();
-
-    this._initViewport();
-    this._initWheelEvent();
-
-    if (this.doc.readonly) {
-      this.tools.setEdgelessTool({ type: 'pan', panning: true });
-    }
-
-    if (this.disableComponents) return;
-    requestConnectedFrame(() => {
-      this._handleToolbarFlag();
-      this.requestUpdate();
-    }, this);
+  get slots() {
+    return this.service.slots;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.clipboardController.hostConnected();
-
-    this.keyboardManager = new EdgelessPageKeyboardManager(this);
-
-    this.handleEvent('selectionChange', () => {
-      const surface = this.host.selection.value.find(
-        (sel): sel is SurfaceSelection => sel.is('surface')
-      );
-      if (!surface) return;
-
-      const el = this.service.getElementById(surface.elements[0]);
-      if (isCanvasElement(el)) {
-        return true;
-      }
-
-      return;
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.mouseRoot = this.parentElement!;
-    this._initTools();
+  get surfaceBlockModel() {
+    return this.model.children.find(
+      child => child.flavour === 'affine:surface'
+    ) as SurfaceBlockModel;
   }
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.clipboardController.hostDisconnected();
-    if (this._resizeObserver) {
-      this._resizeObserver.disconnect();
-      this._resizeObserver = null;
-    }
-
-    this.keyboardManager = null;
-    this.components.toolbar?.remove();
-    this.components.toolbar = null;
+  get tools() {
+    return this.service.tool;
   }
 
-  override renderBlock() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
-    const widgets = repeat(
-      Object.entries(this.widgets),
-      ([id]) => id,
-      ([_, widget]) => widget
-    );
-
-    return html`${this.host.renderModel(this.surfaceBlockModel)}
-      <edgeless-block-portal-container .edgeless=${this}>
-      </edgeless-block-portal-container>
-      <div class="widgets-container">${widgets}</div> `;
+  get viewport(): Viewport {
+    const {
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    } = this.viewportElement;
+    const { top, left } = this.viewportElement.getBoundingClientRect();
+    return {
+      top,
+      left,
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    };
   }
+
+  get viewportElement(): HTMLElement {
+    if (this._viewportElement) return this._viewportElement;
+    this._viewportElement = this.host.closest(
+      '.affine-edgeless-viewport'
+    ) as HTMLElement | null;
+    assertExists(this._viewportElement);
+    return this._viewportElement;
+  }
+
+  @state()
+  private accessor _isResizing = false;
+
+  @query('.edgeless-background')
+  accessor background!: HTMLDivElement;
+
+  @state()
+  accessor edgelessTool: EdgelessTool = {
+    type: localStorage.defaultTool ?? 'default',
+  };
+
+  @query('.edgeless-layer')
+  accessor layer!: HTMLDivElement;
+
+  @query('edgeless-selected-rect')
+  accessor selectedRect!: EdgelessSelectedRect;
+
+  @query('affine-surface')
+  accessor surface!: SurfaceBlockComponent;
 }
 
 declare global {

@@ -1,7 +1,8 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
 

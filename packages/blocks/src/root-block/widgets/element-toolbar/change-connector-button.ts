@@ -1,17 +1,22 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import '../../edgeless/components/panel/stroke-style-panel.js';
-import '../../edgeless/components/panel/color-panel.js';
-import './change-text-menu.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { html, LitElement, nothing, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import type {
+  ConnectorElementProps,
+  ConnectorLabelProps,
+} from '../../../surface-block/element-model/connector.js';
+import type { PointStyle } from '../../../surface-block/index.js';
+import type { LineStyleEvent } from '../../edgeless/components/panel/line-styles-panel.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   AddTextIcon,
@@ -32,14 +37,8 @@ import {
   ScribbledStyleIcon,
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { LineWidth } from '../../../_common/types.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
-import type {
-  ConnectorElementProps,
-  ConnectorLabelProps,
-} from '../../../surface-block/element-model/connector.js';
-import type { PointStyle } from '../../../surface-block/index.js';
 import {
   type ConnectorElementModel,
   ConnectorEndpoint,
@@ -48,13 +47,14 @@ import {
   DEFAULT_REAR_END_POINT_STYLE,
   type StrokeStyle,
 } from '../../../surface-block/index.js';
+import '../../edgeless/components/panel/color-panel.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
 } from '../../edgeless/components/panel/color-panel.js';
-import type { LineStyleEvent } from '../../edgeless/components/panel/line-styles-panel.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import '../../edgeless/components/panel/stroke-style-panel.js';
 import { mountConnectorLabelEditor } from '../../edgeless/utils/text.js';
+import './change-text-menu.js';
 
 function getMostCommonColor(
   elements: ConnectorElementModel[]
@@ -216,68 +216,8 @@ const MODE_CHOOSE: [ConnectorMode, () => TemplateResult<1>][] = [
 
 @customElement('edgeless-change-connector-button')
 export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor elements: ConnectorElementModel[] = [];
-
-  get doc() {
-    return this.edgeless.doc;
-  }
-
-  get service() {
-    return this.edgeless.service;
-  }
-
-  private _setConnectorProp<
-    K extends keyof Omit<ConnectorElementProps, keyof ConnectorLabelProps>,
-  >(key: K, value: ConnectorElementProps[K]) {
-    this.doc.captureSync();
-    this.elements
-      .filter(notEqual(key, value))
-      .forEach(element =>
-        this.service.updateElement(element.id, { [key]: value })
-      );
-  }
-
-  private _setConnectorMode(mode: ConnectorMode) {
-    this._setConnectorProp('mode', mode);
-  }
-
-  private _setConnectorRough(rough: boolean) {
-    this._setConnectorProp('rough', rough);
-  }
-
-  private _setConnectorColor(stroke: CssVariableName) {
-    this._setConnectorProp('stroke', stroke);
-  }
-
-  private _setConnectorStrokeWidth(strokeWidth: number) {
-    this._setConnectorProp('strokeWidth', strokeWidth);
-  }
-
-  private _setConnectorStrokeStyle(strokeStyle: StrokeStyle) {
-    this._setConnectorProp('strokeStyle', strokeStyle);
-  }
-
-  private _setConnectorStorke({ type, value }: LineStyleEvent) {
-    if (type === 'size') {
-      this._setConnectorStrokeWidth(value);
-      return;
-    }
-    this._setConnectorStrokeStyle(value);
-  }
-
-  private _setConnectorPointStyle(end: ConnectorEndpoint, style: PointStyle) {
-    const props = {
-      [end === ConnectorEndpoint.Front
-        ? 'frontEndpointStyle'
-        : 'rearEndpointStyle']: style,
-    };
-    this.elements.forEach(element =>
-      this.service.updateElement(element.id, { ...props })
-    );
+  private _addLabel() {
+    mountConnectorLabelEditor(this.elements[0], this.edgeless);
   }
 
   private _flipEndpointStyle(
@@ -301,8 +241,54 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     );
   }
 
-  private _addLabel() {
-    mountConnectorLabelEditor(this.elements[0], this.edgeless);
+  private _setConnectorColor(stroke: CssVariableName) {
+    this._setConnectorProp('stroke', stroke);
+  }
+
+  private _setConnectorMode(mode: ConnectorMode) {
+    this._setConnectorProp('mode', mode);
+  }
+
+  private _setConnectorPointStyle(end: ConnectorEndpoint, style: PointStyle) {
+    const props = {
+      [end === ConnectorEndpoint.Front
+        ? 'frontEndpointStyle'
+        : 'rearEndpointStyle']: style,
+    };
+    this.elements.forEach(element =>
+      this.service.updateElement(element.id, { ...props })
+    );
+  }
+
+  private _setConnectorProp<
+    K extends keyof Omit<ConnectorElementProps, keyof ConnectorLabelProps>,
+  >(key: K, value: ConnectorElementProps[K]) {
+    this.doc.captureSync();
+    this.elements
+      .filter(notEqual(key, value))
+      .forEach(element =>
+        this.service.updateElement(element.id, { [key]: value })
+      );
+  }
+
+  private _setConnectorRough(rough: boolean) {
+    this._setConnectorProp('rough', rough);
+  }
+
+  private _setConnectorStorke({ type, value }: LineStyleEvent) {
+    if (type === 'size') {
+      this._setConnectorStrokeWidth(value);
+      return;
+    }
+    this._setConnectorStrokeStyle(value);
+  }
+
+  private _setConnectorStrokeStyle(strokeStyle: StrokeStyle) {
+    this._setConnectorProp('strokeStyle', strokeStyle);
+  }
+
+  private _setConnectorStrokeWidth(strokeWidth: number) {
+    this._setConnectorProp('strokeWidth', strokeWidth);
   }
 
   private _showAddButtonOrTextMenu() {
@@ -496,7 +482,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                     @click=${() => this._setConnectorMode(value)}
                   >
                     ${icon}
-                  </affine-toolabr-icon-button>
+                  </editor-icon-button>
                 `
               )}
             </div>
@@ -535,6 +521,20 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       renderToolbarSeparator
     );
   }
+
+  get doc() {
+    return this.edgeless.doc;
+  }
+
+  get service() {
+    return this.edgeless.service;
+  }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor elements: ConnectorElementModel[] = [];
 }
 
 declare global {

@@ -1,5 +1,3 @@
-import './ask-ai-panel.js';
-
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import {
   type AIItemGroupConfig,
@@ -10,12 +8,13 @@ import { HoverController } from '@blocksuite/blocks';
 import { createLitPortal } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getRootService } from '../../utils/selection-utils.js';
+import './ask-ai-panel.js';
 
 type buttonSize = 'small' | 'middle' | 'large';
 type toggleType = 'hover' | 'click';
@@ -41,13 +40,65 @@ export type AskAIButtonOptions = {
 
 @customElement('ask-ai-button')
 export class AskAIButton extends WithDisposable(LitElement) {
-  get _edgeless() {
-    const rootService = getRootService(this.host);
-    if (rootService instanceof EdgelessRootService) {
-      return rootService;
+  private _abortController: AbortController | null = null;
+
+  private _clearAbortController = () => {
+    if (this._abortController) {
+      this._abortController.abort();
+      this._abortController = null;
     }
-    return null;
-  }
+  };
+
+  private _toggleAIPanel = () => {
+    if (this.toggleType !== 'click') {
+      return;
+    }
+
+    if (this._abortController) {
+      this._clearAbortController();
+      return;
+    }
+
+    this._abortController = new AbortController();
+    assertExists(this._askAIButton);
+    const panelMinWidth = this.options.panelWidth || 330;
+    createLitPortal({
+      template: html`<ask-ai-panel
+        .host=${this.host}
+        .actionGroups=${this.actionGroups}
+        .minWidth=${panelMinWidth}
+      ></ask-ai-panel>`,
+      container: this._askAIButton,
+      computePosition: {
+        referenceElement: this._askAIButton,
+        placement: 'bottom-start',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+      abortController: this._abortController,
+      closeOnClickAway: true,
+    });
+  };
+
+  private _whenHover = new HoverController(
+    this,
+    ({ abortController }) => {
+      return {
+        template: html`<ask-ai-panel
+          .host=${this.host}
+          .actionGroups=${this.actionGroups}
+          .abortController=${abortController}
+        ></ask-ai-panel>`,
+        computePosition: {
+          referenceElement: this,
+          placement: 'top-start',
+          middleware: [flip(), offset(-40)],
+          autoUpdate: true,
+        },
+      };
+    },
+    { allowMultiple: true }
+  );
 
   static override styles = css`
     .ask-ai-button {
@@ -89,95 +140,23 @@ export class AskAIButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @query('.ask-ai-button')
-  private accessor _askAIButton!: HTMLDivElement;
-
-  private _abortController: AbortController | null = null;
-
-  private _whenHover = new HoverController(
-    this,
-    ({ abortController }) => {
-      return {
-        template: html`<ask-ai-panel
-          .host=${this.host}
-          .actionGroups=${this.actionGroups}
-          .abortController=${abortController}
-        ></ask-ai-panel>`,
-        computePosition: {
-          referenceElement: this,
-          placement: 'top-start',
-          middleware: [flip(), offset(-40)],
-          autoUpdate: true,
-        },
-      };
-    },
-    { allowMultiple: true }
-  );
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor actionGroups!: AIItemGroupConfig[];
-
-  @property({ attribute: false })
-  accessor toggleType: toggleType = 'hover';
-
-  @property({ attribute: false })
-  accessor options: AskAIButtonOptions = {
-    size: 'middle',
-    backgroundColor: undefined,
-    boxShadow: undefined,
-    panelWidth: 330,
-  };
-
-  private _clearAbortController = () => {
-    if (this._abortController) {
-      this._abortController.abort();
-      this._abortController = null;
+  get _edgeless() {
+    const rootService = getRootService(this.host);
+    if (rootService instanceof EdgelessRootService) {
+      return rootService;
     }
-  };
-
-  private _toggleAIPanel = () => {
-    if (this.toggleType !== 'click') {
-      return;
-    }
-
-    if (this._abortController) {
-      this._clearAbortController();
-      return;
-    }
-
-    this._abortController = new AbortController();
-    assertExists(this._askAIButton);
-    const panelMinWidth = this.options.panelWidth || 330;
-    createLitPortal({
-      template: html`<ask-ai-panel
-        .host=${this.host}
-        .actionGroups=${this.actionGroups}
-        .minWidth=${panelMinWidth}
-      ></ask-ai-panel>`,
-      container: this._askAIButton,
-      computePosition: {
-        referenceElement: this._askAIButton,
-        placement: 'bottom-start',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-      abortController: this._abortController,
-      closeOnClickAway: true,
-    });
-  };
-
-  override firstUpdated() {
-    this.disposables.add(() => {
-      this._edgeless?.tool.setEdgelessTool({ type: 'default' });
-    });
+    return null;
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._clearAbortController();
+  }
+
+  override firstUpdated() {
+    this.disposables.add(() => {
+      this._edgeless?.tool.setEdgelessTool({ type: 'default' });
+    });
   }
 
   override render() {
@@ -202,6 +181,26 @@ export class AskAIButton extends WithDisposable(LitElement) {
       >
     </div>`;
   }
+
+  @query('.ask-ai-button')
+  private accessor _askAIButton!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor actionGroups!: AIItemGroupConfig[];
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor options: AskAIButtonOptions = {
+    size: 'middle',
+    backgroundColor: undefined,
+    boxShadow: undefined,
+    panelWidth: 330,
+  };
+
+  @property({ attribute: false })
+  accessor toggleType: toggleType = 'hover';
 }
 
 declare global {

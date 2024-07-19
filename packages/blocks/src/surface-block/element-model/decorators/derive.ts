@@ -1,5 +1,6 @@
-import { keys } from '../../../_common/utils/iterable.js';
 import type { SurfaceElementModel } from '../base.js';
+
+import { keys } from '../../../_common/utils/iterable.js';
 import {
   getDecoratorState,
   getObjectPropMeta,

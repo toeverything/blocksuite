@@ -4,6 +4,11 @@ import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type {
+  SurfaceRefBlockComponent,
+  SurfaceRefBlockModel,
+} from '../../../surface-ref-block/index.js';
+
 import { HoverController } from '../../../_common/components/hover/controller.js';
 import { isPeekable, peek } from '../../../_common/components/peekable.js';
 import { toast } from '../../../_common/components/toast.js';
@@ -17,10 +22,6 @@ import {
   DownloadIcon,
 } from '../../../_common/icons/text.js';
 import { downloadBlob } from '../../../_common/utils/filesys.js';
-import type {
-  SurfaceRefBlockComponent,
-  SurfaceRefBlockModel,
-} from '../../../surface-ref-block/index.js';
 import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
 
 export const AFFINE_SURFACE_REF_TOOLBAR = 'affine-surface-ref-toolbar';

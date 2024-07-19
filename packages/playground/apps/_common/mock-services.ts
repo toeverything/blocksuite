@@ -1,5 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { PageRootService } from '@blocksuite/blocks';
+
 import {
   type DocMode,
   type DocModeService,

@@ -1,10 +1,12 @@
 import type { Text } from '@blocksuite/store';
+
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { IHitTestOptions } from '../surface-block/element-model/base.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
+import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { Bound } from '../surface-block/utils/bound.js';
 
 type FrameBlockProps = {
   title: Text;
@@ -35,6 +37,13 @@ export const FrameBlockSchema = defineBlockSchema({
 export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
   static PADDING = [8, 10];
 
+  override boxSelect(selectedBound: Bound): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return (
+      bound.isIntersectWithBound(selectedBound) || selectedBound.contains(bound)
+    );
+  }
+
   override hitTest(x: number, y: number, _: IHitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointNearBound([x, y], 5);
@@ -42,13 +51,6 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
     if (hit) return true;
 
     return this.externalBound?.isPointInBound([x, y]) ?? false;
-  }
-
-  override boxSelect(selectedBound: Bound): boolean {
-    const bound = Bound.deserialize(this.xywh);
-    return (
-      bound.isIntersectWithBound(selectedBound) || selectedBound.contains(bound)
-    );
   }
 }
 

@@ -1,9 +1,10 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { selectable } from '../_common/edgeless/mixin/index.js';
 import type { LinkPreviewData } from '../_common/embed-block-helper/index.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
+import { selectable } from '../_common/edgeless/mixin/index.js';
 
 export interface BookmarkBlockEdgelessProps {
   index: string;
@@ -46,7 +47,13 @@ export const BookmarkBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    parent: ['affine:note', 'affine:surface', 'affine:edgeless-text'],
+    parent: [
+      'affine:note',
+      'affine:surface',
+      'affine:edgeless-text',
+      'affine:paragraph',
+      'affine:list',
+    ],
   },
   toModel: () => new BookmarkBlockModel(),
 });

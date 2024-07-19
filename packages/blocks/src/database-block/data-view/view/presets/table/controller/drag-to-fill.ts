@@ -5,9 +5,10 @@ import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import { tRichText } from '../../../../logical/data-type.js';
 import type { DataViewTable } from '../table-view.js';
 import type { TableViewSelection } from '../types.js';
+
+import { tRichText } from '../../../../logical/data-type.js';
 
 @customElement('data-view-drag-to-fill')
 export class DragToFillElement extends ShadowlessElement {
@@ -33,9 +34,6 @@ export class DragToFillElement extends ShadowlessElement {
     }
   `;
 
-  @state()
-  accessor dragging = false;
-
   dragToFillRef = createRef<HTMLDivElement>();
 
   override render() {
@@ -46,6 +44,9 @@ export class DragToFillElement extends ShadowlessElement {
       class="drag-to-fill ${this.dragging ? 'dragging' : ''}"
     ></div>`;
   }
+
+  @state()
+  accessor dragging = false;
 }
 
 export function fillSelectionWithFocusCellData(

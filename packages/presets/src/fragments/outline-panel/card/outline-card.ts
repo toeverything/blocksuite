@@ -1,22 +1,23 @@
+import type { BlockModel, Doc } from '@blocksuite/store';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import {
-  createButtonPopper,
-  getThemeMode,
   type NoteBlockModel,
   NoteDisplayMode,
+  createButtonPopper,
+  getThemeMode,
   on,
   once,
 } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
-import type { BlockModel, Doc } from '@blocksuite/store';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { baseTheme } from '@toeverything/theme';
 import {
+  LitElement,
+  type PropertyValues,
   css,
   html,
-  LitElement,
   nothing,
-  type PropertyValues,
   unsafeCSS,
 } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
@@ -219,85 +220,43 @@ const styles = css`
 `;
 
 export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
-  static override styles = styles;
-
-  @state()
-  private accessor _showPopper = false;
-
-  @query('.display-mode-button-group')
-  private accessor _displayModeButtonGroup!: HTMLDivElement;
-
-  @query('note-display-mode-panel')
-  private accessor _displayModePanel!: HTMLDivElement;
+  private _clearNoteDisposables = () => {
+    this._noteDisposables?.dispose();
+    this._noteDisposables = null;
+  };
 
   private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
   private _noteDisposables: DisposableGroup | null = null;
 
-  @property({ attribute: false })
-  accessor doc!: Doc;
+  static override styles = styles;
 
-  @property({ attribute: false })
-  accessor editorMode: 'page' | 'edgeless' = 'page';
-
-  @property({ attribute: false })
-  accessor note!: NoteBlockModel;
-
-  @property({ attribute: false })
-  accessor index!: number;
-
-  @property({ attribute: false })
-  accessor number!: number;
-
-  @property({ attribute: false })
-  accessor showPreviewIcon!: boolean;
-
-  @property({ attribute: false })
-  accessor enableNotesSorting!: boolean;
-
-  @property({ attribute: false })
-  accessor status: 'selected' | 'placeholder' | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor invisible = false;
-
-  private _clearNoteDisposables = () => {
-    this._noteDisposables?.dispose();
-    this._noteDisposables = null;
-  };
-
-  private _setNoteDisposables() {
-    this._clearNoteDisposables();
-    this._noteDisposables = new DisposableGroup();
-    this._noteDisposables.add(
-      this.note.propsUpdated.on(() => this.requestUpdate())
-    );
+  // Need to consider the case that block not a child of a note
+  private _buildBlockPath(block: BlockModel) {
+    return [this.note.id, block.id];
   }
 
-  private _getCurrentModeLabel(mode: NoteDisplayMode) {
-    switch (mode) {
-      case NoteDisplayMode.DocAndEdgeless:
-        return 'Both';
-      case NoteDisplayMode.EdgelessOnly:
-        return 'Edgeless';
-      case NoteDisplayMode.DocOnly:
-        return 'Page';
-      default:
-        return 'Both';
-    }
-  }
-
-  private _dispatchSelectEvent(e: MouseEvent) {
-    e.stopPropagation();
-    const event = new CustomEvent('select', {
+  private _dispatchClickBlockEvent(block: BlockModel) {
+    const event = new CustomEvent('clickblock', {
       detail: {
-        id: this.note.id,
-        selected: this.status !== 'selected',
-        number: this.number,
-        multiselect: e.shiftKey,
+        blockPath: this._buildBlockPath(block),
       },
-    }) as SelectEvent;
+    });
+
+    this.dispatchEvent(event);
+  }
+
+  private _dispatchDisplayModeChangeEvent(
+    note: NoteBlockModel,
+    newMode: NoteDisplayMode
+  ) {
+    const event = new CustomEvent('displaymodechange', {
+      detail: {
+        note,
+        newMode,
+      },
+    });
 
     this.dispatchEvent(event);
   }
@@ -346,33 +305,39 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
     this.dispatchEvent(event);
   }
 
-  // Need to consider the case that block not a child of a note
-  private _buildBlockPath(block: BlockModel) {
-    return [this.note.id, block.id];
-  }
-
-  private _dispatchClickBlockEvent(block: BlockModel) {
-    const event = new CustomEvent('clickblock', {
+  private _dispatchSelectEvent(e: MouseEvent) {
+    e.stopPropagation();
+    const event = new CustomEvent('select', {
       detail: {
-        blockPath: this._buildBlockPath(block),
+        id: this.note.id,
+        selected: this.status !== 'selected',
+        number: this.number,
+        multiselect: e.shiftKey,
       },
-    });
+    }) as SelectEvent;
 
     this.dispatchEvent(event);
   }
 
-  private _dispatchDisplayModeChangeEvent(
-    note: NoteBlockModel,
-    newMode: NoteDisplayMode
-  ) {
-    const event = new CustomEvent('displaymodechange', {
-      detail: {
-        note,
-        newMode,
-      },
-    });
+  private _getCurrentModeLabel(mode: NoteDisplayMode) {
+    switch (mode) {
+      case NoteDisplayMode.DocAndEdgeless:
+        return 'Both';
+      case NoteDisplayMode.EdgelessOnly:
+        return 'Edgeless';
+      case NoteDisplayMode.DocOnly:
+        return 'Page';
+      default:
+        return 'Both';
+    }
+  }
 
-    this.dispatchEvent(event);
+  private _setNoteDisposables() {
+    this._clearNoteDisposables();
+    this._noteDisposables = new DisposableGroup();
+    this._noteDisposables.add(
+      this.note.propsUpdated.on(() => this.requestUpdate())
+    );
   }
 
   override connectedCallback(): void {
@@ -395,12 +360,6 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
     this._clearNoteDisposables();
   }
 
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('note') || _changedProperties.has('index')) {
-      this._setNoteDisposables();
-    }
-  }
-
   override firstUpdated() {
     this._displayModePopper = createButtonPopper(
       this._displayModeButtonGroup,
@@ -408,8 +367,10 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
       ({ display }) => {
         this._showPopper = display === 'show';
       },
-      8,
-      -60
+      {
+        mainAxis: 8,
+        crossAxis: -60,
+      }
     );
 
     this.disposables.add(this._displayModePopper);
@@ -491,6 +452,48 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
       </div>
     `;
   }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('note') || _changedProperties.has('index')) {
+      this._setNoteDisposables();
+    }
+  }
+
+  @query('.display-mode-button-group')
+  private accessor _displayModeButtonGroup!: HTMLDivElement;
+
+  @query('note-display-mode-panel')
+  private accessor _displayModePanel!: HTMLDivElement;
+
+  @state()
+  private accessor _showPopper = false;
+
+  @property({ attribute: false })
+  accessor doc!: Doc;
+
+  @property({ attribute: false })
+  accessor editorMode: 'page' | 'edgeless' = 'page';
+
+  @property({ attribute: false })
+  accessor enableNotesSorting!: boolean;
+
+  @property({ attribute: false })
+  accessor index!: number;
+
+  @property({ attribute: false })
+  accessor invisible = false;
+
+  @property({ attribute: false })
+  accessor note!: NoteBlockModel;
+
+  @property({ attribute: false })
+  accessor number!: number;
+
+  @property({ attribute: false })
+  accessor showPreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  accessor status: 'selected' | 'placeholder' | undefined = undefined;
 }
 
 declare global {

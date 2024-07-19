@@ -1,4 +1,5 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { RootBlockSchema } from '../root-model.js';

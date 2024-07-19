@@ -1,11 +1,10 @@
-import './outline-setting-menu.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
 import { createButtonPopper } from '@blocksuite/blocks';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SortingIcon } from '../../_common/icons.js';
+import './outline-setting-menu.js';
 
 const styles = css`
   :host {
@@ -77,32 +76,11 @@ const styles = css`
 `;
 
 export class OutlinePanelHeader extends WithDisposable(LitElement) {
-  static override styles = styles;
-
-  @state()
-  private accessor _settingPopperShow = false;
-
-  @query('.note-setting-button')
-  private accessor _noteSettingButton!: HTMLDivElement;
-
-  @query('.note-preview-setting-container')
-  private accessor _notePreviewSettingMenu!: HTMLDivElement;
-
   private _notePreviewSettingMenuPopper: ReturnType<
     typeof createButtonPopper
   > | null = null;
 
-  @property({ attribute: false })
-  accessor showPreviewIcon!: boolean;
-
-  @property({ attribute: false })
-  accessor enableNotesSorting!: boolean;
-
-  @property({ attribute: false })
-  accessor toggleShowPreviewIcon!: (on: boolean) => void;
-
-  @property({ attribute: false })
-  accessor toggleNotesSorting!: () => void;
+  static override styles = styles;
 
   override firstUpdated() {
     const _disposables = this._disposables;
@@ -113,8 +91,10 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
       ({ display }) => {
         this._settingPopperShow = display === 'show';
       },
-      14,
-      -30
+      {
+        mainAxis: 14,
+        crossAxis: -30,
+      }
     );
     _disposables.add(this._notePreviewSettingMenuPopper);
   }
@@ -155,6 +135,27 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
         ></outline-note-preview-setting-menu>
       </div>`;
   }
+
+  @query('.note-preview-setting-container')
+  private accessor _notePreviewSettingMenu!: HTMLDivElement;
+
+  @query('.note-setting-button')
+  private accessor _noteSettingButton!: HTMLDivElement;
+
+  @state()
+  private accessor _settingPopperShow = false;
+
+  @property({ attribute: false })
+  accessor enableNotesSorting!: boolean;
+
+  @property({ attribute: false })
+  accessor showPreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  accessor toggleNotesSorting!: () => void;
+
+  @property({ attribute: false })
+  accessor toggleShowPreviewIcon!: (on: boolean) => void;
 }
 
 declare global {

@@ -1,19 +1,43 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { html, LitElement, nothing } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
-import { MorePopupMenu } from '../../../../_common/components/more-popup-menu/more-popup-menu.js';
-import { createLitPortal } from '../../../../_common/components/portal.js';
-import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
-import { stopPropagation } from '../../../../_common/utils/event.js';
+import type { EditorIconButton } from '../../../../_common/components/toolbar/icon-button.js';
 import type { ImageBlockComponent } from '../../../../image-block/image-block.js';
-import { styles } from '../styles.js';
 import type { ImageConfigItem, MoreMenuConfigItem } from '../type.js';
+
+import { createLitPortal } from '../../../../_common/components/portal.js';
+import '../../../../_common/components/toolbar/icon-button.js';
+import '../../../../_common/components/toolbar/menu-button.js';
+import '../../../../_common/components/toolbar/toolbar.js';
+import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
+import { styles } from '../styles.js';
 import { ConfigRenderer, MoreMenuRenderer } from '../utils.js';
 
 @customElement('affine-image-toolbar')
 export class AffineImageToolbar extends LitElement {
+  private _currentOpenMenu: AbortController | null = null;
+
+  private _popMenuAbortController: AbortController | null = null;
+
+  static override styles = styles;
+
+  closeCurrentMenu = () => {
+    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
+      this._currentOpenMenu.abort();
+      this._currentOpenMenu = null;
+    }
+  };
+
+  private _clearPopMenu() {
+    if (this._popMenuAbortController) {
+      this._popMenuAbortController.abort();
+      this._popMenuAbortController = null;
+    }
+  }
+
   get _items() {
     return ConfigRenderer(
       this.blockElement,
@@ -21,40 +45,6 @@ export class AffineImageToolbar extends LitElement {
       this.config,
       this.closeCurrentMenu
     );
-  }
-
-  static override styles = styles;
-
-  @query('.image-toolbar-button.more')
-  private accessor _moreButton!: HTMLElement;
-
-  @state()
-  private accessor _moreMenuOpen = false;
-
-  private _popMenuAbortController: AbortController | null = null;
-
-  private _currentOpenMenu: AbortController | null = null;
-
-  @property({ attribute: false })
-  accessor blockElement!: ImageBlockComponent;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  @property({ attribute: false })
-  accessor config!: ImageConfigItem[];
-
-  @property({ attribute: false })
-  accessor moreMenuConfig!: MoreMenuConfigItem[];
-
-  @property({ attribute: false })
-  accessor onActiveStatusChange: (active: boolean) => void = noop;
-
-  private _clearPopMenu() {
-    if (this._popMenuAbortController) {
-      this._popMenuAbortController.abort();
-      this._popMenuAbortController = null;
-    }
   }
 
   private _toggleMoreMenu() {
@@ -79,17 +69,26 @@ export class AffineImageToolbar extends LitElement {
 
     this._currentOpenMenu = this._popMenuAbortController;
 
-    const moreMenu = new MorePopupMenu();
-    const moreItems = MoreMenuRenderer(
-      this.blockElement,
-      this._popMenuAbortController,
-      this.moreMenuConfig
-    );
-    moreMenu.items = moreItems;
-
     assertExists(this._moreButton);
     createLitPortal({
-      template: moreMenu,
+      template: html`
+        <editor-menu-content
+          data-show
+          class="image-more-popup-menu"
+          style=${styleMap({
+            '--content-padding': '8px',
+            '--packed-height': '4px',
+          })}
+        >
+          <div slot data-size="large" data-orientation="vertical">
+            ${MoreMenuRenderer(
+              this.blockElement,
+              this._popMenuAbortController,
+              this.moreMenuConfig
+            )}
+          </div>
+        </editor-menu-content>
+      `,
       container: this.blockElement.host,
       // stacking-context(editor-host)
       portalStyles: {
@@ -107,13 +106,6 @@ export class AffineImageToolbar extends LitElement {
     this._moreMenuOpen = true;
   }
 
-  closeCurrentMenu = () => {
-    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
-      this._currentOpenMenu.abort();
-      this._currentOpenMenu = null;
-    }
-  };
-
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.closeCurrentMenu();
@@ -122,24 +114,42 @@ export class AffineImageToolbar extends LitElement {
 
   override render() {
     return html`
-      <div
-        class="affine-image-toolbar-container"
-        @pointerdown=${stopPropagation}
-      >
+      <editor-toolbar class="affine-image-toolbar-container" data-without-bg>
         ${this._items}
-        <icon-button
+        <editor-icon-button
           class="image-toolbar-button more"
-          size="24px"
+          aria-label="More"
+          .tooltip=${'More'}
+          .tooltipOffset=${4}
+          .showTooltip=${!this._moreMenuOpen}
           @click=${() => this._toggleMoreMenu()}
         >
           ${MoreVerticalIcon}
-          ${!this._moreMenuOpen
-            ? html`<affine-tooltip>More</affine-tooltip>`
-            : nothing}
-        </icon-button>
-      </div>
+        </editor-icon-button>
+      </editor-toolbar>
     `;
   }
+
+  @query('editor-icon-button.more')
+  private accessor _moreButton!: EditorIconButton;
+
+  @state()
+  private accessor _moreMenuOpen = false;
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @property({ attribute: false })
+  accessor blockElement!: ImageBlockComponent;
+
+  @property({ attribute: false })
+  accessor config!: ImageConfigItem[];
+
+  @property({ attribute: false })
+  accessor moreMenuConfig!: MoreMenuConfigItem[];
+
+  @property({ attribute: false })
+  accessor onActiveStatusChange: (active: boolean) => void = noop;
 }
 
 declare global {

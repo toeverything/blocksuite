@@ -1,5 +1,8 @@
 import { html } from 'lit';
 
+import type { DataViewRenderer } from '../../../data-view.js';
+import type { KanbanSelectionController } from './controller/selection.js';
+
 import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import {
   ArrowRightBigIcon,
@@ -8,8 +11,6 @@ import {
   MoveRightIcon,
 } from '../../../../../_common/icons/index.js';
 import { DeleteIcon } from '../../../common/icons/index.js';
-import type { DataViewRenderer } from '../../../data-view.js';
-import type { KanbanSelectionController } from './controller/selection.js';
 
 export const openDetail = (
   dataViewEle: DataViewRenderer,

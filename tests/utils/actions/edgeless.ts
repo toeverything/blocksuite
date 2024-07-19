@@ -1,22 +1,23 @@
-import '../declare-test-window.js';
-
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type { IPoint, NoteDisplayMode } from '@blocks/_common/types.js';
 import type { NoteBlockModel } from '@blocks/note-block/index.js';
 import type { IVec } from '@blocks/surface-block/index.js';
-import { assertExists, sleep } from '@global/utils/index.js';
 import type { Locator, Page } from '@playwright/test';
+
+import { assertExists, sleep } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 
 import type { Bound } from '../asserts.js';
+
+import '../declare-test-window.js';
 import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
+  SHIFT_KEY,
+  SHORT_KEY,
   pressBackspace,
   pressEnter,
   selectAllByKeyboard,
-  SHIFT_KEY,
-  SHORT_KEY,
   type,
 } from './keyboard.js';
 import {
@@ -45,11 +46,11 @@ const AWAIT_TIMEOUT = 500;
 export const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 export type Point = { x: number; y: number };
 export enum Shape {
-  Square = 'Square',
-  Ellipse = 'Ellipse',
   Diamond = 'Diamond',
-  Triangle = 'Triangle',
+  Ellipse = 'Ellipse',
   'Rounded rectangle' = 'Rounded rectangle',
+  Square = 'Square',
+  Triangle = 'Triangle',
 }
 
 export enum LassoMode {
@@ -395,7 +396,7 @@ export async function assertEdgelessLassoToolMode(page: Page, mode: LassoMode) {
 }
 
 export async function getEdgelessBlockChild(page: Page) {
-  const block = page.locator('.edgeless-block-portal-note');
+  const block = page.locator('affine-edgeless-note');
   const blockBox = await block.boundingBox();
   if (blockBox === null) throw new Error('Missing edgeless block child rect');
   return blockBox;
@@ -632,7 +633,9 @@ export async function pickColorAtPoints(page: Page, points: number[][]) {
 
 export async function getNoteBoundBoxInEdgeless(page: Page, noteId: string) {
   const editor = getEditorLocator(page);
-  const note = editor.locator(`affine-note[data-block-id="${noteId}"]`);
+  const note = editor.locator(
+    `affine-edgeless-note[data-block-id="${noteId}"]`
+  );
   const bound = await note.boundingBox();
   if (!bound) {
     throw new Error(`Missing note: ${noteId}`);
@@ -667,7 +670,7 @@ export async function activeNoteInEdgeless(page: Page, noteId: string) {
 
 export async function selectNoteInEdgeless(page: Page, noteId: string) {
   const bound = await getNoteBoundBoxInEdgeless(page, noteId);
-  await page.mouse.click(bound.x, bound.y);
+  await page.mouse.click(bound.x + bound.width / 2, bound.y + bound.height / 2);
 }
 
 export function locatorNoteDisplayModeButton(

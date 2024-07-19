@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { PANEL_BASE } from '../../styles.js';
@@ -12,6 +12,12 @@ export class EditorToolbar extends WithDisposable(LitElement) {
       ${PANEL_BASE}
       height: 36px;
       box-sizing: content-box;
+    }
+
+    :host([data-without-bg]) {
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
     }
 
     ::slotted(*) {
@@ -27,7 +33,12 @@ export class EditorToolbar extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.addFromEvent(this, 'pointerdown', stopPropagation);
+
+    this._disposables.addFromEvent(this, 'pointerdown', (e: PointerEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+    });
+    this._disposables.addFromEvent(this, 'wheel', stopPropagation);
   }
 
   override render() {

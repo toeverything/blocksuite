@@ -1,4 +1,4 @@
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { Slot, assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
   type InlineRange,
@@ -11,14 +11,15 @@ import type { BlockElement } from '../element/block-element.js';
 
 export const getInlineRangeProvider: (
   element: BlockElement
-) => InlineRangeProvider = element => {
+) => InlineRangeProvider | null = element => {
   const editorHost = element.host;
   const selectionManager = editorHost.selection;
   const rangeManager = editorHost.rangeManager;
   const inlineRangeUpdatedSlot = new Slot<InlineRangeUpdatedProp>();
 
-  assertExists(selectionManager);
-  assertExists(rangeManager);
+  if (!selectionManager || !rangeManager) {
+    return null;
+  }
 
   const isElementSelected = (range: Range): boolean => {
     // Most cases, the range is collapsed, so we no need to use `intersectsNode`

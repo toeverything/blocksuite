@@ -1,18 +1,22 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
-import { ref, type RefOrCallback } from 'lit/directives/ref.js';
+import { type RefOrCallback, ref } from 'lit/directives/ref.js';
+
+import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
+import type { AffineFormatBarWidget } from '../../format-bar.js';
 
 import { whenHover } from '../../../../../_common/components/hover/index.js';
+import '../../../../../_common/components/toolbar/icon-button.js';
+import '../../../../../_common/components/toolbar/menu-button.js';
 import {
   ArrowDownIcon,
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
   TextForegroundDuotoneIcon,
 } from '../../../../../_common/icons/index.js';
-import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
-import type { AffineFormatBarWidget } from '../../format-bar.js';
 import { backgroundConfig, foregroundConfig } from './consts.js';
 
 enum HighlightType {
@@ -53,51 +57,56 @@ const HighlightPanel = (
   formatBar: AffineFormatBarWidget,
   containerRef?: RefOrCallback
 ) => {
-  return html`<div ${ref(containerRef)} class="highlight-panel">
-    <!-- Text Color Highlight -->
-    <div class="highligh-panel-heading">Color</div>
-    ${foregroundConfig.map(
-      ({ name, color }) =>
-        html`<icon-button
-          width="100%"
-          height="32px"
-          style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
-          text="${name}"
-          data-testid="${color ?? 'unset'}"
-          @click="${() => {
-            updateHighlight(formatBar.host, color, HighlightType.Foreground);
-            formatBar.requestUpdate();
-          }}"
-        >
-          <span style="color: ${color}; display: flex; align-items: center;">
-            ${TextForegroundDuotoneIcon}
-          </span>
-        </icon-button>`
-    )}
+  return html`
+    <editor-menu-content class="highlight-panel" data-show ${ref(containerRef)}>
+      <div slot data-orientation="vertical">
+        <!-- Text Color Highlight -->
+        <div class="highligh-panel-heading">Color</div>
+        ${foregroundConfig.map(
+          ({ name, color }) => html`
+            <editor-menu-action
+              data-testid="${color ?? 'unset'}"
+              @click="${() => {
+                updateHighlight(
+                  formatBar.host,
+                  color,
+                  HighlightType.Foreground
+                );
+                formatBar.requestUpdate();
+              }}"
+            >
+              <span style="display: flex; color: ${color}">
+                ${TextForegroundDuotoneIcon}
+              </span>
+              ${name}
+            </editor-menu-action>
+          `
+        )}
 
-    <!-- Text Background Highlight -->
-    <div class="highligh-panel-heading">Background</div>
-    ${backgroundConfig.map(
-      ({ name, color }) =>
-        html`<icon-button
-          width="100%"
-          height="32px"
-          style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
-          text="${name}"
-          @click="${() => {
-            updateHighlight(formatBar.host, color, HighlightType.Background);
-            formatBar.requestUpdate();
-          }}"
-        >
-          <span
-            style="color: ${color ??
-            'rgba(0,0,0,0)'}; display: flex; align-items: center;"
-          >
-            ${TextBackgroundDuotoneIcon}
-          </span>
-        </icon-button>`
-    )}
-  </div>`;
+        <!-- Text Background Highlight -->
+        <div class="highligh-panel-heading">Background</div>
+        ${backgroundConfig.map(
+          ({ name, color }) => html`
+            <editor-menu-action
+              @click="${() => {
+                updateHighlight(
+                  formatBar.host,
+                  color,
+                  HighlightType.Background
+                );
+                formatBar.requestUpdate();
+              }}"
+            >
+              <span style="display: flex; color: ${color ?? 'transparent'}">
+                ${TextBackgroundDuotoneIcon}
+              </span>
+              ${name}
+            </editor-menu-action>
+          `
+        )}
+      </div>
+    </editor-menu-content>
+  `;
 };
 
 export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
@@ -117,12 +126,12 @@ export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
       formatBar.shadowRoot?.querySelector<HTMLElement>('.highlight-panel');
     assertExists(button);
     assertExists(panel);
-    panel.style.display = 'block';
+    panel.style.display = 'flex';
     computePosition(button, panel, {
       placement: 'bottom',
       middleware: [
         flip(),
-        offset(10),
+        offset(6),
         shift({
           padding: 6,
         }),
@@ -137,21 +146,20 @@ export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
 
   const highlightPanel = HighlightPanel(formatBar, setFloating);
 
-  return html`<div ${ref(setReference)} class="highlight-button">
-    <icon-button
-      class="highlight-icon"
-      data-last-used="${lastUsedColor ?? 'unset'}"
-      width="52px"
-      height="32px"
-      @click="${() =>
-        updateHighlight(editorHost, lastUsedColor, lastUsedHighlightType)}"
-    >
-      <span
-        style="color: ${lastUsedColor}; display: flex; align-items: center; "
-        >${HighLightDuotoneIcon}</span
+  return html`
+    <div class="highlight-button" ${ref(setReference)}>
+      <editor-icon-button
+        class="highlight-icon"
+        data-last-used="${lastUsedColor ?? 'unset'}"
+        @click="${() =>
+          updateHighlight(editorHost, lastUsedColor, lastUsedHighlightType)}"
       >
-      ${ArrowDownIcon}</icon-button
-    >
-    ${highlightPanel}
-  </div>`;
+        <span style="display: flex; color: ${lastUsedColor}">
+          ${HighLightDuotoneIcon}
+        </span>
+        ${ArrowDownIcon}
+      </editor-icon-button>
+      ${highlightPanel}
+    </div>
+  `;
 };
