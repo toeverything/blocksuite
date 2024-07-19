@@ -303,7 +303,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   override render() {
-    console.log('=> service', this.rootService);
     return html`
       <style>
         .quick-edgeless-menu {

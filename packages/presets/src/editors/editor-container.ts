@@ -22,8 +22,6 @@ import { when } from 'lit/directives/when.js';
 
 import '../fragments/doc-meta-tags/doc-meta-tags.js';
 import '../fragments/doc-title/doc-title.js';
-import './edgeless-editor.js';
-import './page-editor.js';
 
 @customElement('affine-editor-container')
 export class AffineEditorContainer
@@ -195,7 +193,7 @@ export class AffineEditorContainer
     const mode = this._mode.value;
 
     return html`${keyed(
-      this.rootModel.id,
+      this.rootModel.id + mode,
       html`
         <div
           class=${mode === 'page'
