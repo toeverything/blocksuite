@@ -17,7 +17,12 @@ import {
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { Slot, assertExists } from '@blocksuite/global/utils';
-import { SignalWatcher, computed, signal } from '@lit-labs/preact-signals';
+import {
+  SignalWatcher,
+  computed,
+  effect,
+  signal,
+} from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -208,10 +213,19 @@ export class AffineEditorContainer
       });
     }
 
-    requestAnimationFrame(() => {
-      if (this._pageRoot) forwardSlot(this._pageRoot.slots, this.slots);
-      if (this._edgelessRoot) forwardSlot(this._edgelessRoot.slots, this.slots);
-    });
+    this._disposables.add(
+      effect(() => {
+        const mode = this._mode.value;
+        requestAnimationFrame(() => {
+          if (mode === 'page') {
+            if (this._pageRoot) forwardSlot(this._pageRoot.slots, this.slots);
+          } else {
+            if (this._edgelessRoot)
+              forwardSlot(this._edgelessRoot.slots, this.slots);
+          }
+        });
+      })
+    );
   }
 
   override render() {
