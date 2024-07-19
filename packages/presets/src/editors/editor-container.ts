@@ -1,4 +1,3 @@
-import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
 import type {
   EdgelessRootBlockComponent,
   PageRootBlockComponent,
@@ -10,13 +9,14 @@ import type {
 } from '@blocksuite/blocks';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
+import { type BlockSpec, EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
   ThemeObserver,
 } from '@blocksuite/blocks';
-import { Slot, assertExists } from '@blocksuite/global/utils';
+import { Slot, assertExists, noop } from '@blocksuite/global/utils';
 import {
   SignalWatcher,
   computed,
@@ -31,6 +31,8 @@ import { when } from 'lit/directives/when.js';
 
 import '../fragments/doc-meta-tags/doc-meta-tags.js';
 import '../fragments/doc-title/doc-title.js';
+
+noop(EditorHost);
 
 /**
  * @deprecated need to refactor

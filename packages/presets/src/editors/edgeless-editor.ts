@@ -5,10 +5,11 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import { type TemplateResult, css, html } from 'lit';
+import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { type Ref, createRef } from 'lit/directives/ref.js';
+import { type Ref, createRef, ref } from 'lit/directives/ref.js';
 
 noop(EditorHost);
 
@@ -42,8 +43,31 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.doc.slots.rootAdded.on(() => this.requestUpdate())
+    );
+  }
+
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.host.updateComplete;
+    return result;
+  }
+
   override render() {
-    return html`<div class="affine-edgeless-viewport">${this.editor}</div>`;
+    if (!this.doc.root) return nothing;
+
+    return html`
+      <div class="affine-edgeless-viewport">
+        <editor-host
+          ${ref(this._host)}
+          .doc=${this.doc}
+          .specs=${this.specs}
+        ></editor-host>
+      </div>
+    `;
   }
 
   get host() {
@@ -55,6 +79,9 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor editor!: TemplateResult;
+
+  @property({ attribute: false })
+  accessor specs = EdgelessEditorBlockSpecs;
 }
 
 declare global {
