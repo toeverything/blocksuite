@@ -1,4 +1,4 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
 import type {
   EdgelessRootBlockComponent,
   PageRootBlockComponent,
@@ -53,12 +53,60 @@ export class AffineEditorContainer
   extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements AbstractEditor
 {
+  private _edgelessSpecs = computed(() => {
+    return [...this._edgelessSpecs$.value].map(spec => {
+      if (spec.schema.model.flavour === 'affine:page') {
+        const setup = spec.setup;
+        spec = {
+          ...spec,
+          setup: (slots, disposable) => {
+            setup?.(slots, disposable);
+            slots.mounted.once(({ service }) => {
+              const { docModeService } = service as PageRootService;
+              disposable.add(
+                docModeService.onModeChange(this.switchEditor.bind(this))
+              );
+            });
+          },
+        };
+      }
+      return spec;
+    });
+  });
+
+  private _edgelessSpecs$ = signal(EdgelessEditorBlockSpecs);
+
   private _hostRef: Ref<EditorHost> = createRef<EditorHost>();
 
   private _mode = signal<DocMode>('page');
 
+  private _pageSpecs = computed(() => {
+    return [...this._pageSpecs$.value].map(spec => {
+      if (spec.schema.model.flavour === 'affine:page') {
+        const setup = spec.setup;
+        spec = {
+          ...spec,
+          setup: (slots, disposable) => {
+            setup?.(slots, disposable);
+            slots.mounted.once(({ service }) => {
+              const { docModeService } = service as PageRootService;
+              disposable.add(
+                docModeService.onModeChange(this.switchEditor.bind(this))
+              );
+            });
+          },
+        };
+      }
+      return spec;
+    });
+  });
+
+  private _pageSpecs$ = signal(PageEditorBlockSpecs);
+
   private _specs = computed(() =>
-    this._mode.value === 'page' ? this._pageSpecs : this._edgelessSpecs
+    this._mode.value === 'page'
+      ? this._pageSpecs.value
+      : this._edgelessSpecs.value
   );
 
   static override styles = css`
@@ -144,48 +192,6 @@ export class AffineEditorContainer
    * @deprecated need to refactor
    */
   readonly themeObserver = new ThemeObserver();
-
-  private get _edgelessSpecs() {
-    return [...this.edgelessSpecs].map(spec => {
-      if (spec.schema.model.flavour === 'affine:page') {
-        const setup = spec.setup;
-        spec = {
-          ...spec,
-          setup: (slots, disposable) => {
-            setup?.(slots, disposable);
-            slots.mounted.once(({ service }) => {
-              const { docModeService } = service as PageRootService;
-              disposable.add(
-                docModeService.onModeChange(this.switchEditor.bind(this))
-              );
-            });
-          },
-        };
-      }
-      return spec;
-    });
-  }
-
-  private get _pageSpecs() {
-    return [...this.pageSpecs].map(spec => {
-      if (spec.schema.model.flavour === 'affine:page') {
-        const setup = spec.setup;
-        spec = {
-          ...spec,
-          setup: (slots, disposable) => {
-            setup?.(slots, disposable);
-            slots.mounted.once(({ service }) => {
-              const { docModeService } = service as PageRootService;
-              disposable.add(
-                docModeService.onModeChange(this.switchEditor.bind(this))
-              );
-            });
-          },
-        };
-      }
-      return spec;
-    });
-  }
 
   /**
    * @deprecated need to refactor
@@ -280,6 +286,10 @@ export class AffineEditorContainer
     }
   }
 
+  set edgelessSpecs(specs: BlockSpec[]) {
+    this._edgelessSpecs$.value = specs;
+  }
+
   get host() {
     // FIXME: we need to get rid of the none-null assertion
     const host = this._hostRef.value!;
@@ -292,6 +302,10 @@ export class AffineEditorContainer
 
   set mode(mode: DocMode) {
     this._mode.value = mode;
+  }
+
+  set pageSpecs(specs: BlockSpec[]) {
+    this._pageSpecs$.value = specs;
   }
 
   get rootModel() {
@@ -311,12 +325,6 @@ export class AffineEditorContainer
 
   @property({ attribute: false })
   accessor doc!: Doc;
-
-  @property({ attribute: false })
-  accessor edgelessSpecs = EdgelessEditorBlockSpecs;
-
-  @property({ attribute: false })
-  accessor pageSpecs = PageEditorBlockSpecs;
 }
 
 declare global {
