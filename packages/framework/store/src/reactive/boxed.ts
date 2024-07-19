@@ -2,11 +2,15 @@ import * as Y from 'yjs';
 
 import { NATIVE_UNIQ_IDENTIFIER } from '../consts.js';
 
+export type OnBoxedChange = (data: unknown) => void;
+
 export class Boxed<T = unknown> {
   private readonly _map: Y.Map<T>;
 
-  static from = <T>(map: Y.Map<T>): Boxed<T> => {
-    return new Boxed<T>(map.get('value') as T);
+  private _onChange?: OnBoxedChange;
+
+  static from = <T>(map: Y.Map<T>, onChange?: OnBoxedChange): Boxed<T> => {
+    return new Boxed<T>(map.get('value') as T, onChange);
   };
 
   static is = (value: unknown): value is Boxed => {
@@ -15,7 +19,16 @@ export class Boxed<T = unknown> {
     );
   };
 
-  constructor(value: T) {
+  getValue = () => {
+    return this._map.get('value');
+  };
+
+  setValue = (value: T) => {
+    return this._map.set('value', value);
+  };
+
+  constructor(value: T, onChange?: OnBoxedChange) {
+    this._onChange = onChange;
     if (
       value instanceof Y.Map &&
       value.get('type') === NATIVE_UNIQ_IDENTIFIER
@@ -26,14 +39,13 @@ export class Boxed<T = unknown> {
       this._map.set('type', NATIVE_UNIQ_IDENTIFIER as T);
       this._map.set('value', value);
     }
+    this._map.observeDeep(() => {
+      this._onChange?.(this.getValue());
+    });
   }
 
-  getValue() {
-    return this._map.get('value');
-  }
-
-  setValue(value: T) {
-    return this._map.set('value', value);
+  bind(onChange: OnBoxedChange) {
+    this._onChange = onChange;
   }
 
   get yMap() {

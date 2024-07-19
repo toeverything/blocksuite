@@ -294,7 +294,9 @@ class PasteTr {
         const target = this.std.host.querySelector<BlockElement>(
           `[${host.blockIdAttr}="${cursorModel.id}"]`
         );
-        assertExists(target);
+        if (!target) {
+          return;
+        }
         if (!cursorModel.text) {
           if (matchFlavours(cursorModel, ['affine:image'])) {
             const selection = this.std.selection.create('image', {

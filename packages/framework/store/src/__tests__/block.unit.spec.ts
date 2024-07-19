@@ -6,6 +6,7 @@ import {
   Schema,
   type SchemaToModel,
   defineBlockSchema,
+  internalPrimitives,
 } from '../schema/index.js';
 import { Block, type YBlock } from '../store/doc/block/index.js';
 import { DocCollection, IdGeneratorType } from '../store/index.js';
@@ -17,6 +18,7 @@ const pageSchema = defineBlockSchema({
     count: 0,
     toggle: false,
     style: {} as Record<string, unknown>,
+    boxed: internal.Boxed(new Y.Map()),
   }),
   metadata: {
     role: 'root',
@@ -194,5 +196,54 @@ describe('block model should has signal props', () => {
 
     model.pop('count');
     expect(yBlock.get('prop:count')).toBe(4);
+  });
+});
+
+test('on change', () => {
+  const doc = createTestDoc();
+  const yDoc = new Y.Doc();
+  const yBlock = yDoc.getMap('yBlock') as YBlock;
+  yBlock.set('sys:id', '0');
+  yBlock.set('sys:flavour', 'page');
+  yBlock.set('sys:children', new Y.Array());
+
+  const onPropsUpdated = vi.fn();
+  const block = new Block(doc.schema, yBlock, doc, {
+    onChange: onPropsUpdated,
+  });
+  const model = block.model as RootModel;
+
+  model.title = internalPrimitives.Text('abc');
+  expect(onPropsUpdated).toHaveBeenCalledWith(
+    expect.anything(),
+    'title',
+    expect.anything()
+  );
+  expect(model.title$.value.toDelta()).toEqual([{ insert: 'abc' }]);
+
+  onPropsUpdated.mockClear();
+
+  model.title.insert('d', 1);
+  expect(onPropsUpdated).toHaveBeenCalledWith(
+    expect.anything(),
+    'title',
+    expect.anything()
+  );
+
+  expect(model.title$.value.toDelta()).toEqual([{ insert: 'adbc' }]);
+
+  onPropsUpdated.mockClear();
+
+  model.boxed.getValue()!.set('foo', 0);
+  expect(onPropsUpdated).toHaveBeenCalledWith(
+    expect.anything(),
+    'boxed',
+    expect.anything()
+  );
+  expect(onPropsUpdated.mock.calls[0][2].toJSON().value).toMatchObject({
+    foo: 0,
+  });
+  expect(model.boxed$.value.getValue()!.toJSON()).toEqual({
+    foo: 0,
   });
 });

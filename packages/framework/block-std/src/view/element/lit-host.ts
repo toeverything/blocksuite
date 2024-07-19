@@ -1,7 +1,5 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import type { StaticValue } from 'lit/static-html.js';
-
 import { handleError } from '@blocksuite/global/exceptions';
 import { Slot, assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Doc } from '@blocksuite/store';
@@ -219,11 +217,5 @@ export class EditorHost extends SignalWatcher(
 declare global {
   interface HTMLElementTagNameMap {
     'editor-host': EditorHost;
-  }
-
-  namespace BlockSuite {
-    interface ComponentType {
-      lit: StaticValue;
-    }
   }
 }

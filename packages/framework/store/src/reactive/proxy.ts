@@ -5,7 +5,8 @@ import { Array as YArray, Map as YMap } from 'yjs';
 
 import type { UnRecord } from './utils.js';
 
-import { Boxed } from './boxed.js';
+import { Boxed, type OnBoxedChange } from './boxed.js';
+import { type OnTextChange, Text } from './text.js';
 import { BaseReactiveYData, native2Y, y2Native } from './utils.js';
 
 export type ProxyOptions<T> = {
@@ -248,7 +249,12 @@ export function createYProxy<Data>(
 
   return y2Native(yAbstract, {
     transform: (value, origin) => {
+      if (value instanceof Text) {
+        value.bind(options.onChange as OnTextChange);
+        return value;
+      }
       if (Boxed.is(origin)) {
+        (value as Boxed).bind(options.onChange as OnBoxedChange);
         return value;
       }
       if (origin instanceof YArray) {
