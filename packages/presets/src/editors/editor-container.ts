@@ -76,6 +76,17 @@ export class AffineEditorContainer
 
   private _edgelessSpecs$ = signal(EdgelessEditorBlockSpecs);
 
+  private _forwardRef = (mode: DocMode) => {
+    requestAnimationFrame(() => {
+      if (mode === 'page') {
+        if (this._pageRoot) forwardSlot(this._pageRoot.slots, this.slots);
+      } else {
+        if (this._edgelessRoot)
+          forwardSlot(this._edgelessRoot.slots, this.slots);
+      }
+    });
+  };
+
   private _hostRef: Ref<EditorHost> = createRef<EditorHost>();
 
   private _mode = signal<DocMode>('page');
@@ -222,14 +233,7 @@ export class AffineEditorContainer
     this._disposables.add(
       effect(() => {
         const mode = this._mode.value;
-        requestAnimationFrame(() => {
-          if (mode === 'page') {
-            if (this._pageRoot) forwardSlot(this._pageRoot.slots, this.slots);
-          } else {
-            if (this._edgelessRoot)
-              forwardSlot(this._edgelessRoot.slots, this.slots);
-          }
-        });
+        this._forwardRef(mode);
       })
     );
   }
@@ -279,6 +283,7 @@ export class AffineEditorContainer
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('doc')) {
       this.slots.docUpdated.emit({ newDocId: this.doc.id });
+      this._forwardRef(this.mode);
     }
 
     if (!changedProperties.has('doc') && !changedProperties.has('mode')) {
