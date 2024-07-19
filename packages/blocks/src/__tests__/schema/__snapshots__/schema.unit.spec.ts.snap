@@ -209,7 +209,9 @@ exports[`serialized block schema > matches current snapshot 1`] = `
     "parent": [
       "affine:note",
       "affine:surface",
-      "affine:edgeless-text"
+      "affine:edgeless-text",
+      "affine:paragraph",
+      "affine:list"
     ]
   },
   "props": {
@@ -308,7 +310,9 @@ exports[`serialized block schema > matches current snapshot 1`] = `
     "version": 1,
     "role": "content",
     "parent": [
-      "affine:note"
+      "affine:note",
+      "affine:paragraph",
+      "affine:list"
     ]
   },
   "props": {
@@ -350,7 +354,9 @@ exports[`serialized block schema > matches current snapshot 1`] = `
     "parent": [
       "affine:note",
       "affine:surface",
-      "affine:edgeless-text"
+      "affine:edgeless-text",
+      "affine:paragraph",
+      "affine:list"
     ]
   },
   "props": {
