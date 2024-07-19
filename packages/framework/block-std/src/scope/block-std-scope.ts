@@ -1,5 +1,7 @@
 import type { Doc, DocCollection } from '@blocksuite/store';
 
+import type { EditorHost } from '../view/index.js';
+
 import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';
 import { UIEventDispatcher } from '../event/index.js';
@@ -8,7 +10,7 @@ import { SpecStore } from '../spec/index.js';
 import { ViewStore } from '../view/index.js';
 
 export interface BlockStdOptions {
-  host: HTMLElement;
+  host: EditorHost;
   doc: Doc;
 }
 
@@ -58,15 +60,8 @@ export class BlockStdScope {
   }
 }
 
-type Values<T> = T[keyof T] extends never ? unknown : T[keyof T];
-
 declare global {
   namespace BlockSuite {
-    interface ComponentType {}
-    interface NodeViewType {}
-
-    type Component = Values<ComponentType>;
-
     type Std = BlockStdScope;
   }
 }

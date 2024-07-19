@@ -12,10 +12,18 @@ export type DeltaOperation = {
   retain?: number;
 } & OptionalAttributes;
 
+export type OnTextChange = (data: Y.Text) => void;
+
 export class Text {
+  private _onChange?: OnTextChange;
+
   private readonly _yText: Y.Text;
 
-  constructor(input?: Y.Text | string | DeltaInsert[]) {
+  constructor(
+    input?: Y.Text | string | DeltaInsert[],
+    onChange?: OnTextChange
+  ) {
+    this._onChange = onChange;
     if (typeof input === 'string') {
       const text = input.replaceAll('\r\n', '\n');
       this._yText = new Y.Text(text);
@@ -33,12 +41,19 @@ export class Text {
     } else {
       this._yText = new Y.Text();
     }
+    this._yText.observe(() => {
+      this._onChange?.(this._yText);
+    });
   }
 
-  static fromDelta(delta: DeltaOperation[]) {
+  /**
+   * @deprecated
+   * This method will lose the change observer unless you pass the onChange callback.
+   */
+  static fromDelta(delta: DeltaOperation[], onChange?: OnTextChange) {
     const result = new Y.Text();
     result.applyDelta(delta);
-    return new Text(result);
+    return new Text(result, onChange);
   }
 
   private _transact(callback: () => void) {
@@ -59,6 +74,10 @@ export class Text {
     });
   }
 
+  bind(onChange?: OnTextChange) {
+    this._onChange = onChange;
+  }
+
   clear() {
     if (!this._yText.length) {
       return;
@@ -69,7 +88,7 @@ export class Text {
   }
 
   clone() {
-    return new Text(this._yText.clone());
+    return new Text(this._yText.clone(), this._onChange);
   }
 
   delete(index: number, length: number) {
@@ -276,7 +295,7 @@ export class Text {
     this.delete(index, this.length - index);
     const rightYText = new Y.Text();
     rightYText.applyDelta(rightDeltas);
-    const rightText = new Text(rightYText);
+    const rightText = new Text(rightYText, this._onChange);
 
     return rightText;
   }
