@@ -251,7 +251,7 @@ export class EdgelessTextBlockComponent extends EdgelessBlockElement<
     const bound = Bound.deserialize(xywh);
     const w =
       hasMaxWidth || this._horizontalResizing || this.dragMoving
-        ? `${bound.w / scale}px`
+        ? bound.w / scale
         : undefined;
 
     return {
