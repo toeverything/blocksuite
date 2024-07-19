@@ -1,0 +1,535 @@
+import type { Boxed, Y } from '@blocksuite/store';
+
+import { type Constructor, Slot } from '@blocksuite/global/utils';
+import { BlockModel, DocCollection, nanoid } from '@blocksuite/store';
+
+import { createDecoratorState } from './decorators/common.js';
+import {
+  initializeWatchers,
+  initializedObservers,
+} from './decorators/index.js';
+import { onElementChange } from './element-model.js';
+import {
+  type IBaseProps,
+  SurfaceElementModel,
+  SurfaceGroupLikeModel,
+} from './element-model.js';
+
+const generateElementId = () => {
+  return nanoid();
+};
+
+export type SurfaceBlockProps = {
+  elements: Boxed<Y.Map<Y.Map<unknown>>>;
+};
+
+export interface ElementUpdatedData {
+  id: string;
+  props: Record<string, unknown>;
+  oldValues: Record<string, unknown>;
+  local: boolean;
+}
+
+export type SurfaceMiddleware = (
+  surface: SurfaceBlockModel,
+  hooks: SurfaceBlockModel['hooks']
+) => () => void;
+
+export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
+  protected _decoratorState = createDecoratorState();
+
+  private _elementCtorMap: Record<
+    string,
+    Constructor<
+      SurfaceElementModel,
+      ConstructorParameters<typeof SurfaceElementModel>
+    >
+  > = {};
+
+  private _elementModels = new Map<
+    string,
+    {
+      mount: () => void;
+      unmount: () => void;
+      model: SurfaceElementModel;
+    }
+  >();
+
+  private _elementToGroup = new Map<string, string>();
+
+  private _groupToElements = new Map<string, string[]>();
+
+  protected _surfaceBlockModel = true;
+
+  elementAdded = new Slot<{ id: string; local: boolean }>();
+
+  elementRemoved = new Slot<{
+    id: string;
+    type: string;
+    model: SurfaceElementModel;
+    local: boolean;
+  }>();
+
+  elementUpdated = new Slot<ElementUpdatedData>();
+
+  /**
+   * Hooks is used to attach extra logic when calling `addElement`、`updateElement`(or assign property directly) and `removeElement`.
+   * It's useful when dealing with relation between different model.
+   */
+  protected hooks = {
+    update: new Slot<Omit<ElementUpdatedData, 'local'>>(),
+    remove: new Slot<{
+      id: string;
+      type: string;
+      model: SurfaceElementModel;
+    }>(),
+  };
+
+  constructor() {
+    super();
+    this.created.once(() => this._init());
+  }
+
+  private _createElement(
+    type: string,
+    id: string,
+    yMap: Y.Map<unknown>,
+    options: {
+      onChange: (payload: {
+        id: string;
+        props: Record<string, unknown>;
+        oldValues: Record<string, unknown>;
+        local: boolean;
+      }) => void;
+      skipFieldInit?: boolean;
+      newCreate?: boolean;
+    }
+  ) {
+    const stashed = new Map<string | symbol, unknown>();
+    const Ctor = this._elementCtorMap[type];
+
+    if (!Ctor) {
+      throw new Error(`Invalid element type: ${yMap.get('type')}`);
+    }
+    const state = this._decoratorState;
+
+    state.creating = true;
+    state.skipYfield = options.skipFieldInit ?? false;
+
+    let mounted = false;
+    const elementModel = new Ctor({
+      id,
+      yMap,
+      model: this,
+      stashedStore: stashed,
+      onChange: payload => mounted && options.onChange({ id, ...payload }),
+    }) as SurfaceElementModel;
+
+    state.creating = false;
+    state.skipYfield = false;
+
+    const unmount = () => {
+      mounted = false;
+      elementModel['_disposable'].dispose();
+    };
+
+    const mount = () => {
+      initializedObservers(Ctor.prototype, elementModel);
+      initializeWatchers(Ctor.prototype, elementModel);
+      elementModel['_disposable'].add(
+        onElementChange(yMap, payload => {
+          mounted &&
+            options.onChange({
+              id,
+              ...payload,
+            });
+        })
+      );
+      elementModel['_preserved'].clear();
+      mounted = true;
+      elementModel.onCreated();
+    };
+
+    return {
+      model: elementModel,
+      mount,
+      unmount,
+    };
+  }
+
+  private _createElementFromProps(
+    props: Record<string, unknown>,
+    options: {
+      onChange: (payload: {
+        id: string;
+        props: Record<string, unknown>;
+        oldValues: Record<string, unknown>;
+        local: boolean;
+      }) => void;
+    }
+  ) {
+    const { type, id, ...rest } = props;
+
+    if (!id) {
+      throw new Error('Cannot find id in props');
+    }
+
+    const yMap = new DocCollection.Y.Map();
+    const elementModel = this._createElement(
+      type as string,
+      id as string,
+      yMap,
+      {
+        ...options,
+        newCreate: true,
+      }
+    );
+
+    props = this._propsToY(type as string, props);
+
+    yMap.set('type', type);
+    yMap.set('id', id);
+
+    Object.keys(rest).forEach(key => {
+      if (props[key] !== undefined) {
+        // @ts-ignore
+        elementModel.model[key] = props[key];
+      }
+    });
+
+    return elementModel;
+  }
+
+  private _init() {
+    this._initElementModels();
+    this._watchGroupRelationChange();
+    this.applyMiddlewares();
+  }
+
+  private _initElementModels() {
+    const elementsYMap = this.elements.getValue()!;
+    const onElementsMapChange = (
+      event: Y.YMapEvent<Y.Map<unknown>>,
+      transaction: Y.Transaction
+    ) => {
+      const { changes, keysChanged } = event;
+
+      keysChanged.forEach(id => {
+        const change = changes.keys.get(id);
+        const element = this.elements.getValue()!.get(id);
+
+        switch (change?.action) {
+          case 'add':
+            if (element) {
+              if (!this._elementModels.has(id)) {
+                const model = this._createElement(
+                  element.get('type') as string,
+                  element.get('id') as string,
+                  element,
+                  {
+                    onChange: payload => this.elementUpdated.emit(payload),
+                    skipFieldInit: true,
+                  }
+                );
+
+                this._elementModels.set(id, model);
+              }
+              const { mount } = this._elementModels.get(id)!;
+              mount();
+              this.elementAdded.emit({ id, local: transaction.local });
+            }
+            break;
+          case 'delete':
+            if (this._elementModels.has(id)) {
+              const { model, unmount } = this._elementModels.get(id)!;
+              unmount();
+              this.elementRemoved.emit({
+                id,
+                type: model.type,
+                model,
+                local: transaction.local,
+              });
+              this._elementToGroup.delete(id);
+              this._elementModels.delete(id);
+            }
+            break;
+        }
+      });
+    };
+
+    elementsYMap.forEach((val, key) => {
+      const model = this._createElement(
+        val.get('type') as string,
+        val.get('id') as string,
+        val,
+        {
+          onChange: payload => this.elementUpdated.emit(payload),
+          skipFieldInit: true,
+        }
+      );
+
+      this._elementModels.set(key, model);
+      model.mount();
+    });
+    elementsYMap.observe(onElementsMapChange);
+
+    this.deleted.on(() => {
+      elementsYMap.unobserve(onElementsMapChange);
+    });
+  }
+
+  private _propsToY(type: string, props: Record<string, unknown>) {
+    const ctor = this._elementCtorMap[type];
+
+    if (!ctor) {
+      throw new Error(`Invalid element type: ${type}`);
+    }
+
+    // @ts-ignore
+    return (ctor.propsToY ?? SurfaceElementModel.propsToY)(props);
+  }
+
+  private _watchGroupRelationChange() {
+    const addToGroup = (elementId: string, groupId: string) => {
+      this._elementToGroup.set(elementId, groupId);
+      this._groupToElements.set(
+        groupId,
+        (this._groupToElements.get(groupId) || []).concat(elementId)
+      );
+    };
+    const removeFromGroup = (elementId: string, groupId: string) => {
+      if (this._elementToGroup.has(elementId)) {
+        const group = this._elementToGroup.get(elementId)!;
+        if (group === groupId) {
+          this._elementToGroup.delete(elementId);
+        }
+      }
+
+      if (this._groupToElements.has(groupId)) {
+        const elements = this._groupToElements.get(groupId)!;
+        const index = elements.indexOf(elementId);
+
+        if (index !== -1) {
+          elements.splice(index, 1);
+          elements.length === 0 && this._groupToElements.delete(groupId);
+        }
+      }
+    };
+    const isGroup = (
+      element: SurfaceElementModel
+    ): element is SurfaceGroupLikeModel =>
+      element instanceof SurfaceGroupLikeModel;
+
+    this.elementModels.forEach(model => {
+      if (isGroup(model)) {
+        model.childIds.forEach(childId => {
+          addToGroup(childId, model.id);
+        });
+      }
+    });
+
+    this.elementUpdated.on(({ id, oldValues }) => {
+      const element = this.getElementById(id)!;
+
+      if (isGroup(element) && oldValues['childIds']) {
+        (oldValues['childIds'] as string[]).forEach(childId => {
+          removeFromGroup(childId, id);
+        });
+
+        element.childIds.forEach(childId => {
+          addToGroup(childId, id);
+        });
+
+        if (element.childIds.length === 0) {
+          this.removeElement(id);
+        }
+      }
+    });
+
+    this.elementAdded.on(({ id }) => {
+      const element = this.getElementById(id)!;
+
+      if (isGroup(element)) {
+        element.childIds.forEach(childId => {
+          addToGroup(childId, id);
+        });
+      }
+    });
+
+    this.elementRemoved.on(({ id, model }) => {
+      if (isGroup(model)) {
+        const children = [...(this._groupToElements.get(id) || [])];
+
+        children.forEach(childId => removeFromGroup(childId, id));
+      }
+    });
+
+    const disposeGroup = this.doc.slots.blockUpdated.on(({ type, id }) => {
+      switch (type) {
+        case 'delete': {
+          const group = this.getGroup(id);
+
+          if (group) {
+            // eslint-disable-next-line unicorn/prefer-dom-node-remove
+            group.removeChild(id);
+          }
+        }
+      }
+    });
+    this.deleted.on(() => {
+      disposeGroup.dispose();
+    });
+  }
+
+  addElement<T extends object = Record<string, unknown>>(
+    props: Partial<T> & { type: string }
+  ) {
+    if (this.doc.readonly) {
+      throw new Error('Cannot add element in readonly mode');
+    }
+
+    const id = generateElementId();
+
+    // @ts-ignore
+    props.id = id;
+
+    const elementModel = this._createElementFromProps(props, {
+      onChange: payload => this.elementUpdated.emit(payload),
+    });
+
+    this._elementModels.set(id, elementModel);
+
+    this.doc.transact(() => {
+      this.elements.getValue()!.set(id, elementModel.model.yMap);
+    });
+
+    return id;
+  }
+
+  protected applyMiddlewares() {}
+
+  override dispose(): void {
+    super.dispose();
+
+    this.elementAdded.dispose();
+    this.elementRemoved.dispose();
+    this.elementUpdated.dispose();
+
+    this._elementModels.forEach(({ unmount }) => unmount());
+    this._elementModels.clear();
+
+    this.hooks.update.dispose();
+    this.hooks.remove.dispose();
+  }
+
+  getElementById(id: string): SurfaceElementModel | null {
+    return this._elementModels.get(id)?.model ?? null;
+  }
+
+  getElementsByType(type: string): SurfaceElementModel[] {
+    return this.elementModels.filter(
+      model => model.type === type
+    ) as SurfaceElementModel[];
+  }
+
+  getGroup<
+    T extends
+      SurfaceGroupLikeModel<IBaseProps> = SurfaceGroupLikeModel<IBaseProps>,
+  >(id: string): T | null {
+    return this._elementToGroup.has(id)
+      ? (this.getElementById(this._elementToGroup.get(id)!) as T)
+      : null;
+  }
+
+  getGroups(id: string): SurfaceGroupLikeModel<IBaseProps>[] {
+    const groups: SurfaceGroupLikeModel<IBaseProps>[] = [];
+    let group = this.getGroup(id);
+
+    while (group) {
+      groups.push(group);
+      group = this.getGroup(group.id);
+    }
+
+    return groups;
+  }
+
+  hasElementById(id: string): boolean {
+    return this._elementModels.has(id);
+  }
+
+  isInMindmap(id: string) {
+    const group = this.getGroup(id);
+
+    return group?.type === 'mindmap';
+  }
+
+  removeElement(id: string) {
+    if (this.doc.readonly) {
+      throw new Error('Cannot remove element in readonly mode');
+    }
+
+    if (!this.hasElementById(id)) {
+      return;
+    }
+
+    this.doc.transact(() => {
+      const element = this.getElementById(id)!;
+      const group = this.getGroup(id);
+
+      if (element instanceof SurfaceGroupLikeModel) {
+        element.childIds.forEach(childId => {
+          if (this.hasElementById(childId)) {
+            this.removeElement(childId);
+          } else if (this.doc.hasBlock(childId)) {
+            this.doc.deleteBlock(this.doc.getBlock(childId)!.model);
+          }
+        });
+      }
+
+      if (group) {
+        // eslint-disable-next-line unicorn/prefer-dom-node-remove
+        group.removeChild(id);
+      }
+
+      this.elements.getValue()!.delete(id);
+
+      this.hooks.remove.emit({
+        id,
+        model: element as SurfaceElementModel,
+        type: element.type,
+      });
+    });
+  }
+
+  updateElement<T extends object = Record<string, unknown>>(
+    id: string,
+    props: Partial<T>
+  ) {
+    if (this.doc.readonly) {
+      throw new Error('Cannot update element in readonly mode');
+    }
+
+    const elementModel = this.getElementById(id);
+
+    if (!elementModel) {
+      throw new Error(`Element ${id} is not found`);
+    }
+
+    this.doc.transact(() => {
+      props = this._propsToY(
+        elementModel.type,
+        props as Record<string, unknown>
+      ) as T;
+      Object.entries(props).forEach(([key, value]) => {
+        // @ts-ignore
+        elementModel[key] = value;
+      });
+    });
+  }
+
+  get elementModels() {
+    const models: SurfaceElementModel[] = [];
+    this._elementModels.forEach(model => models.push(model.model));
+    return models;
+  }
+}

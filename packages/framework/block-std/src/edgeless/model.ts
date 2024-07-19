@@ -18,6 +18,7 @@ import {
 import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
+import type { SurfaceElementModel } from './surface-model/element-model.js';
 
 export interface IHitTestOptions {
   expand?: number;
@@ -214,3 +215,5 @@ export function selectable<
 
   return SuperClass as unknown as typeof EdgelessBlockModel<Props>;
 }
+
+export type EdgelessModel = EdgelessBlockModel | SurfaceElementModel;

@@ -16,6 +16,10 @@ interface TLBounds {
   rotation?: number;
 }
 
+export function randomSeed(): number {
+  return Math.floor(Math.random() * 2 ** 31);
+}
+
 export function getBoundsFromPoints(points: IVec[], rotation = 0): TLBounds {
   let minX = Infinity;
   let minY = Infinity;
