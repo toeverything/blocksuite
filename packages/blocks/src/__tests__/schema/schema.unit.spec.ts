@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { AffineSchemas } from '../../schemas';
+import { AffineSchemas } from '../../schemas.js';
 
 function serializeSchema(schema: (typeof AffineSchemas)[0]) {
   const rawProps =
