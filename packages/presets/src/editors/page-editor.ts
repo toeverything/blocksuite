@@ -5,11 +5,10 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { PageEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import { css, html, nothing } from 'lit';
+import { type TemplateResult, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { type Ref, createRef, ref } from 'lit/directives/ref.js';
+import { type Ref, createRef } from 'lit/directives/ref.js';
 
 noop(EditorHost);
 
@@ -48,35 +47,12 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.doc.slots.rootAdded.on(() => this.requestUpdate())
-    );
-  }
-
-  override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    await this.host.updateComplete;
-    return result;
-  }
-
   override render() {
-    if (!this.doc.root) return nothing;
+    const classes = this.hasViewport
+      ? 'affine-page-viewport'
+      : 'page-editor-container';
 
-    return html`
-      <div
-        class=${this.hasViewport
-          ? 'affine-page-viewport'
-          : 'page-editor-container'}
-      >
-        <editor-host
-          ${ref(this._host)}
-          .doc=${this.doc}
-          .specs=${this.specs}
-        ></editor-host>
-      </div>
-    `;
+    return html`<div class=${classes}>${this.editor}</div>`;
   }
 
   get host() {
@@ -86,11 +62,11 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor doc!: Doc;
 
+  @property({ attribute: false })
+  accessor editor!: TemplateResult;
+
   @property({ type: Boolean })
   accessor hasViewport = true;
-
-  @property({ attribute: false })
-  accessor specs = PageEditorBlockSpecs;
 }
 
 declare global {
