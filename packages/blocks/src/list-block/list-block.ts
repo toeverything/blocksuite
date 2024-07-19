@@ -15,6 +15,7 @@ import { BlockComponent } from '../_common/components/block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
+import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { listBlockStyles } from './styles.js';
@@ -180,9 +181,7 @@ export class ListBlockComponent extends BlockComponent<
 
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockElement>(
-        'affine-note, affine-edgeless-note, affine-edgeless-text'
-      );
+      const el = this.closest<BlockElement>(NOTE_SELECTOR);
       return el;
     }
     return this.rootElement;

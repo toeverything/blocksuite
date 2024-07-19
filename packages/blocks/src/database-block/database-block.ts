@@ -15,6 +15,7 @@ import {
   popMenu,
   toast,
 } from '../_common/components/index.js';
+import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import {
   CopyIcon,
   DeleteIcon,
@@ -214,8 +215,8 @@ export class DatabaseBlockComponent extends BlockComponent<
       );
       return () => {
         this.indicator.remove();
-        const model = this.doc.getBlockById(id);
-        const target = this.doc.getBlockById(result.dropBlockId);
+        const model = this.doc.getBlock(id).model;
+        const target = this.doc.getBlock(result.dropBlockId).model;
         let parent = this.doc.getParent(result.dropBlockId);
         const shouldInsertIn = result.dropType === 'in';
         if (shouldInsertIn) {
@@ -406,7 +407,7 @@ export class DatabaseBlockComponent extends BlockComponent<
 
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>('affine-note');
+      const note = this.closest<NoteBlockComponent>(NOTE_SELECTOR);
       return note;
     }
     return this.rootElement;
