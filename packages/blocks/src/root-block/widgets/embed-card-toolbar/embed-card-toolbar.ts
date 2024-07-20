@@ -4,7 +4,7 @@ import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, DocCollection, Slice } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
-import { type PropertyValues, type TemplateResult, html, nothing } from 'lit';
+import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { join } from 'lit/directives/join.js';
@@ -14,6 +14,7 @@ import type { EmbedCardStyle } from '../../../_common/types.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedOptions } from '../../root-service.js';
+import type { RootBlockComponent } from '../../types.js';
 
 import '../../../_common/components/button.js';
 import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
@@ -49,10 +50,6 @@ import {
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
 import { getBlockProps } from '../../../_common/utils/block-props.js';
-import {
-  getBlockComponentByPath,
-  getModelByBlockComponent,
-} from '../../../_common/utils/query.js';
 import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
 import {
   type BookmarkBlockModel,
@@ -67,7 +64,6 @@ import {
   isEmbeddedLinkBlock,
   isImageBlock,
 } from '../../edgeless/utils/query.js';
-import { RootBlockModel } from '../../root-model.js';
 import { embedCardToolbarStyle } from './styles.js';
 
 export const AFFINE_EMBED_CARD_TOOLBAR_WIDGET = 'affine-embed-card-toolbar';
@@ -75,11 +71,13 @@ export const AFFINE_EMBED_CARD_TOOLBAR_WIDGET = 'affine-embed-card-toolbar';
 @customElement(AFFINE_EMBED_CARD_TOOLBAR_WIDGET)
 export class EmbedCardToolbar extends WidgetElement<
   EmbedToolbarModel,
-  EmbedToolbarBlockElement
+  RootBlockComponent
 > {
   private _abortController = new AbortController();
 
   private _embedOptions: EmbedOptions | null = null;
+
+  private _focusBlock: EmbedToolbarBlockElement | null = null;
 
   private _resetAbortController = () => {
     this._abortController.abort();
@@ -99,8 +97,10 @@ export class EmbedCardToolbar extends WidgetElement<
       }
     }
 
+    if (!this._focusBlock) return false;
+
     return (
-      'convertToEmbed' in this.blockElement ||
+      'convertToEmbed' in this._focusBlock ||
       this._embedOptions?.viewType === 'embed'
     );
   }
@@ -183,9 +183,12 @@ export class EmbedCardToolbar extends WidgetElement<
     if (this._isCardView) {
       return;
     }
+    if (!this._focusBlock) {
+      return;
+    }
 
-    if ('convertToCard' in this.blockElement) {
-      this.blockElement.convertToCard();
+    if ('convertToCard' in this._focusBlock) {
+      this._focusBlock.convertToCard();
       return;
     }
 
@@ -229,8 +232,12 @@ export class EmbedCardToolbar extends WidgetElement<
       return;
     }
 
-    if ('convertToEmbed' in this.blockElement) {
-      this.blockElement.convertToEmbed();
+    if (!this._focusBlock) {
+      return;
+    }
+
+    if ('convertToEmbed' in this._focusBlock) {
+      this._focusBlock.convertToEmbed();
       return;
     }
 
@@ -311,6 +318,7 @@ export class EmbedCardToolbar extends WidgetElement<
 
   private _hide() {
     this._resetAbortController();
+    this._focusBlock = null;
     this.hide = true;
   }
 
@@ -388,7 +396,7 @@ export class EmbedCardToolbar extends WidgetElement<
       buttons.push({
         name: 'Open this doc',
         icon: ExpandFullSmallIcon,
-        handler: () => this.blockElement.open(),
+        handler: () => this._focusBlock?.open(),
       });
     }
 
@@ -441,7 +449,7 @@ export class EmbedCardToolbar extends WidgetElement<
   }
 
   private _refreshData() {
-    this.blockElement.refreshData();
+    this._focusBlock?.refreshData();
     this._abortController.abort();
   }
 
@@ -469,11 +477,17 @@ export class EmbedCardToolbar extends WidgetElement<
   }
 
   private _show() {
+    if (!this._focusBlock) {
+      return;
+    }
     this.hide = false;
     this._abortController.signal.addEventListener(
       'abort',
-      autoUpdate(this.blockElement, this, () => {
-        computePosition(this.blockElement, this, {
+      autoUpdate(this._focusBlock, this, () => {
+        if (!this._focusBlock) {
+          return;
+        }
+        computePosition(this._focusBlock, this, {
           placement: 'top-start',
           middleware: [flip(), offset(8)],
         })
@@ -487,8 +501,12 @@ export class EmbedCardToolbar extends WidgetElement<
   }
 
   private _showCaption() {
+    const focusBlock = this._focusBlock;
+    if (!focusBlock) {
+      return;
+    }
     try {
-      this.blockElement.captionEditor.show();
+      focusBlock.captionEditor.show();
     } catch (_) {
       toggleEmbedCardCaptionEditModal(this.blockElement);
     }
@@ -496,8 +514,8 @@ export class EmbedCardToolbar extends WidgetElement<
   }
 
   private _turnIntoInlineView() {
-    if ('covertToInline' in this.blockElement) {
-      this.blockElement.covertToInline();
+    if (this._focusBlock && 'covertToInline' in this._focusBlock) {
+      this._focusBlock.covertToInline();
       return;
     }
 
@@ -619,18 +637,13 @@ export class EmbedCardToolbar extends WidgetElement<
           return;
         }
 
-        const block = getBlockComponentByPath(
-          this.host,
-          blockSelections[0].blockId
-        );
+        const block = this.std.view.getBlock(blockSelections[0].blockId);
         if (!block || !isEmbedCardBlockElement(block)) {
           this._hide();
           return;
         }
 
-        this.blockElement = block;
-        this.model = getModelByBlockComponent(block) as EmbedToolbarModel;
-
+        this._focusBlock = block as EmbedToolbarBlockElement;
         this._show();
       })
     );
@@ -718,20 +731,6 @@ export class EmbedCardToolbar extends WidgetElement<
         )}
       </editor-toolbar>
     `;
-  }
-
-  override willUpdate(changedProperties: PropertyValues<typeof this>) {
-    // avoid no selection change on the first update so that `this.model` will be root block model
-    if (!this.hasUpdated) return;
-
-    // `this.model` is only controlled by selection changed event
-    if (changedProperties.has('model')) {
-      const previousModel = changedProperties.get('model');
-      assertExists(previousModel);
-      if (this.model instanceof RootBlockModel) {
-        this.model = previousModel;
-      }
-    }
   }
 
   @query('.embed-card-toolbar-button.card-style')

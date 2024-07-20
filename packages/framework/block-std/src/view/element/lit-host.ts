@@ -1,8 +1,13 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import { handleError } from '@blocksuite/global/exceptions';
+import {
+  BlockSuiteError,
+  ErrorCode,
+  handleError,
+} from '@blocksuite/global/exceptions';
 import { Slot, assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Doc } from '@blocksuite/store';
+import { createContext, provide } from '@lit/context';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import {
   LitElement,
@@ -11,7 +16,7 @@ import {
   css,
   nothing,
 } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
@@ -25,6 +30,9 @@ import { BlockStdScope } from '../../scope/index.js';
 import { RangeManager } from '../utils/range-manager.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import { ShadowlessElement } from './shadowless-element.js';
+
+export const docContext = createContext<Doc>('doc');
+export const stdContext = createContext<BlockStdScope>('std');
 
 @customElement('editor-host')
 export class EditorHost extends SignalWatcher(
@@ -46,11 +54,7 @@ export class EditorHost extends SignalWatcher(
     const tag = view.component;
     const widgets: Record<string, TemplateResult> = view.widgets
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
-          const template = html`<${tag}
-            ${unsafeStatic(this.widgetIdAttr)}=${key}
-            .host=${this}
-            .model=${model}
-            .doc=${this.doc}></${tag}>`;
+          const template = html`<${tag} ${unsafeStatic(this.widgetIdAttr)}=${key}></${tag}>`;
 
           return {
             ...mapping,
@@ -61,9 +65,6 @@ export class EditorHost extends SignalWatcher(
 
     return html`<${tag}
       ${unsafeStatic(this.blockIdAttr)}=${model.id}
-      .host=${this}
-      .doc=${this.doc}
-      .model=${model}
       .widgets=${widgets}
       .viewType=${block.blockViewType}
     ></${tag}>`;
@@ -109,13 +110,12 @@ export class EditorHost extends SignalWatcher(
     unmounted: new Slot(),
   };
 
-  std!: BlockSuite.Std;
-
   override connectedCallback() {
     super.connectedCallback();
 
     if (!this.doc.root) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.NoRootModelError,
         'This doc is missing root block. Please initialize the default block structure before connecting the editor to DOM.'
       );
     }
@@ -204,11 +204,16 @@ export class EditorHost extends SignalWatcher(
   @property({ attribute: false })
   accessor blockIdAttr = 'data-block-id';
 
+  @provide({ context: docContext })
   @property({ attribute: false })
   accessor doc!: Doc;
 
   @property({ attribute: false })
   accessor specs!: BlockSpec[];
+
+  @provide({ context: stdContext })
+  @state()
+  accessor std!: BlockSuite.Std;
 
   @property({ attribute: false })
   accessor widgetIdAttr = 'data-widget-id';
