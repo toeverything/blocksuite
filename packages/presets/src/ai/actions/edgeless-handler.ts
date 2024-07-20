@@ -402,7 +402,6 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     edgelessCopilot.hideCopilotPanel();
     edgelessCopilot.lockToolbar(true);
 
-    aiPanel.host = host;
     updateEdgelessAIPanelConfig(
       aiPanel,
       edgelessCopilot,
