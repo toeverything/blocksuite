@@ -167,7 +167,10 @@ export class SlashMenu extends WithDisposable(LitElement) {
     });
 
     const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor, 'RichText InlineEditor not found');
+    if (!inlineEditor || !inlineEditor.eventSource) {
+      console.error('inlineEditor or eventSource is not found');
+      return;
+    }
 
     /**
      * Handle arrow key
@@ -443,7 +446,11 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
       this.context.rootElement.host,
       this.context.model
     );
-    assertExists(inlineEditor, 'RichText InlineEditor not found');
+
+    if (!inlineEditor || !inlineEditor.eventSource) {
+      console.error('inlineEditor or eventSource is not found');
+      return;
+    }
 
     inlineEditor.eventSource.addEventListener(
       'keydown',

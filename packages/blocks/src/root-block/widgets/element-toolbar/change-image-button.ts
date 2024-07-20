@@ -1,5 +1,4 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -35,7 +34,6 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
     const blockElement = this.edgeless.std.view.getBlock(
       blockSelection[0].blockId
     ) as ImageBlockComponent | null;
-    assertExists(blockElement);
 
     return blockElement;
   }

@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { assertExists, noop } from '@blocksuite/global/utils';
+import { noop } from '@blocksuite/global/utils';
 
 import type { SelectionArea } from '../../services/tools-manager.js';
 import type { EdgelessTool } from '../../types.js';
@@ -65,8 +65,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
   private _resize(shift = false) {
     const { _draggingArea, _draggingNoteOverlay, _edgeless } = this;
-    assertExists(_draggingArea);
-    assertExists(_draggingNoteOverlay);
+    if (!_draggingArea || !_draggingNoteOverlay) return;
 
     const { viewport } = _edgeless.service;
     const { zoom } = viewport;
@@ -171,8 +170,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   }
 
   onContainerDragMove(e: PointerEventState) {
-    assertExists(this._draggingNoteOverlay);
-    assertExists(this._draggingArea);
+    if (!this._draggingNoteOverlay || !this._draggingArea) return;
 
     this._draggingArea.end = new DOMPoint(e.x, e.y);
     this._resize(e.keys.shift || this._edgeless.tools.shiftKey);
