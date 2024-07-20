@@ -6,11 +6,7 @@ import {
   type UIEventHandler,
   WidgetElement,
 } from '@blocksuite/block-std';
-import {
-  DisposableGroup,
-  assertExists,
-  throttle,
-} from '@blocksuite/global/utils';
+import { DisposableGroup, throttle } from '@blocksuite/global/utils';
 import {
   type BlockModel,
   type BlockSelector,
@@ -234,7 +230,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     // Should select the block if current block is not selected
     const blockElement = this.anchorBlockElement;
-    assertExists(blockElement);
+    if (!blockElement) return;
 
     if (selectedBlocks.length > 1) {
       this._showDragHandleOnHoverBlock(this._anchorBlockPath);
@@ -433,7 +429,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const offsetParentRect =
       this.dragHandleContainerOffsetParent.getBoundingClientRect();
-    assertExists(offsetParentRect);
+    if (!offsetParentRect) return new Rect(0, 0, 0, 0);
 
     left -= offsetParentRect.left;
     right -= offsetParentRect.left;
@@ -537,7 +533,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (!this._isHoverDragHandleVisible || !this._anchorBlockPath) return [];
 
     const hoverBlock = this.anchorBlockElement;
-    assertExists(hoverBlock);
+    if (!hoverBlock) return [];
 
     const selections = this.selectedBlocks;
     let blockElements: BlockElement[] = [];
@@ -720,7 +716,7 @@ export class AffineDragHandleWidget extends WidgetElement<
         }
       );
       const newNoteBlock = this.doc.getBlockById(newNoteId) as NoteBlockModel;
-      assertExists(newNoteBlock);
+      if (!newNoteBlock) return;
 
       const bound = Bound.deserialize(newNoteBlock.xywh);
       bound.h *= this.noteScale;
@@ -768,14 +764,14 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     const targetBlock = this.doc.getBlockById(targetBlockId);
-    assertExists(targetBlock);
+    if (!targetBlock) return;
 
     const shouldInsertIn = dropType === 'in';
 
     const parent = shouldInsertIn
       ? targetBlock
       : this.doc.getParent(targetBlockId);
-    assertExists(parent);
+    if (!parent) return;
 
     const altKey = state.raw.altKey;
 
@@ -810,7 +806,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     // In doc page mode, update selected blocks
     // In edgeless mode, focus on the first block
     setTimeout(() => {
-      assertExists(parent);
+      if (!parent) return;
       // Need to update selection when moving blocks successfully
       // Because the block path may be changed after moving
       const parentElement = this._getBlockElementFromViewStore(parent.id);
@@ -842,8 +838,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const grabber = this._dragHandleGrabber;
     if (!container || !grabber) return;
 
-    if (this._isHoverDragHandleVisible) {
-      assertExists(this._anchorBlockPath);
+    if (this._isHoverDragHandleVisible && this._anchorBlockPath) {
       const blockElement = this.anchorBlockElement;
       if (!blockElement) return;
 
@@ -909,10 +904,13 @@ export class AffineDragHandleWidget extends WidgetElement<
       return false;
     }
 
-    if (!this._isHoverDragHandleVisible) return;
+    if (
+      !this._isHoverDragHandleVisible ||
+      !this._anchorBlockId ||
+      !this._anchorBlockPath
+    )
+      return;
     // Get current hover block element by path
-    assertExists(this._anchorBlockId);
-    assertExists(this._anchorBlockPath);
     const hoverBlockElement = this.anchorBlockElement;
     if (!hoverBlockElement) return false;
 
@@ -949,8 +947,9 @@ export class AffineDragHandleWidget extends WidgetElement<
       )
     ) {
       const blockElement = this.anchorBlockElement;
-      assertExists(blockElement);
-      this._setSelectedBlocks([blockElement]);
+      if (blockElement) {
+        this._setSelectedBlocks([blockElement]);
+      }
     }
 
     const blockElements = this.selectedBlocks
@@ -992,7 +991,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     const blockId = closestBlockElement.getAttribute(this.host.blockIdAttr);
-    assertExists(blockId);
+    if (!blockId) return;
 
     this._anchorBlockId = blockId;
     this._anchorBlockPath = closestBlockElement.blockId;
@@ -1196,12 +1195,12 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     if (!this._anchorBlockPath) return;
     const blockElement = this.anchorBlockElement;
-    assertExists(blockElement);
+    if (!blockElement) return;
 
     const edgelessElement = edgelessRoot.service.getElementById(
       blockElement.model.id
     );
-    assertExists(edgelessElement);
+    if (!edgelessElement) return;
 
     const container = this._dragHandleContainer;
     const grabber = this._dragHandleGrabber;
@@ -1411,7 +1410,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _updateDropResult = (dropResult: DropResult | null) => {
-    assertExists(this.dropIndicator);
+    if (!this.dropIndicator) return;
     this.dropBlockId = dropResult?.dropBlockId ?? '';
     this.dropType = dropResult?.dropType ?? null;
     if (dropResult?.rect) {

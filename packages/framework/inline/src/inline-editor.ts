@@ -294,7 +294,7 @@ export class InlineEditor<
       this.rootElement.contentEditable = value;
     }
 
-    if (this.eventSource.contentEditable !== value) {
+    if (this.eventSource && this.eventSource.contentEditable !== value) {
       this.eventSource.contentEditable = value;
     }
 
@@ -343,7 +343,6 @@ export class InlineEditor<
   }
 
   get eventSource() {
-    assertExists(this._eventSource);
     return this._eventSource;
   }
 
