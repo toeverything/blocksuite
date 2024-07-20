@@ -65,7 +65,11 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
     if (!this.doc.root) return nothing;
 
     return html`
-      <div class="affine-edgeless-viewport">
+      <div
+        class=${this.hasViewport
+          ? 'affine-page-viewport'
+          : 'page-editor-container'}
+      >
         <editor-host
           ${ref(this._host)}
           .doc=${this.doc}
