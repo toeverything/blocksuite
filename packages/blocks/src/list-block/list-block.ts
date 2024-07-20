@@ -188,7 +188,7 @@ export class ListBlockComponent extends BlockComponent<
   }
 
   @state()
-  private accessor _isCollapsedWhenReadOnly = !!this.model?.collapsed;
+  private accessor _isCollapsedWhenReadOnly = false;
 
   @query('rich-text')
   private accessor _richTextElement: RichText | null = null;
