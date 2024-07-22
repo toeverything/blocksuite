@@ -1,7 +1,7 @@
 import type * as Y from 'yjs';
 
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Slot, assertExists } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { DocCollection } from './collection.js';
@@ -140,14 +140,19 @@ export class DocCollectionMeta {
 
   removeDocMeta(id: string) {
     // you cannot delete a doc if there's no doc
-    assertExists(this.docs);
-    const docMeta = this.docMetas as DocMeta[];
+    if (!this.docs) {
+      return;
+    }
+
+    const docMeta = this.docMetas;
     const index = docMeta.findIndex((doc: DocMeta) => id === doc.id);
     if (index === -1) {
       return;
     }
     this.doc.transact(() => {
-      assertExists(this.docs);
+      if (!this.docs) {
+        return;
+      }
       this.docs.splice(index, 1);
     }, this.doc.clientID);
   }
@@ -158,9 +163,6 @@ export class DocCollectionMeta {
     }, this.doc.clientID);
   }
 
-  /**
-   * @internal Use {@link DocCollection.setDocMeta} instead
-   */
   setDocMeta(id: string, props: Partial<DocMeta>) {
     const docs = (this.docs as DocMeta[]) ?? [];
     const index = docs.findIndex((doc: DocMeta) => id === doc.id);
@@ -170,7 +172,6 @@ export class DocCollectionMeta {
         return;
       }
       if (index === -1) return;
-      assertExists(this.docs);
 
       const doc = this.docs[index] as Record<string, unknown>;
       Object.entries(props).forEach(([key, value]) => {

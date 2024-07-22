@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { effect, signal } from '@preact/signals-core';
 import { createMutex } from 'lib0/mutex.js';
 import * as Y from 'yjs';
@@ -127,7 +127,12 @@ export class SyncController {
   private _createModel(props: UnRecord) {
     const _mutex = this._mutex;
     const schema = this.schema.flavourSchemaMap.get(this.flavour);
-    assertExists(schema, `Cannot find schema for flavour ${this.flavour}`);
+    if (!schema) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        `schema for flavour: ${this.flavour} not found`
+      );
+    }
 
     const model = schema.model.toModel?.() ?? new BlockModel<object>();
     const signalWithProps = Object.entries(props).reduce(
@@ -262,12 +267,32 @@ export class SyncController {
       }
     });
 
-    assertExists(id, 'Block id is not found');
-    assertExists(flavour, 'Block flavour is not found');
-    assertExists(yChildren, 'Block children is not found');
+    if (!id) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        'block id is not found when creating model'
+      );
+    }
+    if (!flavour) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        'block flavour is not found when creating model'
+      );
+    }
+    if (!yChildren) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        'block children is not found when creating model'
+      );
+    }
 
     const schema = this.schema.flavourSchemaMap.get(flavour);
-    assertExists(schema, `Cannot find schema for flavour ${flavour}`);
+    if (!schema) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        `schema for flavour: ${flavour} not found`
+      );
+    }
     const defaultProps = schema.model.props?.(internalPrimitives);
 
     if (typeof version !== 'number') {

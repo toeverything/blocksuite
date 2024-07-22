@@ -1,5 +1,5 @@
-import { ErrorCode } from '@blocksuite/global/exceptions';
-import { Slot, assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { Slot } from '@blocksuite/global/utils';
 
 import type { BlockModel, BlockSchemaType } from '../schema/index.js';
 import type { Doc, DocCollection, DocMeta } from '../store/index.js';
@@ -95,11 +95,12 @@ export class Job {
       });
       const rootModel = doc.root;
       const meta = this._exportDocMeta(doc);
-      assertExists(
-        rootModel,
-        'Root block not found in doc',
-        ErrorCode.TransformerError
-      );
+      if (!rootModel) {
+        throw new BlockSuiteError(
+          ErrorCode.TransformerError,
+          'Root block not found in doc'
+        );
+      }
       const blocks = await this.blockToSnapshot(rootModel);
       if (!blocks) {
         return;
@@ -338,7 +339,12 @@ export class Job {
   private _exportDocMeta(doc: Doc): DocSnapshot['meta'] {
     const docMeta = doc.meta;
 
-    assertExists(docMeta, 'Doc meta not found', ErrorCode.TransformerError);
+    if (!docMeta) {
+      throw new BlockSuiteError(
+        ErrorCode.TransformerError,
+        'Doc meta not found'
+      );
+    }
     return {
       id: docMeta.id,
       title: docMeta.title,
@@ -350,17 +356,21 @@ export class Job {
   private _getCollectionMeta() {
     const { meta } = this._collection;
     const { pageVersion, workspaceVersion, docs } = meta;
-    assertExists(
-      pageVersion,
-      'Page version not found',
-      ErrorCode.TransformerError
-    );
-    assertExists(
-      workspaceVersion,
-      'Workspace version not found',
-      ErrorCode.TransformerError
-    );
-    assertExists(docs, 'Docs not found', ErrorCode.TransformerError);
+    if (!pageVersion) {
+      throw new BlockSuiteError(
+        ErrorCode.TransformerError,
+        'Page version not found'
+      );
+    }
+    if (!workspaceVersion) {
+      throw new BlockSuiteError(
+        ErrorCode.TransformerError,
+        'Workspace version not found'
+      );
+    }
+    if (!docs) {
+      throw new BlockSuiteError(ErrorCode.TransformerError, 'Docs not found');
+    }
     return {
       pageVersion,
       workspaceVersion,
@@ -371,11 +381,12 @@ export class Job {
 
   private _getSchema(flavour: string) {
     const schema = this._collection.schema.flavourSchemaMap.get(flavour);
-    assertExists(
-      schema,
-      `Flavour schema not found for ${flavour}`,
-      ErrorCode.TransformerError
-    );
+    if (!schema) {
+      throw new BlockSuiteError(
+        ErrorCode.TransformerError,
+        `Flavour schema not found for ${flavour}`
+      );
+    }
     return schema;
   }
 
@@ -422,11 +433,12 @@ export class Job {
     }
 
     const model = doc.getBlockById(id);
-    assertExists(
-      model,
-      `Block not found by id ${id}`,
-      ErrorCode.TransformerError
-    );
+    if (!model) {
+      throw new BlockSuiteError(
+        ErrorCode.TransformerError,
+        `Block not found by id ${id}`
+      );
+    }
     this._slots.afterImport.emit({
       type: 'block',
       snapshot,

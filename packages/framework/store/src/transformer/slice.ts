@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 import type { Doc } from '../store/index.js';
 import type { DraftModel } from './draft.js';
@@ -17,8 +17,12 @@ export class Slice {
   static fromModels(doc: Doc, models: DraftModel[]) {
     const meta = doc.collection.meta;
     const { pageVersion, workspaceVersion } = meta;
-    assertExists(pageVersion);
-    assertExists(workspaceVersion);
+    if (!pageVersion || !workspaceVersion) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        'pageVersion or workspaceVersion not found when creating slice'
+      );
+    }
     return new Slice({
       content: models,
       workspaceId: doc.collection.id,
