@@ -1,3 +1,5 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
@@ -76,7 +78,10 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
       this.editor.attributeService.normalizeAttributes(attributes);
 
     if (!text || !text.length) {
-      throw new Error('text must not be empty');
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
+        'text must not be empty'
+      );
     }
 
     this.transact(() => {

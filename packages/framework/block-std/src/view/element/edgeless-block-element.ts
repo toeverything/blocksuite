@@ -1,6 +1,7 @@
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { nothing } from 'lit';
 
 import type { BlockService } from '../../service/index.js';
@@ -30,7 +31,10 @@ export abstract class EdgelessBlockElement<
     }>;
 
     if (!xywh$) {
-      throw new Error('Edgeless block should have at least `xywh` property.');
+      throw new BlockSuiteError(
+        ErrorCode.EdgelessBlockError,
+        'Edgeless block should have at least `xywh` property.'
+      );
     }
 
     const [x, y, w, h] = JSON.parse(xywh$.value);
@@ -104,7 +108,10 @@ export function toEdgelessBlockElement<
       }>;
 
       if (!xywh$) {
-        throw new Error('Edgeless block should have at least `xywh` property.');
+        throw new BlockSuiteError(
+          ErrorCode.EdgelessBlockError,
+          'Edgeless block should have at least `xywh` property.'
+        );
       }
 
       const [x, y, w, h] = JSON.parse(xywh$.value);
@@ -119,7 +126,8 @@ export function toEdgelessBlockElement<
       }>;
 
       if (!xywh || !index) {
-        throw new Error(
+        throw new BlockSuiteError(
+          ErrorCode.EdgelessBlockError,
           'Edgeless block should have at least `xywh` and `index` properties.'
         );
       }

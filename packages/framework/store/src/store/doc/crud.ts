@@ -1,3 +1,4 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
@@ -249,7 +250,8 @@ export class DocCRUD {
 
       const last = children[children.length - 1];
       if (this.getNext(last) !== blockId) {
-        throw new Error(
+        throw new BlockSuiteError(
+          ErrorCode.ModelCRUDError,
           'The blocks to move are not contiguous under their parent'
         );
       }
@@ -290,7 +292,10 @@ export class DocCRUD {
             .toArray()
             .findIndex(id => id === targetSibling);
           if (targetIndex === -1) {
-            throw new Error('Target sibling not found');
+            throw new BlockSuiteError(
+              ErrorCode.ModelCRUDError,
+              'Target sibling not found'
+            );
           }
           insertIndex = shouldInsertBeforeSibling
             ? targetIndex

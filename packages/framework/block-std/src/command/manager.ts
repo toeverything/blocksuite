@@ -1,3 +1,5 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 import type {
   Chain,
   Command,
@@ -181,7 +183,10 @@ export class CommandManager {
     const cmdFunc = this._commands.get(command);
 
     if (!cmdFunc) {
-      throw new Error(`The command "${command}" not found`);
+      throw new BlockSuiteError(
+        ErrorCode.CommandError,
+        `The command "${command}" not found`
+      );
     }
 
     const inData = args[0];

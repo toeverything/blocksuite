@@ -1,3 +1,4 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists, sha } from '@blocksuite/global/utils';
 
 /**
@@ -29,7 +30,10 @@ export class MemoryBlobCRUD {
     const value = typeof valueOrKey === 'string' ? _value : valueOrKey;
 
     if (!value) {
-      throw new Error('value is required');
+      throw new BlockSuiteError(
+        ErrorCode.TransformerError,
+        'value is required'
+      );
     }
 
     this._map.set(key, value);
