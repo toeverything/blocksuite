@@ -1,3 +1,4 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   type Logger,
   NoopLogger,
@@ -193,7 +194,10 @@ export class DocCollection extends DocCollectionAddonType {
   createDoc(options: { id?: string; selector?: BlockSelector } = {}) {
     const { id: docId = this.idGenerator(), selector } = options;
     if (this._hasDoc(docId)) {
-      throw new Error('doc already exists');
+      throw new BlockSuiteError(
+        ErrorCode.DocCollectionError,
+        'doc already exists'
+      );
     }
 
     this.meta.addDocMeta({

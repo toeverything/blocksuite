@@ -1,3 +1,4 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { type Disposable, Slot, assertExists } from '@blocksuite/global/utils';
 import { signal } from '@preact/signals-core';
 
@@ -242,7 +243,10 @@ export class Doc {
     parentIndex?: number
   ): string {
     if (this.readonly) {
-      throw new Error('cannot modify data in readonly mode');
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        'cannot modify data in readonly mode'
+      );
     }
 
     const id = blockProps.id ?? this._blockCollection.generateBlockId();

@@ -1,5 +1,6 @@
 import type { StackItem } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { computed, signal } from '@lit-labs/preact-signals';
 
@@ -34,7 +35,10 @@ export class SelectionManager {
   private _jsonToSelection = (json: Record<string, unknown>) => {
     const ctor = this._selectionConstructors[json.type as string];
     if (!ctor) {
-      throw new Error(`Unknown selection type: ${json.type}`);
+      throw new BlockSuiteError(
+        ErrorCode.SelectionError,
+        `Unknown selection type: ${json.type}`
+      );
     }
     return ctor.fromJSON(json);
   };
@@ -130,7 +134,10 @@ export class SelectionManager {
   ): BlockSuite.SelectionInstance[T] {
     const ctor = this._selectionConstructors[type];
     if (!ctor) {
-      throw new Error(`Unknown selection type: ${type}`);
+      throw new BlockSuiteError(
+        ErrorCode.SelectionError,
+        `Unknown selection type: ${type}`
+      );
     }
     return new ctor(...args) as BlockSuite.SelectionInstance[T];
   }

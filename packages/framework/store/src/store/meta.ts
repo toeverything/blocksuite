@@ -1,5 +1,6 @@
 import type * as Y from 'yjs';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Slot, assertExists } from '@blocksuite/global/utils';
 
 import type { BlockSuiteDoc } from '../yjs/index.js';
@@ -207,37 +208,43 @@ export class DocCollectionMeta {
   validateVersion(collection: DocCollection) {
     const workspaceVersion = this._proxy.workspaceVersion;
     if (!workspaceVersion) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.DocCollectionError,
         'Invalid workspace data, workspace version is missing. Please make sure the data is valid.'
       );
     }
     if (workspaceVersion < COLLECTION_VERSION) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.DocCollectionError,
         `Workspace version ${workspaceVersion} is outdated. Please upgrade the editor.`
       );
     }
 
     const pageVersion = this._proxy.pageVersion;
     if (!pageVersion) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.DocCollectionError,
         'Invalid workspace data, page version is missing. Please make sure the data is valid.'
       );
     }
     if (pageVersion < PAGE_VERSION) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.DocCollectionError,
         `Doc version ${pageVersion} is outdated. Please upgrade the editor.`
       );
     }
 
     const blockVersions = { ...this._proxy.blockVersions };
     if (!blockVersions) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.DocCollectionError,
         'Invalid workspace data, versions data is missing. Please make sure the data is valid'
       );
     }
     const dataFlavours = Object.keys(blockVersions);
     if (dataFlavours.length === 0) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.DocCollectionError,
         'Invalid workspace data, missing versions field. Please make sure the data is valid.'
       );
     }
@@ -247,15 +254,18 @@ export class DocCollectionMeta {
       const editorVersion =
         collection.schema.flavourSchemaMap.get(dataFlavour)?.version;
       if (!editorVersion) {
-        throw new Error(
+        throw new BlockSuiteError(
+          ErrorCode.DocCollectionError,
           `Editor missing ${dataFlavour} flavour. Please make sure this block flavour is registered.`
         );
       } else if (dataVersion > editorVersion) {
-        throw new Error(
+        throw new BlockSuiteError(
+          ErrorCode.DocCollectionError,
           `Editor doesn't support ${dataFlavour}@${dataVersion}. Please upgrade the editor.`
         );
       } else if (dataVersion < editorVersion) {
-        throw new Error(
+        throw new BlockSuiteError(
+          ErrorCode.DocCollectionError,
           `In workspace data, the block flavour ${dataFlavour}@${dataVersion} is outdated. Please downgrade the editor or try data migration.`
         );
       }

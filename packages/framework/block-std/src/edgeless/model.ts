@@ -4,6 +4,7 @@ import type {
   SerializedXYWH,
 } from '@blocksuite/global/utils';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   Bound,
   PointLocation,
@@ -202,7 +203,10 @@ export function selectable<
     }
 
     if (Object.getPrototypeOf(currentClass.prototype) === null) {
-      throw new Error('The SuperClass is not a subclass of BlockModel');
+      throw new BlockSuiteError(
+        ErrorCode.EdgelessBlockError,
+        'The SuperClass is not a subclass of BlockModel'
+      );
     }
 
     Object.setPrototypeOf(currentClass.prototype, EdgelessBlockModel.prototype);

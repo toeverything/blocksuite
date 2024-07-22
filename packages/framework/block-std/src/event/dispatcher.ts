@@ -1,5 +1,6 @@
 import type { BlockModel } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { BlockElement } from '../view/index.js';
@@ -259,7 +260,10 @@ export class UIEventDispatcher {
         break;
       }
       default: {
-        throw new Error(`Unknown event scope source: ${state.sourceType}`);
+        throw new BlockSuiteError(
+          ErrorCode.EventDispatcherError,
+          `Unknown event scope source: ${state.sourceType}`
+        );
       }
     }
 
