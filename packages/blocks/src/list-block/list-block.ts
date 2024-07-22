@@ -125,8 +125,10 @@ export class ListBlockComponent extends BlockComponent<
         : '';
 
     const children = html`<div
-      class="affine-block-children-container"
-      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
+      class="affine-block-children-container ${collapsed
+        ? 'affine-list__collapsed'
+        : ''}"
+      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px;"
     >
       ${this.renderChildren(this.model)}
     </div>`;
@@ -152,7 +154,7 @@ export class ListBlockComponent extends BlockComponent<
           ></rich-text>
         </div>
 
-        ${collapsed ? nothing : children}
+        ${children}
       </div>
     `;
   }

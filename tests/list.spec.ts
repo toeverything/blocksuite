@@ -815,15 +815,16 @@ test.describe('toggle list', () => {
     await initThreeLists(page);
     const toggleIcon = getToggleIcon(page);
     const prefixes = page.locator('.affine-list-block__prefix');
+    const collapsed = page.locator('.affine-list__collapsed');
     const parentPrefix = prefixes.nth(1);
 
-    await expect(prefixes).toHaveCount(3);
+    await expect(collapsed).toHaveCount(0);
     await parentPrefix.hover();
     await waitNextFrame(page);
     await assertToggleIconVisible(toggleIcon);
 
     await toggleIcon.click();
-    await expect(prefixes).toHaveCount(2);
+    await expect(collapsed).toHaveCount(1);
     await assertStoreMatchJSX(
       page,
       `
@@ -871,7 +872,7 @@ test.describe('toggle list', () => {
     await assertToggleIconVisible(toggleIcon);
 
     await toggleIcon.click();
-    await expect(prefixes).toHaveCount(3);
+    await expect(collapsed).toHaveCount(0);
     await assertStoreMatchJSX(
       page,
       `
@@ -929,15 +930,15 @@ test.describe('toggle list', () => {
     await type(page, '012');
 
     const toggleIcon = getToggleIcon(page);
-    const prefixes = page.locator('.affine-list-block__prefix');
+    const collapsed = page.locator('.affine-list__collapsed');
 
     await toggleIcon.click();
-    await expect(prefixes).toHaveCount(3);
+    await expect(collapsed).toHaveCount(1);
 
-    await focusRichText(page, 2);
+    await focusRichText(page, 3);
     await pressTab(page);
     await waitNextFrame(page, 200);
-    await expect(prefixes).toHaveCount(4);
+    await expect(collapsed).toHaveCount(0);
   });
 
   test('toggle icon should be show when hover', async ({ page }) => {
@@ -967,23 +968,24 @@ test.describe('readonly', () => {
     await initThreeLists(page);
     const toggleIcon = getToggleIcon(page);
     const prefixes = page.locator('.affine-list-block__prefix');
+    const collapsed = page.locator('.affine-list__collapsed');
     const parentPrefix = prefixes.nth(1);
-    await expect(prefixes).toHaveCount(3);
+    await expect(collapsed).toHaveCount(0);
 
     await parentPrefix.hover();
     await assertToggleIconVisible(toggleIcon);
 
     await toggleIcon.click();
-    await expect(prefixes).toHaveCount(2);
+    await expect(collapsed).toHaveCount(1);
 
     await switchReadonly(page);
     await assertToggleIconVisible(toggleIcon);
 
     await toggleIcon.click();
-    await expect(prefixes).toHaveCount(3);
+    await expect(collapsed).toHaveCount(0);
 
     await toggleIcon.click();
-    await expect(prefixes).toHaveCount(2);
+    await expect(collapsed).toHaveCount(1);
   });
 
   test('can not modify todo list in readonly mode', async ({ page }) => {
