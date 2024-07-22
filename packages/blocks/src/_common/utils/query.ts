@@ -60,7 +60,8 @@ export function getNextBlock(
   map: Record<string, true> = {}
 ): BlockModel | null {
   if (model.id in map) {
-    throw new Error("Can't get next block! There's a loop in the block tree!");
+    console.error("Can't get next block! There's a loop in the block tree!");
+    return null;
   }
   map[model.id] = true;
 
@@ -137,9 +138,10 @@ export function getPreviousBlock(
     model: BlockModel
   ) => {
     if (model.id in map) {
-      throw new Error(
+      console.error(
         "Can't get previous block! There's a loop in the block tree!"
       );
+      return null;
     }
     map[model.id] = true;
 
@@ -263,11 +265,15 @@ export function isInsideEdgelessEditor(host: EditorHost) {
 export function getViewportElement(editorHost: EditorHost) {
   if (!isInsidePageEditor(editorHost)) return null;
   const doc = editorHost.doc;
-  assertExists(doc.root);
+  if (!doc.root) {
+    console.error('Failed to get root doc');
+    return null;
+  }
   const rootElement = editorHost.view.viewFromPath('block', [doc.root.id]);
 
   if (!rootElement || rootElement.closest('affine-page-root') !== rootElement) {
-    throw new Error('Failed to get viewport element!');
+    console.error('Failed to get viewport element!');
+    return null;
   }
   return (rootElement as PageRootBlockComponent).viewportElement;
 }
@@ -362,7 +368,8 @@ export async function asyncGetInlineEditorByModel(
 ) {
   if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple inline editor instances.
-    throw new Error('Cannot get inline editor by database model!');
+    console.error('Cannot get inline editor by database model!');
+    return null;
   }
   const richText = await asyncGetRichTextByModel(editorHost, model);
   if (!richText) return null;

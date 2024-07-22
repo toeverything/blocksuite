@@ -468,7 +468,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     if (this.targetInlineRange.length === 0) {
-      throw new Error('Cannot toggle link popup on empty range');
+      return;
     }
 
     if (this.type === 'edit' || this.type === 'create') {

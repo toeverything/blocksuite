@@ -273,7 +273,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     if (this.targetInlineRange.length === 0) {
-      throw new Error('Cannot toggle reference popup on empty range');
+      return;
     }
 
     const parent = this.blockElement.host.doc.getParent(

@@ -142,9 +142,7 @@ export class IconButton extends LitElement {
 
     const DEFAULT_SIZE = '28px';
     if (this.size && (this.width || this.height)) {
-      throw new Error(
-        'Cannot set both size and width/height on an icon-button'
-      );
+      return;
     }
 
     let width = this.width ?? DEFAULT_SIZE;

@@ -2,8 +2,9 @@ import type { BlockService, EditorHost } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import { Bound } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 
 import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
@@ -109,7 +110,10 @@ export class ExportManager {
       location.pathname !== pathName ||
       isInsidePageEditor(this.editorHost) !== editorMode
     ) {
-      throw new Error('Unable to export content to canvas');
+      throw new BlockSuiteError(
+        ErrorCode.EdgelessExportError,
+        'Unable to export content to canvas'
+      );
     }
   }
 
@@ -359,7 +363,13 @@ export class ExportManager {
   }
 
   private async _toCanvas(): Promise<HTMLCanvasElement | void> {
-    await this._checkReady();
+    try {
+      await this._checkReady();
+    } catch (e: unknown) {
+      console.error('Failed to export to canvas');
+      console.error(e);
+      return;
+    }
 
     if (isInsidePageEditor(this.editorHost)) {
       return this._docToCanvas();

@@ -89,11 +89,13 @@ export function insertContent(
   attributes?: AffineTextAttributes
 ) {
   if (!model.text) {
-    throw new Error("Can't insert text! Text not found");
+    console.error("Can't insert text! Text not found");
+    return;
   }
   const inlineEditor = getInlineEditorByModel(editorHost, model);
   if (!inlineEditor) {
-    throw new Error("Can't insert text! Inline editor not found");
+    console.error("Can't insert text! Inline editor not found");
+    return;
   }
   const inlineRange = inlineEditor.getInlineRange();
   const index = inlineRange ? inlineRange.index : model.text.length;

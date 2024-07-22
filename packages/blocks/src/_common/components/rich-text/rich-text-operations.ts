@@ -697,13 +697,7 @@ function handleParagraphDeleteActions(
         previousSibling,
         parent
       ) ||
-      handleEmbedDividerCodeSibling(
-        editorHost,
-        model,
-        previousSibling,
-        parent
-      ) ||
-      handleUnknownBlockBackspace(previousSibling)
+      handleEmbedDividerCodeSibling(editorHost, model, previousSibling, parent)
     );
   }
   return false;
@@ -912,20 +906,6 @@ function handleParagraphBlockForwardDelete(
   }
 }
 
-function handleUnknownBlockBackspace(model: ExtendedModel) {
-  throw new Error(
-    'Failed to handle backspace! Unknown block flavours! flavour:' +
-      model.flavour
-  );
-}
-
-function handleUnknownBlockForwardDelete(model: ExtendedModel) {
-  throw new Error(
-    'Failed to handle forwarddelete! Unknown block flavours! flavour:' +
-      model.flavour
-  );
-}
-
 export function handleLineStartBackspace(
   editorHost: EditorHost,
   model: ExtendedModel
@@ -936,8 +916,6 @@ export function handleLineStartBackspace(
   ) {
     return;
   }
-
-  handleUnknownBlockBackspace(model);
 }
 
 export function handleLineEndForwardDelete(
@@ -952,5 +930,4 @@ export function handleLineEndForwardDelete(
     handleDatabaseBlockForwardDelete(model);
     return;
   }
-  handleUnknownBlockForwardDelete(model);
 }

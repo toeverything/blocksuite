@@ -748,11 +748,18 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       tooltip: slashMenuToolTips['Copy'],
       action: ({ rootElement, model }) => {
         if (!model.text || !(model.text instanceof Text)) {
-          throw new Error("Can't duplicate a block without text");
+          console.error("Can't duplicate a block without text");
+          return;
         }
         const parent = rootElement.doc.getParent(model);
         if (!parent) {
-          throw new Error('Failed to duplicate block! Parent not found');
+          console.error(
+            'Failed to duplicate block! Parent not found: ' +
+              model.id +
+              '|' +
+              model.flavour
+          );
+          return;
         }
         const index = parent.children.indexOf(model);
 

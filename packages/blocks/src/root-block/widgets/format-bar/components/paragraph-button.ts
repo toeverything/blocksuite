@@ -78,7 +78,8 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
 
   const rootElement = formatBar.blockElement;
   if (!isRootElement(rootElement)) {
-    throw new Error('paragraph button host is not a page component');
+    console.error('paragraph button host is not a page component');
+    return null;
   }
 
   const { setFloating, setReference } = whenHover(isHover => {

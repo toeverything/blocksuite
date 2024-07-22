@@ -3,6 +3,7 @@ import type {
   InternalPrimitives,
 } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { defineBlockSchema } from '@blocksuite/store';
 
 import type { EmbedBlockModel } from './embed-block-model.js';
@@ -82,8 +83,10 @@ export class LinkPreviewer {
           description: tweet.text,
           image: tweet.media?.photos[0].url || tweet.author.banner_url,
         };
-      } catch (_) {
-        throw new Error('Failed to fetch tweet');
+      } catch (e) {
+        console.error(`Failed to fetch tweet: ${url}`);
+        console.error(e);
+        return {};
       }
     } else {
       const response = await fetch(this._endpoint, {
@@ -98,13 +101,18 @@ export class LinkPreviewer {
       })
         .then(r => {
           if (!r || !r.ok) {
-            throw new Error('Failed to fetch link preview');
+            throw new BlockSuiteError(
+              ErrorCode.DefaultRuntimeError,
+              `Failed to fetch link preview: ${url}`
+            );
           }
           return r;
         })
         .catch(err => {
           if (isAbortError(err)) return null;
-          throw new Error('Failed to fetch link preview');
+          console.error(`Failed to fetch link preview: ${url}`);
+          console.error(err);
+          return null;
         });
 
       if (!response) return {};

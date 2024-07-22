@@ -71,7 +71,7 @@ export class AttachmentBlockComponent extends BlockComponent<
       template: AttachmentOptionsTemplate({
         anchor: this,
         model: this.model,
-        showCaption: () => this.captionEditor.show(),
+        showCaption: () => this.captionEditor?.show(),
         copy: this.copy,
         download: this.download,
         refresh: this.refreshData,

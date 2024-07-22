@@ -30,7 +30,7 @@ export const defaultItems: CodeToolbarItem[] = [
     tooltip: 'Caption',
     showWhen: blockElement => !blockElement.doc.readonly,
     action: (codeBlock, onClick) => {
-      codeBlock.captionEditor.show();
+      codeBlock.captionEditor?.show();
       onClick?.();
     },
   },

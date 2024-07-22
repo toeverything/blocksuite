@@ -8,6 +8,7 @@ import type {
   FromSliceSnapshotResult,
 } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { isEqual, sha } from '@blocksuite/global/utils';
 import {
   ASTWalker,
@@ -1012,19 +1013,28 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<NotionHtml>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'NotionHtmlAdapter.fromBlockSnapshot is not implemented'
+    );
   }
 
   override fromDocSnapshot(
     _payload: FromDocSnapshotPayload
   ): Promise<FromDocSnapshotResult<NotionHtml>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'NotionHtmlAdapter.fromDocSnapshot is not implemented'
+    );
   }
 
   override fromSliceSnapshot(
     _payload: FromSliceSnapshotPayload
   ): Promise<FromSliceSnapshotResult<NotionHtml>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'NotionHtmlAdapter.fromSliceSnapshot is not implemented'
+    );
   }
 
   override toBlockSnapshot(
