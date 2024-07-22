@@ -494,6 +494,11 @@ export class EdgelessNoteBlockComponent extends toEdgelessBlockElement(
   }
 
   override toZIndex() {
+    if (!this.isConnected) {
+      console.error(
+        'Element has disconnected, but the render method is still called'
+      );
+    }
     // FIXME: weird empty rootService
     return this.rootService?.layer.getZIndex(this.model).toString() ?? '0';
   }
