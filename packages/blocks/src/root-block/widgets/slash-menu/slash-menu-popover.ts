@@ -374,7 +374,11 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
     if (isGroupDivider(item)) return this._renderGroupItem(item);
     else if (isActionItem(item)) return this._renderActionItem(item);
     else if (isSubMenuItem(item)) return this._renderSubMenuItem(item);
-    else throw new Error('Unreachable');
+    else {
+      console.error('Unknown item type for slash menu');
+      console.error(item);
+      return nothing;
+    }
   };
 
   private _renderSubMenuItem = (item: SlashSubMenu) => {

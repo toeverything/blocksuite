@@ -66,7 +66,8 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
 
   private _getCursorRect(selections: BaseSelection[]): SelectionRect | null {
     if (!isRootElement(this.blockElement)) {
-      throw new Error('remote selection widget must be used in page component');
+      console.error('remote selection widget must be used in page component');
+      return null;
     }
 
     const textSelection = selections.find(
@@ -141,7 +142,8 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
 
   private _getSelectionRect(selections: BaseSelection[]): SelectionRect[] {
     if (!isRootElement(this.blockElement)) {
-      throw new Error('remote selection widget must be used in page component');
+      console.error('remote selection widget must be used in page component');
+      return [];
     }
 
     const textSelection = selections.find(

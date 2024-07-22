@@ -1,20 +1,19 @@
 import type {
+  BlockSnapshot,
+  DocSnapshot,
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
   FromDocSnapshotPayload,
   FromDocSnapshotResult,
   FromSliceSnapshotPayload,
   FromSliceSnapshotResult,
+  SliceSnapshot,
   ToBlockSnapshotPayload,
   ToDocSnapshotPayload,
   ToSliceSnapshotPayload,
 } from '@blocksuite/store';
-import type {
-  BlockSnapshot,
-  DocSnapshot,
-  SliceSnapshot,
-} from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 import { BaseAdapter } from '@blocksuite/store';
 
@@ -32,13 +31,19 @@ export class ClipboardAdapter extends BaseAdapter<string> {
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<string>> {
-    throw new Error('not implemented');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'ClipboardAdapter.fromBlockSnapshot is not implemented'
+    );
   }
 
   override fromDocSnapshot(
     _payload: FromDocSnapshotPayload
   ): Promise<FromDocSnapshotResult<string>> {
-    throw new Error('not implemented');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'ClipboardAdapter.fromDocSnapshot is not implemented'
+    );
   }
 
   override async fromSliceSnapshot(
@@ -61,13 +66,19 @@ export class ClipboardAdapter extends BaseAdapter<string> {
   override toBlockSnapshot(
     _payload: ToBlockSnapshotPayload<string>
   ): Promise<BlockSnapshot> {
-    throw new Error('not implemented');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'ClipboardAdapter.toBlockSnapshot is not implemented'
+    );
   }
 
   override toDocSnapshot(
     _payload: ToDocSnapshotPayload<string>
   ): Promise<DocSnapshot> {
-    throw new Error('not implemented');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'ClipboardAdapter.toDocSnapshot is not implemented'
+    );
   }
 
   override toSliceSnapshot(

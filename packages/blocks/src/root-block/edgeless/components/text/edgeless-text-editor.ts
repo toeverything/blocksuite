@@ -145,10 +145,12 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   override connectedCallback(): void {
     super.connectedCallback();
     if (!this.edgeless) {
-      throw new Error('edgeless is not set.');
+      console.error('edgeless is not set.');
+      return;
     }
     if (!this.element) {
-      throw new Error('text element is not set.');
+      console.error('text element is not set.');
+      return;
     }
 
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');

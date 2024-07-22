@@ -35,10 +35,11 @@ export class BlockComponent<
   }
 
   get captionEditor() {
-    if (!this.useCaptionEditor || !this._captionEditor)
-      throw new Error(
+    if (!this.useCaptionEditor || !this._captionEditor) {
+      console.error(
         'Oops! Please enable useCaptionEditor before accessing captionEditor'
       );
+    }
     return this._captionEditor;
   }
 

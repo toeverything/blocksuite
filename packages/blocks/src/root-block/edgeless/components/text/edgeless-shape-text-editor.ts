@@ -6,7 +6,7 @@ import {
 import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -263,7 +263,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
   override render() {
     if (!this.element.text) {
-      throw new Error('Failed to mount shape editor because of no text.');
+      console.error('Failed to mount shape editor because of no text.');
+      return nothing;
     }
 
     const [verticalPadding, horiPadding] = this.element.padding;

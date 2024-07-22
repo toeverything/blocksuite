@@ -526,7 +526,7 @@ export class EmbedCardToolbar extends WidgetElement<
       return;
     }
     try {
-      focusBlock.captionEditor.show();
+      focusBlock.captionEditor?.show();
     } catch (_) {
       toggleEmbedCardCaptionEditModal(focusBlock);
     }

@@ -498,9 +498,10 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     // check if format bar widget support the host
     if (!isRootElement(rootElement)) {
-      throw new Error(
+      console.error(
         `format bar not support rootElement: ${rootElement.constructor.name} but its widgets has format bar`
       );
+      return;
     }
 
     this._calculatePlacement();

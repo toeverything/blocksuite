@@ -19,7 +19,7 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
   };
 
   private _showCaption = () => {
-    this._blockElement?.captionEditor.show();
+    this._blockElement?.captionEditor?.show();
   };
 
   private get _blockElement() {

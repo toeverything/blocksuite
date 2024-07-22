@@ -204,6 +204,7 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
         const state = ctx.get('keyboardState');
         const event = state.raw;
         const inlineEditor = this.inlineEditor;
+        if (!inlineEditor) return;
         const inlineRange = inlineEditor.getInlineRange();
         if (inlineRange) {
           event.stopPropagation();
@@ -228,6 +229,7 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
             indexArr.push(0);
           }
           indexArr.forEach(i => {
+            if (!this.inlineEditor) return;
             this.inlineEditor.insertText(
               {
                 index: i,
@@ -251,6 +253,7 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
         const state = ctx.get('keyboardState');
         const event = state.raw;
         const inlineEditor = this.inlineEditor;
+        if (!inlineEditor) return;
         const inlineRange = inlineEditor.getInlineRange();
         if (inlineRange) {
           event.stopPropagation();
@@ -278,6 +281,7 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
             i => text.slice(i, i + 2) === INDENT_SYMBOL
           );
           indexArr.forEach(i => {
+            if (!this.inlineEditor) return;
             this.inlineEditor.deleteText({
               index: i,
               length: 2,
@@ -404,10 +408,7 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
     const inlineRoot = this.querySelector<InlineRootElement>(
       `[${INLINE_ROOT_ATTR}]`
     );
-    if (!inlineRoot) {
-      throw new Error('Inline editor root not found');
-    }
-    return inlineRoot.inlineEditor;
+    return inlineRoot?.inlineEditor;
   }
 
   get readonly() {

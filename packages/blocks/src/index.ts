@@ -1,7 +1,8 @@
+/// <reference types="@blocksuite/global" />
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Point } from '@blocksuite/global/utils';
 
-/// <reference types="@blocksuite/global" />
 import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours } from './_common/utils/index.js';
 import './code-block/affine-code-line.js';
@@ -184,7 +185,8 @@ if (env[importIdentifier] === true) {
 }
 
 if (typeof window === 'undefined') {
-  throw new Error(
+  throw new BlockSuiteError(
+    ErrorCode.NoneSupportedSSRError,
     'Seems like you are importing @blocksuite/blocks in SSR mode. Which is not supported for now.'
   );
 }

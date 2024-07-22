@@ -128,7 +128,8 @@ export class AffineSlashMenuWidget extends WidgetElement {
     inlineEditor.slots.inlineRangeApply.once(() => {
       const rootElement = this.blockElement;
       if (!isRootElement(rootElement)) {
-        throw new Error('SlashMenuWidget should be used in RootBlock');
+        console.error('SlashMenuWidget should be used in RootBlock');
+        return;
       }
 
       const config: SlashMenuStaticConfig = {
@@ -163,7 +164,8 @@ export class AffineSlashMenuWidget extends WidgetElement {
     super.connectedCallback();
 
     if (this.config.triggerKeys.some(key => key.length === 0)) {
-      throw new Error('Trigger key of slash menu should not be empty string');
+      console.error('Trigger key of slash menu should not be empty string');
+      return;
     }
 
     this.handleEvent('beforeInput', this._onBeforeInput);
