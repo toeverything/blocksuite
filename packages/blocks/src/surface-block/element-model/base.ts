@@ -8,7 +8,7 @@ import { Bound } from '@blocksuite/global/utils';
 import { PointLocation } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
-import type { EdgelessBlockNode } from '../../root-block/edgeless/edgeless-block-node.js';
+import type { BlockNode } from '../../root-block/edgeless/edgeless-block-node.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { OmitFunctionsAndKeysAndReadOnly } from './utility-type.js';
 
@@ -416,7 +416,7 @@ export abstract class SurfaceGroupLikeModel<
     for (const key of this.childIds) {
       const element =
         this.surface.getElementById(key) ||
-        (this.surface.doc.getBlockById(key) as EdgelessBlockNode);
+        (this.surface.doc.getBlockById(key) as BlockNode);
 
       element && elements.push(element);
     }

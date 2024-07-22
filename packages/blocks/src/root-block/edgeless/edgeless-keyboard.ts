@@ -26,7 +26,7 @@ import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import { CopilotSelectionController } from './controllers/tools/copilot-tool.js';
 import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
-import { EdgelessBlockNode } from './edgeless-block-node.js';
+import { BlockNode } from './edgeless-block-node.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
@@ -127,10 +127,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
           if (
             selection.selectedElements.length === 1 &&
-            selection.firstElement instanceof EdgelessBlockNode &&
-            matchFlavours(selection.firstElement as EdgelessBlockNode, [
-              'affine:note',
-            ])
+            selection.firstElement instanceof BlockNode &&
+            matchFlavours(selection.firstElement as BlockNode, ['affine:note'])
           ) {
             rootElement.slots.toggleNoteSlicer.emit();
           }

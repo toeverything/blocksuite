@@ -10,7 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
-import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
+import type { SelectableNodeProps } from '../edgeless/mixin/index.js';
 
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
@@ -32,7 +32,7 @@ import { styles } from './styles.js';
 
 export class EmbedBlockElement<
   Model extends
-    BlockModel<EdgelessSelectableProps> = BlockModel<EdgelessSelectableProps>,
+    BlockModel<SelectableNodeProps> = BlockModel<SelectableNodeProps>,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockComponent<Model, Service, WidgetName> {

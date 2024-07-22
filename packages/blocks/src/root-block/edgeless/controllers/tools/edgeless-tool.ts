@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import type { EdgelessBlockNode } from '../../edgeless-block-node.js';
+import type { BlockNode } from '../../edgeless-block-node.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessRootService } from '../../edgeless-root-service.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
@@ -21,7 +21,7 @@ export abstract class EdgelessToolController<
     this._service = service;
   }
 
-  protected get _blocks(): EdgelessBlockNode[] {
+  protected get _blocks(): BlockNode[] {
     return this._edgeless.service.blocks;
   }
 

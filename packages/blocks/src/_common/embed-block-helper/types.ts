@@ -1,6 +1,6 @@
-import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
+import type { SelectableNodeProps } from '../edgeless/mixin/index.js';
 
-export type EmbedProps<Props = object> = Props & EdgelessSelectableProps;
+export type EmbedProps<Props = object> = Props & SelectableNodeProps;
 
 export type LinkPreviewData = {
   description: string | null;

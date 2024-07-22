@@ -11,7 +11,7 @@ import type { SurfaceBlockModel } from '../surface-model.js';
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import { FrameBlockModel } from '../../frame-block/frame-model.js';
-import { EdgelessBlockNode } from '../../root-block/edgeless/edgeless-block-node.js';
+import { BlockNode } from '../../root-block/edgeless/edgeless-block-node.js';
 import {
   SurfaceElementModel,
   SurfaceGroupLikeModel,
@@ -42,7 +42,7 @@ type BaseLayer<T> = {
   indexes: [string, string];
 };
 
-export type BlockLayer = BaseLayer<EdgelessBlockNode> & {
+export type BlockLayer = BaseLayer<BlockNode> & {
   type: 'block';
 
   /**
@@ -73,9 +73,9 @@ export class LayerManager {
 
   static INITAL_INDEX = 'a0';
 
-  blocks!: EdgelessBlockNode[];
+  blocks!: BlockNode[];
 
-  blocksGrid = new GridManager<EdgelessBlockNode>();
+  blocksGrid = new GridManager<BlockNode>();
 
   canvasElements!: SurfaceElementModel[];
 
@@ -120,7 +120,7 @@ export class LayerManager {
           .getBlocks()
           .filter(
             model =>
-              model instanceof EdgelessBlockNode &&
+              model instanceof BlockNode &&
               renderableInEdgeless(doc, surface, model)
           ) as BlockSuite.EdgelessModelType[]
       ).concat(surface.elementModels)
@@ -547,7 +547,7 @@ export class LayerManager {
     } else {
       updateType = 'block';
       updateArray(this.blocks, element);
-      this.blocksGrid.update(element as EdgelessBlockNode);
+      this.blocksGrid.update(element as BlockNode);
     }
 
     if (updateType && (indexChanged || childIdsChanged)) {
@@ -573,11 +573,11 @@ export class LayerManager {
           const block = doc.getBlockById(payload.id)!;
 
           if (
-            block instanceof EdgelessBlockNode &&
+            block instanceof BlockNode &&
             renderableInEdgeless(doc, surface, block) &&
             this.blocks.indexOf(block) === -1
           ) {
-            this.add(block as EdgelessBlockNode);
+            this.add(block as BlockNode);
           }
         }
         if (payload.type === 'update') {
@@ -586,10 +586,10 @@ export class LayerManager {
           if (
             payload.props.key === 'index' ||
             (payload.props.key === 'xywh' &&
-              block instanceof EdgelessBlockNode &&
+              block instanceof BlockNode &&
               renderableInEdgeless(doc, surface, block))
           ) {
-            this.update(block as EdgelessBlockNode, {
+            this.update(block as BlockNode, {
               [payload.props.key]: true,
             });
           }
@@ -597,8 +597,8 @@ export class LayerManager {
         if (payload.type === 'delete') {
           const block = doc.getBlockById(payload.id);
 
-          if (block instanceof EdgelessBlockNode) {
-            this.delete(block as EdgelessBlockNode);
+          if (block instanceof BlockNode) {
+            this.delete(block as BlockNode);
           }
         }
       })
@@ -646,7 +646,7 @@ export class LayerManager {
     } else {
       insertType = 'block';
       insertToOrderedArray(this.blocks, element);
-      this.blocksGrid.add(element as EdgelessBlockNode);
+      this.blocksGrid.add(element as BlockNode);
     }
 
     if (insertType) {

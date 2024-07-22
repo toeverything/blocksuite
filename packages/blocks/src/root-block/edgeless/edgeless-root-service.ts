@@ -31,7 +31,7 @@ import {
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { RootService, type TelemetryEvent } from '../root-service.js';
-import { EdgelessBlockNode } from './edgeless-block-node.js';
+import { BlockNode } from './edgeless-block-node.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
@@ -500,7 +500,7 @@ export class EdgelessRootService extends RootService {
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'blocks' | 'frame'
-  ): EdgelessBlockNode[];
+  ): BlockNode[];
 
   pickElementsByBound(
     bound: IBound | Bound,
@@ -557,7 +557,7 @@ export class EdgelessRootService extends RootService {
     id = typeof id === 'string' ? id : id.id;
 
     const el = this.getElementById(id);
-    if (el instanceof EdgelessBlockNode) {
+    if (el instanceof BlockNode) {
       this.doc.deleteBlock(el);
       return;
     }
@@ -575,7 +575,7 @@ export class EdgelessRootService extends RootService {
     const index = this._layer.getReorderedIndex(element, direction);
 
     // block should be updated in transaction
-    if (element instanceof EdgelessBlockNode) {
+    if (element instanceof BlockNode) {
       this.doc.transact(() => {
         element.index = index;
       });
@@ -681,7 +681,7 @@ export class EdgelessRootService extends RootService {
   }
 
   get blocks() {
-    return (this.frames as EdgelessBlockNode[]).concat(this._layer.blocks);
+    return (this.frames as BlockNode[]).concat(this._layer.blocks);
   }
 
   /**

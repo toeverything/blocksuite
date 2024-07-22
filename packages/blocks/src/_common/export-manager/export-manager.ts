@@ -5,7 +5,7 @@ import type { BlockModel, Doc } from '@blocksuite/store';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { EdgelessBlockNode } from '../../root-block/edgeless/edgeless-block-node.js';
+import type { BlockNode } from '../../root-block/edgeless/edgeless-block-node.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../root-block/index.js';
 
@@ -388,7 +388,7 @@ export class ExportManager {
     bound: IBound,
     blockElementGetter: (model: BlockModel) => Element | null = () => null,
     edgeless?: EdgelessRootBlockComponent,
-    nodes?: EdgelessBlockNode[],
+    nodes?: BlockNode[],
     surfaces?: BlockSuite.SurfaceElementModelType[],
     edgelessBackground?: {
       zoom: number;
