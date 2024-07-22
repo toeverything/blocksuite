@@ -35,7 +35,8 @@
     "@blocksuite/store": "workspace:*"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./edgeless": "./src/edgeless/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -43,8 +44,14 @@
     "types": "dist/index.d.ts",
     "exports": {
       ".": {
+        "types": "./dist/index.d.ts",
         "module": "./dist/index.js",
         "import": "./dist/index.js"
+      },
+      "./edgeless": {
+        "types": "./dist/edgeless/index.d.ts",
+        "module": "./dist/edgeless/index.js",
+        "import": "./dist/edgeless/index.js"
       }
     }
   },

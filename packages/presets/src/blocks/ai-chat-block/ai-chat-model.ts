@@ -1,6 +1,6 @@
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import { selectable } from '@blocksuite/block-std';
+import { selectable } from '@blocksuite/block-std/edgeless';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 type AIChatProps = {
