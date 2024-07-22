@@ -1,5 +1,5 @@
-import type { ShapeElementModel } from '../../shape.js';
-import type { MindmapNode } from './layout.js';
+import type { ShapeNode } from '../../shape.js';
+import type { MindmapVertex } from './layout.js';
 
 import { last } from '../../../../_common/utils/iterable.js';
 import { fitContent } from '../../../canvas-renderer/element-renderer/shape/utils.js';
@@ -40,7 +40,7 @@ export type ConnectorStyle = {
 
 export abstract class MindmapStyleGetter {
   abstract getNodeStyle(
-    node: MindmapNode,
+    node: MindmapVertex,
     path: number[]
   ): {
     connector: ConnectorStyle;
@@ -89,7 +89,7 @@ export class StyleOne extends MindmapStyleGetter {
   }
 
   getNodeStyle(
-    _: MindmapNode,
+    _: MindmapVertex,
     path: number[]
   ): { connector: ConnectorStyle; node: NodeStyle } {
     const color = this._getColor(path[1] ?? 0);
@@ -168,7 +168,7 @@ export class StyleTwo extends MindmapStyleGetter {
   }
 
   getNodeStyle(
-    _: MindmapNode,
+    _: MindmapVertex,
     path: number[]
   ): { connector: ConnectorStyle; node: NodeStyle } {
     const color = this._getColor(path.length - 2);
@@ -245,7 +245,7 @@ export class StyleThree extends MindmapStyleGetter {
   }
 
   override getNodeStyle(
-    _: MindmapNode,
+    _: MindmapVertex,
     path: number[]
   ): { connector: ConnectorStyle; node: NodeStyle } {
     const strokeColor = this._getColor(path.length - 2);
@@ -318,7 +318,7 @@ export class StyleFour extends MindmapStyleGetter {
   }
 
   getNodeStyle(
-    _: MindmapNode,
+    _: MindmapVertex,
     path: number[]
   ): { connector: ConnectorStyle; node: NodeStyle } {
     const stroke = this._getColor(path[1] ?? 0);
@@ -359,7 +359,7 @@ export const mindmapStyleGetters: {
 };
 
 export const applyNodeStyle = (
-  node: MindmapNode,
+  node: MindmapVertex,
   nodeStyle: NodeStyle,
   shouldFitContent: boolean = false
 ) => {
@@ -371,5 +371,5 @@ export const applyNodeStyle = (
     }
   });
 
-  shouldFitContent && fitContent(node.element as ShapeElementModel);
+  shouldFitContent && fitContent(node.element as ShapeNode);
 };

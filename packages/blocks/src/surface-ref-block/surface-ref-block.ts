@@ -52,7 +52,7 @@ const NO_CONTENT_REASON = {
   DEFAULT: 'This content was deleted on edgeless mode',
 } as Record<string, string>;
 
-type RefElementModel = BlockSuite.SurfaceElementModelType | FrameBlockModel;
+type RefElementModel = BlockSuite.SurfaceNodeModelType | FrameBlockModel;
 
 @customElement('affine-surface-ref')
 @Peekable()

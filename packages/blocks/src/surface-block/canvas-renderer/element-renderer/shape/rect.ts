@@ -1,4 +1,4 @@
-import type { ShapeElementModel } from '../../../element-model/shape.js';
+import type { ShapeNode } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
@@ -10,7 +10,7 @@ import { drawGeneralShape } from './utils.js';
 const K_RECT = 1 - 0.5522847498;
 
 export function rect(
-  model: ShapeElementModel,
+  model: ShapeNode,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer,

@@ -1,4 +1,4 @@
-import type { ConnectorElementModel } from '../index.js';
+import type { ConnectorNode } from '../index.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
@@ -14,7 +14,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
   const pathGenerator = new ConnectorPathGenerator({
     getElementById: getElementById,
   });
-  const updateConnectorPath = (connector: ConnectorElementModel) => {
+  const updateConnectorPath = (connector: ConnectorNode) => {
     if (
       ((connector.source?.id && hasElementById(connector.source.id)) ||
         (!connector.source?.id && connector.source?.position)) &&
@@ -24,9 +24,9 @@ export const connectorMiddleware: SurfaceMiddleware = (
       pathGenerator.updatePath(connector);
     }
   };
-  const pendingList = new Set<ConnectorElementModel>();
+  const pendingList = new Set<ConnectorNode>();
   let pendingFlag = false;
-  const addToUpdateList = (connector: ConnectorElementModel) => {
+  const addToUpdateList = (connector: ConnectorNode) => {
     pendingList.add(connector);
 
     if (!pendingFlag) {
@@ -46,7 +46,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
       if (!element) return;
 
       if ('type' in element && element.type === 'connector') {
-        addToUpdateList(element as ConnectorElementModel);
+        addToUpdateList(element as ConnectorNode);
       } else {
         surface.getConnectors(id).forEach(addToUpdateList);
       }
@@ -64,9 +64,9 @@ export const connectorMiddleware: SurfaceMiddleware = (
         (props['mode'] !== undefined ||
           props['target'] ||
           props['source'] ||
-          (props['xywh'] && !(element as ConnectorElementModel).updatingPath))
+          (props['xywh'] && !(element as ConnectorNode).updatingPath))
       ) {
-        addToUpdateList(element as ConnectorElementModel);
+        addToUpdateList(element as ConnectorNode);
       }
     }),
     surface.doc.slots.blockUpdated.on(payload => {
@@ -81,9 +81,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
 
   surface
     .getElementsByType('connector')
-    .forEach(connector =>
-      updateConnectorPath(connector as ConnectorElementModel)
-    );
+    .forEach(connector => updateConnectorPath(connector as ConnectorNode));
 
   return () => {
     disposables.forEach(d => d.dispose());

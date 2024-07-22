@@ -20,7 +20,7 @@ import {
 import {
   type NodeBaseProps,
   type NodeHitTestOptions,
-  SurfaceElementModel,
+  SurfaceNode,
 } from './base.js';
 import { local, yfield } from './decorators.js';
 import { diamond } from './utils/shape/diamond.js';
@@ -69,7 +69,7 @@ export type ShapeProps = NodeBaseProps & {
 export const SHAPE_TEXT_PADDING = 20;
 export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
-export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
+export class ShapeNode extends SurfaceNode<ShapeProps> {
   textBound: IBound | null = null;
 
   static override propsToY(props: ShapeProps) {
@@ -193,12 +193,12 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
 
 declare global {
   namespace BlockSuite {
-    interface SurfaceElementModelMap {
-      shape: ShapeElementModel;
+    interface SurfaceNodeModelMap {
+      shape: ShapeNode;
     }
 
     interface EdgelessTextModelMap {
-      shape: ShapeElementModel;
+      shape: ShapeNode;
     }
   }
 }

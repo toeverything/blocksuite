@@ -5,7 +5,7 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ConnectorElementModel } from '../../../../surface-block/index.js';
+import type { ConnectorNode } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 const SIZE = 12;
@@ -129,7 +129,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   private accessor _startHandler!: HTMLDivElement;
 
   @property({ attribute: false })
-  accessor connector!: ConnectorElementModel;
+  accessor connector!: ConnectorNode;
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;

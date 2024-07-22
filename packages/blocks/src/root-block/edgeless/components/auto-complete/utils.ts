@@ -13,8 +13,8 @@ import type {
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import {
-  GroupElementModel,
-  ShapeElementModel,
+  GroupNode,
+  ShapeNode,
 } from '../../../../surface-block/element-model/index.js';
 import {
   type Options,
@@ -175,8 +175,8 @@ export class AutoCompleteShapeOverlay extends Overlay {
 
 export function nextBound(
   type: Direction,
-  curShape: ShapeElementModel,
-  elements: ShapeElementModel[]
+  curShape: ShapeNode,
+  elements: ShapeNode[]
 ) {
   const bound = Bound.deserialize(curShape.xywh);
   const { x, y, w, h } = bound;
@@ -265,8 +265,8 @@ export function getPosition(type: Direction) {
   return { startPosition, endPosition };
 }
 
-export function isShape(element: unknown): element is ShapeElementModel {
-  return element instanceof ShapeElementModel;
+export function isShape(element: unknown): element is ShapeNode {
+  return element instanceof ShapeNode;
 }
 
 export function capitalizeFirstLetter(str: string) {
@@ -275,7 +275,7 @@ export function capitalizeFirstLetter(str: string) {
 
 export function createEdgelessElement(
   edgeless: EdgelessRootBlockComponent,
-  current: ShapeElementModel | NoteBlockModel,
+  current: ShapeNode | NoteBlockModel,
   bound: Bound
 ) {
   let id;
@@ -307,7 +307,7 @@ export function createEdgelessElement(
     doc.addBlock('affine:paragraph', {}, note.id);
   }
   const group = current.group;
-  if (group instanceof GroupElementModel) {
+  if (group instanceof GroupNode) {
     group.addChild(id);
   }
   return id;
@@ -315,7 +315,7 @@ export function createEdgelessElement(
 
 export function createShapeElement(
   edgeless: EdgelessRootBlockComponent,
-  current: ShapeElementModel | NoteBlockModel,
+  current: ShapeNode | NoteBlockModel,
   targetType: TARGET_SHAPE_TYPE
 ) {
   const service = edgeless.service!;
@@ -331,7 +331,7 @@ export function createShapeElement(
     text: new DocCollection.Y.Text(),
   });
   const group = current.group;
-  if (group instanceof GroupElementModel) {
+  if (group instanceof GroupNode) {
     group.addChild(id);
   }
   return id;

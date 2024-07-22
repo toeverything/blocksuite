@@ -3,7 +3,7 @@ import type { IBound } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import type { SurfaceElementModel } from '../element-model/base.js';
+import type { SurfaceNode } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 
 import { requestConnectedFrame } from '../../_common/utils/event.js';
@@ -231,7 +231,7 @@ export class Renderer {
      * its element will be add to this array and drawing on the
      * main canvas
      */
-    let fallbackElement: SurfaceElementModel[] = [];
+    let fallbackElement: SurfaceNode[] = [];
 
     this.layerManager.getCanvasLayers().forEach((layer, idx) => {
       if (!this._stackingCanvas[idx]) {
@@ -270,7 +270,7 @@ export class Renderer {
     matrix: DOMMatrix,
     rc: RoughCanvas,
     bound: IBound,
-    surfaceElements?: SurfaceElementModel[],
+    surfaceElements?: SurfaceNode[],
     overLay: boolean = false
   ) {
     if (!ctx) return;
@@ -347,7 +347,7 @@ export class Renderer {
 
   getCanvasByBound(
     bound: IBound = this.viewport.viewportBounds,
-    surfaceElements?: SurfaceElementModel[],
+    surfaceElements?: SurfaceNode[],
     canvas?: HTMLCanvasElement,
     clearBeforeDrawing?: boolean,
     withZoom?: boolean

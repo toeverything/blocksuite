@@ -16,7 +16,7 @@ import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtu
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
+import type { MindmapNode } from '../../../surface-block/element-model/mindmap.js';
 import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../root-model.js';
@@ -31,15 +31,12 @@ import {
   groupBy,
   pickValues,
 } from '../../../_common/utils/iterable.js';
+import { ConnectorMode, GroupNode } from '../../../surface-block/index.js';
 import {
-  ConnectorMode,
-  GroupElementModel,
-} from '../../../surface-block/index.js';
-import {
-  type BrushElementModel,
-  type ConnectorElementModel,
-  type ShapeElementModel,
-  type TextElementModel,
+  type BrushNode,
+  type ConnectorNode,
+  type ShapeNode,
+  type TextNode,
   clamp,
 } from '../../../surface-block/index.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
@@ -71,16 +68,16 @@ import './more-button.js';
 import { renderReleaseFromGroupButton } from './release-from-group-button.js';
 
 type CategorizedElements = {
-  shape?: ShapeElementModel[];
-  brush?: BrushElementModel[];
-  text?: TextElementModel[];
-  group?: GroupElementModel[];
-  connector?: ConnectorElementModel[];
+  shape?: ShapeNode[];
+  brush?: BrushNode[];
+  text?: TextNode[];
+  group?: GroupNode[];
+  connector?: ConnectorNode[];
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
   attachment?: AttachmentBlockModel[];
-  mindmap?: MindmapElementModel[];
+  mindmap?: MindmapNode[];
   embedCard?: BookmarkBlockModel[] &
     EmbedGithubModel[] &
     EmbedYoutubeModel[] &
@@ -159,7 +156,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
         return 'edgelessText';
       }
 
-      return (model as BlockSuite.SurfaceElementModelType).type;
+      return (model as BlockSuite.SurfaceNodeModelType).type;
     });
     return result as CategorizedElements;
   }
@@ -346,7 +343,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
         ];
 
     if (selectedElements.length === 1) {
-      if (selection.firstElement.group instanceof GroupElementModel) {
+      if (selection.firstElement.group instanceof GroupNode) {
         buttons.unshift(renderReleaseFromGroupButton(this.edgeless));
       }
 

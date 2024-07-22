@@ -1,7 +1,4 @@
-import type {
-  GroupElementModel,
-  MindmapElementModel,
-} from '@blocksuite/blocks';
+import type { GroupNode, MindmapNode } from '@blocksuite/blocks';
 
 import {
   type EdgelessRootBlockComponent,
@@ -118,7 +115,7 @@ describe('group', () => {
     children.set(note1, true);
 
     const groupId = service.addElement('group', { children });
-    const group = service.getElementById(groupId) as GroupElementModel;
+    const group = service.getElementById(groupId) as GroupNode;
     const assertInitial = () => {
       expect(group.x).toBe(0);
       expect(group.y).toBe(0);
@@ -215,8 +212,7 @@ describe('mindmap', () => {
       ],
     };
     const mindmapId = service.addElement('mindmap', { children: tree });
-    const mindmap = () =>
-      service.getElementById(mindmapId) as MindmapElementModel;
+    const mindmap = () => service.getElementById(mindmapId) as MindmapNode;
 
     expect(service.surface.elementModels.length).toBe(6);
     doc.captureSync();
@@ -265,8 +261,7 @@ describe('mindmap', () => {
       type: LayoutType.RIGHT,
       children: tree,
     });
-    const mindmap = () =>
-      service.getElementById(mindmapId) as MindmapElementModel;
+    const mindmap = () => service.getElementById(mindmapId) as MindmapNode;
 
     doc.captureSync();
     await wait();

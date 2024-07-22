@@ -4,19 +4,19 @@ import { type BlockSnapshot, Job } from '@blocksuite/store';
 
 import type { SerializedConnectorElement } from '../../../surface-block/element-model/connector.js';
 import type { SerializedGroupElement } from '../../../surface-block/element-model/group.js';
-import type { SerializedMindmapElement } from '../../../surface-block/element-model/mindmap.js';
+import type { SerializedMindmapNode } from '../../../surface-block/element-model/mindmap.js';
 import type { NodeDetail } from '../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessFrameManager } from '../frame-manager.js';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  type SerializedElement,
-  SurfaceGroupLikeModel,
+  GroupLikeNode,
+  type SerializedNode,
 } from '../../../surface-block/element-model/base.js';
 import {
-  ConnectorElementModel,
-  GroupElementModel,
-  MindmapElementModel,
+  ConnectorNode,
+  GroupNode,
+  MindmapNode,
 } from '../../../surface-block/index.js';
 import { BlockNode } from '../edgeless-block-node.js';
 import { isFrameBlock } from '../utils/query.js';
@@ -30,7 +30,7 @@ export function getCloneElements(
     set.add(element);
     if (isFrameBlock(element)) {
       frame.getElementsInFrame(element).forEach(ele => set.add(ele));
-    } else if (element instanceof SurfaceGroupLikeModel) {
+    } else if (element instanceof GroupLikeNode) {
       const children = element.childElements;
       getCloneElements(children, frame).forEach(ele => set.add(ele));
     }
@@ -51,7 +51,7 @@ export async function prepareCloneData(
       return data;
     })
   );
-  return res.filter((d): d is SerializedElement | BlockSnapshot => !!d);
+  return res.filter((d): d is SerializedNode | BlockSnapshot => !!d);
 }
 
 export async function serializeElement(
@@ -65,7 +65,7 @@ export async function serializeElement(
       return;
     }
     return { ...snapshot };
-  } else if (element instanceof ConnectorElementModel) {
+  } else if (element instanceof ConnectorNode) {
     return serializeConnector(element, elements);
   } else {
     return element.serialize();
@@ -73,7 +73,7 @@ export async function serializeElement(
 }
 
 export function serializeConnector(
-  connector: ConnectorElementModel,
+  connector: ConnectorNode,
   elements: BlockSuite.EdgelessModelType[]
 ) {
   const sourceId = connector.source?.id;
@@ -100,13 +100,13 @@ export function serializeConnector(
  */
 export function sortEdgelessElements(elements: BlockSuite.EdgelessModelType[]) {
   const result = groupBy(elements, element => {
-    if (element instanceof ConnectorElementModel) {
+    if (element instanceof ConnectorNode) {
       return 'connector';
     }
-    if (element instanceof GroupElementModel) {
+    if (element instanceof GroupNode) {
       return 'group';
     }
-    if (element instanceof MindmapElementModel) {
+    if (element instanceof MindmapNode) {
       return 'mindmap';
     }
     return 'default';
@@ -168,7 +168,7 @@ export function mapGroupIds(
  * @returns updated element props
  */
 export function mapMindmapIds(
-  props: SerializedMindmapElement,
+  props: SerializedMindmapNode,
   ids: Map<string, string>
 ) {
   if (props.children) {
@@ -189,18 +189,18 @@ export function mapMindmapIds(
 }
 
 export function getElementProps(
-  element: BlockSuite.SurfaceModelType,
+  element: BlockSuite.SurfaceNodeType,
   ids: Map<string, string>
 ) {
-  if (element instanceof ConnectorElementModel) {
+  if (element instanceof ConnectorNode) {
     const props = element.serialize();
     return mapConnectorIds(props, ids);
   }
-  if (element instanceof GroupElementModel) {
+  if (element instanceof GroupNode) {
     const props = element.serialize();
     return mapGroupIds(props, ids);
   }
-  if (element instanceof MindmapElementModel) {
+  if (element instanceof MindmapNode) {
     const props = element.serialize();
     return mapMindmapIds(props, ids);
   }

@@ -2,7 +2,7 @@ import type { Bound } from '@blocksuite/global/utils';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
 import type { TextAlign, TextVerticalAlign } from '../../../consts.js';
-import type { ShapeElementModel } from '../../../element-model/shape.js';
+import type { ShapeNode } from '../../../element-model/shape.js';
 import type { Renderer } from '../../renderer.js';
 
 import {
@@ -19,7 +19,7 @@ import {
 
 export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
-  shapeModel: ShapeElementModel,
+  shapeModel: ShapeNode,
   renderer: Renderer
 ) {
   const sizeOffset = Math.max(shapeModel.strokeWidth, 0);
@@ -171,10 +171,7 @@ export function verticalOffset(
       ? verticalPadding
       : height - lineHeight * lines.length - verticalPadding;
 }
-export function normalizeShapeBound(
-  shape: ShapeElementModel,
-  bound: Bound
-): Bound {
+export function normalizeShapeBound(shape: ShapeNode, bound: Bound): Bound {
   if (!shape.text) return bound;
 
   const [verticalPadding, horiPadding] = shape.padding;
@@ -211,7 +208,7 @@ export function normalizeShapeBound(
   return bound;
 }
 
-export function fitContent(shape: ShapeElementModel) {
+export function fitContent(shape: ShapeNode) {
   const font = getFontString(shape);
 
   if (!shape.text) {

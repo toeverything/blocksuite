@@ -5,17 +5,14 @@ import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
-import type { GroupElementModel } from '../element-model/group.js';
+import type { GroupNode } from '../element-model/group.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import { FrameBlockModel } from '../../frame-block/frame-model.js';
 import { BlockNode } from '../../root-block/edgeless/edgeless-block-node.js';
-import {
-  SurfaceElementModel,
-  SurfaceGroupLikeModel,
-} from '../element-model/base.js';
+import { GroupLikeNode, SurfaceNode } from '../element-model/base.js';
 import { GridManager } from '../grid.js';
 import {
   compare,
@@ -54,7 +51,7 @@ export type BlockLayer = BaseLayer<BlockNode> & {
   zIndex: number;
 };
 
-export type CanvasLayer = BaseLayer<SurfaceElementModel> & {
+export type CanvasLayer = BaseLayer<SurfaceNode> & {
   type: 'canvas';
 
   /**
@@ -77,12 +74,12 @@ export class LayerManager {
 
   blocksGrid = new GridManager<BlockNode>();
 
-  canvasElements!: SurfaceElementModel[];
+  canvasElements!: SurfaceNode[];
 
-  canvasGrid = new GridManager<SurfaceElementModel>();
+  canvasGrid = new GridManager<SurfaceNode>();
 
   canvasLayers!: {
-    set: Set<SurfaceElementModel>;
+    set: Set<SurfaceNode>;
     /**
      * fractional index
      */
@@ -91,7 +88,7 @@ export class LayerManager {
      * z-index, used for actual rendering
      */
     zIndex: number;
-    elements: Array<SurfaceElementModel>;
+    elements: Array<SurfaceNode>;
   }[];
 
   frames!: FrameBlockModel[];
@@ -163,7 +160,7 @@ export class LayerManager {
     this.frames = [];
 
     elements.forEach(element => {
-      if (element instanceof SurfaceElementModel) {
+      if (element instanceof SurfaceNode) {
         this.canvasElements.push(element);
         this.canvasGrid.add(element);
       } else if (matchFlavours(element, ['affine:frame'])) {
@@ -338,7 +335,7 @@ export class LayerManager {
       position: number | 'tail'
     ) => {
       assertType<CanvasLayer>(layer);
-      assertType<SurfaceElementModel>(element);
+      assertType<SurfaceNode>(element);
 
       if (position === 'tail') {
         layer.elements.push(element);
@@ -412,7 +409,7 @@ export class LayerManager {
             updateLayersZIndex(layers, cur);
           } else {
             const splicedElements = layer.elements.splice(insertIdx);
-            layer.set = new Set(layer.elements as SurfaceElementModel[]);
+            layer.set = new Set(layer.elements as SurfaceNode[]);
 
             layers.splice(
               cur + 1,
@@ -458,7 +455,7 @@ export class LayerManager {
       if (layer.type !== type) return false;
 
       assertType<CanvasLayer>(layer);
-      assertType<SurfaceElementModel>(target);
+      assertType<SurfaceNode>(target);
 
       if (layer.set.has(target)) {
         layer.set.delete(target);
@@ -531,13 +528,13 @@ export class LayerManager {
     if (!type.startsWith('affine:')) {
       updateType = 'canvas';
       updateArray(this.canvasElements, element);
-      this.canvasGrid.update(element as SurfaceElementModel);
+      this.canvasGrid.update(element as SurfaceNode);
 
       if (
-        (type === 'group' || element instanceof SurfaceGroupLikeModel) &&
+        (type === 'group' || element instanceof GroupLikeNode) &&
         (indexChanged || childIdsChanged)
       ) {
-        (element as GroupElementModel).childElements.forEach(
+        (element as GroupNode).childElements.forEach(
           child => child && this._updateLayer(child)
         );
       }
@@ -633,10 +630,10 @@ export class LayerManager {
     if (!type.startsWith('affine:')) {
       insertType = 'canvas';
       insertToOrderedArray(this.canvasElements, element);
-      this.canvasGrid.add(element as SurfaceElementModel);
+      this.canvasGrid.add(element as SurfaceNode);
 
-      if (type === 'group' || element instanceof SurfaceGroupLikeModel) {
-        (element as GroupElementModel).childElements.forEach(
+      if (type === 'group' || element instanceof GroupLikeNode) {
+        (element as GroupNode).childElements.forEach(
           child => child && this._updateLayer(child)
         );
       }
@@ -730,7 +727,7 @@ export class LayerManager {
   delete(element: BlockSuite.EdgelessModelType) {
     let deleteType: 'canvas' | 'block' | undefined = undefined;
 
-    if (element instanceof SurfaceElementModel) {
+    if (element instanceof SurfaceNode) {
       deleteType = 'canvas';
       removeFromOrderedArray(this.canvasElements, element);
       this.canvasGrid.remove(element);

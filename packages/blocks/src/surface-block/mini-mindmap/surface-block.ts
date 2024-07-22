@@ -5,7 +5,7 @@ import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import type { ShapeElementModel } from '../element-model/shape.js';
+import type { ShapeNode } from '../element-model/shape.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { MindmapService } from './service.js';
 
@@ -28,7 +28,7 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
     this.model.doc.transact(() => {
       this.model.elementModels.forEach(element => {
         if (element.type === 'shape') {
-          fitContent(element as ShapeElementModel);
+          fitContent(element as ShapeNode);
         }
       });
     });

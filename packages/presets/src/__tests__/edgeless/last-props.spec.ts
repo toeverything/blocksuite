@@ -1,9 +1,9 @@
 import type {
-  BrushElementModel,
-  ConnectorElementModel,
+  BrushNode,
+  ConnectorNode,
   EdgelessRootBlockComponent,
-  ShapeElementModel,
-  TextElementModel,
+  ShapeNode,
+  TextNode,
 } from '@blocksuite/blocks';
 
 import { beforeEach, describe, expect, test } from 'vitest';
@@ -25,20 +25,20 @@ describe('apply last props', () => {
 
   test('shape', () => {
     const id = service.addElement('shape', { shapeType: 'rect' });
-    const shape = service.getElementById(id) as ShapeElementModel;
+    const shape = service.getElementById(id) as ShapeNode;
     expect(shape.fillColor).toBe('--affine-palette-shape-yellow');
     expect(shape.strokeColor).toBe('--affine-palette-line-yellow');
     expect(shape.shapeStyle).toBe('General');
     service.updateElement(id, { fillColor: '--affine-palette-shape-orange' });
     const secondShape = service.getElementById(
       service.addElement('shape', { shapeType: 'rect' })
-    ) as ShapeElementModel;
+    ) as ShapeNode;
     expect(secondShape.fillColor).toBe('--affine-palette-shape-orange');
   });
 
   test('connector', () => {
     const id = service.addElement('connector', { mode: 0 });
-    const connector = service.getElementById(id) as ConnectorElementModel;
+    const connector = service.getElementById(id) as ConnectorNode;
     expect(connector.stroke).toBe('--affine-palette-line-grey');
     expect(connector.strokeWidth).toBe(2);
     expect(connector.strokeStyle).toBe('solid');
@@ -47,30 +47,30 @@ describe('apply last props', () => {
     service.updateElement(id, { strokeWidth: 10 });
     const secondConnector = service.getElementById(
       service.addElement('connector', { mode: 1 })
-    ) as ShapeElementModel;
+    ) as ShapeNode;
     expect(secondConnector.strokeWidth).toBe(10);
   });
 
   test('brush', () => {
     const id = service.addElement('brush', {});
-    const brush = service.getElementById(id) as BrushElementModel;
+    const brush = service.getElementById(id) as BrushNode;
     expect(brush.color).toBe('--affine-palette-line-black');
     expect(brush.lineWidth).toBe(4);
     service.updateElement(id, { lineWidth: 10 });
     const secondBrush = service.getElementById(
       service.addElement('brush', {})
-    ) as BrushElementModel;
+    ) as BrushNode;
     expect(secondBrush.lineWidth).toBe(10);
   });
 
   test('text', () => {
     const id = service.addElement('text', {});
-    const text = service.getElementById(id) as TextElementModel;
+    const text = service.getElementById(id) as TextNode;
     expect(text.fontSize).toBe(24);
     service.updateElement(id, { fontSize: 36 });
     const secondText = service.getElementById(
       service.addElement('text', {})
-    ) as TextElementModel;
+    ) as TextNode;
     expect(secondText.fontSize).toBe(36);
   });
 });

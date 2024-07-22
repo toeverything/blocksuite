@@ -17,16 +17,16 @@ import {
   pointInPolygon,
   polygonNearestPoint,
 } from '../utils/math-utils.js';
-import { type NodeBaseProps, SurfaceElementModel } from './base.js';
+import { type NodeBaseProps, SurfaceNode } from './base.js';
 import { yfield } from './decorators.js';
 
-export type TextElementProps = NodeBaseProps & {
+export type TextNodeProps = NodeBaseProps & {
   text: Y.Text;
   hasMaxWidth?: boolean;
 } & Omit<TextStyleProps, 'fontWeight' | 'fontStyle'> &
   Partial<Pick<TextStyleProps, 'fontWeight' | 'fontStyle'>>;
 
-export class TextElementModel extends SurfaceElementModel<TextElementProps> {
+export class TextNode extends SurfaceNode<TextNodeProps> {
   static override propsToY(props: Record<string, unknown>) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text as string);
@@ -70,10 +70,10 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   @yfield()
   accessor fontSize: number = 16;
 
-  @yfield<FontStyle, TextElementModel>(FontStyle.Normal)
+  @yfield<FontStyle, TextNode>(FontStyle.Normal)
   accessor fontStyle: FontStyle = FontStyle.Normal;
 
-  @yfield<FontWeight, TextElementModel>(FontWeight.Regular)
+  @yfield<FontWeight, TextNode>(FontWeight.Regular)
   accessor fontWeight: FontWeight = FontWeight.Regular;
 
   @yfield(false)
@@ -94,12 +94,12 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
 
 declare global {
   namespace BlockSuite {
-    interface SurfaceElementModelMap {
-      text: TextElementModel;
+    interface SurfaceNodeModelMap {
+      text: TextNode;
     }
 
     interface EdgelessTextModelMap {
-      text: TextElementModel;
+      text: TextNode;
     }
   }
 }

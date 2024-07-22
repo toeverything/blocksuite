@@ -28,11 +28,11 @@ import {
 } from '../utils/math-utils.js';
 import { Polyline } from '../utils/polyline.js';
 import {
+  LocalNode,
   type NodeBaseProps,
   type NodeHitTestOptions,
-  type SerializedElement,
-  SurfaceElementModel,
-  SurfaceLocalModel,
+  type SerializedNode,
+  SurfaceNode,
 } from './base.js';
 import { derive, local, yfield } from './decorators.js';
 
@@ -101,12 +101,12 @@ export type ConnectorLabelProps = {
   labelConstraints?: ConnectorLabelConstraintsProps;
 };
 
-export type SerializedConnectorElement = SerializedElement & {
+export type SerializedConnectorElement = SerializedNode & {
   source: SerializedConnection;
   target: SerializedConnection;
 };
 
-export type ConnectorElementProps = NodeBaseProps & {
+export type ConnectorNodeProps = NodeBaseProps & {
   mode: ConnectorMode;
   stroke: string;
   strokeWidth: number;
@@ -120,10 +120,10 @@ export type ConnectorElementProps = NodeBaseProps & {
   rearEndpointStyle?: PointStyle;
 } & ConnectorLabelProps;
 
-export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementProps> {
+export class ConnectorNode extends SurfaceNode<ConnectorNodeProps> {
   updatingPath = false;
 
-  static override propsToY(props: ConnectorElementProps) {
+  static override propsToY(props: ConnectorNodeProps) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text);
     }
@@ -475,7 +475,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   @yfield()
   accessor mode: ConnectorMode = ConnectorMode.Orthogonal;
 
-  @derive((path: PointLocation[], instance: ConnectorElementModel) => {
+  @derive((path: PointLocation[], instance: ConnectorNode) => {
     const { x, y } = instance;
 
     return {
@@ -526,7 +526,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
 
-export class LocalConnectorElementModel extends SurfaceLocalModel {
+export class LocalConnectorNode extends LocalNode {
   private _path: PointLocation[] = [];
 
   absolutePath: PointLocation[] = [];
@@ -584,19 +584,19 @@ export class LocalConnectorElementModel extends SurfaceLocalModel {
 export function isConnectorWithLabel(
   model: BlockSuite.EdgelessModelType | BlockSuite.SurfaceLocalModelType
 ) {
-  return model instanceof ConnectorElementModel && model.hasLabel();
+  return model instanceof ConnectorNode && model.hasLabel();
 }
 
 declare global {
   namespace BlockSuite {
-    interface SurfaceElementModelMap {
-      connector: ConnectorElementModel;
+    interface SurfaceNodeModelMap {
+      connector: ConnectorNode;
     }
     interface SurfaceLocalModelMap {
-      connector: LocalConnectorElementModel;
+      connector: LocalConnectorNode;
     }
     interface EdgelessTextModelMap {
-      connector: ConnectorElementModel;
+      connector: ConnectorNode;
     }
   }
 }

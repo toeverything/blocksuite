@@ -8,8 +8,8 @@ import { z } from 'zod';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type {
-  MindmapNode,
   MindmapRoot,
+  MindmapVertex,
   NodeDetail,
 } from './utils/mindmap/layout.js';
 import type {
@@ -21,11 +21,11 @@ import { keys, last, pick } from '../../_common/utils/iterable.js';
 import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import {
+  GroupLikeNode,
   type NodeBaseProps,
-  type SerializedElement,
-  SurfaceGroupLikeModel,
+  type SerializedNode,
 } from './base.js';
-import { LocalConnectorElementModel } from './connector.js';
+import { LocalConnectorNode } from './connector.js';
 import { convert, observe, watch, yfield } from './decorators.js';
 import { LayoutType, layout } from './utils/mindmap/layout.js';
 import {
@@ -56,16 +56,16 @@ function isNodeType(node: Record<string, unknown>): node is NodeType {
   return typeof node.text === 'string' && Array.isArray(node.children);
 }
 
-export type SerializedMindmapElement = SerializedElement & {
+export type SerializedMindmapNode = SerializedNode & {
   children: Record<string, NodeDetail>;
 };
 
-type MindmapElementProps = NodeBaseProps & {
+type MindmapNodeProps = NodeBaseProps & {
   children: Y.Map<NodeDetail>;
 };
 
-export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementProps> {
-  private _nodeMap = new Map<string, MindmapNode>();
+export class MindmapNode extends GroupLikeNode<MindmapNodeProps> {
+  private _nodeMap = new Map<string, MindmapVertex>();
 
   private _queueBuildTree = false;
 
@@ -73,9 +73,9 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 
   private _tree!: MindmapRoot;
 
-  connectors = new Map<string, LocalConnectorElementModel>();
+  connectors = new Map<string, LocalConnectorNode>();
 
-  extraConnectors = new Map<string, LocalConnectorElementModel>();
+  extraConnectors = new Map<string, LocalConnectorNode>();
 
   pathGenerator: ConnectorPathGenerator = new ConnectorPathGenerator({
     getElementById: (id: string) =>
@@ -84,13 +84,13 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   });
 
   static createFromTree(
-    tree: MindmapNode,
+    tree: MindmapVertex,
     style: MindmapStyle,
     layoutType: LayoutType,
     surface: SurfaceBlockModel
   ) {
     const children = new DocCollection.Y.Map();
-    const traverse = (subtree: MindmapNode, parent?: string) => {
+    const traverse = (subtree: MindmapVertex, parent?: string) => {
       const value: NodeDetail = {
         ...subtree.detail,
         parent,
@@ -113,7 +113,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       layoutType,
       style,
     });
-    const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
+    const mindmap = surface.getElementById(mindmapId) as MindmapNode;
 
     mindmap.layout();
 
@@ -139,7 +139,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       props.children = children;
     }
 
-    return props as MindmapElementProps;
+    return props as MindmapNodeProps;
   }
 
   private _cfgBalanceLayoutDir() {
@@ -175,9 +175,9 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 
   private _isConnectorOutdated(
     options: {
-      connector: LocalConnectorElementModel;
-      from: MindmapNode;
-      to: MindmapNode;
+      connector: LocalConnectorNode;
+      from: MindmapVertex;
+      to: MindmapVertex;
       layout: LayoutType;
     },
     updateKey: boolean = true
@@ -197,8 +197,8 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   }
 
   protected addConnector(
-    from: MindmapNode,
-    to: MindmapNode,
+    from: MindmapVertex,
+    to: MindmapVertex,
     layout: LayoutType,
     connectorStyle: ConnectorStyle,
     extra: boolean = false
@@ -206,7 +206,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     const id = `#${from.id}-${to.id}`;
 
     if (extra) {
-      this.extraConnectors.set(id, new LocalConnectorElementModel());
+      this.extraConnectors.set(id, new LocalConnectorNode());
     } else if (this.connectors.has(id)) {
       const connector = this.connectors.get(id)!;
       const { outdated } = this._isConnectorOutdated({
@@ -220,7 +220,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
         return connector;
       }
     } else {
-      const connector = new LocalConnectorElementModel();
+      const connector = new LocalConnectorNode();
       // update cache key
       this._isConnectorOutdated({
         connector,
@@ -259,7 +259,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     /**
      * The parent node id of the new node. If it's null, the node will be the root node
      */
-    parent: string | MindmapNode | null,
+    parent: string | MindmapVertex | null,
     sibling?: string | number,
     position: 'before' | 'after' = 'after',
     props: Record<string, unknown> = {},
@@ -382,8 +382,8 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   }
 
   addTree(
-    parent: string | MindmapNode,
-    tree: NodeType | MindmapNode,
+    parent: string | MindmapVertex,
+    tree: NodeType | MindmapVertex,
     /**
      * `sibling` indicates where to insert a subtree among peer elements.
      * If it's a string, it represents a peer element's ID;
@@ -413,7 +413,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     }
 
     const traverse = (
-      node: NodeType | MindmapNode,
+      node: NodeType | MindmapVertex,
       parent: string,
       sibling?: string | number,
       layout?: LayoutType.LEFT | LayoutType.RIGHT
@@ -469,7 +469,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       if (!style) return;
       applyNodeStyle(this._tree, style.root, fitContent);
 
-      const walk = (node: MindmapNode, path: number[]) => {
+      const walk = (node: MindmapVertex, path: number[]) => {
         node.children.forEach((child, idx) => {
           const currentPath = [...path, idx];
           const nodeStyle = style.getNodeStyle(child, currentPath);
@@ -485,7 +485,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   }
 
   protected buildTree() {
-    const mindmapNodeMap = new Map<string, MindmapNode>();
+    const mindmapNodeMap = new Map<string, MindmapVertex>();
     const nodesMap = this.children;
 
     // The element may be removed
@@ -508,7 +508,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
             detail: val,
             element: this.surface.getElementById(id)!,
             children: [],
-          } as MindmapNode);
+          } as MindmapVertex);
 
       if (!node.detail) {
         node.detail = val;
@@ -531,7 +531,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
           id: val.parent,
           children: [node],
           element: this.surface.getElementById(val.parent)!,
-        } as MindmapNode);
+        } as MindmapVertex);
       }
     });
 
@@ -566,17 +566,17 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
    *
    * So the node can be used to create a new mind map or merge into other mind map
    */
-  detach(subtree: string | MindmapNode) {
+  detach(subtree: string | MindmapVertex) {
     subtree =
       typeof subtree === 'string' ? this._nodeMap.get(subtree)! : subtree;
 
-    assertType<MindmapNode>(subtree);
+    assertType<MindmapVertex>(subtree);
 
     if (!subtree) {
       return;
     }
 
-    const traverse = (subtree: MindmapNode) => {
+    const traverse = (subtree: MindmapVertex) => {
       this.children.delete(subtree.id);
 
       // cut the reference inside the ymap
@@ -617,7 +617,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     return node.children;
   }
 
-  getConnector(from: MindmapNode, to: MindmapNode) {
+  getConnector(from: MindmapVertex, to: MindmapVertex) {
     if (!this._nodeMap.has(from.id) || !this._nodeMap.has(to.id)) {
       return null;
     }
@@ -630,12 +630,12 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     );
   }
 
-  getLayoutDir(node: string | MindmapNode): LayoutType | null {
+  getLayoutDir(node: string | MindmapVertex): LayoutType | null {
     node = typeof node === 'string' ? this._nodeMap.get(node)! : node;
 
-    assertType<MindmapNode>(node);
+    assertType<MindmapVertex>(node);
 
-    let current: MindmapNode | null = node;
+    let current: MindmapVertex | null = node;
     const root = this._tree;
 
     while (current) {
@@ -643,7 +643,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
         return current.overriddenDir;
       }
 
-      const parent: MindmapNode | null = current.detail.parent
+      const parent: MindmapVertex | null = current.detail.parent
         ? this._nodeMap.get(current.detail.parent) ?? null
         : null;
 
@@ -683,7 +683,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
    * // [0, 1, 2]
    * ```
    */
-  getPath(element: string | MindmapNode) {
+  getPath(element: string | MindmapVertex) {
     let node = this._nodeMap.get(
       typeof element === 'string' ? element : element.id
     );
@@ -742,7 +742,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   }
 
   layout(
-    tree: MindmapNode | MindmapRoot = this.tree,
+    tree: MindmapVertex | MindmapRoot = this.tree,
     applyStyle = true,
     layoutType?: LayoutType
   ) {
@@ -776,8 +776,8 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   }
 
   moveTree(
-    tree: MindmapNode,
-    parent: string | MindmapNode,
+    tree: MindmapVertex,
+    parent: string | MindmapVertex,
     siblingIndex: number,
     layout?: LayoutType
   ) {
@@ -789,7 +789,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       return;
     }
 
-    assertType<MindmapNode>(parent);
+    assertType<MindmapVertex>(parent);
 
     if (layout === LayoutType.BALANCE || parent !== this._tree) {
       layout = undefined;
@@ -839,7 +839,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 
     const surface = this.surface;
     const removedDescendants: string[] = [];
-    const remove = (element: MindmapNode) => {
+    const remove = (element: MindmapVertex) => {
       element.children?.forEach(child => {
         remove(child);
       });
@@ -887,10 +887,10 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 
   override serialize() {
     const result = super.serialize();
-    return result as SerializedMindmapElement;
+    return result as SerializedMindmapNode;
   }
 
-  stashTree(node: MindmapNode | string) {
+  stashTree(node: MindmapVertex | string) {
     const mindNode = typeof node === 'string' ? this.getNode(node) : node;
 
     if (!mindNode) {
@@ -898,9 +898,9 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     }
 
     const stashed = new Set<
-      BlockSuite.SurfaceElementModelType | LocalConnectorElementModel
+      BlockSuite.SurfaceNodeModelType | LocalConnectorNode
     >();
-    const traverse = (node: MindmapNode, parent: MindmapNode | null) => {
+    const traverse = (node: MindmapVertex, parent: MindmapVertex | null) => {
       node.element.stash('xywh');
       node.element.opacity = 0.3;
       stashed.add(node.element);
@@ -936,8 +936,10 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     };
   }
 
-  traverse(callback: (node: MindmapNode, parent: MindmapNode | null) => void) {
-    const traverse = (node: MindmapNode, parent: MindmapNode | null) => {
+  traverse(
+    callback: (node: MindmapVertex, parent: MindmapVertex | null) => void
+  ) {
+    const traverse = (node: MindmapVertex, parent: MindmapVertex | null) => {
       callback(node, parent);
 
       node?.children.forEach(child => {
@@ -1017,21 +1019,19 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       return initialValue;
     }
   })
-  @observe(
-    (_, instance: MindmapElementModel, transaction: Y.Transaction | null) => {
-      instance.setChildIds(
-        Array.from(instance.children.keys()),
-        transaction?.local ?? true
-      );
+  @observe((_, instance: MindmapNode, transaction: Y.Transaction | null) => {
+    instance.setChildIds(
+      Array.from(instance.children.keys()),
+      transaction?.local ?? true
+    );
 
-      instance.buildTree();
-      instance.connectors.clear();
-    }
-  )
+    instance.buildTree();
+    instance.connectors.clear();
+  })
   @yfield()
   accessor children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
 
-  @watch((_, instance: MindmapElementModel, local) => {
+  @watch((_, instance: MindmapNode, local) => {
     if (!local) {
       return;
     }
@@ -1054,7 +1054,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   @yfield()
   accessor layoutType: LayoutType = LayoutType.RIGHT;
 
-  @watch((_, instance: MindmapElementModel, local) => {
+  @watch((_, instance: MindmapNode, local) => {
     if (local) {
       instance.layout();
     }
@@ -1066,7 +1066,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
 declare global {
   namespace BlockSuite {
     interface SurfaceGroupLikeModelMap {
-      mindmap: MindmapElementModel;
+      mindmap: MindmapNode;
     }
   }
 }

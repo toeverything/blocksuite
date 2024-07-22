@@ -2,10 +2,7 @@ import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
-import type {
-  ConnectorElementModel,
-  ShapeElementModel,
-} from '../../surface-block/index.js';
+import type { ConnectorNode, ShapeNode } from '../../surface-block/index.js';
 
 import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { SHAPE_TEXT_PADDING } from '../../surface-block/element-model/shape.js';
@@ -36,7 +33,7 @@ export const DEFAULT_SHAPE_PROPS: Partial<IShape> = {
   shapeStyle: ShapeStyle.General,
 };
 
-export const DEFAULT_CONNECTOR_PROPS: Partial<ConnectorElementModel> = {
+export const DEFAULT_CONNECTOR_PROPS: Partial<ConnectorNode> = {
   stroke: '--affine-palette-line-black',
   mode: ConnectorMode.Orthogonal,
   strokeWidth: 2,
@@ -101,7 +98,7 @@ const drawAllNode = (
             text: new DocCollection.Y.Text(text),
           });
     shapeIds.push(id);
-    const ele = service.getElementById(id) as ShapeElementModel;
+    const ele = service.getElementById(id) as ShapeNode;
     const maxWidth =
       Math.max(
         ...text.split('\n').map(line => getLineWidth(line, getFontString(ele)))
@@ -124,7 +121,7 @@ const drawAllNode = (
   };
   const layoutNode = drawNode(node, true);
   const root = options?.rootId
-    ? (service.getElementById(options.rootId) as ShapeElementModel)
+    ? (service.getElementById(options.rootId) as ShapeNode)
     : undefined;
   const result = layout.right(layoutNode, {
     gapHorizontal: 130,
@@ -162,7 +159,7 @@ const layoutAllNode = (
   };
   const getLayoutNode = (node: TreeNodeWithId): LayoutNode_ => {
     const { children, id } = node;
-    const ele = service.getElementById(id) as ShapeElementModel;
+    const ele = service.getElementById(id) as ShapeNode;
     return {
       id,
       width: ele.w,
@@ -172,7 +169,7 @@ const layoutAllNode = (
   };
   const layoutNode = getLayoutNode(node);
   const root = options?.rootId
-    ? (service.getElementById(options.rootId) as ShapeElementModel)
+    ? (service.getElementById(options.rootId) as ShapeNode)
     : undefined;
   const result = layout.right(layoutNode, {
     gapHorizontal: 130,
@@ -232,7 +229,7 @@ export const createNode = (
     xywh: `[${0},${0},${0},${0}]`,
     text: new DocCollection.Y.Text(text),
   });
-  const ele = service.getElementById(id) as ShapeElementModel;
+  const ele = service.getElementById(id) as ShapeNode;
   const maxWidth =
     Math.max(
       ...text.split('\n').map(line => getLineWidth(line, getFontString(ele)))
@@ -271,7 +268,7 @@ export const changeText = (
   service.updateElement(id, {
     text: new DocCollection.Y.Text(text),
   });
-  const ele = service.getElementById(id) as ShapeElementModel;
+  const ele = service.getElementById(id) as ShapeNode;
   const maxWidth =
     Math.max(
       ...text.split('\n').map(line => getLineWidth(line, getFontString(ele)))

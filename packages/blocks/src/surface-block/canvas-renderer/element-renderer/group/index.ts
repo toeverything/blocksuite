@@ -1,12 +1,12 @@
 import { Bound } from '@blocksuite/global/utils';
 
-import type { GroupElementModel } from '../../../element-model/group.js';
+import type { GroupNode } from '../../../element-model/group.js';
 import type { Renderer } from '../../renderer.js';
 
 import { titleRenderParams } from './utils.js';
 
 export function group(
-  model: GroupElementModel,
+  model: GroupNode,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer
@@ -30,7 +30,7 @@ export function group(
 }
 
 function renderTitle(
-  model: GroupElementModel,
+  model: GroupNode,
   ctx: CanvasRenderingContext2D,
   renderer: Renderer
 ) {

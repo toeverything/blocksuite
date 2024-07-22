@@ -1,8 +1,8 @@
-import type { BrushElementModel } from '../../../element-model/brush.js';
+import type { BrushNode } from '../../../element-model/brush.js';
 import type { Renderer } from '../../renderer.js';
 
 export function brush(
-  model: BrushElementModel,
+  model: BrushNode,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer

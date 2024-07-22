@@ -6,7 +6,7 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 
 import '../../../_common/components/toolbar/icon-button.js';
 import { ReleaseFromGroupButtonIcon } from '../../../_common/icons/index.js';
-import { GroupElementModel } from '../../../surface-block/element-model/group.js';
+import { GroupNode } from '../../../surface-block/element-model/group.js';
 
 @customElement('edgeless-release-from-group-button')
 export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
@@ -14,7 +14,7 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
     const service = this.edgeless.service;
     const element = service.selection.firstElement;
 
-    if (!(element.group instanceof GroupElementModel)) return;
+    if (!(element.group instanceof GroupNode)) return;
 
     const group = element.group;
 
@@ -26,7 +26,7 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
     );
 
     const parent = group.group;
-    if (parent instanceof GroupElementModel) {
+    if (parent instanceof GroupNode) {
       parent.addChild(element.id);
     }
   }

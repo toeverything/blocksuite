@@ -2,23 +2,23 @@ import { DocCollection, type Y } from '@blocksuite/store';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
 
-import { SurfaceElementModel } from './base.js';
-import { BrushElementModel } from './brush.js';
-import { ConnectorElementModel } from './connector.js';
+import { SurfaceNode } from './base.js';
+import { BrushNode } from './brush.js';
+import { ConnectorNode } from './connector.js';
 import { initializeWatchers, initializedObservers } from './decorators.js';
 import { getDecoratorState } from './decorators/common.js';
-import { GroupElementModel } from './group.js';
-import { MindmapElementModel } from './mindmap.js';
-import { ShapeElementModel } from './shape.js';
-import { TextElementModel } from './text.js';
+import { GroupNode } from './group.js';
+import { MindmapNode } from './mindmap.js';
+import { ShapeNode } from './shape.js';
+import { TextNode } from './text.js';
 
 const elementsCtorMap = {
-  group: GroupElementModel,
-  connector: ConnectorElementModel,
-  shape: ShapeElementModel,
-  brush: BrushElementModel,
-  text: TextElementModel,
-  mindmap: MindmapElementModel,
+  group: GroupNode,
+  connector: ConnectorNode,
+  shape: ShapeNode,
+  brush: BrushNode,
+  text: TextNode,
+  mindmap: MindmapNode,
 };
 
 export function createElementModel(
@@ -37,7 +37,7 @@ export function createElementModel(
     newCreate?: boolean;
   }
 ): {
-  model: SurfaceElementModel;
+  model: SurfaceNode;
   unmount: () => void;
   mount: () => void;
 } {
@@ -59,7 +59,7 @@ export function createElementModel(
     model,
     stashedStore: stashed,
     onChange: payload => mounted && options.onChange({ id, ...payload }),
-  }) as SurfaceElementModel;
+  }) as SurfaceNode;
 
   state.creating = false;
   state.skipYfield = false;
@@ -144,7 +144,7 @@ export function propsToY(type: string, props: Record<string, unknown>) {
   }
 
   // @ts-ignore
-  return (ctor.propsToY ?? SurfaceElementModel.propsToY)(props);
+  return (ctor.propsToY ?? SurfaceNode.propsToY)(props);
 }
 
 export function createModelFromProps(
@@ -193,13 +193,13 @@ export function createModelFromProps(
 }
 
 export {
-  BrushElementModel,
-  ConnectorElementModel,
-  GroupElementModel,
-  MindmapElementModel,
-  ShapeElementModel,
-  SurfaceElementModel,
-  TextElementModel,
+  BrushNode,
+  ConnectorNode,
+  GroupNode,
+  MindmapNode,
+  ShapeNode,
+  SurfaceNode,
+  TextNode,
 };
 
 export enum CanvasElementType {
@@ -212,12 +212,12 @@ export enum CanvasElementType {
 }
 
 export type ElementModelMap = {
-  ['shape']: ShapeElementModel;
-  ['brush']: BrushElementModel;
-  ['connector']: ConnectorElementModel;
-  ['text']: TextElementModel;
-  ['group']: GroupElementModel;
-  ['mindmap']: MindmapElementModel;
+  ['shape']: ShapeNode;
+  ['brush']: BrushNode;
+  ['connector']: ConnectorNode;
+  ['text']: TextNode;
+  ['group']: GroupNode;
+  ['mindmap']: MindmapNode;
 };
 
 export function isCanvasElementType(type: string): type is CanvasElementType {

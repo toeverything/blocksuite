@@ -4,8 +4,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
-import type { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
+import type { MindmapNode } from '../../../surface-block/element-model/mindmap.js';
+import type { ShapeNode } from '../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import '../../../_common/components/toolbar/icon-button.js';
@@ -187,13 +187,12 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
   private _isSubnode() {
     return (
       this.nodes.length === 1 &&
-      (this.nodes[0].group as MindmapElementModel).tree.element !==
-        this.nodes[0]
+      (this.nodes[0].group as MindmapNode).tree.element !== this.nodes[0]
     );
   }
 
   private get _mindmaps() {
-    const mindmaps = new Set<MindmapElementModel>();
+    const mindmaps = new Set<MindmapNode>();
 
     return this.elements.reduce((_, el) => {
       mindmaps.add(el);
@@ -255,32 +254,32 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor elements!: MindmapElementModel[];
+  accessor elements!: MindmapNode[];
 
   @state()
   accessor layoutType!: LayoutType;
 
   @property({ attribute: false })
-  accessor nodes!: ShapeElementModel[];
+  accessor nodes!: ShapeNode[];
 }
 
 export function renderMindmapButton(
   edgeless: EdgelessRootBlockComponent,
-  elements?: (ShapeElementModel | MindmapElementModel)[]
+  elements?: (ShapeNode | MindmapNode)[]
 ) {
   if (!elements?.length) return nothing;
 
-  const mindmaps: MindmapElementModel[] = [];
+  const mindmaps: MindmapNode[] = [];
 
   elements.forEach(e => {
     if (e.type === 'mindmap') {
-      mindmaps.push(e as MindmapElementModel);
+      mindmaps.push(e as MindmapNode);
     }
 
     const group = edgeless.service.surface.getGroup(e.id);
 
     if (group?.type === 'mindmap') {
-      mindmaps.push(group as MindmapElementModel);
+      mindmaps.push(group as MindmapNode);
     }
   });
 

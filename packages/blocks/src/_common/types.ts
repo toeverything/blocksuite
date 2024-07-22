@@ -2,11 +2,8 @@ import type { Slot } from '@blocksuite/global/utils';
 import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import type { ConnectorElementModel } from '../surface-block/element-model/connector.js';
-import type {
-  BrushElementModel,
-  GroupElementModel,
-} from '../surface-block/index.js';
+import type { ConnectorNode } from '../surface-block/element-model/connector.js';
+import type { BrushNode, GroupNode } from '../surface-block/index.js';
 import type { RefNodeSlots } from './inline/presets/nodes/reference-node/reference-node.js';
 import type { BlockComponent } from './utils/query.js';
 
@@ -40,7 +37,7 @@ export type ExtendedModel = BlockModel & Record<string, any>;
 
 export type Connectable = Exclude<
   BlockSuite.EdgelessModelType,
-  ConnectorElementModel | BrushElementModel | GroupElementModel
+  ConnectorNode | BrushNode | GroupNode
 >;
 
 export enum LineWidth {

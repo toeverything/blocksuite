@@ -32,11 +32,8 @@ import {
   type TextStyleProps,
 } from '../../../surface-block/consts.js';
 import { isConnectorWithLabel } from '../../../surface-block/element-model/connector.js';
-import { TextElementModel } from '../../../surface-block/element-model/text.js';
-import {
-  ConnectorElementModel,
-  ShapeElementModel,
-} from '../../../surface-block/index.js';
+import { TextNode } from '../../../surface-block/element-model/text.js';
+import { ConnectorNode, ShapeNode } from '../../../surface-block/index.js';
 import { normalizeShapeBound } from '../../../surface-block/index.js';
 import {
   getFontFacesByFontFamily,
@@ -109,7 +106,7 @@ function extractField<K extends keyof TextStyleProps>(
       : (element[field as keyof EdgelessTextBlockModel] as TextStyleProps[K]);
   }
   return (
-    element instanceof ConnectorElementModel
+    element instanceof ConnectorNode
       ? element.labelStyle[field]
       : element[field]
   ) as TextStyleProps[K];
@@ -157,7 +154,7 @@ function buildProps(
   element: BlockSuite.EdgelessTextModelType,
   props: { [K in keyof TextStyleProps]?: TextStyleProps[K] }
 ) {
-  if (element instanceof ConnectorElementModel) {
+  if (element instanceof ConnectorNode) {
     return {
       labelStyle: {
         ...element.labelStyle,
@@ -223,7 +220,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   private _updateElementBound = (element: BlockSuite.EdgelessTextModelType) => {
     const elementType = this.elementType;
-    if (elementType === 'text' && element instanceof TextElementModel) {
+    if (elementType === 'text' && element instanceof TextNode) {
       // the change of font family will change the bound of the text
       const {
         text: yText,
@@ -253,7 +250,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         labelXYWH,
         labelStyle: { fontFamily, fontStyle, fontSize, fontWeight },
         labelConstraints: { hasMaxWidth, maxWidth },
-      } = element as ConnectorElementModel;
+      } = element as ConnectorNode;
       const prevBounds = Bound.fromXYWH(labelXYWH || [0, 0, 16, 16]);
       const center = prevBounds.center;
       const bounds = normalizeTextBound(
@@ -272,10 +269,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.service.updateElement(element.id, {
         labelXYWH: bounds.toXYWH(),
       });
-    } else if (
-      elementType === 'shape' &&
-      element instanceof ShapeElementModel
-    ) {
+    } else if (elementType === 'shape' && element instanceof ShapeNode) {
       const newBound = normalizeShapeBound(
         element,
         Bound.fromXYWH(element.deserializedXYWH)

@@ -10,7 +10,7 @@ import {
   type SnapshotReturn,
 } from '@blocksuite/store';
 
-import type { ConnectorElementModel } from '../../../surface-block/index.js';
+import type { ConnectorNode } from '../../../surface-block/index.js';
 import type { SurfaceBlockModel } from '../../../surface-block/surface-model.js';
 import type { SurfaceBlockTransformer } from '../../../surface-block/surface-transformer.js';
 
@@ -133,7 +133,7 @@ export class TemplateJob {
           if (type === 'connector') {
             (['target', 'source'] as const).forEach(prop => {
               const propVal = val[prop];
-              assertType<ConnectorElementModel['source']>(propVal);
+              assertType<ConnectorNode['source']>(propVal);
 
               if (propVal['id'] || !propVal['position']) return;
 

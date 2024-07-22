@@ -1,15 +1,13 @@
 import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
 
-import { MindmapElementModel } from '../../../surface-block/index.js';
+import { MindmapNode } from '../../../surface-block/index.js';
 
 export function isMindmapNode(el: BlockSuite.EdgelessModelType) {
-  return (
-    el.group instanceof MindmapElementModel || el instanceof MindmapElementModel
-  );
+  return el.group instanceof MindmapNode || el instanceof MindmapNode;
 }
 
 export function isSelectSingleMindMap(els: BlockSuite.EdgelessModelType[]) {
-  return els.length === 1 && els[0].group instanceof MindmapElementModel;
+  return els.length === 1 && els[0].group instanceof MindmapNode;
 }
 
 export function isElementOutsideViewport(

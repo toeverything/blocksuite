@@ -34,7 +34,7 @@ import {
 export type { NodeHitTestOptions } from '@blocksuite/block-std/edgeless';
 
 export type ModelToProps<
-  T extends SurfaceElementModel,
+  T extends SurfaceNode,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   K extends keyof any,
 > = OmitFunctionsAndKeysAndReadOnly<
@@ -47,7 +47,7 @@ export type NodeBaseProps = {
   seed: number;
 };
 
-export type SerializedElement = Record<string, unknown> & {
+export type SerializedNode = Record<string, unknown> & {
   type: string;
   xywh: SerializedXYWH;
   id: string;
@@ -55,9 +55,8 @@ export type SerializedElement = Record<string, unknown> & {
   props: Record<string, unknown>;
 };
 
-export abstract class SurfaceElementModel<
-  Props extends NodeBaseProps = NodeBaseProps,
-> implements Node
+export abstract class SurfaceNode<Props extends NodeBaseProps = NodeBaseProps>
+  implements Node
 {
   protected _disposable = new DisposableGroup();
 
@@ -188,7 +187,7 @@ export abstract class SurfaceElementModel<
   }
 
   serialize() {
-    return this.yMap.toJSON() as SerializedElement;
+    return this.yMap.toJSON() as SerializedNode;
   }
 
   stash(prop: keyof Props | string) {
@@ -200,7 +199,7 @@ export abstract class SurfaceElementModel<
       return;
     }
 
-    const curVal = this[prop as unknown as keyof SurfaceElementModel];
+    const curVal = this[prop as unknown as keyof SurfaceNode];
 
     this._stashed.set(prop, curVal);
 
@@ -214,7 +213,7 @@ export abstract class SurfaceElementModel<
         const derivedProps = getDeriveProperties(
           prop as string,
           original,
-          this as unknown as SurfaceElementModel
+          this as unknown as SurfaceNode
         );
 
         this._stashed.set(prop, value);
@@ -238,7 +237,7 @@ export abstract class SurfaceElementModel<
           },
         });
 
-        updateDerivedProp(derivedProps, this as unknown as SurfaceElementModel);
+        updateDerivedProp(derivedProps, this as unknown as SurfaceNode);
       },
     });
   }
@@ -277,7 +276,7 @@ export abstract class SurfaceElementModel<
     return this._local.get('externalBound') as Bound | null;
   }
 
-  get group(): SurfaceGroupLikeModel | null {
+  get group(): GroupLikeNode | null {
     return this.surface.getGroup(this.id);
   }
 
@@ -334,9 +333,9 @@ export abstract class SurfaceElementModel<
   abstract xywh: SerializedXYWH;
 }
 
-export abstract class SurfaceGroupLikeModel<
+export abstract class GroupLikeNode<
   Props extends NodeBaseProps = NodeBaseProps,
-> extends SurfaceElementModel<Props> {
+> extends SurfaceNode<Props> {
   private _childIds: string[] = [];
 
   /**
@@ -345,7 +344,7 @@ export abstract class SurfaceGroupLikeModel<
    */
   descendants(withoutGroup = true) {
     return this.childElements.reduce((prev, child) => {
-      if (child instanceof SurfaceGroupLikeModel) {
+      if (child instanceof GroupLikeNode) {
         prev = prev.concat(child.descendants());
 
         !withoutGroup && prev.push(child);
@@ -440,11 +439,11 @@ export abstract class SurfaceGroupLikeModel<
    */
   abstract removeChild(id: string): void;
 
-  @local<SerializedXYWH, SurfaceGroupLikeModel>()
+  @local<SerializedXYWH, GroupLikeNode>()
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
 
-export abstract class SurfaceLocalModel {
+export abstract class LocalNode {
   private _lastXYWH: SerializedXYWH = '[0,0,-1,-1]';
 
   protected _local = new Map<string | symbol, unknown>();
@@ -484,28 +483,28 @@ export abstract class SurfaceLocalModel {
 
 declare global {
   namespace BlockSuite {
-    interface SurfaceElementModelMap {}
-    type SurfaceElementModelKeyType = keyof SurfaceElementModelMap;
-    type SurfaceElementModelType =
-      | SurfaceElementModelMap[SurfaceElementModelKeyType]
-      | SurfaceElementModel;
+    interface SurfaceNodeModelMap {}
+    type SurfaceNodeModelKeyType = keyof SurfaceNodeModelMap;
+    type SurfaceNodeModelType =
+      | SurfaceNodeModelMap[SurfaceNodeModelKeyType]
+      | SurfaceNode;
 
     interface SurfaceGroupLikeModelMap {}
     type SurfaceGroupLikeModelKeyType = keyof SurfaceGroupLikeModelMap;
     type SurfaceGroupLikeModelType =
       | SurfaceGroupLikeModelMap[SurfaceGroupLikeModelKeyType]
-      | SurfaceGroupLikeModel;
+      | GroupLikeNode;
 
     interface SurfaceLocalModelMap {}
     type SurfaceLocalModelKeyType = keyof SurfaceLocalModelMap;
     type SurfaceLocalModelType =
       | SurfaceLocalModelMap[SurfaceLocalModelKeyType]
-      | SurfaceLocalModel;
+      | LocalNode;
 
     // not include local model
-    type SurfaceModelType = SurfaceElementModelType | SurfaceGroupLikeModelType;
-    type SurfaceModelKeyType =
-      | SurfaceElementModelKeyType
+    type SurfaceNodeType = SurfaceNodeModelType | SurfaceGroupLikeModelType;
+    type SurfaceNodeKeyType =
+      | SurfaceNodeModelKeyType
       | SurfaceGroupLikeModelKeyType;
   }
 }

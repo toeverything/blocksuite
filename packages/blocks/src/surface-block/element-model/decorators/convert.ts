@@ -1,4 +1,4 @@
-import type { SurfaceElementModel } from '../base.js';
+import type { SurfaceNode } from '../base.js';
 
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
@@ -13,7 +13,7 @@ const convertSymbol = Symbol('convert');
  * @param fn
  * @returns
  */
-export function convert<V, T extends SurfaceElementModel>(
+export function convert<V, T extends SurfaceNode>(
   fn: (propValue: V, instance: T) => unknown
 ) {
   return function convertDecorator(

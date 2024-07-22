@@ -7,8 +7,8 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type {
-  ConnectorElementProps,
   ConnectorLabelProps,
+  ConnectorNodeProps,
 } from '../../../surface-block/element-model/connector.js';
 import type { PointStyle } from '../../../surface-block/index.js';
 import type { LineStyleEvent } from '../../edgeless/components/panel/line-styles-panel.js';
@@ -40,9 +40,9 @@ import {
 import { LineWidth } from '../../../_common/types.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import {
-  type ConnectorElementModel,
   ConnectorEndpoint,
   ConnectorMode,
+  type ConnectorNode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
   type StrokeStyle,
@@ -56,37 +56,33 @@ import '../../edgeless/components/panel/stroke-style-panel.js';
 import { mountConnectorLabelEditor } from '../../edgeless/utils/text.js';
 import './change-text-menu.js';
 
-function getMostCommonColor(
-  elements: ConnectorElementModel[]
-): CssVariableName {
+function getMostCommonColor(elements: ConnectorNode[]): CssVariableName {
   const colors = countBy(elements, ele => ele.stroke);
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
-function getMostCommonMode(
-  elements: ConnectorElementModel[]
-): ConnectorMode | null {
+function getMostCommonMode(elements: ConnectorNode[]): ConnectorMode | null {
   const modes = countBy(elements, ele => ele.mode);
   const max = maxBy(Object.entries(modes), ([_k, count]) => count);
   return max ? (Number(max[0]) as ConnectorMode) : null;
 }
 
-function getMostCommonLineWidth(elements: ConnectorElementModel[]): LineWidth {
+function getMostCommonLineWidth(elements: ConnectorNode[]): LineWidth {
   const sizes = countBy(elements, ele => ele.strokeWidth);
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (Number(max[0]) as LineWidth) : LineWidth.Four;
 }
 
 export function getMostCommonLineStyle(
-  elements: ConnectorElementModel[]
+  elements: ConnectorNode[]
 ): StrokeStyle | null {
   const sizes = countBy(elements, ele => ele.strokeStyle);
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (max[0] as StrokeStyle) : null;
 }
 
-function getMostCommonRough(elements: ConnectorElementModel[]): boolean {
+function getMostCommonRough(elements: ConnectorNode[]): boolean {
   const { trueCount, falseCount } = elements.reduce(
     (counts, ele) => {
       if (ele.rough) {
@@ -103,7 +99,7 @@ function getMostCommonRough(elements: ConnectorElementModel[]): boolean {
 }
 
 function getMostCommonEndpointStyle(
-  elements: ConnectorElementModel[],
+  elements: ConnectorNode[],
   endpoint: ConnectorEndpoint
 ): PointStyle | null {
   const field =
@@ -116,9 +112,9 @@ function getMostCommonEndpointStyle(
 }
 
 function notEqual<
-  K extends keyof Omit<ConnectorElementProps, keyof ConnectorLabelProps>,
->(key: K, value: ConnectorElementProps[K]) {
-  return (element: ConnectorElementModel) => element[key] !== value;
+  K extends keyof Omit<ConnectorNodeProps, keyof ConnectorLabelProps>,
+>(key: K, value: ConnectorNodeProps[K]) {
+  return (element: ConnectorNode) => element[key] !== value;
 }
 
 interface EndpointStyle {
@@ -261,8 +257,8 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   }
 
   private _setConnectorProp<
-    K extends keyof Omit<ConnectorElementProps, keyof ConnectorLabelProps>,
-  >(key: K, value: ConnectorElementProps[K]) {
+    K extends keyof Omit<ConnectorNodeProps, keyof ConnectorLabelProps>,
+  >(key: K, value: ConnectorNodeProps[K]) {
     this.doc.captureSync();
     this.elements
       .filter(notEqual(key, value))
@@ -534,7 +530,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor elements: ConnectorElementModel[] = [];
+  accessor elements: ConnectorNode[] = [];
 }
 
 declare global {
@@ -545,7 +541,7 @@ declare global {
 
 export function renderConnectorButton(
   edgeless: EdgelessRootBlockComponent,
-  elements?: ConnectorElementModel[]
+  elements?: ConnectorNode[]
 ) {
   if (!elements?.length) return nothing;
 

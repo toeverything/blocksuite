@@ -8,10 +8,10 @@ import { type BlockModel, Slot } from '@blocksuite/store';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type {
   CanvasElementType,
-  ConnectorElementModel,
+  ConnectorNode,
 } from '../../surface-block/element-model/index.js';
 import type {
-  GroupElementModel,
+  GroupNode,
   SurfaceBlockModel,
 } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
@@ -21,13 +21,10 @@ import type { EdgelessTool } from './types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { clamp } from '../../_common/utils/math.js';
 import {
+  GroupLikeNode,
   type NodeHitTestOptions,
-  SurfaceGroupLikeModel,
 } from '../../surface-block/element-model/base.js';
-import {
-  MindmapElementModel,
-  getCommonBound,
-} from '../../surface-block/index.js';
+import { MindmapNode, getCommonBound } from '../../surface-block/index.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { RootService, type TelemetryEvent } from '../root-service.js';
@@ -102,7 +99,7 @@ export class EdgelessRootService extends RootService {
     cursorUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
       blocks: BlockSuite.EdgelessBlockModelType[];
-      shapes: BlockSuite.SurfaceModelType[];
+      shapes: BlockSuite.SurfaceNodeType[];
     }>(),
     readonlyUpdated: new Slot<boolean>(),
     draggingAreaUpdated: new Slot(),
@@ -193,7 +190,7 @@ export class EdgelessRootService extends RootService {
   createGroup(elements: BlockSuite.EdgelessModelType[] | string[]) {
     const groups = this.elements.filter(
       el => el.type === 'group'
-    ) as GroupElementModel[];
+    ) as GroupNode[];
     const groupId = this._surface.addElement({
       type: 'group',
       children: elements.reduce(
@@ -218,13 +215,13 @@ export class EdgelessRootService extends RootService {
       !selection.selectedElements.every(
         element =>
           element.group === selection.firstElement.group &&
-          !(element.group instanceof MindmapElementModel)
+          !(element.group instanceof MindmapNode)
       )
     ) {
       return;
     }
 
-    const parent = selection.firstElement.group as GroupElementModel;
+    const parent = selection.firstElement.group as GroupNode;
 
     if (parent !== null) {
       selection.selectedElements.forEach(element => {
@@ -295,7 +292,7 @@ export class EdgelessRootService extends RootService {
   getConnectors(element: BlockSuite.EdgelessModelType | string) {
     const id = typeof element === 'string' ? element : element.id;
 
-    return this.surface.getConnectors(id) as ConnectorElementModel[];
+    return this.surface.getConnectors(id) as ConnectorNode[];
   }
 
   getElementById(id: string): BlockSuite.EdgelessModelType | null {
@@ -467,8 +464,7 @@ export class EdgelessRootService extends RootService {
 
       while (
         picked === activeGroup ||
-        (picked instanceof SurfaceGroupLikeModel &&
-          picked.hasDescendant(activeGroup))
+        (picked instanceof GroupLikeNode && picked.hasDescendant(activeGroup))
       ) {
         picked = results[--index];
       }
@@ -505,7 +501,7 @@ export class EdgelessRootService extends RootService {
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'canvas'
-  ): BlockSuite.SurfaceElementModelType[];
+  ): BlockSuite.SurfaceNodeModelType[];
 
   pickElementsByBound(
     bound: IBound | Bound,
@@ -604,12 +600,12 @@ export class EdgelessRootService extends RootService {
     this.viewport.smoothZoom(clamp(this.zoom + step, ZOOM_MIN, ZOOM_MAX));
   }
 
-  ungroup(group: GroupElementModel) {
+  ungroup(group: GroupNode) {
     const { selection } = this;
     const elements = group.childElements;
-    const parent = group.group as GroupElementModel;
+    const parent = group.group as GroupNode;
 
-    if (group instanceof MindmapElementModel) {
+    if (group instanceof MindmapNode) {
       return;
     }
 

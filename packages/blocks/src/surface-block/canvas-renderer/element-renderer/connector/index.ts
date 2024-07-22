@@ -1,8 +1,8 @@
 import type { PointLocation } from '@blocksuite/global/utils';
 
 import type {
-  ConnectorElementModel,
-  LocalConnectorElementModel,
+  ConnectorNode,
+  LocalConnectorNode,
   PointStyle,
 } from '../../../element-model/connector.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
@@ -32,7 +32,7 @@ import {
 } from './utils.js';
 
 export function connector(
-  model: ConnectorElementModel | LocalConnectorElementModel,
+  model: ConnectorNode | LocalConnectorNode,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer,
@@ -62,7 +62,7 @@ export function connector(
   if (hasLabel) {
     ctx.save();
 
-    const { deserializedXYWH, labelXYWH } = model as ConnectorElementModel;
+    const { deserializedXYWH, labelXYWH } = model as ConnectorNode;
     const [x, y, w, h] = deserializedXYWH;
     const [lx, ly, lw, lh] = labelXYWH!;
     const offset = DEFAULT_ARROW_SIZE * strokeWidth;
@@ -92,7 +92,7 @@ export function connector(
     ctx.restore();
 
     renderLabel(
-      model as ConnectorElementModel,
+      model as ConnectorNode,
       ctx,
       matrix.translate(dx, dy),
       renderer
@@ -101,7 +101,7 @@ export function connector(
 }
 
 function renderPoints(
-  model: ConnectorElementModel | LocalConnectorElementModel,
+  model: ConnectorNode | LocalConnectorNode,
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
   rc: RoughCanvas,
@@ -169,7 +169,7 @@ function renderPoints(
 }
 
 function renderEndpoint(
-  model: ConnectorElementModel | LocalConnectorElementModel,
+  model: ConnectorNode | LocalConnectorNode,
   location: PointLocation[],
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
@@ -196,7 +196,7 @@ function renderEndpoint(
 }
 
 function renderLabel(
-  model: ConnectorElementModel,
+  model: ConnectorNode,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer

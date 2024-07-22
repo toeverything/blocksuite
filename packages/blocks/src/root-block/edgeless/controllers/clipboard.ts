@@ -44,8 +44,8 @@ import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import {
-  type SerializedElement,
-  SurfaceGroupLikeModel,
+  GroupLikeNode,
+  type SerializedNode,
 } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
@@ -53,7 +53,7 @@ import {
   type Connection,
   getBoundsWithRotation,
 } from '../../../surface-block/index.js';
-import { ConnectorElementModel } from '../../../surface-block/index.js';
+import { ConnectorNode } from '../../../surface-block/index.js';
 import { compare } from '../../../surface-block/managers/layer-utils.js';
 import { getCommonBound } from '../../../surface-block/utils/bound.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
@@ -459,13 +459,13 @@ export class EdgelessClipboardController extends PageClipboard {
     });
     const element = this.host.service.getElementById(
       id
-    ) as BlockSuite.SurfaceModelType;
+    ) as BlockSuite.SurfaceNodeType;
     assertExists(element);
     return element;
   }
 
   private _createCanvasElements(
-    elements: SerializedElement[],
+    elements: SerializedNode[],
     idMap: Map<string, string>
   ) {
     const result = groupBy(elements, item => {
@@ -813,7 +813,7 @@ export class EdgelessClipboardController extends PageClipboard {
     edgeless: EdgelessRootBlockComponent,
     bound: IBound,
     nodes?: BlockSuite.EdgelessBlockModelType[],
-    canvasElements: BlockSuite.SurfaceModelType[] = [],
+    canvasElements: BlockSuite.SurfaceNodeType[] = [],
     {
       background,
       padding = IMAGE_PADDING,
@@ -940,7 +940,7 @@ export class EdgelessClipboardController extends PageClipboard {
             if (isTopLevelBlock(ele)) {
               blocksInsideFrame.push(ele as BlockSuite.EdgelessBlockModelType);
             } else {
-              canvasElements.push(ele as BlockSuite.SurfaceModelType);
+              canvasElements.push(ele as BlockSuite.SurfaceNodeType);
             }
           });
 
@@ -1008,7 +1008,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private async _pasteShapesAndBlocks(
-    elementsRawData: (SerializedElement | BlockSnapshot)[]
+    elementsRawData: (SerializedNode | BlockSnapshot)[]
   ) {
     const { canvasElements, blockModels } =
       await this.createElementsFromClipboardData(elementsRawData);
@@ -1098,9 +1098,9 @@ export class EdgelessClipboardController extends PageClipboard {
       a: BlockSuite.EdgelessModelType,
       b: BlockSuite.EdgelessModelType
     ) {
-      if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
+      if (a instanceof GroupLikeNode && a.hasDescendant(b)) {
         return -1;
-      } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
+      } else if (b instanceof GroupLikeNode && b.hasDescendant(a)) {
         return 1;
       } else {
         const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModelType[];
@@ -1171,7 +1171,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
   async copyAsPng(
     blocks: BlockSuite.EdgelessBlockModelType[],
-    shapes: BlockSuite.SurfaceModelType[]
+    shapes: BlockSuite.SurfaceNodeType[]
   ) {
     const blocksLen = blocks.length;
     const shapesLen = shapes.length;
@@ -1206,12 +1206,12 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   async createElementsFromClipboardData(
-    elementsRawData: (SerializedElement | BlockSnapshot)[],
+    elementsRawData: (SerializedNode | BlockSnapshot)[],
     pasteCenter?: IVec
   ) {
     const originalIndexes = new Map<string, string>();
     const blockRawData: BlockSnapshot[] = [];
-    const surfaceRawData: SerializedElement[] = [];
+    const surfaceRawData: SerializedNode[] = [];
 
     elementsRawData.forEach(data => {
       const { data: blockSnapshot } = BlockSnapshotSchema.safeParse(data);
@@ -1221,7 +1221,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
         blockRawData.push(blockSnapshot);
       } else {
-        const serializedElement = data as SerializedElement;
+        const serializedElement = data as SerializedNode;
         originalIndexes.set(serializedElement.id, serializedElement.index);
 
         surfaceRawData.push(serializedElement);
@@ -1347,7 +1347,7 @@ export class EdgelessClipboardController extends PageClipboard {
         ele.w,
         ele.h
       );
-      if (ele instanceof ConnectorElementModel) {
+      if (ele instanceof ConnectorNode) {
         ele.moveTo(newBound);
       } else {
         this.host.service.updateElement(ele.id, {
@@ -1381,7 +1381,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
   async toCanvas(
     blocks: BlockSuite.EdgelessBlockModelType[],
-    shapes: BlockSuite.SurfaceModelType[],
+    shapes: BlockSuite.SurfaceNodeType[],
     options?: CanvasExportOptions
   ) {
     blocks.sort(compare);

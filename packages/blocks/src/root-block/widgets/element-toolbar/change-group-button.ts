@@ -4,7 +4,7 @@ import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import type { GroupElementModel } from '../../../surface-block/index.js';
+import type { GroupNode } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { toast } from '../../../_common/components/toast.js';
@@ -126,7 +126,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor groups!: GroupElementModel[];
+  accessor groups!: GroupNode[];
 }
 
 declare global {
@@ -137,7 +137,7 @@ declare global {
 
 export function renderGroupButton(
   edgeless: EdgelessRootBlockComponent,
-  groups?: GroupElementModel[]
+  groups?: GroupNode[]
 ) {
   if (!groups?.length) return nothing;
 

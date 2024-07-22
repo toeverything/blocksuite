@@ -5,24 +5,24 @@ import type { Y } from '@blocksuite/store';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import type { NodeBaseProps, SerializedElement } from './base.js';
+import type { NodeBaseProps, SerializedNode } from './base.js';
 
 import { keys } from '../../_common/utils/iterable.js';
 import { linePolygonIntersects } from '../utils/math-utils.js';
-import { SurfaceGroupLikeModel } from './base.js';
+import { GroupLikeNode } from './base.js';
 import { local, observe, yfield } from './decorators.js';
 
-type GroupElementProps = NodeBaseProps & {
+type GroupNodeProps = NodeBaseProps & {
   children: Y.Map<boolean>;
   title: Y.Text;
 };
 
-export type SerializedGroupElement = SerializedElement & {
+export type SerializedGroupElement = SerializedNode & {
   title: string;
   children: Record<string, boolean>;
 };
 
-export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> {
+export class GroupNode extends GroupLikeNode<GroupNodeProps> {
   static override propsToY(props: Record<string, unknown>) {
     if (props.title && !(props.title instanceof DocCollection.Y.Text)) {
       props.title = new DocCollection.Y.Text(props.title as string);
@@ -38,7 +38,7 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
       props.children = children;
     }
 
-    return props as GroupElementProps;
+    return props as GroupNodeProps;
   }
 
   addChild(element: BlockSuite.EdgelessModelType | string) {
@@ -85,7 +85,7 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
     return 'group';
   }
 
-  @observe((_, instance: GroupElementModel, transaction) => {
+  @observe((_, instance: GroupNode, transaction) => {
     instance.setChildIds(
       Array.from(instance.children.keys()),
       transaction?.local ?? false
@@ -104,7 +104,7 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
 declare global {
   namespace BlockSuite {
     interface SurfaceGroupLikeModelMap {
-      group: GroupElementModel;
+      group: GroupNode;
     }
   }
 }

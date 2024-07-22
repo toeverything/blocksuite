@@ -2,7 +2,7 @@ import type { Bound } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
 import type { FontFamily, FontStyle, FontWeight } from '../../../consts.js';
-import type { TextElementModel } from '../../../element-model/text.js';
+import type { TextNode } from '../../../element-model/text.js';
 
 import {
   getFontFacesByFontFamily,
@@ -470,7 +470,7 @@ export const truncateTextByWidth = (
 };
 
 export function getTextCursorPosition(
-  model: TextElementModel,
+  model: TextNode,
   coord: { x: number; y: number }
 ) {
   const leftTop = getPointsFromBoundsWithRotation(model)[0];
@@ -490,7 +490,7 @@ export function getTextCursorPosition(
 }
 
 export function getCursorByCoord(
-  model: TextElementModel,
+  model: TextNode,
   coord: { x: number; y: number }
 ) {
   const [lineIndex, offsetX] = getTextCursorPosition(model, coord);

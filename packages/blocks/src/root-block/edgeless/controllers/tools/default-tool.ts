@@ -7,7 +7,7 @@ import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
+import type { MindmapVertex } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessTool } from '../../types.js';
 
 import {
@@ -20,16 +20,16 @@ import {
 } from '../../../../_common/utils/index.js';
 import { clamp } from '../../../../_common/utils/math.js';
 import {
+  GroupLikeNode,
   type NodeHitTestOptions,
-  SurfaceGroupLikeModel,
 } from '../../../../surface-block/element-model/base.js';
 import { isConnectorWithLabel } from '../../../../surface-block/element-model/connector.js';
 import {
-  ConnectorElementModel,
-  GroupElementModel,
-  MindmapElementModel,
-  ShapeElementModel,
-  TextElementModel,
+  ConnectorNode,
+  GroupNode,
+  MindmapNode,
+  ShapeNode,
+  TextNode,
 } from '../../../../surface-block/element-model/index.js';
 import {
   hideTargetConnector,
@@ -128,16 +128,16 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _dragging = false;
 
   private _draggingSingleMindmap: null | {
-    mindmap: MindmapElementModel;
-    node: MindmapNode;
+    mindmap: MindmapNode;
+    node: MindmapVertex;
     startElementBound: Bound;
     clear?: () => void;
     detach?: boolean;
   } = null;
 
   private _hoveredMindMap: null | {
-    mindmap: MindmapElementModel;
-    node: MindmapNode;
+    mindmap: MindmapNode;
+    node: MindmapVertex;
     mergeInfo?: Exclude<
       ReturnType<typeof showMergeIndicator>,
       undefined
@@ -162,7 +162,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _selectedBounds: Bound[] = [];
 
   // For moving the connector label
-  private _selectedConnector: ConnectorElementModel | null = null;
+  private _selectedConnector: ConnectorNode | null = null;
 
   private _selectedConnectorLabelBounds: Bound | null = null;
 
@@ -291,7 +291,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const currentSelected = this._pick(x, y);
         if (
           !isFrameBlock(selected) &&
-          !(selected instanceof GroupElementModel) &&
+          !(selected instanceof GroupNode) &&
           currentSelected &&
           currentSelected !== selected
         ) {
@@ -305,11 +305,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         if (
           isCanvasElement(selected) &&
           isConnectorWithLabel(selected) &&
-          (selected as ConnectorElementModel).labelHitTest(
+          (selected as ConnectorNode).labelHitTest(
             this._service.viewport.toModelCoord(x, y)
           )
         ) {
-          this._selectedConnector = selected as ConnectorElementModel;
+          this._selectedConnector = selected as ConnectorNode;
           this._selectedConnectorLabelBounds = Bound.fromXYWH(
             this._selectedConnector.labelXYWH!
           );
@@ -331,11 +331,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         if (
           isCanvasElement(selected) &&
           isConnectorWithLabel(selected) &&
-          (selected as ConnectorElementModel).labelHitTest(
+          (selected as ConnectorNode).labelHitTest(
             this._service.viewport.toModelCoord(x, y)
           )
         ) {
-          this._selectedConnector = selected as ConnectorElementModel;
+          this._selectedConnector = selected as ConnectorNode;
           this._selectedConnectorLabelBounds = Bound.fromXYWH(
             this._selectedConnector.labelXYWH!
           );
@@ -351,11 +351,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _filterConnectedConnector() {
     this._toBeMoved = this._toBeMoved.filter(ele => {
-      if (
-        ele instanceof ConnectorElementModel &&
-        ele.source.id &&
-        ele.target.id
-      ) {
+      if (ele instanceof ConnectorNode && ele.source.id && ele.target.id) {
         if (
           this._toBeMoved.some(e => e.id === ele.source.id) &&
           this._toBeMoved.some(e => e.id === ele.target.id)
@@ -369,7 +365,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _isDraggable(element: BlockSuite.EdgelessModelType) {
     return !(
-      element instanceof ConnectorElementModel &&
+      element instanceof ConnectorNode &&
       !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
     );
   }
@@ -410,7 +406,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           this._doc.captureSync();
         }
 
-        if (element instanceof ConnectorElementModel) {
+        if (element instanceof ConnectorNode) {
           element.moveTo(bound);
         }
 
@@ -444,13 +440,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         .pickElement(x, y, { all: true, expand: 40 })
         .filter(
           el =>
-            (el.group as BlockSuite.SurfaceElementModelType)?.type ===
-              'mindmap' && el !== current
+            (el.group as BlockSuite.SurfaceNodeModelType)?.type === 'mindmap' &&
+            el !== current
         )
         .map(el => ({
-          element: el as ShapeElementModel,
-          node: (el.group as MindmapElementModel).getNode(el.id)!,
-          mindmap: el.group as MindmapElementModel,
+          element: el as ShapeNode,
+          node: (el.group as MindmapNode).getNode(el.id)!,
+          mindmap: el.group as MindmapNode,
         }))[0];
 
       if (hoveredMindmap) {
@@ -525,7 +521,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const modelPos = service.viewport.toModelCoord(x, y);
     const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
 
-    if (group instanceof MindmapElementModel) {
+    if (group instanceof MindmapNode) {
       const picked = service.pickElement(modelPos[0], modelPos[1], {
         ...((options ?? {}) as NodeHitTestOptions),
         all: true,
@@ -566,9 +562,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       Bound.deserialize(element.xywh)
     );
 
-    if (
-      this._toBeMoved.every(ele => !(ele.group instanceof MindmapElementModel))
-    ) {
+    if (this._toBeMoved.every(ele => !(ele.group instanceof MindmapNode))) {
       this._alignBound = this._edgeless.service.snap.setupAlignables(
         this._toBeMoved
       );
@@ -790,18 +784,18 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       return;
     } else {
       const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
-      if (selected instanceof TextElementModel) {
+      if (selected instanceof TextNode) {
         mountTextElementEditor(selected, this._edgeless, {
           x,
           y,
         });
         return;
       }
-      if (selected instanceof ShapeElementModel) {
+      if (selected instanceof ShapeNode) {
         mountShapeTextEditor(selected, this._edgeless);
         return;
       }
-      if (selected instanceof ConnectorElementModel) {
+      if (selected instanceof ConnectorNode) {
         mountConnectorLabelEditor(selected, this._edgeless, [x, y]);
         return;
       }
@@ -809,7 +803,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         mountFrameTitleEditor(selected, this._edgeless);
         return;
       }
-      if (selected instanceof GroupElementModel) {
+      if (selected instanceof GroupNode) {
         mountGroupTitleEditor(selected, this._edgeless);
         return;
       }
@@ -847,7 +841,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const subtree = mindmap.detach(this._draggingSingleMindmap.node);
 
         if (subtree) {
-          MindmapElementModel.createFromTree(
+          MindmapNode.createFromTree(
             subtree,
             mindmap.style,
             mindmap.layoutType,
@@ -866,11 +860,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           el.pop('xywh');
         });
 
-        if (el instanceof ConnectorElementModel) {
+        if (el instanceof ConnectorNode) {
           el.pop('labelXYWH');
         }
 
-        if (el instanceof MindmapElementModel) {
+        if (el instanceof MindmapNode) {
           el.requestLayout();
         }
       });
@@ -966,12 +960,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         this._edgeless.service.frame
           .getElementsInFrame(element)
           .forEach(ele => toBeMoved.add(ele));
-      } else if (
-        element.group instanceof MindmapElementModel &&
-        elements.length > 1
-      ) {
+      } else if (element.group instanceof MindmapNode && elements.length > 1) {
         element.group.descendants().forEach(ele => toBeMoved.add(ele));
-      } else if (element instanceof SurfaceGroupLikeModel) {
+      } else if (element instanceof GroupLikeNode) {
         element.descendants().forEach(ele => toBeMoved.add(ele));
       }
     });
@@ -985,9 +976,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._filterConnectedConnector();
 
     // Connector needs to be updated first
-    this._toBeMoved.sort((a, _) =>
-      a instanceof ConnectorElementModel ? -1 : 1
-    );
+    this._toBeMoved.sort((a, _) => (a instanceof ConnectorNode ? -1 : 1));
 
     // Set up drag state
     this.initializeDragState(e, dragType);
@@ -995,9 +984,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     // stash the state
     if (
       this._toBeMoved.length === 1 &&
-      this._toBeMoved[0].group instanceof MindmapElementModel
+      this._toBeMoved[0].group instanceof MindmapNode
     ) {
-      const mindmap = this._toBeMoved[0].group as MindmapElementModel;
+      const mindmap = this._toBeMoved[0].group as MindmapNode;
       this._draggingSingleMindmap = {
         mindmap,
         node: mindmap.getNode(this._toBeMoved[0].id)!,
@@ -1008,7 +997,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._toBeMoved.forEach(ele => {
         ele.stash('xywh');
 
-        if (ele instanceof ConnectorElementModel) {
+        if (ele instanceof ConnectorNode) {
           ele.stash('labelXYWH');
         }
       });

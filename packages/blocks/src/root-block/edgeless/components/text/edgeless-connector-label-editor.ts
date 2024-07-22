@@ -11,7 +11,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import type { ConnectorElementModel } from '../../../../surface-block/index.js';
+import type { ConnectorNode } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import '../../../../_common/components/rich-text/rich-text.js';
@@ -301,7 +301,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
   }
 
   @property({ attribute: false })
-  accessor connector!: ConnectorElementModel;
+  accessor connector!: ConnectorNode;
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;

@@ -7,7 +7,7 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 
 import '../../../_common/components/toolbar/icon-button.js';
 import { FrameIcon } from '../../../_common/icons/index.js';
-import { MindmapElementModel } from '../../../surface-block/index.js';
+import { MindmapNode } from '../../../surface-block/index.js';
 
 @customElement('edgeless-add-frame-button')
 export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
@@ -58,8 +58,7 @@ export function renderAddFrameButton(
   elements: BlockSuite.EdgelessModelType[]
 ) {
   if (elements.length < 2) return nothing;
-  if (elements.some(e => e.group instanceof MindmapElementModel))
-    return nothing;
+  if (elements.some(e => e.group instanceof MindmapNode)) return nothing;
 
   return html`
     <edgeless-add-frame-button

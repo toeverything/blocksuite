@@ -40,14 +40,14 @@ import {
 } from '../../../../embed-synced-doc-block/styles.js';
 import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { TextElementModel } from '../../../../surface-block/element-model/text.js';
+import { TextNode } from '../../../../surface-block/element-model/text.js';
 import {
   CanvasElementType,
-  GroupElementModel,
-  ShapeElementModel,
+  GroupNode,
+  ShapeNode,
 } from '../../../../surface-block/index.js';
 import {
-  ConnectorElementModel,
+  ConnectorNode,
   normalizeDegAngle,
   normalizeShapeBound,
 } from '../../../../surface-block/index.js';
@@ -181,17 +181,17 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         return;
       }
 
-      if (element instanceof TextElementModel) {
+      if (element instanceof TextNode) {
         this.#adjustText(element, bound, direction);
         return;
       }
 
-      if (element instanceof ShapeElementModel) {
+      if (element instanceof ShapeNode) {
         this.#adjustShape(element, bound, direction);
         return;
       }
 
-      if (element instanceof ConnectorElementModel && matrix && path) {
+      if (element instanceof ConnectorNode && matrix && path) {
         this.#adjustConnector(element, bound, matrix, path);
         return;
       }
@@ -223,10 +223,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       const point = new DOMPoint(...originalCenter).matrixTransform(m);
       bounds.center = [point.x, point.y];
 
-      if (
-        isCanvasElement(element) &&
-        element instanceof ConnectorElementModel
-      ) {
+      if (isCanvasElement(element) && element instanceof ConnectorNode) {
         this.#adjustConnector(
           element,
           bounds,
@@ -263,7 +260,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         el.stash('rotate' as 'xywh');
       }
 
-      if (el instanceof TextElementModel && !rotation) {
+      if (el instanceof TextNode && !rotation) {
         el.stash('fontSize');
         el.stash('hasMaxWidth');
       }
@@ -279,7 +276,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           el.pop('rotate' as 'xywh');
         }
 
-        if (el instanceof TextElementModel && !rotation) {
+        if (el instanceof TextNode && !rotation) {
           el.pop('fontSize');
           el.pop('hasMaxWidth');
         }
@@ -810,7 +807,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   #adjustConnector(
-    element: ConnectorElementModel,
+    element: ConnectorNode,
     bounds: Bound,
     matrix: DOMMatrix,
     originalPath: PointLocation[]
@@ -994,22 +991,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     });
   }
 
-  #adjustShape(
-    element: ShapeElementModel,
-    bound: Bound,
-    _direction: HandleDirection
-  ) {
+  #adjustShape(element: ShapeNode, bound: Bound, _direction: HandleDirection) {
     bound = normalizeShapeBound(element, bound);
     this.edgeless.service.updateElement(element.id, {
       xywh: bound.serialize(),
     });
   }
 
-  #adjustText(
-    element: TextElementModel,
-    bound: Bound,
-    direction: HandleDirection
-  ) {
+  #adjustText(element: TextNode, bound: Bound, direction: HandleDirection) {
     let p = 1;
     if (
       direction === HandleDirection.Left ||
@@ -1071,7 +1060,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       !this.autoCompleteOff &&
       !this._isResizing &&
       this.selection.selectedElements.length === 1 &&
-      (this.selection.selectedElements[0] instanceof ShapeElementModel ||
+      (this.selection.selectedElements[0] instanceof ShapeNode ||
         isNoteBlock(this.selection.selectedElements[0]))
     );
   }
@@ -1181,9 +1170,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
               if (target.classList.contains('rotate') && !this._canRotate()) {
                 return;
               }
-              const proportional = elements.some(
-                el => el instanceof TextElementModel
-              );
+              const proportional = elements.some(el => el instanceof TextNode);
               _resizeManager.onPointerDown(e, direction, proportional);
             },
             (
@@ -1202,7 +1189,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         : nothing;
 
       const connectorHandle =
-        elements.length === 1 && elements[0] instanceof ConnectorElementModel
+        elements.length === 1 && elements[0] instanceof ConnectorNode
           ? html`
               <edgeless-connector-handle
                 .connector=${elements[0]}
@@ -1213,10 +1200,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
       const elementHandle =
         elements.length > 1 &&
-        !elements.reduce(
-          (p, e) => p && e instanceof ConnectorElementModel,
-          true
-        )
+        !elements.reduce((p, e) => p && e instanceof ConnectorNode, true)
           ? elements.map(element => {
               const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
               const [x, y] = edgeless.service.viewport.toViewCoord(
@@ -1245,9 +1229,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     const isSingleGroup =
-      elements.length === 1 && elements[0] instanceof GroupElementModel;
+      elements.length === 1 && elements[0] instanceof GroupNode;
 
-    if (elements.length === 1 && elements[0] instanceof ConnectorElementModel) {
+    if (elements.length === 1 && elements[0] instanceof ConnectorNode) {
       _selectedRect.width = 0;
       _selectedRect.height = 0;
       _selectedRect.borderWidth = 0;
@@ -1354,9 +1338,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllConnectors = false;
         areAllShapes = false;
       } else {
-        assertType<BlockSuite.SurfaceElementModelType>(element);
+        assertType<BlockSuite.SurfaceNodeModelType>(element);
         if (element.type === CanvasElementType.CONNECTOR) {
-          const connector = element as ConnectorElementModel;
+          const connector = element as ConnectorNode;
           areAllIndependentConnectors &&= !(
             connector.source.id || connector.target.id
           );

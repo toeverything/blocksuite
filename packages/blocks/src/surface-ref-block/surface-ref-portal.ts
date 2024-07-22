@@ -12,7 +12,7 @@ import { literal, html as staticHtml, unsafeStatic } from 'lit/static-html.js';
 
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { BlockNode } from '../root-block/edgeless/edgeless-block-node.js';
-import type { GroupElementModel } from '../surface-block/element-model/group.js';
+import type { GroupNode } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
 
 import './portal/generic-block.js';
@@ -126,7 +126,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
   };
 
-  private _getBlocksInGroup(model: GroupElementModel): BlockNode[] {
+  private _getBlocksInGroup(model: GroupNode): BlockNode[] {
     return Array.from(model.childIds)
       .map(id => this.doc.getBlockById(id) as BlockNode)
       .filter(el => el);
@@ -162,7 +162,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   accessor portal!: HTMLDivElement;
 
   @property({ attribute: false })
-  accessor refModel!: GroupElementModel | FrameBlockModel;
+  accessor refModel!: GroupNode | FrameBlockModel;
 
   @property({ attribute: false })
   accessor renderModel!: (model: BlockModel) => TemplateResult;

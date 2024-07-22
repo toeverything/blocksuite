@@ -1,7 +1,7 @@
 import type {
-  BrushElementModel,
-  GroupElementModel,
-  ShapeElementModel,
+  BrushNode,
+  GroupNode,
+  ShapeNode,
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
 
@@ -69,7 +69,7 @@ describe('element model', () => {
       type: 'shape',
     });
 
-    const element = model.getElementById(id)! as ShapeElementModel;
+    const element = model.getElementById(id)! as ShapeNode;
 
     expect(element.index).toBe('a0');
     expect(element.strokeColor).toBe('--affine-palette-line-yellow');
@@ -82,7 +82,7 @@ describe('element model', () => {
       strokeColor: '--affine-palette-line-black',
     });
 
-    const element = model.getElementById(id)! as ShapeElementModel;
+    const element = model.getElementById(id)! as ShapeNode;
 
     expect(element.strokeColor).toBe('--affine-palette-line-black');
   });
@@ -92,7 +92,7 @@ describe('element model', () => {
       type: 'shape',
     });
 
-    const element = model.getElementById(id)! as ShapeElementModel;
+    const element = model.getElementById(id)! as ShapeNode;
 
     expect(element.yMap.get('strokeColor')).toBe(
       '--affine-palette-line-yellow'
@@ -150,7 +150,7 @@ describe('group', () => {
         [id3]: true,
       },
     });
-    const group = model.getElementById(groupId) as GroupElementModel;
+    const group = model.getElementById(groupId) as GroupNode;
 
     model.doc.transact(() => {
       group.children.delete(id);
@@ -202,7 +202,7 @@ describe('group', () => {
         [id2]: true,
       },
     });
-    const group = model.getElementById(groupId) as GroupElementModel;
+    const group = model.getElementById(groupId) as GroupNode;
 
     model.updateElement(groupId, {
       children: {
@@ -331,7 +331,7 @@ describe('stash/pop', () => {
       type: 'shape',
       strokeWidth: 4,
     });
-    const elementModel = model.getElementById(id)! as ShapeElementModel;
+    const elementModel = model.getElementById(id)! as ShapeNode;
 
     expect(elementModel.strokeWidth).toBe(4);
 
@@ -354,7 +354,7 @@ describe('stash/pop', () => {
       type: 'shape',
       strokeWidth: 4,
     });
-    const elementModel = model.getElementById(id)! as ShapeElementModel;
+    const elementModel = model.getElementById(id)! as ShapeNode;
 
     elementModel.stash('strokeWidth');
 
@@ -374,7 +374,7 @@ describe('stash/pop', () => {
         [120, 150],
       ],
     });
-    const elementModel = model.getElementById(id)! as BrushElementModel;
+    const elementModel = model.getElementById(id)! as BrushNode;
 
     elementModel.stash('points');
     elementModel.points = [
@@ -398,7 +398,7 @@ describe('stash/pop', () => {
     const id = model.addElement({
       type: 'group',
     });
-    const elementModel = model.getElementById(id)! as GroupElementModel;
+    const elementModel = model.getElementById(id)! as GroupNode;
 
     elementModel.stash('xywh');
     elementModel.xywh = '[10,10,200,200]';
@@ -423,7 +423,7 @@ describe('derive decorator', () => {
         [120, 150],
       ],
     });
-    const elementModel = model.getElementById(id)! as BrushElementModel;
+    const elementModel = model.getElementById(id)! as BrushNode;
 
     expect(elementModel.w).toBe(120 + elementModel.lineWidth);
     expect(elementModel.h).toBe(150 + elementModel.lineWidth);
@@ -435,7 +435,7 @@ describe('local decorator', () => {
     const id = model.addElement({
       type: 'shape',
     });
-    const elementModel = model.getElementById(id)! as BrushElementModel;
+    const elementModel = model.getElementById(id)! as BrushNode;
 
     expect(elementModel.display).toBe(true);
 
@@ -450,7 +450,7 @@ describe('local decorator', () => {
     const id = model.addElement({
       type: 'shape',
     });
-    const elementModel = model.getElementById(id)! as BrushElementModel;
+    const elementModel = model.getElementById(id)! as BrushNode;
 
     const onchange = vi.fn();
 
@@ -472,7 +472,7 @@ describe('convert decorator', () => {
         [300, 300],
       ],
     });
-    const elementModel = model.getElementById(id)! as BrushElementModel;
+    const elementModel = model.getElementById(id)! as BrushNode;
     const halfLineWidth = elementModel.lineWidth / 2;
     const xOffset = 50 - halfLineWidth;
     const yOffset = 25 - halfLineWidth;
@@ -490,7 +490,7 @@ describe('basic property', () => {
     const id = model.addElement({
       type: 'group',
     });
-    const group = model.getElementById(id)! as GroupElementModel;
+    const group = model.getElementById(id)! as GroupNode;
 
     expect(group.x).toBe(0);
     expect(group.y).toBe(0);

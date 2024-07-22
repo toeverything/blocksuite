@@ -1,6 +1,6 @@
 import { Bound } from '@blocksuite/global/utils';
 
-import type { GroupElementModel } from '../../../element-model/group.js';
+import type { GroupNode } from '../../../element-model/group.js';
 
 import { FontFamily, FontWeight } from '../../../consts.js';
 import {
@@ -14,7 +14,7 @@ const TITLE_FONT = FontFamily.Inter;
 const TITLE_FONT_SIZE = 16;
 const TITLE_PADDING = [10, 4];
 
-export function titleRenderParams(group: GroupElementModel, zoom: number) {
+export function titleRenderParams(group: GroupNode, zoom: number) {
   let text = group.title.toJSON();
   const font = getGroupTitleFont(zoom);
   const lineWidth = getLineWidth(text, font);
@@ -59,7 +59,7 @@ export function titleRenderParams(group: GroupElementModel, zoom: number) {
   };
 }
 
-export function titleBound(group: GroupElementModel, zoom: number) {
+export function titleBound(group: GroupNode, zoom: number) {
   const { titleWidth, titleHeight, bound } = titleRenderParams(group, zoom);
 
   return new Bound(bound.x, bound.y - titleHeight, titleWidth, titleHeight);

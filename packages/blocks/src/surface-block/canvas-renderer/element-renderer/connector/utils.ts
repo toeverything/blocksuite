@@ -3,8 +3,8 @@ import type { IVec, PointLocation } from '@blocksuite/global/utils';
 import { Vec } from '@blocksuite/global/utils';
 
 import type {
-  ConnectorElementModel,
-  LocalConnectorElementModel,
+  ConnectorNode,
+  LocalConnectorNode,
 } from '../../../element-model/connector.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
@@ -120,7 +120,7 @@ export type ArrowOptions = ReturnType<typeof getArrowOptions>;
 
 export function getArrowOptions(
   end: ConnectorEnd,
-  model: ConnectorElementModel | LocalConnectorElementModel,
+  model: ConnectorNode | LocalConnectorNode,
   renderer: Renderer
 ) {
   const { stroke, seed, mode, rough, roughness, strokeWidth, path } = model;

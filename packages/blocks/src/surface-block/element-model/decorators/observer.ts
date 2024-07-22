@@ -1,6 +1,6 @@
 import type { Y } from '@blocksuite/store';
 
-import type { SurfaceElementModel } from '../base.js';
+import type { SurfaceNode } from '../base.js';
 
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
@@ -10,7 +10,7 @@ const observerDisposableSymbol = Symbol('observerDisposable');
 type ObserveFn<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   E extends Y.YEvent<any> = Y.YEvent<any>,
-  T extends SurfaceElementModel = SurfaceElementModel,
+  T extends SurfaceNode = SurfaceNode,
 > = (
   /**
    * The event object of the Y.Map or Y.Array, the `null` value means the observer is initializing.
@@ -36,7 +36,7 @@ export function observe<
   V,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   E extends Y.YEvent<any>,
-  T extends SurfaceElementModel,
+  T extends SurfaceNode,
 >(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: ObserveFn<E, T>
@@ -51,7 +51,7 @@ export function observe<
         setObjectPropMeta(observeSymbol, Object.getPrototypeOf(this), prop, fn);
         return v;
       },
-    } as ClassAccessorDecoratorResult<SurfaceElementModel, V>;
+    } as ClassAccessorDecoratorResult<SurfaceNode, V>;
   };
 }
 
@@ -63,10 +63,7 @@ function getObserveMeta(
   return getObjectPropMeta(proto, observeSymbol, prop);
 }
 
-export function startObserve(
-  prop: string | symbol,
-  receiver: SurfaceElementModel
-) {
+export function startObserve(prop: string | symbol, receiver: SurfaceNode) {
   const proto = Object.getPrototypeOf(receiver);
   const observeFn = getObserveMeta(proto, prop as string)!;
   // @ts-ignore
@@ -84,7 +81,7 @@ export function startObserve(
     return;
   }
 
-  const value = receiver[prop as keyof SurfaceElementModel] as
+  const value = receiver[prop as keyof SurfaceNode] as
     | Y.Map<unknown>
     | Y.Array<unknown>
     | null;
@@ -111,10 +108,7 @@ export function startObserve(
   }
 }
 
-export function initializedObservers(
-  proto: unknown,
-  receiver: SurfaceElementModel
-) {
+export function initializedObservers(proto: unknown, receiver: SurfaceNode) {
   const observers = getObjectPropMeta(proto, observeSymbol);
 
   Object.keys(observers).forEach(prop => {

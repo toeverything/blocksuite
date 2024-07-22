@@ -12,7 +12,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { MindmapElementModel } from '../element-model/mindmap.js';
+import type { MindmapNode } from '../element-model/mindmap.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
@@ -122,7 +122,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
   }
 
   get _mindmap() {
-    return this.surface.getElementById(this.mindmapId) as MindmapElementModel;
+    return this.surface.getElementById(this.mindmapId) as MindmapNode;
   }
 
   private _switchStyle(style: MindmapStyle) {

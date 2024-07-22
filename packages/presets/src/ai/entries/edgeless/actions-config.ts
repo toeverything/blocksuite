@@ -2,9 +2,9 @@ import {
   type AIItemGroupConfig,
   AIStarIconWithAnimation,
   BlocksUtils,
-  MindmapElementModel,
-  ShapeElementModel,
-  TextElementModel,
+  MindmapNode,
+  ShapeNode,
+  TextNode,
 } from '@blocksuite/blocks';
 
 import {
@@ -296,8 +296,8 @@ const generateGroup: AIItemGroupConfig = {
           const pureShapes = shapes.filter(
             e =>
               !(
-                e instanceof TextElementModel ||
-                (e instanceof ShapeElementModel && e.text?.length)
+                e instanceof TextNode ||
+                (e instanceof ShapeNode && e.text?.length)
               )
           );
 
@@ -347,10 +347,10 @@ const generateGroup: AIItemGroupConfig = {
         undefined,
         function (host) {
           const selected = getCopilotSelectedElems(host);
-          const firstSelected = selected[0] as ShapeElementModel;
+          const firstSelected = selected[0] as ShapeNode;
           const mindmap = firstSelected?.group;
 
-          if (!(mindmap instanceof MindmapElementModel)) {
+          if (!(mindmap instanceof MindmapNode)) {
             return Promise.resolve({});
           }
 
@@ -428,7 +428,7 @@ const generateGroup: AIItemGroupConfig = {
             if (
               n === 1 ||
               e === 1 ||
-              (s === 1 && shapes[0] instanceof TextElementModel)
+              (s === 1 && shapes[0] instanceof TextNode)
             ) {
               return {
                 content,

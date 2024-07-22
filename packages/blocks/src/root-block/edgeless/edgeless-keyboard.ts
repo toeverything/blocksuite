@@ -1,7 +1,7 @@
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
 
-import type { ShapeElementModel } from '../../surface-block/index.js';
+import type { ShapeNode } from '../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import type { EdgelessTool } from './types.js';
 
@@ -14,12 +14,12 @@ import { LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import { EdgelessTextBlockComponent } from '../../edgeless-text/edgeless-text-block.js';
 import { EdgelessTextBlockModel } from '../../edgeless-text/edgeless-text-model.js';
-import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
+import { MindmapNode } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
 import {
-  ConnectorElementModel,
   ConnectorMode,
-  GroupElementModel,
+  ConnectorNode,
+  GroupNode,
   ShapeType,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
@@ -249,7 +249,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const { selection } = this.rootElement.service;
           if (
             selection.selectedElements.length === 1 &&
-            selection.firstElement instanceof GroupElementModel
+            selection.firstElement instanceof GroupNode
           ) {
             ctx.get('keyboardState').event.preventDefault();
             rootElement.service.ungroup(selection.firstElement);
@@ -360,7 +360,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             const element = elements[0];
             const id = element.id;
 
-            if (element instanceof ConnectorElementModel) {
+            if (element instanceof ConnectorNode) {
               selection.set({
                 elements: [id],
                 editing: true,
@@ -389,11 +389,11 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             return;
           }
 
-          const mindmap = elements[0].group as MindmapElementModel;
+          const mindmap = elements[0].group as MindmapNode;
           const node = mindmap.getNode(elements[0].id)!;
           const parent = mindmap.getParentNode(node.id) ?? node;
           const id = mindmap.addNode(parent.id);
-          const target = service.getElementById(id) as ShapeElementModel;
+          const target = service.getElementById(id) as ShapeNode;
 
           requestAnimationFrame(() => {
             mountShapeTextEditor(target, rootElement);
@@ -417,10 +417,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             return;
           }
 
-          const mindmap = elements[0].group as MindmapElementModel;
+          const mindmap = elements[0].group as MindmapNode;
           const node = mindmap.getNode(elements[0].id)!;
           const id = mindmap.addNode(node.id);
-          const target = service.getElementById(id) as ShapeElementModel;
+          const target = service.getElementById(id) as ShapeNode;
 
           requestAnimationFrame(() => {
             mountShapeTextEditor(target, rootElement);
@@ -521,14 +521,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     const { selectedElements } = edgeless.service.selection;
     const inc = shift ? 10 : 1;
     const mindmapNodes = selectedElements.filter(
-      el => el.group instanceof MindmapElementModel
+      el => el.group instanceof MindmapNode
     );
 
     if (mindmapNodes.length > 0) {
       const node = mindmapNodes[0];
-      const mindmap = node.group as MindmapElementModel;
+      const mindmap = node.group as MindmapNode;
       const nodeDirection = mindmap.getLayoutDir(node.id);
-      let targetNode: BlockSuite.SurfaceElementModelType | null = null;
+      let targetNode: BlockSuite.SurfaceNodeModelType | null = null;
 
       switch (key) {
         case 'ArrowUp':
@@ -608,7 +608,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       }
 
       if (isCanvasElement(element)) {
-        if (element instanceof ConnectorElementModel) {
+        if (element instanceof ConnectorNode) {
           element.moveTo(bound);
         }
         element['xywh'] = bound.serialize();

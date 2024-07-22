@@ -1,4 +1,4 @@
-import type { SurfaceElementModel } from '../base.js';
+import type { SurfaceNode } from '../base.js';
 
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
@@ -19,7 +19,7 @@ export function getYFieldPropsSet(target: unknown): Set<string | symbol> {
   return proto[yPropsSetSymbol] as Set<string | symbol>;
 }
 
-export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
+export function yfield<V, T extends SurfaceNode>(fallback?: V) {
   // return function yDecorator(prototype: unknown, prop: string | symbol) {
   return function yDecorator(
     target: ClassAccessorDecoratorTarget<T, V>,
@@ -28,7 +28,7 @@ export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
     const prop = context.name;
 
     return {
-      init(this: SurfaceElementModel, v: V) {
+      init(this: SurfaceNode, v: V) {
         const yProps = getYFieldPropsSet(this);
 
         yProps.add(prop);
@@ -49,7 +49,7 @@ export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
         }
         return v;
       },
-      get(this: SurfaceElementModel) {
+      get(this: SurfaceNode) {
         return (
           this.yMap.get(prop as string) ??
           this._preserved.get(prop as string) ??

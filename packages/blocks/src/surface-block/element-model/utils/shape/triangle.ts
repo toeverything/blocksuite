@@ -5,7 +5,7 @@ import { Bound } from '@blocksuite/global/utils';
 import { PointLocation } from '@blocksuite/global/utils';
 
 import type { NodeHitTestOptions } from '../../base.js';
-import type { ShapeElementModel } from '../../shape.js';
+import type { ShapeNode } from '../../shape.js';
 
 import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
 import {
@@ -44,12 +44,7 @@ export const triangle = {
 
     ctx.restore();
   },
-  hitTest(
-    this: ShapeElementModel,
-    x: number,
-    y: number,
-    options: NodeHitTestOptions
-  ) {
+  hitTest(this: ShapeNode, x: number, y: number, options: NodeHitTestOptions) {
     const points = getPointsFromBoundsWithRotation(this, triangle.points);
 
     let hit = pointOnPolygonStoke(
@@ -88,22 +83,22 @@ export const triangle = {
 
     return hit;
   },
-  containedByBounds(bounds: Bound, element: ShapeElementModel): boolean {
+  containedByBounds(bounds: Bound, element: ShapeNode): boolean {
     const points = getPointsFromBoundsWithRotation(element, triangle.points);
     return points.some(point => bounds.containsPoint(point));
   },
 
-  getNearestPoint(point: IVec, element: ShapeElementModel) {
+  getNearestPoint(point: IVec, element: ShapeNode) {
     const points = getPointsFromBoundsWithRotation(element, triangle.points);
     return polygonNearestPoint(points, point);
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElementModel) {
+  intersectWithLine(start: IVec, end: IVec, element: ShapeNode) {
     const points = getPointsFromBoundsWithRotation(element, triangle.points);
     return linePolygonIntersects(start, end, points);
   },
 
-  getRelativePointLocation(position: IVec, element: ShapeElementModel) {
+  getRelativePointLocation(position: IVec, element: ShapeNode) {
     const bound = Bound.deserialize(element.xywh);
     const point = bound.getRelativePoint(position);
     let points = triangle.points(bound);

@@ -3,7 +3,7 @@ import type { Doc } from '@blocksuite/store';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';
 
-import { SurfaceGroupLikeModel } from '../element-model/base.js';
+import { GroupLikeNode } from '../element-model/base.js';
 
 export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {
   const layer = layers[layerIndex];
@@ -90,9 +90,9 @@ export function compare(
   a: BlockSuite.EdgelessModelType,
   b: BlockSuite.EdgelessModelType
 ) {
-  if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
+  if (a instanceof GroupLikeNode && a.hasDescendant(b)) {
     return -1;
-  } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
+  } else if (b instanceof GroupLikeNode && b.hasDescendant(a)) {
     return 1;
   } else {
     const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModelType[];

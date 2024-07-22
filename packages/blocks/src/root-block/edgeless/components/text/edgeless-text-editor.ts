@@ -10,7 +10,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import type { TextElementModel } from '../../../../surface-block/element-model/text.js';
+import type { TextNode } from '../../../../surface-block/element-model/text.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import '../../../../_common/components/rich-text/rich-text.js';
@@ -310,7 +310,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     return result;
   }
 
-  getVisualPosition(element: TextElementModel) {
+  getVisualPosition(element: TextNode) {
     const { x, y, w, h, rotate } = element;
     return Vec.rotWith([x, y], [x + w / 2, y + h / 2], toRadian(rotate));
   }
@@ -399,7 +399,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor element!: TextElementModel;
+  accessor element!: TextNode;
 
   @query('rich-text')
   accessor richText!: RichText;

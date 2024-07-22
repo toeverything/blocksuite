@@ -11,9 +11,9 @@ import type { EdgelessRootService } from '../../../edgeless-root-service.js';
 import { LayoutType } from '../../../../../surface-block/element-model/utils/mindmap/layout.js';
 import {
   CanvasElementType,
-  type MindmapElementModel,
-  type ShapeElementModel,
-  TextElementModel,
+  type MindmapNode,
+  type ShapeNode,
+  TextNode,
 } from '../../../../../surface-block/index.js';
 import { mountTextElementEditor } from '../../../utils/text.js';
 
@@ -105,9 +105,7 @@ export const getMindmapRender =
       type: 'mindmap',
     });
 
-    const mindmap = edgelessService.getElementById(
-      mindmapId
-    ) as MindmapElementModel;
+    const mindmap = edgelessService.getElementById(mindmapId) as MindmapNode;
 
     const rootW = 145;
     const rootH = 50;
@@ -119,11 +117,9 @@ export const getMindmapRender =
     const rootX = x;
     const rootY = centerVertical - rootH / 2;
 
-    const createNode = (
-      ...args: Parameters<MindmapElementModel['addNode']>
-    ) => {
+    const createNode = (...args: Parameters<MindmapNode['addNode']>) => {
       const id = mindmap.addNode(...args);
-      const node = edgelessService.getElementById(id) as ShapeElementModel;
+      const node = edgelessService.getElementById(id) as ShapeNode;
       return { node, id };
     };
     const root = createNode(null, undefined, undefined, {
@@ -174,7 +170,7 @@ export const textRender: DraggableTool['render'] = (
 
     edgeless.doc.captureSync();
     const textElement = edgeless.service.getElementById(id);
-    assertInstanceOf(textElement, TextElementModel);
+    assertInstanceOf(textElement, TextNode);
     mountTextElementEditor(textElement, edgeless);
   }
 

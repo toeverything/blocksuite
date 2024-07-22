@@ -6,16 +6,16 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import type { GroupElementModel } from '../../../surface-block/element-model/group.js';
+import type { GroupNode } from '../../../surface-block/element-model/group.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { FontFamily } from '../../../surface-block/consts.js';
-import { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
-import { TextElementModel } from '../../../surface-block/element-model/text.js';
+import { ShapeNode } from '../../../surface-block/element-model/shape.js';
+import { TextNode } from '../../../surface-block/element-model/text.js';
 import {
   CanvasElementType,
-  type ConnectorElementModel,
+  type ConnectorNode,
   type IModelCoord,
 } from '../../../surface-block/index.js';
 import {
@@ -34,7 +34,7 @@ import {
 } from './consts.js';
 
 export function mountTextElementEditor(
-  textElement: TextElementModel,
+  textElement: TextNode,
   edgeless: EdgelessRootBlockComponent,
   focusCoord?: IModelCoord
 ) {
@@ -63,7 +63,7 @@ export function mountTextElementEditor(
 }
 
 export function mountShapeTextEditor(
-  shapeElement: ShapeElementModel,
+  shapeElement: ShapeNode,
   edgeless: EdgelessRootBlockComponent
 ) {
   if (!shapeElement.text) {
@@ -84,7 +84,7 @@ export function mountShapeTextEditor(
     });
   }
   const updatedElement = edgeless.service.getElementById(shapeElement.id);
-  assertInstanceOf(updatedElement, ShapeElementModel);
+  assertInstanceOf(updatedElement, ShapeNode);
 
   const shapeEditor = new EdgelessShapeTextEditor();
   shapeEditor.element = updatedElement;
@@ -114,7 +114,7 @@ export function mountFrameTitleEditor(
 }
 
 export function mountGroupTitleEditor(
-  group: GroupElementModel,
+  group: GroupNode,
   edgeless: EdgelessRootBlockComponent
 ) {
   const groupEditor = new EdgelessGroupTitleEditor();
@@ -152,14 +152,14 @@ export function addText(
     edgeless.doc.captureSync();
     const textElement = edgeless.service.getElementById(id);
     assertExists(textElement);
-    if (textElement instanceof TextElementModel) {
+    if (textElement instanceof TextNode) {
       mountTextElementEditor(textElement, edgeless);
     }
   }
 }
 
 export function mountConnectorLabelEditor(
-  connector: ConnectorElementModel,
+  connector: ConnectorNode,
   edgeless: EdgelessRootBlockComponent,
   point?: IVec
 ) {

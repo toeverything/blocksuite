@@ -4,7 +4,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { BrushProps } from '../../../surface-block/element-model/brush.js';
-import type { BrushElementModel } from '../../../surface-block/index.js';
+import type { BrushNode } from '../../../surface-block/index.js';
 import type { LineWidthEvent } from '../../edgeless/components/panel/line-width-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
@@ -20,22 +20,20 @@ import {
 } from '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/line-width-panel.js';
 
-function getMostCommonColor(
-  elements: BrushElementModel[]
-): CssVariableName | null {
+function getMostCommonColor(elements: BrushNode[]): CssVariableName | null {
   const colors = countBy(elements, ele => ele.color);
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
-function getMostCommonSize(elements: BrushElementModel[]): LineWidth {
+function getMostCommonSize(elements: BrushNode[]): LineWidth {
   const sizes = countBy(elements, ele => ele.lineWidth);
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (Number(max[0]) as LineWidth) : LineWidth.Four;
 }
 
 function notEqual<K extends keyof BrushProps>(key: K, value: BrushProps[K]) {
-  return (element: BrushElementModel) => element[key] !== value;
+  return (element: BrushNode) => element[key] !== value;
 }
 
 @customElement('edgeless-change-brush-button')
@@ -124,7 +122,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor elements: BrushElementModel[] = [];
+  accessor elements: BrushNode[] = [];
 }
 
 declare global {
@@ -135,7 +133,7 @@ declare global {
 
 export function renderChangeBrushButton(
   edgeless: EdgelessRootBlockComponent,
-  elements?: BrushElementModel[]
+  elements?: BrushNode[]
 ) {
   if (!elements?.length) return nothing;
 

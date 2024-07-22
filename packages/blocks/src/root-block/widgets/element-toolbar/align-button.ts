@@ -21,9 +21,9 @@ import {
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
 import {
-  ConnectorElementModel,
-  GroupElementModel,
-  MindmapElementModel,
+  ConnectorNode,
+  GroupNode,
+  MindmapNode,
 } from '../../../surface-block/index.js';
 
 const enum Alignment {
@@ -235,9 +235,9 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
   }
 
   private _updateXYWH(ele: BlockSuite.EdgelessModelType, bound: Bound) {
-    if (ele instanceof ConnectorElementModel) {
+    if (ele instanceof ConnectorNode) {
       ele.moveTo(bound);
-    } else if (ele instanceof GroupElementModel) {
+    } else if (ele instanceof GroupNode) {
       const groupBound = Bound.deserialize(ele.xywh);
       ele.childElements.forEach(child => {
         const newBound = Bound.deserialize(child.xywh);
@@ -313,8 +313,7 @@ export function renderAlignButton(
   elements: BlockSuite.EdgelessModelType[]
 ) {
   if (elements.length < 2) return nothing;
-  if (elements.some(e => e.group instanceof MindmapElementModel))
-    return nothing;
+  if (elements.some(e => e.group instanceof MindmapNode)) return nothing;
 
   return html`
     <edgeless-align-button .edgeless=${edgeless}></edgeless-align-button>

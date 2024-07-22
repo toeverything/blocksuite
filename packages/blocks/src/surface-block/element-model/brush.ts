@@ -22,7 +22,7 @@ import {
 import {
   type NodeBaseProps,
   type NodeHitTestOptions,
-  SurfaceElementModel,
+  SurfaceNode,
 } from './base.js';
 import { convert, derive, watch, yfield } from './decorators.js';
 
@@ -36,7 +36,7 @@ export type BrushProps = NodeBaseProps & {
   lineWidth: number;
 };
 
-export class BrushElementModel extends SurfaceElementModel<BrushProps> {
+export class BrushNode extends SurfaceNode<BrushProps> {
   static override propsToY(props: BrushProps) {
     return props;
   }
@@ -129,10 +129,10 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   @yfield()
   accessor color: string = '#000000';
 
-  @watch((_, instance: BrushElementModel) => {
+  @watch((_, instance: BrushNode) => {
     instance['_local'].delete('commands');
   })
-  @derive((lineWidth: number, instance: BrushElementModel) => {
+  @derive((lineWidth: number, instance: BrushNode) => {
     if (lineWidth === instance.lineWidth) return {};
 
     const bound = instance.elementBound;
@@ -157,10 +157,10 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   @yfield()
   accessor lineWidth: number = 4;
 
-  @watch((_, instance: BrushElementModel) => {
+  @watch((_, instance: BrushNode) => {
     instance['_local'].delete('commands');
   })
-  @derive((points: IVec[], instance: BrushElementModel) => {
+  @derive((points: IVec[], instance: BrushNode) => {
     const lineWidth = instance.lineWidth;
     const bound = getBoundFromPoints(points);
     const boundWidthLineWidth = inflateBound(bound, lineWidth);
@@ -169,7 +169,7 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
       xywh: boundWidthLineWidth.serialize(),
     };
   })
-  @convert((points: (IVec | IVec3)[], instance: BrushElementModel) => {
+  @convert((points: (IVec | IVec3)[], instance: BrushNode) => {
     const lineWidth = instance.lineWidth;
     const bound = getBoundFromPoints(points as IVec[]);
     const boundWidthLineWidth = inflateBound(bound, lineWidth);
@@ -187,7 +187,7 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   @yfield(0)
   accessor rotate: number = 0;
 
-  @derive((xywh: SerializedXYWH, instance: BrushElementModel) => {
+  @derive((xywh: SerializedXYWH, instance: BrushNode) => {
     const bound = Bound.deserialize(xywh);
     if (bound.w === instance.w && bound.h === instance.h) return {};
 
@@ -215,8 +215,8 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
 
 declare global {
   namespace BlockSuite {
-    interface SurfaceElementModelMap {
-      brush: BrushElementModel;
+    interface SurfaceNodeModelMap {
+      brush: BrushNode;
     }
   }
 }

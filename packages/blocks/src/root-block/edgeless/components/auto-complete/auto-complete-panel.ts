@@ -28,12 +28,12 @@ import {
 } from '../../../../surface-block/consts.js';
 import {
   CanvasElementType,
-  type ConnectorElementModel,
-  type ShapeElementModel,
-  TextElementModel,
+  type ConnectorNode,
+  type ShapeNode,
+  TextNode,
 } from '../../../../surface-block/element-model/index.js';
 import {
-  GroupElementModel,
+  GroupNode,
   clamp,
   normalizeDegAngle,
   toDegree,
@@ -116,8 +116,8 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   constructor(
     position: [number, number],
     edgeless: EdgelessRootBlockComponent,
-    currentSource: ShapeElementModel | NoteBlockModel,
-    connector: ConnectorElementModel
+    currentSource: ShapeNode | NoteBlockModel,
+    connector: ConnectorNode
   ) {
     super();
     this.position = position;
@@ -199,7 +199,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     doc.addBlock('affine:paragraph', { type: 'text' }, id);
     const group = this.currentSource.group;
 
-    if (group instanceof GroupElementModel) {
+    if (group instanceof GroupNode) {
       group.addChild(id);
     }
     this.connector.target = {
@@ -231,7 +231,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     });
 
     mountShapeTextEditor(
-      service.getElementById(id) as ShapeElementModel,
+      service.getElementById(id) as ShapeNode,
       this.edgeless
     );
     edgeless.service.selection.set({
@@ -264,7 +264,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       edgelessService.updateElement(this.connector.id, {
         target: { id: textId, position },
       });
-      if (this.currentSource.group instanceof GroupElementModel) {
+      if (this.currentSource.group instanceof GroupNode) {
         this.currentSource.group.addChild(textId);
       }
 
@@ -285,12 +285,12 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         fontStyle: FontStyle.Normal,
       });
       const textElement = edgelessService.getElementById(textId);
-      assertInstanceOf(textElement, TextElementModel);
+      assertInstanceOf(textElement, TextNode);
 
       edgelessService.updateElement(this.connector.id, {
         target: { id: textId, position },
       });
-      if (this.currentSource.group instanceof GroupElementModel) {
+      if (this.currentSource.group instanceof GroupNode) {
         this.currentSource.group.addChild(textId);
       }
 
@@ -329,7 +329,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     return !!this.edgeless.service.getElementById(this.connector.id);
   }
 
-  private _generateTarget(connector: ConnectorElementModel) {
+  private _generateTarget(connector: ConnectorNode) {
     const { currentSource } = this;
     let w = SHAPE_OVERLAY_WIDTH;
     let h = SHAPE_OVERLAY_HEIGHT;
@@ -635,10 +635,10 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   }
 
   @property({ attribute: false })
-  accessor connector: ConnectorElementModel;
+  accessor connector: ConnectorNode;
 
   @property({ attribute: false })
-  accessor currentSource: ShapeElementModel | NoteBlockModel;
+  accessor currentSource: ShapeNode | NoteBlockModel;
 
   @property({ attribute: false })
   accessor edgeless: EdgelessRootBlockComponent;

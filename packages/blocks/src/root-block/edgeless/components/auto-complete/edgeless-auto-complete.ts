@@ -9,7 +9,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import type { ConnectorElementModel } from '../../../../surface-block/element-model/connector.js';
+import type { ConnectorNode } from '../../../../surface-block/element-model/connector.js';
 import type { ShapeType } from '../../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
@@ -25,10 +25,10 @@ import {
   type Connection,
   ConnectorMode,
 } from '../../../../surface-block/element-model/connector.js';
-import { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
+import { MindmapNode } from '../../../../surface-block/element-model/mindmap.js';
 import { shapeMethods } from '../../../../surface-block/element-model/shape.js';
 import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
-import { ShapeElementModel } from '../../../../surface-block/index.js';
+import { ShapeNode } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   Overlay,
@@ -88,7 +88,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     if (!this.edgeless.dispatcher) return;
 
-    let connector: ConnectorElementModel | null;
+    let connector: ConnectorNode | null;
 
     this._disposables.addFromEvent(document, 'pointermove', e => {
       const point = service.viewport.toModelCoord(
@@ -236,7 +236,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       source,
       target,
     });
-    return edgeless.service.getElementById(id) as ConnectorElementModel;
+    return edgeless.service.getElementById(id) as ConnectorNode;
   }
 
   private _addMindmapNode(
@@ -245,7 +245,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   ) {
     const mindmap = this.current.group;
 
-    if (!(mindmap instanceof MindmapElementModel)) return;
+    if (!(mindmap instanceof MindmapNode)) return;
 
     const parentNode =
       target === 'sibling'
@@ -262,17 +262,13 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     requestAnimationFrame(() => {
       mountShapeTextEditor(
-        this.edgeless.service.getElementById(newNode) as ShapeElementModel,
+        this.edgeless.service.getElementById(newNode) as ShapeNode,
         this.edgeless
       );
     });
   }
 
-  private _computeLine(
-    type: Direction,
-    curShape: ShapeElementModel,
-    nextBound: Bound
-  ) {
+  private _computeLine(type: Direction, curShape: ShapeNode, nextBound: Bound) {
     const startBound = this.current.elementBound;
     const { startPosition, endPosition } = getPosition(type);
     const nextShape = {
@@ -297,8 +293,8 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _computeNextBound(type: Direction) {
     if (isShape(this.current)) {
       const connectedShapes = this._getConnectedElements(this.current).filter(
-        e => e instanceof ShapeElementModel
-      ) as ShapeElementModel[];
+        e => e instanceof ShapeNode
+      ) as ShapeNode[];
       return nextBound(type, this.current, connectedShapes);
     } else {
       const bound = this.current.elementBound;
@@ -324,10 +320,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
   }
 
-  private _createAutoCompletePanel(
-    e: PointerEvent,
-    connector: ConnectorElementModel
-  ) {
+  private _createAutoCompletePanel(e: PointerEvent, connector: ConnectorNode) {
     if (!this.canShowAutoComplete) return;
 
     const position = this.edgeless.service.viewport.toModelCoord(
@@ -362,7 +355,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       );
 
       mountShapeTextEditor(
-        service.getElementById(id) as ShapeElementModel,
+        service.getElementById(id) as ShapeNode,
         this.edgeless
       );
     } else {
@@ -384,32 +377,27 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     this.removeOverlay();
   }
 
-  private _getConnectedElements(element: ShapeElementModel) {
+  private _getConnectedElements(element: ShapeNode) {
     const service = this.edgeless.service;
 
     return service.getConnectors(element.id).reduce((prev, current) => {
       if (current.target.id === element.id && current.source.id) {
-        prev.push(
-          service.getElementById(current.source.id) as ShapeElementModel
-        );
+        prev.push(service.getElementById(current.source.id) as ShapeNode);
       }
       if (current.source.id === element.id && current.target.id) {
-        prev.push(
-          service.getElementById(current.target.id) as ShapeElementModel
-        );
+        prev.push(service.getElementById(current.target.id) as ShapeNode);
       }
 
       return prev;
-    }, [] as ShapeElementModel[]);
+    }, [] as ShapeNode[]);
   }
 
   private _getMindmapButtons():
     | [Direction, 'child' | 'sibling', LayoutType.LEFT | LayoutType.RIGHT][]
     | null {
-    const mindmap = this.current.group as MindmapElementModel;
+    const mindmap = this.current.group as MindmapNode;
     const mindmapDirection =
-      this.current instanceof ShapeElementModel &&
-      mindmap instanceof MindmapElementModel
+      this.current instanceof ShapeNode && mindmap instanceof MindmapNode
         ? mindmap.getLayoutDir(this.current.id)
         : null;
     const isRoot = mindmap?.tree.id === this.current.id;
@@ -445,7 +433,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private _renderArrow() {
-    const isShape = this.current instanceof ShapeElementModel;
+    const isShape = this.current instanceof ShapeNode;
     const { selectedRect } = this;
     const { zoom } = this.edgeless.service.viewport;
     const width = 72;
@@ -506,7 +494,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
           class="edgeless-auto-complete-arrow"
           @mouseenter=${() => {
             this._timer = setTimeout(() => {
-              if (this.current instanceof ShapeElementModel) {
+              if (this.current instanceof ShapeNode) {
                 const bound = this._computeNextBound(type);
                 const path = this._computeLine(type, this.current, bound);
                 this._showNextShape(
@@ -602,7 +590,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private _showNextShape(
-    current: ShapeElementModel,
+    current: ShapeNode,
     bound: Bound,
     path: IVec[],
     targetType: ShapeType
@@ -669,8 +657,8 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const isShape = this.current instanceof ShapeElementModel;
-    const isMindMap = this.current.group instanceof MindmapElementModel;
+    const isShape = this.current instanceof ShapeNode;
+    const isMindMap = this.current.group instanceof MindmapNode;
 
     if (this._isMoving || (this._isHover && !isShape)) {
       this.removeOverlay();
@@ -704,7 +692,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private accessor _isMoving = false;
 
   @property({ attribute: false })
-  accessor current!: ShapeElementModel | NoteBlockModel;
+  accessor current!: ShapeNode | NoteBlockModel;
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;

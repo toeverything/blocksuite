@@ -1,4 +1,4 @@
-import type { SurfaceElementModel } from '../base.js';
+import type { SurfaceNode } from '../base.js';
 
 import { keys } from '../../../_common/utils/iterable.js';
 import {
@@ -21,7 +21,7 @@ function getDerivedMeta(
 export function getDeriveProperties(
   prop: string | symbol,
   propValue: unknown,
-  receiver: SurfaceElementModel
+  receiver: SurfaceNode
 ) {
   const prototype = Object.getPrototypeOf(receiver);
   const decoratorState = getDecoratorState();
@@ -50,7 +50,7 @@ export function getDeriveProperties(
 
 export function updateDerivedProp(
   derivedProps: Record<string, unknown> | null,
-  receiver: SurfaceElementModel
+  receiver: SurfaceNode
 ) {
   if (derivedProps) {
     const decoratorState = getDecoratorState();
@@ -77,7 +77,7 @@ export function updateDerivedProp(
  * @param fn
  * @returns
  */
-export function derive<V, T extends SurfaceElementModel>(
+export function derive<V, T extends SurfaceNode>(
   fn: (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     propValue: any,
@@ -90,7 +90,7 @@ export function derive<V, T extends SurfaceElementModel>(
   ) {
     const prop = String(context.name);
     return {
-      init(this: SurfaceElementModel, v: V) {
+      init(this: SurfaceNode, v: V) {
         const proto = Object.getPrototypeOf(this);
         const derived = getDerivedMeta(proto, prop);
 
@@ -102,6 +102,6 @@ export function derive<V, T extends SurfaceElementModel>(
 
         return v;
       },
-    } as ClassAccessorDecoratorResult<SurfaceElementModel, V>;
+    } as ClassAccessorDecoratorResult<SurfaceNode, V>;
   };
 }

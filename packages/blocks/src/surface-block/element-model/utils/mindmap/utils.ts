@@ -1,12 +1,12 @@
 import { assertType } from '@blocksuite/global/utils';
 
-import type { MindmapElementModel } from '../../mindmap.js';
-import type { ShapeElementModel } from '../../shape.js';
+import type { MindmapNode } from '../../mindmap.js';
+import type { ShapeNode } from '../../shape.js';
 
-import { LayoutType, type MindmapNode } from './layout.js';
+import { LayoutType, type MindmapVertex } from './layout.js';
 
 export function getHoveredArea(
-  target: ShapeElementModel,
+  target: ShapeNode,
   position: [number, number],
   layoutDir: LayoutType
 ): 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' {
@@ -26,12 +26,12 @@ export function getHoveredArea(
  * @returns
  */
 export function showMergeIndicator(
-  mindmap: MindmapElementModel,
+  mindmap: MindmapNode,
   /**
    * The hovered node
    */
-  target: string | MindmapNode,
-  source: MindmapNode,
+  target: string | MindmapVertex,
+  source: MindmapVertex,
   position: [number, number]
 ) {
   target = mindmap.getNode(typeof target === 'string' ? target : target.id)!;
@@ -40,10 +40,10 @@ export function showMergeIndicator(
     return;
   }
 
-  assertType<MindmapNode>(target);
+  assertType<MindmapVertex>(target);
 
   // the target cannot be the child of source
-  const mergeCheck = (sourceTree: MindmapNode): boolean => {
+  const mergeCheck = (sourceTree: MindmapVertex): boolean => {
     if (target === sourceTree) {
       return false;
     }
@@ -57,7 +57,7 @@ export function showMergeIndicator(
   const getMergeInfo = () => {
     const layoutType = mindmap.getLayoutDir(target)!;
     const hoveredArea = getHoveredArea(
-      target.element as ShapeElementModel,
+      target.element as ShapeNode,
       position,
       layoutType
     );
@@ -126,11 +126,11 @@ export function showMergeIndicator(
  * Hide the connector that the target end point is given node
  */
 export function hideTargetConnector(
-  mindmap: MindmapElementModel,
+  mindmap: MindmapNode,
   /**
    * The mind map node which's connector will be hide
    */
-  target: MindmapNode
+  target: MindmapVertex
 ) {
   const parent = mindmap.getParentNode(target.id);
 
@@ -159,10 +159,10 @@ export function hideTargetConnector(
  * @param to
  */
 export function moveSubtree(
-  from: MindmapElementModel,
-  subtree: MindmapNode,
-  to: MindmapElementModel,
-  parent: MindmapNode | string,
+  from: MindmapNode,
+  subtree: MindmapVertex,
+  to: MindmapNode,
+  parent: MindmapVertex | string,
   index: number,
   layout?: LayoutType
 ) {

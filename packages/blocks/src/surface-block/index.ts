@@ -18,26 +18,26 @@ export {
   GRID_GAP_MAX,
   GRID_GAP_MIN,
 } from './consts.js';
-export { SurfaceElementModel } from './element-model/base.js';
-export { BrushElementModel } from './element-model/brush.js';
+export { SurfaceNode } from './element-model/base.js';
+export { BrushNode } from './element-model/brush.js';
 export {
   type Connection,
-  ConnectorElementModel,
   ConnectorEndpoint,
   ConnectorMode,
+  ConnectorNode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
   type PointStyle,
 } from './element-model/connector.js';
-export { GroupElementModel } from './element-model/group.js';
+export { GroupNode } from './element-model/group.js';
 export { CanvasElementType } from './element-model/index.js';
 export {
   LayoutType,
-  MindmapElementModel,
+  MindmapNode,
   MindmapStyle,
 } from './element-model/mindmap.js';
-export { ShapeElementModel } from './element-model/shape.js';
-export { TextElementModel } from './element-model/text.js';
+export { ShapeNode } from './element-model/shape.js';
+export { TextNode } from './element-model/text.js';
 export * from './elements/index.js';
 export { ShapeType } from './elements/shape/consts.js';
 export {

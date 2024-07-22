@@ -6,7 +6,7 @@ import { Bound } from '@blocksuite/global/utils';
 import { PointLocation } from '@blocksuite/global/utils';
 
 import type { NodeHitTestOptions } from '../../base.js';
-import type { ShapeElementModel } from '../../shape.js';
+import type { ShapeNode } from '../../shape.js';
 
 import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
 import {
@@ -42,12 +42,7 @@ export const ellipse = {
 
     ctx.restore();
   },
-  hitTest(
-    this: ShapeElementModel,
-    x: number,
-    y: number,
-    options: NodeHitTestOptions
-  ) {
+  hitTest(this: ShapeNode, x: number, y: number, options: NodeHitTestOptions) {
     const point: IVec = [x, y];
     const expand = (options?.expand ?? 1) / (options?.zoom ?? 1);
     const rx = this.w / 2;
@@ -83,7 +78,7 @@ export const ellipse = {
 
     return hit;
   },
-  containedByBounds(bounds: Bound, element: ShapeElementModel): boolean {
+  containedByBounds(bounds: Bound, element: ShapeNode): boolean {
     const points = getPointsFromBoundsWithRotation(element, ellipse.points);
     return points.some(point => bounds.containsPoint(point));
   },
@@ -93,7 +88,7 @@ export const ellipse = {
   // * https://blog.chatfield.io/simple-method-for-distance-to-ellipse/
   // * https://gist.github.com/fundon/11331322d3ca223c42e216df48c339e1
   // * https://github.com/excalidraw/excalidraw/blob/master/packages/utils/geometry/geometry.ts#L888 (MIT)
-  getNearestPoint(point: IVec, { rotate, xywh }: ShapeElementModel) {
+  getNearestPoint(point: IVec, { rotate, xywh }: ShapeNode) {
     const { center, w, h } = Bound.deserialize(xywh);
     const rad = toRadian(rotate);
     const a = w / 2;
@@ -144,11 +139,7 @@ export const ellipse = {
     );
   },
 
-  intersectWithLine(
-    start: IVec,
-    end: IVec,
-    { rotate, xywh }: ShapeElementModel
-  ) {
+  intersectWithLine(start: IVec, end: IVec, { rotate, xywh }: ShapeNode) {
     const rad = toRadian(rotate);
     const bound = Bound.deserialize(xywh);
     return lineEllipseIntersects(
@@ -161,10 +152,7 @@ export const ellipse = {
     );
   },
 
-  getRelativePointLocation(
-    relativePoint: IVec,
-    { rotate, xywh }: ShapeElementModel
-  ) {
+  getRelativePointLocation(relativePoint: IVec, { rotate, xywh }: ShapeNode) {
     const bounds = Bound.deserialize(xywh);
     const point = bounds.getRelativePoint(relativePoint);
     const { x, y, w, h, center } = bounds;

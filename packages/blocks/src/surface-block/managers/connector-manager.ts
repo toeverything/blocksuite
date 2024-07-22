@@ -14,8 +14,8 @@ import type { Connectable } from '../../_common/types.js';
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import type {
   Connection,
-  ConnectorElementModel,
-  LocalConnectorElementModel,
+  ConnectorNode,
+  LocalConnectorNode,
 } from '../element-model/connector.js';
 
 import { last } from '../../_common/utils/iterable.js';
@@ -24,7 +24,7 @@ import {
   ConnectorMode,
   isConnectorWithLabel,
 } from '../element-model/connector.js';
-import { GroupElementModel } from '../element-model/group.js';
+import { GroupNode } from '../element-model/group.js';
 import { AStarRunner } from '../utils/a-star.js';
 import { getBoundFromPoints } from '../utils/bound.js';
 import {
@@ -104,7 +104,7 @@ function rBound(ele: BlockSuite.EdgelessModelType, anti = false): IBound {
 }
 
 export function isConnectorAndBindingsAllSelected(
-  connector: ConnectorElementModel | LocalConnectorElementModel,
+  connector: ConnectorNode | LocalConnectorNode,
   selected: BlockSuite.EdgelessModelType[]
 ) {
   const connectorSelected = selected.find(s => s.id === connector.id);
@@ -991,7 +991,7 @@ export class ConnectionOverlay extends Overlay {
       }
     }
 
-    if (target instanceof GroupElementModel) {
+    if (target instanceof GroupNode) {
       this.targetBounds = Bound.deserialize(target.xywh);
     } else {
       this.targetBounds = null;
@@ -1019,9 +1019,7 @@ export class ConnectorPathGenerator {
     }
   ) {}
 
-  private _computeStartEndPoint(
-    connector: ConnectorElementModel | LocalConnectorElementModel
-  ) {
+  private _computeStartEndPoint(connector: ConnectorNode | LocalConnectorNode) {
     const { source, target } = connector;
     const start = this._getConnectorEndElement(connector, 'source');
     const end = this._getConnectorEndElement(connector, 'target');
@@ -1055,7 +1053,7 @@ export class ConnectorPathGenerator {
   }
 
   private _generateConnectorPath(
-    connector: ConnectorElementModel | LocalConnectorElementModel
+    connector: ConnectorNode | LocalConnectorNode
   ) {
     const { mode } = connector;
     if (mode === ConnectorMode.Straight) {
@@ -1086,7 +1084,7 @@ export class ConnectorPathGenerator {
   }
 
   private _generateCurveConnectorPath(
-    connector: ConnectorElementModel | LocalConnectorElementModel
+    connector: ConnectorNode | LocalConnectorNode
   ) {
     const { source, target } = connector;
 
@@ -1154,7 +1152,7 @@ export class ConnectorPathGenerator {
   }
 
   private _generateStraightConnectorPath(
-    connector: ConnectorElementModel | LocalConnectorElementModel
+    connector: ConnectorNode | LocalConnectorNode
   ) {
     const { source, target } = connector;
     if (source.id && !source.position && target.id && !target.position) {
@@ -1179,7 +1177,7 @@ export class ConnectorPathGenerator {
   }
 
   private _getConnectionPoint(
-    connector: ConnectorElementModel | LocalConnectorElementModel,
+    connector: ConnectorNode | LocalConnectorNode,
     type: 'source' | 'target'
   ): PointLocation {
     const connection = connector[type];
@@ -1202,7 +1200,7 @@ export class ConnectorPathGenerator {
   }
 
   private _getConnectorEndElement(
-    connector: ConnectorElementModel | LocalConnectorElementModel,
+    connector: ConnectorNode | LocalConnectorNode,
     type: 'source' | 'target'
   ): Connectable | null {
     const id = connector[type].id;
@@ -1322,9 +1320,7 @@ export class ConnectorPathGenerator {
     return mergePath(path);
   }
 
-  hasRelatedElement(
-    connecter: ConnectorElementModel | LocalConnectorElementModel
-  ) {
+  hasRelatedElement(connecter: ConnectorNode | LocalConnectorNode) {
     const { source, target } = connecter;
     if (
       (source.id && !this.options.getElementById(source.id)) ||
@@ -1337,7 +1333,7 @@ export class ConnectorPathGenerator {
   }
 
   updatePath(
-    connector: ConnectorElementModel | LocalConnectorElementModel,
+    connector: ConnectorNode | LocalConnectorNode,
     path?: PointLocation[]
   ) {
     const points = path ?? this._generateConnectorPath(connector) ?? [];
@@ -1356,7 +1352,7 @@ export class ConnectorPathGenerator {
 
     // Updates Connector's Label position.
     if (isConnectorWithLabel(connector)) {
-      const model = connector as ConnectorElementModel;
+      const model = connector as ConnectorNode;
       const [cx, cy] = model.getPointByOffsetDistance(
         model.labelOffset.distance
       );

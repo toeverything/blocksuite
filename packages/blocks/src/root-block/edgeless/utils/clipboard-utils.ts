@@ -66,7 +66,7 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
       return 'shapes';
     }) as {
       notes: NoteBlockModel[];
-      shapes: BlockSuite.SurfaceModelType[];
+      shapes: BlockSuite.SurfaceNodeType[];
       frames: FrameBlockModel[];
       images: ImageBlockModel[];
       edgelessTexts: EdgelessTextBlockModel[];

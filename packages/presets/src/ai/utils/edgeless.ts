@@ -6,19 +6,19 @@ import type {
 
 import {
   AFFINE_EDGELESS_COPILOT_WIDGET,
-  MindmapElementModel,
-  type ShapeElementModel,
+  MindmapNode,
+  type ShapeNode,
   matchFlavours,
 } from '@blocksuite/blocks';
 
-export function mindMapToMarkdown(mindmap: MindmapElementModel) {
+export function mindMapToMarkdown(mindmap: MindmapNode) {
   let markdownStr = '';
 
   const traverse = (
-    node: MindmapElementModel['tree']['children'][number],
+    node: MindmapNode['tree']['children'][number],
     indent: number = 0
   ) => {
-    const text = (node.element as ShapeElementModel).text?.toString() ?? '';
+    const text = (node.element as ShapeNode).text?.toString() ?? '';
 
     markdownStr += `${'  '.repeat(indent)}- ${text}\n`;
 
@@ -35,11 +35,11 @@ export function mindMapToMarkdown(mindmap: MindmapElementModel) {
 export function isMindMapRoot(ele: BlockSuite.EdgelessModelType) {
   const group = ele?.group;
 
-  return group instanceof MindmapElementModel && group.tree.element === ele;
+  return group instanceof MindmapNode && group.tree.element === ele;
 }
 
 export function isMindmapChild(ele: BlockSuite.EdgelessModelType) {
-  return ele?.group instanceof MindmapElementModel && !isMindMapRoot(ele);
+  return ele?.group instanceof MindmapNode && !isMindMapRoot(ele);
 }
 
 export function getService(host: EditorHost) {

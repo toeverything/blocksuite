@@ -9,9 +9,9 @@ import type { EdgelessTool } from '../../types.js';
 import {
   CanvasElementType,
   type Connection,
-  type ConnectorElementModel,
-  GroupElementModel,
-  ShapeElementModel,
+  type ConnectorNode,
+  GroupNode,
+  ShapeNode,
   ShapeType,
 } from '../../../../surface-block/index.js';
 import {
@@ -37,7 +37,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   // Likes pressing `ESC`
   private _allowCancel = false;
 
-  private _connector: ConnectorElementModel | null = null;
+  private _connector: ConnectorNode | null = null;
 
   private _mode: ConnectorToolMode = ConnectorToolMode.Dragging;
 
@@ -72,7 +72,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     });
     this._connector = this._edgeless.service.getElementById(
       id
-    ) as ConnectorElementModel;
+    ) as ConnectorNode;
   }
 
   afterModeSwitch() {
@@ -216,8 +216,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._sourceBounds = Bound.deserialize(element.xywh);
     this._sourceBounds.rotate = element.rotate;
     this._sourceLocations =
-      element instanceof ShapeElementModel &&
-      element.shapeType === ShapeType.Triangle
+      element instanceof ShapeNode && element.shapeType === ShapeType.Triangle
         ? ConnectorEndpointLocationsOnTriangle
         : ConnectorEndpointLocations;
 
@@ -233,7 +232,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
     this._createConnector();
 
-    if (element instanceof GroupElementModel) {
+    if (element instanceof GroupNode) {
       this._surface.overlays.connector.sourceBounds = this._sourceBounds;
     }
 

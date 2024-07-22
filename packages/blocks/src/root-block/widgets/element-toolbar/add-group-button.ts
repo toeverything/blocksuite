@@ -6,10 +6,7 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 
 import '../../../_common/components/toolbar/icon-button.js';
 import { GroupIcon } from '../../../_common/icons/index.js';
-import {
-  GroupElementModel,
-  MindmapElementModel,
-} from '../../../surface-block/index.js';
+import { GroupNode, MindmapNode } from '../../../surface-block/index.js';
 
 @customElement('edgeless-add-group-button')
 export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
@@ -51,9 +48,8 @@ export function renderAddGroupButton(
   elements: BlockSuite.EdgelessModelType[]
 ) {
   if (elements.length < 2) return nothing;
-  if (elements[0] instanceof GroupElementModel) return nothing;
-  if (elements.some(e => e.group instanceof MindmapElementModel))
-    return nothing;
+  if (elements[0] instanceof GroupNode) return nothing;
+  if (elements.some(e => e.group instanceof MindmapNode)) return nothing;
 
   return html`
     <edgeless-add-group-button

@@ -4,7 +4,7 @@ import { Bound } from '@blocksuite/global/utils';
 
 import type { SurfaceBlockComponent } from '../../../index.js';
 import type {
-  ConnectorElementModel,
+  ConnectorNode,
   SurfaceBlockModel,
 } from '../../../surface-block/index.js';
 import type { EdgelessRootService } from '../edgeless-root-service.js';
@@ -433,7 +433,7 @@ export class EdgelessSnapManager extends Overlay {
       }
 
       return prev;
-    }, [] as ConnectorElementModel[]);
+    }, [] as ConnectorNode[]);
 
     const { viewport } = this._rootService;
     const viewportBounds = Bound.from(viewport.viewportBounds);

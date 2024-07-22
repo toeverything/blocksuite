@@ -13,7 +13,7 @@ import { values } from '../_common/utils/iterable.js';
 import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
 import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
-import { ConnectorElementModel } from './element-model/index.js';
+import { ConnectorNode } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
 
 @customElement('affine-surface')
@@ -50,8 +50,8 @@ export class SurfaceBlockComponent extends BlockElement<
 
   private _renderer!: Renderer;
 
-  static isConnector = (element: unknown): element is ConnectorElementModel => {
-    return element instanceof ConnectorElementModel;
+  static isConnector = (element: unknown): element is ConnectorNode => {
+    return element instanceof ConnectorNode;
   };
 
   static isShape = isShape;

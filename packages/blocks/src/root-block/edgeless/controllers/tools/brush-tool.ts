@@ -3,7 +3,7 @@ import type { IVec } from '@blocksuite/global/utils';
 
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type { BrushElementModel } from '../../../../surface-block/index.js';
+import type { BrushNode } from '../../../../surface-block/index.js';
 
 import { CanvasElementType } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './edgeless-tool.js';
@@ -13,7 +13,7 @@ type BrushTool = {
 };
 
 export class BrushToolController extends EdgelessToolController<BrushTool> {
-  private _draggingElement: BrushElementModel | null = null;
+  private _draggingElement: BrushNode | null = null;
 
   private _draggingElementId: string | null = null;
 
@@ -182,7 +182,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       type: CanvasElementType.BRUSH,
     });
 
-    const element = this._service.getElementById(id) as BrushElementModel;
+    const element = this._service.getElementById(id) as BrushNode;
 
     element.stash('points');
     element.stash('xywh');

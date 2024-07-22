@@ -1,4 +1,4 @@
-import type { ConnectorElementModel } from '@blocksuite/blocks';
+import type { ConnectorNode } from '@blocksuite/blocks';
 
 import {
   type EdgelessRootService,
@@ -12,12 +12,12 @@ export const getConnectorFromId = (
 ) => {
   return surface.elements.filter(
     v => SurfaceBlockComponent.isConnector(v) && v.source.id === id
-  ) as ConnectorElementModel[];
+  ) as ConnectorNode[];
 };
 export const getConnectorToId = (id: string, surface: EdgelessRootService) => {
   return surface.elements.filter(
     v => SurfaceBlockComponent.isConnector(v) && v.target.id === id
-  ) as ConnectorElementModel[];
+  ) as ConnectorNode[];
 };
 export const getConnectorPath = (id: string, surface: EdgelessRootService) => {
   let current: string | undefined = id;

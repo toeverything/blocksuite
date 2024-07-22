@@ -2,10 +2,7 @@ import type { IBound } from '@blocksuite/global/utils';
 
 import { Bound } from '@blocksuite/global/utils';
 
-import type {
-  ShapeElementModel,
-  ShapeType,
-} from '../../../element-model/shape.js';
+import type { ShapeNode, ShapeType } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
@@ -26,7 +23,7 @@ import { horizontalOffset, verticalOffset } from './utils.js';
 
 const shapeRenderers: {
   [key in ShapeType]: (
-    model: ShapeElementModel,
+    model: ShapeNode,
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
     renderer: Renderer,
@@ -40,7 +37,7 @@ const shapeRenderers: {
 };
 
 export function shape(
-  model: ShapeElementModel,
+  model: ShapeNode,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer,
@@ -54,7 +51,7 @@ export function shape(
 }
 
 function renderText(
-  model: ShapeElementModel,
+  model: ShapeNode,
   ctx: CanvasRenderingContext2D,
   renderer: Renderer
 ) {

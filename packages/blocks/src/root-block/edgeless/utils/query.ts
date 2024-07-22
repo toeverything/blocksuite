@@ -25,12 +25,12 @@ import type { EdgelessTool } from '../types.js';
 
 import {
   type CanvasElementWithText,
-  ConnectorElementModel,
+  ConnectorNode,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
-  MindmapElementModel,
-  ShapeElementModel,
-  TextElementModel,
+  MindmapNode,
+  ShapeNode,
+  TextNode,
   clamp,
   getQuadBoundsWithRotation,
 } from '../../../surface-block/index.js';
@@ -39,7 +39,7 @@ import { getElementsWithoutGroup } from './group.js';
 export function isMindmapNode(
   element: BlockNode | BlockSuite.EdgelessModelType | null
 ) {
-  return element?.group instanceof MindmapElementModel;
+  return element?.group instanceof MindmapNode;
 }
 
 export function isTopLevelBlock(
@@ -182,16 +182,14 @@ export function isEmbedHtmlBlock(
 
 export function isCanvasElement(
   selectable: BlockSuite.EdgelessModelType | null
-): selectable is BlockSuite.SurfaceModelType {
+): selectable is BlockSuite.SurfaceNodeType {
   return !isTopLevelBlock(selectable);
 }
 
 export function isCanvasElementWithText(
   element: BlockSuite.EdgelessModelType
 ): element is CanvasElementWithText {
-  return (
-    element instanceof TextElementModel || element instanceof ShapeElementModel
-  );
+  return element instanceof TextNode || element instanceof ShapeNode;
 }
 
 export function isConnectable(
@@ -298,7 +296,7 @@ export function getSelectableBounds(
       rotate: ele.rotate,
     };
 
-    if (isCanvasElement(ele) && ele instanceof ConnectorElementModel) {
+    if (isCanvasElement(ele) && ele instanceof ConnectorNode) {
       props.path = ele.absolutePath.map(p => p.clone());
     }
 

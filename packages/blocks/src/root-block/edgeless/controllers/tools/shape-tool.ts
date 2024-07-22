@@ -4,10 +4,7 @@ import type { IVec } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { noop } from '@blocksuite/global/utils';
 
-import type {
-  ShapeElementModel,
-  ShapeType,
-} from '../../../../surface-block/index.js';
+import type { ShapeNode, ShapeType } from '../../../../surface-block/index.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 import type { EdgelessTool } from '../../types.js';
 
@@ -32,7 +29,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   protected override _draggingArea: SelectionArea | null = null;
 
-  private _draggingElement: ShapeElementModel | null = null;
+  private _draggingElement: ShapeNode | null = null;
 
   private _draggingElementId: string | null = null;
 
@@ -292,9 +289,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const id = this._addNewShape(e, 0, 0);
 
     this._draggingElementId = id;
-    this._draggingElement = this._service.getElementById(
-      id
-    ) as ShapeElementModel;
+    this._draggingElement = this._service.getElementById(id) as ShapeNode;
     this._draggingElement.stash('xywh');
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),

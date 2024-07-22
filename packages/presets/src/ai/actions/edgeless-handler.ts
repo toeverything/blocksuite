@@ -3,7 +3,7 @@ import type {
   AIError,
   AffineAIPanelWidget,
   EdgelessCopilotWidget,
-  MindmapElementModel,
+  MindmapNode,
 } from '@blocksuite/blocks';
 import type { TemplateResult } from 'lit';
 
@@ -12,8 +12,8 @@ import {
   EdgelessTextBlockModel,
   ImageBlockModel,
   NoteBlockModel,
-  ShapeElementModel,
-  TextElementModel,
+  ShapeNode,
+  TextNode,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
@@ -72,7 +72,7 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
     if (
       isMindMapRoot(selectedElements[0] || isMindmapChild(selectedElements[0]))
     ) {
-      const mindmap = selectedElements[0].group as MindmapElementModel;
+      const mindmap = selectedElements[0].group as MindmapNode;
 
       return createMindmapRenderer(host, ctx, mindmap.style);
     }
@@ -123,17 +123,17 @@ export async function getContentFromSelected(
 ) {
   const { notes, texts, shapes, images, edgelessTexts } = selected.reduce<{
     notes: NoteBlockModel[];
-    texts: TextElementModel[];
-    shapes: ShapeElementModel[];
+    texts: TextNode[];
+    shapes: ShapeNode[];
     images: ImageBlockModel[];
     edgelessTexts: EdgelessTextBlockModel[];
   }>(
     (pre, cur) => {
       if (cur instanceof NoteBlockModel) {
         pre.notes.push(cur);
-      } else if (cur instanceof TextElementModel) {
+      } else if (cur instanceof TextNode) {
         pre.texts.push(cur);
-      } else if (cur instanceof ShapeElementModel && cur.text?.length) {
+      } else if (cur instanceof ShapeNode && cur.text?.length) {
         pre.shapes.push(cur);
       } else if (cur instanceof ImageBlockModel && cur.caption?.length) {
         pre.images.push(cur);
@@ -471,7 +471,7 @@ export function noteBlockOrTextShowWhen(
   return selected.some(
     el =>
       el instanceof NoteBlockModel ||
-      el instanceof TextElementModel ||
+      el instanceof TextNode ||
       el instanceof EdgelessTextBlockModel
   );
 }

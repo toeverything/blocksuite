@@ -6,9 +6,9 @@ import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import type { EdgelessRootService } from '../edgeless-root-service.js';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
-import { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
+import { MindmapNode } from '../../../surface-block/element-model/mindmap.js';
 import {
-  GroupElementModel,
+  GroupNode,
   type SurfaceBlockModel,
 } from '../../../surface-block/index.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
@@ -36,7 +36,7 @@ export interface CursorSelectionState {
 }
 
 export class EdgelessSelectionManager {
-  private _activeGroup: GroupElementModel | MindmapElementModel | null = null;
+  private _activeGroup: GroupNode | MindmapNode | null = null;
 
   private _cursorSelection: CursorSelection | null = null;
 
@@ -285,8 +285,8 @@ export class EdgelessSelectionManager {
 
     if (
       selection.elements.length === 1 &&
-      (this.firstElement instanceof GroupElementModel ||
-        this.firstElement instanceof MindmapElementModel)
+      (this.firstElement instanceof GroupNode ||
+        this.firstElement instanceof MindmapNode)
     ) {
       this._activeGroup = this.firstElement;
     } else {

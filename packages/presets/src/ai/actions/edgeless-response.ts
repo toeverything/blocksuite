@@ -5,8 +5,8 @@ import type {
   EdgelessCopilotWidget,
   EdgelessElementToolbarWidget,
   EdgelessRootService,
-  MindmapElementModel,
-  ShapeElementModel,
+  MindmapNode,
+  ShapeNode,
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import type { TemplateResult } from 'lit';
@@ -237,7 +237,7 @@ export const responses: {
       getAIPanel(host).hide();
     });
 
-    const mindmap = elements[0].group as MindmapElementModel;
+    const mindmap = elements[0].group as MindmapNode;
 
     if (!data?.node) return;
 
@@ -252,7 +252,7 @@ export const responses: {
 
       surface.doc.transact(() => {
         const updateNodeSize = (node: typeof subtree) => {
-          fitContent(node.element as ShapeElementModel);
+          fitContent(node.element as ShapeNode);
 
           node.children.forEach(child => {
             updateNodeSize(child);
@@ -289,7 +289,7 @@ export const responses: {
 
     // This means regenerate
     if (isMindMapRoot(elements[0])) {
-      const mindmap = elements[0].group as MindmapElementModel;
+      const mindmap = elements[0].group as MindmapNode;
       const xywh = mindmap.tree.element.xywh;
 
       surface.removeElement(mindmap.id);
@@ -317,11 +317,11 @@ export const responses: {
       type: 'mindmap',
     });
 
-    const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
+    const mindmap = surface.getElementById(mindmapId) as MindmapNode;
 
     host.doc.transact(() => {
       mindmap.childElements.forEach(shape => {
-        fitContent(shape as ShapeElementModel);
+        fitContent(shape as ShapeNode);
       });
     });
 

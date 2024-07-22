@@ -3,7 +3,7 @@ import type { BlockSnapshot, SnapshotReturn } from '@blocksuite/store';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists, assertType } from '@blocksuite/global/utils';
 
-import type { ConnectorElementModel } from '../../../surface-block/index.js';
+import type { ConnectorNode } from '../../../surface-block/index.js';
 import type { SlotBlockPayload, TemplateJob } from './template.js';
 
 import { generateElementId } from '../../../surface-block/utils/index.js';
@@ -184,7 +184,7 @@ export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
           if (type === 'connector') {
             (['target', 'source'] as const).forEach(prop => {
               const propVal = val[prop];
-              assertType<ConnectorElementModel['target']>(propVal);
+              assertType<ConnectorNode['target']>(propVal);
 
               if (propVal['id'] || !propVal['position']) return;
               const pos = propVal['position'];

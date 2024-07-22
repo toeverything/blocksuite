@@ -1,4 +1,4 @@
-import type { TextElementModel } from '../../../element-model/text.js';
+import type { TextNode } from '../../../element-model/text.js';
 import type { Renderer } from '../../renderer.js';
 
 import {
@@ -11,7 +11,7 @@ import {
 } from './utils.js';
 
 export function text(
-  model: TextElementModel,
+  model: TextNode,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer

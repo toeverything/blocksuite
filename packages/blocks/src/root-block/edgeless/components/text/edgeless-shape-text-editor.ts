@@ -20,8 +20,8 @@ import {
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { TextResizing } from '../../../../surface-block/consts.js';
 import {
-  MindmapElementModel,
-  type ShapeElementModel,
+  MindmapNode,
+  type ShapeNode,
 } from '../../../../surface-block/element-model/index.js';
 import { toRadian } from '../../../../surface-block/index.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
@@ -48,14 +48,12 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           evt.preventDefault();
           const edgeless = this.edgeless;
           const element = this.element;
-          const mindmap = this.element.group as MindmapElementModel;
+          const mindmap = this.element.group as MindmapNode;
           const parent = mindmap.getParentNode(element.id) ?? element;
           const id = mindmap.addNode(parent.id);
 
           requestAnimationFrame(() => {
-            this.element = edgeless.service.getElementById(
-              id
-            ) as ShapeElementModel;
+            this.element = edgeless.service.getElementById(id) as ShapeNode;
             const element = this.element;
             this.mountEditor?.(element, edgeless);
 
@@ -80,13 +78,11 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           evt.preventDefault();
           const edgeless = this.edgeless;
           const element = this.element;
-          const mindmap = this.element.group as MindmapElementModel;
+          const mindmap = this.element.group as MindmapNode;
           const id = mindmap.addNode(element.id);
 
           requestAnimationFrame(() => {
-            this.element = edgeless.service.getElementById(
-              id
-            ) as ShapeElementModel;
+            this.element = edgeless.service.getElementById(id) as ShapeNode;
             const element = this.element;
             this.mountEditor?.(element, edgeless);
 
@@ -127,8 +123,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     }
 
     this.element.textDisplay = true;
-    this.element.group instanceof MindmapElementModel &&
-      this.element.group.layout();
+    this.element.group instanceof MindmapNode && this.element.group.layout();
 
     this.remove();
     this.edgeless.service.selection.set({
@@ -172,8 +167,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           containerHeight
         ).serialize(),
       });
-      this.element.group instanceof MindmapElementModel &&
-        this.element.group.layout();
+      this.element.group instanceof MindmapNode && this.element.group.layout();
       this.richText.style.minHeight = `${containerHeight}px`;
     }
 
@@ -217,7 +211,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
     this.updateComplete
       .then(() => {
-        if (this.element.group instanceof MindmapElementModel) {
+        if (this.element.group instanceof MindmapNode) {
           this.inlineEditor.selectAll();
         } else {
           this.inlineEditor.focusEnd();
@@ -365,14 +359,11 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor element!: ShapeElementModel;
+  accessor element!: ShapeNode;
 
   @property({ attribute: false })
   accessor mountEditor:
-    | ((
-        element: ShapeElementModel,
-        edgeless: EdgelessRootBlockComponent
-      ) => void)
+    | ((element: ShapeNode, edgeless: EdgelessRootBlockComponent) => void)
     | undefined = undefined;
 
   @query('rich-text')
