@@ -103,62 +103,6 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
   );
 });
 
-test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
-  await page.click('.block-hub-menu-container [role="menuitem"]');
-  await page.waitForTimeout(200);
-  const listMenu = page.locator('.block-hub-icon-container:nth-child(4)');
-  await listMenu.hover();
-  const blockHubListContainer = page.locator(
-    '.block-hub-cards-container[type="file"]'
-  );
-  await expect(blockHubListContainer).toBeVisible();
-  await page.click(
-    '.card-container[affine-flavour="affine:bookmark"][affine-type="bookmark"]'
-  );
-  await page.waitForTimeout(200);
-  await type(page, inputUrl);
-  await pressEnter(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:type="text"
-    />
-    <affine:bookmark
-      prop:caption={null}
-      prop:description={null}
-      prop:icon={null}
-      prop:image={null}
-      prop:index="a0"
-      prop:rotate={0}
-      prop:style="horizontal"
-      prop:title={null}
-      prop:url="${inputUrl}"
-    />
-  </affine:note>
-</affine:page>`
-  );
-});
-
 test(scoped`covert bookmark block to link text`, async ({ page }) => {
   await createBookmarkBlockBySlashMenu(page);
   const bookmark = page.locator('affine-bookmark');
