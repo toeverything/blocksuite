@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, type TemplateResult, html, nothing } from 'lit';
+import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 import { choose } from 'lit/directives/choose.js';
@@ -35,7 +35,6 @@ import {
   ShapeStyle,
   StrokeStyle,
 } from '../../../surface-block/index.js';
-import { lineSizeButtonStyles } from '../../edgeless/components/buttons/line-size-button.js';
 import '../../edgeless/components/panel/color-panel.js';
 import {
   GET_DEFAULT_LINE_COLOR,
@@ -51,6 +50,32 @@ import {
 } from '../../edgeless/utils/consts.js';
 import { mountShapeTextEditor } from '../../edgeless/utils/text.js';
 import './change-text-menu.js';
+
+const changeShapeButtonStyles = [
+  css`
+    .edgeless-component-line-size-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 16px;
+      height: 16px;
+    }
+
+    .edgeless-component-line-size-button div {
+      border-radius: 50%;
+      background-color: var(--affine-icon-color);
+    }
+
+    .edgeless-component-line-size-button.size-s div {
+      width: 4px;
+      height: 4px;
+    }
+    .edgeless-component-line-size-button.size-l div {
+      width: 10px;
+      height: 10px;
+    }
+  `,
+];
 
 function getMostCommonShape(
   elements: ShapeElementModel[]
@@ -108,7 +133,7 @@ function getMostCommonShapeStyle(elements: ShapeElementModel[]): ShapeStyle {
 
 @customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
-  static override styles = [lineSizeButtonStyles];
+  static override styles = [changeShapeButtonStyles];
 
   private _addText() {
     mountShapeTextEditor(this.elements[0], this.edgeless);
