@@ -10,7 +10,7 @@ import type { NoteBlockModel } from '../../note-block/note-model.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 
 import { Overlay, type RoughCanvas } from '../../surface-block/index.js';
-import { EdgelessBlockModel } from './edgeless-block-model.js';
+import { EdgelessBlockNode } from './edgeless-block-node.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';
 
@@ -173,7 +173,7 @@ export function getBlocksInFrame(
   ).concat(
     surfaceModel[0].children.filter(ele => {
       if (ele.id === model.id) return;
-      if (ele instanceof EdgelessBlockModel) {
+      if (ele instanceof EdgelessBlockNode) {
         const blockBound = Bound.deserialize(ele.xywh);
         return fullyContained
           ? bound.contains(blockBound)

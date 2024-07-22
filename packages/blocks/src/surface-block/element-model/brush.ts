@@ -20,13 +20,13 @@ import {
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
 import {
-  type EdgelessNodeHitTestOptions,
-  type SurfaceElementBaseProps,
+  type NodeBaseProps,
+  type NodeHitTestOptions,
   SurfaceElementModel,
 } from './base.js';
 import { convert, derive, watch, yfield } from './decorators.js';
 
-export type BrushProps = SurfaceElementBaseProps & {
+export type BrushProps = NodeBaseProps & {
   /**
    * [[x0,y0,pressure0?],[x1,y1,pressure1?]...]
    * pressure is optional and exsits when pressure sensitivity is supported, otherwise not.
@@ -63,7 +63,7 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   override hitTest(
     px: number,
     py: number,
-    options?: EdgelessNodeHitTestOptions
+    options?: NodeHitTestOptions
   ): boolean {
     const hit = isPointOnlines(
       Bound.deserialize(this.xywh),

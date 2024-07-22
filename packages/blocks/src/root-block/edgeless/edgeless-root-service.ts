@@ -21,7 +21,7 @@ import type { EdgelessTool } from './types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { clamp } from '../../_common/utils/math.js';
 import {
-  type EdgelessNodeHitTestOptions,
+  type NodeHitTestOptions,
   SurfaceGroupLikeModel,
 } from '../../surface-block/element-model/base.js';
 import {
@@ -31,7 +31,7 @@ import {
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { RootService, type TelemetryEvent } from '../root-service.js';
-import { EdgelessBlockModel } from './edgeless-block-model.js';
+import { EdgelessBlockNode } from './edgeless-block-node.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
@@ -389,7 +389,7 @@ export class EdgelessRootService extends RootService {
   pickElement(
     x: number,
     y: number,
-    options: EdgelessNodeHitTestOptions = { all: false, expand: 10 }
+    options: NodeHitTestOptions = { all: false, expand: 10 }
   ): BlockSuite.EdgelessModelType[] | BlockSuite.EdgelessModelType | null {
     options.expand ??= 10;
     options.zoom = this._viewport.zoom;
@@ -450,7 +450,7 @@ export class EdgelessRootService extends RootService {
   pickElementInGroup(
     x: number,
     y: number,
-    options?: EdgelessNodeHitTestOptions
+    options?: NodeHitTestOptions
   ): BlockSuite.EdgelessModelType | null {
     const selectionManager = this._selection;
     const results = this.pickElement(x, y, {
@@ -500,7 +500,7 @@ export class EdgelessRootService extends RootService {
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'blocks' | 'frame'
-  ): EdgelessBlockModel[];
+  ): EdgelessBlockNode[];
 
   pickElementsByBound(
     bound: IBound | Bound,
@@ -557,7 +557,7 @@ export class EdgelessRootService extends RootService {
     id = typeof id === 'string' ? id : id.id;
 
     const el = this.getElementById(id);
-    if (el instanceof EdgelessBlockModel) {
+    if (el instanceof EdgelessBlockNode) {
       this.doc.deleteBlock(el);
       return;
     }
@@ -575,7 +575,7 @@ export class EdgelessRootService extends RootService {
     const index = this._layer.getReorderedIndex(element, direction);
 
     // block should be updated in transaction
-    if (element instanceof EdgelessBlockModel) {
+    if (element instanceof EdgelessBlockNode) {
       this.doc.transact(() => {
         element.index = index;
       });
@@ -681,7 +681,7 @@ export class EdgelessRootService extends RootService {
   }
 
   get blocks() {
-    return (this.frames as EdgelessBlockModel[]).concat(this._layer.blocks);
+    return (this.frames as EdgelessBlockNode[]).concat(this._layer.blocks);
   }
 
   /**

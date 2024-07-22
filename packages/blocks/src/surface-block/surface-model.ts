@@ -15,7 +15,7 @@ import type {
 } from './element-model/connector.js';
 
 import {
-  type SurfaceElementBaseProps,
+  type NodeBaseProps,
   SurfaceGroupLikeModel,
 } from './element-model/base.js';
 import {
@@ -573,15 +573,15 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   getGroup<
     T extends
-      SurfaceGroupLikeModel<SurfaceElementBaseProps> = SurfaceGroupLikeModel<SurfaceElementBaseProps>,
+      SurfaceGroupLikeModel<NodeBaseProps> = SurfaceGroupLikeModel<NodeBaseProps>,
   >(id: string): T | null {
     return this._elementToGroup.has(id)
       ? (this.getElementById(this._elementToGroup.get(id)!) as T)
       : null;
   }
 
-  getGroups(id: string): SurfaceGroupLikeModel<SurfaceElementBaseProps>[] {
-    const groups: SurfaceGroupLikeModel<SurfaceElementBaseProps>[] = [];
+  getGroups(id: string): SurfaceGroupLikeModel<NodeBaseProps>[] {
+    const groups: SurfaceGroupLikeModel<NodeBaseProps>[] = [];
     let group = this.getGroup(id);
 
     while (group) {

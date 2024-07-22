@@ -1,8 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type {
-  EdgelessNode,
-  EdgelessNodeHitTestOptions,
-} from '@blocksuite/block-std/edgeless';
+import type { Node, NodeHitTestOptions } from '@blocksuite/block-std/edgeless';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
@@ -11,7 +8,7 @@ import { Bound } from '@blocksuite/global/utils';
 import { PointLocation } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
-import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
+import type { EdgelessBlockNode } from '../../root-block/edgeless/edgeless-block-node.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { OmitFunctionsAndKeysAndReadOnly } from './utility-type.js';
 
@@ -34,7 +31,7 @@ import {
   yfield,
 } from './decorators.js';
 
-export type { EdgelessNodeHitTestOptions } from '@blocksuite/block-std/edgeless';
+export type { NodeHitTestOptions } from '@blocksuite/block-std/edgeless';
 
 export type ModelToProps<
   T extends SurfaceElementModel,
@@ -45,7 +42,7 @@ export type ModelToProps<
   K | 'yMap' | 'surface' | 'display' | 'opacity' | 'externalXYWH'
 >;
 
-export type SurfaceElementBaseProps = {
+export type NodeBaseProps = {
   index: string;
   seed: number;
 };
@@ -59,8 +56,8 @@ export type SerializedElement = Record<string, unknown> & {
 };
 
 export abstract class SurfaceElementModel<
-  Props extends SurfaceElementBaseProps = SurfaceElementBaseProps,
-> implements EdgelessNode
+  Props extends NodeBaseProps = NodeBaseProps,
+> implements Node
 {
   protected _disposable = new DisposableGroup();
 
@@ -152,7 +149,7 @@ export abstract class SurfaceElementModel<
   hitTest(
     x: number,
     y: number,
-    _: EdgelessNodeHitTestOptions,
+    _: NodeHitTestOptions,
     __: EditorHost
   ): boolean {
     return this.elementBound.isPointInBound([x, y]);
@@ -338,7 +335,7 @@ export abstract class SurfaceElementModel<
 }
 
 export abstract class SurfaceGroupLikeModel<
-  Props extends SurfaceElementBaseProps = SurfaceElementBaseProps,
+  Props extends NodeBaseProps = NodeBaseProps,
 > extends SurfaceElementModel<Props> {
   private _childIds: string[] = [];
 
@@ -419,7 +416,7 @@ export abstract class SurfaceGroupLikeModel<
     for (const key of this.childIds) {
       const element =
         this.surface.getElementById(key) ||
-        (this.surface.doc.getBlockById(key) as EdgelessBlockModel);
+        (this.surface.doc.getBlockById(key) as EdgelessBlockNode);
 
       element && elements.push(element);
     }

@@ -21,8 +21,8 @@ import { keys, last, pick } from '../../_common/utils/iterable.js';
 import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import {
+  type NodeBaseProps,
   type SerializedElement,
-  type SurfaceElementBaseProps,
   SurfaceGroupLikeModel,
 } from './base.js';
 import { LocalConnectorElementModel } from './connector.js';
@@ -60,7 +60,7 @@ export type SerializedMindmapElement = SerializedElement & {
   children: Record<string, NodeDetail>;
 };
 
-type MindmapElementProps = SurfaceElementBaseProps & {
+type MindmapElementProps = NodeBaseProps & {
   children: Y.Map<NodeDetail>;
 };
 

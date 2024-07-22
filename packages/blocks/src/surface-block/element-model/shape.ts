@@ -18,8 +18,8 @@ import {
   TextVerticalAlign,
 } from '../consts.js';
 import {
-  type EdgelessNodeHitTestOptions,
-  type SurfaceElementBaseProps,
+  type NodeBaseProps,
+  type NodeHitTestOptions,
   SurfaceElementModel,
 } from './base.js';
 import { local, yfield } from './decorators.js';
@@ -47,7 +47,7 @@ export enum ShapeTextFontSize {
   XLARGE = 36,
 }
 
-export type ShapeProps = SurfaceElementBaseProps & {
+export type ShapeProps = NodeBaseProps & {
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
@@ -92,7 +92,7 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
   }
 
-  override hitTest(x: number, y: number, options: EdgelessNodeHitTestOptions) {
+  override hitTest(x: number, y: number, options: NodeHitTestOptions) {
     return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
       ...options,
       ignoreTransparent: options.ignoreTransparent ?? true,

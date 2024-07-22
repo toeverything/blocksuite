@@ -4,7 +4,7 @@ import type { Text } from '@blocksuite/store';
 import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { EdgelessNodeHitTestOptions } from '../surface-block/element-model/base.js';
+import type { NodeHitTestOptions } from '../surface-block/element-model/base.js';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 
@@ -44,11 +44,7 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
     );
   }
 
-  override hitTest(
-    x: number,
-    y: number,
-    _: EdgelessNodeHitTestOptions
-  ): boolean {
+  override hitTest(x: number, y: number, _: NodeHitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointNearBound([x, y], 5);
 

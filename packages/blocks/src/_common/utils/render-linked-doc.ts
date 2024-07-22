@@ -16,7 +16,7 @@ import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
 
-import { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
+import { EdgelessBlockNode } from '../../root-block/edgeless/edgeless-block-node.js';
 import {
   getElementProps,
   sortEdgelessElements,
@@ -568,7 +568,7 @@ export function createLinkedDocFromEdgelessElements(
     const ids = new Map<string, string>();
     sortedElements.forEach(model => {
       let newId = model.id;
-      if (model instanceof EdgelessBlockModel) {
+      if (model instanceof EdgelessBlockNode) {
         const blockProps = getBlockProps(model);
         if (isNoteBlock(model)) {
           newId = linkedDoc.addBlock('affine:note', blockProps, rootId);

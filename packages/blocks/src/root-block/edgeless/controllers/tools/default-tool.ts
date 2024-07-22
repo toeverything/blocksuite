@@ -20,7 +20,7 @@ import {
 } from '../../../../_common/utils/index.js';
 import { clamp } from '../../../../_common/utils/math.js';
 import {
-  type EdgelessNodeHitTestOptions,
+  type NodeHitTestOptions,
   SurfaceGroupLikeModel,
 } from '../../../../surface-block/element-model/base.js';
 import { isConnectorWithLabel } from '../../../../surface-block/element-model/connector.js';
@@ -520,14 +520,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _pick(x: number, y: number, options?: EdgelessNodeHitTestOptions) {
+  private _pick(x: number, y: number, options?: NodeHitTestOptions) {
     const service = this._service;
     const modelPos = service.viewport.toModelCoord(x, y);
     const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
 
     if (group instanceof MindmapElementModel) {
       const picked = service.pickElement(modelPos[0], modelPos[1], {
-        ...((options ?? {}) as EdgelessNodeHitTestOptions),
+        ...((options ?? {}) as NodeHitTestOptions),
         all: true,
       });
 

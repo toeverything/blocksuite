@@ -5,7 +5,7 @@ import { Vec } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { PointLocation } from '@blocksuite/global/utils';
 
-import type { EdgelessNodeHitTestOptions } from '../../base.js';
+import type { NodeHitTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 
 import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
@@ -46,7 +46,7 @@ export const ellipse = {
     this: ShapeElementModel,
     x: number,
     y: number,
-    options: EdgelessNodeHitTestOptions
+    options: NodeHitTestOptions
   ) {
     const point: IVec = [x, y];
     const expand = (options?.expand ?? 1) / (options?.zoom ?? 1);

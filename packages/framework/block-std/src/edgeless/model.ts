@@ -18,7 +18,7 @@ import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
 
-export interface EdgelessNodeHitTestOptions {
+export interface NodeHitTestOptions {
   expand?: number;
 
   /**
@@ -33,7 +33,7 @@ export interface EdgelessNodeHitTestOptions {
   zoom?: number;
 }
 
-export interface EdgelessNode {
+export interface Node {
   id: string;
   xywh: SerializedXYWH;
   /**
@@ -60,17 +60,17 @@ export interface EdgelessNode {
   hitTest(
     x: number,
     y: number,
-    options: EdgelessNodeHitTestOptions,
+    options: NodeHitTestOptions,
     host: EditorHost
   ): boolean;
   boxSelect(bound: Bound): boolean;
 }
 
-export class EdgelessBlockModel<
+export class EdgelessBlockNode<
     Props extends EdgelessSelectableProps = EdgelessSelectableProps,
   >
   extends BlockModel<Props>
-  implements EdgelessNode
+  implements Node
 {
   private _externalXYWH: SerializedXYWH | undefined = undefined;
 
@@ -124,7 +124,7 @@ export class EdgelessBlockModel<
   hitTest(
     x: number,
     y: number,
-    _: EdgelessNodeHitTestOptions,
+    _: NodeHitTestOptions,
     __: EditorHost
   ): boolean {
     const bound = Bound.deserialize(this.xywh);
@@ -158,7 +158,7 @@ export class EdgelessBlockModel<
     this._externalXYWH = xywh;
   }
 
-  get group(): EdgelessNode | null {
+  get group(): Node | null {
     // FIXME: make surface a official supported block
     const surface = this.doc
       .getBlocks()
@@ -171,7 +171,7 @@ export class EdgelessBlockModel<
     return surface.getGroup(this.id) ?? null;
   }
 
-  get groups(): EdgelessNode[] {
+  get groups(): Node[] {
     // FIXME: make surface a official supported block
     const surface = this.doc
       .getBlocks()
@@ -195,7 +195,7 @@ export function selectable<
   T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
 >(SuperClass: T) {
   if (SuperClass === BlockModel) {
-    return EdgelessBlockModel as unknown as typeof EdgelessBlockModel<Props>;
+    return EdgelessBlockNode as unknown as typeof EdgelessBlockNode<Props>;
   } else {
     let currentClass = SuperClass;
 
@@ -210,8 +210,8 @@ export function selectable<
       throw new Error('The SuperClass is not a subclass of BlockModel');
     }
 
-    Object.setPrototypeOf(currentClass.prototype, EdgelessBlockModel.prototype);
+    Object.setPrototypeOf(currentClass.prototype, EdgelessBlockNode.prototype);
   }
 
-  return SuperClass as unknown as typeof EdgelessBlockModel<Props>;
+  return SuperClass as unknown as typeof EdgelessBlockNode<Props>;
 }

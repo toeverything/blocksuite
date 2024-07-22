@@ -1,4 +1,4 @@
-import type { EdgelessBlockModel } from './edgeless-block-model.js';
+import type { EdgelessBlockNode } from './edgeless-block-node.js';
 
 export type EdgelessTool = BlockSuite.EdgelessToolType;
 
@@ -8,7 +8,7 @@ declare global {
     type EdgelessBlockModelKeyType = keyof EdgelessBlockModelMap;
     type EdgelessBlockModelType =
       | EdgelessBlockModelMap[EdgelessBlockModelKeyType]
-      | EdgelessBlockModel;
+      | EdgelessBlockNode;
 
     type EdgelessModelType = EdgelessBlockModelType | SurfaceModelType;
     type EdgelessModelKeyType = EdgelessBlockModelKeyType | SurfaceModelKeyType;

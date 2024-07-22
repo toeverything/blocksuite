@@ -20,7 +20,7 @@ import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
-import type { EdgelessBlockModel } from '../edgeless-block-model.js';
+import type { EdgelessBlockNode } from '../edgeless-block-node.js';
 import type { EdgelessTool } from '../types.js';
 
 import {
@@ -37,14 +37,14 @@ import {
 import { getElementsWithoutGroup } from './group.js';
 
 export function isMindmapNode(
-  element: EdgelessBlockModel | BlockSuite.EdgelessModelType | null
+  element: EdgelessBlockNode | BlockSuite.EdgelessModelType | null
 ) {
   return element?.group instanceof MindmapElementModel;
 }
 
 export function isTopLevelBlock(
   selectable: BlockModel | BlockSuite.EdgelessModelType | BlockModel | null
-): selectable is EdgelessBlockModel {
+): selectable is EdgelessBlockNode {
   return !!selectable && 'flavour' in selectable;
 }
 
