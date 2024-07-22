@@ -1,4 +1,7 @@
+import type { Bound, IVec } from '@blocksuite/global/utils';
+
 import { WithDisposable } from '@blocksuite/block-std';
+import { Vec } from '@blocksuite/global/utils';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -27,12 +30,9 @@ import { shapeMethods } from '../../../../surface-block/element-model/shape.js';
 import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
 import { ShapeElementModel } from '../../../../surface-block/index.js';
 import {
-  type Bound,
   CanvasElementType,
-  type IVec,
   Overlay,
   type RoughCanvas,
-  Vec,
 } from '../../../../surface-block/index.js';
 import { ConnectorPathGenerator } from '../../../../surface-block/managers/connector-manager.js';
 import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';

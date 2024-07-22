@@ -6,13 +6,12 @@ import {
   type AIItemConfig,
   AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
-  Bound,
   ImageBlockModel,
   NoteDisplayMode,
   isInsideEdgelessEditor,
   matchFlavours,
 } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
+import { Bound, assertExists } from '@blocksuite/global/utils';
 
 import {
   AIPenIcon,

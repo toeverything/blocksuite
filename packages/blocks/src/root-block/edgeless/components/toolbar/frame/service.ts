@@ -1,9 +1,8 @@
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-
-import { Bound } from '../../../../../surface-block/index.js';
 
 /**
  * Create a frame block with the given width and height

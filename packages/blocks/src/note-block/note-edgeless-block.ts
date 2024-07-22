@@ -2,13 +2,12 @@ import type { BlockElement, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
-  Bound,
   ShadowlessElement,
   WithDisposable,
-  almostEqual,
-  clamp,
   toEdgelessBlockElement,
 } from '@blocksuite/block-std';
+import { Point } from '@blocksuite/global/utils';
+import { Bound, almostEqual, clamp } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -23,7 +22,6 @@ import { MoreIndicatorIcon } from '../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../_common/types.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { getClosestBlockElementByPoint } from '../_common/utils/query.js';
-import { Point } from '../_common/utils/rect.js';
 import { handleNativeRangeAtPoint } from '../_common/utils/selection.js';
 import { StrokeStyle } from '../surface-block/consts.js';
 import { NoteBlockComponent } from './note-block.js';

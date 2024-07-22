@@ -1,5 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
@@ -34,7 +36,6 @@ import {
   moveSubtree,
   showMergeIndicator,
 } from '../../../../surface-block/element-model/utils/mindmap/utils.js';
-import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import { intersects } from '../../../../surface-block/utils/math-utils.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';

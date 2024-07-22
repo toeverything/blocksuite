@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type ReactiveController,
@@ -5,7 +6,6 @@ import {
   render,
 } from 'lit';
 
-import { Bound } from '../../../../../../surface-block/index.js';
 import {
   type ElementDragEvent,
   mouseResolver,

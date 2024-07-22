@@ -1,5 +1,7 @@
 import { PathFinder } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { type Disposable, assertExists, noop } from '@blocksuite/global/utils';
 import {
   type PropertyDeclaration,
@@ -28,8 +30,6 @@ import {
 } from '../_common/icons/index.js';
 import { requestConnectedFrame } from '../_common/utils/event.js';
 import { getBackgroundGrid } from '../root-block/edgeless/utils/query.js';
-import { Bound } from '../surface-block/utils/bound.js';
-import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import './surface-ref-portal.js';
 import { SurfaceRefPortal } from './surface-ref-portal.js';
 import { noContentPlaceholder } from './utils.js';

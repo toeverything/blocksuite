@@ -2,6 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { IS_FIREFOX } from '@blocksuite/global/env';
+import { Point } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, query, queryAll, state } from 'lit/decorators.js';
@@ -15,7 +16,6 @@ import { BlockHubIcon, CrossIcon } from '../../../../_common/icons/index.js';
 import {
   type DroppingType,
   type EditingState,
-  Point,
   Rect,
   asyncFocusRichText,
   buildPath,

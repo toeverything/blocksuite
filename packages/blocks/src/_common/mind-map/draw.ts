@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
@@ -9,7 +10,6 @@ import type {
 import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { SHAPE_TEXT_PADDING } from '../../surface-block/element-model/shape.js';
 import {
-  Bound,
   CanvasElementType,
   ConnectorMode,
   type IShape,

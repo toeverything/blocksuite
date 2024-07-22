@@ -1,12 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { Renderer } from '../../../surface-block/canvas-renderer/renderer.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
 
 import { isTopLevelBlock } from '../../../root-block/edgeless/utils/query.js';
-import { Bound } from '../../../surface-block/utils/bound.js';
 
 export const edgelessToBlob = async (
   host: EditorHost,

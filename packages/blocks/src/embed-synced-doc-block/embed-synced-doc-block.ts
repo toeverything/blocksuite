@@ -1,5 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockSelector,
@@ -31,7 +32,6 @@ import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
 import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
 import { SpecProvider } from '../specs/utils/spec-provider.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import './components/embed-synced-doc-card.js';
 import { blockStyles } from './styles.js';
 

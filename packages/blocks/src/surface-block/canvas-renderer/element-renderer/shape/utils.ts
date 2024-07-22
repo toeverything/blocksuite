@@ -1,6 +1,8 @@
+import type { Bound } from '@blocksuite/global/utils';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
 import type { TextAlign, TextVerticalAlign } from '../../../consts.js';
 import type { ShapeElementModel } from '../../../element-model/shape.js';
-import type { Bound, SerializedXYWH } from '../../../index.js';
 import type { Renderer } from '../../renderer.js';
 
 import {

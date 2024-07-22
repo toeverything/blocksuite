@@ -1,6 +1,7 @@
-import { BlockModel, defineBlockSchema } from '@blocksuite/store';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+import { Bound } from '@blocksuite/global/utils';
+import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../_common/consts.js';
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
@@ -10,7 +11,6 @@ import {
 } from '../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../_common/types.js';
 import { StrokeStyle } from '../surface-block/consts.js';
-import { Bound } from '../surface-block/utils/bound.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',

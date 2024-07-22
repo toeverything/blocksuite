@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
@@ -20,7 +21,6 @@ import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
-import { Bound } from '../surface-block/index.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
 

@@ -1,6 +1,7 @@
 import type { Doc } from '@blocksuite/store';
 import type { BlockModel } from '@blocksuite/store';
 
+import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
@@ -11,7 +12,6 @@ import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import { FrameBlockModel } from '../../frame-block/frame-model.js';
 import { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
-import { Bound } from '../../surface-block/utils/bound.js';
 import {
   SurfaceElementModel,
   SurfaceGroupLikeModel,

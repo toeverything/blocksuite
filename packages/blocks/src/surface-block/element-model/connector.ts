@@ -1,6 +1,10 @@
-import { DocCollection, type Y } from '@blocksuite/store';
+import type { IVec } from '@blocksuite/global/utils';
+import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
-import type { SerializedXYWH, XYWH } from '../utils/xywh.js';
+import { Vec } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
+import { PointLocation } from '@blocksuite/global/utils';
+import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
   DEFAULT_ROUGHNESS,
@@ -11,7 +15,6 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '../consts.js';
-import { Bound } from '../utils/bound.js';
 import {
   getBezierNearestPoint,
   getBezierNearestTime,
@@ -23,9 +26,7 @@ import {
   linePolylineIntersects,
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
-import { PointLocation } from '../utils/point-location.js';
 import { Polyline } from '../utils/polyline.js';
-import { type IVec, Vec } from '../utils/vec.js';
 import {
   type IBaseProps,
   type IHitTestOptions,

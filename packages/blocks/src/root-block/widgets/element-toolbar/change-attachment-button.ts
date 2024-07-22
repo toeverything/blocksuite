@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -24,7 +25,6 @@ import {
 } from '../../../_common/icons/text.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { downloadAttachmentBlob } from '../../../attachment-block/utils.js';
-import { Bound } from '../../../surface-block/index.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 
 @customElement('edgeless-change-attachment-button')

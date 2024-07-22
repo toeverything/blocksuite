@@ -3,17 +3,19 @@ import type {
   IEdgelessElement,
   IHitTestOptions,
 } from '@blocksuite/block-std';
+import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
+import { PointLocation } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
-import type { IVec } from '../utils/vec.js';
 import type { OmitFunctionsAndKeysAndReadOnly } from './utility-type.js';
 
 import { randomSeed } from '../rough/math.js';
-import { Bound } from '../utils/bound.js';
 import {
   getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
@@ -22,12 +24,6 @@ import {
   polygonNearestPoint,
   rotatePoints,
 } from '../utils/math-utils.js';
-import { PointLocation } from '../utils/point-location.js';
-import {
-  type SerializedXYWH,
-  type XYWH,
-  deserializeXYWH,
-} from '../utils/xywh.js';
 import {
   convertProps,
   getDeriveProperties,

@@ -1,4 +1,5 @@
-import type { IBound } from '../../consts.js';
+import type { IBound } from '@blocksuite/global/utils';
+
 import type { MindmapElementModel } from '../../element-model/mindmap.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Renderer } from '../renderer.js';

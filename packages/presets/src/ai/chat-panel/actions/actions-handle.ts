@@ -3,18 +3,15 @@ import type {
   EditorHost,
   TextSelection,
 } from '@blocksuite/block-std';
-import type {
-  EdgelessRootService,
-  ImageSelection,
-  SerializedXYWH,
-} from '@blocksuite/blocks';
+import type { EdgelessRootService, ImageSelection } from '@blocksuite/blocks';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
   BlocksUtils,
-  Bound,
   NoteDisplayMode,
   getElementsBound,
 } from '@blocksuite/blocks';
+import { Bound } from '@blocksuite/global/utils';
 
 import {
   CreateIcon,

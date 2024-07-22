@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
 import type { SlDropdown } from '@shoelace-style/shoelace';
@@ -12,7 +13,6 @@ import {
   HtmlTransformer,
   MarkdownTransformer,
   NotionHtmlAdapter,
-  type SerializedXYWH,
   SizeVariables,
   StyleVariables,
   type SurfaceBlockComponent,

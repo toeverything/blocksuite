@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -8,7 +9,6 @@ import type { EmbedHtmlBlockService } from './embed-html-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import './components/fullscreen-toolbar.js';
 import { HtmlIcon, styles } from './styles.js';
 

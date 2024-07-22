@@ -1,4 +1,8 @@
+import type { XYWH } from '@blocksuite/global/utils';
+
 import { WithDisposable } from '@blocksuite/block-std';
+import { serializeXYWH } from '@blocksuite/global/utils';
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
@@ -29,13 +33,9 @@ import {
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
 import {
-  Bound,
   GroupElementModel,
-  Vec,
-  type XYWH,
   clamp,
   normalizeDegAngle,
-  serializeXYWH,
   toDegree,
 } from '../../../../surface-block/index.js';
 import { captureEventTarget } from '../../../widgets/drag-handle/utils.js';

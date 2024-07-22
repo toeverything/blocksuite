@@ -5,6 +5,8 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, debounce } from '@blocksuite/global/utils';
 import { type Block, BlockViewType, type Doc, nanoid } from '@blocksuite/store';
 import { type PropertyValues, css, html, nothing } from 'lit';
@@ -22,8 +24,6 @@ import type { SurfaceRefRenderer } from '../../../../surface-ref-block/surface-r
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { SpecProvider } from '../../../../specs/index.js';
-import { Bound } from '../../../../surface-block/utils/bound.js';
-import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import '../../../../surface-ref-block/surface-ref-portal.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 

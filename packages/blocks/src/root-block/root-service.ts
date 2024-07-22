@@ -2,6 +2,7 @@ import type { BlockElement, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { BlockService } from '@blocksuite/block-std';
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { NoteBlockModel } from '../note-block/note-model.js';
@@ -37,7 +38,6 @@ import { getRootByEditorHost } from '../_common/utils/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import { CommunityCanvasTextFonts } from '../surface-block/consts.js';
-import { Bound, Vec } from '../surface-block/index.js';
 import { EditPropsStore } from '../surface-block/managers/edit-session.js';
 import {
   copySelectedModelsCommand,

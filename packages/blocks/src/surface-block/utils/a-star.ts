@@ -1,7 +1,7 @@
-import { assertExists } from '@blocksuite/global/utils';
+import type { IVec3 } from '@blocksuite/global/utils';
+import type { Bound } from '@blocksuite/global/utils';
 
-import type { Bound } from './bound.js';
-import type { IVec3 } from './vec.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 import { Graph } from './graph.js';
 import { almostEqual } from './math-utils.js';

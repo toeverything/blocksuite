@@ -6,12 +6,11 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import {
-  Bound,
   type EdgelessRootBlockComponent,
   type FrameBlockModel,
   generateKeyBetween,
 } from '@blocksuite/blocks';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { Bound, DisposableGroup } from '@blocksuite/global/utils';
 import { type PropertyValues, css, html, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

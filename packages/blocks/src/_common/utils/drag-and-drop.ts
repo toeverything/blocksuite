@@ -1,3 +1,4 @@
+import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { assertExists } from '@blocksuite/global/utils';
@@ -13,7 +14,7 @@ import {
   getModelByBlockComponent,
   getRectByBlockElement,
 } from './query.js';
-import { type Point, Rect } from './rect.js';
+import { Rect } from './rect.js';
 
 /**
  * A dropping type.

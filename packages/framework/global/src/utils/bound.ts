@@ -1,13 +1,24 @@
-import type { IBound, SerializedXYWH, XYWH } from './types.js';
 import type { IVec } from './vec.js';
+import type { SerializedXYWH, XYWH } from './xywh.js';
 
 import {
   EPSILON,
   getBoundsFromPoints,
   lineIntersects,
   polygonPointDistance,
-} from '../utils/math.js';
-import { deserializeXYWH, serializeXYWH } from '../utils/xywh.js';
+} from './math.js';
+import { deserializeXYWH, serializeXYWH } from './xywh.js';
+
+/**
+ * Represents the x, y, width, and height of a block that can be easily accessed.
+ */
+export interface IBound {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  rotate?: number;
+}
 
 export class Bound implements IBound {
   h: number;

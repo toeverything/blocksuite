@@ -1,3 +1,9 @@
+import type { IVec, IVec3 } from '@blocksuite/global/utils';
+import type { IBound } from '@blocksuite/global/utils';
+
+import { Vec } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
+import { PointLocation } from '@blocksuite/global/utils';
 import {
   assertEquals,
   assertExists,
@@ -6,13 +12,11 @@ import {
 
 import type { Connectable } from '../../_common/types.js';
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
-import type { IBound } from '../consts.js';
 import type {
   Connection,
   ConnectorElementModel,
   LocalConnectorElementModel,
 } from '../element-model/connector.js';
-import type { IVec, IVec3 } from '../utils/vec.js';
 
 import { last } from '../../_common/utils/iterable.js';
 import { Overlay } from '../canvas-renderer/renderer.js';
@@ -22,7 +26,7 @@ import {
 } from '../element-model/connector.js';
 import { GroupElementModel } from '../element-model/group.js';
 import { AStarRunner } from '../utils/a-star.js';
-import { Bound, getBoundFromPoints } from '../utils/bound.js';
+import { getBoundFromPoints } from '../utils/bound.js';
 import {
   getBezierCurveBoundingBox,
   getBezierParameters,
@@ -39,8 +43,6 @@ import {
   sign,
   toRadian,
 } from '../utils/math-utils.js';
-import { PointLocation } from '../utils/point-location.js';
-import { Vec } from '../utils/vec.js';
 
 export type OrthogonalConnectorInput = {
   startBound: Bound | null;
@@ -1343,7 +1345,7 @@ export class ConnectorPathGenerator {
       connector.mode === ConnectorMode.Curve
         ? getBezierCurveBoundingBox(getBezierParameters(points))
         : getBoundFromPoints(points);
-    const relativePoints = points.map(p => {
+    const relativePoints = points.map((p: PointLocation) => {
       return p.setVec(Vec.sub(p, [bound.x, bound.y]));
     });
 

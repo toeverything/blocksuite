@@ -1,12 +1,12 @@
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 
+import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import type { IHitTestOptions } from '../surface-block/element-model/base.js';
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import { Bound } from '../surface-block/utils/bound.js';
 
 type FrameBlockProps = {
   title: Text;

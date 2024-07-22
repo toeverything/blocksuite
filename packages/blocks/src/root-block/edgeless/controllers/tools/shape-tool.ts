@@ -1,5 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 
+import { Bound } from '@blocksuite/global/utils';
 import { noop } from '@blocksuite/global/utils';
 
 import type {
@@ -10,11 +12,7 @@ import type { SelectionArea } from '../../services/tools-manager.js';
 import type { EdgelessTool } from '../../types.js';
 
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
-import {
-  Bound,
-  CanvasElementType,
-  type IVec,
-} from '../../../../surface-block/index.js';
+import { CanvasElementType } from '../../../../surface-block/index.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   SHAPE_OVERLAY_HEIGHT,

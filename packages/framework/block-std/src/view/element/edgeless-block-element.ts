@@ -1,8 +1,8 @@
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { nothing } from 'lit';
 
-import type { SerializedXYWH } from '../../edgeless/types.js';
 import type { BlockService } from '../../service/index.js';
 
 import { BlockElement } from './block-element.js';

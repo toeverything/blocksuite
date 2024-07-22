@@ -1,13 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { noop } from '@blocksuite/global/utils';
+import { Point, noop } from '@blocksuite/global/utils';
 
 import type { SelectionArea } from '../../services/tools-manager.js';
 import type { EdgelessTool } from '../../types.js';
 
 import {
   type NoteChildrenFlavour,
-  Point,
   hasClassNameInList,
 } from '../../../../_common/utils/index.js';
 import {

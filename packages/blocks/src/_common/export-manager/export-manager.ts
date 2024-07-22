@@ -1,12 +1,13 @@
 import type { BlockService, EditorHost } from '@blocksuite/block-std';
+import type { IBound } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../root-block/index.js';
-import type { IBound } from '../../surface-block/consts.js';
 
 import {
   blockElementGetter,
@@ -23,7 +24,6 @@ import {
   type Renderer,
   SurfaceElementModel,
 } from '../../surface-block/index.js';
-import { Bound } from '../../surface-block/utils/bound.js';
 import { fetchImage } from '../adapters/utils.js';
 import { CANVAS_EXPORT_IGNORE_TAGS } from '../consts.js';
 import { FileExporter } from './file-exporter.js';

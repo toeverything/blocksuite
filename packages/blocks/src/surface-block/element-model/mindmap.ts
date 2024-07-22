@@ -1,3 +1,6 @@
+import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
+
+import { deserializeXYWH } from '@blocksuite/global/utils';
 import { assertType } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
@@ -17,11 +20,6 @@ import type {
 import { keys, last, pick } from '../../_common/utils/iterable.js';
 import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
-import {
-  type SerializedXYWH,
-  type XYWH,
-  deserializeXYWH,
-} from '../utils/xywh.js';
 import {
   type IBaseProps,
   type SerializedElement,

@@ -1,3 +1,7 @@
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Point } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
+
 import type { SurfaceBlockComponent } from '../../../index.js';
 import type {
   ConnectorElementModel,
@@ -5,11 +9,8 @@ import type {
 } from '../../../surface-block/index.js';
 import type { EdgelessRootService } from '../edgeless-root-service.js';
 
-import { Point } from '../../../_common/utils/rect.js';
 import {
-  Bound,
   Overlay,
-  deserializeXYWH,
   getBoundsWithRotation,
 } from '../../../surface-block/index.js';
 import { isConnectable, isTopLevelBlock } from '../utils/query.js';

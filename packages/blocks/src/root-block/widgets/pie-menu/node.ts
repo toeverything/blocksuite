@@ -1,8 +1,9 @@
+import type { IVec } from '@blocksuite/global/utils';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { IVec } from '../../../surface-block/index.js';
 import type { PieNodeModel } from './base.js';
 import type { PieMenu } from './menu.js';
 

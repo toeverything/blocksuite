@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -10,7 +11,6 @@ import type { ImageBlockService } from './image-service.js';
 
 import { BlockComponent } from '../_common/components/block-component.js';
 import { Peekable } from '../_common/components/index.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import './components/edgeless-image-block.js';
 import './components/image-card.js';
 import './components/page-image-block.js';

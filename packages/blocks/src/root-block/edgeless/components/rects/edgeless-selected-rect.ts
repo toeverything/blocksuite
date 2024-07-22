@@ -1,11 +1,19 @@
+import type { IVec, PointLocation } from '@blocksuite/global/utils';
+
 import { WithDisposable } from '@blocksuite/block-std';
-import { type Disposable, Slot, assertType } from '@blocksuite/global/utils';
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
+import {
+  type Disposable,
+  type IPoint,
+  Slot,
+  assertType,
+} from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { IPoint } from '../../../../_common/types.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EdgelessTextBlockComponent } from '../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
@@ -36,14 +44,10 @@ import { TextElementModel } from '../../../../surface-block/element-model/text.j
 import {
   CanvasElementType,
   GroupElementModel,
-  type PointLocation,
   ShapeElementModel,
-  deserializeXYWH,
 } from '../../../../surface-block/index.js';
 import {
-  Bound,
   ConnectorElementModel,
-  type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
 } from '../../../../surface-block/index.js';

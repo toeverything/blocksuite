@@ -1,6 +1,9 @@
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Point } from '@blocksuite/global/utils';
+
 /// <reference types="@blocksuite/global" />
 import { mindMap } from './_common/mind-map/index.js';
-import { Point, matchFlavours } from './_common/utils/index.js';
+import { matchFlavours } from './_common/utils/index.js';
 import './code-block/affine-code-line.js';
 import './database-block/index.js';
 import './divider-block/index.js';
@@ -13,7 +16,6 @@ import { splitElements } from './root-block/edgeless/utils/clipboard-utils.js';
 import { isCanvasElement } from './root-block/edgeless/utils/query.js';
 // manual import to avoid being tree-shaken
 import './root-block/index.js';
-import { deserializeXYWH } from './surface-block/index.js';
 import './surface-ref-block/index.js';
 
 export * from './_common/adapters/index.js';
@@ -125,7 +127,6 @@ export * from './schemas.js';
 export * from './specs/index.js';
 export {
   AffineCanvasTextFonts,
-  Bound,
   BrushElementModel,
   CanvasElementType,
   CommunityCanvasTextFonts,
@@ -139,7 +140,6 @@ export {
   MindmapStyle,
   MindmapSurfaceBlock,
   type PointStyle,
-  type SerializedXYWH,
   ShapeElementModel,
   ShapeStyle,
   StrokeStyle,

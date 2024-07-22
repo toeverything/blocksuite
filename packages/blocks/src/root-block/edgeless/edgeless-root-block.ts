@@ -1,9 +1,12 @@
 import type { SurfaceSelection } from '@blocksuite/block-std';
+import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { BlockElement } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
-import { assertExists, throttle } from '@blocksuite/global/utils';
+import { serializeXYWH } from '@blocksuite/global/utils';
+import { Point } from '@blocksuite/global/utils';
+import { Bound, Vec, assertExists, throttle } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -31,9 +34,7 @@ import {
 } from '../../_common/consts.js';
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import {
-  type IPoint,
   NoteDisplayMode,
-  Point,
   type Viewport,
   asyncFocusRichText,
   handleNativeRangeAtPoint,
@@ -46,14 +47,7 @@ import {
   setAttachmentUploaded,
   setAttachmentUploading,
 } from '../../attachment-block/utils.js';
-import {
-  Bound,
-  type IBound,
-  type IVec,
-  Vec,
-  normalizeWheelDeltaY,
-  serializeXYWH,
-} from '../../surface-block/index.js';
+import { normalizeWheelDeltaY } from '../../surface-block/index.js';
 import '../../surface-block/surface-block.js';
 import './components/note-slicer/index.js';
 import './components/presentation/edgeless-navigator-black-background.js';

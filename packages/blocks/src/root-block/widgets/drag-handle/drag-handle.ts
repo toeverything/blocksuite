@@ -1,4 +1,5 @@
 import type { BlockElement } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 
 import {
   PathFinder,
@@ -6,6 +7,8 @@ import {
   type UIEventHandler,
   WidgetElement,
 } from '@blocksuite/block-std';
+import { Point } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, throttle } from '@blocksuite/global/utils';
 import {
   type BlockModel,
@@ -27,7 +30,6 @@ import type { EdgelessTool } from '../../edgeless/types.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';
 
 import {
-  Point,
   Rect,
   getBlockElementsExcludeSubtrees,
   getCurrentNativeRange,
@@ -44,7 +46,6 @@ import {
 import { PageRootBlockComponent } from '../../../root-block/page/page-root-block.js';
 import { autoScroll } from '../../../root-block/text-selection/utils.js';
 import { SpecProvider } from '../../../specs/utils/spec-provider.js';
-import { Bound, type IVec } from '../../../surface-block/index.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
 import {

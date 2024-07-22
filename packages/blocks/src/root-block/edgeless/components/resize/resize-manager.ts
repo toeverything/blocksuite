@@ -1,12 +1,12 @@
-import { assertExists } from '@blocksuite/global/utils';
+import type { PointLocation } from '@blocksuite/global/utils';
+import type { IVec } from '@blocksuite/global/utils';
 
-import type { IPoint } from '../../../../_common/types.js';
-import type { IVec } from '../../../../surface-block/utils/vec.js';
+import { Bound } from '@blocksuite/global/utils';
+import { type IPoint, assertExists } from '@blocksuite/global/utils';
+
 import type { SelectableProps } from '../../utils/query.js';
 
 import {
-  Bound,
-  type PointLocation,
   getQuadBoundsWithRotation,
   rotatePoints,
 } from '../../../../surface-block/index.js';

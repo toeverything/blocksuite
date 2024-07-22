@@ -1,7 +1,7 @@
-import type { IBound } from '../edgeless/types.js';
+import type { IBound } from './bound.js';
 
-import { PointLocation } from '../edgeless/point-location.js';
-import { type IVec, Vec } from '../edgeless/vec.js';
+import { PointLocation } from './point-location.js';
+import { type IVec, Vec } from './vec.js';
 
 export const EPSILON = 1e-12;
 export const MACHINE_EPSILON = 1.12e-16;

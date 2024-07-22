@@ -1,4 +1,5 @@
 import { IS_MAC } from '@blocksuite/global/env';
+import { Bound } from '@blocksuite/global/utils';
 
 import type { ShapeElementModel } from '../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
@@ -16,7 +17,6 @@ import { EdgelessTextBlockModel } from '../../edgeless-text/edgeless-text-model.
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
 import {
-  Bound,
   ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,

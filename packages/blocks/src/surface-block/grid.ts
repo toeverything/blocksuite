@@ -1,6 +1,9 @@
-import { GRID_SIZE, type IBound } from './consts.js';
+import type { IBound } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
+
+import { GRID_SIZE } from './consts.js';
 import { compare } from './managers/layer-utils.js';
-import { Bound } from './utils/bound.js';
 import {
   getBoundsWithRotation,
   intersects,

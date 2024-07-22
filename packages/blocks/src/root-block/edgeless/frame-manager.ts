@@ -1,5 +1,6 @@
 import type { Doc } from '@blocksuite/store';
 
+import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -8,7 +9,7 @@ import type { EdgelessRootService } from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 
-import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
+import { Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import { EdgelessBlockModel } from './edgeless-block-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';

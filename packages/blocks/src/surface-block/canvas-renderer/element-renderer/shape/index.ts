@@ -1,4 +1,7 @@
-import type { IBound } from '../../../consts.js';
+import type { IBound } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
+
 import type {
   ShapeElementModel,
   ShapeType,
@@ -6,7 +9,6 @@ import type {
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
-import { Bound } from '../../../utils/bound.js';
 import {
   deltaInsertsToChunks,
   getFontMetrics,

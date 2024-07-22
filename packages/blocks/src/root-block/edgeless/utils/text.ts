@@ -1,5 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -12,11 +14,9 @@ import { FontFamily } from '../../../surface-block/consts.js';
 import { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
 import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {
-  Bound,
   CanvasElementType,
   type ConnectorElementModel,
   type IModelCoord,
-  type IVec,
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,

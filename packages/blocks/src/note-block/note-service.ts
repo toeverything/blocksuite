@@ -1,11 +1,12 @@
 import { BlockService } from '@blocksuite/block-std';
+import { Point } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
 import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import type { EdgelessNoteBlockComponent } from './note-edgeless-block.js';
 
-import { Point } from '../_common/utils/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
@@ -15,7 +16,6 @@ import {
   captureEventTarget,
   getDuplicateBlocks,
 } from '../root-block/widgets/drag-handle/utils.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import { focusBlockEnd } from './commands/focus-block-end.js';
 import { focusBlockStart } from './commands/focus-block-start.js';
 import {

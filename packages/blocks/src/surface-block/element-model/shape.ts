@@ -1,9 +1,10 @@
-import { DocCollection, type Y } from '@blocksuite/store';
+import type { PointLocation } from '@blocksuite/global/utils';
+import type { IVec } from '@blocksuite/global/utils';
+import type { Bound } from '@blocksuite/global/utils';
+import type { IBound } from '@blocksuite/global/utils';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import type { IBound, SerializedXYWH } from '../index.js';
-import type { Bound } from '../utils/bound.js';
-import type { PointLocation } from '../utils/point-location.js';
-import type { IVec } from '../utils/vec.js';
+import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
   DEFAULT_ROUGHNESS,

@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
@@ -23,7 +24,6 @@ import {
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { humanFileSize } from '../_common/utils/math.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import {
   type AttachmentBlockModel,
   AttachmentBlockStyles,

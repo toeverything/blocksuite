@@ -1,4 +1,5 @@
 import type { Slot } from '@blocksuite/global/utils';
+import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import type { ConnectorElementModel } from '../surface-block/element-model/connector.js';
@@ -8,14 +9,8 @@ import type {
 } from '../surface-block/index.js';
 import type { RefNodeSlots } from './inline/presets/nodes/reference-node/reference-node.js';
 import type { BlockComponent } from './utils/query.js';
-import type { Point } from './utils/rect.js';
 
 export type SelectionPosition = 'start' | 'end' | Point;
-
-export interface IPoint {
-  x: number;
-  y: number;
-}
 
 export interface EditingState {
   element: BlockComponent;

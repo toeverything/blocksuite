@@ -1,5 +1,6 @@
 import type { TemplateResult } from 'lit';
 
+import { Bound } from '@blocksuite/global/utils';
 import { assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -9,7 +10,6 @@ import type { EdgelessRootService } from '../../../edgeless-root-service.js';
 
 import { LayoutType } from '../../../../../surface-block/element-model/utils/mindmap/layout.js';
 import {
-  Bound,
   CanvasElementType,
   type MindmapElementModel,
   type ShapeElementModel,

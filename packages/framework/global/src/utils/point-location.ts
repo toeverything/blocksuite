@@ -1,5 +1,9 @@
 import { type IVec, Vec } from './vec.js';
 
+/**
+ * PointLocation is an implementation of IVec with in/out vectors and tangent.
+ * This is useful when dealing with path.
+ */
 export class PointLocation extends Array<number> implements IVec {
   _in: IVec = [0, 0];
 

@@ -1,15 +1,12 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { Vec } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { ConnectorElementModel } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-
-import {
-  type ConnectorElementModel,
-  Vec,
-} from '../../../../surface-block/index.js';
 
 const SIZE = 12;
 const HALF_SIZE = SIZE / 2;

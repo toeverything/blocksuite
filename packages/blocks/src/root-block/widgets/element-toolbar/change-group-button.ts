@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { deserializeXYWH, serializeXYWH } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
@@ -17,10 +18,6 @@ import {
 } from '../../../_common/icons/index.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import {
-  deserializeXYWH,
-  serializeXYWH,
-} from '../../../surface-block/index.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
 import { mountGroupTitleEditor } from '../../edgeless/utils/text.js';
 

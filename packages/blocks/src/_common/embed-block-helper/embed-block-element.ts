@@ -2,6 +2,7 @@ import type { BlockService } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { Bound, Point } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -20,12 +21,10 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../../root-block/widgets/drag-handle/utils.js';
-import { Bound } from '../../surface-block/index.js';
 import { BlockComponent } from '../components/block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
 import {
   type EmbedCardStyle,
-  Point,
   getThemeMode,
   matchFlavours,
 } from '../utils/index.js';

@@ -1,21 +1,22 @@
-import type { Constructor } from '@blocksuite/global/utils';
-
-import { BlockModel } from '@blocksuite/store';
-
-import type { EditorHost } from '../view/index.js';
-import type { SerializedXYWH } from './types.js';
-import type { IVec } from './vec.js';
+import type {
+  Constructor,
+  IVec,
+  SerializedXYWH,
+} from '@blocksuite/global/utils';
 
 import {
+  Bound,
+  PointLocation,
   getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
-} from '../utils/math.js';
-import { Bound } from './bound.js';
-import { PointLocation } from './point-location.js';
+} from '@blocksuite/global/utils';
+import { BlockModel } from '@blocksuite/store';
+
+import type { EditorHost } from '../view/index.js';
 
 export interface IHitTestOptions {
   expand?: number;

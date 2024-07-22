@@ -1,7 +1,17 @@
 export * from './assert.js';
+export type { IBound } from './bound.js';
+export { Bound } from './bound.js';
 export * from './crypto.js';
 export * from './disposable.js';
 export * from './function.js';
 export * from './logger.js';
+export * from './math.js';
+export { Point } from './point.js';
+export type { IPoint } from './point.js';
+export { PointLocation } from './point-location.js';
 export * from './slot.js';
 export * from './types.js';
+export type { IVec, IVec3 } from './vec.js';
+export { Vec } from './vec.js';
+export type { SerializedXYWH, XYWH } from './xywh.js';
+export { deserializeXYWH, serializeXYWH } from './xywh.js';

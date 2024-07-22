@@ -6,8 +6,13 @@ import type {
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { BlocksUtils, Bound, NoteDisplayMode } from '@blocksuite/blocks';
-import { DisposableGroup, assertExists, noop } from '@blocksuite/global/utils';
+import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
+import {
+  Bound,
+  DisposableGroup,
+  assertExists,
+  noop,
+} from '@blocksuite/global/utils';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

@@ -12,14 +12,6 @@ export const DEFAULT_ROUGHNESS = 1.4;
 // TODO: need to check the default central area ratio
 export const DEFAULT_CENTRAL_AREA_RATIO = 0.3;
 
-export interface IBound {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  rotate?: number;
-}
-
 export enum ShapeStyle {
   General = 'General',
   Scribbled = 'Scribbled',

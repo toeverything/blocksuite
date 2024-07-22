@@ -1,15 +1,14 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
+import type { IPoint } from '@blocksuite/global/utils';
 
-import { noop } from '@blocksuite/global/utils';
+import { Bound, Vec, noop } from '@blocksuite/global/utils';
 
 import type { EdgelessTool } from '../../types.js';
 
-import { type IPoint, LassoMode } from '../../../../_common/types.js';
-import { Bound } from '../../../../surface-block/index.js';
+import { LassoMode } from '../../../../_common/types.js';
 import {
-  type IVec,
   Overlay,
-  Vec,
   getBoundFromPoints,
   getSvgPathFromStroke,
 } from '../../../../surface-block/index.js';

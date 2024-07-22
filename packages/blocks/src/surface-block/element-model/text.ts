@@ -1,7 +1,8 @@
-import { DocCollection, type Y } from '@blocksuite/store';
+import type { IVec } from '@blocksuite/global/utils';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import type { SerializedXYWH } from '../index.js';
-import type { IVec } from '../utils/vec.js';
+import { Bound } from '@blocksuite/global/utils';
+import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
   FontFamily,
@@ -10,7 +11,6 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '../consts.js';
-import { Bound } from '../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,

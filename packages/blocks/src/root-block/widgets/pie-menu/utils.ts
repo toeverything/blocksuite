@@ -1,4 +1,5 @@
-import type { IVec } from '../../../surface-block/index.js';
+import type { IVec } from '@blocksuite/global/utils';
+
 import type { EdgelessTool } from '../../edgeless/types.js';
 import type {
   ActionFunction,

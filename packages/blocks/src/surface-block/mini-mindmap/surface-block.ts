@@ -1,3 +1,5 @@
+import type { Bound } from '@blocksuite/global/utils';
+
 import { BlockElement } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -5,7 +7,6 @@ import { customElement, query } from 'lit/decorators.js';
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import type { ShapeElementModel } from '../element-model/shape.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
-import type { Bound } from '../utils/bound.js';
 import type { MindmapService } from './service.js';
 
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';

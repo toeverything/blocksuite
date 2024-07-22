@@ -1,10 +1,11 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { IBound } from '@blocksuite/global/utils';
 
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { IBound } from '../../surface-block/consts.js';
 import type {
   CanvasElementType,
   ConnectorElementModel,
@@ -29,7 +30,6 @@ import {
 } from '../../surface-block/index.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
-import { Bound } from '../../surface-block/utils/bound.js';
 import { RootService, type TelemetryEvent } from '../root-service.js';
 import { EdgelessBlockModel } from './edgeless-block-model.js';
 import { EdgelessFrameManager } from './frame-manager.js';

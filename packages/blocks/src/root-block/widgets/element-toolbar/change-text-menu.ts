@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -36,7 +37,7 @@ import {
   ConnectorElementModel,
   ShapeElementModel,
 } from '../../../surface-block/index.js';
-import { Bound, normalizeShapeBound } from '../../../surface-block/index.js';
+import { normalizeShapeBound } from '../../../surface-block/index.js';
 import {
   getFontFacesByFontFamily,
   wrapFontFamily,

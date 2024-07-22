@@ -5,7 +5,6 @@ export { normalizeShapeBound } from './canvas-renderer/element-renderer/index.js
 export { fitContent } from './canvas-renderer/element-renderer/shape/utils.js';
 export { Overlay, Renderer } from './canvas-renderer/renderer.js';
 export {
-  type IBound,
   type IModelCoord,
   ShapeStyle,
   StrokeStyle,
@@ -77,9 +76,6 @@ export {
   toDegree,
   toRadian,
 } from './utils/math-utils.js';
-export { PointLocation } from './utils/point-location.js';
-export { type IVec, type IVec3, Vec } from './utils/vec.js';
-export * from './utils/xywh.js';
 
 declare global {
   namespace BlockSuite {

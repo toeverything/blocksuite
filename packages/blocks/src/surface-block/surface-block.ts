@@ -1,4 +1,5 @@
 import { BlockElement, RangeManager } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
@@ -14,7 +15,6 @@ import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
 import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
-import { Bound } from './utils/bound.js';
 
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockElement<

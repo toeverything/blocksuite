@@ -1,5 +1,11 @@
+/**
+ * XYWH represents the x, y, width, and height of an element or block.
+ */
 export type XYWH = [number, number, number, number];
 
+/**
+ * SerializedXYWH is a string that represents the x, y, width, and height of a block.
+ */
 export type SerializedXYWH = `[${number},${number},${number},${number}]`;
 
 export function serializeXYWH(

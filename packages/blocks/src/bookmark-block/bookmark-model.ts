@@ -1,8 +1,9 @@
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import type { LinkPreviewData } from '../_common/embed-block-helper/index.js';
 import type { EmbedCardStyle } from '../_common/types.js';
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 import { selectable } from '../_common/edgeless/mixin/index.js';
 

@@ -1,10 +1,11 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
+import { Bound } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 
 import type { EdgelessTool } from '../../types.js';
 
-import { Bound, getElementsBound } from '../../../../surface-block/index.js';
+import { getElementsBound } from '../../../../surface-block/index.js';
 import {
   AFFINE_AI_PANEL_WIDGET,
   type AffineAIPanelWidget,

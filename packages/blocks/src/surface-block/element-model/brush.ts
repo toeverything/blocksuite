@@ -1,9 +1,12 @@
-import type { IVec, IVec3 } from '../utils/vec.js';
-import type { SerializedXYWH } from '../utils/xywh.js';
+import type { IVec, IVec3 } from '@blocksuite/global/utils';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
+import { Vec } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
+import { PointLocation } from '@blocksuite/global/utils';
 
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
 import {
-  Bound,
   getBoundFromPoints,
   inflateBound,
   transformPointsToNewBound,
@@ -16,8 +19,6 @@ import {
   lineIntersects,
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
-import { PointLocation } from '../utils/point-location.js';
-import { Vec } from '../utils/vec.js';
 import {
   type IBaseProps,
   type IHitTestOptions,

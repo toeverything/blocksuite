@@ -1,7 +1,7 @@
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
-import type { IPoint, NoteDisplayMode } from '@blocks/_common/types.js';
+import type { NoteDisplayMode } from '@blocks/_common/types.js';
 import type { NoteBlockModel } from '@blocks/note-block/index.js';
-import type { IVec } from '@blocks/surface-block/index.js';
+import type { IPoint, IVec } from '@global/utils/index.js';
 import type { Locator, Page } from '@playwright/test';
 
 import { assertExists, sleep } from '@global/utils/index.js';

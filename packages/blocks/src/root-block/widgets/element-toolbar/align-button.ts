@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -20,7 +21,6 @@ import {
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
 import {
-  Bound,
   ConnectorElementModel,
   GroupElementModel,
   MindmapElementModel,

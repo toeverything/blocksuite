@@ -6,6 +6,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { deserializeXYWH } from '@blocksuite/global/utils';
 import {
   type BlockModel,
   type BlockSelector,
@@ -25,7 +26,6 @@ import {
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../../_common/types.js';
 import { SpecProvider } from '../../specs/utils/spec-provider.js';
-import { deserializeXYWH } from '../../surface-block/index.js';
 
 @customElement('surface-ref-note-portal')
 export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {

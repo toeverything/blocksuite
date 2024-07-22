@@ -1,6 +1,7 @@
 import type { BlockElement } from '@blocksuite/block-std';
 
 import { EdgelessBlockElement } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { type PropertyValueMap, css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -19,7 +20,6 @@ import {
   DefaultModeDragType,
   DefaultToolController,
 } from '../root-block/edgeless/controllers/tools/default-tool.js';
-import { Bound } from '../surface-block/index.js';
 import { wrapFontFamily } from '../surface-block/utils/font.js';
 
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;

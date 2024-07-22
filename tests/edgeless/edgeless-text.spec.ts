@@ -1,6 +1,6 @@
 import type { EdgelessTextBlockComponent } from '@blocks/edgeless-text/edgeless-text-block.js';
 
-import { Bound } from '@blocks/surface-block/utils/bound.js';
+import { Bound } from '@global/utils/bound.js';
 import { type Page, expect } from '@playwright/test';
 
 import {

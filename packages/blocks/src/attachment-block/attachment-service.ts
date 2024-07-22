@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { BlockService, Bound } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { BlockService } from '@blocksuite/block-std';
+import { Bound, Point, assertExists } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 import { render } from 'lit';
 
@@ -16,7 +16,6 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { Point } from '../_common/utils/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { isInsideEdgelessEditor } from '../_common/utils/query.js';
 import {

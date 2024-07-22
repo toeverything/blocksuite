@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { PathFinder } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockModel,
@@ -22,7 +23,7 @@ import {
 } from '../../root-block/edgeless/utils/clone-utils.js';
 import { isNoteBlock } from '../../root-block/edgeless/utils/query.js';
 import { SpecProvider } from '../../specs/utils/spec-provider.js';
-import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
+import { getCommonBound } from '../../surface-block/utils/bound.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
 import { type DocMode, NoteDisplayMode } from '../types.js';

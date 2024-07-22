@@ -1,10 +1,11 @@
+import type { PointLocation } from '@blocksuite/global/utils';
+
 import type {
   ConnectorElementModel,
   LocalConnectorElementModel,
   PointStyle,
 } from '../../../element-model/connector.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import type { PointLocation } from '../../../utils/point-location.js';
 import type { Renderer } from '../../renderer.js';
 
 import {

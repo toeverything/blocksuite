@@ -3,6 +3,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html } from 'lit';
@@ -22,7 +23,7 @@ import {
   MindmapElementModel,
   type ShapeElementModel,
 } from '../../../../surface-block/element-model/index.js';
-import { Bound, Vec, toRadian } from '../../../../surface-block/index.js';
+import { toRadian } from '../../../../surface-block/index.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 import { getSelectedRect } from '../../utils/query.js';
 

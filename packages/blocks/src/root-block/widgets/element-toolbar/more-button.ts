@@ -2,6 +2,7 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -48,7 +49,6 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
-import { Bound } from '../../../surface-block/index.js';
 import '../../edgeless/components/toolbar/shape/shape-menu.js';
 import { removeContainedFrames } from '../../edgeless/frame-manager.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';

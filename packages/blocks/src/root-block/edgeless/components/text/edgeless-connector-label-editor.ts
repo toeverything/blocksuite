@@ -3,6 +3,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
@@ -10,17 +11,13 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+import type { ConnectorElementModel } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { almostEqual } from '../../../../_common/utils/math.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import {
-  Bound,
-  type ConnectorElementModel,
-  Vec,
-} from '../../../../surface-block/index.js';
 
 const HORIZONTAL_PADDING = 2;
 const VERTICAL_PADDING = 2;

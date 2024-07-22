@@ -1,4 +1,5 @@
 import { WidgetElement } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   computePosition,
@@ -21,7 +22,7 @@ import {
   MOUSE_BUTTON,
   requestConnectedFrame,
 } from '../../../_common/utils/event.js';
-import { Bound, getElementsBound } from '../../../surface-block/index.js';
+import { getElementsBound } from '../../../surface-block/index.js';
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 

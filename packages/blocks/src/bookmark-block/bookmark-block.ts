@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -9,7 +10,6 @@ import type { BookmarkBlockService } from './bookmark-service.js';
 import { BlockComponent } from '../_common/components/block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import './components/bookmark-card.js';
 import { refreshBookmarkUrlData } from './utils.js';
 

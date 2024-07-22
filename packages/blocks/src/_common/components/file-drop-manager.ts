@@ -1,15 +1,15 @@
 import type { BlockService } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { Point } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { IVec } from '../../surface-block/index.js';
 import type { DragIndicator } from './drag-indicator.js';
 
 import {
   type DropResult,
-  Point,
   calcDropTarget,
   getClosestBlockElementByPoint,
   getModelByBlockComponent,

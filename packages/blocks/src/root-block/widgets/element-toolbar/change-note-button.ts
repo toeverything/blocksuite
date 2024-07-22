@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -28,7 +29,6 @@ import {
 } from '../../../_common/icons/index.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import { Bound } from '../../../surface-block/index.js';
 import '../../edgeless/components/panel/color-panel.js';
 import {
   type LineStyleEvent,

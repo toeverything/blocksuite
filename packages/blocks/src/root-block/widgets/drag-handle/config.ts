@@ -1,8 +1,9 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { BlockElement, EditorHost } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
+import type { Point } from '@blocksuite/global/utils';
 
-import type { Point, Rect } from '../../../_common/utils/index.js';
+import type { Rect } from '../../../_common/utils/index.js';
 import type { DragPreview } from './components/drag-preview.js';
 
 export const DRAG_HANDLE_CONTAINER_HEIGHT = 24;

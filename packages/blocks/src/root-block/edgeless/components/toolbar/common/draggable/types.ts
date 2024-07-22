@@ -1,7 +1,7 @@
 import type { DisposableClass } from '@blocksuite/block-std';
+import type { Bound } from '@blocksuite/global/utils';
 import type { TemplateResult } from 'lit';
 
-import type { Bound } from '../../../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../../edgeless-root-block.js';
 import type { EdgelessRootService } from '../../../../edgeless-root-service.js';
 

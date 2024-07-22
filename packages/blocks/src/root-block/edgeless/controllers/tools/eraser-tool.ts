@@ -1,13 +1,10 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IPoint, IVec } from '@blocksuite/global/utils';
 
-import { noop } from '@blocksuite/global/utils';
-
-import type { IPoint } from '../../../../_common/utils/index.js';
-import type { IVec } from '../../../../surface-block/utils/vec.js';
+import { Bound, noop } from '@blocksuite/global/utils';
 
 import { buildPath } from '../../../../_common/utils/index.js';
 import {
-  Bound,
   Overlay,
   getStroke,
   getSvgPathFromStroke,

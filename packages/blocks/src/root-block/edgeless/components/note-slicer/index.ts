@@ -1,4 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { deserializeXYWH, serializeXYWH } from '@blocksuite/global/utils';
+import { Point } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -13,14 +15,9 @@ import type {
 
 import { SmallScissorsIcon } from '../../../../_common/icons/edgeless.js';
 import {
-  Point,
   buildPath,
   getRectByBlockElement,
 } from '../../../../_common/utils/index.js';
-import {
-  deserializeXYWH,
-  serializeXYWH,
-} from '../../../../surface-block/utils/xywh.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 

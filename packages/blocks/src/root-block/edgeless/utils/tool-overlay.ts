@@ -1,3 +1,6 @@
+import type { XYWH } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, noop } from '@blocksuite/global/utils';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
@@ -6,11 +9,9 @@ import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import { shapeMethods } from '../../../surface-block/element-model/shape.js';
 import {
-  Bound,
   type Options,
   Overlay,
   type RoughCanvas,
-  type XYWH,
 } from '../../../surface-block/index.js';
 import {
   NOTE_OVERLAY_CORNER_RADIUS,

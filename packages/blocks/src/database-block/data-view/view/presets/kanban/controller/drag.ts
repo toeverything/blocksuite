@@ -1,11 +1,12 @@
 import type { ReactiveController } from 'lit';
 
+import { Point } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { InsertToPosition } from '../../../../types.js';
 import type { DataViewKanban } from '../kanban-view.js';
 
-import { Point, Rect } from '../../../../../../_common/utils/index.js';
+import { Rect } from '../../../../../../_common/utils/index.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
 import { KanbanCard } from '../card.js';

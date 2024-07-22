@@ -1,7 +1,8 @@
+import type { IBound } from '@blocksuite/global/utils';
+
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import type { IBound } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 

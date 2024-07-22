@@ -3,6 +3,7 @@ import type {
   EditorHost,
   ViewStore,
 } from '@blocksuite/block-std';
+import type { Point } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -14,7 +15,7 @@ import type { RootBlockComponent } from '../../index.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 import type { AbstractEditor } from '../types.js';
-import type { Point, Rect } from './rect.js';
+import type { Rect } from './rect.js';
 
 import {
   BLOCK_ID_ATTR as ATTR,

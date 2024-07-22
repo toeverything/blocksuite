@@ -1,4 +1,8 @@
+import type { PointLocation } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 
 import type { EmbedBlockModel } from '../../../_common/embed-block-helper/embed-block-model.js';
 import type { Connectable } from '../../../_common/utils/index.js';
@@ -16,12 +20,10 @@ import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
-import type { PointLocation } from '../../../surface-block/index.js';
 import type { EdgelessBlockModel } from '../edgeless-block-model.js';
 import type { EdgelessTool } from '../types.js';
 
 import {
-  Bound,
   type CanvasElementWithText,
   ConnectorElementModel,
   GRID_GAP_MAX,
@@ -30,7 +32,6 @@ import {
   ShapeElementModel,
   TextElementModel,
   clamp,
-  deserializeXYWH,
   getQuadBoundsWithRotation,
 } from '../../../surface-block/index.js';
 import { getElementsWithoutGroup } from './group.js';

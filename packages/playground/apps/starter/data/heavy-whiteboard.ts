@@ -1,4 +1,4 @@
-import type { SerializedXYWH } from '@blocksuite/blocks';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
   Boxed,

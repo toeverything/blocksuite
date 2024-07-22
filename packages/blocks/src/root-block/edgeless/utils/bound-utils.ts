@@ -1,4 +1,4 @@
-import { Bound } from '../../../surface-block/index.js';
+import { Bound } from '@blocksuite/global/utils';
 
 export function edgelessElementsBound(
   elements: BlockSuite.EdgelessModelType[]

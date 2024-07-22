@@ -5,11 +5,11 @@ import type {
   UIEventHandler,
   UIEventState,
 } from '@blocksuite/block-std';
+import type { Bound } from '@blocksuite/global/utils';
 
 import { IS_MAC } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
-import type { Bound } from '../../../surface-block/utils/bound.js';
 import type { EdgelessToolController } from '../controllers/tools/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessRootService } from '../edgeless-root-service.js';

@@ -3,6 +3,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -15,7 +16,7 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { Bound, Vec, toRadian } from '../../../../surface-block/index.js';
+import { toRadian } from '../../../../surface-block/index.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';

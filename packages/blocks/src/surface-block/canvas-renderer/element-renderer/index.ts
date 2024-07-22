@@ -1,4 +1,6 @@
-import type { IBound, RoughCanvas, SurfaceElementModel } from '../../index.js';
+import type { IBound } from '@blocksuite/global/utils';
+
+import type { RoughCanvas, SurfaceElementModel } from '../../index.js';
 import type { Renderer } from '../renderer.js';
 
 import { brush } from './brush/index.js';

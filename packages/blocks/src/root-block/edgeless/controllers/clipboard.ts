@@ -4,7 +4,11 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
+import type { IBound } from '@blocksuite/global/utils';
 
+import { Vec } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import {
   DisposableGroup,
   assertExists,
@@ -22,7 +26,6 @@ import DOMPurify from 'dompurify';
 
 import type { EdgelessSelectableProps } from '../../../_common/edgeless/mixin/edgeless-selectable.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import {
@@ -52,8 +55,7 @@ import {
 } from '../../../surface-block/index.js';
 import { ConnectorElementModel } from '../../../surface-block/index.js';
 import { compare } from '../../../surface-block/managers/layer-utils.js';
-import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
-import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
+import { getCommonBound } from '../../../surface-block/utils/bound.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import {

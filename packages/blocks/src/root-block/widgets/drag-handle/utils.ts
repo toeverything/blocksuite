@@ -6,6 +6,8 @@ import {
   PathFinder,
   type PointerEventState,
 } from '@blocksuite/block-std';
+import { Point } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
@@ -16,7 +18,6 @@ import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
   type BlockComponent,
   type EmbedCardStyle,
-  Point,
   Rect,
   findClosestBlockElement,
   getClosestBlockElementByElement,
@@ -27,7 +28,6 @@ import {
   isInsidePageEditor,
   matchFlavours,
 } from '../../../_common/utils/index.js';
-import { Bound } from '../../../surface-block/index.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
   DRAG_HANDLE_CONTAINER_HEIGHT,

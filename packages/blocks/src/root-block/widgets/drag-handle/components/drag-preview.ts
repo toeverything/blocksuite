@@ -1,11 +1,10 @@
 import type { TemplateResult } from 'lit';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
+import { Point } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-
-import { Point } from '../../../../_common/utils/index.js';
 
 @customElement('affine-drag-preview')
 export class DragPreview extends ShadowlessElement {
