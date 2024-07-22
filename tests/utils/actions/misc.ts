@@ -193,10 +193,6 @@ export const getEditorHostLocator = (page: Page) => {
   return page.locator('editor-host').nth(currentEditorIndex);
 };
 
-export const getBlockHub = (page: Page) => {
-  return page.locator('affine-block-hub').nth(currentEditorIndex);
-};
-
 type TaggedConsoleMessage = ConsoleMessage & { __ignore?: boolean };
 function ignoredLog(message: ConsoleMessage) {
   (message as TaggedConsoleMessage).__ignore = true;
@@ -1116,25 +1112,6 @@ export async function readClipboardText(
   );
   return text;
 }
-
-export const getCenterPosition: (
-  page: Page,
-  // TODO use `locator` directly
-  selector: string
-) => Promise<{ x: number; y: number }> = async (
-  page: Page,
-  selector: string
-) => {
-  const locator = page.locator(selector);
-  const box = await locator.boundingBox();
-  if (!box) {
-    throw new Error("Failed to getCenterPosition! Can't get bounding box");
-  }
-  return {
-    x: box.x + box.width / 2,
-    y: box.y + box.height / 2,
-  };
-};
 
 export const getCenterPositionByLocator: (
   page: Page,
