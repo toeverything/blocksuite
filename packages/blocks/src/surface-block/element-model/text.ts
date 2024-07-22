@@ -17,10 +17,10 @@ import {
   pointInPolygon,
   polygonNearestPoint,
 } from '../utils/math-utils.js';
-import { type IBaseProps, SurfaceElementModel } from './base.js';
+import { type SurfaceElementBaseProps, SurfaceElementModel } from './base.js';
 import { yfield } from './decorators.js';
 
-export type TextElementProps = IBaseProps & {
+export type TextElementProps = SurfaceElementBaseProps & {
   text: Y.Text;
   hasMaxWidth?: boolean;
 } & Omit<TextStyleProps, 'fontWeight' | 'fontStyle'> &

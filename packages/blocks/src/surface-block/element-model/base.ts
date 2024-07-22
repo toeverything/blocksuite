@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  IEdgelessElement,
-  IHitTestOptions,
+  EdgelessNode,
+  EdgelessNodeHitTestOptions,
 } from '@blocksuite/block-std/edgeless';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
@@ -34,7 +34,7 @@ import {
   yfield,
 } from './decorators.js';
 
-export type { IHitTestOptions } from '@blocksuite/block-std/edgeless';
+export type { EdgelessNodeHitTestOptions } from '@blocksuite/block-std/edgeless';
 
 export type ModelToProps<
   T extends SurfaceElementModel,
@@ -45,7 +45,7 @@ export type ModelToProps<
   K | 'yMap' | 'surface' | 'display' | 'opacity' | 'externalXYWH'
 >;
 
-export type IBaseProps = {
+export type SurfaceElementBaseProps = {
   index: string;
   seed: number;
 };
@@ -58,8 +58,9 @@ export type SerializedElement = Record<string, unknown> & {
   props: Record<string, unknown>;
 };
 
-export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
-  implements IEdgelessElement
+export abstract class SurfaceElementModel<
+  Props extends SurfaceElementBaseProps = SurfaceElementBaseProps,
+> implements EdgelessNode
 {
   protected _disposable = new DisposableGroup();
 
@@ -148,7 +149,12 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
     return new PointLocation(rotatePoint, tangent);
   }
 
-  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
+  hitTest(
+    x: number,
+    y: number,
+    _: EdgelessNodeHitTestOptions,
+    __: EditorHost
+  ): boolean {
     return this.elementBound.isPointInBound([x, y]);
   }
 
@@ -332,7 +338,7 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
 }
 
 export abstract class SurfaceGroupLikeModel<
-  Props extends IBaseProps = IBaseProps,
+  Props extends SurfaceElementBaseProps = SurfaceElementBaseProps,
 > extends SurfaceElementModel<Props> {
   private _childIds: string[] = [];
 

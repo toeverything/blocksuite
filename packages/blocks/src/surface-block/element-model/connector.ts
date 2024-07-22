@@ -28,9 +28,9 @@ import {
 } from '../utils/math-utils.js';
 import { Polyline } from '../utils/polyline.js';
 import {
-  type IBaseProps,
-  type IHitTestOptions,
+  type EdgelessNodeHitTestOptions,
   type SerializedElement,
+  type SurfaceElementBaseProps,
   SurfaceElementModel,
   SurfaceLocalModel,
 } from './base.js';
@@ -106,7 +106,7 @@ export type SerializedConnectorElement = SerializedElement & {
   target: SerializedConnection;
 };
 
-export type ConnectorElementProps = IBaseProps & {
+export type ConnectorElementProps = SurfaceElementBaseProps & {
   mode: ConnectorMode;
   stroke: string;
   strokeWidth: number;
@@ -254,7 +254,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   override hitTest(
     x: number,
     y: number,
-    options?: IHitTestOptions | undefined
+    options?: EdgelessNodeHitTestOptions | undefined
   ): boolean {
     const currentPoint: IVec = [x, y];
 

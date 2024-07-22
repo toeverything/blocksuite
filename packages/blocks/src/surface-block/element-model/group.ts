@@ -5,14 +5,14 @@ import type { Y } from '@blocksuite/store';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import type { IBaseProps, SerializedElement } from './base.js';
+import type { SerializedElement, SurfaceElementBaseProps } from './base.js';
 
 import { keys } from '../../_common/utils/iterable.js';
 import { linePolygonIntersects } from '../utils/math-utils.js';
 import { SurfaceGroupLikeModel } from './base.js';
 import { local, observe, yfield } from './decorators.js';
 
-type GroupElementProps = IBaseProps & {
+type GroupElementProps = SurfaceElementBaseProps & {
   children: Y.Map<boolean>;
   title: Y.Text;
 };

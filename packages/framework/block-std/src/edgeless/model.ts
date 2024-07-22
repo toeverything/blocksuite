@@ -18,7 +18,7 @@ import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
 
-export interface IHitTestOptions {
+export interface EdgelessNodeHitTestOptions {
   expand?: number;
 
   /**
@@ -33,7 +33,7 @@ export interface IHitTestOptions {
   zoom?: number;
 }
 
-export interface IEdgelessElement {
+export interface EdgelessNode {
   id: string;
   xywh: SerializedXYWH;
   /**
@@ -60,7 +60,7 @@ export interface IEdgelessElement {
   hitTest(
     x: number,
     y: number,
-    options: IHitTestOptions,
+    options: EdgelessNodeHitTestOptions,
     host: EditorHost
   ): boolean;
   boxSelect(bound: Bound): boolean;
@@ -70,7 +70,7 @@ export class EdgelessBlockModel<
     Props extends EdgelessSelectableProps = EdgelessSelectableProps,
   >
   extends BlockModel<Props>
-  implements IEdgelessElement
+  implements EdgelessNode
 {
   private _externalXYWH: SerializedXYWH | undefined = undefined;
 
@@ -121,7 +121,12 @@ export class EdgelessBlockModel<
     return new PointLocation(rotatePoint, tangent);
   }
 
-  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
+  hitTest(
+    x: number,
+    y: number,
+    _: EdgelessNodeHitTestOptions,
+    __: EditorHost
+  ): boolean {
     const bound = Bound.deserialize(this.xywh);
     return bound.isPointInBound([x, y], 0);
   }
@@ -153,7 +158,7 @@ export class EdgelessBlockModel<
     this._externalXYWH = xywh;
   }
 
-  get group(): IEdgelessElement | null {
+  get group(): EdgelessNode | null {
     // FIXME: make surface a official supported block
     const surface = this.doc
       .getBlocks()
@@ -166,7 +171,7 @@ export class EdgelessBlockModel<
     return surface.getGroup(this.id) ?? null;
   }
 
-  get groups(): IEdgelessElement[] {
+  get groups(): EdgelessNode[] {
     // FIXME: make surface a official supported block
     const surface = this.doc
       .getBlocks()
