@@ -1,6 +1,5 @@
 import type * as Y from 'yjs';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { minimatch } from 'minimatch';
 
 import type { BlockSchemaType } from './base.js';
@@ -35,7 +34,9 @@ export class Schema {
   ) => {
     try {
       const currentSchema = this.flavourSchemaMap.get(flavour);
-      assertExists(currentSchema);
+      if (!currentSchema) {
+        throw new MigrationError(`schema for flavour: ${flavour} not found`);
+      }
       const { onUpgrade, version } = currentSchema;
       if (!onUpgrade) {
         return;
@@ -75,10 +76,11 @@ export class Schema {
       const flavour = block.get('sys:flavour') as string;
       const currentVersion =
         (block.get('sys:version') as number) ?? oldBlockVersions[flavour] ?? 0;
-      assertExists(
-        currentVersion,
-        `previous version for flavour ${flavour} not found`
-      );
+      if (currentVersion == null) {
+        throw new MigrationError(
+          `version for flavour ${flavour} not found in block`
+        );
+      }
       this.upgradeBlock(flavour, currentVersion, block);
     });
 
@@ -101,18 +103,16 @@ export class Schema {
     childFlavours?: string[]
   ): void => {
     const schema = this.flavourSchemaMap.get(flavour);
-    assertExists(
-      schema,
-      new SchemaValidateError(flavour, SCHEMA_NOT_FOUND_MESSAGE)
-    );
+    if (!schema) {
+      throw new SchemaValidateError(flavour, SCHEMA_NOT_FOUND_MESSAGE);
+    }
 
     const validateChildren = () => {
       childFlavours?.forEach(childFlavour => {
         const childSchema = this.flavourSchemaMap.get(childFlavour);
-        assertExists(
-          childSchema,
-          new SchemaValidateError(childFlavour, SCHEMA_NOT_FOUND_MESSAGE)
-        );
+        if (!childSchema) {
+          throw new SchemaValidateError(childFlavour, SCHEMA_NOT_FOUND_MESSAGE);
+        }
         this.validateSchema(childSchema, schema);
       });
     };
@@ -137,10 +137,9 @@ export class Schema {
     }
 
     const parentSchema = this.flavourSchemaMap.get(parentFlavour);
-    assertExists(
-      parentSchema,
-      new SchemaValidateError(parentFlavour, SCHEMA_NOT_FOUND_MESSAGE)
-    );
+    if (!parentSchema) {
+      throw new SchemaValidateError(parentFlavour, SCHEMA_NOT_FOUND_MESSAGE);
+    }
     this.validateSchema(schema, parentSchema);
     validateChildren();
   };
