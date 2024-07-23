@@ -5,7 +5,7 @@ import {
   ErrorCode,
   handleError,
 } from '@blocksuite/global/exceptions';
-import { Slot, assertExists } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Doc } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
 import { SignalWatcher } from '@lit-labs/preact-signals';
@@ -142,9 +142,9 @@ export class EditorHost extends SignalWatcher(
     try {
       const result = await super.getUpdateComplete();
       const rootModel = this.doc.root;
-      assertExists(rootModel);
+      if (!rootModel) return result;
       const view = this.std.spec.getView(rootModel.flavour);
-      assertExists(view);
+      if (!view) return result;
       const widgetTags = Object.values(view.widgets ?? {});
       const elementsTags = [view.component, ...widgetTags];
       await Promise.all(

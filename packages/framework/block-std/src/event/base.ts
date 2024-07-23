@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 type MatchEvent<T extends string> = T extends UIEventStateType
   ? BlockSuiteUIEventState[T]
@@ -27,7 +27,12 @@ export class UIEventStateContext {
     type: Type
   ): MatchEvent<Type> => {
     const state = this._map[type];
-    assertExists(state, `UIEventStateContext: state ${type} not found`);
+    if (!state) {
+      throw new BlockSuiteError(
+        ErrorCode.EventDispatcherError,
+        `UIEventStateContext: state ${type} not found`
+      );
+    }
     return state as MatchEvent<Type>;
   };
 

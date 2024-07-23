@@ -1,7 +1,5 @@
 import type { BlockModel } from '@blocksuite/store';
 
-import { assertExists } from '@blocksuite/global/utils';
-
 import type { BlockComponent, WidgetComponent } from './element/index.js';
 
 export class ViewStore {
@@ -68,7 +66,9 @@ export class ViewStore {
     path?: string | undefined | null
   ) => {
     const tree = this.fromPath(path);
-    assertExists(tree, `Invalid path to get node in view: ${path}`);
+    if (!tree) {
+      return;
+    }
 
     const iterate =
       (parent: BlockComponent) => (node: BlockComponent, index: number) => {
@@ -102,10 +102,12 @@ export class ViewStore {
     this._widgetMap.clear();
   }
 
+  /**
+   * @deprecated
+   * Use `getBlock` or `getWidget` instead
+   */
   viewFromPath(type: 'block', path: string[]): null | BlockComponent;
-
   viewFromPath(type: 'widget', path: string[]): null | WidgetComponent;
-
   viewFromPath(
     type: 'block' | 'widget',
     path: string[]

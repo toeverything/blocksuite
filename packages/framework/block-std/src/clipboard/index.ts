@@ -7,7 +7,7 @@ import type {
 } from '@blocksuite/store';
 import type { RootContentMap } from 'hast';
 
-import { assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Job } from '@blocksuite/store';
 import * as lz from 'lz-string';
 import rehypeParse from 'rehype-parse';
@@ -212,7 +212,12 @@ export class Clipboard {
         parent,
         index
       );
-      assertExists(slice);
+      if (!slice) {
+        throw new BlockSuiteError(
+          ErrorCode.TransformerError,
+          'No snapshot found'
+        );
+      }
       return slice;
     } catch {
       const getDataByType = this._getDataByType(data);
@@ -261,7 +266,9 @@ export class Clipboard {
   private async _getClipboardItem(slice: Slice, type: string) {
     const job = this._getJob();
     const adapterItem = this._adapterMap.get(type);
-    assertExists(adapterItem);
+    if (!adapterItem) {
+      return;
+    }
     const { adapter } = adapterItem;
     const adapterInstance = new adapter(job);
     const result = await adapterInstance.fromSlice(slice);
@@ -283,7 +290,12 @@ export class Clipboard {
     const domParser = new DOMParser();
     const doc = domParser.parseFromString(items, 'text/html');
     const dom = doc.querySelector<HTMLDivElement>('[data-blocksuite-snapshot]');
-    assertExists(dom);
+    if (!dom) {
+      throw new BlockSuiteError(
+        ErrorCode.TransformerError,
+        'No snapshot found'
+      );
+    }
     const json = JSON.parse(
       lz.decompressFromEncodedURIComponent(
         dom.dataset.blocksuiteSnapshot as string
