@@ -11,7 +11,7 @@ import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import type { ListBlockModel } from './list-model.js';
 import type { ListBlockService } from './list-service.js';
 
-import { BlockComponent } from '../_common/components/block-component.js';
+import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
@@ -23,7 +23,7 @@ import { ListIcon } from './utils/get-list-icon.js';
 import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
-export class ListBlockComponent extends BlockComponent<
+export class ListBlockComponent extends CaptionedBlockComponent<
   ListBlockModel,
   ListBlockService
 > {

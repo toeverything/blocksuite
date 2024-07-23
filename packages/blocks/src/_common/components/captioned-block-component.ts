@@ -7,7 +7,7 @@ import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { BlockCaptionEditor } from './block-caption.js';
 
-export class BlockComponent<
+export class CaptionedBlockComponent<
   Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
