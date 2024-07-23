@@ -210,7 +210,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     noop();
   }
 
-  quickConnect(point: IVec, element: BlockSuite.EdgelessModelType) {
+  quickConnect(point: IVec, element: BlockSuite.EdgelessModel) {
     this._startPoint = this._service.viewport.toModelCoord(point[0], point[1]);
     this._mode = ConnectorToolMode.Quick;
     this._sourceBounds = Bound.deserialize(element.xywh);

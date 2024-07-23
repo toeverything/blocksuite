@@ -2,19 +2,19 @@ import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
 
 import { MindmapElementModel } from '../../../surface-block/index.js';
 
-export function isMindmapNode(el: BlockSuite.EdgelessModelType) {
+export function isMindmapNode(el: BlockSuite.EdgelessModel) {
   return (
     el.group instanceof MindmapElementModel || el instanceof MindmapElementModel
   );
 }
 
-export function isSelectSingleMindMap(els: BlockSuite.EdgelessModelType[]) {
+export function isSelectSingleMindMap(els: BlockSuite.EdgelessModel[]) {
   return els.length === 1 && els[0].group instanceof MindmapElementModel;
 }
 
 export function isElementOutsideViewport(
   viewport: Viewport,
-  element: BlockSuite.EdgelessModelType,
+  element: BlockSuite.EdgelessModel,
   padding: [number, number] = [0, 0]
 ) {
   const elementBound = element.elementBound;
@@ -32,7 +32,7 @@ export function isElementOutsideViewport(
 
 export function getNearestTranslation(
   viewport: Viewport,
-  element: BlockSuite.EdgelessModelType,
+  element: BlockSuite.EdgelessModel,
   padding: [number, number] = [0, 0]
 ) {
   const viewportBound = viewport.viewportBounds;

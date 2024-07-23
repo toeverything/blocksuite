@@ -30,9 +30,9 @@ type EraserTool = {
 };
 
 export class EraserToolController extends EdgelessToolController<EraserTool> {
-  private _erasables = new Set<BlockSuite.EdgelessModelType>();
+  private _erasables = new Set<BlockSuite.EdgelessModel>();
 
-  private _eraseTargets = new Set<BlockSuite.EdgelessModelType>();
+  private _eraseTargets = new Set<BlockSuite.EdgelessModel>();
 
   private _eraserPoints: IVec[] = [];
 

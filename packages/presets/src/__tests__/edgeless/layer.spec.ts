@@ -546,7 +546,7 @@ test('the actual rendering z-index should satisfy the logic order of their index
 });
 
 describe('index generator', () => {
-  let preinsertedShape: BlockSuite.SurfaceElementModelType;
+  let preinsertedShape: BlockSuite.SurfaceElementModel;
   let preinsertedNote: NoteBlockModel;
 
   beforeEach(() => {
@@ -559,7 +559,7 @@ describe('index generator', () => {
 
     preinsertedShape = service.getElementById(
       shapeId
-    )! as BlockSuite.SurfaceElementModelType;
+    )! as BlockSuite.SurfaceElementModel;
     preinsertedNote = service.getElementById(noteId)! as NoteBlockModel;
   });
 

@@ -10,8 +10,8 @@ declare global {
       | EdgelessBlockModelMap[EdgelessBlockModelKeyType]
       | EdgelessBlockModel;
 
-    type EdgelessModelType = EdgelessBlockModelType | SurfaceModelType;
-    type EdgelessModelKeyType = EdgelessBlockModelKeyType | SurfaceModelKeyType;
+    type EdgelessModel = EdgelessBlockModelType | SurfaceModel;
+    type EdgelessModelKeys = EdgelessBlockModelKeyType | SurfaceModelKeyType;
 
     interface EdgelessTextModelMap {}
     type EdgelessTextModelKeyType = keyof EdgelessTextModelMap;

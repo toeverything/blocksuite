@@ -1,8 +1,8 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  EditorHost,
   IEdgelessElement,
   IHitTestOptions,
-} from '@blocksuite/block-std';
+} from '@blocksuite/block-std/edgeless';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
@@ -33,7 +33,7 @@ import {
   yfield,
 } from './decorators/index.js';
 
-export type { IHitTestOptions } from '@blocksuite/block-std';
+export type { IHitTestOptions } from '@blocksuite/block-std/edgeless';
 
 export type IBaseProps = {
   index: string;

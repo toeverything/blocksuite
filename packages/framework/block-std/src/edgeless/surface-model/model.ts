@@ -38,7 +38,7 @@ export type SurfaceMiddleware = (
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   protected _decoratorState = createDecoratorState();
 
-  private _elementCtorMap: Record<
+  protected _elementCtorMap: Record<
     string,
     Constructor<
       SurfaceElementModel,
@@ -46,7 +46,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     >
   > = {};
 
-  private _elementModels = new Map<
+  protected _elementModels = new Map<
     string,
     {
       mount: () => void;
@@ -55,9 +55,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     }
   >();
 
-  private _elementToGroup = new Map<string, string>();
+  protected _elementToGroup = new Map<string, string>();
 
-  private _groupToElements = new Map<string, string[]>();
+  protected _elementTypeMap = new Map<string, SurfaceElementModel[]>();
+
+  protected _groupToElements = new Map<string, string[]>();
 
   protected _surfaceBlockModel = true;
 
@@ -90,7 +92,50 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this.created.once(() => this._init());
   }
 
-  private _createElement(
+  private _createElementFromProps(
+    props: Record<string, unknown>,
+    options: {
+      onChange: (payload: {
+        id: string;
+        props: Record<string, unknown>;
+        oldValues: Record<string, unknown>;
+        local: boolean;
+      }) => void;
+    }
+  ) {
+    const { type, id, ...rest } = props;
+
+    if (!id) {
+      throw new Error('Cannot find id in props');
+    }
+
+    const yMap = new DocCollection.Y.Map();
+    const elementModel = this._createElementFromYMap(
+      type as string,
+      id as string,
+      yMap,
+      {
+        ...options,
+        newCreate: true,
+      }
+    );
+
+    props = this._propsToY(type as string, props);
+
+    yMap.set('type', type);
+    yMap.set('id', id);
+
+    Object.keys(rest).forEach(key => {
+      if (props[key] !== undefined) {
+        // @ts-ignore
+        elementModel.model[key] = props[key];
+      }
+    });
+
+    return elementModel;
+  }
+
+  private _createElementFromYMap(
     type: string,
     id: string,
     yMap: Y.Map<unknown>,
@@ -117,6 +162,9 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     state.skipYfield = options.skipFieldInit ?? false;
 
     let mounted = false;
+    // @ts-ignore
+    Ctor['_decoratorState'] = state;
+
     const elementModel = new Ctor({
       id,
       yMap,
@@ -125,6 +173,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       onChange: payload => mounted && options.onChange({ id, ...payload }),
     }) as SurfaceElementModel;
 
+    // @ts-ignore
+    delete Ctor['_decoratorState'];
     state.creating = false;
     state.skipYfield = false;
 
@@ -157,50 +207,19 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     };
   }
 
-  private _createElementFromProps(
-    props: Record<string, unknown>,
-    options: {
-      onChange: (payload: {
-        id: string;
-        props: Record<string, unknown>;
-        oldValues: Record<string, unknown>;
-        local: boolean;
-      }) => void;
-    }
+  protected _extendElement(
+    ctorMap: Record<
+      string,
+      Constructor<
+        SurfaceElementModel,
+        ConstructorParameters<typeof SurfaceElementModel>
+      >
+    >
   ) {
-    const { type, id, ...rest } = props;
-
-    if (!id) {
-      throw new Error('Cannot find id in props');
-    }
-
-    const yMap = new DocCollection.Y.Map();
-    const elementModel = this._createElement(
-      type as string,
-      id as string,
-      yMap,
-      {
-        ...options,
-        newCreate: true,
-      }
-    );
-
-    props = this._propsToY(type as string, props);
-
-    yMap.set('type', type);
-    yMap.set('id', id);
-
-    Object.keys(rest).forEach(key => {
-      if (props[key] !== undefined) {
-        // @ts-ignore
-        elementModel.model[key] = props[key];
-      }
-    });
-
-    return elementModel;
+    Object.assign(this._elementCtorMap, ctorMap);
   }
 
-  private _init() {
+  protected _init() {
     this._initElementModels();
     this._watchGroupRelationChange();
     this.applyMiddlewares();
@@ -208,11 +227,36 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   private _initElementModels() {
     const elementsYMap = this.elements.getValue()!;
+    const addToType = (type: string, model: SurfaceElementModel) => {
+      const sameTypeElements = this._elementTypeMap.get(type) || [];
+
+      if (sameTypeElements.indexOf(model) === -1) {
+        sameTypeElements.push(model);
+      }
+
+      this._elementTypeMap.set(type, sameTypeElements);
+    };
+    const removeFromType = (type: string, model: SurfaceElementModel) => {
+      const sameTypeElements = this._elementTypeMap.get(type) || [];
+      const index = sameTypeElements.indexOf(model);
+
+      if (index !== -1) {
+        sameTypeElements.splice(index, 1);
+      }
+    };
     const onElementsMapChange = (
       event: Y.YMapEvent<Y.Map<unknown>>,
       transaction: Y.Transaction
     ) => {
       const { changes, keysChanged } = event;
+      const addedElements: {
+        mount: () => void;
+        model: SurfaceElementModel;
+      }[] = [];
+      const deletedElements: {
+        unmount: () => void;
+        model: SurfaceElementModel;
+      }[] = [];
 
       keysChanged.forEach(id => {
         const change = changes.keys.get(id);
@@ -221,44 +265,53 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
         switch (change?.action) {
           case 'add':
             if (element) {
-              if (!this._elementModels.has(id)) {
-                const model = this._createElement(
-                  element.get('type') as string,
-                  element.get('id') as string,
-                  element,
-                  {
-                    onChange: payload => this.elementUpdated.emit(payload),
-                    skipFieldInit: true,
-                  }
-                );
+              const hasModel = this._elementModels.has(id);
+              const model = hasModel
+                ? this._elementModels.get(id)!
+                : this._createElementFromYMap(
+                    element.get('type') as string,
+                    element.get('id') as string,
+                    element,
+                    {
+                      onChange: payload => this.elementUpdated.emit(payload),
+                      skipFieldInit: true,
+                    }
+                  );
 
-                this._elementModels.set(id, model);
-              }
-              const { mount } = this._elementModels.get(id)!;
-              mount();
-              this.elementAdded.emit({ id, local: transaction.local });
+              !hasModel && this._elementModels.set(id, model);
+              addToType(model.model.type, model.model);
+              addedElements.push(model);
             }
             break;
           case 'delete':
             if (this._elementModels.has(id)) {
               const { model, unmount } = this._elementModels.get(id)!;
-              unmount();
-              this.elementRemoved.emit({
-                id,
-                type: model.type,
-                model,
-                local: transaction.local,
-              });
               this._elementToGroup.delete(id);
+              removeFromType(model.type, model);
               this._elementModels.delete(id);
+              deletedElements.push({ model, unmount });
             }
             break;
         }
       });
+
+      addedElements.forEach(({ mount, model }) => {
+        mount();
+        this.elementAdded.emit({ id: model.id, local: transaction.local });
+      });
+      deletedElements.forEach(({ unmount, model }) => {
+        unmount();
+        this.elementRemoved.emit({
+          id: model.id,
+          type: model.type,
+          model,
+          local: transaction.local,
+        });
+      });
     };
 
     elementsYMap.forEach((val, key) => {
-      const model = this._createElement(
+      const model = this._createElementFromYMap(
         val.get('type') as string,
         val.get('id') as string,
         val,
@@ -269,7 +322,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       );
 
       this._elementModels.set(key, model);
-      model.mount();
+    });
+
+    this._elementModels.forEach(({ mount, model }) => {
+      addToType(model.type, model);
+      mount();
     });
     elementsYMap.observe(onElementsMapChange);
 
@@ -427,9 +484,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   }
 
   getElementsByType(type: string): SurfaceElementModel[] {
-    return this.elementModels.filter(
-      model => model.type === type
-    ) as SurfaceElementModel[];
+    return this._elementTypeMap.get(type) || [];
   }
 
   getGroup<

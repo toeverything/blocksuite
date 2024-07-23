@@ -12,7 +12,7 @@ import { text } from './text/index.js';
 export { normalizeShapeBound } from './shape/utils.js';
 
 export type ElementRenderer<
-  T extends BlockSuite.SurfaceElementModelType = SurfaceElementModel,
+  T extends BlockSuite.SurfaceElementModel = SurfaceElementModel,
 > = (
   model: T,
   ctx: CanvasRenderingContext2D,

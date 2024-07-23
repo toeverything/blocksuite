@@ -33,7 +33,11 @@ export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
 
         yProps.add(prop);
 
-        if (getDecoratorState(this.surface)?.skipYfield) {
+        if (
+          getDecoratorState(
+            this.surface ?? Object.getPrototypeOf(this).constructor
+          )?.skipYfield
+        ) {
           return;
         }
 

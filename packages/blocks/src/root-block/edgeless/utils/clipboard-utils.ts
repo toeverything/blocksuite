@@ -20,7 +20,7 @@ import {
 const offset = 10;
 export async function duplicate(
   edgeless: EdgelessRootBlockComponent,
-  elements: BlockSuite.EdgelessModelType[],
+  elements: BlockSuite.EdgelessModel[],
   select = true
 ) {
   const { clipboardController } = edgeless;
@@ -49,7 +49,7 @@ export async function duplicate(
     });
   }
 }
-export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
+export const splitElements = (elements: BlockSuite.EdgelessModel[]) => {
   const { notes, frames, shapes, images, edgelessTexts, embedSyncedDocs } =
     groupBy(getElementsWithoutGroup(elements), element => {
       if (isNoteBlock(element)) {
@@ -66,7 +66,7 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
       return 'shapes';
     }) as {
       notes: NoteBlockModel[];
-      shapes: BlockSuite.SurfaceModelType[];
+      shapes: BlockSuite.SurfaceModel[];
       frames: FrameBlockModel[];
       images: ImageBlockModel[];
       edgelessTexts: EdgelessTextBlockModel[];

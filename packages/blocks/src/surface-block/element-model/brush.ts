@@ -1,9 +1,17 @@
-import type { IVec, IVec3 } from '@blocksuite/global/utils';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
+import type {
+  IBaseProps,
+  IHitTestOptions,
+} from '@blocksuite/block-std/edgeless';
+import type { IVec, IVec3, SerializedXYWH } from '@blocksuite/global/utils';
 
-import { Vec } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { PointLocation } from '@blocksuite/global/utils';
+import {
+  SurfaceElementModel,
+  convert,
+  derive,
+  watch,
+  yfield,
+} from '@blocksuite/block-std/edgeless';
+import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
 import {
@@ -19,12 +27,6 @@ import {
   lineIntersects,
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
-import {
-  type IBaseProps,
-  type IHitTestOptions,
-  SurfaceElementModel,
-} from './base.js';
-import { convert, derive, watch, yfield } from './decorators.js';
 
 export type BrushProps = IBaseProps & {
   /**

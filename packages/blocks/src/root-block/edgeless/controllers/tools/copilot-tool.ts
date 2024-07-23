@@ -111,7 +111,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   onPressSpaceBar(): void {}
 
   updateDragPointsWith(
-    selectedElements: BlockSuite.EdgelessModelType[],
+    selectedElements: BlockSuite.EdgelessModel[],
     padding = 0
   ) {
     const bounds = getElementsBound(
@@ -123,7 +123,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   updateSelectionWith(
-    selectedElements: BlockSuite.EdgelessModelType[],
+    selectedElements: BlockSuite.EdgelessModel[],
     padding = 0
   ) {
     const { selection } = this._edgeless.service;

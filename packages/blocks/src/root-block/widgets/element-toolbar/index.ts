@@ -94,7 +94,7 @@ type CategorizedElements = {
 
 type CustomEntry = {
   render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
-  when: (model: BlockSuite.EdgelessModelType[]) => boolean;
+  when: (model: BlockSuite.EdgelessModel[]) => boolean;
 };
 
 export const EDGELESS_ELEMENT_TOOLBAR_WIDGET =
@@ -159,7 +159,7 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
         return 'edgelessText';
       }
 
-      return (model as BlockSuite.SurfaceElementModelType).type;
+      return (model as BlockSuite.SurfaceElementModel).type;
     });
     return result as CategorizedElements;
   }
@@ -400,7 +400,7 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
   @state()
   private accessor _registeredEntries: {
     render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
-    when: (model: BlockSuite.EdgelessModelType[]) => boolean;
+    when: (model: BlockSuite.EdgelessModel[]) => boolean;
   }[] = [];
 
   @property({ attribute: false })

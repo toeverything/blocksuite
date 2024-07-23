@@ -26,7 +26,7 @@ export type MindmapNode = {
   id: string;
   detail: NodeDetail;
 
-  element: BlockSuite.SurfaceElementModelType;
+  element: BlockSuite.SurfaceElementModel;
   children: MindmapNode[];
 
   /**

@@ -55,7 +55,7 @@ declare global {
 
 export function renderAddFrameButton(
   edgeless: EdgelessRootBlockComponent,
-  elements: BlockSuite.EdgelessModelType[]
+  elements: BlockSuite.EdgelessModel[]
 ) {
   if (elements.length < 2) return nothing;
   if (elements.some(e => e.group instanceof MindmapElementModel))

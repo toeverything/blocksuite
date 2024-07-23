@@ -88,7 +88,7 @@ export class SurfaceRefRenderer {
     this.slots.surfaceRendererInit.emit();
   }
 
-  getModel(id: string): BlockSuite.EdgelessModelType | null {
+  getModel(id: string): BlockSuite.EdgelessModel | null {
     return (
       (this.doc.getBlockById(id) as Exclude<
         BlockSuite.EdgelessBlockModelType,

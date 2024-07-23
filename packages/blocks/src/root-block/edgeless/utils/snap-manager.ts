@@ -273,7 +273,7 @@ export class EdgelessSnapManager extends Overlay {
   }
 
   private _getBoundsWithRotationByAlignable(
-    alignable: BlockSuite.EdgelessModelType
+    alignable: BlockSuite.EdgelessModel
   ) {
     const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
     const [x, y, w, h] = deserializeXYWH(alignable.xywh);
@@ -422,7 +422,7 @@ export class EdgelessSnapManager extends Overlay {
     });
   }
 
-  setupAlignables(alignables: BlockSuite.EdgelessModelType[]): Bound {
+  setupAlignables(alignables: BlockSuite.EdgelessModel[]): Bound {
     if (alignables.length === 0) return new Bound();
 
     const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
@@ -445,7 +445,7 @@ export class EdgelessSnapManager extends Overlay {
       [
         ...this._rootService.blocks,
         ...canvasElements,
-      ] as BlockSuite.EdgelessModelType[]
+      ] as BlockSuite.EdgelessModel[]
     ).forEach(alignable => {
       const bounds = this._getBoundsWithRotationByAlignable(alignable);
       if (

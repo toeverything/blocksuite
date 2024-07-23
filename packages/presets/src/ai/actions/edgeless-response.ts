@@ -228,7 +228,7 @@ export const responses: {
 
     const elements = ctx.get()[
       'selectedElements'
-    ] as BlockSuite.EdgelessModelType[];
+    ] as BlockSuite.EdgelessModel[];
     const data = ctx.get() as {
       node: MindMapNode;
     };
@@ -282,7 +282,7 @@ export const responses: {
     ) as SurfaceBlockModel[];
     const elements = ctx.get()[
       'selectedElements'
-    ] as BlockSuite.EdgelessModelType[];
+    ] as BlockSuite.EdgelessModel[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = ctx.get() as any;
     let newGenerated = true;

@@ -231,10 +231,10 @@ describe('connector', () => {
         id: id2,
       },
     });
-    const connector = model.getElementById(connectorId);
+    const connector = model.getElementById(connectorId)!;
 
-    expect(model.getConnectors(id)).toEqual([connector]);
-    expect(model.getConnectors(id2)).toEqual([connector]);
+    expect(model.getConnectors(id).map(el => el.id)).toEqual([connector.id]);
+    expect(model.getConnectors(id2).map(el => el.id)).toEqual([connector.id]);
   });
 
   test('multiple connectors are supported', () => {
@@ -262,11 +262,13 @@ describe('connector', () => {
         id: id2,
       },
     });
-    const connector = model.getElementById(connectorId);
-    const connector2 = model.getElementById(connectorId2);
 
-    expect(model.getConnectors(id)).toEqual([connector, connector2]);
-    expect(model.getConnectors(id2)).toEqual([connector, connector2]);
+    const connector = model.getElementById(connectorId)!;
+    const connector2 = model.getElementById(connectorId2)!;
+    const connectors = [connector.id, connector2.id];
+
+    expect(model.getConnectors(id).map(c => c.id)).toEqual(connectors);
+    expect(model.getConnectors(id2).map(c => c.id)).toEqual(connectors);
   });
 
   test('should return null if connector are updated', () => {

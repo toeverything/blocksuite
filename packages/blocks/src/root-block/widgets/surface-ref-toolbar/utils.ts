@@ -13,7 +13,7 @@ export const edgelessToBlob = async (
   options: {
     surfaceRefBlock: SurfaceRefBlockComponent;
     surfaceRenderer: Renderer;
-    edgelessElement: BlockSuite.EdgelessModelType;
+    edgelessElement: BlockSuite.EdgelessModel;
     blockContainer: HTMLElement;
   }
 ): Promise<Blob> => {

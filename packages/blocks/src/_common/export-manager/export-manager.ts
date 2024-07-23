@@ -402,7 +402,7 @@ export class ExportManager {
     blockComponentGetter: (model: BlockModel) => Element | null = () => null,
     edgeless?: EdgelessRootBlockComponent,
     nodes?: EdgelessBlockModel[],
-    surfaces?: BlockSuite.SurfaceElementModelType[],
+    surfaces?: BlockSuite.SurfaceElementModel[],
     edgelessBackground?: {
       zoom: number;
     }

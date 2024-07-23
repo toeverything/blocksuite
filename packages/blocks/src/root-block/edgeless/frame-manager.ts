@@ -111,7 +111,7 @@ export class EdgelessFrameManager {
 
   getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: BlockSuite.EdgelessModelType[] =
+    const elements: BlockSuite.EdgelessModel[] =
       this._rootService.layer.canvasGrid.search(bound, true);
 
     return elements.concat(
@@ -119,7 +119,7 @@ export class EdgelessFrameManager {
     );
   }
 
-  selectFrame(eles: BlockSuite.EdgelessModelType[]) {
+  selectFrame(eles: BlockSuite.EdgelessModel[]) {
     const frames = this._rootService.frames;
     if (frames.length === 0) return null;
 

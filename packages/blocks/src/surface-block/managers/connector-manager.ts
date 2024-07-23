@@ -98,14 +98,14 @@ export function calculateNearestLocation(
     ) as IVec;
 }
 
-function rBound(ele: BlockSuite.EdgelessModelType, anti = false): IBound {
+function rBound(ele: BlockSuite.EdgelessModel, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);
   return { ...bound, rotate: anti ? -ele.rotate : ele.rotate };
 }
 
 export function isConnectorAndBindingsAllSelected(
   connector: ConnectorElementModel | LocalConnectorElementModel,
-  selected: BlockSuite.EdgelessModelType[]
+  selected: BlockSuite.EdgelessModel[]
 ) {
   const connectorSelected = selected.find(s => s.id === connector.id);
   if (!connectorSelected) {
@@ -129,7 +129,7 @@ export function isConnectorAndBindingsAllSelected(
   return false;
 }
 
-export function getAnchors(ele: BlockSuite.EdgelessModelType) {
+export function getAnchors(ele: BlockSuite.EdgelessModel) {
   const bound = Bound.deserialize(ele.xywh);
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
@@ -157,7 +157,7 @@ export function getAnchors(ele: BlockSuite.EdgelessModelType) {
 }
 
 function getConnectableRelativePosition(
-  connectable: BlockSuite.EdgelessModelType,
+  connectable: BlockSuite.EdgelessModel,
   position: IVec
 ) {
   const location = connectable.getRelativePointLocation(position as IVec);
@@ -1015,7 +1015,7 @@ export class ConnectorPathGenerator {
 
   constructor(
     private options: {
-      getElementById: (id: string) => BlockSuite.EdgelessModelType | null;
+      getElementById: (id: string) => BlockSuite.EdgelessModel | null;
     }
   ) {}
 
