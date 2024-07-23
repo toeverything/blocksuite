@@ -305,9 +305,9 @@ export class EdgelessRootService extends RootService {
     return el;
   }
 
-  getElementsByType<
-    K extends Parameters<SurfaceBlockModel['getElementsByType']>[0],
-  >(type: K) {
+  getElementsByType<K extends keyof BlockSuite.SurfaceElementModelMap>(
+    type: K
+  ): BlockSuite.SurfaceElementModelMap[K][] {
     return this.surface.getElementsByType(type);
   }
 

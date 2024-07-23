@@ -111,5 +111,9 @@ declare global {
     interface SurfaceGroupLikeModelMap {
       group: GroupElementModel;
     }
+
+    interface SurfaceElementModelMap {
+      group: GroupElementModel;
+    }
   }
 }

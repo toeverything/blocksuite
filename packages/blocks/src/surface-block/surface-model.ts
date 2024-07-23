@@ -200,4 +200,12 @@ export class SurfaceBlockModel extends BaseSurfaceModel {
       connector => connector.source?.id === id || connector.target?.id === id
     );
   }
+
+  override getElementsByType<K extends keyof BlockSuite.SurfaceElementModelMap>(
+    type: K
+  ): BlockSuite.SurfaceElementModelMap[K][] {
+    return super.getElementsByType(
+      type
+    ) as BlockSuite.SurfaceElementModelMap[K][];
+  }
 }
