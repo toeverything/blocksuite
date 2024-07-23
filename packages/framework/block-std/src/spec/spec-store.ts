@@ -81,6 +81,19 @@ export class SpecStore {
     this.slots.afterApply.emit();
   }
 
+  getConfig<Key extends BlockSuite.ConfigKeys>(
+    flavour: string
+  ): BlockSuite.BlockConfigs[Key] | null;
+
+  getConfig(flavour: string) {
+    const spec = this._specs.get(flavour);
+    if (!spec) {
+      return null;
+    }
+
+    return spec.config;
+  }
+
   getService<Key extends BlockSuite.ServiceKeys>(
     flavour: Key
   ): BlockSuite.BlockServices[Key];
@@ -127,7 +140,9 @@ export class SpecStore {
 declare global {
   namespace BlockSuite {
     interface BlockServices {}
+    interface BlockConfigs {}
 
     type ServiceKeys = string & keyof BlockServices;
+    type ConfigKeys = string & keyof BlockConfigs;
   }
 }

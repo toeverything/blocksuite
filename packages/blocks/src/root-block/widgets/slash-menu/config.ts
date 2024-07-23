@@ -1,7 +1,6 @@
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { Slice, Text } from '@blocksuite/store';
 
 import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
@@ -173,7 +172,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
                 const codeModel = newModels[0];
                 onModelTextUpdated(rootElement.host, codeModel, richText => {
                   const inlineEditor = richText.inlineEditor;
-                  assertExists(inlineEditor);
+                  if (!inlineEditor) return;
                   inlineEditor.focusEnd();
                 }).catch(console.error);
               }
@@ -218,10 +217,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
               rootElement.host,
               model
             );
-            assertExists(
-              inlineEditor,
-              "Can't set style mark! Inline editor not found"
-            );
+            if (!inlineEditor) return;
             inlineEditor.setMarks({
               [id]: true,
             });
@@ -261,7 +257,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const linkedDocWidgetEle =
           rootElement.widgetElements['affine-linked-doc-widget'];
         if (!linkedDocWidgetEle) return false;
-        if (!('showLinkedDoc' in linkedDocWidgetEle)) {
+        if (!('showLinkedDocPopover' in linkedDocWidgetEle)) {
           console.warn(
             'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
           );
@@ -272,17 +268,17 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       action: ({ model, rootElement }) => {
         const triggerKey = '@';
         insertContent(rootElement.host, model, triggerKey);
-        assertExists(model.doc.root);
+        if (!model.doc.root) return;
         const widgetEle =
           rootElement.widgetElements['affine-linked-doc-widget'];
-        assertExists(widgetEle);
+        if (!widgetEle) return;
         // We have checked the existence of showLinkedDoc method in the showWhen
         const linkedDocWidget = widgetEle as AffineLinkedDocWidget;
         // Wait for range to be updated
         setTimeout(() => {
           const inlineEditor = getInlineEditorByModel(rootElement.host, model);
-          assertExists(inlineEditor);
-          linkedDocWidget.showLinkedDoc(inlineEditor, triggerKey);
+          if (!inlineEditor) return;
+          linkedDocWidget.showLinkedDocPopover(inlineEditor, triggerKey);
         });
       },
     },
@@ -351,7 +347,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
 
         const attachmentService =
           rootElement.host.spec.getService('affine:attachment');
-        assertExists(attachmentService);
+        if (!attachmentService) return;
         const maxFileSize = attachmentService.maxFileSize;
 
         await addSiblingAttachmentBlocks(
@@ -642,7 +638,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
 
       action: ({ model, rootElement }) => {
         const parent = rootElement.doc.getParent(model);
-        assertExists(parent);
+        if (!parent) return;
         const index = parent.children.indexOf(model);
         const id = rootElement.doc.addBlock(
           'affine:data-view',

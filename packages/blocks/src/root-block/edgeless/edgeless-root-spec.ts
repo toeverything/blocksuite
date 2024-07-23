@@ -7,6 +7,7 @@ import type {
 
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
+import type { RootBlockConfig } from '../index.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 
 import { RootBlockSchema } from '../root-model.js';
@@ -43,7 +44,13 @@ export type EdgelessRootBlockWidgetName =
   | typeof AFFINE_VIEWPORT_OVERLAY_WIDGET
   | typeof AFFINE_EDGELESS_AUTO_CONNECT_WIDGET;
 
-export const EdgelessRootBlockSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
+export type EdgelessRootBlockSpecType = BlockSpec<
+  EdgelessRootBlockWidgetName,
+  BlockService,
+  RootBlockConfig
+>;
+
+export const EdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
   schema: RootBlockSchema,
   service: EdgelessRootService,
   view: {
@@ -90,7 +97,7 @@ export const EdgelessRootBlockSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
   },
 };
 
-export const PreviewEdgelessRootBlockSpec: BlockSpec = {
+export const PreviewEdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
   schema: RootBlockSchema,
   service: EdgelessRootService,
   view: {
