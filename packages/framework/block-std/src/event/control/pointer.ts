@@ -1,5 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import type { UIEventDispatcher } from '../dispatcher.js';
 
 import { UIEventState, UIEventStateContext } from '../base.js';
@@ -63,7 +61,9 @@ export class PointerControl {
     });
     this._lastDragState = state;
 
-    assertExists(this._startDragState);
+    if (!this._startDragState) {
+      return;
+    }
 
     if (!this._dragging && isFarEnough(this._startDragState.raw, state.raw)) {
       this._dragging = true;
