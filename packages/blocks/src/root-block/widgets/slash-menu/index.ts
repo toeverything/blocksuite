@@ -126,7 +126,7 @@ export class AffineSlashMenuWidget extends WidgetElement {
     if (!inlineEditor) return;
 
     inlineEditor.slots.inlineRangeApply.once(() => {
-      const rootElement = this.blockElement;
+      const rootElement = this.block;
       if (!isRootElement(rootElement)) {
         console.error('SlashMenuWidget should be used in RootBlock');
         return;

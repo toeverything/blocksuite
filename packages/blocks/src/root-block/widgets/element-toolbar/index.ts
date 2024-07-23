@@ -379,7 +379,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   }
 
   get edgeless() {
-    return this.blockElement as EdgelessRootBlockComponent;
+    return this.block as EdgelessRootBlockComponent;
   }
 
   get selection() {

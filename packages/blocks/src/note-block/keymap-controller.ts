@@ -4,7 +4,7 @@ import type {
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { assertExists } from '@blocksuite/global/utils';
@@ -103,7 +103,7 @@ export class KeymapController implements ReactiveController {
     });
   };
 
-  private _focusBlock: BlockElement | null = null;
+  private _focusBlock: BlockComponent | null = null;
 
   private _onArrowDown = (ctx: UIEventStateContext) => {
     const event = ctx.get('defaultState').event;
@@ -522,9 +522,9 @@ export class KeymapController implements ReactiveController {
     this._bindMoveBlockHotKey();
   };
 
-  host: ReactiveControllerHost & BlockElement;
+  host: ReactiveControllerHost & BlockComponent;
 
-  constructor(host: ReactiveControllerHost & BlockElement) {
+  constructor(host: ReactiveControllerHost & BlockComponent) {
     (this.host = host).addController(this);
   }
 

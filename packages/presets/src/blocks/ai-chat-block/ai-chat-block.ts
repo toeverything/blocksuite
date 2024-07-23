@@ -1,4 +1,4 @@
-import { BlockElement } from '@blocksuite/block-std';
+import { BlockComponent } from '@blocksuite/block-std';
 import { Peekable } from '@blocksuite/blocks';
 import { computed } from '@lit-labs/preact-signals';
 import { html } from 'lit';
@@ -16,7 +16,7 @@ import { ChatMessagesSchema } from './types.js';
 @Peekable({
   enableOn: ({ doc }: AIChatBlockComponent) => !doc.readonly,
 })
-export class AIChatBlockComponent extends BlockElement<AIChatBlockModel> {
+export class AIChatBlockComponent extends BlockComponent<AIChatBlockModel> {
   // Deserialize messages from JSON string and verify the type using zod
   private _deserializeChatMessages = computed(() => {
     const messages = this.model.messages$.value;

@@ -1,4 +1,4 @@
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type {
   EdgelessCopilotWidget,
   EdgelessRootService,
@@ -62,8 +62,8 @@ export function getEdgelessCopilotWidget(
   return copilotWidget;
 }
 
-export function findNoteBlockModel(blockElement: BlockElement) {
-  let curBlock = blockElement;
+export function findNoteBlockModel(block: BlockComponent) {
+  let curBlock = block;
   while (curBlock) {
     if (matchFlavours(curBlock.model, ['affine:note'])) {
       return curBlock.model;
@@ -71,7 +71,7 @@ export function findNoteBlockModel(blockElement: BlockElement) {
     if (matchFlavours(curBlock.model, ['affine:page', 'affine:surface'])) {
       return null;
     }
-    curBlock = curBlock.parentBlockElement;
+    curBlock = curBlock.parentBlock;
   }
   return null;
 }

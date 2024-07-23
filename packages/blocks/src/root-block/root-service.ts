@@ -1,4 +1,4 @@
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { BlockService } from '@blocksuite/block-std';
@@ -411,7 +411,7 @@ export class RootService extends BlockService<RootBlockModel> {
   }
 
   get selectedBlocks() {
-    let result: BlockElement[] = [];
+    let result: BlockComponent[] = [];
     this.std.command
       .chain()
       .tryAll(chain => [

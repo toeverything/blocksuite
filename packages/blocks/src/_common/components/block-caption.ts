@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
@@ -140,7 +140,7 @@ export class BlockCaptionEditor<
   }
 
   @property({ attribute: false })
-  accessor block!: BlockElement<Model> & { isInSurface?: boolean };
+  accessor block!: BlockComponent<Model> & { isInSurface?: boolean };
 
   @state()
   accessor caption: string | null | undefined = undefined;

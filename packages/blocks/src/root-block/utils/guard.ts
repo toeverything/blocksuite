@@ -1,12 +1,12 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 import type { RootBlockComponent } from '../types.js';
 
 export function isRootElement(
-  blockElement: BlockElement
-): blockElement is RootBlockComponent {
+  block: BlockComponent
+): block is RootBlockComponent {
   return (
-    blockElement.tagName === 'AFFINE-PAGE-ROOT' ||
-    blockElement.tagName === 'AFFINE-EDGELESS-ROOT'
+    block.tagName === 'AFFINE-PAGE-ROOT' ||
+    block.tagName === 'AFFINE-EDGELESS-ROOT'
   );
 }

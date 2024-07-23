@@ -148,7 +148,7 @@ export class AffinePieMenuWidget extends WidgetElement {
   }
 
   get rootElement(): EdgelessRootBlockComponent {
-    const rootElement = this.blockElement;
+    const rootElement = this.block;
     if (rootElement instanceof EdgelessRootBlockComponent) {
       return rootElement;
     }

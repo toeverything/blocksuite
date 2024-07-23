@@ -11,7 +11,7 @@ import type { DragIndicator } from './drag-indicator.js';
 import {
   type DropResult,
   calcDropTarget,
-  getClosestBlockElementByPoint,
+  getClosestBlockComponentByPoint,
   getModelByBlockComponent,
   isInsidePageEditor,
   matchFlavours,
@@ -87,7 +87,7 @@ export class FileDropManager {
 
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
-    const element = getClosestBlockElementByPoint(point.clone());
+    const element = getClosestBlockComponentByPoint(point.clone());
 
     let result: DropResult | null = null;
     if (element) {

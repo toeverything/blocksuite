@@ -131,16 +131,14 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       const editableElements = Array.from<HTMLDivElement>(
         this.querySelectorAll('[contenteditable]')
       );
-      const blockElements = Array.from(
-        this.querySelectorAll(`[data-block-id]`)
-      );
+      const blocks = Array.from(this.querySelectorAll(`[data-block-id]`));
 
       editableElements.forEach(element => {
         if (element.contentEditable === 'true')
           element.contentEditable = 'false';
       });
 
-      blockElements.forEach(element => {
+      blocks.forEach(element => {
         element.setAttribute(RangeManager.rangeQueryExcludeAttr, 'true');
       });
     }, 500);

@@ -140,7 +140,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
           return;
         }
 
-        const off = this.blockElement.dispatcher.add('pointerDown', ctx => {
+        const off = this.block.dispatcher.add('pointerDown', ctx => {
           const e = ctx.get('pointerState').raw;
           const aiPanel = this.host.view.getWidget(
             AFFINE_AI_PANEL_WIDGET,
@@ -250,7 +250,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
   }
 
   get edgeless() {
-    return this.blockElement;
+    return this.block;
   }
 
   get selectionModelRect() {

@@ -2,7 +2,7 @@ import { assertExists, throttle } from '@blocksuite/global/utils';
 
 import type { BaseSelection, TextSelection } from '../../selection/index.js';
 
-import { BlockElement } from '../element/block-element.js';
+import { BlockComponent } from '../element/block-component.js';
 import { RangeManager } from './range-manager.js';
 
 /**
@@ -25,7 +25,7 @@ export class RangeBinding {
     const range = this.rangeManager.value;
     if (!range) return;
 
-    const blocks = this.rangeManager.getSelectedBlockElementsByRange(range, {
+    const blocks = this.rangeManager.getSelectedBlockComponentsByRange(range, {
       mode: 'flat',
     });
 
@@ -89,10 +89,10 @@ export class RangeBinding {
     const range = this.rangeManager.value;
     if (!range) return;
 
-    const blocks = this.rangeManager.getSelectedBlockElementsByRange(range, {
+    const blocks = this.rangeManager.getSelectedBlockComponentsByRange(range, {
       mode: 'flat',
     });
-    const highestBlocks = this.rangeManager.getSelectedBlockElementsByRange(
+    const highestBlocks = this.rangeManager.getSelectedBlockComponentsByRange(
       range,
       {
         mode: 'highest',
@@ -111,12 +111,12 @@ export class RangeBinding {
     this._compositionStartCallback = async event => {
       this.isComposing = false;
 
-      const parents: BlockElement[] = [];
+      const parents: BlockComponent[] = [];
       for (const highestBlock of highestBlocks) {
         const parentModel = this.host.doc.getParent(highestBlock.blockId);
         if (!parentModel) continue;
         const parent = this.host.view.getBlock(parentModel.id);
-        if (!(parent instanceof BlockElement) || parents.includes(parent))
+        if (!(parent instanceof BlockComponent) || parents.includes(parent))
           continue;
 
         // Restore the DOM structure damaged by the composition
@@ -204,7 +204,7 @@ export class RangeBinding {
         ? range.commonAncestorContainer
         : range.commonAncestorContainer.parentElement;
     if (!el) return;
-    const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
+    const block = el.closest<BlockComponent>(`[${this.host.blockIdAttr}]`);
     if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
       return;
 

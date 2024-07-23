@@ -402,14 +402,14 @@ export class AffineAIPanelWidget extends WidgetElement {
       this._onDocumentClick
     );
     this.disposables.add(
-      this.blockElement.host.event.add('pointerDown', evtState =>
+      this.block.host.event.add('pointerDown', evtState =>
         this._onDocumentClick(
           evtState.get('pointerState').event as PointerEvent
         )
       )
     );
     this.disposables.add(
-      this.blockElement.host.event.add('click', () => {
+      this.block.host.event.add('click', () => {
         return this.state !== 'hidden' ? true : false;
       })
     );

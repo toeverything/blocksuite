@@ -55,7 +55,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
   };
 
   private _updateRemoteRects = () => {
-    const { selection, blockElement } = this;
+    const { selection, block } = this;
     const remoteSelectionsMap = selection.remoteSurfaceSelectionsMap;
     const remoteRects: EdgelessRemoteSelectionWidget['_remoteRects'] =
       new Map();
@@ -65,7 +65,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
         if (selection.elements.length === 0) return;
 
         const elements = selection.elements
-          .map(id => blockElement.service.getElementById(id))
+          .map(id => block.service.getElementById(id))
           .filter(element => element) as BlockSuite.EdgelessModelType[];
         const rect = getSelectedRect(elements);
 
@@ -252,7 +252,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
   }
 
   get edgeless() {
-    return this.blockElement;
+    return this.block;
   }
 
   get selection() {

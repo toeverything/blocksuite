@@ -1,5 +1,5 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockSnapshot, Doc } from '@blocksuite/store';
 
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
@@ -80,7 +80,7 @@ export class PageClipboard {
     });
   };
 
-  host: BlockElement;
+  host: BlockComponent;
 
   onBlockSnapshotPaste = (
     snapshot: BlockSnapshot,
@@ -163,7 +163,7 @@ export class PageClipboard {
       .run();
   };
 
-  constructor(host: BlockElement) {
+  constructor(host: BlockComponent) {
     this.host = host;
   }
 

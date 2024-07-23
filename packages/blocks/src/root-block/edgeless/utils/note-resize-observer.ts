@@ -23,8 +23,8 @@ export class NoteResizeObserver {
   private _onResize = (entries: ResizeObserverEntry[]) => {
     const resizedNotes = new Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>();
     entries.forEach(entry => {
-      const blockElement = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
-      const id = blockElement?.getAttribute(BLOCK_ID_ATTR);
+      const blockComponent = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
+      const id = blockComponent?.getAttribute(BLOCK_ID_ATTR);
       if (!id) return;
       const lastRect = this._lastRects.get(id);
       if (
@@ -74,14 +74,9 @@ export class NoteResizeObserver {
       const blockId = model.id;
       unCachedKeys.delete(blockId);
 
-      const blockElement = editorHost.view.viewFromPath(
-        'block',
-        buildPath(model)
-      );
+      const block = editorHost.view.viewFromPath('block', buildPath(model));
 
-      const container = blockElement?.querySelector(
-        '.affine-note-block-container'
-      );
+      const container = block?.querySelector('.affine-note-block-container');
 
       const cachedElement = this._cachedElements.get(blockId);
       if (cachedElement) {

@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
 import { getInlineRangeProvider } from '@blocksuite/block-std';
@@ -152,7 +152,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
 
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockElement>(NOTE_SELECTOR);
+      const el = this.closest<BlockComponent>(NOTE_SELECTOR);
       return el;
     }
     return this.rootElement;

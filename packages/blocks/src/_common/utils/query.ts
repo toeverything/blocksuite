@@ -1,5 +1,5 @@
 import type {
-  BlockElement,
+  BlockComponent,
   EditorHost,
   ViewStore,
 } from '@blocksuite/block-std';
@@ -30,10 +30,6 @@ const ATTR_SELECTOR = `[${ATTR}]`;
 // h1.margin-top = 8px + 24px = 32px;
 const MAX_SPACE = 32;
 const STEPS = MAX_SPACE / 2 / 2;
-
-// Fix use unknown type
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type BlockComponent = BlockElement<any>;
 
 interface ContainerBlock {
   model?: BlockModel;
@@ -175,7 +171,7 @@ export function buildPath(model: BlockModel | null): string[] {
   return path;
 }
 
-export function blockElementGetter(model: BlockModel, view: ViewStore) {
+export function blockComponentGetter(model: BlockModel, view: ViewStore) {
   if (matchFlavours(model, ['affine:image', 'affine:frame'])) {
     let current: BlockModel | null = model;
     const path: string[] = [];
@@ -494,7 +490,7 @@ function isEdgelessChildImage({ classList }: Element) {
  * ############### block
  * ```
  */
-export function getClosestBlockElementByPoint(
+export function getClosestBlockComponentByPoint(
   point: Point,
   state: {
     rect?: Rect;
@@ -542,7 +538,7 @@ export function getClosestBlockElementByPoint(
   }
 
   // find block element
-  element = findBlockElement(
+  element = findBlockComponent(
     document.elementsFromPoint(point.x, point.y),
     container
   );
@@ -567,7 +563,7 @@ export function getClosestBlockElementByPoint(
       }
     } else {
       // Indented paragraphs or list
-      bounds = getRectByBlockElement(element);
+      bounds = getRectByBlockComponent(element);
       childBounds = element
         .querySelector('.affine-block-children-container')
         ?.firstElementChild?.getBoundingClientRect();
@@ -594,13 +590,13 @@ export function getClosestBlockElementByPoint(
     n *= -1;
 
     // find block element
-    element = findBlockElement(
+    element = findBlockComponent(
       document.elementsFromPoint(point.x, point.y),
       container
     );
 
     if (element) {
-      bounds = getRectByBlockElement(element);
+      bounds = getRectByBlockComponent(element);
       diff = bounds.bottom - point.y;
       if (diff >= 0 && diff <= STEPS * 2) {
         return element;
@@ -622,7 +618,7 @@ export function getClosestBlockElementByPoint(
  * @param container container which the blocks can be found inside
  * @param point position
  */
-export function findClosestBlockElement(
+export function findClosestBlockComponent(
   container: BlockComponent,
   point: Point,
   selector: string
@@ -660,7 +656,7 @@ export function findClosestBlockElement(
 /**
  * Returns the closest block element by element that does not contain the page element and note element.
  */
-export function getClosestBlockElementByElement(
+export function getClosestBlockComponentByElement(
   element: Element | null
 ): BlockComponent | null {
   if (!element) return null;
@@ -698,7 +694,7 @@ export function getModelByBlockComponent(component: Element) {
  * https://github.com/toeverything/blocksuite/issues/902
  * https://github.com/toeverything/blocksuite/pull/1121
  */
-export function getRectByBlockElement(element: Element | BlockComponent) {
+export function getRectByBlockComponent(element: Element | BlockComponent) {
   if (isDatabase(element)) return element.getBoundingClientRect();
   return (element.firstElementChild ?? element).getBoundingClientRect();
 }
@@ -707,7 +703,7 @@ export function getRectByBlockElement(element: Element | BlockComponent) {
  * Returns block elements excluding their subtrees.
  * Only keep block elements of same level.
  */
-export function getBlockElementsExcludeSubtrees(
+export function getBlockComponentsExcludeSubtrees(
   elements: Element[] | BlockComponent[]
 ) {
   if (elements.length <= 1) return elements;
@@ -727,7 +723,7 @@ export function getBlockElementsExcludeSubtrees(
  * Find block element from an `Element[]`.
  * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
  */
-function findBlockElement(elements: Element[], parent?: Element) {
+function findBlockComponent(elements: Element[], parent?: Element) {
   const len = elements.length;
   let element = null;
   let i = 0;
@@ -742,7 +738,7 @@ function findBlockElement(elements: Element[], parent?: Element) {
       if (i < len && hasBlockId(element) && isBlock(element)) {
         return elements[i];
       }
-      return getClosestBlockElementByElement(element);
+      return getClosestBlockComponentByElement(element);
     }
   }
   return null;
@@ -822,7 +818,7 @@ export function getDropRectByPoint(
   flag: DropFlags;
 } {
   const result = {
-    rect: getRectByBlockElement(element),
+    rect: getRectByBlockComponent(element),
     flag: DropFlags.Normal,
   };
 

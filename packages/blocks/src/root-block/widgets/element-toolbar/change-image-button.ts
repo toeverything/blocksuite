@@ -14,15 +14,15 @@ import { downloadImageBlob } from '../../../image-block/utils.js';
 @customElement('edgeless-change-image-button')
 export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
   private _download = () => {
-    if (!this._blockElement) return;
-    downloadImageBlob(this._blockElement).catch(console.error);
+    if (!this._blockComponent) return;
+    downloadImageBlob(this._blockComponent).catch(console.error);
   };
 
   private _showCaption = () => {
-    this._blockElement?.captionEditor?.show();
+    this._blockComponent?.captionEditor?.show();
   };
 
-  private get _blockElement() {
+  private get _blockComponent() {
     const blockSelection =
       this.edgeless.service.selection.surfaceSelections.filter(sel =>
         sel.elements.includes(this.model.id)
@@ -31,11 +31,11 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const blockElement = this.edgeless.std.view.getBlock(
+    const block = this.edgeless.std.view.getBlock(
       blockSelection[0].blockId
     ) as ImageBlockComponent | null;
 
-    return blockElement;
+    return block;
   }
 
   private get _doc() {

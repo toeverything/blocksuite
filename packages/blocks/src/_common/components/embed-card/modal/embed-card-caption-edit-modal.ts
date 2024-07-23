@@ -1,9 +1,13 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
+import {
+  type BlockComponent,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-
-import type { BlockComponent } from '../../../utils/query.js';
 
 import { embedCardModalStyles } from './styles.js';
 
@@ -18,7 +22,7 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
   }
 
   private get _model() {
-    return this.block.model;
+    return this.block.model as BlockModel<{ caption: string }>;
   }
 
   private _onKeydown(e: KeyboardEvent) {

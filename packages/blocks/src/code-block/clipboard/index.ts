@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 import { Clipboard, type UIEventHandler } from '@blocksuite/block-std';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
@@ -26,7 +26,7 @@ export class CodeClipboardController {
     });
   };
 
-  host: BlockElement;
+  host: BlockComponent;
 
   onPagePaste: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
@@ -70,7 +70,7 @@ export class CodeClipboardController {
     return true;
   };
 
-  constructor(host: BlockElement) {
+  constructor(host: BlockComponent) {
     this.host = host;
   }
 

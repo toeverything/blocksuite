@@ -34,7 +34,7 @@ export class AffineSurfaceRefToolbar extends WidgetElement<
   private _hoverController = new HoverController(
     this,
     ({ abortController }) => {
-      const surfaceRefBlock = this.blockElement;
+      const surfaceRefBlock = this.block;
       const selection = this.host.selection;
 
       const textSelection = selection.find('text');
@@ -56,12 +56,12 @@ export class AffineSurfaceRefToolbar extends WidgetElement<
 
       return {
         template: SurfaceRefToolbarOptions({
-          blockElement: this.blockElement,
-          model: this.blockElement.model,
+          block: this.block,
+          model: this.block.model,
           abortController,
         }),
         computePosition: {
-          referenceElement: this.blockElement,
+          referenceElement: this.block,
           placement: 'top-start',
           middleware: [
             offset({
@@ -86,7 +86,7 @@ export class AffineSurfaceRefToolbar extends WidgetElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    this._hoverController.setReference(this.blockElement);
+    this._hoverController.setReference(this.block);
   }
 }
 
@@ -97,13 +97,13 @@ declare global {
 }
 
 function SurfaceRefToolbarOptions(options: {
-  blockElement: SurfaceRefBlockComponent;
+  block: SurfaceRefBlockComponent;
   model: SurfaceRefBlockModel;
   abortController: AbortController;
 }) {
-  const { blockElement, model, abortController } = options;
+  const { block, model, abortController } = options;
   const readonly = model.doc.readonly;
-  const hasValidReference = !!blockElement.referenceModel;
+  const hasValidReference = !!block.referenceModel;
 
   return html`
     <style>
@@ -151,7 +151,7 @@ function SurfaceRefToolbarOptions(options: {
         class="view-in-edgeless-button"
         text="View in Edgeless"
         width="fit-content"
-        @click=${() => blockElement.viewInEdgeless()}
+        @click=${() => block.viewInEdgeless()}
         >${EdgelessModeIcon}
       </icon-button>
 
@@ -168,7 +168,7 @@ function SurfaceRefToolbarOptions(options: {
         ?hidden=${readonly}
         @click=${() => {
           abortController.abort();
-          blockElement.captionElement.show();
+          block.captionElement.show();
         }}
       >
         ${CaptionIcon}
@@ -180,15 +180,15 @@ function SurfaceRefToolbarOptions(options: {
         size="32px"
         ?hidden=${!hasValidReference}
         @click=${() => {
-          const referencedModel = blockElement.referenceModel;
+          const referencedModel = block.referenceModel;
 
           if (!referencedModel) return;
 
-          edgelessToBlob(blockElement.host, {
-            surfaceRefBlock: blockElement,
-            surfaceRenderer: blockElement.surfaceRenderer,
+          edgelessToBlob(block.host, {
+            surfaceRefBlock: block,
+            surfaceRenderer: block.surfaceRenderer,
             edgelessElement: referencedModel,
-            blockContainer: blockElement.portal,
+            blockContainer: block.portal,
           })
             .then(blob => {
               const fileName =
@@ -208,12 +208,12 @@ function SurfaceRefToolbarOptions(options: {
         <affine-tooltip tip-position="top">Download</affine-tooltip>
       </icon-button>
 
-      ${isPeekable(blockElement)
+      ${isPeekable(block)
         ? html`<icon-button
             size="32px"
             ?hidden=${!hasValidReference}
             @click=${() => {
-              peek(blockElement);
+              peek(block);
             }}
           >
             ${CenterPeekIcon}
@@ -227,18 +227,18 @@ function SurfaceRefToolbarOptions(options: {
         size="32px"
         ?hidden=${!hasValidReference}
         @click=${() => {
-          edgelessToBlob(blockElement.host, {
-            surfaceRefBlock: blockElement,
-            surfaceRenderer: blockElement.surfaceRenderer,
+          edgelessToBlob(block.host, {
+            surfaceRefBlock: block,
+            surfaceRenderer: block.surfaceRenderer,
             edgelessElement:
-              blockElement.referenceModel as BlockSuite.EdgelessModelType,
-            blockContainer: blockElement.portal,
+              block.referenceModel as BlockSuite.EdgelessModelType,
+            blockContainer: block.portal,
           })
             .then(blob => {
               return writeImageBlobToClipboard(blob);
             })
             .then(() => {
-              toast(blockElement.host, 'Copied image to clipboard');
+              toast(block.host, 'Copied image to clipboard');
             })
             .catch(err => {
               console.error(err);

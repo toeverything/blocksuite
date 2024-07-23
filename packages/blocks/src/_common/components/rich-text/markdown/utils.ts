@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 import type { ListType } from '../../../../list-block/index.js';
 
@@ -8,7 +8,7 @@ import {
   matchFlavours,
 } from '../../../../_common/utils/index.js';
 
-function addSpace(element: BlockElement, index: number) {
+function addSpace(element: BlockComponent, index: number) {
   element.model.text?.insert(' ', index);
   const currentText = element.selection.find('text');
   element.selection.setGroup('note', [
@@ -24,7 +24,7 @@ function addSpace(element: BlockElement, index: number) {
 }
 
 export function convertToList(
-  element: BlockElement,
+  element: BlockComponent,
   listType: ListType,
   prefix: string,
   otherProperties?: Record<string, unknown>
@@ -59,7 +59,7 @@ export function convertToList(
 }
 
 export function convertToParagraph(
-  element: BlockElement,
+  element: BlockComponent,
   type: 'text' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
   prefix: string
 ): boolean {
@@ -108,7 +108,7 @@ export function convertToParagraph(
 }
 
 export function convertToDivider(
-  element: BlockElement,
+  element: BlockComponent,
   prefix: string
 ): boolean {
   const { doc, model } = element;

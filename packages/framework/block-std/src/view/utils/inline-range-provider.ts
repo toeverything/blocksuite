@@ -7,10 +7,10 @@ import {
 } from '@blocksuite/inline';
 
 import type { TextSelection } from '../../selection/index.js';
-import type { BlockElement } from '../element/block-element.js';
+import type { BlockComponent } from '../element/block-component.js';
 
 export const getInlineRangeProvider: (
-  element: BlockElement
+  element: BlockComponent
 ) => InlineRangeProvider | null = element => {
   const editorHost = element.host;
   const selectionManager = editorHost.selection;
@@ -32,8 +32,8 @@ export const getInlineRangeProvider: (
       const inlineRoot = startElement?.closest(`[${INLINE_ROOT_ATTR}]`);
       if (!inlineRoot) return false;
 
-      const blockElement = startElement?.closest(`[${editorHost.blockIdAttr}]`);
-      if (!blockElement || blockElement !== element) return false;
+      const block = startElement?.closest(`[${editorHost.blockIdAttr}]`);
+      if (!block || block !== element) return false;
     } else {
       if (!range.intersectsNode(element)) return false;
     }

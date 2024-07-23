@@ -60,23 +60,22 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
     return null;
   }
 
-  const selectedBlockElements = formatBar.selectedBlockElements;
+  const selectedBlocks = formatBar.selectedBlocks;
   // only support model with text
-  if (selectedBlockElements.some(el => !el.model.text)) {
+  if (selectedBlocks.some(el => !el.model.text)) {
     return null;
   }
 
   const paragraphIcon =
-    selectedBlockElements.length < 1
+    selectedBlocks.length < 1
       ? textConversionConfigs[0].icon
       : textConversionConfigs.find(
           ({ flavour, type }) =>
-            selectedBlockElements[0].flavour === flavour &&
-            (selectedBlockElements[0].model as ParagraphBlockModel).type ===
-              type
+            selectedBlocks[0].flavour === flavour &&
+            (selectedBlocks[0].model as ParagraphBlockModel).type === type
         )?.icon ?? textConversionConfigs[0].icon;
 
-  const rootElement = formatBar.blockElement;
+  const rootElement = formatBar.block;
   if (!isRootElement(rootElement)) {
     console.error('paragraph button host is not a page component');
     return null;

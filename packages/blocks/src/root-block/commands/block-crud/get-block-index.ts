@@ -1,5 +1,5 @@
 import type { Command } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 import { assertExists } from '@blocksuite/global/utils';
 
@@ -22,13 +22,13 @@ export const getBlockIndexCommand: Command<
   const parent = ctx.std.view.getBlock(parentModel.id);
   if (!parent) return;
 
-  const index = parent.childBlockElements.findIndex(x => {
+  const index = parent.childBlocks.findIndex(x => {
     return x.blockId === path;
   });
 
   next({
     blockIndex: index,
-    parentBlock: parent as BlockElement,
+    parentBlock: parent as BlockComponent,
   });
 };
 
@@ -36,7 +36,7 @@ declare global {
   namespace BlockSuite {
     interface CommandContext {
       blockIndex?: number;
-      parentBlock?: BlockElement;
+      parentBlock?: BlockComponent;
     }
 
     interface Commands {

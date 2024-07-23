@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline/types';
 
 import { WithDisposable } from '@blocksuite/block-std';
@@ -238,24 +238,24 @@ export class LinkPopup extends WithDisposable(LitElement) {
       targetFlavour = this._embedOptions.flavour;
     }
 
-    const blockElement = this.blockElement;
-    if (!blockElement) return;
+    const block = this.block;
+    if (!block) return;
     const url = this.currentLink;
     const title = this.currentText;
     const props = {
       url,
       title: title === url ? '' : title,
     };
-    const doc = blockElement.doc;
-    const parent = doc.getParent(blockElement.model);
+    const doc = block.doc;
+    const parent = doc.getParent(block.model);
     assertExists(parent);
-    const index = parent.children.indexOf(blockElement.model);
+    const index = parent.children.indexOf(block.model);
     doc.addBlock(targetFlavour as never, props, parent, index + 1);
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      doc.deleteBlock(blockElement.model);
+      doc.deleteBlock(block.model);
     } else {
       this.inlineEditor.formatText(this.targetInlineRange, { link: null });
     }
@@ -271,19 +271,19 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const { flavour } = this._embedOptions;
     const url = this.currentLink;
 
-    const blockElement = this.blockElement;
-    if (!blockElement) return;
-    const doc = blockElement.doc;
-    const parent = doc.getParent(blockElement.model);
+    const block = this.block;
+    if (!block) return;
+    const doc = block.doc;
+    const parent = doc.getParent(block.model);
     assertExists(parent);
-    const index = parent.children.indexOf(blockElement.model);
+    const index = parent.children.indexOf(block.model);
 
     doc.addBlock(flavour as never, { url }, parent, index + 1);
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      doc.deleteBlock(blockElement.model);
+      doc.deleteBlock(block.model);
     } else {
       this.inlineEditor.formatText(this.targetInlineRange, { link: null });
     }
@@ -299,10 +299,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private get _isBookmarkAllowed() {
-    const blockElement = this.blockElement;
-    if (!blockElement) return false;
-    const schema = blockElement.doc.schema;
-    const parent = blockElement.doc.getParent(blockElement.model);
+    const block = this.block;
+    if (!block) return false;
+    const schema = block.doc.schema;
+    const parent = block.doc.getParent(block.model);
     if (!parent) return false;
     const bookmarkSchema = schema.flavourSchemaMap.get('affine:bookmark');
     if (!bookmarkSchema) return false;
@@ -566,14 +566,12 @@ export class LinkPopup extends WithDisposable(LitElement) {
       .catch(console.error);
   }
 
-  get blockElement() {
-    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
+  get block() {
+    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
       `[${BLOCK_ID_ATTR}]`
     );
-    if (!blockElement) {
-      return null;
-    }
-    return blockElement;
+    if (!block) return null;
+    return block;
   }
 
   get currentLink() {
@@ -590,11 +588,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   get host() {
-    return this.blockElement?.host;
+    return this.block?.host;
   }
 
   get std() {
-    return this.blockElement?.std;
+    return this.block?.std;
   }
 
   @property({ attribute: false })

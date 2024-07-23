@@ -6,7 +6,7 @@ import type { EmbedLoomStyles } from './embed-loom-model.js';
 import type { EmbedLoomBlockService } from './embed-loom-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
+import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
 import { type EmbedLoomModel, loomUrlRegex } from './embed-loom-model.js';
@@ -14,7 +14,7 @@ import { LoomIcon, styles } from './styles.js';
 import { refreshEmbedLoomUrlData } from './utils.js';
 
 @customElement('affine-embed-loom-block')
-export class EmbedLoomBlockComponent extends EmbedBlockElement<
+export class EmbedLoomBlockComponent extends EmbedBlockComponent<
   EmbedLoomModel,
   EmbedLoomBlockService
 > {

@@ -30,7 +30,7 @@ import {
 } from '../utils/index.js';
 import { styles } from './styles.js';
 
-export class EmbedBlockElement<
+export class EmbedBlockComponent<
   Model extends
     BlockModel<EdgelessSelectableProps> = BlockModel<EdgelessSelectableProps>,
   Service extends BlockService = BlockService,

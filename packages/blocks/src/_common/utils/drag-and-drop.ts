@@ -1,3 +1,4 @@
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -7,12 +8,11 @@ import type { EditingState } from '../types.js';
 
 import { matchFlavours } from './model.js';
 import {
-  type BlockComponent,
   DropFlags,
-  getClosestBlockElementByElement,
+  getClosestBlockComponentByElement,
   getDropRectByPoint,
   getModelByBlockComponent,
-  getRectByBlockElement,
+  getRectByBlockComponent,
 } from './query.js';
 import { Rect } from './rect.js';
 
@@ -55,9 +55,9 @@ export function calcDropTarget(
   }
 
   if (!shouldAppendToDatabase && !matchFlavours(model, ['affine:database'])) {
-    const databaseBlockElement = element.closest('affine-database');
-    if (databaseBlockElement) {
-      element = databaseBlockElement;
+    const databaseBlockComponent = element.closest('affine-database');
+    if (databaseBlockComponent) {
+      element = databaseBlockComponent;
       model = getModelByBlockComponent(element);
     }
   }
@@ -125,7 +125,7 @@ export function calcDropTarget(
       ) {
         type = 'none';
       } else {
-        prevRect = getRectByBlockElement(prev);
+        prevRect = getRectByBlockComponent(prev);
       }
     } else {
       prev = element.parentElement?.previousElementSibling;
@@ -149,13 +149,13 @@ export function calcDropTarget(
         next = null;
       }
     } else {
-      next = getClosestBlockElementByElement(
+      next = getClosestBlockComponentByElement(
         element.parentElement
       )?.nextElementSibling;
     }
 
     if (next) {
-      nextRect = getRectByBlockElement(next);
+      nextRect = getRectByBlockComponent(next);
       offsetY = (nextRect.top - domRect.bottom) / 2;
     }
   }

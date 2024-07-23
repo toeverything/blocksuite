@@ -3,7 +3,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
-import type { BlockElement } from '../view/index.js';
+import type { BlockComponent } from '../view/index.js';
 
 import { PathFinder } from '../utils/index.js';
 import {
@@ -218,7 +218,7 @@ export class UIEventDispatcher {
 
     // TODO(mirone/#6534): find a better way to get block element from a node
     const el = target instanceof Element ? target : target.parentElement;
-    const block = el?.closest<BlockElement>('[data-block-id]');
+    const block = el?.closest<BlockComponent>('[data-block-id]');
 
     const path = block?.path;
     if (!path) {

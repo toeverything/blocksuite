@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { BlockElement, WidgetElement } from '@blocksuite/block-std';
+import { BlockComponent, WidgetElement } from '@blocksuite/block-std';
 import { assertInstanceOf } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -21,7 +21,7 @@ type Rect = {
 };
 
 type BlockInfo = {
-  element: BlockElement;
+  element: BlockComponent;
   rect: Rect;
 };
 
@@ -127,11 +127,11 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
     }
     const { scrollLeft, scrollTop } = this._viewport;
 
-    const getAllNodeFromTree = (): BlockElement[] => {
-      const blockElement: BlockElement[] = [];
+    const getAllNodeFromTree = (): BlockComponent[] => {
+      const blocks: BlockComponent[] = [];
       this.host.view.walkThrough(node => {
         const view = node;
-        if (!(view instanceof BlockElement)) {
+        if (!(view instanceof BlockComponent)) {
           return true;
         }
         if (
@@ -140,11 +140,11 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
             view.model.flavour
           )
         ) {
-          blockElement.push(view);
+          blocks.push(view);
         }
         return;
       });
-      return blockElement;
+      return blocks;
     };
 
     const elements = getAllNodeFromTree();
@@ -184,13 +184,13 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
   }
 
   private get _viewport() {
-    const rootElement = this.blockElement;
+    const rootElement = this.block;
     if (!rootElement) return;
     return rootElement.viewport;
   }
 
   private get scrollContainer() {
-    return getScrollContainer(this.blockElement);
+    return getScrollContainer(this.block);
   }
 
   override connectedCallback() {
@@ -352,7 +352,7 @@ function filterBlockInfosByParent(
   const targetBlock = parentInfos.element;
   let results = [parentInfos];
   if (targetBlock.childElementCount > 0) {
-    const childBlockInfos = targetBlock.childBlockElements
+    const childBlockInfos = targetBlock.childBlocks
       .map(el =>
         filteredBlockInfos.find(
           blockInfo => blockInfo.element.model.id === el.model.id
@@ -433,7 +433,7 @@ function getSelectingBlockPaths(blockInfos: BlockInfo[], userRect: Rect) {
 function isDragArea(e: PointerEventState) {
   const el = e.raw.target;
   assertInstanceOf(el, Element);
-  const block = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
+  const block = el.closest<BlockComponent>(`[${BLOCK_ID_ATTR}]`);
   return block && matchFlavours(block.model, ['affine:page', 'affine:note']);
 }
 

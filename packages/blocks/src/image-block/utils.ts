@@ -215,8 +215,8 @@ function convertToPng(blob: Blob): Promise<Blob | null> {
   });
 }
 
-export async function copyImageBlob(blockElement: ImageBlockComponent) {
-  const { host, model } = blockElement;
+export async function copyImageBlob(block: ImageBlockComponent) {
+  const { host, model } = block;
   let blob = await getImageBlob(model);
   if (!blob) {
     console.error('Failed to get image blob');

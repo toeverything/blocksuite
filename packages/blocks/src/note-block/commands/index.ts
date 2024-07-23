@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 export * from './block-type.js';
 export * from './select-block.js';
@@ -8,9 +8,9 @@ export * from './text-style.js';
 declare global {
   namespace BlockSuite {
     interface CommandContext {
-      focusBlock?: BlockElement | null;
+      focusBlock?: BlockComponent | null;
 
-      anchorBlock?: BlockElement | null;
+      anchorBlock?: BlockComponent | null;
     }
   }
 }

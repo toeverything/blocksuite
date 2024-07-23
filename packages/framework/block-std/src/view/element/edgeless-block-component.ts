@@ -6,16 +6,16 @@ import { nothing } from 'lit';
 
 import type { BlockService } from '../../service/index.js';
 
-import { BlockElement } from './block-element.js';
+import { BlockComponent } from './block-component.js';
 
 export const edgelessElementSymbol = Symbol('edgelessElement');
 
-export abstract class EdgelessBlockElement<
+export abstract class EdgelessBlockComponent<
   EdgelessRootService extends BlockService = BlockService,
   Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
-> extends BlockElement<Model, Service, WidgetName> {
+> extends BlockComponent<Model, Service, WidgetName> {
   [edgelessElementSymbol] = true;
 
   override connectedCallback(): void {
@@ -76,12 +76,12 @@ export abstract class EdgelessBlockElement<
 }
 
 // @ts-ignore
-export function toEdgelessBlockElement<
+export function toEdgelessBlockComponent<
   EdgelessRootService extends BlockService,
   Model extends BlockModel,
   Service extends BlockService,
   WidgetName extends string,
-  B extends typeof BlockElement<Model, Service, WidgetName>,
+  B extends typeof BlockComponent<Model, Service, WidgetName>,
 >(CustomBlock: B) {
   // @ts-ignore
   return class extends CustomBlock {
@@ -164,6 +164,6 @@ export function toEdgelessBlockElement<
     new (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...args: any[]
-    ): EdgelessBlockElement<EdgelessRootService>;
+    ): EdgelessBlockComponent<EdgelessRootService>;
   };
 }

@@ -19,9 +19,9 @@ import '../../../_common/components/button.js';
 import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import {
-  type EmbedToolbarBlockElement,
+  type EmbedToolbarBlockComponent,
   type EmbedToolbarModel,
-  isEmbedCardBlockElement,
+  isEmbedCardBlockComponent,
 } from '../../../_common/components/embed-card/type.js';
 import { isPeekable, peek } from '../../../_common/components/index.js';
 import { toast } from '../../../_common/components/toast.js';
@@ -76,7 +76,7 @@ export class EmbedCardToolbar extends WidgetElement<
 
   private _embedOptions: EmbedOptions | null = null;
 
-  private _focusBlock: EmbedToolbarBlockElement | null = null;
+  private _focusBlock: EmbedToolbarBlockComponent | null = null;
 
   private _resetAbortController = () => {
     this._abortController.abort();
@@ -661,12 +661,12 @@ export class EmbedCardToolbar extends WidgetElement<
         }
 
         const block = this.std.view.getBlock(blockSelections[0].blockId);
-        if (!block || !isEmbedCardBlockElement(block)) {
+        if (!block || !isEmbedCardBlockComponent(block)) {
           this._hide();
           return;
         }
 
-        this._focusBlock = block as EmbedToolbarBlockElement;
+        this._focusBlock = block as EmbedToolbarBlockComponent;
         this._show();
       })
     );

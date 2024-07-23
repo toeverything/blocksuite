@@ -27,7 +27,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
     this._hoverController = new HoverController(
       this,
       ({ abortController }) => {
-        const codeBlock = this.blockElement;
+        const codeBlock = this.block;
         const selection = this.host.selection;
 
         const textSelection = selection.find('text');
@@ -49,7 +49,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
 
         return {
           template: html`<affine-code-toolbar
-            .blockElement=${codeBlock}
+            .blockComponent=${codeBlock}
             .abortController=${abortController}
             .items=${this.items}
             .moreItems=${this.moreItems}
@@ -60,7 +60,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
               }
             }}
           ></affine-code-toolbar>`,
-          container: this.blockElement,
+          container: this.block,
           // stacking-context(editor-host)
           portalStyles: {
             zIndex: 'var(--affine-z-index-popover)',
@@ -86,7 +86,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
       { allowMultiple: true }
     );
 
-    const codeBlock = this.blockElement;
+    const codeBlock = this.block;
     this._hoverController.setReference(codeBlock);
     this._hoverController.onAbort = () => {
       // If the more menu is opened, don't close it.

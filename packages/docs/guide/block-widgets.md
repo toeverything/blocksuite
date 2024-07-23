@@ -28,7 +28,7 @@ class MyWidgetView extends WidgetElement<MyBlockView> {
 ## Get Host Block
 
 Widget is always related to a block called host block.
-And we can get the host block by using `blockElement` property.
+And we can get the host block by using `BlockComponent` property.
 
 For example, if you have a `code block` for displaying code examples, and you want to display a `language picker` widget to let users change the language of the code block. The widget could be defined in this manner:
 
@@ -38,9 +38,9 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElements('my-widget')
-class CodeLanguagePicker extends WidgetElement<CodeBlockElement> {
+class CodeLanguagePicker extends WidgetElement<CodeBlockComponent> {
   private _onChange = e => {
-    this.doc.updateBlock(this.blockElement.model, {
+    this.doc.updateBlock(this.blockComponent.model, {
       language: e.target.value,
     });
   };

@@ -1,5 +1,5 @@
 import { PathFinder } from '@blocksuite/block-std';
-import { BlockElement } from '@blocksuite/block-std';
+import { BlockComponent } from '@blocksuite/block-std';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { type Disposable, assertExists, noop } from '@blocksuite/global/utils';
@@ -56,7 +56,7 @@ type RefElementModel = BlockSuite.SurfaceElementModelType | FrameBlockModel;
 
 @customElement('affine-surface-ref')
 @Peekable()
-export class SurfaceRefBlockComponent extends BlockElement<
+export class SurfaceRefBlockComponent extends BlockComponent<
   SurfaceRefBlockModel,
   SurfaceRefBlockService
 > {
@@ -481,7 +481,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     return (
       this.isConnected &&
       this.parentElement &&
-      !this.parentBlockElement.closest('affine-surface-ref')
+      !this.parentBlock.closest('affine-surface-ref')
     );
   }
 

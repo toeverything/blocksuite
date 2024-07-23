@@ -690,12 +690,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             if (selected.children.length === 0) {
               this._addEmptyParagraphBlock(selected);
             } else {
-              const blockElement = this._edgeless.host.view.viewFromPath(
+              const block = this._edgeless.host.view.viewFromPath(
                 'block',
                 buildPath(selected)
               );
-              if (blockElement) {
-                const rect = blockElement
+              if (block) {
+                const rect = block
                   .querySelector('.affine-block-children-container')!
                   .getBoundingClientRect();
 
