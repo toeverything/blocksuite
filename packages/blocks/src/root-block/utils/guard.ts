@@ -2,7 +2,7 @@ import type { BlockComponent } from '@blocksuite/block-std';
 
 import type { RootBlockComponent } from '../types.js';
 
-export function isRootElement(
+export function isRootComponent(
   block: BlockComponent
 ): block is RootBlockComponent {
   return (

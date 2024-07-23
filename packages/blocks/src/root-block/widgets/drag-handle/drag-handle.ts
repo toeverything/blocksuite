@@ -5,7 +5,7 @@ import {
   PathFinder,
   type PointerEventState,
   type UIEventHandler,
-  WidgetElement,
+  WidgetComponent,
 } from '@blocksuite/block-std';
 import { Point } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
@@ -83,7 +83,7 @@ import {
 export const AFFINE_DRAG_HANDLE_WIDGET = 'affine-drag-handle-widget';
 
 @customElement(AFFINE_DRAG_HANDLE_WIDGET)
-export class AffineDragHandleWidget extends WidgetElement<
+export class AffineDragHandleWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent | PageRootBlockComponent
 > {
@@ -146,7 +146,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (noteBlock.doc.id !== this.doc.id) return false;
 
     if (isInsidePageEditor(this.host)) return true;
-    const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+    const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
 
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
     return (
@@ -169,7 +169,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+    const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
     const editing = edgelessRoot.service.selection.editing;
     const selectedElements = edgelessRoot.service.selection.selectedElements;
     if (editing || selectedElements.length !== 1) {
@@ -287,14 +287,14 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       dragPreview.style.opacity = altKey ? '1' : '0.5';
     }
-    this.rootElement.append(dragPreview);
+    this.rootComponent.append(dragPreview);
     return dragPreview;
   };
 
   private _createDropIndicator = () => {
     if (!this.dropIndicator) {
       this.dropIndicator = new DropIndicator();
-      this.rootElement.append(this.dropIndicator);
+      this.rootComponent.append(this.dropIndicator);
     }
   };
 
@@ -457,7 +457,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const point = new Point(state.raw.x, state.raw.y);
     const closestBlock = getClosestBlockByPoint(
       this.host,
-      this.rootElement,
+      this.rootComponent,
       point
     );
     if (!closestBlock) return null;
@@ -697,7 +697,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       });
       if (isSurfaceComponent) return true;
 
-      const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+      const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
 
       const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
 
@@ -975,7 +975,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const point = new Point(state.raw.x, state.raw.y);
     const closestBlock = getClosestBlockByPoint(
       this.host,
-      this.rootElement,
+      this.rootComponent,
       point
     );
     if (!closestBlock) {
@@ -1181,7 +1181,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   private _showDragHandleOnTopLevelBlocks = async () => {
     if (isInsidePageEditor(this.host)) return;
-    const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+    const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
     await edgelessRoot.surface.updateComplete;
 
     if (!this._anchorBlockPath) return;
@@ -1282,7 +1282,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const closestNoteBlock = getClosestNoteBlock(
       this.host,
-      this.rootElement,
+      this.rootComponent,
       point
     ) as NoteBlockComponent | null;
 
@@ -1354,7 +1354,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const point = new Point(state.raw.x, state.raw.y);
     const closestNoteBlock = getClosestNoteBlock(
       this.host,
-      this.rootElement,
+      this.rootComponent,
       point
     );
     if (
@@ -1368,7 +1368,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     this.lastDragPointerState = state;
-    if (this.rootElement instanceof PageRootBlockComponent) {
+    if (this.rootComponent instanceof PageRootBlockComponent) {
       if (!shouldAutoScroll) return;
 
       const result = autoScroll(this.scrollContainer, state.raw.y);
@@ -1467,7 +1467,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     edgelessElement: EdgelessBlockModel
   ): Rect | null {
     if (isInsidePageEditor(this.host)) return null;
-    const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+    const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
 
     const rect = getSelectedRect([edgelessElement]);
     let [left, top] = edgelessRoot.service.viewport.toViewCoord(
@@ -1499,7 +1499,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private get scrollContainer() {
-    return getScrollContainer(this.rootElement!);
+    return getScrollContainer(this.rootComponent!);
   }
 
   override connectedCallback() {
@@ -1564,7 +1564,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (isInsidePageEditor(this.host)) {
       this._disposables.add(this.doc.slots.blockUpdated.on(() => this._hide()));
 
-      const pageRoot = this.rootElement as PageRootBlockComponent;
+      const pageRoot = this.rootComponent as PageRootBlockComponent;
       this._disposables.add(
         pageRoot.slots.viewportUpdated.on(() => {
           this._hide();
@@ -1580,7 +1580,7 @@ export class AffineDragHandleWidget extends WidgetElement<
         this._updateDropIndicatorOnScroll
       );
     } else if (isInsideEdgelessEditor(this.host)) {
-      const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+      const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
 
       this._disposables.add(
         edgelessRoot.slots.edgelessToolUpdated.on(
@@ -1657,7 +1657,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   get anchorEdgelessElement(): EdgelessBlockModel | null {
     if (isInsidePageEditor(this.host) || !this._anchorBlockId) return null;
-    const { service } = this.rootElement as EdgelessRootBlockComponent;
+    const { service } = this.rootComponent as EdgelessRootBlockComponent;
     const edgelessElement = service.getElementById(this._anchorBlockId);
     return isTopLevelBlock(edgelessElement) ? edgelessElement : null;
   }
@@ -1666,7 +1666,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     return AffineDragHandleWidget.staticOptionRunner;
   }
 
-  get rootElement() {
+  get rootComponent() {
     return this.block as PageRootBlockComponent | EdgelessRootBlockComponent;
   }
 

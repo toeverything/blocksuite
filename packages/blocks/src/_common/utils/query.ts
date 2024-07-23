@@ -265,13 +265,16 @@ export function getViewportElement(editorHost: EditorHost) {
     console.error('Failed to get root doc');
     return null;
   }
-  const rootElement = editorHost.view.viewFromPath('block', [doc.root.id]);
+  const rootComponent = editorHost.view.viewFromPath('block', [doc.root.id]);
 
-  if (!rootElement || rootElement.closest('affine-page-root') !== rootElement) {
+  if (
+    !rootComponent ||
+    rootComponent.closest('affine-page-root') !== rootComponent
+  ) {
     console.error('Failed to get viewport element!');
     return null;
   }
-  return (rootElement as PageRootBlockComponent).viewportElement;
+  return (rootComponent as PageRootBlockComponent).viewportElement;
 }
 
 /**
@@ -308,12 +311,12 @@ export async function asyncGetBlockComponentByModel(
   model: BlockModel
 ): Promise<BlockComponent | null> {
   assertExists(model.doc.root);
-  const rootElement = getRootByEditorHost(editorHost);
-  if (!rootElement) return null;
-  await rootElement.updateComplete;
+  const rootComponent = getRootByEditorHost(editorHost);
+  if (!rootComponent) return null;
+  await rootComponent.updateComplete;
 
   if (model.id === model.doc.root.id) {
-    return rootElement;
+    return rootComponent;
   }
 
   return editorHost.view.getBlock(model.id);

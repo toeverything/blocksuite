@@ -120,9 +120,9 @@ export class PieNode extends WithDisposable(LitElement) {
     if (isRootNode(schema)) return;
 
     const ctx = {
-      rootElement: this.menu.rootElement,
+      rootComponent: this.menu.rootComponent,
       menu: this.menu,
-      widgetElement: this.menu.widgetElement,
+      widgetComponent: this.menu.widgetComponent,
       node: this,
     };
 
@@ -139,8 +139,13 @@ export class PieNode extends WithDisposable(LitElement) {
     const icon = this.model.icon;
     if (typeof icon === 'function') {
       const { menu } = this;
-      const { rootElement, widgetElement } = menu;
-      return icon({ rootElement, menu, widgetElement, node: this });
+      const { rootComponent, widgetComponent } = menu;
+      return icon({
+        rootComponent,
+        menu,
+        widgetComponent,
+        node: this,
+      });
     }
     return icon;
   }

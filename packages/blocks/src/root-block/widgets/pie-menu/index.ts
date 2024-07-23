@@ -1,7 +1,7 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -25,7 +25,7 @@ noop(PieNodeChild);
 export const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
 
 @customElement(AFFINE_PIE_MENU_WIDGET)
-export class AffinePieMenuWidget extends WidgetElement {
+export class AffinePieMenuWidget extends WidgetComponent {
   private _handleCursorPos = (ctx: UIEventStateContext) => {
     const ev = ctx.get('pointerState');
     const { x, y } = ev.point;
@@ -37,7 +37,7 @@ export class AffinePieMenuWidget extends WidgetElement {
     const ev = ctx.get('keyboardState');
     const { trigger } = this.currentMenu.schema;
 
-    if (trigger({ keyEvent: ev.raw, rootElement: this.rootElement })) {
+    if (trigger({ keyEvent: ev.raw, rootComponent: this.rootComponent })) {
       clearTimeout(this.selectOnTrigRelease.timeout);
       if (this.selectOnTrigRelease.allow) {
         this.currentMenu.selectHovered();
@@ -61,7 +61,7 @@ export class AffinePieMenuWidget extends WidgetElement {
     const menu = this._createMenu(schema, {
       x,
       y,
-      widgetElement: this,
+      widgetComponent: this,
     });
     this.currentMenu = menu;
 
@@ -77,19 +77,19 @@ export class AffinePieMenuWidget extends WidgetElement {
     {
       x,
       y,
-      widgetElement,
+      widgetComponent,
     }: {
       x: number;
       y: number;
-      widgetElement: AffinePieMenuWidget;
+      widgetComponent: AffinePieMenuWidget;
     }
   ) {
     const menu = new PieMenu();
     menu.id = schema.id;
     menu.schema = schema;
     menu.position = [x, y];
-    menu.rootElement = widgetElement.rootElement;
-    menu.widgetElement = widgetElement;
+    menu.rootComponent = widgetComponent.rootComponent;
+    menu.widgetComponent = widgetComponent;
     menu.abortController.signal.addEventListener(
       'abort',
       this._onMenuClose.bind(this)
@@ -99,7 +99,7 @@ export class AffinePieMenuWidget extends WidgetElement {
   }
 
   private _initPie() {
-    PieManager.setup({ rootElement: this.rootElement });
+    PieManager.setup({ rootComponent: this.rootComponent });
 
     this._disposables.add(
       PieManager.slots.open.on(this._attachMenu.bind(this))
@@ -147,10 +147,10 @@ export class AffinePieMenuWidget extends WidgetElement {
     return !!this.currentMenu;
   }
 
-  get rootElement(): EdgelessRootBlockComponent {
-    const rootElement = this.block;
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      return rootElement;
+  get rootComponent(): EdgelessRootBlockComponent {
+    const rootComponent = this.block;
+    if (rootComponent instanceof EdgelessRootBlockComponent) {
+      return rootComponent;
     }
     throw new Error('AffinePieMenuWidget is only supported in edgeless');
   }

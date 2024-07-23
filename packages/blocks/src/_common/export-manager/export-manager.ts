@@ -131,13 +131,15 @@ export class ExportManager {
           reject(e);
         }
         const rootModel = this.doc.root;
-        const rootElement = this.doc.root
+        const rootComponent = this.doc.root
           ? getBlockComponentByModel(this.editorHost, rootModel)
           : null;
-        const imageCard = rootElement?.querySelector('affine-image-block-card');
+        const imageCard = rootComponent?.querySelector(
+          'affine-image-block-card'
+        );
         const isReady =
           !imageCard || imageCard.getAttribute('imageState') === '0';
-        if (rootElement && isReady) {
+        if (rootComponent && isReady) {
           clearInterval(checkReactRender);
           resolve(true);
         }
@@ -179,15 +181,15 @@ export class ExportManager {
     const pathname = location.pathname;
     const editorMode = isInsidePageEditor(this.editorHost);
 
-    const rootElement = getRootByEditorHost(this.editorHost);
-    assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement;
+    const rootComponent = getRootByEditorHost(this.editorHost);
+    assertExists(rootComponent);
+    const viewportElement = rootComponent.viewportElement;
     assertExists(viewportElement);
     const pageContainer = viewportElement.querySelector(
       '.affine-page-root-block-container'
     );
     const rect = pageContainer?.getBoundingClientRect();
-    const { viewport } = rootElement;
+    const { viewport } = rootComponent;
     assertExists(viewport);
     const pageWidth = rect?.width;
     const pageLeft = rect?.left ?? 0;
@@ -410,9 +412,9 @@ export class ExportManager {
 
     const pathname = location.pathname;
     const editorMode = isInsidePageEditor(this.editorHost);
-    const rootElement = getRootByEditorHost(this.editorHost);
-    assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement;
+    const rootComponent = getRootByEditorHost(this.editorHost);
+    assertExists(rootComponent);
+    const viewportElement = rootComponent.viewportElement;
     assertExists(viewportElement);
     const containerComputedStyle = window.getComputedStyle(viewportElement);
 
@@ -420,7 +422,7 @@ export class ExportManager {
       this._html2canvas(element, {
         backgroundColor: containerComputedStyle.backgroundColor,
       });
-    const container = rootElement.querySelector(
+    const container = rootComponent.querySelector(
       '.affine-block-children-container'
     );
 

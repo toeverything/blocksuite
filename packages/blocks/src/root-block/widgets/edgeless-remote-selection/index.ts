@@ -1,6 +1,6 @@
 import type { UserInfo } from '@blocksuite/store';
 
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -23,7 +23,7 @@ export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
   'affine-edgeless-remote-selection-widget';
 
 @customElement(AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET)
-export class EdgelessRemoteSelectionWidget extends WidgetElement<
+export class EdgelessRemoteSelectionWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {

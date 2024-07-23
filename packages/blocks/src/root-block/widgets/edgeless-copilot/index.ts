@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import {
   autoUpdate,
@@ -29,7 +29,7 @@ import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 export const AFFINE_EDGELESS_COPILOT_WIDGET = 'affine-edgeless-copilot-widget';
 
 @customElement(AFFINE_EDGELESS_COPILOT_WIDGET)
-export class EdgelessCopilotWidget extends WidgetElement<
+export class EdgelessCopilotWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {

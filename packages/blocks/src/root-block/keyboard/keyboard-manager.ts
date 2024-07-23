@@ -43,8 +43,8 @@ export class PageKeyboardManager {
     });
   };
 
-  constructor(public rootElement: BlockComponent) {
-    this.rootElement.bindHotKey(
+  constructor(public rootComponent: BlockComponent) {
+    this.rootComponent.bindHotKey(
       {
         'Mod-z': ctx => {
           ctx.get('defaultState').event.preventDefault();
@@ -85,8 +85,8 @@ export class PageKeyboardManager {
   }
 
   private _createEmbedBlock() {
-    const rootElement = this.rootElement;
-    const [_, ctx] = this.rootElement.std.command
+    const rootComponent = this.rootComponent;
+    const [_, ctx] = this.rootComponent.std.command
       .chain()
       .getSelectedModels({
         types: ['block'],
@@ -103,20 +103,20 @@ export class PageKeyboardManager {
       return;
     }
 
-    const doc = rootElement.host.doc;
+    const doc = rootComponent.host.doc;
     const autofill = getTitleFromSelectedModels(selectedModels);
-    void promptDocTitle(rootElement.host, autofill).then(title => {
+    void promptDocTitle(rootComponent.host, autofill).then(title => {
       if (title === null) return;
       const linkedDoc = convertSelectedBlocksToLinkedDoc(
         doc,
         selectedModels,
         title
       );
-      const linkedDocService = rootElement.host.spec.getService(
+      const linkedDocService = rootComponent.host.spec.getService(
         'affine:embed-linked-doc'
       );
       linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
-      notifyDocCreated(rootElement.host, doc);
+      notifyDocCreated(rootComponent.host, doc);
     });
   }
 
@@ -134,7 +134,7 @@ export class PageKeyboardManager {
   }
 
   private get _doc() {
-    return this.rootElement.doc;
+    return this.rootComponent.doc;
   }
 
   private _replaceBlocksBySelection(
@@ -144,7 +144,7 @@ export class PageKeyboardManager {
   ) {
     const current = selections[0];
     const first = this._doc.getBlockById(current.blockId);
-    const firstElement = this.rootElement.host.view.getBlock(current.blockId);
+    const firstElement = this.rootComponent.host.view.getBlock(current.blockId);
 
     assertExists(first, `Cannot find block ${current.blockId}`);
     assertExists(firstElement, `Cannot find block view ${current.blockId}`);
@@ -169,6 +169,6 @@ export class PageKeyboardManager {
   }
 
   private get _selection() {
-    return this.rootElement.host.selection;
+    return this.rootComponent.host.selection;
   }
 }

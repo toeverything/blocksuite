@@ -13,7 +13,7 @@ import { html } from 'lit/static-html.js';
 import type { EventName, UIEventHandler } from '../../event/index.js';
 import type { BlockStdScope } from '../../scope/index.js';
 import type { BlockService } from '../../service/index.js';
-import type { WidgetElement } from './widget-element.js';
+import type { WidgetComponent } from './widget-component.js';
 
 import { WithDisposable } from '../utils/with-disposable.js';
 import { docContext, stdContext } from './lit-host.js';
@@ -267,13 +267,13 @@ export class BlockComponent<
     return el?.closest('[data-block-id]') as BlockComponent;
   }
 
-  get rootElement(): BlockComponent | null {
+  get rootComponent(): BlockComponent | null {
     const rootId = this.doc.root?.id;
     if (!rootId) {
       return null;
     }
-    const rootElement = this.host.view.getBlock(rootId);
-    return rootElement ?? null;
+    const rootComponent = this.host.view.getBlock(rootId);
+    return rootComponent ?? null;
   }
 
   get selected() {
@@ -298,10 +298,10 @@ export class BlockComponent<
   }
 
   get topContenteditableElement(): BlockComponent | null {
-    return this.rootElement;
+    return this.rootComponent;
   }
 
-  get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
+  get widgetComponents(): Partial<Record<WidgetName, WidgetComponent>> {
     return Object.keys(this.widgets).reduce(
       (mapping, key) => ({
         ...mapping,

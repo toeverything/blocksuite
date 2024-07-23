@@ -6,15 +6,15 @@ The widget is designed to provide this kind of functionalities. Similar to block
 
 ## Widget Component
 
-The `WidgetElement` class can be used for building a widget view based on web component:
+The `WidgetComponent` class can be used for building a widget view based on web component:
 
 ```ts
-import { WidgetElement } from '@blocksuite/lit';
+import { WidgetComponent } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElements('my-widget')
-class MyWidgetView extends WidgetElement<MyBlockView> {
+class MyWidgetView extends WidgetComponent<MyBlockView> {
   override render() {
     return html`
       <div>
@@ -33,12 +33,12 @@ And we can get the host block by using `BlockComponent` property.
 For example, if you have a `code block` for displaying code examples, and you want to display a `language picker` widget to let users change the language of the code block. The widget could be defined in this manner:
 
 ```ts
-import { WidgetElement } from '@blocksuite/lit';
+import { WidgetComponent } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElements('my-widget')
-class CodeLanguagePicker extends WidgetElement<CodeBlockComponent> {
+class CodeLanguagePicker extends WidgetComponent<CodeBlockComponent> {
   private _onChange = e => {
     this.doc.updateBlock(this.blockComponent.model, {
       language: e.target.value,

@@ -16,7 +16,7 @@ export interface PieMenuSchema {
 
   trigger: (props: {
     keyEvent: KeyboardEvent;
-    rootElement: EdgelessRootBlockComponent;
+    rootComponent: EdgelessRootBlockComponent;
   }) => boolean;
 }
 
@@ -45,9 +45,9 @@ export interface PieRootNodeModel extends PieBaseNodeModel {
 }
 
 export type PieMenuContext = {
-  rootElement: EdgelessRootBlockComponent;
+  rootComponent: EdgelessRootBlockComponent;
   menu: PieMenu;
-  widgetElement: AffinePieMenuWidget;
+  widgetComponent: AffinePieMenuWidget;
   node: PieNode;
 };
 export type ActionFunction = (ctx: PieMenuContext) => void;

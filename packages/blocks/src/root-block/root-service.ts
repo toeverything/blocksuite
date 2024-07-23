@@ -433,11 +433,11 @@ export class RootService extends BlockService<RootBlockModel> {
   }
 
   get viewportElement() {
-    const rootElement = this.std.view.viewFromPath('block', [
+    const rootComponent = this.std.view.viewFromPath('block', [
       this.std.doc.root?.id ?? '',
     ]) as RootBlockComponent | null;
-    assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement as HTMLElement | null;
+    assertExists(rootComponent);
+    const viewportElement = rootComponent.viewportElement as HTMLElement | null;
     assertExists(viewportElement);
     return viewportElement;
   }

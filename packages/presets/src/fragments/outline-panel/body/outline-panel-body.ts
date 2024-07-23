@@ -394,11 +394,11 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   private _scrollToBlock(e: ClickBlockEvent) {
     if (this._isEdgelessMode() || !this.editorHost) return;
 
-    const rootElement = this.editorHost.querySelector('affine-page-root');
-    if (!rootElement) return;
+    const rootComponent = this.editorHost.querySelector('affine-page-root');
+    if (!rootComponent) return;
 
     const { blockPath } = e.detail;
-    const path = [rootElement.model.id, ...blockPath];
+    const path = [rootComponent.model.id, ...blockPath];
     const block = this.editorHost.view.viewFromPath('block', path);
     if (!block) return;
 
@@ -411,17 +411,17 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     requestAnimationFrame(() => {
       const blockRect = block.getBoundingClientRect();
       const { top, left, width, height } = blockRect;
-      assertExists(rootElement.viewport, 'viewport should exist');
+      assertExists(rootComponent.viewport, 'viewport should exist');
       const {
         top: offsetY,
         left: offsetX,
         scrollTop,
         scrollLeft,
-      } = rootElement.viewport;
+      } = rootComponent.viewport;
 
       if (!this._highlightMask) {
         this._highlightMask = document.createElement('div');
-        rootElement.append(this._highlightMask);
+        rootComponent.append(this._highlightMask);
       }
 
       Object.assign(this._highlightMask.style, {

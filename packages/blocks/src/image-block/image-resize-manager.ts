@@ -73,9 +73,9 @@ export class ImageResizeManager {
       eventTarget
     ) as BlockComponent;
 
-    const rootElement = getClosestRootBlockComponent(this._activeComponent);
-    if (rootElement && isEdgelessPage(rootElement)) {
-      this._zoom = rootElement.service.viewport.zoom;
+    const rootComponent = getClosestRootBlockComponent(this._activeComponent);
+    if (rootComponent && isEdgelessPage(rootComponent)) {
+      this._zoom = rootComponent.service.viewport.zoom;
     } else {
       this._zoom = 1;
     }

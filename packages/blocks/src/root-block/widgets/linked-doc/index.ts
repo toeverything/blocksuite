@@ -1,6 +1,6 @@
 import type { EditorHost, UIEventStateContext } from '@blocksuite/block-std';
 
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import {
   DisposableGroup,
   assertExists,
@@ -86,7 +86,7 @@ export function showLinkedDocPopover({
 export const AFFINE_LINKED_DOC_WIDGET = 'affine-linked-doc-widget';
 
 @customElement(AFFINE_LINKED_DOC_WIDGET)
-export class AffineLinkedDocWidget extends WidgetElement {
+export class AffineLinkedDocWidget extends WidgetComponent {
   private _onKeyDown = (ctx: UIEventStateContext) => {
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;

@@ -150,7 +150,7 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
           place
         );
       } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
-        const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+        const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
         point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
         await edgelessRoot.addAttachments(attachmentFiles, point);
 
@@ -186,14 +186,14 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
     );
   }
 
-  get rootElement(): RootBlockComponent {
+  get rootComponent(): RootBlockComponent {
     const rootModel = this.doc.root;
     assertExists(rootModel);
 
-    const rootElement = this.std.view.viewFromPath('block', [
+    const rootComponent = this.std.view.viewFromPath('block', [
       rootModel.id,
     ]) as RootBlockComponent | null;
-    assertExists(rootElement);
-    return rootElement;
+    assertExists(rootComponent);
+    return rootComponent;
   }
 }

@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { sleep } from '@blocksuite/global/utils';
 import { offset } from '@floating-ui/dom';
 import { computed } from '@lit-labs/preact-signals';
@@ -15,7 +15,7 @@ export const AFFINE_CODE_LANGUAGE_LIST_WIDGET =
   'affine-code-language-list-widget';
 
 @customElement(AFFINE_CODE_LANGUAGE_LIST_WIDGET)
-export class AffineCodeLanguageListWidget extends WidgetElement<
+export class AffineCodeLanguageListWidget extends WidgetComponent<
   CodeBlockModel,
   CodeBlockComponent
 > {

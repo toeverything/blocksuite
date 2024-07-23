@@ -830,10 +830,10 @@ export class EdgelessClipboardController extends PageClipboard {
     const pathname = location.pathname;
     const editorMode = isInsidePageEditor(host);
 
-    const rootElement = getRootByEditorHost(host);
-    assertExists(rootElement);
+    const rootComponent = getRootByEditorHost(host);
+    assertExists(rootComponent);
 
-    const container = rootElement.querySelector(
+    const container = rootComponent.querySelector(
       '.affine-block-children-container'
     );
     if (!container) return;

@@ -186,12 +186,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     const linkedDocId = this.model.pageId;
     if (linkedDocId === this.doc.id) return;
 
-    const rootElement = this.std.view.viewFromPath('block', [
+    const rootComponent = this.std.view.viewFromPath('block', [
       this.doc.root?.id ?? '',
     ]) as RootBlockComponent | null;
-    assertExists(rootElement);
+    assertExists(rootComponent);
 
-    rootElement.slots.docLinkClicked.emit({ docId: linkedDocId });
+    rootComponent.slots.docLinkClicked.emit({ docId: linkedDocId });
   };
 
   refreshData = () => {

@@ -310,12 +310,12 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     const syncedDocId = this.model.pageId;
     if (syncedDocId === this.doc.id) return;
 
-    const rootElement = this.std.view.viewFromPath('block', [
+    const rootComponent = this.std.view.viewFromPath('block', [
       this.doc.root?.id ?? '',
     ]) as RootBlockComponent | null;
-    assertExists(rootElement);
+    assertExists(rootComponent);
 
-    rootElement.slots.docLinkClicked.emit({ docId: syncedDocId });
+    rootComponent.slots.docLinkClicked.emit({ docId: syncedDocId });
   };
 
   refreshData = () => {
