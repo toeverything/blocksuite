@@ -10,7 +10,7 @@ import type { DatabaseBlockModel } from './database-model.js';
 import type { DatabaseBlockService } from './database-service.js';
 
 import {
-  BlockComponent,
+  CaptionedBlockComponent,
   DragIndicator,
   popMenu,
   toast,
@@ -51,7 +51,7 @@ import { DatabaseBlockSchema } from './database-model.js';
 import { DatabaseBlockViewSource } from './view-source.js';
 
 @customElement('affine-database')
-export class DatabaseBlockComponent extends BlockComponent<
+export class DatabaseBlockComponent extends CaptionedBlockComponent<
   DatabaseBlockModel,
   DatabaseBlockService
 > {

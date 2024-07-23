@@ -11,7 +11,7 @@ import type { EdgelessRootService } from '../root-block/index.js';
 import type { AttachmentBlockService } from './attachment-service.js';
 
 import {
-  BlockComponent,
+  CaptionedBlockComponent,
   HoverController,
   toast,
 } from '../_common/components/index.js';
@@ -34,7 +34,7 @@ import { styles } from './styles.js';
 import { checkAttachmentBlob, downloadAttachmentBlob } from './utils.js';
 
 @customElement('affine-attachment')
-export class AttachmentBlockComponent extends BlockComponent<
+export class AttachmentBlockComponent extends CaptionedBlockComponent<
   AttachmentBlockModel,
   AttachmentBlockService
 > {

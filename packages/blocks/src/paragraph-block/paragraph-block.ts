@@ -11,7 +11,7 @@ import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 import type { ParagraphBlockService } from './paragraph-service.js';
 
-import { BlockComponent } from '../_common/components/block-component.js';
+import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
@@ -22,7 +22,7 @@ import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root
 import { paragraphBlockStyles } from './styles.js';
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends BlockComponent<
+export class ParagraphBlockComponent extends CaptionedBlockComponent<
   ParagraphBlockModel,
   ParagraphBlockService
 > {

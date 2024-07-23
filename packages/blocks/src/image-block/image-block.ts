@@ -9,7 +9,7 @@ import type { ImageBlockPageComponent } from './components/page-image-block.js';
 import type { ImageBlockModel } from './image-model.js';
 import type { ImageBlockService } from './image-service.js';
 
-import { BlockComponent } from '../_common/components/block-component.js';
+import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { Peekable } from '../_common/components/index.js';
 import './components/edgeless-image-block.js';
 import './components/image-card.js';
@@ -24,7 +24,7 @@ import {
 
 @customElement('affine-image')
 @Peekable()
-export class ImageBlockComponent extends BlockComponent<
+export class ImageBlockComponent extends CaptionedBlockComponent<
   ImageBlockModel,
   ImageBlockService
 > {

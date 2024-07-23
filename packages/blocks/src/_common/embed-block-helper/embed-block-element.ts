@@ -21,7 +21,7 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../../root-block/widgets/drag-handle/utils.js';
-import { BlockComponent } from '../components/block-component.js';
+import { CaptionedBlockComponent } from '../components/captioned-block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
 import {
   type EmbedCardStyle,
@@ -35,7 +35,7 @@ export class EmbedBlockElement<
     BlockModel<EdgelessSelectableProps> = BlockModel<EdgelessSelectableProps>,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
-> extends BlockComponent<Model, Service, WidgetName> {
+> extends CaptionedBlockComponent<Model, Service, WidgetName> {
   protected _cardStyle: EmbedCardStyle = 'horizontal';
 
   private _dragHandleOption: DragHandleOption = {

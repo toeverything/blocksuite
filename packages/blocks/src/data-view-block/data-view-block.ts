@@ -8,7 +8,10 @@ import type { DataSource } from '../database-block/data-view/common/data-source/
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
-import { BlockComponent, popMenu } from '../_common/components/index.js';
+import {
+  CaptionedBlockComponent,
+  popMenu,
+} from '../_common/components/index.js';
 import {
   CopyIcon,
   DeleteIcon,
@@ -36,7 +39,7 @@ import { BlockQueryDataSource } from './data-source.js';
 import { BlockQueryViewSource } from './view-source.js';
 
 @customElement('affine-data-view')
-export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
+export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBlockModel> {
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.host.event.bindHotkey(hotkeys, {

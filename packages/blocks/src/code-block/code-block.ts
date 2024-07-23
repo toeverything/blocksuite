@@ -18,6 +18,7 @@ import { z } from 'zod';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 
+import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import '../_common/components/rich-text/rich-text.js';
 import { toast } from '../_common/components/toast.js';
@@ -25,7 +26,6 @@ import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import { BlockComponent } from './../_common/components/block-component.js';
 import { CodeClipboardController } from './clipboard/index.js';
 import { codeBlockStyles } from './styles.js';
 import { getStandardLanguage, isPlaintext } from './utils/code-languages.js';
@@ -40,7 +40,7 @@ import {
 import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
+export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> {
   private _highlighter: Highlighter | null = null;
 
   private _inlineRangeProvider: InlineRangeProvider | null = null;
