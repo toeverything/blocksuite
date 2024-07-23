@@ -8,7 +8,10 @@ import type { EDGELESS_ELEMENT_TOOLBAR_WIDGET } from './widgets/element-toolbar/
 import type { AFFINE_EMBED_CARD_TOOLBAR_WIDGET } from './widgets/embed-card-toolbar/embed-card-toolbar.js';
 import type { AFFINE_FORMAT_BAR_WIDGET } from './widgets/format-bar/format-bar.js';
 import type { AFFINE_INNER_MODAL_WIDGET } from './widgets/inner-modal/inner-modal.js';
-import type { AFFINE_LINKED_DOC_WIDGET } from './widgets/linked-doc/index.js';
+import type {
+  AFFINE_LINKED_DOC_WIDGET,
+  LinkedWidgetConfig,
+} from './widgets/linked-doc/index.js';
 import type { AFFINE_MODAL_WIDGET } from './widgets/modal/modal.js';
 import type { AFFINE_PAGE_DRAGGING_AREA_WIDGET } from './widgets/page-dragging-area/page-dragging-area.js';
 import type { AFFINE_PIE_MENU_ID_EDGELESS_TOOLS } from './widgets/pie-menu/config.js';
@@ -50,3 +53,7 @@ export type RootBlockComponent =
   | EdgelessRootBlockComponent;
 
 export type PieMenuId = typeof AFFINE_PIE_MENU_ID_EDGELESS_TOOLS;
+
+export interface RootBlockConfig {
+  linkedWidget?: Partial<LinkedWidgetConfig>;
+}

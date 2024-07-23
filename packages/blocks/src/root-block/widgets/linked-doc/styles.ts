@@ -43,5 +43,10 @@ export const styles = css`
     background: var(--affine-border-color);
   }
 
+  .group icon-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
   ${scrollbarStyle('.linked-doc-popover .group')}
 `;
