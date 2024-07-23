@@ -133,7 +133,7 @@ export const popRowMenu = (
 };
 
 export const popColStatOperationMenu = (
-  _rootElement: RootBlockComponent | null,
+  _rootComponent: RootBlockComponent | null,
   elem: HTMLElement,
   _column: DataViewColumnManager,
   calcType: ColumnDataType,

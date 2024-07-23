@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -9,7 +9,7 @@ import type { PageRootBlockComponent, RootBlockModel } from '../../index.js';
 export const AFFINE_VIEWPORT_OVERLAY_WIDGET = 'affine-viewport-overlay-widget';
 
 @customElement(AFFINE_VIEWPORT_OVERLAY_WIDGET)
-export class AffineViewportOverlayWidget extends WidgetElement<
+export class AffineViewportOverlayWidget extends WidgetComponent<
   RootBlockModel,
   PageRootBlockComponent
 > {

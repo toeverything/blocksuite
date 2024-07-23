@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -15,7 +15,7 @@ import { commonConfig, moreMenuConfig } from './config.js';
 export const AFFINE_IMAGE_TOOLBAR_WIDGET = 'affine-image-toolbar-widget';
 
 @customElement(AFFINE_IMAGE_TOOLBAR_WIDGET)
-export class AffineImageToolbarWidget extends WidgetElement<
+export class AffineImageToolbarWidget extends WidgetComponent<
   ImageBlockModel,
   ImageBlockComponent
 > {

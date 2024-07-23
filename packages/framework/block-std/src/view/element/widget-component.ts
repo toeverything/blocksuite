@@ -16,7 +16,7 @@ import {
 } from './block-component.js';
 import { docContext, stdContext } from './lit-host.js';
 
-export class WidgetElement<
+export class WidgetComponent<
   Model extends BlockModel = BlockModel,
   B extends BlockComponent = BlockComponent,
   S extends BlockService = BlockService,

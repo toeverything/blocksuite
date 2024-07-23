@@ -155,20 +155,24 @@ export const isOutOfNoteBlock = (
 
 export const getClosestNoteBlock = (
   editorHost: EditorHost,
-  rootElement: BlockComponent,
+  rootComponent: BlockComponent,
   point: Point
 ) => {
   return isInsidePageEditor(editorHost)
-    ? findClosestBlockComponent(rootElement, point, 'affine-note')
+    ? findClosestBlockComponent(rootComponent, point, 'affine-note')
     : getHoveringNote(point)?.closest('affine-edgeless-note');
 };
 
 export const getClosestBlockByPoint = (
   editorHost: EditorHost,
-  rootElement: BlockComponent,
+  rootComponent: BlockComponent,
   point: Point
 ) => {
-  const closestNoteBlock = getClosestNoteBlock(editorHost, rootElement, point);
+  const closestNoteBlock = getClosestNoteBlock(
+    editorHost,
+    rootComponent,
+    point
+  );
   if (!closestNoteBlock || closestNoteBlock.closest('.affine-surface-ref')) {
     return null;
   }

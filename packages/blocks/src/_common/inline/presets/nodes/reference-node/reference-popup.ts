@@ -139,12 +139,12 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const block = this.block;
     if (refDocId === block.doc.id) return;
 
-    const rootElement = this.std.view.viewFromPath('block', [
+    const rootComponent = this.std.view.viewFromPath('block', [
       block.doc.root?.id ?? '',
     ]) as RootBlockComponent | null;
-    assertExists(rootElement);
+    assertExists(rootComponent);
 
-    rootElement.slots.docLinkClicked.emit({ docId: refDocId });
+    rootComponent.slots.docLinkClicked.emit({ docId: refDocId });
   }
 
   private _openMenuButton() {

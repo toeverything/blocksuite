@@ -134,7 +134,7 @@ export class PieMenu extends WithDisposable(LitElement) {
 
   private _setupEvents() {
     this._disposables.addFromEvent(
-      this.widgetElement,
+      this.widgetComponent,
       'pointermove',
       this._handlePointerMove
     );
@@ -283,11 +283,11 @@ export class PieMenu extends WithDisposable(LitElement) {
   accessor position!: IVec;
 
   @property({ attribute: false })
-  accessor rootElement!: EdgelessRootBlockComponent;
+  accessor rootComponent!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
   accessor schema!: PieMenuSchema;
 
   @property({ attribute: false })
-  accessor widgetElement!: AffinePieMenuWidget;
+  accessor widgetComponent!: AffinePieMenuWidget;
 }

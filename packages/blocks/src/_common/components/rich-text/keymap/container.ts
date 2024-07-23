@@ -236,10 +236,10 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     'Mod-Backspace': ctx => {
       if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
 
-      const rootElement = block.closest<RootBlockComponent>(
+      const rootComponent = block.closest<RootBlockComponent>(
         'affine-page-root,affine-edgeless-root'
       );
-      if (!rootElement) return;
+      if (!rootComponent) return;
 
       {
         const [_, context] = std.command
@@ -277,10 +277,10 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     'Shift-Tab': ctx => {
       if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
 
-      const rootElement = block.closest<RootBlockComponent>(
+      const rootComponent = block.closest<RootBlockComponent>(
         'affine-page-root,affine-edgeless-root'
       );
-      if (!rootElement) return;
+      if (!rootComponent) return;
 
       {
         const [_, context] = std.command

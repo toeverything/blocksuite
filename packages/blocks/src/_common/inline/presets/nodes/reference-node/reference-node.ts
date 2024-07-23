@@ -145,9 +145,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const targetDocId = refMeta.id;
     const rootModel = model.doc.root;
     assertExists(rootModel);
-    const rootElement = getRootByElement(this) as RootBlockComponent;
-    assertExists(rootElement);
-    rootElement.slots.docLinkClicked.emit({ docId: targetDocId });
+    const rootComponent = getRootByElement(this) as RootBlockComponent;
+    assertExists(rootComponent);
+    rootComponent.slots.docLinkClicked.emit({ docId: targetDocId });
   }
 
   override connectedCallback() {

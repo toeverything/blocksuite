@@ -68,9 +68,9 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   };
 
   openMenu = (ev: MouseEvent) => {
-    const rootElement = getRootByElement(this);
+    const rootComponent = getRootByElement(this);
     popColStatOperationMenu(
-      rootElement,
+      rootComponent,
       ev.target as HTMLElement,
       this.column,
       this.getColumnType(),

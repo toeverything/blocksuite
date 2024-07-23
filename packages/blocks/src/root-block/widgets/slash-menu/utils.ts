@@ -164,8 +164,8 @@ export function createConversionItem(
     icon,
     tooltip: slashMenuToolTips[name],
     showWhen: ({ model }) => model.doc.schema.flavourSchemaMap.has(flavour),
-    action: ({ rootElement }) => {
-      rootElement.host.std.command
+    action: ({ rootComponent }) => {
+      rootComponent.host.std.command
         .chain()
         .updateBlockType({
           flavour,

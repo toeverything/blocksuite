@@ -252,7 +252,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   }
 
   get host() {
-    return this.context.rootElement.host;
+    return this.context.rootComponent.host;
   }
 
   @state()
@@ -447,7 +447,7 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
     });
 
     const inlineEditor = getInlineEditorByModel(
-      this.context.rootElement.host,
+      this.context.rootComponent.host,
       this.context.model
     );
 

@@ -182,11 +182,11 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   }
 
   override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
+    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
       const el = this.closest<BlockComponent>(NOTE_SELECTOR);
       return el;
     }
-    return this.rootElement;
+    return this.rootComponent;
   }
 
   @state()

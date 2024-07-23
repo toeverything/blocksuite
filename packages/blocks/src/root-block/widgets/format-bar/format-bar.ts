@@ -4,7 +4,7 @@ import type {
   CursorSelection,
 } from '@blocksuite/block-std';
 
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import {
   type Placement,
@@ -28,7 +28,7 @@ import {
 import '../../../_common/components/toolbar/toolbar.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { isFormatSupported } from '../../../note-block/commands/utils.js';
-import { isRootElement } from '../../../root-block/utils/guard.js';
+import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { ConfigRenderer } from './components/config-renderer.js';
 import {
   type FormatBarConfigItem,
@@ -42,7 +42,7 @@ import { formatBarStyle } from './styles.js';
 export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
-export class AffineFormatBarWidget extends WidgetElement {
+export class AffineFormatBarWidget extends WidgetComponent {
   private _abortController = new AbortController();
 
   private _floatDisposables: DisposableGroup | null = null;
@@ -54,7 +54,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
 
   private _calculatePlacement() {
-    const rootElement = this.block;
+    const rootComponent = this.block;
 
     this.handleEvent('pointerMove', ctx => {
       this._dragging = ctx.get('pointerState').dragging;
@@ -102,11 +102,11 @@ export class AffineFormatBarWidget extends WidgetElement {
     this.disposables.add(
       this._selectionManager.slots.changed.on(() => {
         const update = async () => {
-          const textSelection = rootElement.selection.find('text');
-          const blockSelections = rootElement.selection.filter('block');
+          const textSelection = rootComponent.selection.find('text');
+          const blockSelections = rootComponent.selection.filter('block');
 
           // Should not re-render format bar when only cursor selection changed in edgeless
-          const cursorSelection = rootElement.selection.find('cursor');
+          const cursorSelection = rootComponent.selection.find('cursor');
           if (cursorSelection) {
             if (!this._lastCursor) {
               this._lastCursor = cursorSelection;
@@ -130,7 +130,7 @@ export class AffineFormatBarWidget extends WidgetElement {
               block.model.role === 'content'
             ) {
               this._displayType = 'text';
-              assertExists(rootElement.host.rangeManager);
+              assertExists(rootComponent.host.rangeManager);
 
               this.host.std.command
                 .chain()
@@ -481,9 +481,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     super.connectedCallback();
     this._abortController = new AbortController();
 
-    const rootElement = this.block;
-    assertExists(rootElement);
-    const widgets = rootElement.widgets;
+    const rootComponent = this.block;
+    assertExists(rootComponent);
+    const widgets = rootComponent.widgets;
 
     // check if the host use the format bar widget
     if (!Object.hasOwn(widgets, AFFINE_FORMAT_BAR_WIDGET)) {
@@ -491,9 +491,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
 
     // check if format bar widget support the host
-    if (!isRootElement(rootElement)) {
+    if (!isRootComponent(rootComponent)) {
       console.error(
-        `format bar not support rootElement: ${rootElement.constructor.name} but its widgets has format bar`
+        `format bar not support rootComponent: ${rootComponent.constructor.name} but its widgets has format bar`
       );
       return;
     }

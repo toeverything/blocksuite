@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -105,7 +105,7 @@ export const AFFINE_EDGELESS_AUTO_CONNECT_WIDGET =
   'affine-edgeless-auto-connect-widget';
 
 @customElement(AFFINE_EDGELESS_AUTO_CONNECT_WIDGET)
-export class EdgelessAutoConnectWidget extends WidgetElement<
+export class EdgelessAutoConnectWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent,
   EdgelessRootService

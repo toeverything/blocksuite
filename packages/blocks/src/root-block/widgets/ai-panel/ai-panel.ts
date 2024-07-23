@@ -1,6 +1,6 @@
 import type { BaseSelection } from '@blocksuite/block-std';
 
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type ComputePositionConfig,
@@ -33,7 +33,7 @@ import './components/index.js';
 export const AFFINE_AI_PANEL_WIDGET = 'affine-ai-panel-widget';
 
 @customElement(AFFINE_AI_PANEL_WIDGET)
-export class AffineAIPanelWidget extends WidgetElement {
+export class AffineAIPanelWidget extends WidgetComponent {
   private _abortController = new AbortController();
 
   private _answer: string | null = null;

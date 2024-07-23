@@ -5,7 +5,7 @@ import {
   BlockSelection,
   TextSelection,
 } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing } from 'lit';
@@ -13,7 +13,7 @@ import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { RemoteColorManager } from '../../../root-block/remote-color-manager/remote-color-manager.js';
-import { isRootElement } from '../../../root-block/utils/guard.js';
+import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';
 
 export interface SelectionRect {
@@ -27,7 +27,7 @@ export const AFFINE_DOC_REMOTE_SELECTION_WIDGET =
   'affine-doc-remote-selection-widget';
 
 @customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET)
-export class AffineDocRemoteSelectionWidget extends WidgetElement {
+export class AffineDocRemoteSelectionWidget extends WidgetComponent {
   private _abortController = new AbortController();
 
   private _remoteColorManager: RemoteColorManager | null = null;
@@ -65,7 +65,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   }
 
   private _getCursorRect(selections: BaseSelection[]): SelectionRect | null {
-    if (!isRootElement(this.block)) {
+    if (!isRootComponent(this.block)) {
       console.error('remote selection widget must be used in page component');
       return null;
     }
@@ -141,7 +141,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   }
 
   private _getSelectionRect(selections: BaseSelection[]): SelectionRect[] {
-    if (!isRootElement(this.block)) {
+    if (!isRootComponent(this.block)) {
       console.error('remote selection widget must be used in page component');
       return [];
     }

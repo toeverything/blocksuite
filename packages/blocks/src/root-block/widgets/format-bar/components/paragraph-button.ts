@@ -15,7 +15,7 @@ import '../../../../_common/components/toolbar/icon-button.js';
 import '../../../../_common/components/toolbar/menu-button.js';
 import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
 import { ArrowDownIcon } from '../../../../_common/icons/index.js';
-import { isRootElement } from '../../../../root-block/utils/guard.js';
+import { isRootComponent } from '../../../../root-block/utils/guard.js';
 
 interface ParagraphPanelProps {
   host: EditorHost;
@@ -75,8 +75,8 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
             (selectedBlocks[0].model as ParagraphBlockModel).type === type
         )?.icon ?? textConversionConfigs[0].icon;
 
-  const rootElement = formatBar.block;
-  if (!isRootElement(rootElement)) {
+  const rootComponent = formatBar.block;
+  if (!isRootComponent(rootComponent)) {
     console.error('paragraph button host is not a page component');
     return null;
   }

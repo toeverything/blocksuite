@@ -61,16 +61,16 @@ export class PieManager {
     this.registeredSchemas[id] = schema;
   }
 
-  private static _setupTriggers(rootElement: EdgelessRootBlockComponent) {
+  private static _setupTriggers(rootComponent: EdgelessRootBlockComponent) {
     Object.values(this.registeredSchemas).forEach(schema => {
       const { trigger } = schema;
 
-      rootElement.handleEvent(
+      rootComponent.handleEvent(
         'keyDown',
         ctx => {
           const ev = ctx.get('keyboardState');
 
-          if (trigger({ keyEvent: ev.raw, rootElement }) && !ev.raw.repeat) {
+          if (trigger({ keyEvent: ev.raw, rootComponent }) && !ev.raw.repeat) {
             this.open(schema.id);
           }
         },
@@ -95,8 +95,12 @@ export class PieManager {
     return this.schemas.delete(schema);
   }
 
-  static setup({ rootElement }: { rootElement: EdgelessRootBlockComponent }) {
+  static setup({
+    rootComponent,
+  }: {
+    rootComponent: EdgelessRootBlockComponent;
+  }) {
     this.schemas.forEach(schema => this._register(schema));
-    this._setupTriggers(rootElement);
+    this._setupTriggers(rootComponent);
   }
 }

@@ -113,12 +113,12 @@ export class LinkCell extends BaseCellRenderer<string> {
     if (!rootId) {
       return;
     }
-    const rootElement = std?.view.viewFromPath('block', [
+    const rootComponent = std?.view.viewFromPath('block', [
       rootId,
     ]) as RootBlockComponent | null;
-    assertExists(rootElement);
+    assertExists(rootComponent);
 
-    rootElement.slots.docLinkClicked.emit({ docId: this.docId });
+    rootComponent.slots.docLinkClicked.emit({ docId: this.docId });
   };
 
   override render() {

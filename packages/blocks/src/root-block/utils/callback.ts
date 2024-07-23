@@ -40,9 +40,9 @@ export async function onModelElementUpdated(
   const page = model.doc;
   assertExists(page.root);
 
-  const rootElement = editorHost.view.viewFromPath('block', [page.root.id]);
-  if (!rootElement) return;
-  await rootElement.updateComplete;
+  const rootComponent = editorHost.view.viewFromPath('block', [page.root.id]);
+  if (!rootComponent) return;
+  await rootComponent.updateComplete;
 
   const element = editorHost.view.viewFromPath('block', buildPath(model));
   if (element) callback(element);

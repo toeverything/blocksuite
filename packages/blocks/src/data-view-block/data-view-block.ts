@@ -282,17 +282,17 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   }
 
   get innerModalWidget() {
-    return this.rootElement?.widgetElements[
+    return this.rootComponent?.widgetComponents[
       AFFINE_INNER_MODAL_WIDGET
     ] as AffineInnerModalWidget;
   }
 
   override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
+    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
       return note;
     }
-    return this.rootElement;
+    return this.rootComponent;
   }
 
   get view() {

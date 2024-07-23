@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -14,7 +14,7 @@ import { defaultItems, defaultMoreItems } from './config.js';
 
 export const AFFINE_CODE_TOOLBAR_WIDGET = 'affine-code-toolbar-widget';
 @customElement(AFFINE_CODE_TOOLBAR_WIDGET)
-export class AffineCodeToolbarWidget extends WidgetElement<
+export class AffineCodeToolbarWidget extends WidgetComponent<
   CodeBlockModel,
   CodeBlockComponent
 > {

@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, DocCollection, Slice } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
@@ -68,7 +68,7 @@ import { embedCardToolbarStyle } from './styles.js';
 export const AFFINE_EMBED_CARD_TOOLBAR_WIDGET = 'affine-embed-card-toolbar';
 
 @customElement(AFFINE_EMBED_CARD_TOOLBAR_WIDGET)
-export class EmbedCardToolbar extends WidgetElement<
+export class EmbedCardToolbar extends WidgetComponent<
   RootBlockModel,
   RootBlockComponent
 > {

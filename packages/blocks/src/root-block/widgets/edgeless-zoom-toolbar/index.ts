@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
@@ -12,7 +12,7 @@ export const AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET =
   'affine-edgeless-zoom-toolbar-widget';
 
 @customElement(AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET)
-export class AffineEdgelessZoomToolbarWidget extends WidgetElement<
+export class AffineEdgelessZoomToolbarWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {

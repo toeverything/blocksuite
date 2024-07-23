@@ -16,17 +16,17 @@ import type {
 import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-export function updateShapeOverlay(rootElement: EdgelessRootBlockComponent) {
-  const controller = rootElement.tools.currentController;
+export function updateShapeOverlay(rootComponent: EdgelessRootBlockComponent) {
+  const controller = rootComponent.tools.currentController;
   if (controller instanceof ShapeToolController) {
     controller.createOverlay();
   }
 }
 
 export function getActiveShapeColor(type: 'fill' | 'stroke') {
-  return ({ rootElement }: PieMenuContext) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      const props = rootElement.service.editPropsStore.getLastProps('shape');
+  return ({ rootComponent }: PieMenuContext) => {
+    if (rootComponent instanceof EdgelessRootBlockComponent) {
+      const props = rootComponent.service.editPropsStore.getLastProps('shape');
       if (type == 'fill') return props.fillColor;
       else return props.strokeColor;
     }
@@ -34,17 +34,20 @@ export function getActiveShapeColor(type: 'fill' | 'stroke') {
   };
 }
 
-export function getActiveConnectorStrokeColor({ rootElement }: PieMenuContext) {
-  if (rootElement instanceof EdgelessRootBlockComponent) {
-    const props = rootElement.service.editPropsStore.getLastProps('connector');
+export function getActiveConnectorStrokeColor({
+  rootComponent,
+}: PieMenuContext) {
+  if (rootComponent instanceof EdgelessRootBlockComponent) {
+    const props =
+      rootComponent.service.editPropsStore.getLastProps('connector');
     return props.stroke;
   }
   return '';
 }
 
 export function setEdgelessToolAction(tool: EdgelessTool): ActionFunction {
-  return ({ rootElement }) => {
-    rootElement.service.tool.setEdgelessTool(tool);
+  return ({ rootComponent }) => {
+    rootComponent.service.tool.setEdgelessTool(tool);
   };
 }
 
