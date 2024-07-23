@@ -1,9 +1,11 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  type BlockComponent,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-
-import type { BlockComponent } from '../../../utils/query.js';
 
 import { embedCardModalStyles } from './styles.js';
 

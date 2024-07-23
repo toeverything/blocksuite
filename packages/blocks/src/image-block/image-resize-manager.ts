@@ -1,9 +1,8 @@
-import type { PointerEventState } from '@blocksuite/block-std';
+import type { BlockComponent, PointerEventState } from '@blocksuite/block-std';
 
 import { assertExists } from '@blocksuite/global/utils';
 
 import {
-  type BlockComponent,
   getClosestBlockComponentByElement,
   getModelByElement,
   isEdgelessPage,
