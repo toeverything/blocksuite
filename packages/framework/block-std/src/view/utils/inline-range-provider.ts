@@ -1,4 +1,5 @@
-import { Slot, assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { Slot } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
   type InlineRange,
@@ -64,7 +65,13 @@ export const getInlineRangeProvider: (
       };
     }
 
-    assertExists(element.model.text);
+    if (!element.model.text) {
+      throw new BlockSuiteError(
+        ErrorCode.SelectionError,
+        'element to set text selection has no text'
+      );
+    }
+
     return {
       index: 0,
       length: element.model.text.length,

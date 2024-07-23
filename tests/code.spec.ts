@@ -12,6 +12,7 @@ import {
   focusRichTextEnd,
   getInlineSelectionIndex,
   getInlineSelectionText,
+  getPageSnapshot,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
@@ -418,8 +419,9 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await assertRichTextInlineRange(page, 0, 3, 0);
 });
 
-// FIXME: this test failed in headless mode but passed in non-headless mode
-test.skip('use keyboard copy inside code block copy', async ({ page }) => {
+test.skip('use keyboard copy inside code block copy', async ({
+  page,
+}, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -435,40 +437,8 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
   await pressEnter(page);
   await pressEnter(page);
   await pasteByKeyboard(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:code
-      prop:caption=""
-      prop:language="Plain Text"
-      prop:text="use"
-      prop:wrap={false}
-    />
-    <affine:code
-      prop:caption=""
-      prop:language="Plain Text"
-      prop:text="use"
-      prop:wrap={false}
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_pasted.json`
   );
 });
 

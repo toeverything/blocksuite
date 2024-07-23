@@ -1,4 +1,4 @@
-import { assertExists, throttle } from '@blocksuite/global/utils';
+import { throttle } from '@blocksuite/global/utils';
 
 import type { BaseSelection, TextSelection } from '../../selection/index.js';
 
@@ -22,7 +22,7 @@ export class RangeBinding {
     const { from, to } = selection;
     if (!to || from.blockId === to.blockId) return;
 
-    const range = this.rangeManager.value;
+    const range = this.rangeManager?.value;
     if (!range) return;
 
     const blocks = this.rangeManager.getSelectedBlockComponentsByRange(range, {
@@ -51,7 +51,7 @@ export class RangeBinding {
         .reverse()
         .forEach(block => {
           const parent = this.host.doc.getParent(block.model);
-          assertExists(parent);
+          if (!parent) return;
           this.host.doc.deleteBlock(block.model, {
             bringChildrenTo: parent,
           });
@@ -86,7 +86,7 @@ export class RangeBinding {
 
     this.isComposing = true;
 
-    const range = this.rangeManager.value;
+    const range = this.rangeManager?.value;
     if (!range) return;
 
     const blocks = this.rangeManager.getSelectedBlockComponentsByRange(range, {
@@ -136,7 +136,7 @@ export class RangeBinding {
           .reverse()
           .forEach(block => {
             const parent = this.host.doc.getParent(block.model);
-            assertExists(parent);
+            if (!parent) return;
             this.host.doc.deleteBlock(block.model, {
               bringChildrenTo: parent,
             });
@@ -154,7 +154,7 @@ export class RangeBinding {
         to: null,
       });
       this.host.selection.setGroup('note', [selection]);
-      this.rangeManager.syncTextSelectionToRange(selection);
+      this.rangeManager?.syncTextSelectionToRange(selection);
     };
   };
 
@@ -208,12 +208,12 @@ export class RangeBinding {
     if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
       return;
 
-    const inlineEditor = this.rangeManager.getClosestInlineEditor(
+    const inlineEditor = this.rangeManager?.getClosestInlineEditor(
       range.commonAncestorContainer
     );
     if (inlineEditor?.isComposing) return;
 
-    const textSelection = this.rangeManager.rangeToTextSelection(
+    const textSelection = this.rangeManager?.rangeToTextSelection(
       range,
       isRangeReversed
     );
@@ -232,7 +232,7 @@ export class RangeBinding {
       selection: textSelection,
       path,
     };
-    this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
+    this.rangeManager?.syncRangeToTextSelection(range, isRangeReversed);
   };
 
   private _onStdSelectionChanged = (selections: BaseSelection[]) => {
@@ -257,9 +257,7 @@ export class RangeBinding {
               path.join('') === this._prevTextSelection.path.join('')
             : false;
 
-        if (eq) {
-          return;
-        }
+        if (eq) return;
 
         this._prevTextSelection =
           text && path
@@ -269,9 +267,9 @@ export class RangeBinding {
               }
             : null;
         if (text) {
-          this.rangeManager.syncTextSelectionToRange(text);
+          this.rangeManager?.syncTextSelectionToRange(text);
         } else {
-          this.rangeManager.clear();
+          this.rangeManager?.clear();
         }
       })
       .catch(console.error);
@@ -320,7 +318,6 @@ export class RangeBinding {
   }
 
   get rangeManager() {
-    assertExists(this.host.rangeManager);
     return this.host.rangeManager;
   }
 
