@@ -2,7 +2,7 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { BlockElement } from '@blocksuite/block-std';
+import { BlockComponent } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import { serializeXYWH } from '@blocksuite/global/utils';
 import { Point } from '@blocksuite/global/utils';
@@ -94,7 +94,7 @@ export interface EdgelessViewport {
 }
 
 @customElement('affine-edgeless-root')
-export class EdgelessRootBlockComponent extends BlockElement<
+export class EdgelessRootBlockComponent extends BlockComponent<
   RootBlockModel,
   EdgelessRootService,
   EdgelessRootBlockWidgetName

@@ -1,5 +1,5 @@
 import type {
-  BlockElement,
+  BlockComponent,
   EditorHost,
   TextSelection,
 } from '@blocksuite/block-std';
@@ -14,10 +14,10 @@ import {
   markdownToSnapshot,
 } from './markdown-utils.js';
 
-const getNoteId = (blockElement: BlockElement) => {
-  let element = blockElement;
+const getNoteId = (block: BlockComponent) => {
+  let element = block;
   while (element && element.flavour !== 'affine:note') {
-    element = element.parentBlockElement;
+    element = element.parentBlock;
   }
 
   return element.model.id;
@@ -25,7 +25,7 @@ const getNoteId = (blockElement: BlockElement) => {
 
 const setBlockSelection = (
   host: EditorHost,
-  parent: BlockElement,
+  parent: BlockComponent,
   models: BlockModel[]
 ) => {
   const selections = models
@@ -51,10 +51,10 @@ const setBlockSelection = (
 export const insert = async (
   host: EditorHost,
   content: string,
-  selectBlock: BlockElement,
+  selectBlock: BlockComponent,
   below: boolean = true
 ) => {
-  const blockParent = selectBlock.parentBlockElement;
+  const blockParent = selectBlock.parentBlock;
   const index = blockParent.model.children.findIndex(
     model => model.id === selectBlock.model.id
   );
@@ -73,7 +73,7 @@ export const insert = async (
 export const insertBelow = async (
   host: EditorHost,
   content: string,
-  selectBlock: BlockElement
+  selectBlock: BlockComponent
 ) => {
   await insert(host, content, selectBlock, true);
 };
@@ -81,7 +81,7 @@ export const insertBelow = async (
 export const insertAbove = async (
   host: EditorHost,
   content: string,
-  selectBlock: BlockElement
+  selectBlock: BlockComponent
 ) => {
   await insert(host, content, selectBlock, false);
 };
@@ -89,11 +89,11 @@ export const insertAbove = async (
 export const replace = async (
   host: EditorHost,
   content: string,
-  firstBlock: BlockElement,
+  firstBlock: BlockComponent,
   selectedModels: BlockModel[],
   textSelection?: TextSelection
 ) => {
-  const firstBlockParent = firstBlock.parentBlockElement;
+  const firstBlockParent = firstBlock.parentBlock;
   const firstIndex = firstBlockParent.model.children.findIndex(
     model => model.id === firstBlock.model.id
   );

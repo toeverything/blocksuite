@@ -22,7 +22,7 @@ import { ShadowlessElement } from './shadowless-element.js';
 export const modelContext = createContext<BlockModel>('model');
 export const serviceContext = createContext<BlockService>('service');
 
-export class BlockElement<
+export class BlockComponent<
   Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
@@ -147,7 +147,7 @@ export class BlockElement<
 
   protected override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
-    await Promise.all(this.childBlockElements.map(el => el.updateComplete));
+    await Promise.all(this.childBlocks.map(el => el.updateComplete));
     return result;
   }
 
@@ -216,13 +216,13 @@ export class BlockElement<
     return this.dataset.blockId as string;
   }
 
-  get childBlockElements() {
+  get childBlocks() {
     const childModels = this.model.children;
     return childModels
       .map(child => {
         return this.std.view.getBlock(child.id);
       })
-      .filter((x): x is BlockElement => !!x);
+      .filter((x): x is BlockComponent => !!x);
   }
 
   get flavour(): string {
@@ -261,13 +261,13 @@ export class BlockElement<
     return model;
   }
 
-  get parentBlockElement(): BlockElement {
+  get parentBlock(): BlockComponent {
     const el = this.parentElement;
     // TODO(mirone/#6534): find a better way to get block element from a node
-    return el?.closest('[data-block-id]') as BlockElement;
+    return el?.closest('[data-block-id]') as BlockComponent;
   }
 
-  get rootElement(): BlockElement | null {
+  get rootElement(): BlockComponent | null {
     const rootId = this.doc.root?.id;
     if (!rootId) {
       return null;
@@ -297,7 +297,7 @@ export class BlockElement<
     return service;
   }
 
-  get topContenteditableElement(): BlockElement | null {
+  get topContenteditableElement(): BlockComponent | null {
     return this.rootElement;
   }
 

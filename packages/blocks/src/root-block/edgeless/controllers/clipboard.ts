@@ -36,7 +36,7 @@ import {
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  blockElementGetter,
+  blockComponentGetter,
   getRootByEditorHost,
   isInsidePageEditor,
 } from '../../../_common/utils/query.js';
@@ -894,7 +894,7 @@ export class EdgelessClipboardController extends PageClipboard {
       block: BlockSuite.EdgelessBlockModelType,
       isInFrame = false
     ) => {
-      let blockElement = blockElementGetter(
+      let blockComponent = blockComponentGetter(
         block,
         this.std.view
       )?.parentElement;
@@ -902,14 +902,14 @@ export class EdgelessClipboardController extends PageClipboard {
         'affine:',
         '.edgeless-block-portal-'
       );
-      blockElement = blockElement?.closest(blockPortalSelector);
-      if (!blockElement) {
+      blockComponent = blockComponent?.closest(blockPortalSelector);
+      if (!blockComponent) {
         throw new Error('Could not find edgeless block portal.');
       }
 
       const blockBound = Bound.deserialize(block.xywh);
       const canvasData = await html2canvas(
-        blockElement as HTMLElement,
+        blockComponent as HTMLElement,
         html2canvasOption
       );
       ctx.drawImage(

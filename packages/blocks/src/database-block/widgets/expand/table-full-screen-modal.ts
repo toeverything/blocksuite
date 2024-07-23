@@ -1,4 +1,4 @@
-import { BlockElement } from '@blocksuite/block-std';
+import { BlockComponent } from '@blocksuite/block-std';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
@@ -11,7 +11,7 @@ import {
 import { fullScreenStyles } from './styles.js';
 
 @customElement('affine-database-table-view-full-screen')
-export class DatabaseTableViewFullScreen extends BlockElement<DatabaseBlockModel> {
+export class DatabaseTableViewFullScreen extends BlockComponent<DatabaseBlockModel> {
   _renderView = () => {
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`

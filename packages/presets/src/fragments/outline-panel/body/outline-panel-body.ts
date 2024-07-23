@@ -399,17 +399,17 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
 
     const { blockPath } = e.detail;
     const path = [rootElement.model.id, ...blockPath];
-    const blockElement = this.editorHost.view.viewFromPath('block', path);
-    if (!blockElement) return;
+    const block = this.editorHost.view.viewFromPath('block', path);
+    if (!block) return;
 
-    blockElement.scrollIntoView({
+    block.scrollIntoView({
       behavior: 'instant',
       block: 'center',
       inline: 'center',
     });
 
     requestAnimationFrame(() => {
-      const blockRect = blockElement.getBoundingClientRect();
+      const blockRect = block.getBoundingClientRect();
       const { top, left, width, height } = blockRect;
       assertExists(rootElement.viewport, 'viewport should exist');
       const {

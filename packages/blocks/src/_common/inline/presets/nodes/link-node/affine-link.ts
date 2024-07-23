@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -25,7 +25,7 @@ export class AffineLink extends ShadowlessElement {
   private _whenHover = new HoverController(
     this,
     ({ abortController }) => {
-      if (this.blockElement.doc.readonly) {
+      if (this.block.doc.readonly) {
         return null;
       }
 
@@ -108,12 +108,12 @@ export class AffineLink extends ShadowlessElement {
     ></a>`;
   }
 
-  get blockElement() {
-    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
+  get block() {
+    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
       `[${BLOCK_ID_ATTR}]`
     );
-    assertExists(blockElement);
-    return blockElement;
+    assertExists(block);
+    return block;
   }
 
   get inlineEditor() {
@@ -146,7 +146,7 @@ export class AffineLink extends ShadowlessElement {
   // Please also note that when readonly mode active,
   // this workaround is not necessary and links work normally.
   get std() {
-    const std = this.blockElement.std;
+    const std = this.block.std;
     assertExists(std);
     return std;
   }

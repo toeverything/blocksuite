@@ -28,7 +28,7 @@ export class AffineImageToolbarWidget extends WidgetElement<
     this._hoverController = new HoverController(
       this,
       ({ abortController }) => {
-        const imageBlock = this.blockElement;
+        const imageBlock = this.block;
         const selection = this.host.selection;
 
         const textSelection = selection.find('text');
@@ -55,7 +55,7 @@ export class AffineImageToolbarWidget extends WidgetElement<
 
         return {
           template: html`<affine-image-toolbar
-            .blockElement=${imageBlock}
+            .blockComponent=${imageBlock}
             .abortController=${abortController}
             .config=${this.config}
             .moreMenuConfig=${this.moreMenuConfig}
@@ -66,7 +66,7 @@ export class AffineImageToolbarWidget extends WidgetElement<
               }
             }}
           ></affine-image-toolbar>`,
-          container: this.blockElement,
+          container: this.block,
           computePosition: {
             referenceElement: imageContainer,
             placement: 'right-start',
@@ -88,7 +88,7 @@ export class AffineImageToolbarWidget extends WidgetElement<
       { allowMultiple: true }
     );
 
-    const imageBlock = this.blockElement;
+    const imageBlock = this.block;
     this._hoverController.setReference(imageBlock);
     this._hoverController.onAbort = () => {
       // If the more menu is opened, don't close it.

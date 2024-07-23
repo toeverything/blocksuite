@@ -1,6 +1,6 @@
 import type { BlockModel } from '@blocksuite/store';
 
-import { BlockElement, type BlockService } from '@blocksuite/block-std';
+import { BlockComponent, type BlockService } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
 import { query } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -11,7 +11,7 @@ export class CaptionedBlockComponent<
   Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
-> extends BlockElement<Model, Service, WidgetName> {
+> extends BlockComponent<Model, Service, WidgetName> {
   constructor() {
     super();
     this.addRenderer(this._renderWithWidget);

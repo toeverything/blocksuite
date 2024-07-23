@@ -28,7 +28,7 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
 
       return {
         template: html`<language-list-button
-          .blockElement=${this.blockElement}
+          .blockComponent=${this.block}
           .onActiveStatusChange=${async (active: boolean) => {
             this._isActivated = active;
             if (!active) {
@@ -48,9 +48,9 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
         portalStyles: {
           zIndex: 'var(--affine-z-index-popover)',
         },
-        container: this.blockElement,
+        container: this.block,
         computePosition: {
-          referenceElement: this.blockElement,
+          referenceElement: this.block,
           placement: 'left-start',
           middleware: [offset({ mainAxis: -5, crossAxis: 5 })],
           autoUpdate: true,
@@ -79,7 +79,7 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
     const hasMultipleBlockSelections =
       blockSelections.length > 1 ||
       (blockSelections.length === 1 &&
-        blockSelections[0].blockId !== this.blockElement.blockId);
+        blockSelections[0].blockId !== this.block.blockId);
 
     if (hasMultipleBlockSelections) {
       return false;
@@ -90,7 +90,7 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this._hoverController.setReference(this.blockElement);
+    this._hoverController.setReference(this.block);
     this._hoverController.onAbort = () => {
       // If the language list is opened, don't close it.
       if (this._isActivated) return;

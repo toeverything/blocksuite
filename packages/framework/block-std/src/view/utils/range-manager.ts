@@ -3,7 +3,7 @@ import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import type { BlockElement } from '../element/block-element.js';
+import type { BlockComponent } from '../element/block-component.js';
 import type { EditorHost } from '../element/lit-host.js';
 
 import { RangeBinding } from './range-binding.js';
@@ -13,7 +13,7 @@ import { RangeBinding } from './range-binding.js';
  */
 export class RangeManager {
   /**
-   * Used to exclude certain elements when using `getSelectedBlockElementsByRange`.
+   * Used to exclude certain elements when using `getSelectedBlockComponentsByRange`.
    */
   static rangeQueryExcludeAttr = 'data-range-query-exclude';
 
@@ -49,7 +49,7 @@ export class RangeManager {
   getClosestBlock(node: Node) {
     const el = node instanceof Element ? node : node.parentElement;
     if (!el) return null;
-    const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
+    const block = el.closest<BlockComponent>(`[${this.host.blockIdAttr}]`);
     if (!block) return null;
     if (this._isRangeSyncExcluded(block)) return null;
     return block;
@@ -80,16 +80,16 @@ export class RangeManager {
    *
    * match function will be evaluated before filtering using mode
    */
-  getSelectedBlockElementsByRange(
+  getSelectedBlockComponentsByRange(
     range: Range,
     options: {
-      match?: (el: BlockElement) => boolean;
+      match?: (el: BlockComponent) => boolean;
       mode?: 'all' | 'flat' | 'highest';
     } = {}
-  ): BlockElement[] {
+  ): BlockComponent[] {
     const { mode = 'all', match = () => true } = options;
 
-    let result = Array.from<BlockElement>(
+    let result = Array.from<BlockComponent>(
       this.host.querySelectorAll(
         `[${this.host.blockIdAttr}]:not([${RangeManager.rangeQueryExcludeAttr}="true"])`
       )

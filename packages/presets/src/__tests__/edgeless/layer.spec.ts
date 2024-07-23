@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -259,22 +259,22 @@ test('blocks should rerender when their z-index changed', async () => {
       index: service.layer.generateIndex('affine:note'),
     }),
   ];
-  const assertBlockElementsContent = () => {
-    const blockElements = Array.from(
+  const assertBlocksContent = () => {
+    const blocks = Array.from(
       document.querySelectorAll(
         'affine-edgeless-root .edgeless-layer > [data-block-id]'
       )
     );
 
-    expect(blockElements.length).toBe(5);
+    expect(blocks.length).toBe(5);
 
-    blockElements.forEach(element => {
+    blocks.forEach(element => {
       expect(element.children.length).toBeGreaterThan(0);
     });
   };
 
   await wait();
-  assertBlockElementsContent();
+  assertBlocksContent();
 
   service.addElement('shape', {
     shapeType: 'rect',
@@ -285,7 +285,7 @@ test('blocks should rerender when their z-index changed', async () => {
   });
 
   await wait();
-  assertBlockElementsContent();
+  assertBlocksContent();
 });
 
 describe('layer reorder functionality', () => {
@@ -524,7 +524,7 @@ test('the actual rendering z-index should satisfy the logic order of their index
   const edgeless = getDocRootBlock(doc, editor, 'edgeless');
   const blocks = Array.from(
     edgeless.querySelectorAll('.edgeless-layer > [data-block-id]')
-  ) as BlockElement[];
+  ) as BlockComponent[];
 
   expect(blocks.length).toBe(indexes.length + 1);
 

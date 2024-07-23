@@ -85,7 +85,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
         >
           <div slot data-size="small" data-orientation="vertical">
             ${MoreMenuRenderer(
-              this.blockElement,
+              this.blockComponent,
               this._popMenuAbortController,
               this.moreItems
             )}
@@ -96,7 +96,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
       portalStyles: {
         zIndex: 'var(--affine-z-index-popover)',
       },
-      container: this.blockElement.host,
+      container: this.blockComponent.host,
       computePosition: {
         referenceElement: this._moreButton,
         placement: 'bottom-start',
@@ -117,7 +117,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
   override render() {
     const items = CodeToolbarItemRenderer(
       this.items,
-      this.blockElement,
+      this.blockComponent,
       this.closeCurrentMenu
     );
 
@@ -131,7 +131,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
           .tooltip=${'More'}
           .tooltipOffset=${4}
           .showTooltip=${!this._moreMenuOpen}
-          ?disabled=${this.blockElement.readonly}
+          ?disabled=${this.blockComponent.readonly}
           @click=${() => this._toggleMoreMenu()}
         >
           ${MoreVerticalIcon}
@@ -147,7 +147,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
   private accessor _moreMenuOpen = false;
 
   @property({ attribute: false })
-  accessor blockElement!: CodeBlockComponent;
+  accessor blockComponent!: CodeBlockComponent;
 
   @property({ attribute: false })
   accessor items!: CodeToolbarItem[];

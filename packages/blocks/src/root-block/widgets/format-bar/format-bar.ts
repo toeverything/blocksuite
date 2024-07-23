@@ -1,6 +1,6 @@
 import type {
   BaseSelection,
-  BlockElement,
+  BlockComponent,
   CursorSelection,
 } from '@blocksuite/block-std';
 
@@ -54,7 +54,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
 
   private _calculatePlacement() {
-    const rootElement = this.blockElement;
+    const rootElement = this.block;
 
     this.handleEvent('pointerMove', ctx => {
       this._dragging = ctx.get('pointerState').dragging;
@@ -76,9 +76,9 @@ export class AffineFormatBarWidget extends WidgetElement {
           }
           targetRect = range.getBoundingClientRect();
         } else if (this.displayType === 'block') {
-          const blockElement = this._selectedBlockElements[0];
-          if (!blockElement) return;
-          targetRect = blockElement.getBoundingClientRect();
+          const block = this._selectedBlocks[0];
+          if (!block) return;
+          targetRect = block.getBoundingClientRect();
         } else {
           return;
         }
@@ -142,7 +142,7 @@ export class AffineFormatBarWidget extends WidgetElement {
                   const { selectedBlocks } = ctx;
                   assertExists(selectedBlocks);
 
-                  this._selectedBlockElements = selectedBlocks;
+                  this._selectedBlocks = selectedBlocks;
                 })
                 .run();
 
@@ -158,11 +158,11 @@ export class AffineFormatBarWidget extends WidgetElement {
             const selectedBlocks = blockSelections
               .map(selection => {
                 const path = selection.blockId;
-                return this.blockElement.host.view.getBlock(path);
+                return this.block.host.view.getBlock(path);
               })
-              .filter((el): el is BlockElement => !!el);
+              .filter((el): el is BlockComponent => !!el);
 
-            this._selectedBlockElements = selectedBlocks;
+            this._selectedBlocks = selectedBlocks;
             return;
           }
 
@@ -250,12 +250,12 @@ export class AffineFormatBarWidget extends WidgetElement {
     };
 
     const getReferenceElementFromBlock = () => {
-      const firstBlockElement = this._selectedBlockElements[0];
-      let rect = firstBlockElement?.getBoundingClientRect();
+      const firstBlock = this._selectedBlocks[0];
+      let rect = firstBlock?.getBoundingClientRect();
 
       if (!rect) return;
 
-      this._selectedBlockElements.forEach(el => {
+      this._selectedBlocks.forEach(el => {
         const elRect = el.getBoundingClientRect();
         if (elRect.top < rect.top) {
           rect = new DOMRect(rect.left, elRect.top, rect.width, rect.bottom);
@@ -273,7 +273,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       return {
         getBoundingClientRect: () => rect,
         getClientRects: () =>
-          this._selectedBlockElements.map(el => el.getBoundingClientRect()),
+          this._selectedBlocks.map(el => el.getBoundingClientRect()),
       };
     };
 
@@ -322,16 +322,13 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     if (
       this.displayType === 'block' &&
-      this._selectedBlockElements?.[0]?.flavour === 'affine:surface-ref'
+      this._selectedBlocks?.[0]?.flavour === 'affine:surface-ref'
     ) {
       return false;
     }
 
-    if (
-      this.displayType === 'block' &&
-      this._selectedBlockElements.length === 1
-    ) {
-      const selectedBlock = this._selectedBlockElements[0];
+    if (this.displayType === 'block' && this._selectedBlocks.length === 1) {
+      const selectedBlock = this._selectedBlocks[0];
       if (
         !matchFlavours(selectedBlock.model, [
           'affine:paragraph',
@@ -349,12 +346,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
 
     // if the selection is on an embed (ex. linked page), we should not display the format bar
-    if (
-      this.displayType === 'text' &&
-      this._selectedBlockElements.length === 1
-    ) {
+    if (this.displayType === 'text' && this._selectedBlocks.length === 1) {
       const isEmbed = () => {
-        const [element] = this._selectedBlockElements;
+        const [element] = this._selectedBlocks;
         const richText = element.querySelector<RichText>('rich-text');
         const inline = richText?.inlineEditor;
         if (!richText || !inline) {
@@ -487,7 +481,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     super.connectedCallback();
     this._abortController = new AbortController();
 
-    const rootElement = this.blockElement;
+    const rootElement = this.block;
     assertExists(rootElement);
     const widgets = rootElement.widgets;
 
@@ -536,7 +530,7 @@ export class AffineFormatBarWidget extends WidgetElement {
 
   reset() {
     this._displayType = 'none';
-    this._selectedBlockElements = [];
+    this._selectedBlocks = [];
   }
 
   override updated() {
@@ -561,8 +555,8 @@ export class AffineFormatBarWidget extends WidgetElement {
     return sl.getRangeAt(0);
   }
 
-  get selectedBlockElements() {
-    return this._selectedBlockElements;
+  get selectedBlocks() {
+    return this._selectedBlocks;
   }
 
   @state()
@@ -572,7 +566,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   private accessor _dragging = false;
 
   @state()
-  private accessor _selectedBlockElements: BlockElement[] = [];
+  private accessor _selectedBlocks: BlockComponent[] = [];
 
   @state()
   accessor configItems: FormatBarConfigItem[] = [];

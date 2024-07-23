@@ -1,7 +1,7 @@
 import type { Doc } from '@blocksuite/store';
 
 import {
-  EdgelessBlockElement,
+  EdgelessBlockComponent,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
@@ -241,7 +241,7 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
 }
 
 @customElement('affine-frame')
-export class FrameBlockComponent extends EdgelessBlockElement<
+export class FrameBlockComponent extends EdgelessBlockComponent<
   EdgelessRootService,
   FrameBlockModel
 > {

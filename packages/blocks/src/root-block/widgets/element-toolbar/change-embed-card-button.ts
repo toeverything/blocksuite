@@ -80,7 +80,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const block = this._blockElement;
+    const block = this._blockComponent;
     if (block && 'convertToCard' in block) {
       block.convertToCard();
       return;
@@ -130,7 +130,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const block = this._blockElement;
+    const block = this._blockComponent;
     if (block && 'convertToEmbed' in block) {
       block.convertToEmbed();
       return;
@@ -198,12 +198,12 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   };
 
   private _open = () => {
-    this._blockElement?.open();
+    this._blockComponent?.open();
   };
 
   private _peek = () => {
-    if (!this._blockElement) return;
-    peek(this._blockElement);
+    if (!this._blockComponent) return;
+    peek(this._blockComponent);
   };
 
   static override styles = css`
@@ -240,7 +240,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
   `;
 
-  private get _blockElement() {
+  private get _blockComponent() {
     const blockSelection =
       this.edgeless.service.selection.surfaceSelections.filter(sel =>
         sel.elements.includes(this.model.id)
@@ -249,7 +249,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const blockElement = this.std.view.getBlock(blockSelection[0].blockId) as
+    const blockComponent = this.std.view.getBlock(blockSelection[0].blockId) as
       | BookmarkBlockComponent
       | EmbedGithubBlockComponent
       | EmbedYoutubeBlockComponent
@@ -259,13 +259,13 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       | EmbedLoomBlockComponent
       | null;
 
-    if (!blockElement) return;
+    if (!blockComponent) return;
 
-    return blockElement;
+    return blockComponent;
   }
 
   private get _canConvertToEmbedView() {
-    const block = this._blockElement;
+    const block = this._blockComponent;
 
     // synced doc entry controlled by awareness flag
     if (!!block && isEmbedLinkedDocBlock(block.model)) {
@@ -314,7 +314,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
     return (
       isEmbedLinkedDocBlock(this.model) &&
-      (!!this._blockElement?.closest('affine-embed-synced-doc-block') ||
+      (!!this._blockComponent?.closest('affine-embed-synced-doc-block') ||
         this.model.pageId === this._doc.id)
     );
   }
@@ -398,7 +398,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     // open in new tab
 
-    if (this._blockElement && isPeekable(this._blockElement)) {
+    if (this._blockComponent && isPeekable(this._blockComponent)) {
       buttons.push({
         name: 'Open in center peek',
         icon: CenterPeekIcon,
@@ -477,7 +477,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _showCaption() {
-    this._blockElement?.captionEditor?.show();
+    this._blockComponent?.captionEditor?.show();
   }
 
   private _viewMenuButton() {

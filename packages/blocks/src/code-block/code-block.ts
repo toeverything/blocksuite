@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { BundledLanguage, Highlighter } from 'shiki';
 
 import { getInlineRangeProvider } from '@blocksuite/block-std';
@@ -417,7 +417,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
 
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockElement>(NOTE_SELECTOR);
+      const el = this.closest<BlockComponent>(NOTE_SELECTOR);
       return el;
     }
     return this.rootElement;

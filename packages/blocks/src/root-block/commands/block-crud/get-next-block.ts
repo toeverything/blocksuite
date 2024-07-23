@@ -1,11 +1,11 @@
 import type { Command } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 import { assertExists } from '@blocksuite/global/utils';
 
-function getNext(std: BlockSuite.Std, blockElement: BlockElement) {
+function getNext(std: BlockSuite.Std, block: BlockComponent) {
   const view = std.view;
-  const next = std.doc.getNext(blockElement.model);
+  const next = std.doc.getNext(block.model);
   if (!next) return null;
   return view.getBlock(next.id);
 }
@@ -15,9 +15,9 @@ function getNextBlock(std: BlockSuite.Std, path: string) {
   const focusBlock = view.getBlock(path);
   if (!focusBlock) return null;
 
-  let next: BlockElement | null = null;
-  if (focusBlock.childBlockElements[0]) {
-    next = focusBlock.childBlockElements[0];
+  let next: BlockComponent | null = null;
+  if (focusBlock.childBlocks[0]) {
+    next = focusBlock.childBlocks[0];
   }
 
   if (!next) {
@@ -54,7 +54,7 @@ export const getNextBlockCommand: Command<
 declare global {
   namespace BlockSuite {
     interface CommandContext {
-      nextBlock?: BlockElement;
+      nextBlock?: BlockComponent;
     }
 
     interface Commands {

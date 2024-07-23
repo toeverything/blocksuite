@@ -10,15 +10,15 @@ import type { BlockService } from '../../service/index.js';
 
 import { WithDisposable } from '../utils/with-disposable.js';
 import {
-  type BlockElement,
+  type BlockComponent,
   modelContext,
   serviceContext,
-} from './block-element.js';
+} from './block-component.js';
 import { docContext, stdContext } from './lit-host.js';
 
 export class WidgetElement<
   Model extends BlockModel = BlockModel,
-  B extends BlockElement = BlockElement,
+  B extends BlockComponent = BlockComponent,
   S extends BlockService = BlockService,
 > extends SignalWatcher(WithDisposable(LitElement)) {
   handleEvent = (
@@ -71,7 +71,7 @@ export class WidgetElement<
     return null;
   }
 
-  get blockElement() {
+  get block() {
     return this.std.view.getBlock(this.model.id) as B;
   }
 

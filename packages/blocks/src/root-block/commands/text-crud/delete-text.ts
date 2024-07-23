@@ -24,7 +24,7 @@ export const deleteTextCommand: Command<
 
   const range = host.rangeManager.textSelectionToRange(textSelection);
   if (!range) return;
-  const selectedElements = host.rangeManager.getSelectedBlockElementsByRange(
+  const selectedElements = host.rangeManager.getSelectedBlockComponentsByRange(
     range,
     {
       mode: 'flat',

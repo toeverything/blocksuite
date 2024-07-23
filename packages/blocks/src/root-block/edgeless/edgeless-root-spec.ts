@@ -1,5 +1,5 @@
 import type {
-  BlockElement,
+  BlockComponent,
   BlockService,
   BlockSpec,
   BlockSpecSlots,
@@ -102,7 +102,7 @@ export const PreviewEdgelessRootBlockSpec: BlockSpec = {
         component,
         service,
       }: {
-        component: BlockElement;
+        component: BlockComponent;
         service: BlockService;
       }) => {
         // Does not allow the edgeless to display toolbar.

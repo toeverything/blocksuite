@@ -25,7 +25,7 @@ export class LanguageListButton extends LitElement {
   private _abortController?: AbortController;
 
   private _clickLangBtn = () => {
-    if (this.blockElement.doc.readonly) return;
+    if (this.blockComponent.doc.readonly) return;
     if (this._abortController) {
       // Close the language list if it's already opened.
       this._abortController.abort();
@@ -49,7 +49,7 @@ export class LanguageListButton extends LitElement {
     const options: FilterableListOptions = {
       placeholder: 'Search for a language',
       onSelect: item => {
-        this.blockElement.setLang(item.name);
+        this.blockComponent.setLang(item.name);
         this._updateLanguage();
       },
       active: item => item.name === this._currentLanguage.id,
@@ -62,7 +62,7 @@ export class LanguageListButton extends LitElement {
         getLanguagePriority(a.name as BundledLanguage) -
         getLanguagePriority(b.name as BundledLanguage),
       referenceElement: this._langButton,
-      container: this.blockElement.host,
+      container: this.blockComponent.host,
       abortController: this._abortController,
       // stacking-context(editor-host)
       portalStyles: {
@@ -98,7 +98,7 @@ export class LanguageListButton extends LitElement {
 
   private _updateLanguage() {
     this._currentLanguage =
-      getStandardLanguage(this.blockElement.model.language) ??
+      getStandardLanguage(this.blockComponent.model.language) ??
       PLAIN_TEXT_LANG_INFO;
   }
 
@@ -115,10 +115,10 @@ export class LanguageListButton extends LitElement {
       text=${this._currentLanguage.name ?? this._currentLanguage.id}
       height="24px"
       @click=${this._clickLangBtn}
-      ?disabled=${this.blockElement.doc.readonly}
+      ?disabled=${this.blockComponent.doc.readonly}
     >
       <span slot="suffix">
-        ${!this.blockElement.doc.readonly ? ArrowDownIcon : nothing}
+        ${!this.blockComponent.doc.readonly ? ArrowDownIcon : nothing}
       </span>
     </icon-button> `;
   }
@@ -130,7 +130,7 @@ export class LanguageListButton extends LitElement {
   private accessor _langButton!: HTMLElement;
 
   @property({ attribute: false })
-  accessor blockElement!: CodeBlockComponent;
+  accessor blockComponent!: CodeBlockComponent;
 
   @property({ attribute: false })
   accessor onActiveStatusChange: (active: boolean) => void = noop;

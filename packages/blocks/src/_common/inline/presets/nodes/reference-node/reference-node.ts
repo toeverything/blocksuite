@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { Slot } from '@blocksuite/global/utils';
 import type { Doc, DocMeta } from '@blocksuite/store';
 
@@ -235,12 +235,12 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     this._updateRefMeta(doc);
   }
 
-  get blockElement() {
-    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
+  get block() {
+    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
       `[${BLOCK_ID_ATTR}]`
     );
-    assertExists(blockElement);
-    return blockElement;
+    assertExists(block);
+    return block;
   }
 
   get customContent() {
@@ -276,7 +276,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   }
 
   get std() {
-    const std = this.blockElement.std;
+    const std = this.block.std;
     assertExists(std);
     return std;
   }

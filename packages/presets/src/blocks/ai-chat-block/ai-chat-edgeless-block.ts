@@ -1,4 +1,4 @@
-import { toEdgelessBlockElement } from '@blocksuite/block-std';
+import { toEdgelessBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -7,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { AIChatBlockComponent } from './ai-chat-block.js';
 
 @customElement('affine-edgeless-ai-chat')
-export class EdgelessAIChatBlockComponent extends toEdgelessBlockElement(
+export class EdgelessAIChatBlockComponent extends toEdgelessBlockComponent(
   AIChatBlockComponent
 ) {
   rootServiceFlavour!: 'affine:page';

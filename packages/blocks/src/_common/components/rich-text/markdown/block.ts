@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 import { assertExists, isEqual } from '@blocksuite/global/utils';
 import {
@@ -22,7 +22,7 @@ import {
 } from './utils.js';
 
 export function tryConvertBlock(
-  element: BlockElement,
+  element: BlockComponent,
   inline: AffineInlineEditor,
   prefixText: string,
   range: { index: number; length: number }

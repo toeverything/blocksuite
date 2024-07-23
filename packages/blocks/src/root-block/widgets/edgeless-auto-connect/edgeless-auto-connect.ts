@@ -356,7 +356,7 @@ export class EdgelessAutoConnectWidget extends WidgetElement<
   }
 
   private _initLabels() {
-    const { service } = this.blockElement;
+    const { service } = this.block;
     const surfaceRefs = service.doc
       .getBlocksByFlavour('affine:surface-ref')
       .map(block => block.model) as SurfaceRefBlockModel[];
@@ -415,7 +415,7 @@ export class EdgelessAutoConnectWidget extends WidgetElement<
 
       this._edgelessOnlyNotesSet = edgelessOnlyNotesSet;
       this._pageVisibleElementsMap = pageVisibleBlocks;
-    }, this.blockElement);
+    }, this.block);
 
     this._disposables.add(
       service.selection.slots.updated.on(() => {

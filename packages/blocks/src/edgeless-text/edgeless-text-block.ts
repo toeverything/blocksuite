@@ -1,6 +1,6 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
-import { EdgelessBlockElement } from '@blocksuite/block-std';
+import { EdgelessBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { type PropertyValueMap, css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -26,7 +26,7 @@ export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 
 @customElement('affine-edgeless-text')
-export class EdgelessTextBlockComponent extends EdgelessBlockElement<
+export class EdgelessTextBlockComponent extends EdgelessBlockComponent<
   EdgelessRootService,
   EdgelessTextBlockModel,
   EdgelessTextBlockService
@@ -149,7 +149,7 @@ export class EdgelessTextBlockComponent extends EdgelessBlockElement<
 
     const { disposables, rootService } = this;
     const edgelessSelection = rootService.selection;
-    const selectedRect = this.parentBlockElement.selectedRect;
+    const selectedRect = this.parentBlock.selectedRect;
 
     disposables.add(
       selectedRect.slots.dragStart
@@ -322,7 +322,7 @@ export class EdgelessTextBlockComponent extends EdgelessBlockElement<
 
   tryFocusEnd() {
     const paragraphOrLists = Array.from(
-      this.querySelectorAll<BlockElement>('affine-paragraph, affine-list')
+      this.querySelectorAll<BlockComponent>('affine-paragraph, affine-list')
     );
     const last = paragraphOrLists.at(-1);
     if (last) {
@@ -347,8 +347,8 @@ export class EdgelessTextBlockComponent extends EdgelessBlockElement<
     );
   }
 
-  override get parentBlockElement() {
-    return super.parentBlockElement as EdgelessRootBlockComponent;
+  override get parentBlock() {
+    return super.parentBlock as EdgelessRootBlockComponent;
   }
 
   @state()

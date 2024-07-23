@@ -1,10 +1,10 @@
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
   ShadowlessElement,
   WithDisposable,
-  toEdgelessBlockElement,
+  toEdgelessBlockComponent,
 } from '@blocksuite/block-std';
 import { Point } from '@blocksuite/global/utils';
 import { Bound, almostEqual, clamp } from '@blocksuite/global/utils';
@@ -21,7 +21,7 @@ import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../_common/edgeless/note/consts.j
 import { MoreIndicatorIcon } from '../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../_common/types.js';
 import { matchFlavours } from '../_common/utils/model.js';
-import { getClosestBlockElementByPoint } from '../_common/utils/query.js';
+import { getClosestBlockComponentByPoint } from '../_common/utils/query.js';
 import { handleNativeRangeAtPoint } from '../_common/utils/selection.js';
 import { StrokeStyle } from '../surface-block/consts.js';
 import { NoteBlockComponent } from './note-block.js';
@@ -101,7 +101,7 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 const ACTIVE_NOTE_EXTRA_PADDING = 20;
 
 @customElement('affine-edgeless-note')
-export class EdgelessNoteBlockComponent extends toEdgelessBlockElement(
+export class EdgelessNoteBlockComponent extends toEdgelessBlockComponent(
   NoteBlockComponent
 ) {
   static override styles = css`
@@ -251,9 +251,9 @@ export class EdgelessNoteBlockComponent extends toEdgelessBlockElement(
   }
 
   private _tryAddParagraph(x: number, y: number) {
-    const nearest = getClosestBlockElementByPoint(
+    const nearest = getClosestBlockComponentByPoint(
       new Point(x, y)
-    ) as BlockElement | null;
+    ) as BlockComponent | null;
     if (!nearest) return;
 
     const nearestBBox = nearest.getBoundingClientRect();

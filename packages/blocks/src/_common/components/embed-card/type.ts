@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
@@ -18,7 +18,7 @@ import { EmbedLoomBlockComponent } from '../../../embed-loom-block/embed-loom-bl
 import { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 import { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 
-export type EmbedToolbarBlockElement =
+export type EmbedToolbarBlockComponent =
   | BookmarkBlockComponent
   | EmbedGithubBlockComponent
   | EmbedYoutubeBlockComponent
@@ -36,9 +36,9 @@ export type EmbedToolbarModel =
   | EmbedSyncedDocModel
   | EmbedLoomModel;
 
-export function isEmbedCardBlockElement(
-  block: BlockElement
-): block is EmbedToolbarBlockElement {
+export function isEmbedCardBlockComponent(
+  block: BlockComponent
+): block is EmbedToolbarBlockComponent {
   return (
     block instanceof BookmarkBlockComponent ||
     block instanceof EmbedGithubBlockComponent ||

@@ -40,7 +40,7 @@ export {
 } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
-  EmbedBlockElement,
+  EmbedBlockComponent,
   createEmbedBlockSchema,
   defineEmbedModel,
 } from './_common/embed-block-helper/index.js';

@@ -1,4 +1,4 @@
-import { BlockElement, RangeManager } from '@blocksuite/block-std';
+import { BlockComponent, RangeManager } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -17,7 +17,7 @@ import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
 
 @customElement('affine-surface')
-export class SurfaceBlockComponent extends BlockElement<
+export class SurfaceBlockComponent extends BlockComponent<
   SurfaceBlockModel,
   SurfaceBlockService
 > {
@@ -246,7 +246,7 @@ export class SurfaceBlockComponent extends BlockElement<
   }
 
   get edgeless() {
-    return this.parentBlockElement as EdgelessRootBlockComponent;
+    return this.parentBlock as EdgelessRootBlockComponent;
   }
 
   get renderer() {

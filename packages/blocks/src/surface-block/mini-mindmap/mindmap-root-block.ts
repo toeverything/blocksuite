@@ -1,11 +1,11 @@
-import { BlockElement } from '@blocksuite/block-std';
+import { BlockComponent } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { RootBlockModel } from '../../root-block/root-model.js';
 
 @customElement('mini-mindmap-root-block')
-export class MindmapRootBlock extends BlockElement<RootBlockModel> {
+export class MindmapRootBlock extends BlockComponent<RootBlockModel> {
   override render() {
     return html`
       <style>

@@ -30,8 +30,8 @@ import '../../edgeless/components/panel/card-style-panel.js';
 @customElement('edgeless-change-attachment-button')
 export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   private _download = () => {
-    if (!this._blockElement) return;
-    downloadAttachmentBlob(this._blockElement);
+    if (!this._block) return;
+    downloadAttachmentBlob(this._block);
   };
 
   private _setCardStyle = (style: EmbedCardStyle) => {
@@ -43,10 +43,10 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   };
 
   private _showCaption = () => {
-    this._blockElement?.captionEditor?.show();
+    this._block?.captionEditor?.show();
   };
 
-  private get _blockElement() {
+  private get _block() {
     const blockSelection =
       this.edgeless.service.selection.surfaceSelections.filter(sel =>
         sel.elements.includes(this.model.id)
@@ -55,12 +55,12 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const blockElement = this.std.view.getBlock(
+    const block = this.std.view.getBlock(
       blockSelection[0].blockId
     ) as AttachmentBlockComponent | null;
-    assertExists(blockElement);
+    assertExists(block);
 
-    return blockElement;
+    return block;
   }
 
   private get _doc() {

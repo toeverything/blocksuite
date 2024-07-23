@@ -11,7 +11,7 @@ import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgel
 import type { RootBlockModel } from '../../root-block/index.js';
 
 import {
-  blockElementGetter,
+  blockComponentGetter,
   getBlockComponentByModel,
   getRootByEditorHost,
   isInsidePageEditor,
@@ -386,7 +386,8 @@ export class ExportManager {
       return this.edgelessToCanvas(
         edgeless.surface.renderer,
         bound,
-        (model: BlockModel) => blockElementGetter(model, this.editorHost.view),
+        (model: BlockModel) =>
+          blockComponentGetter(model, this.editorHost.view),
         edgeless
       );
     }
@@ -396,7 +397,7 @@ export class ExportManager {
   async edgelessToCanvas(
     surfaceRenderer: Renderer,
     bound: IBound,
-    blockElementGetter: (model: BlockModel) => Element | null = () => null,
+    blockComponentGetter: (model: BlockModel) => Element | null = () => null,
     edgeless?: EdgelessRootBlockComponent,
     nodes?: EdgelessBlockModel[],
     surfaces?: BlockSuite.SurfaceElementModelType[],
@@ -467,14 +468,16 @@ export class ExportManager {
           blockBound.h
         );
       }
-      let blockElement = blockElementGetter(block)?.parentElement;
+      let blockComponent = blockComponentGetter(block)?.parentElement;
       if (matchFlavours(block, ['affine:note'])) {
-        blockElement = blockElement?.closest('.edgeless-block-portal-note');
+        blockComponent = blockComponent?.closest('.edgeless-block-portal-note');
       }
 
-      if (blockElement) {
+      if (blockComponent) {
         const blockBound = xywhArrayToObject(block);
-        const canvasData = await this._html2canvas(blockElement as HTMLElement);
+        const canvasData = await this._html2canvas(
+          blockComponent as HTMLElement
+        );
         ctx.drawImage(
           canvasData,
           blockBound.x - bound.x + 50,
@@ -490,7 +493,7 @@ export class ExportManager {
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = blockElementGetter(element);
+          const htmlElement = blockComponentGetter(element);
           const blockBound = xywhArrayToObject(element);
           const canvasData = await html2canvas(htmlElement as HTMLElement);
 

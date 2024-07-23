@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, type PropertyValues, css } from 'lit';
@@ -55,7 +55,7 @@ export class BlockSelection extends SignalWatcher(LitElement) {
   }
 
   @property({ attribute: false })
-  accessor block!: BlockElement;
+  accessor block!: BlockComponent;
 
   @property({ attribute: false })
   accessor borderRadius: number = 5;

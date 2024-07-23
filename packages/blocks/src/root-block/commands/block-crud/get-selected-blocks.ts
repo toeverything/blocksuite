@@ -6,7 +6,7 @@ import type {
 import type { EditorHost } from '@blocksuite/block-std';
 import type { RoleType } from '@blocksuite/store';
 
-import { BlockElement } from '@blocksuite/block-std';
+import { BlockComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { ImageSelection } from '../../../image-block/image-selection.js';
@@ -18,7 +18,7 @@ export const getSelectedBlocksCommand: Command<
     textSelection?: TextSelection;
     blockSelections?: BlockSelection[];
     imageSelections?: ImageSelection[];
-    filter?: (el: BlockElement) => boolean;
+    filter?: (el: BlockComponent) => boolean;
     types?: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
     roles?: RoleType[];
     mode?: 'all' | 'flat' | 'highest';
@@ -30,7 +30,7 @@ export const getSelectedBlocksCommand: Command<
     mode = 'flat',
   } = ctx;
 
-  let dirtyResult: BlockElement[] = [];
+  let dirtyResult: BlockComponent[] = [];
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
   if (types.includes('text') && textSelection) {
@@ -40,12 +40,14 @@ export const getSelectedBlocksCommand: Command<
       const range = rangeManager.textSelectionToRange(textSelection);
       if (!range) return;
 
-      const selectedBlockElements =
-        rangeManager.getSelectedBlockElementsByRange(range, {
-          match: (el: BlockElement) => roles.includes(el.model.role),
+      const selectedBlocks = rangeManager.getSelectedBlockComponentsByRange(
+        range,
+        {
+          match: (el: BlockComponent) => roles.includes(el.model.role),
           mode,
-        });
-      dirtyResult.push(...selectedBlockElements);
+        }
+      );
+      dirtyResult.push(...selectedBlocks);
     } catch {
       return;
     }
@@ -55,12 +57,12 @@ export const getSelectedBlocksCommand: Command<
   if (types.includes('block') && blockSelections) {
     const viewStore = ctx.std.view;
     const doc = ctx.std.doc;
-    const selectedBlockElements = blockSelections.flatMap(selection => {
+    const selectedBlockComponents = blockSelections.flatMap(selection => {
       const el = viewStore.getBlock(selection.blockId);
       if (!el) {
         return [];
       }
-      const blockElements: BlockElement[] = [el];
+      const blocks: BlockComponent[] = [el];
       let selectionPath = selection.blockId;
       if (mode === 'all') {
         let parent = null;
@@ -71,7 +73,7 @@ export const getSelectedBlocksCommand: Command<
           }
           const view = parent;
           if (
-            view instanceof BlockElement &&
+            view instanceof BlockComponent &&
             !roles.includes(view.model.role)
           ) {
             break;
@@ -80,36 +82,36 @@ export const getSelectedBlocksCommand: Command<
         } while (parent);
         parent = viewStore.getBlock(selectionPath);
         if (parent) {
-          blockElements.push(parent);
+          blocks.push(parent);
         }
       }
       if (['all', 'flat'].includes(mode)) {
         viewStore.walkThrough(node => {
           const view = node;
-          if (!(view instanceof BlockElement)) {
+          if (!(view instanceof BlockComponent)) {
             return true;
           }
           if (roles.includes(view.model.role)) {
-            blockElements.push(view);
+            blocks.push(view);
           }
           return;
         }, selectionPath);
       }
-      return blockElements;
+      return blocks;
     });
-    dirtyResult.push(...selectedBlockElements);
+    dirtyResult.push(...selectedBlockComponents);
   }
 
   const imageSelections = ctx.imageSelections ?? ctx.currentImageSelections;
   if (types.includes('image') && imageSelections) {
     const viewStore = ctx.std.view;
-    const selectedBlockElements = imageSelections
+    const selectedBlocks = imageSelections
       .map(selection => {
         const el = viewStore.getBlock(selection.blockId);
         return el;
       })
-      .filter((el): el is BlockElement => Boolean(el));
-    dirtyResult.push(...selectedBlockElements);
+      .filter((el): el is BlockComponent => Boolean(el));
+    dirtyResult.push(...selectedBlocks);
   }
 
   if (ctx.filter) {
@@ -117,7 +119,7 @@ export const getSelectedBlocksCommand: Command<
   }
 
   // remove duplicate elements
-  const result: BlockElement[] = dirtyResult
+  const result: BlockComponent[] = dirtyResult
     .filter((el, index) => dirtyResult.indexOf(el) === index)
     // sort by document position
     .sort((a, b) => {
@@ -153,7 +155,7 @@ export const getSelectedBlocksCommand: Command<
 declare global {
   namespace BlockSuite {
     interface CommandContext {
-      selectedBlocks?: BlockElement[];
+      selectedBlocks?: BlockComponent[];
     }
 
     interface Commands {

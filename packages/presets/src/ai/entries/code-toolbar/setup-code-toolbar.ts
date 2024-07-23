@@ -22,7 +22,7 @@ export function setupCodeToolbarEntry(codeToolbar: AffineCodeToolbarWidget) {
   const onAskAIClick = () => {
     const { host } = codeToolbar;
     const { selection } = host;
-    const imageBlock = codeToolbar.blockElement;
+    const imageBlock = codeToolbar.block;
     selection.setGroup('note', [
       selection.create('block', { blockId: imageBlock.blockId }),
     ]);

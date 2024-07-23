@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { BlockElement } from '@blocksuite/block-std';
+import { BlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -9,7 +9,7 @@ import type { NoteBlockService } from './note-service.js';
 import { KeymapController } from './keymap-controller.js';
 
 @customElement('affine-note')
-export class NoteBlockComponent extends BlockElement<
+export class NoteBlockComponent extends BlockComponent<
   NoteBlockModel,
   NoteBlockService
 > {

@@ -16,7 +16,7 @@ import type {
 import { SmallScissorsIcon } from '../../../../_common/icons/edgeless.js';
 import {
   buildPath,
-  getRectByBlockElement,
+  getRectByBlockComponent,
 } from '../../../../_common/utils/index.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
@@ -110,7 +110,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     return this.edgeless.host;
   }
 
-  get _noteBlockElement() {
+  get _noteBlock() {
     if (!this._editorHost) return null;
     const noteBlock = this._editorHost.view.viewFromPath(
       'block',
@@ -190,7 +190,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private _updateDivingLineAndBlockIds() {
-    if (!this._anchorNote || !this._noteBlockElement) {
+    if (!this._anchorNote || !this._noteBlock) {
       this._divingLinePositions = [];
       this._noteBlockIds = [];
       return;
@@ -198,7 +198,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
     const divingLinePositions: Point[] = [];
     const noteBlockIds: string[] = [];
-    const noteRect = this._noteBlockElement.getBoundingClientRect();
+    const noteRect = this._noteBlock.getBoundingClientRect();
     const noteTop = noteRect.top;
     const noteBottom = noteRect.bottom;
 
@@ -350,10 +350,10 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
     this._updateDivingLineAndBlockIds();
 
-    const noteBlockElement = this._noteBlockElement;
-    if (!noteBlockElement || !this._divingLinePositions.length) return nothing;
+    const noteBlock = this._noteBlock;
+    if (!noteBlock || !this._divingLinePositions.length) return nothing;
 
-    const rect = getRectByBlockElement(noteBlockElement);
+    const rect = getRectByBlockComponent(noteBlock);
     const width = rect.width;
     const buttonPosition = this._divingLinePositions[this._activeSlicerIndex];
 
