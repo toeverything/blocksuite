@@ -1,7 +1,7 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { LitElement, css, html } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SortingIcon } from '../../_common/icons.js';
 import './outline-setting-menu.js';
@@ -75,6 +75,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_OUTLINE_PANEL_HEADER = 'affine-outline-panel-header';
+
+@customElement(AFFINE_OUTLINE_PANEL_HEADER)
 export class OutlinePanelHeader extends WithDisposable(LitElement) {
   private _notePreviewSettingMenuPopper: ReturnType<
     typeof createButtonPopper
@@ -129,10 +132,10 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
         </edgeless-tool-icon-button>
       </div>
       <div class="note-preview-setting-container">
-        <outline-note-preview-setting-menu
+        <affine-outline-note-preview-setting-menu
           .showPreviewIcon=${this.showPreviewIcon}
           .toggleShowPreviewIcon=${this.toggleShowPreviewIcon}
-        ></outline-note-preview-setting-menu>
+        ></affine-outline-note-preview-setting-menu>
       </div>`;
   }
 
@@ -160,6 +163,6 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'outline-panel-header': OutlinePanelHeader;
+    [AFFINE_OUTLINE_PANEL_HEADER]: OutlinePanelHeader;
   }
 }

@@ -1,7 +1,6 @@
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { registerFramePanelComponents } from '@blocksuite/presets';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -23,17 +22,13 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
   `;
 
   private _renderPanel() {
-    return html`<frame-panel .editor=${this.editor}></frame-panel>`;
+    return html`<affine-frame-panel
+      .editor=${this.editor}
+    ></affine-frame-panel>`;
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
-
-    registerFramePanelComponents(components => {
-      Object.entries(components).forEach(([name, component]) => {
-        customElements.define(name, component);
-      });
-    });
 
     this.disposables.add(
       this.editor.slots.editorModeSwitched.on(() => {

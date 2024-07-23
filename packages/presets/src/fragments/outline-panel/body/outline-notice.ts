@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html, nothing } from 'lit';
-import { property } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import { SmallCloseIcon, SortingIcon } from '../../_common/icons.js';
 
@@ -79,6 +79,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_OUTLINE_NOTICE = 'affine-outline-notice';
+
+@customElement(AFFINE_OUTLINE_NOTICE)
 export class OutlineNotice extends WithDisposable(LitElement) {
   static override styles = styles;
 
@@ -129,6 +132,6 @@ export class OutlineNotice extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'outline-notice': OutlineNotice;
+    [AFFINE_OUTLINE_NOTICE]: OutlineNotice;
   }
 }

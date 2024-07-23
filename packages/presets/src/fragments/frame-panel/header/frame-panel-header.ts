@@ -6,7 +6,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { LitElement, type PropertyValues, css, html } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SmallFrameNavigatorIcon } from '../../_common/icons.js';
 import './frames-setting-menu.js';
@@ -99,6 +99,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_FRAME_PANEL_HEADER = 'affine-frame-panel-header';
+
+@customElement(AFFINE_FRAME_PANEL_HEADER)
 export class FramePanelHeader extends WithDisposable(LitElement) {
   private _clearEdgelessDisposables = () => {
     this._edgelessDisposables?.dispose();
@@ -199,10 +202,10 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
         </edgeless-tool-icon-button>
       </div>
       <div class="frames-setting-container">
-        <frames-setting-menu
+        <affine-frames-setting-menu
           .edgeless=${this.edgeless}
           .editorHost=${this.editorHost}
-        ></frames-setting-menu>
+        ></affine-frames-setting-menu>
       </div>
       <div class="presentation-button" @click=${this._enterPresentationMode}>
         ${SmallFrameNavigatorIcon}<span class="presentation-button-label"
@@ -244,6 +247,6 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frame-panel-header': FramePanelHeader;
+    [AFFINE_FRAME_PANEL_HEADER]: FramePanelHeader;
   }
 }

@@ -2,17 +2,14 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { LitElement, type PropertyValues, css, html, unsafeCSS } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
 
-import { OutlineNotice } from './body/outline-notice.js';
-import { OutlinePanelBody } from './body/outline-panel-body.js';
-import { OutlineNoteCard } from './card/outline-card.js';
-import { OutlineBlockPreview } from './card/outline-preview.js';
+import './body/outline-notice.js';
+import './body/outline-panel-body.js';
 import { type OutlineSettingsDataType, outlineSettingsKey } from './config.js';
-import { OutlinePanelHeader } from './header/outline-panel-header.js';
-import { OutlineNotePreviewSettingMenu } from './header/outline-setting-menu.js';
+import './header/outline-panel-header.js';
 
 const styles = css`
   :host {
@@ -57,6 +54,10 @@ const styles = css`
     display: none;
   }
 `;
+
+export const AFFINE_OUTLINE_PANEL = 'affine-outline-panel';
+
+@customElement(AFFINE_OUTLINE_PANEL)
 export class OutlinePanel extends WithDisposable(LitElement) {
   private _editorDisposables: DisposableGroup | null = null;
 
@@ -142,13 +143,13 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   override render() {
     return html`
       <div class="outline-panel-container">
-        <outline-panel-header
+        <affine-outline-panel-header
           .showPreviewIcon=${this._showPreviewIcon}
           .enableNotesSorting=${this._enableNotesSorting}
           .toggleShowPreviewIcon=${this._toggleShowPreviewIcon}
           .toggleNotesSorting=${this._toggleNotesSorting}
-        ></outline-panel-header>
-        <outline-panel-body
+        ></affine-outline-panel-header>
+        <affine-outline-panel-body
           class="outline-panel-body"
           .doc=${this.doc}
           .fitPadding=${this.fitPadding}
@@ -161,12 +162,12 @@ export class OutlinePanel extends WithDisposable(LitElement) {
           .noticeVisible=${this._noticeVisible}
           .setNoticeVisibility=${this._setNoticeVisibility}
         >
-        </outline-panel-body>
-        <outline-notice
+        </affine-outline-panel-body>
+        <affine-outline-notice
           .noticeVisible=${this._noticeVisible}
           .toggleNotesSorting=${this._toggleNotesSorting}
           .setNoticeVisibility=${this._setNoticeVisibility}
-        ></outline-notice>
+        ></affine-outline-notice>
       </div>
     `;
   }
@@ -211,22 +212,6 @@ export class OutlinePanel extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'outline-panel': OutlinePanel;
+    [AFFINE_OUTLINE_PANEL]: OutlinePanel;
   }
-}
-
-const componentsMap = {
-  'outline-note-card': OutlineNoteCard,
-  'outline-block-preview': OutlineBlockPreview,
-  'outline-panel': OutlinePanel,
-  'outline-note-preview-setting-menu': OutlineNotePreviewSettingMenu,
-  'outline-panel-body': OutlinePanelBody,
-  'outline-panel-header': OutlinePanelHeader,
-  'outline-notice': OutlineNotice,
-};
-
-export function registerOutlinePanelComponents(
-  callback: (components: typeof componentsMap) => void
-) {
-  callback(componentsMap);
 }

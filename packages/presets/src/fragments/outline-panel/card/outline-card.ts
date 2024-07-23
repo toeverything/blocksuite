@@ -9,7 +9,7 @@ import {
   on,
   once,
 } from '@blocksuite/blocks';
-import { DisposableGroup, noop } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { baseTheme } from '@toeverything/theme';
 import {
@@ -20,13 +20,11 @@ import {
   nothing,
   unsafeCSS,
 } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { HiddenIcon, SmallArrowDownIcon } from '../../_common/icons.js';
-import { OutlineBlockPreview } from './outline-preview.js';
-
-noop(OutlineBlockPreview);
+import './outline-preview.js';
 
 export type ReorderEvent = CustomEvent<{
   currentNumber: number;
@@ -219,6 +217,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_OUTLINE_NOTE_CARD = 'affine-outline-note-card';
+
+@customElement(AFFINE_OUTLINE_NOTE_CARD)
 export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
   private _clearNoteDisposables = () => {
     this._noteDisposables?.dispose();
@@ -434,7 +435,7 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
         </div>`}
           <div class="card-content">
             ${children.map(block => {
-              return html`<outline-block-preview
+              return html`<affine-outline-block-preview
                 .block=${block}
                 .showPreviewIcon=${this.showPreviewIcon}
                 .disabledIcon=${this.invisible}
@@ -444,7 +445,7 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
                   if (this.editorMode === 'edgeless' || this.invisible) return;
                   this._dispatchClickBlockEvent(block);
                 }}
-              ></outline-block-preview>`;
+              ></affine-outline-block-preview>`;
             })}
             </div>
           </div>
@@ -498,6 +499,6 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'outline-note-card': OutlineNoteCard;
+    [AFFINE_OUTLINE_NOTE_CARD]: OutlineNoteCard;
   }
 }

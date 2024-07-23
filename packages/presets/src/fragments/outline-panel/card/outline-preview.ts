@@ -14,7 +14,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { BlocksUtils } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
-import { property } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import { SmallLinkedDocIcon } from '../../_common/icons.js';
 import { headingKeys, placeholderMap, previewIconMap } from '../config.js';
@@ -140,6 +140,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_OUTLINE_BLOCK_PREVIEW = 'affine-outline-block-preview';
+
+@customElement(AFFINE_OUTLINE_BLOCK_PREVIEW)
 export class OutlineBlockPreview extends WithDisposable(LitElement) {
   private _clearTextDisposables = () => {
     this._textDisposables?.dispose();
@@ -329,6 +332,6 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'outline-block-preview': OutlineBlockPreview;
+    [AFFINE_OUTLINE_BLOCK_PREVIEW]: OutlineBlockPreview;
   }
 }

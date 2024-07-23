@@ -12,7 +12,7 @@ import {
 } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
 import { type PropertyValues, css, html, nothing } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type {
@@ -80,6 +80,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_FRAME_PANEL_BODY = 'affine-frame-panel-body';
+
+@customElement(AFFINE_FRAME_PANEL_BODY)
 export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   private _clearDocDisposables = () => {
     this._docDisposables?.dispose();
@@ -244,7 +247,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       frameItem => [frameItem.frame.id, frameItem.cardIndex].join('-'),
       frameItem => {
         const { frame, frameIndex, cardIndex } = frameItem;
-        return html`<frame-card
+        return html`<affine-frame-card
           data-frame-id=${frame.id}
           .edgeless=${this.edgeless}
           .doc=${this.doc}
@@ -260,7 +263,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
           @select=${this._selectFrame}
           @fitview=${this._fitToElement}
           @drag=${this._drag}
-        ></frame-card>`;
+        ></affine-frame-card>`;
       }
     )}`;
 
@@ -448,6 +451,6 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frame-panel-body': FramePanelBody;
+    [AFFINE_FRAME_PANEL_BODY]: FramePanelBody;
   }
 }

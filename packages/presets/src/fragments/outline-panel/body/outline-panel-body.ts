@@ -7,23 +7,19 @@ import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
-import {
-  Bound,
-  DisposableGroup,
-  assertExists,
-  noop,
-} from '@blocksuite/global/utils';
+import { Bound, DisposableGroup } from '@blocksuite/global/utils';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import {
-  type ClickBlockEvent,
-  type DisplayModeChangeEvent,
-  type FitViewEvent,
-  OutlineNoteCard,
-  type SelectEvent,
+import type {
+  ClickBlockEvent,
+  DisplayModeChangeEvent,
+  FitViewEvent,
+  SelectEvent,
 } from '../card/outline-card.js';
+
+import '../card/outline-card.js';
 import { headingKeys } from '../config.js';
 import { startDragging } from '../utils/drag.js';
 import './outline-notice.js';
@@ -41,8 +37,6 @@ type OutlineNoteItem = {
    */
   number: number;
 };
-
-noop(OutlineNoteCard);
 
 const styles = css`
   .outline-panel-body-container {
@@ -105,6 +99,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_OUTLINE_PANEL_BODY = 'affine-outline-panel-body';
+
+@customElement(AFFINE_OUTLINE_PANEL_BODY)
 export class OutlinePanelBody extends WithDisposable(LitElement) {
   private _changedFlag = false;
 
@@ -149,7 +146,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
             this._pageVisibleNotes,
             note => note.note.id,
             (note, idx) => html`
-              <outline-note-card
+              <affine-outline-note-card
                 data-note-id=${note.note.id}
                 .note=${note.note}
                 .number=${idx + 1}
@@ -168,7 +165,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
                 @fitview=${this._fitToElement}
                 @clickblock=${this._scrollToBlock}
                 @displaymodechange=${this._handleDisplayModeChange}
-              ></outline-note-card>
+              ></affine-outline-note-card>
             `
           )
         : html`${nothing}`}
@@ -178,7 +175,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
               this._edgelessOnlyNotes,
               note => note.note.id,
               (note, idx) =>
-                html`<outline-note-card
+                html`<affine-outline-note-card
                   data-note-id=${note.note.id}
                   .note=${note.note}
                   .number=${idx + 1}
@@ -189,7 +186,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
                   .enableNotesSorting=${this.enableNotesSorting}
                   @fitview=${this._fitToElement}
                   @displaymodechange=${this._handleDisplayModeChange}
-                ></outline-note-card>`
+                ></affine-outline-note-card>`
             )} `
         : nothing}
     </div>`;
@@ -326,7 +323,11 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     this.doc.updateBlock(note, { displayMode: newMode });
 
     const noteParent = this.doc.getParent(note);
-    assertExists(noteParent);
+    if (noteParent === null) {
+      console.error(`Failed to get parent of note(id:${note.id})`);
+      return;
+    }
+
     const noteParentChildNotes = noteParent.children.filter(block =>
       BlocksUtils.matchFlavours(block, ['affine:note'])
     ) as NoteBlockModel[];
@@ -409,9 +410,14 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     });
 
     requestAnimationFrame(() => {
+      if (!rootComponent.viewport) {
+        console.error('viewport should exist');
+        return;
+      }
+
       const blockRect = block.getBoundingClientRect();
       const { top, left, width, height } = blockRect;
-      assertExists(rootComponent.viewport, 'viewport should exist');
+
       const {
         top: offsetY,
         left: offsetX,
@@ -742,6 +748,6 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'outline-panel-body': OutlinePanelBody;
+    [AFFINE_OUTLINE_PANEL_BODY]: OutlinePanelBody;
   }
 }

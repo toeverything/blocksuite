@@ -3,18 +3,12 @@ import { FramePreview } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { type PropertyValues, css, html, unsafeCSS } from 'lit';
-import { property } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../index.js';
 
 import './body/frame-panel-body.js';
-import { FramePanelBody } from './body/frame-panel-body.js';
-import { FrameCard } from './card/frame-card.js';
-import { FrameCardTitle } from './card/frame-card-title.js';
-import { FrameCardTitleEditor } from './card/frame-card-title-editor.js';
 import './header/frame-panel-header.js';
-import { FramePanelHeader } from './header/frame-panel-header.js';
-import { FramesSettingMenu } from './header/frames-setting-menu.js';
 
 const styles = css`
   frame-panel {
@@ -68,6 +62,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_FRAME_PANEL = 'affine-frame-panel';
+
+@customElement(AFFINE_FRAME_PANEL)
 export class FramePanel extends WithDisposable(ShadowlessElement) {
   private _editorDisposables: DisposableGroup | null = null;
 
@@ -113,17 +110,17 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
 
   override render() {
     return html`<div class="frame-panel-container">
-      <frame-panel-header
+      <affine-frame-panel-header
         .edgeless=${this.edgeless}
         .editorHost=${this.host}
-      ></frame-panel-header>
-      <frame-panel-body
+      ></affine-frame-panel-header>
+      <affine-frame-panel-body
         class="frame-panel-body"
         .edgeless=${this.edgeless}
         .doc=${this.doc}
         .editorHost=${this.host}
         .fitPadding=${this.fitPadding}
-      ></frame-panel-body>
+      ></affine-frame-panel-body>
     </div>`;
   }
 
@@ -154,22 +151,6 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frame-panel': FramePanel;
+    [AFFINE_FRAME_PANEL]: FramePanel;
   }
-}
-
-const componentsMap = {
-  'frame-panel': FramePanel,
-  'frame-panel-header': FramePanelHeader,
-  'frame-panel-body': FramePanelBody,
-  'frames-setting-menu': FramesSettingMenu,
-  'frame-card': FrameCard,
-  'frame-card-title': FrameCardTitle,
-  'frame-card-title-editor': FrameCardTitleEditor,
-};
-
-export function registerFramePanelComponents(
-  callback: (components: typeof componentsMap) => void
-) {
-  callback(componentsMap);
 }

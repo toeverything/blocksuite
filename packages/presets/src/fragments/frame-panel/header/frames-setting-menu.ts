@@ -3,7 +3,7 @@ import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, type PropertyValues, css, html } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 const styles = css`
   :host {
@@ -68,6 +68,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_FRAMES_SETTING_MENU = 'affine-frames-setting-menu';
+
+@customElement(AFFINE_FRAMES_SETTING_MENU)
 export class FramesSettingMenu extends WithDisposable(LitElement) {
   private _onBlackBackgroundChange = (checked: boolean) => {
     this.blackBackground = checked;
@@ -214,6 +217,6 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frames-setting-menu': FramesSettingMenu;
+    [AFFINE_FRAMES_SETTING_MENU]: FramesSettingMenu;
   }
 }
