@@ -1,3 +1,5 @@
+import type { BlockModel } from '@blocksuite/store';
+
 import {
   type BlockComponent,
   ShadowlessElement,
@@ -20,7 +22,7 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
   }
 
   private get _model() {
-    return this.block.model;
+    return this.block.model as BlockModel<{ caption: string }>;
   }
 
   private _onKeydown(e: KeyboardEvent) {
