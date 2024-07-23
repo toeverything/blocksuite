@@ -1,3 +1,5 @@
+import type { EdgelessModel as EModel } from '@blocksuite/block-std/edgeless';
+
 import type { EdgelessBlockModel } from './edgeless-block-model.js';
 
 export type EdgelessTool = BlockSuite.EdgelessToolType;
@@ -10,7 +12,7 @@ declare global {
       | EdgelessBlockModelMap[EdgelessBlockModelKeyType]
       | EdgelessBlockModel;
 
-    type EdgelessModel = EdgelessBlockModelType | SurfaceModel;
+    type EdgelessModel = EModel;
     type EdgelessModelKeys = EdgelessBlockModelKeyType | SurfaceModelKeyType;
 
     interface EdgelessTextModelMap {}
