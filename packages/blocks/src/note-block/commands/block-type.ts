@@ -1,5 +1,4 @@
 import type { Command } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -24,7 +23,7 @@ export const updateBlockType: Command<
   UpdateBlockConfig
 > = (ctx, next) => {
   const { std, flavour, props } = ctx;
-  const host = std.host as EditorHost;
+  const host = std.host;
   const doc = std.doc;
 
   const getSelectedBlocks = () => {

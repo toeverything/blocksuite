@@ -1,4 +1,3 @@
-import type { EditorHost } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
 import { Bound } from '@blocksuite/global/utils';
@@ -711,7 +710,7 @@ export class EdgelessRootService extends RootService {
   }
 
   override get host() {
-    return this.std.host as EditorHost;
+    return this.std.host;
   }
 
   get layer() {

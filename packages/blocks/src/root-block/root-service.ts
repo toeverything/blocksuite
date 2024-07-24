@@ -1,4 +1,4 @@
-import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { BlockService } from '@blocksuite/block-std';
@@ -171,7 +171,7 @@ export class RootService extends BlockService<RootBlockModel> {
     targetStyle: EmbedCardStyle,
     props: Record<string, unknown>
   ) => {
-    const host = this.host as EditorHost;
+    const host = this.host;
 
     const mode = this.docModeService.getMode();
     const { model, index } = this._getParentModelBySelection();
@@ -225,7 +225,7 @@ export class RootService extends BlockService<RootBlockModel> {
   };
 
   private _insertLink = (url: string) => {
-    const host = this.host as EditorHost;
+    const host = this.host;
     const rootService = host.spec.getService('affine:page');
 
     const embedOptions = rootService.getEmbedBlockOptions(url);
@@ -256,7 +256,7 @@ export class RootService extends BlockService<RootBlockModel> {
       noteId
     );
 
-    asyncFocusRichText(this.host as EditorHost, id, {
+    asyncFocusRichText(this.host, id, {
       index: text.length,
       length: 0,
     })?.catch(console.error);

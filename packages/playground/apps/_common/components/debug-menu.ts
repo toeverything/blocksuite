@@ -205,11 +205,11 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.rootService.exportManager.exportPdf().catch(console.error);
+    this.rootService?.exportManager.exportPdf().catch(console.error);
   }
 
   private _exportPng() {
-    this.rootService.exportManager.exportPng().catch(console.error);
+    this.rootService?.exportManager.exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {
@@ -343,6 +343,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
+    if (!this.editor.host) return;
     const { docModeService } = this.editor.host.spec.getService('affine:page');
     this.mode = docModeService.toggleMode();
   }
@@ -630,16 +631,8 @@ export class DebugMenu extends ShadowlessElement {
     super.update(changedProperties);
   }
 
-  get command() {
-    return this.host.command;
-  }
-
   get doc() {
     return this.editor.doc;
-  }
-
-  get host() {
-    return this.editor.host;
   }
 
   get mode() {
@@ -651,7 +644,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   get rootService() {
-    return this.host.spec.getService('affine:page');
+    return this.editor.host?.spec.getService('affine:page');
   }
 
   @state()

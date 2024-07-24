@@ -298,9 +298,7 @@ export class AffineEditorContainer
   }
 
   get host() {
-    // FIXME: we need to get rid of the none-null assertion
-    const host = this._hostRef.value!;
-    return host;
+    return this._hostRef.value;
   }
 
   get mode() {

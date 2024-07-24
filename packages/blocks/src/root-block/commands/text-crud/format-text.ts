@@ -1,7 +1,5 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
@@ -22,10 +20,7 @@ export const formatTextCommand: Command<
   const { styles, mode = 'merge' } = ctx;
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
-  assertExists(
-    textSelection,
-    '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
-  );
+  if (!textSelection) return;
 
   const success = ctx.std.command
     .chain()
@@ -39,7 +34,7 @@ export const formatTextCommand: Command<
     })
     .inline((ctx, next) => {
       const { selectedBlocks } = ctx;
-      assertExists(selectedBlocks);
+      if (!selectedBlocks) return;
 
       const selectedInlineEditors = selectedBlocks.flatMap(el => {
         const inlineRoot = el.querySelector<
@@ -88,9 +83,7 @@ export const formatTextCommand: Command<
 
       Promise.all(selectedBlocks.map(el => el.updateComplete))
         .then(() => {
-          (ctx.std.host as EditorHost).rangeManager?.syncTextSelectionToRange(
-            textSelection
-          );
+          ctx.std.host.rangeManager?.syncTextSelectionToRange(textSelection);
         })
         .catch(console.error);
 

@@ -241,7 +241,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
     let icon: TemplateResult<1> | null = null;
     if (matchFlavours(model, ['affine:list'])) {
-      const listService = this._host!.spec.getService('affine:list');
+      const listService = this._host.spec.getService('affine:list');
 
       icon = listService.styles.icon(model, false, () => {});
     }
@@ -373,7 +373,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
           assertExists(doc);
           const show = this._backLinkShow[index] ?? false;
 
-          const listService = this._host!.spec.getService('affine:list');
+          const listService = this._host.spec.getService('affine:list');
 
           return html`<style>
               .affine-list-block__prefix{

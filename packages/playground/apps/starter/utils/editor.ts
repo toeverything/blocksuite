@@ -100,7 +100,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   docsPanel.editor = editor;
 
   const commentPanel = new CommentPanel();
-  commentPanel.host = editor.host;
+  commentPanel.editor = editor;
 
   const chatPanel = new CustomChatPanel();
   chatPanel.editor = editor;

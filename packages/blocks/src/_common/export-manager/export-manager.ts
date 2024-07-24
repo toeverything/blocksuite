@@ -580,6 +580,6 @@ export class ExportManager {
   }
 
   get editorHost(): EditorHost {
-    return this._blockService.std.host as EditorHost;
+    return this._blockService.std.host;
   }
 }

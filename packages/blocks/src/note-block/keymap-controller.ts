@@ -1,6 +1,5 @@
 import type {
   BlockSelection,
-  EditorHost,
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
@@ -65,7 +64,7 @@ export class KeymapController implements ReactiveController {
               })
               .inline((ctx, next) => {
                 const newModels = ctx.updatedBlocks;
-                const host = ctx.std.host as EditorHost;
+                const host = ctx.std.host;
                 assertExists(newModels);
                 assertExists(host);
 

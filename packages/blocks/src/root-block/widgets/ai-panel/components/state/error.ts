@@ -218,7 +218,10 @@ export class AIPanelError extends WithDisposable(LitElement) {
                   ? html`<ai-panel-divider></ai-panel-divider>`
                   : nothing}
                 <div class="response-list-container">
-                  <ai-item-list .groups=${[group]}></ai-item-list>
+                  <ai-item-list
+                    .host=${this.host}
+                    .groups=${[group]}
+                  ></ai-item-list>
                 </div>
               `
             )}

@@ -52,7 +52,7 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
 
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
-    await this.host.updateComplete;
+    await this.host?.updateComplete;
     return result;
   }
 
@@ -71,7 +71,7 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   }
 
   get host() {
-    return this._host.value as EditorHost;
+    return this._host.value;
   }
 
   @property({ attribute: false })

@@ -280,7 +280,7 @@ class PasteTr {
   };
 
   focusPasted = () => {
-    const host = this.std.host as EditorHost;
+    const host = this.std.host;
 
     const cursorBlock =
       this.fromPointState.model.flavour === 'affine:code' || !this.lastSnapshot

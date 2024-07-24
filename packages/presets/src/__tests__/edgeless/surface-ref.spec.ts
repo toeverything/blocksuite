@@ -178,7 +178,7 @@ describe('basic', () => {
     ) as HTMLElement;
 
     const switchEditor = vi.fn(() => {});
-    const pageService = editor.host.std.spec.getService('affine:page');
+    const pageService = editor.host!.std.spec.getService('affine:page');
     pageService.docModeService.onModeChange(switchEditor);
 
     expect(surfaceRef).instanceOf(Element);

@@ -1,10 +1,7 @@
-import type { EditorHost } from '@blocksuite/block-std';
-
 import { BlockService } from '@blocksuite/block-std';
-import { Bound, Point, assertExists } from '@blocksuite/global/utils';
+import { Bound, Point } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
-import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import type { RootBlockComponent } from '../root-block/types.js';
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
@@ -17,6 +14,7 @@ import {
 import { setImageProxyMiddlewareURL } from '../_common/transformers/middlewares.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { isInsideEdgelessEditor } from '../_common/utils/query.js';
+import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -126,14 +124,15 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
 
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
         addSiblingImageBlock(
-          this.host as EditorHost,
+          this.host,
           imageFiles,
           this.maxFileSize,
           targetModel,
           place
         );
-      } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
-        const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
+      } else if (isInsideEdgelessEditor(this.host)) {
+        const edgelessRoot = this.rootComponent;
+        if (!(edgelessRoot instanceof EdgelessRootBlockComponent)) return false;
         point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
         await edgelessRoot.addImages(imageFiles, point);
 
@@ -168,14 +167,12 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
     );
   }
 
-  get rootComponent(): RootBlockComponent {
+  get rootComponent(): RootBlockComponent | null {
     const rootModel = this.doc.root;
-    assertExists(rootModel);
-
+    if (!rootModel) return null;
     const rootComponent = this.std.view.viewFromPath('block', [
       rootModel.id,
     ]) as RootBlockComponent | null;
-    assertExists(rootComponent);
     return rootComponent;
   }
 }

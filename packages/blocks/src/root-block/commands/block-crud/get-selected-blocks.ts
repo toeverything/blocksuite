@@ -3,11 +3,9 @@ import type {
   Command,
   TextSelection,
 } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/block-std';
 import type { RoleType } from '@blocksuite/store';
 
 import { BlockComponent } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 
 import type { ImageSelection } from '../../../image-block/image-selection.js';
 
@@ -34,9 +32,9 @@ export const getSelectedBlocksCommand: Command<
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
   if (types.includes('text') && textSelection) {
-    const rangeManager = (ctx.std.host as EditorHost).rangeManager;
-    assertExists(rangeManager);
+    const rangeManager = ctx.std.host.rangeManager;
     try {
+      if (!rangeManager) return;
       const range = rangeManager.textSelectionToRange(textSelection);
       if (!range) return;
 

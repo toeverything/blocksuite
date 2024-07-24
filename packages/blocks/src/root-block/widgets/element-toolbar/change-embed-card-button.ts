@@ -1,5 +1,3 @@
-import type { EditorHost } from '@blocksuite/block-std';
-
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
@@ -180,7 +178,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
 
     navigator.clipboard.writeText(this.model.url).catch(console.error);
-    toast(this.std.host as EditorHost, 'Copied link to clipboard');
+    toast(this.std.host, 'Copied link to clipboard');
     this.edgeless.service.selection.clear();
   };
 
@@ -598,8 +596,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               .tooltip=${'Edit'}
               class="change-embed-card-button edit"
               ?disabled=${this._doc.readonly}
-              @click=${() =>
-                toggleEmbedCardEditModal(this.std.host as EditorHost, model)}
+              @click=${() => toggleEmbedCardEditModal(this.std.host, model)}
             >
               ${EditIcon}
             </editor-icon-button>
