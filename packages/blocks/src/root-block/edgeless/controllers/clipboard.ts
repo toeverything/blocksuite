@@ -47,7 +47,10 @@ import {
   type SerializedElement,
   SurfaceGroupLikeModel,
 } from '../../../surface-block/element-model/base.js';
-import { CanvasElementType } from '../../../surface-block/element-model/index.js';
+import {
+  CanvasElementType,
+  GroupElementModel,
+} from '../../../surface-block/element-model/index.js';
 import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
 import {
   type Connection,
@@ -1323,7 +1326,9 @@ export class EdgelessClipboardController extends PageClipboard {
       pasteCenter ??
       this.host.service.viewport.toModelCoord(lastMousePos.x, lastMousePos.y);
     const [modelX, modelY] = pasteCenter;
-    const oldCommonBound = edgelessElementsBound(allElements);
+    const oldCommonBound = edgelessElementsBound(
+      allElements.filter(el => !(el instanceof GroupElementModel))
+    );
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
 
