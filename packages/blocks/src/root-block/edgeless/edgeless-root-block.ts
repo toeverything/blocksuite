@@ -125,6 +125,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       user-select: none;
       display: block;
       height: 100%;
+      touch-action: none;
     }
 
     .widgets-container {

@@ -238,8 +238,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
     }
 
     this._setSelectedBlocks([blocks]);
-
-    return true;
   };
 
   private _createDragPreview = (

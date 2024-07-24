@@ -56,11 +56,11 @@ export class AffineFormatBarWidget extends WidgetComponent {
   private _calculatePlacement() {
     const rootComponent = this.block;
 
-    this.handleEvent('pointerMove', ctx => {
-      this._dragging = ctx.get('pointerState').dragging;
+    this.handleEvent('dragStart', () => {
+      this._dragging = true;
     });
 
-    this.handleEvent('pointerUp', () => {
+    this.handleEvent('dragEnd', () => {
       this._dragging = false;
     });
 
