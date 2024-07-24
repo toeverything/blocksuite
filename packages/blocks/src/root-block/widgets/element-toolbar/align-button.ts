@@ -234,7 +234,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _updateXYWH(ele: BlockSuite.EdgelessModelType, bound: Bound) {
+  private _updateXYWH(ele: BlockSuite.EdgelessModel, bound: Bound) {
     if (ele instanceof ConnectorElementModel) {
       ele.moveTo(bound);
     } else if (ele instanceof GroupElementModel) {
@@ -310,7 +310,7 @@ declare global {
 
 export function renderAlignButton(
   edgeless: EdgelessRootBlockComponent,
-  elements: BlockSuite.EdgelessModelType[]
+  elements: BlockSuite.EdgelessModel[]
 ) {
   if (elements.length < 2) return nothing;
   if (elements.some(e => e.group instanceof MindmapElementModel))

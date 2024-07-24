@@ -39,7 +39,7 @@ export type AbstractEditor = {
 export type ExtendedModel = BlockModel & Record<string, any>;
 
 export type Connectable = Exclude<
-  BlockSuite.EdgelessModelType,
+  BlockSuite.EdgelessModel,
   ConnectorElementModel | BrushElementModel | GroupElementModel
 >;
 

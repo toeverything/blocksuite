@@ -1,4 +1,4 @@
-import type { SurfaceElementModel } from '../base.js';
+import type { SurfaceElementModel } from '../element-model.js';
 
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
@@ -33,7 +33,11 @@ export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
 
         yProps.add(prop);
 
-        if (getDecoratorState()?.skipYfield) {
+        if (
+          getDecoratorState(
+            this.surface ?? Object.getPrototypeOf(this).constructor
+          )?.skipYfield
+        ) {
           return;
         }
 
@@ -57,9 +61,9 @@ export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
         );
       },
       set(this: T, originalVal: V) {
-        const isCreating = getDecoratorState()?.creating;
+        const isCreating = getDecoratorState(this.surface)?.creating;
 
-        if (getDecoratorState()?.skipYfield) {
+        if (getDecoratorState(this.surface)?.skipYfield) {
           return;
         }
 

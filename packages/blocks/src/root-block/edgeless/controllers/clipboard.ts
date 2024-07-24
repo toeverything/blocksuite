@@ -257,7 +257,7 @@ export class EdgelessClipboardController extends PageClipboard {
       const flavour = pageId
         ? 'affine:embed-linked-doc'
         : embedOptions
-          ? (embedOptions.flavour as BlockSuite.EdgelessModelKeyType)
+          ? (embedOptions.flavour as BlockSuite.EdgelessModelKeys)
           : 'affine:bookmark';
       const style = pageId
         ? 'vertical'
@@ -459,7 +459,7 @@ export class EdgelessClipboardController extends PageClipboard {
     });
     const element = this.host.service.getElementById(
       id
-    ) as BlockSuite.SurfaceModelType;
+    ) as BlockSuite.SurfaceModel;
     assertExists(element);
     return element;
   }
@@ -813,7 +813,7 @@ export class EdgelessClipboardController extends PageClipboard {
     edgeless: EdgelessRootBlockComponent,
     bound: IBound,
     nodes?: BlockSuite.EdgelessBlockModelType[],
-    canvasElements: BlockSuite.SurfaceModelType[] = [],
+    canvasElements: BlockSuite.SurfaceModel[] = [],
     {
       background,
       padding = IMAGE_PADDING,
@@ -940,7 +940,7 @@ export class EdgelessClipboardController extends PageClipboard {
             if (isTopLevelBlock(ele)) {
               blocksInsideFrame.push(ele as BlockSuite.EdgelessBlockModelType);
             } else {
-              canvasElements.push(ele as BlockSuite.SurfaceModelType);
+              canvasElements.push(ele as BlockSuite.SurfaceModel);
             }
           });
 
@@ -1091,20 +1091,17 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _updatePastedElementsIndex(
-    elements: BlockSuite.EdgelessModelType[],
+    elements: BlockSuite.EdgelessModel[],
     originalIndexes: Map<string, string>
   ) {
-    function compare(
-      a: BlockSuite.EdgelessModelType,
-      b: BlockSuite.EdgelessModelType
-    ) {
+    function compare(a: BlockSuite.EdgelessModel, b: BlockSuite.EdgelessModel) {
       if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
         return -1;
       } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
         return 1;
       } else {
-        const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModelType[];
-        const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModelType[];
+        const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModel[];
+        const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModel[];
         const minGroups = Math.min(aGroups.length, bGroups.length);
 
         for (let i = 0; i < minGroups; ++i) {
@@ -1171,7 +1168,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
   async copyAsPng(
     blocks: BlockSuite.EdgelessBlockModelType[],
-    shapes: BlockSuite.SurfaceModelType[]
+    shapes: BlockSuite.SurfaceModel[]
   ) {
     const blocksLen = blocks.length;
     const shapesLen = shapes.length;
@@ -1381,7 +1378,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
   async toCanvas(
     blocks: BlockSuite.EdgelessBlockModelType[],
-    shapes: BlockSuite.SurfaceModelType[],
+    shapes: BlockSuite.SurfaceModel[],
     options?: CanvasExportOptions
   ) {
     blocks.sort(compare);
@@ -1409,7 +1406,7 @@ export class EdgelessClipboardController extends PageClipboard {
 }
 
 export async function prepareClipboardData(
-  selectedAll: BlockSuite.EdgelessModelType[],
+  selectedAll: BlockSuite.EdgelessModel[],
   std: BlockStdScope
 ) {
   const job = new Job({

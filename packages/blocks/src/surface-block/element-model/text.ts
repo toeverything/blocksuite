@@ -1,6 +1,6 @@
-import type { IVec } from '@blocksuite/global/utils';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
+import type { IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
+import { yfield } from '@blocksuite/block-std/edgeless';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
@@ -18,7 +18,6 @@ import {
   polygonNearestPoint,
 } from '../utils/math-utils.js';
 import { type IBaseProps, SurfaceElementModel } from './base.js';
-import { yfield } from './decorators.js';
 
 export type TextElementProps = IBaseProps & {
   text: Y.Text;

@@ -230,8 +230,7 @@ function SurfaceRefToolbarOptions(options: {
           edgelessToBlob(block.host, {
             surfaceRefBlock: block,
             surfaceRenderer: block.surfaceRenderer,
-            edgelessElement:
-              block.referenceModel as BlockSuite.EdgelessModelType,
+            edgelessElement: block.referenceModel as BlockSuite.EdgelessModel,
             blockContainer: block.portal,
           })
             .then(blob => {

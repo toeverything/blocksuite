@@ -18,6 +18,9 @@ import {
 import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
+import type { SurfaceElementModel } from './surface-model/element-model.js';
+
+import { SurfaceBlockModel } from './surface-model/model.js';
 
 export interface IHitTestOptions {
   expand?: number;
@@ -155,29 +158,23 @@ export class EdgelessBlockModel<
   }
 
   get group(): IEdgelessElement | null {
-    // FIXME: make surface a official supported block
     const surface = this.doc
       .getBlocks()
-      // @ts-ignore
-      .find(block => block['_surfaceBlockModel']);
+      .find(block => block instanceof SurfaceBlockModel);
 
     if (!surface) return null;
 
-    // @ts-ignore
-    return surface.getGroup(this.id) ?? null;
+    return (surface as SurfaceBlockModel).getGroup(this.id) ?? null;
   }
 
   get groups(): IEdgelessElement[] {
-    // FIXME: make surface a official supported block
     const surface = this.doc
       .getBlocks()
-      // @ts-ignore
-      .find(block => block['_surfaceBlockModel']);
+      .find(block => block instanceof SurfaceBlockModel);
 
     if (!surface) return [];
 
-    // @ts-ignore
-    return surface.getGroups(this.id);
+    return (surface as SurfaceBlockModel).getGroups(this.id);
   }
 }
 
@@ -214,3 +211,5 @@ export function selectable<
 
   return SuperClass as unknown as typeof EdgelessBlockModel<Props>;
 }
+
+export type EdgelessModel = EdgelessBlockModel | SurfaceElementModel;

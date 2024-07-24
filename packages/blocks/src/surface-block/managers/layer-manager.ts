@@ -103,11 +103,11 @@ export class LayerManager {
   slots = {
     layerUpdated: new Slot<{
       type: 'delete' | 'add' | 'update';
-      initiatingElement: BlockSuite.EdgelessModelType;
+      initiatingElement: BlockSuite.EdgelessModel;
     }>(),
   };
 
-  constructor(elements?: BlockSuite.EdgelessModelType[]) {
+  constructor(elements?: BlockSuite.EdgelessModel[]) {
     if (elements) {
       this._init(elements);
     }
@@ -122,7 +122,7 @@ export class LayerManager {
             model =>
               model instanceof EdgelessBlockModel &&
               renderableInEdgeless(doc, surface, model)
-          ) as BlockSuite.EdgelessModelType[]
+          ) as BlockSuite.EdgelessModel[]
       ).concat(surface.elementModels)
     );
 
@@ -157,7 +157,7 @@ export class LayerManager {
     this.canvasLayers = canvasLayers;
   }
 
-  private _init(elements: BlockSuite.EdgelessModelType[]) {
+  private _init(elements: BlockSuite.EdgelessModel[]) {
     this.canvasElements = [];
     this.blocks = [];
     this.frames = [];
@@ -321,7 +321,7 @@ export class LayerManager {
   }
 
   private _insertIntoLayer(
-    target: BlockSuite.EdgelessModelType,
+    target: BlockSuite.EdgelessModel,
     type: 'block' | 'canvas'
   ) {
     if (this.layers.length === 0) {
@@ -334,7 +334,7 @@ export class LayerManager {
 
     const addToLayer = (
       layer: Layer,
-      element: BlockSuite.EdgelessModelType,
+      element: BlockSuite.EdgelessModel,
       position: number | 'tail'
     ) => {
       assertType<CanvasLayer>(layer);
@@ -361,7 +361,7 @@ export class LayerManager {
     };
     const createLayer = (
       type: 'block' | 'canvas',
-      targets: BlockSuite.EdgelessModelType[],
+      targets: BlockSuite.EdgelessModel[],
       curZIndex: number
     ): Layer => {
       const newLayer = {
@@ -450,7 +450,7 @@ export class LayerManager {
   }
 
   private _removeFromLayer(
-    target: BlockSuite.EdgelessModelType,
+    target: BlockSuite.EdgelessModel,
     type: 'block' | 'canvas'
   ) {
     const layers = this.layers;
@@ -511,7 +511,7 @@ export class LayerManager {
    * @returns a boolean value to indicate whether the layers have been updated
    */
   private _updateLayer(
-    element: BlockSuite.EdgelessModelType,
+    element: BlockSuite.EdgelessModel,
     props?: Record<string, unknown>
   ) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
@@ -520,8 +520,8 @@ export class LayerManager {
     const indexChanged = !props || 'index' in props;
     const childIdsChanged = props && 'childIds' in props;
     const updateArray = (
-      array: BlockSuite.EdgelessModelType[],
-      element: BlockSuite.EdgelessModelType
+      array: BlockSuite.EdgelessModel[],
+      element: BlockSuite.EdgelessModel
     ) => {
       if (!indexChanged) return;
       removeFromOrderedArray(array, element);
@@ -551,14 +551,8 @@ export class LayerManager {
     }
 
     if (updateType && (indexChanged || childIdsChanged)) {
-      this._removeFromLayer(
-        element as BlockSuite.EdgelessModelType,
-        updateType
-      );
-      this._insertIntoLayer(
-        element as BlockSuite.EdgelessModelType,
-        updateType
-      );
+      this._removeFromLayer(element as BlockSuite.EdgelessModel, updateType);
+      this._insertIntoLayer(element as BlockSuite.EdgelessModel, updateType);
 
       return true;
     }
@@ -626,7 +620,7 @@ export class LayerManager {
     );
   }
 
-  add(element: BlockSuite.EdgelessModelType) {
+  add(element: BlockSuite.EdgelessModel) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
     const type = 'flavour' in element ? element.flavour : element.type;
 
@@ -650,10 +644,7 @@ export class LayerManager {
     }
 
     if (insertType) {
-      this._insertIntoLayer(
-        element as BlockSuite.EdgelessModelType,
-        insertType
-      );
+      this._insertIntoLayer(element as BlockSuite.EdgelessModel, insertType);
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit({
         type: 'add',
@@ -665,7 +656,7 @@ export class LayerManager {
   /**
    * Pass to the `Array.sort` to  sort the elements by their index
    */
-  compare(a: BlockSuite.EdgelessModelType, b: BlockSuite.EdgelessModelType) {
+  compare(a: BlockSuite.EdgelessModel, b: BlockSuite.EdgelessModel) {
     return compare(a, b);
   }
 
@@ -721,13 +712,13 @@ export class LayerManager {
         groups: () => [],
       };
 
-      manager.add(mockedFakeElement as unknown as BlockSuite.EdgelessModelType);
+      manager.add(mockedFakeElement as unknown as BlockSuite.EdgelessModel);
 
       return idx;
     };
   }
 
-  delete(element: BlockSuite.EdgelessModelType) {
+  delete(element: BlockSuite.EdgelessModel) {
     let deleteType: 'canvas' | 'block' | undefined = undefined;
 
     if (element instanceof SurfaceElementModel) {
@@ -806,15 +797,14 @@ export class LayerManager {
   }
 
   getReorderedIndex(
-    element: BlockSuite.EdgelessModelType,
+    element: BlockSuite.EdgelessModel,
     direction: ReorderingDirection
   ): string {
-    const group =
-      (element.group as BlockSuite.SurfaceGroupLikeModelType) || null;
+    const group = (element.group as BlockSuite.SurfaceGroupLikeModel) || null;
     const isFrameBlock =
       (element as FrameBlockModel).flavour === 'affine:frame';
 
-    let elements: BlockSuite.EdgelessModelType[];
+    let elements: BlockSuite.EdgelessModel[];
 
     if (group !== null) {
       elements = group.childElements.filter(
@@ -828,7 +818,7 @@ export class LayerManager {
       elements = this.frames;
     } else {
       elements = this.layers.reduce(
-        (pre: BlockSuite.EdgelessModelType[], current) =>
+        (pre: BlockSuite.EdgelessModel[], current) =>
           pre.concat(current.elements.filter(element => element.group == null)),
         []
       );
@@ -874,7 +864,7 @@ export class LayerManager {
     }
   }
 
-  getZIndex(element: BlockSuite.EdgelessModelType): number {
+  getZIndex(element: BlockSuite.EdgelessModel): number {
     if (element instanceof FrameBlockModel) {
       const lastLayer = last(this.layers);
       const frameIndex = this.frames.indexOf(element);
@@ -893,10 +883,7 @@ export class LayerManager {
     return layer.zIndex + layer.elements.indexOf(element);
   }
 
-  update(
-    element: BlockSuite.EdgelessModelType,
-    props?: Record<string, unknown>
-  ) {
+  update(element: BlockSuite.EdgelessModel, props?: Record<string, unknown>) {
     if (this._updateLayer(element, props)) {
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit({

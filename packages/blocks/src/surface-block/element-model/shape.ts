@@ -1,9 +1,20 @@
-import type { PointLocation } from '@blocksuite/global/utils';
-import type { IVec } from '@blocksuite/global/utils';
-import type { Bound } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/global/utils';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
+import type {
+  IBaseProps,
+  IHitTestOptions,
+} from '@blocksuite/block-std/edgeless';
+import type {
+  Bound,
+  IBound,
+  IVec,
+  PointLocation,
+  SerializedXYWH,
+} from '@blocksuite/global/utils';
 
+import {
+  SurfaceElementModel,
+  local,
+  yfield,
+} from '@blocksuite/block-std/edgeless';
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
@@ -17,12 +28,6 @@ import {
   type TextStyleProps,
   TextVerticalAlign,
 } from '../consts.js';
-import {
-  type IBaseProps,
-  type IHitTestOptions,
-  SurfaceElementModel,
-} from './base.js';
-import { local, yfield } from './decorators.js';
 import { diamond } from './utils/shape/diamond.js';
 import { ellipse } from './utils/shape/ellipse.js';
 import { rect } from './utils/shape/rect.js';

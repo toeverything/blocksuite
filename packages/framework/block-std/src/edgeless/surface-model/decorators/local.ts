@@ -1,4 +1,4 @@
-import type { SurfaceElementModel } from '../base.js';
+import type { SurfaceElementModel } from '../element-model.js';
 
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
@@ -27,7 +27,7 @@ export function local<V, T extends SurfaceElementModel>() {
         return this._local.get(prop);
       },
       set(this: T, originalValue: unknown) {
-        const isCreating = getDecoratorState()?.creating;
+        const isCreating = getDecoratorState(this.surface)?.creating;
         const oldValue = this._local.get(prop);
         // When state is creating, the value is considered as default value
         // hence there's no need to convert it

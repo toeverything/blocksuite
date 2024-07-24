@@ -67,7 +67,7 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   if (id === 'brainstormMindmap') {
     const selectedElements = ctx.get()[
       'selectedElements'
-    ] as BlockSuite.EdgelessModelType[];
+    ] as BlockSuite.EdgelessModel[];
 
     if (
       isMindMapRoot(selectedElements[0] || isMindmapChild(selectedElements[0]))
@@ -119,7 +119,7 @@ async function getContentFromHubBlockModel(
 
 export async function getContentFromSelected(
   host: EditorHost,
-  selected: BlockSuite.EdgelessModelType[]
+  selected: BlockSuite.EdgelessModel[]
 ) {
   const { notes, texts, shapes, images, edgelessTexts } = selected.reduce<{
     notes: NoteBlockModel[];

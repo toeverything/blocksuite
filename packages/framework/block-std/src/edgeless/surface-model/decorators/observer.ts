@@ -1,6 +1,6 @@
 import type { Y } from '@blocksuite/store';
 
-import type { SurfaceElementModel } from '../base.js';
+import type { SurfaceElementModel } from '../element-model.js';
 
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 

@@ -505,7 +505,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor elements: BlockSuite.EdgelessModelType[] = [];
+  accessor elements: BlockSuite.EdgelessModel[] = [];
 
   @property({ attribute: false })
   accessor vertical = false;

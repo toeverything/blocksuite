@@ -357,7 +357,7 @@ export class EdgelessSelectionManager {
   }
 
   get selectedElements() {
-    const elements: BlockSuite.EdgelessModelType[] = [];
+    const elements: BlockSuite.EdgelessModel[] = [];
 
     this.selectedIds.forEach(id => {
       const el = this.service.getElementById(id);

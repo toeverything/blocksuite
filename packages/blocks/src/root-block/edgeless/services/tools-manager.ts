@@ -36,7 +36,7 @@ export type EdgelessToolConstructor =
 
 export interface EdgelessHoverState {
   rect: Bound;
-  content: BlockSuite.EdgelessModelType;
+  content: BlockSuite.EdgelessModel;
 }
 
 export interface SelectionArea {

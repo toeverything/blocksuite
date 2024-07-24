@@ -22,10 +22,10 @@ import { EdgelessBlockModel } from '../edgeless-block-model.js';
 import { isFrameBlock } from '../utils/query.js';
 
 export function getCloneElements(
-  elements: BlockSuite.EdgelessModelType[],
+  elements: BlockSuite.EdgelessModel[],
   frame: EdgelessFrameManager
 ) {
-  const set = new Set<BlockSuite.EdgelessModelType>();
+  const set = new Set<BlockSuite.EdgelessModel>();
   elements.forEach(element => {
     set.add(element);
     if (isFrameBlock(element)) {
@@ -39,7 +39,7 @@ export function getCloneElements(
 }
 
 export async function prepareCloneData(
-  elements: BlockSuite.EdgelessModelType[],
+  elements: BlockSuite.EdgelessModel[],
   std: BlockStdScope
 ) {
   const job = new Job({
@@ -55,8 +55,8 @@ export async function prepareCloneData(
 }
 
 export async function serializeElement(
-  element: BlockSuite.EdgelessModelType,
-  elements: BlockSuite.EdgelessModelType[],
+  element: BlockSuite.EdgelessModel,
+  elements: BlockSuite.EdgelessModel[],
   job: Job
 ) {
   if (element instanceof EdgelessBlockModel) {
@@ -74,7 +74,7 @@ export async function serializeElement(
 
 export function serializeConnector(
   connector: ConnectorElementModel,
-  elements: BlockSuite.EdgelessModelType[]
+  elements: BlockSuite.EdgelessModel[]
 ) {
   const sourceId = connector.source?.id;
   const targetId = connector.target?.id;
@@ -98,7 +98,7 @@ export function serializeConnector(
  * @param elements edgeless model list
  * @returns sorted edgeless model list
  */
-export function sortEdgelessElements(elements: BlockSuite.EdgelessModelType[]) {
+export function sortEdgelessElements(elements: BlockSuite.EdgelessModel[]) {
   const result = groupBy(elements, element => {
     if (element instanceof ConnectorElementModel) {
       return 'connector';
@@ -189,7 +189,7 @@ export function mapMindmapIds(
 }
 
 export function getElementProps(
-  element: BlockSuite.SurfaceModelType,
+  element: BlockSuite.SurfaceModel,
   ids: Map<string, string>
 ) {
   if (element instanceof ConnectorElementModel) {

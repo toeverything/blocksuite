@@ -5,7 +5,7 @@ import { isConnectable, isNoteBlock } from './query.js';
 
 export function deleteElements(
   surface: SurfaceBlockComponent,
-  elements: BlockSuite.EdgelessModelType[]
+  elements: BlockSuite.EdgelessModel[]
 ) {
   const set = new Set(elements);
   const service = surface.edgeless.service;

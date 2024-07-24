@@ -1,3 +1,5 @@
+import type { SurfaceBlockModel } from '../model.js';
+
 /**
  * Set metadata for a property
  * @param symbol Unique symbol for the metadata
@@ -38,22 +40,14 @@ export function getObjectPropMeta(
   return target[symbol] ?? {};
 }
 
-/**
- * Decorator state is used to control decorator's behaviour.
- * Eg., yfield decorator will pause executioon when creating model from existing ymap because that would cause
- * the existing value get overrided by default value.
- * @returns
- */
-const state: {
-  creating: boolean;
-  deriving: boolean;
-  skipYfield: boolean;
-} = {
-  creating: false,
-  deriving: false,
-  skipYfield: false,
-};
+export function getDecoratorState(surface: SurfaceBlockModel) {
+  return surface['_decoratorState'];
+}
 
-export function getDecoratorState() {
-  return state;
+export function createDecoratorState() {
+  return {
+    creating: false,
+    deriving: false,
+    skipYfield: false,
+  };
 }

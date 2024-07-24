@@ -20,10 +20,10 @@ import './portal/note.js';
 
 const portalMap = {
   'affine:note': 'surface-ref-note-portal',
-} as Record<BlockSuite.EdgelessModelKeyType, string>;
+} as Record<BlockSuite.EdgelessModelKeys, string>;
 
 const getPortalTag = (model: BlockModel) => {
-  const tag = portalMap[model.flavour as BlockSuite.EdgelessModelKeyType];
+  const tag = portalMap[model.flavour as BlockSuite.EdgelessModelKeys];
   return tag ?? 'surface-ref-generic-block-portal';
 };
 

@@ -66,7 +66,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetComponent<
 
         const elements = selection.elements
           .map(id => block.service.getElementById(id))
-          .filter(element => element) as BlockSuite.EdgelessModelType[];
+          .filter(element => element) as BlockSuite.EdgelessModel[];
         const rect = getSelectedRect(elements);
 
         if (rect.width === 0 || rect.height === 0) return;

@@ -183,7 +183,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   };
 
-  private _toBeMoved: BlockSuite.EdgelessModelType[] = [];
+  private _toBeMoved: BlockSuite.EdgelessModel[] = [];
 
   private _updateSelectingState = () => {
     const { tools, service } = this._edgeless;
@@ -367,7 +367,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _isDraggable(element: BlockSuite.EdgelessModelType) {
+  private _isDraggable(element: BlockSuite.EdgelessModel) {
     return !(
       element instanceof ConnectorElementModel &&
       !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
@@ -444,8 +444,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         .pickElement(x, y, { all: true, expand: 40 })
         .filter(
           el =>
-            (el.group as BlockSuite.SurfaceElementModelType)?.type ===
-              'mindmap' && el !== current
+            (el.group as BlockSuite.SurfaceElementModel)?.type === 'mindmap' &&
+            el !== current
         )
         .map(el => ({
           element: el as ShapeElementModel,

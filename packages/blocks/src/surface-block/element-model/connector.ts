@@ -1,9 +1,18 @@
-import type { IVec } from '@blocksuite/global/utils';
-import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
+import type {
+  IBaseProps,
+  IHitTestOptions,
+  SerializedElement,
+} from '@blocksuite/block-std/edgeless';
+import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
-import { Vec } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { PointLocation } from '@blocksuite/global/utils';
+import {
+  SurfaceElementModel,
+  SurfaceLocalModel,
+  derive,
+  local,
+  yfield,
+} from '@blocksuite/block-std/edgeless';
+import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
@@ -27,14 +36,6 @@ import {
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
 import { Polyline } from '../utils/polyline.js';
-import {
-  type IBaseProps,
-  type IHitTestOptions,
-  type SerializedElement,
-  SurfaceElementModel,
-  SurfaceLocalModel,
-} from './base.js';
-import { derive, local, yfield } from './decorators.js';
 
 export enum ConnectorEndpoint {
   Front = 'Front',
@@ -582,7 +583,7 @@ export class LocalConnectorElementModel extends SurfaceLocalModel {
 }
 
 export function isConnectorWithLabel(
-  model: BlockSuite.EdgelessModelType | BlockSuite.SurfaceLocalModelType
+  model: BlockSuite.EdgelessModel | BlockSuite.SurfaceLocalModel
 ) {
   return model instanceof ConnectorElementModel && model.hasLabel();
 }

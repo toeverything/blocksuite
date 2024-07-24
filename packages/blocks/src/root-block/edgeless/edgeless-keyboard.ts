@@ -537,7 +537,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       const node = mindmapNodes[0];
       const mindmap = node.group as MindmapElementModel;
       const nodeDirection = mindmap.getLayoutDir(node.id);
-      let targetNode: BlockSuite.SurfaceElementModelType | null = null;
+      let targetNode: BlockSuite.SurfaceElementModel | null = null;
 
       switch (key) {
         case 'ArrowUp':

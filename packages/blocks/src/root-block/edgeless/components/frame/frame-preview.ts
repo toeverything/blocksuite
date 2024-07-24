@@ -27,7 +27,7 @@ import { SpecProvider } from '../../../../specs/index.js';
 import '../../../../surface-ref-block/surface-ref-portal.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 
-type RefElement = Exclude<BlockSuite.EdgelessModelType, NoteBlockModel>;
+type RefElement = Exclude<BlockSuite.EdgelessModel, NoteBlockModel>;
 
 const DEFAULT_PREVIEW_CONTAINER_WIDTH = 280;
 const DEFAULT_PREVIEW_CONTAINER_HEIGHT = 166;

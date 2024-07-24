@@ -959,7 +959,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   #adjustProportional(
-    element: BlockSuite.EdgelessModelType,
+    element: BlockSuite.EdgelessModel,
     bound: Bound,
     direction: HandleDirection
   ) {
@@ -1057,7 +1057,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   #adjustUseFallback(
-    element: BlockSuite.EdgelessModelType,
+    element: BlockSuite.EdgelessModel,
     bound: Bound,
     _direction: HandleDirection
   ) {
@@ -1087,7 +1087,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
   }
 
-  private _isProportionalElement(element: BlockSuite.EdgelessModelType) {
+  private _isProportionalElement(element: BlockSuite.EdgelessModel) {
     return (
       isAttachmentBlock(element) ||
       isImageBlock(element) ||
@@ -1100,7 +1100,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
   }
 
-  private _shouldRenderSelection(elements?: BlockSuite.EdgelessModelType[]) {
+  private _shouldRenderSelection(elements?: BlockSuite.EdgelessModel[]) {
     elements = elements ?? this.selection.selectedElements;
     return elements.length > 0 && !this.selection.editing;
   }
@@ -1354,7 +1354,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllConnectors = false;
         areAllShapes = false;
       } else {
-        assertType<BlockSuite.SurfaceElementModelType>(element);
+        assertType<BlockSuite.SurfaceElementModel>(element);
         if (element.type === CanvasElementType.CONNECTOR) {
           const connector = element as ConnectorElementModel;
           areAllIndependentConnectors &&= !(

@@ -23,7 +23,7 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElement<T extends BlockSuite.EdgelessModelType>(
+function rangeFromElement<T extends BlockSuite.EdgelessModel>(
   ele: T
 ): number[] {
   const bound = ele.elementBound;
@@ -34,7 +34,7 @@ function rangeFromElement<T extends BlockSuite.EdgelessModelType>(
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElementExternal<T extends BlockSuite.EdgelessModelType>(
+function rangeFromElementExternal<T extends BlockSuite.EdgelessModel>(
   ele: T
 ): number[] | null {
   if (!ele.externalXYWH) return null;
@@ -47,7 +47,7 @@ function rangeFromElementExternal<T extends BlockSuite.EdgelessModelType>(
   return [minRow, maxRow, minCol, maxCol];
 }
 
-export class GridManager<T extends BlockSuite.EdgelessModelType> {
+export class GridManager<T extends BlockSuite.EdgelessModel> {
   private _elementToGrids = new Map<T, Set<Set<T>>>();
 
   private _externalElementToGrids = new Map<T, Set<Set<T>>>();

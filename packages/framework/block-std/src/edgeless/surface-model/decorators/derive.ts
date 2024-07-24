@@ -1,6 +1,5 @@
-import type { SurfaceElementModel } from '../base.js';
+import type { SurfaceElementModel } from '../element-model.js';
 
-import { keys } from '../../../_common/utils/iterable.js';
 import {
   getDecoratorState,
   getObjectPropMeta,
@@ -8,6 +7,8 @@ import {
 } from './common.js';
 
 const deriveSymbol = Symbol('derive');
+
+const keys = Object.keys;
 
 function getDerivedMeta(
   proto: unknown,
@@ -24,7 +25,7 @@ export function getDeriveProperties(
   receiver: SurfaceElementModel
 ) {
   const prototype = Object.getPrototypeOf(receiver);
-  const decoratorState = getDecoratorState();
+  const decoratorState = getDecoratorState(receiver.surface);
 
   if (decoratorState.deriving || decoratorState.creating) {
     return null;
@@ -53,7 +54,7 @@ export function updateDerivedProp(
   receiver: SurfaceElementModel
 ) {
   if (derivedProps) {
-    const decoratorState = getDecoratorState();
+    const decoratorState = getDecoratorState(receiver.surface);
     decoratorState.deriving = true;
     keys(derivedProps).forEach(key => {
       // @ts-ignore

@@ -278,7 +278,7 @@ export class EditPropsStore {
   }
 
   applyLastProps(
-    type: BlockSuite.EdgelessModelKeyType,
+    type: BlockSuite.EdgelessModelKeys,
     props: Record<string, unknown>
   ) {
     if (!isLastPropType(type)) return;
@@ -318,7 +318,7 @@ export class EditPropsStore {
   }
 
   recordLastProps(
-    type: BlockSuite.EdgelessModelKeyType,
+    type: BlockSuite.EdgelessModelKeys,
     recordProps: Partial<LastProps[LastPropsKey]>
   ) {
     if (!isLastPropType(type)) return;
@@ -367,7 +367,7 @@ function extractProps(
 }
 
 function isLastPropType(
-  type: BlockSuite.EdgelessModelKeyType
+  type: BlockSuite.EdgelessModelKeys
 ): type is keyof LastProps {
   return Object.keys(LastPropsSchema.shape).includes(type);
 }

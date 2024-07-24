@@ -552,7 +552,7 @@ export function createLinkedDocFromNote(
 
 export function createLinkedDocFromEdgelessElements(
   host: EditorHost,
-  elements: BlockSuite.EdgelessModelType[],
+  elements: BlockSuite.EdgelessModel[],
   docTitle?: string
 ) {
   const linkedDoc = host.doc.collection.createDoc({});
