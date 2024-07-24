@@ -747,6 +747,111 @@ export async function zoomByMouseWheel(
   await page.keyboard.up(SHORT_KEY);
 }
 
+// touch screen zooming is not supported by Playwright now
+// use pointer event mock instead
+// https://github.com/microsoft/playwright/issues/2903
+export async function zoomByPinch(
+  page: Page,
+  start1: IPoint,
+  start2: IPoint,
+  end1: IPoint,
+  end2: IPoint,
+  step: number = 5
+) {
+  await page.evaluate(
+    async ({ start1, start2, end1, end2, step }) => {
+      const target = document.querySelector('affine-edgeless-root');
+      if (!target) {
+        throw new Error('Missing edgeless page');
+      }
+
+      const pointerdown = (position: IPoint, isPrimary: boolean) => {
+        const clientX = position.x;
+        const clientY = position.y;
+
+        target.dispatchEvent(
+          new PointerEvent('pointerdown', {
+            clientX,
+            clientY,
+            bubbles: true,
+            pointerId: isPrimary ? 1 : 2,
+            isPrimary,
+          })
+        );
+      };
+
+      const pointermove = (position: IPoint, isPrimary: boolean) => {
+        const clientX = position.x;
+        const clientY = position.y;
+
+        target.dispatchEvent(
+          new PointerEvent('pointermove', {
+            clientX,
+            clientY,
+            bubbles: true,
+            pointerId: isPrimary ? 1 : 2,
+            isPrimary,
+          })
+        );
+      };
+
+      const pointerup = (position: IPoint, isPrimary: boolean) => {
+        const clientX = position.x;
+        const clientY = position.y;
+
+        target.dispatchEvent(
+          new PointerEvent('pointerup', {
+            clientX,
+            clientY,
+            bubbles: true,
+            pointerId: isPrimary ? 1 : 2,
+            isPrimary,
+          })
+        );
+      };
+
+      pointerdown(start1, true);
+      pointerdown(start2, false);
+
+      if (step !== 0) {
+        const xStep1 = (end1.x - start1.x) / step;
+        const yStep1 = (end1.y - start1.y) / step;
+        const xStep2 = (end2.x - start2.x) / step;
+        const yStep2 = (end2.y - start2.y) / step;
+
+        for (const [i] of Array.from({ length: step }).entries()) {
+          pointermove(
+            {
+              x: start1.x + xStep1 * (i + 1),
+              y: start1.y + yStep1 * (i + 1),
+            },
+            true
+          );
+          pointermove(
+            {
+              x: start2.x + xStep2 * (i + 1),
+              y: start2.y + yStep2 * (i + 1),
+            },
+            false
+          );
+
+          await new Promise(resolve => setTimeout(resolve, 16));
+        }
+
+        pointerup(end1, true);
+        pointerup(end2, false);
+      }
+    },
+    {
+      start1,
+      start2,
+      end1,
+      end2,
+      step,
+    }
+  );
+}
+
 export async function zoomFitByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+1`, { delay: 100 });
   await waitNextFrame(page, 300);

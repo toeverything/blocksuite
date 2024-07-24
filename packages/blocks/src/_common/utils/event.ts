@@ -1,6 +1,6 @@
 import { IS_IOS, IS_MAC } from '@blocksuite/global/env';
 
-export function isPinchEvent(e: WheelEvent) {
+export function isTouchPadPinchEvent(e: WheelEvent) {
   // two finger pinches on touch pad, ctrlKey is always true.
   // https://bugs.chromium.org/p/chromium/issues/detail?id=397027
   if (IS_IOS || IS_MAC) {

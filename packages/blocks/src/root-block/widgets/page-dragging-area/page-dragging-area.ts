@@ -229,8 +229,13 @@ export class AffinePageDraggingAreaWidget extends WidgetComponent<
         if (!this._dragging) {
           return;
         }
-        ctx.get('defaultState').event.preventDefault();
+
         const state = ctx.get('pointerState');
+        // TODO(@L-Sun) support drag area for touch device
+        if (state.raw.pointerType === 'touch') return;
+
+        ctx.get('defaultState').event.preventDefault();
+
         this._rafID = requestAnimationFrame(() => {
           this._updateDraggingArea(state, true);
         });

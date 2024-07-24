@@ -21,6 +21,7 @@ export function click(target: HTMLElement, position: { x: number; y: number }) {
       clientX,
       clientY,
       bubbles: true,
+      pointerId: 1,
       isPrimary: true,
     })
   );
@@ -29,6 +30,7 @@ export function click(target: HTMLElement, position: { x: number; y: number }) {
       clientX,
       clientY,
       bubbles: true,
+      pointerId: 1,
       isPrimary: true,
     })
   );
@@ -60,6 +62,7 @@ export function pointerdown(
       clientX,
       clientY,
       bubbles: true,
+      pointerId: isPrimary ? 1 : 2,
       isPrimary,
     })
   );
@@ -84,6 +87,7 @@ export function pointerup(
       clientX,
       clientY,
       bubbles: true,
+      pointerId: isPrimary ? 1 : 2,
       isPrimary,
     })
   );
@@ -108,6 +112,7 @@ export function pointermove(
       clientX,
       clientY,
       bubbles: true,
+      pointerId: isPrimary ? 1 : 2,
       isPrimary,
     })
   );
@@ -138,6 +143,14 @@ export function drag(
   pointerup(target, end);
 }
 
+/**
+ * simulate pinch event, position relative to the target
+ * @param target
+ * @param start1 start position of the first finger
+ * @param start2 start position of the second finger
+ * @param end1 end position of the first finger
+ * @param end2 end position of the second finger
+ */
 export function pinch(
   target: Element,
   start1: { x: number; y: number },
@@ -158,14 +171,22 @@ export function pinch(
     const yStep2 = (end2.y - start2.y) / step;
 
     for (const [i] of Array.from({ length: step }).entries()) {
-      pointermove(target as HTMLElement, {
-        x: start1.x + xStep1 * (i + 1),
-        y: start1.y + yStep1 * (i + 1),
-      });
-      pointermove(target as HTMLElement, {
-        x: start2.x + xStep2 * (i + 1),
-        y: start2.y + yStep2 * (i + 1),
-      });
+      pointermove(
+        target as HTMLElement,
+        {
+          x: start1.x + xStep1 * (i + 1),
+          y: start1.y + yStep1 * (i + 1),
+        },
+        true
+      );
+      pointermove(
+        target as HTMLElement,
+        {
+          x: start2.x + xStep2 * (i + 1),
+          y: start2.y + yStep2 * (i + 1),
+        },
+        false
+      );
     }
   }
 

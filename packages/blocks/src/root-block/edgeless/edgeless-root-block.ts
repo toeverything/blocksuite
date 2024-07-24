@@ -38,7 +38,7 @@ import {
   type Viewport,
   asyncFocusRichText,
   handleNativeRangeAtPoint,
-  isPinchEvent,
+  isTouchPadPinchEvent,
   requestConnectedFrame,
   requestThrottledConnectFrame,
 } from '../../_common/utils/index.js';
@@ -216,6 +216,40 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       .catch(console.error);
   }
 
+  private _initPinchEvent() {
+    this.disposables.add(
+      this.dispatcher.add('pinch', ctx => {
+        const { viewport } = this.service;
+        if (viewport.locked) return;
+
+        const multiPointersState = ctx.get('multiPointerState');
+        const [p1, p2] = multiPointersState.pointers;
+
+        const startCenter = new Point(
+          0.5 * (p1.start.x + p2.start.x),
+          0.5 * (p1.start.y + p2.start.y)
+        );
+
+        const lastDistance = Vec.dist(
+          [p1.x - p1.delta.x, p1.y - p1.delta.y],
+          [p2.x - p2.delta.x, p2.y - p2.delta.y]
+        );
+        const currentDistance = Vec.dist([p1.x, p1.y], [p2.x, p2.y]);
+
+        const zoom = (currentDistance / lastDistance) * viewport.zoom;
+
+        const [baseX, baseY] = viewport.toModelCoord(
+          startCenter.x,
+          startCenter.y
+        );
+
+        viewport.setZoom(zoom, new Point(baseX, baseY));
+
+        return false;
+      })
+    );
+  }
+
   private _initPixelRatioChangeEffect() {
     let media: MediaQueryList;
 
@@ -377,11 +411,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
         e.preventDefault();
 
         const { viewport, locked } = this.service;
-
         if (locked) return;
 
         // zoom
-        if (isPinchEvent(e)) {
+        if (isTouchPadPinchEvent(e)) {
           const rect = this.getBoundingClientRect();
           // Perform zooming relative to the mouse position
           const [baseX, baseY] = this.service.viewport.toModelCoord(
@@ -751,6 +784,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
     this._initViewport();
     this._initWheelEvent();
+    this._initPinchEvent();
 
     if (this.doc.readonly) {
       this.tools.setEdgelessTool({ type: 'pan', panning: true });
