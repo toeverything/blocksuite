@@ -125,6 +125,9 @@
       "hasown": "npm:@nolyfill/hasown@latest",
       "isarray": "npm:@nolyfill/isarray@latest",
       "set-function-length": "npm:@nolyfill/set-function-length@latest"
+    },
+    "patchedDependencies": {
+      "@lit-labs/preact-signals@1.0.2": "patches/@lit-labs__preact-signals@1.0.2.patch"
     }
   },
   "stackblitz": {

@@ -30,6 +30,11 @@ overrides:
   isarray: npm:@nolyfill/isarray@latest
   set-function-length: npm:@nolyfill/set-function-length@latest
 
+patchedDependencies:
+  '@lit-labs/preact-signals@1.0.2':
+    hash: tirlsfb7xqdhpmx3ykt5c3ucrm
+    path: patches/@lit-labs__preact-signals@1.0.2.patch
+
 importers:
 
   .:
@@ -195,7 +200,7 @@ importers:
         version: 1.6.5
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2
+        version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
       '@lit/context':
         specifier: ^1.1.1
         version: 1.1.1
@@ -347,7 +352,7 @@ importers:
         version: link:../global
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2
+        version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
       '@lit/context':
         specifier: ^1.1.1
         version: 1.1.1
@@ -588,7 +593,7 @@ importers:
         version: 1.6.5
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2
+        version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
       '@toeverything/theme':
         specifier: ^0.7.35
         version: 0.7.35
@@ -6765,7 +6770,7 @@ snapshots:
     dependencies:
       '@lezer/common': 1.2.1
 
-  '@lit-labs/preact-signals@1.0.2':
+  '@lit-labs/preact-signals@1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)':
     dependencies:
       '@preact/signals-core': 1.6.1
       lit: 3.1.3
