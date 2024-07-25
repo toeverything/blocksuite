@@ -444,23 +444,21 @@ export class EdgelessNoteBlockComponent extends toEdgelessBlockComponent(
         @mouseleave=${this._leaved}
         @mousemove=${this._hovered}
         data-scale="${scale}"
-        contenteditable="false"
       >
         <div
           class="note-background"
           style=${styleMap(backgroundStyle)}
           @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
           @click=${this._handleClickAtBackground}
-          contenteditable="false"
         ></div>
 
         <div
+          class="edgeless-note-page-content"
           style=${styleMap({
             width: '100%',
             height: '100%',
             'overflow-y': this._isShowCollapsedContent ? 'initial' : 'clip',
           })}
-          contenteditable="false"
         >
           ${this.renderPageContent()}
         </div>

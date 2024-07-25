@@ -35,4 +35,4 @@ export const NoteShadowsSchema = createZodUnion(NOTE_SHADOWS);
 export const DEFAULT_NOTE_SHADOW = NOTE_SHADOWS[2];
 
 export const NOTE_SELECTOR =
-  'affine-note, affine-edgeless-note, affine-edgeless-text';
+  'affine-note, affine-edgeless-note .edgeless-note-page-content, affine-edgeless-text';
