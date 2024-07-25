@@ -1,4 +1,4 @@
-import { toEdgelessBlockComponent } from '@blocksuite/block-std';
+import { toGfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -7,12 +7,12 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { AIChatBlockComponent } from './ai-chat-block.js';
 
 @customElement('affine-edgeless-ai-chat')
-export class EdgelessAIChatBlockComponent extends toEdgelessBlockComponent(
+export class EdgelessAIChatBlockComponent extends toGfxBlockComponent(
   AIChatBlockComponent
 ) {
   rootServiceFlavour!: 'affine:page';
 
-  override renderEdgelessBlock() {
+  override renderGfxBlock() {
     const bound = Bound.deserialize(this.model.xywh$.value);
     const scale = this.model.scale$.value;
     const width = bound.w / scale;

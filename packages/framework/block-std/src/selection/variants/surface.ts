@@ -9,7 +9,7 @@ const SurfaceSelectionSchema = z.object({
 });
 
 export class SurfaceSelection extends BaseSelection {
-  static override group = 'edgeless';
+  static override group = 'gfx';
 
   static override type = 'surface';
 

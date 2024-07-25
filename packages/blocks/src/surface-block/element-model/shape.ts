@@ -1,7 +1,7 @@
 import type {
-  IBaseProps,
-  IHitTestOptions,
-} from '@blocksuite/block-std/edgeless';
+  BaseElementProps,
+  ElementHitTestOptions,
+} from '@blocksuite/block-std/gfx';
 import type {
   Bound,
   IBound,
@@ -11,10 +11,10 @@ import type {
 } from '@blocksuite/global/utils';
 
 import {
-  SurfaceElementModel,
+  GfxPrimitiveElementModel,
   local,
   yfield,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
@@ -52,7 +52,7 @@ export enum ShapeTextFontSize {
   XLARGE = 36,
 }
 
-export type ShapeProps = IBaseProps & {
+export type ShapeProps = BaseElementProps & {
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
@@ -74,7 +74,7 @@ export type ShapeProps = IBaseProps & {
 export const SHAPE_TEXT_PADDING = 20;
 export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
-export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
+export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
   textBound: IBound | null = null;
 
   static override propsToY(props: ShapeProps) {
@@ -97,7 +97,7 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
   }
 
-  override hitTest(x: number, y: number, options: IHitTestOptions) {
+  override hitTest(x: number, y: number, options: ElementHitTestOptions) {
     return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
       ...options,
       ignoreTransparent: options.ignoreTransparent ?? true,

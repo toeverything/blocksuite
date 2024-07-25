@@ -1,23 +1,23 @@
 import type {
-  IBaseProps,
+  BaseElementProps,
   SerializedElement,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import type { IVec, PointLocation } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
 import {
-  SurfaceGroupLikeModel,
+  GfxGroupLikeElementModel,
   local,
   observe,
   yfield,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import { keys } from '../../_common/utils/iterable.js';
 import { linePolygonIntersects } from '../utils/math-utils.js';
 
-type GroupElementProps = IBaseProps & {
+type GroupElementProps = BaseElementProps & {
   children: Y.Map<boolean>;
   title: Y.Text;
 };
@@ -27,7 +27,7 @@ export type SerializedGroupElement = SerializedElement & {
   children: Record<string, boolean>;
 };
 
-export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> {
+export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProps> {
   static override propsToY(props: Record<string, unknown>) {
     if (props.title && !(props.title instanceof DocCollection.Y.Text)) {
       props.title = new DocCollection.Y.Text(props.title as string);

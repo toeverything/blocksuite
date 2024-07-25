@@ -1,6 +1,6 @@
 import type { IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
-import { yfield } from '@blocksuite/block-std/edgeless';
+import { yfield } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
@@ -17,9 +17,9 @@ import {
   pointInPolygon,
   polygonNearestPoint,
 } from '../utils/math-utils.js';
-import { type IBaseProps, SurfaceElementModel } from './base.js';
+import { type BaseElementProps, SurfaceElementModel } from './base.js';
 
-export type TextElementProps = IBaseProps & {
+export type TextElementProps = BaseElementProps & {
   text: Y.Text;
   hasMaxWidth?: boolean;
 } & Omit<TextStyleProps, 'fontWeight' | 'fontStyle'> &

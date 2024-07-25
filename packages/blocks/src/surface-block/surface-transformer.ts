@@ -1,4 +1,4 @@
-import type { SurfaceBlockProps } from '@blocksuite/block-std/edgeless';
+import type { SurfaceBlockProps } from '@blocksuite/block-std/gfx';
 import type {
   FromSnapshotPayload,
   SnapshotReturn,

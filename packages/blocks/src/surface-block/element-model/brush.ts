@@ -1,16 +1,16 @@
 import type {
-  IBaseProps,
-  IHitTestOptions,
-} from '@blocksuite/block-std/edgeless';
+  BaseElementProps,
+  ElementHitTestOptions,
+} from '@blocksuite/block-std/gfx';
 import type { IVec, IVec3, SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
-  SurfaceElementModel,
+  GfxPrimitiveElementModel,
   convert,
   derive,
   watch,
   yfield,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
@@ -28,7 +28,7 @@ import {
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
 
-export type BrushProps = IBaseProps & {
+export type BrushProps = BaseElementProps & {
   /**
    * [[x0,y0,pressure0?],[x1,y1,pressure1?]...]
    * pressure is optional and exsits when pressure sensitivity is supported, otherwise not.
@@ -38,7 +38,7 @@ export type BrushProps = IBaseProps & {
   lineWidth: number;
 };
 
-export class BrushElementModel extends SurfaceElementModel<BrushProps> {
+export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   static override propsToY(props: BrushProps) {
     return props;
   }
@@ -62,7 +62,11 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
     return new PointLocation(point);
   }
 
-  override hitTest(px: number, py: number, options?: IHitTestOptions): boolean {
+  override hitTest(
+    px: number,
+    py: number,
+    options?: ElementHitTestOptions
+  ): boolean {
     const hit = isPointOnlines(
       Bound.deserialize(this.xywh),
       this.points as [number, number][],

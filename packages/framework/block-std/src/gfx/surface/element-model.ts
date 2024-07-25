@@ -1,8 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  IEdgelessElement,
-  IHitTestOptions,
-} from '@blocksuite/block-std/edgeless';
+  CommonElement,
+  ElementHitTestOptions,
+} from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
@@ -20,7 +20,7 @@ import {
   rotatePoints,
 } from '@blocksuite/global/utils';
 
-import type { EdgelessBlockModel, EdgelessModel } from '../model.js';
+import type { GfxBlockElementModel, GfxModel } from '../model.js';
 import type { SurfaceBlockModel } from './model.js';
 
 import {
@@ -33,9 +33,9 @@ import {
   yfield,
 } from './decorators/index.js';
 
-export type { IHitTestOptions } from '@blocksuite/block-std/edgeless';
+export type { ElementHitTestOptions as ElementHitTestOptions } from '@blocksuite/block-std/gfx';
 
-export type IBaseProps = {
+export type BaseElementProps = {
   index: string;
   seed: number;
 };
@@ -48,8 +48,9 @@ export type SerializedElement = Record<string, unknown> & {
   props: Record<string, unknown>;
 };
 
-export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
-  implements IEdgelessElement
+export abstract class GfxPrimitiveElementModel<
+  Props extends BaseElementProps = BaseElementProps,
+> implements CommonElement
 {
   protected _disposable = new DisposableGroup();
 
@@ -138,7 +139,12 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
     return new PointLocation(rotatePoint, tangent);
   }
 
-  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
+  hitTest(
+    x: number,
+    y: number,
+    _: ElementHitTestOptions,
+    __: EditorHost
+  ): boolean {
     return this.elementBound.isPointInBound([x, y]);
   }
 
@@ -187,7 +193,7 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
       return;
     }
 
-    const curVal = this[prop as unknown as keyof SurfaceElementModel];
+    const curVal = this[prop as unknown as keyof GfxPrimitiveElementModel];
 
     this._stashed.set(prop, curVal);
 
@@ -201,7 +207,7 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
         const derivedProps = getDeriveProperties(
           prop as string,
           original,
-          this as unknown as SurfaceElementModel
+          this as unknown as GfxPrimitiveElementModel
         );
 
         this._stashed.set(prop, value);
@@ -225,7 +231,10 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
           },
         });
 
-        updateDerivedProp(derivedProps, this as unknown as SurfaceElementModel);
+        updateDerivedProp(
+          derivedProps,
+          this as unknown as GfxPrimitiveElementModel
+        );
       },
     });
   }
@@ -264,7 +273,7 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
     return this._local.get('externalBound') as Bound | null;
   }
 
-  get group(): SurfaceGroupLikeModel | null {
+  get group(): GfxGroupLikeElementModel | null {
     return this.surface.getGroup(this.id);
   }
 
@@ -321,9 +330,9 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
   abstract xywh: SerializedXYWH;
 }
 
-export abstract class SurfaceGroupLikeModel<
-  Props extends IBaseProps = IBaseProps,
-> extends SurfaceElementModel<Props> {
+export abstract class GfxGroupLikeElementModel<
+  Props extends BaseElementProps = BaseElementProps,
+> extends GfxPrimitiveElementModel<Props> {
   private _childIds: string[] = [];
 
   /**
@@ -332,19 +341,19 @@ export abstract class SurfaceGroupLikeModel<
    */
   descendants(withoutGroup = true) {
     return this.childElements.reduce((prev, child) => {
-      if (child instanceof SurfaceGroupLikeModel) {
+      if (child instanceof GfxGroupLikeElementModel) {
         prev = prev.concat(child.descendants());
 
-        !withoutGroup && prev.push(child as SurfaceElementModel);
+        !withoutGroup && prev.push(child as GfxPrimitiveElementModel);
       } else {
         prev.push(child);
       }
 
       return prev;
-    }, [] as EdgelessModel[]);
+    }, [] as GfxModel[]);
   }
 
-  hasChild(element: string | EdgelessModel) {
+  hasChild(element: string | GfxModel) {
     return (
       (typeof element === 'string'
         ? this.children?.has(element)
@@ -359,7 +368,7 @@ export abstract class SurfaceGroupLikeModel<
   /**
    * Check if the group has the given descendant.
    */
-  hasDescendant(element: string | EdgelessModel) {
+  hasDescendant(element: string | GfxModel) {
     const groups = this.surface.getGroups(
       typeof element === 'string' ? element : element.id
     );
@@ -398,12 +407,12 @@ export abstract class SurfaceGroupLikeModel<
   }
 
   get childElements() {
-    const elements: EdgelessModel[] = [];
+    const elements: GfxModel[] = [];
 
     for (const key of this.childIds) {
       const element =
         this.surface.getElementById(key) ||
-        (this.surface.doc.getBlockById(key) as EdgelessBlockModel);
+        (this.surface.doc.getBlockById(key) as GfxBlockElementModel);
 
       element && elements.push(element);
     }
@@ -427,11 +436,11 @@ export abstract class SurfaceGroupLikeModel<
    */
   abstract removeChild(id: string): void;
 
-  @local<SerializedXYWH, SurfaceGroupLikeModel>()
+  @local<SerializedXYWH, GfxGroupLikeElementModel>()
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
 
-export abstract class SurfaceLocalModel {
+export abstract class GfxLocalElementModel {
   private _lastXYWH: SerializedXYWH = '[0,0,-1,-1]';
 
   protected _local = new Map<string | symbol, unknown>();

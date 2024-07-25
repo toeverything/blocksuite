@@ -110,7 +110,7 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
         );
 
         editorHost.doc.deleteBlock(noteBlock);
-        editorHost.selection.setGroup('edgeless', []);
+        editorHost.selection.setGroup('gfx', []);
       }
 
       return true;

@@ -1,7 +1,7 @@
 import type { Doc } from '@blocksuite/store';
 
 import {
-  EdgelessBlockComponent,
+  GfxBlockComponent,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
@@ -241,7 +241,7 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
 }
 
 @customElement('affine-frame')
-export class FrameBlockComponent extends EdgelessBlockComponent<
+export class FrameBlockComponent extends GfxBlockComponent<
   EdgelessRootService,
   FrameBlockModel
 > {
@@ -275,7 +275,7 @@ export class FrameBlockComponent extends EdgelessBlockComponent<
     });
   }
 
-  override renderEdgelessBlock() {
+  override renderGfxBlock() {
     const { model, _isNavigator, doc, rootService } = this;
 
     return html`

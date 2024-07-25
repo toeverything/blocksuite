@@ -498,7 +498,7 @@ export function convertDragPreviewEdgelessToDoc({
   const altKey = state.raw.altKey;
   if (!altKey) {
     doc.deleteBlock(blockModel);
-    host.selection.setGroup('edgeless', []);
+    host.selection.setGroup('gfx', []);
   }
 
   return true;

@@ -1,6 +1,6 @@
 import type { Y } from '@blocksuite/store';
 
-import type { SurfaceElementModel } from '../element-model.js';
+import type { GfxPrimitiveElementModel } from '../element-model.js';
 
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
@@ -10,7 +10,7 @@ const observerDisposableSymbol = Symbol('observerDisposable');
 type ObserveFn<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   E extends Y.YEvent<any> = Y.YEvent<any>,
-  T extends SurfaceElementModel = SurfaceElementModel,
+  T extends GfxPrimitiveElementModel = GfxPrimitiveElementModel,
 > = (
   /**
    * The event object of the Y.Map or Y.Array, the `null` value means the observer is initializing.
@@ -36,7 +36,7 @@ export function observe<
   V,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   E extends Y.YEvent<any>,
-  T extends SurfaceElementModel,
+  T extends GfxPrimitiveElementModel,
 >(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: ObserveFn<E, T>
@@ -51,7 +51,7 @@ export function observe<
         setObjectPropMeta(observeSymbol, Object.getPrototypeOf(this), prop, fn);
         return v;
       },
-    } as ClassAccessorDecoratorResult<SurfaceElementModel, V>;
+    } as ClassAccessorDecoratorResult<GfxPrimitiveElementModel, V>;
   };
 }
 
@@ -65,7 +65,7 @@ function getObserveMeta(
 
 export function startObserve(
   prop: string | symbol,
-  receiver: SurfaceElementModel
+  receiver: GfxPrimitiveElementModel
 ) {
   const proto = Object.getPrototypeOf(receiver);
   const observeFn = getObserveMeta(proto, prop as string)!;
@@ -84,7 +84,7 @@ export function startObserve(
     return;
   }
 
-  const value = receiver[prop as keyof SurfaceElementModel] as
+  const value = receiver[prop as keyof GfxPrimitiveElementModel] as
     | Y.Map<unknown>
     | Y.Array<unknown>
     | null;
@@ -113,7 +113,7 @@ export function startObserve(
 
 export function initializedObservers(
   proto: unknown,
-  receiver: SurfaceElementModel
+  receiver: GfxPrimitiveElementModel
 ) {
   const observers = getObjectPropMeta(proto, observeSymbol);
 

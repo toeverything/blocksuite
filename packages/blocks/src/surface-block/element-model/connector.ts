@@ -1,17 +1,17 @@
 import type {
-  IBaseProps,
-  IHitTestOptions,
+  BaseElementProps,
+  ElementHitTestOptions,
   SerializedElement,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
-  SurfaceElementModel,
-  SurfaceLocalModel,
+  GfxLocalElementModel,
+  GfxPrimitiveElementModel,
   derive,
   local,
   yfield,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
@@ -107,7 +107,7 @@ export type SerializedConnectorElement = SerializedElement & {
   target: SerializedConnection;
 };
 
-export type ConnectorElementProps = IBaseProps & {
+export type ConnectorElementProps = BaseElementProps & {
   mode: ConnectorMode;
   stroke: string;
   strokeWidth: number;
@@ -121,7 +121,7 @@ export type ConnectorElementProps = IBaseProps & {
   rearEndpointStyle?: PointStyle;
 } & ConnectorLabelProps;
 
-export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementProps> {
+export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorElementProps> {
   updatingPath = false;
 
   static override propsToY(props: ConnectorElementProps) {
@@ -255,7 +255,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   override hitTest(
     x: number,
     y: number,
-    options?: IHitTestOptions | undefined
+    options?: ElementHitTestOptions | undefined
   ): boolean {
     const currentPoint: IVec = [x, y];
 
@@ -527,7 +527,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
 
-export class LocalConnectorElementModel extends SurfaceLocalModel {
+export class LocalConnectorElementModel extends GfxLocalElementModel {
   private _path: PointLocation[] = [];
 
   absolutePath: PointLocation[] = [];

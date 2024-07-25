@@ -1,4 +1,4 @@
-import type { EdgelessModel as EModel } from '@blocksuite/block-std/edgeless';
+import type { GfxModel as EModel } from '@blocksuite/block-std/gfx';
 
 import type { EdgelessBlockModel } from './edgeless-block-model.js';
 

@@ -1,17 +1,17 @@
 import type {
-  IBaseProps,
+  BaseElementProps,
   SerializedElement,
   SurfaceBlockModel,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
-  SurfaceGroupLikeModel,
+  GfxGroupLikeElementModel,
   convert,
   observe,
   watch,
   yfield,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import { assertType, deserializeXYWH } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
@@ -64,11 +64,11 @@ export type SerializedMindmapElement = SerializedElement & {
   children: Record<string, NodeDetail>;
 };
 
-type MindmapElementProps = IBaseProps & {
+type MindmapElementProps = BaseElementProps & {
   children: Y.Map<NodeDetail>;
 };
 
-export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementProps> {
+export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElementProps> {
   private _nodeMap = new Map<string, MindmapNode>();
 
   private _queueBuildTree = false;

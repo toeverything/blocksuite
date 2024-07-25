@@ -10,9 +10,9 @@ import {
 } from './decorators/index.js';
 import { onElementChange } from './element-model.js';
 import {
-  type IBaseProps,
-  SurfaceElementModel,
-  SurfaceGroupLikeModel,
+  type BaseElementProps,
+  GfxGroupLikeElementModel,
+  GfxPrimitiveElementModel,
 } from './element-model.js';
 
 const generateElementId = () => {
@@ -41,8 +41,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   protected _elementCtorMap: Record<
     string,
     Constructor<
-      SurfaceElementModel,
-      ConstructorParameters<typeof SurfaceElementModel>
+      GfxPrimitiveElementModel,
+      ConstructorParameters<typeof GfxPrimitiveElementModel>
     >
   > = {};
 
@@ -51,13 +51,13 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     {
       mount: () => void;
       unmount: () => void;
-      model: SurfaceElementModel;
+      model: GfxPrimitiveElementModel;
     }
   >();
 
   protected _elementToGroup = new Map<string, string>();
 
-  protected _elementTypeMap = new Map<string, SurfaceElementModel[]>();
+  protected _elementTypeMap = new Map<string, GfxPrimitiveElementModel[]>();
 
   protected _groupToElements = new Map<string, string[]>();
 
@@ -68,7 +68,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   elementRemoved = new Slot<{
     id: string;
     type: string;
-    model: SurfaceElementModel;
+    model: GfxPrimitiveElementModel;
     local: boolean;
   }>();
 
@@ -83,7 +83,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     remove: new Slot<{
       id: string;
       type: string;
-      model: SurfaceElementModel;
+      model: GfxPrimitiveElementModel;
     }>(),
   };
 
@@ -171,7 +171,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       model: this,
       stashedStore: stashed,
       onChange: payload => mounted && options.onChange({ id, ...payload }),
-    }) as SurfaceElementModel;
+    }) as GfxPrimitiveElementModel;
 
     // @ts-ignore
     delete Ctor['_decoratorState'];
@@ -211,8 +211,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     ctorMap: Record<
       string,
       Constructor<
-        SurfaceElementModel,
-        ConstructorParameters<typeof SurfaceElementModel>
+        GfxPrimitiveElementModel,
+        ConstructorParameters<typeof GfxPrimitiveElementModel>
       >
     >
   ) {
@@ -227,7 +227,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   private _initElementModels() {
     const elementsYMap = this.elements.getValue()!;
-    const addToType = (type: string, model: SurfaceElementModel) => {
+    const addToType = (type: string, model: GfxPrimitiveElementModel) => {
       const sameTypeElements = this._elementTypeMap.get(type) || [];
 
       if (sameTypeElements.indexOf(model) === -1) {
@@ -236,7 +236,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
       this._elementTypeMap.set(type, sameTypeElements);
     };
-    const removeFromType = (type: string, model: SurfaceElementModel) => {
+    const removeFromType = (type: string, model: GfxPrimitiveElementModel) => {
       const sameTypeElements = this._elementTypeMap.get(type) || [];
       const index = sameTypeElements.indexOf(model);
 
@@ -251,11 +251,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       const { changes, keysChanged } = event;
       const addedElements: {
         mount: () => void;
-        model: SurfaceElementModel;
+        model: GfxPrimitiveElementModel;
       }[] = [];
       const deletedElements: {
         unmount: () => void;
-        model: SurfaceElementModel;
+        model: GfxPrimitiveElementModel;
       }[] = [];
 
       keysChanged.forEach(id => {
@@ -343,7 +343,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     }
 
     // @ts-ignore
-    return (ctor.propsToY ?? SurfaceElementModel.propsToY)(props);
+    return (ctor.propsToY ?? GfxPrimitiveElementModel.propsToY)(props);
   }
 
   private _watchGroupRelationChange() {
@@ -373,9 +373,9 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       }
     };
     const isGroup = (
-      element: SurfaceElementModel
-    ): element is SurfaceGroupLikeModel =>
-      element instanceof SurfaceGroupLikeModel;
+      element: GfxPrimitiveElementModel
+    ): element is GfxGroupLikeElementModel =>
+      element instanceof GfxGroupLikeElementModel;
 
     this.elementModels.forEach(model => {
       if (isGroup(model)) {
@@ -479,25 +479,25 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this.hooks.remove.dispose();
   }
 
-  getElementById(id: string): SurfaceElementModel | null {
+  getElementById(id: string): GfxPrimitiveElementModel | null {
     return this._elementModels.get(id)?.model ?? null;
   }
 
-  getElementsByType(type: string): SurfaceElementModel[] {
+  getElementsByType(type: string): GfxPrimitiveElementModel[] {
     return this._elementTypeMap.get(type) || [];
   }
 
   getGroup<
     T extends
-      SurfaceGroupLikeModel<IBaseProps> = SurfaceGroupLikeModel<IBaseProps>,
+      GfxGroupLikeElementModel<BaseElementProps> = GfxGroupLikeElementModel<BaseElementProps>,
   >(id: string): T | null {
     return this._elementToGroup.has(id)
       ? (this.getElementById(this._elementToGroup.get(id)!) as T)
       : null;
   }
 
-  getGroups(id: string): SurfaceGroupLikeModel<IBaseProps>[] {
-    const groups: SurfaceGroupLikeModel<IBaseProps>[] = [];
+  getGroups(id: string): GfxGroupLikeElementModel<BaseElementProps>[] {
+    const groups: GfxGroupLikeElementModel<BaseElementProps>[] = [];
     let group = this.getGroup(id);
 
     while (group) {
@@ -531,7 +531,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       const element = this.getElementById(id)!;
       const group = this.getGroup(id);
 
-      if (element instanceof SurfaceGroupLikeModel) {
+      if (element instanceof GfxGroupLikeElementModel) {
         element.childIds.forEach(childId => {
           if (this.hasElementById(childId)) {
             this.removeElement(childId);
@@ -550,7 +550,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
       this.hooks.remove.emit({
         id,
-        model: element as SurfaceElementModel,
+        model: element as GfxPrimitiveElementModel,
         type: element.type,
       });
     });
@@ -583,7 +583,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   }
 
   get elementModels() {
-    const models: SurfaceElementModel[] = [];
+    const models: GfxPrimitiveElementModel[] = [];
     this._elementModels.forEach(model => models.push(model.model));
     return models;
   }

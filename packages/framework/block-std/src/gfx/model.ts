@@ -18,11 +18,11 @@ import {
 import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
-import type { SurfaceElementModel } from './surface-model/element-model.js';
+import type { GfxPrimitiveElementModel } from './surface/element-model.js';
 
-import { SurfaceBlockModel } from './surface-model/model.js';
+import { SurfaceBlockModel } from './surface/model.js';
 
-export interface IHitTestOptions {
+export interface ElementHitTestOptions {
   expand?: number;
 
   /**
@@ -37,7 +37,7 @@ export interface IHitTestOptions {
   zoom?: number;
 }
 
-export interface IEdgelessElement {
+export interface CommonElement {
   id: string;
   xywh: SerializedXYWH;
   /**
@@ -64,18 +64,15 @@ export interface IEdgelessElement {
   hitTest(
     x: number,
     y: number,
-    options: IHitTestOptions,
+    options: ElementHitTestOptions,
     host: EditorHost
   ): boolean;
   boxSelect(bound: Bound): boolean;
 }
 
-export class EdgelessBlockModel<
-    Props extends EdgelessSelectableProps = EdgelessSelectableProps,
-  >
-  extends BlockModel<Props>
-  implements IEdgelessElement
-{
+export class GfxBlockElementModel<
+  Props extends GfxSelectableProps = GfxSelectableProps,
+> extends BlockModel<Props> {
   private _externalXYWH: SerializedXYWH | undefined = undefined;
 
   connectable = true;
@@ -125,7 +122,12 @@ export class EdgelessBlockModel<
     return new PointLocation(rotatePoint, tangent);
   }
 
-  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
+  hitTest(
+    x: number,
+    y: number,
+    _: ElementHitTestOptions,
+    __: EditorHost
+  ): boolean {
     const bound = Bound.deserialize(this.xywh);
     return bound.isPointInBound([x, y], 0);
   }
@@ -157,7 +159,7 @@ export class EdgelessBlockModel<
     this._externalXYWH = xywh;
   }
 
-  get group(): IEdgelessElement | null {
+  get group(): CommonElement | null {
     const surface = this.doc
       .getBlocks()
       .find(block => block instanceof SurfaceBlockModel);
@@ -167,7 +169,7 @@ export class EdgelessBlockModel<
     return (surface as SurfaceBlockModel).getGroup(this.id) ?? null;
   }
 
-  get groups(): IEdgelessElement[] {
+  get groups(): CommonElement[] {
     const surface = this.doc
       .getBlocks()
       .find(block => block instanceof SurfaceBlockModel);
@@ -178,17 +180,17 @@ export class EdgelessBlockModel<
   }
 }
 
-export type EdgelessSelectableProps = {
+export type GfxSelectableProps = {
   xywh: SerializedXYWH;
   index: string;
 };
 
 export function selectable<
-  Props extends EdgelessSelectableProps,
+  Props extends GfxSelectableProps,
   T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
 >(SuperClass: T) {
   if (SuperClass === BlockModel) {
-    return EdgelessBlockModel as unknown as typeof EdgelessBlockModel<Props>;
+    return GfxBlockElementModel as unknown as typeof GfxBlockElementModel<Props>;
   } else {
     let currentClass = SuperClass;
 
@@ -201,15 +203,18 @@ export function selectable<
 
     if (Object.getPrototypeOf(currentClass.prototype) === null) {
       throw new BlockSuiteError(
-        ErrorCode.EdgelessBlockError,
+        ErrorCode.GfxBlockElementError,
         'The SuperClass is not a subclass of BlockModel'
       );
     }
 
-    Object.setPrototypeOf(currentClass.prototype, EdgelessBlockModel.prototype);
+    Object.setPrototypeOf(
+      currentClass.prototype,
+      GfxBlockElementModel.prototype
+    );
   }
 
-  return SuperClass as unknown as typeof EdgelessBlockModel<Props>;
+  return SuperClass as unknown as typeof GfxBlockElementModel<Props>;
 }
 
-export type EdgelessModel = EdgelessBlockModel | SurfaceElementModel;
+export type GfxModel = GfxBlockElementModel | GfxPrimitiveElementModel;

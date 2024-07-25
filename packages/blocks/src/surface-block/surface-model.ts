@@ -1,7 +1,7 @@
-import type { SurfaceBlockProps } from '@blocksuite/block-std/edgeless';
+import type { SurfaceBlockProps } from '@blocksuite/block-std/gfx';
 import type { MigrationRunner, Y } from '@blocksuite/store';
 
-import { SurfaceBlockModel as BaseSurfaceModel } from '@blocksuite/block-std/edgeless';
+import { SurfaceBlockModel as BaseSurfaceModel } from '@blocksuite/block-std/gfx';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import {
   Boxed,

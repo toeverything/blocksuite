@@ -12,17 +12,17 @@ export {
   updateDerivedProp,
   watch,
   yfield,
-} from './surface-model/decorators/index.js';
+} from './surface/decorators/index.js';
 export {
-  type IBaseProps,
+  type BaseElementProps,
+  GfxGroupLikeElementModel,
+  GfxLocalElementModel,
+  GfxPrimitiveElementModel,
   type SerializedElement,
-  SurfaceElementModel,
-  SurfaceGroupLikeModel,
-  SurfaceLocalModel,
-} from './surface-model/element-model.js';
+} from './surface/element-model.js';
 export {
   SurfaceBlockModel,
   type SurfaceBlockProps,
   type SurfaceMiddleware,
-} from './surface-model/model.js';
+} from './surface/model.js';
 export * from './viewport.js';

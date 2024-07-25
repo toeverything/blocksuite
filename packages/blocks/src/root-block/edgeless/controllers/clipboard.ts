@@ -1218,10 +1218,10 @@ export class EdgelessClipboardController extends PageClipboard {
 
         blockRawData.push(blockSnapshot);
       } else {
-        const serializedElement = data as SerializedElement;
-        originalIndexes.set(serializedElement.id, serializedElement.index);
+        const element = data as SerializedElement;
+        originalIndexes.set(element.id, element.index);
 
-        surfaceRawData.push(serializedElement);
+        surfaceRawData.push(element);
       }
     });
 

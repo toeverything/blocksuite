@@ -15,7 +15,7 @@ export enum ErrorCode {
   CommandError,
   EventDispatcherError,
   SelectionError,
-  EdgelessBlockError,
+  GfxBlockElementError,
   MissingViewModelError,
 
   // Fatal error should be greater than 10000
