@@ -1,7 +1,4 @@
-import type {
-  IBaseProps,
-  IHitTestOptions,
-} from '@blocksuite/block-std/edgeless';
+import type { IBaseProps, IHitTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec, IVec3, SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
@@ -10,7 +7,7 @@ import {
   derive,
   watch,
   yfield,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';

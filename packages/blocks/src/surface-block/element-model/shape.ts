@@ -1,7 +1,4 @@
-import type {
-  IBaseProps,
-  IHitTestOptions,
-} from '@blocksuite/block-std/edgeless';
+import type { IBaseProps, IHitTestOptions } from '@blocksuite/block-std/gfx';
 import type {
   Bound,
   IBound,
@@ -10,11 +7,7 @@ import type {
   SerializedXYWH,
 } from '@blocksuite/global/utils';
 
-import {
-  SurfaceElementModel,
-  local,
-  yfield,
-} from '@blocksuite/block-std/edgeless';
+import { SurfaceElementModel, local, yfield } from '@blocksuite/block-std/gfx';
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {

@@ -36,7 +36,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./edgeless": "./src/edgeless/index.ts"
+    "./gfx": "./src/gfx/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -48,10 +48,10 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       },
-      "./edgeless": {
-        "types": "./dist/edgeless/index.d.ts",
-        "module": "./dist/edgeless/index.js",
-        "import": "./dist/edgeless/index.js"
+      "./gfx": {
+        "types": "./dist/gfx/index.d.ts",
+        "module": "./dist/gfx/index.js",
+        "import": "./dist/gfx/index.js"
       }
     }
   },

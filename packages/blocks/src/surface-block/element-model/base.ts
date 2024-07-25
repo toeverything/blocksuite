@@ -1,4 +1,4 @@
-import type { SurfaceElementModel } from '@blocksuite/block-std/edgeless';
+import type { SurfaceElementModel } from '@blocksuite/block-std/gfx';
 
 import type { OmitFunctionsAndKeysAndReadOnly } from './utility-type.js';
 
@@ -11,24 +11,21 @@ export type ModelToProps<
   K | 'yMap' | 'surface' | 'display' | 'opacity' | 'externalXYWH'
 >;
 
-export type { IHitTestOptions } from '@blocksuite/block-std/edgeless';
+export type { IHitTestOptions } from '@blocksuite/block-std/gfx';
 
 import type {
   SurfaceElementModel as ElementModel,
   SurfaceGroupLikeModel as GroupLikeModel,
   SurfaceLocalModel as LocalModel,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 
-export type {
-  IBaseProps,
-  SerializedElement,
-} from '@blocksuite/block-std/edgeless';
+export type { IBaseProps, SerializedElement } from '@blocksuite/block-std/gfx';
 
 export {
   SurfaceElementModel,
   SurfaceGroupLikeModel,
   SurfaceLocalModel,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 
 declare global {
   namespace BlockSuite {

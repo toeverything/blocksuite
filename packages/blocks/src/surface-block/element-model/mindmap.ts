@@ -2,7 +2,7 @@ import type {
   IBaseProps,
   SerializedElement,
   SurfaceBlockModel,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
@@ -11,7 +11,7 @@ import {
   observe,
   watch,
   yfield,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import { assertType, deserializeXYWH } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';

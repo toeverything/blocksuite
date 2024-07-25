@@ -1,6 +1,6 @@
 import type { IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
-import { yfield } from '@blocksuite/block-std/edgeless';
+import { yfield } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 

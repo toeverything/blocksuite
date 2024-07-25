@@ -1,7 +1,4 @@
-import type {
-  IBaseProps,
-  SerializedElement,
-} from '@blocksuite/block-std/edgeless';
+import type { IBaseProps, SerializedElement } from '@blocksuite/block-std/gfx';
 import type { IVec, PointLocation } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
@@ -10,7 +7,7 @@ import {
   local,
   observe,
   yfield,
-} from '@blocksuite/block-std/edgeless';
+} from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
