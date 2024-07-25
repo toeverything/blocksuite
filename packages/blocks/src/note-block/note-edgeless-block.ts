@@ -377,7 +377,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     };
   }
 
-  override renderEdgelessBlock() {
+  override renderGfxBlock() {
     const { model } = this;
     const { displayMode } = model;
     if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)

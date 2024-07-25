@@ -12,7 +12,7 @@ export class EdgelessAIChatBlockComponent extends toGfxBlockComponent(
 ) {
   rootServiceFlavour!: 'affine:page';
 
-  override renderEdgelessBlock() {
+  override renderGfxBlock() {
     const bound = Bound.deserialize(this.model.xywh$.value);
     const scale = this.model.scale$.value;
     const width = bound.w / scale;

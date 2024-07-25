@@ -39,7 +39,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     return candidates;
   };
 
-  private _renderEdgelessBlocks = () => {
+  private _renderGfxBlocks = () => {
     const refModel = this.refModel;
     const blocks =
       'flavour' in refModel
@@ -137,7 +137,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   override render() {
     return html`<div class="surface-blocks-portal">
       <div class="stacking-canvas"></div>
-      ${this._renderEdgelessBlocks()}
+      ${this._renderGfxBlocks()}
     </div>`;
   }
 
