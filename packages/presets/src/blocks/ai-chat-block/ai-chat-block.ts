@@ -7,8 +7,7 @@ import { customElement } from 'lit/decorators.js';
 import type { AIChatBlockModel } from './ai-chat-model.js';
 
 import { ChatWithAIIcon } from '../_common/icon.js';
-import './components/ai-chat-message/ai-chat-messages.js';
-import './components/peek-view/chat-block-peek-view.js';
+import './components/ai-chat-messages.js';
 import { AIChatBlockStyles } from './styles.js';
 import { ChatMessagesSchema } from './types.js';
 
@@ -31,19 +30,6 @@ export class AIChatBlockComponent extends BlockComponent<AIChatBlockModel> {
       return [];
     }
   });
-
-  private _openChatBlock = async () => {
-    if (!this._peekViewService) {
-      return;
-    }
-
-    const messages = this._deserializeChatMessages.value;
-    const peekViewTemplate = html`<ai-chat-block-peek-view
-      .historyMessages=${messages}
-      .host=${this.host}
-    ></ai-chat-block-peek-view>`;
-    await this._peekViewService.peek(this, peekViewTemplate);
-  };
 
   static override styles = AIChatBlockStyles;
 
@@ -70,7 +56,7 @@ export class AIChatBlockComponent extends BlockComponent<AIChatBlockModel> {
           .withMask=${true}
         ></ai-chat-messages>
       </div>
-      <div class="ai-chat-block-button" @click=${this._openChatBlock}>
+      <div class="ai-chat-block-button">
         ${ChatWithAIIcon} <span>AI chat block</span>
       </div>
     </div> `;

@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { ImageLoadingFailedIcon, LoadingIcon } from '../../../_common/icon.js';
+import { ImageLoadingFailedIcon, LoadingIcon } from '../../_common/icon.js';
 import './image-placeholder.js';
 
 @customElement('chat-image')
@@ -17,7 +17,8 @@ export class ChatImage extends LitElement {
       justify-content: center;
       align-items: center;
       width: 70%;
-      max-width: 320px;
+      max-width: 200px;
+      max-height: 122px;
 
       img {
         max-width: 100%;
@@ -70,7 +71,7 @@ export class ChatImages extends LitElement {
       display: flex;
       width: 100%;
       gap: 8px;
-      flex-direction: column;
+      flex-wrap: wrap;
     }
   `;
 

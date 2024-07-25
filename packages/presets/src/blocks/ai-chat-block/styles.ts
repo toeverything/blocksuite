@@ -43,7 +43,6 @@ export const AIChatBlockStyles = css`
       align-items: center;
       gap: 8px;
       font-weight: 600;
-      cursor: pointer;
       svg {
         color: var(--affine-icon-color);
       }
