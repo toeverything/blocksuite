@@ -2,7 +2,8 @@ import { WidgetComponent } from '@blocksuite/block-std';
 import { offset, shift } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { join } from 'lit/directives/join.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import type {
   SurfaceRefBlockComponent,
@@ -12,14 +13,27 @@ import type {
 import { HoverController } from '../../../_common/components/hover/controller.js';
 import { isPeekable, peek } from '../../../_common/components/peekable.js';
 import { toast } from '../../../_common/components/toast.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
+import '../../../_common/components/toolbar/toolbar.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import {
+  type Action,
+  renderActions,
+} from '../../../_common/components/toolbar/utils.js';
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
-import { EdgelessModeIcon } from '../../../_common/icons/edgeless.js';
+import {
+  EdgelessModeIcon,
+  MoreVerticalIcon,
+  SmallArrowDownIcon,
+} from '../../../_common/icons/edgeless.js';
 import {
   CaptionIcon,
   CenterPeekIcon,
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
+  OpenIcon,
 } from '../../../_common/icons/text.js';
 import { downloadBlob } from '../../../_common/utils/filesys.js';
 import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
@@ -105,163 +119,164 @@ function SurfaceRefToolbarOptions(options: {
   const readonly = model.doc.readonly;
   const hasValidReference = !!block.referenceModel;
 
-  return html`
-    <style>
-      :host {
-        z-index: 1;
-      }
-      .surface-ref-toolbar-container {
-        display: flex;
-        box-sizing: border-box;
-        box-shadow: var(--affine-shadow-2);
-        border-radius: 8px;
-        list-style: none;
-        padding: 4px 8px;
-        gap: 4px;
-        align-items: center;
-        background-color: var(--affine-background-overlay-panel-color);
-        margin: 0;
-      }
-      .delete-button:hover {
-        background: var(--affine-background-error-color);
-        color: var(--affine-error-color);
-      }
-      .delete-button:hover > svg {
-        color: var(--affine-error-color);
-      }
+  const openMenuActions: Action[] = [];
+  if (hasValidReference) {
+    openMenuActions.push({
+      name: 'Open in edgeless',
+      icon: EdgelessModeIcon,
+      handler: () => block.viewInEdgeless(),
+      disabled: readonly,
+    });
 
-      .divider {
-        width: 1px;
-        height: 24px;
-        background-color: var(--affine-border-color);
-        margin: 0 8px;
-      }
+    if (isPeekable(block)) {
+      openMenuActions.push({
+        name: 'Open in center peek',
+        icon: CenterPeekIcon,
+        handler: () => peek(block),
+      });
+    }
+  }
 
-      .view-in-edgeless-button {
-        font-size: 12px;
-        color: var(--affine-text-secondary-color);
-        font-weight: 600;
-        gap: 2px;
-      }
-    </style>
+  const moreMenuActions: Action[][] = [
+    hasValidReference
+      ? [
+          {
+            type: 'copy',
+            name: 'Copy',
+            icon: CopyIcon,
+            handler: () => {
+              edgelessToBlob(block.host, {
+                surfaceRefBlock: block,
+                surfaceRenderer: block.surfaceRenderer,
+                edgelessElement:
+                  block.referenceModel as BlockSuite.EdgelessModel,
+                blockContainer: block.portal,
+              })
+                .then(blob => {
+                  return writeImageBlobToClipboard(blob);
+                })
+                .then(() => {
+                  toast(block.host, 'Copied image to clipboard');
+                })
+                .catch(err => {
+                  console.error(err);
+                });
+            },
+          },
+          {
+            type: 'download',
+            name: 'Download',
+            icon: DownloadIcon,
+            handler: () => {
+              const referencedModel = block.referenceModel;
 
-    <div class="surface-ref-toolbar-container">
-      <icon-button
-        ?hidden=${!hasValidReference || readonly}
-        class="view-in-edgeless-button"
-        text="View in Edgeless"
-        width="fit-content"
-        @click=${() => block.viewInEdgeless()}
-        >${EdgelessModeIcon}
-      </icon-button>
+              if (!referencedModel) return;
 
-      <div
-        class="divider"
-        ?hidden=${readonly}
-        style=${styleMap({
-          display: hasValidReference ? undefined : 'none',
-        })}
-      ></div>
+              edgelessToBlob(block.host, {
+                surfaceRefBlock: block,
+                surfaceRenderer: block.surfaceRenderer,
+                edgelessElement: referencedModel,
+                blockContainer: block.portal,
+              })
+                .then(blob => {
+                  const fileName =
+                    'title' in referencedModel
+                      ? referencedModel.title?.toString() ?? 'Edgeless Content'
+                      : 'Edgeless Content';
 
-      <icon-button
-        size="32px"
-        ?hidden=${readonly}
-        @click=${() => {
-          abortController.abort();
-          block.captionElement.show();
-        }}
-      >
-        ${CaptionIcon}
-
-        <affine-tooltip tip-position="top">Caption</affine-tooltip>
-      </icon-button>
-
-      <icon-button
-        size="32px"
-        ?hidden=${!hasValidReference}
-        @click=${() => {
-          const referencedModel = block.referenceModel;
-
-          if (!referencedModel) return;
-
-          edgelessToBlob(block.host, {
-            surfaceRefBlock: block,
-            surfaceRenderer: block.surfaceRenderer,
-            edgelessElement: referencedModel,
-            blockContainer: block.portal,
-          })
-            .then(blob => {
-              const fileName =
-                'title' in referencedModel
-                  ? referencedModel.title?.toString() ?? 'Edgeless Content'
-                  : 'Edgeless Content';
-
-              downloadBlob(blob, fileName);
-            })
-            .catch(err => {
-              console.error(err);
-            });
-        }}
-      >
-        ${DownloadIcon}
-
-        <affine-tooltip tip-position="top">Download</affine-tooltip>
-      </icon-button>
-
-      ${isPeekable(block)
-        ? html`<icon-button
-            size="32px"
-            ?hidden=${!hasValidReference}
-            @click=${() => {
-              peek(block);
-            }}
-          >
-            ${CenterPeekIcon}
-            <affine-tooltip tip-position="top"
-              >Open in center peek</affine-tooltip
-            >
-          </icon-button>`
-        : nothing}
-
-      <icon-button
-        size="32px"
-        ?hidden=${!hasValidReference}
-        @click=${() => {
-          edgelessToBlob(block.host, {
-            surfaceRefBlock: block,
-            surfaceRenderer: block.surfaceRenderer,
-            edgelessElement: block.referenceModel as BlockSuite.EdgelessModel,
-            blockContainer: block.portal,
-          })
-            .then(blob => {
-              return writeImageBlobToClipboard(blob);
-            })
-            .then(() => {
-              toast(block.host, 'Copied image to clipboard');
-            })
-            .catch(err => {
-              console.error(err);
-            });
-        }}
-      >
-        ${CopyIcon}
-
-        <affine-tooltip tip-position="top">Copy to clipboard</affine-tooltip>
-      </icon-button>
-
-      <icon-button
-        class="delete-button"
-        size="32px"
-        ?hidden=${readonly}
-        @click="${() => {
+                  downloadBlob(blob, fileName);
+                })
+                .catch(err => {
+                  console.error(err);
+                });
+            },
+          },
+        ]
+      : [],
+    [
+      {
+        type: 'delete',
+        name: 'Delete',
+        icon: DeleteIcon,
+        disabled: readonly,
+        handler: () => {
           model.doc.deleteBlock(model);
           abortController.abort();
-        }}"
-      >
-        ${DeleteIcon}
+        },
+      },
+    ],
+  ];
 
-        <affine-tooltip tip-position="top">Delete</affine-tooltip>
-      </icon-button>
-    </div>
+  const buttons = [
+    openMenuActions.length
+      ? html`
+          <editor-menu-button
+            .contentPadding=${'8px'}
+            .button=${html`
+              <editor-icon-button
+                aria-label="Open doc"
+                .justify=${'space-between'}
+                .labelHeight=${'20px'}
+              >
+                ${OpenIcon}${SmallArrowDownIcon}
+              </editor-icon-button>
+            `}
+          >
+            <div slot data-size="large" data-orientation="vertical">
+              ${repeat(
+                openMenuActions,
+                button => button.name,
+                ({ name, icon, handler, disabled }) => html`
+                  <editor-menu-action
+                    aria-label=${name}
+                    ?disabled=${disabled}
+                    @click=${handler}
+                  >
+                    ${icon}<span class="label">${name}</span>
+                  </editor-menu-action>
+                `
+              )}
+            </div>
+          </editor-menu-button>
+        `
+      : nothing,
+
+    readonly
+      ? nothing
+      : html`
+          <editor-icon-button
+            aria-label="Caption"
+            @click=${() => {
+              abortController.abort();
+              block.captionElement.show();
+            }}
+          >
+            ${CaptionIcon}
+          </editor-icon-button>
+        `,
+
+    html`
+      <editor-menu-button
+        .contentPadding=${'8px'}
+        .button=${html`
+          <editor-icon-button aria-label="More" .tooltip=${'More'}>
+            ${MoreVerticalIcon}
+          </editor-icon-button>
+        `}
+      >
+        <div slot data-size="large" data-orientation="vertical">
+          ${renderActions(moreMenuActions)}
+        </div>
+      </editor-menu-button>
+    `,
+  ];
+
+  return html`
+    <editor-toolbar class="surface-ref-toolbar-container">
+      ${join(
+        buttons.filter(button => button !== nothing),
+        renderToolbarSeparator
+      )}
+    </editor-toolbar>
   `;
 }
