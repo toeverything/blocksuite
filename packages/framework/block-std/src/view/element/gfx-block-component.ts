@@ -8,15 +8,15 @@ import type { BlockService } from '../../service/index.js';
 
 import { BlockComponent } from './block-component.js';
 
-export const edgelessElementSymbol = Symbol('edgelessElement');
+export const GfxElementSymbol = Symbol('GfxElement');
 
-export abstract class EdgelessBlockComponent<
-  EdgelessRootService extends BlockService = BlockService,
+export abstract class GfxBlockComponent<
+  GfxRootService extends BlockService = BlockService,
   Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockComponent<Model, Service, WidgetName> {
-  [edgelessElementSymbol] = true;
+  [GfxElementSymbol] = true;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -32,8 +32,8 @@ export abstract class EdgelessBlockComponent<
 
     if (!xywh$) {
       throw new BlockSuiteError(
-        ErrorCode.EdgelessBlockError,
-        'Edgeless block should have at least `xywh` property.'
+        ErrorCode.GfxBlockElementError,
+        'Gfx block element should have `xywh` property.'
       );
     }
 
@@ -51,10 +51,10 @@ export abstract class EdgelessBlockComponent<
     this.style.height = `${h}px`;
     this.style.zIndex = zIndex;
 
-    return this.renderEdgelessBlock();
+    return this.renderGfxBlock();
   }
 
-  renderEdgelessBlock(): unknown {
+  renderGfxBlock(): unknown {
     return nothing;
   }
 
@@ -67,17 +67,15 @@ export abstract class EdgelessBlockComponent<
   }
 
   get rootService() {
-    return this.host.spec.getService(
-      this.rootServiceFlavour
-    ) as EdgelessRootService;
+    return this.host.spec.getService(this.rootServiceFlavour) as GfxRootService;
   }
 
   abstract rootServiceFlavour: string;
 }
 
 // @ts-ignore
-export function toEdgelessBlockComponent<
-  EdgelessRootService extends BlockService,
+export function toGfxBlockComponent<
+  GfxRootService extends BlockService,
   Model extends BlockModel,
   Service extends BlockService,
   WidgetName extends string,
@@ -85,7 +83,7 @@ export function toEdgelessBlockComponent<
 >(CustomBlock: B) {
   // @ts-ignore
   return class extends CustomBlock {
-    [edgelessElementSymbol] = true;
+    [GfxElementSymbol] = true;
 
     rootServiceFlavour!: string;
 
@@ -109,8 +107,8 @@ export function toEdgelessBlockComponent<
 
       if (!xywh$) {
         throw new BlockSuiteError(
-          ErrorCode.EdgelessBlockError,
-          'Edgeless block should have at least `xywh` property.'
+          ErrorCode.GfxBlockElementError,
+          'Gfx block element should have `xywh` property.'
         );
       }
 
@@ -127,8 +125,8 @@ export function toEdgelessBlockComponent<
 
       if (!xywh || !index) {
         throw new BlockSuiteError(
-          ErrorCode.EdgelessBlockError,
-          'Edgeless block should have at least `xywh` and `index` properties.'
+          ErrorCode.GfxBlockElementError,
+          'Gfx block element should have `xywh` and `index` props.'
         );
       }
 
@@ -140,10 +138,10 @@ export function toEdgelessBlockComponent<
       this.style.height = typeof h === 'number' ? `${h}px` : h;
       this.style.zIndex = zIndex;
 
-      return this.renderEdgelessBlock();
+      return this.renderGfxBlock();
     }
 
-    renderEdgelessBlock(): unknown {
+    renderGfxBlock(): unknown {
       return this.renderPageContent();
     }
 
@@ -158,12 +156,12 @@ export function toEdgelessBlockComponent<
     get rootService() {
       return this.host.spec.getService(
         this.rootServiceFlavour
-      ) as EdgelessRootService;
+      ) as GfxRootService;
     }
   } as B & {
     new (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...args: any[]
-    ): EdgelessBlockComponent<EdgelessRootService>;
+    ): GfxBlockComponent<GfxRootService>;
   };
 }

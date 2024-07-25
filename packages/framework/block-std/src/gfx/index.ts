@@ -15,10 +15,10 @@ export {
 } from './surface/decorators/index.js';
 export {
   type BaseElementProps,
-  type SerializedElement as SerializedElement,
-  SurfaceElementModel,
-  SurfaceGroupLikeModel,
-  SurfaceLocalModel,
+  GfxGroupLikeElementModel,
+  GfxLocalElementModel,
+  GfxPrimitiveElementModel,
+  type SerializedElement,
 } from './surface/element-model.js';
 export {
   SurfaceBlockModel,

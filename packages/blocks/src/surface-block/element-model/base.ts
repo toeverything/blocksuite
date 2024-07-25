@@ -1,9 +1,9 @@
-import type { SurfaceElementModel } from '@blocksuite/block-std/gfx';
+import type { GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
 
 import type { OmitFunctionsAndKeysAndReadOnly } from './utility-type.js';
 
 export type ModelToProps<
-  T extends SurfaceElementModel,
+  T extends GfxPrimitiveElementModel,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   K extends keyof any,
 > = OmitFunctionsAndKeysAndReadOnly<
@@ -14,9 +14,9 @@ export type ModelToProps<
 export type { ElementHitTestOptions } from '@blocksuite/block-std/gfx';
 
 import type {
-  SurfaceElementModel as ElementModel,
-  SurfaceGroupLikeModel as GroupLikeModel,
-  SurfaceLocalModel as LocalModel,
+  GfxPrimitiveElementModel as ElementModel,
+  GfxGroupLikeElementModel as GroupLikeModel,
+  GfxLocalElementModel as LocalModel,
 } from '@blocksuite/block-std/gfx';
 
 export type {
@@ -25,9 +25,9 @@ export type {
 } from '@blocksuite/block-std/gfx';
 
 export {
-  SurfaceElementModel,
-  SurfaceGroupLikeModel,
-  SurfaceLocalModel,
+  GfxGroupLikeElementModel as SurfaceGroupLikeModel,
+  GfxLocalElementModel as SurfaceLocalModel,
+  GfxPrimitiveElementModel as SurfaceElementModel,
 } from '@blocksuite/block-std/gfx';
 
 declare global {

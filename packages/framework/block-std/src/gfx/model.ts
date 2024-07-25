@@ -18,7 +18,7 @@ import {
 import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
-import type { SurfaceElementModel } from './surface/element-model.js';
+import type { GfxPrimitiveElementModel } from './surface/element-model.js';
 
 import { SurfaceBlockModel } from './surface/model.js';
 
@@ -70,8 +70,8 @@ export interface CommonElement {
   boxSelect(bound: Bound): boolean;
 }
 
-export class EdgelessBlockModel<
-  Props extends EdgelessSelectableProps = EdgelessSelectableProps,
+export class GfxBlockElementModel<
+  Props extends GfxSelectableProps = GfxSelectableProps,
 > extends BlockModel<Props> {
   private _externalXYWH: SerializedXYWH | undefined = undefined;
 
@@ -180,17 +180,17 @@ export class EdgelessBlockModel<
   }
 }
 
-export type EdgelessSelectableProps = {
+export type GfxSelectableProps = {
   xywh: SerializedXYWH;
   index: string;
 };
 
 export function selectable<
-  Props extends EdgelessSelectableProps,
+  Props extends GfxSelectableProps,
   T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
 >(SuperClass: T) {
   if (SuperClass === BlockModel) {
-    return EdgelessBlockModel as unknown as typeof EdgelessBlockModel<Props>;
+    return GfxBlockElementModel as unknown as typeof GfxBlockElementModel<Props>;
   } else {
     let currentClass = SuperClass;
 
@@ -203,15 +203,18 @@ export function selectable<
 
     if (Object.getPrototypeOf(currentClass.prototype) === null) {
       throw new BlockSuiteError(
-        ErrorCode.EdgelessBlockError,
+        ErrorCode.GfxBlockElementError,
         'The SuperClass is not a subclass of BlockModel'
       );
     }
 
-    Object.setPrototypeOf(currentClass.prototype, EdgelessBlockModel.prototype);
+    Object.setPrototypeOf(
+      currentClass.prototype,
+      GfxBlockElementModel.prototype
+    );
   }
 
-  return SuperClass as unknown as typeof EdgelessBlockModel<Props>;
+  return SuperClass as unknown as typeof GfxBlockElementModel<Props>;
 }
 
-export type EdgelessModel = EdgelessBlockModel | SurfaceElementModel;
+export type GfxModel = GfxBlockElementModel | GfxPrimitiveElementModel;

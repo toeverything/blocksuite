@@ -20,7 +20,7 @@ import {
   rotatePoints,
 } from '@blocksuite/global/utils';
 
-import type { EdgelessBlockModel, EdgelessModel } from '../model.js';
+import type { GfxBlockElementModel, GfxModel } from '../model.js';
 import type { SurfaceBlockModel } from './model.js';
 
 import {
@@ -48,7 +48,7 @@ export type SerializedElement = Record<string, unknown> & {
   props: Record<string, unknown>;
 };
 
-export abstract class SurfaceElementModel<
+export abstract class GfxPrimitiveElementModel<
   Props extends BaseElementProps = BaseElementProps,
 > implements CommonElement
 {
@@ -193,7 +193,7 @@ export abstract class SurfaceElementModel<
       return;
     }
 
-    const curVal = this[prop as unknown as keyof SurfaceElementModel];
+    const curVal = this[prop as unknown as keyof GfxPrimitiveElementModel];
 
     this._stashed.set(prop, curVal);
 
@@ -207,7 +207,7 @@ export abstract class SurfaceElementModel<
         const derivedProps = getDeriveProperties(
           prop as string,
           original,
-          this as unknown as SurfaceElementModel
+          this as unknown as GfxPrimitiveElementModel
         );
 
         this._stashed.set(prop, value);
@@ -231,7 +231,10 @@ export abstract class SurfaceElementModel<
           },
         });
 
-        updateDerivedProp(derivedProps, this as unknown as SurfaceElementModel);
+        updateDerivedProp(
+          derivedProps,
+          this as unknown as GfxPrimitiveElementModel
+        );
       },
     });
   }
@@ -270,7 +273,7 @@ export abstract class SurfaceElementModel<
     return this._local.get('externalBound') as Bound | null;
   }
 
-  get group(): SurfaceGroupLikeModel | null {
+  get group(): GfxGroupLikeElementModel | null {
     return this.surface.getGroup(this.id);
   }
 
@@ -327,9 +330,9 @@ export abstract class SurfaceElementModel<
   abstract xywh: SerializedXYWH;
 }
 
-export abstract class SurfaceGroupLikeModel<
+export abstract class GfxGroupLikeElementModel<
   Props extends BaseElementProps = BaseElementProps,
-> extends SurfaceElementModel<Props> {
+> extends GfxPrimitiveElementModel<Props> {
   private _childIds: string[] = [];
 
   /**
@@ -338,19 +341,19 @@ export abstract class SurfaceGroupLikeModel<
    */
   descendants(withoutGroup = true) {
     return this.childElements.reduce((prev, child) => {
-      if (child instanceof SurfaceGroupLikeModel) {
+      if (child instanceof GfxGroupLikeElementModel) {
         prev = prev.concat(child.descendants());
 
-        !withoutGroup && prev.push(child as SurfaceElementModel);
+        !withoutGroup && prev.push(child as GfxPrimitiveElementModel);
       } else {
         prev.push(child);
       }
 
       return prev;
-    }, [] as EdgelessModel[]);
+    }, [] as GfxModel[]);
   }
 
-  hasChild(element: string | EdgelessModel) {
+  hasChild(element: string | GfxModel) {
     return (
       (typeof element === 'string'
         ? this.children?.has(element)
@@ -365,7 +368,7 @@ export abstract class SurfaceGroupLikeModel<
   /**
    * Check if the group has the given descendant.
    */
-  hasDescendant(element: string | EdgelessModel) {
+  hasDescendant(element: string | GfxModel) {
     const groups = this.surface.getGroups(
       typeof element === 'string' ? element : element.id
     );
@@ -404,12 +407,12 @@ export abstract class SurfaceGroupLikeModel<
   }
 
   get childElements() {
-    const elements: EdgelessModel[] = [];
+    const elements: GfxModel[] = [];
 
     for (const key of this.childIds) {
       const element =
         this.surface.getElementById(key) ||
-        (this.surface.doc.getBlockById(key) as EdgelessBlockModel);
+        (this.surface.doc.getBlockById(key) as GfxBlockElementModel);
 
       element && elements.push(element);
     }
@@ -433,11 +436,11 @@ export abstract class SurfaceGroupLikeModel<
    */
   abstract removeChild(id: string): void;
 
-  @local<SerializedXYWH, SurfaceGroupLikeModel>()
+  @local<SerializedXYWH, GfxGroupLikeElementModel>()
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
 
-export abstract class SurfaceLocalModel {
+export abstract class GfxLocalElementModel {
   private _lastXYWH: SerializedXYWH = '[0,0,-1,-1]';
 
   protected _local = new Map<string | symbol, unknown>();

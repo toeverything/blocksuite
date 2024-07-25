@@ -6,7 +6,7 @@ import type { IVec, PointLocation } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
 import {
-  SurfaceGroupLikeModel,
+  GfxGroupLikeElementModel,
   local,
   observe,
   yfield,
@@ -27,7 +27,7 @@ export type SerializedGroupElement = SerializedElement & {
   children: Record<string, boolean>;
 };
 
-export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> {
+export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProps> {
   static override propsToY(props: Record<string, unknown>) {
     if (props.title && !(props.title instanceof DocCollection.Y.Text)) {
       props.title = new DocCollection.Y.Text(props.title as string);

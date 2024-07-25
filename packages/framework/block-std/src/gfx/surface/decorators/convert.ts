@@ -1,4 +1,4 @@
-import type { SurfaceElementModel } from '../element-model.js';
+import type { GfxPrimitiveElementModel } from '../element-model.js';
 
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
@@ -13,7 +13,7 @@ const convertSymbol = Symbol('convert');
  * @param fn
  * @returns
  */
-export function convert<V, T extends SurfaceElementModel>(
+export function convert<V, T extends GfxPrimitiveElementModel>(
   fn: (propValue: V, instance: T) => unknown
 ) {
   return function convertDecorator(

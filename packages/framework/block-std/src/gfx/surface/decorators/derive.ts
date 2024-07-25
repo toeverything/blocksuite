@@ -1,4 +1,4 @@
-import type { SurfaceElementModel } from '../element-model.js';
+import type { GfxPrimitiveElementModel } from '../element-model.js';
 
 import {
   getDecoratorState,
@@ -22,7 +22,7 @@ function getDerivedMeta(
 export function getDeriveProperties(
   prop: string | symbol,
   propValue: unknown,
-  receiver: SurfaceElementModel
+  receiver: GfxPrimitiveElementModel
 ) {
   const prototype = Object.getPrototypeOf(receiver);
   const decoratorState = getDecoratorState(receiver.surface);
@@ -51,7 +51,7 @@ export function getDeriveProperties(
 
 export function updateDerivedProp(
   derivedProps: Record<string, unknown> | null,
-  receiver: SurfaceElementModel
+  receiver: GfxPrimitiveElementModel
 ) {
   if (derivedProps) {
     const decoratorState = getDecoratorState(receiver.surface);
@@ -78,7 +78,7 @@ export function updateDerivedProp(
  * @param fn
  * @returns
  */
-export function derive<V, T extends SurfaceElementModel>(
+export function derive<V, T extends GfxPrimitiveElementModel>(
   fn: (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     propValue: any,
@@ -91,7 +91,7 @@ export function derive<V, T extends SurfaceElementModel>(
   ) {
     const prop = String(context.name);
     return {
-      init(this: SurfaceElementModel, v: V) {
+      init(this: GfxPrimitiveElementModel, v: V) {
         const proto = Object.getPrototypeOf(this);
         const derived = getDerivedMeta(proto, prop);
 
@@ -103,6 +103,6 @@ export function derive<V, T extends SurfaceElementModel>(
 
         return v;
       },
-    } as ClassAccessorDecoratorResult<SurfaceElementModel, V>;
+    } as ClassAccessorDecoratorResult<GfxPrimitiveElementModel, V>;
   };
 }

@@ -5,7 +5,7 @@ import type {
 import type { IVec, IVec3, SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
-  SurfaceElementModel,
+  GfxPrimitiveElementModel,
   convert,
   derive,
   watch,
@@ -38,7 +38,7 @@ export type BrushProps = BaseElementProps & {
   lineWidth: number;
 };
 
-export class BrushElementModel extends SurfaceElementModel<BrushProps> {
+export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   static override propsToY(props: BrushProps) {
     return props;
   }

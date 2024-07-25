@@ -8,7 +8,7 @@ const CursorSelectionSchema = z.object({
 });
 
 export class CursorSelection extends BaseSelection {
-  static override group = 'edgeless';
+  static override group = 'gfx';
 
   static override type = 'cursor';
 
@@ -17,7 +17,7 @@ export class CursorSelection extends BaseSelection {
   readonly y: number;
 
   constructor(x: number, y: number) {
-    super({ blockId: '[edgeless-cursor]' });
+    super({ blockId: '[gfx-cursor]' });
     this.x = x;
     this.y = y;
   }

@@ -4,7 +4,7 @@ import type { BlockModel } from '@blocksuite/store';
 import {
   ShadowlessElement,
   WithDisposable,
-  toEdgelessBlockComponent,
+  toGfxBlockComponent,
 } from '@blocksuite/block-std';
 import { Point } from '@blocksuite/global/utils';
 import { Bound, almostEqual, clamp } from '@blocksuite/global/utils';
@@ -101,7 +101,7 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 const ACTIVE_NOTE_EXTRA_PADDING = 20;
 
 @customElement('affine-edgeless-note')
-export class EdgelessNoteBlockComponent extends toEdgelessBlockComponent(
+export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
   NoteBlockComponent
 ) {
   static override styles = css`

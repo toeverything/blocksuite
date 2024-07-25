@@ -1,8 +1,8 @@
-import type { SurfaceElementModel } from '../element-model.js';
+import type { GfxPrimitiveElementModel } from '../element-model.js';
 
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
-type WatchFn<T extends SurfaceElementModel = SurfaceElementModel> = (
+type WatchFn<T extends GfxPrimitiveElementModel = GfxPrimitiveElementModel> = (
   oldValue: unknown,
   instance: T,
   local: boolean
@@ -14,7 +14,7 @@ const watchSymbol = Symbol('watch');
  * The watch decorator is used to watch the property change of the element.
  * You can thinks of it as a decorator version of `elementUpdated` slot of the surface model.
  */
-export function watch<V, T extends SurfaceElementModel>(
+export function watch<V, T extends GfxPrimitiveElementModel>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: WatchFn<T>
 ) {
@@ -24,11 +24,11 @@ export function watch<V, T extends SurfaceElementModel>(
   ) {
     const prop = context.name;
     return {
-      init(this: SurfaceElementModel, v: V) {
+      init(this: GfxPrimitiveElementModel, v: V) {
         setObjectPropMeta(watchSymbol, Object.getPrototypeOf(this), prop, fn);
         return v;
       },
-    } as ClassAccessorDecoratorResult<SurfaceElementModel, V>;
+    } as ClassAccessorDecoratorResult<GfxPrimitiveElementModel, V>;
   };
 }
 
@@ -36,7 +36,7 @@ function getWatchMeta(proto: unknown, prop: string | symbol): null | WatchFn {
   return getObjectPropMeta(proto, watchSymbol, prop);
 }
 
-function startWatch(prop: string | symbol, receiver: SurfaceElementModel) {
+function startWatch(prop: string | symbol, receiver: GfxPrimitiveElementModel) {
   const proto = Object.getPrototypeOf(receiver);
   const watchFn = getWatchMeta(proto, prop as string)!;
 
@@ -53,7 +53,7 @@ function startWatch(prop: string | symbol, receiver: SurfaceElementModel) {
 
 export function initializeWatchers(
   prototype: unknown,
-  receiver: SurfaceElementModel
+  receiver: GfxPrimitiveElementModel
 ) {
   const watchers = getObjectPropMeta(prototype, watchSymbol);
 

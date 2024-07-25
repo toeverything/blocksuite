@@ -6,8 +6,8 @@ import type {
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
-  SurfaceElementModel,
-  SurfaceLocalModel,
+  GfxLocalElementModel,
+  GfxPrimitiveElementModel,
   derive,
   local,
   yfield,
@@ -121,7 +121,7 @@ export type ConnectorElementProps = BaseElementProps & {
   rearEndpointStyle?: PointStyle;
 } & ConnectorLabelProps;
 
-export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementProps> {
+export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorElementProps> {
   updatingPath = false;
 
   static override propsToY(props: ConnectorElementProps) {
@@ -527,7 +527,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
 
-export class LocalConnectorElementModel extends SurfaceLocalModel {
+export class LocalConnectorElementModel extends GfxLocalElementModel {
   private _path: PointLocation[] = [];
 
   absolutePath: PointLocation[] = [];

@@ -1,6 +1,6 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 
-import { EdgelessBlockComponent } from '@blocksuite/block-std';
+import { GfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { type PropertyValueMap, css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -26,7 +26,7 @@ export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 
 @customElement('affine-edgeless-text')
-export class EdgelessTextBlockComponent extends EdgelessBlockComponent<
+export class EdgelessTextBlockComponent extends GfxBlockComponent<
   EdgelessRootService,
   EdgelessTextBlockModel,
   EdgelessTextBlockService
@@ -264,7 +264,7 @@ export class EdgelessTextBlockComponent extends EdgelessBlockComponent<
     };
   }
 
-  override renderEdgelessBlock() {
+  override renderGfxBlock() {
     const { model } = this;
     const { scale, rotate, hasMaxWidth } = model;
     const containerStyle: StyleInfo = {

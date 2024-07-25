@@ -6,7 +6,7 @@ import type {
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
-  SurfaceGroupLikeModel,
+  GfxGroupLikeElementModel,
   convert,
   observe,
   watch,
@@ -68,7 +68,7 @@ type MindmapElementProps = BaseElementProps & {
   children: Y.Map<NodeDetail>;
 };
 
-export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementProps> {
+export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElementProps> {
   private _nodeMap = new Map<string, MindmapNode>();
 
   private _queueBuildTree = false;
