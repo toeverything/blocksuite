@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  CommonGfxElement,
-  GfxElementHitTestOptions,
+  CommonElement,
+  ElementHitTestOptions,
 } from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
@@ -33,14 +33,14 @@ import {
   yfield,
 } from './decorators/index.js';
 
-export type { GfxElementHitTestOptions as GfxElementHitTestOptions } from '@blocksuite/block-std/gfx';
+export type { ElementHitTestOptions as ElementHitTestOptions } from '@blocksuite/block-std/gfx';
 
-export type BaseGfxElementProps = {
+export type BaseElementProps = {
   index: string;
   seed: number;
 };
 
-export type SerializedGfxElement = Record<string, unknown> & {
+export type SerializedElement = Record<string, unknown> & {
   type: string;
   xywh: SerializedXYWH;
   id: string;
@@ -49,8 +49,8 @@ export type SerializedGfxElement = Record<string, unknown> & {
 };
 
 export abstract class SurfaceElementModel<
-  Props extends BaseGfxElementProps = BaseGfxElementProps,
-> implements CommonGfxElement
+  Props extends BaseElementProps = BaseElementProps,
+> implements CommonElement
 {
   protected _disposable = new DisposableGroup();
 
@@ -142,7 +142,7 @@ export abstract class SurfaceElementModel<
   hitTest(
     x: number,
     y: number,
-    _: GfxElementHitTestOptions,
+    _: ElementHitTestOptions,
     __: EditorHost
   ): boolean {
     return this.elementBound.isPointInBound([x, y]);
@@ -181,7 +181,7 @@ export abstract class SurfaceElementModel<
   }
 
   serialize() {
-    return this.yMap.toJSON() as SerializedGfxElement;
+    return this.yMap.toJSON() as SerializedElement;
   }
 
   stash(prop: keyof Props | string) {
@@ -328,7 +328,7 @@ export abstract class SurfaceElementModel<
 }
 
 export abstract class SurfaceGroupLikeModel<
-  Props extends BaseGfxElementProps = BaseGfxElementProps,
+  Props extends BaseElementProps = BaseElementProps,
 > extends SurfaceElementModel<Props> {
   private _childIds: string[] = [];
 

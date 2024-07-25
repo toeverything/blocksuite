@@ -1,6 +1,6 @@
 import type {
-  BaseGfxElementProps,
-  SerializedGfxElement,
+  BaseElementProps,
+  SerializedElement,
   SurfaceBlockModel,
 } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
@@ -60,11 +60,11 @@ function isNodeType(node: Record<string, unknown>): node is NodeType {
   return typeof node.text === 'string' && Array.isArray(node.children);
 }
 
-export type SerializedMindmapElement = SerializedGfxElement & {
+export type SerializedMindmapElement = SerializedElement & {
   children: Record<string, NodeDetail>;
 };
 
-type MindmapElementProps = BaseGfxElementProps & {
+type MindmapElementProps = BaseElementProps & {
   children: Y.Map<NodeDetail>;
 };
 

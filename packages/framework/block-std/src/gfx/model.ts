@@ -22,7 +22,7 @@ import type { SurfaceElementModel } from './surface/element-model.js';
 
 import { SurfaceBlockModel } from './surface/model.js';
 
-export interface GfxElementHitTestOptions {
+export interface ElementHitTestOptions {
   expand?: number;
 
   /**
@@ -37,7 +37,7 @@ export interface GfxElementHitTestOptions {
   zoom?: number;
 }
 
-export interface CommonGfxElement {
+export interface CommonElement {
   id: string;
   xywh: SerializedXYWH;
   /**
@@ -64,7 +64,7 @@ export interface CommonGfxElement {
   hitTest(
     x: number,
     y: number,
-    options: GfxElementHitTestOptions,
+    options: ElementHitTestOptions,
     host: EditorHost
   ): boolean;
   boxSelect(bound: Bound): boolean;
@@ -125,7 +125,7 @@ export class EdgelessBlockModel<
   hitTest(
     x: number,
     y: number,
-    _: GfxElementHitTestOptions,
+    _: ElementHitTestOptions,
     __: EditorHost
   ): boolean {
     const bound = Bound.deserialize(this.xywh);
@@ -159,7 +159,7 @@ export class EdgelessBlockModel<
     this._externalXYWH = xywh;
   }
 
-  get group(): CommonGfxElement | null {
+  get group(): CommonElement | null {
     const surface = this.doc
       .getBlocks()
       .find(block => block instanceof SurfaceBlockModel);
@@ -169,7 +169,7 @@ export class EdgelessBlockModel<
     return (surface as SurfaceBlockModel).getGroup(this.id) ?? null;
   }
 
-  get groups(): CommonGfxElement[] {
+  get groups(): CommonElement[] {
     const surface = this.doc
       .getBlocks()
       .find(block => block instanceof SurfaceBlockModel);

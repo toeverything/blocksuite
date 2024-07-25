@@ -1,6 +1,6 @@
 import type {
-  BaseGfxElementProps,
-  GfxElementHitTestOptions,
+  BaseElementProps,
+  ElementHitTestOptions,
 } from '@blocksuite/block-std/gfx';
 import type { IVec, IVec3, SerializedXYWH } from '@blocksuite/global/utils';
 
@@ -28,7 +28,7 @@ import {
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
 
-export type BrushProps = BaseGfxElementProps & {
+export type BrushProps = BaseElementProps & {
   /**
    * [[x0,y0,pressure0?],[x1,y1,pressure1?]...]
    * pressure is optional and exsits when pressure sensitivity is supported, otherwise not.
@@ -65,7 +65,7 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   override hitTest(
     px: number,
     py: number,
-    options?: GfxElementHitTestOptions
+    options?: ElementHitTestOptions
   ): boolean {
     const hit = isPointOnlines(
       Bound.deserialize(this.xywh),

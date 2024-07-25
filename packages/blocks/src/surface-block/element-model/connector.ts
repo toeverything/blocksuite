@@ -1,7 +1,7 @@
 import type {
-  BaseGfxElementProps,
-  GfxElementHitTestOptions,
-  SerializedGfxElement,
+  BaseElementProps,
+  ElementHitTestOptions,
+  SerializedElement,
 } from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
@@ -102,12 +102,12 @@ export type ConnectorLabelProps = {
   labelConstraints?: ConnectorLabelConstraintsProps;
 };
 
-export type SerializedConnectorElement = SerializedGfxElement & {
+export type SerializedConnectorElement = SerializedElement & {
   source: SerializedConnection;
   target: SerializedConnection;
 };
 
-export type ConnectorElementProps = BaseGfxElementProps & {
+export type ConnectorElementProps = BaseElementProps & {
   mode: ConnectorMode;
   stroke: string;
   strokeWidth: number;
@@ -255,7 +255,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   override hitTest(
     x: number,
     y: number,
-    options?: GfxElementHitTestOptions | undefined
+    options?: ElementHitTestOptions | undefined
   ): boolean {
     const currentPoint: IVec = [x, y];
 

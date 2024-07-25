@@ -4,7 +4,7 @@ import type { IVec } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { PointLocation } from '@blocksuite/global/utils';
 
-import type { GfxElementHitTestOptions } from '../../base.js';
+import type { ElementHitTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 
 import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
@@ -48,7 +48,7 @@ export const triangle = {
     this: ShapeElementModel,
     x: number,
     y: number,
-    options: GfxElementHitTestOptions
+    options: ElementHitTestOptions
   ) {
     const points = getPointsFromBoundsWithRotation(this, triangle.points);
 

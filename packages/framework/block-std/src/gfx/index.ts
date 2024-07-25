@@ -14,8 +14,8 @@ export {
   yfield,
 } from './surface/decorators/index.js';
 export {
-  type BaseGfxElementProps,
-  type SerializedGfxElement,
+  type BaseElementProps,
+  type SerializedElement as SerializedElement,
   SurfaceElementModel,
   SurfaceGroupLikeModel,
   SurfaceLocalModel,

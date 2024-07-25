@@ -11,7 +11,7 @@ export type ModelToProps<
   K | 'yMap' | 'surface' | 'display' | 'opacity' | 'externalXYWH'
 >;
 
-export type { GfxElementHitTestOptions } from '@blocksuite/block-std/gfx';
+export type { ElementHitTestOptions } from '@blocksuite/block-std/gfx';
 
 import type {
   SurfaceElementModel as ElementModel,
@@ -20,8 +20,8 @@ import type {
 } from '@blocksuite/block-std/gfx';
 
 export type {
-  BaseGfxElementProps,
-  SerializedGfxElement,
+  BaseElementProps,
+  SerializedElement,
 } from '@blocksuite/block-std/gfx';
 
 export {

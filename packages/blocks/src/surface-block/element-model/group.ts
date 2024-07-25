@@ -1,6 +1,6 @@
 import type {
-  BaseGfxElementProps,
-  SerializedGfxElement,
+  BaseElementProps,
+  SerializedElement,
 } from '@blocksuite/block-std/gfx';
 import type { IVec, PointLocation } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
@@ -17,12 +17,12 @@ import { DocCollection } from '@blocksuite/store';
 import { keys } from '../../_common/utils/iterable.js';
 import { linePolygonIntersects } from '../utils/math-utils.js';
 
-type GroupElementProps = BaseGfxElementProps & {
+type GroupElementProps = BaseElementProps & {
   children: Y.Map<boolean>;
   title: Y.Text;
 };
 
-export type SerializedGroupElement = SerializedGfxElement & {
+export type SerializedGroupElement = SerializedElement & {
   title: string;
   children: Record<string, boolean>;
 };
