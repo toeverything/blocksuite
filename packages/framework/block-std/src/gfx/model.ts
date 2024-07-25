@@ -18,9 +18,9 @@ import {
 import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
-import type { SurfaceElementModel } from './surface-model/element-model.js';
+import type { SurfaceElementModel } from './surface/element-model.js';
 
-import { SurfaceBlockModel } from './surface-model/model.js';
+import { SurfaceBlockModel } from './surface/model.js';
 
 export interface IHitTestOptions {
   expand?: number;
