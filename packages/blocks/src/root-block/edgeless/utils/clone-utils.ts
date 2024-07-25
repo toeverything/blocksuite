@@ -10,7 +10,7 @@ import type { EdgelessFrameManager } from '../frame-manager.js';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  type SerializedElement,
+  type SerializedGfxElement,
   SurfaceGroupLikeModel,
 } from '../../../surface-block/element-model/base.js';
 import {
@@ -51,7 +51,7 @@ export async function prepareCloneData(
       return data;
     })
   );
-  return res.filter((d): d is SerializedElement | BlockSnapshot => !!d);
+  return res.filter((d): d is SerializedGfxElement | BlockSnapshot => !!d);
 }
 
 export async function serializeElement(

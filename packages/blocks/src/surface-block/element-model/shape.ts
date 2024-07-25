@@ -1,4 +1,7 @@
-import type { IBaseProps, IHitTestOptions } from '@blocksuite/block-std/gfx';
+import type {
+  BaseGfxElementProps,
+  GfxElementHitTestOptions,
+} from '@blocksuite/block-std/gfx';
 import type {
   Bound,
   IBound,
@@ -45,7 +48,7 @@ export enum ShapeTextFontSize {
   XLARGE = 36,
 }
 
-export type ShapeProps = IBaseProps & {
+export type ShapeProps = BaseGfxElementProps & {
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
@@ -90,7 +93,7 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
   }
 
-  override hitTest(x: number, y: number, options: IHitTestOptions) {
+  override hitTest(x: number, y: number, options: GfxElementHitTestOptions) {
     return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
       ...options,
       ignoreTransparent: options.ignoreTransparent ?? true,

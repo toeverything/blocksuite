@@ -10,7 +10,7 @@ import {
 } from './decorators/index.js';
 import { onElementChange } from './element-model.js';
 import {
-  type IBaseProps,
+  type BaseGfxElementProps,
   SurfaceElementModel,
   SurfaceGroupLikeModel,
 } from './element-model.js';
@@ -489,15 +489,15 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   getGroup<
     T extends
-      SurfaceGroupLikeModel<IBaseProps> = SurfaceGroupLikeModel<IBaseProps>,
+      SurfaceGroupLikeModel<BaseGfxElementProps> = SurfaceGroupLikeModel<BaseGfxElementProps>,
   >(id: string): T | null {
     return this._elementToGroup.has(id)
       ? (this.getElementById(this._elementToGroup.get(id)!) as T)
       : null;
   }
 
-  getGroups(id: string): SurfaceGroupLikeModel<IBaseProps>[] {
-    const groups: SurfaceGroupLikeModel<IBaseProps>[] = [];
+  getGroups(id: string): SurfaceGroupLikeModel<BaseGfxElementProps>[] {
+    const groups: SurfaceGroupLikeModel<BaseGfxElementProps>[] = [];
     let group = this.getGroup(id);
 
     while (group) {

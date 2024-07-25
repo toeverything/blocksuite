@@ -44,7 +44,7 @@ import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import {
-  type SerializedElement,
+  type SerializedGfxElement,
   SurfaceGroupLikeModel,
 } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
@@ -465,7 +465,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _createCanvasElements(
-    elements: SerializedElement[],
+    elements: SerializedGfxElement[],
     idMap: Map<string, string>
   ) {
     const result = groupBy(elements, item => {
@@ -1008,7 +1008,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private async _pasteShapesAndBlocks(
-    elementsRawData: (SerializedElement | BlockSnapshot)[]
+    elementsRawData: (SerializedGfxElement | BlockSnapshot)[]
   ) {
     const { canvasElements, blockModels } =
       await this.createElementsFromClipboardData(elementsRawData);
@@ -1203,12 +1203,12 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   async createElementsFromClipboardData(
-    elementsRawData: (SerializedElement | BlockSnapshot)[],
+    elementsRawData: (SerializedGfxElement | BlockSnapshot)[],
     pasteCenter?: IVec
   ) {
     const originalIndexes = new Map<string, string>();
     const blockRawData: BlockSnapshot[] = [];
-    const surfaceRawData: SerializedElement[] = [];
+    const surfaceRawData: SerializedGfxElement[] = [];
 
     elementsRawData.forEach(data => {
       const { data: blockSnapshot } = BlockSnapshotSchema.safeParse(data);
@@ -1218,10 +1218,10 @@ export class EdgelessClipboardController extends PageClipboard {
 
         blockRawData.push(blockSnapshot);
       } else {
-        const serializedElement = data as SerializedElement;
-        originalIndexes.set(serializedElement.id, serializedElement.index);
+        const element = data as SerializedGfxElement;
+        originalIndexes.set(element.id, element.index);
 
-        surfaceRawData.push(serializedElement);
+        surfaceRawData.push(element);
       }
     });
 

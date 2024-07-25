@@ -22,7 +22,7 @@ import type { SurfaceElementModel } from './surface/element-model.js';
 
 import { SurfaceBlockModel } from './surface/model.js';
 
-export interface IHitTestOptions {
+export interface GfxElementHitTestOptions {
   expand?: number;
 
   /**
@@ -37,7 +37,7 @@ export interface IHitTestOptions {
   zoom?: number;
 }
 
-export interface IEdgelessElement {
+export interface CommonGfxElement {
   id: string;
   xywh: SerializedXYWH;
   /**
@@ -64,18 +64,15 @@ export interface IEdgelessElement {
   hitTest(
     x: number,
     y: number,
-    options: IHitTestOptions,
+    options: GfxElementHitTestOptions,
     host: EditorHost
   ): boolean;
   boxSelect(bound: Bound): boolean;
 }
 
 export class EdgelessBlockModel<
-    Props extends EdgelessSelectableProps = EdgelessSelectableProps,
-  >
-  extends BlockModel<Props>
-  implements IEdgelessElement
-{
+  Props extends EdgelessSelectableProps = EdgelessSelectableProps,
+> extends BlockModel<Props> {
   private _externalXYWH: SerializedXYWH | undefined = undefined;
 
   connectable = true;
@@ -125,7 +122,12 @@ export class EdgelessBlockModel<
     return new PointLocation(rotatePoint, tangent);
   }
 
-  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
+  hitTest(
+    x: number,
+    y: number,
+    _: GfxElementHitTestOptions,
+    __: EditorHost
+  ): boolean {
     const bound = Bound.deserialize(this.xywh);
     return bound.isPointInBound([x, y], 0);
   }
@@ -157,7 +159,7 @@ export class EdgelessBlockModel<
     this._externalXYWH = xywh;
   }
 
-  get group(): IEdgelessElement | null {
+  get group(): CommonGfxElement | null {
     const surface = this.doc
       .getBlocks()
       .find(block => block instanceof SurfaceBlockModel);
@@ -167,7 +169,7 @@ export class EdgelessBlockModel<
     return (surface as SurfaceBlockModel).getGroup(this.id) ?? null;
   }
 
-  get groups(): IEdgelessElement[] {
+  get groups(): CommonGfxElement[] {
     const surface = this.doc
       .getBlocks()
       .find(block => block instanceof SurfaceBlockModel);

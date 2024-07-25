@@ -17,9 +17,9 @@ import {
   pointInPolygon,
   polygonNearestPoint,
 } from '../utils/math-utils.js';
-import { type IBaseProps, SurfaceElementModel } from './base.js';
+import { type BaseGfxElementProps, SurfaceElementModel } from './base.js';
 
-export type TextElementProps = IBaseProps & {
+export type TextElementProps = BaseGfxElementProps & {
   text: Y.Text;
   hasMaxWidth?: boolean;
 } & Omit<TextStyleProps, 'fontWeight' | 'fontStyle'> &

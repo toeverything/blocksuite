@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  IEdgelessElement,
-  IHitTestOptions,
+  CommonGfxElement,
+  GfxElementHitTestOptions,
 } from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
@@ -33,14 +33,14 @@ import {
   yfield,
 } from './decorators/index.js';
 
-export type { IHitTestOptions } from '@blocksuite/block-std/gfx';
+export type { GfxElementHitTestOptions as GfxElementHitTestOptions } from '@blocksuite/block-std/gfx';
 
-export type IBaseProps = {
+export type BaseGfxElementProps = {
   index: string;
   seed: number;
 };
 
-export type SerializedElement = Record<string, unknown> & {
+export type SerializedGfxElement = Record<string, unknown> & {
   type: string;
   xywh: SerializedXYWH;
   id: string;
@@ -48,8 +48,9 @@ export type SerializedElement = Record<string, unknown> & {
   props: Record<string, unknown>;
 };
 
-export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
-  implements IEdgelessElement
+export abstract class SurfaceElementModel<
+  Props extends BaseGfxElementProps = BaseGfxElementProps,
+> implements CommonGfxElement
 {
   protected _disposable = new DisposableGroup();
 
@@ -138,7 +139,12 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
     return new PointLocation(rotatePoint, tangent);
   }
 
-  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
+  hitTest(
+    x: number,
+    y: number,
+    _: GfxElementHitTestOptions,
+    __: EditorHost
+  ): boolean {
     return this.elementBound.isPointInBound([x, y]);
   }
 
@@ -175,7 +181,7 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
   }
 
   serialize() {
-    return this.yMap.toJSON() as SerializedElement;
+    return this.yMap.toJSON() as SerializedGfxElement;
   }
 
   stash(prop: keyof Props | string) {
@@ -322,7 +328,7 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
 }
 
 export abstract class SurfaceGroupLikeModel<
-  Props extends IBaseProps = IBaseProps,
+  Props extends BaseGfxElementProps = BaseGfxElementProps,
 > extends SurfaceElementModel<Props> {
   private _childIds: string[] = [];
 

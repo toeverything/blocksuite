@@ -20,7 +20,7 @@ import type { EdgelessTool } from './types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { clamp } from '../../_common/utils/math.js';
 import {
-  type IHitTestOptions,
+  type GfxElementHitTestOptions,
   SurfaceGroupLikeModel,
 } from '../../surface-block/element-model/base.js';
 import {
@@ -388,7 +388,7 @@ export class EdgelessRootService extends RootService {
   pickElement(
     x: number,
     y: number,
-    options: IHitTestOptions = { all: false, expand: 10 }
+    options: GfxElementHitTestOptions = { all: false, expand: 10 }
   ): BlockSuite.EdgelessModel[] | BlockSuite.EdgelessModel | null {
     options.expand ??= 10;
     options.zoom = this._viewport.zoom;
@@ -450,7 +450,7 @@ export class EdgelessRootService extends RootService {
   pickElementInGroup(
     x: number,
     y: number,
-    options?: IHitTestOptions
+    options?: GfxElementHitTestOptions
   ): BlockSuite.EdgelessModel | null {
     const selectionManager = this._selection;
     const results = this.pickElement(x, y, {
