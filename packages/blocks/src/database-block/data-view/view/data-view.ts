@@ -6,14 +6,18 @@ import type {
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 import type { DataSource } from '../common/data-source/base.js';
 import type { ViewSource } from '../common/index.js';
 import type { DataViewRenderer } from '../data-view.js';
 import type { DataViewSelection, InsertToPosition } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
 import type { DataViewWidget } from '../widget/types.js';
-import type { DataViewManagerBase } from './data-view-manager.js';
-import type { DataViewManager } from './data-view-manager.js';
+import type {
+  DataViewManager,
+  DataViewManagerBase,
+} from './data-view-manager.js';
 
 export interface DataViewProps<
   T extends DataViewManager = DataViewManager,
@@ -123,7 +127,10 @@ export class ViewRendererManager {
   getView(type: string): DataViewRendererConfig {
     const view = this.map.get(type);
     if (!view) {
-      throw new Error(`${type} is not exist`);
+      throw new BlockSuiteError(
+        ErrorCode.DatabaseBlockError,
+        `${type} is not exist`
+      );
     }
     return view;
   }
