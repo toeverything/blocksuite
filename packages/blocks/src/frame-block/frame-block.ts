@@ -276,10 +276,19 @@ export class FrameBlockComponent extends GfxBlockComponent<
 
   override renderGfxBlock() {
     const { model, _isNavigator, showBorder, doc, rootService } = this;
-    const backgroundColor = rootService.themeObserver.generateColorProperty(
-      model.background,
-      '--affine-platte-transparent'
-    );
+    let backgroundColor = '--affine-platte-transparent';
+
+    // The root service may not be initialized when switching page mode
+    if (rootService) {
+      backgroundColor = rootService.themeObserver.generateColorProperty(
+        model.background,
+        backgroundColor
+      );
+    } else if (typeof model.background === 'string') {
+      backgroundColor = model.background.startsWith('--')
+        ? `var(${model.background})`
+        : model.background;
+    }
 
     return html`
       <edgeless-frame-title

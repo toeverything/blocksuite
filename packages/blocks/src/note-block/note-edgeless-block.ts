@@ -405,11 +405,19 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     };
 
     const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
-    const backgroundColor =
-      this.rootService.themeObserver.generateColorProperty(
+    let backgroundColor = `${DEFAULT_NOTE_BACKGROUND_COLOR}`;
+
+    // The root service may not be initialized when switching page mode
+    if (this.rootService) {
+      backgroundColor = this.rootService.themeObserver.generateColorProperty(
         model.background,
-        DEFAULT_NOTE_BACKGROUND_COLOR
+        backgroundColor
       );
+    } else if (typeof model.background === 'string') {
+      backgroundColor = model.background.startsWith('--')
+        ? `var(${model.background})`
+        : model.background;
+    }
 
     const backgroundStyle = {
       position: 'absolute',
