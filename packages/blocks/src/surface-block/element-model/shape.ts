@@ -113,8 +113,8 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     return 'shape';
   }
 
-  @yfield()
-  accessor color: string | CustomColor = '#000000';
+  @yfield('#000000' as string | CustomColor)
+  accessor color!: string | CustomColor;
 
   @yfield()
   accessor fillColor: string | CustomColor = '--affine-palette-shape-yellow';
