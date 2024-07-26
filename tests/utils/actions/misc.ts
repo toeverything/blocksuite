@@ -10,6 +10,7 @@ import type {
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
+import type { CustomOutlineViewer } from '@playground/apps/_common/components/custom-outline-viewer.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { DocsPanel } from '@playground/apps/_common/components/docs-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
@@ -121,13 +122,18 @@ async function initEmptyEditor({
             const outlinePanel: CustomOutlinePanel = document.createElement(
               'custom-outline-panel'
             );
+            const outlineViewer: CustomOutlineViewer = document.createElement(
+              'custom-outline-viewer'
+            );
             docsPanel.editor = editor;
             framePanel.editor = editor;
             outlinePanel.editor = editor;
+            outlineViewer.editor = editor;
             debugMenu.collection = collection;
             debugMenu.editor = editor;
             debugMenu.docsPanel = docsPanel;
             debugMenu.framePanel = framePanel;
+            debugMenu.outlineViewer = outlineViewer;
             debugMenu.outlinePanel = outlinePanel;
             const leftSidePanel = document.createElement('left-side-panel');
             debugMenu.leftSidePanel = leftSidePanel;
@@ -135,6 +141,7 @@ async function initEmptyEditor({
             document.body.append(leftSidePanel);
             document.body.append(framePanel);
             document.body.append(outlinePanel);
+            document.body.append(outlineViewer);
 
             window.debugMenu = debugMenu;
             window.editor = editor;

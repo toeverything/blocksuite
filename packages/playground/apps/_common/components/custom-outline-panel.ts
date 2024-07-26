@@ -1,7 +1,7 @@
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('custom-outline-panel')
@@ -10,7 +10,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
     .custom-outline-container {
       position: absolute;
       top: 0;
-      right: 0;
+      right: 16px;
       border: 1px solid var(--affine-border-color, #e3e2e4);
       background: var(--affine-background-overlay-panel-color);
       height: 100vh;
@@ -33,7 +33,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
         ? html`
             <div class="custom-outline-container">${this._renderPanel()}</div>
           `
-        : null}
+        : nothing}
     `;
   }
 

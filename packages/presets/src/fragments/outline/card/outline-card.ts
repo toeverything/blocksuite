@@ -9,17 +9,9 @@ import {
   on,
   once,
 } from '@blocksuite/blocks';
-import { DisposableGroup } from '@blocksuite/global/utils';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { baseTheme } from '@toeverything/theme';
-import {
-  LitElement,
-  type PropertyValues,
-  css,
-  html,
-  nothing,
-  unsafeCSS,
-} from 'lit';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -73,7 +65,6 @@ const styles = css`
     width: 100%;
 
     border-radius: 4px;
-    background-color: var(--affine-background-primary-color);
 
     cursor: default;
     user-select: none;
@@ -221,15 +212,8 @@ export const AFFINE_OUTLINE_NOTE_CARD = 'affine-outline-note-card';
 
 @customElement(AFFINE_OUTLINE_NOTE_CARD)
 export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
-  private _clearNoteDisposables = () => {
-    this._noteDisposables?.dispose();
-    this._noteDisposables = null;
-  };
-
   private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
     null;
-
-  private _noteDisposables: DisposableGroup | null = null;
 
   static override styles = styles;
 
@@ -333,14 +317,6 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
     }
   }
 
-  private _setNoteDisposables() {
-    this._clearNoteDisposables();
-    this._noteDisposables = new DisposableGroup();
-    this._noteDisposables.add(
-      this.note.propsUpdated.on(() => this.requestUpdate())
-    );
-  }
-
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -354,11 +330,6 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
     });
 
     this._disposables.add(() => observer.disconnect());
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._clearNoteDisposables();
   }
 
   override firstUpdated() {
@@ -437,6 +408,7 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
             ${children.map(block => {
               return html`<affine-outline-block-preview
                 .block=${block}
+                .className=${this.activeHeadingId === block.id ? 'active' : ''}
                 .showPreviewIcon=${this.showPreviewIcon}
                 .disabledIcon=${this.invisible}
                 .cardNumber=${this.number}
@@ -454,12 +426,6 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
     `;
   }
 
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('note') || _changedProperties.has('index')) {
-      this._setNoteDisposables();
-    }
-  }
-
   @query('.display-mode-button-group')
   private accessor _displayModeButtonGroup!: HTMLDivElement;
 
@@ -468,6 +434,9 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
 
   @state()
   private accessor _showPopper = false;
+
+  @property({ attribute: false })
+  accessor activeHeadingId: string | null = null;
 
   @property({ attribute: false })
   accessor doc!: Doc;

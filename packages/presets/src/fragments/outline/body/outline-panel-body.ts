@@ -3,11 +3,12 @@ import type {
   EdgelessRootBlockComponent,
   NoteBlockModel,
 } from '@blocksuite/blocks';
-import type { BlockModel, Doc } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
+import { SignalWatcher, effect } from '@lit-labs/preact-signals';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -19,9 +20,14 @@ import type {
   SelectEvent,
 } from '../card/outline-card.js';
 
+import { getDocTitleByEditorHost } from '../../doc-title/doc-title.js';
 import '../card/outline-card.js';
-import { headingKeys } from '../config.js';
 import { startDragging } from '../utils/drag.js';
+import {
+  getHeadingBlocksFromDoc,
+  getNotesFromDoc,
+  isHeadingBlock,
+} from '../utils/query.js';
 import './outline-notice.js';
 
 type OutlineNoteItem = {
@@ -102,7 +108,9 @@ const styles = css`
 export const AFFINE_OUTLINE_PANEL_BODY = 'affine-outline-panel-body';
 
 @customElement(AFFINE_OUTLINE_PANEL_BODY)
-export class OutlinePanelBody extends WithDisposable(LitElement) {
+export class OutlinePanelBody extends SignalWatcher(
+  WithDisposable(LitElement)
+) {
   private _changedFlag = false;
 
   private _docDisposables: DisposableGroup | null = null;
@@ -141,6 +149,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
             style=${`transform: translateY(${this._indicatorTranslateY}px)`}
           ></div>`
         : nothing}
+      ${this._renderDocTitle()}
       ${this._pageVisibleNotes.length
         ? repeat(
             this._pageVisibleNotes,
@@ -153,6 +162,8 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
                 .index=${note.index}
                 .doc=${this.doc}
                 .editorMode=${this.mode}
+                .editorHost=${this.editorHost}
+                .activeHeadingId=${this.activeHeadingId}
                 .status=${selectedNotesSet.has(note.note.id)
                   ? this._dragging
                     ? 'placeholder'
@@ -181,6 +192,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
                   .number=${idx + 1}
                   .index=${note.index}
                   .doc=${this.doc}
+                  .activeHeadingId=${this.activeHeadingId}
                   .invisible=${true}
                   .showPreviewIcon=${this.showPreviewIcon}
                   .enableNotesSorting=${this.enableNotesSorting}
@@ -355,13 +367,6 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     return this.mode === 'edgeless';
   }
 
-  private _isHeadingBlock(block: BlockModel) {
-    return (
-      BlocksUtils.matchFlavours(block, ['affine:paragraph']) &&
-      headingKeys.has(block.type)
-    );
-  }
-
   private _moveNotes(
     index: number,
     selected: string[],
@@ -390,6 +395,34 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     this.doc.updateBlock(this.doc.root, {
       children: newChildren,
     });
+  }
+
+  private _renderDocTitle() {
+    const hasNotEmptyHeadings =
+      getHeadingBlocksFromDoc(
+        this.doc,
+        [NoteDisplayMode.DocOnly, NoteDisplayMode.DocAndEdgeless],
+        true
+      ).length > 0;
+
+    if (!hasNotEmptyHeadings) return nothing;
+    return html`<affine-outline-block-preview
+      .block=${this.doc.root}
+      .cardNumber=${1}
+      .enableNotesSorting=${false}
+      .showPreviewIcon=${this.showPreviewIcon}
+      @click=${() => {
+        if (this._isEdgelessMode() || !this.editorHost) return;
+
+        const docTitle = getDocTitleByEditorHost(this.editorHost);
+        if (!docTitle) return;
+
+        docTitle.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }}
+    ></affine-outline-block-preview>`;
   }
 
   private _scrollToBlock(e: ClickBlockEvent) {
@@ -441,6 +474,8 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
         display: 'block',
       });
 
+      this.activeHeadingId = block.model.id;
+
       // Clear the previous timeout if it exists
       if (this._highlightTimeoutId !== null) {
         clearTimeout(this._highlightTimeoutId);
@@ -486,22 +521,14 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   }
 
   private _setDocDisposables() {
-    const { slots } = this.doc;
-    const slotsForUpdate = [slots.blockUpdated];
-
-    slotsForUpdate.forEach(slot => {
-      this._clearDocDisposables();
-      this._docDisposables = new DisposableGroup();
-      this._docDisposables.add(
-        slot.on(() => {
-          this._updateNotes();
-          this._updateNoticeVisibility();
-        })
-      );
-    });
-
-    this._updateNotes();
-    this._updateNoticeVisibility();
+    this._clearDocDisposables();
+    this._docDisposables = new DisposableGroup();
+    this._docDisposables.add(
+      effect(() => {
+        this._updateNotes();
+        this._updateNoticeVisibility();
+      })
+    );
   }
 
   /**
@@ -519,7 +546,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       for (const block of noteItem.note.children) {
         hasChildrenBlocks = true;
 
-        if (this._isHeadingBlock(block)) {
+        if (isHeadingBlock(block)) {
           hasHeadings = true;
           break;
         }
@@ -543,36 +570,31 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       return;
     }
 
-    const pageVisibleNotes: OutlineNoteItem[] = [];
-    const edgelessOnlyNotes: OutlineNoteItem[] = [];
     const oldSelectedSet = this._selected.reduce((pre, id) => {
       pre.add(id);
       return pre;
     }, new Set<string>());
     const newSelected: string[] = [];
 
-    rootModel.children.forEach((block, index) => {
+    rootModel.children.forEach(block => {
       if (!['affine:note'].includes(block.flavour)) return;
 
       const blockModel = block as NoteBlockModel;
-      const OutlineNoteItem = {
-        note: block as NoteBlockModel,
-        index,
-        number: index + 1,
-      };
 
-      if (blockModel.displayMode === NoteDisplayMode.EdgelessOnly) {
-        edgelessOnlyNotes.push(OutlineNoteItem);
-      } else {
-        pageVisibleNotes.push(OutlineNoteItem);
+      if (blockModel.displayMode !== NoteDisplayMode.EdgelessOnly) {
         if (oldSelectedSet.has(block.id)) {
           newSelected.push(block.id);
         }
       }
     });
 
-    this._pageVisibleNotes = pageVisibleNotes;
-    this._edgelessOnlyNotes = edgelessOnlyNotes;
+    this._pageVisibleNotes = getNotesFromDoc(this.doc, [
+      NoteDisplayMode.DocAndEdgeless,
+      NoteDisplayMode.DocOnly,
+    ]);
+    this._edgelessOnlyNotes = getNotesFromDoc(this.doc, [
+      NoteDisplayMode.EdgelessOnly,
+    ]);
     this._selected = newSelected;
   }
 
@@ -663,7 +685,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     `;
   }
 
-  override updated(_changedProperties: PropertyValues) {
+  override willUpdate(_changedProperties: PropertyValues) {
     if (_changedProperties.has('doc') || _changedProperties.has('edgeless')) {
       this._setDocDisposables();
     }
@@ -705,6 +727,9 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
 
   @query('.outline-panel-body-container')
   accessor OutlinePanelContainer!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor activeHeadingId: string | null = null;
 
   @property({ attribute: false })
   accessor doc!: Doc;

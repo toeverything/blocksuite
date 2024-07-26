@@ -46,6 +46,7 @@ import * as lz from 'lz-string';
 import type { CustomChatPanel } from './custom-chat-panel.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
+import type { CustomOutlineViewer } from './custom-outline-viewer.js';
 import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 import type { SidePanel } from './side-panel.js';
@@ -194,6 +195,10 @@ export class DebugMenu extends ShadowlessElement {
 
     const noteId = this.doc.addBlock('affine:note', { xywh }, rootId);
     this.doc.addBlock('affine:paragraph', {}, noteId);
+  }
+
+  private _enableOutlineViewer() {
+    this.outlineViewer.toggleDisplay();
   }
 
   private _exportHtml() {
@@ -565,6 +570,9 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._toggleOutlinePanel}">
                 Toggle Outline Panel
               </sl-menu-item>
+              <sl-menu-item @click="${this._enableOutlineViewer}">
+                Enable Outline Viewer
+              </sl-menu-item>
               <sl-menu-item @click="${this._toggleFramePanel}">
                 Toggle Frame Panel
               </sl-menu-item>
@@ -685,6 +693,9 @@ export class DebugMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   accessor outlinePanel!: CustomOutlinePanel;
+
+  @property({ attribute: false })
+  accessor outlineViewer!: CustomOutlineViewer;
 
   @property({ attribute: false })
   accessor readonly = false;

@@ -7,17 +7,19 @@ import type {
   ImageBlockModel,
   ListBlockModel,
   ParagraphBlockModel,
+  RootBlockModel,
 } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { BlocksUtils } from '@blocksuite/blocks';
-import { DisposableGroup, noop } from '@blocksuite/global/utils';
+import { noop } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { SmallLinkedDocIcon } from '../../_common/icons.js';
-import { headingKeys, placeholderMap, previewIconMap } from '../config.js';
+import { placeholderMap, previewIconMap } from '../config.js';
+import { isHeadingBlock, isRootBlock } from '../utils/query.js';
 
 type ValuesOf<T, K extends keyof T = keyof T> = T[K];
 
@@ -29,6 +31,10 @@ const styles = css`
   :host {
     display: block;
     width: 100%;
+  }
+
+  :host(.active) {
+    color: var(--affine-text-emphasis-color);
   }
 
   .outline-block-preview {
@@ -77,6 +83,7 @@ const styles = css`
     padding-left: 28px;
   }
 
+  .subtype.title,
   .subtype.h1,
   .subtype.h2,
   .subtype.h3,
@@ -86,6 +93,9 @@ const styles = css`
     font-weight: 600;
   }
 
+  .subtype.title {
+    padding-left: 0;
+  }
   .subtype.h1 {
     padding-left: 0;
   }
@@ -143,34 +153,15 @@ const styles = css`
 export const AFFINE_OUTLINE_BLOCK_PREVIEW = 'affine-outline-block-preview';
 
 @customElement(AFFINE_OUTLINE_BLOCK_PREVIEW)
-export class OutlineBlockPreview extends WithDisposable(LitElement) {
-  private _clearTextDisposables = () => {
-    this._textDisposables?.dispose();
-    this._textDisposables = null;
-  };
-
-  private _setTextDisposables = (block: ValuesOf<BlockSuite.BlockModels>) => {
-    this._clearTextDisposables();
-    this._textDisposables = new DisposableGroup();
-    block.text?.yText.observe(this._updateElement);
-    this._textDisposables.add({
-      dispose: () => block.text?.yText.unobserve(this._updateElement),
-    });
-    this._textDisposables.add(this.block.propsUpdated.on(this._updateElement));
-  };
-
-  private _textDisposables: DisposableGroup | null = null;
-
-  private _updateElement = () => {
-    this.requestUpdate();
-  };
-
+export class OutlineBlockPreview extends SignalWatcher(
+  WithDisposable(LitElement)
+) {
   static override styles = styles;
 
   private _TextBlockPreview(block: ParagraphBlockModel | ListBlockModel) {
     const deltas: DeltaInsert<AffineTextAttributes>[] =
       block.text.yText.toDelta();
-    if (!deltas?.length) return nothing;
+    if (!block.text.length) return nothing;
     const iconClass = this.disabledIcon ? 'icon disabled' : 'icon';
 
     const previewText = deltas.map(delta => {
@@ -203,15 +194,6 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
         : nothing}`;
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._clearTextDisposables();
-  }
-
   override render() {
     return html`<div class="outline-block-preview">
       ${this.renderBlockByFlavour()}
@@ -222,12 +204,21 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
     const { block } = this;
     const iconClass = this.disabledIcon ? 'icon disabled' : 'icon';
 
-    const isHeadingBlock =
-      BlocksUtils.matchFlavours(block, ['affine:paragraph']) &&
-      headingKeys.has(block.type);
-    if (!this.enableNotesSorting && !isHeadingBlock) return nothing;
+    if (
+      !this.enableNotesSorting &&
+      !isHeadingBlock(block) &&
+      !isRootBlock(block)
+    )
+      return nothing;
 
     switch (block.flavour as keyof BlockSuite.BlockModels) {
+      case 'affine:page':
+        assertType<RootBlockModel>(block);
+        return block.title.length > 0
+          ? html`<span class="text subtype title">
+              ${block.title$.value}
+            </span>`
+          : nothing;
       case 'affine:paragraph':
         assertType<ParagraphBlockModel>(block);
         return this._TextBlockPreview(block);
@@ -297,21 +288,6 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
       default:
         return nothing;
     }
-  }
-
-  override updated() {
-    this.updateComplete
-      .then(() => {
-        if (
-          BlocksUtils.matchFlavours(this.block, [
-            'affine:paragraph',
-            'affine:list',
-          ])
-        ) {
-          this._setTextDisposables(this.block);
-        }
-      })
-      .catch(console.error);
   }
 
   @property({ attribute: false })

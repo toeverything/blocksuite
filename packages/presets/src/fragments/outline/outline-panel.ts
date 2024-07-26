@@ -1,5 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
+import { SignalWatcher, signal } from '@lit-labs/preact-signals';
 import { baseTheme } from '@toeverything/theme';
 import { LitElement, type PropertyValues, css, html, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -10,6 +11,7 @@ import './body/outline-notice.js';
 import './body/outline-panel-body.js';
 import { type OutlineSettingsDataType, outlineSettingsKey } from './config.js';
 import './header/outline-panel-header.js';
+import { observeActiveHeading } from './utils/heading-highlight.js';
 
 const styles = css`
   :host {
@@ -58,7 +60,9 @@ const styles = css`
 export const AFFINE_OUTLINE_PANEL = 'affine-outline-panel';
 
 @customElement(AFFINE_OUTLINE_PANEL)
-export class OutlinePanel extends WithDisposable(LitElement) {
+export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
+  private _activeHeadingId$ = signal<string | null>(null);
+
   private _editorDisposables: DisposableGroup | null = null;
 
   private _setNoticeVisibility = (visibility: boolean) => {
@@ -133,6 +137,9 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
     this._loadSettingsFromLocalStorage();
+    this.disposables.add(
+      observeActiveHeading(() => this.host, this._activeHeadingId$)
+    );
   }
 
   override disconnectedCallback() {
@@ -141,6 +148,8 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   }
 
   override render() {
+    if (!this.host) return;
+
     return html`
       <div class="outline-panel-container">
         <affine-outline-panel-header
@@ -155,6 +164,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
           .fitPadding=${this.fitPadding}
           .edgeless=${this.edgeless}
           .editorHost=${this.host}
+          .activeHeadingId=${this._activeHeadingId$.value}
           .mode=${this.mode}
           .showPreviewIcon=${this._showPreviewIcon}
           .enableNotesSorting=${this._enableNotesSorting}
