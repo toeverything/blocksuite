@@ -401,6 +401,9 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                   undefined,
                   this.configs.get('imageProxy') as string
                 );
+                if (!res) {
+                  break;
+                }
                 const clonedRes = res.clone();
                 const name =
                   getFilenameFromContentDisposition(

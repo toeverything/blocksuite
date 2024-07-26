@@ -61,8 +61,9 @@ export class ExportManager {
         undefined,
         this._exportOptions.imageProxyEndpoint
       )
-        .then(response => response.blob())
+        .then(response => response && response.blob())
         .then(async blob => {
+          if (!blob) return;
           // If the file type is SVG, set svg width and height
           if (blob.type === 'image/svg+xml') {
             // Parse the SVG

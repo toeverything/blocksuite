@@ -257,6 +257,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               undefined,
               this.configs.get('imageProxy') as string
             );
+            if (!res) {
+              break;
+            }
             const clonedRes = res.clone();
             const file = new File(
               [await res.blob()],

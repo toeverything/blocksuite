@@ -8,6 +8,9 @@ export async function fetchImageToFile(
 ): Promise<File | void> {
   try {
     const res = await fetchImage(url, undefined, imageProxy);
+    if (!res) {
+      throw new Error('Failed to fetch image');
+    }
     if (res.ok) {
       let blob = await res.blob();
       if (!blob.type || !blob.type.startsWith('image/')) {

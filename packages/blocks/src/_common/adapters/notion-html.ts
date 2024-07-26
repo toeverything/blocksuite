@@ -281,6 +281,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 undefined,
                 this.configs.get('imageProxy') as string
               );
+              if (!res) {
+                break;
+              }
               const clonedRes = res.clone();
               const name =
                 getFilenameFromContentDisposition(
@@ -606,6 +609,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 undefined,
                 this.configs.get('imageProxy') as string
               );
+              if (!res) {
+                break;
+              }
               const clonedRes = res.clone();
               const name =
                 getFilenameFromContentDisposition(
@@ -664,7 +670,13 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 }
               });
             } else {
-              const res = await fetch(embededURL);
+              const res = await fetch(embededURL).catch(error => {
+                console.warn('Error fetching embed:', error);
+                return null;
+              });
+              if (!res) {
+                break;
+              }
               const resCloned = res.clone();
               name =
                 getFilenameFromContentDisposition(
@@ -854,9 +866,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 const text = hastGetTextContent(child);
                 const number = Number(text);
                 if (Number.isNaN(number)) {
-                  if (columns[index].type !== 'rich-text') {
-                    columns[index].type = 'rich-text';
-                  }
+                  columns[index].type = 'rich-text';
                   row[columns[index].id] = {
                     columnId: columns[index].id,
                     value: createText(text),
