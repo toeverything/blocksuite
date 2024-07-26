@@ -3,9 +3,11 @@ import type { IBound } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
+import type { CustomColor } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 
+import { ColorScheme } from '../../_common/theme/theme-observer.js';
 import { requestConnectedFrame } from '../../_common/utils/event.js';
 import { last } from '../../_common/utils/iterable.js';
 import { RoughCanvas } from '../rough/canvas.js';
@@ -32,7 +34,17 @@ export abstract class Overlay {
 
 type EnvProvider = {
   getVariableColor: (val: string) => string;
+  getColorScheme: () => ColorScheme;
   selectedElements?: () => string[];
+  getColor: (
+    color: string | CustomColor,
+    fallback?: string,
+    real?: boolean
+  ) => string;
+  generateColorProperty: (
+    color: string | CustomColor,
+    fallback: string
+  ) => string;
 };
 
 type RendererOptions = {
@@ -345,6 +357,13 @@ export class Renderer {
     this._disposables.dispose();
   }
 
+  generateColorProperty(color: string | CustomColor, fallback: string) {
+    return this.provider.generateColorProperty?.(color, fallback) ??
+      fallback.startsWith('--')
+      ? `var(${fallback})`
+      : fallback;
+  }
+
   getCanvasByBound(
     bound: IBound = this.viewport.viewportBounds,
     surfaceElements?: SurfaceElementModel[],
@@ -373,6 +392,14 @@ export class Renderer {
     this._renderByBound(ctx, matrix, rc, bound, surfaceElements);
 
     return canvas;
+  }
+
+  getColor(color: string | CustomColor, fallback?: string, real?: boolean) {
+    return this.provider.getColor?.(color, fallback, real) ?? 'transparent';
+  }
+
+  getColorScheme() {
+    return this.provider.getColorScheme?.() ?? ColorScheme.Light;
   }
 
   getVariableColor(val: string) {

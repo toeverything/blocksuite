@@ -1000,7 +1000,7 @@ export async function assertEdgelessNoteBackground(
       if (!noteWrapper) {
         throw new Error(`Could not find note: ${noteId}`);
       }
-      return noteWrapper.style.background;
+      return noteWrapper.style.backgroundColor;
     });
 
   expect(backgroundColor).toEqual(`var(${color})`);

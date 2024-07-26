@@ -18,6 +18,7 @@ import {
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
+  type CustomColor,
   DEFAULT_ROUGHNESS,
   FontFamily,
   FontStyle,
@@ -56,9 +57,9 @@ export type ShapeProps = BaseElementProps & {
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
-  fillColor: string;
+  fillColor: string | CustomColor;
   strokeWidth: number;
-  strokeColor: string;
+  strokeColor: string | CustomColor;
   strokeStyle: StrokeStyle;
   shapeStyle: ShapeStyle;
   // https://github.com/rough-stuff/rough/wiki#roughness
@@ -112,11 +113,11 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     return 'shape';
   }
 
-  @yfield('#000000')
-  accessor color!: string;
+  @yfield()
+  accessor color: string | CustomColor = '#000000';
 
   @yfield()
-  accessor fillColor: string = '--affine-palette-shape-yellow';
+  accessor fillColor: string | CustomColor = '--affine-palette-shape-yellow';
 
   @yfield()
   accessor filled: boolean = false;
@@ -166,7 +167,7 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
   accessor shapeType: ShapeType = 'rect';
 
   @yfield()
-  accessor strokeColor: string = '--affine-palette-line-yellow';
+  accessor strokeColor: string | CustomColor = '--affine-palette-line-yellow';
 
   @yfield()
   accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;

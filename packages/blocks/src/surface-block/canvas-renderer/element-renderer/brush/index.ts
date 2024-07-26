@@ -7,7 +7,7 @@ export function brush(
   matrix: DOMMatrix,
   renderer: Renderer
 ) {
-  const { color, rotate } = model;
+  const { rotate } = model;
   const [, , w, h] = model.deserializedXYWH;
   const cx = w / 2;
   const cy = h / 2;
@@ -16,6 +16,9 @@ export function brush(
     matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
   );
 
-  ctx.fillStyle = renderer.getVariableColor(color);
+  const color = renderer.getColor(model.color, '#000000', true);
+
+  ctx.fillStyle = color;
+
   ctx.fill(new Path2D(model.commands));
 }

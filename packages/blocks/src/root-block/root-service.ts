@@ -28,6 +28,7 @@ import {
   EMBED_CARD_WIDTH,
 } from '../_common/consts.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import {
   HtmlTransformer,
   MarkdownTransformer,
@@ -329,6 +330,8 @@ export class RootService extends BlockService<RootBlockModel> {
   };
 
   telemetryService: TelemetryService | null = null;
+
+  readonly themeObserver = new ThemeObserver();
 
   transformers = {
     markdown: MarkdownTransformer,

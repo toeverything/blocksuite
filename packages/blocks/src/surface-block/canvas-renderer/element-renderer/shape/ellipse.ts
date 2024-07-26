@@ -2,14 +2,15 @@ import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
-import { drawGeneralShape } from './utils.js';
+import { type CustomStyle, drawGeneralShape } from './utils.js';
 
 export function ellipse(
   model: ShapeElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer,
-  rc: RoughCanvas
+  rc: RoughCanvas,
+  customStyle: CustomStyle
 ) {
   const {
     seed,
@@ -26,8 +27,8 @@ export function ellipse(
   const renderHeight = Math.max(1, h - renderOffset * 2);
   const cx = renderWidth / 2;
   const cy = renderHeight / 2;
-  const realFillColor = renderer.getVariableColor(model.fillColor);
-  const realStrokeColor = renderer.getVariableColor(model.strokeColor);
+
+  const { fillColor, strokeColor } = customStyle;
 
   ctx.setTransform(
     matrix
@@ -38,15 +39,15 @@ export function ellipse(
   );
 
   if (shapeStyle === 'General') {
-    drawGeneralShape(ctx, model, renderer);
+    drawGeneralShape(ctx, model, renderer, fillColor, strokeColor);
   } else {
     rc.ellipse(cx, cy, renderWidth, renderHeight, {
       seed,
       roughness: shapeStyle === 'Scribbled' ? roughness : 0,
       strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
-      stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
+      stroke: strokeStyle === 'none' ? 'none' : strokeColor,
       strokeWidth,
-      fill: filled ? realFillColor : undefined,
+      fill: filled ? fillColor : undefined,
       curveFitting: 1,
     });
   }

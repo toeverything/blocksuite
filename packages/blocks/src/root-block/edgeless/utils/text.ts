@@ -68,10 +68,13 @@ export function mountShapeTextEditor(
 ) {
   if (!shapeElement.text) {
     const text = new DocCollection.Y.Text();
-    const { fillColor } = shapeElement;
-    const color = isTransparent(fillColor)
+    let color = edgeless.surface.themeObserver.getColor(
+      shapeElement.fillColor,
+      GET_DEFAULT_LINE_COLOR()
+    );
+    color = isTransparent(color)
       ? GET_DEFAULT_LINE_COLOR()
-      : fillColor === SHAPE_FILL_COLOR_BLACK
+      : color === SHAPE_FILL_COLOR_BLACK
         ? SHAPE_TEXT_COLOR_PURE_WHITE
         : SHAPE_TEXT_COLOR_PURE_BLACK;
     edgeless.service.updateElement(shapeElement.id, {

@@ -61,6 +61,7 @@ const FLAGS_PRESET = {
   enable_edgeless_text: true,
   enable_ai_onboarding: false,
   enable_ai_chat_block: false,
+  enable_color_picker: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

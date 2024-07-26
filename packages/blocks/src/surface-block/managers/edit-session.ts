@@ -59,6 +59,11 @@ const TextAlignSchema = z.nativeEnum(TextAlign);
 const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
 const ShapeTypeSchema = z.nativeEnum(ShapeType);
 const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
+const CustomColorSchema = z.object({
+  normal: z.string().optional(),
+  light: z.string().optional(),
+  dark: z.string().optional(),
+});
 
 const LastPropsSchema = z.object({
   connector: z.object({
@@ -353,7 +358,7 @@ function extractProps(
 
   Object.entries(props).forEach(([key, value]) => {
     if (!(key in ref.shape)) return;
-    if (isPlainObject(value)) {
+    if (isPlainObject(value) && !isCustomColorType(key, value)) {
       result[key] = extractProps(
         props[key] as Record<string, unknown>,
         ref.shape[key] as z.ZodObject<z.ZodRawShape>
@@ -393,4 +398,12 @@ function deepAssign(
   });
 
   return target;
+}
+
+function isCustomColorType(key: string, value: unknown) {
+  return (
+    ['background', 'color', 'stroke', 'fill', 'Color'].some(
+      stuff => key.startsWith(stuff) || key.endsWith(stuff)
+    ) && CustomColorSchema.safeParse(value).success
+  );
 }

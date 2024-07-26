@@ -14,7 +14,6 @@ import type { TextElementModel } from '../../../../surface-block/element-model/t
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import '../../../../_common/components/rich-text/rich-text.js';
-import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { toRadian } from '../../../../surface-block/index.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
@@ -324,7 +323,6 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       fontSize,
       fontWeight,
       fontStyle,
-      color,
       textAlign,
       rotate,
       hasMaxWidth,
@@ -345,6 +343,10 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     ];
 
     const isEmpty = !text.length && !this._isComposition;
+    const color = this.edgeless.surface.themeObserver.getColor(
+      this.element.color,
+      '#000000'
+    );
 
     return html`<div
       style=${styleMap({
@@ -355,7 +357,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         fontSize: `${fontSize}px`,
         fontWeight,
         fontStyle,
-        color: isCssVariable(color) ? `var(${color})` : color,
+        color: color.startsWith('--') ? `var(${color})` : color,
         textAlign,
         lineHeight: `${lineHeight}px`,
         boxSizing: 'content-box',

@@ -17,7 +17,6 @@ import {
   getNearestTranslation,
   isElementOutsideViewport,
 } from '../../../../_common/edgeless/mindmap/index.js';
-import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { TextResizing } from '../../../../surface-block/consts.js';
 import {
   MindmapElementModel,
@@ -283,6 +282,10 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       leftTopY
     );
     const autoWidth = textResizing === TextResizing.AUTO_WIDTH;
+    const color = this.edgeless.surface.themeObserver.getColor(
+      this.element.color,
+      '#000000'
+    );
 
     const inlineEditorStyle = styleMap({
       position: 'absolute',
@@ -310,9 +313,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       outline: 'none',
       transform: `scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
       transformOrigin: 'top left',
-      color: isCssVariable(this.element.color)
-        ? `var(${this.element.color})`
-        : this.element.color,
+      color: color.startsWith('--') ? `var(${color})` : color,
       padding: `${verticalPadding}px ${horiPadding}px`,
       textAlign: this.element.textAlign,
       display: 'grid',

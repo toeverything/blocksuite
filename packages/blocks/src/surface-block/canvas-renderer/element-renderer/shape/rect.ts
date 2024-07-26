@@ -2,7 +2,7 @@ import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
-import { drawGeneralShape } from './utils.js';
+import { type CustomStyle, drawGeneralShape } from './utils.js';
 
 /**
  * "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf)
@@ -14,17 +14,18 @@ export function rect(
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer,
-  rc: RoughCanvas
+  rc: RoughCanvas,
+  customStyle: CustomStyle
 ) {
   const {
-    seed,
-    strokeWidth,
     filled,
     radius,
-    strokeStyle,
-    roughness,
     rotate,
+    roughness,
+    seed,
     shapeStyle,
+    strokeStyle,
+    strokeWidth,
   } = model;
   const [, , w, h] = model.deserializedXYWH;
   const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -34,8 +35,8 @@ export function rect(
     radius < 1 ? Math.min(renderWidth * radius, renderHeight * radius) : radius;
   const cx = renderWidth / 2;
   const cy = renderHeight / 2;
-  const realFillColor = renderer.getVariableColor(model.fillColor);
-  const realStrokeColor = renderer.getVariableColor(model.strokeColor);
+
+  const { fillColor, strokeColor } = customStyle;
 
   ctx.setTransform(
     matrix
@@ -46,7 +47,7 @@ export function rect(
   );
 
   if (shapeStyle === 'General') {
-    drawGeneralShape(ctx, model, renderer);
+    drawGeneralShape(ctx, model, renderer, fillColor, strokeColor);
   } else {
     rc.path(
       `
@@ -71,9 +72,9 @@ export function rect(
         seed,
         roughness,
         strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
-        stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
+        stroke: strokeStyle === 'none' ? 'none' : strokeColor,
         strokeWidth,
-        fill: filled ? realFillColor : undefined,
+        fill: filled ? fillColor : undefined,
       }
     );
   }

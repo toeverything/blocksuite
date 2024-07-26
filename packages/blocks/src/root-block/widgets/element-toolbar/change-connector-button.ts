@@ -1,17 +1,21 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { when } from 'lit/directives/when.js';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
 import type {
   ConnectorElementProps,
   ConnectorLabelProps,
 } from '../../../surface-block/element-model/connector.js';
 import type { PointStyle } from '../../../surface-block/index.js';
-import type { LineStyleEvent } from '../../edgeless/components/panel/line-styles-panel.js';
+import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
+import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import '../../../_common/components/toolbar/icon-button.js';
@@ -45,23 +49,37 @@ import {
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
-  type StrokeStyle,
+  StrokeStyle,
 } from '../../../surface-block/index.js';
+import {
+  packColor,
+  packColorsWithColorScheme,
+} from '../../edgeless/components/color-picker/utils.js';
 import '../../edgeless/components/panel/color-panel.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
+  LINE_COLORS,
 } from '../../edgeless/components/panel/color-panel.js';
+import {
+  type LineStyleEvent,
+  LineStylesPanel,
+} from '../../edgeless/components/panel/line-styles-panel.js';
 import '../../edgeless/components/panel/stroke-style-panel.js';
 import { mountConnectorLabelEditor } from '../../edgeless/utils/text.js';
 import './change-text-menu.js';
 
 function getMostCommonColor(
-  elements: ConnectorElementModel[]
-): CssVariableName {
-  const colors = countBy(elements, ele => ele.stroke);
+  elements: ConnectorElementModel[],
+  colorScheme: ColorScheme
+): string | null {
+  const colors = countBy(elements, (ele: ConnectorElementModel) => {
+    return typeof ele.stroke === 'object'
+      ? ele.stroke[colorScheme] ?? ele.stroke.normal ?? null
+      : ele.stroke;
+  });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
-  return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
+  return max ? (max[0] as string) : null;
 }
 
 function getMostCommonMode(
@@ -216,6 +234,23 @@ const MODE_CHOOSE: [ConnectorMode, () => TemplateResult<1>][] = [
 
 @customElement('edgeless-change-connector-button')
 export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
+  pickColor = (event: PickColorEvent) => {
+    if (event.type === 'pick') {
+      const { type, value } = event.detail;
+      this.elements.forEach(ele => {
+        this.service.updateElement(
+          ele.id,
+          packColor(type, 'stroke', value, ele.stroke)
+        );
+      });
+      return;
+    }
+
+    this.elements.forEach(ele =>
+      ele[event.type === 'start' ? 'stash' : 'pop']('stroke')
+    );
+  };
+
   private _addLabel() {
     mountConnectorLabelEditor(this.elements[0], this.edgeless);
   }
@@ -302,48 +337,97 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const selectedColor = getMostCommonColor(this.elements);
-    const selectedMode = getMostCommonMode(this.elements);
-    const selectedLineSize =
-      getMostCommonLineWidth(this.elements) ?? LineWidth.Four;
-    const selectedRough = getMostCommonRough(this.elements);
-    const selectedLineStyle = getMostCommonLineStyle(this.elements);
+    const colorScheme = this.edgeless.surface.renderer.getColorScheme();
+    const elements = this.elements;
+    const selectedColor =
+      getMostCommonColor(elements, colorScheme) ?? GET_DEFAULT_LINE_COLOR();
+    const selectedMode = getMostCommonMode(elements);
+    const selectedLineSize = getMostCommonLineWidth(elements) ?? LineWidth.Four;
+    const selectedRough = getMostCommonRough(elements);
+    const selectedLineStyle =
+      getMostCommonLineStyle(elements) ?? StrokeStyle.Solid;
     const selectedStartPointStyle =
-      getMostCommonEndpointStyle(this.elements, ConnectorEndpoint.Front) ??
+      getMostCommonEndpointStyle(elements, ConnectorEndpoint.Front) ??
       DEFAULT_FRONT_END_POINT_STYLE;
     const selectedEndPointStyle =
-      getMostCommonEndpointStyle(this.elements, ConnectorEndpoint.Rear) ??
+      getMostCommonEndpointStyle(elements, ConnectorEndpoint.Rear) ??
       DEFAULT_REAR_END_POINT_STYLE;
 
     return join(
       [
-        html`
-          <editor-menu-button
-            .contentPadding=${'8px'}
-            .button=${html`
-              <editor-icon-button
-                aria-label="Stroke style"
-                .tooltip=${'Stroke style'}
+        when(
+          this.edgeless.doc.awarenessStore.getFlag('enable_color_picker'),
+          () => {
+            const { type, colors } = packColorsWithColorScheme(
+              colorScheme,
+              selectedColor,
+              elements[0].stroke
+            );
+
+            return html`
+              <edgeless-color-picker-button
+                class="stroke-color"
+                .label=${'Stroke style'}
+                .pick=${this.pickColor}
+                .color=${selectedColor}
+                .colors=${colors}
+                .colorType=${type}
+                .palettes=${LINE_COLORS}
+                .hollowCircle=${true}
               >
-                <edgeless-color-button
-                  .color=${selectedColor}
-                ></edgeless-color-button>
-              </editor-icon-button>
-            `}
-          >
-            <stroke-style-panel
-              slot
-              .strokeWidth=${selectedLineSize}
-              .strokeStyle=${selectedLineStyle}
-              .strokeColor=${selectedColor}
-              .setStrokeStyle=${(e: LineStyleEvent) =>
-                this._setConnectorStorke(e)}
-              .setStrokeColor=${(e: ColorEvent) =>
-                this._setConnectorColor(e.detail)}
+                <div
+                  slot="other"
+                  class="line-styles"
+                  style=${styleMap({
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '8px',
+                    alignItems: 'center',
+                  })}
+                >
+                  ${LineStylesPanel({
+                    selectedLineSize: selectedLineSize,
+                    selectedLineStyle: selectedLineStyle,
+                    onClick: (e: LineStyleEvent) => this._setConnectorStorke(e),
+                    lineStyles: [StrokeStyle.Solid, StrokeStyle.Dash],
+                  })}
+                </div>
+                <editor-toolbar-separator
+                  slot="separator"
+                  data-orientation="horizontal"
+                ></editor-toolbar-separator>
+              </edgeless-color-picker-button>
+            `;
+          },
+          () => html`
+            <editor-menu-button
+              .contentPadding=${'8px'}
+              .button=${html`
+                <editor-icon-button
+                  aria-label="Stroke style"
+                  .tooltip=${'Stroke style'}
+                >
+                  <edgeless-color-button
+                    .color=${selectedColor}
+                  ></edgeless-color-button>
+                </editor-icon-button>
+              `}
             >
-            </stroke-style-panel>
-          </editor-menu-button>
-        `,
+              <stroke-style-panel
+                slot
+                .options=${['--affine-palette-transparent', ...LINE_COLORS]}
+                .strokeWidth=${selectedLineSize}
+                .strokeStyle=${selectedLineStyle}
+                .strokeColor=${selectedColor}
+                .setStrokeStyle=${(e: LineStyleEvent) =>
+                  this._setConnectorStorke(e)}
+                .setStrokeColor=${(e: ColorEvent) =>
+                  this._setConnectorColor(e.detail)}
+              >
+              </stroke-style-panel>
+            </editor-menu-button>
+          `
+        ),
 
         html`
           <editor-menu-button
@@ -535,6 +619,9 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor elements: ConnectorElementModel[] = [];
+
+  @query('edgeless-color-picker-button.stroke-color')
+  accessor strokeColorButton!: EdgelessColorPickerButton;
 }
 
 declare global {

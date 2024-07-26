@@ -1,10 +1,14 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { when } from 'lit/directives/when.js';
 
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
 import type { BrushProps } from '../../../surface-block/element-model/brush.js';
 import type { BrushElementModel } from '../../../surface-block/index.js';
+import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
+import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
+import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import type { LineWidthEvent } from '../../edgeless/components/panel/line-width-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
@@ -13,19 +17,28 @@ import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';
 import { LineWidth } from '../../../_common/types.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
+import {
+  packColor,
+  packColorsWithColorScheme,
+} from '../../edgeless/components/color-picker/utils.js';
 import '../../edgeless/components/panel/color-panel.js';
 import {
-  type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
+  LINE_COLORS,
 } from '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/line-width-panel.js';
 
 function getMostCommonColor(
-  elements: BrushElementModel[]
-): CssVariableName | null {
-  const colors = countBy(elements, ele => ele.color);
+  elements: BrushElementModel[],
+  colorScheme: ColorScheme
+): string {
+  const colors = countBy(elements, (ele: BrushElementModel) => {
+    return typeof ele.color === 'object'
+      ? ele.color[colorScheme] ?? ele.color.normal ?? null
+      : ele.color;
+  });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
-  return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
+  return max ? (max[0] as string) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonSize(elements: BrushElementModel[]): LineWidth {
@@ -50,6 +63,23 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this._selectedSize = lineWidth;
   };
 
+  pickColor = (event: PickColorEvent) => {
+    if (event.type === 'pick') {
+      const { type, value } = event.detail;
+      this.elements.forEach(ele => {
+        this.service.updateElement(
+          ele.id,
+          packColor(type, 'color', value, ele.color)
+        );
+      });
+      return;
+    }
+
+    this.elements.forEach(ele =>
+      ele[event.type === 'start' ? 'stash' : 'pop']('color')
+    );
+  };
+
   private _setBrushProp<K extends keyof BrushProps>(
     key: K,
     value: BrushProps[K]
@@ -63,6 +93,8 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   }
 
   override render() {
+    const colorScheme = this.edgeless.surface.renderer.getColorScheme();
+    const elements = this.elements;
     const { selectedSize, selectedColor } = this;
 
     return html`
@@ -74,23 +106,49 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
       <editor-toolbar-separator></editor-toolbar-separator>
 
-      <editor-menu-button
-        .contentPadding=${'8px'}
-        .button=${html`
-          <editor-icon-button aria-label="Color" .tooltip=${'Color'}>
-            <edgeless-color-button
+      ${when(
+        this.edgeless.doc.awarenessStore.getFlag('enable_color_picker'),
+        () => {
+          const { type, colors } = packColorsWithColorScheme(
+            colorScheme,
+            selectedColor,
+            elements[0].color
+          );
+
+          return html`
+            <edgeless-color-picker-button
+              class="color"
+              .label=${'Color'}
+              .pick=${this.pickColor}
               .color=${selectedColor}
-            ></edgeless-color-button>
-          </editor-icon-button>
-        `}
-      >
-        <edgeless-color-panel
-          slot
-          .value=${selectedColor}
-          @select=${this._setBrushColor}
-        >
-        </edgeless-color-panel>
-      </editor-menu-button>
+              .colors=${colors}
+              .colorType=${type}
+              .palettes=${LINE_COLORS}
+            >
+            </edgeless-color-picker-button>
+          `;
+        },
+        () => html`
+          <editor-menu-button
+            .contentPadding=${'8px'}
+            .button=${html`
+              <editor-icon-button aria-label="Color" .tooltip=${'Color'}>
+                <edgeless-color-button
+                  .color=${selectedColor}
+                ></edgeless-color-button>
+              </editor-icon-button>
+            `}
+          >
+            <edgeless-color-panel
+              slot
+              .options=${['--affine-palette-transparent', ...LINE_COLORS]}
+              .value=${selectedColor}
+              @select=${this._setBrushColor}
+            >
+            </edgeless-color-panel>
+          </editor-menu-button>
+        `
+      )}
     `;
   }
 
@@ -99,7 +157,10 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   }
 
   get selectedColor() {
-    return this._selectedColor ?? getMostCommonColor(this.elements);
+    const colorScheme = this.edgeless.surface.renderer.getColorScheme();
+    return (
+      this._selectedColor ?? getMostCommonColor(this.elements, colorScheme)
+    );
   }
 
   get selectedSize() {
@@ -119,6 +180,9 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
   @state()
   private accessor _selectedSize: LineWidth | null = null;
+
+  @query('edgeless-color-picker-button.color')
+  accessor colorButton!: EdgelessColorPickerButton;
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;

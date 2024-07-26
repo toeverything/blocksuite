@@ -15,6 +15,8 @@ import {
 import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
+import type { CustomColor } from '../consts.js';
+
 import {
   DEFAULT_ROUGHNESS,
   FontFamily,
@@ -109,7 +111,7 @@ export type SerializedConnectorElement = SerializedElement & {
 
 export type ConnectorElementProps = BaseElementProps & {
   mode: ConnectorMode;
-  stroke: string;
+  stroke: string | CustomColor;
   strokeWidth: number;
   strokeStyle: StrokeStyle;
   roughness?: number;
@@ -504,7 +506,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   };
 
   @yfield()
-  accessor stroke: string = '#000000';
+  accessor stroke: string | CustomColor = '#000000';
 
   @yfield()
   accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
@@ -552,7 +554,7 @@ export class LocalConnectorElementModel extends GfxLocalElementModel {
     position: [0, 0],
   };
 
-  stroke: string = '#000000';
+  stroke: string | CustomColor = '#000000';
 
   strokeStyle: StrokeStyle = StrokeStyle.Solid;
 

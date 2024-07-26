@@ -12,7 +12,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
 
-import { isCssVariable } from '../_common/theme/css-variables.js';
 import { FrameBlockModel } from './frame-model.js';
 
 const NESTED_FRAME_OFFSET = 4;
@@ -277,6 +276,10 @@ export class FrameBlockComponent extends GfxBlockComponent<
 
   override renderGfxBlock() {
     const { model, _isNavigator, showBorder, doc, rootService } = this;
+    const backgroundColor = rootService.themeObserver.generateColorProperty(
+      model.background,
+      '--affine-platte-transparent'
+    );
 
     return html`
       <edgeless-frame-title
@@ -287,9 +290,7 @@ export class FrameBlockComponent extends GfxBlockComponent<
       <div
         class="affine-frame-container"
         style=${styleMap({
-          backgroundColor: isCssVariable(model.background)
-            ? `var(${model.background})`
-            : '',
+          backgroundColor,
           height: '100%',
           width: '100%',
           borderRadius: '8px',

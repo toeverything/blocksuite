@@ -9,7 +9,7 @@ import { stopPropagation } from '../../utils/event.js';
 export class EditorToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      ${PANEL_BASE}
+      ${PANEL_BASE};
       height: 36px;
       box-sizing: content-box;
     }

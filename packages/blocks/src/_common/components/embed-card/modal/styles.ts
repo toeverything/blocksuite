@@ -1,6 +1,6 @@
 import { css } from 'lit';
 
-import { INPUT_FONT_BASE, PANEL_BASE } from '../../../styles.js';
+import { FONT_XS, PANEL_BASE } from '../../../styles.js';
 
 export const embedCardModalStyles = css`
   .embed-card-modal-mask {
@@ -14,7 +14,7 @@ export const embedCardModalStyles = css`
   }
 
   .embed-card-modal-wrapper {
-    ${PANEL_BASE}
+    ${PANEL_BASE};
     flex-direction: column;
     position: absolute;
     left: 0;
@@ -51,7 +51,7 @@ export const embedCardModalStyles = css`
     border: 1px solid var(--affine-border-color);
     background: var(--affine-white-10);
     color: var(--affine-text-primary-color);
-    ${INPUT_FONT_BASE}
+    ${FONT_XS};
   }
   input.embed-card-modal-input {
     padding-top: 4px;

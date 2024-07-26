@@ -5,6 +5,7 @@ import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
+import type { CustomColor } from '../consts.js';
 import type { ShapeElementModel } from '../element-model/shape.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { MindmapService } from './service.js';
@@ -85,11 +86,21 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
       enableStackingCanvas: true,
       provider: {
         selectedElements: () => [],
+        getColorScheme: () => this._theme.mode,
         getVariableColor: (val: string) => this._theme.getVariableValue(val),
+        getColor: (
+          color: string | CustomColor,
+          fallback?: string,
+          real?: boolean
+        ) => this._theme.getColor(color, fallback, real),
+        generateColorProperty: (
+          color: string | CustomColor,
+          fallback: string
+        ) => this._theme.generateColorProperty(color, fallback),
       },
     });
     this._theme.observe(this.ownerDocument.documentElement);
-    this.disposables.add(this._theme);
+    this.disposables.add(() => this._theme.dispose());
   }
 
   override firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {

@@ -1,10 +1,16 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
+import { when } from 'lit/directives/when.js';
 
+import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
+import type {
+  EdgelessColorPickerButton,
+  PickColorEvent,
+} from '../../edgeless/components/color-picker/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import '../../../_common/components/toolbar/icon-button.js';
@@ -42,6 +48,11 @@ import {
   getFontFacesByFontFamily,
   wrapFontFamily,
 } from '../../../surface-block/utils/font.js';
+import '../../edgeless/components/color-picker/index.js';
+import {
+  packColor,
+  packColorsWithColorScheme,
+} from '../../edgeless/components/color-picker/utils.js';
 import '../../edgeless/components/panel/align-panel.js';
 import {
   type ColorEvent,
@@ -53,24 +64,12 @@ import '../../edgeless/components/panel/font-weight-and-style-panel.js';
 import '../../edgeless/components/panel/size-panel.js';
 
 const FONT_SIZE_LIST = [
-  {
-    value: 16,
-  },
-  {
-    value: 24,
-  },
-  {
-    value: 32,
-  },
-  {
-    value: 40,
-  },
-  {
-    value: 64,
-  },
-  {
-    value: 128,
-  },
+  { value: 16 },
+  { value: 24 },
+  { value: 32 },
+  { value: 40 },
+  { value: 64 },
+  { value: 128 },
 ] as const;
 
 const FONT_WEIGHT_CHOOSE: [FontWeight, () => string][] = [
@@ -90,14 +89,14 @@ const TEXT_ALIGN_CHOOSE: [TextAlign, () => TemplateResult<1>][] = [
   [TextAlign.Right, () => TextAlignRightIcon],
 ] as const;
 
-function countByField<K extends keyof TextStyleProps>(
+function countByField<K extends keyof Omit<TextStyleProps, 'color'>>(
   elements: BlockSuite.EdgelessTextModelType[],
   field: K
 ) {
   return countBy(elements, element => extractField(element, field));
 }
 
-function extractField<K extends keyof TextStyleProps>(
+function extractField<K extends keyof Omit<TextStyleProps, 'color'>>(
   element: BlockSuite.EdgelessTextModelType,
   field: K
 ) {
@@ -115,7 +114,7 @@ function extractField<K extends keyof TextStyleProps>(
   ) as TextStyleProps[K];
 }
 
-function getMostCommonValue<K extends keyof TextStyleProps>(
+function getMostCommonValue<K extends keyof Omit<TextStyleProps, 'color'>>(
   elements: BlockSuite.EdgelessTextModelType[],
   field: K
 ) {
@@ -128,9 +127,19 @@ function getMostCommonAlign(elements: BlockSuite.EdgelessTextModelType[]) {
   return max ? (max[0] as TextAlign) : TextAlign.Left;
 }
 
-function getMostCommonColor(elements: BlockSuite.EdgelessTextModelType[]) {
-  const max = getMostCommonValue(elements, 'color');
-  return max ? max[0] : GET_DEFAULT_LINE_COLOR();
+function getMostCommonColor(
+  elements: BlockSuite.EdgelessTextModelType[],
+  colorScheme: ColorScheme
+): string {
+  const colors = countBy(elements, (ele: BlockSuite.EdgelessTextModelType) => {
+    const color =
+      ele instanceof ConnectorElementModel ? ele.labelStyle.color : ele.color;
+    return typeof color === 'object'
+      ? color[colorScheme] ?? color.normal ?? null
+      : color;
+  });
+  const max = maxBy(Object.entries(colors), ([_k, count]) => count);
+  return max ? (max[0] as string) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonFontFamily(elements: BlockSuite.EdgelessTextModelType[]) {
@@ -297,10 +306,43 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     }
   `;
 
+  pickColor = (event: PickColorEvent) => {
+    if (event.type === 'pick') {
+      const { type, value } = event.detail;
+
+      this.elements.forEach(ele => {
+        if (ele instanceof ConnectorElementModel) {
+          this.service.updateElement(ele.id, {
+            labelStyle: {
+              ...ele.labelStyle,
+              ...packColor(type, 'color', value, ele.labelStyle.color),
+            },
+          });
+          this._updateElementBound(ele);
+          return;
+        }
+
+        this.service.updateElement(
+          ele.id,
+          packColor(type, 'color', value, ele.color)
+        );
+        this._updateElementBound(ele);
+      });
+      return;
+    }
+
+    const key = this.elementType === 'connector' ? 'labelStyle' : 'color';
+    this.elements.forEach(ele => {
+      // @ts-expect-error: FIXME
+      ele[event.type === 'start' ? 'stash' : 'pop'](key);
+    });
+  };
+
   override render() {
+    const colorScheme = this.edgeless.surface.renderer.getColorScheme();
     const elements = this.elements;
     const selectedAlign = getMostCommonAlign(elements);
-    const selectedColor = getMostCommonColor(elements);
+    const selectedColor = getMostCommonColor(elements, colorScheme);
     const selectedFontFamily = getMostCommonFontFamily(elements);
     const selectedFontSize = Math.trunc(getMostCommonFontSize(elements));
     const selectedFontStyle = getMostCommonFontStyle(elements);
@@ -339,28 +381,54 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
           </editor-menu-button>
         `,
 
-        html`
-          <editor-menu-button
-            .contentPadding=${'8px'}
-            .button=${html`
-              <editor-icon-button
-                aria-label="Text color"
-                .tooltip=${'Text color'}
+        when(
+          this.edgeless.doc.awarenessStore.getFlag('enable_color_picker'),
+          () => {
+            const { type, colors } = packColorsWithColorScheme(
+              colorScheme,
+              selectedColor,
+              elements[0] instanceof ConnectorElementModel
+                ? elements[0].labelStyle.color
+                : elements[0].color
+            );
+
+            return html`
+              <edgeless-color-picker-button
+                class="text-color"
+                .label=${'Text color'}
+                .pick=${this.pickColor}
+                .isText=${true}
+                .color=${selectedColor}
+                .colors=${colors}
+                .colorType=${type}
+                .palettes=${LINE_COLORS}
               >
-                <edgeless-text-color-icon
-                  .color=${selectedColor}
-                ></edgeless-text-color-icon>
-              </editor-icon-button>
-            `}
-          >
-            <edgeless-color-panel
-              slot
-              .value=${selectedColor}
-              .options=${LINE_COLORS}
-              @select=${this._setTextColor}
-            ></edgeless-color-panel>
-          </editor-menu-button>
-        `,
+              </edgeless-color-picker-button>
+            `;
+          },
+          () => html`
+            <editor-menu-button
+              .contentPadding=${'8px'}
+              .button=${html`
+                <editor-icon-button
+                  aria-label="Text color"
+                  .tooltip=${'Text color'}
+                >
+                  <edgeless-text-color-icon
+                    .color=${selectedColor}
+                  ></edgeless-text-color-icon>
+                </editor-icon-button>
+              `}
+            >
+              <edgeless-color-panel
+                slot
+                .value=${selectedColor}
+                .options=${['--affine-palette-transparent', ...LINE_COLORS]}
+                @select=${this._setTextColor}
+              ></edgeless-color-panel>
+            </editor-menu-button>
+          `
+        ),
 
         html`
           <editor-menu-button
@@ -453,6 +521,9 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor elements!: BlockSuite.EdgelessTextModelType[];
+
+  @query('edgeless-color-picker-button.text-color')
+  accessor textColorButton!: EdgelessColorPickerButton;
 }
 
 declare global {

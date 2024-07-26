@@ -12,6 +12,7 @@ import { literal, html as staticHtml, unsafeStatic } from 'lit/static-html.js';
 
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { EdgelessBlockModel } from '../root-block/edgeless/edgeless-block-model.js';
+import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
 import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
 
@@ -73,6 +74,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
           .model=${model}
           .doc=${this.doc}
           .host=${this.host}
+          .renderer=${this.renderer}
           .renderModel=${this.renderModel}
           style=${styleMap({
             'z-index': zIndex,
@@ -168,6 +170,9 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor renderModel!: (model: BlockModel) => TemplateResult;
+
+  @property({ attribute: false })
+  accessor renderer!: Renderer;
 }
 
 declare global {

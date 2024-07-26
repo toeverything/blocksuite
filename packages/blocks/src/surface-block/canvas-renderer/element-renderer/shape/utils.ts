@@ -17,10 +17,18 @@ import {
   wrapTextDeltas,
 } from '../text/utils.js';
 
+export type CustomStyle = {
+  color: string;
+  fillColor: string;
+  strokeColor: string;
+};
+
 export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
   shapeModel: ShapeElementModel,
-  renderer: Renderer
+  renderer: Renderer,
+  fillColor: string,
+  strokeColor: string
 ) {
   const sizeOffset = Math.max(shapeModel.strokeWidth, 0);
   const w = Math.max(shapeModel.w - sizeOffset, 0);
@@ -41,8 +49,8 @@ export function drawGeneralShape(
   }
 
   ctx.lineWidth = shapeModel.strokeWidth;
-  ctx.strokeStyle = renderer.getVariableColor(shapeModel.strokeColor);
-  ctx.fillStyle = renderer.getVariableColor(shapeModel.fillColor);
+  ctx.strokeStyle = strokeColor;
+  ctx.fillStyle = fillColor;
 
   switch (shapeModel.strokeStyle) {
     case 'none':

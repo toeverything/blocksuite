@@ -13,6 +13,8 @@ import {
 } from '@blocksuite/block-std/gfx';
 import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 
+import type { CustomColor } from '../consts.js';
+
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
 import {
   getBoundFromPoints,
@@ -34,7 +36,7 @@ export type BrushProps = BaseElementProps & {
    * pressure is optional and exsits when pressure sensitivity is supported, otherwise not.
    */
   points: number[][];
-  color: string;
+  color: string | CustomColor;
   lineWidth: number;
 };
 
@@ -129,7 +131,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   }
 
   @yfield()
-  accessor color: string = '#000000';
+  accessor color: string | CustomColor = '#000000';
 
   @watch((_, instance: BrushElementModel) => {
     instance['_local'].delete('commands');

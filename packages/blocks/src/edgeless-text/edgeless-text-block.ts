@@ -13,7 +13,6 @@ import type {
 import type { EdgelessTextBlockModel } from './edgeless-text-model.js';
 import type { EdgelessTextBlockService } from './edgeless-text-service.js';
 
-import { isCssVariable } from '../_common/theme/css-variables.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';
 import {
@@ -317,10 +316,14 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
   }
 
   override renderPageContent() {
-    const { color, fontFamily, fontStyle, fontWeight, textAlign } = this.model;
+    const { fontFamily, fontStyle, fontWeight, textAlign } = this.model;
+    const color = this.rootService.themeObserver.generateColorProperty(
+      this.model.color,
+      '#000000'
+    );
 
     const style = styleMap({
-      color: isCssVariable(color) ? `var(${color})` : color,
+      color,
       fontFamily: wrapFontFamily(fontFamily),
       fontStyle,
       fontWeight,

@@ -76,17 +76,35 @@ export function connector(
     ctx.clip(path, 'evenodd');
   }
 
+  const strokeColor = renderer.getColor(model.stroke, '#000000', true);
+
   renderPoints(
     model,
     ctx,
-    renderer,
     rc,
     points,
     strokeStyle === 'dash',
-    mode === ConnectorMode.Curve
+    mode === ConnectorMode.Curve,
+    strokeColor
   );
-  renderEndpoint(model, points, ctx, renderer, rc, 'Front', frontEndpointStyle);
-  renderEndpoint(model, points, ctx, renderer, rc, 'Rear', rearEndpointStyle);
+  renderEndpoint(
+    model,
+    points,
+    ctx,
+    rc,
+    'Front',
+    frontEndpointStyle,
+    strokeColor
+  );
+  renderEndpoint(
+    model,
+    points,
+    ctx,
+    rc,
+    'Rear',
+    rearEndpointStyle,
+    strokeColor
+  );
 
   if (hasLabel) {
     ctx.restore();
@@ -103,21 +121,20 @@ export function connector(
 function renderPoints(
   model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
-  renderer: Renderer,
   rc: RoughCanvas,
   points: PointLocation[],
   dash: boolean,
-  curve: boolean
+  curve: boolean,
+  stroke: string
 ) {
-  const { seed, stroke, strokeWidth, roughness, rough } = model;
-  const realStrokeColor = renderer.getVariableColor(stroke);
+  const { seed, strokeWidth, roughness, rough } = model;
 
   if (rough) {
     const options = {
       seed,
       roughness,
+      stroke,
       strokeLineDash: dash ? [12, 12] : undefined,
-      stroke: realStrokeColor,
       strokeWidth,
     };
     if (curve) {
@@ -131,7 +148,7 @@ function renderPoints(
     }
   } else {
     ctx.save();
-    ctx.strokeStyle = realStrokeColor;
+    ctx.strokeStyle = stroke;
     ctx.lineWidth = strokeWidth;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
@@ -172,12 +189,12 @@ function renderEndpoint(
   model: ConnectorElementModel | LocalConnectorElementModel,
   location: PointLocation[],
   ctx: CanvasRenderingContext2D,
-  renderer: Renderer,
   rc: RoughCanvas,
   end: 'Front' | 'Rear',
-  style: PointStyle
+  style: PointStyle,
+  stroke: string
 ) {
-  const arrowOptions = getArrowOptions(end, model, renderer);
+  const arrowOptions = getArrowOptions(end, model, stroke);
 
   switch (style) {
     case 'Arrow':
@@ -233,7 +250,7 @@ function renderLabel(
   ctx.font = font;
   ctx.textAlign = textAlign;
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = renderer.getVariableColor(color);
+  ctx.fillStyle = renderer.getColor(color, '#000000', true);
 
   let textMaxWidth = textAlign === 'center' ? 0 : getMaxTextWidth(lines, font);
   if (hasMaxWidth && maxWidth > 0) {

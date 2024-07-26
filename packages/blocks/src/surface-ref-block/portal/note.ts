@@ -18,6 +18,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { NoteBlockModel } from '../../note-block/index.js';
+import type { Renderer } from '../../surface-block/canvas-renderer/renderer.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
@@ -78,12 +79,18 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { model, index } = this;
-    const { displayMode, edgeless } = model;
+    const { displayMode, edgeless, doc } = model;
     if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)
       return nothing;
 
-    const { xywh, background } = model;
-    const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
+    let background = `${DEFAULT_NOTE_BACKGROUND_COLOR}`;
+    if (doc.awarenessStore.getFlag('enable_color_picker')) {
+      background = this.renderer.getColor(model.background, background);
+    } else if (typeof model.background === 'string') {
+      background = model.background;
+    }
+
+    const [modelX, modelY, modelW, modelH] = deserializeXYWH(model.xywh);
     const style = {
       zIndex: `${index}`,
       width: modelW + 'px',
@@ -94,7 +101,9 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       transform: `translate(${modelX}px, ${modelY}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px none var(--affine-black-10)`,
-      background: `var(${background ?? DEFAULT_NOTE_BACKGROUND_COLOR})`,
+      background: background.startsWith('--')
+        ? `var(${background})`
+        : background,
       boxShadow: 'var(--affine-note-shadow-sticker)',
       position: 'absolute',
       borderRadius: '0px',
@@ -152,6 +161,9 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor model!: NoteBlockModel;
+
+  @property({ attribute: false })
+  accessor renderer!: Renderer;
 }
 
 declare global {

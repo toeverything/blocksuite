@@ -15,7 +15,6 @@ import type { ConnectorElementModel } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import '../../../../_common/components/rich-text/rich-text.js';
-import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { almostEqual } from '../../../../_common/utils/math.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 
@@ -229,8 +228,8 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
         fontSize,
         fontStyle,
         fontWeight,
-        color,
         textAlign,
+        color: labelColor,
       },
       labelConstraints: { hasMaxWidth, maxWidth },
     } = connector;
@@ -246,6 +245,10 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
     ];
 
     const isEmpty = !connector.text!.length && !this._isComposition;
+    const color = this.edgeless.surface.themeObserver.getColor(
+      labelColor,
+      '#000000'
+    );
 
     return html`
       <div
@@ -260,7 +263,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
           maxWidth: hasMaxWidth
             ? `${maxWidth + BORDER_WIDTH * 2 + HORIZONTAL_PADDING * 2}px`
             : 'initial',
-          color: isCssVariable(color) ? `var(${color})` : color,
+          color: color.startsWith('--') ? `var(${color})` : color,
           transform: transformOperation.join(' '),
         })}
       >

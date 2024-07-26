@@ -383,7 +383,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)
       return nothing;
 
-    const { xywh, background, edgeless } = model;
+    const { xywh, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;
     const { collapse, collapsedHeight, scale = 1 } = edgeless;
@@ -405,6 +405,11 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     };
 
     const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
+    const backgroundColor =
+      this.rootService.themeObserver.generateColorProperty(
+        model.background,
+        DEFAULT_NOTE_BACKGROUND_COLOR
+      );
 
     const backgroundStyle = {
       position: 'absolute',
@@ -416,7 +421,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
       transition: this._editing
         ? 'left 0.3s, top 0.3s, width 0.3s, height 0.3s'
         : 'none',
-      background: `var(${background ?? DEFAULT_NOTE_BACKGROUND_COLOR})`,
+      backgroundColor,
       border: `${borderSize}px ${
         borderStyle === StrokeStyle.Dash ? 'dashed' : borderStyle
       } var(--affine-black-10)`,

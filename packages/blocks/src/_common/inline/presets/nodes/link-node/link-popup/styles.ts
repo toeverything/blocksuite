@@ -1,10 +1,10 @@
 import { css } from 'lit';
 
-import { INPUT_FONT_BASE, PANEL_BASE } from '../../../../../styles.js';
+import { FONT_XS, PANEL_BASE } from '../../../../../styles.js';
 
 const editLinkStyle = css`
   .affine-link-edit-popover {
-    ${PANEL_BASE}
+    ${PANEL_BASE};
     display: grid;
     grid-template-columns: auto auto;
     grid-template-rows: repeat(2, 1fr);
@@ -22,7 +22,7 @@ const editLinkStyle = css`
   .affine-link-edit-popover label {
     box-sizing: border-box;
     color: var(--affine-icon-color);
-    ${INPUT_FONT_BASE}
+    ${FONT_XS};
     font-weight: 400;
   }
 
@@ -32,7 +32,7 @@ const editLinkStyle = css`
     border: none;
     background: transparent;
     color: var(--affine-text-primary-color);
-    ${INPUT_FONT_BASE}
+    ${FONT_XS};
   }
   .affine-link-edit-popover input::placeholder {
     color: var(--affine-placeholder-color);
@@ -160,7 +160,7 @@ export const linkPopupStyle = css`
   }
 
   .affine-link-popover.create {
-    ${PANEL_BASE}
+    ${PANEL_BASE};
     gap: 12px;
     padding: 12px;
 
@@ -178,7 +178,7 @@ export const linkPopupStyle = css`
     border-style: solid;
     border-color: transparent;
     color: var(--affine-text-primary-color);
-    ${INPUT_FONT_BASE}
+    ${FONT_XS};
   }
   .affine-link-popover-input::placeholder {
     color: var(--affine-placeholder-color);

@@ -47,9 +47,6 @@ export type AUTO_COMPLETE_TARGET_TYPE =
   | 'note'
   | 'frame';
 
-export const DEFAULT_NOTE_BACKGROUND_COLOR =
-  '--affine-background-secondary-color';
-
 class AutoCompleteTargetOverlay extends Overlay {
   xywh: XYWH;
 

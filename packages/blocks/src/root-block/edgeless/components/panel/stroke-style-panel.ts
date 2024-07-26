@@ -47,7 +47,7 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
       <edgeless-color-panel
         role="listbox"
         aria-label="Border colors"
-        .options=${STROKE_COLORS}
+        .options=${['--affine-palette-transparent', ...STROKE_COLORS]}
         .value=${this.strokeColor}
         .hollowCircle=${this.hollowCircle}
         @select=${(e: ColorEvent) => this.setStrokeColor(e)}

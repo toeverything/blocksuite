@@ -14,6 +14,7 @@ import type { ShapeType } from '../../../../surface-block/element-model/shape.js
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
+import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../_common/edgeless/note/consts.js';
 import {
   AutoCompleteArrowIcon,
   MindMapChildIcon,
@@ -28,6 +29,7 @@ import {
 import { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
 import { shapeMethods } from '../../../../surface-block/element-model/shape.js';
 import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
+import { DEFAULT_SHAPE_STROKE_COLOR } from '../../../../surface-block/elements/shape/consts.js';
 import { ShapeElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
@@ -219,12 +221,20 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(current)) {
-      color = current.strokeColor;
+      color = edgeless.surface.themeObserver.getColor(
+        current.strokeColor,
+        DEFAULT_SHAPE_STROKE_COLOR
+      );
     } else {
-      let tag = current.background.split('-').pop();
+      const tmpColor = edgeless.surface.themeObserver.getColor(
+        current.background,
+        DEFAULT_NOTE_BACKGROUND_COLOR
+      );
+      let tag = tmpColor.split('-').pop();
       if (!tag || tag === 'gray') tag = 'grey';
       color = `--affine-palette-line-${tag}`;
     }
+
     const stroke = getComputedStyle(edgeless).getPropertyValue(color)
       ? color
       : DEFAULT_CONNECTOR_COLOR;
@@ -610,8 +620,11 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const { surface } = this.edgeless;
     surface.renderer.addOverlay(this._autoCompleteOverlay);
 
-    this._autoCompleteOverlay.stroke =
-      this._surface.themeObserver.getVariableValue(current.strokeColor);
+    this._autoCompleteOverlay.stroke = surface.renderer.getColor(
+      current.strokeColor,
+      DEFAULT_SHAPE_STROKE_COLOR,
+      true
+    );
     this._autoCompleteOverlay.linePoints = path;
     this._autoCompleteOverlay.renderShape = ctx => {
       shapeMethods[targetType].draw(ctx, { ...bound, rotate: current.rotate });
