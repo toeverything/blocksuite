@@ -1,3 +1,5 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 export interface TUnion {
   type: 'union';
   title: 'union';
@@ -131,7 +133,10 @@ export class DataDefine<Data extends DataTypeShape = Record<string, unknown>> {
   isSuperOf(subType: TDataType): boolean {
     const dataDefine = this.dataMap.get(subType.name);
     if (!dataDefine) {
-      throw new Error('bug');
+      throw new BlockSuiteError(
+        ErrorCode.DatabaseBlockError,
+        'data config not found'
+      );
     }
     return dataDefine.isSubOfByName(this.config.name);
   }
@@ -235,7 +240,10 @@ export class Typesystem {
     if (this.isDataType(sub)) {
       const dataDefine = this.dataMap.get(sub.name);
       if (!dataDefine) {
-        throw new Error('bug');
+        throw new BlockSuiteError(
+          ErrorCode.DatabaseBlockError,
+          'data config not found'
+        );
       }
       if (!this.isDataType(superType)) {
         return false;
@@ -265,7 +273,10 @@ export class Typesystem {
         case 'array':
           return tArray(subst(type.ele));
         case 'function':
-          throw new Error('TODO');
+          throw new BlockSuiteError(
+            ErrorCode.DatabaseBlockError,
+            'not implement yet'
+          );
       }
     };
     const result = tFunction({

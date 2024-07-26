@@ -17,6 +17,7 @@ export enum ErrorCode {
   SelectionError,
   GfxBlockElementError,
   MissingViewModelError,
+  DatabaseBlockError,
 
   // Fatal error should be greater than 10000
   DefaultFatalError = 10000,

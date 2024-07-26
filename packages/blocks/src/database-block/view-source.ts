@@ -1,3 +1,4 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Slot } from '@blocksuite/global/utils';
 
 import type { SingleViewSource, ViewSource } from './data-view/common/index.js';
@@ -61,7 +62,10 @@ export class DatabaseBlockViewSource implements ViewSource {
       };
       const view = getView();
       if (!view) {
-        throw new Error('view not found');
+        throw new BlockSuiteError(
+          ErrorCode.DatabaseBlockError,
+          'view not found'
+        );
       }
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
@@ -81,7 +85,10 @@ export class DatabaseBlockViewSource implements ViewSource {
         get view() {
           const view = getView();
           if (!view) {
-            throw new Error('view not found');
+            throw new BlockSuiteError(
+              ErrorCode.DatabaseBlockError,
+              'view not found'
+            );
           }
           return view;
         },

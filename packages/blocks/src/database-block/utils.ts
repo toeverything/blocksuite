@@ -1,3 +1,4 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { nanoid } from '@blocksuite/store';
 
 import type {
@@ -72,7 +73,10 @@ const initMap: Record<
     };
     const column = allowList.sort((a, b) => getWeight(b) - getWeight(a))[0];
     if (!column) {
-      throw new Error('not implement yet');
+      throw new BlockSuiteError(
+        ErrorCode.DatabaseBlockError,
+        'not implement yet'
+      );
     }
     return {
       id,

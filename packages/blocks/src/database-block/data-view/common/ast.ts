@@ -1,3 +1,5 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 import type { TType } from '../logical/typesystem.js';
 import type { UniComponent } from '../utils/uni-component/uni-component.js';
 
@@ -63,7 +65,10 @@ export const getRefType = (vars: Variable[], ref: VariableOrProperty) => {
 export const firstFilterName = (vars: Variable[], ref: VariableOrProperty) => {
   const type = getRefType(vars, ref);
   if (!type) {
-    throw new Error(`can't resolve ref type`);
+    throw new BlockSuiteError(
+      ErrorCode.DatabaseBlockError,
+      `can't resolve ref type`
+    );
   }
   return filterMatcher.match(type)?.name;
 };
@@ -87,7 +92,10 @@ export const firstFilter = (vars: Variable[]): SingleFilter => {
   };
   const filter = firstFilterName(vars, ref);
   if (!filter) {
-    throw new Error(`can't match any filter`);
+    throw new BlockSuiteError(
+      ErrorCode.DatabaseBlockError,
+      `can't match any filter`
+    );
   }
   return {
     type: 'filter',
