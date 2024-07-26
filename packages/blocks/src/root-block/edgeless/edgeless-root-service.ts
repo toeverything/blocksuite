@@ -63,13 +63,15 @@ export type ElementCreationSource =
   | 'canvas:paste'
   | 'context-menu'
   | 'ai'
-  | 'internal';
+  | 'internal'
+  | 'conversation'
+  | 'manually save';
 
 declare module '@blocksuite/blocks' {
   interface ElementCreationEvent extends TelemetryEvent {
-    segment?: 'toolbar';
+    segment?: 'toolbar' | 'whiteboard' | 'right sidebar';
     page: 'whiteboard editor';
-    module?: 'toolbar';
+    module?: 'toolbar' | 'canvas' | 'ai chat panel';
     control?: ElementCreationSource;
   }
 
