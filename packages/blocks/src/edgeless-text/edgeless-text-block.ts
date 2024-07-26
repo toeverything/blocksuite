@@ -34,6 +34,10 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
   private _horizontalResizing = false;
 
   private _resizeObserver = new ResizeObserver(() => {
+    if (this.doc.readonly) {
+      return;
+    }
+
     const rect = this._textContainer.getBoundingClientRect();
     const bound = Bound.deserialize(this.model.xywh);
     if (!this.rootService) {
@@ -58,6 +62,41 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
   `;
 
   override rootServiceFlavour = 'affine:page';
+
+  private _initDragEffect() {
+    const edgelessSelection = this.rootService.selection;
+    const selectedRect = this.parentBlock.selectedRect;
+    const disposables = this.disposables;
+
+    if (!edgelessSelection || !selectedRect) {
+      return;
+    }
+
+    disposables.add(
+      selectedRect.slots.dragStart
+        .filter(() => edgelessSelection.selectedElements.includes(this.model))
+        .on(() => {
+          if (
+            selectedRect.dragDirection === HandleDirection.Left ||
+            selectedRect.dragDirection === HandleDirection.Right
+          ) {
+            this._horizontalResizing = true;
+          }
+        })
+    );
+    disposables.add(
+      selectedRect.slots.dragEnd
+        .filter(() => edgelessSelection.selectedElements.includes(this.model))
+        .on(() => {
+          if (
+            selectedRect.dragDirection === HandleDirection.Left ||
+            selectedRect.dragDirection === HandleDirection.Right
+          ) {
+            this._horizontalResizing = false;
+          }
+        })
+    );
+  }
 
   private _updateH() {
     const bound = Bound.deserialize(this.model.xywh);
@@ -149,32 +188,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
 
     const { disposables, rootService } = this;
     const edgelessSelection = rootService.selection;
-    const selectedRect = this.parentBlock.selectedRect;
 
-    disposables.add(
-      selectedRect.slots.dragStart
-        .filter(() => edgelessSelection.selectedElements.includes(this.model))
-        .on(() => {
-          if (
-            selectedRect.dragDirection === HandleDirection.Left ||
-            selectedRect.dragDirection === HandleDirection.Right
-          ) {
-            this._horizontalResizing = true;
-          }
-        })
-    );
-    disposables.add(
-      selectedRect.slots.dragEnd
-        .filter(() => edgelessSelection.selectedElements.includes(this.model))
-        .on(() => {
-          if (
-            selectedRect.dragDirection === HandleDirection.Left ||
-            selectedRect.dragDirection === HandleDirection.Right
-          ) {
-            this._horizontalResizing = false;
-          }
-        })
-    );
+    this._initDragEffect();
 
     disposables.add(
       edgelessSelection.slots.updated.on(() => {
@@ -187,7 +202,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     );
 
     this._resizeObserver.observe(this._textContainer);
-    this.model.deleted.on(() => {
+
+    disposables.add(() => {
       this._resizeObserver.disconnect();
     });
 

@@ -1,6 +1,6 @@
 import { BlockComponent, RangeManager } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
@@ -8,7 +8,6 @@ import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { isInsideEdgelessEditor } from '../_common/utils/index.js';
 import { values } from '../_common/utils/iterable.js';
 import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
 import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
@@ -137,7 +136,7 @@ export class SurfaceBlockComponent extends BlockComponent<
   };
 
   refresh = () => {
-    this._renderer.refresh();
+    this._renderer?.refresh();
   };
 
   readonly themeObserver = new ThemeObserver();
@@ -211,16 +210,10 @@ export class SurfaceBlockComponent extends BlockComponent<
     );
   }
 
-  private get _isEdgeless() {
-    return isInsideEdgelessEditor(this.host);
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
-
-    if (!this._isEdgeless) return;
 
     this._initThemeObserver();
     this._initRenderer();
@@ -228,16 +221,12 @@ export class SurfaceBlockComponent extends BlockComponent<
   }
 
   override firstUpdated() {
-    if (!this._isEdgeless) return;
-
     this._renderer.attach(this._surfaceContainer);
     this._surfaceContainer.append(...this._renderer.stackingCanvas);
     this._initCanvasTransform();
   }
 
   override render() {
-    if (!this._isEdgeless) return nothing;
-
     return html`
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in renderer -->

@@ -9,6 +9,7 @@ import type {
   SurfaceRefBlockComponent,
   SurfaceRefBlockModel,
 } from '../../../surface-ref-block/index.js';
+import type { EdgelessRootPreviewBlockComponent } from '../../edgeless/edgeless-root-preview-block.js';
 
 import { HoverController } from '../../../_common/components/hover/controller.js';
 import { isPeekable, peek } from '../../../_common/components/peekable.js';
@@ -145,12 +146,21 @@ function SurfaceRefToolbarOptions(options: {
             name: 'Copy',
             icon: CopyIcon,
             handler: () => {
+              if (!block.referenceModel || !block.doc.root) return;
+
+              const editor = block.previewEditor;
+              const edgelessRootElement = editor?.view.getBlock(
+                block.doc.root.id
+              );
+              const surfaceRenderer = (
+                edgelessRootElement as EdgelessRootPreviewBlockComponent
+              )?.surface?.renderer;
+
               edgelessToBlob(block.host, {
                 surfaceRefBlock: block,
-                surfaceRenderer: block.surfaceRenderer,
+                surfaceRenderer,
                 edgelessElement:
                   block.referenceModel as BlockSuite.EdgelessModel,
-                blockContainer: block.portal,
               })
                 .then(blob => {
                   return writeImageBlobToClipboard(blob);
@@ -168,15 +178,21 @@ function SurfaceRefToolbarOptions(options: {
             name: 'Download',
             icon: DownloadIcon,
             handler: () => {
-              const referencedModel = block.referenceModel;
+              if (!block.referenceModel || !block.doc.root) return;
 
-              if (!referencedModel) return;
+              const referencedModel = block.referenceModel;
+              const editor = block.previewEditor;
+              const edgelessRootElement = editor?.view.getBlock(
+                block.doc.root.id
+              );
+              const surfaceRenderer = (
+                edgelessRootElement as EdgelessRootPreviewBlockComponent
+              )?.surface?.renderer;
 
               edgelessToBlob(block.host, {
                 surfaceRefBlock: block,
-                surfaceRenderer: block.surfaceRenderer,
+                surfaceRenderer,
                 edgelessElement: referencedModel,
-                blockContainer: block.portal,
               })
                 .then(blob => {
                   const fileName =

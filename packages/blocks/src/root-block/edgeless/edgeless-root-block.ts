@@ -12,10 +12,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
-import type {
-  ImageBlockModel,
-  ImageBlockProps,
-} from '../../image-block/image-model.js';
+import type { ImageBlockProps } from '../../image-block/image-model.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
@@ -82,16 +79,6 @@ import {
   DEFAULT_NOTE_WIDTH,
 } from './utils/consts.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
-export interface EdgelessViewport {
-  left: number;
-  top: number;
-  scrollLeft: number;
-  scrollTop: number;
-  scrollWidth: number;
-  scrollHeight: number;
-  clientWidth: number;
-  clientHeight: number;
-}
 
 @customElement('affine-edgeless-root')
 export class EdgelessRootBlockComponent extends BlockComponent<
@@ -525,24 +512,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     });
 
     return blockIds;
-  }
-
-  addImage(model: Partial<ImageBlockModel>, point: IPoint) {
-    const options = {
-      width: model.width ?? 0,
-      height: model.height ?? 0,
-    };
-    {
-      delete model.width;
-      delete model.height;
-    }
-    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
-    const bound = new Bound(x, y, options.width, options.height);
-    return this.service.addBlock(
-      'affine:image',
-      { ...model, xywh: bound.serialize() },
-      this.surface.model
-    );
   }
 
   async addImages(

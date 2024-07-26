@@ -276,7 +276,7 @@ export class FrameBlockComponent extends GfxBlockComponent<
   }
 
   override renderGfxBlock() {
-    const { model, _isNavigator, doc, rootService } = this;
+    const { model, _isNavigator, showBorder, doc, rootService } = this;
 
     return html`
       <edgeless-frame-title
@@ -293,7 +293,10 @@ export class FrameBlockComponent extends GfxBlockComponent<
           height: '100%',
           width: '100%',
           borderRadius: '8px',
-          border: _isNavigator ? 'none' : `2px solid var(--affine-black-30)`,
+          border:
+            _isNavigator || !showBorder
+              ? 'none'
+              : `2px solid var(--affine-black-30)`,
         })}
       ></div>
     `;
@@ -301,6 +304,9 @@ export class FrameBlockComponent extends GfxBlockComponent<
 
   @state()
   private accessor _isNavigator = false;
+
+  @state()
+  accessor showBorder = true;
 }
 
 declare global {
