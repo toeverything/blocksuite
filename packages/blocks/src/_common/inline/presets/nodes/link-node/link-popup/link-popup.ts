@@ -191,7 +191,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
             </editor-icon-button>
           `}
         >
-          <div slot data-size="large" data-orientation="vertical">
+          <div data-size="large" data-orientation="vertical">
             ${this._moreActions()}
           </div>
         </editor-menu-button>
@@ -445,7 +445,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="small" data-orientation="vertical">
+        <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.type,

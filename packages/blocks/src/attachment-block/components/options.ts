@@ -179,7 +179,7 @@ export function AttachmentOptionsTemplate({
           </editor-icon-button>
         `}
       >
-        <div slot data-size="small" data-orientation="vertical">
+        <div data-size="small" data-orientation="vertical">
           ${repeat(
             viewActions,
             button => button.type,
@@ -230,9 +230,7 @@ export function AttachmentOptionsTemplate({
           </editor-icon-button>
         `}
       >
-        <div slot data-size="large" data-orientation="vertical">
-          ${moreActions}
-        </div>
+        <div data-size="large" data-orientation="vertical">${moreActions}</div>
       </editor-menu-button>
     `,
   ];

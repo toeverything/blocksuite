@@ -15,7 +15,7 @@ export class CardStylePanel extends WithDisposable(LitElement) {
     :host {
       display: flex;
       align-items: center;
-      justify-content: conter;
+      justify-content: center;
       gap: 8px;
     }
 
@@ -66,7 +66,7 @@ export class CardStylePanel extends WithDisposable(LitElement) {
   }[];
 
   @property({ attribute: false })
-  accessor value!: EmbedCardStyle;
+  accessor value: EmbedCardStyle | undefined = undefined;
 }
 
 declare global {

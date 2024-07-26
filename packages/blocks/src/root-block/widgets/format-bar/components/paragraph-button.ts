@@ -50,7 +50,7 @@ const ParagraphPanel = ({
 
   return html`
     <editor-menu-content class="paragraph-panel" data-show ${ref(containerRef)}>
-      <div slot data-orientation="vertical">${renderedConfig}</div>
+      <div data-orientation="vertical">${renderedConfig}</div>
     </editor-menu-content>
   `;
 };

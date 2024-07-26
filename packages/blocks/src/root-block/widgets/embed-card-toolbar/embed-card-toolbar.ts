@@ -153,7 +153,7 @@ export class EmbedCardToolbar extends WidgetComponent<
             </editor-icon-button>
           `}
         >
-          <div slot>
+          <div>
             ${repeat(
               buttons,
               button => button.type,
@@ -449,7 +449,7 @@ export class EmbedCardToolbar extends WidgetComponent<
           </editor-icon-button>
         `}
       >
-        <div slot data-size="small" data-orientation="vertical">
+        <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.name,
@@ -611,7 +611,7 @@ export class EmbedCardToolbar extends WidgetComponent<
           </editor-icon-button>
         `}
       >
-        <div slot data-size="small" data-orientation="vertical">
+        <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.type,
@@ -741,7 +741,7 @@ export class EmbedCardToolbar extends WidgetComponent<
             </editor-icon-button>
           `}
         >
-          <div slot data-size="large" data-orientation="vertical">
+          <div data-size="large" data-orientation="vertical">
             ${this._moreActions()}
           </div>
         </editor-menu-button>

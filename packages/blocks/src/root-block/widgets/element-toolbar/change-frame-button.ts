@@ -135,7 +135,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
         onlyOne
           ? html`
               <editor-icon-button
-                arai-label=${'Insert into Page'}
+                aria-label=${'Insert into Page'}
                 .tooltip=${'Insert into Page'}
                 .iconSize=${'20px'}
                 .labelHeight=${'20px'}
@@ -198,7 +198,6 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               `}
             >
               <edgeless-color-panel
-                slot
                 .value=${background}
                 .options=${[
                   '--affine-palette-transparent',

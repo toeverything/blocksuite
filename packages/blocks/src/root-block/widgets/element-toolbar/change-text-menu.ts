@@ -421,7 +421,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
               `}
             >
               <edgeless-color-panel
-                slot
                 .value=${selectedColor}
                 .options=${['--affine-palette-transparent', ...LINE_COLORS]}
                 @select=${this._setTextColor}
@@ -498,7 +497,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
             `}
           >
             <edgeless-align-panel
-              slot
               .value=${selectedAlign}
               .onSelect=${this._setTextAlign}
             ></edgeless-align-panel>

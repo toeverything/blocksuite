@@ -270,7 +270,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               `}
             >
               <note-display-mode-panel
-                slot
                 .displayMode=${displayMode}
                 .onSelect=${(newMode: NoteDisplayMode) =>
                   this._setDisplayMode(note, newMode)}
@@ -319,7 +318,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                 `}
               >
                 <edgeless-color-panel
-                  slot
                   .value=${background}
                   .options=${[
                     '--affine-palette-transparent',
@@ -347,7 +345,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               `}
             >
               <edgeless-note-shadow-panel
-                slot
                 .value=${shadowType}
                 .background=${background}
                 .onSelect=${(value: string) => this._setShadowType(value)}
@@ -365,7 +362,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                 </editor-icon-button>
               `}
             >
-              <div slot data-orientation="horizontal">
+              <div data-orientation="horizontal">
                 ${LineStylesPanel({
                   selectedLineSize: borderSize,
                   selectedLineStyle: borderStyle,
@@ -466,7 +463,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   accessor notes: NoteBlockModel[] = [];
 
   @property({ attribute: false })
-  accessor quickConnectButton!: TemplateResult<1>;
+  accessor quickConnectButton!: TemplateResult<1> | typeof nothing;
 }
 
 declare global {

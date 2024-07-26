@@ -238,7 +238,7 @@ function SurfaceRefToolbarOptions(options: {
               </editor-icon-button>
             `}
           >
-            <div slot data-size="large" data-orientation="vertical">
+            <div data-size="large" data-orientation="vertical">
               ${repeat(
                 openMenuActions,
                 button => button.name,
@@ -280,7 +280,7 @@ function SurfaceRefToolbarOptions(options: {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="large" data-orientation="vertical">
+        <div data-size="large" data-orientation="vertical">
           ${renderActions(moreMenuActions)}
         </div>
       </editor-menu-button>

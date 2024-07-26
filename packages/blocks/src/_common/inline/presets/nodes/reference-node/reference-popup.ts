@@ -186,7 +186,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="large" data-orientation="vertical">
+        <div data-size="large" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.name,
@@ -248,7 +248,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="small" data-orientation="vertical">
+        <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.type,
@@ -303,7 +303,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
             </editor-icon-button>
           `}
         >
-          <div slot data-size="large" data-orientation="vertical">
+          <div data-size="large" data-orientation="vertical">
             ${this._moreActions()}
           </div>
         </editor-menu-button>

@@ -132,7 +132,7 @@ export class EditorMenuContent extends LitElement {
       padding: var(--content-padding, 0 6px);
     }
 
-    ::slotted([slot]) {
+    ::slotted(*) {
       display: flex;
       align-items: center;
       align-self: stretch;
@@ -140,19 +140,19 @@ export class EditorMenuContent extends LitElement {
       min-height: 36px;
     }
 
-    ::slotted([slot][data-size]) {
+    ::slotted([data-size]) {
       min-width: 146px;
     }
 
-    ::slotted([slot][data-size='small']) {
+    ::slotted([data-size='small']) {
       min-width: 164px;
     }
 
-    ::slotted([slot][data-size='large']) {
+    ::slotted([data-size='large']) {
       min-width: 176px;
     }
 
-    ::slotted([slot][data-orientation='vertical']) {
+    ::slotted([data-orientation='vertical']) {
       flex-direction: column;
       align-items: stretch;
       gap: unset;

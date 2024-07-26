@@ -423,7 +423,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="small" data-orientation="vertical">
+        <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.name,
@@ -515,7 +515,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </editor-icon-button>
           `}
         >
-          <div slot data-size="small" data-orientation="vertical">
+          <div data-size="small" data-orientation="vertical">
             ${repeat(
               buttons,
               button => button.type,
@@ -582,7 +582,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </a>
 
             <editor-icon-button
-              arai-label="Click to copy link"
+              aria-label="Click to copy link"
               .tooltip=${'Click to copy link'}
               class="change-embed-card-button copy"
               ?disabled=${this._doc.readonly}
@@ -592,7 +592,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </editor-icon-button>
 
             <editor-icon-button
-              arai-label="Edit"
+              aria-label="Edit"
               .tooltip=${'Edit'}
               class="change-embed-card-button edit"
               ?disabled=${this._doc.readonly}
@@ -621,7 +621,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               `}
             >
               <card-style-panel
-                slot
                 .value=${model.style}
                 .options=${this._getCardStyleOptions}
                 .onSelect=${(value: EmbedCardStyle) =>
@@ -635,7 +634,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       'caption' in model
         ? html`
             <editor-icon-button
-              arai-label="Add caption"
+              aria-label="Add caption"
               .tooltip=${'Add caption'}
               class="change-embed-card-button caption"
               ?disabled=${this._doc.readonly}
@@ -701,7 +700,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | EmbedLoomModel;
 
   @property({ attribute: false })
-  accessor quickConnectButton!: TemplateResult<1>;
+  accessor quickConnectButton!: TemplateResult<1> | typeof nothing;
 }
 
 declare global {

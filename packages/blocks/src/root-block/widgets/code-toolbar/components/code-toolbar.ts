@@ -83,7 +83,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
             '--packed-height': '4px',
           })}
         >
-          <div slot data-size="small" data-orientation="vertical">
+          <div data-size="small" data-orientation="vertical">
             ${MoreMenuRenderer(
               this.blockComponent,
               this._popMenuAbortController,

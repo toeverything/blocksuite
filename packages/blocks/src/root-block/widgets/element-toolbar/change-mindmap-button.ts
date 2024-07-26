@@ -215,7 +215,6 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
             `}
           >
             <edgeless-change-mindmap-style-panel
-              slot
               .mindmapStyle=${this._getCommonStyle()}
               .onSelect=${this._updateStyle}
             >
@@ -234,7 +233,6 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
                 `}
               >
                 <edgeless-change-mindmap-layout-panel
-                  slot
                   .mindmapLayout=${this.layout.value}
                   .onSelect=${this._updateLayoutType}
                 >

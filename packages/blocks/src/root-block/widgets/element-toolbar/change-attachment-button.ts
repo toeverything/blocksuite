@@ -98,7 +98,6 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
         `}
       >
         <card-style-panel
-          slot
           .value=${this.model.style}
           .options=${this._getCardStyleOptions}
           .onSelect=${this._setCardStyle}

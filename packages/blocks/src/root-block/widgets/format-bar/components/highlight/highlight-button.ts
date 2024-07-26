@@ -59,7 +59,7 @@ const HighlightPanel = (
 ) => {
   return html`
     <editor-menu-content class="highlight-panel" data-show ${ref(containerRef)}>
-      <div slot data-orientation="vertical">
+      <div data-orientation="vertical">
         <!-- Text Color Highlight -->
         <div class="highligh-panel-heading">Color</div>
         ${foregroundConfig.map(

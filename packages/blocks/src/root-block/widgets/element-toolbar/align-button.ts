@@ -276,7 +276,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot>
+        <div>
           ${repeat(
             ALIGNMENT_LIST,
             (item, index) => item.name + index,

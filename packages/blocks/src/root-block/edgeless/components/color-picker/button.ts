@@ -84,7 +84,7 @@ export class EdgelessColorPickerButton extends WithDisposable(LitElement) {
           [
             'normal',
             () => html`
-              <div slot data-orientation="vertical">
+              <div data-orientation="vertical">
                 <slot name="other"></slot>
                 <slot name="separator"></slot>
                 <edgeless-color-panel
@@ -111,7 +111,8 @@ export class EdgelessColorPickerButton extends WithDisposable(LitElement) {
               <edgeless-color-picker
                 .pick=${this.pick}
                 .colors=${{
-                  type: this.colorType,
+                  type:
+                    this.colorType === 'palette' ? 'normal' : this.colorType,
                   modes: this.colors.map(
                     preprocessColor(window.getComputedStyle(this))
                   ),

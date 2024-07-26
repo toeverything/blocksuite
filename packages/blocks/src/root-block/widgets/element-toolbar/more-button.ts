@@ -470,7 +470,6 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         `}
       >
         <div
-          slot
           class="more-actions-container"
           data-size="large"
           data-orientation="vertical"

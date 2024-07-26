@@ -299,7 +299,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
             `}
           >
             <edgeless-shape-panel
-              slot
               .selectedShape=${selectedShape}
               .shapeStyle=${selectedShapeStyle}
             >
@@ -321,7 +320,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
             `}
           >
             <edgeless-shape-style-panel
-              slot
               .value=${selectedShapeStyle}
               .onSelect=${(value: ShapeStyle) => this._setShapeStyle(value)}
             >
@@ -366,7 +364,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
               `}
             >
               <edgeless-color-panel
-                slot
                 role="listbox"
                 aria-label="Fill colors"
                 .value=${selectedFillColor}
@@ -438,7 +435,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
               `}
             >
               <stroke-style-panel
-                slot
                 .hollowCircle=${true}
                 .strokeWidth=${selectedLineSize}
                 .strokeStyle=${selectedLineStyle}

@@ -310,7 +310,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     this._setConnectorProp('rough', rough);
   }
 
-  private _setConnectorStorke({ type, value }: LineStyleEvent) {
+  private _setConnectorStroke({ type, value }: LineStyleEvent) {
     if (type === 'size') {
       this._setConnectorStrokeWidth(value);
       return;
@@ -388,7 +388,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ${LineStylesPanel({
                     selectedLineSize: selectedLineSize,
                     selectedLineStyle: selectedLineStyle,
-                    onClick: (e: LineStyleEvent) => this._setConnectorStorke(e),
+                    onClick: (e: LineStyleEvent) => this._setConnectorStroke(e),
                     lineStyles: [StrokeStyle.Solid, StrokeStyle.Dash],
                   })}
                 </div>
@@ -414,13 +414,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               `}
             >
               <stroke-style-panel
-                slot
                 .options=${['--affine-palette-transparent', ...LINE_COLORS]}
                 .strokeWidth=${selectedLineSize}
                 .strokeStyle=${selectedLineStyle}
                 .strokeColor=${selectedColor}
                 .setStrokeStyle=${(e: LineStyleEvent) =>
-                  this._setConnectorStorke(e)}
+                  this._setConnectorStroke(e)}
                 .setStrokeColor=${(e: ColorEvent) =>
                   this._setConnectorColor(e.detail)}
               >
@@ -437,7 +436,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               </editor-icon-button>
             `}
           >
-            <div slot>
+            <div>
               ${repeat(
                 STYLE_LIST,
                 item => item.name,
@@ -471,7 +470,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               </editor-icon-button>
             `}
           >
-            <div slot>
+            <div>
               ${repeat(
                 FRONT_ENDPOINT_STYLE_LIST,
                 item => item.value,
@@ -520,7 +519,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               </editor-icon-button>
             `}
           >
-            <div slot>
+            <div>
               ${repeat(
                 REAR_ENDPOINT_STYLE_LIST,
                 item => item.value,
@@ -553,7 +552,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               </editor-icon-button>
             `}
           >
-            <div slot>
+            <div>
               ${repeat(
                 MODE_LIST,
                 item => item.name,
