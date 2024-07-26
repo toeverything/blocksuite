@@ -38,7 +38,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       flex-shrink: 0;
 
       border-radius: 1px;
-      background: var(--light-black-black10, rgba(0, 0, 0, 0.1));
+      background: var(--affine-black-10, rgba(0, 0, 0, 0.1));
     }
 
     .outline-heading-indicator[active] {
@@ -46,7 +46,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       height: 2px;
 
       border-radius: 1px;
-      background: var(--light-black-black80, rgba(0, 0, 0, 0.8));
+      background: var(--affine-black-80, rgba(0, 0, 0, 0.8));
     }
 
     .outline-viewer-container {
@@ -56,7 +56,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       width: 0px;
       box-sizing: border-box;
       overflow-x: hidden;
-      background: var(--light-background-backgroundOverlayPanelColor, #fbfbfc);
+      background: var(--affine-background-overlay-panel-color, #fbfbfc);
       box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.14);
       border-radius: var(--8, 8px);
 
@@ -65,7 +65,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
 
     .outline-viewer-container.show {
       width: 200px;
-      border: 0.5px solid var(--light-detailColor-borderColor, #e3e2e4);
+      border: 0.5px solid var(--affine-border-color, #e3e2e4);
     }
 
     .outline-viewer-inner-container {
@@ -172,7 +172,6 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
 
   private _toggleOutlinePanel() {
     if (this.toggleOutlinePanel) {
-      // TODO(@L-Sun) close current viewer
       this.toggleOutlinePanel();
     }
   }
