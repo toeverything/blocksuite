@@ -54,10 +54,18 @@ export class EdgelessColorPicker extends SignalWatcher(
   #alphaRect = new DOMRect();
 
   #editAlpha = (e: InputEvent) => {
-    const value = Number((e.target as HTMLInputElement).value.trim());
-    const alpha = clamp(0, value, 100);
+    const target = e.target as HTMLInputElement;
+    const orignalValue = target.value;
+    let value = orignalValue.trim().replace(/[^0-9]/, '');
+
+    const alpha = clamp(0, Number(value), 100);
     const a = bound01(alpha, 100);
     const hsva = this.hsva$.peek();
+
+    value = `${alpha}`;
+    if (orignalValue !== value) {
+      target.value = value;
+    }
 
     if (hsva.a === a) return;
 
@@ -73,26 +81,29 @@ export class EdgelessColorPicker extends SignalWatcher(
     const target = e.target as HTMLInputElement;
 
     if (e.key === 'Enter') {
-      const value = target.value.trim().replace(MATCHERS.other, '');
+      const orignalValue = target.value;
+      let value = orignalValue.trim().replace(MATCHERS.other, '');
       let matched;
       if (
         (matched = value.match(MATCHERS.hex3)) ||
         (matched = value.match(MATCHERS.hex6))
       ) {
-        const { h, s, v } = parseHexToHsva(matched[1]);
-        const hsv = { h, s, v };
-
         const oldHsva = this.hsva$.peek();
-
-        if (eq(hsv, oldHsva)) return;
-
+        const hsv = parseHexToHsva(matched[1]);
         const newHsva = { ...oldHsva, ...hsv };
+
+        value = rgbToHex(hsvaToRgba(newHsva));
+        if (orignalValue !== value) {
+          target.value = value;
+        }
+
+        if (eq(newHsva, oldHsva)) return;
 
         this.#setControlsPos(newHsva);
 
         this.#pick();
       } else {
-        target.value = this.hex6WithoutHash;
+        target.value = this.hex6WithoutHash$.peek();
       }
     }
   };
@@ -525,16 +536,16 @@ export class EdgelessColorPicker extends SignalWatcher(
             spellcheck="false"
             minlength="1"
             maxlength="6"
-            .value=${live(this.hex6WithoutHash)}
+            .value=${live(this.hex6WithoutHash$.value)}
             @keydown=${this.#editHex}
           />
         </label>
-        <label class="field opacity">
+        <label class="field alpha">
           <input
             type="number"
             min="0"
             max="100"
-            .value=${live(this.alpha100)}
+            .value=${live(this.alpha100$.value)}
             @input=${this.#editAlpha}
           />
           <span>%</span>
@@ -544,13 +555,9 @@ export class EdgelessColorPicker extends SignalWatcher(
   }
 
   // 0-100
-  get alpha100() {
-    return `${Math.round(this.hsva$.value.a * 100)}`;
-  }
-
-  get hex6WithoutHash() {
-    return this.hex6$.value.substring(1);
-  }
+  accessor alpha100$ = computed(
+    () => `${Math.round(this.hsva$.value.a * 100)}`
+  );
 
   @query('.color-slider-wrapper.alpha .color-slider')
   accessor alphaControl!: HTMLDivElement;
@@ -580,6 +587,8 @@ export class EdgelessColorPicker extends SignalWatcher(
 
   // #ffffff
   accessor hex6$ = computed(() => this.hex8$.value.substring(0, 7));
+
+  accessor hex6WithoutHash$ = computed(() => this.hex6$.value.substring(1));
 
   // #ffffffff
   accessor hex8$ = computed(() => rgbaToHex8(this.rgba$.value));

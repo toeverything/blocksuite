@@ -264,7 +264,7 @@ export const COLOR_PICKER_STYLE = css`
     width: 134px;
   }
 
-  .field.opacity {
+  .field.alpha {
     width: 56px;
     gap: 0;
   }

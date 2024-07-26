@@ -109,6 +109,7 @@ export class EdgelessColorPickerButton extends WithDisposable(LitElement) {
             'custom',
             () => html`
               <edgeless-color-picker
+                class="custom"
                 .pick=${this.pick}
                 .colors=${{
                   type:

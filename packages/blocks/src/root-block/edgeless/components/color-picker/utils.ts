@@ -142,7 +142,7 @@ export const rgbToHex = ({ r, g, b }: Rgb) =>
 
 // Converts an RGBA color to CSS's hex8 string
 export const rgbaToHex8 = ({ r, g, b, a }: Rgba) => {
-  const hex = [r, g, b, a ?? 1]
+  const hex = [r, g, b, a]
     .map(n => n * 255)
     .map(Math.round)
     .map(n => n.toString(16).padStart(2, '0'))
@@ -166,23 +166,15 @@ export const parseHexToRgba = (hex: string) => {
   if (len === 3 || len === 4) {
     arr = hex.split('').map(s => s.repeat(2));
   } else if (len === 6 || len === 8) {
-    const tmp = [0, 0, 0];
-    if (len === 8) tmp.push(0);
-    arr = tmp.map((n, i) => n + i * 2).map(n => hex.substring(n, n + 2));
+    arr = Array.from<number>({ length: len / 2 })
+      .fill(0)
+      .map((n, i) => n + i * 2)
+      .map(n => hex.substring(n, n + 2));
   }
 
-  if (arr.length === 3 && len % 3 === 0) {
-    arr.push('ff');
-  }
-
-  let r = 0;
-  let g = 0;
-  let b = 0;
-  let a = 1;
-
-  if (arr.length === 4) {
-    [r, g, b, a] = arr.map(s => parseInt(s, 16)).map(n => bound01(n, 255));
-  }
+  const [r, g, b, a = 1] = arr
+    .map(s => parseInt(s, 16))
+    .map(n => bound01(n, 255));
 
   return { r, g, b, a };
 };
@@ -222,6 +214,26 @@ export const renderCanvas = (canvas: HTMLCanvasElement, rgb: Rgb) => {
 export const keepColor = (color: string) =>
   color.length > 7 ? color.substring(0, 7) : color;
 
+export const parseStringToRgba = (value: string) => {
+  if (value.startsWith('#')) {
+    return parseHexToRgba(value);
+  }
+
+  if (value.startsWith('rgb')) {
+    const [r, g, b, a = 1] = value
+      .replace(/^rgba?/, '')
+      .replace(/\(|\)/, '')
+      .split(',')
+      .map(s => parseFloat(s.trim()))
+      // In CSS, the alpha in the range [0, 1]
+      .map((n, i) => bound01(n, i === 3 ? 1 : 255));
+
+    return { r, g, b, a };
+  }
+
+  return { r: 0, g: 0, b: 0, a: 1 };
+};
+
 // Preprocess Color
 export const preprocessColor = (style: CSSStyleDeclaration) => {
   return ({ type, value }: { type: ModeType; value: string }) => {
@@ -229,26 +241,7 @@ export const preprocessColor = (style: CSSStyleDeclaration) => {
       value = style.getPropertyValue(value);
     }
 
-    if (value.startsWith('#')) {
-      const rgba = parseHexToRgba(value);
-      return { type, rgba };
-    }
-
-    const rgba: Rgba = { r: 0, g: 0, b: 0, a: 1 };
-
-    if (value.startsWith('rgb')) {
-      const [r, g, b, a] = value
-        .replace(/^rgba?/, '')
-        .replace(/\(|\)/, '')
-        .split(',')
-        .map(s => parseFloat(s.trim()))
-        .map(n => bound01(n, 255));
-
-      rgba.r = r;
-      rgba.g = g;
-      rgba.b = b;
-      rgba.a = a ?? 1;
-    }
+    const rgba = parseStringToRgba(value);
 
     return { type, rgba };
   };

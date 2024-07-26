@@ -132,7 +132,7 @@ export class EditorMenuContent extends LitElement {
       padding: var(--content-padding, 0 6px);
     }
 
-    ::slotted(*) {
+    ::slotted(:not(.custom)) {
       display: flex;
       align-items: center;
       align-self: stretch;
