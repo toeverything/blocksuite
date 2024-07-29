@@ -36,9 +36,14 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
     return props;
   }
 
-  override containedByBounds(bounds: Bound): boolean {
+  override containsBound(bounds: Bound): boolean {
     const points = getPointsFromBoundsWithRotation(this);
     return points.some(point => bounds.containsPoint(point));
+  }
+
+  override getLineIntersections(start: IVec, end: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return linePolygonIntersects(start, end, points);
   }
 
   override getNearestPoint(point: IVec): IVec {
@@ -48,14 +53,9 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
     ) as IVec;
   }
 
-  override hitTest(x: number, y: number): boolean {
+  override includesPoint(x: number, y: number): boolean {
     const points = getPointsFromBoundsWithRotation(this);
     return pointInPolygon([x, y], points);
-  }
-
-  override intersectWithLine(start: IVec, end: IVec) {
-    const points = getPointsFromBoundsWithRotation(this);
-    return linePolygonIntersects(start, end, points);
   }
 
   get type() {

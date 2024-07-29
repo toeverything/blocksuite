@@ -145,7 +145,7 @@ export function getAnchors(ele: BlockSuite.EdgelessModel) {
       getPointFromBoundsWithRotation({ ...bound, rotate }, vec as IVec)
     )
     .forEach(vec => {
-      const rst = ele.intersectWithLine(bound.center as IVec, vec as IVec);
+      const rst = ele.getLineIntersections(bound.center as IVec, vec as IVec);
       assertExists(rst);
       const originPoint = getPointFromBoundsWithRotation(
         { ...bound, rotate: -rotate },
@@ -975,7 +975,7 @@ export class ConnectionOverlay extends Overlay {
 
       // if not, check if in inside of the element
       if (
-        connectable.hitTest(
+        connectable.includesPoint(
           point[0],
           point[1],
           {

@@ -1,5 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { ElementHitTestOptions } from '@blocksuite/block-std/gfx';
+import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
@@ -30,7 +30,7 @@ import {
   yfield,
 } from './decorators/index.js';
 
-export type { ElementHitTestOptions } from '@blocksuite/block-std/gfx';
+export type { PointTestOptions } from '@blocksuite/block-std/gfx';
 
 export type BaseElementProps = {
   index: string;
@@ -45,9 +45,24 @@ export type SerializedElement = Record<string, unknown> & {
   props: Record<string, unknown>;
 };
 
+export interface GfxElementGeometry {
+  containsBound(bound: Bound): boolean;
+  getNearestPoint(point: IVec): IVec;
+  getLineIntersections(start: IVec, end: IVec): PointLocation[] | null;
+  getRelativePointLocation(point: IVec): PointLocation;
+  includesPoint(
+    x: number,
+    y: number,
+    options: PointTestOptions,
+    host: EditorHost
+  ): boolean;
+  intersectsBound(bound: Bound): boolean;
+}
+
 export abstract class GfxPrimitiveElementModel<
   Props extends BaseElementProps = BaseElementProps,
-> {
+> implements GfxElementGeometry
+{
   protected _disposable = new DisposableGroup();
 
   protected _id: string;
@@ -97,19 +112,15 @@ export abstract class GfxPrimitiveElementModel<
     return props;
   }
 
-  boxSelect(bound: Bound): boolean {
-    return (
-      this.containedByBounds(bound) ||
-      bound.points.some((point, i, points) =>
-        this.intersectWithLine(point, points[(i + 1) % points.length])
-      )
-    );
-  }
-
-  containedByBounds(bounds: Bound): boolean {
+  containsBound(bounds: Bound): boolean {
     return getPointsFromBoundsWithRotation(this).some(point =>
       bounds.containsPoint(point)
     );
+  }
+
+  getLineIntersections(start: IVec, end: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return linePolygonIntersects(start, end, points);
   }
 
   getNearestPoint(point: IVec) {
@@ -126,18 +137,22 @@ export abstract class GfxPrimitiveElementModel<
     return new PointLocation(rotatePoint, tangent);
   }
 
-  hitTest(
+  includesPoint(
     x: number,
     y: number,
-    _: ElementHitTestOptions,
+    _: PointTestOptions,
     __: EditorHost
   ): boolean {
     return this.elementBound.isPointInBound([x, y]);
   }
 
-  intersectWithLine(start: IVec, end: IVec) {
-    const points = getPointsFromBoundsWithRotation(this);
-    return linePolygonIntersects(start, end, points);
+  intersectsBound(bound: Bound): boolean {
+    return (
+      this.containsBound(bound) ||
+      bound.points.some((point, i, points) =>
+        this.getLineIntersections(point, points[(i + 1) % points.length])
+      )
+    );
   }
 
   onCreated() {}

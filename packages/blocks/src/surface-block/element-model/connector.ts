@@ -1,6 +1,6 @@
 import type {
   BaseElementProps,
-  ElementHitTestOptions,
+  PointTestOptions,
   SerializedElement,
 } from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
@@ -134,7 +134,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
     return props;
   }
 
-  override containedByBounds(bounds: Bound) {
+  override containsBound(bounds: Bound) {
     return (
       this.absolutePath.some(point => bounds.containsPoint(point)) ||
       (this.hasLabel() &&
@@ -142,6 +142,28 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
           bounds.containsPoint(p)
         ))
     );
+  }
+
+  override getLineIntersections(start: IVec, end: IVec) {
+    const { mode, absolutePath: path } = this;
+
+    let intersected = null;
+
+    if (mode === ConnectorMode.Curve && path.length > 1) {
+      intersected = intersects(path, [start, end]);
+    } else {
+      intersected = linePolylineIntersects(start, end, path);
+    }
+
+    if (!intersected && this.hasLabel()) {
+      intersected = linePolylineIntersects(
+        start,
+        end,
+        Bound.fromXYWH(this.labelXYWH!).points
+      );
+    }
+
+    return intersected;
   }
 
   /**
@@ -254,14 +276,14 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
     return Boolean(!this.lableEditing && this.labelDisplay && this.labelXYWH);
   }
 
-  override hitTest(
+  override includesPoint(
     x: number,
     y: number,
-    options?: ElementHitTestOptions | undefined
+    options?: PointTestOptions | undefined
   ): boolean {
     const currentPoint: IVec = [x, y];
 
-    if (this.labelHitTest(currentPoint as IVec)) {
+    if (this.labelIncludesPoint(currentPoint as IVec)) {
       return true;
     }
 
@@ -278,29 +300,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
     );
   }
 
-  override intersectWithLine(start: IVec, end: IVec) {
-    const { mode, absolutePath: path } = this;
-
-    let intersected = null;
-
-    if (mode === ConnectorMode.Curve && path.length > 1) {
-      intersected = intersects(path, [start, end]);
-    } else {
-      intersected = linePolylineIntersects(start, end, path);
-    }
-
-    if (!intersected && this.hasLabel()) {
-      intersected = linePolylineIntersects(
-        start,
-        end,
-        Bound.fromXYWH(this.labelXYWH!).points
-      );
-    }
-
-    return intersected;
-  }
-
-  labelHitTest(point: IVec) {
+  labelIncludesPoint(point: IVec) {
     return (
       this.hasLabel() && Bound.fromXYWH(this.labelXYWH!).isPointInBound(point)
     );

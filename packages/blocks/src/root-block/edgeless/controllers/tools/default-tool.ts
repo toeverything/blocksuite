@@ -20,7 +20,7 @@ import {
 } from '../../../../_common/utils/index.js';
 import { clamp } from '../../../../_common/utils/math.js';
 import {
-  type ElementHitTestOptions,
+  type PointTestOptions,
   SurfaceGroupLikeModel,
 } from '../../../../surface-block/element-model/base.js';
 import { isConnectorWithLabel } from '../../../../surface-block/element-model/connector.js';
@@ -305,7 +305,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         if (
           isCanvasElement(selected) &&
           isConnectorWithLabel(selected) &&
-          (selected as ConnectorElementModel).labelHitTest(
+          (selected as ConnectorElementModel).labelIncludesPoint(
             this._service.viewport.toModelCoord(x, y)
           )
         ) {
@@ -331,7 +331,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         if (
           isCanvasElement(selected) &&
           isConnectorWithLabel(selected) &&
-          (selected as ConnectorElementModel).labelHitTest(
+          (selected as ConnectorElementModel).labelIncludesPoint(
             this._service.viewport.toModelCoord(x, y)
           )
         ) {
@@ -520,14 +520,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _pick(x: number, y: number, options?: ElementHitTestOptions) {
+  private _pick(x: number, y: number, options?: PointTestOptions) {
     const service = this._service;
     const modelPos = service.viewport.toModelCoord(x, y);
     const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
 
     if (group instanceof MindmapElementModel) {
       const picked = service.pickElement(modelPos[0], modelPos[1], {
-        ...((options ?? {}) as ElementHitTestOptions),
+        ...((options ?? {}) as PointTestOptions),
         all: true,
       });
 
