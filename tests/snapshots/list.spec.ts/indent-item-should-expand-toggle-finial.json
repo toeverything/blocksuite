@@ -33,7 +33,7 @@
       "children": [
         {
           "type": "block",
-          "id": "7",
+          "id": "3",
           "flavour": "affine:list",
           "version": 1,
           "props": {
@@ -42,7 +42,7 @@
               "$blocksuite:internal:text$": true,
               "delta": [
                 {
-                  "insert": "1"
+                  "insert": "123"
                 }
               ]
             },
@@ -50,10 +50,31 @@
             "collapsed": false,
             "order": null
           },
+          "children": []
+        },
+        {
+          "type": "block",
+          "id": "4",
+          "flavour": "affine:list",
+          "version": 1,
+          "props": {
+            "type": "bulleted",
+            "text": {
+              "$blocksuite:internal:text$": true,
+              "delta": [
+                {
+                  "insert": "456"
+                }
+              ]
+            },
+            "checked": false,
+            "collapsed": true,
+            "order": null
+          },
           "children": [
             {
               "type": "block",
-              "id": "8",
+              "id": "5",
               "flavour": "affine:list",
               "version": 1,
               "props": {
@@ -62,7 +83,7 @@
                   "$blocksuite:internal:text$": true,
                   "delta": [
                     {
-                      "insert": "2"
+                      "insert": "789"
                     }
                   ]
                 },
@@ -74,7 +95,7 @@
             },
             {
               "type": "block",
-              "id": "9",
+              "id": "6",
               "flavour": "affine:list",
               "version": 1,
               "props": {
@@ -83,7 +104,7 @@
                   "$blocksuite:internal:text$": true,
                   "delta": [
                     {
-                      "insert": "3"
+                      "insert": "012"
                     }
                   ]
                 },
@@ -94,27 +115,6 @@
               "children": []
             }
           ]
-        },
-        {
-          "type": "block",
-          "id": "10",
-          "flavour": "affine:list",
-          "version": 1,
-          "props": {
-            "type": "bulleted",
-            "text": {
-              "$blocksuite:internal:text$": true,
-              "delta": [
-                {
-                  "insert": "4"
-                }
-              ]
-            },
-            "checked": false,
-            "collapsed": false,
-            "order": null
-          },
-          "children": []
         }
       ]
     }

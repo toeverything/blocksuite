@@ -33,7 +33,7 @@
       "children": [
         {
           "type": "block",
-          "id": "3",
+          "id": "2",
           "flavour": "affine:list",
           "version": 1,
           "props": {
@@ -45,6 +45,38 @@
             "checked": false,
             "collapsed": false,
             "order": null
+          },
+          "children": [
+            {
+              "type": "block",
+              "id": "3",
+              "flavour": "affine:list",
+              "version": 1,
+              "props": {
+                "type": "bulleted",
+                "text": {
+                  "$blocksuite:internal:text$": true,
+                  "delta": []
+                },
+                "checked": false,
+                "collapsed": false,
+                "order": null
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "type": "block",
+          "id": "5",
+          "flavour": "affine:paragraph",
+          "version": 1,
+          "props": {
+            "type": "text",
+            "text": {
+              "$blocksuite:internal:text$": true,
+              "delta": []
+            }
           },
           "children": []
         }

@@ -40,20 +40,39 @@ export function convertToList(
     const index = parent.children.indexOf(model);
     addSpace(element, prefix.length);
     doc.captureSync();
-
     model.text?.delete(0, prefix.length + 1);
-    const blockProps = {
-      type: listType,
-      text: model.text?.clone(),
-      children: model.children,
-      ...otherProperties,
-    };
-    doc.deleteBlock(model, {
-      deleteChildren: false,
-    });
 
-    const id = doc.addBlock('affine:list', blockProps, parent, index);
-    asyncFocusRichText(element.host, id)?.catch(console.error);
+    if (listType === 'numbered') {
+      let order = parseInt(prefix.slice(0, -1));
+      if (!Number.isInteger(order)) order = 1;
+      const { list } = element.std.command.exec('convertToNumberedList', {
+        id: model.id,
+        order,
+        stopCapturing: false,
+      });
+      if (!list) return false;
+      element.host.updateComplete
+        .then(() => {
+          const listElement = element.host.view.getBlock(list.id);
+          element.std.command.exec('focusBlockStart', {
+            focusBlock: listElement,
+          });
+        })
+        .catch(console.error);
+    } else {
+      const blockProps = {
+        type: listType,
+        text: model.text?.clone(),
+        children: model.children,
+        ...otherProperties,
+      };
+      doc.deleteBlock(model, {
+        deleteChildren: false,
+      });
+
+      const id = doc.addBlock('affine:list', blockProps, parent, index);
+      asyncFocusRichText(element.host, id)?.catch(console.error);
+    }
   }
   return true;
 }

@@ -40,7 +40,11 @@
             "type": "bulleted",
             "text": {
               "$blocksuite:internal:text$": true,
-              "delta": []
+              "delta": [
+                {
+                  "insert": "hello"
+                }
+              ]
             },
             "checked": false,
             "collapsed": false,

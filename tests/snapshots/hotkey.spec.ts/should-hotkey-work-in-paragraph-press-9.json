@@ -37,14 +37,18 @@
           "flavour": "affine:list",
           "version": 1,
           "props": {
-            "type": "bulleted",
+            "type": "numbered",
             "text": {
               "$blocksuite:internal:text$": true,
-              "delta": []
+              "delta": [
+                {
+                  "insert": "hello"
+                }
+              ]
             },
             "checked": false,
             "collapsed": false,
-            "order": null
+            "order": 1
           },
           "children": []
         }

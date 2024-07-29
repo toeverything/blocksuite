@@ -33,18 +33,41 @@
       "children": [
         {
           "type": "block",
-          "id": "3",
-          "flavour": "affine:list",
+          "id": "4",
+          "flavour": "affine:paragraph",
           "version": 1,
           "props": {
-            "type": "bulleted",
+            "type": "text",
+            "text": {
+              "$blocksuite:internal:text$": true,
+              "delta": [
+                {
+                  "insert": "hello"
+                }
+              ]
+            }
+          },
+          "children": []
+        },
+        {
+          "type": "block",
+          "id": "5",
+          "flavour": "affine:divider",
+          "version": 1,
+          "props": {},
+          "children": []
+        },
+        {
+          "type": "block",
+          "id": "6",
+          "flavour": "affine:paragraph",
+          "version": 1,
+          "props": {
+            "type": "text",
             "text": {
               "$blocksuite:internal:text$": true,
               "delta": []
-            },
-            "checked": false,
-            "collapsed": false,
-            "order": null
+            }
           },
           "children": []
         }

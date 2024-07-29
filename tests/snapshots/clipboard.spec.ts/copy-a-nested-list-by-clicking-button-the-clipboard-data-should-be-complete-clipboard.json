@@ -15,7 +15,8 @@
         ]
       },
       "checked": false,
-      "collapsed": false
+      "collapsed": false,
+      "order": null
     },
     "children": [
       {
@@ -34,7 +35,8 @@
             ]
           },
           "checked": false,
-          "collapsed": false
+          "collapsed": false,
+          "order": null
         },
         "children": [
           {
@@ -53,7 +55,8 @@
                 ]
               },
               "checked": false,
-              "collapsed": false
+              "collapsed": false,
+              "order": null
             },
             "children": []
           }

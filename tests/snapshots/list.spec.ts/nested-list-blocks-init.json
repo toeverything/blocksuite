@@ -33,7 +33,7 @@
       "children": [
         {
           "type": "block",
-          "id": "7",
+          "id": "2",
           "flavour": "affine:list",
           "version": 1,
           "props": {
@@ -42,7 +42,7 @@
               "$blocksuite:internal:text$": true,
               "delta": [
                 {
-                  "insert": "1"
+                  "insert": "123"
                 }
               ]
             },
@@ -53,7 +53,7 @@
           "children": [
             {
               "type": "block",
-              "id": "8",
+              "id": "3",
               "flavour": "affine:list",
               "version": 1,
               "props": {
@@ -62,7 +62,7 @@
                   "$blocksuite:internal:text$": true,
                   "delta": [
                     {
-                      "insert": "2"
+                      "insert": "456"
                     }
                   ]
                 },
@@ -70,51 +70,31 @@
                 "collapsed": false,
                 "order": null
               },
-              "children": []
-            },
-            {
-              "type": "block",
-              "id": "9",
-              "flavour": "affine:list",
-              "version": 1,
-              "props": {
-                "type": "bulleted",
-                "text": {
-                  "$blocksuite:internal:text$": true,
-                  "delta": [
-                    {
-                      "insert": "3"
-                    }
-                  ]
-                },
-                "checked": false,
-                "collapsed": false,
-                "order": null
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "type": "block",
-          "id": "10",
-          "flavour": "affine:list",
-          "version": 1,
-          "props": {
-            "type": "bulleted",
-            "text": {
-              "$blocksuite:internal:text$": true,
-              "delta": [
+              "children": [
                 {
-                  "insert": "4"
+                  "type": "block",
+                  "id": "4",
+                  "flavour": "affine:list",
+                  "version": 1,
+                  "props": {
+                    "type": "bulleted",
+                    "text": {
+                      "$blocksuite:internal:text$": true,
+                      "delta": [
+                        {
+                          "insert": "789"
+                        }
+                      ]
+                    },
+                    "checked": false,
+                    "collapsed": false,
+                    "order": null
+                  },
+                  "children": []
                 }
               ]
-            },
-            "checked": false,
-            "collapsed": false,
-            "order": null
-          },
-          "children": []
+            }
+          ]
         }
       ]
     }

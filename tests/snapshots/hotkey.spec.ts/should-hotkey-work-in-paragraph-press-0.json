@@ -33,18 +33,19 @@
       "children": [
         {
           "type": "block",
-          "id": "3",
-          "flavour": "affine:list",
+          "id": "4",
+          "flavour": "affine:paragraph",
           "version": 1,
           "props": {
-            "type": "bulleted",
+            "type": "text",
             "text": {
               "$blocksuite:internal:text$": true,
-              "delta": []
-            },
-            "checked": false,
-            "collapsed": false,
-            "order": null
+              "delta": [
+                {
+                  "insert": "hello"
+                }
+              ]
+            }
           },
           "children": []
         }

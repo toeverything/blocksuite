@@ -146,12 +146,22 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       const target = ctx.get('defaultState').event.target as Node;
       if (!block.host.contains(target)) return;
       if (!block.selected?.is('text')) return;
-      block.doc.captureSync();
 
       const inlineEditor = _getInlineEditor();
       if (!inlineEditor) return;
       const inlineRange = inlineEditor.getInlineRange();
       if (!inlineRange) return;
+
+      if (matchFlavours(block.model, ['affine:list'])) {
+        std.command.exec('splitList', {
+          blockId: block.blockId,
+          inlineIndex: inlineRange.index,
+        });
+        return true;
+      }
+
+      block.doc.captureSync();
+
       if (
         !tryConvertBlock(
           block,
@@ -175,8 +185,18 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       if (!inlineEditor) return;
       const inlineRange = inlineEditor.getInlineRange();
       if (!inlineRange) return;
-      hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw, true);
+
       _preventDefault(ctx);
+
+      if (matchFlavours(block.model, ['affine:list'])) {
+        std.command.exec('splitList', {
+          blockId: block.blockId,
+          inlineIndex: inlineRange.index,
+        });
+        return true;
+      }
+
+      hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw, true);
 
       return true;
     },
@@ -202,21 +222,30 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     Tab: ctx => {
       if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
 
+      _preventDefault(ctx);
+
       {
-        const [_, context] = std.command
-          .chain()
-          .getSelectedModels({
+        const { selectedModels: textModels } = std.command.exec(
+          'getSelectedModels',
+          {
             types: ['text'],
-          })
-          .run();
-        const textModels = context.selectedModels;
+          }
+        );
         if (textModels && textModels.length === 1) {
           const inlineEditor = _getInlineEditor();
           if (!inlineEditor) return;
           const inlineRange = inlineEditor.getInlineRange();
           if (!inlineRange) return;
+
+          if (matchFlavours(model, ['affine:list'])) {
+            std.command.exec('indentList', {
+              blockId: model.id,
+              inlineIndex: inlineRange.index,
+            });
+            return true;
+          }
+
           handleIndent(block.host, model, inlineRange.index);
-          _preventDefault(ctx);
 
           return true;
         }
@@ -282,22 +311,31 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       );
       if (!rootComponent) return;
 
+      _preventDefault(ctx);
+
       {
-        const [_, context] = std.command
-          .chain()
-          .getSelectedModels({
+        const { selectedModels: textModels } = std.command.exec(
+          'getSelectedModels',
+          {
             types: ['text'],
-          })
-          .run();
-        const textModels = context.selectedModels;
+          }
+        );
 
         if (textModels && textModels.length === 1) {
           const inlineEditor = _getInlineEditor();
           if (!inlineEditor) return;
           const inlineRange = inlineEditor.getInlineRange();
           if (!inlineRange) return;
+
+          if (matchFlavours(model, ['affine:list'])) {
+            std.command.exec('unindentList', {
+              blockId: model.id,
+              inlineIndex: inlineRange.index,
+            });
+            return true;
+          }
+
           handleUnindent(block.host, model, inlineRange.index);
-          _preventDefault(ctx);
 
           return true;
         }

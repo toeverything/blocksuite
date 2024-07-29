@@ -33,16 +33,38 @@
       "children": [
         {
           "type": "block",
-          "id": "3",
+          "id": "2",
+          "flavour": "affine:paragraph",
+          "version": 1,
+          "props": {
+            "type": "text",
+            "text": {
+              "$blocksuite:internal:text$": true,
+              "delta": [
+                {
+                  "insert": "text1"
+                }
+              ]
+            }
+          },
+          "children": []
+        },
+        {
+          "type": "block",
+          "id": "4",
           "flavour": "affine:list",
           "version": 1,
           "props": {
-            "type": "bulleted",
+            "type": "todo",
             "text": {
               "$blocksuite:internal:text$": true,
-              "delta": []
+              "delta": [
+                {
+                  "insert": "todo item"
+                }
+              ]
             },
-            "checked": false,
+            "checked": true,
             "collapsed": false,
             "order": null
           },

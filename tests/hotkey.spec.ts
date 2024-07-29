@@ -10,6 +10,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getPageSnapshot,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   initThreeParagraphs,
@@ -803,9 +804,9 @@ test('should multiple line format hotkey work', async ({ page }) => {
   );
 });
 
-test('should hotkey work in paragraph', async ({ page }) => {
+test('should hotkey work in paragraph', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
   await type(page, 'hello');
@@ -813,177 +814,32 @@ test('should hotkey work in paragraph', async ({ page }) => {
   // XXX wait for group to be updated
   await page.waitForTimeout(10);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+1`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="hello"
-    prop:type="h1"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+6`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="hello"
-    prop:type="h6"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_press_6.json`
   );
   await page.waitForTimeout(50);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+8`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:list
-    prop:checked={false}
-    prop:collapsed={false}
-    prop:text="hello"
-    prop:type="bulleted"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_press_8.json`
   );
   await page.waitForTimeout(50);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+9`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:list
-    prop:checked={false}
-    prop:collapsed={false}
-    prop:text="hello"
-    prop:type="numbered"
-  />
-</affine:note>`,
-    noteId
+  await waitNextFrame(page, 200);
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_press_9.json`
   );
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+0`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="hello"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_press_0.json`
   );
   await page.waitForTimeout(50);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+d`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="hello"
-    prop:type="text"
-  />
-  <affine:divider />
-  <affine:paragraph
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_press_d.json`
   );
 });
 

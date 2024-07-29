@@ -1,22 +1,28 @@
-import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
+import type { SchemaToModel, Text } from '@blocksuite/store';
 
+import { defineBlockSchema } from '@blocksuite/store';
+
+// `toggle` type has been deprecated, do not use it
 export type ListType = 'bulleted' | 'numbered' | 'todo' | 'toggle';
 
-declare const BackwardUndefined: unique symbol;
-/**
- * The `collapsed` property may be `undefined` due to legacy data,
- * but you should not manually set it to undefined.
- */
-type ListCollapsed = boolean | typeof BackwardUndefined;
+export interface ListProps {
+  type: ListType;
+  text: Text;
+  checked: boolean;
+  collapsed: boolean;
+  order: number | null;
+}
 
 export const ListBlockSchema = defineBlockSchema({
   flavour: 'affine:list',
-  props: internal => ({
-    type: 'bulleted' as ListType,
-    text: internal.Text(),
-    checked: false,
-    collapsed: false as ListCollapsed,
-  }),
+  props: internal =>
+    ({
+      type: 'bulleted',
+      text: internal.Text(),
+      checked: false,
+      collapsed: false,
+      order: null, // number type only for numbered list
+    }) as ListProps,
   metadata: {
     version: 1,
     role: 'content',

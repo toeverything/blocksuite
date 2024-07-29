@@ -33,7 +33,7 @@
       "children": [
         {
           "type": "block",
-          "id": "7",
+          "id": "5",
           "flavour": "affine:list",
           "version": 1,
           "props": {
@@ -42,7 +42,7 @@
               "$blocksuite:internal:text$": true,
               "delta": [
                 {
-                  "insert": "1"
+                  "insert": "C"
                 }
               ]
             },
@@ -53,7 +53,7 @@
           "children": [
             {
               "type": "block",
-              "id": "8",
+              "id": "6",
               "flavour": "affine:list",
               "version": 1,
               "props": {
@@ -62,7 +62,7 @@
                   "$blocksuite:internal:text$": true,
                   "delta": [
                     {
-                      "insert": "2"
+                      "insert": "D"
                     }
                   ]
                 },
@@ -74,7 +74,7 @@
             },
             {
               "type": "block",
-              "id": "9",
+              "id": "7",
               "flavour": "affine:list",
               "version": 1,
               "props": {
@@ -83,7 +83,71 @@
                   "$blocksuite:internal:text$": true,
                   "delta": [
                     {
-                      "insert": "3"
+                      "insert": "E"
+                    }
+                  ]
+                },
+                "checked": false,
+                "collapsed": false,
+                "order": null
+              },
+              "children": [
+                {
+                  "type": "block",
+                  "id": "8",
+                  "flavour": "affine:list",
+                  "version": 1,
+                  "props": {
+                    "type": "bulleted",
+                    "text": {
+                      "$blocksuite:internal:text$": true,
+                      "delta": [
+                        {
+                          "insert": "F"
+                        }
+                      ]
+                    },
+                    "checked": false,
+                    "collapsed": false,
+                    "order": null
+                  },
+                  "children": []
+                },
+                {
+                  "type": "block",
+                  "id": "9",
+                  "flavour": "affine:list",
+                  "version": 1,
+                  "props": {
+                    "type": "bulleted",
+                    "text": {
+                      "$blocksuite:internal:text$": true,
+                      "delta": [
+                        {
+                          "insert": "G"
+                        }
+                      ]
+                    },
+                    "checked": false,
+                    "collapsed": false,
+                    "order": null
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "block",
+              "id": "4",
+              "flavour": "affine:list",
+              "version": 1,
+              "props": {
+                "type": "bulleted",
+                "text": {
+                  "$blocksuite:internal:text$": true,
+                  "delta": [
+                    {
+                      "insert": "B"
                     }
                   ]
                 },
@@ -97,7 +161,7 @@
         },
         {
           "type": "block",
-          "id": "10",
+          "id": "3",
           "flavour": "affine:list",
           "version": 1,
           "props": {
@@ -106,7 +170,7 @@
               "$blocksuite:internal:text$": true,
               "delta": [
                 {
-                  "insert": "4"
+                  "insert": "A"
                 }
               ]
             },
