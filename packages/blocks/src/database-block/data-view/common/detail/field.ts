@@ -37,7 +37,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   _clickLeft = (e: MouseEvent) => {
     if (this.readonly) return;
     const ele = e.currentTarget as HTMLElement;
-    const columns = this.view.detailColumns;
+    const columns = this.view.detailColumns$.value;
     popMenu(ele, {
       options: {
         input: inputConfig(this.column),

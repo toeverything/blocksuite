@@ -54,6 +54,12 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     return result;
   });
 
+  detailColumns$ = computed(() => {
+    return this.columnsWithoutFilter$.value.filter(
+      id => this.columnGetType(id) !== 'title'
+    );
+  });
+
   filter$ = computed(() => {
     return this.viewData$.value?.filter ?? emptyFilterGroup;
   });
@@ -255,12 +261,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
         filter,
       };
     });
-  }
-
-  get detailColumns(): string[] {
-    return this.columnsWithoutFilter$.value.filter(
-      id => this.columnGetType(id) !== 'title'
-    );
   }
 
   get groupHelper(): GroupHelper | undefined {
