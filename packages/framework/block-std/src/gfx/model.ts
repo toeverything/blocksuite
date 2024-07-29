@@ -23,7 +23,7 @@ import type {
   GfxPrimitiveElementModel,
 } from './surface/element-model.js';
 
-import { SurfaceBlockModel } from './surface/model.js';
+import { SurfaceBlockModel } from './surface/block-model.js';
 
 export interface ElementHitTestOptions {
   expand?: number;

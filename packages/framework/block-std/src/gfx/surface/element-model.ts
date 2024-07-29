@@ -18,7 +18,7 @@ import {
 } from '@blocksuite/global/utils';
 
 import type { GfxBlockElementModel, GfxModel } from '../model.js';
-import type { SurfaceBlockModel } from './model.js';
+import type { SurfaceBlockModel } from './block-model.js';
 
 import {
   convertProps,
@@ -30,7 +30,7 @@ import {
   yfield,
 } from './decorators/index.js';
 
-export type { ElementHitTestOptions as ElementHitTestOptions } from '@blocksuite/block-std/gfx';
+export type { ElementHitTestOptions } from '@blocksuite/block-std/gfx';
 
 export type BaseElementProps = {
   index: string;
