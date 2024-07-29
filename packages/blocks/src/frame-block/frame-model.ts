@@ -40,8 +40,6 @@ export class FrameBlockModel
   extends GfxCompatible<FrameBlockProps>(BlockModel)
   implements GfxElementGeometry
 {
-  static PADDING = [8, 10];
-
   override includesPoint(x: number, y: number, _: PointTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointNearBound([x, y], 5);
