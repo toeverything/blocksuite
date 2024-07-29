@@ -11,7 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { literal, html as staticHtml, unsafeStatic } from 'lit/static-html.js';
 
 import type { FrameBlockModel } from '../frame-block/index.js';
-import type { EdgelessBlockModel } from '../root-block/edgeless/edgeless-block-model.js';
+import type { GfxBlockModel } from '../root-block/edgeless/block-model.js';
 import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
 import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
@@ -30,9 +30,7 @@ const getPortalTag = (model: BlockModel) => {
 
 @customElement('surface-ref-portal')
 export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
-  private _getBlocksInFrame = (
-    model: FrameBlockModel
-  ): EdgelessBlockModel[] => {
+  private _getBlocksInFrame = (model: FrameBlockModel): GfxBlockModel[] => {
     const bound = model.elementBound;
     const candidates =
       this.surfaceService?.layer.blocksGrid.search(bound) ?? [];
@@ -130,9 +128,9 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
   };
 
-  private _getBlocksInGroup(model: GroupElementModel): EdgelessBlockModel[] {
+  private _getBlocksInGroup(model: GroupElementModel): GfxBlockModel[] {
     return Array.from(model.childIds)
-      .map(id => this.doc.getBlockById(id) as EdgelessBlockModel)
+      .map(id => this.doc.getBlockById(id) as GfxBlockModel)
       .filter(el => el);
   }
 

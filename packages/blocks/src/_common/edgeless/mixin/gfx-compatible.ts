@@ -3,21 +3,21 @@ import type { SerializedXYWH } from '@blocksuite/global/utils';
 
 import { BlockModel } from '@blocksuite/store';
 
-import { EdgelessBlockModel } from '../../../root-block/edgeless/edgeless-block-model.js';
+import { GfxBlockModel } from '../../../root-block/edgeless/block-model.js';
 
-export type EdgelessSelectableProps = {
+export type GfxCompatibleProps = {
   xywh: SerializedXYWH;
   index: string;
 };
 
-export function selectable<
-  Props extends EdgelessSelectableProps,
+export function GfxCompatible<
+  Props extends GfxCompatibleProps,
   T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
->(SuperClass: T) {
-  if (SuperClass === BlockModel) {
-    return EdgelessBlockModel as unknown as typeof EdgelessBlockModel<Props>;
+>(BlockModelSuperClass: T) {
+  if (BlockModelSuperClass === BlockModel) {
+    return GfxBlockModel as unknown as typeof GfxBlockModel<Props>;
   } else {
-    let currentClass = SuperClass;
+    let currentClass = BlockModelSuperClass;
 
     while (
       Object.getPrototypeOf(currentClass.prototype) !== BlockModel.prototype &&
@@ -30,8 +30,8 @@ export function selectable<
       throw new Error('The SuperClass is not a subclass of BlockModel');
     }
 
-    Object.setPrototypeOf(currentClass.prototype, EdgelessBlockModel.prototype);
+    Object.setPrototypeOf(currentClass.prototype, GfxBlockModel.prototype);
   }
 
-  return SuperClass as unknown as typeof EdgelessBlockModel<Props>;
+  return BlockModelSuperClass as unknown as typeof GfxBlockModel<Props>;
 }

@@ -24,7 +24,7 @@ import {
 } from '@blocksuite/store';
 import DOMPurify from 'dompurify';
 
-import type { EdgelessSelectableProps } from '../../../_common/edgeless/mixin/edgeless-selectable.js';
+import type { GfxCompatibleProps } from '../../../_common/edgeless/mixin/gfx-compatible.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
@@ -1213,7 +1213,7 @@ export class EdgelessClipboardController extends PageClipboard {
     elementsRawData.forEach(data => {
       const { data: blockSnapshot } = BlockSnapshotSchema.safeParse(data);
       if (blockSnapshot) {
-        const props = blockSnapshot.props as EdgelessSelectableProps;
+        const props = blockSnapshot.props as GfxCompatibleProps;
         originalIndexes.set(blockSnapshot.id, props.index);
 
         blockRawData.push(blockSnapshot);

@@ -1,4 +1,4 @@
-export * from './model.js';
+export * from './gfx-block-model.js';
 export {
   SurfaceBlockModel,
   type SurfaceBlockProps,
@@ -20,9 +20,11 @@ export {
 } from './surface/decorators/index.js';
 export {
   type BaseElementProps,
+  type GfxElementGeometry,
   GfxGroupLikeElementModel,
   GfxLocalElementModel,
   GfxPrimitiveElementModel,
+  type PointTestOptions,
   type SerializedElement,
 } from './surface/element-model.js';
 export * from './viewport.js';

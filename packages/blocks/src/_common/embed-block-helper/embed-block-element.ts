@@ -10,7 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
-import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
+import type { GfxCompatibleProps } from '../edgeless/mixin/index.js';
 
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
@@ -31,8 +31,7 @@ import {
 import { styles } from './styles.js';
 
 export class EmbedBlockComponent<
-  Model extends
-    BlockModel<EdgelessSelectableProps> = BlockModel<EdgelessSelectableProps>,
+  Model extends BlockModel<GfxCompatibleProps> = BlockModel<GfxCompatibleProps>,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends CaptionedBlockComponent<Model, Service, WidgetName> {

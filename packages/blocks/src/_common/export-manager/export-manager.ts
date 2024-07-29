@@ -6,7 +6,7 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 
-import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
+import type { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../root-block/index.js';
 
@@ -402,7 +402,7 @@ export class ExportManager {
     bound: IBound,
     blockComponentGetter: (model: BlockModel) => Element | null = () => null,
     edgeless?: EdgelessRootBlockComponent,
-    nodes?: EdgelessBlockModel[],
+    nodes?: GfxBlockModel[],
     surfaces?: BlockSuite.SurfaceElementModel[],
     edgelessBackground?: {
       zoom: number;

@@ -1,5 +1,4 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
@@ -17,7 +16,7 @@ import {
   rotatePoints,
 } from '@blocksuite/global/utils';
 
-import type { GfxBlockElementModel, GfxModel } from '../model.js';
+import type { GfxBlockElementModel, GfxModel } from '../gfx-block-model.js';
 import type { SurfaceBlockModel } from './block-model.js';
 
 import {
@@ -29,8 +28,6 @@ import {
   watch,
   yfield,
 } from './decorators/index.js';
-
-export type { PointTestOptions } from '@blocksuite/block-std/gfx';
 
 export type BaseElementProps = {
   index: string;
@@ -44,6 +41,21 @@ export type SerializedElement = Record<string, unknown> & {
   index: string;
   props: Record<string, unknown>;
 };
+
+export interface PointTestOptions {
+  expand?: number;
+
+  /**
+   * If true, the transparent area of the element will be ignored during the point inclusion test.
+   * Otherwise, the transparent area will be considered as filled area.
+   *
+   * Default is true.
+   */
+  ignoreTransparent?: boolean;
+
+  all?: boolean;
+  zoom?: number;
+}
 
 export interface GfxElementGeometry {
   containsBound(bound: Bound): boolean;

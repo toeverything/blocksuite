@@ -25,7 +25,7 @@ import type {
 } from '../../../note-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../../root-block/root-model.js';
-import type { EdgelessBlockModel } from '../../edgeless/edgeless-block-model.js';
+import type { GfxBlockModel } from '../../edgeless/block-model.js';
 import type { EdgelessTool } from '../../edgeless/types.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';
 
@@ -1462,7 +1462,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
   }
 
   private _getHoverAreaRectTopLevelBlock(
-    edgelessElement: EdgelessBlockModel
+    edgelessElement: GfxBlockModel
   ): Rect | null {
     if (isInsidePageEditor(this.host)) return null;
     const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
@@ -1653,7 +1653,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     return this._getBlockComponentFromViewStore(this._anchorBlockPath);
   }
 
-  get anchorEdgelessElement(): EdgelessBlockModel | null {
+  get anchorEdgelessElement(): GfxBlockModel | null {
     if (isInsidePageEditor(this.host) || !this._anchorBlockId) return null;
     const { service } = this.rootComponent as EdgelessRootBlockComponent;
     const edgelessElement = service.getElementById(this._anchorBlockId);

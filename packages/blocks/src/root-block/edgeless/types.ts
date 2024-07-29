@@ -1,6 +1,6 @@
 import type { GfxModel as EModel } from '@blocksuite/block-std/gfx';
 
-import type { EdgelessBlockModel } from './edgeless-block-model.js';
+import type { GfxBlockModel } from './block-model.js';
 
 export type EdgelessTool = BlockSuite.EdgelessToolType;
 
@@ -10,7 +10,7 @@ declare global {
     type EdgelessBlockModelKeyType = keyof EdgelessBlockModelMap;
     type EdgelessBlockModelType =
       | EdgelessBlockModelMap[EdgelessBlockModelKeyType]
-      | EdgelessBlockModel;
+      | GfxBlockModel;
 
     type EdgelessModel = EModel;
     type EdgelessModelKeys = EdgelessBlockModelKeyType | SurfaceModelKeyType;
