@@ -1,5 +1,4 @@
 import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
-import { undefined } from 'zod';
 
 import type { TType } from '../../../logical/typesystem.js';
 import type { InsertToPosition } from '../../../types.js';
