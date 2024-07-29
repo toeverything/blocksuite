@@ -4,7 +4,7 @@ import { yfield } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import type { CustomColor } from '../consts.js';
+import type { Color } from '../consts.js';
 
 import {
   FontFamily,
@@ -63,7 +63,7 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   }
 
   @yfield()
-  accessor color: string | CustomColor = '#000000';
+  accessor color: Color = '#000000';
 
   @yfield()
   accessor fontFamily: FontFamily = FontFamily.Inter;

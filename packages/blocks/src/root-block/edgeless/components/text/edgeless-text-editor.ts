@@ -343,7 +343,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     ];
 
     const isEmpty = !text.length && !this._isComposition;
-    const color = this.edgeless.surface.themeObserver.getColor(
+    const color = this.edgeless.surface.themeObserver.getColorValue(
       this.element.color,
       '#000000'
     );

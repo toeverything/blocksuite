@@ -1,6 +1,6 @@
 import { Slot } from '@blocksuite/global/utils';
 
-import type { CustomColor } from '../../surface-block/consts.js';
+import type { Color } from '../../surface-block/consts.js';
 import type { CssVariablesMap } from './css-variables.js';
 
 import { StyleVariables, isCssVariable } from './css-variables.js';
@@ -60,7 +60,7 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
    * `var(--affine-palette-shape-blue)`
    * ```
    */
-  generateColorProperty(color: string | CustomColor, fallback = 'transparent') {
+  generateColorProperty(color: Color, fallback = 'transparent') {
     fallback = fallback.startsWith('--') ? `var(${fallback})` : fallback;
 
     if (typeof color === 'string') {
@@ -90,8 +90,8 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
    * `--affine-palette-shape-blue`
    * ```
    */
-  getColor(
-    color: string | CustomColor,
+  getColorValue(
+    color: Color,
     fallback = '--affine-palette-transparent',
     real?: boolean
   ) {

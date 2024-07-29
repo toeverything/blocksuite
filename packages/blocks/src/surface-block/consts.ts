@@ -13,9 +13,11 @@ export const DEFAULT_ROUGHNESS = 1.4;
 // TODO: need to check the default central area ratio
 export const DEFAULT_CENTRAL_AREA_RATIO = 0.3;
 
-export type CustomColor = {
-  [K in ColorScheme]?: string;
-};
+export type Color =
+  | string
+  | {
+      [K in ColorScheme]?: string;
+    };
 
 export enum ShapeStyle {
   General = 'General',
@@ -51,7 +53,7 @@ export enum TextResizing {
 }
 
 export type TextStyleProps = {
-  color: string | CustomColor;
+  color: Color;
   fontFamily: FontFamily;
   fontSize: number;
   fontStyle: FontStyle;

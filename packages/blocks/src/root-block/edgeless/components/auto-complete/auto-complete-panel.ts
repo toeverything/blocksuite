@@ -180,7 +180,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(this.currentSource)) {
-      const tmpColor = this.edgeless.surface.themeObserver.getColor(
+      const tmpColor = this.edgeless.surface.themeObserver.getColorValue(
         this.currentSource.fillColor,
         DEFAULT_SHAPE_FILL_COLOR
       );
@@ -192,7 +192,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         color = tmpColor;
       }
     } else {
-      color = this.edgeless.surface.themeObserver.getColor(
+      color = this.edgeless.surface.themeObserver.getColorValue(
         this.currentSource.background,
         DEFAULT_NOTE_BACKGROUND_COLOR
       );
@@ -480,7 +480,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(this.currentSource)) {
-      const tmpColor = this.edgeless.surface.themeObserver.getColor(
+      const tmpColor = this.edgeless.surface.themeObserver.getColorValue(
         this.currentSource.fillColor,
         DEFAULT_SHAPE_FILL_COLOR
       );
@@ -492,7 +492,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         color = tmpColor;
       }
     } else {
-      color = this.edgeless.surface.themeObserver.getColor(
+      color = this.edgeless.surface.themeObserver.getColorValue(
         this.currentSource.background,
         DEFAULT_NOTE_BACKGROUND_COLOR
       );
@@ -539,12 +539,12 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         ? this.currentSource
         : this.edgeless.service.editPropsStore.getLastProps('shape');
 
-    const stroke = this.edgeless.surface.themeObserver.getColor(
+    const stroke = this.edgeless.surface.themeObserver.getColorValue(
       strokeColor,
       DEFAULT_SHAPE_STROKE_COLOR,
       true
     );
-    const fill = this.edgeless.surface.themeObserver.getColor(
+    const fill = this.edgeless.surface.themeObserver.getColorValue(
       fillColor,
       DEFAULT_SHAPE_FILL_COLOR,
       true

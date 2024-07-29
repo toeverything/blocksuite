@@ -39,7 +39,7 @@ export function text(
   const horizontalOffset =
     textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
-  const color = renderer.getColor(model.color, '#000000', true);
+  const color = renderer.getColorValue(model.color, '#000000', true);
 
   ctx.font = font;
   ctx.fillStyle = color;

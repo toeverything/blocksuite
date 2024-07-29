@@ -31,6 +31,10 @@ export class AIChatMessage extends LitElement {
       font-weight: 400;
     }
 
+    .ai-chat-user-message {
+      white-space: pre-wrap;
+    }
+
     .ai-chat-user-message.with-attachments {
       margin-top: 8px;
     }

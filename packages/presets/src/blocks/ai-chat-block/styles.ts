@@ -16,6 +16,8 @@ export const AIChatBlockStyles = css`
     font-size: var(--affine-font-sm);
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     border-radius: 8px;
+    user-select: none;
+    pointer-events: none;
 
     .ai-chat-messages-container {
       display: block;

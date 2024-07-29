@@ -3,7 +3,7 @@ import type { IBound } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import type { CustomColor } from '../consts.js';
+import type { Color } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 
@@ -36,15 +36,8 @@ type EnvProvider = {
   getVariableColor: (val: string) => string;
   getColorScheme: () => ColorScheme;
   selectedElements?: () => string[];
-  getColor: (
-    color: string | CustomColor,
-    fallback?: string,
-    real?: boolean
-  ) => string;
-  generateColorProperty: (
-    color: string | CustomColor,
-    fallback: string
-  ) => string;
+  getColorValue: (color: Color, fallback?: string, real?: boolean) => string;
+  generateColorProperty: (color: Color, fallback: string) => string;
 };
 
 type RendererOptions = {
@@ -357,7 +350,7 @@ export class Renderer {
     this._disposables.dispose();
   }
 
-  generateColorProperty(color: string | CustomColor, fallback: string) {
+  generateColorProperty(color: Color, fallback: string) {
     return this.provider.generateColorProperty?.(color, fallback) ??
       fallback.startsWith('--')
       ? `var(${fallback})`
@@ -394,12 +387,14 @@ export class Renderer {
     return canvas;
   }
 
-  getColor(color: string | CustomColor, fallback?: string, real?: boolean) {
-    return this.provider.getColor?.(color, fallback, real) ?? 'transparent';
-  }
-
   getColorScheme() {
     return this.provider.getColorScheme?.() ?? ColorScheme.Light;
+  }
+
+  getColorValue(color: Color, fallback?: string, real?: boolean) {
+    return (
+      this.provider.getColorValue?.(color, fallback, real) ?? 'transparent'
+    );
   }
 
   getVariableColor(val: string) {

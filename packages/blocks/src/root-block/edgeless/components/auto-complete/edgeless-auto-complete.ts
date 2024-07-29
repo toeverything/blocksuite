@@ -221,12 +221,12 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(current)) {
-      color = edgeless.surface.themeObserver.getColor(
+      color = edgeless.surface.themeObserver.getColorValue(
         current.strokeColor,
         DEFAULT_SHAPE_STROKE_COLOR
       );
     } else {
-      const tmpColor = edgeless.surface.themeObserver.getColor(
+      const tmpColor = edgeless.surface.themeObserver.getColorValue(
         current.background,
         DEFAULT_NOTE_BACKGROUND_COLOR
       );
@@ -620,7 +620,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const { surface } = this.edgeless;
     surface.renderer.addOverlay(this._autoCompleteOverlay);
 
-    this._autoCompleteOverlay.stroke = surface.renderer.getColor(
+    this._autoCompleteOverlay.stroke = surface.renderer.getColorValue(
       current.strokeColor,
       DEFAULT_SHAPE_STROKE_COLOR,
       true

@@ -68,7 +68,7 @@ export function mountShapeTextEditor(
 ) {
   if (!shapeElement.text) {
     const text = new DocCollection.Y.Text();
-    let color = edgeless.surface.themeObserver.getColor(
+    let color = edgeless.surface.themeObserver.getColorValue(
       shapeElement.fillColor,
       GET_DEFAULT_LINE_COLOR()
     );
