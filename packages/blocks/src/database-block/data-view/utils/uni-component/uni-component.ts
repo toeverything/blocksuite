@@ -21,7 +21,7 @@ export type UniComponent<
 > = (ele: HTMLElement, props: Props) => UniComponentReturn<Props, Expose>;
 export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
   uni: UniComponent<Props, Expose> | undefined,
-  props: Props,
+  props?: Props,
   options?: {
     ref?: Ref<Expose>;
     style?: Readonly<StyleInfo>;

@@ -8,12 +8,12 @@ import './filter-bar.js';
 export const widgetFilterBar = defineUniComponent(
   (props: DataViewWidgetProps) => {
     const view = props.view;
-    if (!view.filterVisible) {
+    if (!view.filterVisible$.value) {
       return html``;
     }
     return html`<filter-bar
-      .vars=${view.vars}
-      .data=${view.filter}
+      .vars=${view.vars$.value}
+      .data=${view.filter$.value}
       .setData=${view.updateFilter.bind(view)}
     ></filter-bar>`;
   }

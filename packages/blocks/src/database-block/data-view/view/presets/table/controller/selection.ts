@@ -83,7 +83,7 @@ export class TableSelectionController implements ReactiveController {
   private handleDragEvent() {
     this.host.disposables.add(
       this.host.handleEvent('dragStart', context => {
-        if (this.host.view.readonly) {
+        if (this.host.view.readonly$.value) {
           return;
         }
         const event = context.get('pointerState').raw;
@@ -114,7 +114,7 @@ export class TableSelectionController implements ReactiveController {
 
   private handleSelectionChange() {
     this.host.disposables.add(
-      this.host.selectionUpdated.on(tableSelection => {
+      this.host.selection$.subscribe(tableSelection => {
         if (!this.isValidSelection(tableSelection)) {
           this.selection = undefined;
           return;
@@ -149,7 +149,9 @@ export class TableSelectionController implements ReactiveController {
           if (container) {
             const cell = container.cell;
             if (old.isEditing) {
-              cell?.onExitEditMode();
+              requestAnimationFrame(() => {
+                cell?.onExitEditMode();
+              });
               cell?.blurCell();
               container.isEditing = false;
             }
@@ -192,9 +194,9 @@ export class TableSelectionController implements ReactiveController {
     const rows =
       groupKey != null
         ? this.view.groupHelper?.groupMap[groupKey].rows
-        : this.view.rows;
+        : this.view.rows$.value;
     requestAnimationFrame(() => {
-      const index = this.host.view.columnManagerList.findIndex(
+      const index = this.host.view.columnManagerList$.value.findIndex(
         v => v.type === 'title'
       );
       this.selection = {
@@ -391,7 +393,7 @@ export class TableSelectionController implements ReactiveController {
     const leftCell = topCells.item(left);
     const rightCell = topCells.item(right);
     const leftRect = leftCell.getBoundingClientRect();
-    const scale = leftRect.width / leftCell.column.width;
+    const scale = leftRect.width / leftCell.column.width$.value;
     return {
       top: leftRect.top / scale,
       left: leftRect.left / scale,
@@ -441,11 +443,11 @@ export class TableSelectionController implements ReactiveController {
     if (!selection) {
       return true;
     }
-    if (selection.focus.rowIndex > this.view.rows.length - 1) {
+    if (selection.focus.rowIndex > this.view.rows$.value.length - 1) {
       this.selection = undefined;
       return false;
     }
-    if (selection.focus.columnIndex > this.view.columns.length - 1) {
+    if (selection.focus.columnIndex > this.view.columns$.value.length - 1) {
       this.selection = undefined;
       return false;
     }
@@ -684,7 +686,7 @@ export class TableSelectionController implements ReactiveController {
     const dragToFill = this.dragToFillDraggable;
 
     if (!div || !dragToFill) return;
-    if (focus && !isRowSelection && !this.host.view.readonly) {
+    if (focus && !isRowSelection && !this.host.view.readonly$.value) {
       // Check if row is removed.
       const rows = this.rows(groupKey) ?? [];
       if (rows.length <= focus.rowIndex) return;
@@ -780,7 +782,7 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const div = this.areaSelectionElement;
     if (!div) return;
-    if ((!rowSelection && !columnSelection) || this.host.view.readonly) {
+    if ((!rowSelection && !columnSelection) || this.host.view.readonly$.value) {
       div.style.display = 'none';
       return;
     }
@@ -789,9 +791,9 @@ export class TableSelectionController implements ReactiveController {
     let { left, top, width, height, scale } = this.getRect(
       groupKey,
       rowSelection?.start ?? 0,
-      rowSelection?.end ?? this.view.rows.length - 1,
+      rowSelection?.end ?? this.view.rows$.value.length - 1,
       columnSelection?.start ?? 0,
-      columnSelection?.end ?? this.view.columnManagerList.length - 1
+      columnSelection?.end ?? this.view.columnManagerList$.value.length - 1
     );
     const isRowSelection = rowSelection && !columnSelection;
     if (isRowSelection) {

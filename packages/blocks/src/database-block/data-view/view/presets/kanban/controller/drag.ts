@@ -130,7 +130,7 @@ export class KanbanDragController implements ReactiveController {
   }
 
   hostConnected() {
-    if (this.host.view.readonly) {
+    if (this.host.view.readonly$.value) {
       return;
     }
     this.host.disposables.add(

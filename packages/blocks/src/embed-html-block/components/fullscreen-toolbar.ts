@@ -18,9 +18,10 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
         items: [
           {
             type: 'custom',
-            render: html`<div class="settings-header">
-              <span>Settings</span>
-            </div>`,
+            render: () =>
+              html`<div class="settings-header">
+                <span>Settings</span>
+              </div>`,
           },
 
           {

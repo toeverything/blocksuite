@@ -5,8 +5,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataViewColumnManager } from '../../../../data-view-manager.js';
-import type { DataViewTableManager } from '../../table-view-manager.js';
+import type { Column } from '../../../../../view-manager/column.js';
+import type { TableSingleView } from '../../table-view-manager.js';
 
 @customElement('affine-data-view-column-preview')
 export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
@@ -57,7 +57,7 @@ export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
   override render() {
     const groupHelper = this.tableViewManager.groupHelper;
     if (!groupHelper) {
-      const rows = this.tableViewManager.rows;
+      const rows = this.tableViewManager.rows$.value;
       return this.renderGroup(rows);
     }
     return groupHelper.groups.map(group => {
@@ -69,13 +69,13 @@ export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  accessor column!: DataViewColumnManager;
+  accessor column!: Column;
 
   @property({ attribute: false })
   accessor table!: HTMLElement;
 
   @property({ attribute: false })
-  accessor tableViewManager!: DataViewTableManager;
+  accessor tableViewManager!: TableSingleView;
 }
 
 declare global {

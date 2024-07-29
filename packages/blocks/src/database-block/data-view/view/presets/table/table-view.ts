@@ -5,7 +5,7 @@ import { html } from 'lit/static-html.js';
 
 import type { GroupHelper } from '../../../common/group-by/helper.js';
 import type { InsertToPosition } from '../../../types.js';
-import type { DataViewTableManager } from './table-view-manager.js';
+import type { TableSingleView } from './table-view-manager.js';
 import type { TableViewSelection } from './types.js';
 
 import { popMenu } from '../../../../../_common/components/index.js';
@@ -129,11 +129,11 @@ const styles = css`
 
 @customElement('affine-database-table')
 export class DataViewTable extends DataViewBase<
-  DataViewTableManager,
+  TableSingleView,
   TableViewSelection
 > {
   private _addRow = (
-    tableViewManager: DataViewTableManager,
+    tableViewManager: TableSingleView,
     position: InsertToPosition | number
   ) => {
     if (this.readonly) return;
@@ -143,7 +143,7 @@ export class DataViewTable extends DataViewBase<
         ? position
         : insertPositionToIndex(
             position,
-            this.view.rows.map(id => ({ id }))
+            this.view.rows$.value.map(id => ({ id }))
           );
     tableViewManager.rowAdd(position);
     requestAnimationFrame(() => {
@@ -195,7 +195,7 @@ export class DataViewTable extends DataViewBase<
             onComplete: text => {
               const column = groupHelper.column;
               if (column) {
-                column.updateData(() => addGroup(text, column.data) as never);
+                column.updateData(() => addGroup(text, column.data$) as never);
               }
             },
           },
@@ -218,7 +218,7 @@ export class DataViewTable extends DataViewBase<
   selectionController = new TableSelectionController(this);
 
   private get readonly() {
-    return this.view.readonly;
+    return this.view.readonly$.value;
   }
 
   private renderTable() {
@@ -250,20 +250,6 @@ export class DataViewTable extends DataViewBase<
     this._addRow(this.view, position);
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-        this.querySelectorAll('affine-data-view-table-group').forEach(v => {
-          v.requestUpdate();
-        });
-      })
-    );
-
-    if (this.readonly) return;
-  }
-
   focusFirstCell(): void {
     this.selectionController.focusFirstCell();
   }
@@ -284,8 +270,6 @@ export class DataViewTable extends DataViewBase<
       ${renderUniLit(this.headerWidget, {
         view: this.view,
         viewMethods: this,
-        viewSource: this.viewSource,
-        dataSource: this.dataSource,
       })}
       <div class="affine-database-table">
         <div class="affine-database-block-table" @wheel="${this.onWheel}">

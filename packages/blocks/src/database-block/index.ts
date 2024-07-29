@@ -24,4 +24,3 @@ declare global {
   }
 }
 export * from './utils.js';
-export { DatabaseBlockViewSource } from './view-source.js';

@@ -1,8 +1,7 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import type { DataViewKanbanManager } from '../../../../view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../../../view/presets/table/table-view-manager.js';
+import type { SingleView } from '../../../../view-manager/single-view.js';
 
 import { popMenu } from '../../../../../../_common/components/index.js';
 import {
@@ -11,6 +10,7 @@ import {
   DuplicateIcon,
   MoreHorizontalIcon,
 } from '../../../../../../_common/icons/index.js';
+import { emptyFilterGroup } from '../../../../common/ast.js';
 import {
   popGroupSetting,
   popSelectGroupByProperty,
@@ -65,7 +65,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
   };
 
   override render() {
-    if (this.view.readonly) {
+    if (this.view.readonly$.value) {
       return;
     }
     return html` <div
@@ -83,7 +83,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
     }
   }
 
-  override accessor view!: DataViewTableManager | DataViewKanbanManager;
+  override accessor view!: SingleView;
 }
 
 declare global {
@@ -93,7 +93,7 @@ declare global {
 }
 export const popViewOptions = (
   target: HTMLElement,
-  view: DataViewTableManager | DataViewKanbanManager,
+  view: SingleView,
   onClose?: () => void
 ) => {
   const reopen = () => {
@@ -103,7 +103,7 @@ export const popViewOptions = (
     options: {
       style: 'min-width:300px',
       input: {
-        initValue: view.name,
+        initValue: view.name$.value,
         onComplete: text => {
           view.updateName(text);
         },
@@ -130,14 +130,14 @@ export const popViewOptions = (
           postfix: ArrowRightSmallIcon,
           select: () => {
             popFilterModal(target, {
-              vars: view.vars,
-              value: view.filter,
+              vars: view.vars$.value,
+              value: view.filter$.value ?? emptyFilterGroup,
               onChange: view.updateFilter.bind(view),
               isRoot: true,
               onBack: reopen,
               onDelete: () => {
                 view.updateFilter({
-                  ...view.filter,
+                  ...(view.filter$.value ?? emptyFilterGroup),
                   conditions: [],
                 });
               },
@@ -150,7 +150,7 @@ export const popViewOptions = (
           icon: GroupingIcon,
           postfix: ArrowRightSmallIcon,
           select: () => {
-            const groupBy = view.view.groupBy;
+            const groupBy = view.viewData$.value?.groupBy;
             if (!groupBy) {
               popSelectGroupByProperty(target, view);
             } else {
@@ -163,7 +163,7 @@ export const popViewOptions = (
           name: 'Duplicate',
           icon: DuplicateIcon,
           select: () => {
-            view.duplicateView();
+            view.duplicate();
           },
         },
         {
@@ -175,7 +175,7 @@ export const popViewOptions = (
               name: 'Delete View',
               icon: DeleteIcon,
               select: () => {
-                view.deleteView();
+                view.delete();
               },
               class: 'delete-item',
             },

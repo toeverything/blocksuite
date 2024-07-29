@@ -7,8 +7,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { RichText } from '../../../_common/components/index.js';
-import type { DataViewKanbanManager } from '../../data-view/view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../data-view/view/presets/table/table-view-manager.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
 import { getViewportElement } from '../../../_common/utils/query.js';
@@ -82,11 +80,10 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     if (!this.showIcon) {
       return;
     }
-
-    const iconColumn = this.view.header.iconColumn;
+    const iconColumn = this.view.header$.value.iconColumn;
     if (!iconColumn) return;
 
-    const icon = this.view.columnGet(iconColumn).getValue(this.rowId) as string;
+    const icon = this.view.cellGetValue(this.cell.rowId, iconColumn) as string;
     if (!icon) return;
 
     return html`<div class="data-view-header-area-icon">${icon}</div>`;
@@ -118,7 +115,7 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
   }
 
   get titleColumn() {
-    const columnId = this.view.header.titleColumn;
+    const columnId = this.view.header$.value.titleColumn;
     assertExists(columnId);
     return this.view.columnGet(columnId);
   }
@@ -134,8 +131,6 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
 
   @property({ attribute: false })
   accessor showIcon = false;
-
-  override accessor view!: DataViewTableManager | DataViewKanbanManager;
 }
 
 @customElement('data-view-header-area-text')

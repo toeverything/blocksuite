@@ -5,8 +5,8 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
-import type { DataViewKanbanManager } from '../data-view/view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../data-view/view/presets/table/table-view-manager.js';
+import type { KanbanSingleView } from '../data-view/view/presets/kanban/kanban-view-manager.js';
+import type { TableSingleView } from '../data-view/view/presets/table/table-view-manager.js';
 
 @customElement('database-datasource-block-renderer')
 export class BlockRenderer
@@ -119,7 +119,7 @@ export class BlockRenderer
   }
 
   renderIcon() {
-    const iconColumn = this.view.header.iconColumn;
+    const iconColumn = this.view.header$.value.iconColumn;
     if (!iconColumn) {
       return;
     }
@@ -155,5 +155,5 @@ export class BlockRenderer
   accessor rowId!: string;
 
   @property({ attribute: false })
-  accessor view!: DataViewTableManager | DataViewKanbanManager;
+  accessor view!: TableSingleView | KanbanSingleView;
 }

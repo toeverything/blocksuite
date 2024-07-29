@@ -45,7 +45,7 @@ export type NormalMenu = MenuCommon &
         type: 'action';
         name: string;
         isSelected?: boolean;
-        label?: TemplateResult;
+        label?: () => TemplateResult;
         icon?: TemplateResult;
         postfix?: TemplateResult;
         select: () => void;
@@ -57,7 +57,7 @@ export type NormalMenu = MenuCommon &
         name: string;
         checked: boolean;
         postfix?: TemplateResult;
-        label?: TemplateResult;
+        label?: () => TemplateResult;
         select: (checked: boolean) => boolean;
         class?: string;
       }
@@ -66,14 +66,14 @@ export type NormalMenu = MenuCommon &
         name: string;
         on: boolean;
         postfix?: TemplateResult;
-        label?: TemplateResult;
+        label?: () => TemplateResult;
         onChange: (on: boolean) => void;
         class?: string;
       }
     | {
         type: 'sub-menu';
         name: string;
-        label?: TemplateResult;
+        label?: () => TemplateResult;
         postfix?: TemplateResult;
         icon?: TemplateResult;
         options: MenuOptions;
@@ -82,7 +82,7 @@ export type NormalMenu = MenuCommon &
       }
     | {
         type: 'custom';
-        render: TemplateResult;
+        render: () => TemplateResult;
       }
   );
 export type Menu = GroupMenu | NormalMenu;
@@ -109,7 +109,7 @@ export type MenuOptions = {
 };
 
 type ItemBase = {
-  label: TemplateResult;
+  label: () => TemplateResult;
   upDivider?: boolean;
   downDivider?: boolean;
   mouseEnter?: () => void;
@@ -128,7 +128,7 @@ type SelectItem = ItemBase & {
 
 type UIItem = {
   type: 'ui';
-  render: TemplateResult;
+  render: () => TemplateResult;
   upDivider?: boolean;
   downDivider?: boolean;
 };
@@ -190,10 +190,10 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       return [
         {
           type: 'select',
-          label: html`
+          label: () => html`
             ${icon}
             <div class="affine-menu-action-text">
-              ${menu.label ?? menu.name}
+              ${menu.label?.() ?? menu.name}
             </div>
             ${postfix}
           `,
@@ -214,12 +214,12 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       return [
         {
           type: 'select',
-          label: html`
+          label: () => html`
             <div class="icon">
               ${checked ? checkboxChecked() : checkboxUnchecked()}
             </div>
             <div class="affine-menu-action-text">
-              ${menu.label ?? menu.name}
+              ${menu.label?.() ?? menu.name}
             </div>
             ${postfix}
           `,
@@ -242,9 +242,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       return [
         {
           type: 'normal',
-          label: html`
+          label: () => html`
             <div class="affine-menu-action-text">
-              ${menu.label ?? menu.name}
+              ${menu.label?.() ?? menu.name}
             </div>
 
             <toggle-switch .on=${menu.on} .onChange=${onChange}></toggle-switch>
@@ -310,13 +310,14 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       return [
         {
           type: 'select',
-          label: html`${menu.icon
-              ? html` <div class="icon">${menu.icon}</div>`
-              : nothing}
-            <div class="affine-menu-action-text">
-              ${menu.label ?? menu.name}
-            </div>
-            ${postfix}`,
+          label: () =>
+            html`${menu.icon
+                ? html` <div class="icon">${menu.icon}</div>`
+                : nothing}
+              <div class="affine-menu-action-text">
+                ${menu.label?.() ?? menu.name}
+              </div>
+              ${postfix}`,
           mouseEnter: openSubMenu,
           select,
           class: menu.isSelected ? 'selected-item' : '',
@@ -701,7 +702,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                 ${divider
                   ? html`<menu-divider style="width: 100%"></menu-divider>`
                   : null}
-                <div @mouseenter=${mouseEnter}>${menu.render}</div>
+                <div @mouseenter=${mouseEnter}>${menu.render()}</div>
               `;
             }
 
@@ -726,7 +727,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                 @click=${select}
                 @mouseenter=${mouseEnter}
               >
-                <div class="content">${menu.label}</div>
+                <div class="content">${menu.label()}</div>
               </div>
             `;
           })}

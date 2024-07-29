@@ -5,7 +5,7 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
-import type { DataViewManager } from '../data-view/view/data-view-manager.js';
+import type { SingleView } from '../data-view/view-manager/single-view.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 
 import {
@@ -120,5 +120,5 @@ export class NoteRenderer
   accessor subHost!: EditorHost;
 
   @property({ attribute: false })
-  accessor view!: DataViewManager;
+  accessor view!: SingleView;
 }

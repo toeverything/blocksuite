@@ -7,7 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { GroupData } from '../../../common/group-by/helper.js';
 import type { DataViewRenderer } from '../../../data-view.js';
 import type { DataViewTable } from './table-view.js';
-import type { DataViewTableManager } from './table-view-manager.js';
+import type { TableSingleView } from './table-view-manager.js';
 
 import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import { GroupTitle } from '../../../common/group-by/group-title.js';
@@ -60,7 +60,7 @@ export class TableGroup extends SignalWatcher(
     this.view.rowAdd('end', this.group?.key);
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
-      const index = this.view.columnManagerList.findIndex(
+      const index = this.view.columnManagerList$.value.findIndex(
         v => v.type === 'title'
       );
       selectionController.selection = {
@@ -78,7 +78,7 @@ export class TableGroup extends SignalWatcher(
     this.view.rowAdd('start', this.group?.key);
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
-      const index = this.view.columnManagerList.findIndex(
+      const index = this.view.columnManagerList$.value.findIndex(
         v => v.type === 'title'
       );
       selectionController.selection = {
@@ -128,7 +128,7 @@ export class TableGroup extends SignalWatcher(
         style="position: sticky;left: 0;width: max-content;padding: 6px 0;margin-bottom: 4px;display:flex;align-items:center;gap: 12px;max-width: 400px"
       >
         ${GroupTitle(this.group, {
-          readonly: this.view.readonly,
+          readonly: this.view.readonly$.value,
           clickAdd: this.clickAddRowInStart,
           clickOps: this.clickGroupOptions,
         })}
@@ -160,7 +160,7 @@ export class TableGroup extends SignalWatcher(
           }
         )}
       </div>
-      ${this.view.readonly
+      ${this.view.readonly$.value
         ? null
         : html` <div
             class="data-view-table-group-add-row dv-hover"
@@ -174,7 +174,7 @@ export class TableGroup extends SignalWatcher(
               ${PlusIcon}<span>New Record</span>
             </div>
           </div>`}
-      ${this.dataViewEle.config.getFlag?.('enable_database_statistics')
+      ${this.view.featureFlags$.value.enable_database_statistics
         ? html`
             <affine-database-column-stats
               .view="${this.view}"
@@ -198,7 +198,7 @@ export class TableGroup extends SignalWatcher(
   }
 
   get rows() {
-    return this.group?.rows ?? this.view.rows;
+    return this.group?.rows ?? this.view.rows$.value;
   }
 
   @property({ attribute: false })
@@ -208,7 +208,7 @@ export class TableGroup extends SignalWatcher(
   accessor group: GroupData | undefined = undefined;
 
   @property({ attribute: false })
-  accessor view!: DataViewTableManager;
+  accessor view!: TableSingleView;
 
   @property({ attribute: false })
   accessor viewEle!: DataViewTable;

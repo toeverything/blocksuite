@@ -71,7 +71,8 @@ export function fillSelectionWithFocusCellData(
     );
 
     const curCol = focusCell.column; // we are sure that we are always in the same column while iterating through rows
-    const focusData = curCol.getValue(focusCell.rowId);
+    const cell = focusCell.cell$.value;
+    const focusData = cell.value$.value;
 
     const draggingColIdx = columnsSelection.start;
     const { start, end } = rowsSelection;
@@ -87,13 +88,13 @@ export function fillSelectionWithFocusCellData(
 
       if (!cellContainer) continue;
 
-      const curRowId = cellContainer.rowId;
+      const curCell = cellContainer.cell$.value;
 
       if (tRichText.is(curCol.dataType)) {
         const focusCellText = focusData as Text | undefined;
 
         const delta = focusCellText?.toDelta() ?? [{ insert: '' }];
-        const curCellText = curCol.getValue(curRowId) as Text | undefined;
+        const curCellText = curCell.value$.value as Text | undefined;
 
         if (curCellText) {
           curCellText.clear();
@@ -101,10 +102,10 @@ export function fillSelectionWithFocusCellData(
         } else {
           const newText = new DocCollection.Y.Text();
           newText.applyDelta(delta);
-          curCol.setValue(curRowId, newText);
+          curCell.setValue(newText);
         }
       } else {
-        curCol.setValue(curRowId, focusData);
+        curCell.setValue(focusData);
       }
     }
   }

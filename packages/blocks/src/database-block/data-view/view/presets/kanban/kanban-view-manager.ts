@@ -1,45 +1,59 @@
-import type { FilterGroup } from '../../../common/ast.js';
+import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+
 import type { TType } from '../../../logical/typesystem.js';
 import type { InsertToPosition } from '../../../types.js';
 import type { KanbanViewData } from './define.js';
 
+import { type FilterGroup, emptyFilterGroup } from '../../../common/ast.js';
+import { defaultGroupBy } from '../../../common/group-by.js';
 import {
   GroupHelper,
   sortByManually,
 } from '../../../common/group-by/helper.js';
 import { groupByMatcher } from '../../../common/group-by/matcher.js';
-import { defaultGroupBy } from '../../../common/view-manager.js';
 import { evalFilter } from '../../../logical/eval-filter.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
-import {
-  DataViewColumnManagerBase,
-  DataViewManagerBase,
-} from '../../data-view-manager.js';
+import { ColumnBase } from '../../../view-manager/column.js';
+import { SingleViewBase } from '../../../view-manager/single-view.js';
 
-export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
-  private syncView() {
-    if (this.view.columns.length === this.columns.length) {
-      return;
-    }
-    this.viewSource.updateView(_view => {
-      return {
-        columns: this.columnsWithoutFilter.map(id => {
-          const column = this.columnGet(id);
-          return {
-            id: column.id,
-            hide: column.hide,
-          };
-        }),
-      };
+export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
+  columns$: ReadonlySignal<string[]> = computed(() => {
+    return this.columnsWithoutFilter$.value.filter(
+      id => !this.columnGetHide(id)
+    );
+  });
+
+  columnsWithoutFilter$ = computed(() => {
+    const needShow = new Set(this.dataSource.properties$.value);
+    const result: string[] = [];
+    this.viewData$.value?.columns.forEach(v => {
+      if (needShow.has(v.id)) {
+        result.push(v.id);
+        needShow.delete(v.id);
+      }
     });
-  }
+    result.push(...needShow);
+    return result;
+  });
 
-  private updateView(
-    updater: (view: KanbanViewData) => Partial<KanbanViewData>
-  ) {
-    this.syncView();
-    this.viewSource.updateView(updater);
-  }
+  filter$ = computed(() => {
+    return this.viewData$.value?.filter ?? emptyFilterGroup;
+  });
+
+  header$ = computed(() => {
+    return (
+      this.viewData$.value?.header ?? {
+        titleColumn: this.columnsWithoutFilter$.value.find(
+          id => this.columnGetType(id) === 'title'
+        ),
+        iconColumn: 'type',
+      }
+    );
+  });
+
+  readonly$ = computed(() => {
+    return this.viewManager.readonly$.value;
+  });
 
   addCard(position: InsertToPosition, group: string) {
     const id = this.rowAdd(position);
@@ -49,12 +63,12 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
 
   changeGroup(columnId: string) {
     const column = this.columnGet(columnId);
-    this.updateView(_view => {
+    this.viewDataUpdate(_view => {
       return {
         groupBy: defaultGroupBy(
           this.columnGetMeta(column.type),
           column.id,
-          column.data
+          column.data$.value
         ),
       };
     });
@@ -68,16 +82,16 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     return true;
   }
 
-  columnGet(columnId: string): DataViewKanbanColumnManager {
-    return new DataViewKanbanColumnManager(columnId, this);
+  columnGet(columnId: string): KanbanColumn {
+    return new KanbanColumn(this, columnId);
   }
 
   columnGetHide(columnId: string): boolean {
-    return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
+    return this.view?.columns.find(v => v.id === columnId)?.hide ?? false;
   }
 
   columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
-    this.updateView(view => {
+    this.viewDataUpdate(view => {
       const columnIndex = view.columns.findIndex(v => v.id === columnId);
       if (columnIndex < 0) {
         return {};
@@ -93,7 +107,7 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
   }
 
   columnUpdateHide(columnId: string, hide: boolean): void {
-    this.updateView(view => {
+    this.viewDataUpdate(view => {
       return {
         columns: view.columns.map(v =>
           v.id === columnId
@@ -107,32 +121,24 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     });
   }
 
-  deleteView(): void {
-    this.viewSource.delete();
-  }
-
-  duplicateView(): void {
-    this.viewSource.duplicate();
-  }
-
-  getHeaderCover(_rowId: string): DataViewKanbanColumnManager | undefined {
-    const columnId = this.view.header.coverColumn;
+  getHeaderCover(_rowId: string): KanbanColumn | undefined {
+    const columnId = this.view?.header.coverColumn;
     if (!columnId) {
       return;
     }
     return this.columnGet(columnId);
   }
 
-  getHeaderIcon(_rowId: string): DataViewKanbanColumnManager | undefined {
-    const columnId = this.view.header.iconColumn;
+  getHeaderIcon(_rowId: string): KanbanColumn | undefined {
+    const columnId = this.view?.header.iconColumn;
     if (!columnId) {
       return;
     }
     return this.columnGet(columnId);
   }
 
-  getHeaderTitle(_rowId: string): DataViewKanbanColumnManager | undefined {
-    const columnId = this.view.header.titleColumn;
+  getHeaderTitle(_rowId: string): KanbanColumn | undefined {
+    const columnId = this.view?.header.titleColumn;
     if (!columnId) {
       return;
     }
@@ -140,13 +146,18 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
   }
 
   hasHeader(_rowId: string): boolean {
-    const hd = this.view.header;
+    const hd = this.view?.header;
+    if (!hd) {
+      return false;
+    }
     return !!hd.titleColumn || !!hd.iconColumn || !!hd.coverColumn;
   }
 
   isInHeader(columnId: string) {
-    const hd = this.view.header;
-
+    const hd = this.view?.header;
+    if (!hd) {
+      return false;
+    }
     return (
       hd.titleColumn === columnId ||
       hd.iconColumn === columnId ||
@@ -155,26 +166,26 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
   }
 
   isShow(rowId: string): boolean {
-    if (this.filter.conditions.length) {
+    if (this.filter$.value?.conditions.length) {
       const rowMap = Object.fromEntries(
-        this.columnManagerList.map(column => [
+        this.columnManagerList$.value.map(column => [
           column.id,
-          column.getJsonValue(rowId),
+          column.cellGet(rowId).jsonValue$.value,
         ])
       );
-      return evalFilter(this.filter, rowMap);
+      return evalFilter(this.filter$.value, rowMap);
     }
     return true;
   }
 
   override rowGetNext(rowId: string): string {
-    const index = this.rows.indexOf(rowId);
-    return this.rows[index + 1];
+    const index = this.rows$.value.indexOf(rowId);
+    return this.rows$.value[index + 1];
   }
 
   override rowGetPrev(rowId: string): string {
-    const index = this.rows.indexOf(rowId);
-    return this.rows[index - 1];
+    const index = this.rows$.value.indexOf(rowId);
+    return this.rows$.value[index - 1];
   }
 
   override rowMove(rowId: string, position: InsertToPosition): void {
@@ -182,29 +193,23 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
   }
 
   updateFilter(filter: FilterGroup): void {
-    this.updateView(() => {
+    this.viewDataUpdate(() => {
       return {
         filter,
       };
     });
   }
 
-  updateName(name: string): void {
-    this.updateView(() => {
-      return {
-        name,
-      };
-    });
-  }
-
   get columns(): string[] {
-    return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
+    return this.columnsWithoutFilter$.value.filter(
+      id => !this.columnGetHide(id)
+    );
   }
 
   get columnsWithoutFilter(): string[] {
-    const needShow = new Set(this.dataSource.properties);
+    const needShow = new Set(this.dataSource.properties$.value);
     const result: string[] = [];
-    this.view.columns.forEach(v => {
+    this.view?.columns.forEach(v => {
       if (needShow.has(v.id)) {
         result.push(v.id);
         needShow.delete(v.id);
@@ -215,17 +220,17 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
   }
 
   get detailColumns(): string[] {
-    return this.columnsWithoutFilter.filter(
+    return this.columnsWithoutFilter$.value.filter(
       id => this.columnGetType(id) !== 'title'
     );
   }
 
   get filter(): FilterGroup {
-    return this.view.filter;
+    return this.view?.filter ?? emptyFilterGroup;
   }
 
   get groupHelper(): GroupHelper | undefined {
-    const groupBy = this.view.groupBy;
+    const groupBy = this.view?.groupBy;
     if (!groupBy) {
       return;
     }
@@ -235,6 +240,9 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     }
     const groupByConfig = result.data;
     const type = this.columnGetDataType(groupBy.columnId);
+    if (!type) {
+      return;
+    }
     if (!this.checkGroup(groupBy.columnId, result.type, type)) {
       // reset groupBy config
       return this.groupHelper;
@@ -244,15 +252,15 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
         sortByManually(
           ids,
           v => v,
-          this.view.groupProperties.map(v => v.key)
+          this.view?.groupProperties.map(v => v.key) ?? []
         ),
       sortRow: (key, ids) => {
-        const property = this.view.groupProperties.find(v => v.key === key);
+        const property = this.view?.groupProperties.find(v => v.key === key);
         return sortByManually(ids, v => v, property?.manuallyCardSort ?? []);
       },
       changeGroupSort: keys => {
-        const map = new Map(this.view.groupProperties.map(v => [v.key, v]));
-        this.updateView(() => {
+        const map = new Map(this.view?.groupProperties.map(v => [v.key, v]));
+        this.viewDataUpdate(() => {
           return {
             groupProperties: keys.map(key => {
               const property = map.get(key);
@@ -269,8 +277,8 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
         });
       },
       changeRowSort: (groupKeys, groupKey, keys) => {
-        const map = new Map(this.view.groupProperties.map(v => [v.key, v]));
-        this.updateView(() => {
+        const map = new Map(this.view?.groupProperties.map(v => [v.key, v]));
+        this.viewDataUpdate(() => {
           return {
             groupProperties: groupKeys.map(key => {
               if (key === groupKey) {
@@ -302,39 +310,20 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
   }
 
   get header() {
-    return this.view.header;
-  }
-
-  get id() {
-    return this.view.id;
-  }
-
-  get isDeleted(): boolean {
-    return this.viewSource.isDeleted();
-  }
-
-  get name(): string {
-    return this.view.name;
-  }
-
-  override get readonly(): boolean {
-    return this.viewSource.readonly;
+    return this.view?.header;
   }
 
   get type(): string {
-    return this.view.mode;
+    return this.view?.mode ?? 'kanban';
   }
 
   get view() {
-    return this.viewSource.view;
+    return this.viewData$.value;
   }
 }
 
-export class DataViewKanbanColumnManager extends DataViewColumnManagerBase {
-  constructor(
-    propertyId: string,
-    override dataViewManager: DataViewKanbanManager
-  ) {
-    super(propertyId, dataViewManager);
+export class KanbanColumn extends ColumnBase {
+  constructor(dataViewManager: KanbanSingleView, columnId: string) {
+    super(dataViewManager, columnId);
   }
 }

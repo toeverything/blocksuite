@@ -35,7 +35,6 @@ export class TableHotkeysController implements ReactiveController {
             this.selectionController.focusToCell('up');
             this.host.view.rowDelete(rows);
           } else if (focus && !isEditing) {
-            const data = this.host.view;
             if (rowsSelection && columnsSelection) {
               // multi cell
               for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
@@ -49,8 +48,7 @@ export class TableHotkeysController implements ReactiveController {
                   const rowId = container?.dataset.rowId;
                   const columnId = container?.dataset.columnId;
                   if (rowId && columnId) {
-                    const value = container?.column.setValueFromString('');
-                    data.cellUpdateValue(rowId, columnId, value);
+                    container?.column.setValueFromString(rowId, '');
                   }
                 }
               }
@@ -64,8 +62,7 @@ export class TableHotkeysController implements ReactiveController {
               const rowId = container?.dataset.rowId;
               const columnId = container?.dataset.columnId;
               if (rowId && columnId) {
-                const value = container?.column.setValueFromString('');
-                data.cellUpdateValue(rowId, columnId, value);
+                container?.column.setValueFromString(rowId, '');
               }
             }
           }
@@ -239,7 +236,7 @@ export class TableHotkeysController implements ReactiveController {
             context.get('keyboardState').raw.preventDefault();
 
             const start = 0;
-            const end = this.host.view.rows.length - 1;
+            const end = this.host.view.rows$.value.length - 1;
             if (
               selection.rowsSelection?.start === start &&
               selection.rowsSelection.end === end &&

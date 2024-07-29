@@ -3,9 +3,9 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { ViewSource } from '../../common/index.js';
 import type { DataViewExpose } from '../../view/data-view.js';
-import type { DataViewManager } from '../../view/data-view-manager.js';
+import type { SingleView } from '../../view-manager/single-view.js';
+import type { ViewManager } from '../../view-manager/view-manager.js';
 import type { DataViewWidget, DataViewWidgetProps } from '../types.js';
 
 import { renderUniLit } from '../../utils/uni-component/index.js';
@@ -47,9 +47,6 @@ export class DataViewHeaderTools extends WidgetBase {
   static override styles = styles;
 
   override render() {
-    if (this.view.isDeleted) {
-      return;
-    }
     const classList = classMap({
       'show-toolbar': this.showToolBar,
       'affine-database-toolbar': true,
@@ -60,8 +57,6 @@ export class DataViewHeaderTools extends WidgetBase {
         const props: DataViewWidgetProps = {
           view: this.view,
           viewMethods: this.viewMethods,
-          viewSource: this.viewSource,
-          dataSource: this.dataSource,
         };
         return renderUniLit(uni, props);
       })}
@@ -81,9 +76,9 @@ declare global {
   }
 }
 export const renderTools = (
-  view: DataViewManager,
+  view: SingleView,
   viewMethods: DataViewExpose,
-  viewSource: ViewSource
+  viewSource: ViewManager
 ) => {
   return html` <data-view-header-tools
     .viewMethods="${viewMethods}"

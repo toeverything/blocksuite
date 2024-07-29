@@ -1,5 +1,6 @@
 import { RangeManager } from '@blocksuite/block-std';
-import { Slice, Slot } from '@blocksuite/store';
+import { Slice } from '@blocksuite/store';
+import { computed } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -25,7 +26,6 @@ import {
   type DataViewWidget,
   type DataViewWidgetProps,
   DatabaseSelection,
-  type ViewSource,
   defineUniComponent,
   renderUniLit,
   widgetPresets,
@@ -36,7 +36,6 @@ import {
 } from '../root-block/index.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
 import { BlockQueryDataSource } from './data-source.js';
-import { BlockQueryViewSource } from './view-source.js';
 
 @customElement('affine-data-view')
 export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBlockModel> {
@@ -108,8 +107,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     };
   };
 
-  private _viewSource?: ViewSource;
-
   private dataView = new DataView();
 
   static override styles = css`
@@ -172,7 +169,17 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     }
   );
 
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
+  selection$ = computed(() => {
+    const databaseSelection = this.selection.value.find(
+      (selection): selection is DatabaseSelection => {
+        if (selection.blockId !== this.blockId) {
+          return false;
+        }
+        return selection instanceof DatabaseSelection;
+      }
+    );
+    return databaseSelection?.viewSelection;
+  });
 
   setSelection = (selection: DataViewSelection | undefined) => {
     this.selection.setGroup(
@@ -217,27 +224,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     super.connectedCallback();
 
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
-
-    this._disposables.add(
-      this.selection.slots.changed.on(selections => {
-        const databaseSelection = selections.find(
-          (selection): selection is DatabaseSelection => {
-            if (selection.blockId !== this.blockId) {
-              return false;
-            }
-            return selection instanceof DatabaseSelection;
-          }
-        );
-        this.selectionUpdated.emit(databaseSelection?.viewSelection);
-      })
-    );
-    this._disposables.add(
-      this.model.propsUpdated.on(data => {
-        if (data.key === 'views') {
-          this.viewSource.checkViewDataUpdate();
-        }
-      })
-    );
   }
 
   override renderBlock() {
@@ -247,17 +233,14 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
         ${this.dataView.render({
           bindHotkey: this._bindHotkey,
           handleEvent: this._handleEvent,
-          getFlag: this.getFlag,
-          selectionUpdated: this.selectionUpdated,
+          selection$: this.selection$,
           setSelection: this.setSelection,
           dataSource: this.dataSource,
-          viewSource: this.viewSource,
           headerWidget: this.headerWidget,
           std: this.std,
           detailPanelConfig: {
             openDetailPanel: peekViewService
-              ? async (target, template) =>
-                  peekViewService.peek(target, template)
+              ? (target, template) => peekViewService.peek(target, template)
               : undefined,
             target: () => this.innerModalWidget.target,
           },
@@ -273,12 +256,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
       });
     }
     return this._dataSource;
-  }
-
-  get getFlag() {
-    return this.host.doc.awarenessStore.getFlag.bind(
-      this.host.doc.awarenessStore
-    );
   }
 
   get innerModalWidget() {
@@ -297,13 +274,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
 
   get view() {
     return this.dataView.expose;
-  }
-
-  get viewSource(): ViewSource {
-    if (!this._viewSource) {
-      this._viewSource = new BlockQueryViewSource(this.model);
-    }
-    return this._viewSource;
   }
 }
 

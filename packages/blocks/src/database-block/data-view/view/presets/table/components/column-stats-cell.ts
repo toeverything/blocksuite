@@ -4,7 +4,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { GroupData } from '../../../../common/group-by/helper.js';
-import type { DataViewTableColumnManager } from '../table-view-manager.js';
+import type { TableColumn } from '../table-view-manager.js';
 
 import { ArrowDownIcon } from '../../../../../../_common/icons/index.js';
 import { getRootByElement } from '../../../../../../_common/utils/index.js';
@@ -101,21 +101,6 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
     this.calculate();
 
     this.disposables.addFromEvent(this, 'click', this.openMenu);
-
-    const view = this.column.dataViewManager;
-    this.disposables.add(
-      view.slots.update.on(() => {
-        this.calculate();
-      })
-    );
-
-    view.rows.forEach(rowId => {
-      this._disposables.add(
-        this.column.onCellUpdate(rowId, () => {
-          this.calculate();
-        })
-      );
-    });
   }
 
   getColumnType(): ColumnDataType {
@@ -126,7 +111,7 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
 
   protected override render() {
     const style = {
-      width: `${this.column.width}px`,
+      width: `${this.column.width$.value}px`,
     };
     return html`<div
       calculated="${!!this.operation && this.operation.type !== 'none'}"
@@ -145,7 +130,7 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   }
 
   @property({ attribute: false })
-  accessor column!: DataViewTableColumnManager;
+  accessor column!: TableColumn;
 
   @property({ attribute: false })
   accessor group: GroupData | undefined = undefined;

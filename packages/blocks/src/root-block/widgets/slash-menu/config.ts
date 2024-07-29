@@ -661,7 +661,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
             rootComponent.host,
             dataViewModel.model.id
           ) as DataViewBlockComponent;
-          dataView.viewSource.viewAdd('table');
+          dataView.dataSource.viewDataAdd('table');
         });
         tryRemoveEmptyLine(model);
       },

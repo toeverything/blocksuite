@@ -21,7 +21,7 @@ export class SelectCell extends BaseCellRenderer<string[], SelectColumnData> {
     return html`
       <affine-multi-tag-view
         .value="${value}"
-        .options="${this.column.data.options}"
+        .options="${this.column.data$.value.options}"
       ></affine-multi-tag-view>
     `;
   }
@@ -67,7 +67,7 @@ export class SelectCellEditing extends BaseCellRenderer<
   };
 
   get _options(): SelectTag[] {
-    return this.column.data.options;
+    return this.column.data$.value.options;
   }
 
   get _value() {

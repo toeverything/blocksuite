@@ -1,7 +1,7 @@
 import { assertEquals } from '@blocksuite/global/utils';
 
 import type { SelectTag } from '../utils/tags/multi-tag-select.js';
-import type { DataViewColumnManager } from '../view/data-view-manager.js';
+import type { Column } from '../view-manager/column.js';
 import type { GroupData } from './group-by/helper.js';
 
 /**
@@ -9,18 +9,16 @@ import type { GroupData } from './group-by/helper.js';
  * Supports various statistical operations such as counting, sum, mean, median, mode, max, min, range,
  * and specific operations for checkbox columns.
  */
-export class ColumnDataStats<
-  Column extends DataViewColumnManager = DataViewColumnManager,
-> {
-  private dataViewManager: Column['dataViewManager'];
+export class ColumnDataStats<Col extends Column = Column> {
+  private dataViewManager: Col['view'];
 
   /**
    * Constructs a new ColumnDataStats instance.
    *
    * @param column The column for which statistics are computed.
    */
-  constructor(private column: Column) {
-    this.dataViewManager = column.dataViewManager;
+  constructor(private column: Col) {
+    this.dataViewManager = column.view;
   }
 
   private _assertColumnType(type: string) {
@@ -36,10 +34,11 @@ export class ColumnDataStats<
     const colType = this.column.type;
     const colValues: string[] = [];
 
-    for (const rId of group?.rows ?? this.dataViewManager.rows) {
+    for (const rId of group?.rows ?? this.dataViewManager.rows$.value) {
       switch (colType) {
         case 'multi-select': {
-          const options = (this.column.data.options ?? []) as SelectTag[];
+          const options = (this.column.data$.value.options ??
+            []) as SelectTag[];
           const values = (this.column.getValue(rId) ?? []) as string[];
           const map = new Map<string, SelectTag>(options?.map(v => [v.id, v]));
           for (const id of values) {
@@ -61,7 +60,7 @@ export class ColumnDataStats<
 
   private _getCheckBoxColValues(group?: GroupData) {
     this._assertColumnType('checkbox');
-    const val = (group?.rows ?? this.dataViewManager.rows).map(rId => {
+    const val = (group?.rows ?? this.dataViewManager.rows$.value).map(rId => {
       return this.column.getValue(rId);
     });
     return val as (boolean | undefined)[];
@@ -70,7 +69,7 @@ export class ColumnDataStats<
   private _getColValuesAsNumber(group?: GroupData) {
     this._assertColumnType('number');
     const values: number[] = [];
-    for (const rId of group?.rows ?? this.dataViewManager.rows) {
+    for (const rId of group?.rows ?? this.dataViewManager.rows$.value) {
       const value = this.column.getValue(rId) as number | undefined;
       if (value !== undefined) values.push(value);
     }
@@ -79,7 +78,7 @@ export class ColumnDataStats<
 
   // @ts-ignore
   private _getColValuesAsString(group?: GroupData, noEmpty: boolean = false) {
-    const val = (group?.rows ?? this.dataViewManager.rows).map(rId => {
+    const val = (group?.rows ?? this.dataViewManager.rows$.value).map(rId => {
       return this.column.getStringValue(rId);
     });
     return noEmpty ? val.filter(v => v.trim() !== '') : val;
@@ -92,7 +91,7 @@ export class ColumnDataStats<
 
   private _getEmptyCellCount(group?: GroupData) {
     let empty = 0;
-    const rows = group?.rows ?? this.dataViewManager.rows;
+    const rows = group?.rows ?? this.dataViewManager.rows$.value;
     for (const rId of rows) {
       const colVal = this.column.getStringValue(rId).trim();
       if (colVal === '') empty++;
@@ -103,7 +102,7 @@ export class ColumnDataStats<
   private _getNonEmptyCellCount(group?: GroupData) {
     let notEmpty = 0;
 
-    const rows = group?.rows ?? this.dataViewManager.rows;
+    const rows = group?.rows ?? this.dataViewManager.rows$.value;
     for (const rId of rows) {
       const colVal = this.column.getStringValue(rId).trim();
       if (colVal !== '') notEmpty++;
@@ -127,7 +126,7 @@ export class ColumnDataStats<
    * Returns the number of cells in the column.
    */
   countAll(group?: GroupData) {
-    return group?.rows.length ?? this.dataViewManager.rows.length;
+    return group?.rows.length ?? this.dataViewManager.rows$.value.length;
   }
 
   /**

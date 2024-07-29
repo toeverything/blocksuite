@@ -7,7 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataViewTableManager } from '../../table-view-manager.js';
+import type { TableSingleView } from '../../table-view-manager.js';
 
 import { AddCursorIcon } from '../../../../../../../_common/icons/index.js';
 import { getScrollContainer } from '../../../../../../../_common/utils/scroll-container.js';
@@ -38,16 +38,11 @@ export class DatabaseColumnHeader extends SignalWatcher(
   };
 
   private get readonly() {
-    return this.tableViewManager.readonly;
+    return this.tableViewManager.readonly$.value;
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    this.disposables.add(
-      this.tableViewManager.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
     const scrollContainer = getScrollContainer(
       this.closest('affine-data-view-renderer')!
     );
@@ -82,11 +77,11 @@ export class DatabaseColumnHeader extends SignalWatcher(
           ? nothing
           : html`<div class="data-view-table-left-bar"></div>`}
         ${repeat(
-          this.tableViewManager.columnManagerList,
+          this.tableViewManager.columnManagerList$.value,
           column => column.id,
           (column, index) => {
             const style = styleMap({
-              width: `${column.width}px`,
+              width: `${column.width$.value}px`,
               border: index === 0 ? 'none' : undefined,
             });
             return html` <affine-database-header-column
@@ -120,7 +115,7 @@ export class DatabaseColumnHeader extends SignalWatcher(
   accessor scaleDiv!: HTMLDivElement;
 
   @property({ attribute: false })
-  accessor tableViewManager!: DataViewTableManager;
+  accessor tableViewManager!: TableSingleView;
 }
 
 declare global {

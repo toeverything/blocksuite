@@ -1,17 +1,12 @@
 import type { UniComponent } from '../utils/uni-component/index.js';
-import type {
-  DataViewColumnManager,
-  DataViewManager,
-} from '../view/data-view-manager.js';
+import type { Cell } from '../view-manager/cell.js';
 import type { ColumnConfig } from './column-config.js';
 
 export interface CellRenderProps<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown,
 > {
-  view: DataViewManager;
-  column: DataViewColumnManager<Value, Data>;
-  rowId: string;
+  cell: Cell<Value, Data>;
   isEditing: boolean;
   selectCurrentCell: (editing: boolean) => void;
 }

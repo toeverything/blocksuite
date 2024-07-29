@@ -16,8 +16,8 @@ import { multiSelectColumnModelConfig } from './data-view/column/presets/multi-s
 import { numberColumnModelConfig } from './data-view/column/presets/number/define.js';
 import { selectColumnModelConfig } from './data-view/column/presets/select/define.js';
 import { textColumnModelConfig } from './data-view/column/presets/text/define.js';
+import { defaultGroupBy } from './data-view/common/group-by.js';
 import { groupByMatcher } from './data-view/common/group-by/matcher.js';
-import { defaultGroupBy } from './data-view/common/view-manager.js';
 import { columnPresets } from './data-view/index.js';
 import { getTagColor } from './data-view/utils/tags/colors.js';
 
@@ -181,7 +181,7 @@ export const databaseViewAddView = (
     viewMeta.model.defaultName
   );
   model.doc.transact(() => {
-    model.views.push(view);
+    model.views = [...model.views, view];
   });
   return view;
 };

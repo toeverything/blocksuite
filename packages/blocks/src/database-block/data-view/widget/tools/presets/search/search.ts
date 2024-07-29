@@ -4,8 +4,8 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { DataViewKanbanManager } from '../../../../view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../../../view/presets/table/table-view-manager.js';
+import type { KanbanSingleView } from '../../../../view/presets/kanban/kanban-view-manager.js';
+import type { TableSingleView } from '../../../../view/presets/table/table-view-manager.js';
 
 import {
   DatabaseSearchClose,
@@ -195,7 +195,7 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
   @state()
   private accessor _showSearch = false;
 
-  public override accessor view!: DataViewTableManager | DataViewKanbanManager;
+  public override accessor view!: TableSingleView | KanbanSingleView;
 }
 
 declare global {

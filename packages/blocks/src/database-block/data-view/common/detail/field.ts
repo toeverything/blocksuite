@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { computed } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -9,10 +10,8 @@ import type {
   CellRenderProps,
   DataViewCellLifeCycle,
 } from '../../column/index.js';
-import type {
-  DataViewColumnManager,
-  DataViewManager,
-} from '../../view/data-view-manager.js';
+import type { Column } from '../../view-manager/column.js';
+import type { SingleView } from '../../view-manager/single-view.js';
 
 import { popMenu } from '../../../../_common/components/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
@@ -46,7 +45,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           {
             type: 'group',
             name: 'Column Prop Group ',
-            children: () => [typeConfig(this.column, this.view)],
+            children: () => [typeConfig(this.column)],
           },
           {
             type: 'action',
@@ -200,6 +199,10 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  cell$ = computed(() => {
+    return this.column.cellGet(this.rowId);
+  });
+
   changeEditing = (editing: boolean) => {
     const selection = this.closest('affine-data-view-record-detail')?.selection;
     if (selection) {
@@ -211,23 +214,25 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   };
 
   private get readonly() {
-    return this.view.readonly;
+    return this.view.readonly$.value;
   }
 
   override render() {
     const column = this.column;
 
     const props: CellRenderProps = {
-      view: this.view,
-      column: this.column,
-      rowId: this.rowId,
+      cell: this.cell$.value,
       isEditing: this.editing,
       selectCurrentCell: this.changeEditing,
     };
-    const { view, edit } = this.column.renderer;
+    const renderer = this.column.renderer$.value;
+    if (!renderer) {
+      return;
+    }
+    const { view, edit } = renderer;
     const contentClass = classMap({
       'field-content': true,
-      empty: !this.editing && this.column.isEmpty(this.rowId),
+      empty: !this.editing && this.cell$.value.isEmpty$.value,
       'is-editing': this.editing,
       'is-focus': this.isFocus,
     });
@@ -254,7 +259,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  accessor column!: DataViewColumnManager;
+  accessor column!: Column;
 
   @state()
   accessor editing = false;
@@ -266,7 +271,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   accessor rowId!: string;
 
   @property({ attribute: false })
-  accessor view!: DataViewManager;
+  accessor view!: SingleView;
 }
 
 declare global {

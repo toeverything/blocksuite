@@ -1,11 +1,8 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { SignalWatcher } from '@lit-labs/preact-signals';
+import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { property } from 'lit/decorators.js';
 
-import type {
-  DataViewColumnManager,
-  DataViewManager,
-} from '../view/data-view-manager.js';
+import type { Cell } from '../view-manager/cell.js';
 import type { CellRenderProps, DataViewCellLifeCycle } from './manager.js';
 
 export abstract class BaseCellRenderer<
@@ -15,6 +12,14 @@ export abstract class BaseCellRenderer<
   extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements DataViewCellLifeCycle, CellRenderProps<Data, Value>
 {
+  readonly$ = computed(() => {
+    return this.cell.column.readonly$.value;
+  });
+
+  value$ = computed(() => {
+    return this.cell.value$.value;
+  });
+
   beforeEnterEditMode(): boolean {
     return true;
   }
@@ -31,14 +36,6 @@ export abstract class BaseCellRenderer<
         e.stopPropagation();
       }
     });
-    const type = this.column.type;
-    this._disposables.add(
-      this.column.onCellUpdate(this.rowId, () => {
-        if (this.column.type === type) {
-          this.requestUpdate();
-        }
-      })
-    );
 
     this._disposables.addFromEvent(this, 'copy', e => {
       if (!this.isEditing) return;
@@ -68,7 +65,7 @@ export abstract class BaseCellRenderer<
   }
 
   onChange(value: Value | undefined): void {
-    this.column.setValue(this.rowId, value);
+    this.cell.setValue(value);
   }
 
   onCopy(_e: ClipboardEvent) {}
@@ -85,26 +82,32 @@ export abstract class BaseCellRenderer<
 
   onPaste(_e: ClipboardEvent) {}
 
-  get readonly(): boolean {
-    return this.column.readonly;
+  get column() {
+    return this.cell.column;
+  }
+
+  get readonly() {
+    return this.readonly$.value;
+  }
+
+  get row() {
+    return this.cell.row;
   }
 
   get value() {
-    return this.column.getValue(this.rowId);
+    return this.value$.value;
+  }
+
+  get view() {
+    return this.cell.view;
   }
 
   @property({ attribute: false })
-  accessor column!: DataViewColumnManager<Value, Data>;
+  accessor cell!: Cell<Value, Data>;
 
   @property({ attribute: false })
   accessor isEditing!: boolean;
 
-  @property()
-  accessor rowId!: string;
-
   @property({ attribute: false })
   accessor selectCurrentCell!: (editing: boolean) => void;
-
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
 }

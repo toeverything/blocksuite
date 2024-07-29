@@ -7,7 +7,10 @@ import { stopPropagation } from '../../../utils/event.js';
 import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
-import { numberColumnModelConfig } from './define.js';
+import {
+  type NumberColumnDataType,
+  numberColumnModelConfig,
+} from './define.js';
 import {
   type NumberFormat,
   formatNumber,
@@ -15,7 +18,7 @@ import {
 } from './utils/formatter.js';
 
 @customElement('affine-database-number-cell')
-export class NumberCell extends BaseCellRenderer<number> {
+export class NumberCell extends BaseCellRenderer<number, NumberColumnDataType> {
   static override styles = css`
     affine-database-number-cell {
       display: block;
@@ -39,9 +42,11 @@ export class NumberCell extends BaseCellRenderer<number> {
   `;
 
   private _getFormattedString() {
-    const enableNewFormatting = this.view.getFlag().enable_number_formatting;
-    const decimals = (this.column.data.decimal as number) ?? 0;
-    const formatMode = (this.column.data.format ?? 'number') as NumberFormat;
+    const enableNewFormatting =
+      this.view.featureFlags$.value.enable_number_formatting;
+    const decimals = this.column.data$.value.decimal ?? 0;
+    const formatMode = (this.column.data$.value.format ??
+      'number') as NumberFormat;
     return this.value
       ? enableNewFormatting
         ? formatNumber(this.value, formatMode, decimals)
@@ -57,11 +62,16 @@ export class NumberCell extends BaseCellRenderer<number> {
 }
 
 @customElement('affine-database-number-cell-editing')
-export class NumberCellEditing extends BaseCellRenderer<number> {
+export class NumberCellEditing extends BaseCellRenderer<
+  number,
+  NumberColumnDataType
+> {
   private _getFormattedString = (value: number) => {
-    const enableNewFormatting = this.view.getFlag().enable_number_formatting;
-    const decimals = (this.column.data.decimal as number) ?? 0;
-    const formatMode = (this.column.data.format ?? 'number') as NumberFormat;
+    const enableNewFormatting =
+      this.view.featureFlags$.value.enable_number_formatting;
+    const decimals = this.column.data$.value.decimal ?? 0;
+    const formatMode = (this.column.data$.value.format ??
+      'number') as NumberFormat;
     return enableNewFormatting
       ? formatNumber(value, formatMode, decimals)
       : value.toString();
@@ -88,7 +98,8 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
       return;
     }
 
-    const enableNewFormatting = this.view.getFlag().enable_number_formatting;
+    const enableNewFormatting =
+      this.view.featureFlags$.value.enable_number_formatting;
     const value = enableNewFormatting ? parseNumber(str) : parseFloat(str);
     if (isNaN(value)) {
       this._inputEle.value = this.value

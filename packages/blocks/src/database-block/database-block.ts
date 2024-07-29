@@ -1,6 +1,6 @@
 import { RangeManager } from '@blocksuite/block-std';
-import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
+import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -42,13 +42,11 @@ import {
   type DataViewWidget,
   type DataViewWidgetProps,
   DatabaseSelection,
-  type ViewSource,
   defineUniComponent,
   renderUniLit,
   widgetPresets,
 } from './data-view/index.js';
 import { DatabaseBlockSchema } from './database-model.js';
-import { DatabaseBlockViewSource } from './view-source.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends CaptionedBlockComponent<
@@ -127,8 +125,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
       }),
     };
   };
-
-  private _viewSource?: ViewSource;
 
   private dataView = new DataView();
 
@@ -240,8 +236,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     return () => {};
   };
 
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
-
   setSelection = (selection: DataViewSelection | undefined) => {
     this.selection.setGroup(
       'note',
@@ -272,6 +266,18 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     ],
   });
 
+  viewSelection$ = computed(() => {
+    const databaseSelection = this.selection.value.find(
+      (selection): selection is DatabaseSelection => {
+        if (selection.blockId !== this.blockId) {
+          return false;
+        }
+        return selection instanceof DatabaseSelection;
+      }
+    );
+    return databaseSelection?.viewSelection;
+  });
+
   private renderDatabaseOps() {
     if (this.doc.readonly) {
       return nothing;
@@ -285,30 +291,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     super.connectedCallback();
 
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
-
-    this._disposables.add(
-      this.selection.slots.changed.on(selections => {
-        const databaseSelection = selections.find(
-          (selection): selection is DatabaseSelection => {
-            if (selection.blockId !== this.blockId) {
-              return false;
-            }
-            return selection instanceof DatabaseSelection;
-          }
-        );
-        this.selectionUpdated.emit(databaseSelection?.viewSelection);
-      })
-    );
-    this._disposables.add(
-      this.model.propsUpdated.on(data => {
-        if (data.key === 'views') {
-          this.viewSource.checkViewDataUpdate();
-        }
-        if (data.key === 'columns' || data.key === 'cells') {
-          this.dataSource.slots.update.emit();
-        }
-      })
-    );
     let canDrop = false;
     this.disposables.add(
       AffineDragHandleWidget.registerOption({
@@ -364,11 +346,9 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
         ${this.dataView.render({
           bindHotkey: this._bindHotkey,
           handleEvent: this._handleEvent,
-          getFlag: this.getFlag,
-          selectionUpdated: this.selectionUpdated,
+          selection$: this.viewSelection$,
           setSelection: this.setSelection,
           dataSource: this.dataSource,
-          viewSource: this.viewSource,
           headerWidget: this.headerWidget,
           onDrag: this.onDrag,
           std: this.std,
@@ -393,12 +373,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     return this._dataSource;
   }
 
-  get getFlag() {
-    return this.host.doc.awarenessStore.getFlag.bind(
-      this.host.doc.awarenessStore
-    );
-  }
-
   get innerModalWidget() {
     return this.rootComponent!.widgetComponents[
       AFFINE_INNER_MODAL_WIDGET
@@ -415,13 +389,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
 
   get view() {
     return this.dataView.expose;
-  }
-
-  get viewSource(): ViewSource {
-    if (!this._viewSource) {
-      this._viewSource = new DatabaseBlockViewSource(this.model);
-    }
-    return this._viewSource;
   }
 }
 

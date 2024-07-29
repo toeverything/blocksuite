@@ -8,15 +8,10 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import type { NumberColumnDataType } from '../../../../../column/presets/number/define.js';
 import type { InsertToPosition } from '../../../../../types.js';
-import type {
-  DataViewColumnManager,
-  DataViewManager,
-} from '../../../../data-view-manager.js';
-import type {
-  DataViewTableColumnManager,
-  DataViewTableManager,
-} from '../../table-view-manager.js';
+import type { Column } from '../../../../../view-manager/column.js';
+import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
 
 import {
   type Menu,
@@ -36,6 +31,7 @@ import {
 import { startDrag } from '../../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../../../utils/insert.js';
+import { renderUniLit } from '../../../../../utils/uni-component/index.js';
 import { getResultInRange } from '../../../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import { getTableContainer } from '../../types.js';
@@ -52,14 +48,14 @@ export class DatabaseHeaderColumn extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
   private _clickColumn = () => {
-    if (this.tableViewManager.readonly) {
+    if (this.tableViewManager.readonly$.value) {
       return;
     }
     this.popMenu();
   };
 
   private _clickTypeIcon = (event: MouseEvent) => {
-    if (this.tableViewManager.readonly) {
+    if (this.tableViewManager.readonly$.value) {
       return;
     }
     if (this.column.type === 'title') {
@@ -77,9 +73,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
             type: 'action',
             name: config.name,
             isSelected: config.type === this.column.type,
-            icon: html` <uni-lit
-              .uni="${this.tableViewManager.getIcon(config.type)}"
-            ></uni-lit>`,
+            icon: renderUniLit(this.tableViewManager.getIcon(config.type)),
             select: () => {
               this.column.updateType?.(config.type);
             },
@@ -167,7 +161,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
   };
 
   private _contextMenu = (e: MouseEvent) => {
-    if (this.tableViewManager.readonly) {
+    if (this.tableViewManager.readonly$.value) {
       return;
     }
     e.preventDefault();
@@ -175,7 +169,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
   };
 
   private _enterWidthDragBar = () => {
-    if (this.tableViewManager.readonly) {
+    if (this.tableViewManager.readonly$.value) {
       return;
     }
     if (this.drawWidthDragBarTask) {
@@ -214,7 +208,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     assertExists(tableContainer);
     assertExists(scrollContainer);
     const columnHeaderRect = this.getBoundingClientRect();
-    const scale = columnHeaderRect.width / this.column.width;
+    const scale = columnHeaderRect.width / this.column.width$.value;
     const headerContainerRect = tableContainer.getBoundingClientRect();
 
     const rectOffsetLeft = evt.x - columnHeaderRect.left;
@@ -318,7 +312,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
   private popMenu(ele?: HTMLElement) {
     const enableNumberFormatting =
-      this.tableViewManager.getFlag().enable_number_formatting;
+      this.tableViewManager.featureFlags$.value.enable_number_formatting;
 
     popMenu(ele ?? this, {
       options: {
@@ -328,7 +322,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
             type: 'group',
             name: 'Column Prop Group ',
             children: () => [
-              typeConfig(this.column, this.tableViewManager),
+              typeConfig(this.column),
               // Number format begin
               ...(enableNumberFormatting
                 ? ([
@@ -344,23 +338,24 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                           search: true,
                         },
                         items: [
-                          numberFormatConfig(
-                            this.column,
-                            this.tableViewManager
-                          ),
+                          numberFormatConfig(this.column),
                           ...(numberFormats.map(format => {
+                            const data = (
+                              this.column as Column<
+                                number,
+                                NumberColumnDataType
+                              >
+                            ).data$.value;
                             return {
                               type: 'action',
-                              isSelected:
-                                this.column.data.format === format.type,
+                              isSelected: data.format === format.type,
                               icon: html`<span
                                 style="font-size: var(--affine-font-base); scale: 1.2;"
                                 >${format.symbol}</span
                               >`,
                               name: format.label,
                               select: () => {
-                                if (this.column.data.format === format.type)
-                                  return;
+                                if (data.format === format.type) return;
                                 this.column.updateData(() => ({
                                   format: format.type,
                                 }));
@@ -486,7 +481,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
   }
 
   private get readonly() {
-    return this.tableViewManager.readonly;
+    return this.tableViewManager.readonly$.value;
   }
 
   private widthDragStart(event: PointerEvent) {
@@ -500,16 +495,11 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
   override connectedCallback() {
     super.connectedCallback();
-    this.disposables.add(
-      this.tableViewManager.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
     const table = this.closest('affine-database-table');
     if (table) {
       this.disposables.add(
         table.handleEvent('dragStart', context => {
-          if (this.tableViewManager.readonly) {
+          if (this.tableViewManager.readonly$.value) {
             return;
           }
           const event = context.get('pointerState').raw;
@@ -580,13 +570,13 @@ export class DatabaseHeaderColumn extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor column!: DataViewTableColumnManager;
+  accessor column!: TableColumn;
 
   @property({ attribute: false })
   accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
 
   @property({ attribute: false })
-  accessor tableViewManager!: DataViewTableManager;
+  accessor tableViewManager!: TableSingleView;
 }
 
 type ColumnOffset = {
@@ -622,15 +612,13 @@ const createDragPreview = (
   };
 };
 
-function numberFormatConfig(
-  column: DataViewColumnManager,
-  _view: DataViewManager
-): NormalMenu {
+function numberFormatConfig(column: Column): NormalMenu {
   return {
     type: 'custom',
-    render: html` <affine-database-number-format-bar
-      .column="${column}"
-    ></affine-database-number-format-bar>`,
+    render: () =>
+      html` <affine-database-number-format-bar
+        .column="${column}"
+      ></affine-database-number-format-bar>`,
   };
 }
 

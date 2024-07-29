@@ -1,53 +1,85 @@
-import type { FilterGroup } from '../../../common/ast.js';
+import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+
 import type { TType } from '../../../logical/typesystem.js';
 import type { InsertToPosition } from '../../../types.js';
-import type { _DataViewDataTypeMap } from '../../data-view.js';
+import type { ViewManager } from '../../../view-manager/view-manager.js';
+import type { TableViewData } from './define.js';
 import type { StatCalcOpType } from './types.js';
 
+import { type FilterGroup, emptyFilterGroup } from '../../../common/ast.js';
 import { ColumnDataStats } from '../../../common/data-stats.js';
+import { defaultGroupBy } from '../../../common/group-by.js';
 import {
   GroupHelper,
   sortByManually,
 } from '../../../common/group-by/helper.js';
 import { groupByMatcher } from '../../../common/group-by/matcher.js';
-import { defaultGroupBy } from '../../../common/view-manager.js';
 import { evalFilter } from '../../../logical/eval-filter.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
+import { ColumnBase } from '../../../view-manager/column.js';
 import {
-  DataViewColumnManagerBase,
-  DataViewManagerBase,
-} from '../../data-view-manager.js';
+  type SingleView,
+  SingleViewBase,
+} from '../../../view-manager/single-view.js';
 
-type TableViewData = _DataViewDataTypeMap['table'];
-
-export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
-  private syncView() {
-    if (this.view.columns.length === this.columns.length) {
-      return;
-    }
-    this.viewSource.updateView(_view => {
+export class TableSingleView extends SingleViewBase<TableViewData> {
+  private computedColumns$ = computed(() => {
+    return this.columnsWithoutFilter$.value.map(id => {
+      const column = this.columnGet(id);
       return {
-        columns: this.columnsWithoutFilter.map(id => {
-          const column = this.columnGet(id);
-          return {
-            id: column.id,
-            hide: column.hide,
-            width: column.width,
-            statCalcType: column.statCalcOp,
-          };
-        }),
+        id: column.id,
+        hide: column.hide,
+        width: column.width$.value,
+        statCalcType: column.statCalcOp,
       };
     });
-  }
+  });
 
-  private updateView(updater: (view: TableViewData) => Partial<TableViewData>) {
-    this.syncView();
-    this.viewSource.updateView(updater);
+  columns$ = computed(() => {
+    return this.columnsWithoutFilter$.value.filter(
+      id => !this.columnGetHide(id)
+    );
+  });
+
+  columnsWithoutFilter$ = computed(() => {
+    const needShow = new Set(this.dataSource.properties$.value);
+    const result: string[] = [];
+    this.viewData$.value?.columns.forEach(v => {
+      if (needShow.has(v.id)) {
+        result.push(v.id);
+        needShow.delete(v.id);
+      }
+    });
+    result.push(...needShow);
+    return result;
+  });
+
+  filter$ = computed(() => {
+    return this.viewData$.value?.filter ?? emptyFilterGroup;
+  });
+
+  header$ = computed(() => {
+    return (
+      this.viewData$.value?.header ?? {
+        titleColumn: this.columnsWithoutFilter$.value.find(
+          id => this.columnGetType(id) === 'title'
+        ),
+        iconColumn: 'type',
+      }
+    );
+  });
+
+  readonly$ = computed(() => {
+    return this.viewManager.readonly$.value;
+  });
+
+  constructor(viewManager: ViewManager, viewId: string) {
+    super(viewManager, viewId);
   }
 
   changeGroup(columnId: string | undefined) {
     if (columnId == null) {
-      this.updateView(() => {
+      this.viewDataUpdate(() => {
         return {
           groupBy: undefined,
         };
@@ -55,12 +87,12 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
       return;
     }
     const column = this.columnGet(columnId);
-    this.updateView(_view => {
+    this.viewDataUpdate(_view => {
       return {
         groupBy: defaultGroupBy(
           this.columnGetMeta(column.type),
           column.id,
-          column.data
+          column.data$
         ),
       };
     });
@@ -74,34 +106,39 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     return true;
   }
 
-  columnGet(columnId: string): DataViewTableColumnManager {
-    return new DataViewTableColumnManager(columnId, this);
+  columnGet(columnId: string): TableColumn {
+    return new TableColumn(this, columnId);
   }
 
   columnGetHide(columnId: string): boolean {
-    return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
+    return (
+      this.viewData$.value?.columns.find(v => v.id === columnId)?.hide ?? false
+    );
   }
 
   columnGetStatCalcOp(columnId: string): StatCalcOpType {
     return (
-      this.view.columns.find(v => v.id === columnId)?.statCalcType ?? 'none'
+      this.viewData$.value?.columns.find(v => v.id === columnId)
+        ?.statCalcType ?? 'none'
     );
   }
 
   columnGetWidth(columnId: string): number {
     return (
-      this.view.columns.find(v => v.id === columnId)?.width ??
+      this.viewData$.value?.columns.find(v => v.id === columnId)?.width ??
       this.dataSource.propertyGetDefaultWidth(columnId)
     );
   }
 
   columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
-    this.updateView(view => {
-      const columnIndex = view.columns.findIndex(v => v.id === columnId);
+    this.viewDataUpdate(() => {
+      const columnIndex = this.computedColumns$.value.findIndex(
+        v => v.id === columnId
+      );
       if (columnIndex < 0) {
         return {};
       }
-      const columns = [...view.columns];
+      const columns = [...this.computedColumns$.value];
       const [column] = columns.splice(columnIndex, 1);
       const index = insertPositionToIndex(toAfterOfColumn, columns);
       columns.splice(index, 0, column);
@@ -112,9 +149,9 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
   }
 
   columnUpdateHide(columnId: string, hide: boolean): void {
-    this.updateView(view => {
+    this.viewDataUpdate(() => {
       return {
-        columns: view.columns.map(v =>
+        columns: this.computedColumns$.value.map(v =>
           v.id === columnId
             ? {
                 ...v,
@@ -127,9 +164,9 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
   }
 
   columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void {
-    this.updateView(view => {
+    this.viewDataUpdate(() => {
       return {
-        columns: view.columns.map(v =>
+        columns: this.computedColumns$.value.map(v =>
           v.id === columnId
             ? {
                 ...v,
@@ -142,9 +179,9 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
   }
 
   columnUpdateWidth(columnId: string, width: number): void {
-    this.updateView(view => {
+    this.viewDataUpdate(() => {
       return {
-        columns: view.columns.map(v =>
+        columns: this.computedColumns$.value.map(v =>
           v.id === columnId
             ? {
                 ...v,
@@ -156,31 +193,23 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     });
   }
 
-  deleteView(): void {
-    this.viewSource.delete();
-  }
-
-  duplicateView(): void {
-    this.viewSource.duplicate();
-  }
-
   hasHeader(rowId: string): boolean {
-    return Object.values(this.header).some(id => this.cellGetValue(rowId, id));
+    return Object.values(this.header$).some(id => this.cellGetValue(rowId, id));
   }
 
   isInHeader(columnId: string) {
-    return Object.values(this.header).some(v => v === columnId);
+    return Object.values(this.header$).some(v => v === columnId);
   }
 
   isShow(rowId: string): boolean {
-    if (this.filter.conditions.length) {
+    if (this.filter$.value?.conditions.length) {
       const rowMap = Object.fromEntries(
-        this.columnManagerList.map(column => [
+        this.columnManagerList$.value.map(column => [
           column.id,
-          column.getJsonValue(rowId),
+          column.cellGet(rowId).jsonValue$.value,
         ])
       );
-      return evalFilter(this.filter, rowMap);
+      return evalFilter(this.filter$.value, rowMap);
     }
     return true;
   }
@@ -198,13 +227,13 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
   }
 
   override rowGetNext(rowId: string): string {
-    const index = this.rows.indexOf(rowId);
-    return this.rows[index + 1];
+    const index = this.rows$.value.indexOf(rowId);
+    return this.rows$.value[index + 1];
   }
 
   override rowGetPrev(rowId: string): string {
-    const index = this.rows.indexOf(rowId);
-    return this.rows[index - 1];
+    const index = this.rows$.value.indexOf(rowId);
+    return this.rows$.value[index - 1];
   }
 
   override rowMove(
@@ -221,50 +250,21 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
   }
 
   updateFilter(filter: FilterGroup): void {
-    this.updateView(() => {
+    this.viewDataUpdate(() => {
       return {
         filter,
       };
     });
   }
 
-  updateName(name: string): void {
-    this.updateView(() => {
-      return {
-        name,
-      };
-    });
-  }
-
-  get columns(): string[] {
-    return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
-  }
-
-  get columnsWithoutFilter(): string[] {
-    const needShow = new Set(this.dataSource.properties);
-    const result: string[] = [];
-    this.view.columns.forEach(v => {
-      if (needShow.has(v.id)) {
-        result.push(v.id);
-        needShow.delete(v.id);
-      }
-    });
-    result.push(...needShow);
-    return result;
-  }
-
   get detailColumns(): string[] {
-    return this.columnsWithoutFilter.filter(
+    return this.columnsWithoutFilter$.value.filter(
       id => this.columnGetType(id) !== 'title'
     );
   }
 
-  get filter(): FilterGroup {
-    return this.view.filter;
-  }
-
   get groupHelper(): GroupHelper | undefined {
-    const groupBy = this.view.groupBy;
+    const groupBy = this.viewData$.value?.groupBy;
     if (!groupBy) {
       return;
     }
@@ -274,6 +274,9 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     }
     const groupByConfig = result.data;
     const type = this.columnGetDataType(groupBy.columnId);
+    if (!type) {
+      return;
+    }
     if (!this.checkGroup(groupBy.columnId, result.type, type)) {
       // reset groupBy config
       return this.groupHelper;
@@ -291,7 +294,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
       },
       changeGroupSort: keys => {
         const map = new Map(this.groupProperties.map(v => [v.key, v]));
-        this.updateView(() => {
+        this.viewDataUpdate(() => {
           return {
             groupProperties: keys.map(key => {
               const property = map.get(key);
@@ -309,7 +312,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
       },
       changeRowSort: (groupKeys, groupKey, keys) => {
         const map = new Map(this.groupProperties.map(v => [v.key, v]));
-        this.updateView(() => {
+        this.viewDataUpdate(() => {
           return {
             groupProperties: groupKeys.map(key => {
               if (key === groupKey) {
@@ -341,68 +344,41 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
   }
 
   get groupProperties() {
-    return this.view.groupProperties ?? [];
-  }
-
-  get header() {
-    return (
-      this.view.header ?? {
-        titleColumn: this.columnsWithoutFilter.find(
-          id => this.columnGetType(id) === 'title'
-        ),
-        iconColumn: 'type',
-      }
-    );
-  }
-
-  get id() {
-    return this.view.id;
-  }
-
-  get isDeleted(): boolean {
-    return this.viewSource.isDeleted();
+    return this.viewData$.value?.groupProperties ?? [];
   }
 
   get name(): string {
-    return this.view.name;
-  }
-
-  override get readonly(): boolean {
-    return this.viewSource.readonly;
+    return this.viewData$.value?.name ?? '';
   }
 
   override get type(): string {
-    return this.view.mode;
-  }
-
-  get view() {
-    return this.viewSource.view;
+    return this.viewData$.value?.mode ?? 'table';
   }
 }
 
-export class DataViewTableColumnManager extends DataViewColumnManagerBase {
+export class TableColumn extends ColumnBase {
   readonly stats = new ColumnDataStats(this);
 
+  width$: ReadonlySignal<number> = computed(() => {
+    return this.tableView.columnGetWidth(this.id);
+  });
+
   constructor(
-    propertyId: string,
-    override dataViewManager: DataViewTableManager
+    private tableView: TableSingleView,
+    columnId: string
   ) {
-    super(propertyId, dataViewManager);
+    super(tableView as SingleView, columnId);
   }
 
   updateStatCalcOp(type: StatCalcOpType): void {
-    return this.dataViewManager.columnUpdateStatCalcOp(this.id, type);
+    return this.tableView.columnUpdateStatCalcOp(this.id, type);
   }
 
   updateWidth(width: number): void {
-    this.dataViewManager.columnUpdateWidth(this.id, width);
+    this.tableView.columnUpdateWidth(this.id, width);
   }
 
   get statCalcOp(): StatCalcOpType {
-    return this.dataViewManager.columnGetStatCalcOp(this.id);
-  }
-
-  get width(): number {
-    return this.dataViewManager.columnGetWidth(this.id);
+    return this.tableView.columnGetStatCalcOp(this.id);
   }
 }

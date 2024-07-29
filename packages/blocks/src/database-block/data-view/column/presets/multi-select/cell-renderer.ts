@@ -22,8 +22,8 @@ export class MultiSelectCell extends BaseCellRenderer<
   override render() {
     return html`
       <affine-multi-tag-view
-        .value="${this.value ?? []}"
-        .options="${this.column.data.options}"
+        .value="${Array.isArray(this.value) ? this.value : []}"
+        .options="${this.column.data$.value.options}"
       ></affine-multi-tag-view>
     `;
   }
@@ -68,7 +68,7 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
   };
 
   get _options(): SelectTag[] {
-    return this.column.data.options;
+    return this.column.data$.value.options;
   }
 
   get _value() {

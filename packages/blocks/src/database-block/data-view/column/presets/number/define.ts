@@ -13,12 +13,13 @@ declare global {
     [numberColumnType.type]: typeof numberColumnModelConfig.model;
   }
 }
+export type NumberColumnDataType = {
+  decimal?: number;
+  format?: NumberFormat;
+};
 export const numberColumnModelConfig = numberColumnType.modelConfig<
   number,
-  {
-    decimal: number;
-    format: NumberFormat;
-  }
+  NumberColumnDataType
 >({
   name: 'Number',
   type: () => tNumber.create(),

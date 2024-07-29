@@ -112,3 +112,8 @@ export const firstFilterInGroup = (vars: Variable[]): FilterGroup => {
     conditions: [firstFilter(vars)],
   };
 };
+export const emptyFilterGroup: FilterGroup = {
+  type: 'group',
+  op: 'and',
+  conditions: [],
+};
