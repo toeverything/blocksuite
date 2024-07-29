@@ -3,13 +3,12 @@ import type { AffineAIPanelState } from '@blocksuite/blocks';
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import {
   type AffineAIPanelWidgetConfig,
-  BlocksUtils,
   CodeBlockComponent,
   DividerBlockComponent,
   ListBlockComponent,
   ParagraphBlockComponent,
 } from '@blocksuite/blocks';
-import { type BlockSelector, BlockViewType, type Doc } from '@blocksuite/store';
+import { BlockViewType, type Doc, type Query } from '@blocksuite/store';
 import { LitElement, type PropertyValues, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -84,33 +83,32 @@ export class AIAnswerText extends WithDisposable(LitElement) {
 
   private _doc!: Doc;
 
-  private _selector: BlockSelector = block =>
-    BlocksUtils.matchFlavours(block.model, [
-      'affine:page',
-      'affine:note',
-      'affine:surface',
-      'affine:paragraph',
-      'affine:code',
-      'affine:list',
-      'affine:divider',
-    ])
-      ? BlockViewType.Display
-      : BlockViewType.Hidden;
-
   private _timer?: ReturnType<typeof setInterval> | null = null;
 
   private _updateDoc = () => {
     if (this._answers.length > 0) {
       const latestAnswer = this._answers.pop();
       this._answers = [];
+      const query: Query = {
+        mode: 'loose',
+        match: [
+          'affine:page',
+          'affine:note',
+          'affine:surface',
+          'affine:paragraph',
+          'affine:code',
+          'affine:list',
+          'affine:divider',
+        ].map(flavour => ({ flavour, viewType: BlockViewType.Display })),
+      };
       if (latestAnswer) {
         markDownToDoc(this.host, latestAnswer)
           .then(doc => {
             this._doc = doc.blockCollection.getDoc({
-              selector: this._selector,
+              query,
             });
             this.disposables.add(() => {
-              doc.blockCollection.clearSelector(this._selector);
+              doc.blockCollection.clearQuery(query);
             });
             this._doc.awarenessStore.setReadonly(
               this._doc.blockCollection,

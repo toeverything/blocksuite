@@ -1,5 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { Block } from '@blocksuite/store';
+import type { Query } from '@blocksuite/store';
 
 import {
   RangeManager,
@@ -7,11 +7,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { deserializeXYWH } from '@blocksuite/global/utils';
-import {
-  type BlockModel,
-  type BlockSelector,
-  BlockViewType,
-} from '@blocksuite/store';
+import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -38,36 +34,29 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   ancestors = new Set<string>();
 
-  selector: BlockSelector = (block, doc) => {
-    let currentBlock: Block | BlockModel | null = block;
-
-    if (this.ancestors.has(block.id)) {
-      return BlockViewType.Display;
-    }
-
-    while (currentBlock) {
-      if (currentBlock.id === this.model.id) {
-        return BlockViewType.Display;
-      }
-
-      currentBlock = doc.getParent(currentBlock.id);
-    }
-
-    return BlockViewType.Hidden;
-  };
+  query: Query | null = null;
 
   override connectedCallback() {
     super.connectedCallback();
 
+    const ancestors = new Set<string>();
     let parent: BlockModel | null = this.model;
     while (parent) {
       this.ancestors.add(parent.id);
       parent = this.model.doc.getParent(parent.id);
     }
+    const query: Query = {
+      mode: 'include',
+      match: Array.from(ancestors).map(id => ({
+        id,
+        viewType: BlockViewType.Display,
+      })),
+    };
+    this.query = query;
 
     const doc = this.model.doc;
     this._disposables.add(() => {
-      doc.blockCollection.clearSelector(this.selector, true);
+      doc.blockCollection.clearQuery(query, true);
     });
   }
 
@@ -127,8 +116,12 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   }
 
   renderPreview() {
+    if (!this.query) {
+      console.error('Query is not set before rendering note preview');
+      return nothing;
+    }
     const doc = this.model.doc.blockCollection.getDoc({
-      selector: this.selector,
+      query: this.query,
       readonly: true,
     });
     const previewSpec = SpecProvider.getInstance().getSpec('page:preview');

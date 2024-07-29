@@ -5,9 +5,9 @@ import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockModel,
-  type BlockSelector,
   BlockViewType,
   type Doc,
+  type Query,
 } from '@blocksuite/store';
 import { type TemplateResult, css, render } from 'lit';
 
@@ -303,12 +303,11 @@ async function renderNoteContent(
       parent = doc.blockCollection.crud.getParent(parent);
     }
   });
-  const selector: BlockSelector = block => {
-    return ids.includes(block.id)
-      ? BlockViewType.Display
-      : BlockViewType.Hidden;
+  const query: Query = {
+    mode: 'strict',
+    match: ids.map(id => ({ id, viewType: BlockViewType.Display })),
   };
-  const previewDoc = doc.blockCollection.getDoc({ selector });
+  const previewDoc = doc.blockCollection.getDoc({ query });
   const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
   const previewTemplate = card.host.renderSpecPortal(
     previewDoc,
