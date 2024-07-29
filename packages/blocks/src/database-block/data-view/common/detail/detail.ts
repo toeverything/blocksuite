@@ -52,13 +52,12 @@ const styles = css`
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 20px 200px;
+    padding: 20px;
     gap: 12px;
     background-color: var(--affine-background-primary-color);
     border-radius: 8px;
-    height: 90%;
-    width: max-content;
-    margin: 3% auto;
+    height: 100%;
+    width: 100%;
   }
 
   .add-property {
