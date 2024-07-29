@@ -1,8 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type {
-  CommonElement,
-  ElementHitTestOptions,
-} from '@blocksuite/block-std/gfx';
+import type { ElementHitTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
@@ -50,8 +47,7 @@ export type SerializedElement = Record<string, unknown> & {
 
 export abstract class GfxPrimitiveElementModel<
   Props extends BaseElementProps = BaseElementProps,
-> implements CommonElement
-{
+> {
   protected _disposable = new DisposableGroup();
 
   protected _id: string;
@@ -66,13 +62,6 @@ export abstract class GfxPrimitiveElementModel<
     local: boolean;
   }) => void;
 
-  /**
-   * When the ymap is not connected to the doc, its value cannot be read.
-   * But we need to use those value during the creation, so the yfield decorated field's value will
-   * be stored in this map too during the creation.
-   *
-   * After the ymap is connected to the doc, this map will be cleared.
-   */
   protected _preserved = new Map<string, unknown>();
 
   protected _stashed: Map<keyof Props | string, unknown>;
@@ -100,8 +89,6 @@ export abstract class GfxPrimitiveElementModel<
     this._stashed = stashedStore as Map<keyof Props, unknown>;
     this._onChange = onChange;
 
-    // class properties is initialized before yMap has been set
-    // so we need to manually assign the default value here
     this.index = 'a0';
     this.seed = randomSeed();
   }
@@ -153,10 +140,6 @@ export abstract class GfxPrimitiveElementModel<
     return linePolygonIntersects(start, end, points);
   }
 
-  /**
-   * `onCreated` function will be executed when
-   * element is created in local rather than remote peers
-   */
   onCreated() {}
 
   pop(prop: keyof Props | string) {
@@ -171,8 +154,6 @@ export abstract class GfxPrimitiveElementModel<
 
     if (getYFieldPropsSet(this).has(prop as string)) {
       this.surface.doc.transact(() => {
-        // directly set the value to the ymap to avoid
-        // executing derive and convert decorators again
         this.yMap.set(prop as string, value);
       });
     } else {
@@ -253,6 +234,10 @@ export abstract class GfxPrimitiveElementModel<
     return (this._local.get('deserializedXYWH') as XYWH) ?? [0, 0, 0, 0];
   }
 
+  /**
+   * The bound of the element after rotation.
+   * The bound without rotation should be created by `Bound.deserialize(this.xywh)`.
+   */
   get elementBound() {
     if (this.rotate) {
       return Bound.from(getBoundsWithRotation(this));
@@ -311,6 +296,13 @@ export abstract class GfxPrimitiveElementModel<
   @watch((_, instance) => {
     instance['_local'].delete('externalBound');
   })
+
+  /**
+   * In some cases, you need to draw something related to the element, but it does not belong to the element itself.
+   * And it is also interactive, you can select element by clicking on it. E.g. the title of the group element.
+   * In this case, we need to store this kind of external xywh in order to do hit test. This property should not be synced to the doc.
+   * This property should be updated every time it gets rendered.
+   */
   @local()
   accessor externalXYWH: SerializedXYWH | undefined = undefined;
 
