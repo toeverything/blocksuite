@@ -1,4 +1,5 @@
 import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+import { undefined } from 'zod';
 
 import type { TType } from '../../../logical/typesystem.js';
 import type { InsertToPosition } from '../../../types.js';
@@ -52,6 +53,12 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
     result.push(...needShow);
     return result;
+  });
+
+  detailColumns$ = computed(() => {
+    return this.columnsWithoutFilter$.value.filter(
+      id => this.columnGetType(id) !== 'title'
+    );
   });
 
   filter$ = computed(() => {
@@ -255,12 +262,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
         filter,
       };
     });
-  }
-
-  get detailColumns(): string[] {
-    return this.columnsWithoutFilter$.value.filter(
-      id => this.columnGetType(id) !== 'title'
-    );
   }
 
   get groupHelper(): GroupHelper | undefined {

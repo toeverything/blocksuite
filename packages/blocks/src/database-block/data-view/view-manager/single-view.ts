@@ -44,8 +44,7 @@ export interface SingleView<
   columns$: ReadonlySignal<string[]>;
   columnsWithoutFilter$: ReadonlySignal<string[]>;
   columnManagerList$: ReadonlySignal<Column[]>;
-
-  get detailColumns(): string[];
+  detailColumns$: ReadonlySignal<string[]>;
 
   rows$: ReadonlySignal<string[]>;
 
@@ -445,7 +444,7 @@ export abstract class SingleViewBase<
 
   abstract columnsWithoutFilter$: ReadonlySignal<string[]>;
 
-  abstract get detailColumns(): string[];
+  abstract detailColumns$: ReadonlySignal<string[]>;
 
   abstract filter$: ReadonlySignal<FilterGroup>;
 

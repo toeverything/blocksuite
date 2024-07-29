@@ -36,6 +36,12 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     return result;
   });
 
+  detailColumns$ = computed(() => {
+    return this.columnsWithoutFilter$.value.filter(
+      id => this.columnGetType(id) !== 'title'
+    );
+  });
+
   filter$ = computed(() => {
     return this.viewData$.value?.filter ?? emptyFilterGroup;
   });
@@ -217,12 +223,6 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     });
     result.push(...needShow);
     return result;
-  }
-
-  get detailColumns(): string[] {
-    return this.columnsWithoutFilter$.value.filter(
-      id => this.columnGetType(id) !== 'title'
-    );
   }
 
   get filter(): FilterGroup {

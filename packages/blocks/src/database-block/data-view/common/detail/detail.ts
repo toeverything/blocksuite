@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { computed } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -128,13 +129,13 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   static override styles = styles;
 
+  columns$ = computed(() => {
+    return this.view.detailColumns$.value.map(id => this.view.columnGet(id));
+  });
+
   detailSlots?: DetailSlots;
 
   selection = new DetailSelection(this);
-
-  private get columns() {
-    return this.view.detailColumns.map(id => this.view.columnGet(id));
-  }
 
   private get readonly() {
     return this.view.readonly$.value;
@@ -203,7 +204,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const columns = this.columns;
+    const columns = this.columns$.value;
     const upClass = classMap({
       'switch-row': true,
       disable: !this.hasPrev(),
@@ -227,12 +228,15 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
           columns,
           v => v.id,
           column => {
-            return html` <affine-data-view-record-field
-              .view="${this.view}"
-              .column="${column}"
-              .rowId="${this.rowId}"
-              data-column-id="${column.id}"
-            ></affine-data-view-record-field>`;
+            return keyed(
+              this.rowId,
+              html` <affine-data-view-record-field
+                .view="${this.view}"
+                .column="${column}"
+                .rowId="${this.rowId}"
+                data-column-id="${column.id}"
+              ></affine-data-view-record-field>`
+            );
           }
         )}
         ${!this.readonly
