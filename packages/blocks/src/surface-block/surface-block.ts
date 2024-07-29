@@ -4,7 +4,7 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import type { CustomColor } from './consts.js';
+import type { Color } from './consts.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
@@ -171,15 +171,10 @@ export class SurfaceBlockComponent extends BlockComponent<
         getColorScheme: () => this.themeObserver.mode,
         getVariableColor: (val: string) =>
           this.themeObserver.getVariableValue(val),
-        getColor: (
-          color: string | CustomColor,
-          fallback?: string,
-          real?: boolean
-        ) => this.themeObserver.getColor(color, fallback, real),
-        generateColorProperty: (
-          color: string | CustomColor,
-          fallback: string
-        ) => this.themeObserver.generateColorProperty(color, fallback),
+        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+          this.themeObserver.getColorValue(color, fallback, real),
+        generateColorProperty: (color: Color, fallback: string) =>
+          this.themeObserver.generateColorProperty(color, fallback),
       },
       onStackingCanvasCreated(canvas) {
         canvas.className = 'indexable-canvas';

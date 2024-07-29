@@ -1,7 +1,7 @@
 // https://www.w3.org/TR/css-color-4/
 
 import type { ColorScheme } from '../../../../_common/theme/theme-observer.js';
-import type { CustomColor } from '../../../../surface-block/consts.js';
+import type { Color } from '../../../../surface-block/consts.js';
 import type {
   Hsv,
   Hsva,
@@ -267,7 +267,7 @@ export const packColor = (
   type: PickColorType,
   key: string,
   value: string,
-  oldColor?: string | CustomColor
+  oldColor?: Color
 ) => {
   if (type === 'palette') {
     return { [key]: value };
@@ -301,7 +301,7 @@ export const packColor = (
 export const packColorsWithColorScheme = (
   colorScheme: ColorScheme,
   value: string,
-  oldColor: string | CustomColor
+  oldColor: Color
 ) => {
   const colors: { type: ModeType; value: string }[] = [
     { type: 'normal', value },

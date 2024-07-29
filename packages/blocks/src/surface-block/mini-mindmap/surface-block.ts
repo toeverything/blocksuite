@@ -5,7 +5,7 @@ import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import type { CustomColor } from '../consts.js';
+import type { Color } from '../consts.js';
 import type { ShapeElementModel } from '../element-model/shape.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { MindmapService } from './service.js';
@@ -88,15 +88,10 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
         selectedElements: () => [],
         getColorScheme: () => this._theme.mode,
         getVariableColor: (val: string) => this._theme.getVariableValue(val),
-        getColor: (
-          color: string | CustomColor,
-          fallback?: string,
-          real?: boolean
-        ) => this._theme.getColor(color, fallback, real),
-        generateColorProperty: (
-          color: string | CustomColor,
-          fallback: string
-        ) => this._theme.generateColorProperty(color, fallback),
+        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+          this._theme.getColorValue(color, fallback, real),
+        generateColorProperty: (color: Color, fallback: string) =>
+          this._theme.generateColorProperty(color, fallback),
       },
     });
     this._theme.observe(this.ownerDocument.documentElement);

@@ -358,7 +358,7 @@ function extractProps(
 
   Object.entries(props).forEach(([key, value]) => {
     if (!(key in ref.shape)) return;
-    if (isPlainObject(value) && !isCustomColorType(key, value)) {
+    if (isPlainObject(value) && !isColorType(key, value)) {
       result[key] = extractProps(
         props[key] as Record<string, unknown>,
         ref.shape[key] as z.ZodObject<z.ZodRawShape>
@@ -400,7 +400,7 @@ function deepAssign(
   return target;
 }
 
-function isCustomColorType(key: string, value: unknown) {
+function isColorType(key: string, value: unknown) {
   return (
     ['background', 'color', 'stroke', 'fill', 'Color'].some(
       stuff => key.startsWith(stuff) || key.endsWith(stuff)

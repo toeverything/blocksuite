@@ -4,14 +4,14 @@ import type { Text } from '@blocksuite/store';
 import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { CustomColor } from '../surface-block/consts.js';
+import type { Color } from '../surface-block/consts.js';
 import type { ElementHitTestOptions } from '../surface-block/element-model/base.js';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 
 type FrameBlockProps = {
   title: Text;
-  background: string | CustomColor;
+  background: Color;
   xywh: SerializedXYWH;
   index: string;
 };

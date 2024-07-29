@@ -16,7 +16,7 @@ export function brush(
     matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
   );
 
-  const color = renderer.getColor(model.color, '#000000', true);
+  const color = renderer.getColorValue(model.color, '#000000', true);
 
   ctx.fillStyle = color;
 

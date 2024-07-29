@@ -282,7 +282,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       leftTopY
     );
     const autoWidth = textResizing === TextResizing.AUTO_WIDTH;
-    const color = this.edgeless.surface.themeObserver.getColor(
+    const color = this.edgeless.surface.themeObserver.getColorValue(
       this.element.color,
       '#000000'
     );

@@ -1,6 +1,6 @@
 /* CSS variables. You need to handle all places where `CSS variables` are marked. */
 
-import type { CustomColor } from '../../surface-block/consts.js';
+import type { Color } from '../../surface-block/consts.js';
 
 export const ColorVariables = [
   '--affine-brand-color',
@@ -146,7 +146,7 @@ export function isCssVariable(name: string): name is CssVariableName {
   );
 }
 
-export function isTransparent(color: CssVariableName | CustomColor) {
+export function isTransparent(color: Color) {
   return (
     typeof color === 'string' &&
     color.toLowerCase() === '--affine-palette-transparent'

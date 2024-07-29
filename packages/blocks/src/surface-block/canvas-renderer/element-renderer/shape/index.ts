@@ -52,13 +52,17 @@ export function shape(
   renderer: Renderer,
   rc: RoughCanvas
 ) {
-  const color = renderer.getColor(model.color, DEFAULT_SHAPE_TEXT_COLOR, true);
-  const fillColor = renderer.getColor(
+  const color = renderer.getColorValue(
+    model.color,
+    DEFAULT_SHAPE_TEXT_COLOR,
+    true
+  );
+  const fillColor = renderer.getColorValue(
     model.fillColor,
     DEFAULT_SHAPE_STROKE_COLOR,
     true
   );
-  const strokeColor = renderer.getColor(
+  const strokeColor = renderer.getColorValue(
     model.strokeColor,
     DEFAULT_SHAPE_FILL_COLOR,
     true

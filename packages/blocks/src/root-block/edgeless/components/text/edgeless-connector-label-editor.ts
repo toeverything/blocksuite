@@ -245,7 +245,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
     ];
 
     const isEmpty = !connector.text!.length && !this._isComposition;
-    const color = this.edgeless.surface.themeObserver.getColor(
+    const color = this.edgeless.surface.themeObserver.getColorValue(
       labelColor,
       '#000000'
     );

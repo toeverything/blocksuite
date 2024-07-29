@@ -10,7 +10,7 @@ import {
   DEFAULT_NOTE_SHADOW,
 } from '../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../_common/types.js';
-import { type CustomColor, StrokeStyle } from '../surface-block/consts.js';
+import { type Color, StrokeStyle } from '../surface-block/consts.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
@@ -54,7 +54,7 @@ export const NoteBlockSchema = defineBlockSchema({
 
 type NoteProps = {
   xywh: SerializedXYWH;
-  background: string | CustomColor;
+  background: Color;
   index: string;
   displayMode: NoteDisplayMode;
   edgeless: NoteEdgelessProps;

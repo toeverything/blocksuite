@@ -4,7 +4,7 @@ import type { Doc } from '@blocksuite/store';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { NoteBlockModel } from '../note-block/index.js';
-import type { CustomColor } from '../surface-block/consts.js';
+import type { Color } from '../surface-block/consts.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
@@ -49,15 +49,10 @@ export class SurfaceRefRenderer {
         getColorScheme: () => themeObserver.mode,
         getVariableColor: (variable: string) =>
           themeObserver.getVariableValue(variable),
-        getColor: (
-          color: string | CustomColor,
-          fallback?: string,
-          real?: boolean
-        ) => themeObserver.getColor(color, fallback, real),
-        generateColorProperty: (
-          color: string | CustomColor,
-          fallback: string
-        ) => themeObserver.generateColorProperty(color, fallback),
+        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+          themeObserver.getColorValue(color, fallback, real),
+        generateColorProperty: (color: Color, fallback: string) =>
+          themeObserver.generateColorProperty(color, fallback),
       },
     });
 

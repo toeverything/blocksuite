@@ -85,7 +85,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
     let background = `${DEFAULT_NOTE_BACKGROUND_COLOR}`;
     if (doc.awarenessStore.getFlag('enable_color_picker')) {
-      background = this.renderer.getColor(model.background, background);
+      background = this.renderer.getColorValue(model.background, background);
     } else if (typeof model.background === 'string') {
       background = model.background;
     }
