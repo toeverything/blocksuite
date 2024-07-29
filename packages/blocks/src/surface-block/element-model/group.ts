@@ -56,11 +56,14 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
     });
   }
 
-  override containedByBounds(bound: Bound): boolean {
+  override containsBound(bound: Bound): boolean {
     return bound.contains(Bound.deserialize(this.xywh));
   }
 
-  override intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
+  override getLineIntersections(
+    start: IVec,
+    end: IVec
+  ): PointLocation[] | null {
     const bound = Bound.deserialize(this.xywh);
     return linePolygonIntersects(start, end, bound.points);
   }

@@ -11,7 +11,7 @@ export type ModelToProps<
   K | 'yMap' | 'surface' | 'display' | 'opacity' | 'externalXYWH'
 >;
 
-export type { ElementHitTestOptions } from '@blocksuite/block-std/gfx';
+export type { PointTestOptions } from '@blocksuite/block-std/gfx';
 
 import type {
   GfxPrimitiveElementModel as ElementModel,

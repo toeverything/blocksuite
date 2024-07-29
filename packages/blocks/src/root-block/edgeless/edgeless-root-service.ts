@@ -20,7 +20,7 @@ import type { EdgelessTool } from './types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { clamp } from '../../_common/utils/math.js';
 import {
-  type ElementHitTestOptions,
+  type PointTestOptions,
   SurfaceGroupLikeModel,
 } from '../../surface-block/element-model/base.js';
 import {
@@ -390,7 +390,7 @@ export class EdgelessRootService extends RootService {
   pickElement(
     x: number,
     y: number,
-    options: ElementHitTestOptions = { all: false, expand: 10 }
+    options: PointTestOptions = { all: false, expand: 10 }
   ): BlockSuite.EdgelessModel[] | BlockSuite.EdgelessModel | null {
     options.expand ??= 10;
     options.zoom = this._viewport.zoom;
@@ -405,7 +405,7 @@ export class EdgelessRootService extends RootService {
       const candidates = this._layer.canvasGrid.search(hitTestBound);
       const picked = candidates.filter(
         element =>
-          element.hitTest(x, y, options, this.host) ||
+          element.includesPoint(x, y, options, this.host) ||
           element.externalBound?.isPointInBound([x, y])
       );
 
@@ -415,7 +415,7 @@ export class EdgelessRootService extends RootService {
       const candidates = this._layer.blocksGrid.search(hitTestBound);
       const picked = candidates.filter(
         element =>
-          element.hitTest(x, y, options, this.host) ||
+          element.includesPoint(x, y, options, this.host) ||
           element.externalBound?.isPointInBound([x, y])
       );
       return picked as BlockSuite.EdgelessModel[];
@@ -423,7 +423,7 @@ export class EdgelessRootService extends RootService {
     const pickFrames = () => {
       return this._layer.frames.filter(
         frame =>
-          frame.hitTest(x, y, options) ||
+          frame.includesPoint(x, y, options) ||
           frame.externalBound?.isPointInBound([x, y])
       ) as BlockSuite.EdgelessModel[];
     };
@@ -452,7 +452,7 @@ export class EdgelessRootService extends RootService {
   pickElementInGroup(
     x: number,
     y: number,
-    options?: ElementHitTestOptions
+    options?: PointTestOptions
   ): BlockSuite.EdgelessModel | null {
     const selectionManager = this._selection;
     const results = this.pickElement(x, y, {
@@ -518,21 +518,21 @@ export class EdgelessRootService extends RootService {
     const pickCanvasElement = () => {
       const candidates = this._layer.canvasGrid.search(bound);
       const picked = candidates.filter(element =>
-        element.boxSelect(bound as Bound)
+        element.intersectsBound(bound as Bound)
       );
       return picked as BlockSuite.EdgelessModel[];
     };
     const pickBlock = () => {
       const candidates = this._layer.blocksGrid.search(bound);
       const picked = candidates.filter(element =>
-        element.boxSelect(bound as Bound)
+        element.intersectsBound(bound as Bound)
       );
       return picked as BlockSuite.EdgelessModel[];
     };
     const pickFrames = () => {
       const candidates = this._layer.framesGrid.search(bound);
       return candidates.filter(frame =>
-        frame.boxSelect(bound as Bound)
+        frame.intersectsBound(bound as Bound)
       ) as BlockSuite.EdgelessModel[];
     };
 

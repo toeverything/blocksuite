@@ -86,21 +86,21 @@ export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
     return this.displayMode !== NoteDisplayMode.DocOnly;
   }
 
-  override boxSelect(bound: Bound): boolean {
+  override containsBound(bounds: Bound): boolean {
     if (!this._isSelectable()) return false;
-    return super.boxSelect(bound);
+    return super.containsBound(bounds);
   }
 
-  override containedByBounds(bounds: Bound): boolean {
-    if (!this._isSelectable()) return false;
-    return super.containedByBounds(bounds);
-  }
-
-  override hitTest(x: number, y: number): boolean {
+  override includesPoint(x: number, y: number): boolean {
     if (!this._isSelectable()) return false;
 
     const bound = Bound.deserialize(this.xywh);
     return bound.isPointInBound([x, y], 0);
+  }
+
+  override intersectsBound(bound: Bound): boolean {
+    if (!this._isSelectable()) return false;
+    return super.intersectsBound(bound);
   }
 }
 

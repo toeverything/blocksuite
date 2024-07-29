@@ -15,10 +15,6 @@ import {
   GfxPrimitiveElementModel,
 } from './element-model.js';
 
-const generateElementId = () => {
-  return nanoid();
-};
-
 export type SurfaceBlockProps = {
   elements: Boxed<Y.Map<Y.Map<unknown>>>;
 };
@@ -445,7 +441,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       throw new Error('Cannot add element in readonly mode');
     }
 
-    const id = generateElementId();
+    const id = nanoid();
 
     // @ts-ignore
     props.id = id;

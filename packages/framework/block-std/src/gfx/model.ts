@@ -19,17 +19,18 @@ import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
 import type {
+  GfxElementGeometry,
   GfxGroupLikeElementModel,
   GfxPrimitiveElementModel,
 } from './surface/element-model.js';
 
-import { SurfaceBlockModel } from './surface/model.js';
+import { SurfaceBlockModel } from './surface/block-model.js';
 
-export interface ElementHitTestOptions {
+export interface PointTestOptions {
   expand?: number;
 
   /**
-   * If true, the transparent area of the element will be ignored during hit test.
+   * If true, the transparent area of the element will be ignored during the point inclusion test.
    * Otherwise, the transparent area will be considered as filled area.
    *
    * Default is true.
@@ -41,24 +42,18 @@ export interface ElementHitTestOptions {
 }
 
 export class GfxBlockElementModel<
-  Props extends GfxSelectableProps = GfxSelectableProps,
-> extends BlockModel<Props> {
+    Props extends GfxSelectableProps = GfxSelectableProps,
+  >
+  extends BlockModel<Props>
+  implements GfxElementGeometry
+{
   private _externalXYWH: SerializedXYWH | undefined = undefined;
 
   connectable = true;
 
   rotate = 0;
 
-  boxSelect(bound: Bound): boolean {
-    return (
-      this.containedByBounds(bound) ||
-      bound.points.some((point, i, points) =>
-        this.intersectWithLine(point, points[(i + 1) % points.length])
-      )
-    );
-  }
-
-  containedByBounds(bounds: Bound): boolean {
+  containsBound(bounds: Bound): boolean {
     const bound = Bound.deserialize(this.xywh);
     const points = getPointsFromBoundsWithRotation({
       x: bound.x,
@@ -68,6 +63,16 @@ export class GfxBlockElementModel<
       rotate: this.rotate,
     });
     return points.some(point => bounds.containsPoint(point));
+  }
+
+  getLineIntersections(start: IVec, end: IVec): PointLocation[] | null {
+    const bound = Bound.deserialize(this.xywh);
+
+    return linePolygonIntersects(
+      start,
+      end,
+      rotatePoints(bound.points, bound.center, this.rotate ?? 0)
+    );
   }
 
   getNearestPoint(point: IVec): IVec {
@@ -92,23 +97,22 @@ export class GfxBlockElementModel<
     return new PointLocation(rotatePoint, tangent);
   }
 
-  hitTest(
+  includesPoint(
     x: number,
     y: number,
-    _: ElementHitTestOptions,
+    _: PointTestOptions,
     __: EditorHost
   ): boolean {
     const bound = Bound.deserialize(this.xywh);
     return bound.isPointInBound([x, y], 0);
   }
 
-  intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
-    const bound = Bound.deserialize(this.xywh);
-
-    return linePolygonIntersects(
-      start,
-      end,
-      rotatePoints(bound.points, bound.center, this.rotate ?? 0)
+  intersectsBound(bound: Bound): boolean {
+    return (
+      this.containsBound(bound) ||
+      bound.points.some((point, i, points) =>
+        this.getLineIntersections(point, points[(i + 1) % points.length])
+      )
     );
   }
 

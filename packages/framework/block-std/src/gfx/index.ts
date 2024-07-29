@@ -1,5 +1,10 @@
 export * from './model.js';
 export {
+  SurfaceBlockModel,
+  type SurfaceBlockProps,
+  type SurfaceMiddleware,
+} from './surface/block-model.js';
+export {
   convert,
   convertProps,
   derive,
@@ -20,9 +25,4 @@ export {
   GfxPrimitiveElementModel,
   type SerializedElement,
 } from './surface/element-model.js';
-export {
-  SurfaceBlockModel,
-  type SurfaceBlockProps,
-  type SurfaceMiddleware,
-} from './surface/model.js';
 export * from './viewport.js';

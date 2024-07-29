@@ -1,6 +1,6 @@
 import type {
   BaseElementProps,
-  ElementHitTestOptions,
+  PointTestOptions,
 } from '@blocksuite/block-std/gfx';
 import type { IVec, IVec3, SerializedXYWH } from '@blocksuite/global/utils';
 
@@ -45,41 +45,12 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
     return props;
   }
 
-  override containedByBounds(bounds: Bound) {
+  override containsBound(bounds: Bound) {
     const points = getPointsFromBoundsWithRotation(this);
     return points.some(point => bounds.containsPoint(point));
   }
 
-  override getNearestPoint(point: IVec): IVec {
-    const { x, y } = this;
-
-    return polyLineNearestPoint(
-      this.points.map(p => Vec.add(p, [x, y])),
-      point
-    ) as IVec;
-  }
-
-  override getRelativePointLocation(position: IVec): PointLocation {
-    const point = Bound.deserialize(this.xywh).getRelativePoint(position);
-    return new PointLocation(point);
-  }
-
-  override hitTest(
-    px: number,
-    py: number,
-    options?: ElementHitTestOptions
-  ): boolean {
-    const hit = isPointOnlines(
-      Bound.deserialize(this.xywh),
-      this.points as [number, number][],
-      this.rotate,
-      [px, py],
-      (options?.expand ?? 10) / Math.min(options?.zoom ?? 1, 1)
-    );
-    return hit;
-  }
-
-  override intersectWithLine(start: IVec, end: IVec) {
+  override getLineIntersections(start: IVec, end: IVec) {
     const tl = [this.x, this.y];
     const points = getPointsFromBoundsWithRotation(this, _ =>
       this.points.map(point => Vec.add(point, tl))
@@ -106,6 +77,35 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
       }
     }
     return null;
+  }
+
+  override getNearestPoint(point: IVec): IVec {
+    const { x, y } = this;
+
+    return polyLineNearestPoint(
+      this.points.map(p => Vec.add(p, [x, y])),
+      point
+    ) as IVec;
+  }
+
+  override getRelativePointLocation(position: IVec): PointLocation {
+    const point = Bound.deserialize(this.xywh).getRelativePoint(position);
+    return new PointLocation(point);
+  }
+
+  override includesPoint(
+    px: number,
+    py: number,
+    options?: PointTestOptions
+  ): boolean {
+    const hit = isPointOnlines(
+      Bound.deserialize(this.xywh),
+      this.points as [number, number][],
+      this.rotate,
+      [px, py],
+      (options?.expand ?? 10) / Math.min(options?.zoom ?? 1, 1)
+    );
+    return hit;
   }
 
   /**

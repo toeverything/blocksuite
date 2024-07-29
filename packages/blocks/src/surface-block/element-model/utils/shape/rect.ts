@@ -4,7 +4,7 @@ import type { IVec } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { PointLocation } from '@blocksuite/global/utils';
 
-import type { ElementHitTestOptions } from '../../base.js';
+import type { PointTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 
 import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
@@ -36,11 +36,11 @@ export const rect = {
     ctx.rect(x, y, w, h);
     ctx.restore();
   },
-  hitTest(
+  includesPoint(
     this: ShapeElementModel,
     x: number,
     y: number,
-    options: ElementHitTestOptions
+    options: PointTestOptions
   ) {
     const points = getPointsFromBoundsWithRotation(this);
 
@@ -82,7 +82,7 @@ export const rect = {
     return hit;
   },
 
-  containedByBounds(bounds: Bound, element: ShapeElementModel): boolean {
+  containsBound(bounds: Bound, element: ShapeElementModel): boolean {
     const points = getPointsFromBoundsWithRotation(element);
     return points.some(point => bounds.containsPoint(point));
   },
@@ -92,7 +92,7 @@ export const rect = {
     return polygonNearestPoint(points, point);
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElementModel) {
+  getLineIntersections(start: IVec, end: IVec, element: ShapeElementModel) {
     const points = getPointsFromBoundsWithRotation(element);
     return linePolygonIntersects(start, end, points);
   },

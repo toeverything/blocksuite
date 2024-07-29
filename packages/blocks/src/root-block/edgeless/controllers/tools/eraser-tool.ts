@@ -151,7 +151,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
         }
       } else {
         if (
-          erasable.intersectWithLine(
+          erasable.getLineIntersections(
             this._prevPoint as IVec,
             currentPoint as IVec
           )

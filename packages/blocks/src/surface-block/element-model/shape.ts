@@ -1,6 +1,6 @@
 import type {
   BaseElementProps,
-  ElementHitTestOptions,
+  PointTestOptions,
 } from '@blocksuite/block-std/gfx';
 import type {
   Bound,
@@ -86,8 +86,12 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     return props;
   }
 
-  override containedByBounds(bounds: Bound) {
-    return shapeMethods[this.shapeType].containedByBounds(bounds, this);
+  override containsBound(bounds: Bound) {
+    return shapeMethods[this.shapeType].containsBound(bounds, this);
+  }
+
+  override getLineIntersections(start: IVec, end: IVec) {
+    return shapeMethods[this.shapeType].getLineIntersections(start, end, this);
   }
 
   override getNearestPoint(point: IVec): IVec {
@@ -98,15 +102,11 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
   }
 
-  override hitTest(x: number, y: number, options: ElementHitTestOptions) {
-    return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
+  override includesPoint(x: number, y: number, options: PointTestOptions) {
+    return shapeMethods[this.shapeType].includesPoint.call(this, x, y, {
       ...options,
       ignoreTransparent: options.ignoreTransparent ?? true,
     });
-  }
-
-  override intersectWithLine(start: IVec, end: IVec) {
-    return shapeMethods[this.shapeType].intersectWithLine(start, end, this);
   }
 
   get type() {
