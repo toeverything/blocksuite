@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { Doc } from '@blocksuite/store';
 
 import { BlockComponent } from '@blocksuite/block-std';
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
@@ -8,7 +9,6 @@ import {
   deserializeXYWH,
 } from '@blocksuite/global/utils';
 import { assertExists, noop } from '@blocksuite/global/utils';
-import { BlockViewType, type Doc } from '@blocksuite/store';
 import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -285,7 +285,6 @@ export class SurfaceRefBlockComponent extends BlockComponent<
         | undefined) ?? null;
     this._surfaceModel = surfaceModel;
 
-    const selector = () => BlockViewType.Display;
     const init = () => {
       const referencedModel: BlockSuite.EdgelessModel =
         (this.doc.getBlock(this.model.reference)
@@ -297,7 +296,6 @@ export class SurfaceRefBlockComponent extends BlockComponent<
         referencedModel && referencedModel.xywh ? referencedModel : null;
       this._previewDoc = this.doc.collection.getDoc(this.doc.id, {
         readonly: true,
-        selector,
       });
       this._referenceXYWH = this._referencedModel?.xywh ?? null;
     };

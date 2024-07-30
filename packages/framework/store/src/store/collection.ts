@@ -16,7 +16,7 @@ import * as Y from 'yjs';
 
 import type { Schema } from '../schema/index.js';
 import type { IdGenerator } from '../utils/id-generator.js';
-import type { BlockSelector, Doc } from './doc/index.js';
+import type { Doc, Query } from './doc/index.js';
 import type { IdGeneratorType } from './id.js';
 
 import {
@@ -187,8 +187,8 @@ export class DocCollection extends DocCollectionAddonType {
    * If the `init` parameter is passed, a `surface`, `note`, and `paragraph` block
    * will be created in the doc simultaneously.
    */
-  createDoc(options: { id?: string; selector?: BlockSelector } = {}) {
-    const { id: docId = this.idGenerator(), selector } = options;
+  createDoc(options: { id?: string; query?: Query } = {}) {
+    const { id: docId = this.idGenerator(), query } = options;
     if (this._hasDoc(docId)) {
       throw new BlockSuiteError(
         ErrorCode.DocCollectionError,
@@ -202,7 +202,7 @@ export class DocCollection extends DocCollectionAddonType {
       createDate: Date.now(),
       tags: [],
     });
-    return this.getDoc(docId, { selector }) as Doc;
+    return this.getDoc(docId, { query }) as Doc;
   }
 
   /**

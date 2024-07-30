@@ -6,10 +6,11 @@ import type { BlockModel } from '../../schema/base.js';
 import type { IdGenerator } from '../../utils/id-generator.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../../yjs/index.js';
 import type { DocCollection } from '../collection.js';
+import type { YBlock } from './index.js';
+import type { Query } from './query.js';
 
 import { Text } from '../../reactive/text.js';
 import { DocCRUD } from './crud.js';
-import { type BlockSelector, BlockViewType, type YBlock } from './index.js';
 import { Doc } from './index.js';
 
 export type YBlocks = Y.Map<YBlock>;
@@ -30,10 +31,8 @@ type DocOptions = {
   idGenerator?: IdGenerator;
 };
 
-export const defaultBlockSelector = () => BlockViewType.Display;
-
 export type GetDocOptions = {
-  selector?: BlockSelector;
+  query?: Query;
   readonly?: boolean;
 };
 
@@ -43,9 +42,9 @@ export class BlockCollection {
   private readonly _docCRUD: DocCRUD;
 
   private _docMap = {
-    undefined: new WeakMap<BlockSelector, Doc>(),
-    true: new WeakMap<BlockSelector, Doc>(),
-    false: new WeakMap<BlockSelector, Doc>(),
+    undefined: new Map<string, Doc>(),
+    true: new Map<string, Doc>(),
+    false: new Map<string, Doc>(),
   };
 
   // doc/space container.
@@ -214,10 +213,10 @@ export class BlockCollection {
     this._yBlocks.clear();
   }
 
-  clearSelector(selector: BlockSelector, readonly?: boolean) {
+  clearQuery(query: Query, readonly?: boolean) {
     const readonlyKey = this._getReadonlyKey(readonly);
 
-    this._docMap[readonlyKey].delete(selector);
+    this._docMap[readonlyKey].delete(JSON.stringify(query));
   }
 
   destroy() {
@@ -239,22 +238,24 @@ export class BlockCollection {
     return this._idGenerator();
   }
 
-  getDoc({ selector = defaultBlockSelector, readonly }: GetDocOptions = {}) {
+  getDoc({ readonly, query }: GetDocOptions = {}) {
     const readonlyKey = this._getReadonlyKey(readonly);
 
-    if (this._docMap[readonlyKey].has(selector)) {
-      return this._docMap[readonlyKey].get(selector)!;
+    const key = JSON.stringify(query);
+
+    if (this._docMap[readonlyKey].has(key)) {
+      return this._docMap[readonlyKey].get(key)!;
     }
 
     const doc = new Doc({
       blockCollection: this,
       crud: this._docCRUD,
       schema: this.collection.schema,
-      selector,
       readonly,
+      query,
     });
 
-    this._docMap[readonlyKey].set(selector, doc);
+    this._docMap[readonlyKey].set(key, doc);
 
     return doc;
   }

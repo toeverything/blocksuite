@@ -1,4 +1,4 @@
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockModel, Query } from '@blocksuite/store';
 
 import {
   type EditorHost,
@@ -8,7 +8,7 @@ import {
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, debounce } from '@blocksuite/global/utils';
-import { type Block, BlockViewType, type Doc, nanoid } from '@blocksuite/store';
+import { BlockViewType, type Doc, nanoid } from '@blocksuite/store';
 import { type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -109,22 +109,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _frameDisposables: DisposableGroup | null = null;
 
-  private _getSelector = (model: BlockModel) => {
-    return (block: Block, doc: Doc) => {
-      let parent: BlockModel | Block | null = block;
-
-      while (parent) {
-        if (parent.id === model.id) {
-          return BlockViewType.Display;
-        }
-
-        parent = doc.getParent(parent.id);
-      }
-
-      return BlockViewType.Hidden;
-    };
-  };
-
   private _getViewportWH = (referencedModel: RefElement) => {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
 
@@ -151,11 +135,14 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   };
 
   private _renderModel = (model: BlockModel) => {
-    const selector = this._getSelector(model);
+    const query: Query = {
+      mode: 'include',
+      match: [{ id: model.id, viewType: BlockViewType.Display }],
+    };
     this._disposables.add(() => {
-      doc.blockCollection.clearSelector(selector);
+      doc.blockCollection.clearQuery(query);
     });
-    const doc = model.doc.blockCollection.getDoc({ selector });
+    const doc = model.doc.blockCollection.getDoc({ query });
     const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
     return this.host.renderSpecPortal(doc, previewSpec.value);
   };

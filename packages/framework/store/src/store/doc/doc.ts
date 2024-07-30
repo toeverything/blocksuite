@@ -9,6 +9,7 @@ import type { DocCRUD } from './crud.js';
 
 import { syncBlockProps } from '../../utils/utils.js';
 import { Block } from './block/index.js';
+import { type Query, runQuery } from './query.js';
 
 export enum BlockViewType {
   Bypass = 'bypass',
@@ -16,14 +17,12 @@ export enum BlockViewType {
   Hidden = 'hidden',
 }
 
-export type BlockSelector = (block: Block, doc: Doc) => BlockViewType;
-
 type DocOptions = {
   schema: Schema;
   blockCollection: BlockCollection;
   crud: DocCRUD;
-  selector: BlockSelector;
   readonly?: boolean;
+  query?: Query;
 };
 
 export class Doc {
@@ -35,11 +34,18 @@ export class Doc {
 
   protected readonly _disposeBlockUpdated: Disposable;
 
+  protected readonly _query: Query = {
+    match: [],
+    mode: 'loose',
+  };
+
   protected readonly _readonly?: boolean;
 
-  protected readonly _schema: Schema;
+  private _runQuery = (block: Block) => {
+    runQuery(this._query, block);
+  };
 
-  protected readonly _selector: BlockSelector;
+  protected readonly _schema: Schema;
 
   readonly slots: BlockCollection['slots'] & {
     /** This is always triggered after `doc.load` is called. */
@@ -75,13 +81,7 @@ export class Doc {
     >;
   };
 
-  constructor({
-    schema,
-    blockCollection,
-    crud,
-    selector,
-    readonly,
-  }: DocOptions) {
+  constructor({ schema, blockCollection, crud, readonly, query }: DocOptions) {
     this._blockCollection = blockCollection;
 
     this.slots = {
@@ -95,8 +95,10 @@ export class Doc {
 
     this._crud = crud;
     this._schema = schema;
-    this._selector = selector;
     this._readonly = readonly;
+    if (query) {
+      this._query = query;
+    }
 
     this._yBlocks.forEach((_, id) => {
       if (id in this._blocks.peek()) {
@@ -163,9 +165,9 @@ export class Doc {
           });
         },
       };
-      const block = new Block(this._schema, yBlock, this, options);
 
-      block.blockViewType = this._selector(block, this);
+      const block = new Block(this._schema, yBlock, this, options);
+      this._runQuery(block);
 
       this._blocks.value = {
         ...this._blocks.value,
@@ -518,9 +520,12 @@ export class Doc {
       );
     }
 
+    const block = this.getBlock(model.id);
+
     this.transact(() => {
       if (isCallback) {
         callBackOrProps();
+        this._runQuery(block);
         return;
       }
 
@@ -539,6 +544,7 @@ export class Doc {
         );
       }
       syncBlockProps(schema, model, yBlock, callBackOrProps);
+      this._runQuery(block);
       return;
     });
   }
