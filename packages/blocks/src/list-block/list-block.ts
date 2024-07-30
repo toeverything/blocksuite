@@ -3,7 +3,7 @@ import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
 import { getInlineRangeProvider } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 import { effect } from '@lit-labs/preact-signals';
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -111,8 +111,9 @@ export class ListBlockComponent extends CaptionedBlockComponent<
       effect(() => {
         const type = this.model.type$.value;
         const order = this.model.order$.value;
+        noop(order);
         // old numbered list has no order
-        if (type === 'numbered' && !Number.isInteger(order)) {
+        if (type === 'numbered') {
           correctNumberedListsOrderToPrev(this.doc, this.model, false);
         }
         // if list is not numbered, order should be null
