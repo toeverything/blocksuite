@@ -195,16 +195,15 @@ export class TableHotkeysController implements ReactiveController {
 
         'Shift-ArrowUp': context => {
           const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            selection.isEditing ||
-            !this.selectionController.isSelectedRowOnly()
-          ) {
+          if (!selection || selection.isEditing) {
             return false;
           }
 
-          if (this.selectionController.isSelectedRowOnly())
+          if (this.selectionController.isSelectedRowOnly()) {
             this.selectionController.navigateRowSelection('up', true);
+          } else {
+            this.selectionController.selectionAreaUp();
+          }
 
           context.get('keyboardState').raw.preventDefault();
           return true;
@@ -212,16 +211,47 @@ export class TableHotkeysController implements ReactiveController {
 
         'Shift-ArrowDown': context => {
           const selection = this.selectionController.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+
+          if (this.selectionController.isSelectedRowOnly()) {
+            this.selectionController.navigateRowSelection('down', true);
+          } else {
+            this.selectionController.selectionAreaDown();
+          }
+
+          context.get('keyboardState').raw.preventDefault();
+          return true;
+        },
+
+        'Shift-ArrowLeft': context => {
+          const selection = this.selectionController.selection;
           if (
             !selection ||
             selection.isEditing ||
-            !this.selectionController.isSelectedRowOnly()
+            this.selectionController.isSelectedRowOnly()
           ) {
             return false;
           }
 
-          if (this.selectionController.isSelectedRowOnly())
-            this.selectionController.navigateRowSelection('down', true);
+          this.selectionController.selectionAreaLeft();
+
+          context.get('keyboardState').raw.preventDefault();
+          return true;
+        },
+
+        'Shift-ArrowRight': context => {
+          const selection = this.selectionController.selection;
+          if (
+            !selection ||
+            selection.isEditing ||
+            this.selectionController.isSelectedRowOnly()
+          ) {
+            return false;
+          }
+
+          this.selectionController.selectionAreaRight();
 
           context.get('keyboardState').raw.preventDefault();
           return true;

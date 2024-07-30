@@ -23,6 +23,8 @@ import {
   fillSelectionWithFocusCellData,
 } from './drag-to-fill.js';
 
+type TableViewSelectionSetOptions = Omit<TableViewSelection, 'viewId' | 'type'>;
+
 export class TableSelectionController implements ReactiveController {
   __dragToFillElement = new DragToFillElement();
 
@@ -306,6 +308,21 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
+  focusToArea(selection: TableViewSelection) {
+    return {
+      ...selection,
+      rowsSelection: selection.rowsSelection ?? {
+        start: selection.focus.rowIndex,
+        end: selection.focus.rowIndex,
+      },
+      columnsSelection: selection.columnsSelection ?? {
+        start: selection.focus.columnIndex,
+        end: selection.focus.columnIndex,
+      },
+      isEditing: false,
+    } satisfies TableViewSelectionSetOptions;
+  }
+
   focusToCell(position: 'left' | 'right' | 'up' | 'down') {
     if (!this.selection) {
       return;
@@ -562,6 +579,116 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
+  selectionAreaDown() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (newSelection.rowsSelection.start === newSelection.focus.rowIndex) {
+      newSelection.rowsSelection.end = Math.min(
+        this.rows(newSelection.groupKey).length - 1,
+        newSelection.rowsSelection.end + 1
+      );
+      this.getCellContainer(
+        newSelection.groupKey,
+        newSelection.rowsSelection.end,
+        newSelection.focus.columnIndex
+      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    } else {
+      newSelection.rowsSelection.start += 1;
+      this.getCellContainer(
+        newSelection.groupKey,
+        newSelection.rowsSelection.start,
+        newSelection.focus.columnIndex
+      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    this.selection = newSelection;
+  }
+
+  selectionAreaLeft() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (newSelection.columnsSelection.end === newSelection.focus.columnIndex) {
+      newSelection.columnsSelection.start = Math.max(
+        0,
+        newSelection.columnsSelection.start - 1
+      );
+      this.getCellContainer(
+        newSelection.groupKey,
+        newSelection.focus.rowIndex,
+        newSelection.columnsSelection.start
+      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    } else {
+      newSelection.columnsSelection.end -= 1;
+      this.getCellContainer(
+        newSelection.groupKey,
+        newSelection.focus.rowIndex,
+        newSelection.columnsSelection.end
+      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    this.selection = newSelection;
+  }
+
+  selectionAreaRight() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (
+      newSelection.columnsSelection.start === newSelection.focus.columnIndex
+    ) {
+      const max =
+        this.rows(newSelection.groupKey)
+          ?.item(0)
+          .querySelectorAll('affine-database-cell-container').length - 1;
+      newSelection.columnsSelection.end = Math.min(
+        max,
+        newSelection.columnsSelection.end + 1
+      );
+      this.getCellContainer(
+        newSelection.groupKey,
+        newSelection.focus.rowIndex,
+        newSelection.columnsSelection.end
+      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    } else {
+      newSelection.columnsSelection.start += 1;
+      this.getCellContainer(
+        newSelection.groupKey,
+        newSelection.focus.rowIndex,
+        newSelection.columnsSelection.start
+      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    this.selection = newSelection;
+  }
+
+  selectionAreaUp() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (newSelection.rowsSelection.end === newSelection.focus.rowIndex) {
+      newSelection.rowsSelection.start = Math.max(
+        0,
+        newSelection.rowsSelection.start - 1
+      );
+      this.getCellContainer(
+        newSelection.groupKey,
+        newSelection.rowsSelection.start,
+        newSelection.focus.columnIndex
+      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    } else {
+      newSelection.rowsSelection.end -= 1;
+      this.getCellContainer(
+        newSelection.groupKey,
+        newSelection.rowsSelection.end,
+        newSelection.focus.columnIndex
+      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    this.selection = newSelection;
+  }
+
   startDrag(
     evt: PointerEvent,
     cell: DatabaseCellContainer,
@@ -814,7 +941,7 @@ export class TableSelectionController implements ReactiveController {
     return this._tableViewSelection;
   }
 
-  set selection(data: Omit<TableViewSelection, 'viewId' | 'type'> | undefined) {
+  set selection(data: TableViewSelectionSetOptions | undefined) {
     if (!data) {
       this.clearSelection();
       return;
