@@ -108,6 +108,14 @@ export const TableAreaSelection = {
       },
     };
   },
+  isFocus(selection: TableAreaSelection) {
+    return (
+      selection.focus.rowIndex === selection.rowsSelection.start &&
+      selection.focus.rowIndex === selection.rowsSelection.end &&
+      selection.focus.columnIndex === selection.columnsSelection.start &&
+      selection.focus.columnIndex === selection.columnsSelection.end
+    );
+  },
 };
 
 export type CellFocus = {

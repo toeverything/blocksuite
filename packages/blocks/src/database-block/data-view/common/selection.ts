@@ -85,7 +85,6 @@ export class DatabaseSelection extends BaseSelection {
   }
 
   static override fromJSON(json: Record<string, unknown>): DatabaseSelection {
-    console.log(json);
     DatabaseSelectionSchema.parse(json);
     return new DatabaseSelection({
       blockId: json.blockId as string,

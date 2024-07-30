@@ -63,10 +63,6 @@ export class TableSelectionController implements ReactiveController {
     this.host.setSelection();
   }
 
-  private get dragToFillDraggable() {
-    return this.__dragToFillElement.dragToFillRef.value;
-  }
-
   private get focusSelectionElement() {
     return this.__selectionElement.focusRef.value;
   }
@@ -232,10 +228,6 @@ export class TableSelectionController implements ReactiveController {
       block: 'nearest',
       inline: 'nearest',
     });
-  }
-
-  private get view() {
-    return this.host.view;
   }
 
   areaToRows(selection: TableAreaSelection) {
@@ -807,6 +799,10 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
+  get dragToFillDraggable() {
+    return this.__dragToFillElement.dragToFillRef.value;
+  }
+
   get selection(): TableViewSelectionWithType | undefined {
     return this._tableViewSelection;
   }
@@ -845,6 +841,10 @@ export class TableSelectionController implements ReactiveController {
     );
     assertExists(tableContainer);
     return tableContainer;
+  }
+
+  get view() {
+    return this.host.view;
   }
 
   get viewData() {
@@ -909,13 +909,29 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
 
   focusRef: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
 
+  preTask = 0;
+
   selectionRef: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
+
+  clearAreaStyle() {
+    const div = this.selectionRef.value;
+    if (!div) return;
+    div.style.display = 'none';
+  }
+
+  clearFocusStyle() {
+    const div = this.focusRef.value;
+    const dragToFill = this.controller.dragToFillDraggable;
+    if (!div || !dragToFill) return;
+    div.style.display = 'none';
+    dragToFill.style.display = 'none';
+  }
 
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
       effect(() => {
-        const selection = this.selection$.value;
+        this.startUpdate(this.selection$.value);
       })
     );
   }
@@ -932,152 +948,104 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  startUpdate(){
-
-  }
-
-  updateFocusSelectionStyle(
-    groupKey: string | undefined,
-    focus?: CellFocus,
-    isRowSelection?: boolean,
-    isEditing = false,
-    showDragToFillHandle = false
-  ) {
-    const div = this.focusSelectionElement;
-    const dragToFill = this.dragToFillDraggable;
-
-    if (!div || !dragToFill) return;
-    if (focus && !isRowSelection && !this.host.view.readonly$.value) {
-      // Check if row is removed.
-      const rows = this.rows(groupKey) ?? [];
-      if (rows.length <= focus.rowIndex) return;
-
-      const { left, top, width, height, scale } = this.getRect(
-        groupKey,
-        focus.rowIndex,
-        focus.rowIndex,
-        focus.columnIndex,
-        focus.columnIndex
-      );
-      const tableRect = this.tableContainer.getBoundingClientRect();
-
-      const x = left - tableRect.left / scale;
-      const y = top - 1 - tableRect.top / scale;
-      const w = width + 1;
-      const h = height + 1;
-      div.style.left = `${x}px`;
-      div.style.top = `${y}px`;
-      div.style.width = `${w}px`;
-      div.style.height = `${h}px`;
-      div.style.borderColor = 'var(--affine-primary-color)';
-      div.style.borderStyle = this.__dragToFillElement.dragging
-        ? 'dashed'
-        : 'solid';
-      div.style.boxShadow = isEditing
-        ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
-        : 'unset';
-      div.style.display = 'block';
-
-      dragToFill.style.left = `${x + w}px`;
-      dragToFill.style.top = `${y + h}px`;
-      dragToFill.style.display = showDragToFillHandle ? 'block' : 'none';
-    } else {
-      div.style.display = 'none';
-      dragToFill.style.display = 'none';
+  startUpdate(selection?: TableViewSelection) {
+    if (this.preTask) {
+      cancelAnimationFrame(this.preTask);
+      this.preTask = 0;
     }
-  }
-
-  updateSelection(tableSelection?: TableViewSelectionWithType) {
-    const update = (): boolean => {
-      if (TableRowSelection.is(tableSelection)) {
-        return true;
-      }
-      if (!tableSelection) {
-        return true;
-      }
-      const cell = this.controller.getCellContainer(
-        tableSelection.groupKey,
-        tableSelection.focus.rowIndex,
-        tableSelection.focus.columnIndex
+    if (
+      selection?.selectionType === 'area' &&
+      !this.controller.host.view.readonly$.value
+    ) {
+      this.updateAreaSelectionStyle(
+        selection.groupKey,
+        selection.rowsSelection,
+        selection.columnsSelection
       );
-      if (!cell) {
-        return false;
-      }
-      this.updateSelectionStyle(
-        tableSelection.groupKey,
-        tableSelection.rowsSelection,
-        tableSelection.columnsSelection
-      );
-
-      const isRowSelection =
-        tableSelection.rowsSelection && !tableSelection.columnsSelection;
-
-      const rowSel = tableSelection.rowsSelection;
-
       const isDragElemDragging = this.controller.__dragToFillElement.dragging;
-      const isEditing = tableSelection.isEditing;
+      const isEditing = selection.isEditing;
 
-      const showDragToFillHandle =
-        !isEditing && ((rowSel && isDragElemDragging) || !rowSel);
+      const showDragToFillHandle = !isEditing && isDragElemDragging;
 
       this.updateFocusSelectionStyle(
-        tableSelection.groupKey,
-        tableSelection.focus,
-        isRowSelection,
+        selection.groupKey,
+        selection.focus,
         isEditing,
         showDragToFillHandle
       );
-      return true;
-    };
-    if (!tableSelection) {
-      cancelAnimationFrame(this.selectionStyleUpdateTask);
-      update();
+      this.preTask = requestAnimationFrame(() => this.startUpdate(this.selection$.value));
     } else {
-      const task = () => {
-        cancelAnimationFrame(this.selectionStyleUpdateTask);
-        if (!update()) {
-          this.selection = undefined;
-          return;
-        }
-        this.selectionStyleUpdateTask = requestAnimationFrame(task);
-      };
-      task();
+      this.clearFocusStyle();
+      this.clearAreaStyle();
     }
   }
 
-  updateSelectionStyle(
+  updateAreaSelectionStyle(
     groupKey: string | undefined,
-    rowSelection?: MultiSelection,
-    columnSelection?: MultiSelection
+    rowSelection: MultiSelection,
+    columnSelection: MultiSelection
   ) {
-    const div = this.areaSelectionElement;
+    const div = this.selectionRef.value;
     if (!div) return;
-    if ((!rowSelection && !columnSelection) || this.host.view.readonly$.value) {
-      div.style.display = 'none';
-      return;
-    }
-    const tableRect = this.tableContainer.getBoundingClientRect();
+    const tableRect = this.controller.tableContainer.getBoundingClientRect();
     // eslint-disable-next-line prefer-const
-    let { left, top, width, height, scale } = this.getRect(
+    let { left, top, width, height, scale } = this.controller.getRect(
       groupKey,
       rowSelection?.start ?? 0,
-      rowSelection?.end ?? this.view.rows$.value.length - 1,
+      rowSelection?.end ?? this.controller.view.rows$.value.length - 1,
       columnSelection?.start ?? 0,
-      columnSelection?.end ?? this.view.columnManagerList$.value.length - 1
+      columnSelection?.end ??
+        this.controller.view.columnManagerList$.value.length - 1
     );
-    const isRowSelection = rowSelection && !columnSelection;
-    if (isRowSelection) {
-      left = tableRect.left;
-      width = tableRect.width;
-    }
     div.style.left = `${left - tableRect.left / scale}px`;
     div.style.top = `${top - tableRect.top / scale}px`;
     div.style.width = `${width}px`;
     div.style.height = `${height}px`;
     div.style.display = 'block';
-    div.style.border = isRowSelection
-      ? '1px solid var(--affine-primary-color)'
+  }
+
+  updateFocusSelectionStyle(
+    groupKey: string | undefined,
+    focus: CellFocus,
+    isEditing: boolean,
+    showDragToFillHandle = false
+  ) {
+    const div = this.focusRef.value;
+    const dragToFill = this.controller.dragToFillDraggable;
+    if (!div || !dragToFill) return;
+    // Check if row is removed.
+    const rows = this.controller.rows(groupKey) ?? [];
+    if (rows.length <= focus.rowIndex) return;
+
+    const { left, top, width, height, scale } = this.controller.getRect(
+      groupKey,
+      focus.rowIndex,
+      focus.rowIndex,
+      focus.columnIndex,
+      focus.columnIndex
+    );
+    const tableRect = this.controller.tableContainer.getBoundingClientRect();
+
+    const x = left - tableRect.left / scale;
+    const y = top - 1 - tableRect.top / scale;
+    const w = width + 1;
+    const h = height + 1;
+    div.style.left = `${x}px`;
+    div.style.top = `${y}px`;
+    div.style.width = `${w}px`;
+    div.style.height = `${h}px`;
+    div.style.borderColor = 'var(--affine-primary-color)';
+    div.style.borderStyle = this.controller.__dragToFillElement.dragging
+      ? 'dashed'
+      : 'solid';
+    div.style.boxShadow = isEditing
+      ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
       : 'unset';
+    div.style.display = 'block';
+
+    dragToFill.style.left = `${x + w}px`;
+    dragToFill.style.top = `${y + h}px`;
+    dragToFill.style.display = showDragToFillHandle ? 'block' : 'none';
   }
 
   get selection$() {

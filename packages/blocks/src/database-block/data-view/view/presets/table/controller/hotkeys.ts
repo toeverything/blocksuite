@@ -87,7 +87,6 @@ export class TableHotkeysController implements ReactiveController {
             } else {
               this.selectionController.selection = undefined;
             }
-            return true;
           } else if (selection.isEditing) {
             this.selectionController.selection = {
               ...selection,

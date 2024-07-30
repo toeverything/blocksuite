@@ -6,7 +6,7 @@ import { html } from 'lit/static-html.js';
 import type { GroupHelper } from '../../../common/group-by/helper.js';
 import type { InsertToPosition } from '../../../types.js';
 import type { TableSingleView } from './table-view-manager.js';
-import type { TableViewSelectionWithType } from './types.js';
+import { TableAreaSelection, type TableViewSelectionWithType } from './types.js';
 
 import { popMenu } from '../../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../../_common/icons/index.js';
@@ -147,13 +147,13 @@ export class DataViewTable extends DataViewBase<
           );
     tableViewManager.rowAdd(position);
     requestAnimationFrame(() => {
-      this.selectionController.selection = {
+      this.selectionController.selection = TableAreaSelection.create({
         focus: {
           rowIndex: index,
           columnIndex: 0,
         },
         isEditing: true,
-      };
+      });
     });
   };
 

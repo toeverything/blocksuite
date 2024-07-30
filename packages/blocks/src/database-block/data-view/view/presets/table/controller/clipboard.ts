@@ -7,7 +7,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
 import type { TableSingleView } from '../table-view-manager.js';
-import type { TableViewSelectionWithType } from '../types.js';
+
+import { TableAreaSelection, TableRowSelection, type TableViewSelectionWithType } from '../types.js';
 
 const BLOCKSUITE_DATABASE = 'blocksuite/database';
 const TEXT = 'text/plain';
@@ -56,7 +57,6 @@ export class TableClipboardController implements ReactiveController {
     const event = _context.get('clipboardState').raw;
     event.stopPropagation();
     const view = this.host;
-    const data = this.host.view;
 
     const clipboardData = event.clipboardData;
     if (!clipboardData) return;
@@ -69,30 +69,12 @@ export class TableClipboardController implements ReactiveController {
       const copyedSelectionData = JSON.parse(
         copiedValues
       ) as CopyedSelectionData;
-
-      // paste cells
-      const targetRange = getTargetRangeFromSelection(tableSelection, data);
-      let rowStartIndex = targetRange.row.start;
-      let columnStartIndex = targetRange.column.start;
-      let rowLength = targetRange.row.length;
-      let columnLength = targetRange.column.length;
-
-      if (targetRange.anchor) {
-        rowStartIndex = tableSelection.focus.rowIndex;
-        columnStartIndex = tableSelection.focus.columnIndex;
-        rowLength = copyedSelectionData.length;
-        columnLength = copyedSelectionData[0].length;
+      if (TableRowSelection.is(tableSelection)) {
+        this.pasteToRows(tableSelection, copyedSelectionData);
+      } else {
+        pasteToCells(view, copyedSelectionData, tableSelection);
       }
-
-      pasteToCells(
-        view,
-        copyedSelectionData,
-        tableSelection.groupKey,
-        rowStartIndex,
-        columnStartIndex,
-        rowLength,
-        columnLength
-      );
+      // paste cells
     }
 
     return true;
@@ -140,6 +122,8 @@ export class TableClipboardController implements ReactiveController {
       })
     );
   }
+
+  pasteToRows(selection: TableRowSelection, data: CopyedSelectionData) {}
 }
 
 function getColumnValue(container: DatabaseCellContainer | undefined) {
@@ -284,101 +268,54 @@ function getCopiedValuesFromSelection(
 }
 
 function getTargetRangeFromSelection(
-  selection: TableViewSelectionWithType,
-  data: TableSingleView
+  selection: TableAreaSelection,
+  data: CopyedSelectionData
 ) {
   const { rowsSelection, columnsSelection, focus } = selection;
-  let range: {
-    row: { start: number; end: number; length: number };
-    column: { start: number; end: number; length: number };
-    anchor?: boolean;
-  } = {
-    row: {
-      start: 0,
-      end: 0,
-      length: 0,
-    },
-    column: {
-      start: 0,
-      end: 0,
-      length: 0,
-    },
-  };
-
-  if (rowsSelection && !columnsSelection) {
-    // rows
-    range = {
-      row: {
-        start: rowsSelection.start,
-        end: rowsSelection.end,
-        length: rowsSelection.end - rowsSelection.start + 1,
-      },
-      column: {
-        start: 0,
-        end: data.columns$.value.length - 1,
-        length: data.columns$.value.length,
-      },
-    };
-    if (rowsSelection.start === rowsSelection.end) {
-      range.anchor = true;
-    }
-  } else if (rowsSelection && columnsSelection) {
-    // multiple cells
-    range = {
-      row: {
-        start: rowsSelection.start,
-        end: rowsSelection.end,
-        length: rowsSelection.end - rowsSelection.start + 1,
-      },
-      column: {
-        start: columnsSelection.start,
-        end: columnsSelection.end,
-        length: columnsSelection.end - columnsSelection.start + 1,
-      },
-    };
-  } else if (!rowsSelection && !columnsSelection && focus) {
-    // single cell
-    range = {
-      anchor: true,
-      row: {
-        start: focus.rowIndex,
-        end: focus.rowIndex,
-        length: 1,
-      },
-      column: {
-        start: focus.columnIndex,
-        end: focus.columnIndex,
-        length: 1,
-      },
-    };
-  }
-  return range;
+  return TableAreaSelection.isFocus(selection)
+    ? {
+        row: {
+          start: focus.rowIndex,
+          length: data.length,
+        },
+        column: {
+          start: focus.columnIndex,
+          length: data.length,
+        },
+      }
+    : {
+        row: {
+          start: rowsSelection.start,
+          length: rowsSelection.end - rowsSelection.start + 1,
+        },
+        column: {
+          start: columnsSelection.start,
+          length: columnsSelection.end - columnsSelection.start + 1,
+        },
+      };
 }
 
 function pasteToCells(
   view: DataViewTable,
-  copied: CopyedSelectionData,
-  groupKey: string | undefined,
-  rowStartIndex: number,
-  columnStartIndex: number,
-  rowLength: number,
-  columnLength: number
+  data: CopyedSelectionData,
+  selection: TableAreaSelection
 ) {
-  const srcColumns = copied;
+  const targetRange = getTargetRangeFromSelection(selection, data);
+  const srcColumns = data;
   const srcRowLength = srcColumns.length;
   const srcColumnLength = srcColumns[0].length;
 
-  for (let i = 0; i < rowLength; i++) {
-    for (let j = 0; j < columnLength; j++) {
-      const rowIndex = rowStartIndex + i;
-      const columnIndex = columnStartIndex + j;
+  for (let i = 0; i < targetRange.row.length; i++) {
+    for (let j = 0; j < targetRange.column.length; j++) {
+      const rowIndex = targetRange.row.start + i;
+      const columnIndex = targetRange.column.start + j;
 
       const srcRowIndex = i % srcRowLength;
       const srcColumnIndex = j % srcColumnLength;
       const srcColumn = srcColumns[srcRowIndex][srcColumnIndex];
 
       const targetContainer = view.selectionController.getCellContainer(
-        groupKey,
+        selection.groupKey,
         rowIndex,
         columnIndex
       );
