@@ -111,6 +111,20 @@ const chunkGroups = {
   presets: [require.resolve('@blocksuite/presets')],
 };
 
+const clearSiteDataPlugin = () =>
+  ({
+    name: 'clear-site-data',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === '/Clear-Site-Data') {
+          res.statusCode = 200;
+          res.setHeader('Clear-Site-Data', '"*"');
+        }
+        next();
+      });
+    },
+  }) as Plugin;
+
 // https://vitejs.dev/config/
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, __dirname, '') };
@@ -140,6 +154,7 @@ export default ({ mode }) => {
           forceBuildInstrument: true,
         }),
       wasm(),
+      clearSiteDataPlugin(),
     ],
     esbuild: {
       target: 'es2018',

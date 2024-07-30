@@ -197,6 +197,11 @@ export class DebugMenu extends ShadowlessElement {
     this.doc.addBlock('affine:paragraph', {}, noteId);
   }
 
+  private async _clearSiteData() {
+    await fetch('/Clear-Site-Data');
+    window.location.reload();
+  }
+
   private _enableOutlineViewer() {
     this.outlineViewer.toggleDisplay();
   }
@@ -589,6 +594,12 @@ export class DebugMenu extends ShadowlessElement {
           <sl-tooltip content="Switch Editor" placement="bottom" hoist>
             <sl-button size="small" @click="${this._switchEditorMode}">
               <sl-icon name="repeat"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip content="Clear Site Data" placement="bottom" hoist>
+            <sl-button size="small" @click="${this._clearSiteData}">
+              <sl-icon name="trash"></sl-icon>
             </sl-button>
           </sl-tooltip>
 

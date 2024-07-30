@@ -111,6 +111,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.doc.addBlock('affine:paragraph', {}, noteId);
   }
 
+  private async _clearSiteData() {
+    await fetch('/Clear-Site-Data');
+    window.location.reload();
+  }
+
   private _exportHtml() {
     const htmlTransformer = this.rootService?.transformers.html;
     htmlTransformer?.exportDoc(this.doc).catch(console.error);
@@ -410,6 +415,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                         </sl-menu-item>`
                       : nothing}
                   </sl-menu>
+                </sl-menu-item>
+                <sl-menu-item @click=${this._clearSiteData}>
+                  Clear Site Data
+                  <sl-icon slot="prefix" name="trash"></sl-icon>
                 </sl-menu-item>
                 <sl-menu-item @click=${this._toggleDarkMode}>
                   Toggle ${this._dark ? 'Light' : 'Dark'} Mode
