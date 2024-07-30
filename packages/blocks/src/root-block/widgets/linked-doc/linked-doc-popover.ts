@@ -26,13 +26,13 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     cleanSpecifiedTail(
       this.editorHost,
       this.inlineEditor,
-      this.triggerKey + this._query
+      this.triggerKey + (this._query || '')
     );
   };
 
   private _expanded = new Map<string, boolean>();
 
-  private _startIndex = this.inlineEditor?.getInlineRange()?.index ?? 0;
+  private _startRange = this.inlineEditor.getInlineRange();
 
   static override styles = styles;
 
@@ -90,12 +90,17 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
   }
 
   private get _query() {
-    return getQuery(this.inlineEditor, this._startIndex) || '';
+    return getQuery(this.inlineEditor, this._startRange);
   }
 
   private async _updateLinkedDocGroup() {
+    const query = this._query;
+    if (query === null) {
+      this.abortController.abort();
+      return;
+    }
     this._linkedDocGroup = await this.getMenus(
-      this._query,
+      query,
       this._abort,
       this.editorHost,
       this.inlineEditor
@@ -122,8 +127,11 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
         void this._updateLinkedDocGroup();
       },
       onDelete: () => {
-        const curIndex = this.inlineEditor.getInlineRange()?.index ?? 0;
-        if (curIndex < this._startIndex) {
+        const curRange = this.inlineEditor.getInlineRange();
+        if (!this._startRange || !curRange) {
+          return;
+        }
+        if (curRange.index < this._startRange.index) {
           this.abortController.abort();
         }
         this._activatedItemIndex = 0;
