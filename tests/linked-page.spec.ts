@@ -2,10 +2,16 @@ import { type Page, expect } from '@playwright/test';
 import { switchEditorMode } from 'utils/actions/edgeless.js';
 import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';
 
-import { addNewPage, switchToPage } from './utils/actions/click.js';
+import {
+  addNewPage,
+  getDebugMenu,
+  switchToPage,
+} from './utils/actions/click.js';
 import { dragBetweenIndices, dragBlockToPoint } from './utils/actions/drag.js';
 import {
+  SHORT_KEY,
   copyByKeyboard,
+  cutByKeyboard,
   pasteByKeyboard,
   pressArrowLeft,
   pressArrowRight,
@@ -24,6 +30,7 @@ import {
   getPageSnapshot,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  setInlineRangeInSelectedRichText,
   waitNextFrame,
 } from './utils/actions/misc.js';
 import {
@@ -673,6 +680,90 @@ test.describe('linked page popover', () => {
     await assertExistRefText('page2');
   });
 
+  test('should paste query works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+
+    await (async () => {
+      for (let index = 0; index < 3; index++) {
+        const newPage = await addNewPage(page);
+        await switchToPage(page, newPage.id);
+        await focusTitle(page);
+        await type(page, 'page' + index);
+      }
+    })();
+
+    await switchToPage(page);
+    await getDebugMenu(page).pagesBtn.click();
+    await focusRichText(page);
+    await type(page, 'e2');
+    await setInlineRangeInSelectedRichText(page, 0, 2);
+    await cutByKeyboard(page);
+
+    const { pageBtn, linkedDocPopover } = getLinkedDocPopover(page);
+    await type(page, '@');
+    await expect(linkedDocPopover).toBeVisible();
+    await expect(pageBtn).toHaveText([
+      'page0',
+      'page1',
+      'page2',
+      'Create "Untitled" doc',
+      'Import',
+    ]);
+
+    await page.keyboard.press(`${SHORT_KEY}+v`);
+    await expect(linkedDocPopover).toBeVisible();
+    await expect(pageBtn).toHaveText(['page2', 'Create "e2" doc', 'Import']);
+  });
+
+  test('should multiple paste query not works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+
+    await (async () => {
+      for (let index = 0; index < 3; index++) {
+        const newPage = await addNewPage(page);
+        await switchToPage(page, newPage.id);
+        await focusTitle(page);
+        await type(page, 'page' + index);
+      }
+    })();
+
+    await switchToPage(page);
+    await getDebugMenu(page).pagesBtn.click();
+    await focusRichText(page);
+    await type(page, 'pa');
+    await pressEnter(page);
+    await type(page, 'ge');
+    await pressEnter(page);
+    await type(page, '2');
+
+    await selectAllByKeyboard(page);
+    await waitNextFrame(page, 200);
+    await selectAllByKeyboard(page);
+    await waitNextFrame(page, 200);
+    await selectAllByKeyboard(page);
+    await waitNextFrame(page, 200);
+    await cutByKeyboard(page);
+    const note = page.locator('affine-note');
+    await note.click({ force: true, position: { x: 100, y: 100 } });
+    await waitNextFrame(page, 200);
+
+    const { pageBtn, linkedDocPopover } = getLinkedDocPopover(page);
+    await type(page, '@');
+    await expect(linkedDocPopover).toBeVisible();
+    await expect(pageBtn).toHaveText([
+      'page0',
+      'page1',
+      'page2',
+      'Create "Untitled" doc',
+      'Import',
+    ]);
+
+    await page.keyboard.press(`${SHORT_KEY}+v`);
+    await expect(linkedDocPopover).not.toBeVisible();
+  });
+
   test('should more docs works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -687,6 +778,7 @@ test.describe('linked page popover', () => {
     })();
 
     await switchToPage(page);
+    await getDebugMenu(page).pagesBtn.click();
     await focusRichText(page);
     await type(page, '@');
 
