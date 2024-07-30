@@ -420,6 +420,12 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
+  getSelectionAreaBorder(position: 'left' | 'right' | 'top' | 'bottom') {
+    return this.__selectionElement.selectionRef.value?.querySelector(
+      `.area-border.area-${position}`
+    );
+  }
+
   hostConnected() {
     requestAnimationFrame(() => {
       this.tableContainer.append(this.__selectionElement);
@@ -589,18 +595,22 @@ export class TableSelectionController implements ReactiveController {
         this.rows(newSelection.groupKey).length - 1,
         newSelection.rowsSelection.end + 1
       );
-      this.getCellContainer(
-        newSelection.groupKey,
-        newSelection.rowsSelection.end,
-        newSelection.focus.columnIndex
-      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('bottom')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
     } else {
       newSelection.rowsSelection.start += 1;
-      this.getCellContainer(
-        newSelection.groupKey,
-        newSelection.rowsSelection.start,
-        newSelection.focus.columnIndex
-      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('top')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
     }
     this.selection = newSelection;
   }
@@ -615,18 +625,22 @@ export class TableSelectionController implements ReactiveController {
         0,
         newSelection.columnsSelection.start - 1
       );
-      this.getCellContainer(
-        newSelection.groupKey,
-        newSelection.focus.rowIndex,
-        newSelection.columnsSelection.start
-      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('left')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
     } else {
       newSelection.columnsSelection.end -= 1;
-      this.getCellContainer(
-        newSelection.groupKey,
-        newSelection.focus.rowIndex,
-        newSelection.columnsSelection.end
-      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('right')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
     }
     this.selection = newSelection;
   }
@@ -647,18 +661,22 @@ export class TableSelectionController implements ReactiveController {
         max,
         newSelection.columnsSelection.end + 1
       );
-      this.getCellContainer(
-        newSelection.groupKey,
-        newSelection.focus.rowIndex,
-        newSelection.columnsSelection.end
-      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('right')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
     } else {
       newSelection.columnsSelection.start += 1;
-      this.getCellContainer(
-        newSelection.groupKey,
-        newSelection.focus.rowIndex,
-        newSelection.columnsSelection.start
-      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('left')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
     }
     this.selection = newSelection;
   }
@@ -673,18 +691,22 @@ export class TableSelectionController implements ReactiveController {
         0,
         newSelection.rowsSelection.start - 1
       );
-      this.getCellContainer(
-        newSelection.groupKey,
-        newSelection.rowsSelection.start,
-        newSelection.focus.columnIndex
-      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('top')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
     } else {
       newSelection.rowsSelection.end -= 1;
-      this.getCellContainer(
-        newSelection.groupKey,
-        newSelection.rowsSelection.end,
-        newSelection.focus.columnIndex
-      )?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('bottom')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
     }
     this.selection = newSelection;
   }
@@ -1006,6 +1028,30 @@ class SelectionElement extends ShadowlessElement {
       outline: none;
     }
 
+    .area-border {
+      position: absolute;
+      pointer-events: none;
+    }
+    .area-left {
+      left: 0;
+      height: 100%;
+      width: 1px;
+    }
+    .area-right {
+      right: 0;
+      height: 100%;
+      width: 1px;
+    }
+    .area-top {
+      top: 0;
+      width: 100%;
+      height: 1px;
+    }
+    .area-bottom {
+      bottom: 0;
+      width: 100%;
+      height: 1px;
+    }
     @media print {
       affine-database-selection {
         display: none;
@@ -1019,7 +1065,12 @@ class SelectionElement extends ShadowlessElement {
 
   override render() {
     return html`
-      <div ${ref(this.selectionRef)} class="database-selection"></div>
+      <div ${ref(this.selectionRef)} class="database-selection">
+        <div class="area-border area-left"></div>
+        <div class="area-border area-right"></div>
+        <div class="area-border area-top"></div>
+        <div class="area-border area-bottom"></div>
+      </div>
       <div tabindex="0" ${ref(this.focusRef)} class="database-focus"></div>
     `;
   }
