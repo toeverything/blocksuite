@@ -1,6 +1,5 @@
 import type { Command } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 
 export const copySelectedModelsCommand: Command<'draftedModels' | 'onCopy'> = (
@@ -8,15 +7,19 @@ export const copySelectedModelsCommand: Command<'draftedModels' | 'onCopy'> = (
   next
 ) => {
   const models = ctx.draftedModels;
-  assertExists(
-    models,
-    '`draftedModels` is required, you need to use `draftSelectedModels` command before adding this command to the pipeline.'
-  );
+  if (!models) {
+    console.error(
+      '`draftedModels` is required, you need to use `draftSelectedModels` command before adding this command to the pipeline.'
+    );
+    return;
+  }
 
-  const slice = Slice.fromModels(ctx.std.doc, models);
+  models
+    .then(models => {
+      const slice = Slice.fromModels(ctx.std.doc, models);
 
-  ctx.std.clipboard
-    .copy(slice)
+      return ctx.std.clipboard.copy(slice);
+    })
     .then(() => ctx.onCopy?.())
     .catch(console.error);
   return next();

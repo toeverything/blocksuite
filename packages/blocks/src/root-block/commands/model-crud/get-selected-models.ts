@@ -1,8 +1,6 @@
 import type { Command } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
-import { assertExists } from '@blocksuite/global/utils';
-
 /**
  * Retrieves the selected models based on the provided selection types and mode.
  *
@@ -53,8 +51,7 @@ export const getSelectedModelsCommand: Command<
       mode,
     })
     .inline(ctx => {
-      const { selectedBlocks } = ctx;
-      assertExists(selectedBlocks);
+      const { selectedBlocks = [] } = ctx;
       selectedModels.push(...selectedBlocks.map(el => el.model));
     })
     .run();
