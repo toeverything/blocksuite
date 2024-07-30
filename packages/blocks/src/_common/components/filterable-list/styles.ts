@@ -5,7 +5,7 @@ import { scrollbarStyle } from '../utils.js';
 
 export const filterableListStyles = css`
   :host {
-    ${PANEL_BASE}
+    ${PANEL_BASE};
 
     flex-direction: column;
     padding: 0;

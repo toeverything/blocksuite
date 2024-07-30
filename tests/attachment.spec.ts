@@ -1,8 +1,10 @@
 import { sleep } from '@global/utils.js';
-import { expect, type Page } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
+import { switchEditorMode } from 'utils/actions/edgeless.js';
 
-import { popImageMoreMenu } from './utils/actions/drag.js';
+import { dragBlockToPoint, popImageMoreMenu } from './utils/actions/drag.js';
 import {
+  SHORT_KEY,
   pressArrowDown,
   pressArrowUp,
   pressBackspace,
@@ -11,7 +13,6 @@ import {
   pressShiftTab,
   pressTab,
   redoByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/keyboard.js';
@@ -19,6 +20,7 @@ import {
   captureHistory,
   enterPlaygroundRoom,
   focusRichText,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   resetHistory,
   waitNextFrame,
@@ -29,6 +31,7 @@ import {
   assertBlockFlavour,
   assertBlockSelections,
   assertKeyboardWorkInInput,
+  assertParentBlockFlavour,
   assertRichImage,
   assertRichTextInlineRange,
   assertStoreMatchJSX,
@@ -717,4 +720,26 @@ test('indent attachment block to list', async ({ page }) => {
 
   await pressShiftTab(page);
   await assertBlockChildrenIds(page, '1', ['3', '5']);
+});
+
+test('attachment can be dragged from note to surface top level block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  const { insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await insertAttachment();
+
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await switchEditorMode(page);
+  await page.mouse.dblclick(450, 450);
+
+  await dragBlockToPoint(page, '4', { x: 200, y: 200 });
+
+  await waitNextFrame(page);
+  await assertParentBlockFlavour(page, '5', 'affine:surface');
 });

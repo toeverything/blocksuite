@@ -1,8 +1,9 @@
+import type { BlockCollection } from '@blocksuite/store';
+
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockCollection } from '@blocksuite/store';
 import { DocCollection, Text } from '@blocksuite/store';
-import { Generator, Schema } from '@blocksuite/store';
+import { IdGeneratorType, Schema } from '@blocksuite/store';
 
 import { AffineEditorContainer } from '../../index.js';
 
@@ -12,7 +13,7 @@ function createCollectionOptions() {
 
   schema.register(AffineSchemas);
 
-  const idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
+  const idGenerator: IdGeneratorType = IdGeneratorType.AutoIncrement; // works only in single user mode
 
   return {
     id: room,

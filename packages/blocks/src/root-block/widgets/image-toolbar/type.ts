@@ -6,9 +6,9 @@ export type DefaultItemConfig = {
   name: string;
   icon: TemplateResult;
   tooltip: string;
-  showWhen: (blockElement: ImageBlockComponent) => boolean;
+  showWhen: (block: ImageBlockComponent) => boolean;
   action: (
-    blockElement: ImageBlockComponent,
+    block: ImageBlockComponent,
     abortController: AbortController,
     onClick?: () => void
   ) => void;
@@ -24,13 +24,13 @@ export type MoreItem = DefaultItemConfig & {
 
 export type DividerItem = {
   type: 'divider';
-  showWhen: (blockElement: ImageBlockComponent) => boolean;
+  showWhen: (block: ImageBlockComponent) => boolean;
 };
 
 export type CustomItem = {
-  showWhen: (blockElement: ImageBlockComponent) => boolean;
+  showWhen: (block: ImageBlockComponent) => boolean;
   render: (
-    blockElement: ImageBlockComponent,
+    block: ImageBlockComponent,
     onClick?: () => void
   ) => TemplateResult | null;
   type: 'custom';

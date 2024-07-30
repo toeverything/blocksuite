@@ -1,10 +1,11 @@
 import type { QueryContent } from '../../indexer/index.js';
+import type { DocCollectionOptions } from '../collection.js';
+
 import {
   BacklinkIndexer,
   BlockIndexer,
   SearchIndexer,
 } from '../../indexer/index.js';
-import type { DocCollectionOptions } from '../collection.js';
 import { addOnFactory } from './shared.js';
 
 type Indexer = {

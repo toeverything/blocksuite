@@ -1,7 +1,6 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 
 export const ensureBlockInContainer = (
-  blockElement: BlockElement,
-  containerElement: BlockElement
-) =>
-  containerElement.contains(blockElement) && blockElement !== containerElement;
+  block: BlockComponent,
+  containerElement: BlockComponent
+) => containerElement.contains(block) && block !== containerElement;

@@ -1,14 +1,16 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type InlineRange,
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
-import type { BlockModel } from '@blocksuite/store';
+
+import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
-import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,

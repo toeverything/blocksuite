@@ -1,6 +1,7 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
+
 import { SignalWatcher } from '@lit-labs/preact-signals';
-import { css, LitElement, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 /**
@@ -37,20 +38,6 @@ export class BlockSelection extends SignalWatcher(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor block!: BlockElement;
-
-  @property({ attribute: false })
-  accessor borderRadius: number = 5;
-
-  @property({ attribute: false })
-  accessor borderWidth: number = 0;
-
-  protected override updated(_changedProperties: PropertyValues): void {
-    super.updated(_changedProperties);
-    this.style.display = this.block.selected?.is('block') ? 'block' : 'none';
-  }
-
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -61,6 +48,20 @@ export class BlockSelection extends SignalWatcher(LitElement) {
     }
     this.style.borderWidth = `${this.borderWidth}px`;
   }
+
+  protected override updated(_changedProperties: PropertyValues): void {
+    super.updated(_changedProperties);
+    this.style.display = this.block.selected?.is('block') ? 'block' : 'none';
+  }
+
+  @property({ attribute: false })
+  accessor block!: BlockComponent;
+
+  @property({ attribute: false })
+  accessor borderRadius: number = 5;
+
+  @property({ attribute: false })
+  accessor borderWidth: number = 0;
 }
 
 declare global {

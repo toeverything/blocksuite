@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
+import { DocCollection, Schema, type Y } from '@blocksuite/store';
 // normal import
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import { DocCollection, Schema, type Y } from '@blocksuite/store';
 import { assert, describe, expect, test } from 'vitest';
 
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';

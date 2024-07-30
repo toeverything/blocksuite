@@ -1,9 +1,10 @@
+import type { DenseMenuBuilder } from '../common/type.js';
+
 import {
   LassoFreeHandIcon,
   LassoPolygonalIcon,
 } from '../../../../../_common/icons/edgeless.js';
 import { LassoMode } from '../../../../../_common/types.js';
-import type { DenseMenuBuilder } from '../common/type.js';
 
 export const buildLassoDenseMenu: DenseMenuBuilder = edgeless => {
   // TODO: active state

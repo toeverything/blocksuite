@@ -1,14 +1,5 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import type { EditorHost, TextRangePoint } from '@blocksuite/block-std';
-import {
-  defaultImageProxyMiddleware,
-  MarkdownAdapter,
-  MixTextAdapter,
-  pasteMiddleware,
-  PlainTextAdapter,
-  titleMiddleware,
-} from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import type {
   BlockModel,
   BlockSnapshot,
@@ -16,6 +7,16 @@ import type {
   DraftModel,
   SliceSnapshot,
 } from '@blocksuite/store';
+
+import {
+  MarkdownAdapter,
+  MixTextAdapter,
+  PlainTextAdapter,
+  defaultImageProxyMiddleware,
+  pasteMiddleware,
+  titleMiddleware,
+} from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection, Job, type Slice } from '@blocksuite/store';
 
 const updateSnapshotText = (
@@ -75,6 +76,9 @@ export async function getContentFromSlice(
     middlewares: [titleMiddleware],
   });
   const snapshot = await job.sliceToSnapshot(slice);
+  if (!snapshot) {
+    return '';
+  }
   processTextInSnapshot(snapshot, host);
   const adapter =
     type === 'markdown' ? new MarkdownAdapter(job) : new PlainTextAdapter(job);
@@ -91,6 +95,9 @@ export async function getPlainTextFromSlice(host: EditorHost, slice: Slice) {
     middlewares: [titleMiddleware],
   });
   const snapshot = await job.sliceToSnapshot(slice);
+  if (!snapshot) {
+    return '';
+  }
   processTextInSnapshot(snapshot, host);
   const plainTextAdapter = new PlainTextAdapter(job);
   const plainText = await plainTextAdapter.fromSliceSnapshot({
@@ -153,7 +160,9 @@ export async function insertFromMarkdown(
       parent,
       (index ?? 0) + i
     );
-    models.push(model);
+    if (model) {
+      models.push(model);
+    }
   }
 
   return models;

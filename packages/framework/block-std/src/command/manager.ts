@@ -1,4 +1,5 @@
-import { cmdSymbol } from './consts.js';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 import type {
   Chain,
   Command,
@@ -8,16 +9,10 @@ import type {
   InitCommandCtx,
 } from './types.js';
 
+import { cmdSymbol } from './consts.js';
+
 export class CommandManager {
   private _commands = new Map<string, Command>();
-
-  constructor(public std: BlockSuite.Std) {}
-
-  private _getCommandCtx = (): InitCommandCtx => {
-    return {
-      std: this.std,
-    };
-  };
 
   private _createChain = (
     methods: Record<BlockSuite.CommandName, unknown>,
@@ -128,14 +123,11 @@ export class CommandManager {
     } as Chain;
   };
 
-  add<N extends BlockSuite.CommandName>(
-    name: N,
-    command: BlockSuite.Commands[N]
-  ): CommandManager;
-  add(name: string, command: Command) {
-    this._commands.set(name, command);
-    return this;
-  }
+  private _getCommandCtx = (): InitCommandCtx => {
+    return {
+      std: this.std,
+    };
+  };
 
   chain = (): Chain<InitCommandCtx> => {
     const methods = {} as Record<
@@ -159,6 +151,17 @@ export class CommandManager {
     return createChain(methods, []) as never;
   };
 
+  constructor(public std: BlockSuite.Std) {}
+  add<N extends BlockSuite.CommandName>(
+    name: N,
+    command: BlockSuite.Commands[N]
+  ): CommandManager;
+
+  add(name: string, command: Command) {
+    this._commands.set(name, command);
+    return this;
+  }
+
   exec<K extends keyof BlockSuite.Commands>(
     command: K,
     ...args: IfAllKeysOptional<
@@ -180,7 +183,10 @@ export class CommandManager {
     const cmdFunc = this._commands.get(command);
 
     if (!cmdFunc) {
-      throw new Error(`The command "${command}" not found`);
+      throw new BlockSuiteError(
+        ErrorCode.CommandError,
+        `The command "${command}" not found`
+      );
     }
 
     const inData = args[0];

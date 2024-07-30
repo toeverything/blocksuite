@@ -1,20 +1,20 @@
-import './components/code-toolbar.js';
-
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { HoverController } from '../../../_common/components/hover/controller.js';
-import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import type { CodeBlockComponent } from '../../../code-block/code-block.js';
 import type { CodeBlockModel } from '../../../code-block/code-model.js';
-import { defaultItems, defaultMoreItems } from './config.js';
 import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
+
+import { HoverController } from '../../../_common/components/hover/controller.js';
+import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
+import './components/code-toolbar.js';
+import { defaultItems, defaultMoreItems } from './config.js';
 
 export const AFFINE_CODE_TOOLBAR_WIDGET = 'affine-code-toolbar-widget';
 @customElement(AFFINE_CODE_TOOLBAR_WIDGET)
-export class AffineCodeToolbarWidget extends WidgetElement<
+export class AffineCodeToolbarWidget extends WidgetComponent<
   CodeBlockModel,
   CodeBlockComponent
 > {
@@ -22,16 +22,12 @@ export class AffineCodeToolbarWidget extends WidgetElement<
 
   private _isActivated = false;
 
-  items: CodeToolbarItem[] = [];
-
-  moreItems: CodeToolbarMoreItem[] = [];
-
   private _setHoverController = () => {
     this._hoverController = null;
     this._hoverController = new HoverController(
       this,
       ({ abortController }) => {
-        const codeBlock = this.blockElement;
+        const codeBlock = this.block;
         const selection = this.host.selection;
 
         const textSelection = selection.find('text');
@@ -53,7 +49,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
 
         return {
           template: html`<affine-code-toolbar
-            .blockElement=${codeBlock}
+            .blockComponent=${codeBlock}
             .abortController=${abortController}
             .items=${this.items}
             .moreItems=${this.moreItems}
@@ -64,7 +60,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
               }
             }}
           ></affine-code-toolbar>`,
-          container: this.blockElement,
+          container: this.block,
           // stacking-context(editor-host)
           portalStyles: {
             zIndex: 'var(--affine-z-index-popover)',
@@ -90,7 +86,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
       { allowMultiple: true }
     );
 
-    const codeBlock = this.blockElement;
+    const codeBlock = this.block;
     this._hoverController.setReference(codeBlock);
     this._hoverController.onAbort = () => {
       // If the more menu is opened, don't close it.
@@ -100,11 +96,9 @@ export class AffineCodeToolbarWidget extends WidgetElement<
     };
   };
 
-  clearConfig() {
-    this.items = [];
-    this.moreItems = [];
-    return this;
-  }
+  items: CodeToolbarItem[] = [];
+
+  moreItems: CodeToolbarMoreItem[] = [];
 
   addItems(items: CodeToolbarItem[], index?: number) {
     if (index === undefined) {
@@ -124,8 +118,9 @@ export class AffineCodeToolbarWidget extends WidgetElement<
     return this;
   }
 
-  setupDefaultConfig() {
-    this.clearConfig().addItems(defaultItems).addMoreItems(defaultMoreItems);
+  clearConfig() {
+    this.items = [];
+    this.moreItems = [];
     return this;
   }
 
@@ -134,6 +129,11 @@ export class AffineCodeToolbarWidget extends WidgetElement<
       this.setupDefaultConfig();
     }
     this._setHoverController();
+  }
+
+  setupDefaultConfig() {
+    this.clearConfig().addItems(defaultItems).addMoreItems(defaultMoreItems);
+    return this;
   }
 }
 

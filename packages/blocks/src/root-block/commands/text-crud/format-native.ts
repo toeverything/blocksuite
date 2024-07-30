@@ -1,10 +1,12 @@
 import type { Command } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
+
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
+
+import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
-import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 // for native range
 export const formatNativeCommand: Command<
@@ -31,10 +33,10 @@ export const formatNativeCommand: Command<
   )
     .filter(el => range?.intersectsNode(el))
     .filter(el => {
-      const blockElement = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
-      if (blockElement) {
+      const block = el.closest<BlockComponent>(`[${BLOCK_ID_ATTR}]`);
+      if (block) {
         return FORMAT_NATIVE_SUPPORT_FLAVOURS.includes(
-          blockElement.model.flavour as BlockSuite.Flavour
+          block.model.flavour as BlockSuite.Flavour
         );
       }
       return false;

@@ -25,7 +25,6 @@ function handleInsertReplacementText<TextAttributes extends BaseTextAttributes>(
   editor.getDeltasByInlineRange(inlineRange).forEach(deltaEntry => {
     attributes = { ...deltaEntry[0].attributes, ...attributes };
   });
-  editor.deleteText(inlineRange);
   if (data) {
     editor.insertText(inlineRange, data, attributes);
     editor.setInlineRange({

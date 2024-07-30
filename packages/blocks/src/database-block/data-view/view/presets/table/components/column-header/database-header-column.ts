@@ -1,5 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -7,7 +8,17 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../../../../../../_common/components/index.js';
+import type { NumberColumnDataType } from '../../../../../column/presets/number/define.js';
+import type { InsertToPosition } from '../../../../../types.js';
+import type { Column } from '../../../../../view-manager/column.js';
+import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
+
+import {
+  type Menu,
+  type NormalMenu,
+  popMenu,
+} from '../../../../../../../_common/components/index.js';
+import { numberFormats } from '../../../../../column/presets/number/utils/formats.js';
 import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
 import {
   DatabaseDuplicate,
@@ -17,18 +28,15 @@ import {
   DatabaseMoveRight,
   DeleteIcon,
 } from '../../../../../common/icons/index.js';
-import type { InsertToPosition } from '../../../../../types.js';
 import { startDrag } from '../../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../../../utils/insert.js';
+import { renderUniLit } from '../../../../../utils/uni-component/index.js';
 import { getResultInRange } from '../../../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import type {
-  DataViewTableColumnManager,
-  DataViewTableManager,
-} from '../../table-view-manager.js';
 import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
+import './number-format-bar.js';
 import {
   getTableGroupRects,
   getVerticalIndicator,
@@ -36,33 +44,44 @@ import {
 } from './vertical-indicator.js';
 
 @customElement('affine-database-header-column')
-export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
-  private get readonly() {
-    return this.tableViewManager.readonly;
-  }
-
-  static override styles = css`
-    affine-database-header-column {
-      display: flex;
+export class DatabaseHeaderColumn extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
+  private _clickColumn = () => {
+    if (this.tableViewManager.readonly$.value) {
+      return;
     }
+    this.popMenu();
+  };
 
-    .affine-database-header-column-grabbing * {
-      cursor: grabbing;
+  private _clickTypeIcon = (event: MouseEvent) => {
+    if (this.tableViewManager.readonly$.value) {
+      return;
     }
-  `;
-
-  private widthDragBar = createRef();
-
-  private drawWidthDragBarTask = 0;
-
-  @property({ attribute: false })
-  accessor tableViewManager!: DataViewTableManager;
-
-  @property({ attribute: false })
-  accessor column!: DataViewTableColumnManager;
-
-  @property({ attribute: false })
-  accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
+    if (this.column.type === 'title') {
+      return;
+    }
+    event.stopPropagation();
+    popMenu(this, {
+      options: {
+        input: {
+          search: true,
+          placeholder: 'Search',
+        },
+        items: this.tableViewManager.allColumnConfig.map(config => {
+          return {
+            type: 'action',
+            name: config.name,
+            isSelected: config.type === this.column.type,
+            icon: renderUniLit(this.tableViewManager.getIcon(config.type)),
+            select: () => {
+              this.column.updateType?.(config.type);
+            },
+          };
+        }),
+      },
+    });
+  };
 
   private _columnsOffset = (header: Element, _scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
@@ -141,6 +160,46 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     };
   };
 
+  private _contextMenu = (e: MouseEvent) => {
+    if (this.tableViewManager.readonly$.value) {
+      return;
+    }
+    e.preventDefault();
+    this.popMenu(e.target as HTMLElement);
+  };
+
+  private _enterWidthDragBar = () => {
+    if (this.tableViewManager.readonly$.value) {
+      return;
+    }
+    if (this.drawWidthDragBarTask) {
+      cancelAnimationFrame(this.drawWidthDragBarTask);
+      this.drawWidthDragBarTask = 0;
+    }
+    this.drawWidthDragBar();
+  };
+
+  private _leaveWidthDragBar = () => {
+    cancelAnimationFrame(this.drawWidthDragBarTask);
+    this.drawWidthDragBarTask = 0;
+    getVerticalIndicator().remove();
+  };
+
+  private drawWidthDragBar = () => {
+    const tableContainer = getTableContainer(this);
+    const tableRect = tableContainer.getBoundingClientRect();
+    const rectList = getTableGroupRects(tableContainer);
+    getVerticalIndicator().display(
+      0,
+      tableRect.top,
+      rectList,
+      this.getBoundingClientRect().right
+    );
+    this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
+  };
+
+  private drawWidthDragBarTask = 0;
+
   private moveColumn = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
     const headerContainer = this.closest('affine-database-column-header');
@@ -149,7 +208,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     assertExists(tableContainer);
     assertExists(scrollContainer);
     const columnHeaderRect = this.getBoundingClientRect();
-    const scale = columnHeaderRect.width / this.column.width;
+    const scale = columnHeaderRect.width / this.column.width$.value;
     const headerContainerRect = tableContainer.getBoundingClientRect();
 
     const rectOffsetLeft = evt.x - columnHeaderRect.left;
@@ -235,27 +294,83 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private _clickColumn = () => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    this.popMenu();
-  };
+  private widthDragBar = createRef();
 
-  private _contextMenu = (e: MouseEvent) => {
-    if (this.tableViewManager.readonly) {
-      return;
+  static override styles = css`
+    affine-database-header-column {
+      display: flex;
     }
-    e.preventDefault();
-    this.popMenu(e.target as HTMLElement);
+
+    .affine-database-header-column-grabbing * {
+      cursor: grabbing;
+    }
+  `;
+
+  editTitle = () => {
+    this._clickColumn();
   };
 
   private popMenu(ele?: HTMLElement) {
+    const enableNumberFormatting =
+      this.tableViewManager.featureFlags$.value.enable_number_formatting;
+
     popMenu(ele ?? this, {
       options: {
         input: inputConfig(this.column),
         items: [
-          typeConfig(this.column, this.tableViewManager),
+          {
+            type: 'group',
+            name: 'Column Prop Group ',
+            children: () => [
+              typeConfig(this.column),
+              // Number format begin
+              ...(enableNumberFormatting
+                ? ([
+                    {
+                      type: 'sub-menu',
+                      name: 'Number Format',
+
+                      hide: () =>
+                        !this.column.updateData ||
+                        this.column.type !== 'number',
+                      options: {
+                        input: {
+                          search: true,
+                        },
+                        items: [
+                          numberFormatConfig(this.column),
+                          ...(numberFormats.map(format => {
+                            const data = (
+                              this.column as Column<
+                                number,
+                                NumberColumnDataType
+                              >
+                            ).data$.value;
+                            return {
+                              type: 'action',
+                              isSelected: data.format === format.type,
+                              icon: html`<span
+                                style="font-size: var(--affine-font-base); scale: 1.2;"
+                                >${format.symbol}</span
+                              >`,
+                              name: format.label,
+                              select: () => {
+                                if (data.format === format.type) return;
+                                this.column.updateData(() => ({
+                                  format: format.type,
+                                }));
+                              },
+                            };
+                          }) as Menu[]),
+                        ],
+                      },
+                    },
+                  ] as Menu[])
+                : []),
+              // Number format end
+            ],
+          },
+
           {
             type: 'action',
             name: 'Duplicate Column',
@@ -279,7 +394,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                   const pre = this.previousElementSibling;
                   if (pre instanceof DatabaseHeaderColumn) {
                     pre.editTitle();
-                    pre.scrollIntoView();
+                    pre.scrollIntoView({ inline: 'nearest', block: 'nearest' });
                   }
                 })
                 .catch(console.error);
@@ -299,7 +414,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                   const next = this.nextElementSibling;
                   if (next instanceof DatabaseHeaderColumn) {
                     next.editTitle();
-                    next.scrollIntoView();
+                    next.scrollIntoView({
+                      inline: 'nearest',
+                      block: 'nearest',
+                    });
                   }
                 })
                 .catch(console.error);
@@ -362,66 +480,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     });
   }
 
-  private _clickTypeIcon = (event: MouseEvent) => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    if (this.column.type === 'title') {
-      return;
-    }
-    event.stopPropagation();
-    popMenu(this, {
-      options: {
-        input: {
-          search: true,
-          placeholder: 'Search',
-        },
-        items: this.tableViewManager.allColumnConfig.map(config => {
-          return {
-            type: 'action',
-            name: config.name,
-            isSelected: config.type === this.column.type,
-            icon: html` <uni-lit
-              .uni="${this.tableViewManager.getIcon(config.type)}"
-            ></uni-lit>`,
-            select: () => {
-              this.column.updateType?.(config.type);
-            },
-          };
-        }),
-      },
-    });
-  };
-
-  private drawWidthDragBar = () => {
-    const tableContainer = getTableContainer(this);
-    const tableRect = tableContainer.getBoundingClientRect();
-    const rectList = getTableGroupRects(tableContainer);
-    getVerticalIndicator().display(
-      0,
-      tableRect.top,
-      rectList,
-      this.getBoundingClientRect().right
-    );
-    this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
-  };
-
-  private _enterWidthDragBar = () => {
-    if (this.tableViewManager.readonly) {
-      return;
-    }
-    if (this.drawWidthDragBarTask) {
-      cancelAnimationFrame(this.drawWidthDragBarTask);
-      this.drawWidthDragBarTask = 0;
-    }
-    this.drawWidthDragBar();
-  };
-
-  private _leaveWidthDragBar = () => {
-    cancelAnimationFrame(this.drawWidthDragBarTask);
-    this.drawWidthDragBarTask = 0;
-    getVerticalIndicator().remove();
-  };
+  private get readonly() {
+    return this.tableViewManager.readonly$.value;
+  }
 
   private widthDragStart(event: PointerEvent) {
     startDragWidthAdjustmentBar(
@@ -434,16 +495,11 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.disposables.add(
-      this.tableViewManager.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
     const table = this.closest('affine-database-table');
     if (table) {
       this.disposables.add(
         table.handleEvent('dragStart', context => {
-          if (this.tableViewManager.readonly) {
+          if (this.tableViewManager.readonly$.value) {
             return;
           }
           const event = context.get('pointerState').raw;
@@ -465,10 +521,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       );
     }
   }
-
-  editTitle = () => {
-    this._clickColumn();
-  };
 
   override render() {
     const column = this.column;
@@ -516,6 +568,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor column!: TableColumn;
+
+  @property({ attribute: false })
+  accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
+
+  @property({ attribute: false })
+  accessor tableViewManager!: TableSingleView;
 }
 
 type ColumnOffset = {
@@ -550,6 +611,16 @@ const createDragPreview = (
     },
   };
 };
+
+function numberFormatConfig(column: Column): NormalMenu {
+  return {
+    type: 'custom',
+    render: () =>
+      html` <affine-database-number-format-bar
+        .column="${column}"
+      ></affine-database-number-format-bar>`,
+  };
+}
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -4,7 +4,8 @@ import type {
   InlineEditor,
   InlineRange,
 } from '@blocksuite/inline';
-import { expect, type Page } from '@playwright/test';
+
+import { type Page, expect } from '@playwright/test';
 
 const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 
@@ -119,7 +120,11 @@ export async function getInlineRichTextLine(
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const editor = (richTexts[i] as any).inlineEditor as InlineEditor;
-      const { line, rangeIndexRelatedToLine } = editor.getLine(index);
+      const result = editor.getLine(index);
+      if (!result) {
+        throw new Error('Cannot find line');
+      }
+      const { line, rangeIndexRelatedToLine } = result;
       return [line.vTextContent, rangeIndexRelatedToLine] as const;
     },
     [index, i]

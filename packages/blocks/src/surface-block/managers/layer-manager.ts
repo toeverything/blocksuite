@@ -1,20 +1,22 @@
-import { assertType, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import type { BlockModel } from '@blocksuite/store';
+
+import { Bound } from '@blocksuite/global/utils';
+import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
+
+import type { GroupElementModel } from '../element-model/group.js';
+import type { SurfaceBlockModel } from '../surface-model.js';
 
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
-import type { FrameBlockModel } from '../../frame-block/frame-model.js';
-import { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
-import { Bound } from '../../surface-block/utils/bound.js';
+import { FrameBlockModel } from '../../frame-block/frame-model.js';
+import { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import {
   SurfaceElementModel,
   SurfaceGroupLikeModel,
 } from '../element-model/base.js';
-import type { GroupElementModel } from '../element-model/group.js';
 import { GridManager } from '../grid.js';
-import type { SurfaceBlockModel } from '../surface-model.js';
 import {
   compare,
   getElementIndex,
@@ -40,7 +42,7 @@ type BaseLayer<T> = {
   indexes: [string, string];
 };
 
-export type BlockLayer = BaseLayer<EdgelessBlockModel> & {
+export type BlockLayer = BaseLayer<GfxBlockModel> & {
   type: 'block';
 
   /**
@@ -67,24 +69,17 @@ export type CanvasLayer = BaseLayer<SurfaceElementModel> & {
 export type Layer = BlockLayer | CanvasLayer;
 
 export class LayerManager {
-  static INITAL_INDEX = 'a0';
-
   private _disposables = new DisposableGroup();
 
-  slots = {
-    layerUpdated: new Slot<{
-      type: 'delete' | 'add' | 'update';
-      initiatingElement: BlockSuite.EdgelessModelType;
-    }>(),
-  };
+  static INITAL_INDEX = 'a0';
+
+  blocks!: GfxBlockModel[];
+
+  blocksGrid = new GridManager<GfxBlockModel>();
 
   canvasElements!: SurfaceElementModel[];
 
-  blocks!: EdgelessBlockModel[];
-
-  frames!: FrameBlockModel[];
-
-  layers!: Layer[];
+  canvasGrid = new GridManager<SurfaceElementModel>();
 
   canvasLayers!: {
     set: Set<SurfaceElementModel>;
@@ -99,79 +94,70 @@ export class LayerManager {
     elements: Array<SurfaceElementModel>;
   }[];
 
-  blocksGrid = new GridManager<EdgelessBlockModel>();
+  frames!: FrameBlockModel[];
 
   framesGrid = new GridManager<FrameBlockModel>();
 
-  canvasGrid = new GridManager<SurfaceElementModel>();
+  layers!: Layer[];
 
-  constructor(elements?: BlockSuite.EdgelessModelType[]) {
+  slots = {
+    layerUpdated: new Slot<{
+      type: 'delete' | 'add' | 'update';
+      initiatingElement: BlockSuite.EdgelessModel;
+    }>(),
+  };
+
+  constructor(elements?: BlockSuite.EdgelessModel[]) {
     if (elements) {
       this._init(elements);
     }
   }
 
-  private listen(doc: Doc, surface: SurfaceBlockModel) {
-    this._disposables.add(
-      doc.slots.blockUpdated.on(payload => {
-        if (payload.type === 'add') {
-          const block = doc.getBlockById(payload.id)!;
-
-          if (
-            block instanceof EdgelessBlockModel &&
-            renderableInEdgeless(doc, surface, block) &&
-            this.blocks.indexOf(block) === -1
-          ) {
-            this.add(block as EdgelessBlockModel);
-          }
-        }
-        if (payload.type === 'update') {
-          const block = doc.getBlockById(payload.id)!;
-
-          if (
-            payload.props.key === 'index' ||
-            (payload.props.key === 'xywh' &&
-              block instanceof EdgelessBlockModel &&
-              renderableInEdgeless(doc, surface, block))
-          ) {
-            this.update(block as EdgelessBlockModel, {
-              [payload.props.key]: true,
-            });
-          }
-        }
-        if (payload.type === 'delete') {
-          const block = doc.getBlockById(payload.id);
-
-          if (block instanceof EdgelessBlockModel) {
-            this.delete(block as EdgelessBlockModel);
-          }
-        }
-      })
+  static create(doc: Doc, surface: SurfaceBlockModel) {
+    const layerManager = new LayerManager(
+      (
+        doc
+          .getBlocks()
+          .filter(
+            model =>
+              model instanceof GfxBlockModel &&
+              renderableInEdgeless(doc, surface, model)
+          ) as BlockSuite.EdgelessModel[]
+      ).concat(surface.elementModels)
     );
 
-    this._disposables.add(
-      surface.elementAdded.on(payload =>
-        this.add(surface.getElementById(payload.id)!)
-      )
-    );
-    this._disposables.add(
-      surface.elementUpdated.on(payload => {
-        if (
-          payload.props['index'] ||
-          payload.props['xywh'] ||
-          payload.props['externalXYWH'] ||
-          payload.props['childIds']
-        ) {
-          this.update(surface.getElementById(payload.id)!, payload.props);
-        }
-      })
-    );
-    this._disposables.add(
-      surface.elementRemoved.on(payload => this.delete(payload.model!))
-    );
+    layerManager.listen(doc, surface);
+
+    return layerManager;
   }
 
-  private _init(elements: BlockSuite.EdgelessModelType[]) {
+  private _buildCanvasLayers() {
+    const canvasLayers = this.layers
+      .filter<CanvasLayer>(
+        (layer): layer is CanvasLayer => layer.type === 'canvas'
+      )
+      .map(layer => {
+        return {
+          set: layer.set,
+          elements: layer.elements,
+          zIndex: layer.zIndex,
+          indexes: layer.indexes,
+        };
+      }) as LayerManager['canvasLayers'];
+
+    if (!canvasLayers.length || last(this.layers)?.type !== 'canvas') {
+      canvasLayers.push({
+        set: new Set(),
+        elements: [],
+        zIndex: 0,
+        indexes: [LayerManager.INITAL_INDEX, LayerManager.INITAL_INDEX],
+      });
+    }
+
+    this.canvasLayers = canvasLayers;
+  }
+
+  private _init(elements: BlockSuite.EdgelessModel[]) {
     this.canvasElements = [];
     this.blocks = [];
     this.frames = [];
@@ -335,7 +321,7 @@ export class LayerManager {
   }
 
   private _insertIntoLayer(
-    target: BlockSuite.EdgelessModelType,
+    target: BlockSuite.EdgelessModel,
     type: 'block' | 'canvas'
   ) {
     if (this.layers.length === 0) {
@@ -348,7 +334,7 @@ export class LayerManager {
 
     const addToLayer = (
       layer: Layer,
-      element: BlockSuite.EdgelessModelType,
+      element: BlockSuite.EdgelessModel,
       position: number | 'tail'
     ) => {
       assertType<CanvasLayer>(layer);
@@ -375,7 +361,7 @@ export class LayerManager {
     };
     const createLayer = (
       type: 'block' | 'canvas',
-      targets: BlockSuite.EdgelessModelType[],
+      targets: BlockSuite.EdgelessModel[],
       curZIndex: number
     ): Layer => {
       const newLayer = {
@@ -464,7 +450,7 @@ export class LayerManager {
   }
 
   private _removeFromLayer(
-    target: BlockSuite.EdgelessModelType,
+    target: BlockSuite.EdgelessModel,
     type: 'block' | 'canvas'
   ) {
     const layers = this.layers;
@@ -521,37 +507,11 @@ export class LayerManager {
     updateLayersZIndex(layers, index);
   }
 
-  private _buildCanvasLayers() {
-    const canvasLayers = this.layers
-      .filter<CanvasLayer>(
-        (layer): layer is CanvasLayer => layer.type === 'canvas'
-      )
-      .map(layer => {
-        return {
-          set: layer.set,
-          elements: layer.elements,
-          zIndex: layer.zIndex,
-          indexes: layer.indexes,
-        };
-      }) as LayerManager['canvasLayers'];
-
-    if (!canvasLayers.length || last(this.layers)?.type !== 'canvas') {
-      canvasLayers.push({
-        set: new Set(),
-        elements: [],
-        zIndex: 0,
-        indexes: [LayerManager.INITAL_INDEX, LayerManager.INITAL_INDEX],
-      });
-    }
-
-    this.canvasLayers = canvasLayers;
-  }
-
   /**
    * @returns a boolean value to indicate whether the layers have been updated
    */
   private _updateLayer(
-    element: BlockSuite.EdgelessModelType,
+    element: BlockSuite.EdgelessModel,
     props?: Record<string, unknown>
   ) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
@@ -560,8 +520,8 @@ export class LayerManager {
     const indexChanged = !props || 'index' in props;
     const childIdsChanged = props && 'childIds' in props;
     const updateArray = (
-      array: BlockSuite.EdgelessModelType[],
-      element: BlockSuite.EdgelessModelType
+      array: BlockSuite.EdgelessModel[],
+      element: BlockSuite.EdgelessModel
     ) => {
       if (!indexChanged) return;
       removeFromOrderedArray(array, element);
@@ -587,18 +547,12 @@ export class LayerManager {
     } else {
       updateType = 'block';
       updateArray(this.blocks, element);
-      this.blocksGrid.update(element as EdgelessBlockModel);
+      this.blocksGrid.update(element as GfxBlockModel);
     }
 
     if (updateType && (indexChanged || childIdsChanged)) {
-      this._removeFromLayer(
-        element as BlockSuite.EdgelessModelType,
-        updateType
-      );
-      this._insertIntoLayer(
-        element as BlockSuite.EdgelessModelType,
-        updateType
-      );
+      this._removeFromLayer(element as BlockSuite.EdgelessModel, updateType);
+      this._insertIntoLayer(element as BlockSuite.EdgelessModel, updateType);
 
       return true;
     }
@@ -606,7 +560,67 @@ export class LayerManager {
     return false;
   }
 
-  add(element: BlockSuite.EdgelessModelType) {
+  private listen(doc: Doc, surface: SurfaceBlockModel) {
+    this._disposables.add(
+      doc.slots.blockUpdated.on(payload => {
+        if (payload.type === 'add') {
+          const block = doc.getBlockById(payload.id)!;
+
+          if (
+            block instanceof GfxBlockModel &&
+            renderableInEdgeless(doc, surface, block) &&
+            this.blocks.indexOf(block) === -1
+          ) {
+            this.add(block as GfxBlockModel);
+          }
+        }
+        if (payload.type === 'update') {
+          const block = doc.getBlockById(payload.id)!;
+
+          if (
+            payload.props.key === 'index' ||
+            (payload.props.key === 'xywh' &&
+              block instanceof GfxBlockModel &&
+              renderableInEdgeless(doc, surface, block))
+          ) {
+            this.update(block as GfxBlockModel, {
+              [payload.props.key]: true,
+            });
+          }
+        }
+        if (payload.type === 'delete') {
+          const block = doc.getBlockById(payload.id);
+
+          if (block instanceof GfxBlockModel) {
+            this.delete(block as GfxBlockModel);
+          }
+        }
+      })
+    );
+
+    this._disposables.add(
+      surface.elementAdded.on(payload =>
+        this.add(surface.getElementById(payload.id)!)
+      )
+    );
+    this._disposables.add(
+      surface.elementUpdated.on(payload => {
+        if (
+          payload.props['index'] ||
+          payload.props['xywh'] ||
+          payload.props['externalXYWH'] ||
+          payload.props['childIds']
+        ) {
+          this.update(surface.getElementById(payload.id)!, payload.props);
+        }
+      })
+    );
+    this._disposables.add(
+      surface.elementRemoved.on(payload => this.delete(payload.model!))
+    );
+  }
+
+  add(element: BlockSuite.EdgelessModel) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
     const type = 'flavour' in element ? element.flavour : element.type;
 
@@ -626,14 +640,11 @@ export class LayerManager {
     } else {
       insertType = 'block';
       insertToOrderedArray(this.blocks, element);
-      this.blocksGrid.add(element as EdgelessBlockModel);
+      this.blocksGrid.add(element as GfxBlockModel);
     }
 
     if (insertType) {
-      this._insertIntoLayer(
-        element as BlockSuite.EdgelessModelType,
-        insertType
-      );
+      this._insertIntoLayer(element as BlockSuite.EdgelessModel, insertType);
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit({
         type: 'add',
@@ -642,90 +653,11 @@ export class LayerManager {
     }
   }
 
-  delete(element: BlockSuite.EdgelessModelType) {
-    let deleteType: 'canvas' | 'block' | undefined = undefined;
-
-    if (element instanceof SurfaceElementModel) {
-      deleteType = 'canvas';
-      removeFromOrderedArray(this.canvasElements, element);
-      this.canvasGrid.remove(element);
-    } else if (matchFlavours(element, ['affine:frame'])) {
-      removeFromOrderedArray(this.frames, element);
-      this.framesGrid.remove(element as FrameBlockModel);
-    } else {
-      deleteType = 'block';
-      removeFromOrderedArray(this.blocks, element);
-      this.blocksGrid.remove(element);
-    }
-
-    if (deleteType) {
-      this._removeFromLayer(element, deleteType);
-      this._buildCanvasLayers();
-      this.slots.layerUpdated.emit({
-        type: 'delete',
-        initiatingElement: element,
-      });
-    }
-  }
-
-  update(
-    element: BlockSuite.EdgelessModelType,
-    props?: Record<string, unknown>
-  ) {
-    if (this._updateLayer(element, props)) {
-      this._buildCanvasLayers();
-      this.slots.layerUpdated.emit({
-        type: 'update',
-        initiatingElement: element,
-      });
-    }
-  }
-
-  getCanvasLayers() {
-    return this.canvasLayers;
-  }
-
-  generateIndex(elementType: string): string {
-    const batch = elementType === 'affine:frame' ? 'frame' : 'common';
-    const type = elementType.startsWith('affine:') ? 'block' : 'canvas';
-
-    if (batch === 'frame') {
-      const lastFrame = last(this.frames);
-
-      return lastFrame
-        ? generateKeyBetween(ungroupIndex(getElementIndex(lastFrame)), null)
-        : LayerManager.INITAL_INDEX;
-    } else {
-      if (type === 'canvas') {
-        const lastIndex = last(this.layers)?.indexes[1];
-
-        return lastIndex
-          ? generateKeyBetween(ungroupIndex(lastIndex), null)
-          : LayerManager.INITAL_INDEX;
-      }
-
-      const lastLayer = last(this.layers);
-
-      if (!lastLayer) return LayerManager.INITAL_INDEX;
-
-      assertType<string>(lastLayer);
-
-      if (lastLayer.type === 'canvas') {
-        const secondLastLayer = nToLast(this.layers, 2);
-        const secondLastLayerIndex = secondLastLayer
-          ? ungroupIndex(secondLastLayer.indexes[1])
-          : null;
-
-        return generateKeyBetween(
-          secondLastLayerIndex,
-          secondLastLayerIndex && secondLastLayerIndex >= lastLayer.indexes[0]
-            ? null
-            : lastLayer.indexes[0]
-        );
-      }
-
-      return generateKeyBetween(lastLayer.indexes[1], null);
-    }
+  /**
+   * Pass to the `Array.sort` to  sort the elements by their index
+   */
+  compare(a: BlockSuite.EdgelessModel, b: BlockSuite.EdgelessModel) {
+    return compare(a, b);
   }
 
   /**
@@ -780,21 +712,99 @@ export class LayerManager {
         groups: () => [],
       };
 
-      manager.add(mockedFakeElement as unknown as BlockSuite.EdgelessModelType);
+      manager.add(mockedFakeElement as unknown as BlockSuite.EdgelessModel);
 
       return idx;
     };
   }
 
+  delete(element: BlockSuite.EdgelessModel) {
+    let deleteType: 'canvas' | 'block' | undefined = undefined;
+
+    if (element instanceof SurfaceElementModel) {
+      deleteType = 'canvas';
+      removeFromOrderedArray(this.canvasElements, element);
+      this.canvasGrid.remove(element);
+    } else if (matchFlavours(element, ['affine:frame'])) {
+      removeFromOrderedArray(this.frames, element);
+      this.framesGrid.remove(element as FrameBlockModel);
+    } else {
+      deleteType = 'block';
+      removeFromOrderedArray(this.blocks, element);
+      this.blocksGrid.remove(element);
+    }
+
+    if (deleteType) {
+      this._removeFromLayer(element, deleteType);
+      this._buildCanvasLayers();
+      this.slots.layerUpdated.emit({
+        type: 'delete',
+        initiatingElement: element,
+      });
+    }
+  }
+
+  dispose() {
+    this.slots.layerUpdated.dispose();
+    this._disposables.dispose();
+  }
+
+  generateIndex(elementType: string): string {
+    const batch = elementType === 'affine:frame' ? 'frame' : 'common';
+    const type = elementType.startsWith('affine:') ? 'block' : 'canvas';
+
+    if (batch === 'frame') {
+      const lastFrame = last(this.frames);
+
+      return lastFrame
+        ? generateKeyBetween(ungroupIndex(getElementIndex(lastFrame)), null)
+        : LayerManager.INITAL_INDEX;
+    } else {
+      if (type === 'canvas') {
+        const lastIndex = last(this.layers)?.indexes[1];
+
+        return lastIndex
+          ? generateKeyBetween(ungroupIndex(lastIndex), null)
+          : LayerManager.INITAL_INDEX;
+      }
+
+      const lastLayer = last(this.layers);
+
+      if (!lastLayer) return LayerManager.INITAL_INDEX;
+
+      assertType<string>(lastLayer);
+
+      if (lastLayer.type === 'canvas') {
+        const secondLastLayer = nToLast(this.layers, 2);
+        const secondLastLayerIndex = secondLastLayer
+          ? ungroupIndex(secondLastLayer.indexes[1])
+          : null;
+
+        return generateKeyBetween(
+          secondLastLayerIndex,
+          secondLastLayerIndex && secondLastLayerIndex >= lastLayer.indexes[0]
+            ? null
+            : lastLayer.indexes[0]
+        );
+      }
+
+      return generateKeyBetween(lastLayer.indexes[1], null);
+    }
+  }
+
+  getCanvasLayers() {
+    return this.canvasLayers;
+  }
+
   getReorderedIndex(
-    element: BlockSuite.EdgelessModelType,
+    element: BlockSuite.EdgelessModel,
     direction: ReorderingDirection
   ): string {
-    const group = element.group;
+    const group = (element.group as BlockSuite.SurfaceGroupLikeModel) || null;
     const isFrameBlock =
       (element as FrameBlockModel).flavour === 'affine:frame';
 
-    let elements: BlockSuite.EdgelessModelType[];
+    let elements: BlockSuite.EdgelessModel[];
 
     if (group !== null) {
       elements = group.childElements.filter(
@@ -808,7 +818,7 @@ export class LayerManager {
       elements = this.frames;
     } else {
       elements = this.layers.reduce(
-        (pre: BlockSuite.EdgelessModelType[], current) =>
+        (pre: BlockSuite.EdgelessModel[], current) =>
           pre.concat(current.elements.filter(element => element.group == null)),
         []
       );
@@ -854,33 +864,32 @@ export class LayerManager {
     }
   }
 
-  /**
-   * Pass to the `Array.sort` to  sort the elements by their index
-   */
-  compare(a: BlockSuite.EdgelessModelType, b: BlockSuite.EdgelessModelType) {
-    return compare(a, b);
+  getZIndex(element: BlockSuite.EdgelessModel): number {
+    if (element instanceof FrameBlockModel) {
+      const lastLayer = last(this.layers);
+      const frameIndex = this.frames.indexOf(element);
+
+      return lastLayer
+        ? lastLayer.zIndex + lastLayer.elements.length + frameIndex
+        : frameIndex;
+    }
+
+    // @ts-ignore
+    const layer = this.layers.find(layer => layer.set.has(element));
+
+    if (!layer) return -1;
+
+    // @ts-ignore
+    return layer.zIndex + layer.elements.indexOf(element);
   }
 
-  dispose() {
-    this.slots.layerUpdated.dispose();
-    this._disposables.dispose();
-  }
-
-  static create(doc: Doc, surface: SurfaceBlockModel) {
-    const layerManager = new LayerManager(
-      (
-        doc
-          .getBlocks()
-          .filter(
-            model =>
-              model instanceof EdgelessBlockModel &&
-              renderableInEdgeless(doc, surface, model)
-          ) as BlockSuite.EdgelessModelType[]
-      ).concat(surface.elementModels)
-    );
-
-    layerManager.listen(doc, surface);
-
-    return layerManager;
+  update(element: BlockSuite.EdgelessModel, props?: Record<string, unknown>) {
+    if (this._updateLayer(element, props)) {
+      this._buildCanvasLayers();
+      this.slots.layerUpdated.emit({
+        type: 'update',
+        initiatingElement: element,
+      });
+    }
   }
 }

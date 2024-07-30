@@ -1,8 +1,11 @@
+import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { EmbedCardStyle } from '../_common/types.js';
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
+import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
 import { AttachmentBlockTransformer } from './attachment-transformer.js';
 
 /**
@@ -86,9 +89,9 @@ export const AttachmentBlockSchema = defineBlockSchema({
   toModel: () => new AttachmentBlockModel(),
 });
 
-export class AttachmentBlockModel extends selectable<AttachmentBlockProps>(
-  BlockModel
-) {}
+export class AttachmentBlockModel
+  extends GfxCompatible<AttachmentBlockProps>(BlockModel)
+  implements GfxElementGeometry {}
 
 declare global {
   namespace BlockSuite {

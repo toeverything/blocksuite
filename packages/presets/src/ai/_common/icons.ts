@@ -1,5 +1,4 @@
 import '@dotlottie/player-component';
-
 import { html } from 'lit';
 
 export const AIStarIcon = html`<svg

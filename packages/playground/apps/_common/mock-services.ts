@@ -1,5 +1,5 @@
-import type { EditorHost } from '@blocksuite/block-std';
 import type { PageRootService } from '@blocksuite/blocks';
+
 import {
   type DocMode,
   type DocModeService,
@@ -67,7 +67,7 @@ export function mockDocModeService(curDocId: string) {
 export function mockNotificationService(service: PageRootService) {
   const notificationService: NotificationService = {
     toast: (message, options) => {
-      toast(service.host as EditorHost, message, options?.duration);
+      toast(service.host, message, options?.duration);
     },
     confirm: notification => {
       return Promise.resolve(confirm(notification.title.toString()));

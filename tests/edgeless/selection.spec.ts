@@ -2,9 +2,9 @@ import { expect } from '@playwright/test';
 
 import * as actions from '../utils/actions/edgeless.js';
 import {
+  Shape,
   getNoteBoundBoxInEdgeless,
   setEdgelessTool,
-  Shape,
   switchEditorMode,
   toModelCoord,
 } from '../utils/actions/edgeless.js';
@@ -225,12 +225,12 @@ test('when the selection is always a note, it should remain in an active state',
   // should wait for inline editor update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'edgeless-note', 2);
 
   await clickInCenter(page, bound);
   await clickInCenter(page, bound);
   await waitNextFrame(page);
-  await assertSelectionInNote(page, ids.noteId);
+  await assertSelectionInNote(page, ids.noteId, 'affine-edgeless-note');
 });
 
 test('should auto panning when selection rectangle reaches viewport edges', async ({

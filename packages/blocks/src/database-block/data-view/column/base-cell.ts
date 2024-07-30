@@ -1,59 +1,26 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { property } from 'lit/decorators.js';
 
-import type {
-  DataViewColumnManager,
-  DataViewManager,
-} from '../view/data-view-manager.js';
+import type { Cell } from '../view-manager/cell.js';
 import type { CellRenderProps, DataViewCellLifeCycle } from './manager.js';
 
 export abstract class BaseCellRenderer<
     Value,
     Data extends Record<string, unknown> = Record<string, unknown>,
   >
-  extends WithDisposable(ShadowlessElement)
+  extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements DataViewCellLifeCycle, CellRenderProps<Data, Value>
 {
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
+  readonly$ = computed(() => {
+    return this.cell.column.readonly$.value;
+  });
 
-  @property({ attribute: false })
-  accessor column!: DataViewColumnManager<Value, Data>;
-
-  @property()
-  accessor rowId!: string;
-
-  @property({ attribute: false })
-  accessor isEditing!: boolean;
-
-  @property({ attribute: false })
-  accessor selectCurrentCell!: (editing: boolean) => void;
-
-  get readonly(): boolean {
-    return this.column.readonly;
-  }
-
-  get value() {
-    return this.column.getValue(this.rowId);
-  }
-
-  onChange(value: Value | undefined): void {
-    this.column.setValue(this.rowId, value);
-  }
+  value$ = computed(() => {
+    return this.cell.value$.value;
+  });
 
   beforeEnterEditMode(): boolean {
-    return true;
-  }
-
-  onEnterEditMode(): void {
-    // do nothing
-  }
-
-  onExitEditMode() {
-    // do nothing
-  }
-
-  focusCell() {
     return true;
   }
 
@@ -69,14 +36,6 @@ export abstract class BaseCellRenderer<
         e.stopPropagation();
       }
     });
-    const type = this.column.type;
-    this._disposables.add(
-      this.column.onCellUpdate(this.rowId, () => {
-        if (this.column.type === type) {
-          this.requestUpdate();
-        }
-      })
-    );
 
     this._disposables.addFromEvent(this, 'copy', e => {
       if (!this.isEditing) return;
@@ -97,13 +56,58 @@ export abstract class BaseCellRenderer<
     });
   }
 
+  focusCell() {
+    return true;
+  }
+
   forceUpdate(): void {
     this.requestUpdate();
+  }
+
+  onChange(value: Value | undefined): void {
+    this.cell.setValue(value);
   }
 
   onCopy(_e: ClipboardEvent) {}
 
   onCut(_e: ClipboardEvent) {}
 
+  onEnterEditMode(): void {
+    // do nothing
+  }
+
+  onExitEditMode() {
+    // do nothing
+  }
+
   onPaste(_e: ClipboardEvent) {}
+
+  get column() {
+    return this.cell.column;
+  }
+
+  get readonly() {
+    return this.readonly$.value;
+  }
+
+  get row() {
+    return this.cell.row;
+  }
+
+  get value() {
+    return this.value$.value;
+  }
+
+  get view() {
+    return this.cell.view;
+  }
+
+  @property({ attribute: false })
+  accessor cell!: Cell<Value, Data>;
+
+  @property({ attribute: false })
+  accessor isEditing!: boolean;
+
+  @property({ attribute: false })
+  accessor selectCurrentCell!: (editing: boolean) => void;
 }

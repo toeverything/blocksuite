@@ -403,3 +403,25 @@ export const SmallCloseIcon = html`<svg
     fill="currentColor"
   />
 </svg>`;
+
+export const TocIcon = html`
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    fill="none"
+    style="user-select:none;flex-shrink:0;"
+  >
+    <path
+      fill="#7A7A7A"
+      fill-rule="evenodd"
+      d="M3.25 6A.75.75 0 0 1 4 5.25h13a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 3.25 6ZM3.25 12a.75.75 0 0 1 .75-.75h13a.75.75 0 0 1 0 1.5H4a.75.75 0 0 1-.75-.75ZM3.25 18a.75.75 0 0 1 .75-.75h13a.75.75 0 0 1 0 1.5H4a.75.75 0 0 1-.75-.75Z"
+      clip-rule="evenodd"
+    />
+    <path
+      fill="#7A7A7A"
+      d="M20.8 12a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM20.8 18a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM20.8 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"
+    />
+  </svg>
+`;

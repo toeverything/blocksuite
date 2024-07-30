@@ -5,9 +5,9 @@ type ClipboardEventStateOptions = {
 };
 
 export class ClipboardEventState extends UIEventState {
-  override type = 'clipboardState';
-
   raw: ClipboardEvent;
+
+  override type = 'clipboardState';
 
   constructor({ event }: ClipboardEventStateOptions) {
     super(event);

@@ -1,13 +1,15 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { DatabaseSearchClose } from '../../../database-block/data-view/common/icons/index.js';
 import type { ViewMeta } from '../../../database-block/data-view/index.js';
-import { viewPresets } from '../../../database-block/data-view/index.js';
 import type { DatabaseBlockModel } from '../../../database-block/index.js';
+
+import { DatabaseSearchClose } from '../../../database-block/data-view/common/icons/index.js';
+import { viewPresets } from '../../../database-block/data-view/index.js';
 import { databaseViewInitConvert } from '../../../database-block/utils.js';
 import {
   DatabaseKanbanViewIcon,
@@ -156,13 +158,6 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  get doc() {
-    return this.host.doc;
-  }
-
   private _convertToDatabase(viewMeta: ViewMeta) {
     const [_, ctx] = this.host.std.command
       .chain()
@@ -243,6 +238,13 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
       </div>
     </div>`;
   }
+
+  get doc() {
+    return this.host.doc;
+  }
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 }
 
 declare global {

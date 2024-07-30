@@ -1,14 +1,34 @@
 export type Template = {
+  /**
+   * name of the sticker
+   *
+   * if not provided, it cannot be searched
+   */
   name?: string;
+
+  /**
+   * template content
+   */
   content: unknown;
+
+  /**
+   * external assets
+   */
   assets?: Record<string, string>;
+
   preview?: string;
+
+  /**
+   * type of template
+   * `template`: normal template, looks like an article
+   * `sticker`: sticker template, only contains one image block under surface block
+   */
   type: string;
 };
 
 export type TemplateCategory = {
   name: string;
-  templates: Template[];
+  templates: Template[] | (() => Promise<Template[]>);
 };
 
 export interface TemplateManager {

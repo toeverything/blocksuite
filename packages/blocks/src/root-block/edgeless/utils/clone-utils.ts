@@ -1,26 +1,31 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
-import { Job } from '@blocksuite/store';
 
-import { groupBy } from '../../../_common/utils/iterable.js';
-import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
+import { type BlockSnapshot, Job } from '@blocksuite/store';
+
 import type { SerializedConnectorElement } from '../../../surface-block/element-model/connector.js';
 import type { SerializedGroupElement } from '../../../surface-block/element-model/group.js';
 import type { SerializedMindmapElement } from '../../../surface-block/element-model/mindmap.js';
 import type { NodeDetail } from '../../../surface-block/element-model/utils/mindmap/layout.js';
+import type { EdgelessFrameManager } from '../frame-manager.js';
+
+import { groupBy } from '../../../_common/utils/iterable.js';
+import {
+  type SerializedElement,
+  SurfaceGroupLikeModel,
+} from '../../../surface-block/element-model/base.js';
 import {
   ConnectorElementModel,
   GroupElementModel,
   MindmapElementModel,
 } from '../../../surface-block/index.js';
-import { EdgelessBlockModel } from '../edgeless-block-model.js';
-import type { EdgelessFrameManager } from '../frame-manager.js';
+import { GfxBlockModel } from '../block-model.js';
 import { isFrameBlock } from '../utils/query.js';
 
 export function getCloneElements(
-  elements: BlockSuite.EdgelessModelType[],
+  elements: BlockSuite.EdgelessModel[],
   frame: EdgelessFrameManager
 ) {
-  const set = new Set<BlockSuite.EdgelessModelType>();
+  const set = new Set<BlockSuite.EdgelessModel>();
   elements.forEach(element => {
     set.add(element);
     if (isFrameBlock(element)) {
@@ -34,7 +39,7 @@ export function getCloneElements(
 }
 
 export async function prepareCloneData(
-  elements: BlockSuite.EdgelessModelType[],
+  elements: BlockSuite.EdgelessModel[],
   std: BlockStdScope
 ) {
   const job = new Job({
@@ -46,16 +51,19 @@ export async function prepareCloneData(
       return data;
     })
   );
-  return res.filter(d => !!d);
+  return res.filter((d): d is SerializedElement | BlockSnapshot => !!d);
 }
 
 export async function serializeElement(
-  element: BlockSuite.EdgelessModelType,
-  elements: BlockSuite.EdgelessModelType[],
+  element: BlockSuite.EdgelessModel,
+  elements: BlockSuite.EdgelessModel[],
   job: Job
 ) {
-  if (element instanceof EdgelessBlockModel) {
+  if (element instanceof GfxBlockModel) {
     const snapshot = await job.blockToSnapshot(element);
+    if (!snapshot) {
+      return;
+    }
     return { ...snapshot };
   } else if (element instanceof ConnectorElementModel) {
     return serializeConnector(element, elements);
@@ -66,7 +74,7 @@ export async function serializeElement(
 
 export function serializeConnector(
   connector: ConnectorElementModel,
-  elements: BlockSuite.EdgelessModelType[]
+  elements: BlockSuite.EdgelessModel[]
 ) {
   const sourceId = connector.source?.id;
   const targetId = connector.target?.id;
@@ -90,7 +98,7 @@ export function serializeConnector(
  * @param elements edgeless model list
  * @returns sorted edgeless model list
  */
-export function sortEdgelessElements(elements: BlockSuite.EdgelessModelType[]) {
+export function sortEdgelessElements(elements: BlockSuite.EdgelessModel[]) {
   const result = groupBy(elements, element => {
     if (element instanceof ConnectorElementModel) {
       return 'connector';
@@ -181,7 +189,7 @@ export function mapMindmapIds(
 }
 
 export function getElementProps(
-  element: BlockSuite.SurfaceModelType,
+  element: BlockSuite.SurfaceModel,
   ids: Map<string, string>
 ) {
   if (element instanceof ConnectorElementModel) {

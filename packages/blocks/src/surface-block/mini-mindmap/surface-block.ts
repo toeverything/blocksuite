@@ -1,32 +1,29 @@
-import { BlockElement } from '@blocksuite/block-std';
+import type { Bound } from '@blocksuite/global/utils';
+
+import { BlockComponent } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
+
+import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
+import type { Color } from '../consts.js';
+import type { ShapeElementModel } from '../element-model/shape.js';
+import type { SurfaceBlockModel } from '../surface-model.js';
+import type { MindmapService } from './service.js';
 
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import { fitContent } from '../canvas-renderer/element-renderer/shape/utils.js';
 import { Renderer } from '../canvas-renderer/renderer.js';
-import type { ShapeElementModel } from '../element-model/shape.js';
 import { LayerManager } from '../managers/layer-manager.js';
-import type { SurfaceBlockModel } from '../surface-model.js';
-import type { Bound } from '../utils/bound.js';
-import type { MindmapService } from './service.js';
 
 @customElement('mini-mindmap-surface-block')
-export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
-  private _theme = new ThemeObserver();
-
+export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   private _layer!: LayerManager;
 
   private _renderer!: Renderer;
 
-  @query('.affine-mini-mindmap-surface')
-  accessor editorContainer!: HTMLDivElement;
+  private _theme = new ThemeObserver();
 
-  get mindmapService() {
-    return this.host.spec.getService(
-      'affine:page'
-    ) as unknown as MindmapService;
-  }
+  private _viewport!: Viewport;
 
   private _adjustNodeWidth() {
     this.model.doc.transact(() => {
@@ -40,7 +37,7 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
 
   private _resizeEffect() {
     const observer = new ResizeObserver(() => {
-      this._renderer.onResize();
+      this._viewport.onResize();
     });
 
     observer.observe(this.editorContainer);
@@ -63,7 +60,7 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
         });
 
         if (bound!) {
-          this._renderer.setViewportByBound(bound, [10, 10, 10, 10]);
+          this._viewport.setViewportByBound(bound, [10, 10, 10, 10]);
         }
       })
     );
@@ -77,26 +74,34 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
       })
     );
 
-    this._renderer.ZOOM_MIN = 0.01;
+    this._viewport.ZOOM_MIN = 0.01;
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
     this._layer = LayerManager.create(this.doc, this.model);
     this._renderer = new Renderer({
+      viewport: this._viewport,
       layerManager: this._layer,
       enableStackingCanvas: true,
       provider: {
         selectedElements: () => [],
+        getColorScheme: () => this._theme.mode,
         getVariableColor: (val: string) => this._theme.getVariableValue(val),
+        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+          this._theme.getColorValue(color, fallback, real),
+        generateColorProperty: (color: Color, fallback: string) =>
+          this._theme.generateColorProperty(color, fallback),
       },
     });
     this._theme.observe(this.ownerDocument.documentElement);
-    this.disposables.add(this._theme);
+    this.disposables.add(() => this._theme.dispose());
   }
 
   override firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {
     this._renderer.attach(this.editorContainer);
+    this._viewport.setContainer(this.editorContainer);
+
     this._resizeEffect();
     this._setupCenterEffect();
     this._setupRenderer();
@@ -117,4 +122,13 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
       </div>
     `;
   }
+
+  get mindmapService() {
+    return this.host.spec.getService(
+      'affine:page'
+    ) as unknown as MindmapService;
+  }
+
+  @query('.affine-mini-mindmap-surface')
+  accessor editorContainer!: HTMLDivElement;
 }

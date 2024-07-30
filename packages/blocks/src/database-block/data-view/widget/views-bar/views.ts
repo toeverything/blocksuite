@@ -1,5 +1,3 @@
-import '../../common/component/overflow/overflow.js';
-
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -15,16 +13,76 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../../../_common/icons/index.js';
+import '../../common/component/overflow/overflow.js';
 import { DeleteIcon } from '../../common/icons/index.js';
-import type { SingleViewSource } from '../../common/index.js';
 import { renderUniLit } from '../../utils/uni-component/index.js';
 import { WidgetBase } from '../widget-base.js';
 
 @customElement('data-view-header-views')
 export class DataViewHeaderViews extends WidgetBase {
-  get readonly() {
-    return this.viewSource.readonly;
-  }
+  _addViewMenu = (event: MouseEvent) => {
+    popFilterableSimpleMenu(
+      event.target as HTMLElement,
+      this.dataSource.viewMetas.map(v => {
+        return {
+          type: 'action',
+          name: v.model.defaultName,
+          icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
+          select: () => {
+            const id = this.viewManager.viewAdd(v.type);
+            this.viewManager.setCurrentView(id);
+          },
+        };
+      })
+    );
+  };
+
+  _showMore = (event: MouseEvent) => {
+    const views = this.viewManager.views$.value;
+    popFilterableSimpleMenu(event.target as HTMLElement, [
+      ...views.map(id => {
+        const openViewOption = (event: MouseEvent) => {
+          event.stopPropagation();
+          this.openViewOption(event.target as HTMLElement, id);
+        };
+        const view = this.viewManager.viewGet(id);
+        return {
+          type: 'action' as const,
+          icon: html`<uni-lit .uni=${this.getRenderer(id).icon}></uni-lit>`,
+          name: view.viewData$.value?.name ?? '',
+          label: () => html`${view.viewData$.value?.name}`,
+          isSelected: this.viewManager.currentViewId$.value === id,
+          select: () => {
+            this.viewManager.setCurrentView(id);
+          },
+          postfix: html`<div
+            class="dv-hover dv-round-4"
+            @click="${openViewOption}"
+            style="display:flex;align-items:center;"
+          >
+            ${MoreHorizontalIcon}
+          </div>`,
+        };
+      }),
+      {
+        type: 'group',
+        name: '',
+        hide: () => this.readonly,
+        children: () =>
+          this.dataSource.viewMetas.map(v => {
+            return {
+              type: 'action',
+              name: `Create ${v.model.defaultName}`,
+              icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
+              select: () => {
+                const id = this.viewManager.viewAdd(v.type);
+                this.viewManager.setCurrentView(id);
+              },
+            };
+          }),
+      },
+    ]);
+  };
 
   static override styles = css`
     data-view-header-views {
@@ -73,88 +131,22 @@ export class DataViewHeaderViews extends WidgetBase {
     }
   `;
 
-  private getRenderer(view: SingleViewSource) {
-    return this.viewSource.getViewMeta(view.view.mode).renderer;
-  }
-
-  _addViewMenu = (event: MouseEvent) => {
-    popFilterableSimpleMenu(
-      event.target as HTMLElement,
-      this.viewSource.allViewMeta.map(v => {
-        return {
-          type: 'action',
-          name: v.model.defaultName,
-          icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
-          select: () => {
-            const id = this.viewSource.viewAdd(v.type);
-            this.viewSource.selectView(id);
-          },
-        };
-      })
-    );
-  };
-
-  _showMore = (event: MouseEvent) => {
-    const views = this.viewSource.views;
-    popFilterableSimpleMenu(event.target as HTMLElement, [
-      ...views.map(v => {
-        const openViewOption = (event: MouseEvent) => {
-          event.stopPropagation();
-          this.openViewOption(event.target as HTMLElement, v.view.id);
-        };
-        return {
-          type: 'action' as const,
-          icon: html`<uni-lit .uni=${this.getRenderer(v).icon}></uni-lit>`,
-          name: v.view.name,
-          isSelected: this.viewSource.currentViewId === v.view.id,
-          select: () => {
-            this.viewSource.selectView(v.view.id);
-          },
-          postfix: html`<div
-            class="dv-hover dv-round-4"
-            @click="${openViewOption}"
-            style="display:flex;align-items:center;"
-          >
-            ${MoreHorizontalIcon}
-          </div>`,
-        };
-      }),
-      {
-        type: 'group',
-        name: '',
-        hide: () => this.readonly,
-        children: () =>
-          this.viewSource.allViewMeta.map(v => {
-            return {
-              type: 'action',
-              name: `Create ${v.model.defaultName}`,
-              icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
-              select: () => {
-                const id = this.viewSource.viewAdd(v.type);
-                this.viewSource.selectView(id);
-              },
-            };
-          }),
-      },
-    ]);
-  };
-
   openViewOption = (target: HTMLElement, id: string) => {
     if (this.readonly) {
       return;
     }
-    const views = this.viewSource.views;
-    const index = views.findIndex(v => v.view.id === id);
-    const view = views[index];
+    const views = this.viewManager.views$.value;
+    const index = views.findIndex(v => v === id);
+    const view = this.viewManager.viewGet(views[index]);
     if (!view) {
       return;
     }
     popMenu(target, {
       options: {
         input: {
-          initValue: view.view.name,
+          initValue: view.viewData$.value?.name,
           onComplete: text => {
-            view.updateView(_data => ({
+            view.viewDataUpdate(_data => ({
               name: text,
             }));
           },
@@ -163,7 +155,7 @@ export class DataViewHeaderViews extends WidgetBase {
           {
             type: 'action',
             name: 'Edit View',
-            icon: renderUniLit(this.getRenderer(view).icon, {}),
+            icon: renderUniLit(this.getRenderer(id).icon, {}),
             select: () => {
               this.closest('affine-data-view-renderer')
                 ?.querySelector('data-view-header-tools-view-options')
@@ -176,10 +168,10 @@ export class DataViewHeaderViews extends WidgetBase {
             hide: () => index === 0,
             icon: MoveLeftIcon,
             select: () => {
-              const target = views[index - 1];
-              this.viewSource.moveTo(
-                view.view.id,
-                target ? { before: true, id: target.view.id } : 'start'
+              const targetId = views[index - 1];
+              this.viewManager.moveTo(
+                id,
+                targetId ? { before: true, id: targetId } : 'start'
               );
             },
           },
@@ -189,10 +181,10 @@ export class DataViewHeaderViews extends WidgetBase {
             icon: MoveRightIcon,
             hide: () => index === views.length - 1,
             select: () => {
-              const target = views[index + 1];
-              this.viewSource.moveTo(
-                view.view.id,
-                target ? { before: false, id: target.view.id } : 'end'
+              const targetId = views[index + 1];
+              this.viewManager.moveTo(
+                id,
+                targetId ? { before: false, id: targetId } : 'end'
               );
             },
           },
@@ -201,7 +193,7 @@ export class DataViewHeaderViews extends WidgetBase {
             name: 'Duplicate',
             icon: DuplicateIcon,
             select: () => {
-              this.viewSource.duplicate(view.view.id);
+              this.viewManager.viewDuplicate(id);
             },
           },
           {
@@ -224,31 +216,15 @@ export class DataViewHeaderViews extends WidgetBase {
     });
   };
 
-  _clickView(event: MouseEvent, id: string) {
-    if (this.viewSource.currentViewId !== id) {
-      this.viewSource.selectView(id);
-      return;
-    }
-    this.openViewOption(event.target as HTMLElement, id);
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.viewSource.updateSlot.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
   renderMore = (count: number) => {
-    const views = this.viewSource.views;
+    const views = this.viewManager.views$.value;
     if (count === views.length) {
       if (this.readonly) {
         return;
       }
       return html`<div
         class="database-view-button dv-icon-16 dv-hover"
+        data-testid="database-add-view-button"
         @click="${this._addViewMenu}"
       >
         ${AddCursorIcon}
@@ -262,26 +238,38 @@ export class DataViewHeaderViews extends WidgetBase {
   };
 
   renderViews = () => {
-    const views = this.viewSource.views;
-    return views.map(view => () => {
+    const views = this.viewManager.views$.value;
+    return views.map(id => () => {
       const classList = classMap({
         'database-view-button': true,
         'dv-hover': true,
-        active: this.viewSource.currentViewId === view.view.id,
+        active: this.viewManager.currentViewId$.value === id,
       });
+      const view = this.viewManager.viewDataGet(id);
       return html`
         <div
           class="${classList}"
           style="margin-right: 4px;"
-          @click="${(event: MouseEvent) =>
-            this._clickView(event, view.view.id)}"
+          @click="${(event: MouseEvent) => this._clickView(event, id)}"
         >
-          <uni-lit class="icon" .uni="${this.getRenderer(view).icon}"></uni-lit>
-          <div class="name">${view.view.name}</div>
+          <uni-lit class="icon" .uni="${this.getRenderer(id).icon}"></uni-lit>
+          <div class="name">${view?.name}</div>
         </div>
       `;
     });
   };
+
+  _clickView(event: MouseEvent, id: string) {
+    if (this.viewManager.currentViewId$.value !== id) {
+      this.viewManager.setCurrentView(id);
+      return;
+    }
+    this.openViewOption(event.target as HTMLElement, id);
+  }
+
+  private getRenderer(viewId: string) {
+    return this.dataSource.viewMetaGetById(viewId).renderer;
+  }
 
   override render() {
     return html`
@@ -290,6 +278,10 @@ export class DataViewHeaderViews extends WidgetBase {
         .renderMore="${this.renderMore}"
       ></component-overflow>
     `;
+  }
+
+  get readonly() {
+    return this.viewManager.readonly$.value;
   }
 }
 

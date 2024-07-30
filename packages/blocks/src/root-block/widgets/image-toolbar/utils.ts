@@ -1,13 +1,6 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import '../../../_common/components/tooltip/tooltip.js';
-
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
-import { getBlockProps } from '../../../_common/utils/block-props.js';
-import { isInsidePageEditor } from '../../../_common/utils/query.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type {
   CommonItem,
@@ -17,15 +10,22 @@ import type {
   MoreMenuConfigItem,
 } from './type.js';
 
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
+import '../../../_common/components/toolbar/separator.js';
+import '../../../_common/components/tooltip/tooltip.js';
+import { getBlockProps } from '../../../_common/utils/block-props.js';
+import { isInsidePageEditor } from '../../../_common/utils/query.js';
+
 export function ConfigRenderer(
-  blockElement: ImageBlockComponent,
+  block: ImageBlockComponent,
   abortController: AbortController,
   config: ImageConfigItem[],
   onClick?: () => void
 ) {
   return config
     .filter(item => {
-      return item.showWhen(blockElement);
+      return item.showWhen(block);
     })
     .map(item => {
       let template: TemplateResult | null = null;
@@ -38,7 +38,7 @@ export function ConfigRenderer(
               class=${buttonClass}
               .tooltip=${defaultItem.tooltip}
               .tooltipOffset=${4}
-              @click=${() => defaultItem.action(blockElement, abortController)}
+              @click=${() => defaultItem.action(block, abortController)}
             >
               ${defaultItem.icon}
             </editor-icon-button>
@@ -47,7 +47,7 @@ export function ConfigRenderer(
         }
         case 'custom': {
           const customItem = item as CustomItem;
-          template = customItem.render(blockElement, onClick);
+          template = customItem.render(block, onClick);
           break;
         }
         default:
@@ -61,13 +61,13 @@ export function ConfigRenderer(
 }
 
 export function MoreMenuRenderer(
-  blockElement: ImageBlockComponent,
+  block: ImageBlockComponent,
   abortController: AbortController,
   config: MoreMenuConfigItem[]
 ) {
   return config
     .filter(item => {
-      return item.showWhen(blockElement);
+      return item.showWhen(block);
     })
     .map(item => {
       let template: TemplateResult | null = null;
@@ -80,7 +80,7 @@ export function MoreMenuRenderer(
               class=${buttonClass}
               @click=${(e: MouseEvent) => {
                 e.stopPropagation();
-                moreItem.action(blockElement, abortController);
+                moreItem.action(block, abortController);
               }}
             >
               ${moreItem.icon} ${moreItem.name}
@@ -107,10 +107,10 @@ export function MoreMenuRenderer(
 }
 
 export function duplicate(
-  blockElement: ImageBlockComponent,
+  block: ImageBlockComponent,
   abortController?: AbortController
 ) {
-  const model = blockElement.model;
+  const model = block.model;
   const blockProps = getBlockProps(model);
   const { width, height, xywh, rotate, zIndex, ...duplicateProps } = blockProps;
 
@@ -127,7 +127,7 @@ export function duplicate(
   );
   abortController?.abort();
 
-  const editorHost = blockElement.host;
+  const editorHost = block.host;
   editorHost.updateComplete
     .then(() => {
       const { selection } = editorHost;

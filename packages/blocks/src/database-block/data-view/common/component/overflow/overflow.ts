@@ -1,5 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { css, html, type PropertyValues, type TemplateResult } from 'lit';
+import { SignalWatcher } from '@lit-labs/preact-signals';
+import { type PropertyValues, type TemplateResult, css, html } from 'lit';
 import {
   customElement,
   property,
@@ -11,7 +12,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 @customElement('component-overflow')
-export class Overflow extends WithDisposable(ShadowlessElement) {
+export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   static override styles = css`
     component-overflow {
       display: flex;
@@ -29,39 +30,6 @@ export class Overflow extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor renderItem!: Array<() => TemplateResult>;
-
-  @property({ attribute: false })
-  accessor renderMore!: (count: number) => TemplateResult;
-
-  @state()
-  accessor renderCount = 0;
-
-  @queryAll(':scope > .component-overflow-item')
-  accessor items!: HTMLDivElement[] & NodeList;
-
-  @query(':scope > .component-overflow-more')
-  accessor more!: HTMLDivElement;
-
-  protected override updated(_changedProperties: PropertyValues) {
-    super.updated(_changedProperties);
-    requestAnimationFrame(() => {
-      this.adjustStyle();
-    });
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    const resize = new ResizeObserver(() => {
-      this.adjustStyle();
-    });
-    resize.observe(this);
-    this.disposables.add(() => {
-      resize.unobserve(this);
-    });
-  }
-
   adjustStyle() {
     let maxWidth =
       this.getBoundingClientRect().width -
@@ -75,6 +43,17 @@ export class Overflow extends WithDisposable(ShadowlessElement) {
       }
     }
     this.renderCount = this.items.length;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const resize = new ResizeObserver(() => {
+      this.adjustStyle();
+    });
+    resize.observe(this);
+    this.disposables.add(() => {
+      resize.unobserve(this);
+    });
   }
 
   override render() {
@@ -91,4 +70,26 @@ export class Overflow extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  protected override updated(_changedProperties: PropertyValues) {
+    super.updated(_changedProperties);
+    requestAnimationFrame(() => {
+      this.adjustStyle();
+    });
+  }
+
+  @queryAll(':scope > .component-overflow-item')
+  accessor items!: HTMLDivElement[] & NodeList;
+
+  @query(':scope > .component-overflow-more')
+  accessor more!: HTMLDivElement;
+
+  @state()
+  accessor renderCount = 0;
+
+  @property({ attribute: false })
+  accessor renderItem!: Array<() => TemplateResult>;
+
+  @property({ attribute: false })
+  accessor renderMore!: (count: number) => TemplateResult;
 }

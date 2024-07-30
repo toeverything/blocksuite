@@ -1,13 +1,16 @@
+import type { Signal } from '@preact/signals-core';
+import type * as Y from 'yjs';
+
 import { type Disposable, Slot } from '@blocksuite/global/utils';
 import { computed, signal } from '@preact/signals-core';
-import type * as Y from 'yjs';
 import { z } from 'zod';
+
+import type { YBlock } from '../store/doc/block/index.js';
+import type { Doc } from '../store/index.js';
+import type { BaseBlockTransformer } from '../transformer/base.js';
 
 import { Boxed } from '../reactive/boxed.js';
 import { Text } from '../reactive/text.js';
-import type { YBlock } from '../store/doc/block.js';
-import type { Doc } from '../store/index.js';
-import type { BaseBlockTransformer } from '../transformer/base.js';
 
 const FlavourSchema = z.string();
 const ParentSchema = z.array(z.string()).optional();
@@ -149,6 +152,9 @@ export function defineBlockSchema({
   return schema;
 }
 
+type SignaledProps<Props> = Props & {
+  [P in keyof Props & string as `${P}$`]: Signal<Props[P]>;
+};
 /**
  * The MagicProps function is used to append the props to the class.
  * For example:
@@ -171,47 +177,24 @@ const modelLabel = Symbol('model_label');
 // @ts-ignore
 export class BlockModel<
   Props extends object = object,
-> extends MagicProps()<Props> {
+  PropsSignal extends object = SignaledProps<Props>,
+> extends MagicProps()<PropsSignal> {
+  private _childModels = computed(() => {
+    const value: BlockModel[] = [];
+    this._children.value.map(id => {
+      const block = this.page.getBlock$(id);
+      if (block) {
+        value.push(block.model);
+      }
+    });
+    return value;
+  });
+
   private _children = signal<string[]>([]);
 
   private _onCreated: Disposable;
 
   private _onDeleted: Disposable;
-
-  // This is used to avoid https://stackoverflow.com/questions/55886792/infer-typescript-generic-class-type
-  [modelLabel]: Props = 'type_info_label' as never;
-
-  version!: number;
-
-  flavour!: string;
-
-  role!: RoleType;
-
-  /**
-   * @deprecated use doc instead
-   */
-  page!: Doc;
-
-  id!: string;
-
-  yBlock!: YBlock;
-
-  keys!: string[];
-
-  stash!: (prop: keyof Props & string) => void;
-
-  pop!: (prop: keyof Props & string) => void;
-
-  // text is optional
-  text?: Text;
-
-  created = new Slot();
-
-  deleted = new Slot();
-
-  propsUpdated = new Slot<{ key: string }>();
-
-  childrenUpdated = new Slot();
 
   childMap = computed(() =>
     this._children.value.reduce((map, id, index) => {
@@ -220,9 +203,42 @@ export class BlockModel<
     }, new Map<string, number>())
   );
 
+  created = new Slot();
+
+  deleted = new Slot();
+
+  flavour!: string;
+
+  id!: string;
+
   isEmpty = computed(() => {
     return this._children.value.length === 0;
   });
+
+  keys!: string[];
+
+  // This is used to avoid https://stackoverflow.com/questions/55886792/infer-typescript-generic-class-type
+  [modelLabel]: Props = 'type_info_label' as never;
+
+  /**
+   * @deprecated use doc instead
+   */
+  page!: Doc;
+
+  pop!: (prop: keyof Props & string) => void;
+
+  propsUpdated = new Slot<{ key: string }>();
+
+  role!: RoleType;
+
+  stash!: (prop: keyof Props & string) => void;
+
+  // text is optional
+  text?: Text;
+
+  version!: number;
+
+  yBlock!: YBlock;
 
   constructor() {
     super();
@@ -230,6 +246,11 @@ export class BlockModel<
       this._children.value = this.yBlock.get('sys:children').toArray();
       this.yBlock.get('sys:children').observe(event => {
         this._children.value = event.target.toArray();
+      });
+      this.yBlock.observe(event => {
+        if (event.keysChanged.has('sys:children')) {
+          this._children.value = this.yBlock.get('sys:children').toArray();
+        }
       });
     });
     this._onDeleted = this.deleted.once(() => {
@@ -242,23 +263,10 @@ export class BlockModel<
     this._onDeleted.dispose();
   }
 
-  get doc() {
-    return this.page;
-  }
-
-  set doc(doc: Doc) {
-    this.page = doc;
-  }
-
-  get children() {
-    const value: BlockModel[] = [];
-    this._children.value.forEach(id => {
-      const block = this.page.getBlock(id);
-      if (block) {
-        value.push(block.model);
-      }
-    });
-    return value;
+  dispose() {
+    this.created.dispose();
+    this.deleted.dispose();
+    this.propsUpdated.dispose();
   }
 
   firstChild(): BlockModel | null {
@@ -272,10 +280,15 @@ export class BlockModel<
     return this.children[this.children.length - 1].lastChild();
   }
 
-  dispose() {
-    this.created.dispose();
-    this.deleted.dispose();
-    this.propsUpdated.dispose();
-    this.childrenUpdated.dispose();
+  get children() {
+    return this._childModels.value;
+  }
+
+  get doc() {
+    return this.page;
+  }
+
+  set doc(doc: Doc) {
+    this.page = doc;
   }
 }

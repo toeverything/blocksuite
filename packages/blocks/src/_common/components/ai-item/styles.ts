@@ -12,10 +12,10 @@ export const menuItemStyles = css`
     align-self: stretch;
     border-radius: 4px;
     box-sizing: border-box;
-    &:hover {
-      background: var(--affine-hover-color);
-      cursor: pointer;
-    }
+  }
+  .menu-item:hover {
+    background: var(--affine-hover-color);
+    cursor: pointer;
   }
   .item-icon {
     display: flex;

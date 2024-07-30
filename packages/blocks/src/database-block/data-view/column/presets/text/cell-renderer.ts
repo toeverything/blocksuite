@@ -41,6 +41,20 @@ export class TextCell extends BaseCellRenderer<string> {
 }
 @customElement('affine-database-text-cell-editing')
 export class TextCellEditing extends BaseCellRenderer<string> {
+  private _keydown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.isComposing) {
+      this._setValue();
+      setTimeout(() => {
+        this.selectCurrentCell(false);
+      });
+    }
+  };
+
+  private _setValue = (str: string = this._inputEle.value) => {
+    this._inputEle.value = `${this.value ?? ''}`;
+    this.onChange(str);
+  };
+
   static override styles = css`
     affine-database-text-cell-editing {
       display: block;
@@ -72,35 +86,18 @@ export class TextCellEditing extends BaseCellRenderer<string> {
     }
   `;
 
-  @query('input')
-  private accessor _inputEle!: HTMLInputElement;
-
-  private _setValue = (str: string = this._inputEle.value) => {
-    this._inputEle.value = `${this.value ?? ''}`;
-    this.onChange(str);
-  };
-
-  private _keydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.isComposing) {
-      this._setValue();
-      setTimeout(() => {
-        this.selectCurrentCell(false);
-      });
-    }
-  };
-
   focusEnd = () => {
     const end = this._inputEle.value.length;
     this._inputEle.focus();
     this._inputEle.setSelectionRange(end, end);
   };
 
-  override onExitEditMode() {
-    this._setValue();
-  }
-
   override firstUpdated() {
     this.focusEnd();
+  }
+
+  override onExitEditMode() {
+    this._setValue();
   }
 
   override render() {
@@ -110,6 +107,9 @@ export class TextCellEditing extends BaseCellRenderer<string> {
       class="affine-database-text"
     />`;
   }
+
+  @query('input')
+  private accessor _inputEle!: HTMLInputElement;
 }
 
 export const textColumnConfig = textColumnModelConfig.renderConfig({

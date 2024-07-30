@@ -1,15 +1,16 @@
 import type {
+  AIItemConfig,
   AffineAIPanelWidget,
   AffineSlashMenuActionItem,
   AffineSlashMenuContext,
   AffineSlashMenuItem,
   AffineSlashSubMenu,
-  AIItemConfig,
 } from '@blocksuite/blocks';
+
 import {
   AFFINE_AI_PANEL_WIDGET,
-  AffineSlashMenuWidget,
   AIStarIcon,
+  AffineSlashMenuWidget,
   MoreHorizontalIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -30,27 +31,27 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
 
   const showWhenWrapper =
     (item?: AIItemConfig) =>
-    ({ rootElement }: AffineSlashMenuContext) => {
-      const affineAIPanelWidget = rootElement.host.view.getWidget(
+    ({ rootComponent }: AffineSlashMenuContext) => {
+      const affineAIPanelWidget = rootComponent.host.view.getWidget(
         AFFINE_AI_PANEL_WIDGET,
-        rootElement.model.id
+        rootComponent.model.id
       );
       if (affineAIPanelWidget === null) return false;
 
-      const chain = rootElement.host.command.chain();
-      const editorMode = rootElement.service.docModeService.getMode(
-        rootElement.doc.id
+      const chain = rootComponent.host.command.chain();
+      const editorMode = rootComponent.service.docModeService.getMode(
+        rootComponent.doc.id
       );
 
-      return item?.showWhen?.(chain, editorMode, rootElement.host) ?? true;
+      return item?.showWhen?.(chain, editorMode, rootComponent.host) ?? true;
     };
 
   const actionItemWrapper = (
     item: AIItemConfig
   ): AffineSlashMenuActionItem => ({
     ...basicItemConfig(item),
-    action: ({ rootElement }: AffineSlashMenuContext) => {
-      item?.handler?.(rootElement.host);
+    action: ({ rootComponent }: AffineSlashMenuContext) => {
+      item?.handler?.(rootComponent.host);
     },
   });
 
@@ -61,7 +62,7 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
       subMenu: item.subItem.map<AffineSlashMenuActionItem>(
         ({ type, handler }) => ({
           name: type,
-          action: ({ rootElement }) => handler?.(rootElement.host),
+          action: ({ rootComponent }) => handler?.(rootComponent.host),
         })
       ),
     };
@@ -82,11 +83,11 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
       name: 'Ask AI',
       icon: AIStarIcon,
       showWhen: showWhenWrapper(),
-      action: ({ rootElement }) => {
-        const view = rootElement.host.view;
+      action: ({ rootComponent }) => {
+        const view = rootComponent.host.view;
         const affineAIPanelWidget = view.getWidget(
           AFFINE_AI_PANEL_WIDGET,
-          rootElement.model.id
+          rootComponent.model.id
         ) as AffineAIPanelWidget;
         assertExists(affineAIPanelWidget);
         assertExists(AIProvider.actions.chat);
@@ -96,14 +97,14 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
     },
 
     ...AIItems.filter(({ name }) =>
-      ['Fix spelling', 'Fix grammar'].includes(name)
+      ['Fix grammar', 'Fix spelling'].includes(name)
     ).map(item => ({
       ...actionItemWrapper(item),
       name: `${item.name} from above`,
     })),
 
     ...AIItems.filter(({ name }) =>
-      ['Summarize', 'Continue writing'].includes(name)
+      ['Continue writing', 'Summarize'].includes(name)
     ).map(actionItemWrapper),
 
     {
@@ -112,16 +113,16 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
       subMenu: [
         { groupName: 'Action with above' },
         ...AIItems.filter(({ name }) =>
-          ['Translate to', 'Change tone to'].includes(name)
+          ['Change tone to', 'Translate to'].includes(name)
         ).map(subMenuWrapper),
 
         ...AIItems.filter(({ name }) =>
           [
+            'Find actions',
+            'Generate outline',
             'Improve writing',
             'Make it longer',
             'Make it shorter',
-            'Generate outline',
-            'Find actions',
           ].includes(name)
         ).map(actionItemWrapper),
       ],

@@ -1,30 +1,27 @@
-import '../../../_common/components/toolbar/icon-button.js';
-
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
+import '../../../_common/components/toolbar/icon-button.js';
 import { GroupIcon } from '../../../_common/icons/index.js';
 import {
   GroupElementModel,
   MindmapElementModel,
 } from '../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-add-group-button')
 export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
+  private _createGroup = () => {
+    this.edgeless.service.createGroupFromSelected();
+  };
+
   static override styles = css`
     .label {
       padding-left: 4px;
     }
   `;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  private _createGroup = () => {
-    this.edgeless.service.createGroupFromSelected();
-  };
 
   protected override render() {
     return html`
@@ -38,6 +35,9 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
       </editor-icon-button>
     `;
   }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {
@@ -48,7 +48,7 @@ declare global {
 
 export function renderAddGroupButton(
   edgeless: EdgelessRootBlockComponent,
-  elements: BlockSuite.EdgelessModelType[]
+  elements: BlockSuite.EdgelessModel[]
 ) {
   if (elements.length < 2) return nothing;
   if (elements[0] instanceof GroupElementModel) return nothing;

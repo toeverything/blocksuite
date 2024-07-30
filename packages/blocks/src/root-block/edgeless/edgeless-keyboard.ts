@@ -1,4 +1,9 @@
 import { IS_MAC } from '@blocksuite/global/env';
+import { Bound } from '@blocksuite/global/utils';
+
+import type { ShapeElementModel } from '../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
+import type { EdgelessTool } from './types.js';
 
 import {
   getNearestTranslation,
@@ -11,21 +16,17 @@ import { EdgelessTextBlockComponent } from '../../edgeless-text/edgeless-text-bl
 import { EdgelessTextBlockModel } from '../../edgeless-text/edgeless-text-model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
-import type { ShapeElementModel } from '../../surface-block/index.js';
 import {
-  Bound,
   ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,
   ShapeType,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
+import { GfxBlockModel } from './block-model.js';
 import { CopilotSelectionController } from './controllers/tools/copilot-tool.js';
 import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
-import { EdgelessBlockModel } from './edgeless-block-model.js';
-import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
-import type { EdgelessTool } from './types.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
@@ -40,33 +41,33 @@ import {
 } from './utils/text.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
-  constructor(override rootElement: EdgelessRootBlockComponent) {
-    super(rootElement);
-    this.rootElement.bindHotKey(
+  constructor(override rootComponent: EdgelessRootBlockComponent) {
+    super(rootComponent);
+    this.rootComponent.bindHotKey(
       {
         v: () => {
-          this._setEdgelessTool(rootElement, {
+          this._setEdgelessTool(rootComponent, {
             type: 'default',
           });
         },
         t: () => {
-          this._setEdgelessTool(rootElement, {
+          this._setEdgelessTool(rootComponent, {
             type: 'text',
           });
         },
         c: () => {
           const mode = ConnectorMode.Curve;
-          rootElement.service.editPropsStore.recordLastProps('connector', {
+          rootComponent.service.editPropsStore.recordLastProps('connector', {
             mode,
           });
-          this._setEdgelessTool(rootElement, { type: 'connector', mode });
+          this._setEdgelessTool(rootComponent, { type: 'connector', mode });
         },
         l: () => {
-          if (!rootElement.doc.awarenessStore.getFlag('enable_lasso_tool')) {
+          if (!rootComponent.doc.awarenessStore.getFlag('enable_lasso_tool')) {
             return;
           }
           // select the current lasso mode
-          const edgeless = rootElement;
+          const edgeless = rootComponent;
           const lassoController = edgeless.tools.controllers['lasso'];
           const tool: EdgelessTool = {
             type: 'lasso',
@@ -79,11 +80,11 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._setEdgelessTool(edgeless, tool);
         },
         'Shift-l': () => {
-          if (!rootElement.doc.awarenessStore.getFlag('enable_lasso_tool')) {
+          if (!rootComponent.doc.awarenessStore.getFlag('enable_lasso_tool')) {
             return;
           }
           // toggle between lasso modes
-          const edgeless = rootElement;
+          const edgeless = rootComponent;
           const cur = edgeless.edgelessTool;
           const tool: EdgelessTool = {
             type: 'lasso',
@@ -97,13 +98,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._setEdgelessTool(edgeless, tool);
         },
         h: () => {
-          this._setEdgelessTool(rootElement, {
+          this._setEdgelessTool(rootComponent, {
             type: 'pan',
             panning: false,
           });
         },
         n: () => {
-          this._setEdgelessTool(rootElement, {
+          this._setEdgelessTool(rootComponent, {
             type: 'affine:note',
             childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
             childType: DEFAULT_NOTE_CHILD_TYPE,
@@ -111,62 +112,67 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         p: () => {
-          this._setEdgelessTool(rootElement, {
+          this._setEdgelessTool(rootComponent, {
             type: 'brush',
           });
         },
         e: () => {
-          this._setEdgelessTool(rootElement, {
+          this._setEdgelessTool(rootComponent, {
             type: 'eraser',
           });
         },
         k: () => {
-          if (this.rootElement.service.locked) return;
-          const { selection } = rootElement.service;
+          if (this.rootComponent.service.locked) return;
+          const { selection } = rootComponent.service;
 
           if (
             selection.selectedElements.length === 1 &&
-            selection.firstElement instanceof EdgelessBlockModel &&
-            matchFlavours(selection.firstElement as EdgelessBlockModel, [
+            selection.firstElement instanceof GfxBlockModel &&
+            matchFlavours(selection.firstElement as GfxBlockModel, [
               'affine:note',
             ])
           ) {
-            rootElement.slots.toggleNoteSlicer.emit();
+            rootComponent.slots.toggleNoteSlicer.emit();
           }
         },
         f: () => {
-          if (this.rootElement.service.locked) return;
+          if (this.rootComponent.service.locked) return;
           if (
-            this.rootElement.service.selection.selectedElements.length !== 0 &&
-            !this.rootElement.service.selection.editing
+            this.rootComponent.service.selection.selectedElements.length !==
+              0 &&
+            !this.rootComponent.service.selection.editing
           ) {
-            const frame = rootElement.service.frame.createFrameOnSelected();
+            const frame = rootComponent.service.frame.createFrameOnSelected();
             if (!frame) return;
-            rootElement.service.telemetryService?.track('CanvasElementAdded', {
-              control: 'shortcut',
-              page: 'whiteboard editor',
-              module: 'toolbar',
-              segment: 'toolbar',
-              type: 'frame',
-            });
-            rootElement.surface.fitToViewport(Bound.deserialize(frame.xywh));
-          } else if (!this.rootElement.service.selection.editing) {
-            this._setEdgelessTool(rootElement, { type: 'frame' });
+            rootComponent.service.telemetryService?.track(
+              'CanvasElementAdded',
+              {
+                control: 'shortcut',
+                page: 'whiteboard editor',
+                module: 'toolbar',
+                segment: 'toolbar',
+                type: 'frame',
+              }
+            );
+            rootComponent.surface.fitToViewport(Bound.deserialize(frame.xywh));
+          } else if (!this.rootComponent.service.selection.editing) {
+            this._setEdgelessTool(rootComponent, { type: 'frame' });
           }
         },
         '-': () => {
-          if (this.rootElement.service.locked) return;
-          const { selectedElements: elements } = rootElement.service.selection;
+          if (this.rootComponent.service.locked) return;
+          const { selectedElements: elements } =
+            rootComponent.service.selection;
           if (
-            !rootElement.service.selection.editing &&
+            !rootComponent.service.selection.editing &&
             elements.length === 1 &&
             isNoteBlock(elements[0])
           ) {
-            rootElement.slots.toggleNoteSlicer.emit();
+            rootComponent.slots.toggleNoteSlicer.emit();
           }
         },
         '@': () => {
-          const std = this.rootElement.std;
+          const std = this.rootComponent.std;
           if (
             std.selection.getGroup('note').length > 0 ||
             // eslint-disable-next-line unicorn/prefer-array-some
@@ -183,7 +189,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           insertedLinkType
             ?.then(type => {
               if (type) {
-                rootElement.service.telemetryService?.track(
+                rootComponent.service.telemetryService?.track(
                   'CanvasElementAdded',
                   {
                     control: 'shortcut',
@@ -194,7 +200,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                   }
                 );
                 if (type.isNewDoc) {
-                  rootElement.service.telemetryService?.track('DocCreated', {
+                  rootComponent.service.telemetryService?.track('DocCreated', {
                     control: 'shortcut',
                     page: 'whiteboard editor',
                     segment: 'whiteboard',
@@ -206,65 +212,67 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             .catch(console.error);
         },
         'Shift-s': () => {
-          if (this.rootElement.service.locked) return;
+          if (this.rootComponent.service.locked) return;
           if (
-            this.rootElement.service.selection.editing ||
+            this.rootComponent.service.selection.editing ||
             !(
-              rootElement.tools.currentController instanceof ShapeToolController
+              rootComponent.tools.currentController instanceof
+              ShapeToolController
             )
           ) {
             return;
           }
 
-          const attr = rootElement.service.editPropsStore.getLastProps('shape');
+          const attr =
+            rootComponent.service.editPropsStore.getLastProps('shape');
 
           const nextShapeType = getNextShapeType(
             attr.radius > 0 && attr.shapeType === ShapeType.Rect
               ? 'roundedRect'
               : attr.shapeType
           );
-          this._setEdgelessTool(rootElement, {
+          this._setEdgelessTool(rootComponent, {
             type: 'shape',
             shapeType:
               nextShapeType === 'roundedRect' ? ShapeType.Rect : nextShapeType,
           });
 
-          updateShapeProps(nextShapeType, rootElement);
+          updateShapeProps(nextShapeType, rootComponent);
 
-          const controller = rootElement.tools
+          const controller = rootComponent.tools
             .currentController as ShapeToolController;
           controller.createOverlay();
         },
         'Mod-g': ctx => {
-          if (this.rootElement.service.locked) return;
+          if (this.rootComponent.service.locked) return;
           if (
-            this.rootElement.service.selection.selectedElements.length > 1 &&
-            !this.rootElement.service.selection.editing
+            this.rootComponent.service.selection.selectedElements.length > 1 &&
+            !this.rootComponent.service.selection.editing
           ) {
             ctx.get('keyboardState').event.preventDefault();
-            rootElement.service.createGroupFromSelected();
+            rootComponent.service.createGroupFromSelected();
           }
         },
         'Shift-Mod-g': ctx => {
-          if (this.rootElement.service.locked) return;
-          const { selection } = this.rootElement.service;
+          if (this.rootComponent.service.locked) return;
+          const { selection } = this.rootComponent.service;
           if (
             selection.selectedElements.length === 1 &&
             selection.firstElement instanceof GroupElementModel
           ) {
             ctx.get('keyboardState').event.preventDefault();
-            rootElement.service.ungroup(selection.firstElement);
+            rootComponent.service.ungroup(selection.firstElement);
           }
         },
         'Mod-a': ctx => {
-          if (this.rootElement.service.locked) return;
-          if (this.rootElement.service.selection.editing) {
+          if (this.rootComponent.service.locked) return;
+          if (this.rootComponent.service.selection.editing) {
             return;
           }
 
           ctx.get('defaultState').event.preventDefault();
-          const { service } = this.rootElement;
-          this.rootElement.service.selection.set({
+          const { service } = this.rootComponent;
+          this.rootComponent.service.selection.set({
             elements: [
               ...service.blocks
                 .filter(block => block.group === null)
@@ -278,19 +286,19 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         'Mod-1': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.rootElement.service.setZoomByAction('fit');
+          this.rootComponent.service.setZoomByAction('fit');
         },
         'Mod--': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.rootElement.service.setZoomByAction('out');
+          this.rootComponent.service.setZoomByAction('out');
         },
         'Mod-0': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.rootElement.service.setZoomByAction('reset');
+          this.rootComponent.service.setZoomByAction('reset');
         },
         'Mod-=': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.rootElement.service.setZoomByAction('in');
+          this.rootComponent.service.setZoomByAction('in');
         },
         Backspace: () => {
           this._delete();
@@ -303,7 +311,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._delete();
         },
         Escape: () => {
-          const { currentController } = this.rootElement.tools;
+          const { currentController } = this.rootComponent.tools;
           if (
             currentController instanceof LassoToolController &&
             currentController.isSelecting
@@ -314,8 +322,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             currentController.abort();
           }
 
-          if (!this.rootElement.service.selection.empty) {
-            rootElement.selection.clear();
+          if (!this.rootComponent.service.selection.empty) {
+            rootComponent.selection.clear();
           }
         },
 
@@ -352,7 +360,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
 
         Enter: () => {
-          const { service } = rootElement;
+          const { service } = rootComponent;
           const selection = service.selection;
           const elements = selection.selectedElements;
           const onlyOne = elements.length === 1;
@@ -367,7 +375,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                 editing: true,
               });
               requestAnimationFrame(() => {
-                mountConnectorLabelEditor(element, rootElement);
+                mountConnectorLabelEditor(element, rootComponent);
               });
               return;
             }
@@ -377,7 +385,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                 elements: [id],
                 editing: true,
               });
-              const textBlock = rootElement.host.view.getBlock(id);
+              const textBlock = rootComponent.host.view.getBlock(id);
               if (textBlock instanceof EdgelessTextBlockComponent) {
                 textBlock.tryFocusEnd();
               }
@@ -397,7 +405,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const target = service.getElementById(id) as ShapeElementModel;
 
           requestAnimationFrame(() => {
-            mountShapeTextEditor(target, rootElement);
+            mountShapeTextEditor(target, rootComponent);
 
             if (isElementOutsideViewport(service.viewport, target, [20, 20])) {
               const { elementBound } = target;
@@ -410,7 +418,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         Tab: () => {
-          const { service } = rootElement;
+          const { service } = rootComponent;
           const selection = service.selection;
           const elements = selection.selectedElements;
 
@@ -424,7 +432,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const target = service.getElementById(id) as ShapeElementModel;
 
           requestAnimationFrame(() => {
-            mountShapeTextEditor(target, rootElement);
+            mountShapeTextEditor(target, rootComponent);
 
             if (isElementOutsideViewport(service.viewport, target, [20, 20])) {
               const { elementBound } = target;
@@ -447,7 +455,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   }
 
   private _bindShiftKey() {
-    this.rootElement.handleEvent(
+    this.rootComponent.handleEvent(
       'keyDown',
       ctx => {
         const event = ctx.get('defaultState').event;
@@ -457,7 +465,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       },
       { global: true }
     );
-    this.rootElement.handleEvent(
+    this.rootComponent.handleEvent(
       'keyUp',
       ctx => {
         const event = ctx.get('defaultState').event;
@@ -472,7 +480,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   }
 
   private _bindToggleHand() {
-    this.rootElement.handleEvent(
+    this.rootComponent.handleEvent(
       'keyDown',
       ctx => {
         const event = ctx.get('keyboardState').raw;
@@ -482,7 +490,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       },
       { global: true }
     );
-    this.rootElement.handleEvent(
+    this.rootComponent.handleEvent(
       'keyUp',
       ctx => {
         const event = ctx.get('keyboardState').raw;
@@ -494,66 +502,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     );
   }
 
-  private _space(event: KeyboardEvent) {
-    /*
-    Call this function with a check for !event.repeat to consider only the first keydown (not repeat). This way, you can use onPressSpaceBar in a tool to determine if the space bar is pressed or not.
-  */
-
-    const edgeless = this.rootElement;
-    const selection = edgeless.service.selection;
-    const currentTool = edgeless.edgelessTool;
-    const type = currentTool.type;
-
-    const isKeyDown = event.type === 'keydown';
-
-    if (isKeyDown) {
-      edgeless.tools.spaceBar = true;
-    } else {
-      edgeless.tools.spaceBar = false;
-    }
-
-    if (edgeless.service.tool.dragging) {
-      return; // Don't do anything if currently dragging
-    }
-
-    const revertToPrevTool = (ev: KeyboardEvent) => {
-      if (ev.code === 'Space') {
-        this._setEdgelessTool(edgeless, currentTool);
-        document.removeEventListener('keyup', revertToPrevTool, false);
-      }
-    };
-
-    if (isKeyDown) {
-      if (type === 'pan' || (type === 'default' && selection.editing)) {
-        return;
-      }
-      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
-
-      edgeless.dispatcher.disposables.addFromEvent(
-        document,
-        'keyup',
-        revertToPrevTool
-      );
-    }
-  }
-
-  private _shift(event: KeyboardEvent) {
-    const edgeless = this.rootElement;
-
-    if (event.repeat) return;
-
-    const shiftKeyPressed =
-      event.key.toLowerCase() === 'shift' && event.shiftKey;
-
-    if (shiftKeyPressed) {
-      edgeless.slots.pressShiftKeyUpdated.emit(true);
-    } else {
-      edgeless.slots.pressShiftKeyUpdated.emit(false);
-    }
-  }
-
   private _delete() {
-    const edgeless = this.rootElement;
+    const edgeless = this.rootComponent;
 
     if (edgeless.service.locked) return;
     if (edgeless.service.selection.editing) {
@@ -571,20 +521,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     );
   }
 
-  private _setEdgelessTool(
-    edgeless: EdgelessRootBlockComponent,
-    edgelessTool: EdgelessTool,
-    ignoreActiveState = false
-  ) {
-    // when editing, should not update mouse mode by shortcut
-    if (!ignoreActiveState && edgeless.service.selection.editing) {
-      return;
-    }
-    edgeless.tools.setEdgelessTool(edgelessTool);
-  }
-
   private _move(key: string, shift = false) {
-    const edgeless = this.rootElement;
+    const edgeless = this.rootComponent;
 
     if (edgeless.service.locked) return;
     if (edgeless.service.selection.editing) return;
@@ -599,7 +537,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       const node = mindmapNodes[0];
       const mindmap = node.group as MindmapElementModel;
       const nodeDirection = mindmap.getLayoutDir(node.id);
-      let targetNode: BlockSuite.SurfaceElementModelType | null = null;
+      let targetNode: BlockSuite.SurfaceElementModel | null = null;
 
       switch (key) {
         case 'ArrowUp':
@@ -687,5 +625,75 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         element['xywh'] = bound.serialize();
       }
     });
+  }
+
+  private _setEdgelessTool(
+    edgeless: EdgelessRootBlockComponent,
+    edgelessTool: EdgelessTool,
+    ignoreActiveState = false
+  ) {
+    // when editing, should not update mouse mode by shortcut
+    if (!ignoreActiveState && edgeless.service.selection.editing) {
+      return;
+    }
+    edgeless.tools.setEdgelessTool(edgelessTool);
+  }
+
+  private _shift(event: KeyboardEvent) {
+    const edgeless = this.rootComponent;
+
+    if (event.repeat) return;
+
+    const shiftKeyPressed =
+      event.key.toLowerCase() === 'shift' && event.shiftKey;
+
+    if (shiftKeyPressed) {
+      edgeless.slots.pressShiftKeyUpdated.emit(true);
+    } else {
+      edgeless.slots.pressShiftKeyUpdated.emit(false);
+    }
+  }
+
+  private _space(event: KeyboardEvent) {
+    /*
+    Call this function with a check for !event.repeat to consider only the first keydown (not repeat). This way, you can use onPressSpaceBar in a tool to determine if the space bar is pressed or not.
+  */
+
+    const edgeless = this.rootComponent;
+    const selection = edgeless.service.selection;
+    const currentTool = edgeless.edgelessTool;
+    const type = currentTool.type;
+
+    const isKeyDown = event.type === 'keydown';
+
+    if (isKeyDown) {
+      edgeless.tools.spaceBar = true;
+    } else {
+      edgeless.tools.spaceBar = false;
+    }
+
+    if (edgeless.service.tool.dragging) {
+      return; // Don't do anything if currently dragging
+    }
+
+    const revertToPrevTool = (ev: KeyboardEvent) => {
+      if (ev.code === 'Space') {
+        this._setEdgelessTool(edgeless, currentTool);
+        document.removeEventListener('keyup', revertToPrevTool, false);
+      }
+    };
+
+    if (isKeyDown) {
+      if (type === 'pan' || (type === 'default' && selection.editing)) {
+        return;
+      }
+      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+
+      edgeless.dispatcher.disposables.addFromEvent(
+        document,
+        'keyup',
+        revertToPrevTool
+      );
+    }
   }
 }

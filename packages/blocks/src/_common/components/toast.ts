@@ -1,7 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
 
 import { getRootByEditorHost } from '../utils/query.js';
 
@@ -38,9 +39,9 @@ const createToastContainer = (editorHost: EditorHost) => {
   `;
   const template = html`<div class="toast-container" style="${styles}"></div>`;
   const element = htmlToElement<HTMLDivElement>(template);
-  const rootElement = getRootByEditorHost(editorHost);
-  assertExists(rootElement);
-  const viewportElement = rootElement.viewportElement;
+  const rootComponent = getRootByEditorHost(editorHost);
+  assertExists(rootComponent);
+  const viewportElement = rootComponent.viewportElement;
   viewportElement?.append(element);
   return element;
 };

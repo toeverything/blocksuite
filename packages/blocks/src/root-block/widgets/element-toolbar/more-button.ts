@@ -1,14 +1,25 @@
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../edgeless/components/toolbar/shape/shape-menu.js';
-
 import type { SurfaceSelection } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
-import { html, LitElement, nothing } from 'lit';
+
+import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
+import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type {
+  AttachmentBlockComponent,
+  BookmarkBlockComponent,
+  EmbedFigmaBlockComponent,
+  EmbedGithubBlockComponent,
+  EmbedLoomBlockComponent,
+  EmbedYoutubeBlockComponent,
+  ImageBlockComponent,
+} from '../../../index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
 import { isPeekable, peek } from '../../../_common/components/peekable.js';
+import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
 import {
   type Action,
   type FatActions,
@@ -38,17 +49,7 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
-import type {
-  AttachmentBlockComponent,
-  BookmarkBlockComponent,
-  EmbedFigmaBlockComponent,
-  EmbedGithubBlockComponent,
-  EmbedLoomBlockComponent,
-  EmbedYoutubeBlockComponent,
-  ImageBlockComponent,
-} from '../../../index.js';
-import { Bound } from '../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import '../../edgeless/components/toolbar/shape/shape-menu.js';
 import { removeContainedFrames } from '../../edgeless/frame-manager.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
@@ -61,9 +62,9 @@ import { deleteElements } from '../../edgeless/utils/crud.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
-  isEmbeddedLinkBlock,
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
+  isEmbeddedLinkBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
@@ -143,180 +144,6 @@ const CREATE_LINKED_DOC_ACTION: Action = {
 
 @customElement('edgeless-more-button')
 export class EdgelessMoreButton extends WithDisposable(LitElement) {
-  @property({ attribute: false })
-  accessor elements: BlockSuite.EdgelessModelType[] = [];
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor vertical = false;
-
-  get doc() {
-    return this.edgeless.doc;
-  }
-
-  get selection() {
-    return this.edgeless.service.selection;
-  }
-
-  get slots() {
-    return this.edgeless.slots;
-  }
-
-  get surface() {
-    return this.edgeless.surface;
-  }
-
-  get view() {
-    return this.edgeless.host.view;
-  }
-
-  private get _blockElement() {
-    const blockSelection = this.edgeless.service.selection.surfaceSelections;
-    if (
-      blockSelection.length !== 1 ||
-      blockSelection[0].elements.length !== 1
-    ) {
-      return;
-    }
-
-    const blockElement = this.view.getBlock(blockSelection[0].blockId);
-    if (!blockElement) {
-      return;
-    }
-
-    return blockElement;
-  }
-
-  get _Actions(): FatActions {
-    return [
-      [FRAME_ACTION, GROUP_ACTION],
-      REORDER_ACTIONS,
-      this.getOpenActions(),
-      [...COPY_ACTIONS, this.getRefreshAction()],
-      [this.getLinkedDocAction()],
-      [DELETE_ACTION],
-    ];
-  }
-
-  get _FrameActions(): FatActions {
-    return [
-      [FRAME_ACTION],
-      COPY_ACTIONS,
-      [this.getLinkedDocAction()],
-      [DELETE_ACTION],
-    ];
-  }
-
-  private getOpenActions(): Action[] {
-    const isSingleSelect = this.selection.selectedElements.length === 1;
-    const { firstElement } = this.selection;
-    const result: Action[] = [];
-
-    if (
-      isSingleSelect &&
-      (isEmbedLinkedDocBlock(firstElement) ||
-        isEmbedSyncedDocBlock(firstElement))
-    ) {
-      const disabled = firstElement.pageId === this.doc.id;
-      result.push({
-        ...OPEN_ACTION,
-        disabled,
-      });
-    }
-
-    if (
-      isSingleSelect &&
-      this._blockElement &&
-      isPeekable(this._blockElement)
-    ) {
-      result.push(CENTER_PEEK_ACTION);
-    }
-
-    return result;
-  }
-
-  private getRefreshAction() {
-    const refreshable = this.selection.selectedElements.every(ele =>
-      this._refreshable(ele as BlockModel)
-    );
-    return refreshable ? RELOAD_ACTION : nothing;
-  }
-
-  private getLinkedDocAction() {
-    const isSingleSelect = this.selection.selectedElements.length === 1;
-    const { firstElement } = this.selection;
-    if (
-      isSingleSelect &&
-      (isEmbedLinkedDocBlock(firstElement) ||
-        isEmbedSyncedDocBlock(firstElement))
-    ) {
-      return nothing;
-    }
-
-    if (isSingleSelect && isNoteBlock(firstElement)) {
-      return TURN_INTO_LINKED_DOC_ACTION;
-    }
-
-    return CREATE_LINKED_DOC_ACTION;
-  }
-
-  private _turnIntoLinkedDoc = (title?: string) => {
-    const isSingleSelect = this.selection.selectedElements.length === 1;
-    const { firstElement: element } = this.selection;
-
-    if (isSingleSelect && isNoteBlock(element)) {
-      const linkedDoc = createLinkedDocFromNote(
-        this.edgeless.host.doc,
-        element,
-        title
-      );
-      // insert linked doc card
-      const cardId = this.edgeless.service.addBlock(
-        'affine:embed-synced-doc',
-        {
-          xywh: element.xywh,
-          style: 'syncedDoc',
-          pageId: linkedDoc.id,
-          index: element.index,
-        },
-        this.surface.model.id
-      );
-      this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
-        control: 'context-menu',
-        page: 'whiteboard editor',
-        module: 'toolbar',
-        segment: 'toolbar',
-        type: 'embed-synced-doc',
-      });
-      this.edgeless.service.telemetryService?.track('DocCreated', {
-        control: 'turn into linked doc',
-        page: 'whiteboard editor',
-        module: 'format toolbar',
-        type: 'embed-linked-doc',
-      });
-      this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
-        control: 'turn into linked doc',
-        page: 'whiteboard editor',
-        module: 'format toolbar',
-        type: 'embed-linked-doc',
-        other: 'new doc',
-      });
-      moveConnectors(element.id, cardId, this.edgeless.service);
-      // delete selected note
-      this.doc.transact(() => {
-        this.surface.doc.deleteBlock(element);
-      });
-      this.edgeless.service.selection.set({
-        elements: [cardId],
-        editing: false,
-      });
-    } else {
-      this._createLinkedDoc(title);
-    }
-  };
-
   private _createLinkedDoc = (title?: string) => {
     const selection = this.edgeless.service.selection;
     const elements = getCloneElements(
@@ -381,20 +208,11 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     });
   };
 
-  private _refreshable(ele: BlockModel) {
-    return (
-      isImageBlock(ele) ||
-      isBookmarkBlock(ele) ||
-      isAttachmentBlock(ele) ||
-      isEmbeddedLinkBlock(ele)
-    );
-  }
-
   private _reload = (selections: SurfaceSelection[]) => {
     selections.forEach(sel => {
-      const blockElement = this.view.getBlock(sel.blockId);
-      if (!!blockElement && this._refreshable(blockElement.model)) {
-        (blockElement as RefreshableBlockComponent).refreshData();
+      const block = this.view.getBlock(sel.blockId);
+      if (!!block && this._refreshable(block.model)) {
+        (block as RefreshableBlockComponent).refreshData();
       }
     });
   };
@@ -470,20 +288,168 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       case 'open':
         if (
-          this._blockElement &&
-          'open' in this._blockElement &&
-          typeof this._blockElement.open === 'function'
+          this._block &&
+          'open' in this._block &&
+          typeof this._block.open === 'function'
         ) {
-          this._blockElement.open();
+          this._block.open();
         }
         break;
       case 'center-peek':
-        if (this._blockElement && isPeekable(this._blockElement)) {
-          peek(this._blockElement);
+        if (this._block && isPeekable(this._block)) {
+          peek(this._block);
         }
         break;
     }
   };
+
+  private _turnIntoLinkedDoc = (title?: string) => {
+    const isSingleSelect = this.selection.selectedElements.length === 1;
+    const { firstElement: element } = this.selection;
+
+    if (isSingleSelect && isNoteBlock(element)) {
+      const linkedDoc = createLinkedDocFromNote(
+        this.edgeless.host.doc,
+        element,
+        title
+      );
+      // insert linked doc card
+      const cardId = this.edgeless.service.addBlock(
+        'affine:embed-synced-doc',
+        {
+          xywh: element.xywh,
+          style: 'syncedDoc',
+          pageId: linkedDoc.id,
+          index: element.index,
+        },
+        this.surface.model.id
+      );
+      this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
+        control: 'context-menu',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: 'embed-synced-doc',
+      });
+      this.edgeless.service.telemetryService?.track('DocCreated', {
+        control: 'turn into linked doc',
+        page: 'whiteboard editor',
+        module: 'format toolbar',
+        type: 'embed-linked-doc',
+      });
+      this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
+        control: 'turn into linked doc',
+        page: 'whiteboard editor',
+        module: 'format toolbar',
+        type: 'embed-linked-doc',
+        other: 'new doc',
+      });
+      moveConnectors(element.id, cardId, this.edgeless.service);
+      // delete selected note
+      this.doc.transact(() => {
+        this.surface.doc.deleteBlock(element);
+      });
+      this.edgeless.service.selection.set({
+        elements: [cardId],
+        editing: false,
+      });
+    } else {
+      this._createLinkedDoc(title);
+    }
+  };
+
+  get _Actions(): FatActions {
+    return [
+      [FRAME_ACTION, GROUP_ACTION],
+      REORDER_ACTIONS,
+      this.getOpenActions(),
+      [...COPY_ACTIONS, this.getRefreshAction()],
+      [this.getLinkedDocAction()],
+      [DELETE_ACTION],
+    ];
+  }
+
+  get _FrameActions(): FatActions {
+    return [
+      [FRAME_ACTION],
+      COPY_ACTIONS,
+      [this.getLinkedDocAction()],
+      [DELETE_ACTION],
+    ];
+  }
+
+  private get _block() {
+    const blockSelection = this.edgeless.service.selection.surfaceSelections;
+    if (
+      blockSelection.length !== 1 ||
+      blockSelection[0].elements.length !== 1
+    ) {
+      return;
+    }
+
+    const block = this.view.getBlock(blockSelection[0].blockId);
+    if (!block) return;
+
+    return block;
+  }
+
+  private _refreshable(ele: BlockModel) {
+    return (
+      isImageBlock(ele) ||
+      isBookmarkBlock(ele) ||
+      isAttachmentBlock(ele) ||
+      isEmbeddedLinkBlock(ele)
+    );
+  }
+
+  private getLinkedDocAction() {
+    const isSingleSelect = this.selection.selectedElements.length === 1;
+    const { firstElement } = this.selection;
+    if (
+      isSingleSelect &&
+      (isEmbedLinkedDocBlock(firstElement) ||
+        isEmbedSyncedDocBlock(firstElement))
+    ) {
+      return nothing;
+    }
+
+    if (isSingleSelect && isNoteBlock(firstElement)) {
+      return TURN_INTO_LINKED_DOC_ACTION;
+    }
+
+    return CREATE_LINKED_DOC_ACTION;
+  }
+
+  private getOpenActions(): Action[] {
+    const isSingleSelect = this.selection.selectedElements.length === 1;
+    const { firstElement } = this.selection;
+    const result: Action[] = [];
+
+    if (
+      isSingleSelect &&
+      (isEmbedLinkedDocBlock(firstElement) ||
+        isEmbedSyncedDocBlock(firstElement))
+    ) {
+      const disabled = firstElement.pageId === this.doc.id;
+      result.push({
+        ...OPEN_ACTION,
+        disabled,
+      });
+    }
+
+    if (isSingleSelect && this._block && isPeekable(this._block)) {
+      result.push(CENTER_PEEK_ACTION);
+    }
+
+    return result;
+  }
+
+  private getRefreshAction() {
+    const refreshable = this.selection.selectedElements.every(ele =>
+      this._refreshable(ele as BlockModel)
+    );
+    return refreshable ? RELOAD_ACTION : nothing;
+  }
 
   override render() {
     const selection = this.edgeless.service.selection;
@@ -503,12 +469,45 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot class="more-actions-container" data-orientation="vertical">
+        <div
+          class="more-actions-container"
+          data-size="large"
+          data-orientation="vertical"
+        >
           ${actions}
         </div>
       </editor-menu-button>
     `;
   }
+
+  get doc() {
+    return this.edgeless.doc;
+  }
+
+  get selection() {
+    return this.edgeless.service.selection;
+  }
+
+  get slots() {
+    return this.edgeless.slots;
+  }
+
+  get surface() {
+    return this.edgeless.surface;
+  }
+
+  get view() {
+    return this.edgeless.host.view;
+  }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor elements: BlockSuite.EdgelessModel[] = [];
+
+  @property({ attribute: false })
+  accessor vertical = false;
 }
 
 declare global {

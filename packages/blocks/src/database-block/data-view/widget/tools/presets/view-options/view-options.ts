@@ -1,6 +1,8 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import type { SingleView } from '../../../../view-manager/single-view.js';
+
 import { popMenu } from '../../../../../../_common/components/index.js';
 import {
   ArrowRightSmallIcon,
@@ -8,6 +10,7 @@ import {
   DuplicateIcon,
   MoreHorizontalIcon,
 } from '../../../../../../_common/icons/index.js';
+import { emptyFilterGroup } from '../../../../common/ast.js';
 import {
   popGroupSetting,
   popSelectGroupByProperty,
@@ -18,8 +21,6 @@ import {
   InfoIcon,
 } from '../../../../common/icons/index.js';
 import { popPropertiesSetting } from '../../../../common/properties.js';
-import type { DataViewKanbanManager } from '../../../../view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../../../view/presets/table/table-view-manager.js';
 import { popFilterModal } from '../../../filter/filter-modal.js';
 import { WidgetBase } from '../../../widget-base.js';
 
@@ -51,14 +52,10 @@ const styles = css`
 export class DataViewHeaderToolsViewOptions extends WidgetBase {
   static override styles = styles;
 
-  override accessor view!: DataViewTableManager | DataViewKanbanManager;
-
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
-  }
+  clickMoreAction = (e: MouseEvent) => {
+    e.stopPropagation();
+    this.openMoreAction(e.target as HTMLElement);
+  };
 
   openMoreAction = (target: HTMLElement) => {
     this.showToolBar(true);
@@ -67,13 +64,8 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
     });
   };
 
-  clickMoreAction = (e: MouseEvent) => {
-    e.stopPropagation();
-    this.openMoreAction(e.target as HTMLElement);
-  };
-
   override render() {
-    if (this.view.readonly) {
+    if (this.view.readonly$.value) {
       return;
     }
     return html` <div
@@ -83,6 +75,15 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
       ${MoreHorizontalIcon}
     </div>`;
   }
+
+  showToolBar(show: boolean) {
+    const tools = this.closest('data-view-header-tools');
+    if (tools) {
+      tools.showToolBar = show;
+    }
+  }
+
+  override accessor view!: SingleView;
 }
 
 declare global {
@@ -92,7 +93,7 @@ declare global {
 }
 export const popViewOptions = (
   target: HTMLElement,
-  view: DataViewTableManager | DataViewKanbanManager,
+  view: SingleView,
   onClose?: () => void
 ) => {
   const reopen = () => {
@@ -102,7 +103,7 @@ export const popViewOptions = (
     options: {
       style: 'min-width:300px',
       input: {
-        initValue: view.name,
+        initValue: view.name$.value,
         onComplete: text => {
           view.updateName(text);
         },
@@ -129,14 +130,14 @@ export const popViewOptions = (
           postfix: ArrowRightSmallIcon,
           select: () => {
             popFilterModal(target, {
-              vars: view.vars,
-              value: view.filter,
+              vars: view.vars$.value,
+              value: view.filter$.value ?? emptyFilterGroup,
               onChange: view.updateFilter.bind(view),
               isRoot: true,
               onBack: reopen,
               onDelete: () => {
                 view.updateFilter({
-                  ...view.filter,
+                  ...(view.filter$.value ?? emptyFilterGroup),
                   conditions: [],
                 });
               },
@@ -149,7 +150,7 @@ export const popViewOptions = (
           icon: GroupingIcon,
           postfix: ArrowRightSmallIcon,
           select: () => {
-            const groupBy = view.view.groupBy;
+            const groupBy = view.viewData$.value?.groupBy;
             if (!groupBy) {
               popSelectGroupByProperty(target, view);
             } else {
@@ -162,7 +163,7 @@ export const popViewOptions = (
           name: 'Duplicate',
           icon: DuplicateIcon,
           select: () => {
-            view.duplicateView();
+            view.duplicate();
           },
         },
         {
@@ -174,7 +175,7 @@ export const popViewOptions = (
               name: 'Delete View',
               icon: DeleteIcon,
               select: () => {
-                view.deleteView();
+                view.delete();
               },
               class: 'delete-item',
             },

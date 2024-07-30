@@ -1,26 +1,29 @@
-import '../../../../components/toolbar/icon-button.js';
-import '../../../../components/toolbar/menu-button.js';
-import '../../../../components/toolbar/separator.js';
-import '../../../../components/toolbar/toolbar.js';
-import '../../../../components/tooltip/tooltip.js';
+import type { BlockComponent } from '@blocksuite/block-std';
+import type { InlineRange } from '@blocksuite/inline';
 
-import type { BlockElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { InlineRange } from '@blocksuite/inline';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
-import { html, LitElement, nothing } from 'lit';
+import { effect } from '@lit-labs/preact-signals';
+import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { RootBlockComponent } from '../../../../../root-block/types.js';
+import type { AffineInlineEditor } from '../../affine-inline-specs.js';
+
 import { isPeekable, peek } from '../../../../components/index.js';
+import '../../../../components/toolbar/icon-button.js';
+import '../../../../components/toolbar/menu-button.js';
+import '../../../../components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../../components/toolbar/separator.js';
+import '../../../../components/toolbar/toolbar.js';
 import {
   type Action,
   renderActions,
 } from '../../../../components/toolbar/utils.js';
+import '../../../../components/tooltip/tooltip.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import {
   CenterPeekIcon,
@@ -31,99 +34,19 @@ import {
   SmallArrowDownIcon,
 } from '../../../../icons/index.js';
 import { isInsideBlockByFlavour } from '../../../../utils/model.js';
-import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 import { styles } from './styles.js';
 
 @customElement('reference-popup')
 export class ReferencePopup extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  get referenceDocId() {
-    const docId = this.inlineEditor.getFormat(this.targetInlineRange).reference
-      ?.pageId;
-    assertExists(docId);
-    return docId;
-  }
-
-  get blockElement() {
-    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
-      `[${BLOCK_ID_ATTR}]`
-    );
-    assertExists(blockElement);
-    return blockElement;
-  }
-
-  get std() {
-    const std = this.blockElement.std;
-    assertExists(std);
-    return std;
-  }
-
-  get doc() {
-    const doc = this.blockElement.doc;
-    assertExists(doc);
-    return doc;
-  }
-
-  get _embedViewButtonDisabled() {
-    if (
-      this.blockElement.doc.readonly ||
-      isInsideBlockByFlavour(
-        this.blockElement.doc,
-        this.blockElement.model,
-        'affine:edgeless-text'
-      )
-    ) {
-      return true;
-    }
-    return (
-      !!this.blockElement.closest('affine-embed-synced-doc-block') ||
-      this.referenceDocId === this.doc.id
-    );
-  }
-
-  get _openButtonDisabled() {
-    return this.referenceDocId === this.doc.id;
-  }
-
-  @property({ attribute: false })
-  accessor target!: LitElement;
-
-  @property({ attribute: false })
-  accessor inlineEditor!: AffineInlineEditor;
-
-  @property({ attribute: false })
-  accessor targetInlineRange!: InlineRange;
-
-  @property({ attribute: false })
-  accessor docTitle!: string;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  @query('.affine-reference-popover-container')
-  accessor popupContainer!: HTMLDivElement;
-
-  private _openDoc() {
-    const refDocId = this.referenceDocId;
-    const blockElement = this.blockElement;
-    if (refDocId === blockElement.doc.id) return;
-
-    const rootElement = this.std.view.viewFromPath('block', [
-      blockElement.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
-    assertExists(rootElement);
-
-    rootElement.slots.docLinkClicked.emit({ docId: refDocId });
-  }
-
   private _convertToCardView() {
-    const blockElement = this.blockElement;
-    const doc = blockElement.host.doc;
-    const parent = doc.getParent(blockElement.model);
+    const block = this.block;
+    const doc = block.host.doc;
+    const parent = doc.getParent(block.model);
     assertExists(parent);
 
-    const index = parent.children.indexOf(blockElement.model);
+    const index = parent.children.indexOf(block.model);
     const docId = this.referenceDocId;
     doc.addBlock(
       'affine:embed-linked-doc',
@@ -135,7 +58,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      doc.deleteBlock(blockElement.model);
+      doc.deleteBlock(block.model);
     } else {
       this.inlineEditor.insertText(this.targetInlineRange, this.docTitle);
     }
@@ -144,12 +67,12 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   private _convertToEmbedView() {
-    const blockElement = this.blockElement;
-    const doc = blockElement.host.doc;
-    const parent = doc.getParent(blockElement.model);
+    const block = this.block;
+    const doc = block.host.doc;
+    const parent = doc.getParent(block.model);
     assertExists(parent);
 
-    const index = parent.children.indexOf(blockElement.model);
+    const index = parent.children.indexOf(block.model);
     const docId = this.referenceDocId;
     doc.addBlock(
       'affine:embed-synced-doc',
@@ -161,7 +84,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      doc.deleteBlock(blockElement.model);
+      doc.deleteBlock(block.model);
     } else {
       this.inlineEditor.insertText(this.targetInlineRange, this.docTitle);
     }
@@ -174,6 +97,54 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       this.inlineEditor.deleteText(this.targetInlineRange);
     }
     this.abortController.abort();
+  }
+
+  get _embedViewButtonDisabled() {
+    if (
+      this.block.doc.readonly ||
+      isInsideBlockByFlavour(
+        this.block.doc,
+        this.block.model,
+        'affine:edgeless-text'
+      )
+    ) {
+      return true;
+    }
+    return (
+      !!this.block.closest('affine-embed-synced-doc-block') ||
+      this.referenceDocId === this.doc.id
+    );
+  }
+
+  private _moreActions() {
+    return renderActions([
+      [
+        {
+          type: 'delete',
+          name: 'Delete',
+          icon: DeleteIcon,
+          disabled: this.doc.readonly,
+          handler: () => this._delete(),
+        },
+      ],
+    ]);
+  }
+
+  get _openButtonDisabled() {
+    return this.referenceDocId === this.doc.id;
+  }
+
+  private _openDoc() {
+    const refDocId = this.referenceDocId;
+    const block = this.block;
+    if (refDocId === block.doc.id) return;
+
+    const rootComponent = this.std.view.viewFromPath('block', [
+      block.doc.root?.id ?? '',
+    ]) as RootBlockComponent | null;
+    assertExists(rootComponent);
+
+    rootComponent.slots.docLinkClicked.emit({ docId: refDocId });
   }
 
   private _openMenuButton() {
@@ -215,7 +186,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="large" data-orientation="vertical">
+        <div data-size="large" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.name,
@@ -277,7 +248,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="small" data-orientation="vertical">
+        <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.type,
@@ -298,39 +269,59 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     `;
   }
 
-  private _moreActions() {
-    return renderActions([
-      [
-        {
-          type: 'delete',
-          name: 'Delete',
-          icon: DeleteIcon,
-          disabled: this.doc.readonly,
-          handler: () => this._delete(),
-        },
-      ],
-    ]);
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
     if (this.targetInlineRange.length === 0) {
-      throw new Error('Cannot toggle reference popup on empty range');
+      return;
     }
 
-    const parent = this.blockElement.host.doc.getParent(
-      this.blockElement.model
-    );
+    const parent = this.block.host.doc.getParent(this.block.model);
     assertExists(parent);
 
     this.disposables.add(
-      parent.childrenUpdated.on(() => {
+      effect(() => {
         const children = parent.children;
-        if (children.includes(this.blockElement.model)) return;
+        if (children.includes(this.block.model)) return;
         this.abortController.abort();
       })
     );
+  }
+
+  override render() {
+    const buttons = [
+      this._openMenuButton(),
+
+      this._viewMenuButton(),
+
+      html`
+        <editor-menu-button
+          .contentPadding=${'8px'}
+          .button=${html`
+            <editor-icon-button aria-label="More" .tooltip=${'More'}>
+              ${MoreVerticalIcon}
+            </editor-icon-button>
+          `}
+        >
+          <div data-size="large" data-orientation="vertical">
+            ${this._moreActions()}
+          </div>
+        </editor-menu-button>
+      `,
+    ];
+
+    return html`
+      <div class="overlay-root">
+        <div class="affine-reference-popover-container">
+          <editor-toolbar class="affine-reference-popover view">
+            ${join(
+              buttons.filter(button => button !== nothing),
+              renderToolbarSeparator
+            )}
+          </editor-toolbar>
+        </div>
+      </div>
+    `;
   }
 
   override updated() {
@@ -360,41 +351,50 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       .catch(console.error);
   }
 
-  override render() {
-    const buttons = [
-      this._openMenuButton(),
-
-      this._viewMenuButton(),
-
-      html`
-        <editor-menu-button
-          .contentPadding=${'8px'}
-          .button=${html`
-            <editor-icon-button aria-label="More" .tooltip=${'More'}>
-              ${MoreVerticalIcon}
-            </editor-icon-button>
-          `}
-        >
-          <div slot data-size="large" data-orientation="vertical">
-            ${this._moreActions()}
-          </div>
-        </editor-menu-button>
-      `,
-    ];
-
-    return html`
-      <div class="overlay-root">
-        <div class="affine-reference-popover-container">
-          <editor-toolbar class="affine-reference-popover view">
-            ${join(
-              buttons.filter(button => button !== nothing),
-              renderToolbarSeparator
-            )}
-          </editor-toolbar>
-        </div>
-      </div>
-    `;
+  get block() {
+    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    assertExists(block);
+    return block;
   }
+
+  get doc() {
+    const doc = this.block.doc;
+    assertExists(doc);
+    return doc;
+  }
+
+  get referenceDocId() {
+    const docId = this.inlineEditor.getFormat(this.targetInlineRange).reference
+      ?.pageId;
+    assertExists(docId);
+    return docId;
+  }
+
+  get std() {
+    const std = this.block.std;
+    assertExists(std);
+    return std;
+  }
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @property({ attribute: false })
+  accessor docTitle!: string;
+
+  @property({ attribute: false })
+  accessor inlineEditor!: AffineInlineEditor;
+
+  @query('.affine-reference-popover-container')
+  accessor popupContainer!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor target!: LitElement;
+
+  @property({ attribute: false })
+  accessor targetInlineRange!: InlineRange;
 }
 
 declare global {

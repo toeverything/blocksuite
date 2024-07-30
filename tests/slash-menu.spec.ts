@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 
 import { addNote, switchEditorMode } from './utils/actions/edgeless.js';
 import {
+  SHORT_KEY,
   pressArrowDown,
   pressArrowLeft,
   pressArrowRight,
@@ -13,7 +14,6 @@ import {
   pressShiftTab,
   pressTab,
   redoByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/keyboard.js';
@@ -974,6 +974,7 @@ test('delete block by slash menu should remove children', async ({ page }) => {
   <affine:list
     prop:checked={false}
     prop:collapsed={false}
+    prop:order={null}
     prop:text="123"
     prop:type="bulleted"
   />

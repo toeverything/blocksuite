@@ -37,9 +37,6 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
     }
   `;
 
-  @query('.affine-database-checkbox')
-  private accessor _checkbox!: HTMLDivElement;
-
   override beforeEnterEditMode() {
     const checked = !this.value;
 
@@ -54,11 +51,11 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
     _e.preventDefault();
   }
 
-  override onPaste(_e: ClipboardEvent) {
+  override onCut(_e: ClipboardEvent) {
     _e.preventDefault();
   }
 
-  override onCut(_e: ClipboardEvent) {
+  override onPaste(_e: ClipboardEvent) {
     _e.preventDefault();
   }
 
@@ -73,6 +70,9 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
       </div>
     </div>`;
   }
+
+  @query('.affine-database-checkbox')
+  private accessor _checkbox!: HTMLDivElement;
 }
 
 export const checkboxColumnConfig = checkboxColumnModelConfig.renderConfig({

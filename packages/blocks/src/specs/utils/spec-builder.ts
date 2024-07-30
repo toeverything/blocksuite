@@ -1,15 +1,13 @@
 import type { BlockSpec, BlockSpecSlots } from '@blocksuite/block-std';
-import { assertExists, type DisposableGroup } from '@blocksuite/global/utils';
+import type { DisposableGroup } from '@blocksuite/global/utils';
+
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 export class SpecBuilder {
   private readonly _value: BlockSpec[];
 
   constructor(spec: BlockSpec[]) {
     this._value = [...spec];
-  }
-
-  get value() {
-    return this._value;
   }
 
   setup<Flavour extends BlockSuite.ServiceKeys>(
@@ -19,9 +17,24 @@ export class SpecBuilder {
       disposableGroup: DisposableGroup
     ) => void
   ) {
-    const spec = this._value.find(s => s.schema.model.flavour === flavour);
-    assertExists(spec, `BlockSpec not found for ${flavour}`);
+    const specIndex = this._value.findIndex(
+      s => s.schema.model.flavour === flavour
+    );
+
+    if (specIndex === -1) {
+      throw new BlockSuiteError(
+        ErrorCode.ValueNotExists,
+        `BlockSpec not found for ${flavour}`
+      );
+    }
+
+    this._value[specIndex] = {
+      ...this._value[specIndex],
+    };
+
+    const spec = this._value[specIndex];
     const oldSetup = spec.setup;
+
     spec.setup = (slots, disposableGroup) => {
       oldSetup?.(slots, disposableGroup);
       setup(
@@ -29,5 +42,9 @@ export class SpecBuilder {
         disposableGroup
       );
     };
+  }
+
+  get value() {
+    return this._value;
   }
 }

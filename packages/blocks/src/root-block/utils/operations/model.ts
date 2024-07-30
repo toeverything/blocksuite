@@ -1,5 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
 
 /**
@@ -10,12 +11,14 @@ import { type BlockModel, Text } from '@blocksuite/store';
 
 export function mergeToCodeModel(models: BlockModel[]) {
   if (models.length === 0) {
-    throw new Error('No models to merge');
+    return null;
   }
   const doc = models[0].doc;
 
   const parent = doc.getParent(models[0]);
-  assertExists(parent);
+  if (!parent) {
+    return null;
+  }
   const index = parent.children.indexOf(models[0]);
   const text = models
     .map(model => {

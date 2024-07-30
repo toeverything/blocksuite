@@ -1,10 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  AffineAIPanelWidget,
   AIError,
+  AffineAIPanelWidget,
   EdgelessCopilotWidget,
   MindmapElementModel,
 } from '@blocksuite/blocks';
+import type { TemplateResult } from 'lit';
+
 import {
   BlocksUtils,
   EdgelessTextBlockModel,
@@ -15,7 +17,8 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
+
+import type { CtxRecord } from './types.js';
 
 import { getAIPanel } from '../ai-panel.js';
 import {
@@ -32,8 +35,8 @@ import { AIProvider } from '../provider.js';
 import { reportResponse } from '../utils/action-reporter.js';
 import {
   getEdgelessCopilotWidget,
-  isMindmapChild,
   isMindMapRoot,
+  isMindmapChild,
 } from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getContentFromSlice } from '../utils/markdown-utils.js';
@@ -51,7 +54,6 @@ import {
   getElementToolbar,
   responses,
 } from './edgeless-response.js';
-import type { CtxRecord } from './types.js';
 
 type AnswerRenderer = NonNullable<
   AffineAIPanelWidget['config']
@@ -65,7 +67,7 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   if (id === 'brainstormMindmap') {
     const selectedElements = ctx.get()[
       'selectedElements'
-    ] as BlockSuite.EdgelessModelType[];
+    ] as BlockSuite.EdgelessModel[];
 
     if (
       isMindMapRoot(selectedElements[0] || isMindmapChild(selectedElements[0]))
@@ -117,7 +119,7 @@ async function getContentFromHubBlockModel(
 
 export async function getContentFromSelected(
   host: EditorHost,
-  selected: BlockSuite.EdgelessModelType[]
+  selected: BlockSuite.EdgelessModel[]
 ) {
   const { notes, texts, shapes, images, edgelessTexts } = selected.reduce<{
     notes: NoteBlockModel[];
@@ -400,7 +402,6 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     edgelessCopilot.hideCopilotPanel();
     edgelessCopilot.lockToolbar(true);
 
-    aiPanel.host = host;
     updateEdgelessAIPanelConfig(
       aiPanel,
       edgelessCopilot,

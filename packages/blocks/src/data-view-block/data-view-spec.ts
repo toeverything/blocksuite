@@ -1,4 +1,5 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+
 import { literal } from 'lit/static-html.js';
 
 import { DataViewBlockSchema } from './data-view-model.js';

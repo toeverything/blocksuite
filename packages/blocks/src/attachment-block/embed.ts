@@ -1,10 +1,10 @@
-import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
+import { type TemplateResult, html } from 'lit';
+
+import type { ImageBlockProps } from '../image-block/image-model.js';
+import type { AttachmentBlockModel } from './attachment-model.js';
 
 import { withTempBlobData } from '../_common/utils/filesys.js';
-import type { ImageBlockProps } from '../image-block/image-model.js';
 import { transformModel } from '../root-block/utils/operations/model.js';
-import type { AttachmentBlockModel } from './attachment-model.js';
 
 type EmbedConfig = {
   name: string;
@@ -111,11 +111,13 @@ export function renderEmbedView(
  * Turn the attachment block into an image block.
  */
 export function turnIntoImageBlock(model: AttachmentBlockModel) {
-  if (!model.doc.schema.flavourSchemaMap.has('affine:image'))
-    throw new Error('The image flavour is not supported!');
+  if (!model.doc.schema.flavourSchemaMap.has('affine:image')) {
+    console.error('The image flavour is not supported!');
+    return;
+  }
 
   const sourceId = model.sourceId;
-  assertExists(sourceId);
+  if (!sourceId) return;
 
   const { saveAttachmentData, getImageData } = withTempBlobData();
   saveAttachmentData(sourceId, { name: model.name });

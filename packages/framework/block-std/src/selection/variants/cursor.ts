@@ -8,18 +8,23 @@ const CursorSelectionSchema = z.object({
 });
 
 export class CursorSelection extends BaseSelection {
-  static override type = 'cursor';
+  static override group = 'gfx';
 
-  static override group = 'edgeless';
+  static override type = 'cursor';
 
   readonly x: number;
 
   readonly y: number;
 
   constructor(x: number, y: number) {
-    super({ blockId: '[edgeless-cursor]' });
+    super({ blockId: '[gfx-cursor]' });
     this.x = x;
     this.y = y;
+  }
+
+  static override fromJSON(json: Record<string, unknown>): CursorSelection {
+    CursorSelectionSchema.parse(json);
+    return new CursorSelection(json.x as number, json.y as number);
   }
 
   override equals(other: BaseSelection): boolean {
@@ -36,11 +41,6 @@ export class CursorSelection extends BaseSelection {
       x: this.x,
       y: this.y,
     };
-  }
-
-  static override fromJSON(json: Record<string, unknown>): CursorSelection {
-    CursorSelectionSchema.parse(json);
-    return new CursorSelection(json.x as number, json.y as number);
   }
 }
 

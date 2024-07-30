@@ -1,49 +1,20 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
-import { html, LitElement, type TemplateResult } from 'lit';
+import { LitElement, type TemplateResult, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { InlineRootElement } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
+
+import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import { EmbedGap } from './embed-gap.js';
 
 @customElement('v-line')
 export class VLine extends LitElement {
-  get inlineEditor() {
-    const rootElement = this.closest(
-      `[${INLINE_ROOT_ATTR}]`
-    ) as InlineRootElement;
-    assertExists(rootElement, 'v-line must be inside a v-root');
-    const inlineEditor = rootElement.inlineEditor;
-    assertExists(
-      inlineEditor,
-      'v-line must be inside a v-root with inline-editor'
-    );
-
-    return inlineEditor;
+  override createRenderRoot() {
+    return this;
   }
-
-  get vElements() {
-    return Array.from(this.querySelectorAll('v-element'));
-  }
-
-  // vTexts.length > 0 does not mean the line is not empty,
-  // you should use vElements.length or vTextLength because v-element corresponds to the actual delta
-  get vTexts() {
-    return Array.from(this.querySelectorAll('v-text'));
-  }
-
-  get vTextLength() {
-    return this.vElements.reduce((acc, el) => acc + el.delta.insert.length, 0);
-  }
-
-  get vTextContent() {
-    return this.vElements.reduce((acc, el) => acc + el.delta.insert, '');
-  }
-
-  @property({ attribute: false })
-  accessor elements: [TemplateResult<1>, DeltaInsert][] = [];
 
   protected override firstUpdated(): void {
     this.style.display = 'block';
@@ -62,6 +33,7 @@ export class VLine extends LitElement {
     });
   }
 
+  // vTexts.length > 0 does not mean the line is not empty,
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await Promise.all(this.vElements.map(el => el.updateComplete));
@@ -81,10 +53,13 @@ export class VLine extends LitElement {
     const renderElements = this.elements.flatMap(([template, delta], index) => {
       if (inlineEditor.isEmbed(delta)) {
         if (delta.insert.length !== 1) {
-          throw new Error(`The length of embed node should only be 1.
+          throw new BlockSuiteError(
+            ErrorCode.InlineEditorError,
+            `The length of embed node should only be 1.
             This seems to be an internal issue with inline editor.
             Please go to https://github.com/toeverything/blocksuite/issues
-            to report it.`);
+            to report it.`
+          );
         }
         // we add `EmbedGap` to make cursor can be placed between embed elements
         if (index === 0) {
@@ -116,9 +91,39 @@ export class VLine extends LitElement {
     })}>${renderElements}</div>`;
   }
 
-  override createRenderRoot() {
-    return this;
+  get inlineEditor() {
+    const rootElement = this.closest(
+      `[${INLINE_ROOT_ATTR}]`
+    ) as InlineRootElement;
+    assertExists(rootElement, 'v-line must be inside a v-root');
+    const inlineEditor = rootElement.inlineEditor;
+    assertExists(
+      inlineEditor,
+      'v-line must be inside a v-root with inline-editor'
+    );
+
+    return inlineEditor;
   }
+
+  get vElements() {
+    return Array.from(this.querySelectorAll('v-element'));
+  }
+
+  get vTextContent() {
+    return this.vElements.reduce((acc, el) => acc + el.delta.insert, '');
+  }
+
+  get vTextLength() {
+    return this.vElements.reduce((acc, el) => acc + el.delta.insert.length, 0);
+  }
+
+  // you should use vElements.length or vTextLength because v-element corresponds to the actual delta
+  get vTexts() {
+    return Array.from(this.querySelectorAll('v-text'));
+  }
+
+  @property({ attribute: false })
+  accessor elements: [TemplateResult<1>, DeltaInsert][] = [];
 }
 
 declare global {

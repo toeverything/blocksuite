@@ -1,5 +1,8 @@
-import type { IBound, RoughCanvas, SurfaceElementModel } from '../../index.js';
+import type { IBound } from '@blocksuite/global/utils';
+
+import type { RoughCanvas, SurfaceElementModel } from '../../index.js';
 import type { Renderer } from '../renderer.js';
+
 import { brush } from './brush/index.js';
 import { connector } from './connector/index.js';
 import { group } from './group/index.js';
@@ -9,7 +12,7 @@ import { text } from './text/index.js';
 export { normalizeShapeBound } from './shape/utils.js';
 
 export type ElementRenderer<
-  T extends BlockSuite.SurfaceElementModelType = SurfaceElementModel,
+  T extends BlockSuite.SurfaceElementModel = SurfaceElementModel,
 > = (
   model: T,
   ctx: CanvasRenderingContext2D,

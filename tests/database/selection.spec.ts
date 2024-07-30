@@ -350,7 +350,6 @@ test.describe('kanban view selection', () => {
     });
 
     await focusKanbanCardHeader(page);
-    await pressEscape(page);
     await assertKanbanCellSelected(page, {
       // group by `number` column, the first(groupIndex: 0) group is `Ungroups`
       groupIndex: 1,
@@ -392,7 +391,6 @@ test.describe('kanban view selection', () => {
     });
 
     await focusKanbanCardHeader(page);
-    await pressEscape(page);
     await pressArrowUp(page);
     await assertKanbanCellSelected(page, {
       groupIndex: 1,
@@ -423,7 +421,6 @@ test.describe('kanban view selection', () => {
     });
 
     await focusKanbanCardHeader(page);
-    await pressEscape(page);
 
     await pressArrowRight(page, 3);
     await assertKanbanCellSelected(page, {

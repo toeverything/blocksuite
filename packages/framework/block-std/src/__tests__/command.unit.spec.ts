@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { Command } from '../command/index.js';
+
 import { CommandManager } from '../command/index.js';
 
 type Command1 = Command<

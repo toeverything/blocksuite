@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
 import type { ListBlockModel } from '../list-model.js';
-import { getListInfo } from './get-list-info.js';
+
 import { getNumberPrefix } from './get-number-prefix.js';
 import {
   BulletIcons,
@@ -11,12 +11,22 @@ import {
   toggleRight,
 } from './icons.js';
 
-export function ListIcon(
+const getListDeep = (model: ListBlockModel): number => {
+  let deep = 0;
+  let parent = model.doc.getParent(model);
+  while (parent?.flavour === model.flavour) {
+    deep++;
+    parent = model.doc.getParent(parent);
+  }
+  return deep;
+};
+
+export function getListIcon(
   model: ListBlockModel,
   showChildren: boolean,
   onClick: (e: MouseEvent) => void
 ) {
-  const { index, deep } = getListInfo(model);
+  const deep = getListDeep(model);
   switch (model.type) {
     case 'bulleted':
       return html`<div
@@ -32,12 +42,12 @@ export function ListIcon(
         class="affine-list-block__prefix affine-list-block__numbered"
         @click=${onClick}
       >
-        ${getNumberPrefix(index, deep)}
+        ${model.order ? getNumberPrefix(model.order, deep) : '1.'}
       </div>`;
     case 'todo':
       return html`<div
         contenteditable="false"
-        class="affine-list-block__prefix affine-list-block__todo-prefix"
+        class=${`affine-list-block__prefix affine-list-block__todo-prefix ${model.doc.readonly ? 'readonly' : ''}`}
         @click=${onClick}
       >
         ${model.checked ? checkboxChecked() : checkboxUnchecked()}

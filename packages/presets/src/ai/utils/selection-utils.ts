@@ -1,4 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import {
   type CopilotSelectionController,
   type FrameBlockModel,
@@ -7,7 +9,6 @@ import {
 } from '@blocksuite/blocks';
 import { BlocksUtils, EdgelessRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
 import { type DraftModel, Slice, toDraftModel } from '@blocksuite/store';
 
 import { getEdgelessCopilotWidget, getService } from './edgeless.js';
@@ -267,7 +268,7 @@ export const getSelectedNoteAnchor = (host: EditorHost, id: string) => {
 
 export function getCopilotSelectedElems(
   host: EditorHost
-): BlockSuite.EdgelessModelType[] {
+): BlockSuite.EdgelessModel[] {
   const service = getService(host);
   const copilotWidget = getEdgelessCopilotWidget(host);
 

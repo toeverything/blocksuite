@@ -1,4 +1,5 @@
 import type { Filter, Value, VariableOrProperty } from '../common/ast.js';
+
 import { filterMatcher } from '../widget/filter/matcher/matcher.js';
 import { propertyMatcher } from './property-matcher.js';
 

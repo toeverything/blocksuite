@@ -1,9 +1,13 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
+
 import { assertExists, isEqual } from '@blocksuite/global/utils';
 import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
+
+import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
+import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 
 import {
   asyncSetInlineRange,
@@ -11,8 +15,6 @@ import {
 } from '../../../../_common/utils/index.js';
 import { getStandardLanguage } from '../../../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../../../code-block/utils/consts.js';
-import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
-import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 import {
   convertToDivider,
   convertToList,
@@ -20,7 +22,7 @@ import {
 } from './utils.js';
 
 export function tryConvertBlock(
-  element: BlockElement,
+  element: BlockComponent,
   inline: AffineInlineEditor,
   prefixText: string,
   range: { index: number; length: number }
@@ -34,7 +36,11 @@ export function tryConvertBlock(
     return KEYBOARD_ALLOW_DEFAULT;
   }
 
-  const { lineIndex, rangeIndexRelatedToLine } = inline.getLine(range.index);
+  const lineInfo = inline.getLine(range.index);
+  if (!lineInfo) {
+    return KEYBOARD_ALLOW_DEFAULT;
+  }
+  const { lineIndex, rangeIndexRelatedToLine } = lineInfo;
   if (lineIndex !== 0 || rangeIndexRelatedToLine > prefixText.length) {
     return KEYBOARD_ALLOW_DEFAULT;
   }

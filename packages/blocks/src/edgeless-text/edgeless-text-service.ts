@@ -1,13 +1,14 @@
 import { BlockService } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
+
+import type { EdgelessRootBlockComponent } from '../root-block/index.js';
+import type { EdgelessTextBlockModel } from './edgeless-text-model.js';
 
 import { asyncFocusRichText } from '../_common/utils/selection.js';
-import type { EdgelessRootBlockComponent } from '../root-block/index.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import {
   EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
   EDGELESS_TEXT_BLOCK_MIN_WIDTH,
 } from './edgeless-text-block.js';
-import type { EdgelessTextBlockModel } from './edgeless-text-model.js';
 
 export class EdgelessTextBlockService extends BlockService<EdgelessTextBlockModel> {
   initEdgelessTextBlock({

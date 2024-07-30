@@ -1,22 +1,23 @@
-import '../declare-test-window.js';
-
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
-import type { IPoint, NoteDisplayMode } from '@blocks/_common/types.js';
+import type { NoteDisplayMode } from '@blocks/_common/types.js';
 import type { NoteBlockModel } from '@blocks/note-block/index.js';
-import type { IVec } from '@blocks/surface-block/index.js';
-import { assertExists, sleep } from '@global/utils/index.js';
+import type { IPoint, IVec } from '@global/utils/index.js';
 import type { Locator, Page } from '@playwright/test';
+
+import { assertExists, sleep } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 
 import type { Bound } from '../asserts.js';
+
+import '../declare-test-window.js';
 import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
+  SHIFT_KEY,
+  SHORT_KEY,
   pressBackspace,
   pressEnter,
   selectAllByKeyboard,
-  SHIFT_KEY,
-  SHORT_KEY,
   type,
 } from './keyboard.js';
 import {
@@ -45,11 +46,11 @@ const AWAIT_TIMEOUT = 500;
 export const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 export type Point = { x: number; y: number };
 export enum Shape {
-  Square = 'Square',
-  Ellipse = 'Ellipse',
   Diamond = 'Diamond',
-  Triangle = 'Triangle',
+  Ellipse = 'Ellipse',
   'Rounded rectangle' = 'Rounded rectangle',
+  Square = 'Square',
+  Triangle = 'Triangle',
 }
 
 export enum LassoMode {
@@ -395,7 +396,7 @@ export async function assertEdgelessLassoToolMode(page: Page, mode: LassoMode) {
 }
 
 export async function getEdgelessBlockChild(page: Page) {
-  const block = page.locator('.edgeless-block-portal-note');
+  const block = page.locator('affine-edgeless-note');
   const blockBox = await block.boundingBox();
   if (blockBox === null) throw new Error('Missing edgeless block child rect');
   return blockBox;
@@ -632,7 +633,9 @@ export async function pickColorAtPoints(page: Page, points: number[][]) {
 
 export async function getNoteBoundBoxInEdgeless(page: Page, noteId: string) {
   const editor = getEditorLocator(page);
-  const note = editor.locator(`affine-note[data-block-id="${noteId}"]`);
+  const note = editor.locator(
+    `affine-edgeless-note[data-block-id="${noteId}"]`
+  );
   const bound = await note.boundingBox();
   if (!bound) {
     throw new Error(`Missing note: ${noteId}`);
@@ -667,7 +670,7 @@ export async function activeNoteInEdgeless(page: Page, noteId: string) {
 
 export async function selectNoteInEdgeless(page: Page, noteId: string) {
   const bound = await getNoteBoundBoxInEdgeless(page, noteId);
-  await page.mouse.click(bound.x, bound.y);
+  await page.mouse.click(bound.x + bound.width / 2, bound.y + bound.height / 2);
 }
 
 export function locatorNoteDisplayModeButton(
@@ -742,6 +745,111 @@ export async function zoomByMouseWheel(
   await page.keyboard.down(SHORT_KEY);
   await page.mouse.wheel(stepX, stepY);
   await page.keyboard.up(SHORT_KEY);
+}
+
+// touch screen zooming is not supported by Playwright now
+// use pointer event mock instead
+// https://github.com/microsoft/playwright/issues/2903
+export async function zoomByPinch(
+  page: Page,
+  start1: IPoint,
+  start2: IPoint,
+  end1: IPoint,
+  end2: IPoint,
+  step: number = 5
+) {
+  await page.evaluate(
+    async ({ start1, start2, end1, end2, step }) => {
+      const target = document.querySelector('affine-edgeless-root');
+      if (!target) {
+        throw new Error('Missing edgeless page');
+      }
+
+      const pointerdown = (position: IPoint, isPrimary: boolean) => {
+        const clientX = position.x;
+        const clientY = position.y;
+
+        target.dispatchEvent(
+          new PointerEvent('pointerdown', {
+            clientX,
+            clientY,
+            bubbles: true,
+            pointerId: isPrimary ? 1 : 2,
+            isPrimary,
+          })
+        );
+      };
+
+      const pointermove = (position: IPoint, isPrimary: boolean) => {
+        const clientX = position.x;
+        const clientY = position.y;
+
+        target.dispatchEvent(
+          new PointerEvent('pointermove', {
+            clientX,
+            clientY,
+            bubbles: true,
+            pointerId: isPrimary ? 1 : 2,
+            isPrimary,
+          })
+        );
+      };
+
+      const pointerup = (position: IPoint, isPrimary: boolean) => {
+        const clientX = position.x;
+        const clientY = position.y;
+
+        target.dispatchEvent(
+          new PointerEvent('pointerup', {
+            clientX,
+            clientY,
+            bubbles: true,
+            pointerId: isPrimary ? 1 : 2,
+            isPrimary,
+          })
+        );
+      };
+
+      pointerdown(start1, true);
+      pointerdown(start2, false);
+
+      if (step !== 0) {
+        const xStep1 = (end1.x - start1.x) / step;
+        const yStep1 = (end1.y - start1.y) / step;
+        const xStep2 = (end2.x - start2.x) / step;
+        const yStep2 = (end2.y - start2.y) / step;
+
+        for (const [i] of Array.from({ length: step }).entries()) {
+          pointermove(
+            {
+              x: start1.x + xStep1 * (i + 1),
+              y: start1.y + yStep1 * (i + 1),
+            },
+            true
+          );
+          pointermove(
+            {
+              x: start2.x + xStep2 * (i + 1),
+              y: start2.y + yStep2 * (i + 1),
+            },
+            false
+          );
+
+          await new Promise(resolve => setTimeout(resolve, 16));
+        }
+
+        pointerup(end1, true);
+        pointerup(end2, false);
+      }
+    },
+    {
+      start1,
+      start2,
+      end1,
+      end2,
+      step,
+    }
+  );
 }
 
 export async function zoomFitByKeyboard(page: Page) {
@@ -1047,14 +1155,14 @@ export async function triggerComponentToolbarAction(
     case 'ungroup': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-group-button')
-        .locator('.edgeless-component-toolbar-ungroup-button');
+        .getByRole('button', { name: 'Ungroup' });
       await button.click();
       break;
     }
     case 'renameGroup': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-group-button')
-        .locator('.edgeless-component-toolbar-group-rename-button');
+        .getByRole('button', { name: 'Rename' });
       await button.click();
       break;
     }

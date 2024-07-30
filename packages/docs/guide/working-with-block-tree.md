@@ -175,7 +175,7 @@ As an example, the following code more specifically shows how the two getters `s
 
 ```ts
 import { BlockService } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockComponent } from '@blocksuite/lit';
 import type { RootBlockModel } from './root-model.js';
 
 export class RootService extends BlockService<RootBlockModel> {
@@ -183,7 +183,7 @@ export class RootService extends BlockService<RootBlockModel> {
 
   // A plain getter in service
   get selectedBlocks() {
-    let result: BlockElement[] = [];
+    let result: BlockComponent[] = [];
     // Here we are using something new...
     // Introducing commands!
     this.std.command
@@ -285,13 +285,13 @@ export class EmbedGithubModel extends defineEmbedModel<{
 Then based on this model, a lit-based UI component for the block can be defined:
 
 ```ts
-import { EmbedBlockElement } from '@blocksuite/blocks';
+import { EmbedBlockComponent } from '@blocksuite/blocks';
 import type { EmbedGithubBlockModel } from './embed-github-model.js';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElement('affine-embed-github-block')
-export class EmbedGithubBlock extends EmbedBlockElement<EmbedGithubModel> {
+export class EmbedGithubBlock extends EmbedBlockComponent<EmbedGithubModel> {
   // styles...
 
   override render() {

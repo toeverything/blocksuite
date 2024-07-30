@@ -1,6 +1,7 @@
-import { Matcher } from '../../logical/matcher.js';
 import type { TType } from '../../logical/typesystem.js';
 import type { UniComponent } from '../../utils/uni-component/uni-component.js';
+
+import { Matcher } from '../../logical/matcher.js';
 
 export interface GroupRenderProps<
   Data extends NonNullable<unknown> = NonNullable<unknown>,

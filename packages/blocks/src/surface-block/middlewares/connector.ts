@@ -1,6 +1,7 @@
 import type { ConnectorElementModel } from '../index.js';
-import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
+
+import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 
 export const connectorMiddleware: SurfaceMiddleware = (
   surface: SurfaceBlockModel
@@ -9,7 +10,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
     surface.hasElementById(id) || surface.doc.hasBlockById(id);
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
-    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType);
+    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModel);
   const pathGenerator = new ConnectorPathGenerator({
     getElementById: getElementById,
   });

@@ -1,22 +1,32 @@
+import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
+import { LitElement, type TemplateResult, html, nothing } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import { join } from 'lit/directives/join.js';
+import { type Ref, createRef, ref } from 'lit/directives/ref.js';
+import { when } from 'lit/directives/when.js';
+
+import type { EditorMenuButton } from '../../../_common/components/toolbar/menu-button.js';
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
+import type { StrokeStyle } from '../../../surface-block/index.js';
+import type {
+  EdgelessColorPickerButton,
+  PickColorEvent,
+} from '../../edgeless/components/color-picker/index.js';
+import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';
-import '../../edgeless/components/panel/color-panel.js';
-import '../../edgeless/components/panel/note-shadow-panel.js';
-import '../../edgeless/components/panel/note-display-mode-panel.js';
-import '../../edgeless/components/panel/scale-panel.js';
-import '../../edgeless/components/panel/size-panel.js';
-
-import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
-import { html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { join } from 'lit/directives/join.js';
-import { createRef, type Ref, ref } from 'lit/directives/ref.js';
-
-import type { EditorMenuButton } from '../../../_common/components/toolbar/menu-button.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import { NOTE_BACKGROUND_COLORS } from '../../../_common/edgeless/note/consts.js';
+import {
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  NOTE_BACKGROUND_COLORS,
+} from '../../../_common/edgeless/note/consts.js';
 import {
   ExpandIcon,
   LineStyleIcon,
@@ -26,41 +36,31 @@ import {
   ShrinkIcon,
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
+import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import type { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { StrokeStyle } from '../../../surface-block/index.js';
-import { Bound } from '../../../surface-block/index.js';
-import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
+import '../../edgeless/components/color-picker/index.js';
+import {
+  packColor,
+  packColorsWithColorScheme,
+} from '../../edgeless/components/color-picker/utils.js';
+import '../../edgeless/components/panel/color-panel.js';
 import {
   type LineStyleEvent,
   LineStylesPanel,
 } from '../../edgeless/components/panel/line-styles-panel.js';
+import '../../edgeless/components/panel/note-display-mode-panel.js';
+import '../../edgeless/components/panel/note-shadow-panel.js';
+import '../../edgeless/components/panel/scale-panel.js';
+import '../../edgeless/components/panel/size-panel.js';
 import { getTooltipWithShortcut } from '../../edgeless/components/utils.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 const SIZE_LIST = [
-  {
-    name: 'None',
-    value: 0,
-  },
-  {
-    name: 'Small',
-    value: 8,
-  },
-  {
-    name: 'Medium',
-    value: 16,
-  },
-  {
-    name: 'Large',
-    value: 24,
-  },
-  {
-    name: 'Huge',
-    value: 32,
-  },
+  { name: 'None', value: 0 },
+  { name: 'Small', value: 8 },
+  { name: 'Medium', value: 16 },
+  { name: 'Large', value: 24 },
+  { name: 'Huge', value: 32 },
 ] as const;
 
 const DisplayModeMap = {
@@ -69,27 +69,71 @@ const DisplayModeMap = {
   [NoteDisplayMode.DocOnly]: 'Page',
 } as const satisfies Record<NoteDisplayMode, string>;
 
+function getMostCommonBackground(
+  elements: NoteBlockModel[],
+  colorScheme: ColorScheme
+): string | null {
+  const colors = countBy(elements, (ele: NoteBlockModel) => {
+    return typeof ele.background === 'object'
+      ? ele.background[colorScheme] ?? ele.background.normal ?? null
+      : ele.background;
+  });
+  const max = maxBy(Object.entries(colors), ([_k, count]) => count);
+  return max ? (max[0] as string) : null;
+}
+
 @customElement('edgeless-change-note-button')
 export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
-  private get doc() {
-    return this.edgeless.doc;
+  private _setBorderRadius = (size: number) => {
+    this.notes.forEach(note => {
+      this.doc.updateBlock(note, () => {
+        note.edgeless.style.borderRadius = size;
+      });
+    });
+  };
+
+  private _setNoteScale = (scale: number) => {
+    this.notes.forEach(note => {
+      this.doc.updateBlock(note, () => {
+        const bound = Bound.deserialize(note.xywh);
+        const oldScale = note.edgeless.scale ?? 1;
+        const ratio = scale / oldScale;
+        bound.w *= ratio;
+        bound.h *= ratio;
+        const xywh = bound.serialize();
+        note.xywh = xywh;
+        note.edgeless.scale = scale;
+      });
+    });
+  };
+
+  pickColor = (event: PickColorEvent) => {
+    if (event.type === 'pick') {
+      const { type, value } = event.detail;
+      this.notes.forEach(ele => {
+        this.doc.updateBlock(
+          ele,
+          packColor(type, 'background', value, ele.background)
+        );
+      });
+      return;
+    }
+
+    this.notes.forEach(ele =>
+      ele[event.type === 'start' ? 'stash' : 'pop']('background')
+    );
+  };
+
+  private _getScaleLabel(scale: number) {
+    return Math.round(scale * 100) + '%';
   }
 
-  private accessor _scalePanelRef: Ref<EditorMenuButton> = createRef();
+  private _handleNoteSlicerButtonClick() {
+    const surfaceService = this.edgeless.service;
+    if (!surfaceService) return;
 
-  private accessor _cornersPanelRef: Ref<EditorMenuButton> = createRef();
-
-  @property({ attribute: false })
-  accessor notes: NoteBlockModel[] = [];
-
-  @property({ attribute: false })
-  accessor enableNoteSlicer!: boolean;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor quickConnectButton!: TemplateResult<1>;
+    this.edgeless.slots.toggleNoteSlicer.emit();
+  }
 
   private _setBackground(background: CssVariableName) {
     this.notes.forEach(note => {
@@ -100,12 +144,25 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     } as Record<string, unknown>);
   }
 
-  private _setShadowType(shadowType: string) {
+  private _setCollapse() {
     this.notes.forEach(note => {
-      this.doc.updateBlock(note, () => {
-        note.edgeless.style.shadowType = shadowType;
-      });
+      const { collapse, collapsedHeight } = note.edgeless;
+
+      if (collapse) {
+        this.doc.updateBlock(note, () => {
+          note.edgeless.collapse = false;
+        });
+      } else if (collapsedHeight) {
+        const { xywh, edgeless } = note;
+        const bound = Bound.deserialize(xywh);
+        bound.h = collapsedHeight * (edgeless.scale ?? 1);
+        this.doc.updateBlock(note, () => {
+          note.edgeless.collapse = true;
+          note.xywh = bound.serialize();
+        });
+      }
     });
+    this.requestUpdate();
   }
 
   private _setDisplayMode(note: NoteBlockModel, newMode: NoteDisplayMode) {
@@ -139,10 +196,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     }
   }
 
-  private _setStrokeWidth(borderSize: number) {
+  private _setShadowType(shadowType: string) {
     this.notes.forEach(note => {
       this.doc.updateBlock(note, () => {
-        note.edgeless.style.borderSize = borderSize;
+        note.edgeless.style.shadowType = shadowType;
       });
     });
   }
@@ -151,6 +208,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.notes.forEach(note => {
       this.doc.updateBlock(note, () => {
         note.edgeless.style.borderStyle = borderStyle;
+      });
+    });
+  }
+
+  private _setStrokeWidth(borderSize: number) {
+    this.notes.forEach(note => {
+      this.doc.updateBlock(note, () => {
+        note.edgeless.style.borderSize = borderSize;
       });
     });
   }
@@ -165,72 +230,25 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     }
   }
 
-  private _setBorderRadius = (size: number) => {
-    this.notes.forEach(note => {
-      this.doc.updateBlock(note, () => {
-        note.edgeless.style.borderRadius = size;
-      });
-    });
-  };
-
-  private _setNoteScale = (scale: number) => {
-    this.notes.forEach(note => {
-      this.doc.updateBlock(note, () => {
-        const bound = Bound.deserialize(note.xywh);
-        const oldScale = note.edgeless.scale ?? 1;
-        const ratio = scale / oldScale;
-        bound.w *= ratio;
-        bound.h *= ratio;
-        const xywh = bound.serialize();
-        note.xywh = xywh;
-        note.edgeless.scale = scale;
-      });
-    });
-  };
-
-  private _setCollapse() {
-    this.notes.forEach(note => {
-      const { collapse, collapsedHeight } = note.edgeless;
-
-      if (collapse) {
-        this.doc.updateBlock(note, () => {
-          note.edgeless.collapse = false;
-        });
-      } else if (collapsedHeight) {
-        const { xywh, edgeless } = note;
-        const bound = Bound.deserialize(xywh);
-        bound.h = collapsedHeight * (edgeless.scale ?? 1);
-        this.doc.updateBlock(note, () => {
-          note.edgeless.collapse = true;
-          note.xywh = bound.serialize();
-        });
-      }
-    });
-    this.requestUpdate();
-  }
-
-  private _handleNoteSlicerButtonClick() {
-    const surfaceService = this.edgeless.service;
-    if (!surfaceService) return;
-
-    this.edgeless.slots.toggleNoteSlicer.emit();
-  }
-
-  private _getScaleLabel(scale: number) {
-    return Math.round(scale * 100) + '%';
+  private get doc() {
+    return this.edgeless.doc;
   }
 
   override render() {
-    const length = this.notes.length;
+    const len = this.notes.length;
     const note = this.notes[0];
-    const { background, edgeless, displayMode } = note;
+    const { edgeless, displayMode } = note;
     const { shadowType, borderRadius, borderSize, borderStyle } =
       edgeless.style;
+    const colorScheme = this.edgeless.surface.renderer.getColorScheme();
+    const background =
+      getMostCommonBackground(this.notes, colorScheme) ??
+      DEFAULT_NOTE_BACKGROUND_COLOR;
 
     const { collapse } = edgeless;
     const scale = edgeless.scale ?? 1;
     const currentMode = DisplayModeMap[displayMode];
-    const onlyOne = length === 1;
+    const onlyOne = len === 1;
     const isDocOnly = displayMode === NoteDisplayMode.DocOnly;
 
     const buttons = [
@@ -252,7 +270,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               `}
             >
               <note-display-mode-panel
-                slot
                 .displayMode=${displayMode}
                 .onSelect=${(newMode: NoteDisplayMode) =>
                   this._setDisplayMode(note, newMode)}
@@ -264,29 +281,54 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
       isDocOnly
         ? nothing
-        : html`
-            <editor-menu-button
-              .contentPadding=${'8px'}
-              .button=${html`
-                <editor-icon-button
-                  aria-label="Background"
-                  .tooltip=${'Background'}
+        : when(
+            this.edgeless.doc.awarenessStore.getFlag('enable_color_picker'),
+            () => {
+              const { type, colors } = packColorsWithColorScheme(
+                colorScheme,
+                background,
+                note.background
+              );
+
+              return html`
+                <edgeless-color-picker-button
+                  class="background"
+                  .label=${'Background'}
+                  .pick=${this.pickColor}
+                  .color=${background}
+                  .colorType=${type}
+                  .colors=${colors}
+                  .palettes=${NOTE_BACKGROUND_COLORS}
                 >
-                  <edgeless-color-button
-                    .color=${background}
-                  ></edgeless-color-button>
-                </editor-icon-button>
-              `}
-            >
-              <edgeless-color-panel
-                slot
-                .value=${background}
-                .options=${NOTE_BACKGROUND_COLORS}
-                @select=${(e: ColorEvent) => this._setBackground(e.detail)}
+                </edgeless-color-picker-button>
+              `;
+            },
+            () => html`
+              <editor-menu-button
+                .contentPadding=${'8px'}
+                .button=${html`
+                  <editor-icon-button
+                    aria-label="Background"
+                    .tooltip=${'Background'}
+                  >
+                    <edgeless-color-button
+                      .color=${background}
+                    ></edgeless-color-button>
+                  </editor-icon-button>
+                `}
               >
-              </edgeless-color-panel>
-            </editor-menu-button>
-          `,
+                <edgeless-color-panel
+                  .value=${background}
+                  .options=${[
+                    '--affine-palette-transparent',
+                    ...NOTE_BACKGROUND_COLORS,
+                  ]}
+                  @select=${(e: ColorEvent) => this._setBackground(e.detail)}
+                >
+                </edgeless-color-panel>
+              </editor-menu-button>
+            `
+          ),
 
       isDocOnly
         ? nothing
@@ -303,7 +345,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               `}
             >
               <edgeless-note-shadow-panel
-                slot
                 .value=${shadowType}
                 .background=${background}
                 .onSelect=${(value: string) => this._setShadowType(value)}
@@ -321,7 +362,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                 </editor-icon-button>
               `}
             >
-              <div slot data-orientation="horizontal">
+              <div data-orientation="horizontal">
                 ${LineStylesPanel({
                   selectedLineSize: borderSize,
                   selectedLineStyle: borderStyle,
@@ -344,7 +385,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
                 .sizeList=${SIZE_LIST}
                 .minSize=${0}
                 .onSelect=${(size: number) => this._setBorderRadius(size)}
-                .onPopperCose=${() => this._cornersPanelRef.value?.close()}
+                .onPopperCose=${() => this._cornersPanelRef.value?.hide()}
               >
               </edgeless-size-panel>
             </editor-menu-button>
@@ -393,7 +434,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
           <edgeless-scale-panel
             .scale=${Math.round(scale * 100)}
             .onSelect=${(scale: number) => this._setNoteScale(scale)}
-            .onPopperCose=${() => this._scalePanelRef.value?.close()}
+            .onPopperCose=${() => this._scalePanelRef.value?.hide()}
           ></edgeless-scale-panel>
         </editor-menu-button>
       `,
@@ -404,6 +445,25 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       renderToolbarSeparator
     );
   }
+
+  private accessor _cornersPanelRef: Ref<EditorMenuButton> = createRef();
+
+  private accessor _scalePanelRef: Ref<EditorMenuButton> = createRef();
+
+  @query('edgeless-color-picker-button.background')
+  accessor backgroundButton!: EdgelessColorPickerButton;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor enableNoteSlicer!: boolean;
+
+  @property({ attribute: false })
+  accessor notes: NoteBlockModel[] = [];
+
+  @property({ attribute: false })
+  accessor quickConnectButton!: TemplateResult<1> | typeof nothing;
 }
 
 declare global {

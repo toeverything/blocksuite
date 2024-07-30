@@ -1,10 +1,9 @@
-// https://github.com/tldraw/tldraw/blob/31f0f02adf58b909f59764f62de09e97542eb2b1/packages/core/src/utils/utils.ts
-// Credits to tldraw
+import type { IVec } from '@blocksuite/global/utils';
+import type { Bound } from '@blocksuite/global/utils';
+import type { IBound } from '@blocksuite/global/utils';
 
-import type { IBound } from '../consts.js';
-import type { Bound } from './bound.js';
-import { PointLocation } from './point-location.js';
-import { type IVec, Vec } from './vec.js';
+import { Vec } from '@blocksuite/global/utils';
+import { PointLocation } from '@blocksuite/global/utils';
 
 export const PI2 = Math.PI * 2;
 export const EPSILON = 1e-12;
@@ -128,7 +127,7 @@ export function pointOnEllipse(
 }
 
 export function pointOnPolygonStoke(
-  p: number[],
+  p: IVec,
   points: IVec[],
   threshold: number
 ): boolean {
@@ -267,6 +266,7 @@ export function lineIntersects(
     }
     return Vec.lrp(sp, ep, u1);
   }
+
   return null;
 }
 
@@ -341,7 +341,7 @@ export function linePolygonIntersects(
 
 export function polygonNearestPoint(points: IVec[], point: IVec) {
   const len = points.length;
-  let rst: IVec = [];
+  let rst: IVec;
   let dis = Infinity;
   for (let i = 0; i < len; i++) {
     const p = points[i];
@@ -353,7 +353,7 @@ export function polygonNearestPoint(points: IVec[], point: IVec) {
       rst = temp;
     }
   }
-  return rst;
+  return rst!;
 }
 
 export function polygonPointDistance(points: IVec[], point: IVec) {
@@ -361,7 +361,7 @@ export function polygonPointDistance(points: IVec[], point: IVec) {
   return Vec.dist(nearest, point);
 }
 
-export function polygonGetPointTangent(points: IVec[], point: IVec) {
+export function polygonGetPointTangent(points: IVec[], point: IVec): IVec {
   const len = points.length;
   for (let i = 0; i < len; i++) {
     const p = points[i];
@@ -402,7 +402,7 @@ export function linePolylineIntersects(
 
 export function polyLineNearestPoint(points: IVec[], point: IVec) {
   const len = points.length;
-  let rst: IVec = [];
+  let rst: IVec;
   let dis = Infinity;
   for (let i = 0; i < len - 1; i++) {
     const p = points[i];
@@ -414,7 +414,7 @@ export function polyLineNearestPoint(points: IVec[], point: IVec) {
       rst = temp;
     }
   }
-  return rst;
+  return rst!;
 }
 
 export function sign(number: number) {

@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -9,7 +9,7 @@ import type { PageRootBlockComponent, RootBlockModel } from '../../index.js';
 export const AFFINE_VIEWPORT_OVERLAY_WIDGET = 'affine-viewport-overlay-widget';
 
 @customElement(AFFINE_VIEWPORT_OVERLAY_WIDGET)
-export class AffineViewportOverlayWidget extends WidgetElement<
+export class AffineViewportOverlayWidget extends WidgetComponent<
   RootBlockModel,
   PageRootBlockComponent
 > {
@@ -27,21 +27,6 @@ export class AffineViewportOverlayWidget extends WidgetElement<
       pointer-events: auto;
     }
   `;
-
-  @state()
-  private accessor _lockViewport = false;
-
-  lock() {
-    this._lockViewport = true;
-  }
-
-  unlock() {
-    this._lockViewport = false;
-  }
-
-  toggleLock() {
-    this._lockViewport = !this._lockViewport;
-  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -68,6 +53,10 @@ export class AffineViewportOverlayWidget extends WidgetElement<
     );
   }
 
+  lock() {
+    this._lockViewport = true;
+  }
+
   override render() {
     const classes = classMap({
       'affine-viewport-overlay-widget': true,
@@ -79,6 +68,17 @@ export class AffineViewportOverlayWidget extends WidgetElement<
     });
     return html` <div class=${classes} style=${style}></div> `;
   }
+
+  toggleLock() {
+    this._lockViewport = !this._lockViewport;
+  }
+
+  unlock() {
+    this._lockViewport = false;
+  }
+
+  @state()
+  private accessor _lockViewport = false;
 }
 
 declare global {

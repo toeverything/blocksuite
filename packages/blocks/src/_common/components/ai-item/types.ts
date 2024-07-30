@@ -32,9 +32,9 @@ abstract class BaseAIError extends Error {
 }
 
 export enum AIErrorType {
-  Unauthorized = 'Unauthorized',
-  PaymentRequired = 'PaymentRequired',
   GeneralNetworkError = 'GeneralNetworkError',
+  PaymentRequired = 'PaymentRequired',
+  Unauthorized = 'Unauthorized',
 }
 
 export class UnauthorizedError extends BaseAIError {

@@ -1,4 +1,5 @@
 import type { BlockService } from '@blocksuite/block-std';
+
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { isPlainObject, recursive } from 'merge';
 import { z } from 'zod';
@@ -58,6 +59,11 @@ const TextAlignSchema = z.nativeEnum(TextAlign);
 const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
 const ShapeTypeSchema = z.nativeEnum(ShapeType);
 const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
+const CustomColorSchema = z.object({
+  normal: z.string().optional(),
+  light: z.string().optional(),
+  dark: z.string().optional(),
+});
 
 const LastPropsSchema = z.object({
   connector: z.object({
@@ -171,6 +177,8 @@ export type SerializedViewport = z.infer<
 >;
 
 export class EditPropsStore {
+  private _disposables = new DisposableGroup();
+
   private _lastProps: LastProps = {
     connector: {
       frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
@@ -225,8 +233,6 @@ export class EditPropsStore {
     },
   };
 
-  private _disposables = new DisposableGroup();
-
   slots = {
     lastPropsUpdated: new Slot<{
       type: LastPropsKey;
@@ -246,6 +252,10 @@ export class EditPropsStore {
         this._lastProps = result.data;
       }
     }
+  }
+
+  private _getStorage<T extends StoragePropsKey>(key: T) {
+    return isSessionProp(key) ? sessionStorage : localStorage;
   }
 
   private _getStorageKey<T extends StoragePropsKey>(key: T) {
@@ -272,33 +282,8 @@ export class EditPropsStore {
     }
   }
 
-  private _getStorage<T extends StoragePropsKey>(key: T) {
-    return isSessionProp(key) ? sessionStorage : localStorage;
-  }
-
-  getLastProps<T extends LastPropsKey>(type: T) {
-    return this._lastProps[type] as LastProps[T];
-  }
-
-  recordLastProps(
-    type: BlockSuite.EdgelessModelKeyType,
-    recordProps: Partial<LastProps[LastPropsKey]>
-  ) {
-    if (!isLastPropType(type)) return;
-
-    const props = this._lastProps[type];
-    const overrideProps = extractProps(
-      recordProps,
-      LastPropsSchema.shape[type]
-    );
-    if (Object.keys(overrideProps).length === 0) return;
-
-    recursive(props, overrideProps);
-    this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
-  }
-
   applyLastProps(
-    type: BlockSuite.EdgelessModelKeyType,
+    type: BlockSuite.EdgelessModelKeys,
     props: Record<string, unknown>
   ) {
     if (!isLastPropType(type)) return;
@@ -307,14 +292,13 @@ export class EditPropsStore {
     deepAssign(props, lastProps);
   }
 
-  setStorage<T extends StoragePropsKey>(key: T, value: StorageProps[T]) {
-    const oldValue = this.getStorage(key);
-    this._getStorage(key).setItem(
-      this._getStorageKey(key),
-      JSON.stringify(value)
-    );
-    if (oldValue === value) return;
-    this.slots.storageUpdated.emit({ key, value });
+  dispose() {
+    this._disposables.dispose();
+    this.slots.lastPropsUpdated.dispose();
+  }
+
+  getLastProps<T extends LastPropsKey>(type: T) {
+    return this._lastProps[type] as LastProps[T];
   }
 
   getStorage<T extends StoragePropsKey>(key: T) {
@@ -338,9 +322,31 @@ export class EditPropsStore {
     }
   }
 
-  dispose() {
-    this._disposables.dispose();
-    this.slots.lastPropsUpdated.dispose();
+  recordLastProps(
+    type: BlockSuite.EdgelessModelKeys,
+    recordProps: Partial<LastProps[LastPropsKey]>
+  ) {
+    if (!isLastPropType(type)) return;
+
+    const props = this._lastProps[type];
+    const overrideProps = extractProps(
+      recordProps,
+      LastPropsSchema.shape[type]
+    );
+    if (Object.keys(overrideProps).length === 0) return;
+
+    recursive(props, overrideProps);
+    this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
+  }
+
+  setStorage<T extends StoragePropsKey>(key: T, value: StorageProps[T]) {
+    const oldValue = this.getStorage(key);
+    this._getStorage(key).setItem(
+      this._getStorageKey(key),
+      JSON.stringify(value)
+    );
+    if (oldValue === value) return;
+    this.slots.storageUpdated.emit({ key, value });
   }
 }
 
@@ -352,7 +358,7 @@ function extractProps(
 
   Object.entries(props).forEach(([key, value]) => {
     if (!(key in ref.shape)) return;
-    if (isPlainObject(value)) {
+    if (isPlainObject(value) && !isColorType(key, value)) {
       result[key] = extractProps(
         props[key] as Record<string, unknown>,
         ref.shape[key] as z.ZodObject<z.ZodRawShape>
@@ -366,7 +372,7 @@ function extractProps(
 }
 
 function isLastPropType(
-  type: BlockSuite.EdgelessModelKeyType
+  type: BlockSuite.EdgelessModelKeys
 ): type is keyof LastProps {
   return Object.keys(LastPropsSchema.shape).includes(type);
 }
@@ -392,4 +398,12 @@ function deepAssign(
   });
 
   return target;
+}
+
+function isColorType(key: string, value: unknown) {
+  return (
+    ['background', 'color', 'stroke', 'fill', 'Color'].some(
+      stuff => key.startsWith(stuff) || key.endsWith(stuff)
+    ) && CustomColorSchema.safeParse(value).success
+  );
 }

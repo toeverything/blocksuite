@@ -1,4 +1,4 @@
-import type { IPoint } from '@blocks/_common/types.js';
+import type { IPoint } from '@global/utils/index.js';
 import type { Page } from '@playwright/test';
 
 import { toViewCoord } from './edgeless.js';
@@ -107,8 +107,8 @@ export async function clickTestOperationsMenuItem(page: Page, name: string) {
   await menuItem.waitFor({ state: 'hidden' }); // wait for animation ended
 }
 
-export async function switchReadonly(page: Page) {
-  await page.evaluate(() => {
+export async function switchReadonly(page: Page, value = true) {
+  await page.evaluate(_value => {
     const defaultPage = document.querySelector(
       'affine-page-root'
     ) as HTMLElement & {
@@ -117,8 +117,8 @@ export async function switchReadonly(page: Page) {
       };
     };
     const doc = defaultPage.doc;
-    doc.awarenessStore.setFlag('readonly', { 'doc:home': true });
-  });
+    doc.awarenessStore.setFlag('readonly', { 'doc:home': _value });
+  }, value);
 }
 
 export async function activeEmbed(page: Page) {

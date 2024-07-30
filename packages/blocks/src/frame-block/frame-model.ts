@@ -1,14 +1,18 @@
+import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
+
+import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import type { IHitTestOptions } from '../surface-block/element-model/base.js';
-import { Bound } from '../surface-block/utils/bound.js';
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+import type { Color } from '../surface-block/consts.js';
+import type { PointTestOptions } from '../surface-block/element-model/base.js';
+
+import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
 
 type FrameBlockProps = {
   title: Text;
-  background: string;
+  background: Color;
   xywh: SerializedXYWH;
   index: string;
 };
@@ -32,10 +36,11 @@ export const FrameBlockSchema = defineBlockSchema({
   },
 });
 
-export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
-  static PADDING = [8, 10];
-
-  override hitTest(x: number, y: number, _: IHitTestOptions): boolean {
+export class FrameBlockModel
+  extends GfxCompatible<FrameBlockProps>(BlockModel)
+  implements GfxElementGeometry
+{
+  override includesPoint(x: number, y: number, _: PointTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointNearBound([x, y], 5);
 
@@ -44,7 +49,7 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
     return this.externalBound?.isPointInBound([x, y]) ?? false;
   }
 
-  override boxSelect(selectedBound: Bound): boolean {
+  override intersectsBound(selectedBound: Bound): boolean {
     const bound = Bound.deserialize(this.xywh);
     return (
       bound.isIntersectWithBound(selectedBound) || selectedBound.contains(bound)

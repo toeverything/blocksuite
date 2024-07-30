@@ -1,7 +1,8 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { DocCollection } from '@blocksuite/store';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -11,14 +12,6 @@ import { removeModeFromStorage } from '../mock-services.js';
 
 @customElement('docs-panel')
 export class DocsPanel extends WithDisposable(ShadowlessElement) {
-  private get collection() {
-    return this.editor.doc.collection;
-  }
-
-  private get docs() {
-    return [...this.collection.docs.values()];
-  }
-
   static override styles = css`
     docs-panel {
       display: flex;
@@ -62,8 +55,26 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
+  createDoc = () => {
+    createDocBlock(this.editor.doc.collection);
+  };
+
+  private get collection() {
+    return this.editor.doc.collection;
+  }
+
+  private get docs() {
+    return [...this.collection.docs.values()];
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.editor.doc.collection.slots.docUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   protected override render(): unknown {
     const { docs, collection } = this;
@@ -114,18 +125,8 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.editor.doc.collection.slots.docUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
-  createDoc = () => {
-    createDocBlock(this.editor.doc.collection);
-  };
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
 }
 
 function createDocBlock(collection: DocCollection) {

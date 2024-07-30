@@ -8,7 +8,7 @@ For UI events such as `click` in editor, there is an underlying event dispatcher
 
 ```ts
 @customElements('my-block')
-class MyBlockView extends BlockElement<MyBlockModel> {
+class MyBlockView extends BlockComponent<MyBlockModel> {
   private _handleClick = () => {
     //...
   };
@@ -25,7 +25,7 @@ class MyBlockView extends BlockElement<MyBlockModel> {
 All events on dispatcher are bound to the root element of the block view to make it possible to bubble events to the parent block view.
 
 ```ts
-class ChildView extends BlockElement<MyBlockModel> {
+class ChildView extends BlockComponent<MyBlockModel> {
   private _handleClick = () => {
     console.log('click1');
   };
@@ -36,7 +36,7 @@ class ChildView extends BlockElement<MyBlockModel> {
   }
 }
 
-class ParentView extends BlockElement<MyBlockModel> {
+class ParentView extends BlockComponent<MyBlockModel> {
   private _handleClick = () => {
     console.log('click2');
   };
@@ -58,7 +58,7 @@ click2
 You may want to stop the event from bubbling to the parent block view. You can simply return `true` in the event handler:
 
 ```ts
-class ChildView extends BlockElement<MyBlockModel> {
+class ChildView extends BlockComponent<MyBlockModel> {
   private _handleClick = () => {
     console.log('click1');
     return true;
@@ -89,7 +89,7 @@ We also provide two more scopes to subscribe to make it possible to handle event
 The flavour scope will subscribe to events triggered by the block view and other blocks with the same flavour.
 
 ```ts
-class MyBlock extends BlockElement<MyBlockModel> {
+class MyBlock extends BlockComponent<MyBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     this.handleEvent('click', this._handleClick, { flavour: true });
@@ -102,7 +102,7 @@ class MyBlock extends BlockElement<MyBlockModel> {
 The global scope will subscribe to events triggered by the block view and all other blocks.
 
 ```ts
-class MyBlock extends BlockElement<MyBlockModel> {
+class MyBlock extends BlockComponent<MyBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     this.handleEvent('click', this._handleClick, { global: true });
@@ -126,7 +126,7 @@ For characters that are created by holding shift, the `Shift-` prefix is implied
 You can use `Mod-` as a shorthand for `Cmd-` on Mac and `Ctrl-` on other platforms.
 
 ```ts
-class MyBlock extends BlockElement<MyBlockModel> {
+class MyBlock extends BlockComponent<MyBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     this.bindHotkey({

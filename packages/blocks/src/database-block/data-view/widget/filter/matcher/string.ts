@@ -1,6 +1,7 @@
+import type { FilterDefineType } from './matcher.js';
+
 import { tBoolean, tString } from '../../../logical/data-type.js';
 import { tFunction } from '../../../logical/typesystem.js';
-import type { FilterDefineType } from './matcher.js';
 
 export const stringFilter = {
   is: {

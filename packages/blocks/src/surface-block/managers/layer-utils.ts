@@ -1,8 +1,9 @@
 import type { Doc } from '@blocksuite/store';
 
-import { SurfaceGroupLikeModel } from '../element-model/base.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';
+
+import { SurfaceGroupLikeModel } from '../element-model/base.js';
 
 export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {
   const layer = layers[layerIndex];
@@ -25,8 +26,8 @@ export function updateLayersZIndex(layers: Layer[], startIdx: number) {
   }
 }
 
-export function getElementIndex(indexable: BlockSuite.EdgelessModelType) {
-  const groups = indexable.groups;
+export function getElementIndex(indexable: BlockSuite.EdgelessModel) {
+  const groups = indexable.groups as BlockSuite.SurfaceGroupLikeModel[];
 
   if (groups.length > 1) {
     return (
@@ -46,8 +47,8 @@ export function ungroupIndex(index: string) {
 }
 
 export function insertToOrderedArray(
-  array: BlockSuite.EdgelessModelType[],
-  element: BlockSuite.EdgelessModelType
+  array: BlockSuite.EdgelessModel[],
+  element: BlockSuite.EdgelessModel
 ) {
   let idx = 0;
   while (idx < array.length && compare(array[idx], element) < 0) {
@@ -58,8 +59,8 @@ export function insertToOrderedArray(
 }
 
 export function removeFromOrderedArray(
-  array: BlockSuite.EdgelessModelType[],
-  element: BlockSuite.EdgelessModelType
+  array: BlockSuite.EdgelessModel[],
+  element: BlockSuite.EdgelessModel
 ) {
   const idx = array.indexOf(element);
 
@@ -69,8 +70,8 @@ export function removeFromOrderedArray(
 }
 
 export function isInRange(
-  edges: [BlockSuite.EdgelessModelType, BlockSuite.EdgelessModelType],
-  target: BlockSuite.EdgelessModelType
+  edges: [BlockSuite.EdgelessModel, BlockSuite.EdgelessModel],
+  target: BlockSuite.EdgelessModel
 ) {
   return compare(target, edges[0]) >= 0 && compare(target, edges[1]) < 0;
 }
@@ -86,16 +87,16 @@ export function renderableInEdgeless(
 }
 
 export function compare(
-  a: BlockSuite.EdgelessModelType,
-  b: BlockSuite.EdgelessModelType
+  a: BlockSuite.EdgelessModel,
+  b: BlockSuite.EdgelessModel
 ) {
   if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
     return -1;
   } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
     return 1;
   } else {
-    const aGroups = a.groups;
-    const bGroups = b.groups;
+    const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModel[];
+    const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModel[];
     const minGroups = Math.min(aGroups.length, bGroups.length);
 
     for (let i = 0; i < minGroups; ++i) {

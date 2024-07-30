@@ -1,5 +1,7 @@
 import type { TemplateResult } from 'lit';
 
+import type { EmbedLinkedDocStyles } from './embed-linked-doc-model.js';
+
 import {
   DarkLoadingIcon,
   EmbedEdgelessIcon,
@@ -12,7 +14,6 @@ import {
   DarkSyncedDocErrorBanner,
   LightSyncedDocErrorBanner,
 } from '../embed-synced-doc-block/styles.js';
-import type { EmbedLinkedDocStyles } from './embed-linked-doc-model.js';
 import {
   DarkLinkedEdgelessDeletedLargeBanner,
   DarkLinkedEdgelessDeletedSmallBanner,

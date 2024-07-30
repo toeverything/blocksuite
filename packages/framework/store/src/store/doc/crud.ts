@@ -1,26 +1,13 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import * as Y from 'yjs';
 
-import { native2Y } from '../../reactive/index.js';
 import type { BlockModel } from '../../schema/index.js';
-import { internalPrimitives, type Schema } from '../../schema/index.js';
 import type { YBlock } from './index.js';
 
+import { native2Y } from '../../reactive/index.js';
+import { type Schema, internalPrimitives } from '../../schema/index.js';
+
 export class DocCRUD {
-  get root(): string | null {
-    let rootId: string | null = null;
-    this._yBlocks.forEach(yBlock => {
-      const flavour = yBlock.get('sys:flavour');
-      const schema = this._schema.flavourSchemaMap.get(flavour);
-      if (!schema) return;
-
-      if (schema.model.role === 'root') {
-        rootId = yBlock.get('sys:id');
-      }
-    });
-    return rootId;
-  }
-
   constructor(
     private readonly _yBlocks: Y.Map<YBlock>,
     private readonly _schema: Schema
@@ -42,29 +29,6 @@ export class DocCRUD {
     return fn(index, parent);
   }
 
-  getParent(targetId: string): string | null {
-    const root = this.root;
-    if (!root || root === targetId) return null;
-
-    const findParent = (parentId: string): string | null => {
-      const parentYBlock = this._yBlocks.get(parentId);
-      if (!parentYBlock) return null;
-
-      const children = parentYBlock.get('sys:children');
-
-      for (const childId of children.toArray()) {
-        if (childId === targetId) return parentId;
-
-        const parent = findParent(childId);
-        if (parent != null) return parent;
-      }
-
-      return null;
-    };
-
-    return findParent(root);
-  }
-
   addBlock(
     id: string,
     flavour: string,
@@ -73,7 +37,12 @@ export class DocCRUD {
     parentIndex?: number
   ) {
     const schema = this._schema.flavourSchemaMap.get(flavour);
-    assertExists(schema, `Could not find schema for flavour ${flavour}`);
+    if (!schema) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        `schema for flavour: ${flavour} not found`
+      );
+    }
 
     const parentFlavour = parent
       ? this._yBlocks.get(parent)?.get('sys:flavour')
@@ -159,7 +128,12 @@ export class DocCRUD {
     const apply = () => {
       if (bringChildrenTo) {
         const bringChildrenToModel = () => {
-          assertExists(bringChildrenTo);
+          if (!bringChildrenTo) {
+            throw new BlockSuiteError(
+              ErrorCode.ModelCRUDError,
+              'bringChildrenTo is not provided when deleting block'
+            );
+          }
           const model = this._yBlocks.get(bringChildrenTo);
           if (!model) return;
           const bringFlavour = model.get('sys:flavour');
@@ -209,12 +183,49 @@ export class DocCRUD {
     this._yBlocks.delete(id);
   }
 
-  updateBlockChildren(id: string, children: string[]) {
-    const yBlock = this._yBlocks.get(id);
-    if (!yBlock) return;
+  getNext(id: string) {
+    return this._getSiblings(
+      id,
+      (index, parent) =>
+        parent
+          .get('sys:children')
+          .toArray()
+          .at(index + 1) ?? null
+    );
+  }
 
-    const yChildren = Y.Array.from(children);
-    yBlock.set('sys:children', yChildren);
+  getParent(targetId: string): string | null {
+    const root = this.root;
+    if (!root || root === targetId) return null;
+
+    const findParent = (parentId: string): string | null => {
+      const parentYBlock = this._yBlocks.get(parentId);
+      if (!parentYBlock) return null;
+
+      const children = parentYBlock.get('sys:children');
+
+      for (const childId of children.toArray()) {
+        if (childId === targetId) return parentId;
+
+        const parent = findParent(childId);
+        if (parent != null) return parent;
+      }
+
+      return null;
+    };
+
+    return findParent(root);
+  }
+
+  getPrev(id: string) {
+    return this._getSiblings(
+      id,
+      (index, parent) =>
+        parent
+          .get('sys:children')
+          .toArray()
+          .at(index - 1) ?? null
+    );
   }
 
   moveBlocks(
@@ -248,7 +259,8 @@ export class DocCRUD {
 
       const last = children[children.length - 1];
       if (this.getNext(last) !== blockId) {
-        throw new Error(
+        throw new BlockSuiteError(
+          ErrorCode.ModelCRUDError,
           'The blocks to move are not contiguous under their parent'
         );
       }
@@ -289,7 +301,10 @@ export class DocCRUD {
             .toArray()
             .findIndex(id => id === targetSibling);
           if (targetIndex === -1) {
-            throw new Error('Target sibling not found');
+            throw new BlockSuiteError(
+              ErrorCode.ModelCRUDError,
+              'Target sibling not found'
+            );
           }
           insertIndex = shouldInsertBeforeSibling
             ? targetIndex
@@ -303,25 +318,26 @@ export class DocCRUD {
     );
   }
 
-  getNext(id: string) {
-    return this._getSiblings(
-      id,
-      (index, parent) =>
-        parent
-          .get('sys:children')
-          .toArray()
-          .at(index + 1) ?? null
-    );
+  updateBlockChildren(id: string, children: string[]) {
+    const yBlock = this._yBlocks.get(id);
+    if (!yBlock) return;
+
+    const yChildrenArray = yBlock.get('sys:children') as Y.Array<string>;
+    yChildrenArray.delete(0, yChildrenArray.length);
+    yChildrenArray.push(children);
   }
 
-  getPrev(id: string) {
-    return this._getSiblings(
-      id,
-      (index, parent) =>
-        parent
-          .get('sys:children')
-          .toArray()
-          .at(index - 1) ?? null
-    );
+  get root(): string | null {
+    let rootId: string | null = null;
+    this._yBlocks.forEach(yBlock => {
+      const flavour = yBlock.get('sys:flavour');
+      const schema = this._schema.flavourSchemaMap.get(flavour);
+      if (!schema) return;
+
+      if (schema.model.role === 'root') {
+        rootId = yBlock.get('sys:id');
+      }
+    });
+    return rootId;
   }
 }

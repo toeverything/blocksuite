@@ -1,102 +1,82 @@
-import { type DisposableClass, WithDisposable } from '@blocksuite/block-std';
 import type { Constructor } from '@blocksuite/global/utils';
+import type { LitElement } from 'lit';
+
+import { type DisposableClass, WithDisposable } from '@blocksuite/block-std';
 import { consume } from '@lit/context';
 import { cssVar } from '@toeverything/theme';
-import type { LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../../types.js';
-import { createPopper, type MenuPopper } from '../common/create-popper.js';
+import type { EdgelessToolbar } from '../edgeless-toolbar.js';
+
+import { type MenuPopper, createPopper } from '../common/create-popper.js';
 import {
-  edgelessToolbarContext,
   type EdgelessToolbarSlots,
+  edgelessToolbarContext,
   edgelessToolbarSlotsContext,
   edgelessToolbarThemeContext,
 } from '../context.js';
-import type { EdgelessToolbar } from '../edgeless-toolbar.js';
 
 export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
+  active: boolean;
+
+  createPopper: typeof createPopper;
+
   edgeless: EdgelessRootBlockComponent;
 
   edgelessTool: EdgelessTool;
 
-  toolbarContainer: HTMLElement | null;
-
-  active: boolean;
+  enableActiveBackground?: boolean;
 
   popper: MenuPopper<HTMLElement> | null;
 
-  theme: 'light' | 'dark';
-
-  toolbarSlots: EdgelessToolbarSlots;
-
-  accessor toolbar: EdgelessToolbar;
-
-  enableActiveBackground?: boolean;
-
-  abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
-
   setEdgelessTool: EdgelessRootBlockComponent['tools']['setEdgelessTool'];
 
-  createPopper: typeof createPopper;
+  theme: 'light' | 'dark';
+
+  toolbarContainer: HTMLElement | null;
+
+  toolbarSlots: EdgelessToolbarSlots;
 
   /**
    * @return true if operation was successful
    */
   tryDisposePopper: () => boolean;
+
+  accessor toolbar: EdgelessToolbar;
+
+  abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
 }
 
 export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
   SuperClass: T
 ) => {
   abstract class DerivedClass extends WithDisposable(SuperClass) {
-    get setEdgelessTool() {
-      return this.edgeless.tools.setEdgelessTool;
-    }
-
-    get active() {
-      const { type } = this;
-      const activeType = this.edgelessTool.type;
-      return Array.isArray(type)
-        ? type.includes(activeType)
-        : activeType === type;
-    }
-
-    @property({ attribute: false })
-    accessor edgeless!: EdgelessRootBlockComponent;
-
-    @property({ attribute: false })
-    accessor toolbarContainer: HTMLElement | null = null;
-
-    @state()
-    accessor edgelessTool!: EdgelessTool;
-
-    @consume({ context: edgelessToolbarThemeContext, subscribe: true })
-    accessor theme!: 'light' | 'dark';
-
-    @consume({ context: edgelessToolbarSlotsContext })
-    accessor toolbarSlots!: EdgelessToolbarSlots;
-
-    @consume({ context: edgelessToolbarContext })
-    accessor toolbar!: EdgelessToolbar;
-
     enableActiveBackground = false;
-
-    abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
-
-    @state()
-    public accessor popper: MenuPopper<HTMLElement> | null = null;
-
-    private _updateActiveEdgelessTool(newTool?: EdgelessTool) {
-      this.edgelessTool = newTool ?? this.edgeless.edgelessTool;
-    }
 
     private _applyActiveStyle() {
       if (!this.enableActiveBackground) return;
       this.style.background = this.active
         ? cssVar('hoverColor')
         : 'transparent';
+    }
+
+    private _updateActiveEdgelessTool(newTool?: EdgelessTool) {
+      this.edgelessTool = newTool ?? this.edgeless.edgelessTool;
+    }
+
+    override connectedCallback() {
+      super.connectedCallback();
+      if (!this.edgeless) return;
+      this._updateActiveEdgelessTool();
+      this._applyActiveStyle();
+      this._disposables.add(
+        this.edgeless.slots.edgelessToolUpdated.on(newTool => {
+          this._updateActiveEdgelessTool(newTool);
+          this._applyActiveStyle();
+        })
+      );
     }
 
     // TODO: move to toolbar-tool-with-menu.mixin
@@ -116,6 +96,11 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
       return this.popper;
     }
 
+    override disconnectedCallback() {
+      super.disconnectedCallback();
+      this.popper?.dispose();
+    }
+
     tryDisposePopper() {
       if (!this.active) return false;
       if (this.popper) {
@@ -126,23 +111,40 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
       return false;
     }
 
-    override connectedCallback() {
-      super.connectedCallback();
-      if (!this.edgeless) return;
-      this._updateActiveEdgelessTool();
-      this._applyActiveStyle();
-      this._disposables.add(
-        this.edgeless.slots.edgelessToolUpdated.on(newTool => {
-          this._updateActiveEdgelessTool(newTool);
-          this._applyActiveStyle();
-        })
-      );
+    get active() {
+      const { type } = this;
+      const activeType = this.edgelessTool.type;
+      return Array.isArray(type)
+        ? type.includes(activeType)
+        : activeType === type;
     }
 
-    override disconnectedCallback() {
-      super.disconnectedCallback();
-      this.popper?.dispose();
+    get setEdgelessTool() {
+      return this.edgeless.tools.setEdgelessTool;
     }
+
+    @property({ attribute: false })
+    accessor edgeless!: EdgelessRootBlockComponent;
+
+    @state()
+    accessor edgelessTool!: EdgelessTool;
+
+    @state()
+    public accessor popper: MenuPopper<HTMLElement> | null = null;
+
+    @consume({ context: edgelessToolbarThemeContext, subscribe: true })
+    accessor theme!: 'light' | 'dark';
+
+    @consume({ context: edgelessToolbarContext })
+    accessor toolbar!: EdgelessToolbar;
+
+    @property({ attribute: false })
+    accessor toolbarContainer: HTMLElement | null = null;
+
+    @consume({ context: edgelessToolbarSlotsContext })
+    accessor toolbarSlots!: EdgelessToolbarSlots;
+
+    abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
   }
 
   return DerivedClass as unknown as T & Constructor<EdgelessToolbarToolClass>;

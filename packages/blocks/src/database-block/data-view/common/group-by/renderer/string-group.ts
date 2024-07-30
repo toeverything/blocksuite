@@ -6,19 +6,6 @@ import { BaseGroup } from './base.js';
 
 @customElement('data-view-group-title-string-view')
 export class StringGroupView extends BaseGroup<NonNullable<unknown>, string> {
-  static override styles = css`
-    .data-view-group-title-string-view {
-      border-radius: 8px;
-      padding: 4px 8px;
-      width: max-content;
-      cursor: pointer;
-    }
-
-    .data-view-group-title-string-view:hover {
-      background-color: var(--affine-hover-color);
-    }
-  `;
-
   private _click = () => {
     if (this.readonly) {
       return;
@@ -35,6 +22,19 @@ export class StringGroupView extends BaseGroup<NonNullable<unknown>, string> {
       },
     });
   };
+
+  static override styles = css`
+    .data-view-group-title-string-view {
+      border-radius: 8px;
+      padding: 4px 8px;
+      width: max-content;
+      cursor: pointer;
+    }
+
+    .data-view-group-title-string-view:hover {
+      background-color: var(--affine-hover-color);
+    }
+  `;
 
   protected override render(): unknown {
     if (!this.value) {

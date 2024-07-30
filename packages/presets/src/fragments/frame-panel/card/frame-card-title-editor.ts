@@ -1,12 +1,8 @@
+import type { FrameBlockModel, RichText } from '@blocksuite/blocks';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type {
-  AffineInlineEditor,
-  FrameBlockModel,
-  RichText,
-} from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { property, query } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 const styles = css`
@@ -15,34 +11,13 @@ const styles = css`
   }
 `;
 
+export const AFFINE_FRAME_TITLE_EDITOR = 'affine-frame-card-title-editor';
+
+@customElement(AFFINE_FRAME_TITLE_EDITOR)
 export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
-  get inlineEditor(): AffineInlineEditor {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
-  static override styles = styles;
-
   private _isComposing = false;
 
-  @query('rich-text')
-  accessor richText!: RichText;
-
-  @property({ attribute: false })
-  accessor frameModel!: FrameBlockModel;
-
-  @property({ attribute: false })
-  accessor titleContentElement!: HTMLElement;
-
-  @property({ attribute: false })
-  accessor left!: number;
-
-  @property({ attribute: false })
-  accessor maxWidth!: number;
+  static override styles = styles;
 
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
@@ -51,15 +26,11 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
     this.titleContentElement.style.display = 'block';
   }
 
-  override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    await this.richText?.updateComplete;
-    return result;
-  }
-
   override firstUpdated(): void {
     this.updateComplete
       .then(() => {
+        if (this.inlineEditor === null) return;
+
         this.titleContentElement.style.display = 'none';
 
         this.inlineEditor.selectAll();
@@ -68,40 +39,32 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
           this.requestUpdate();
         });
 
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'blur',
-          () => {
+        const inlineEditorContainer = this.inlineEditor.rootElement;
+
+        this.disposables.addFromEvent(inlineEditorContainer, 'blur', () => {
+          this._unmount();
+        });
+        this.disposables.addFromEvent(inlineEditorContainer, 'click', e => {
+          e.stopPropagation();
+        });
+        this.disposables.addFromEvent(inlineEditorContainer, 'dblclick', e => {
+          e.stopPropagation();
+        });
+
+        this.disposables.addFromEvent(inlineEditorContainer, 'keydown', e => {
+          e.stopPropagation();
+          if (e.key === 'Enter' && !this._isComposing) {
             this._unmount();
           }
-        );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'click',
-          e => {
-            e.stopPropagation();
-          }
-        );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'dblclick',
-          e => {
-            e.stopPropagation();
-          }
-        );
-
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'keydown',
-          e => {
-            e.stopPropagation();
-            if (e.key === 'Enter' && !this._isComposing) {
-              this._unmount();
-            }
-          }
-        );
+        });
       })
       .catch(console.error);
+  }
+
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.richText?.updateComplete;
+    return result;
   }
 
   override render() {
@@ -134,10 +97,29 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       style=${inlineEditorStyle}
     ></rich-text>`;
   }
+
+  get inlineEditor() {
+    return this.richText.inlineEditor;
+  }
+
+  @property({ attribute: false })
+  accessor frameModel!: FrameBlockModel;
+
+  @property({ attribute: false })
+  accessor left!: number;
+
+  @property({ attribute: false })
+  accessor maxWidth!: number;
+
+  @query('rich-text')
+  accessor richText!: RichText;
+
+  @property({ attribute: false })
+  accessor titleContentElement!: HTMLElement;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frame-card-title-editor': FrameCardTitleEditor;
+    [AFFINE_FRAME_TITLE_EDITOR]: FrameCardTitleEditor;
   }
 }

@@ -1,23 +1,25 @@
-import './note-menu.js';
-
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
+import type { NoteTool } from '../../../controllers/tools/note-tool.js';
+
+import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import {
   Heading1Icon,
   LinkIcon,
   TextIcon,
 } from '../../../../../_common/icons/text.js';
-import type { NoteTool } from '../../../controllers/tools/note-tool.js';
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../auto-complete/utils.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { toShapeNotToAdapt } from './icon.js';
+import './note-menu.js';
 
 @customElement('edgeless-note-senior-button')
 export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
+  private _states = ['childFlavour', 'childType', 'tip'] as const;
+
   static override styles = css`
     :host,
     .edgeless-note-button {
@@ -123,24 +125,9 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
     }
   `;
 
-  private _states = ['childFlavour', 'childType', 'tip'] as const;
-
-  @state()
-  private accessor _noteBg: string = DEFAULT_NOTE_BACKGROUND_COLOR;
-
-  override type = 'affine:note' as const;
-
   override enableActiveBackground = true;
 
-  // TODO: better to extract these states outside of component?
-  @state()
-  accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
-
-  @state()
-  accessor childType = 'text';
-
-  @state()
-  accessor tip = 'Note';
+  override type = 'affine:note' as const;
 
   private _toggleNoteMenu() {
     if (this.tryDisposePopper()) return;
@@ -220,4 +207,17 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
       </div>
     </edgeless-toolbar-button>`;
   }
+
+  @state()
+  private accessor _noteBg: string = DEFAULT_NOTE_BACKGROUND_COLOR;
+
+  // TODO: better to extract these states outside of component?
+  @state()
+  accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
+
+  @state()
+  accessor childType = 'text';
+
+  @state()
+  accessor tip = 'Note';
 }

@@ -1,9 +1,12 @@
+import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { selectable } from '../_common/edgeless/mixin/index.js';
 import type { LinkPreviewData } from '../_common/embed-block-helper/index.js';
 import type { EmbedCardStyle } from '../_common/types.js';
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
+import { GfxCompatible } from '../_common/edgeless/mixin/index.js';
 
 export interface BookmarkBlockEdgelessProps {
   index: string;
@@ -57,9 +60,9 @@ export const BookmarkBlockSchema = defineBlockSchema({
   toModel: () => new BookmarkBlockModel(),
 });
 
-export class BookmarkBlockModel extends selectable<BookmarkBlockProps>(
-  BlockModel
-) {}
+export class BookmarkBlockModel
+  extends GfxCompatible<BookmarkBlockProps>(BlockModel)
+  implements GfxElementGeometry {}
 
 declare global {
   namespace BlockSuite {

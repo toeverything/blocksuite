@@ -1,6 +1,6 @@
 import { IS_IOS, IS_MAC } from '@blocksuite/global/env';
 
-export function isPinchEvent(e: WheelEvent) {
+export function isTouchPadPinchEvent(e: WheelEvent) {
   // two finger pinches on touch pad, ctrlKey is always true.
   // https://bugs.chromium.org/p/chromium/issues/detail?id=397027
   if (IS_IOS || IS_MAC) {
@@ -11,20 +11,20 @@ export function isPinchEvent(e: WheelEvent) {
 
 // See https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
 export enum MOUSE_BUTTONS {
+  AUXILIARY = 4,
+  FIFTH = 16,
+  FORTH = 8,
   NO_BUTTON = 0,
   PRIMARY = 1,
   SECONDARY = 2,
-  AUXILIARY = 4,
-  FORTH = 8,
-  FIFTH = 16,
 }
 
 export enum MOUSE_BUTTON {
-  MAIN = 0,
   AUXILIARY = 1,
-  SECONDARY = 2,
-  FORTH = 3,
   FIFTH = 4,
+  FORTH = 3,
+  MAIN = 0,
+  SECONDARY = 2,
 }
 
 export function isMiddleButtonPressed(e: MouseEvent) {

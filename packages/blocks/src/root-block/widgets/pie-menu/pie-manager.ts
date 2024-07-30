@@ -10,9 +10,9 @@ import type { PieMenuSchema } from './base.js';
  */
 
 export class PieManager {
-  private static schemas = new Set<PieMenuSchema>();
-
   private static registeredSchemas: Record<string, PieMenuSchema> = {};
+
+  private static schemas = new Set<PieMenuSchema>();
 
   static settings = {
     /**
@@ -44,22 +44,10 @@ export class PieManager {
     open: new Slot<PieMenuSchema>(),
   };
 
-  private static _setupTriggers(rootElement: EdgelessRootBlockComponent) {
-    Object.values(this.registeredSchemas).forEach(schema => {
-      const { trigger } = schema;
-
-      rootElement.handleEvent(
-        'keyDown',
-        ctx => {
-          const ev = ctx.get('keyboardState');
-
-          if (trigger({ keyEvent: ev.raw, rootElement }) && !ev.raw.repeat) {
-            this.open(schema.id);
-          }
-        },
-        { global: true }
-      );
-    });
+  private static _getSchema(id: string) {
+    const schema = this.registeredSchemas[id];
+    assertExists(schema);
+    return schema;
   }
 
   private static _register(schema: PieMenuSchema) {
@@ -73,23 +61,26 @@ export class PieManager {
     this.registeredSchemas[id] = schema;
   }
 
-  private static _getSchema(id: string) {
-    const schema = this.registeredSchemas[id];
-    assertExists(schema);
-    return schema;
+  private static _setupTriggers(rootComponent: EdgelessRootBlockComponent) {
+    Object.values(this.registeredSchemas).forEach(schema => {
+      const { trigger } = schema;
+
+      rootComponent.handleEvent(
+        'keyDown',
+        ctx => {
+          const ev = ctx.get('keyboardState');
+
+          if (trigger({ keyEvent: ev.raw, rootComponent }) && !ev.raw.repeat) {
+            this.open(schema.id);
+          }
+        },
+        { global: true }
+      );
+    });
   }
 
   static add(schema: PieMenuSchema) {
     return this.schemas.add(schema);
-  }
-
-  static remove(schema: PieMenuSchema) {
-    return this.schemas.delete(schema);
-  }
-
-  static setup({ rootElement }: { rootElement: EdgelessRootBlockComponent }) {
-    this.schemas.forEach(schema => this._register(schema));
-    this._setupTriggers(rootElement);
   }
 
   static dispose() {
@@ -98,5 +89,18 @@ export class PieManager {
 
   static open(id: PieMenuId) {
     this.slots.open.emit(this._getSchema(id));
+  }
+
+  static remove(schema: PieMenuSchema) {
+    return this.schemas.delete(schema);
+  }
+
+  static setup({
+    rootComponent,
+  }: {
+    rootComponent: EdgelessRootBlockComponent;
+  }) {
+    this.schemas.forEach(schema => this._register(schema));
+    this._setupTriggers(rootComponent);
   }
 }

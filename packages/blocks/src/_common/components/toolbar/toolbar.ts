@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { PANEL_BASE } from '../../styles.js';
@@ -9,7 +9,7 @@ import { stopPropagation } from '../../utils/event.js';
 export class EditorToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      ${PANEL_BASE}
+      ${PANEL_BASE};
       height: 36px;
       box-sizing: content-box;
     }

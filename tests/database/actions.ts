@@ -1,8 +1,9 @@
 import type { RichTextCell } from '@blocks/database-block/columns/rich-text/cell-renderer.js';
 import type { RichTextCellEditing } from '@blocks/database-block/columns/rich-text/cell-renderer.js';
 import type { ColumnType } from '@blocks/database-block/data-view/view/presets/table/types.js';
+
 import { ZERO_WIDTH_SPACE } from '@inline/consts.js';
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 
 import {
   pressEnter,

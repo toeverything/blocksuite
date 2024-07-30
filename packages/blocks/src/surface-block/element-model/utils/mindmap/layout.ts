@@ -1,5 +1,7 @@
-import type { SerializedXYWH } from '../../../index.js';
-import { Bound } from '../../../utils/bound.js';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
+
 import type { MindmapElementModel } from '../../mindmap.js';
 
 export const NODE_VERTICAL_SPACING = 45;
@@ -24,7 +26,7 @@ export type MindmapNode = {
   id: string;
   detail: NodeDetail;
 
-  element: BlockSuite.SurfaceElementModelType;
+  element: BlockSuite.SurfaceElementModel;
   children: MindmapNode[];
 
   /**
@@ -40,9 +42,9 @@ export type MindmapRoot = MindmapNode & {
 };
 
 export enum LayoutType {
-  RIGHT = 0,
-  LEFT = 1,
   BALANCE = 2,
+  LEFT = 1,
+  RIGHT = 0,
 }
 
 type TreeSize = {

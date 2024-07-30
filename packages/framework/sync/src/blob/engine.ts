@@ -22,6 +22,85 @@ export class BlobEngine {
     readonly logger: Logger
   ) {}
 
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async delete(_key: string) {
+    this.logger.error(
+      'You are trying to delete a blob. We do not support this feature yet. We need to wait until we implement the indexer, which will inform us which doc is using a particular blob so that we can safely delete it.'
+    );
+  }
+
+  async get(key: string) {
+    this.logger.debug('get blob', key);
+    for (const source of this.sources) {
+      const data = await source.get(key);
+      if (data) {
+        return data;
+      }
+    }
+    return null;
+  }
+
+  async list() {
+    const blobIdSet = new Set<string>();
+
+    for (const source of this.sources) {
+      const blobs = await source.list();
+      for (const blob of blobs) {
+        blobIdSet.add(blob);
+      }
+    }
+
+    return Array.from(blobIdSet);
+  }
+
+  async set(value: Blob): Promise<string>;
+
+  async set(key: string, value: Blob): Promise<string>;
+
+  async set(valueOrKey: string | Blob, _value?: Blob) {
+    if (this.main.readonly) {
+      throw new Error('main peer is readonly');
+    }
+
+    const key =
+      typeof valueOrKey === 'string'
+        ? valueOrKey
+        : await sha(await valueOrKey.arrayBuffer());
+    const value = typeof valueOrKey === 'string' ? _value : valueOrKey;
+
+    if (!value) {
+      throw new Error('value is empty');
+    }
+
+    // await upload to the main peer
+    await this.main.set(key, value);
+
+    // uploads to other peers in the background
+    Promise.allSettled(
+      this.shadows
+        .filter(r => !r.readonly)
+        .map(peer =>
+          peer.set(key, value).catch(err => {
+            this.logger.error('Error when uploading to peer', err);
+          })
+        )
+    )
+      .then(result => {
+        if (result.some(({ status }) => status === 'rejected')) {
+          this.logger.error(
+            `blob ${key} update finish, but some peers failed to update`
+          );
+        } else {
+          this.logger.debug(`blob ${key} update finish`);
+        }
+      })
+      .catch(() => {
+        // Promise.allSettled never reject
+      });
+
+    return key;
+  }
+
   start() {
     if (this._abort) {
       return;
@@ -50,10 +129,6 @@ export class BlobEngine {
   stop() {
     this._abort?.abort();
     this._abort = null;
-  }
-
-  get sources() {
-    return [this.main, ...this.shadows];
   }
 
   async sync() {
@@ -117,80 +192,7 @@ export class BlobEngine {
     this.logger.debug('finish syncing blob');
   }
 
-  async get(key: string) {
-    this.logger.debug('get blob', key);
-    for (const source of this.sources) {
-      const data = await source.get(key);
-      if (data) {
-        return data;
-      }
-    }
-    return null;
-  }
-
-  async set(value: Blob): Promise<string>;
-  async set(key: string, value: Blob): Promise<string>;
-  async set(valueOrKey: string | Blob, _value?: Blob) {
-    if (this.main.readonly) {
-      throw new Error('main peer is readonly');
-    }
-
-    const key =
-      typeof valueOrKey === 'string'
-        ? valueOrKey
-        : await sha(await valueOrKey.arrayBuffer());
-    const value = typeof valueOrKey === 'string' ? _value : valueOrKey;
-
-    if (!value) {
-      throw new Error('value is empty');
-    }
-
-    // await upload to the main peer
-    await this.main.set(key, value);
-
-    // uploads to other peers in the background
-    Promise.allSettled(
-      this.shadows
-        .filter(r => !r.readonly)
-        .map(peer =>
-          peer.set(key, value).catch(err => {
-            this.logger.error('Error when uploading to peer', err);
-          })
-        )
-    )
-      .then(result => {
-        if (result.some(({ status }) => status === 'rejected')) {
-          this.logger.error(
-            `blob ${key} update finish, but some peers failed to update`
-          );
-        } else {
-          this.logger.debug(`blob ${key} update finish`);
-        }
-      })
-      .catch(() => {
-        // Promise.allSettled never reject
-      });
-
-    return key;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async delete(_key: string) {
-    this.logger.error(
-      'You are trying to delete a blob. We do not support this feature yet. We need to wait until we implement the indexer, which will inform us which doc is using a particular blob so that we can safely delete it.'
-    );
-  }
-
-  async list() {
-    const blobIdSet = new Set<string>();
-
-    for (const source of this.sources) {
-      const blobs = await source.list();
-      for (const blob of blobs) {
-        blobIdSet.add(blob);
-      }
-    }
-
-    return Array.from(blobIdSet);
+  get sources() {
+    return [this.main, ...this.shadows];
   }
 }

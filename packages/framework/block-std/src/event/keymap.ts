@@ -1,3 +1,4 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { base, keyName } from 'w3c-keyname';
 
 import type { UIEventHandler } from './base.js';
@@ -40,7 +41,10 @@ function normalizeKeyName(name: string) {
       return;
     }
 
-    throw new Error('Unrecognized modifier name: ' + mod);
+    throw new BlockSuiteError(
+      ErrorCode.EventDispatcherError,
+      'Unrecognized modifier name: ' + mod
+    );
   });
   if (alt) result = 'Alt-' + result;
   if (ctrl) result = 'Ctrl-' + result;

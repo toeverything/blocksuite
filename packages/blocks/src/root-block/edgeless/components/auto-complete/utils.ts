@@ -1,25 +1,27 @@
+import type { XYWH } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { Connection } from '../../../../surface-block/element-model/connector.js';
-import {
-  GroupElementModel,
-  ShapeElementModel,
-} from '../../../../surface-block/element-model/index.js';
 import type {
   ShapeStyle,
   ShapeType,
 } from '../../../../surface-block/element-model/shape.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+
 import {
-  Bound,
-  normalizeDegAngle,
+  GroupElementModel,
+  ShapeElementModel,
+} from '../../../../surface-block/element-model/index.js';
+import {
   type Options,
   Overlay,
   type RoughCanvas,
-  type XYWH,
+  normalizeDegAngle,
 } from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 
 export enum Direction {
@@ -44,9 +46,6 @@ export type AUTO_COMPLETE_TARGET_TYPE =
   | 'text'
   | 'note'
   | 'frame';
-
-export const DEFAULT_NOTE_BACKGROUND_COLOR =
-  '--affine-background-secondary-color';
 
 class AutoCompleteTargetOverlay extends Overlay {
   xywh: XYWH;

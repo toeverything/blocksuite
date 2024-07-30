@@ -1,18 +1,12 @@
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { customElement, property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { isPeekable, Peekable } from '../_common/components/peekable.js';
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
-import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import type { DocMode } from '../_common/types.js';
-import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
-import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import type { RootBlockComponent } from '../root-block/index.js';
-import { Bound } from '../surface-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
 import type {
@@ -20,73 +14,29 @@ import type {
   EmbedLinkedDocStyles,
 } from './embed-linked-doc-model.js';
 import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
+
+import { Peekable, isPeekable } from '../_common/components/peekable.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
+import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
+import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
+import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
 
 @customElement('affine-embed-linked-doc-block')
-@Peekable()
-export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
+@Peekable({
+  enableOn: ({ doc }: EmbedLinkedDocBlockComponent) => !doc.readonly,
+})
+export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   EmbedLinkedDocModel,
   EmbedLinkedDocBlockService
 > {
-  get editorMode() {
-    return this._linkedDocMode;
-  }
-
-  get linkedDoc() {
-    const doc = this.std.collection.getDoc(this.model.pageId);
-    return doc;
-  }
-
-  get docTitle() {
-    return this.linkedDoc?.meta?.title.length
-      ? this.linkedDoc.meta.title
-      : 'Untitled';
-  }
-
-  private get _rootService() {
-    return this.std.spec.getService('affine:page');
-  }
-
-  static override styles = styles;
-
-  @state()
-  private accessor _linkedDocMode: DocMode = 'page';
-
-  @state()
-  private accessor _docUpdatedAt: Date = new Date();
-
-  @state()
-  private accessor _loading = false;
-
   override _cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
-
-  override _width = EMBED_CARD_WIDTH.horizontal;
 
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
-  @property({ attribute: false })
-  accessor isNoteContentEmpty = false;
-
-  @property({ attribute: false })
-  accessor isBannerEmpty = false;
-
-  @property({ attribute: false })
-  accessor surfaceRefService!: SurfaceRefBlockService;
-
-  @property({ attribute: false })
-  accessor isError = false;
-
-  @property({ attribute: false })
-  accessor surfaceRefRenderer: SurfaceRefRenderer | undefined = undefined;
-
-  @queryAsync('.affine-embed-linked-doc-banner.render')
-  accessor bannerContainer!: Promise<HTMLDivElement>;
-
-  @queryAsync('.affine-embed-linked-doc-content-note.render')
-  accessor noteContainer!: Promise<HTMLDivElement>;
-
-  private async _load() {
+  private _load = async () => {
     this._loading = true;
     this.isError = false;
     this.isNoteContentEmpty = true;
@@ -124,55 +74,87 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
         renderLinkedDocInCard(this);
       }
     }
-  }
+  };
 
-  private _isDocEmpty() {
-    const linkedDoc = this.linkedDoc;
-    if (!linkedDoc) {
-      return false;
-    }
-    return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
-  }
-
-  private _setDocUpdatedAt() {
-    const meta = this.doc.collection.meta.getDocMeta(this.model.pageId);
-    if (meta) {
-      const date = meta.updatedDate || meta.createDate;
-      this._docUpdatedAt = new Date(date);
-    }
-  }
-
-  private _selectBlock() {
+  private _selectBlock = () => {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
       blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
-  }
+  };
 
-  private _handleClick(_event: MouseEvent) {
-    if (this.isInSurface) return;
-    this._selectBlock();
-  }
+  private _setDocUpdatedAt = () => {
+    const meta = this.doc.collection.meta.getDocMeta(this.model.pageId);
+    if (meta) {
+      const date = meta.updatedDate || meta.createDate;
+      this._docUpdatedAt = new Date(date);
+    }
+  };
 
-  private _handleDoubleClick(event: MouseEvent) {
-    if (isPeekable(this)) {
+  override _width = EMBED_CARD_WIDTH.horizontal;
+
+  static override styles = styles;
+
+  cleanUpSurfaceRefRenderer = () => {
+    if (this.surfaceRefRenderer) {
+      this.surfaceRefService.removeRenderer(this.surfaceRefRenderer.id);
+    }
+  };
+
+  convertToEmbed = () => {
+    const { id, doc, pageId, caption, xywh } = this.model;
+
+    // synced doc entry controlled by awareness flag
+    const isSyncedDocEnabled = doc.awarenessStore.getFlag(
+      'enable_synced_doc_block'
+    );
+    if (!isSyncedDocEnabled) {
       return;
     }
-    event.stopPropagation();
-    this.open();
-  }
 
-  open = () => {
-    const linkedDocId = this.model.pageId;
-    if (linkedDocId === this.doc.id) return;
+    if (this.isInSurface) {
+      const style = 'syncedDoc';
+      const bound = Bound.deserialize(xywh);
+      bound.w = EMBED_CARD_WIDTH[style];
+      bound.h = EMBED_CARD_HEIGHT[style];
 
-    const rootElement = this.std.view.viewFromPath('block', [
-      this.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
-    assertExists(rootElement);
+      const edgelessService = this.rootService;
 
-    rootElement.slots.docLinkClicked.emit({ docId: linkedDocId });
+      if (!edgelessService) {
+        return;
+      }
+
+      const newId = edgelessService.addBlock(
+        'affine:embed-synced-doc',
+        { pageId, xywh: bound.serialize(), caption },
+        edgelessService.surface
+      );
+
+      this.std.command.exec('reassociateConnectors', {
+        oldId: id,
+        newId,
+      });
+
+      edgelessService.selection.set({
+        editing: false,
+        elements: [newId],
+      });
+    } else {
+      const parent = doc.getParent(this.model);
+      assertExists(parent);
+      const index = parent.children.indexOf(this.model);
+
+      doc.addBlock(
+        'affine:embed-synced-doc',
+        { pageId, caption },
+        parent,
+        index
+      );
+
+      this.std.selection.setGroup('note', []);
+    }
+    doc.deleteBlock(this.model);
   };
 
   covertToInline = () => {
@@ -200,56 +182,16 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     doc.deleteBlock(this.model);
   };
 
-  convertToEmbed = () => {
-    const { id, doc, pageId, caption, xywh } = this.model;
+  open = () => {
+    const linkedDocId = this.model.pageId;
+    if (linkedDocId === this.doc.id) return;
 
-    // synced doc entry controlled by awareness flag
-    const isSyncedDocEnabled = doc.awarenessStore.getFlag(
-      'enable_synced_doc_block'
-    );
-    if (!isSyncedDocEnabled) {
-      return;
-    }
+    const rootComponent = this.std.view.viewFromPath('block', [
+      this.doc.root?.id ?? '',
+    ]) as RootBlockComponent | null;
+    assertExists(rootComponent);
 
-    if (this.isInSurface) {
-      const style = 'syncedDoc';
-      const bound = Bound.deserialize(xywh);
-      bound.w = EMBED_CARD_WIDTH[style];
-      bound.h = EMBED_CARD_HEIGHT[style];
-
-      const edgeless = this.edgeless;
-      assertExists(edgeless);
-
-      const newId = edgeless.service.addBlock(
-        'affine:embed-synced-doc',
-        { pageId, xywh: bound.serialize(), caption },
-        edgeless.surface.model
-      );
-
-      this.std.command.exec('reassociateConnectors', {
-        oldId: id,
-        newId,
-      });
-
-      edgeless.service.selection.set({
-        editing: false,
-        elements: [newId],
-      });
-    } else {
-      const parent = doc.getParent(this.model);
-      assertExists(parent);
-      const index = parent.children.indexOf(this.model);
-
-      doc.addBlock(
-        'affine:embed-synced-doc',
-        { pageId, caption },
-        parent,
-        index
-      );
-
-      this.std.selection.setGroup('note', []);
-    }
-    doc.deleteBlock(this.model);
+    rootComponent.slots.docLinkClicked.emit({ docId: linkedDocId });
   };
 
   refreshData = () => {
@@ -259,36 +201,29 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     });
   };
 
-  cleanUpSurfaceRefRenderer = () => {
-    if (this.surfaceRefRenderer) {
-      this.surfaceRefService.removeRenderer(this.surfaceRefRenderer.id);
-    }
-  };
+  private _handleClick(_event: MouseEvent) {
+    if (this.isInSurface) return;
+    this._selectBlock();
+  }
 
-  override updated() {
-    // update card style when linked doc deleted
-    const linkedDoc = this.linkedDoc;
-    const { xywh, style } = this.model;
-    const bound = Bound.deserialize(xywh);
-    if (linkedDoc && style === 'horizontalThin') {
-      bound.w = EMBED_CARD_WIDTH.horizontal;
-      bound.h = EMBED_CARD_HEIGHT.horizontal;
-      this.doc.withoutTransact(() => {
-        this.doc.updateBlock(this.model, {
-          xywh: bound.serialize(),
-          style: 'horizontal',
-        });
-      });
-    } else if (!linkedDoc && style === 'horizontal') {
-      bound.w = EMBED_CARD_WIDTH.horizontalThin;
-      bound.h = EMBED_CARD_HEIGHT.horizontalThin;
-      this.doc.withoutTransact(() => {
-        this.doc.updateBlock(this.model, {
-          xywh: bound.serialize(),
-          style: 'horizontalThin',
-        });
-      });
+  private _handleDoubleClick(event: MouseEvent) {
+    if (isPeekable(this)) {
+      return;
     }
+    event.stopPropagation();
+    this.open();
+  }
+
+  private _isDocEmpty() {
+    const linkedDoc = this.linkedDoc;
+    if (!linkedDoc) {
+      return false;
+    }
+    return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
+  }
+
+  private get _rootService() {
+    return this.std.spec.getService('affine:page');
   }
 
   override connectedCallback() {
@@ -312,7 +247,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
         linkedDoc.slots.blockUpdated.on(payload => {
           if (
             payload.type === 'update' &&
-            ['xywh', 'caption', ''].includes(payload.props.key)
+            ['', 'caption', 'xywh'].includes(payload.props.key)
           ) {
             return;
           }
@@ -355,9 +290,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     });
 
     if (this.isInSurface) {
-      const surface = this.surface;
-      assertExists(surface);
-
       this.disposables.add(
         this.model.propsUpdated.on(() => {
           this.requestUpdate();
@@ -506,4 +438,75 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       `
     );
   }
+
+  override updated() {
+    // update card style when linked doc deleted
+    const linkedDoc = this.linkedDoc;
+    const { xywh, style } = this.model;
+    const bound = Bound.deserialize(xywh);
+    if (linkedDoc && style === 'horizontalThin') {
+      bound.w = EMBED_CARD_WIDTH.horizontal;
+      bound.h = EMBED_CARD_HEIGHT.horizontal;
+      this.doc.withoutTransact(() => {
+        this.doc.updateBlock(this.model, {
+          xywh: bound.serialize(),
+          style: 'horizontal',
+        });
+      });
+    } else if (!linkedDoc && style === 'horizontal') {
+      bound.w = EMBED_CARD_WIDTH.horizontalThin;
+      bound.h = EMBED_CARD_HEIGHT.horizontalThin;
+      this.doc.withoutTransact(() => {
+        this.doc.updateBlock(this.model, {
+          xywh: bound.serialize(),
+          style: 'horizontalThin',
+        });
+      });
+    }
+  }
+
+  get docTitle() {
+    return this.linkedDoc?.meta?.title.length
+      ? this.linkedDoc.meta.title
+      : 'Untitled';
+  }
+
+  get editorMode() {
+    return this._linkedDocMode;
+  }
+
+  get linkedDoc() {
+    const doc = this.std.collection.getDoc(this.model.pageId);
+    return doc;
+  }
+
+  @state()
+  private accessor _docUpdatedAt: Date = new Date();
+
+  @state()
+  private accessor _linkedDocMode: DocMode = 'page';
+
+  @state()
+  private accessor _loading = false;
+
+  @queryAsync('.affine-embed-linked-doc-banner.render')
+  accessor bannerContainer!: Promise<HTMLDivElement>;
+
+  @property({ attribute: false })
+  accessor isBannerEmpty = false;
+
+  @property({ attribute: false })
+  accessor isError = false;
+
+  @property({ attribute: false })
+  accessor isNoteContentEmpty = false;
+
+  @queryAsync('.affine-embed-linked-doc-content-note.render')
+  accessor noteContainer!: Promise<HTMLDivElement>;
+
+  @property({ attribute: false })
+  accessor surfaceRefRenderer: SurfaceRefRenderer | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor surfaceRefService!: SurfaceRefBlockService;
 }

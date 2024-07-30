@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -7,7 +7,7 @@ import { createCustomModal } from './custom-modal.js';
 export const AFFINE_MODAL_WIDGET = 'affine-modal-widget';
 
 @customElement(AFFINE_MODAL_WIDGET)
-export class AffineModalWidget extends WidgetElement {
+export class AffineModalWidget extends WidgetComponent {
   open(options: Parameters<typeof createCustomModal>[0]) {
     return createCustomModal(options, this.ownerDocument.body);
   }

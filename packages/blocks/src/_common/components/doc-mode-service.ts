@@ -1,4 +1,5 @@
 import type { Disposable } from '@blocksuite/global/utils';
+
 import { Slot } from '@blocksuite/global/utils';
 
 import type { DocMode } from '../types.js';

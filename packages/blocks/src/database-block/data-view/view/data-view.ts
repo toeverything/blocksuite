@@ -3,20 +3,21 @@ import type {
   EventName,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import type { Disposable, Slot } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
+import type { Disposable } from '@blocksuite/global/utils';
+import type { ReadonlySignal } from '@lit-labs/preact-signals';
+
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 import type { DataSource } from '../common/data-source/base.js';
-import type { ViewSource } from '../common/index.js';
 import type { DataViewRenderer } from '../data-view.js';
 import type { DataViewSelection, InsertToPosition } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
+import type { SingleView } from '../view-manager/single-view.js';
+import type { ViewManager } from '../view-manager/view-manager.js';
 import type { DataViewWidget } from '../widget/types.js';
-import type { DataViewManagerBase } from './data-view-manager.js';
-import type { DataViewManager } from './data-view-manager.js';
 
 export interface DataViewProps<
-  T extends DataViewManager = DataViewManager,
+  T extends SingleView = SingleView,
   Selection extends DataViewSelection = DataViewSelection,
 > {
   dataViewEle: DataViewRenderer;
@@ -24,7 +25,6 @@ export interface DataViewProps<
   headerWidget?: DataViewWidget;
 
   view: T;
-  viewSource: ViewSource;
   dataSource: DataSource;
 
   bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable;
@@ -33,11 +33,9 @@ export interface DataViewProps<
 
   setSelection: (selection?: Selection) => void;
 
-  selectionUpdated: Slot<Selection | undefined>;
+  selection$: ReadonlySignal<Selection | undefined>;
 
   onDrag?: (evt: MouseEvent, id: string) => () => void;
-
-  getFlag?: Doc['awarenessStore']['getFlag'];
 
   std: BlockStdScope;
 }
@@ -84,7 +82,10 @@ export interface DataViewConfig<
   Data extends DataViewDataType = DataViewDataType,
 > {
   defaultName: string;
-  dataViewManager: new () => DataViewManagerBase<Data>;
+  dataViewManager: new (
+    viewManager: ViewManager,
+    viewId: string
+  ) => SingleView<Data>;
 }
 
 export interface DataViewRendererConfig {
@@ -123,7 +124,10 @@ export class ViewRendererManager {
   getView(type: string): DataViewRendererConfig {
     const view = this.map.get(type);
     if (!view) {
-      throw new Error(`${type} is not exist`);
+      throw new BlockSuiteError(
+        ErrorCode.DatabaseBlockError,
+        `${type} is not exist`
+      );
     }
     return view;
   }

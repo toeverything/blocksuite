@@ -1,9 +1,9 @@
-import path from 'node:path';
+import type { Plugin } from 'vite';
 
 import { init, parse } from 'es-module-lexer';
 import MagicString from 'magic-string';
 import micromatch from 'micromatch';
-import type { Plugin } from 'vite';
+import path from 'node:path';
 const isMatch = micromatch.isMatch;
 
 export function fineTuneHmr({

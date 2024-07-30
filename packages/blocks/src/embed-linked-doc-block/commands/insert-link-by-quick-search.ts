@@ -1,4 +1,5 @@
 import type { Command } from '@blocksuite/block-std';
+
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { RootService } from '../../root-block/root-service.js';

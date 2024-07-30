@@ -8,41 +8,6 @@ export class PriorityQueue<T, K> {
 
   constructor(private _compare: (a: K, b: K) => number) {}
 
-  enqueue(value: T, priority: K): void {
-    const node = { value, priority };
-    this.heap.push(node);
-    this.bubbleUp();
-  }
-
-  dequeue(): T | null {
-    const min = this.heap[0];
-    const end = this.heap.pop();
-    if (this.heap.length > 0 && end) {
-      this.heap[0] = end;
-      this.bubbleDown();
-    }
-    return min?.value ?? null;
-  }
-
-  empty(): boolean {
-    return this.heap.length === 0;
-  }
-
-  bubbleUp(index: number = this.heap.length - 1): void {
-    const element = this.heap[index];
-
-    while (index > 0) {
-      const parentIndex = Math.floor((index - 1) / 2);
-      const parent = this.heap[parentIndex];
-
-      if (this._compare(parent.priority, element.priority) <= 0) break;
-
-      this.heap[parentIndex] = element;
-      this.heap[index] = parent;
-      index = parentIndex;
-    }
-  }
-
   bubbleDown(): void {
     let index = 0;
     const length = this.heap.length;
@@ -81,5 +46,40 @@ export class PriorityQueue<T, K> {
       this.heap[swap] = element;
       index = swap;
     }
+  }
+
+  bubbleUp(index: number = this.heap.length - 1): void {
+    const element = this.heap[index];
+
+    while (index > 0) {
+      const parentIndex = Math.floor((index - 1) / 2);
+      const parent = this.heap[parentIndex];
+
+      if (this._compare(parent.priority, element.priority) <= 0) break;
+
+      this.heap[parentIndex] = element;
+      this.heap[index] = parent;
+      index = parentIndex;
+    }
+  }
+
+  dequeue(): T | null {
+    const min = this.heap[0];
+    const end = this.heap.pop();
+    if (this.heap.length > 0 && end) {
+      this.heap[0] = end;
+      this.bubbleDown();
+    }
+    return min?.value ?? null;
+  }
+
+  empty(): boolean {
+    return this.heap.length === 0;
+  }
+
+  enqueue(value: T, priority: K): void {
+    const node = { value, priority };
+    this.heap.push(node);
+    this.bubbleUp();
   }
 }

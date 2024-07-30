@@ -1,7 +1,9 @@
 import type { TemplateResult } from 'lit';
+
 import { html } from 'lit';
 
 import type { Menu } from '../../../_common/components/menu/menu.js';
+
 import { ArrowLeftBigIcon } from '../common/icons/index.js';
 
 export const menuTitleItem = (
@@ -13,12 +15,13 @@ export const menuTitleItem = (
 ): Menu => {
   return {
     type: 'custom',
-    render: html`<div
-      style="display:flex;align-items:center;gap: 8px;padding: 7px 12px;min-width: 300px;justify-content: space-between"
-    >
-      ${menuTitle(name, onBack)}
-      <div>${ops?.right}</div>
-    </div>`,
+    render: () =>
+      html`<div
+        style="display:flex;align-items:center;gap: 8px;padding: 7px 12px;min-width: 300px;justify-content: space-between"
+      >
+        ${menuTitle(name, onBack)}
+        <div>${ops?.right}</div>
+      </div>`,
   };
 };
 export const menuTitle = (name: string, onBack: () => void) => {

@@ -1,5 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { Job } from '@blocksuite/store';
 
 import { MarkdownAdapter } from '../adapters/index.js';
@@ -11,6 +12,9 @@ async function exportDoc(doc: Doc) {
   const snapshot = await job.docToSnapshot(doc);
 
   const adapter = new MarkdownAdapter(job);
+  if (!snapshot) {
+    return;
+  }
 
   const markdownResult = await adapter.fromDocSnapshot({
     snapshot,

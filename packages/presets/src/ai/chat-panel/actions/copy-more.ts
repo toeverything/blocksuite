@@ -3,23 +3,27 @@ import type {
   EditorHost,
   TextSelection,
 } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
-import { type AIError, createButtonPopper, Tooltip } from '@blocksuite/blocks';
+import { type AIError, Tooltip, createButtonPopper } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+
+import type { ChatContextValue, ChatMessage } from '../chat-context.js';
 
 import { CopyIcon, MoreIcon, RetryIcon } from '../../_common/icons.js';
 import { AIProvider } from '../../provider.js';
 import { copyText } from '../../utils/editor-actions.js';
-import type { ChatContextValue, ChatMessage } from '../chat-context.js';
 import { PageEditorActions } from './actions-handle.js';
 
 noop(Tooltip);
 
 @customElement('chat-copy-more')
 export class ChatCopyMore extends WithDisposable(LitElement) {
+  private _morePopper: ReturnType<typeof createButtonPopper> | null = null;
+
   static override styles = css`
     .copy-more {
       display: flex;
@@ -74,42 +78,6 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
     }
   `;
 
-  @state()
-  private accessor _showMoreMenu = false;
-
-  @query('.more-button')
-  private accessor _moreButton!: HTMLDivElement;
-
-  @query('.more-menu')
-  private accessor _moreMenu!: HTMLDivElement;
-
-  private _morePopper: ReturnType<typeof createButtonPopper> | null = null;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor content!: string;
-
-  @property({ attribute: false })
-  accessor isLast!: boolean;
-
-  @property({ attribute: false })
-  accessor curTextSelection: TextSelection | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor curBlockSelections: BlockSelection[] | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor chatContextValue!: ChatContextValue;
-
-  @property({ attribute: false })
-  accessor updateContext!: (context: Partial<ChatContextValue>) => void;
-
-  private _toggle() {
-    this._morePopper?.toggle();
-  }
-
   private async _retry() {
     const { doc } = this.host;
     try {
@@ -152,19 +120,8 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
     }
   }
 
-  protected override updated(changed: PropertyValues): void {
-    if (changed.has('isLast')) {
-      if (this.isLast) {
-        this._morePopper?.dispose();
-        this._morePopper = null;
-      } else if (!this._morePopper) {
-        this._morePopper = createButtonPopper(
-          this._moreButton,
-          this._moreMenu,
-          ({ display }) => (this._showMoreMenu = display === 'show')
-        );
-      }
-    }
+  private _toggle() {
+    this._morePopper?.toggle();
   }
 
   override render() {
@@ -217,6 +174,51 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
           : nothing}
       </div>`;
   }
+
+  protected override updated(changed: PropertyValues): void {
+    if (changed.has('isLast')) {
+      if (this.isLast) {
+        this._morePopper?.dispose();
+        this._morePopper = null;
+      } else if (!this._morePopper) {
+        this._morePopper = createButtonPopper(
+          this._moreButton,
+          this._moreMenu,
+          ({ display }) => (this._showMoreMenu = display === 'show')
+        );
+      }
+    }
+  }
+
+  @query('.more-button')
+  private accessor _moreButton!: HTMLDivElement;
+
+  @query('.more-menu')
+  private accessor _moreMenu!: HTMLDivElement;
+
+  @state()
+  private accessor _showMoreMenu = false;
+
+  @property({ attribute: false })
+  accessor chatContextValue!: ChatContextValue;
+
+  @property({ attribute: false })
+  accessor content!: string;
+
+  @property({ attribute: false })
+  accessor curBlockSelections: BlockSelection[] | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor curTextSelection: TextSelection | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor isLast!: boolean;
+
+  @property({ attribute: false })
+  accessor updateContext!: (context: Partial<ChatContextValue>) => void;
 }
 
 declare global {

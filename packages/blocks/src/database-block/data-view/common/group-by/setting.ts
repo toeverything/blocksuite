@@ -1,9 +1,13 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { PropertyValues } from 'lit';
+
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
+
+import type { SingleView } from '../../view-manager/single-view.js';
+import type { GroupRenderProps } from './matcher.js';
 
 import {
   type Menu,
@@ -13,11 +17,10 @@ import {
 import { ArrowRightSmallIcon } from '../../../../_common/icons/index.js';
 import { menuTitleItem } from '../../utils/menu-title.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import { DataViewKanbanManager } from '../../view/presets/kanban/kanban-view-manager.js';
-import { DataViewTableManager } from '../../view/presets/table/table-view-manager.js';
+import { KanbanSingleView } from '../../view/presets/kanban/kanban-view-manager.js';
+import { TableSingleView } from '../../view/presets/table/table-view-manager.js';
 import { dataViewCssVariable } from '../css-variable.js';
 import { DeleteIcon } from '../icons/index.js';
-import type { GroupRenderProps } from './matcher.js';
 import { groupByMatcher } from './matcher.js';
 
 @customElement('data-view-group-setting')
@@ -53,11 +56,12 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor view!: DataViewTableManager | DataViewKanbanManager;
-
-  @query('.group-sort-setting')
-  accessor groupContainer!: HTMLElement;
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.addFromEvent(this, 'pointerdown', e => {
+      e.stopPropagation();
+    });
+  }
 
   protected override firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -133,20 +137,14 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
     `;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    this._disposables.addFromEvent(this, 'pointerdown', e => {
-      e.stopPropagation();
-    });
-  }
+  @query('.group-sort-setting')
+  accessor groupContainer!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor view!: TableSingleView | KanbanSingleView;
 }
 export const selectGroupByProperty = (
-  view: DataViewTableManager | DataViewKanbanManager,
+  view: SingleView,
   onClose?: () => void
 ): MenuOptions => {
   return {
@@ -156,7 +154,7 @@ export const selectGroupByProperty = (
       placeholder: 'Search',
     },
     items: [
-      ...view.columnsWithoutFilter
+      ...view.columnsWithoutFilter$.value
         .filter(id => {
           if (view.columnGet(id).type === 'title') {
             return false;
@@ -168,10 +166,15 @@ export const selectGroupByProperty = (
           return {
             type: 'action',
             name: column.name,
-            isSelected: view.view.groupBy?.columnId === id,
+            isSelected: view.viewData$.value?.groupBy?.columnId === id,
             icon: html` <uni-lit .uni="${column.icon}"></uni-lit>`,
             select: () => {
-              view.changeGroup(id);
+              if (
+                view instanceof TableSingleView ||
+                view instanceof KanbanSingleView
+              ) {
+                view.changeGroup(id);
+              }
             },
           };
         }),
@@ -179,7 +182,8 @@ export const selectGroupByProperty = (
         type: 'group',
         name: '',
         hide: () =>
-          view instanceof DataViewKanbanManager || view.view.groupBy == null,
+          view instanceof KanbanSingleView ||
+          view.viewData$.value?.groupBy == null,
         children: () => [
           {
             type: 'action',
@@ -187,7 +191,7 @@ export const selectGroupByProperty = (
             class: 'delete-item',
             name: 'Remove Grouping',
             select: () => {
-              if (view instanceof DataViewTableManager) {
+              if (view instanceof TableSingleView) {
                 view.changeGroup(undefined);
               }
             },
@@ -199,7 +203,7 @@ export const selectGroupByProperty = (
 };
 export const popSelectGroupByProperty = (
   target: HTMLElement,
-  view: DataViewTableManager | DataViewKanbanManager,
+  view: SingleView,
   onClose?: () => void
 ) => {
   popMenu(target, {
@@ -208,17 +212,20 @@ export const popSelectGroupByProperty = (
 };
 export const popGroupSetting = (
   target: HTMLElement,
-  view: DataViewTableManager | DataViewKanbanManager,
+  view: SingleView,
   onBack: () => void
 ) => {
-  const groupBy = view.view.groupBy;
+  const groupBy = view.viewData$.value?.groupBy;
   if (groupBy == null) {
+    return;
+  }
+  const type = view.columnGetType(groupBy.columnId);
+  if (!type) {
     return;
   }
   const reopen = () => {
     popGroupSetting(target, view, onBack);
   };
-  const type = view.columnGetType(groupBy.columnId);
   const icon = view.getIcon(type);
   const menuHandler = popMenu(target, {
     options: {
@@ -257,10 +264,11 @@ export const popGroupSetting = (
           children: () => [
             {
               type: 'custom',
-              render: html` <data-view-group-setting
-                .view="${view}"
-                .columnId="${groupBy.columnId}"
-              ></data-view-group-setting>`,
+              render: () =>
+                html` <data-view-group-setting
+                  .view="${view}"
+                  .columnId="${groupBy.columnId}"
+                ></data-view-group-setting>`,
             },
           ],
         },

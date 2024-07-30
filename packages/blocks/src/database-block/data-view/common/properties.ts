@@ -5,12 +5,11 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
+import type { Column } from '../view-manager/column.js';
+import type { SingleView } from '../view-manager/single-view.js';
+
 import { createPopup } from '../../../_common/components/index.js';
 import { ArrowLeftBigIcon } from '../../../_common/icons/index.js';
-import type {
-  DataViewColumnManager,
-  DataViewManager,
-} from '../view/data-view-manager.js';
 
 const show = html`<svg
   width="24"
@@ -159,58 +158,15 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     }
   `;
 
-  @property({ attribute: false })
-  accessor view!: DataViewManager;
-
-  @property({ attribute: false })
-  accessor onBack: (() => void) | undefined = undefined;
-
-  @query('.properties-group')
-  accessor groupContainer!: HTMLElement;
-
-  private itemsGroup() {
-    return this.view.columnsWithoutFilter.map(id => this.view.columnGet(id));
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    this._disposables.addFromEvent(this, 'pointerdown', e => {
-      e.stopPropagation();
+  clickChangeAll = (allShow: boolean) => {
+    this.view.columnsWithoutFilter$.value.forEach(id => {
+      if (this.view.columnGetType(id) !== 'title') {
+        this.view.columnUpdateHide(id, allShow);
+      }
     });
-  }
+  };
 
-  override firstUpdated() {
-    const sortable = new Sortable(this.groupContainer, {
-      animation: 150,
-      group: `properties-sort-${this.view.id}`,
-      onEnd: evt => {
-        const properties = [...this.view.columnsWithoutFilter];
-        const index = evt.oldIndex ?? -1;
-        const from = properties[index];
-        properties.splice(index, 1);
-        const to = properties[evt.newIndex ?? -1];
-        this.view.columnMove(
-          from,
-          to
-            ? {
-                before: true,
-                id: to,
-              }
-            : 'end'
-        );
-      },
-    });
-    this._disposables.add({
-      dispose: () => sortable.destroy(),
-    });
-  }
-
-  renderColumn = (column: DataViewColumnManager) => {
+  renderColumn = (column: Column) => {
     const isTitle = column.type === 'title';
     const icon = column.hide ? hidden : show;
     const changeVisible = () => {
@@ -230,13 +186,44 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     </div>`;
   };
 
-  clickChangeAll = (allShow: boolean) => {
-    this.view.columnsWithoutFilter.forEach(id => {
-      if (this.view.columnGetType(id) !== 'title') {
-        this.view.columnUpdateHide(id, allShow);
-      }
+  private itemsGroup() {
+    return this.view.columnsWithoutFilter$.value.map(id =>
+      this.view.columnGet(id)
+    );
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.addFromEvent(this, 'pointerdown', e => {
+      e.stopPropagation();
     });
-  };
+  }
+
+  override firstUpdated() {
+    const sortable = new Sortable(this.groupContainer, {
+      animation: 150,
+      group: `properties-sort-${this.view.id}`,
+      onEnd: evt => {
+        const properties = [...this.view.columnsWithoutFilter$.value];
+        const index = evt.oldIndex ?? -1;
+        const from = properties[index];
+        properties.splice(index, 1);
+        const to = properties[evt.newIndex ?? -1];
+        this.view.columnMove(
+          from,
+          to
+            ? {
+                before: true,
+                id: to,
+              }
+            : 'end'
+        );
+      },
+    });
+    this._disposables.add({
+      dispose: () => sortable.destroy(),
+    });
+  }
 
   override render() {
     const items = this.itemsGroup();
@@ -263,6 +250,15 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       </div>
     `;
   }
+
+  @query('.properties-group')
+  accessor groupContainer!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor onBack: (() => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor view!: SingleView;
 }
 
 declare global {
@@ -274,7 +270,7 @@ declare global {
 export const popPropertiesSetting = (
   target: HTMLElement,
   props: {
-    view: DataViewManager;
+    view: SingleView;
     onClose?: () => void;
     onBack?: () => void;
   }

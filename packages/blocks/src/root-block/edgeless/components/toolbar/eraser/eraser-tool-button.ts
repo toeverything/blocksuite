@@ -1,11 +1,12 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
+
+import type { EdgelessTool } from '../../../types.js';
 
 import {
   EdgelessEraserDarkIcon,
   EdgelessEraserLightIcon,
 } from '../../../../../_common/icons/index.js';
-import type { EdgelessTool } from '../../../types.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
@@ -36,9 +37,9 @@ export class EdgelessEraserToolButton extends EdgelessToolbarToolMixin(
     }
   `;
 
-  override type: EdgelessTool['type'] = 'eraser';
-
   override enableActiveBackground = true;
+
+  override type: EdgelessTool['type'] = 'eraser';
 
   override firstUpdated() {
     this.disposables.add(

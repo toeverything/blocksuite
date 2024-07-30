@@ -1,35 +1,39 @@
-import { html, LitElement } from 'lit';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
+
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 import { getInlineEditorInsideRoot } from '../utils/query.js';
 
 @customElement('v-element')
 export class VElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > extends LitElement {
-  @property({ type: Object })
-  accessor delta: DeltaInsert<T> = {
-    insert: ZERO_WIDTH_SPACE,
-  };
-
-  @property({ attribute: false })
-  accessor selected!: boolean;
+  override createRenderRoot() {
+    return this;
+  }
 
   override render() {
     const inlineEditor = getInlineEditorInsideRoot(this);
+    if (!inlineEditor) {
+      return nothing;
+    }
     const attributeRenderer = inlineEditor.attributeService.attributeRenderer;
 
     const isEmbed = inlineEditor.isEmbed(this.delta);
     if (isEmbed) {
       if (this.delta.insert.length !== 1) {
-        throw new Error(`The length of embed node should only be 1.
+        throw new BlockSuiteError(
+          ErrorCode.InlineEditorError,
+          `The length of embed node should only be 1.
           This seems to be an internal issue with inline editor.
           Please go to https://github.com/toeverything/blocksuite/issues
-          to report it.`);
+          to report it.`
+        );
       }
 
       return html`<span
@@ -48,9 +52,13 @@ export class VElement<
     >`;
   }
 
-  override createRenderRoot() {
-    return this;
-  }
+  @property({ type: Object })
+  accessor delta: DeltaInsert<T> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
+
+  @property({ attribute: false })
+  accessor selected!: boolean;
 }
 
 declare global {

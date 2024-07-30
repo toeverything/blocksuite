@@ -30,6 +30,7 @@ import {
   clickBlockById,
   copyByKeyboard,
   dragBetweenCoords,
+  dragBetweenIndices,
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
   fillLine,
@@ -82,7 +83,7 @@ test('can drag selected non-active note', async ({ page }) => {
 
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -91,7 +92,7 @@ test('can drag selected non-active note', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertNoteXYWH(page, [0, 100, NOTE_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 100, NOTE_WIDTH, 92]);
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
@@ -202,7 +203,7 @@ test('add Note', async ({ page }) => {
   await assertRichTexts(page, ['', 'hello']);
   await page.mouse.click(300, 200);
   await page.mouse.click(350, 320);
-  await assertEdgelessSelectedRect(page, [270, 260, 448, 91]);
+  await assertEdgelessSelectedRect(page, [270, 260, 448, 92]);
 });
 
 test('add empty Note', async ({ page }) => {
@@ -219,14 +220,14 @@ test('add empty Note', async ({ page }) => {
   await waitNextFrame(page);
 
   // assert add note success
-  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'edgeless-note', 2);
 
   // click out of note
   await page.mouse.click(250, 200);
 
   // assert empty note is note removed
   await page.mouse.move(320, 320);
-  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'edgeless-note', 2);
 });
 
 test('always keep at least 1 note block', async ({ page }) => {
@@ -239,7 +240,7 @@ test('always keep at least 1 note block', async ({ page }) => {
   // clicking in default mode will try to remove empty note block
   await page.mouse.click(0, 0);
 
-  const notes = await page.locator('affine-note').all();
+  const notes = await page.locator('affine-edgeless-note').all();
   expect(notes.length).toEqual(1);
 });
 
@@ -284,9 +285,7 @@ test('dragging un-selected note', async ({ page }) => {
 
   await switchEditorMode(page);
 
-  const noteBox = await page
-    .locator('.edgeless-block-portal-note')
-    .boundingBox();
+  const noteBox = await page.locator('affine-edgeless-note').boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
   }
@@ -323,9 +322,7 @@ test('drag handle should be shown when a note is activated in default mode or hi
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  const noteBox = await page
-    .locator('.edgeless-block-portal-note')
-    .boundingBox();
+  const noteBox = await page.locator('affine-edgeless-note').boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
   }
@@ -472,7 +469,7 @@ test.describe('note slicer', () => {
     await initSixParagraphs(page);
 
     await switchEditorMode(page);
-    await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(1);
+    await expect(page.locator('affine-edgeless-note')).toHaveCount(1);
 
     await selectNoteInEdgeless(page, noteId);
     await triggerComponentToolbarAction(page, 'changeNoteSlicerSetting');
@@ -480,7 +477,7 @@ test.describe('note slicer', () => {
 
     await page.locator('.note-slicer-button').click();
 
-    await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
+    await expect(page.locator('affine-edgeless-note')).toHaveCount(2);
   });
 
   test('note slicer button should appears at right position', async ({
@@ -597,21 +594,21 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
   await initSixParagraphs(page);
 
   await switchEditorMode(page);
-  await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(1);
+  await expect(page.locator('affine-edgeless-note')).toHaveCount(1);
 
   await selectNoteInEdgeless(page, noteId);
   await triggerComponentToolbarAction(page, 'changeNoteSlicerSetting');
 
   const button = page.locator('.note-slicer-button');
   await button.click();
-  await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
+  await expect(page.locator('affine-edgeless-note')).toHaveCount(2);
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
-  await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(1);
+  await expect(page.locator('affine-edgeless-note')).toHaveCount(1);
   await redoByKeyboard(page);
   await waitNextFrame(page);
-  await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
+  await expect(page.locator('affine-edgeless-note')).toHaveCount(2);
 });
 
 test('undo/redo should work correctly after resizing', async ({ page }) => {
@@ -712,7 +709,7 @@ test('duplicate note should work correctly', async ({ page }) => {
   const moreActionsContainer = page.locator('.more-actions-container');
   await expect(moreActionsContainer).toBeHidden();
 
-  const noteLocator = page.locator('edgeless-block-portal-note');
+  const noteLocator = page.locator('affine-edgeless-note');
   await expect(noteLocator).toHaveCount(2);
   const [firstNote, secondNote] = await noteLocator.all();
 
@@ -724,8 +721,8 @@ test('duplicate note should work correctly', async ({ page }) => {
   // size should be same
   const firstNoteBox = await firstNote.boundingBox();
   const secondNoteBox = await secondNote.boundingBox();
-  expect(firstNoteBox?.width === secondNoteBox?.width).toBeTruthy();
-  expect(firstNoteBox?.height === secondNoteBox?.height).toBeTruthy();
+  expect(firstNoteBox!.width).toBeCloseTo(secondNoteBox!.width);
+  expect(firstNoteBox!.height).toBeCloseTo(secondNoteBox!.height);
 });
 
 test('double click toolbar zoom button, should not add text', async ({
@@ -801,7 +798,7 @@ test('continuous undo and redo (note block add operation) should work', async ({
   await click(page, { x: 260, y: 450 });
   await copyByKeyboard(page);
 
-  let count = await countBlock(page, 'affine-note');
+  let count = await countBlock(page, 'affine-edgeless-note');
   expect(count).toBe(1);
 
   await page.mouse.move(100, 100);
@@ -816,23 +813,23 @@ test('continuous undo and redo (note block add operation) should work', async ({
   await pasteByKeyboard(page, false);
   await waitNextFrame(page, 1000);
 
-  count = await countBlock(page, 'affine-note');
+  count = await countBlock(page, 'affine-edgeless-note');
   expect(count).toBe(4);
 
   await undoByClick(page);
-  count = await countBlock(page, 'affine-note');
+  count = await countBlock(page, 'affine-edgeless-note');
   expect(count).toBe(3);
 
   await undoByClick(page);
-  count = await countBlock(page, 'affine-note');
+  count = await countBlock(page, 'affine-edgeless-note');
   expect(count).toBe(2);
 
   await redoByClick(page);
-  count = await countBlock(page, 'affine-note');
+  count = await countBlock(page, 'affine-edgeless-note');
   expect(count).toBe(3);
 
   await redoByClick(page);
-  count = await countBlock(page, 'affine-note');
+  count = await countBlock(page, 'affine-edgeless-note');
   expect(count).toBe(4);
 });
 
@@ -843,11 +840,11 @@ test('when no visible note block, clicking in page mode will auto add a new note
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await assertBlockCount(page, 'note', 1);
+  await assertBlockCount(page, 'edgeless-note', 1);
   // select note
   await selectNoteInEdgeless(page, '2');
   await assertNoteSequence(page, '1');
-  await assertBlockCount(page, 'note', 1);
+  await assertBlockCount(page, 'edgeless-note', 1);
   // hide note
   await triggerComponentToolbarAction(page, 'changeNoteDisplayMode');
   await waitNextFrame(page);
@@ -882,7 +879,7 @@ test('drag to add customized size note', async ({ page }) => {
   await waitForInlineEditorStateUpdated(page);
 
   // assert add note success
-  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'edgeless-note', 2);
 
   // click out of note
   await page.mouse.click(250, 200);
@@ -915,7 +912,7 @@ test('drag to add customized size note: should clamp to min width and min height
   // should wait for inline editor update and resizeObserver callback
   await waitForInlineEditorStateUpdated(page);
   // assert add note success
-  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'edgeless-note', 2);
 
   // click out of note
   await page.mouse.click(250, 200);
@@ -942,7 +939,7 @@ test('Note added on doc mode should display on both modes by default', async ({
 
   await switchEditorMode(page);
   // there should be 1 note in edgeless page as well
-  await assertBlockCount(page, 'note', 1);
+  await assertBlockCount(page, 'edgeless-note', 1);
 });
 
 test('Note added on edgeless mode should display on edgeless only by default', async ({
@@ -956,7 +953,7 @@ test('Note added on edgeless mode should display on edgeless only by default', a
   await addNote(page, 'note2', 100, 100);
 
   // assert add note success, there should be 2 notes in edgeless page
-  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'edgeless-note', 2);
 
   await switchEditorMode(page);
   // switch to doc mode, the note added on edgeless mode should not render on doc mode
@@ -975,7 +972,7 @@ test('Note can be changed to display on doc and edgeless mode', async ({
   const noteId = await addNote(page, 'note2', 100, 100);
   await page.mouse.click(200, 50);
   // assert add note success, there should be 2 notes in edgeless page
-  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'edgeless-note', 2);
 
   // switch to doc mode
   await switchEditorMode(page);
@@ -991,7 +988,7 @@ test('Note can be changed to display on doc and edgeless mode', async ({
     NoteDisplayMode.DocAndEdgeless
   );
   // there should still be 2 notes in edgeless page
-  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'edgeless-note', 2);
 
   // switch to doc mode
   await switchEditorMode(page);
@@ -1035,7 +1032,7 @@ test('Click at empty note should add a paragraph block', async ({ page }) => {
 
   // There should be two note blocks and one paragraph block
   await assertRichTexts(page, ['123']);
-  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'edgeless-note', 2);
   await assertBlockCount(page, 'paragraph', 1);
 
   // Click at empty note block to add a paragraph block
@@ -1068,7 +1065,7 @@ test('Should focus at closest text block when note collapse', async ({
   // Select the note
   await zoomOutByKeyboard(page);
   const notePortalBox = await page
-    .locator('.edgeless-block-portal-note')
+    .locator('affine-edgeless-note')
     .boundingBox();
   assertExists(notePortalBox);
   await page.mouse.click(notePortalBox.x + 10, notePortalBox.y + 10);
@@ -1115,7 +1112,7 @@ test('delete first block in edgeless note', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
 
   // first block without children, nothing should happen
@@ -1137,4 +1134,23 @@ test('delete first block in edgeless note', async ({ page }) => {
   await pressBackspace(page);
   await assertRichTexts(page, ['bbb']);
   await assertBlockChildrenIds(page, '4', []);
+});
+
+test('select text cross blocks in edgeless note', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await activeNoteInEdgeless(page, noteId);
+  await waitNextFrame(page, 400);
+
+  await type(page, 'aaa');
+  await pressEnter(page);
+  await type(page, 'bbb');
+  await pressEnter(page);
+  await type(page, 'ccc');
+  await assertRichTexts(page, ['aaa', 'bbb', 'ccc']);
+
+  await dragBetweenIndices(page, [0, 1], [2, 2]);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['ac']);
 });

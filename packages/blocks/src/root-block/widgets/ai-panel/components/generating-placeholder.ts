@@ -1,11 +1,11 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import {
+  LitElement,
+  type PropertyValues,
   css,
   html,
-  LitElement,
   nothing,
-  type PropertyValues,
   unsafeCSS,
 } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -90,18 +90,6 @@ class GeneratingPlaceholder extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor height: number = 300;
-
-  @property({ attribute: false })
-  accessor loadingProgress!: number;
-
-  @property({ attribute: false })
-  accessor stages!: string[];
-
-  @property({ attribute: false })
-  accessor showHeader!: boolean;
-
   protected override render() {
     const theme = getThemeMode();
     const loadingText = this.stages[this.loadingProgress - 1] || '';
@@ -135,6 +123,18 @@ class GeneratingPlaceholder extends WithDisposable(LitElement) {
       );
     }
   }
+
+  @property({ attribute: false })
+  accessor height: number = 300;
+
+  @property({ attribute: false })
+  accessor loadingProgress!: number;
+
+  @property({ attribute: false })
+  accessor showHeader!: boolean;
+
+  @property({ attribute: false })
+  accessor stages!: string[];
 }
 
 declare global {

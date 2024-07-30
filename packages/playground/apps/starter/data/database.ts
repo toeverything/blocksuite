@@ -1,9 +1,9 @@
 import {
-  columnPresets,
   type DatabaseBlockModel,
-  databaseViewAddView,
   type ListType,
   type ParagraphType,
+  columnPresets,
+  databaseViewAddView,
   richTextColumnConfig,
   viewPresets,
 } from '@blocksuite/blocks';
@@ -16,6 +16,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
   const doc = collection.createDoc({ id });
   doc.awarenessStore.setFlag('enable_expand_database_block', true);
   doc.awarenessStore.setFlag('enable_database_statistics', true);
+  doc.awarenessStore.setFlag('enable_database_number_formatting', true);
   doc.awarenessStore.setFlag('enable_database_attachment_note', true);
   doc.awarenessStore.setFlag('enable_block_query', true);
 

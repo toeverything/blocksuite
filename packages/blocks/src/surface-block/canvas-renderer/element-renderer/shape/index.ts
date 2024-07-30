@@ -1,11 +1,19 @@
-import type { IBound } from '../../../consts.js';
+import type { IBound } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
+
 import type {
   ShapeElementModel,
   ShapeType,
 } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import { Bound } from '../../../utils/bound.js';
 import type { Renderer } from '../../renderer.js';
+
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+  DEFAULT_SHAPE_TEXT_COLOR,
+} from '../../../elements/shape/consts.js';
 import {
   deltaInsertsToChunks,
   getFontMetrics,
@@ -19,7 +27,7 @@ import { diamond } from './diamond.js';
 import { ellipse } from './ellipse.js';
 import { rect } from './rect.js';
 import { triangle } from './triangle.js';
-import { horizontalOffset, verticalOffset } from './utils.js';
+import { type CustomStyle, horizontalOffset, verticalOffset } from './utils.js';
 
 const shapeRenderers: {
   [key in ShapeType]: (
@@ -27,7 +35,8 @@ const shapeRenderers: {
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
     renderer: Renderer,
-    rc: RoughCanvas
+    rc: RoughCanvas,
+    custom: CustomStyle
   ) => void;
 } = {
   diamond,
@@ -43,23 +52,46 @@ export function shape(
   renderer: Renderer,
   rc: RoughCanvas
 ) {
-  shapeRenderers[model.shapeType](model, ctx, matrix, renderer, rc);
+  const color = renderer.getColorValue(
+    model.color,
+    DEFAULT_SHAPE_TEXT_COLOR,
+    true
+  );
+  const fillColor = renderer.getColorValue(
+    model.fillColor,
+    DEFAULT_SHAPE_STROKE_COLOR,
+    true
+  );
+  const strokeColor = renderer.getColorValue(
+    model.strokeColor,
+    DEFAULT_SHAPE_FILL_COLOR,
+    true
+  );
+  const customStyle = { color, fillColor, strokeColor };
+
+  shapeRenderers[model.shapeType](
+    model,
+    ctx,
+    matrix,
+    renderer,
+    rc,
+    customStyle
+  );
 
   if (model.textDisplay) {
-    renderText(model, ctx, renderer);
+    renderText(model, ctx, customStyle);
   }
 }
 
 function renderText(
   model: ShapeElementModel,
   ctx: CanvasRenderingContext2D,
-  renderer: Renderer
+  { color }: CustomStyle
 ) {
   const {
     x,
     y,
     text,
-    color,
     fontSize,
     fontFamily,
     fontWeight,
@@ -96,7 +128,7 @@ function renderText(
   let maxLineWidth = 0;
 
   ctx.font = font;
-  ctx.fillStyle = renderer.getVariableColor(color);
+  ctx.fillStyle = color;
   ctx.textAlign = textAlign;
   ctx.textBaseline = 'alphabetic';
 

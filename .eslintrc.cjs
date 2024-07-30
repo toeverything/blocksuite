@@ -55,6 +55,8 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:wc/recommended',
     'plugin:lit/recommended',
+    'plugin:perfectionist/recommended-natural',
+    'plugin:prettier/recommended',
   ],
   ignorePatterns: [
     '**/dist/*',
@@ -66,7 +68,7 @@ module.exports = {
   ],
   overrides: [
     {
-      plugins: ['@typescript-eslint', '@stylistic/ts'],
+      plugins: ['@typescript-eslint', '@stylistic/ts', 'unused-imports'],
       files: ['*.ts', '*.spec.ts'],
       rules: {
         'no-unused-vars': 'off',
@@ -77,7 +79,9 @@ module.exports = {
             accessibility: 'no-public',
           },
         ],
-        '@typescript-eslint/no-unused-vars': [
+        '@typescript-eslint/no-unused-vars': 'off',
+        'unused-imports/no-unused-imports': 'error',
+        'unused-imports/no-unused-vars': [
           'error',
           {
             vars: 'all',
@@ -88,32 +92,6 @@ module.exports = {
             caughtErrorsIgnorePattern: '^_',
             destructuredArrayIgnorePattern: '^_',
             ignoreRestSiblings: true,
-          },
-        ],
-        '@typescript-eslint/member-ordering': [
-          'error',
-          {
-            default: [
-              'private-static-field',
-              'protected-static-field',
-              'public-static-field',
-
-              'private-instance-field',
-              'protected-instance-field',
-              'public-instance-field',
-
-              'private-constructor',
-              'protected-constructor',
-              'public-constructor',
-
-              'private-instance-method',
-              'protected-instance-method',
-              'public-instance-method',
-
-              'private-static-method',
-              'protected-static-method',
-              'public-static-method',
-            ],
           },
         ],
         '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'error',
@@ -172,44 +150,38 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'simple-import-sort', 'prettier', 'unicorn'],
+  plugins: ['unicorn', 'prettier'],
   rules: {
     '@typescript-eslint/consistent-type-imports': [
       'error',
       { prefer: 'type-imports', disallowTypeAnnotations: false },
     ],
-    'simple-import-sort/imports': 'error',
-    'simple-import-sort/exports': 'error',
-    '@typescript-eslint/no-restricted-imports': [
+    'arrow-body-style': 'off',
+    'prefer-arrow-callback': 'off',
+    'perfectionist/sort-intersection-types': 'off',
+    'perfectionist/sort-union-types': 'off',
+    'perfectionist/sort-interfaces': 'off',
+    'perfectionist/sort-objects': 'off',
+    'perfectionist/sort-object-types': 'off',
+    'perfectionist/sort-classes': [
       'error',
       {
-        patterns: [
-          {
-            group: ['**/dist', '**/dist/**'],
-            message: 'Don not import from dist',
-            allowTypeImports: false,
-          },
-          {
-            group: ['**/src', '**/src/**'],
-            message: 'Don not import from src',
-            allowTypeImports: false,
-          },
-          {
-            group: ['**/*.css', '**/*.css?*'],
-            message:
-              'Don not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-            allowTypeImports: false,
-          },
+        type: 'natural',
+        order: 'asc',
+        groups: [
+          'private-property',
+          'static-property',
+          'index-signature',
+          'property',
+          'constructor',
+          'static-private-method',
+          'static-method',
+          'private-method',
+          'method',
+          ['get-method', 'set-method'],
+          'unknown',
         ],
       },
     ],
-    'prettier/prettier': [
-      'error',
-      {
-        endOfLine: 'auto',
-      },
-    ],
-    'arrow-body-style': 'off',
-    'prefer-arrow-callback': 'off',
   },
 };

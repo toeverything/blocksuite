@@ -1,46 +1,11 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import type { BlockElement, WidgetElement } from './element/index.js';
+import type { BlockComponent, WidgetComponent } from './element/index.js';
 
 export class ViewStore {
-  private readonly _blockMap = new Map<string, BlockElement>();
+  private readonly _blockMap = new Map<string, BlockComponent>();
 
-  private readonly _widgetMap = new Map<string, WidgetElement>();
-
-  constructor(public std: BlockSuite.Std) {}
-
-  setBlock = (node: BlockElement) => {
-    this._blockMap.set(node.model.id, node);
-  };
-
-  setWidget = (node: WidgetElement) => {
-    const id = node.dataset.widgetId as string;
-    const widgetIndex = `${node.model.id}|${id}`;
-    this._widgetMap.set(widgetIndex, node);
-  };
-
-  getBlock = (id: string): BlockElement | null => {
-    return this._blockMap.get(id) ?? null;
-  };
-
-  getWidget = (
-    widgetName: string,
-    hostBlockId: string
-  ): WidgetElement | null => {
-    const widgetIndex = `${hostBlockId}|${widgetName}`;
-    return this._widgetMap.get(widgetIndex) ?? null;
-  };
-
-  deleteBlock = (node: BlockElement) => {
-    this._blockMap.delete(node.id);
-  };
-
-  deleteWidget = (node: WidgetElement) => {
-    const id = node.dataset.widgetId as string;
-    const widgetIndex = `${node.model.id}|${id}`;
-    this._widgetMap.delete(widgetIndex);
-  };
+  private readonly _widgetMap = new Map<string, WidgetComponent>();
 
   calculatePath = (model: BlockModel): string[] => {
     const path: string[] = [];
@@ -52,7 +17,17 @@ export class ViewStore {
     return path.reverse();
   };
 
-  fromPath = (path: string | undefined | null): BlockElement | null => {
+  deleteBlock = (node: BlockComponent) => {
+    this._blockMap.delete(node.id);
+  };
+
+  deleteWidget = (node: WidgetComponent) => {
+    const id = node.dataset.widgetId as string;
+    const widgetIndex = `${node.model.id}|${id}`;
+    this._widgetMap.delete(widgetIndex);
+  };
+
+  fromPath = (path: string | undefined | null): BlockComponent | null => {
     const id = path ?? this.std.doc.root?.id;
     if (!id) {
       return null;
@@ -60,33 +35,43 @@ export class ViewStore {
     return this._blockMap.get(id) ?? null;
   };
 
-  viewFromPath(type: 'block', path: string[]): null | BlockElement;
-  viewFromPath(type: 'widget', path: string[]): null | WidgetElement;
-  viewFromPath(
-    type: 'block' | 'widget',
-    path: string[]
-  ): null | BlockElement | WidgetElement {
-    if (type === 'block') {
-      return this.fromPath(path[path.length - 1]);
-    }
-    const temp = path.slice(-2) as [string, string];
-    const widgetId = temp.join('|');
-    return this._widgetMap.get(widgetId) ?? null;
-  }
+  getBlock = (id: string): BlockComponent | null => {
+    return this._blockMap.get(id) ?? null;
+  };
+
+  getWidget = (
+    widgetName: string,
+    hostBlockId: string
+  ): WidgetComponent | null => {
+    const widgetIndex = `${hostBlockId}|${widgetName}`;
+    return this._widgetMap.get(widgetIndex) ?? null;
+  };
+
+  setBlock = (node: BlockComponent) => {
+    this._blockMap.set(node.model.id, node);
+  };
+
+  setWidget = (node: WidgetComponent) => {
+    const id = node.dataset.widgetId as string;
+    const widgetIndex = `${node.model.id}|${id}`;
+    this._widgetMap.set(widgetIndex, node);
+  };
 
   walkThrough = (
     fn: (
-      nodeView: BlockElement,
+      nodeView: BlockComponent,
       index: number,
-      parent: BlockElement
+      parent: BlockComponent
     ) => undefined | null | true,
     path?: string | undefined | null
   ) => {
     const tree = this.fromPath(path);
-    assertExists(tree, `Invalid path to get node in view: ${path}`);
+    if (!tree) {
+      return;
+    }
 
     const iterate =
-      (parent: BlockElement) => (node: BlockElement, index: number) => {
+      (parent: BlockComponent) => (node: BlockComponent, index: number) => {
         const result = fn(node, index, parent);
         if (result === true) {
           return;
@@ -108,10 +93,30 @@ export class ViewStore {
     });
   };
 
+  constructor(public std: BlockSuite.Std) {}
+
   mount() {}
 
   unmount() {
     this._blockMap.clear();
     this._widgetMap.clear();
+  }
+
+  /**
+   * @deprecated
+   * Use `getBlock` or `getWidget` instead
+   */
+  viewFromPath(type: 'block', path: string[]): null | BlockComponent;
+  viewFromPath(type: 'widget', path: string[]): null | WidgetComponent;
+  viewFromPath(
+    type: 'block' | 'widget',
+    path: string[]
+  ): null | BlockComponent | WidgetComponent {
+    if (type === 'block') {
+      return this.fromPath(path[path.length - 1]);
+    }
+    const temp = path.slice(-2) as [string, string];
+    const widgetId = temp.join('|');
+    return this._widgetMap.get(widgetId) ?? null;
   }
 }

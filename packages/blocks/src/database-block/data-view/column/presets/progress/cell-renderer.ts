@@ -96,43 +96,85 @@ export class ProgressCell extends BaseCellRenderer<number> {
 
     return html` <div class="affine-database-progress">
       <div class="affine-database-progress-bar">
-        <div
-          class="affine-database-progress-bg"
-          @click="${this._bgClick}"
-          style=${bgStyles}
-        >
+        <div class="affine-database-progress-bg" style=${bgStyles}>
           <div class="affine-database-progress-fg" style=${fgStyles}></div>
         </div>
       </div>
       <div class="progress-number progress">${progress}</div>
     </div>`;
   }
-
-  _bgClick(e: MouseEvent) {
-    if (this.column.readonly) {
-      return;
-    }
-    this.onChange(
-      Math.round(
-        (e.offsetX * 100) / (e.currentTarget as HTMLDivElement).offsetWidth
-      )
-    );
-  }
 }
 
 @customElement('affine-database-progress-cell-editing')
 export class ProgressCellEditing extends BaseCellRenderer<number> {
+  static override styles = styles;
+
+  startDrag = (event: MouseEvent) => {
+    const bgRect = this._progressBg.getBoundingClientRect();
+    const min = bgRect.left;
+    const max = bgRect.right;
+    const setValue = (x: number) => {
+      this.tempValue = Math.round(
+        ((Math.min(max, Math.max(min, x)) - min) / (max - min)) * 100
+      );
+    };
+    startDrag(event, {
+      onDrag: ({ x }) => {
+        setValue(x);
+        return;
+      },
+      onMove: ({ x }) => {
+        setValue(x);
+        return;
+      },
+      onDrop: () => {
+        //
+      },
+      onClear: () => {
+        //
+      },
+    });
+  };
+
+  _onChange(value?: number) {
+    this.tempValue = value;
+  }
+
   get _value() {
     return this.tempValue ?? this.value ?? 0;
   }
 
-  static override styles = styles;
+  override firstUpdated() {
+    const disposables = this._disposables;
 
-  @state()
-  private accessor tempValue: number | undefined = undefined;
+    disposables.addFromEvent(this._progressBg, 'pointerdown', this.startDrag);
+    disposables.addFromEvent(window, 'keydown', evt => {
+      if (evt.key === 'ArrowDown') {
+        this._onChange(Math.max(0, this._value - 1));
+        return;
+      }
+      if (evt.key === 'ArrowUp') {
+        this._onChange(Math.min(100, this._value + 1));
+        return;
+      }
+    });
+  }
 
-  @query('.affine-database-progress-bg')
-  private accessor _progressBg!: HTMLElement;
+  override onCopy(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
+
+  override onCut(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
+
+  override onExitEditMode() {
+    this.onChange(this._value);
+  }
+
+  override onPaste(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
 
   protected override render() {
     const progress = this._value;
@@ -166,68 +208,11 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
     </div>`;
   }
 
-  override onExitEditMode() {
-    this.onChange(this._value);
-  }
+  @query('.affine-database-progress-bg')
+  private accessor _progressBg!: HTMLElement;
 
-  _onChange(value?: number) {
-    this.tempValue = value;
-  }
-
-  override firstUpdated() {
-    const disposables = this._disposables;
-
-    disposables.addFromEvent(this._progressBg, 'pointerdown', this.startDrag);
-    disposables.addFromEvent(window, 'keydown', evt => {
-      if (evt.key === 'ArrowDown') {
-        this._onChange(Math.max(0, this._value - 1));
-        return;
-      }
-      if (evt.key === 'ArrowUp') {
-        this._onChange(Math.min(100, this._value + 1));
-        return;
-      }
-    });
-  }
-
-  startDrag = (event: MouseEvent) => {
-    const bgRect = this._progressBg.getBoundingClientRect();
-    const min = bgRect.left;
-    const max = bgRect.right;
-    const setValue = (x: number) => {
-      this.tempValue = Math.round(
-        ((Math.min(max, Math.max(min, x)) - min) / (max - min)) * 100
-      );
-    };
-    startDrag(event, {
-      onDrag: ({ x }) => {
-        setValue(x);
-        return;
-      },
-      onMove: ({ x }) => {
-        setValue(x);
-        return;
-      },
-      onDrop: () => {
-        //
-      },
-      onClear: () => {
-        //
-      },
-    });
-  };
-
-  override onCopy(_e: ClipboardEvent) {
-    _e.preventDefault();
-  }
-
-  override onPaste(_e: ClipboardEvent) {
-    _e.preventDefault();
-  }
-
-  override onCut(_e: ClipboardEvent) {
-    _e.preventDefault();
-  }
+  @state()
+  private accessor tempValue: number | undefined = undefined;
 }
 
 export const progressColumnConfig = progressColumnModelConfig.renderConfig({

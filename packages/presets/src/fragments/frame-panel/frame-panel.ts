@@ -1,20 +1,14 @@
-import './header/frame-panel-header.js';
-import './body/frame-panel-body.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { FramePreview } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, type PropertyValues, unsafeCSS } from 'lit';
-import { property } from 'lit/decorators.js';
+import { type PropertyValues, css, html, unsafeCSS } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../index.js';
-import { FramePanelBody } from './body/frame-panel-body.js';
-import { FrameCard } from './card/frame-card.js';
-import { FrameCardTitle } from './card/frame-card-title.js';
-import { FrameCardTitleEditor } from './card/frame-card-title-editor.js';
-import { FramePanelHeader } from './header/frame-panel-header.js';
-import { FramesSettingMenu } from './header/frames-setting-menu.js';
+
+import './body/frame-panel-body.js';
+import './header/frame-panel-header.js';
 
 const styles = css`
   frame-panel {
@@ -68,28 +62,13 @@ const styles = css`
   }
 `;
 
+export const AFFINE_FRAME_PANEL = 'affine-frame-panel';
+
+@customElement(AFFINE_FRAME_PANEL)
 export class FramePanel extends WithDisposable(ShadowlessElement) {
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get host() {
-    return this.editor.host;
-  }
-
-  get edgeless() {
-    return this.editor.querySelector('affine-edgeless-root');
-  }
-
-  static override styles = styles;
-
   private _editorDisposables: DisposableGroup | null = null;
 
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-
-  @property({ attribute: false })
-  accessor fitPadding: number[] = [50, 380, 50, 50];
+  static override styles = styles;
 
   private _clearEditorDisposables() {
     this._editorDisposables?.dispose();
@@ -117,12 +96,6 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('editor')) {
-      this._setEditorDisposables();
-    }
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     if (!customElements.get('frame-preview')) {
@@ -137,39 +110,47 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
 
   override render() {
     return html`<div class="frame-panel-container">
-      <frame-panel-header
+      <affine-frame-panel-header
         .edgeless=${this.edgeless}
         .editorHost=${this.host}
-      ></frame-panel-header>
-      <frame-panel-body
+      ></affine-frame-panel-header>
+      <affine-frame-panel-body
         class="frame-panel-body"
         .edgeless=${this.edgeless}
         .doc=${this.doc}
         .editorHost=${this.host}
         .fitPadding=${this.fitPadding}
-      ></frame-panel-body>
+      ></affine-frame-panel-body>
     </div>`;
   }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('editor')) {
+      this._setEditorDisposables();
+    }
+  }
+
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get edgeless() {
+    return this.editor.querySelector('affine-edgeless-root');
+  }
+
+  get host() {
+    return this.editor.host;
+  }
+
+  @property({ attribute: false })
+  accessor editor!: AffineEditorContainer;
+
+  @property({ attribute: false })
+  accessor fitPadding: number[] = [50, 380, 50, 50];
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frame-panel': FramePanel;
+    [AFFINE_FRAME_PANEL]: FramePanel;
   }
-}
-
-const componentsMap = {
-  'frame-panel': FramePanel,
-  'frame-panel-header': FramePanelHeader,
-  'frame-panel-body': FramePanelBody,
-  'frames-setting-menu': FramesSettingMenu,
-  'frame-card': FrameCard,
-  'frame-card-title': FrameCardTitle,
-  'frame-card-title-editor': FrameCardTitleEditor,
-};
-
-export function registerFramePanelComponents(
-  callback: (components: typeof componentsMap) => void
-) {
-  callback(componentsMap);
 }

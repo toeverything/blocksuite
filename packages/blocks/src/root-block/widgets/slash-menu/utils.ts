@@ -1,11 +1,10 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertType } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { assertType } from '@blocksuite/global/utils';
 
 import type { TextConversionConfig } from '../../../_common/configs/text-conversion.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
-import { isInsideBlockByFlavour } from '../../../_common/utils/index.js';
-import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import type {
   SlashMenuActionItem,
   SlashMenuContext,
@@ -15,6 +14,9 @@ import type {
   SlashMenuStaticItem,
   SlashSubMenu,
 } from './config.js';
+
+import { isInsideBlockByFlavour } from '../../../_common/utils/index.js';
+import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import { slashMenuToolTips } from './tooltips/index.js';
 
 export function isGroupDivider(
@@ -87,11 +89,13 @@ export function insertContent(
   attributes?: AffineTextAttributes
 ) {
   if (!model.text) {
-    throw new Error("Can't insert text! Text not found");
+    console.error("Can't insert text! Text not found");
+    return;
   }
   const inlineEditor = getInlineEditorByModel(editorHost, model);
   if (!inlineEditor) {
-    throw new Error("Can't insert text! Inline editor not found");
+    console.error("Can't insert text! Inline editor not found");
+    return;
   }
   const inlineRange = inlineEditor.getInlineRange();
   const index = inlineRange ? inlineRange.index : model.text.length;
@@ -160,8 +164,8 @@ export function createConversionItem(
     icon,
     tooltip: slashMenuToolTips[name],
     showWhen: ({ model }) => model.doc.schema.flavourSchemaMap.has(flavour),
-    action: ({ rootElement }) => {
-      rootElement.host.std.command
+    action: ({ rootComponent }) => {
+      rootComponent.host.std.command
         .chain()
         .updateBlockType({
           flavour,

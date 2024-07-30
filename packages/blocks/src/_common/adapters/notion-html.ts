@@ -1,4 +1,3 @@
-import { isEqual, sha } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
@@ -8,15 +7,18 @@ import type {
   FromSliceSnapshotPayload,
   FromSliceSnapshotResult,
 } from '@blocksuite/store';
+
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { isEqual, sha } from '@blocksuite/global/utils';
 import {
-  type AssetsManager,
   ASTWalker,
+  type AssetsManager,
   BaseAdapter,
   type BlockSnapshot,
   type DocSnapshot,
+  type SliceSnapshot,
   getAssetName,
   nanoid,
-  type SliceSnapshot,
 } from '@blocksuite/store';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
@@ -25,13 +27,13 @@ import { getTagColor } from '../../database-block/data-view/utils/tags/colors.js
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
+  type HtmlAST,
   hastGetElementChildren,
   hastGetTextChildrenOnlyAst,
   hastGetTextContent,
   hastQuerySelector,
-  type HtmlAST,
 } from './hast.js';
-import { createText, fetchable, fetchImage, isText } from './utils.js';
+import { createText, fetchImage, fetchable, isText } from './utils.js';
 
 export type NotionHtml = string;
 
@@ -85,9 +87,152 @@ type BlocksuiteTableRow = Record<
 >;
 
 export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
-  private _htmlToAst(notionHtml: NotionHtml) {
-    return unified().use(rehypeParse).parse(notionHtml);
-  }
+  private _hastToDelta = (
+    ast: HtmlAST,
+    option: {
+      trim?: boolean;
+      pageMap?: Map<string, string>;
+    } = { trim: true }
+  ): DeltaInsert<object>[] => {
+    return this._hastToDeltaSpreaded(ast, option).reduce((acc, cur) => {
+      if (acc.length === 0) {
+        return [cur];
+      }
+      const last = acc[acc.length - 1];
+      if (
+        typeof last.insert === 'string' &&
+        typeof cur.insert === 'string' &&
+        isEqual(last.attributes, cur.attributes)
+      ) {
+        last.insert += cur.insert;
+        return acc;
+      }
+      return [...acc, cur];
+    }, [] as DeltaInsert<object>[]);
+  };
+
+  private _hastToDeltaSpreaded = (
+    ast: HtmlAST,
+    option: {
+      trim?: boolean;
+      pageMap?: Map<string, string>;
+    } = { trim: true }
+  ): DeltaInsert<object>[] => {
+    if (option.trim === undefined) {
+      option.trim = true;
+    }
+    switch (ast.type) {
+      case 'text': {
+        if (option.trim) {
+          if (ast.value.trim()) {
+            return [{ insert: ast.value.trim() }];
+          }
+          return [];
+        }
+        if (ast.value) {
+          return [{ insert: ast.value }];
+        }
+        return [];
+      }
+      case 'element': {
+        switch (ast.tagName) {
+          case 'ol':
+          case 'ul': {
+            return [];
+          }
+          case 'span': {
+            return ast.children.flatMap(child =>
+              this._hastToDeltaSpreaded(child, option)
+            );
+          }
+          case 'strong': {
+            return ast.children.flatMap(child =>
+              this._hastToDeltaSpreaded(child, option).map(delta => {
+                delta.attributes = { ...delta.attributes, bold: true };
+                return delta;
+              })
+            );
+          }
+          case 'em': {
+            return ast.children.flatMap(child =>
+              this._hastToDeltaSpreaded(child, option).map(delta => {
+                delta.attributes = { ...delta.attributes, italic: true };
+                return delta;
+              })
+            );
+          }
+          case 'code': {
+            return ast.children.flatMap(child =>
+              this._hastToDeltaSpreaded(child, option).map(delta => {
+                delta.attributes = { ...delta.attributes, code: true };
+                return delta;
+              })
+            );
+          }
+          case 'del': {
+            return ast.children.flatMap(child =>
+              this._hastToDeltaSpreaded(child, option).map(delta => {
+                delta.attributes = { ...delta.attributes, strike: true };
+                return delta;
+              })
+            );
+          }
+          case 'u': {
+            return ast.children.flatMap(child =>
+              this._hastToDeltaSpreaded(child, option).map(delta => {
+                delta.attributes = { ...delta.attributes, underline: true };
+                return delta;
+              })
+            );
+          }
+          case 'a': {
+            const href = ast.properties?.href;
+            if (typeof href !== 'string') {
+              return [];
+            }
+            return ast.children.flatMap(child =>
+              this._hastToDeltaSpreaded(child, option).map(delta => {
+                if (option.pageMap) {
+                  const pageId = option.pageMap.get(decodeURIComponent(href));
+                  if (pageId) {
+                    delta.attributes = {
+                      ...delta.attributes,
+                      reference: {
+                        type: 'LinkedPage',
+                        pageId,
+                      },
+                    };
+                    delta.insert = ' ';
+                    return delta;
+                  }
+                }
+                if (href.startsWith('http')) {
+                  delta.attributes = {
+                    ...delta.attributes,
+                    link: href,
+                  };
+                  return delta;
+                }
+                return delta;
+              })
+            );
+          }
+          case 'mark': {
+            // TODO: add support for highlight
+            return ast.children.flatMap(child =>
+              this._hastToDeltaSpreaded(child, option).map(delta => {
+                delta.attributes = { ...delta.attributes };
+                return delta;
+              })
+            );
+          }
+        }
+      }
+    }
+    return 'children' in ast
+      ? ast.children.flatMap(child => this._hastToDeltaSpreaded(child, option))
+      : [];
+  };
 
   private _traverseNotionHtml = async (
     html: HtmlAST,
@@ -136,6 +281,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 undefined,
                 this.configs.get('imageProxy') as string
               );
+              if (!res) {
+                break;
+              }
               const clonedRes = res.clone();
               const name =
                 getFilenameFromContentDisposition(
@@ -461,6 +609,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 undefined,
                 this.configs.get('imageProxy') as string
               );
+              if (!res) {
+                break;
+              }
               const clonedRes = res.clone();
               const name =
                 getFilenameFromContentDisposition(
@@ -519,7 +670,13 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 }
               });
             } else {
-              const res = await fetch(embededURL);
+              const res = await fetch(embededURL).catch(error => {
+                console.warn('Error fetching embed:', error);
+                return null;
+              });
+              if (!res) {
+                break;
+              }
               const resCloned = res.clone();
               name =
                 getFilenameFromContentDisposition(
@@ -663,7 +820,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 if (!('options' in columns[index].data)) {
                   columns[index].data.options = [];
                 }
-                if (!['select', 'multi-select'].includes(columns[index].type)) {
+                if (!['multi-select', 'select'].includes(columns[index].type)) {
                   columns[index].type = 'select';
                 }
                 if (
@@ -709,9 +866,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 const text = hastGetTextContent(child);
                 const number = Number(text);
                 if (Number.isNaN(number)) {
-                  if (columns[index].type !== 'rich-text') {
-                    columns[index].type = 'rich-text';
-                  }
+                  columns[index].type = 'rich-text';
                   row[columns[index].id] = {
                     columnId: columns[index].id,
                     value: createText(text),
@@ -861,169 +1016,65 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     return walker.walk(html, snapshot);
   };
 
-  private _hastToDeltaSpreaded = (
-    ast: HtmlAST,
-    option: {
-      trim?: boolean;
-      pageMap?: Map<string, string>;
-    } = { trim: true }
-  ): DeltaInsert<object>[] => {
-    if (option.trim === undefined) {
-      option.trim = true;
-    }
-    switch (ast.type) {
-      case 'text': {
-        if (option.trim) {
-          if (ast.value.trim()) {
-            return [{ insert: ast.value.trim() }];
-          }
-          return [];
-        }
-        if (ast.value) {
-          return [{ insert: ast.value }];
-        }
-        return [];
-      }
-      case 'element': {
-        switch (ast.tagName) {
-          case 'ol':
-          case 'ul': {
-            return [];
-          }
-          case 'span': {
-            return ast.children.flatMap(child =>
-              this._hastToDeltaSpreaded(child, option)
-            );
-          }
-          case 'strong': {
-            return ast.children.flatMap(child =>
-              this._hastToDeltaSpreaded(child, option).map(delta => {
-                delta.attributes = { ...delta.attributes, bold: true };
-                return delta;
-              })
-            );
-          }
-          case 'em': {
-            return ast.children.flatMap(child =>
-              this._hastToDeltaSpreaded(child, option).map(delta => {
-                delta.attributes = { ...delta.attributes, italic: true };
-                return delta;
-              })
-            );
-          }
-          case 'code': {
-            return ast.children.flatMap(child =>
-              this._hastToDeltaSpreaded(child, option).map(delta => {
-                delta.attributes = { ...delta.attributes, code: true };
-                return delta;
-              })
-            );
-          }
-          case 'del': {
-            return ast.children.flatMap(child =>
-              this._hastToDeltaSpreaded(child, option).map(delta => {
-                delta.attributes = { ...delta.attributes, strike: true };
-                return delta;
-              })
-            );
-          }
-          case 'u': {
-            return ast.children.flatMap(child =>
-              this._hastToDeltaSpreaded(child, option).map(delta => {
-                delta.attributes = { ...delta.attributes, underline: true };
-                return delta;
-              })
-            );
-          }
-          case 'a': {
-            const href = ast.properties?.href;
-            if (typeof href !== 'string') {
-              return [];
-            }
-            return ast.children.flatMap(child =>
-              this._hastToDeltaSpreaded(child, option).map(delta => {
-                if (option.pageMap) {
-                  const pageId = option.pageMap.get(decodeURIComponent(href));
-                  if (pageId) {
-                    delta.attributes = {
-                      ...delta.attributes,
-                      reference: {
-                        type: 'LinkedPage',
-                        pageId,
-                      },
-                    };
-                    delta.insert = ' ';
-                    return delta;
-                  }
-                }
-                if (href.startsWith('http')) {
-                  delta.attributes = {
-                    ...delta.attributes,
-                    link: href,
-                  };
-                  return delta;
-                }
-                return delta;
-              })
-            );
-          }
-          case 'mark': {
-            // TODO: add support for highlight
-            return ast.children.flatMap(child =>
-              this._hastToDeltaSpreaded(child, option).map(delta => {
-                delta.attributes = { ...delta.attributes };
-                return delta;
-              })
-            );
-          }
-        }
-      }
-    }
-    return 'children' in ast
-      ? ast.children.flatMap(child => this._hastToDeltaSpreaded(child, option))
-      : [];
-  };
-
-  private _hastToDelta = (
-    ast: HtmlAST,
-    option: {
-      trim?: boolean;
-      pageMap?: Map<string, string>;
-    } = { trim: true }
-  ): DeltaInsert<object>[] => {
-    return this._hastToDeltaSpreaded(ast, option).reduce((acc, cur) => {
-      if (acc.length === 0) {
-        return [cur];
-      }
-      const last = acc[acc.length - 1];
-      if (
-        typeof last.insert === 'string' &&
-        typeof cur.insert === 'string' &&
-        isEqual(last.attributes, cur.attributes)
-      ) {
-        last.insert += cur.insert;
-        return acc;
-      }
-      return [...acc, cur];
-    }, [] as DeltaInsert<object>[]);
-  };
-
-  override fromDocSnapshot(
-    _payload: FromDocSnapshotPayload
-  ): Promise<FromDocSnapshotResult<NotionHtml>> {
-    throw new Error('Method not implemented.');
+  private _htmlToAst(notionHtml: NotionHtml) {
+    return unified().use(rehypeParse).parse(notionHtml);
   }
 
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<NotionHtml>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'NotionHtmlAdapter.fromBlockSnapshot is not implemented'
+    );
+  }
+
+  override fromDocSnapshot(
+    _payload: FromDocSnapshotPayload
+  ): Promise<FromDocSnapshotResult<NotionHtml>> {
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'NotionHtmlAdapter.fromDocSnapshot is not implemented'
+    );
   }
 
   override fromSliceSnapshot(
     _payload: FromSliceSnapshotPayload
   ): Promise<FromSliceSnapshotResult<NotionHtml>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'NotionHtmlAdapter.fromSliceSnapshot is not implemented'
+    );
+  }
+
+  override toBlockSnapshot(
+    payload: NotionHtmlToBlockSnapshotPayload
+  ): Promise<BlockSnapshot> {
+    const notionHtmlAst = this._htmlToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid(),
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [],
+    };
+    return this._traverseNotionHtml(
+      notionHtmlAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets,
+      payload.pageMap
+    );
+  }
+
+  override async toDoc(payload: NotionHtmlToDocSnapshotPayload) {
+    const snapshot = await this.toDocSnapshot(payload);
+    return this.job.snapshotToDoc(snapshot);
   }
 
   override async toDocSnapshot(
@@ -1086,36 +1137,6 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         ],
       },
     };
-  }
-
-  override async toDoc(payload: NotionHtmlToDocSnapshotPayload) {
-    const snapshot = await this.toDocSnapshot(payload);
-    return this.job.snapshotToDoc(snapshot);
-  }
-
-  override toBlockSnapshot(
-    payload: NotionHtmlToBlockSnapshotPayload
-  ): Promise<BlockSnapshot> {
-    const notionHtmlAst = this._htmlToAst(payload.file);
-    const blockSnapshotRoot = {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [],
-    };
-    return this._traverseNotionHtml(
-      notionHtmlAst,
-      blockSnapshotRoot as BlockSnapshot,
-      payload.assets,
-      payload.pageMap
-    );
   }
 
   override async toSliceSnapshot(

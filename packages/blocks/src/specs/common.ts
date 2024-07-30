@@ -15,12 +15,35 @@ import { EmbedSyncedDocBlockSpec } from '../embed-synced-doc-block/embed-synced-
 import { EmbedYoutubeBlockSpec } from '../embed-youtube-block/embed-youtube-spec.js';
 import { ImageBlockSpec } from '../image-block/image-spec.js';
 import { ListBlockSpec } from '../list-block/list-spec.js';
-import { NoteBlockSpec } from '../note-block/note-spec.js';
+import {
+  EdgelessNoteBlockSpec,
+  NoteBlockSpec,
+} from '../note-block/note-spec.js';
 import { ParagraphBlockSpec } from '../paragraph-block/paragraph-spec.js';
 
 export const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   ListBlockSpec,
   NoteBlockSpec,
+  DatabaseBlockSpec,
+  DataViewBlockSpec,
+  DividerBlockSpec,
+  CodeBlockSpec,
+  ImageBlockSpec,
+  ParagraphBlockSpec,
+  BookmarkBlockSpec,
+  AttachmentBlockSpec,
+  EmbedFigmaBlockSpec,
+  EmbedGithubBlockSpec,
+  EmbedYoutubeBlockSpec,
+  EmbedLoomBlockSpec,
+  EmbedHtmlBlockSpec,
+  EmbedSyncedDocBlockSpec,
+  EmbedLinkedDocBlockSpec,
+];
+
+export const EdgelessFirstPartyBlockSpecs: BlockSpec[] = [
+  ListBlockSpec,
+  EdgelessNoteBlockSpec,
   DatabaseBlockSpec,
   DataViewBlockSpec,
   DividerBlockSpec,

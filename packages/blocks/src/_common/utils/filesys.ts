@@ -1,6 +1,8 @@
 // Polyfill for `showOpenFilePicker` API
 // See https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wicg-file-system-access/index.d.ts
 // See also https://caniuse.com/?search=showOpenFilePicker
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 interface OpenFilePickerOptions {
   types?:
     | {
@@ -134,7 +136,10 @@ export async function openFileOrFiles({
     try {
       const fileType = FileTypes.find(i => i.description === acceptType);
       if (acceptType !== 'Any' && !fileType)
-        throw new Error(`Unexpected acceptType "${acceptType}"`);
+        throw new BlockSuiteError(
+          ErrorCode.DefaultRuntimeError,
+          `Unexpected acceptType "${acceptType}"`
+        );
       const pickerOpts = {
         types: fileType ? [fileType] : undefined,
         multiple,
@@ -160,9 +165,8 @@ export async function openFileOrFiles({
         return files;
       }
     } catch (err) {
-      if (!(err instanceof Error)) throw err;
-      // Fail silently if the user has simply canceled the dialog.
-      if (err.name !== 'AbortError') throw err;
+      console.error('Error opening file');
+      console.error(err);
       return null;
     }
   }

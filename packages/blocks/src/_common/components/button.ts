@@ -1,5 +1,5 @@
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 /**
@@ -110,31 +110,6 @@ export class IconButton extends LitElement {
     }
   `;
 
-  @property()
-  accessor size: string | number | null = null;
-
-  @property()
-  accessor width: string | number | null = null;
-
-  @property()
-  accessor height: string | number | null = null;
-
-  @property()
-  accessor text: string | null = null;
-
-  @property()
-  accessor subText: string | null = null;
-
-  @property({ attribute: true, type: Boolean })
-  accessor active: boolean = false;
-
-  @property({ attribute: true, type: String })
-  accessor hover: 'true' | 'false' | undefined = undefined;
-
-  // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
-  @property({ attribute: true, type: Boolean })
-  accessor disabled: boolean | undefined = undefined;
-
   constructor() {
     super();
     // Allow activate button by pressing Enter key
@@ -167,9 +142,7 @@ export class IconButton extends LitElement {
 
     const DEFAULT_SIZE = '28px';
     if (this.size && (this.width || this.height)) {
-      throw new Error(
-        'Cannot set both size and width/height on an icon-button'
-      );
+      return;
     }
 
     let width = this.width ?? DEFAULT_SIZE;
@@ -221,6 +194,31 @@ export class IconButton extends LitElement {
       ${textContainer}
       <slot name="suffix"></slot>`;
   }
+
+  @property({ attribute: true, type: Boolean })
+  accessor active: boolean = false;
+
+  // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
+  @property({ attribute: true, type: Boolean })
+  accessor disabled: boolean | undefined = undefined;
+
+  @property()
+  accessor height: string | number | null = null;
+
+  @property({ attribute: true, type: String })
+  accessor hover: 'true' | 'false' | undefined = undefined;
+
+  @property()
+  accessor size: string | number | null = null;
+
+  @property()
+  accessor subText: string | null = null;
+
+  @property()
+  accessor text: string | null = null;
+
+  @property()
+  accessor width: string | number | null = null;
 }
 
 declare global {

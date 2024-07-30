@@ -1,8 +1,9 @@
-import './commands/index.js';
-
 import type { EdgelessRootService } from './edgeless/edgeless-root-service.js';
 import type { PageRootService } from './page/page-root-service.js';
 import type { RootBlockModel } from './root-model.js';
+import type { RootBlockConfig } from './types.js';
+
+import './commands/index.js';
 
 export * from './clipboard/index.js';
 export * from './edgeless/index.js';
@@ -28,6 +29,9 @@ declare global {
     }
     interface BlockServices {
       'affine:page': PageRootService | EdgelessRootService;
+    }
+    interface BlockConfigs {
+      'affine:page': RootBlockConfig;
     }
   }
 }

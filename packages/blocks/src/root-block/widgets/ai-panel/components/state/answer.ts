@@ -1,13 +1,14 @@
-import '../finish-tip.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { AIPanelAnswerConfig, CopyConfig } from '../../type.js';
+
 import { filterAIItemGroup } from '../../utils.js';
+import '../finish-tip.js';
 
 @customElement('ai-panel-answer')
 export class AIPanelAnswer extends WithDisposable(LitElement) {
@@ -84,18 +85,6 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor config!: AIPanelAnswerConfig;
-
-  @property({ attribute: false })
-  accessor finish = true;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor copy: CopyConfig | undefined = undefined;
-
   override render() {
     const responseGroup = filterAIItemGroup(this.host, this.config.responses);
     return html`
@@ -107,7 +96,10 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       </div>
       ${this.finish
         ? html`
-            <ai-finish-tip .copy=${this.copy}></ai-finish-tip>
+            <ai-finish-tip
+              .copy=${this.copy}
+              .host=${this.host}
+            ></ai-finish-tip>
             ${responseGroup.length > 0
               ? html`
                   <ai-panel-divider></ai-panel-divider>
@@ -117,7 +109,10 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
                         ? html`<ai-panel-divider></ai-panel-divider>`
                         : nothing}
                       <div class="response-list-container">
-                        <ai-item-list .groups=${[group]}></ai-item-list>
+                        <ai-item-list
+                          .host=${this.host}
+                          .groups=${[group]}
+                        ></ai-item-list>
                       </div>
                     `
                   )}
@@ -129,7 +124,10 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
             ${this.config.actions.length > 0
               ? html`
                   <div class="action-list-container">
-                    <ai-item-list .groups=${this.config.actions}></ai-item-list>
+                    <ai-item-list
+                      .host=${this.host}
+                      .groups=${this.config.actions}
+                    ></ai-item-list>
                   </div>
                 `
               : nothing}
@@ -137,6 +135,18 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
         : nothing}
     `;
   }
+
+  @property({ attribute: false })
+  accessor config!: AIPanelAnswerConfig;
+
+  @property({ attribute: false })
+  accessor copy: CopyConfig | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor finish = true;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 }
 
 declare global {

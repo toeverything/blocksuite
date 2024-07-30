@@ -1,6 +1,6 @@
+import { Bound } from '@blocksuite/global/utils';
 import { describe, expect, it } from 'vitest';
 
-import { Bound } from '../../surface-block/utils/bound.js';
 import { Graph } from '../../surface-block/utils/graph.js';
 
 describe('graph', () => {

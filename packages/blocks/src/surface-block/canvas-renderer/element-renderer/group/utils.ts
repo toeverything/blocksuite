@@ -1,6 +1,8 @@
-import { FontFamily, FontWeight } from '../../../consts.js';
+import { Bound } from '@blocksuite/global/utils';
+
 import type { GroupElementModel } from '../../../element-model/group.js';
-import { Bound } from '../../../utils/bound.js';
+
+import { FontFamily, FontWeight } from '../../../consts.js';
 import {
   getFontString,
   getLineHeight,

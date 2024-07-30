@@ -1,17 +1,17 @@
-import './card.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import type { GroupData } from '../../../common/group-by/helper.js';
+import type { DataViewRenderer } from '../../../data-view.js';
+import type { KanbanSingleView } from './kanban-view-manager.js';
+
 import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../../_common/icons/index.js';
 import { GroupTitle } from '../../../common/group-by/group-title.js';
-import type { GroupData } from '../../../common/group-by/helper.js';
-import type { DataViewRenderer } from '../../../data-view.js';
-import type { DataViewKanbanManager } from './kanban-view-manager.js';
+import './card.js';
 
 const styles = css`
   affine-data-view-kanban-group {
@@ -95,17 +95,6 @@ const styles = css`
 
 @customElement('affine-data-view-kanban-group')
 export class KanbanGroup extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor dataViewEle!: DataViewRenderer;
-
-  @property({ attribute: false })
-  accessor view!: DataViewKanbanManager;
-
-  @property({ attribute: false })
-  accessor group!: GroupData;
-
   private clickAddCard = () => {
     const id = this.view.addCard('end', this.group.key);
     requestAnimationFrame(() => {
@@ -115,7 +104,8 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
           selectionType: 'cell',
           groupKey: this.group.key,
           cardId: id,
-          columnId: this.view.header.titleColumn || this.view.columns[0],
+          columnId:
+            this.view.header$.value.titleColumn || this.view.columns$.value[0],
           isEditing: true,
         };
       }
@@ -131,7 +121,8 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
           selectionType: 'cell',
           groupKey: this.group.key,
           cardId: id,
-          columnId: this.view.header.titleColumn || this.view.columns[0],
+          columnId:
+            this.view.header$.value.titleColumn || this.view.columns$.value[0],
           isEditing: true,
         };
       }
@@ -161,12 +152,14 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     ]);
   };
 
+  static override styles = styles;
+
   override render() {
     const cards = this.group.rows;
     return html`
       <div class="group-header">
         ${GroupTitle(this.group, {
-          readonly: this.view.readonly,
+          readonly: this.view.readonly$.value,
           clickAdd: this.clickAddCardInStart,
           clickOps: this.clickGroupOptions,
         })}
@@ -187,7 +180,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
             `;
           }
         )}
-        ${this.view.readonly
+        ${this.view.readonly$.value
           ? nothing
           : html`<div class="add-card" @click="${this.clickAddCard}">
               <div
@@ -200,6 +193,15 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor dataViewEle!: DataViewRenderer;
+
+  @property({ attribute: false })
+  accessor group!: GroupData;
+
+  @property({ attribute: false })
+  accessor view!: KanbanSingleView;
 }
 
 declare global {

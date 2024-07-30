@@ -1,11 +1,6 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
-import { minimatch } from 'minimatch';
 
-export function assertFlavours(model: { flavour: string }, allowed: string[]) {
-  if (!allowed.includes(model.flavour)) {
-    throw new Error(`model flavour ${model.flavour} is not allowed`);
-  }
-}
+import { minimatch } from 'minimatch';
 
 export function matchFlavours<Key extends (keyof BlockSuite.BlockModels)[]>(
   model: BlockModel | null,

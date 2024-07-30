@@ -1,4 +1,3 @@
-import { assertExists, sha } from '@blocksuite/global/utils';
 import type {
   CollectionInfoSnapshot,
   Doc,
@@ -6,7 +5,9 @@ import type {
   DocSnapshot,
   JobMiddleware,
 } from '@blocksuite/store';
-import { extMimeMap, getAssetName, Job } from '@blocksuite/store';
+
+import { assertExists, sha } from '@blocksuite/global/utils';
+import { Job, extMimeMap, getAssetName } from '@blocksuite/store';
 import JSZip from 'jszip';
 
 import { replaceIdMiddleware, titleMiddleware } from './middlewares.js';
@@ -20,10 +21,12 @@ async function exportDocs(collection: DocCollection, docs: Doc[]) {
   const collectionInfo = job.collectionInfoToSnapshot();
   zip.file('info.json', JSON.stringify(collectionInfo, null, 2));
 
-  snapshots.forEach(snapshot => {
-    const snapshotName = `${snapshot.meta.id}.snapshot.json`;
-    zip.file(snapshotName, JSON.stringify(snapshot, null, 2));
-  });
+  snapshots
+    .filter((snapshot): snapshot is DocSnapshot => !!snapshot)
+    .forEach(snapshot => {
+      const snapshotName = `${snapshot.meta.id}.snapshot.json`;
+      zip.file(snapshotName, JSON.stringify(snapshot, null, 2));
+    });
 
   const assets = zip.folder('assets');
   assertExists(assets);

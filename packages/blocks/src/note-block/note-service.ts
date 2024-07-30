@@ -1,9 +1,13 @@
 import { BlockService } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { Point } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
-import { matchFlavours } from '../_common/utils/model.js';
+import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
+import type { EdgelessNoteBlockComponent } from './note-edgeless-block.js';
+
+import { matchFlavours } from '../_common/utils/model.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -20,7 +24,6 @@ import {
   selectBlocksBetween,
   updateBlockType,
 } from './commands/index.js';
-import type { NoteBlockComponent } from './note-block.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
 
 export class NoteBlockService extends BlockService<NoteBlockModel> {
@@ -45,31 +48,21 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
       ) {
         return false;
       }
-      const noteComponent = anchorComponent as NoteBlockComponent;
+      const edgelessService = editorHost.std.spec.getService(
+        'affine:page'
+      ) as EdgelessRootService;
+      const zoom = edgelessService?.viewport.zoom ?? 1;
+      const noteComponent = anchorComponent as EdgelessNoteBlockComponent;
+      const dragPreviewEl = document.createElement('div');
+      const bound = Bound.deserialize(noteComponent.model.xywh);
+      const offset = new Point(bound.x * zoom, bound.y * zoom);
 
-      const notePortal = noteComponent.closest('.edgeless-block-portal-note');
-      assertExists(notePortal);
+      render(
+        noteComponent.host.renderModel(noteComponent.model),
+        dragPreviewEl
+      );
 
-      const dragPreviewEl = notePortal.cloneNode() as HTMLElement;
-      dragPreviewEl.style.transform = '';
-      dragPreviewEl.style.left = '0';
-      dragPreviewEl.style.top = '0';
-
-      const noteBackground = notePortal.querySelector('.note-background');
-      assertExists(noteBackground);
-
-      const noteBackgroundClone = noteBackground.cloneNode();
-      dragPreviewEl.append(noteBackgroundClone);
-
-      const container = document.createElement('div');
-      container.style.width = '100%';
-      container.style.height = '100%';
-      container.style.overflow = 'hidden';
-      dragPreviewEl.append(container);
-
-      render(noteComponent.host.renderModel(noteComponent.model), container);
-
-      startDragging([noteComponent], state, dragPreviewEl);
+      startDragging([noteComponent], state, dragPreviewEl, offset);
       return true;
     },
     onDragEnd: ({
@@ -117,7 +110,7 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
         );
 
         editorHost.doc.deleteBlock(noteBlock);
-        editorHost.selection.setGroup('edgeless', []);
+        editorHost.selection.setGroup('gfx', []);
       }
 
       return true;

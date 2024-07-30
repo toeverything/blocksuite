@@ -1,3 +1,5 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 type SelectionConstructor<T = unknown> = {
   type: string;
   group: string;
@@ -9,14 +11,21 @@ export type BaseSelectionOptions = {
 };
 
 export abstract class BaseSelection {
-  static readonly type: string;
-
   static readonly group: string;
+
+  static readonly type: string;
 
   readonly blockId: string;
 
   constructor({ blockId }: BaseSelectionOptions) {
     this.blockId = blockId;
+  }
+
+  static fromJSON(_: Record<string, unknown>): BaseSelection {
+    throw new BlockSuiteError(
+      ErrorCode.SelectionError,
+      'You must override this method'
+    );
   }
 
   is<T extends BlockSuite.SelectionType>(
@@ -25,20 +34,16 @@ export abstract class BaseSelection {
     return this.type === type;
   }
 
+  get group(): string {
+    return (this.constructor as SelectionConstructor).group;
+  }
+
   get type(): BlockSuite.SelectionType {
     return (this.constructor as SelectionConstructor)
       .type as BlockSuite.SelectionType;
   }
 
-  get group(): string {
-    return (this.constructor as SelectionConstructor).group;
-  }
-
   abstract equals(other: BaseSelection): boolean;
 
   abstract toJSON(): Record<string, unknown>;
-
-  static fromJSON(_: Record<string, unknown>): BaseSelection {
-    throw new Error('You must override this method');
-  }
 }

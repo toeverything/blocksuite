@@ -1,17 +1,19 @@
+import type { IVec, PointLocation } from '@blocksuite/global/utils';
+
+import { Vec } from '@blocksuite/global/utils';
+
 import type {
   ConnectorElementModel,
   LocalConnectorElementModel,
 } from '../../../element-model/connector.js';
-import { ConnectorMode } from '../../../element-model/connector.js';
-import type { PointLocation } from '../../../index.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
+
+import { ConnectorMode } from '../../../element-model/connector.js';
 import {
   type BezierCurveParameters,
   getBezierParameters,
   getBezierTangent,
 } from '../../../utils/curve.js';
-import { type IVec, Vec } from '../../../utils/vec.js';
-import type { Renderer } from '../../renderer.js';
 
 type ConnectorEnd = 'Front' | 'Rear';
 
@@ -88,7 +90,7 @@ export function getPointWithTangent(
         ? getBezierTangent(bezierParameters, 1)
         : getBezierTangent(bezierParameters, 0);
   }
-  clone.tangent = tangent ?? [];
+  clone.tangent = tangent ?? [0, 0];
 
   return clone;
 }
@@ -118,10 +120,9 @@ export type ArrowOptions = ReturnType<typeof getArrowOptions>;
 export function getArrowOptions(
   end: ConnectorEnd,
   model: ConnectorElementModel | LocalConnectorElementModel,
-  renderer: Renderer
+  strokeColor: string
 ) {
-  const { stroke, seed, mode, rough, roughness, strokeWidth, path } = model;
-  const realStrokeColor = renderer.getVariableColor(stroke);
+  const { seed, mode, rough, roughness, strokeWidth, path } = model;
 
   return {
     end,
@@ -130,8 +131,8 @@ export function getArrowOptions(
     rough,
     roughness,
     strokeWidth,
-    strokeColor: realStrokeColor,
-    fillColor: realStrokeColor,
+    strokeColor,
+    fillColor: strokeColor,
     fillStyle: 'solid',
     bezierParameters: getBezierParameters(path),
   };

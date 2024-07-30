@@ -1,21 +1,23 @@
 /// <reference types="@blocksuite/global" />
-// manual import to avoid being tree-shaken
-import './root-block/index.js';
-import './paragraph-block/index.js';
-import './list-block/index.js';
-import './note-block/index.js';
-import './frame-block/index.js';
-import './divider-block/index.js';
-import './code-block/affine-code-line.js';
-import './image-block/index.js';
-import './database-block/index.js';
-import './surface-ref-block/index.js';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Point } from '@blocksuite/global/utils';
 
 import { mindMap } from './_common/mind-map/index.js';
-import { matchFlavours, Point } from './_common/utils/index.js';
+import { matchFlavours } from './_common/utils/index.js';
+import './code-block/affine-code-line.js';
+import './database-block/index.js';
+import './divider-block/index.js';
+import './frame-block/index.js';
+import './image-block/index.js';
+import './list-block/index.js';
+import './note-block/index.js';
+import './paragraph-block/index.js';
 import { splitElements } from './root-block/edgeless/utils/clipboard-utils.js';
 import { isCanvasElement } from './root-block/edgeless/utils/query.js';
-import { deserializeXYWH } from './surface-block/index.js';
+// manual import to avoid being tree-shaken
+import './root-block/index.js';
+import './surface-ref-block/index.js';
 
 export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
@@ -26,19 +28,21 @@ export type {
   PeekViewService,
 } from './_common/components/index.js';
 export {
-  createLitPortal,
   HoverController,
+  Peekable,
   PeekableController,
   RichText,
+  Tooltip,
+  createLitPortal,
+  peek,
   scrollbarStyle,
   toast,
-  Tooltip,
 } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
+  EmbedBlockComponent,
   createEmbedBlockSchema,
   defineEmbedModel,
-  EmbedBlockElement,
 } from './_common/embed-block-helper/index.js';
 export {
   ArrowDownSmallIcon,
@@ -67,8 +71,8 @@ export {
   StyleVariables,
 } from './_common/theme/css-variables.js';
 export {
-  extractCssVariables,
   ThemeObserver,
+  extractCssVariables,
 } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
 export {
@@ -94,8 +98,8 @@ export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
 export * from './data-view-block/index.js';
 export {
-  popTagSelect,
   type SelectTag,
+  popTagSelect,
 } from './database-block/data-view/utils/tags/multi-tag-select.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
@@ -124,30 +128,28 @@ export * from './schemas.js';
 export * from './specs/index.js';
 export {
   AffineCanvasTextFonts,
-  Bound,
   BrushElementModel,
   CanvasElementType,
   CommunityCanvasTextFonts,
   ConnectorElementModel,
   ConnectorMode,
-  fitContent,
-  generateKeyBetween,
-  getElementsBound,
   GroupElementModel,
   LayoutType,
-  markdownToMindmap,
   MindmapElementModel,
   MindmapRootBlock,
   MindmapService,
   MindmapStyle,
   MindmapSurfaceBlock,
   type PointStyle,
-  type SerializedXYWH,
   ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
   SurfaceBlockModel,
   TextElementModel,
+  fitContent,
+  generateKeyBetween,
+  getElementsBound,
+  markdownToMindmap,
 } from './surface-block/index.js';
 export { MiniMindmapPreview } from './surface-block/mini-mindmap/mindmap-preview.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
@@ -183,7 +185,8 @@ if (env[importIdentifier] === true) {
 }
 
 if (typeof window === 'undefined') {
-  throw new Error(
+  throw new BlockSuiteError(
+    ErrorCode.NoneSupportedSSRError,
     'Seems like you are importing @blocksuite/blocks in SSR mode. Which is not supported for now.'
   );
 }

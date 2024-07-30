@@ -1,5 +1,6 @@
-import * as globalUtils from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import * as globalUtils from '@blocksuite/global/utils';
 
 function toStyledEntry(key: string, value: unknown) {
   return [

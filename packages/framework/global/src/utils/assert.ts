@@ -10,24 +10,30 @@ export function isPrimitive(
 
 export function assertType<T>(_: unknown): asserts _ is T {}
 
+/**
+ * @deprecated Avoid using this util as escape hatch of error handling.
+ * For non-framework code, please handle error in application level instead.
+ */
 export function assertExists<T>(
   val: T | null | undefined,
-  message: string | Error = 'val does not exist'
+  message: string | Error = 'val does not exist',
+  errorCode = ErrorCode.ValueNotExists
 ): asserts val is T {
   if (val === null || val === undefined) {
     if (message instanceof Error) {
       throw message;
     }
-    throw new BlockSuiteError(ErrorCode.ValueNotExists, message);
+    throw new BlockSuiteError(errorCode, message);
   }
 }
 
 export function assertNotExists<T>(
   val: T | null | undefined,
-  message = 'val exists'
+  message = 'val exists',
+  errorCode = ErrorCode.ValueNotExists
 ): asserts val is null | undefined {
   if (val !== null && val !== undefined) {
-    throw new BlockSuiteError(ErrorCode.ValueNotExists, message);
+    throw new BlockSuiteError(errorCode, message);
   }
 }
 
@@ -79,10 +85,11 @@ export function isEqual<T extends Allowed, U extends T>(
 export function assertEquals<T extends Allowed, U extends T>(
   val: T,
   expected: U,
-  message = 'val is not same as expected'
+  message = 'val is not same as expected',
+  errorCode = ErrorCode.ValueNotEqual
 ): asserts val is U {
   if (!isEqual(val, expected)) {
-    throw new BlockSuiteError(ErrorCode.ValueNotEqual, message);
+    throw new BlockSuiteError(errorCode, message);
   }
 }
 
@@ -92,9 +99,10 @@ type Class<T> = new (...args: any[]) => T;
 export function assertInstanceOf<T>(
   val: unknown,
   expected: Class<T>,
-  message = 'val is not instance of expected'
+  message = 'val is not instance of expected',
+  errorCode = ErrorCode.ValueNotInstanceOf
 ): asserts val is T {
   if (!(val instanceof expected)) {
-    throw new BlockSuiteError(ErrorCode.ValueNotInstanceOf, message);
+    throw new BlockSuiteError(errorCode, message);
   }
 }

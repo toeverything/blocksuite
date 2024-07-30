@@ -1,29 +1,18 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
-import type { DataViewTableManager } from '../table-view-manager.js';
+import type { TableSingleView } from '../table-view-manager.js';
 import type { TableViewSelection } from '../types.js';
 
 const BLOCKSUITE_DATABASE = 'blocksuite/database';
 const TEXT = 'text/plain';
 
 export class TableClipboardController implements ReactiveController {
-  private get readonly() {
-    return this.host.view.readonly;
-  }
-
-  private get std() {
-    return this.host.std;
-  }
-
-  constructor(public host: DataViewTable) {
-    host.addController(this);
-  }
-
   private _onCopy = (
     _context: UIEventStateContext,
     tableSelection: TableViewSelection,
@@ -96,7 +85,6 @@ export class TableClipboardController implements ReactiveController {
       }
 
       pasteToCells(
-        data,
         view,
         copyedSelectionData,
         tableSelection.groupKey,
@@ -109,6 +97,18 @@ export class TableClipboardController implements ReactiveController {
 
     return true;
   };
+
+  constructor(public host: DataViewTable) {
+    host.addController(this);
+  }
+
+  private get readonly() {
+    return this.host.view.readonly$.value;
+  }
+
+  private get std() {
+    return this.host.std;
+  }
 
   hostConnected() {
     this.host.disposables.add(
@@ -154,7 +154,7 @@ function getColumnValue(container: DatabaseCellContainer | undefined) {
 const UNSUPPORTED_COLUMNS = ['progress', 'checkbox'];
 function copyCellsValue(
   selection: TableViewSelection,
-  data: DataViewTableManager,
+  data: TableSingleView,
   view: DataViewTable,
   isCut = false
 ) {
@@ -163,7 +163,7 @@ function copyCellsValue(
   if (rowsSelection && !columnsSelection) {
     // rows
     const { start, end } = rowsSelection;
-    const titleIndex = data.columnsWithoutFilter.findIndex(
+    const titleIndex = data.columnsWithoutFilter$.value.findIndex(
       id => data.columnGetType(id) === 'title'
     );
     for (let i = start; i <= end; i++) {
@@ -180,7 +180,7 @@ function copyCellsValue(
     for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
       const value: string[] = [];
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
-        const column = data.columnGet(data.columns[j]);
+        const column = data.columnGet(data.columns$.value[j]);
         const container = view.selectionController.getCellContainer(
           groupKey,
           i,
@@ -204,7 +204,7 @@ function copyCellsValue(
     }
   } else if (!rowsSelection && !columnsSelection && focus) {
     // single cell
-    const column = data.columnGet(data.columns[focus.columnIndex]);
+    const column = data.columnGet(data.columns$.value[focus.columnIndex]);
     const container = view.selectionController.getCellContainer(
       groupKey,
       focus.rowIndex,
@@ -231,7 +231,7 @@ type CopyedColumn = { type: string; value: string };
 type CopyedSelectionData = CopyedColumn[][];
 function getCopiedValuesFromSelection(
   selection: TableViewSelection,
-  data: DataViewTableManager,
+  data: TableSingleView,
   view: DataViewTable
 ): CopyedSelectionData {
   const { rowsSelection, columnsSelection, focus, groupKey } = selection;
@@ -241,8 +241,8 @@ function getCopiedValuesFromSelection(
     const { start, end } = rowsSelection;
     for (let i = start; i <= end; i++) {
       const cellValues: CopyedColumn[] = [];
-      for (let j = 0; j < data.columns.length; j++) {
-        const column = data.columnGet(data.columns[j]);
+      for (let j = 0; j < data.columns$.value.length; j++) {
+        const column = data.columnGet(data.columns$.value[j]);
         const container = view.selectionController.getCellContainer(
           groupKey,
           i,
@@ -258,7 +258,7 @@ function getCopiedValuesFromSelection(
     for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
       const cellValues: CopyedColumn[] = [];
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
-        const column = data.columnGet(data.columns[j]);
+        const column = data.columnGet(data.columns$.value[j]);
         const container = view.selectionController.getCellContainer(
           groupKey,
           i,
@@ -276,7 +276,7 @@ function getCopiedValuesFromSelection(
       focus.rowIndex,
       focus.columnIndex
     );
-    const column = data.columnGet(data.columns[focus.columnIndex]);
+    const column = data.columnGet(data.columns$.value[focus.columnIndex]);
     const value = cellToStringMap[column.type]?.(container);
     values.push([{ type: column.type, value }]);
   }
@@ -285,7 +285,7 @@ function getCopiedValuesFromSelection(
 
 function getTargetRangeFromSelection(
   selection: TableViewSelection,
-  data: DataViewTableManager
+  data: TableSingleView
 ) {
   const { rowsSelection, columnsSelection, focus } = selection;
   let range: {
@@ -315,8 +315,8 @@ function getTargetRangeFromSelection(
       },
       column: {
         start: 0,
-        end: data.columns.length - 1,
-        length: data.columns.length,
+        end: data.columns$.value.length - 1,
+        length: data.columns$.value.length,
       },
     };
     if (rowsSelection.start === rowsSelection.end) {
@@ -356,7 +356,6 @@ function getTargetRangeFromSelection(
 }
 
 function pasteToCells(
-  data: DataViewTableManager,
   view: DataViewTable,
   copied: CopyedSelectionData,
   groupKey: string | undefined,
@@ -387,10 +386,7 @@ function pasteToCells(
       const columnId = targetContainer?.dataset.columnId;
 
       if (rowId && columnId) {
-        const value = targetContainer?.column.setValueFromString(
-          srcColumn.value
-        );
-        data.cellUpdateValue(rowId, columnId, value);
+        targetContainer?.column.setValueFromString(rowId, srcColumn.value);
       }
     }
   }

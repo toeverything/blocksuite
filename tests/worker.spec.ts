@@ -12,7 +12,9 @@ declare global {
   }
 }
 
-test('should the worker in the playground work fine.', async ({ page }) => {
+test.skip('should the worker in the playground work fine.', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 

@@ -1,18 +1,18 @@
+import type { Text } from '@blocksuite/store';
+
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Text } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { RichText } from '../../../_common/components/index.js';
+import type { DatabaseBlockComponent } from '../../database-block.js';
+
 import { getViewportElement } from '../../../_common/utils/query.js';
 import { isValidUrl } from '../../../_common/utils/url.js';
 import { HostContextKey } from '../../context/host-context.js';
 import { BaseCellRenderer } from '../../data-view/column/index.js';
-import type { DataViewKanbanManager } from '../../data-view/view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../data-view/view/presets/table/table-view-manager.js';
-import type { DatabaseBlockComponent } from '../../database-block.js';
 
 const styles = css`
   data-view-header-area-text {
@@ -74,34 +74,27 @@ const styles = css`
 `;
 
 abstract class BaseTextCell extends BaseCellRenderer<Text> {
-  get service() {
-    return this.view
-      .getContext(HostContextKey)
-      ?.std.spec.getService('affine:database');
-  }
+  static override styles = styles;
 
-  get inlineManager() {
-    return this.service?.inlineManager;
-  }
+  renderIcon() {
+    if (!this.showIcon) {
+      return;
+    }
+    const iconColumn = this.view.header$.value.iconColumn;
+    if (!iconColumn) return;
 
-  get attributesSchema() {
-    return this.inlineManager?.getSchema();
+    const icon = this.view.cellGetValue(this.cell.rowId, iconColumn) as string;
+    if (!icon) return;
+
+    return html`<div class="data-view-header-area-icon">${icon}</div>`;
   }
 
   get attributeRenderer() {
     return this.inlineManager?.getRenderer();
   }
 
-  get topContenteditableElement() {
-    const databaseBlock =
-      this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.topContenteditableElement;
-  }
-
-  get titleColumn() {
-    const columnId = this.view.header.titleColumn;
-    assertExists(columnId);
-    return this.view.columnGet(columnId);
+  get attributesSchema() {
+    return this.inlineManager?.getSchema();
   }
 
   get inlineEditor() {
@@ -111,29 +104,33 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     return inlineEditor;
   }
 
-  static override styles = styles;
+  get inlineManager() {
+    return this.service?.inlineManager;
+  }
 
-  override accessor view!: DataViewTableManager | DataViewKanbanManager;
+  get service() {
+    return this.view
+      .getContext(HostContextKey)
+      ?.std.spec.getService('affine:database');
+  }
 
-  @property({ attribute: false })
-  accessor showIcon = false;
+  get titleColumn() {
+    const columnId = this.view.header$.value.titleColumn;
+    assertExists(columnId);
+    return this.view.columnGet(columnId);
+  }
+
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    return databaseBlock?.topContenteditableElement;
+  }
 
   @query('rich-text')
   accessor richText!: RichText;
 
-  renderIcon() {
-    if (!this.showIcon) {
-      return;
-    }
-
-    const iconColumn = this.view.header.iconColumn;
-    if (!iconColumn) return;
-
-    const icon = this.view.columnGet(iconColumn).getValue(this.rowId) as string;
-    if (!icon) return;
-
-    return html`<div class="data-view-header-area-icon">${icon}</div>`;
-  }
+  @property({ attribute: false })
+  accessor showIcon = false;
 }
 
 @customElement('data-view-header-area-text')
@@ -170,11 +167,6 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     e.preventDefault();
     e.stopPropagation();
   };
-
-  private get std() {
-    const host = this.view.getContext(HostContextKey);
-    return host?.std;
-  }
 
   private _onCut = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
@@ -249,6 +241,26 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     }
   };
 
+  private get std() {
+    const host = this.view.getContext(HostContextKey);
+    return host?.std;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const selectAll = (e: KeyboardEvent) => {
+      if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.inlineEditor.selectAll();
+      }
+    };
+    this.addEventListener('keydown', selectAll);
+    this.disposables.add(() => {
+      this.removeEventListener('keydown', selectAll);
+    });
+  }
+
   override firstUpdated(props: Map<string, unknown>) {
     super.firstUpdated(props);
     this.disposables.addFromEvent(this.richText, 'copy', this._onCopy);
@@ -275,21 +287,6 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
         );
       })
       .catch(console.error);
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    const selectAll = (e: KeyboardEvent) => {
-      if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.inlineEditor.selectAll();
-      }
-    };
-    this.addEventListener('keydown', selectAll);
-    this.disposables.add(() => {
-      this.removeEventListener('keydown', selectAll);
-    });
   }
 
   override render() {

@@ -88,13 +88,21 @@ export function createInlineKeyDownHandler(
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;
 
-    const [leafStart, offsetStart] = inlineEditor.getTextPoint(
-      inlineRange.index
-    );
-    const [leafEnd, offsetEnd] =
-      inlineRange.length === 0
-        ? [leafStart, offsetStart]
-        : inlineEditor.getTextPoint(inlineRange.index + inlineRange.length);
+    const startTextPoint = inlineEditor.getTextPoint(inlineRange.index);
+    if (!startTextPoint) return;
+    const [leafStart, offsetStart] = startTextPoint;
+    let leafEnd: Text;
+    let offsetEnd: number;
+    if (inlineRange.length === 0) {
+      leafEnd = leafStart;
+      offsetEnd = offsetStart;
+    } else {
+      const endTextPoint = inlineEditor.getTextPoint(
+        inlineRange.index + inlineRange.length
+      );
+      if (!endTextPoint) return;
+      [leafEnd, offsetEnd] = endTextPoint;
+    }
     const prefixText = leafStart.textContent
       ? leafStart.textContent.slice(0, offsetStart)
       : '';

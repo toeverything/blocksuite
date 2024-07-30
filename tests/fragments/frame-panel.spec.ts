@@ -2,11 +2,11 @@ import { expect } from '@playwright/test';
 import { dragBetweenCoords } from 'utils/actions/drag.js';
 
 import {
+  Shape,
   addBasicShapeElement,
   addNote,
   edgelessCommonSetup,
   setEdgelessTool,
-  Shape,
   toggleFramePanel,
 } from '../utils/actions/edgeless.js';
 import { waitNextFrame } from '../utils/actions/index.js';
@@ -16,7 +16,7 @@ test.describe('frame panel', () => {
   test('should display empty placeholder when no frames', async ({ page }) => {
     await edgelessCommonSetup(page);
     await toggleFramePanel(page);
-    const frameCards = page.locator('frame-card');
+    const frameCards = page.locator('affine-frame-card');
     expect(await frameCards.count()).toBe(0);
 
     const placeholder = page.locator('.no-frame-placeholder');
@@ -44,9 +44,9 @@ test.describe('frame panel', () => {
     await setEdgelessTool(page, 'frame');
     await dragBetweenCoords(page, { x: 100, y: 440 }, { x: 600, y: 600 });
 
-    const frames = page.locator('edgeless-block-portal-frame');
+    const frames = page.locator('affine-frame');
     expect(await frames.count()).toBe(2);
-    const frameCards = page.locator('frame-card');
+    const frameCards = page.locator('affine-frame-card');
     expect(await frameCards.count()).toBe(2);
   });
 
@@ -62,10 +62,11 @@ test.describe('frame panel', () => {
 
     await setEdgelessTool(page, 'frame');
     await dragBetweenCoords(page, { x: 100, y: 440 }, { x: 600, y: 600 });
+    await waitNextFrame(page, 100);
 
-    const frames = page.locator('edgeless-block-portal-frame');
+    const frames = page.locator('affine-frame');
     expect(await frames.count()).toBe(1);
-    const frameCards = page.locator('frame-card');
+    const frameCards = page.locator('affine-frame-card');
     expect(await frameCards.count()).toBe(1);
     const notePortal = page.locator('surface-ref-note-portal');
     expect(await notePortal.count()).toBe(1);
@@ -74,7 +75,7 @@ test.describe('frame panel', () => {
   test('should update panel when frames change', async ({ page }) => {
     await edgelessCommonSetup(page);
     await toggleFramePanel(page);
-    const frameCards = page.locator('frame-card');
+    const frameCards = page.locator('affine-frame-card');
     expect(await frameCards.count()).toBe(0);
 
     await addNote(page, 'hello', 150, 500);
@@ -88,7 +89,7 @@ test.describe('frame panel', () => {
     await dragBetweenCoords(page, { x: 50, y: 300 }, { x: 120, y: 400 });
     await waitNextFrame(page);
 
-    const frames = page.locator('edgeless-block-portal-frame');
+    const frames = page.locator('affine-frame');
     expect(await frames.count()).toBe(2);
     expect(await frameCards.count()).toBe(2);
 

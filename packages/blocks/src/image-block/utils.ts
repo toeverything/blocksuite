@@ -1,15 +1,17 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
+
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
+import type { AttachmentBlockProps } from '../attachment-block/attachment-model.js';
+import type { ImageBlockComponent } from './image-block.js';
+import type { ImageBlockModel, ImageBlockProps } from './image-model.js';
 
 import { downloadBlob, withTempBlobData } from '../_common/utils/filesys.js';
 import { humanFileSize } from '../_common/utils/math.js';
-import type { AttachmentBlockProps } from '../attachment-block/attachment-model.js';
 import { readImageSize } from '../root-block/edgeless/components/utils.js';
 import { transformModel } from '../root-block/utils/operations/model.js';
 import { toast } from './../_common/components/toast.js';
-import type { ImageBlockComponent } from './image-block.js';
-import type { ImageBlockModel, ImageBlockProps } from './image-model.js';
 
 const MAX_RETRY_COUNT = 3;
 const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
@@ -31,7 +33,8 @@ export async function uploadBlobForImage(
   blob: Blob
 ): Promise<void> {
   if (isImageUploading(blockId)) {
-    throw new Error('The image is already uploading!');
+    console.error('The image is already uploading!');
+    return;
   }
   setImageUploading(blockId);
   const doc = editorHost.doc;
@@ -51,9 +54,11 @@ export async function uploadBlobForImage(
     setImageUploaded(blockId);
 
     const imageModel = doc.getBlockById(blockId) as ImageBlockModel | null;
-    assertExists(imageModel);
 
     doc.withoutTransact(() => {
+      if (!imageModel) {
+        return;
+      }
       doc.updateBlock(imageModel, {
         sourceId,
       } satisfies Partial<ImageBlockProps>);
@@ -115,12 +120,12 @@ export async function fetchImageBlob(block: ImageBlockComponent) {
     }
 
     if (!sourceId) {
-      throw new Error('Image sourceId is missing!');
+      return;
     }
 
     const blob = await doc.blobSync.get(sourceId);
     if (!blob) {
-      throw new Error('Image blob is missing!');
+      return;
     }
 
     block.loading = false;
@@ -198,7 +203,7 @@ function convertToPng(blob: Blob): Promise<Blob | null> {
         c.width = img.width;
         c.height = img.height;
         const ctx = c.getContext('2d');
-        assertExists(ctx);
+        if (!ctx) return;
         ctx.drawImage(img, 0, 0);
         c.toBlob(resolve, 'image/png');
       };
@@ -210,8 +215,8 @@ function convertToPng(blob: Blob): Promise<Blob | null> {
   });
 }
 
-export async function copyImageBlob(blockElement: ImageBlockComponent) {
-  const { host, model } = blockElement;
+export async function copyImageBlob(block: ImageBlockComponent) {
+  const { host, model } = block;
   let blob = await getImageBlob(model);
   if (!blob) {
     console.error('Failed to get image blob');
@@ -222,7 +227,11 @@ export async function copyImageBlob(blockElement: ImageBlockComponent) {
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {
       const dataURL = await convertToString(blob);
-      if (!dataURL) throw new Error('Cant convert a blob to data URL.');
+      if (!dataURL)
+        throw new BlockSuiteError(
+          ErrorCode.DefaultRuntimeError,
+          'Cant convert a blob to data URL.'
+        );
       // @ts-ignore
       await window.apis.clipboard?.copyAsImageFromString(dataURL);
     } else {
@@ -349,14 +358,16 @@ export function addImageBlocks(
 export async function turnImageIntoCardView(block: ImageBlockComponent) {
   const doc = block.doc;
   if (!doc.schema.flavourSchemaMap.has('affine:attachment')) {
-    throw new Error('The attachment flavour is not supported!');
+    console.error('The attachment flavour is not supported!');
+    return;
   }
 
   const model = block.model;
   const sourceId = model.sourceId;
   const blob = await getImageBlob(model);
   if (!sourceId || !blob) {
-    throw new Error('Image data not available');
+    console.error('Image data not available');
+    return;
   }
 
   const { saveImageData, getAttachmentData } = withTempBlobData();

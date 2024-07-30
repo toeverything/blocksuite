@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { Slot, throttle } from '@blocksuite/global/utils';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
@@ -7,8 +8,6 @@ import { matchFlavours } from '../../../_common/utils/model.js';
 import { buildPath } from '../../../_common/utils/query.js';
 
 export class NoteResizeObserver {
-  private _observer: ResizeObserver;
-
   /**
    * Observation will fire when observation starts if Element is being rendered, and Element’s size is not 0,0.
    * https://w3c.github.io/csswg-drafts/resize-observer/#resize-observer-interface
@@ -19,24 +18,13 @@ export class NoteResizeObserver {
 
   private _lastRects = new Map<string, DOMRectReadOnly>();
 
-  slots = {
-    resize: new Slot<Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>>(),
-  };
-
-  constructor() {
-    this._observer = new ResizeObserver(
-      throttle<ResizeObserverEntry[][], typeof this._onResize>(
-        this._onResize,
-        1000 / 60
-      )
-    );
-  }
+  private _observer: ResizeObserver;
 
   private _onResize = (entries: ResizeObserverEntry[]) => {
     const resizedNotes = new Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>();
     entries.forEach(entry => {
-      const blockElement = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
-      const id = blockElement?.getAttribute(BLOCK_ID_ATTR);
+      const blockComponent = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
+      const id = blockComponent?.getAttribute(BLOCK_ID_ATTR);
       if (!id) return;
       const lastRect = this._lastRects.get(id);
       if (
@@ -57,6 +45,26 @@ export class NoteResizeObserver {
     }
   };
 
+  slots = {
+    resize: new Slot<Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>>(),
+  };
+
+  constructor() {
+    this._observer = new ResizeObserver(
+      throttle<ResizeObserverEntry[][], typeof this._onResize>(
+        this._onResize,
+        1000 / 60
+      )
+    );
+  }
+
+  dispose() {
+    this._observer.disconnect();
+    this.slots.resize.dispose();
+    this._cachedElements.clear();
+    this._lastRects.clear();
+  }
+
   resetListener(editorHost: EditorHost) {
     const doc = editorHost.doc;
     const unCachedKeys = new Set(this._cachedElements.keys());
@@ -66,14 +74,9 @@ export class NoteResizeObserver {
       const blockId = model.id;
       unCachedKeys.delete(blockId);
 
-      const blockElement = editorHost.view.viewFromPath(
-        'block',
-        buildPath(model)
-      );
+      const block = editorHost.view.viewFromPath('block', buildPath(model));
 
-      const container = blockElement?.querySelector(
-        '.affine-note-block-container'
-      );
+      const container = block?.querySelector('.affine-note-block-container');
 
       const cachedElement = this._cachedElements.get(blockId);
       if (cachedElement) {
@@ -95,12 +98,5 @@ export class NoteResizeObserver {
       if (!element) return;
       this._observer.unobserve(element);
     });
-  }
-
-  dispose() {
-    this._observer.disconnect();
-    this.slots.resize.dispose();
-    this._cachedElements.clear();
-    this._lastRects.clear();
   }
 }

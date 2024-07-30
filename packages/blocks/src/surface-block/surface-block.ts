@@ -1,58 +1,77 @@
-import '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
-
-import { BlockElement, RangeManager } from '@blocksuite/block-std';
-import { css, html, nothing } from 'lit';
+import { BlockComponent, RangeManager } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
+import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
+import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import type { Color } from './consts.js';
+import type { SurfaceBlockModel } from './surface-model.js';
+import type { SurfaceBlockService } from './surface-service.js';
+
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { isInsideEdgelessEditor } from '../_common/utils/index.js';
 import { values } from '../_common/utils/iterable.js';
 import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
-import type { EdgelessBlockPortalContainer } from '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
-import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
 import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
-import type { SurfaceBlockModel } from './surface-model.js';
-import type { SurfaceBlockService } from './surface-service.js';
-import { Bound } from './utils/bound.js';
-import { normalizeWheelDeltaY } from './utils/index.js';
-
-export type IndexedCanvasUpdateEvent = CustomEvent<{
-  content: HTMLCanvasElement[];
-}>;
 
 @customElement('affine-surface')
-export class SurfaceBlockComponent extends BlockElement<
+export class SurfaceBlockComponent extends BlockComponent<
   SurfaceBlockModel,
   SurfaceBlockService
 > {
-  get renderer() {
-    return this._renderer;
-  }
+  private _cachedViewport = new Bound();
 
-  get edgeless() {
-    return this.parentBlockElement as EdgelessRootBlockComponent;
-  }
+  private _initCanvasTransform = () => {
+    const refresh = () => {
+      this._surfaceContainer.style.setProperty(
+        '--canvas-transform',
+        this._getReversedTransform()
+      );
+    };
 
-  private get _isEdgeless() {
-    return isInsideEdgelessEditor(this.host);
-  }
+    this._disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
+        refresh();
+      })
+    );
+
+    refresh();
+  };
+
+  private _initThemeObserver = () => {
+    this.themeObserver.observe(document.documentElement);
+    this.themeObserver.on(() => this.requestUpdate());
+    this.disposables.add(() => this.themeObserver.dispose());
+  };
+
+  private _lastTime = 0;
+
+  private _renderer!: Renderer;
+
+  static isConnector = (element: unknown): element is ConnectorElementModel => {
+    return element instanceof ConnectorElementModel;
+  };
+
+  static isShape = isShape;
 
   static override styles = css`
     .affine-edgeless-surface-block-container {
-      position: absolute;
       width: 100%;
       height: 100%;
     }
 
     .affine-edgeless-surface-block-container canvas {
+      left: 0;
+      top: 0;
       width: 100%;
       height: 100%;
-      position: relative;
+      position: absolute;
       z-index: 1;
       pointer-events: none;
+      transform-origin: 0 0;
+      transform: var(--canvas-transform);
     }
 
     edgeless-block-portal-container {
@@ -99,26 +118,35 @@ export class SurfaceBlockComponent extends BlockElement<
     }
   `;
 
-  static isShape = isShape;
+  fitToViewport = (bound: Bound) => {
+    const { viewport } = this.edgeless.service;
+    bound = bound.expand(30);
+    if (Date.now() - this._lastTime > 200)
+      this._cachedViewport = viewport.viewportBounds;
+    this._lastTime = Date.now();
 
-  private _renderer!: Renderer;
+    if (this._cachedViewport.contains(bound)) return;
 
-  private _lastTime = 0;
-
-  private _cachedViewport = new Bound();
-
-  @query('.affine-edgeless-surface-block-container')
-  private accessor _surfaceContainer!: HTMLElement;
-
-  readonly themeObserver = new ThemeObserver();
+    this._cachedViewport = this._cachedViewport.unite(bound);
+    viewport.setViewportByBound(this._cachedViewport, [0, 0, 0, 0], true);
+  };
 
   overlays!: {
     connector: ConnectionOverlay;
     frame: FrameOverlay;
   };
 
-  @query('edgeless-block-portal-container')
-  accessor portal!: EdgelessBlockPortalContainer;
+  refresh = () => {
+    this._renderer?.refresh();
+  };
+
+  readonly themeObserver = new ThemeObserver();
+
+  private _getReversedTransform() {
+    const { translateX, translateY, zoom } = this.edgeless.service.viewport;
+
+    return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
+  }
 
   private _initOverlay() {
     this.overlays = {
@@ -135,19 +163,21 @@ export class SurfaceBlockComponent extends BlockElement<
     const service = this.edgeless.service!;
 
     this._renderer = new Renderer({
+      viewport: service.viewport,
       layerManager: service.layer,
       enableStackingCanvas: true,
       provider: {
         selectedElements: () => service.selection.selectedIds,
+        getColorScheme: () => this.themeObserver.mode,
         getVariableColor: (val: string) =>
           this.themeObserver.getVariableValue(val),
+        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+          this.themeObserver.getColorValue(color, fallback, real),
+        generateColorProperty: (color: Color, fallback: string) =>
+          this.themeObserver.generateColorProperty(color, fallback),
       },
       onStackingCanvasCreated(canvas) {
         canvas.className = 'indexable-canvas';
-
-        canvas.style.setProperty('transform-origin', '0 0');
-        canvas.style.setProperty('position', 'absolute');
-        canvas.style.setProperty('pointer-events', 'none');
       },
     });
 
@@ -168,36 +198,22 @@ export class SurfaceBlockComponent extends BlockElement<
         this._renderer.refresh();
       })
     );
-    this._disposables.add(this._renderer.sync(this.edgeless.service.viewport));
     this._disposables.add(() => {
       this._renderer.dispose();
     });
     this._disposables.add(
-      this._renderer.stackingCanvasUpdated.on(() => {
-        this._emitStackingCanvasUpdate();
+      this._renderer.stackingCanvasUpdated.on(payload => {
+        if (payload.added.length) {
+          this._surfaceContainer.append(...payload.added);
+        }
+
+        if (payload.removed.length) {
+          payload.removed.forEach(canvas => {
+            canvas.remove();
+          });
+        }
       })
     );
-    this._disposables.add(
-      this.std.event.slots.editorHostPanned.on(() => {
-        this._renderer.onResize();
-      })
-    );
-  }
-
-  private _initThemeObserver = () => {
-    this.themeObserver.observe(document.documentElement);
-    this.themeObserver.on(() => this.requestUpdate());
-    this.disposables.add(() => this.themeObserver.dispose());
-  };
-
-  private _emitStackingCanvasUpdate() {
-    const evt = new CustomEvent('indexedcanvasupdate', {
-      detail: {
-        content: this._renderer.stackingCanvas,
-      },
-    }) as IndexedCanvasUpdateEvent;
-
-    this.dispatchEvent(evt);
   }
 
   override connectedCallback() {
@@ -205,58 +221,18 @@ export class SurfaceBlockComponent extends BlockElement<
 
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
 
-    if (!this._isEdgeless) return;
-
     this._initThemeObserver();
     this._initRenderer();
     this._initOverlay();
   }
 
   override firstUpdated() {
-    if (!this._isEdgeless) return;
-
     this._renderer.attach(this._surfaceContainer);
-  }
-
-  refresh() {
-    this._renderer.refresh();
-  }
-
-  fitToViewport(bound: Bound) {
-    const { viewport } = this.edgeless.service;
-    bound = bound.expand(30);
-    if (Date.now() - this._lastTime > 200)
-      this._cachedViewport = viewport.viewportBounds;
-    this._lastTime = Date.now();
-
-    if (this._cachedViewport.contains(bound)) return;
-
-    this._cachedViewport = this._cachedViewport.unite(bound);
-    viewport.setViewportByBound(this._cachedViewport, [0, 0, 0, 0], true);
-  }
-
-  /** @internal Only for testing */
-  initDefaultGestureHandler() {
-    const { _renderer } = this;
-    _renderer.canvas.addEventListener('wheel', e => {
-      e.preventDefault();
-      // pan
-      if (!e.ctrlKey) {
-        const dx = e.deltaX / _renderer.zoom;
-        const dy = e.deltaY / _renderer.zoom;
-        _renderer.setCenter(_renderer.centerX + dx, _renderer.centerY + dy);
-      }
-      // zoom
-      else {
-        const zoom = normalizeWheelDeltaY(e.deltaY);
-        _renderer.setZoom(zoom);
-      }
-    });
+    this._surfaceContainer.append(...this._renderer.stackingCanvas);
+    this._initCanvasTransform();
   }
 
   override render() {
-    if (!this._isEdgeless) return nothing;
-
     return html`
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in renderer -->
@@ -264,9 +240,16 @@ export class SurfaceBlockComponent extends BlockElement<
     `;
   }
 
-  static isConnector = (element: unknown): element is ConnectorElementModel => {
-    return element instanceof ConnectorElementModel;
-  };
+  get edgeless() {
+    return this.parentBlock as EdgelessRootBlockComponent;
+  }
+
+  get renderer() {
+    return this._renderer;
+  }
+
+  @query('.affine-edgeless-surface-block-container')
+  private accessor _surfaceContainer!: HTMLElement;
 }
 
 declare global {

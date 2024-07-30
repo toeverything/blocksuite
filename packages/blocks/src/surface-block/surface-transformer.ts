@@ -1,30 +1,24 @@
+import type { SurfaceBlockProps } from '@blocksuite/block-std/gfx';
 import type {
   FromSnapshotPayload,
   SnapshotReturn,
   ToSnapshotPayload,
   Y,
 } from '@blocksuite/store';
-import { BaseBlockTransformer, DocCollection } from '@blocksuite/store';
 
-import type { SurfaceBlockProps } from './surface-model.js';
+import { BaseBlockTransformer, DocCollection } from '@blocksuite/store';
 
 const SURFACE_TEXT_UNIQ_IDENTIFIER = 'affine:surface:text';
 // Used for group children field
 const SURFACE_YMAP_UNIQ_IDENTIFIER = 'affine:surface:ymap';
 
 export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockProps> {
-  private _toJSON(value: unknown): unknown {
-    if (value instanceof DocCollection.Y.Text) {
-      return {
-        [SURFACE_TEXT_UNIQ_IDENTIFIER]: true,
-        delta: value.toDelta(),
-      };
-    } else if (value instanceof DocCollection.Y.Map) {
-      return {
-        [SURFACE_YMAP_UNIQ_IDENTIFIER]: true,
-        json: value.toJSON(),
-      };
-    }
+  private _elementToJSON(element: Y.Map<unknown>) {
+    const value: Record<string, unknown> = {};
+    element.forEach((_value, _key) => {
+      value[_key] = this._toJSON(_value);
+    });
+
     return value;
   }
 
@@ -46,12 +40,18 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
     return value;
   }
 
-  private _elementToJSON(element: Y.Map<unknown>) {
-    const value: Record<string, unknown> = {};
-    element.forEach((_value, _key) => {
-      value[_key] = this._toJSON(_value);
-    });
-
+  private _toJSON(value: unknown): unknown {
+    if (value instanceof DocCollection.Y.Text) {
+      return {
+        [SURFACE_TEXT_UNIQ_IDENTIFIER]: true,
+        delta: value.toDelta(),
+      };
+    } else if (value instanceof DocCollection.Y.Map) {
+      return {
+        [SURFACE_YMAP_UNIQ_IDENTIFIER]: true,
+        json: value.toJSON(),
+      };
+    }
     return value;
   }
 
@@ -62,22 +62,6 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
     });
 
     return yMap;
-  }
-
-  override async toSnapshot(payload: ToSnapshotPayload<SurfaceBlockProps>) {
-    const snapshot = await super.toSnapshot(payload);
-    const elementsValue = payload.model.elements.getValue();
-    const value: Record<string, unknown> = {};
-    if (elementsValue) {
-      elementsValue.forEach((element, key) => {
-        value[key] = this._elementToJSON(element as Y.Map<unknown>);
-      });
-    }
-    snapshot.props = {
-      elements: value,
-    };
-
-    return snapshot;
   }
 
   override async fromSnapshot(
@@ -103,5 +87,21 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
     };
 
     return snapshotRet;
+  }
+
+  override async toSnapshot(payload: ToSnapshotPayload<SurfaceBlockProps>) {
+    const snapshot = await super.toSnapshot(payload);
+    const elementsValue = payload.model.elements.getValue();
+    const value: Record<string, unknown> = {};
+    if (elementsValue) {
+      elementsValue.forEach((element, key) => {
+        value[key] = this._elementToJSON(element as Y.Map<unknown>);
+      });
+    }
+    snapshot.props = {
+      elements: value,
+    };
+
+    return snapshot;
   }
 }

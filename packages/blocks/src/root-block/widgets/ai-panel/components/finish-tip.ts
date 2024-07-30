@@ -1,11 +1,14 @@
+import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+
+import type { CopyConfig } from '../type.js';
 
 import { AIDoneIcon } from '../../../../_common/icons/ai.js';
 import { WarningIcon } from '../../../../_common/icons/misc.js';
 import { CopyIcon } from '../../../../_common/icons/text.js';
-import type { CopyConfig } from '../type.js';
 
 @customElement('ai-finish-tip')
 export class AIFinishTip extends WithDisposable(LitElement) {
@@ -60,12 +63,6 @@ export class AIFinishTip extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor copy: CopyConfig | undefined = undefined;
-
-  @state()
-  accessor copied = false;
-
   override render() {
     return html`<div class="finish-tip">
       ${WarningIcon}
@@ -78,6 +75,12 @@ export class AIFinishTip extends WithDisposable(LitElement) {
                   class="copy"
                   @click=${async () => {
                     this.copied = !!(await this.copy?.onCopy());
+                    if (this.copied) {
+                      const rootService =
+                        this.host.spec.getService('affine:page');
+                      const { notificationService } = rootService;
+                      notificationService?.toast('Copied to clipboard');
+                    }
                   }}
                 >
                   ${CopyIcon}
@@ -87,6 +90,15 @@ export class AIFinishTip extends WithDisposable(LitElement) {
         : nothing}
     </div>`;
   }
+
+  @state()
+  accessor copied = false;
+
+  @property({ attribute: false })
+  accessor copy: CopyConfig | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 }
 
 declare global {

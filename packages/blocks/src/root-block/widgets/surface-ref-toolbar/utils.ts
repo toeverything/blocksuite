@@ -1,21 +1,23 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { isTopLevelBlock } from '../../../root-block/edgeless/utils/query.js';
 import type { Renderer } from '../../../surface-block/canvas-renderer/renderer.js';
-import { Bound } from '../../../surface-block/utils/bound.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
+
+import { blockComponentGetter } from '../../../_common/utils/query.js';
+import { isTopLevelBlock } from '../../../root-block/edgeless/utils/query.js';
 
 export const edgelessToBlob = async (
   host: EditorHost,
   options: {
     surfaceRefBlock: SurfaceRefBlockComponent;
     surfaceRenderer: Renderer;
-    edgelessElement: BlockSuite.EdgelessModelType;
-    blockContainer: HTMLElement;
+    edgelessElement: BlockSuite.EdgelessModel;
   }
 ): Promise<Blob> => {
-  const { edgelessElement, blockContainer } = options;
+  const { edgelessElement, surfaceRefBlock } = options;
   const rootService = host.spec.getService('affine:page');
   const exportManager = rootService.exportManager;
   const bound = Bound.deserialize(edgelessElement.xywh);
@@ -25,14 +27,11 @@ export const edgelessToBlob = async (
     .edgelessToCanvas(
       options.surfaceRenderer,
       bound,
-      model =>
-        blockContainer.querySelector(
-          `[data-portal-reference-block-id="${model.id}"]`
-        ),
+      model => blockComponentGetter(model, surfaceRefBlock.host.view),
       undefined,
       isBlock ? [edgelessElement] : undefined,
       isBlock ? undefined : [edgelessElement],
-      { zoom: options.surfaceRenderer.zoom }
+      { zoom: options.surfaceRenderer.viewport.zoom }
     )
     .then(canvas => {
       assertExists(canvas);

@@ -1,14 +1,14 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { toast } from '../_common/components/toast.js';
-import { humanFileSize } from '../_common/utils/math.js';
 import type { AttachmentBlockComponent } from './attachment-block.js';
 import type {
   AttachmentBlockModel,
   AttachmentBlockProps,
 } from './attachment-model.js';
+
+import { toast } from '../_common/components/toast.js';
+import { humanFileSize } from '../_common/utils/math.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 import { allowEmbed } from './embed.js';
 
@@ -44,7 +44,7 @@ async function uploadAttachmentBlob(
   blob: Blob
 ): Promise<void> {
   if (isAttachmentUploading(blockId)) {
-    throw new Error('The attachment is already uploading!');
+    return;
   }
 
   const doc = editorHost.doc;
@@ -67,9 +67,11 @@ async function uploadAttachmentBlob(
     const attachmentModel = doc.getBlockById(
       blockId
     ) as AttachmentBlockModel | null;
-    assertExists(attachmentModel);
 
     doc.withoutTransact(() => {
+      if (!attachmentModel) {
+        return;
+      }
       doc.updateBlock(attachmentModel, {
         sourceId,
       } satisfies Partial<AttachmentBlockProps>);
@@ -110,12 +112,12 @@ export async function checkAttachmentBlob(block: AttachmentBlockComponent) {
 
   try {
     if (!sourceId) {
-      throw new Error('Attachment sourceId is missing!');
+      return;
     }
 
     const blob = await getAttachmentBlob(model);
     if (!blob) {
-      throw new Error('Attachment blob is missing!');
+      return;
     }
 
     block.loading = false;

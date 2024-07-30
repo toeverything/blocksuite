@@ -1,9 +1,10 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/block-std';
+
+import { WidgetComponent } from '@blocksuite/block-std';
 import {
+  DisposableGroup,
   assertExists,
   debounce,
-  DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
 import { customElement } from 'lit/decorators.js';
@@ -13,10 +14,9 @@ import {
   getInlineEditorByModel,
   matchFlavours,
 } from '../../../_common/utils/index.js';
-import { isRootElement } from '../../utils/guard.js';
+import { isRootComponent } from '../../utils/guard.js';
 import { getPopperPosition } from '../../utils/position.js';
 import {
-  defaultSlashMenuConfig,
   type SlashMenuActionItem,
   type SlashMenuContext,
   type SlashMenuGroupDivider,
@@ -24,6 +24,7 @@ import {
   type SlashMenuItemGenerator,
   type SlashMenuStaticConfig,
   type SlashSubMenu,
+  defaultSlashMenuConfig,
 } from './config.js';
 import { SlashMenu } from './slash-menu-popover.js';
 import { filterEnabledSlashMenuItems } from './utils.js';
@@ -65,10 +66,14 @@ const showSlashMenu = debounce(
       disposables.dispose()
     );
 
-    const slashMenu = new SlashMenu();
+    const inlineEditor = getInlineEditorByModel(
+      context.rootComponent.host,
+      context.model
+    );
+    if (!inlineEditor) return;
+    const slashMenu = new SlashMenu(inlineEditor, abortController);
     disposables.add(() => slashMenu.remove());
     slashMenu.context = context;
-    slashMenu.abortController = abortController;
     slashMenu.config = config;
     slashMenu.triggerKey = triggerKey;
 
@@ -99,11 +104,7 @@ const showSlashMenu = debounce(
 export const AFFINE_SLASH_MENU_WIDGET = 'affine-slash-menu-widget';
 
 @customElement(AFFINE_SLASH_MENU_WIDGET)
-export class AffineSlashMenuWidget extends WidgetElement {
-  static DEFAULT_CONFIG = defaultSlashMenuConfig;
-
-  config = AffineSlashMenuWidget.DEFAULT_CONFIG;
-
+export class AffineSlashMenuWidget extends WidgetComponent {
   private _onBeforeInput = (ctx: UIEventStateContext) => {
     const eventState = ctx.get('defaultState');
     const event = eventState.event as InputEvent;
@@ -125,16 +126,17 @@ export class AffineSlashMenuWidget extends WidgetElement {
     if (!inlineEditor) return;
 
     inlineEditor.slots.inlineRangeApply.once(() => {
-      const rootElement = this.blockElement;
-      if (!isRootElement(rootElement)) {
-        throw new Error('SlashMenuWidget should be used in RootBlock');
+      const rootComponent = this.block;
+      if (!isRootComponent(rootComponent)) {
+        console.error('SlashMenuWidget should be used in RootBlock');
+        return;
       }
 
       const config: SlashMenuStaticConfig = {
         ...this.config,
         items: filterEnabledSlashMenuItems(this.config.items, {
           model,
-          rootElement,
+          rootComponent: rootComponent,
         }),
       };
 
@@ -145,7 +147,7 @@ export class AffineSlashMenuWidget extends WidgetElement {
 
         closeSlashMenu();
         showSlashMenu({
-          context: { model, rootElement },
+          context: { model, rootComponent: rootComponent },
           range: curRange,
           triggerKey,
           config,
@@ -154,11 +156,16 @@ export class AffineSlashMenuWidget extends WidgetElement {
     });
   };
 
+  static DEFAULT_CONFIG = defaultSlashMenuConfig;
+
+  config = AffineSlashMenuWidget.DEFAULT_CONFIG;
+
   override connectedCallback() {
     super.connectedCallback();
 
     if (this.config.triggerKeys.some(key => key.length === 0)) {
-      throw new Error('Trigger key of slash menu should not be empty string');
+      console.error('Trigger key of slash menu should not be empty string');
+      return;
     }
 
     this.handleEvent('beforeInput', this._onBeforeInput);

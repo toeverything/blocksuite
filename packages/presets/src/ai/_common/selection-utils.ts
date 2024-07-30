@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import {
   BlocksUtils,
   EdgelessRootService,

@@ -1,9 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { type AIError, openFileOrFiles } from '@blocksuite/blocks';
-import { css, html, LitElement, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+
+import type { ChatContextValue, ChatMessage } from './chat-context.js';
 
 import {
   ChatAbortIcon,
@@ -15,7 +18,6 @@ import {
 import { AIProvider } from '../provider.js';
 import { reportResponse } from '../utils/action-reporter.js';
 import { readBlobAsURL } from '../utils/image.js';
-import type { ChatContextValue, ChatMessage } from './chat-context.js';
 
 const MaximumImageCount = 8;
 
@@ -196,35 +198,77 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
+  send = async () => {
+    const { status, markdown } = this.chatContextValue;
+    if (status === 'loading' || status === 'transmitting') return;
 
-  @query('.chat-panel-images')
-  accessor imagesWrapper!: HTMLDivElement;
+    const text = this.textarea.value;
+    const { images } = this.chatContextValue;
+    if (!text && images.length === 0) {
+      return;
+    }
+    const { doc } = this.host;
+    this.textarea.value = '';
+    this.isInputEmpty = true;
+    this.updateContext({
+      images: [],
+      status: 'loading',
+      error: null,
+      quote: '',
+      markdown: '',
+    });
 
-  @query('textarea')
-  accessor textarea!: HTMLTextAreaElement;
+    const attachments = await Promise.all(
+      images?.map(image => readBlobAsURL(image))
+    );
 
-  @query('.close-wrapper')
-  accessor closeWrapper!: HTMLDivElement;
+    const content = (markdown ? `${markdown}\n` : '') + text;
 
-  @state()
-  accessor curIndex = -1;
+    this.updateContext({
+      items: [
+        ...this.chatContextValue.items,
+        {
+          role: 'user',
+          content: content,
+          createdAt: new Date().toISOString(),
+          attachments,
+        },
+        { role: 'assistant', content: '', createdAt: new Date().toISOString() },
+      ],
+    });
 
-  @state()
-  accessor isInputEmpty = true;
+    try {
+      const abortController = new AbortController();
+      const stream = AIProvider.actions.chat?.({
+        input: content,
+        docId: doc.id,
+        attachments: images,
+        workspaceId: doc.collection.id,
+        host: this.host,
+        stream: true,
+        signal: abortController.signal,
+        where: 'chat-panel',
+        control: 'chat-send',
+      });
 
-  @state()
-  accessor focused = false;
+      if (stream) {
+        this.updateContext({ abortController });
 
-  @property({ attribute: false })
-  accessor chatContextValue!: ChatContextValue;
+        for await (const text of stream) {
+          const items = [...this.chatContextValue.items];
+          const last = items[items.length - 1] as ChatMessage;
+          last.content += text;
+          this.updateContext({ items, status: 'transmitting' });
+        }
 
-  @property({ attribute: false })
-  accessor updateContext!: (context: Partial<ChatContextValue>) => void;
-
-  @property({ attribute: false })
-  accessor cleanupHistories!: () => Promise<void>;
+        this.updateContext({ status: 'success' });
+      }
+    } catch (error) {
+      this.updateContext({ status: 'error', error: error as AIError });
+    } finally {
+      this.updateContext({ abortController: null });
+    }
+  };
 
   private _addImages(images: File[]) {
     const oldImages = this.chatContextValue.images;
@@ -402,77 +446,35 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       </div>`;
   }
 
-  send = async () => {
-    const { status, markdown } = this.chatContextValue;
-    if (status === 'loading' || status === 'transmitting') return;
+  @property({ attribute: false })
+  accessor chatContextValue!: ChatContextValue;
 
-    const text = this.textarea.value;
-    const { images } = this.chatContextValue;
-    if (!text && images.length === 0) {
-      return;
-    }
-    const { doc } = this.host;
-    this.textarea.value = '';
-    this.isInputEmpty = true;
-    this.updateContext({
-      images: [],
-      status: 'loading',
-      error: null,
-      quote: '',
-      markdown: '',
-    });
+  @property({ attribute: false })
+  accessor cleanupHistories!: () => Promise<void>;
 
-    const attachments = await Promise.all(
-      images?.map(image => readBlobAsURL(image))
-    );
+  @query('.close-wrapper')
+  accessor closeWrapper!: HTMLDivElement;
 
-    const content = (markdown ? `${markdown}\n` : '') + text;
+  @state()
+  accessor curIndex = -1;
 
-    this.updateContext({
-      items: [
-        ...this.chatContextValue.items,
-        {
-          role: 'user',
-          content: content,
-          createdAt: new Date().toISOString(),
-          attachments,
-        },
-        { role: 'assistant', content: '', createdAt: new Date().toISOString() },
-      ],
-    });
+  @state()
+  accessor focused = false;
 
-    try {
-      const abortController = new AbortController();
-      const stream = AIProvider.actions.chat?.({
-        input: content,
-        docId: doc.id,
-        attachments: images,
-        workspaceId: doc.collection.id,
-        host: this.host,
-        stream: true,
-        signal: abortController.signal,
-        where: 'chat-panel',
-        control: 'chat-send',
-      });
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 
-      if (stream) {
-        this.updateContext({ abortController });
+  @query('.chat-panel-images')
+  accessor imagesWrapper!: HTMLDivElement;
 
-        for await (const text of stream) {
-          const items = [...this.chatContextValue.items];
-          const last = items[items.length - 1] as ChatMessage;
-          last.content += text;
-          this.updateContext({ items, status: 'transmitting' });
-        }
+  @state()
+  accessor isInputEmpty = true;
 
-        this.updateContext({ status: 'success' });
-      }
-    } catch (error) {
-      this.updateContext({ status: 'error', error: error as AIError });
-    } finally {
-      this.updateContext({ abortController: null });
-    }
-  };
+  @query('textarea')
+  accessor textarea!: HTMLTextAreaElement;
+
+  @property({ attribute: false })
+  accessor updateContext!: (context: Partial<ChatContextValue>) => void;
 }
 
 declare global {

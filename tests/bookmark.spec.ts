@@ -1,12 +1,13 @@
-import './utils/declare-test-window.js';
-
 import type { Page } from '@playwright/test';
+
 import { expect } from '@playwright/test';
 import { getEmbedCardToolbar } from 'utils/query.js';
 
 import {
+  SHORT_KEY,
   activeNoteInEdgeless,
   copyByKeyboard,
+  dragBlockToPoint,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
@@ -21,7 +22,6 @@ import {
   pressTab,
   selectAllByKeyboard,
   setInlineRangeInSelectedRichText,
-  SHORT_KEY,
   switchEditorMode,
   type,
   waitForInlineEditorStateUpdated,
@@ -34,9 +34,11 @@ import {
   assertBlockFlavour,
   assertBlockSelections,
   assertExists,
+  assertParentBlockFlavour,
   assertRichTextInlineRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
+import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 
 const inputUrl = 'http://localhost';
@@ -85,62 +87,6 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
     prop:hidden={false}
     prop:index="a0"
   >
-    <affine:bookmark
-      prop:caption={null}
-      prop:description={null}
-      prop:icon={null}
-      prop:image={null}
-      prop:index="a0"
-      prop:rotate={0}
-      prop:style="horizontal"
-      prop:title={null}
-      prop:url="${inputUrl}"
-    />
-  </affine:note>
-</affine:page>`
-  );
-});
-
-test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
-  await page.click('.block-hub-menu-container [role="menuitem"]');
-  await page.waitForTimeout(200);
-  const listMenu = page.locator('.block-hub-icon-container:nth-child(4)');
-  await listMenu.hover();
-  const blockHubListContainer = page.locator(
-    '.block-hub-cards-container[type="file"]'
-  );
-  await expect(blockHubListContainer).toBeVisible();
-  await page.click(
-    '.card-container[affine-flavour="affine:bookmark"][affine-type="bookmark"]'
-  );
-  await page.waitForTimeout(200);
-  await type(page, inputUrl);
-  await pressEnter(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:bookmark
       prop:caption={null}
       prop:description={null}
@@ -645,4 +591,26 @@ test('indent bookmark block to list', async ({ page }) => {
 
   await pressShiftTab(page);
   await assertBlockChildrenIds(page, '1', ['3', '5']);
+});
+
+test('bookmark can be dragged from note to surface top level block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await page.waitForTimeout(100);
+  await type(page, '/link', 100);
+  await pressEnter(page);
+  await page.waitForTimeout(100);
+  await type(page, inputUrl);
+  await pressEnter(page);
+
+  await switchEditorMode(page);
+  await page.mouse.dblclick(450, 450);
+
+  await dragBlockToPoint(page, '4', { x: 200, y: 200 });
+
+  await waitNextFrame(page);
+  await assertParentBlockFlavour(page, '5', 'affine:surface');
 });

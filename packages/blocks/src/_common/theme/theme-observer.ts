@@ -1,7 +1,15 @@
 import { Slot } from '@blocksuite/global/utils';
 
+import type { Color } from '../../surface-block/consts.js';
 import type { CssVariablesMap } from './css-variables.js';
-import { isCssVariable, StyleVariables } from './css-variables.js';
+
+import { StyleVariables, isCssVariable } from './css-variables.js';
+
+export enum ColorScheme {
+  Dark = 'dark',
+  Light = 'light',
+  Normal = 'normal',
+}
 
 export function extractCssVariables(element: Element): CssVariablesMap {
   const styles = window.getComputedStyle(element);
@@ -23,30 +31,77 @@ export function extractCssVariables(element: Element): CssVariablesMap {
  * Observer theme changing by `data-theme` property
  */
 export class ThemeObserver extends Slot<CssVariablesMap> {
-  private _observer?: MutationObserver;
-
-  private _mode = '';
-
   private _cssVariables: CssVariablesMap | null = null;
 
-  get cssVariables() {
-    return this._cssVariables;
+  private _mode: ColorScheme = ColorScheme.Normal;
+
+  private _observer?: MutationObserver;
+
+  override dispose() {
+    super.dispose();
+    this._observer?.disconnect();
   }
 
-  observe(element: HTMLElement) {
-    this._observer?.disconnect();
-    this._cssVariables = extractCssVariables(element);
-    this._observer = new MutationObserver(() => {
-      const mode = element.dataset.theme;
-      if (this._mode !== mode) {
-        this._cssVariables = extractCssVariables(element);
-        this.emit(this._cssVariables);
-      }
-    });
-    this._observer.observe(element, {
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
+  /**
+   * Generates a CSS's color property with `var` or `light-dark` functions.
+   *
+   * Sometimes used to set the frame/note background.
+   *
+   * @param color - A color value.
+   * @param fallback  - If color value processing fails, it will be used as a fallback.
+   * @returns - A color property string.
+   *
+   * @example
+   *
+   * ```
+   * `rgba(255,0,0)`
+   * `#fff`
+   * `light-dark(#fff, #000)`
+   * `var(--affine-palette-shape-blue)`
+   * ```
+   */
+  generateColorProperty(color: Color, fallback = 'transparent') {
+    fallback = fallback.startsWith('--') ? `var(${fallback})` : fallback;
+
+    if (typeof color === 'string') {
+      return color.startsWith('--') ? `var(${color})` : color ?? fallback;
+    }
+
+    if (color.light && color.dark) {
+      return `light-dark(${color.light}, ${color.dark})`;
+    }
+
+    return color.normal ?? fallback;
+  }
+
+  /**
+   * Gets a color with the current theme.
+   *
+   * @param color - A color value.
+   * @param fallback  - If color value processing fails, it will be used as a fallback.
+   * @param real - If true, it returns the computed style.
+   * @returns - A color property string.
+   *
+   * @example
+   *
+   * ```
+   * `rgba(255,0,0)`
+   * `#fff`
+   * `--affine-palette-shape-blue`
+   * ```
+   */
+  getColorValue(
+    color: Color,
+    fallback = '--affine-palette-transparent',
+    real?: boolean
+  ) {
+    color =
+      (typeof color === 'string'
+        ? color
+        : color[this.mode] ?? color['normal']) ??
+      fallback ??
+      'transparent';
+    return real ? this.getVariableValue(color) : color;
   }
 
   getVariableValue(variable: string) {
@@ -63,8 +118,31 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
     return variable;
   }
 
-  override dispose() {
-    super.dispose();
+  observe(element: HTMLElement) {
+    const callback = () => {
+      const mode = element.dataset.theme;
+      if (mode && this._mode !== mode) {
+        this._mode = mode as ColorScheme;
+        this._cssVariables = extractCssVariables(element);
+        this.emit(this._cssVariables);
+      }
+    };
+
     this._observer?.disconnect();
+    this._observer = new MutationObserver(callback);
+    this._observer.observe(element, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+
+    callback();
+  }
+
+  get cssVariables() {
+    return this._cssVariables;
+  }
+
+  get mode() {
+    return this._mode;
   }
 }

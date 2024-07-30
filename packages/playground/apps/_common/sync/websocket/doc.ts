@@ -1,27 +1,11 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { DocSource } from '@blocksuite/sync';
+
+import { assertExists } from '@blocksuite/global/utils';
 import { diffUpdate, encodeStateVectorFromUpdate, mergeUpdates } from 'yjs';
 
 import type { WebSocketMessage } from './types';
 
 export class WebSocketDocSource implements DocSource {
-  name = 'websocket';
-
-  docMap = new Map<string, Uint8Array>();
-
-  constructor(readonly ws: WebSocket) {
-    this.ws.addEventListener('message', this._onMessage);
-
-    this.ws.send(
-      JSON.stringify({
-        channel: 'doc',
-        payload: {
-          type: 'init',
-        },
-      } satisfies WebSocketMessage)
-    );
-  }
-
   private _onMessage = (event: MessageEvent<string>) => {
     const data = JSON.parse(event.data) as WebSocketMessage;
 
@@ -51,6 +35,23 @@ export class WebSocketDocSource implements DocSource {
       this.docMap.set(docId, new Uint8Array(updates));
     }
   };
+
+  docMap = new Map<string, Uint8Array>();
+
+  name = 'websocket';
+
+  constructor(readonly ws: WebSocket) {
+    this.ws.addEventListener('message', this._onMessage);
+
+    this.ws.send(
+      JSON.stringify({
+        channel: 'doc',
+        payload: {
+          type: 'init',
+        },
+      } satisfies WebSocketMessage)
+    );
+  }
 
   pull(docId: string, state: Uint8Array) {
     const update = this.docMap.get(docId);

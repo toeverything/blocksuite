@@ -1,7 +1,7 @@
+import type { UserConfig } from 'vite';
+
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-
-import type { UserConfig } from 'vite';
 import { defineConfig, mergeConfig } from 'vite';
 
 import { brotliAsync, gzipAsync } from '../../scripts/utils.js';
