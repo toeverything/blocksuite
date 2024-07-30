@@ -1,3 +1,5 @@
+import { IS_MAC } from '@blocksuite/global/env';
+
 import type { EventOptions, UIEventDispatcher } from '../dispatcher.js';
 
 import {
@@ -11,6 +13,9 @@ import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class KeyboardControl {
   private _down = (event: KeyboardEvent) => {
+    if (!this._shouldTrigger(event)) {
+      return;
+    }
     const keyboardEventState = new KeyboardEventState({
       event,
       composing: this.composition,
@@ -21,7 +26,32 @@ export class KeyboardControl {
     );
   };
 
+  private _shouldTrigger = (event: KeyboardEvent) => {
+    if (event.defaultPrevented) {
+      return false;
+    }
+    if (event.isComposing) {
+      return false;
+    }
+    const mod = IS_MAC ? event.metaKey : event.ctrlKey;
+    if (
+      ['c', 'v', 'x'].includes(event.key) &&
+      mod &&
+      !event.shiftKey &&
+      !event.altKey
+    ) {
+      return false;
+    }
+    if (['Control', 'Meta', 'Shift'].includes(event.key)) {
+      return false;
+    }
+    return true;
+  };
+
   private _up = (event: KeyboardEvent) => {
+    if (!this._shouldTrigger(event)) {
+      return;
+    }
     const keyboardEventState = new KeyboardEventState({
       event,
       composing: this.composition,

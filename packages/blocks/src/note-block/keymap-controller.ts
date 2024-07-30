@@ -434,35 +434,17 @@ export class KeymapController implements ReactiveController {
 
   private _onSelectAll: UIEventHandler = ctx => {
     ctx.get('defaultState').event.preventDefault();
-    const view = this._std.view;
     const selection = this._std.selection;
     // eslint-disable-next-line unicorn/prefer-array-some
     if (!selection.find('block')) {
       return;
     }
-    const blocks: BlockSelection[] = [];
-    view.walkThrough(nodeView => {
-      if (
-        // Remove children blocks, only select the most top level blocks.
-        !blocks
-          .map(block => this._std.doc.getBlockById(block.blockId))
-          .filter(b => !!b)
-          .map(b => buildPath(b))
-          .reduce(
-            (acc, cur) =>
-              // check whether cur is a sub list of nodeView.path
-              acc || cur.every(path => nodeView.path.includes(path)),
-            false
-          )
-      ) {
-        blocks.push(
-          selection.create('block', {
-            blockId: nodeView.blockId,
-          })
-        );
-      }
-      return null;
-    }, this.host.blockId);
+    const children = this.host.model.children;
+    const blocks: BlockSelection[] = children.map(child => {
+      return selection.create('block', {
+        blockId: child.id,
+      });
+    });
     selection.update(selList => {
       return selList.filter(sel => !sel.is('block')).concat(blocks);
     });
