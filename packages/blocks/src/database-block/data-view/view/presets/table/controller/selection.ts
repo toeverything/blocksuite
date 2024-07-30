@@ -23,6 +23,8 @@ import {
   fillSelectionWithFocusCellData,
 } from './drag-to-fill.js';
 
+type TableViewSelectionSetOptions = Omit<TableViewSelection, 'viewId' | 'type'>;
+
 export class TableSelectionController implements ReactiveController {
   __dragToFillElement = new DragToFillElement();
 
@@ -306,6 +308,21 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
+  focusToArea(selection: TableViewSelection) {
+    return {
+      ...selection,
+      rowsSelection: selection.rowsSelection ?? {
+        start: selection.focus.rowIndex,
+        end: selection.focus.rowIndex,
+      },
+      columnsSelection: selection.columnsSelection ?? {
+        start: selection.focus.columnIndex,
+        end: selection.focus.columnIndex,
+      },
+      isEditing: false,
+    } satisfies TableViewSelectionSetOptions;
+  }
+
   focusToCell(position: 'left' | 'right' | 'up' | 'down') {
     if (!this.selection) {
       return;
@@ -401,6 +418,12 @@ export class TableSelectionController implements ReactiveController {
       height: (bottomRow.getBoundingClientRect().bottom - leftRect.top) / scale,
       scale,
     };
+  }
+
+  getSelectionAreaBorder(position: 'left' | 'right' | 'top' | 'bottom') {
+    return this.__selectionElement.selectionRef.value?.querySelector(
+      `.area-border.area-${position}`
+    );
   }
 
   hostConnected() {
@@ -560,6 +583,132 @@ export class TableSelectionController implements ReactiveController {
       },
       isEditing: false,
     };
+  }
+
+  selectionAreaDown() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (newSelection.rowsSelection.start === newSelection.focus.rowIndex) {
+      newSelection.rowsSelection.end = Math.min(
+        this.rows(newSelection.groupKey).length - 1,
+        newSelection.rowsSelection.end + 1
+      );
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('bottom')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    } else {
+      newSelection.rowsSelection.start += 1;
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('top')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    }
+    this.selection = newSelection;
+  }
+
+  selectionAreaLeft() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (newSelection.columnsSelection.end === newSelection.focus.columnIndex) {
+      newSelection.columnsSelection.start = Math.max(
+        0,
+        newSelection.columnsSelection.start - 1
+      );
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('left')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    } else {
+      newSelection.columnsSelection.end -= 1;
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('right')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    }
+    this.selection = newSelection;
+  }
+
+  selectionAreaRight() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (
+      newSelection.columnsSelection.start === newSelection.focus.columnIndex
+    ) {
+      const max =
+        this.rows(newSelection.groupKey)
+          ?.item(0)
+          .querySelectorAll('affine-database-cell-container').length - 1;
+      newSelection.columnsSelection.end = Math.min(
+        max,
+        newSelection.columnsSelection.end + 1
+      );
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('right')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    } else {
+      newSelection.columnsSelection.start += 1;
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('left')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    }
+    this.selection = newSelection;
+  }
+
+  selectionAreaUp() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (newSelection.rowsSelection.end === newSelection.focus.rowIndex) {
+      newSelection.rowsSelection.start = Math.max(
+        0,
+        newSelection.rowsSelection.start - 1
+      );
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('top')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    } else {
+      newSelection.rowsSelection.end -= 1;
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('bottom')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    }
+    this.selection = newSelection;
   }
 
   startDrag(
@@ -814,7 +963,7 @@ export class TableSelectionController implements ReactiveController {
     return this._tableViewSelection;
   }
 
-  set selection(data: Omit<TableViewSelection, 'viewId' | 'type'> | undefined) {
+  set selection(data: TableViewSelectionSetOptions | undefined) {
     if (!data) {
       this.clearSelection();
       return;
@@ -879,6 +1028,30 @@ class SelectionElement extends ShadowlessElement {
       outline: none;
     }
 
+    .area-border {
+      position: absolute;
+      pointer-events: none;
+    }
+    .area-left {
+      left: 0;
+      height: 100%;
+      width: 1px;
+    }
+    .area-right {
+      right: 0;
+      height: 100%;
+      width: 1px;
+    }
+    .area-top {
+      top: 0;
+      width: 100%;
+      height: 1px;
+    }
+    .area-bottom {
+      bottom: 0;
+      width: 100%;
+      height: 1px;
+    }
     @media print {
       affine-database-selection {
         display: none;
@@ -892,7 +1065,12 @@ class SelectionElement extends ShadowlessElement {
 
   override render() {
     return html`
-      <div ${ref(this.selectionRef)} class="database-selection"></div>
+      <div ${ref(this.selectionRef)} class="database-selection">
+        <div class="area-border area-left"></div>
+        <div class="area-border area-right"></div>
+        <div class="area-border area-top"></div>
+        <div class="area-border area-bottom"></div>
+      </div>
       <div tabindex="0" ${ref(this.focusRef)} class="database-focus"></div>
     `;
   }
