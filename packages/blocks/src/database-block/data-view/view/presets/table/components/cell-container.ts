@@ -1,17 +1,14 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';
 
-import type {
-  CellRenderProps,
-  DataViewCellLifeCycle,
-} from '../../../../column/index.js';
+import type { CellRenderProps, DataViewCellLifeCycle } from '../../../../column/index.js';
 import type { SingleView } from '../../../../view-manager/single-view.js';
 import type { TableColumn } from '../table-view-manager.js';
-import type { TableViewSelection } from '../types.js';
+import { TableAreaSelection, type TableViewSelectionWithType } from '../types.js';
 
 import { renderUniLit } from '../../../../utils/uni-component/index.js';
 
@@ -52,23 +49,23 @@ export class DatabaseCellContainer extends SignalWatcher(
     if (selectionView) {
       const selection = selectionView.selection;
       if (selection && this.isSelected(selection) && editing) {
-        selectionView.selection = {
+        selectionView.selection = TableAreaSelection.create({
           groupKey: this.groupKey,
           focus: {
             rowIndex: this.rowIndex,
             columnIndex: this.columnIndex,
           },
           isEditing: true,
-        };
+        });
       } else {
-        selectionView.selection = {
+        selectionView.selection = TableAreaSelection.create({
           groupKey: this.groupKey,
           focus: {
             rowIndex: this.rowIndex,
             columnIndex: this.columnIndex,
           },
           isEditing: false,
-        };
+        });
       }
     }
   };
@@ -94,7 +91,10 @@ export class DatabaseCellContainer extends SignalWatcher(
     });
   }
 
-  isSelected(selection: TableViewSelection) {
+  isSelected(selection: TableViewSelectionWithType) {
+    if(selection.selectionType!=='area'){
+      return false;
+    }
     if (selection.groupKey !== this.groupKey) {
       return;
     }

@@ -1,18 +1,14 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
-import {
-  DEFAULT_ADD_BUTTON_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
-  DEFAULT_COLUMN_TITLE_HEIGHT,
-} from '../../consts.js';
+import { DEFAULT_ADD_BUTTON_WIDTH, DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 
 export const styles = css`
     affine-database-column-header {
         display: block;
         background-color: var(--affine-background-primary-color);
         position: relative;
-        z-index: 1;
+        z-index: 2;
     }
 
     .affine-database-column-header {

@@ -6,7 +6,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import type { DataViewTable } from '../table-view.js';
-import type { TableViewSelection } from '../types.js';
+import type { TableAreaSelection } from '../types.js';
 
 import { tRichText } from '../../../../logical/data-type.js';
 
@@ -51,7 +51,7 @@ export class DragToFillElement extends ShadowlessElement {
 
 export function fillSelectionWithFocusCellData(
   host: DataViewTable,
-  selection: TableViewSelection
+  selection: TableAreaSelection
 ) {
   const { groupKey, rowsSelection, columnsSelection, focus } = selection;
 

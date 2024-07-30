@@ -3,27 +3,32 @@ import { z } from 'zod';
 
 import type { DataViewSelection, GetDataViewSelection } from '../types.js';
 
-const TableViewSelectionSchema = z.object({
-  viewId: z.string(),
-  type: z.literal('table'),
-  rowsSelection: z
-    .object({
+const TableViewSelectionSchema = z.union([
+  z.object({
+    viewId: z.string(),
+    type: z.literal('table'),
+    selectionType: z.literal('area'),
+    rowsSelection: z.object({
       start: z.number(),
       end: z.number(),
-    })
-    .optional(),
-  columnsSelection: z
-    .object({
+    }),
+    columnsSelection: z.object({
       start: z.number(),
       end: z.number(),
-    })
-    .optional(),
-  focus: z.object({
-    rowIndex: z.number(),
-    columnIndex: z.number(),
+    }),
+    focus: z.object({
+      rowIndex: z.number(),
+      columnIndex: z.number(),
+    }),
+    isEditing: z.boolean(),
   }),
-  isEditing: z.boolean(),
-});
+  z.object({
+    viewId: z.string(),
+    type: z.literal('table'),
+    selectionType: z.literal('row'),
+    rows: z.array(z.string()),
+  }),
+]);
 
 const KanbanCellSelectionSchema = z.object({
   selectionType: z.literal('cell'),
@@ -80,6 +85,7 @@ export class DatabaseSelection extends BaseSelection {
   }
 
   static override fromJSON(json: Record<string, unknown>): DatabaseSelection {
+    console.log(json);
     DatabaseSelectionSchema.parse(json);
     return new DatabaseSelection({
       blockId: json.blockId as string,

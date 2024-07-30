@@ -1,10 +1,6 @@
-import type { TemplateResult } from 'lit';
-
 import { assertExists } from '@blocksuite/global/utils';
 
 export type ColumnType = string;
-
-export type ColumnTypeIcon = Record<ColumnType, TemplateResult>;
 
 export interface Column<
   Data extends Record<string, unknown> = Record<string, unknown>,
@@ -56,6 +52,64 @@ export const getTableContainer = (ele: HTMLElement) => {
   assertExists(element);
   return element;
 };
+type WithTableViewType<T> = T extends unknown
+  ? {
+      viewId: string;
+      type: 'table';
+    } & T
+  : never;
+export type TableRowSelection = {
+  selectionType: 'row';
+  rows: string[];
+};
+export const TableRowSelection = {
+  rows: (selection?: TableViewSelection): string[] => {
+    if (selection?.selectionType === 'row') {
+      return selection.rows;
+    }
+    return [];
+  },
+  create(options: { rows: string[] }): TableRowSelection {
+    return {
+      selectionType: 'row',
+      rows: options.rows,
+    };
+  },
+  is(selection?: TableViewSelection): selection is TableRowSelection {
+    return selection?.selectionType === 'row';
+  },
+};
+export type TableAreaSelection = {
+  selectionType: 'area';
+  groupKey?: string;
+  rowsSelection: MultiSelection;
+  columnsSelection: MultiSelection;
+  focus: CellFocus;
+  isEditing: boolean;
+};
+export const TableAreaSelection = {
+  create: (options: {
+    groupKey?: string;
+    focus: CellFocus;
+    rowsSelection?: MultiSelection;
+    columnsSelection?: MultiSelection;
+    isEditing: boolean;
+  }): TableAreaSelection => {
+    return {
+      ...options,
+      selectionType: 'area',
+      rowsSelection: options.rowsSelection ?? {
+        start: options.focus.rowIndex,
+        end: options.focus.rowIndex,
+      },
+      columnsSelection: options.columnsSelection ?? {
+        start: options.focus.columnIndex,
+        end: options.focus.columnIndex,
+      },
+    };
+  },
+};
+
 export type CellFocus = {
   rowIndex: number;
   columnIndex: number;
@@ -64,12 +118,7 @@ export type MultiSelection = {
   start: number;
   end: number;
 };
-export type TableViewSelection = {
-  viewId: string;
-  type: 'table';
-  groupKey?: string;
-  rowsSelection?: MultiSelection;
-  columnsSelection?: MultiSelection;
-  focus: CellFocus;
-  isEditing: boolean;
-};
+export type TableViewSelection = TableAreaSelection | TableRowSelection;
+export type TableViewSelectionWithType = WithTableViewType<
+  TableAreaSelection | TableRowSelection
+>;

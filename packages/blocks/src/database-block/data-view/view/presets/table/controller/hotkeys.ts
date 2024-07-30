@@ -3,6 +3,7 @@ import type { ReactiveController } from 'lit';
 import type { DataViewTable } from '../table-view.js';
 
 import { popRowMenu } from '../components/menu.js';
+import { TableAreaSelection, TableRowSelection } from '../types.js';
 
 export class TableHotkeysController implements ReactiveController {
   constructor(private host: DataViewTable) {
@@ -17,6 +18,12 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection) {
             return;
           }
+          if (TableRowSelection.is(selection)) {
+            const rows = TableRowSelection.rows(selection);
+            this.selectionController.selection = undefined;
+            this.host.view.rowDelete(rows);
+            return;
+          }
           const {
             focus,
             rowsSelection,
@@ -24,17 +31,7 @@ export class TableHotkeysController implements ReactiveController {
             isEditing,
             groupKey,
           } = selection;
-          if (rowsSelection && !columnsSelection) {
-            const rows = Array.from(
-              this.selectionController.rows(selection.groupKey)
-            )
-              .filter(
-                (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
-              )
-              .map(v => v.rowId);
-            this.selectionController.focusToCell('up');
-            this.host.view.rowDelete(rows);
-          } else if (focus && !isEditing) {
+          if (focus && !isEditing) {
             if (rowsSelection && columnsSelection) {
               // multi cell
               for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
@@ -72,49 +69,78 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection) {
             return false;
           }
-          const rowsSelection = selection.rowsSelection;
-          if (selection.isEditing) {
+          if (TableRowSelection.is(selection)) {
+            const result = this.selectionController.rowsToArea(selection.rows);
+            if (result) {
+              this.selectionController.selection = TableAreaSelection.create({
+                groupKey: result.groupKey,
+                focus: {
+                  rowIndex: result.start,
+                  columnIndex: 0,
+                },
+                rowsSelection: {
+                  start: result.start,
+                  end: result.end,
+                },
+                isEditing: false,
+              });
+            } else {
+              this.selectionController.selection = undefined;
+            }
+            return true;
+          } else if (selection.isEditing) {
             this.selectionController.selection = {
               ...selection,
               isEditing: false,
             };
           } else {
-            if (rowsSelection && !selection.columnsSelection) {
-              this.selectionController.selection = {
-                ...selection,
-                rowsSelection: undefined,
-                columnsSelection: undefined,
-              };
-            } else {
-              this.selectionController.selection = {
-                ...selection,
-                rowsSelection: {
-                  start: rowsSelection?.start ?? selection.focus.rowIndex,
-                  end: rowsSelection?.end ?? selection.focus.rowIndex,
-                },
-                columnsSelection: undefined,
-              };
-            }
+            const rows = this.selectionController.areaToRows(selection);
+            this.selectionController.rowSelectionChange({
+              add: rows,
+              remove: [],
+            });
           }
           return true;
         },
         Enter: context => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (!selection) {
             return false;
           }
-          this.selectionController.selection = {
-            ...selection,
-            rowsSelection: undefined,
-            columnsSelection: undefined,
-            isEditing: true,
-          };
+          if (TableRowSelection.is(selection)) {
+            const result = this.selectionController.rowsToArea(selection.rows);
+            if (result) {
+              this.selectionController.selection = TableAreaSelection.create({
+                groupKey: result.groupKey,
+                focus: {
+                  rowIndex: result.start,
+                  columnIndex: 0,
+                },
+                rowsSelection: {
+                  start: result.start,
+                  end: result.end,
+                },
+                isEditing: false,
+              });
+            }
+          } else if (selection.isEditing) {
+            return false;
+          } else {
+            this.selectionController.selection = {
+              ...selection,
+              isEditing: true,
+            };
+          }
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
         'Shift-Enter': () => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (
+            !selection ||
+            TableRowSelection.is(selection) ||
+            selection.isEditing
+          ) {
             return false;
           }
           const cell = this.selectionController.getCellContainer(
@@ -132,7 +158,11 @@ export class TableHotkeysController implements ReactiveController {
         },
         Tab: ctx => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (
+            !selection ||
+            TableRowSelection.is(selection) ||
+            selection.isEditing
+          ) {
             return false;
           }
           ctx.get('keyboardState').raw.preventDefault();
@@ -141,7 +171,11 @@ export class TableHotkeysController implements ReactiveController {
         },
         'Shift-Tab': ctx => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (
+            !selection ||
+            TableRowSelection.is(selection) ||
+            selection.isEditing
+          ) {
             return false;
           }
           ctx.get('keyboardState').raw.preventDefault();
@@ -150,7 +184,11 @@ export class TableHotkeysController implements ReactiveController {
         },
         ArrowLeft: context => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (
+            !selection ||
+            TableRowSelection.is(selection) ||
+            selection.isEditing
+          ) {
             return false;
           }
           this.selectionController.focusToCell('left');
@@ -159,7 +197,11 @@ export class TableHotkeysController implements ReactiveController {
         },
         ArrowRight: context => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (
+            !selection ||
+            TableRowSelection.is(selection) ||
+            selection.isEditing
+          ) {
             return false;
           }
           this.selectionController.focusToCell('right');
@@ -168,26 +210,34 @@ export class TableHotkeysController implements ReactiveController {
         },
         ArrowUp: context => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (!selection) {
             return false;
           }
 
-          if (this.selectionController.isSelectedRowOnly())
+          if (TableRowSelection.is(selection)) {
             this.selectionController.navigateRowSelection('up', false);
-          else this.selectionController.focusToCell('up');
+          } else if (selection.isEditing) {
+            return false;
+          } else {
+            this.selectionController.focusToCell('up');
+          }
 
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
         ArrowDown: context => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (!selection) {
             return false;
           }
 
-          if (this.selectionController.isSelectedRowOnly())
+          if (TableRowSelection.is(selection)) {
             this.selectionController.navigateRowSelection('down', false);
-          else this.selectionController.focusToCell('down');
+          } else if (selection.isEditing) {
+            return false;
+          } else {
+            this.selectionController.focusToCell('down');
+          }
 
           context.get('keyboardState').raw.preventDefault();
           return true;
@@ -195,12 +245,14 @@ export class TableHotkeysController implements ReactiveController {
 
         'Shift-ArrowUp': context => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (!selection) {
             return false;
           }
 
-          if (this.selectionController.isSelectedRowOnly()) {
+          if (TableRowSelection.is(selection)) {
             this.selectionController.navigateRowSelection('up', true);
+          } else if (selection.isEditing) {
+            return false;
           } else {
             this.selectionController.selectionAreaUp();
           }
@@ -211,12 +263,14 @@ export class TableHotkeysController implements ReactiveController {
 
         'Shift-ArrowDown': context => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.isEditing) {
+          if (!selection) {
             return false;
           }
 
-          if (this.selectionController.isSelectedRowOnly()) {
+          if (TableRowSelection.is(selection)) {
             this.selectionController.navigateRowSelection('down', true);
+          } else if (selection.isEditing) {
+            return false;
           } else {
             this.selectionController.selectionAreaDown();
           }
@@ -229,8 +283,9 @@ export class TableHotkeysController implements ReactiveController {
           const selection = this.selectionController.selection;
           if (
             !selection ||
+            TableRowSelection.is(selection) ||
             selection.isEditing ||
-            this.selectionController.isSelectedRowOnly()
+            this.selectionController.isRowSelection()
           ) {
             return false;
           }
@@ -245,8 +300,9 @@ export class TableHotkeysController implements ReactiveController {
           const selection = this.selectionController.selection;
           if (
             !selection ||
+            TableRowSelection.is(selection) ||
             selection.isEditing ||
-            this.selectionController.isSelectedRowOnly()
+            this.selectionController.isRowSelection()
           ) {
             return false;
           }
@@ -259,6 +315,9 @@ export class TableHotkeysController implements ReactiveController {
 
         'Mod-a': context => {
           const selection = this.selectionController.selection;
+          if (TableRowSelection.is(selection)) {
+            return false;
+          }
           if (selection?.isEditing) {
             return true;
           }

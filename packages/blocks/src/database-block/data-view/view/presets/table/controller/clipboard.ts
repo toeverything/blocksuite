@@ -7,7 +7,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
 import type { TableSingleView } from '../table-view-manager.js';
-import type { TableViewSelection } from '../types.js';
+import type { TableViewSelectionWithType } from '../types.js';
 
 const BLOCKSUITE_DATABASE = 'blocksuite/database';
 const TEXT = 'text/plain';
@@ -15,7 +15,7 @@ const TEXT = 'text/plain';
 export class TableClipboardController implements ReactiveController {
   private _onCopy = (
     _context: UIEventStateContext,
-    tableSelection: TableViewSelection,
+    tableSelection: TableViewSelectionWithType,
     isCut = false
   ) => {
     const view = this.host;
@@ -47,7 +47,7 @@ export class TableClipboardController implements ReactiveController {
 
   private _onCut = (
     _context: UIEventStateContext,
-    tableSelection: TableViewSelection
+    tableSelection: TableViewSelectionWithType
   ) => {
     this._onCopy(_context, tableSelection, true);
   };
@@ -153,7 +153,7 @@ function getColumnValue(container: DatabaseCellContainer | undefined) {
  */
 const UNSUPPORTED_COLUMNS = ['progress', 'checkbox'];
 function copyCellsValue(
-  selection: TableViewSelection,
+  selection: TableViewSelectionWithType,
   data: TableSingleView,
   view: DataViewTable,
   isCut = false
@@ -230,7 +230,7 @@ function copyCellsValue(
 type CopyedColumn = { type: string; value: string };
 type CopyedSelectionData = CopyedColumn[][];
 function getCopiedValuesFromSelection(
-  selection: TableViewSelection,
+  selection: TableViewSelectionWithType,
   data: TableSingleView,
   view: DataViewTable
 ): CopyedSelectionData {
@@ -284,7 +284,7 @@ function getCopiedValuesFromSelection(
 }
 
 function getTargetRangeFromSelection(
-  selection: TableViewSelection,
+  selection: TableViewSelectionWithType,
   data: TableSingleView
 ) {
   const { rowsSelection, columnsSelection, focus } = selection;
