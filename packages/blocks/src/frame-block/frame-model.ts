@@ -1,3 +1,4 @@
+import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 
@@ -7,7 +8,7 @@ import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 import type { Color } from '../surface-block/consts.js';
 import type { PointTestOptions } from '../surface-block/element-model/base.js';
 
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
 
 type FrameBlockProps = {
   title: Text;
@@ -35,9 +36,10 @@ export const FrameBlockSchema = defineBlockSchema({
   },
 });
 
-export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
-  static PADDING = [8, 10];
-
+export class FrameBlockModel
+  extends GfxCompatible<FrameBlockProps>(BlockModel)
+  implements GfxElementGeometry
+{
   override includesPoint(x: number, y: number, _: PointTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointNearBound([x, y], 5);

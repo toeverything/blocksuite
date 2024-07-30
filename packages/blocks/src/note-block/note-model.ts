@@ -1,10 +1,11 @@
+import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
 import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../_common/consts.js';
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
 import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_SHADOW,
@@ -81,7 +82,10 @@ type NoteEdgelessProps = {
   scale?: number;
 };
 
-export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
+export class NoteBlockModel
+  extends GfxCompatible<NoteProps>(BlockModel)
+  implements GfxElementGeometry
+{
   private _isSelectable(): boolean {
     return this.displayMode !== NoteDisplayMode.DocOnly;
   }

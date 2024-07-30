@@ -4,16 +4,16 @@ import type { BlockModel } from '@blocksuite/store';
 import type { EmbedProps } from './types.js';
 
 import {
-  type EdgelessSelectableProps,
-  selectable,
+  GfxCompatible,
+  type GfxCompatibleProps,
 } from '../edgeless/mixin/index.js';
 
 export function defineEmbedModel<
   Props extends object,
   T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
->(SuperClass: T) {
-  return selectable<Props & EdgelessSelectableProps>(
-    SuperClass as Constructor<BlockModel<Props & EdgelessSelectableProps>>
+>(BlockModelSuperClass: T) {
+  return GfxCompatible<Props & GfxCompatibleProps>(
+    BlockModelSuperClass as Constructor<BlockModel<Props & GfxCompatibleProps>>
   );
 }
 

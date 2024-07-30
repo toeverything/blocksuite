@@ -22,27 +22,13 @@ import type {
   GfxElementGeometry,
   GfxGroupLikeElementModel,
   GfxPrimitiveElementModel,
+  PointTestOptions,
 } from './surface/element-model.js';
 
 import { SurfaceBlockModel } from './surface/block-model.js';
 
-export interface PointTestOptions {
-  expand?: number;
-
-  /**
-   * If true, the transparent area of the element will be ignored during the point inclusion test.
-   * Otherwise, the transparent area will be considered as filled area.
-   *
-   * Default is true.
-   */
-  ignoreTransparent?: boolean;
-
-  all?: boolean;
-  zoom?: number;
-}
-
 export class GfxBlockElementModel<
-    Props extends GfxSelectableProps = GfxSelectableProps,
+    Props extends GfxCompatibleProps = GfxCompatibleProps,
   >
   extends BlockModel<Props>
   implements GfxElementGeometry
@@ -154,19 +140,19 @@ export class GfxBlockElementModel<
   }
 }
 
-export type GfxSelectableProps = {
+type GfxCompatibleProps = {
   xywh: SerializedXYWH;
   index: string;
 };
 
-export function selectable<
-  Props extends GfxSelectableProps,
+export function GfxCompatible<
+  Props extends GfxCompatibleProps,
   T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
->(SuperClass: T) {
-  if (SuperClass === BlockModel) {
+>(BlockModelSuperClass: T) {
+  if (BlockModelSuperClass === BlockModel) {
     return GfxBlockElementModel as unknown as typeof GfxBlockElementModel<Props>;
   } else {
-    let currentClass = SuperClass;
+    let currentClass = BlockModelSuperClass;
 
     while (
       Object.getPrototypeOf(currentClass.prototype) !== BlockModel.prototype &&
@@ -188,7 +174,7 @@ export function selectable<
     );
   }
 
-  return SuperClass as unknown as typeof GfxBlockElementModel<Props>;
+  return BlockModelSuperClass as unknown as typeof GfxBlockElementModel<Props>;
 }
 
 export type GfxModel = GfxBlockElementModel | GfxPrimitiveElementModel;
