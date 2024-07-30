@@ -1,7 +1,6 @@
 import type { Command } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { type DraftModel, toDraftModel } from '@blocksuite/store';
 
 export const draftSelectedModelsCommand: Command<
@@ -9,41 +8,45 @@ export const draftSelectedModelsCommand: Command<
   'draftedModels'
 > = (ctx, next) => {
   const models = ctx.selectedModels;
-  assertExists(
-    models,
-    '`selectedModels` is required, you need to use `getSelectedModels` command before adding this command to the pipeline.'
-  );
+  if (!models) {
+    console.error(
+      '`selectedModels` is required, you need to use `getSelectedModels` command before adding this command to the pipeline.'
+    );
+    return;
+  }
 
-  const draftedModels = models.map(toDraftModel);
+  const draftedModelsPromise = new Promise<DraftModel[]>(resolve => {
+    const draftedModels = models.map(toDraftModel);
 
-  const traverse = (model: DraftModel) => {
-    const isDatabase = model.flavour === 'affine:database';
-    const children = isDatabase
-      ? model.children
-      : model.children.filter(child => {
-          const idx = draftedModels.findIndex(m => m.id === child.id);
-          return idx >= 0;
-        });
+    const modelMap = new Map(draftedModels.map(model => [model.id, model]));
 
-    children.forEach(child => {
-      const idx = draftedModels.findIndex(m => m.id === child.id);
-      if (idx >= 0) {
-        draftedModels.splice(idx, 1);
-      }
-      traverse(child);
-    });
-    model.children = children;
-  };
+    const traverse = (model: DraftModel) => {
+      const isDatabase = model.flavour === 'affine:database';
+      const children = isDatabase
+        ? model.children
+        : model.children.filter(child => modelMap.has(child.id));
 
-  draftedModels.forEach(traverse);
+      children.forEach(child => {
+        modelMap.delete(child.id);
+        traverse(child);
+      });
+      model.children = children;
+    };
 
-  return next({ draftedModels });
+    draftedModels.forEach(traverse);
+
+    const remainingDraftedModels = Array.from(modelMap.values());
+
+    resolve(remainingDraftedModels);
+  });
+
+  return next({ draftedModels: draftedModelsPromise });
 };
 
 declare global {
   namespace BlockSuite {
     interface CommandContext {
-      draftedModels?: DraftModel<BlockModel<object>>[];
+      draftedModels?: Promise<DraftModel<BlockModel<object>>[]>;
     }
 
     interface Commands {
