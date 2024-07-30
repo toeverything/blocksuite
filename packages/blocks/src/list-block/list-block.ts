@@ -116,7 +116,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
           correctNumberedListsOrderToPrev(this.doc, this.model, false);
         }
         // if list is not numbered, order should be null
-        if (type !== 'numbered') {
+        if (type !== 'numbered' && order !== null) {
           this.model.order = null;
         }
       })
