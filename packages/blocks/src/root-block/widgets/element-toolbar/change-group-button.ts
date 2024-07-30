@@ -66,10 +66,6 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
     toast(this.edgeless.host, 'Group has been inserted into page');
   }
 
-  protected override createRenderRoot() {
-    return this;
-  }
-
   protected override render() {
     const { groups } = this;
     const onlyOne = groups.length === 1;
@@ -78,7 +74,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
       [
         onlyOne
           ? html`
-              <edgeless-icon-button
+              <editor-icon-button
                 aria-label="Insert into Page"
                 .tooltip=${'Insert into Page'}
                 .iconSize=${'20px'}
@@ -87,27 +83,25 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
               >
                 ${NoteIcon}
                 <span class="label">Insert into Page</span>
-              </edgeless-icon-button>
+              </editor-icon-button>
             `
           : nothing,
 
         onlyOne
           ? html`
-              <edgeless-icon-button
-                class=${'edgeless-component-toolbar-group-rename-button'}
+              <editor-icon-button
                 aria-label="Rename"
                 .tooltip=${'Rename'}
                 .iconSize=${'20px'}
                 @click=${() => mountGroupTitleEditor(groups[0], this.edgeless)}
               >
                 ${RenameIcon}
-              </edgeless-icon-button>
+              </editor-icon-button>
             `
           : nothing,
 
         html`
-          <edgeless-icon-button
-            class=${'edgeless-component-toolbar-ungroup-button'}
+          <editor-icon-button
             aria-label="Ungroup"
             .tooltip=${'Ungroup'}
             .iconSize=${'20px'}
@@ -115,7 +109,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
               groups.forEach(group => this.edgeless.service.ungroup(group))}
           >
             ${UngroupButtonIcon}
-          </edgeless-icon-button>
+          </editor-icon-button>
         `,
       ].filter(button => button !== nothing),
       renderToolbarSeparator

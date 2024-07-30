@@ -1155,14 +1155,14 @@ export async function triggerComponentToolbarAction(
     case 'ungroup': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-group-button')
-        .locator('.edgeless-component-toolbar-ungroup-button');
+        .getByRole('button', { name: 'Ungroup' });
       await button.click();
       break;
     }
     case 'renameGroup': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-group-button')
-        .locator('.edgeless-component-toolbar-group-rename-button');
+        .getByRole('button', { name: 'Rename' });
       await button.click();
       break;
     }
