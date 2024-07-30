@@ -1133,10 +1133,10 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           await assets.readFromBlob(blobId);
           const blob = assets.getAssets().get(blobId);
           assetsIds.push(blobId);
-          const blobName = getAssetName(assets.getAssets(), blobId);
           if (!blob) {
             break;
           }
+          const blobName = getAssetName(assets.getAssets(), blobId);
           const isScaledImage = o.node.props.width && o.node.props.height;
           const widthStyle = isScaledImage
             ? {

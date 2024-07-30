@@ -586,10 +586,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           await assets.readFromBlob(blobId);
           const blob = assets.getAssets().get(blobId);
           assetsIds.push(blobId);
-          const blobName = getAssetName(assets.getAssets(), blobId);
           if (!blob) {
             break;
           }
+          const blobName = getAssetName(assets.getAssets(), blobId);
           context
             .openNode(
               {
