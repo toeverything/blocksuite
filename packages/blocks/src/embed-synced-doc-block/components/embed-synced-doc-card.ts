@@ -13,6 +13,8 @@ import { getSyncedDocIcons } from '../utils.js';
 
 @customElement('affine-embed-synced-doc-card')
 export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
+  private _dragging = false;
+
   static override styles = cardStyles;
 
   cleanUpSurfaceRefRenderer = () => {
@@ -52,6 +54,21 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
+    this.block.handleEvent(
+      'dragStart',
+      () => {
+        this._dragging = true;
+      },
+      { global: true }
+    );
+    this.block.handleEvent(
+      'dragEnd',
+      () => {
+        this._dragging = false;
+      },
+      { global: true }
+    );
+
     const { isCycle } = this.block.blockState;
     const syncedDoc = this.block.syncedDoc;
     if (isCycle && syncedDoc) {
@@ -70,6 +87,9 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       );
       this.disposables.add(
         syncedDoc.slots.blockUpdated.on(payload => {
+          if (this._dragging) {
+            return;
+          }
           if (
             payload.type === 'update' &&
             ['', 'caption', 'xywh'].includes(payload.props.key)
