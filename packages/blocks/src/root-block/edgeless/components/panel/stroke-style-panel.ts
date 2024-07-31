@@ -2,7 +2,6 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import type { ColorEvent } from './color-panel.js';
 
 import '../../../../_common/components/button.js';
@@ -66,7 +65,7 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
   accessor setStrokeStyle!: (e: LineStyleEvent) => void;
 
   @property({ attribute: false })
-  accessor strokeColor!: CssVariableName;
+  accessor strokeColor!: string;
 
   @property({ attribute: false })
   accessor strokeStyle!: StrokeStyle;

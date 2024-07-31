@@ -150,6 +150,8 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   };
 
   private _onTouchEnd = (event: TouchEvent) => {
+    if (!event.changedTouches.length) return;
+
     this._onDragEnd({
       // https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent#touchend
       x: event.changedTouches[0].clientX,

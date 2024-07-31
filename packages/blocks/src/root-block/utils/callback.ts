@@ -5,17 +5,14 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 
-import {
-  asyncGetRichTextByModel,
-  buildPath,
-} from '../../_common/utils/query.js';
+import { asyncGetRichText, buildPath } from '../../_common/utils/query.js';
 
 export async function onModelTextUpdated(
   editorHost: EditorHost,
   model: BlockModel,
   callback?: (text: RichText) => void
 ) {
-  const richText = await asyncGetRichTextByModel(editorHost, model);
+  const richText = await asyncGetRichText(editorHost, model.id);
   assertExists(richText, 'RichText is not ready yet.');
   await richText.updateComplete;
   const inlineEditor = richText.inlineEditor;

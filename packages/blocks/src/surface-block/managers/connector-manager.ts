@@ -836,7 +836,7 @@ export class ConnectionOverlay extends Overlay {
   _clearRect() {
     this.points = [];
     this.highlightPoint = null;
-    this._renderer.refresh();
+    this._renderer?.refresh();
   }
 
   private _findConnectablesInViews() {
@@ -961,7 +961,7 @@ export class ConnectionOverlay extends Overlay {
           rBound(connectable, true),
           nearestPoint
         );
-        this._renderer.refresh();
+        this._renderer?.refresh();
         target = connectable;
         result = {
           id: connectable.id,
@@ -1004,7 +1004,7 @@ export class ConnectionOverlay extends Overlay {
       };
     }
 
-    this._renderer.refresh();
+    this._renderer?.refresh();
 
     return result;
   }

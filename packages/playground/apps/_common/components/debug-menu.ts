@@ -18,7 +18,6 @@ import {
   type SurfaceBlockComponent,
   ZipTransformer,
   defaultImageProxyMiddleware,
-  extractCssVariables,
   openFileOrFiles,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -73,11 +72,6 @@ export function getSurfaceElementFromEditor(editorHost: EditorHost) {
   return surfaceElement;
 }
 
-const cssVariablesMap = extractCssVariables(document.documentElement);
-const plate: Record<string, string> = {};
-ColorVariables.forEach((key: string) => {
-  plate[key] = cssVariablesMap[key];
-});
 const OTHER_CSS_VARIABLES = StyleVariables.filter(
   variable =>
     !SizeVariables.includes(variable) &&
@@ -86,7 +80,10 @@ const OTHER_CSS_VARIABLES = StyleVariables.filter(
 );
 let styleDebugMenuLoaded = false;
 
-function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
+function initStyleDebugMenu(
+  styleMenu: Pane,
+  { writer, reader }: { [K in 'writer' | 'reader']: CSSStyleDeclaration }
+) {
   const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
   const fontFamilyFolder = styleMenu.addFolder({
     title: 'Font Family',
@@ -98,12 +95,11 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
     expanded: false,
   });
   SizeVariables.forEach(name => {
+    const value = reader.getPropertyValue(name);
     sizeFolder
       .addBinding(
         {
-          [name]: isNaN(parseFloat(cssVariablesMap[name]))
-            ? 0
-            : parseFloat(cssVariablesMap[name]),
+          [name]: isNaN(parseFloat(value)) ? 0 : parseFloat(value),
         },
         name,
         {
@@ -112,27 +108,27 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
         }
       )
       .on('change', e => {
-        style.setProperty(name, `${Math.round(e.value)}px`);
+        writer.setProperty(name, `${Math.round(e.value)}px`);
       });
   });
   FontFamilyVariables.forEach(name => {
+    const value = reader.getPropertyValue(name);
     fontFamilyFolder
       .addBinding(
         {
-          [name]: cssVariablesMap[name],
+          [name]: value,
         },
         name
       )
       .on('change', e => {
-        style.setProperty(name, e.value);
+        writer.setProperty(name, e.value);
       });
   });
   OTHER_CSS_VARIABLES.forEach(name => {
-    othersFolder
-      .addBinding({ [name]: cssVariablesMap[name] }, name)
-      .on('change', e => {
-        style.setProperty(name, e.value);
-      });
+    const value = reader.getPropertyValue(name);
+    othersFolder.addBinding({ [name]: value }, name).on('change', e => {
+      writer.setProperty(name, e.value);
+    });
   });
   fontFamilyFolder
     .addBinding(
@@ -143,13 +139,14 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
       '--affine-font-family'
     )
     .on('change', e => {
-      style.setProperty('--affine-font-family', e.value);
+      writer.setProperty('--affine-font-family', e.value);
     });
-  for (const plateKey in plate) {
-    colorFolder.addBinding(plate, plateKey).on('change', e => {
-      style.setProperty(plateKey, e.value);
+  ColorVariables.forEach(name => {
+    const value = reader.getPropertyValue(name);
+    colorFolder.addBinding({ [name]: value }, name).on('change', e => {
+      writer.setProperty(name, e.value);
     });
-  }
+  });
 }
 
 function getDarkModeConfig(): boolean {
@@ -398,7 +395,10 @@ export class DebugMenu extends ShadowlessElement {
       this._styleMenu = new Pane({ title: 'Waiting' });
       this._styleMenu.hidden = true;
       this._styleMenu.element.style.width = '650';
-      initStyleDebugMenu(this._styleMenu, document.documentElement.style);
+      initStyleDebugMenu(this._styleMenu, {
+        writer: document.documentElement.style,
+        reader: getComputedStyle(document.documentElement),
+      });
     }
 
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
@@ -604,7 +604,7 @@ export class DebugMenu extends ShadowlessElement {
           </sl-tooltip>
 
           <sl-tooltip
-            content="Toggle ${this._dark ? ' Light' : 'Dark'} Mode"
+            content="Toggle ${this._dark ? 'Light' : 'Dark'} Mode"
             placement="bottom"
             hoist
           >

@@ -29,7 +29,6 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../_common/consts.js';
-import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import {
   NoteDisplayMode,
   type Viewport,
@@ -101,8 +100,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   }, this);
 
   private _resizeObserver: ResizeObserver | null = null;
-
-  private readonly _themeObserver = new ThemeObserver();
 
   private _viewportElement: HTMLElement | null = null;
 
@@ -297,9 +294,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   private _initSlotEffects() {
     const { disposables, slots } = this;
 
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => this.surface.refresh());
-    this.disposables.add(() => this._themeObserver.dispose());
+    this.disposables.add(
+      this.service.themeObserver.mode$.subscribe(() => this.surface.refresh())
+    );
 
     disposables.add(this.service.selection);
     disposables.add(

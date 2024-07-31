@@ -9,7 +9,7 @@ import {
   NoteNoShadowIcon,
   NoteShadowSampleIcon,
 } from '../../../../_common/icons/edgeless.js';
-import { getThemeMode } from '../../../../_common/utils/query.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import '../buttons/tool-icon-button.js';
 
 const TOOLBAR_SHADOWS_LIGHT = [
@@ -70,7 +70,7 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
   `;
 
   override render() {
-    const mode = getThemeMode();
+    const mode = ThemeObserver.mode;
     const SHADOWS =
       mode === 'dark' ? TOOLBAR_SHADOWS_DARK : TOOLBAR_SHADOWS_LIGHT;
     return repeat(

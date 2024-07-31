@@ -34,7 +34,7 @@ function getMostCommonColor(
 ): string {
   const colors = countBy(elements, (ele: BrushElementModel) => {
     return typeof ele.color === 'object'
-      ? ele.color[colorScheme] ?? ele.color.normal ?? null
+      ? (ele.color[colorScheme] ?? ele.color.normal ?? null)
       : ele.color;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
@@ -65,13 +65,12 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {
-      const { type, value } = event.detail;
-      this.elements.forEach(ele => {
+      this.elements.forEach(ele =>
         this.service.updateElement(
           ele.id,
-          packColor(type, 'color', value, ele.color)
-        );
-      });
+          packColor('color', { ...event.detail })
+        )
+      );
       return;
     }
 

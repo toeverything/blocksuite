@@ -8,6 +8,7 @@ import {
   EdgelessPenDarkIcon,
   EdgelessPenLightIcon,
 } from '../../../../../_common/icons/edgeless.js';
+import { ThemeObserver } from '../../../../../_common/theme/theme-observer.js';
 import { LineWidth } from '../../../../../_common/utils/index.js';
 import '../../buttons/toolbar-button.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
@@ -88,6 +89,7 @@ export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
   override render() {
     const { active, theme } = this;
     const icon = theme === 'dark' ? EdgelessPenDarkIcon : EdgelessPenLightIcon;
+    const color = ThemeObserver.generateColorProperty(this.states.color);
 
     return html`
       <edgeless-toolbar-button
@@ -96,16 +98,9 @@ export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
         .tooltipOffset=${4}
         .active=${active}
         .withHover=${true}
-        @click=${() => {
-          this._toggleBrushMenu();
-        }}
+        @click=${() => this._toggleBrushMenu()}
       >
-        <div
-          style=${styleMap({ color: `var(${this.states.color})` })}
-          class="pen-wrapper"
-        >
-          ${icon}
-        </div>
+        <div style=${styleMap({ color })} class="pen-wrapper">${icon}</div>
       </edgeless-toolbar-button>
     `;
   }

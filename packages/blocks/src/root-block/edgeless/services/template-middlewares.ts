@@ -33,7 +33,7 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
     blockJson.id = newId;
 
     data.parent = data.parent
-      ? regeneratedIdMap.get(data.parent) ?? data.parent
+      ? (regeneratedIdMap.get(data.parent) ?? data.parent)
       : undefined;
 
     if (blockJson.flavour === 'affine:surface-ref') {

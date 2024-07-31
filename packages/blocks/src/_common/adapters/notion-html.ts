@@ -722,7 +722,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           const columnTypeClass = hastQuerySelector(o.node, 'svg')?.properties
             ?.className;
           const columnType = Array.isArray(columnTypeClass)
-            ? ColumnClassMap[columnTypeClass[0]] ?? 'rich-text'
+            ? (ColumnClassMap[columnTypeClass[0]] ?? 'rich-text')
             : 'rich-text';
           context.pushGlobalContextStack<BlocksuiteTableColumn>(
             'hast:table:column',

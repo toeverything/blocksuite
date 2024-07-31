@@ -27,7 +27,7 @@ import { diamond } from './diamond.js';
 import { ellipse } from './ellipse.js';
 import { rect } from './rect.js';
 import { triangle } from './triangle.js';
-import { type CustomStyle, horizontalOffset, verticalOffset } from './utils.js';
+import { type Colors, horizontalOffset, verticalOffset } from './utils.js';
 
 const shapeRenderers: {
   [key in ShapeType]: (
@@ -36,7 +36,7 @@ const shapeRenderers: {
     matrix: DOMMatrix,
     renderer: Renderer,
     rc: RoughCanvas,
-    custom: CustomStyle
+    colors: Colors
   ) => void;
 } = {
   diamond,
@@ -59,12 +59,12 @@ export function shape(
   );
   const fillColor = renderer.getColorValue(
     model.fillColor,
-    DEFAULT_SHAPE_STROKE_COLOR,
+    DEFAULT_SHAPE_FILL_COLOR,
     true
   );
   const strokeColor = renderer.getColorValue(
     model.strokeColor,
-    DEFAULT_SHAPE_FILL_COLOR,
+    DEFAULT_SHAPE_STROKE_COLOR,
     true
   );
   const customStyle = { color, fillColor, strokeColor };
@@ -86,7 +86,7 @@ export function shape(
 function renderText(
   model: ShapeElementModel,
   ctx: CanvasRenderingContext2D,
-  { color }: CustomStyle
+  { color }: Colors
 ) {
   const {
     x,

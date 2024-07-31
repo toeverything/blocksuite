@@ -129,8 +129,8 @@ const drawAllNode = (
   const result = layout.right(layoutNode, {
     gapHorizontal: 130,
     gapVertical: 10,
-    x: root ? root.x : options?.x ?? 0,
-    y: root ? root.y : options?.y ?? 0,
+    x: root ? root.x : (options?.x ?? 0),
+    y: root ? root.y : (options?.y ?? 0),
   });
   const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
     const { id, width, height } = node;
@@ -177,8 +177,8 @@ const layoutAllNode = (
   const result = layout.right(layoutNode, {
     gapHorizontal: 130,
     gapVertical: 10,
-    x: root ? root.x : options?.x ?? 0,
-    y: root ? root.y : options?.y ?? 0,
+    x: root ? root.x : (options?.x ?? 0),
+    y: root ? root.y : (options?.y ?? 0),
   });
   const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
     const { id, width, height } = node;

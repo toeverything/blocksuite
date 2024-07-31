@@ -4,8 +4,8 @@ import { WithDisposable } from '@blocksuite/block-std';
 import {
   type NoteBlockModel,
   NoteDisplayMode,
+  ThemeObserver,
   createButtonPopper,
-  getThemeMode,
   on,
   once,
 } from '@blocksuite/blocks';
@@ -351,7 +351,7 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
   override render() {
     if (this.note.isEmpty.peek()) return nothing;
 
-    const mode = getThemeMode();
+    const mode = ThemeObserver.mode;
     const { children, displayMode } = this.note;
     const currentMode = this._getCurrentModeLabel(displayMode);
     const cardHeaderClasses = classMap({

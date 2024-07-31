@@ -32,14 +32,14 @@ export class FrameOverlay extends Overlay {
 
   clear() {
     this.bound = null;
-    this._renderer.refresh();
+    this._renderer?.refresh();
   }
 
   highlight(frame: FrameBlockModel) {
     const bound = Bound.deserialize(frame.xywh);
 
     this.bound = bound;
-    this._renderer.refresh();
+    this._renderer?.refresh();
   }
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {

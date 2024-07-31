@@ -36,57 +36,16 @@ export type DraggableTool = {
 
 const unitMap = { x: 'px', y: 'px', r: 'deg', s: '', z: '', o: '' };
 export const textConfig: ToolConfig = {
-  default: {
-    x: -20,
-    y: -8,
-    r: 7.74,
-    s: 0.92,
-    z: 2,
-  },
-  active: {
-    x: -22,
-    y: -9,
-    r: -8,
-    s: 0.92,
-  },
-  hover: {
-    x: -22,
-    y: -9,
-    r: -8,
-    s: 1,
-    z: 3,
-  },
-  next: {
-    x: -22,
-    y: 64,
-    r: 0,
-  },
+  default: { x: -20, y: -8, r: 7.74, s: 0.92, z: 2 },
+  active: { x: -22, y: -9, r: -8, s: 0.92 },
+  hover: { x: -22, y: -9, r: -8, s: 1, z: 3 },
+  next: { x: -22, y: 64, r: 0 },
 };
 export const mindmapConfig: ToolConfig = {
-  default: {
-    x: 4,
-    y: -4,
-    s: 1,
-    z: 1,
-    r: -7,
-  },
-  active: {
-    x: 11,
-    y: -14,
-    r: 9,
-    s: 1,
-  },
-  hover: {
-    x: 11,
-    y: -14,
-    r: 9,
-    s: 1.16,
-    z: 3,
-  },
-  next: {
-    y: 64,
-    r: 0,
-  },
+  default: { x: 4, y: -4, s: 1, z: 1, r: -7 },
+  active: { x: 11, y: -14, r: 9, s: 1 },
+  hover: { x: 11, y: -14, r: 9, s: 1.16, z: 3 },
+  next: { y: 64, r: 0 },
 };
 
 export const getMindmapRender =

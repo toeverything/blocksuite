@@ -9,7 +9,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type { AffineTextAttributes } from '../_common/inline/presets/affine-inline-specs.js';
 import type { HighlightOptionsGetter } from './code-model.js';
 
-import { getThemeMode } from '../_common/utils/query.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 import {
   highlightCache,
@@ -29,7 +29,7 @@ export class AffineCodeLine extends ShadowlessElement {
       return html`<span><v-text .str=${this.delta.insert}></v-text></span>`;
     }
 
-    const mode = getThemeMode();
+    const mode = ThemeObserver.mode;
     const cacheKey: highlightCacheKey = `${this.delta.insert}-${lang}-${mode}`;
     const cache = highlightCache.get(cacheKey);
 

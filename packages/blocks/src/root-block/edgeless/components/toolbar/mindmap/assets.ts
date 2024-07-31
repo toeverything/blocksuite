@@ -1,5 +1,6 @@
 import type { TemplateResult } from 'lit';
 
+import { ColorScheme } from '../../../../../_common/theme/theme-observer.js';
 import { MindmapStyle } from '../../../../../surface-block/index.js';
 import { type DraggableTool, getMindmapRender } from './basket-elements.js';
 import {
@@ -18,10 +19,10 @@ export type ToolbarMindmapItem = {
   render: DraggableTool['render'];
 };
 
-export const getMindMaps = (theme: 'dark' | 'light'): ToolbarMindmapItem[] => [
+export const getMindMaps = (theme: ColorScheme): ToolbarMindmapItem[] => [
   {
     type: 'mindmap',
-    icon: theme === 'light' ? mindMapStyle1Light : mindMapStyle1Dark,
+    icon: theme === ColorScheme.Dark ? mindMapStyle1Dark : mindMapStyle1Light,
     style: MindmapStyle.ONE,
     render: getMindmapRender(MindmapStyle.ONE),
   },

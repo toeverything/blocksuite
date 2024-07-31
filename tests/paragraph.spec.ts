@@ -937,11 +937,11 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   <affine:paragraph
     prop:text="123"
     prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="789"
-    prop:type="text"
   >
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
     <affine:paragraph
       prop:text="456"
       prop:type="text"

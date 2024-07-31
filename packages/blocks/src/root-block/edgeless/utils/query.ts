@@ -104,6 +104,23 @@ export function isEmbeddedBlock(
   );
 }
 
+/**
+ * TODO: Remove this function after the edgeless refactor completed
+ * This function is used to check if the block is an AI chat block for edgeless selected rect
+ * Should not be used in the future
+ * Related issue: https://linear.app/affine-design/issue/BS-1009/
+ * @deprecated
+ */
+export function isAIChatBlock(
+  element: BlockModel | BlockSuite.EdgelessModel | null
+) {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-ai-chat'
+  );
+}
+
 export function isEmbeddedLinkBlock(
   element: BlockModel | BlockSuite.EdgelessModel | null
 ) {

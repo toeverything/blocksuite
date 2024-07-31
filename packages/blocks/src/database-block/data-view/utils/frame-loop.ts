@@ -48,12 +48,12 @@ export const autoScrollOnBoundary = (
         top: boundary,
         bottom: boundary,
       }
-    : boundary ?? {
+    : (boundary ?? {
         left: defaultBoundary,
         right: defaultBoundary,
         top: defaultBoundary,
         bottom: defaultBoundary,
-      };
+      });
   const mousePosition = { x: 0, y: 0 };
   const mouseMove = (e: MouseEvent) => {
     mousePosition.x = e.clientX;

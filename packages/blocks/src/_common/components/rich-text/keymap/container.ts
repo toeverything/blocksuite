@@ -56,7 +56,7 @@ export const bindContainerHotkey = (block: BlockComponent) => {
           return selection.create('text', {
             from: {
               blockId: block.blockId,
-              index: start ? 0 : block.model.text?.length ?? 0,
+              index: start ? 0 : (block.model.text?.length ?? 0),
               length: 0,
             },
             to: null,

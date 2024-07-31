@@ -36,7 +36,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   private _onCopy = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor);
+    if (!inlineEditor) return;
 
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;
@@ -53,7 +53,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   private _onCut = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor);
+    if (!inlineEditor) return;
 
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;
@@ -75,7 +75,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   private _onPaste = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor);
+    if (!inlineEditor) return;
 
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;
@@ -188,8 +188,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
     // init auto scroll
     inlineEditor.disposables.add(
-      inlineEditor.slots.inlineRangeUpdate.on(([inlineRange, sync]) => {
-        if (!inlineRange || !sync) return;
+      inlineEditor.slots.inlineRangeUpdate.on(([inlineRange]) => {
+        if (!inlineRange) return;
 
         // lazy
         const verticalScrollContainer =

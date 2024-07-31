@@ -438,7 +438,7 @@ export class EdgelessRootService extends RootService {
 
       results = results.concat(frames);
 
-      return options.all ? results : last(results) ?? null;
+      return options.all ? results : (last(results) ?? null);
     } else {
       return last(frames) ?? null;
     }
