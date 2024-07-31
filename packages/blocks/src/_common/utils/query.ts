@@ -14,7 +14,6 @@ import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import type { RootBlockComponent } from '../../index.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
-import type { AbstractEditor } from '../types.js';
 import type { Rect } from './rect.js';
 
 import {
@@ -228,13 +227,6 @@ export function getEdgelessRootByEditorHost(editorHost: EditorHost) {
   return editorHost.querySelector('affine-edgeless-root');
 }
 
-/** @deprecated */
-export function getEditorContainer(editorHost: EditorHost): AbstractEditor {
-  const editorContainer = editorHost.closest('affine-editor-container');
-  assertExists(editorContainer);
-  return editorContainer as AbstractEditor;
-}
-
 export function isInsidePageEditor(host: EditorHost) {
   return Array.from(host.children).some(
     v => v.tagName.toLowerCase() === 'affine-page-root'
@@ -306,40 +298,31 @@ export function getBlockComponentByPath(
  * Use `root.view.viewFromPath` instead.
  * @deprecated
  */
-export async function asyncGetBlockComponentByModel(
+export async function asyncGetBlockComponent(
   editorHost: EditorHost,
-  model: BlockModel
+  id: string
 ): Promise<BlockComponent | null> {
-  assertExists(model.doc.root);
-  const rootComponent = getRootByEditorHost(editorHost);
+  const rootBlockId = editorHost.doc.root?.id;
+  if (!rootBlockId) return null;
+  const rootComponent = editorHost.view.getBlock(rootBlockId);
   if (!rootComponent) return null;
   await rootComponent.updateComplete;
 
-  if (model.id === model.doc.root.id) {
-    return rootComponent;
-  }
-
-  return editorHost.view.getBlock(model.id);
+  return editorHost.view.getBlock(id);
 }
 
 /**
  * @deprecated In most cases, you not need RichText, you can use {@link getInlineEditorByModel} instead.
  */
 export function getRichTextByModel(editorHost: EditorHost, model: BlockModel) {
-  const blockComponent = editorHost.view.viewFromPath(
-    'block',
-    buildPath(model)
-  );
+  const blockComponent = editorHost.view.getBlock(model.id);
   const richText = blockComponent?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
 }
 
-export async function asyncGetRichTextByModel(
-  editorHost: EditorHost,
-  model: BlockModel
-) {
-  const blockComponent = await asyncGetBlockComponentByModel(editorHost, model);
+export async function asyncGetRichText(editorHost: EditorHost, id: string) {
+  const blockComponent = await asyncGetBlockComponent(editorHost, id);
   if (!blockComponent) return null;
   await blockComponent.updateComplete;
   const richText = blockComponent?.querySelector<RichText>('rich-text');
@@ -357,20 +340,6 @@ export function getInlineEditorByModel(
     return null;
   }
   const richText = getRichTextByModel(editorHost, model);
-  if (!richText) return null;
-  return richText.inlineEditor;
-}
-
-export async function asyncGetInlineEditorByModel(
-  editorHost: EditorHost,
-  model: BlockModel
-) {
-  if (matchFlavours(model, ['affine:database'])) {
-    // Not support database model since it's may be have multiple inline editor instances.
-    console.error('Cannot get inline editor by database model!');
-    return null;
-  }
-  const richText = await asyncGetRichTextByModel(editorHost, model);
   if (!richText) return null;
   return richText.inlineEditor;
 }

@@ -91,10 +91,11 @@ export function handleBlockEndEnter(
 
       const nextModel = doc.getNext(newParent);
       if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
-        asyncFocusRichText(editorHost, nextModel.id, {
-          index: nextModel.text.yText.length,
-          length: 0,
-        })?.catch(console.error);
+        asyncFocusRichText(
+          editorHost,
+          nextModel.id,
+          nextModel.text.length
+        )?.catch(console.error);
         return;
       }
 
