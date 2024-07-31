@@ -52,7 +52,6 @@ export async function asyncFocusRichText(
   id: string,
   offset: number = 0
 ) {
-  const richText = await asyncGetRichText(editorHost, id);
   const selection = editorHost.std.selection;
   selection.setGroup('note', [
     selection.create('text', {
@@ -60,9 +59,7 @@ export async function asyncFocusRichText(
       to: null,
     }),
   ]);
-  richText?.scrollIntoView();
-
-  return;
+  await editorHost.updateComplete;
 }
 
 /**
