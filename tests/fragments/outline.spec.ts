@@ -1,4 +1,5 @@
 import { type Locator, type Page, expect } from '@playwright/test';
+import { addNote, switchEditorMode } from 'utils/actions/edgeless.js';
 import { pressBackspace, pressEnter, type } from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
@@ -6,6 +7,7 @@ import {
   focusTitle,
   getEditorHostLocator,
   getEditorLocator,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
@@ -291,7 +293,12 @@ test.describe('toc-viewer', () => {
     await pressEnter(page);
 
     const indicator = getIndicators(page).first();
-    await indicator.hover();
+    const indicatorBox = await indicator.boundingBox();
+    // we do not use indicator.hover(), because the locator is inconsistent
+    await page.mouse.move(
+      indicatorBox!.x + indicatorBox!.width / 2,
+      indicatorBox!.y + indicatorBox!.height / 2
+    );
 
     const viewer = page.locator('affine-outline-panel-body');
     await expect(viewer).toBeVisible();
@@ -316,5 +323,87 @@ test.describe('toc-viewer', () => {
       await page.mouse.wheel(0, lastHeadingCenter - viewportCenter + 50);
       await expect(indicators.nth(i)).toHaveAttribute('active');
     }
+  });
+
+  test('should highlight indicator when click item in outline panel', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await toggleTocViewer(page);
+
+    await focusRichTextEnd(page);
+    const headings = await createHeadingsWithGap(page);
+
+    const indicators = getIndicators(page);
+    const indicatorBox = await indicators.first().boundingBox();
+    // we do not use indicator.hover(), because the locator is inconsistent
+    await page.mouse.move(
+      indicatorBox!.x + indicatorBox!.width / 2,
+      indicatorBox!.y + indicatorBox!.height / 2
+    );
+
+    const viewer = page.locator('affine-outline-panel-body');
+
+    const headingsInPanel = Array.from({ length: 6 }, (_, i) =>
+      viewer.locator(`.h${i + 1} > span`)
+    );
+
+    await headingsInPanel[2].click();
+    await expect(headings[2]).toBeVisible();
+    await expect(indicators.nth(2)).toHaveAttribute('active');
+  });
+
+  test('should hide in edgeless mode', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await toggleTocViewer(page);
+
+    const indicators = getIndicators(page);
+
+    await focusRichTextEnd(page);
+    await type(page, '# Heading 1');
+    await pressEnter(page);
+
+    await expect(indicators).toHaveCount(1);
+
+    await switchEditorMode(page);
+
+    await expect(indicators).toHaveCount(0);
+  });
+
+  test('should hide edgeless only note headings', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await toggleTocViewer(page);
+
+    await focusRichTextEnd(page);
+
+    await type(page, '# Heading 1');
+    await pressEnter(page);
+
+    await type(page, '## Heading 2');
+    await pressEnter(page);
+
+    await switchEditorMode(page);
+
+    await addNote(page, '# Edgeless', 300, 300);
+
+    await switchEditorMode(page);
+
+    const indicators = getIndicators(page);
+    await expect(indicators).toHaveCount(2);
+
+    const indicatorBox = await indicators.first().boundingBox();
+    // we do not use indicator.hover(), because the locator is inconsistent
+    await page.mouse.move(
+      indicatorBox!.x + indicatorBox!.width / 2,
+      indicatorBox!.y + indicatorBox!.height / 2
+    );
+
+    const viewer = page.locator('affine-outline-panel-body');
+    await expect(viewer).toBeVisible();
+    const hiddenTitle = viewer.locator('.hidden-title');
+    await expect(hiddenTitle).toBeHidden();
   });
 });

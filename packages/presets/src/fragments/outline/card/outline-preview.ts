@@ -33,6 +33,11 @@ const styles = css`
     width: 100%;
   }
 
+  :host(:hover) {
+    cursor: pointer;
+    background: var(--affine-hover-color);
+  }
+
   :host(.active) {
     color: var(--affine-text-emphasis-color);
   }

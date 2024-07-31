@@ -164,7 +164,7 @@ export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
           .fitPadding=${this.fitPadding}
           .edgeless=${this.edgeless}
           .editorHost=${this.host}
-          .activeHeadingId=${this._activeHeadingId$.value}
+          .activeHeadingId=${this._activeHeadingId$}
           .mode=${this.mode}
           .showPreviewIcon=${this._showPreviewIcon}
           .enableNotesSorting=${this._enableNotesSorting}
