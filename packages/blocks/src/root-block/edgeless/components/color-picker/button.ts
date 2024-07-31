@@ -94,7 +94,7 @@ export class EdgelessColorPickerButton extends WithDisposable(LitElement) {
                 >
                   <edgeless-color-custom-button
                     slot="custom"
-                    style=${this.customButtonStyle}
+                    style=${styleMap(this.customButtonStyle)}
                     .active=${!this.isCSSVariable}
                     @click=${this.switchToCustomTab}
                   ></edgeless-color-custom-button>
@@ -134,10 +134,7 @@ export class EdgelessColorPickerButton extends WithDisposable(LitElement) {
       b = 'var(--affine-background-overlay-panel-color)';
       c = keepColor(this.color);
     }
-    return styleMap({
-      '--b': b,
-      '--c': c,
-    });
+    return { '--b': b, '--c': c };
   }
 
   get isCSSVariable() {
