@@ -75,7 +75,7 @@ function getMostCommonBackground(
 ): string | null {
   const colors = countBy(elements, (ele: NoteBlockModel) => {
     return typeof ele.background === 'object'
-      ? ele.background[colorScheme] ?? ele.background.normal ?? null
+      ? (ele.background[colorScheme] ?? ele.background.normal ?? null)
       : ele.background;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);

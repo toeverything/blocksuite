@@ -1277,7 +1277,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
     this.noteScale = isInsidePageEditor(this.host)
       ? 1
-      : closestNoteBlock?.model.edgeless.scale ?? 1;
+      : (closestNoteBlock?.model.edgeless.scale ?? 1);
 
     if (
       closestNoteBlock &&

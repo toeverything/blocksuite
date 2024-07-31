@@ -64,7 +64,7 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
     fallback = fallback.startsWith('--') ? `var(${fallback})` : fallback;
 
     if (typeof color === 'string') {
-      return color.startsWith('--') ? `var(${color})` : color ?? fallback;
+      return color.startsWith('--') ? `var(${color})` : (color ?? fallback);
     }
 
     if (color.light && color.dark) {
@@ -98,7 +98,7 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
     color =
       (typeof color === 'string'
         ? color
-        : color[this.mode] ?? color['normal']) ??
+        : (color[this.mode] ?? color['normal'])) ??
       fallback ??
       'transparent';
     return real ? this.getVariableValue(color) : color;

@@ -259,7 +259,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     const parentNode =
       target === 'sibling'
-        ? mindmap.getParentNode(this.current.id) ?? this.current
+        ? (mindmap.getParentNode(this.current.id) ?? this.current)
         : this.current;
 
     const newNode = mindmap.addNode(

@@ -146,7 +146,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
 
     const theme = getThemeMode();
     const isSelected = !!this.selected?.is('block');
-    const scale = isInSurface ? this.model.scale ?? 1 : undefined;
+    const scale = isInSurface ? (this.model.scale ?? 1) : undefined;
 
     this.dataset.nestedEditor = '';
 

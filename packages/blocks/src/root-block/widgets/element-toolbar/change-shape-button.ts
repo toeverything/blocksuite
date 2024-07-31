@@ -98,7 +98,7 @@ function getMostCommonFillColor(
   const colors = countBy(elements, (ele: ShapeElementModel) => {
     if (ele.filled) {
       return typeof ele.fillColor === 'object'
-        ? ele.fillColor[colorScheme] ?? ele.fillColor.normal ?? null
+        ? (ele.fillColor[colorScheme] ?? ele.fillColor.normal ?? null)
         : ele.fillColor;
     }
     return '--affine-palette-transparent';
@@ -113,7 +113,7 @@ function getMostCommonStrokeColor(
 ): string | null {
   const colors = countBy(elements, (ele: ShapeElementModel) => {
     return typeof ele.strokeColor === 'object'
-      ? ele.strokeColor[colorScheme] ?? ele.strokeColor.normal ?? null
+      ? (ele.strokeColor[colorScheme] ?? ele.strokeColor.normal ?? null)
       : ele.strokeColor;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);

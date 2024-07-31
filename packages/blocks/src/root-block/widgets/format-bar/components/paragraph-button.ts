@@ -69,11 +69,11 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
   const paragraphIcon =
     selectedBlocks.length < 1
       ? textConversionConfigs[0].icon
-      : textConversionConfigs.find(
+      : (textConversionConfigs.find(
           ({ flavour, type }) =>
             selectedBlocks[0].flavour === flavour &&
             (selectedBlocks[0].model as ParagraphBlockModel).type === type
-        )?.icon ?? textConversionConfigs[0].icon;
+        )?.icon ?? textConversionConfigs[0].icon);
 
   const rootComponent = formatBar.block;
   if (!isRootComponent(rootComponent)) {

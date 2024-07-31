@@ -200,7 +200,7 @@ export class TemplateJob {
             ...modelData.props,
             id: modelData.id,
           },
-          parent ? mergeIdMapping.get(parent) ?? parent : undefined,
+          parent ? (mergeIdMapping.get(parent) ?? parent) : undefined,
           index
         );
       }
@@ -259,7 +259,7 @@ export class TemplateJob {
         snapshot.flavour as MergeBlockFlavour
       )
         ? null
-        : (await job.snapshotToModelData(snapshot)) ?? null;
+        : ((await job.snapshotToModelData(snapshot)) ?? null);
 
       modelDataList.push({
         flavour: snapshot.flavour,

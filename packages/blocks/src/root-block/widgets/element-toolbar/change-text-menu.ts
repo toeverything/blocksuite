@@ -135,7 +135,7 @@ function getMostCommonColor(
     const color =
       ele instanceof ConnectorElementModel ? ele.labelStyle.color : ele.color;
     return typeof color === 'object'
-      ? color[colorScheme] ?? color.normal ?? null
+      ? (color[colorScheme] ?? color.normal ?? null)
       : color;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);

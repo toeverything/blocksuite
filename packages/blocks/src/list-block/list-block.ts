@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import type { BlockComponent } from '@blocksuite/block-std';
+import type { BaseSelection, BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
 import { getInlineRangeProvider } from '@blocksuite/block-std';
@@ -59,7 +59,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     const selection = this.host.selection;
     selection.update(selList => {
       return selList
-        .filter(sel => !sel.is('text') && !sel.is('block'))
+        .filter<BaseSelection>(sel => !sel.is('text') && !sel.is('block'))
         .concat(selection.create('block', { blockId: this.blockId }));
     });
   }

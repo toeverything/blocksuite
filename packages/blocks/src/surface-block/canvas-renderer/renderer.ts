@@ -351,8 +351,8 @@ export class Renderer {
   }
 
   generateColorProperty(color: Color, fallback: string) {
-    return this.provider.generateColorProperty?.(color, fallback) ??
-      fallback.startsWith('--')
+    return (this.provider.generateColorProperty?.(color, fallback) ??
+      fallback.startsWith('--'))
       ? `var(${fallback})`
       : fallback;
   }

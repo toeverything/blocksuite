@@ -34,7 +34,7 @@ function getMostCommonColor(
 ): string {
   const colors = countBy(elements, (ele: BrushElementModel) => {
     return typeof ele.color === 'object'
-      ? ele.color[colorScheme] ?? ele.color.normal ?? null
+      ? (ele.color[colorScheme] ?? ele.color.normal ?? null)
       : ele.color;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);

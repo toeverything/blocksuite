@@ -76,7 +76,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       ? 'Loading...'
       : !title
         ? this.error
-          ? domainName ?? 'Link card'
+          ? (domainName ?? 'Link card')
           : ''
         : title;
 
@@ -105,7 +105,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
         ? this.error
           ? 'Failed to retrieve link information.'
           : url
-        : description ?? '';
+        : (description ?? '');
 
     const bannerImage =
       !this.loading && image

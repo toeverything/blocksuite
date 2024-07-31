@@ -158,7 +158,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   };
 
   private _onSelect = (id: string) => {
-    const isExist = this.value.findIndex(item => item === id) > -1;
+    const isExist = this.value.some(item => item === id);
     if (isExist) {
       // this.editComplete();
       return;
