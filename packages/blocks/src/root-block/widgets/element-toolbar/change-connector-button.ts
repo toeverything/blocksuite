@@ -7,7 +7,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
 import type {
   ConnectorElementProps,
@@ -75,7 +74,7 @@ function getMostCommonColor(
 ): string | null {
   const colors = countBy(elements, (ele: ConnectorElementModel) => {
     return typeof ele.stroke === 'object'
-      ? ele.stroke[colorScheme] ?? ele.stroke.normal ?? null
+      ? (ele.stroke[colorScheme] ?? ele.stroke.normal ?? null)
       : ele.stroke;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
@@ -236,13 +235,12 @@ const MODE_CHOOSE: [ConnectorMode, () => TemplateResult<1>][] = [
 export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {
-      const { type, value } = event.detail;
-      this.elements.forEach(ele => {
+      this.elements.forEach(ele =>
         this.service.updateElement(
           ele.id,
-          packColor(type, 'stroke', value, ele.stroke)
-        );
-      });
+          packColor('stroke', { ...event.detail })
+        )
+      );
       return;
     }
 
@@ -276,7 +274,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     );
   }
 
-  private _setConnectorColor(stroke: CssVariableName) {
+  private _setConnectorColor(stroke: string) {
     this._setConnectorProp('stroke', stroke);
   }
 

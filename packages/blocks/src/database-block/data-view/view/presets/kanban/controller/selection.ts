@@ -34,10 +34,9 @@ export class KanbanSelectionController implements ReactiveController {
     if (!closestGroupKey) return;
     const cards = selection?.selectionType === 'card' ? selection.cards : [];
 
-    const newCards =
-      cards.findIndex(card => card.cardId === closestCardId) >= 0
-        ? cards.filter(card => card.cardId !== closestCardId)
-        : [...cards, { cardId: closestCardId, groupKey: closestGroupKey }];
+    const newCards = cards.some(card => card.cardId === closestCardId)
+      ? cards.filter(card => card.cardId !== closestCardId)
+      : [...cards, { cardId: closestCardId, groupKey: closestGroupKey }];
     this.selection = atLeastOne(newCards)
       ? {
           selectionType: 'card',

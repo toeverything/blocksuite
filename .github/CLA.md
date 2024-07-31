@@ -128,3 +128,4 @@ Example:
 - Kirill T., @shvixxl, 2024/05/03
 - Eugene Olisevich, @@EugeneOlisevich, 2024/06/05
 - Zheng Pan, @pzppzz, 2024/06/24
+- Samuel Golmann, @goldsam, 2024/07/29

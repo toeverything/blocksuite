@@ -2,7 +2,7 @@ import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
-import { type CustomStyle, drawGeneralShape } from './utils.js';
+import { type Colors, drawGeneralShape } from './utils.js';
 
 export function triangle(
   model: ShapeElementModel,
@@ -10,7 +10,7 @@ export function triangle(
   matrix: DOMMatrix,
   renderer: Renderer,
   rc: RoughCanvas,
-  customStyle: CustomStyle
+  colors: Colors
 ) {
   const {
     seed,
@@ -28,7 +28,7 @@ export function triangle(
   const cx = renderWidth / 2;
   const cy = renderHeight / 2;
 
-  const { fillColor, strokeColor } = customStyle;
+  const { fillColor, strokeColor } = colors;
 
   ctx.setTransform(
     matrix

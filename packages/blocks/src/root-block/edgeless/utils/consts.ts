@@ -57,3 +57,8 @@ export const BlendColor = '#7D91FF';
 export const SHAPE_TEXT_COLOR_PURE_WHITE = '--affine-palette-line-white';
 export const SHAPE_TEXT_COLOR_PURE_BLACK = '--affine-palette-line-black';
 export const SHAPE_FILL_COLOR_BLACK = '--affine-palette-shape-black';
+
+export const AI_CHAT_BLOCK_MIN_WIDTH = 260;
+export const AI_CHAT_BLOCK_MIN_HEIGHT = 160;
+export const AI_CHAT_BLOCK_MAX_WIDTH = 320;
+export const AI_CHAT_BLOCK_MAX_HEIGHT = 300;

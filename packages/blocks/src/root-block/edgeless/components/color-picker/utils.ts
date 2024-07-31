@@ -6,6 +6,7 @@ import type {
   Hsv,
   Hsva,
   ModeType,
+  PickColorDetail,
   PickColorType,
   Point,
   Rgb,
@@ -132,7 +133,7 @@ export const hsvaToRgba = (hsva: Hsva): Rgba => ({
   a: hsva.a,
 });
 
-// Converts an RGB color to hex
+// Converts a RGB color to hex
 export const rgbToHex = ({ r, g, b }: Rgb) =>
   [r, g, b]
     .map(n => n * 255)
@@ -150,9 +151,8 @@ export const rgbaToHex8 = ({ r, g, b, a }: Rgba) => {
   return `#${hex}`;
 };
 
-// Converts an HSV color to CSS's `rgba`
-export const hsvToHex8 = (color: Hsv, a = 1) =>
-  rgbaToHex8({ ...hsvToRgb(color), a });
+// Converts an HSVA color to CSS's hex8 string
+export const hsvaToHex8 = (hsva: Hsva) => rgbaToHex8(hsvaToRgba(hsva));
 
 // Parses an hex string to RGBA.
 export const parseHexToRgba = (hex: string) => {
@@ -215,6 +215,8 @@ export const keepColor = (color: string) =>
   color.length > 7 ? color.substring(0, 7) : color;
 
 export const parseStringToRgba = (value: string) => {
+  value = value.trim();
+
   if (value.startsWith('#')) {
     return parseHexToRgba(value);
   }
@@ -225,7 +227,7 @@ export const parseStringToRgba = (value: string) => {
       .replace(/\(|\)/, '')
       .split(',')
       .map(s => parseFloat(s.trim()))
-      // In CSS, the alpha in the range [0, 1]
+      // In CSS, the alpha is already in the range [0, 1]
       .map((n, i) => bound01(n, i === 3 ? 1 : 255));
 
     return { r, g, b, a };
@@ -248,46 +250,22 @@ export const preprocessColor = (style: CSSStyleDeclaration) => {
 };
 
 /**
- * Packs to generate a color object with picking type and an old color
+ * Packs to generate an object with a field name and picked color detail
  *
- * @param type - The pick color event type
- * @param key - The field name in the model
- * @param value - The color value
- * @param oldColor
- * @returns object
+ * @param key - The model's field name
+ * @param detail - The picked color detail
+ * @returns An object
  *
  * @example
+ *
  * ```json
- * { 'fillColor': '#fff' }
- * { 'fillColor': { normal: '#fff' }}
- * { 'fillColor': { light: '#fff', 'dark': '#00f' }}
+ * { 'fillColor': '--affine-palette-shape-yellow' }
+ * { 'fillColor': { normal: '#ffffffff' }}
+ * { 'fillColor': { light: '#fff000ff', 'dark': '#0000fff00' }}
  * ```
  */
-export const packColor = (
-  type: PickColorType,
-  key: string,
-  value: string,
-  oldColor?: Color
-) => {
-  if (type === 'palette') {
-    return { [key]: value };
-  }
-
-  let color = { [type]: value };
-
-  if (type !== 'normal') {
-    if (typeof oldColor === 'object') {
-      delete oldColor.normal;
-      color = { ...oldColor, ...color };
-    }
-
-    // makes sure light/dark exist at the same time
-    if (Object.keys(color).length === 1) {
-      color[type === 'light' ? 'dark' : 'light'] = value;
-    }
-  }
-
-  return { [key]: color };
+export const packColor = (key: string, detail: PickColorDetail) => {
+  return { [key]: detail.palette ?? detail };
 };
 
 /**

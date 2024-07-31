@@ -1,11 +1,16 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { Color } from '../../../../../surface-block/consts.js';
 import type { EdgelessTool } from '../../../types.js';
-import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 
+import { ThemeObserver } from '../../../../../_common/theme/theme-observer.js';
 import '../../buttons/tool-icon-button.js';
+import {
+  type ColorEvent,
+  GET_DEFAULT_LINE_COLOR,
+} from '../../panel/color-panel.js';
 import '../../panel/one-row-color-panel.js';
 import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
@@ -33,12 +38,16 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(LitElement) {
   type: EdgelessTool['type'] = 'brush';
 
   override render() {
-    const { color, lineWidth } = this;
+    const color = ThemeObserver.getColorValue(
+      this.color,
+      GET_DEFAULT_LINE_COLOR()
+    );
+
     return html`
       <edgeless-slide-menu>
         <div class="menu-content">
           <edgeless-line-width-panel
-            .selectedSize=${lineWidth}
+            .selectedSize=${this.lineWidth}
             @select=${(e: LineWidthEvent) =>
               this.onChange({ lineWidth: e.detail })}
           >
@@ -54,7 +63,7 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(LitElement) {
   }
 
   @property({ attribute: false })
-  accessor color!: string;
+  accessor color!: Color;
 
   @property({ attribute: false })
   accessor lineWidth!: number;

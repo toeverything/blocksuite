@@ -9,7 +9,7 @@ import type { SelectionPosition } from '../types.js';
 
 import { matchFlavours } from './model.js';
 import {
-  asyncGetRichTextByModel,
+  asyncGetRichText,
   buildPath,
   getDocTitleInlineEditor,
   getPageRootByElement,
@@ -34,7 +34,7 @@ export async function asyncSetInlineRange(
   model: BlockModel,
   inlineRange: InlineRange
 ) {
-  const richText = await asyncGetRichTextByModel(editorHost, model);
+  const richText = await asyncGetRichText(editorHost, model.id);
   if (!richText) {
     return;
   }
@@ -47,18 +47,22 @@ export async function asyncSetInlineRange(
   inlineEditor.setInlineRange(inlineRange);
 }
 
-export function asyncFocusRichText(
+export async function asyncFocusRichText(
   editorHost: EditorHost,
   id: string,
-  inlineRange: InlineRange = { index: 0, length: 0 }
+  offset: number = 0
 ) {
-  const doc = editorHost.doc;
-  const model = doc.getBlockById(id);
-  if (!model) {
-    return;
-  }
-  if (matchFlavours(model, ['affine:divider'])) return;
-  return asyncSetInlineRange(editorHost, model, inlineRange);
+  const richText = await asyncGetRichText(editorHost, id);
+  const selection = editorHost.std.selection;
+  selection.setGroup('note', [
+    selection.create('text', {
+      from: { blockId: id, index: offset, length: 0 },
+      to: null,
+    }),
+  ]);
+  richText?.scrollIntoView();
+
+  return;
 }
 
 /**

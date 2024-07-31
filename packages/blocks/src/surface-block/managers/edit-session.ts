@@ -1,7 +1,7 @@
 import type { BlockService } from '@blocksuite/block-std';
 
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
-import { isPlainObject, recursive } from 'merge';
+import { isPlainObject, merge } from 'merge';
 import { z } from 'zod';
 
 import {
@@ -59,36 +59,49 @@ const TextAlignSchema = z.nativeEnum(TextAlign);
 const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
 const ShapeTypeSchema = z.nativeEnum(ShapeType);
 const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
-const CustomColorSchema = z.object({
-  normal: z.string().optional(),
-  light: z.string().optional(),
-  dark: z.string().optional(),
-});
+
+const ColorSchema = z.union([
+  z.object({
+    normal: z.string(),
+  }),
+  z.object({
+    light: z.string(),
+    dark: z.string(),
+  }),
+]);
+const LineColorSchema = z.union([LineColorsSchema, ColorSchema]);
+const ShapeFillColorSchema = z.union([FillColorsSchema, ColorSchema]);
+const ShapeStrokeColorSchema = z.union([StrokeColorsSchema, ColorSchema]);
+const TextColorSchema = z.union([z.string(), ColorSchema]);
+const NoteBackgroundColorSchema = z.union([
+  NoteBackgroundColorsSchema,
+  ColorSchema,
+]);
 
 const LastPropsSchema = z.object({
   connector: z.object({
     frontEndpointStyle: ConnectorEndpointSchema,
     rearEndpointStyle: ConnectorEndpointSchema,
     strokeStyle: StrokeStyleSchema,
-    stroke: LineColorsSchema,
+    stroke: LineColorSchema,
     strokeWidth: LineWidthSchema,
     rough: z.boolean(),
     mode: z.number().optional(),
   }),
   brush: z.object({
-    color: LineColorsSchema,
+    color: LineColorSchema,
     lineWidth: LineWidthSchema,
   }),
   shape: z.object({
     shapeType: ShapeTypeSchema,
-    fillColor: FillColorsSchema,
-    strokeColor: StrokeColorsSchema,
+    fillColor: ShapeFillColorSchema,
+    strokeColor: ShapeStrokeColorSchema,
     shapeStyle: ShapeStyleSchema,
     filled: z.boolean(),
     radius: z.number(),
     strokeWidth: z.number().optional(),
     strokeStyle: StrokeStyleSchema.optional(),
-    color: z.string().optional(),
+    color: TextColorSchema.optional(),
     fontSize: ShapeTextFontSizeSchema.optional(),
     fontFamily: FontFamilySchema.optional(),
     fontWeight: FontWeightSchema.optional(),
@@ -99,7 +112,7 @@ const LastPropsSchema = z.object({
     roughness: z.number().optional(),
   }),
   text: z.object({
-    color: z.string(),
+    color: TextColorSchema,
     fontFamily: FontFamilySchema,
     textAlign: TextAlignSchema,
     fontWeight: FontWeightSchema,
@@ -107,14 +120,14 @@ const LastPropsSchema = z.object({
     fontSize: z.number(),
   }),
   'affine:edgeless-text': z.object({
-    color: z.string(),
+    color: TextColorSchema,
     fontFamily: FontFamilySchema,
     textAlign: TextAlignSchema,
     fontWeight: FontWeightSchema,
     fontStyle: FontStyleSchema,
   }),
   'affine:note': z.object({
-    background: NoteBackgroundColorsSchema,
+    background: NoteBackgroundColorSchema,
     displayMode: NoteDisplayModeSchema.optional(),
     edgeless: z.object({
       style: z.object({
@@ -335,7 +348,7 @@ export class EditPropsStore {
     );
     if (Object.keys(overrideProps).length === 0) return;
 
-    recursive(props, overrideProps);
+    merge(props, overrideProps);
     this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
   }
 
@@ -358,7 +371,14 @@ function extractProps(
 
   Object.entries(props).forEach(([key, value]) => {
     if (!(key in ref.shape)) return;
-    if (isPlainObject(value) && !isColorType(key, value)) {
+    if (isPlainObject(value)) {
+      if (isColorType(key, value)) {
+        const color = processColorValue(value as z.infer<typeof ColorSchema>);
+        if (Object.keys(color).length === 0) return;
+        result[key] = color;
+        return;
+      }
+
       result[key] = extractProps(
         props[key] as Record<string, unknown>,
         ref.shape[key] as z.ZodObject<z.ZodRawShape>
@@ -404,6 +424,15 @@ function isColorType(key: string, value: unknown) {
   return (
     ['background', 'color', 'stroke', 'fill', 'Color'].some(
       stuff => key.startsWith(stuff) || key.endsWith(stuff)
-    ) && CustomColorSchema.safeParse(value).success
+    ) && ColorSchema.safeParse(value).success
   );
+}
+
+// Don't want the user to create a transparent element, so the alpha value is removed.
+function processColorValue(value: z.infer<typeof ColorSchema>) {
+  const obj: Record<string, string> = {};
+  for (const [k, v] of Object.entries(value)) {
+    obj[k] = v.startsWith('#') ? v.substring(0, 7) : v;
+  }
+  return obj;
 }

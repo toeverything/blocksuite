@@ -13,7 +13,6 @@ import type { RootBlockModel } from '../root-model.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
-import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import { requestThrottledConnectFrame } from '../../_common/utils/index.js';
 import '../../surface-block/surface-block.js';
 import './components/note-slicer/index.js';
@@ -45,8 +44,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   }, this);
 
   private _resizeObserver: ResizeObserver | null = null;
-
-  private readonly _themeObserver = new ThemeObserver();
 
   private _viewportElement: HTMLElement | null = null;
 
@@ -158,9 +155,9 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   private _initSlotEffects() {
     const { disposables } = this;
 
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => this.surface.refresh());
-    this.disposables.add(() => this._themeObserver.dispose());
+    this.disposables.add(
+      this.service.themeObserver.mode$.subscribe(() => this.surface.refresh())
+    );
 
     disposables.add(this.service.selection);
   }

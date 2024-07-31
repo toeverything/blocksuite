@@ -26,6 +26,7 @@ import '../../../_common/components/toolbar/menu-button.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import '../../../_common/components/toolbar/toolbar.js';
 import { ConnectorCWithArrowIcon } from '../../../_common/icons/edgeless.js';
+import { ThemeObserver } from '../../../_common/theme/theme-observer.js';
 import {
   atLeastNMatches,
   groupBy,
@@ -278,6 +279,12 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
     );
+
+    this.updateComplete
+      .then(() => {
+        _disposables.add(ThemeObserver.subscribe(() => this.requestUpdate()));
+      })
+      .catch(console.error);
   }
 
   registerEntry(entry: CustomEntry) {

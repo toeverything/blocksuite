@@ -21,6 +21,7 @@ import {
   MindMapSiblingIcon,
   NoteAutoCompleteIcon,
 } from '../../../../_common/icons/index.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
 import {
   type Connection,
@@ -221,12 +222,12 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(current)) {
-      color = edgeless.surface.themeObserver.getColorValue(
+      color = ThemeObserver.getColorValue(
         current.strokeColor,
         DEFAULT_SHAPE_STROKE_COLOR
       );
     } else {
-      const tmpColor = edgeless.surface.themeObserver.getColorValue(
+      const tmpColor = ThemeObserver.getColorValue(
         current.background,
         DEFAULT_NOTE_BACKGROUND_COLOR
       );
@@ -259,7 +260,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     const parentNode =
       target === 'sibling'
-        ? mindmap.getParentNode(this.current.id) ?? this.current
+        ? (mindmap.getParentNode(this.current.id) ?? this.current)
         : this.current;
 
     const newNode = mindmap.addNode(

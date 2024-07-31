@@ -1,6 +1,5 @@
 import type { TemplateResult } from 'lit';
 
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { PieMenuId } from '../../types.js';
 import type { AffinePieMenuWidget } from './index.js';
@@ -70,10 +69,10 @@ export interface PieSubmenuNodeModel extends PieBaseNodeModel {
 
 export interface PieColorNodeModel extends PieBaseNodeModel {
   type: 'color';
-  color: CssVariableName;
+  color: string;
   hollowCircle: boolean;
   text?: string;
-  onChange: (color: CssVariableName, ctx: PieMenuContext) => void;
+  onChange: (color: string, ctx: PieMenuContext) => void;
 }
 
 export type IPieNodeWithAction =

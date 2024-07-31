@@ -135,7 +135,7 @@ function getMostCommonColor(
     const color =
       ele instanceof ConnectorElementModel ? ele.labelStyle.color : ele.color;
     return typeof color === 'object'
-      ? color[colorScheme] ?? color.normal ?? null
+      ? (color[colorScheme] ?? color.normal ?? null)
       : color;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
@@ -308,14 +308,12 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {
-      const { type, value } = event.detail;
-
       this.elements.forEach(ele => {
         if (ele instanceof ConnectorElementModel) {
           this.service.updateElement(ele.id, {
             labelStyle: {
               ...ele.labelStyle,
-              ...packColor(type, 'color', value, ele.labelStyle.color),
+              ...packColor('color', { ...event.detail }),
             },
           });
           this._updateElementBound(ele);
@@ -324,7 +322,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
         this.service.updateElement(
           ele.id,
-          packColor(type, 'color', value, ele.color)
+          packColor('color', { ...event.detail })
         );
         this._updateElementBound(ele);
       });

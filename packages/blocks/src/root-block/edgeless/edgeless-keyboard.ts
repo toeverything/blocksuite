@@ -556,16 +556,16 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         case 'ArrowLeft':
           targetNode =
             nodeDirection === LayoutType.RIGHT
-              ? mindmap.getParentNode(node.id)?.element ?? null
-              : mindmap.getChildNodes(node.id, 'left')[0]?.element ?? null;
+              ? (mindmap.getParentNode(node.id)?.element ?? null)
+              : (mindmap.getChildNodes(node.id, 'left')[0]?.element ?? null);
 
           break;
         case 'ArrowRight':
           targetNode =
             nodeDirection === LayoutType.RIGHT ||
             nodeDirection === LayoutType.BALANCE
-              ? mindmap.getChildNodes(node.id, 'right')[0]?.element ?? null
-              : mindmap.getParentNode(node.id)?.element ?? null;
+              ? (mindmap.getChildNodes(node.id, 'right')[0]?.element ?? null)
+              : (mindmap.getParentNode(node.id)?.element ?? null);
           break;
       }
 

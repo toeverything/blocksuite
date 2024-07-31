@@ -19,6 +19,7 @@ import type { NoteBlockModel } from './note-model.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../_common/consts.js';
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../_common/edgeless/note/consts.js';
 import { MoreIndicatorIcon } from '../_common/icons/edgeless.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { NoteDisplayMode } from '../_common/types.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { getClosestBlockComponentByPoint } from '../_common/utils/query.js';
@@ -405,19 +406,10 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     };
 
     const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
-    let backgroundColor = `${DEFAULT_NOTE_BACKGROUND_COLOR}`;
-
-    // The root service may not be initialized when switching page mode
-    if (this.rootService) {
-      backgroundColor = this.rootService.themeObserver.generateColorProperty(
-        model.background,
-        backgroundColor
-      );
-    } else if (typeof model.background === 'string') {
-      backgroundColor = model.background.startsWith('--')
-        ? `var(${model.background})`
-        : model.background;
-    }
+    const backgroundColor = ThemeObserver.generateColorProperty(
+      model.background,
+      DEFAULT_NOTE_BACKGROUND_COLOR
+    );
 
     const backgroundStyle = {
       position: 'absolute',

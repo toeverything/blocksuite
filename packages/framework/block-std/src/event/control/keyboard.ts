@@ -27,9 +27,6 @@ export class KeyboardControl {
   };
 
   private _shouldTrigger = (event: KeyboardEvent) => {
-    if (event.defaultPrevented) {
-      return false;
-    }
     if (event.isComposing) {
       return false;
     }

@@ -648,7 +648,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       }
 
       const parent: MindmapNode | null = current.detail.parent
-        ? this._nodeMap.get(current.detail.parent) ?? null
+        ? (this._nodeMap.get(current.detail.parent) ?? null)
         : null;
 
       if (parent === root) {
@@ -672,7 +672,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   getParentNode(id: string) {
     const node = this.children.get(id);
 
-    return node?.parent ? this._nodeMap.get(node.parent) ?? null : null;
+    return node?.parent ? (this._nodeMap.get(node.parent) ?? null) : null;
   }
 
   /**
@@ -807,7 +807,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
             preSibling?.detail.index ?? null,
             sibling?.detail.index ?? null
           )
-        : tree.detail.index ?? undefined;
+        : (tree.detail.index ?? undefined);
 
     this.surface.doc.transact(() => {
       const val: NodeDetail =

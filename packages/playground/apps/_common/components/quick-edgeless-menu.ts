@@ -5,11 +5,7 @@ import type { DeltaInsert } from '@blocksuite/inline';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
-import {
-  ColorVariables,
-  EdgelessRootService,
-  extractCssVariables,
-} from '@blocksuite/blocks';
+import { EdgelessRootService } from '@blocksuite/blocks';
 import { type DocCollection, Text, Utils } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -38,12 +34,6 @@ import type { LeftSidePanel } from './left-side-panel.js';
 
 import { notify } from '../../default/utils/notify.js';
 import { generateRoomId } from '../sync/websocket/utils.js';
-
-const cssVariablesMap = extractCssVariables(document.documentElement);
-const plate: Record<string, string> = {};
-ColorVariables.forEach((key: string) => {
-  plate[key] = cssVariablesMap[key];
-});
 
 const basePath = import.meta.env.DEV
   ? '/node_modules/@shoelace-style/shoelace/dist'

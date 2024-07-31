@@ -9,7 +9,7 @@ import {
   LightLoadingIcon,
   ReloadIcon,
 } from '../_common/icons/text.js';
-import { getThemeMode } from '../_common/utils/query.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import {
   DarkSyncedDocErrorBanner,
   LightSyncedDocErrorBanner,
@@ -48,7 +48,7 @@ export function getEmbedLinkedDocIcons(
   editorMode: 'page' | 'edgeless',
   style: (typeof EmbedLinkedDocStyles)[number]
 ): EmbedCardImages {
-  const theme = getThemeMode();
+  const theme = ThemeObserver.mode;
   const small = style !== 'vertical';
   if (editorMode === 'page') {
     if (theme === 'light') {

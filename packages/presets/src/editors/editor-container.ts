@@ -14,7 +14,6 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
-  ThemeObserver,
 } from '@blocksuite/blocks';
 import { Slot, assertExists, noop } from '@blocksuite/global/utils';
 import {
@@ -204,16 +203,9 @@ export class AffineEditorContainer
   /**
    * @deprecated need to refactor
    */
-  readonly themeObserver = new ThemeObserver();
-
-  /**
-   * @deprecated need to refactor
-   */
   override connectedCallback() {
     super.connectedCallback();
 
-    this.themeObserver.observe(document.documentElement);
-    this._disposables.add(this.themeObserver);
     this._disposables.add(
       this.doc.slots.rootAdded.on(() => this.requestUpdate())
     );

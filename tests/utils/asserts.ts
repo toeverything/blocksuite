@@ -5,7 +5,6 @@ import type {
   BlockComponent,
   EditorHost,
 } from '@block-std/view/element/index.js';
-import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
   AffineInlineEditor,
   NoteBlockModel,
@@ -989,7 +988,7 @@ export async function assertSelectionInNote(
 export async function assertEdgelessNoteBackground(
   page: Page,
   noteId: string,
-  color: CssVariableName
+  color: string
 ) {
   const editor = getEditorLocator(page);
   const backgroundColor = await editor
@@ -1033,12 +1032,12 @@ function toHex(color: string) {
 
 export async function assertEdgelessColorSameWithHexColor(
   page: Page,
-  edgelessColor: CssVariableName,
+  edgelessColor: string,
   hexColor: `#${string}`
 ) {
   const themeColor = await getCurrentThemeCSSPropertyValue(page, edgelessColor);
   expect(themeColor).toBeTruthy();
-  const edgelessHexColor = toHex(themeColor as string);
+  const edgelessHexColor = toHex(themeColor);
 
   assertSameColor(hexColor, edgelessHexColor as `#${string}`);
 }
@@ -1212,10 +1211,7 @@ export async function assertBlockSelections(page: Page, paths: string[]) {
   expect(actualPaths).toEqual(paths);
 }
 
-export async function assertConnectorStrokeColor(
-  page: Page,
-  color: CssVariableName
-) {
+export async function assertConnectorStrokeColor(page: Page, color: string) {
   const colorButton = page
     .locator('edgeless-change-connector-button')
     .locator('edgeless-color-panel')

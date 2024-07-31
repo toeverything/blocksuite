@@ -6,6 +6,7 @@ import { consume } from '@lit/context';
 import { cssVar } from '@toeverything/theme';
 import { property, state } from 'lit/decorators.js';
 
+import type { ColorScheme } from '../../../../../_common/theme/theme-observer.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessToolbar } from '../edgeless-toolbar.js';
@@ -33,7 +34,7 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
 
   setEdgelessTool: EdgelessRootBlockComponent['tools']['setEdgelessTool'];
 
-  theme: 'light' | 'dark';
+  theme: ColorScheme;
 
   toolbarContainer: HTMLElement | null;
 
@@ -133,7 +134,7 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
     public accessor popper: MenuPopper<HTMLElement> | null = null;
 
     @consume({ context: edgelessToolbarThemeContext, subscribe: true })
-    accessor theme!: 'light' | 'dark';
+    accessor theme!: ColorScheme;
 
     @consume({ context: edgelessToolbarContext })
     accessor toolbar!: EdgelessToolbar;

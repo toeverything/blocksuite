@@ -1,4 +1,4 @@
-import type { UIEventStateContext } from '@blocksuite/block-std';
+import type { BaseSelection, UIEventStateContext } from '@blocksuite/block-std';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { type PropertyValues, css, html } from 'lit';
@@ -57,7 +57,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
 
       selection.update(selList =>
         selList
-          .filter(sel => !sel.is('image'))
+          .filter<BaseSelection>(sel => !sel.is('image'))
           .concat(
             selection.create('text', {
               from: {

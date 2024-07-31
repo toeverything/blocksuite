@@ -13,6 +13,7 @@ import type {
   PieSubmenuNodeModel,
 } from './base.js';
 
+import { ThemeObserver } from '../../../_common/theme/theme-observer.js';
 import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
@@ -27,8 +28,8 @@ export function getActiveShapeColor(type: 'fill' | 'stroke') {
   return ({ rootComponent }: PieMenuContext) => {
     if (rootComponent instanceof EdgelessRootBlockComponent) {
       const props = rootComponent.service.editPropsStore.getLastProps('shape');
-      if (type == 'fill') return props.fillColor;
-      else return props.strokeColor;
+      const color = type == 'fill' ? props.fillColor : props.strokeColor;
+      return ThemeObserver.getColorValue(color);
     }
     return '';
   };
@@ -40,7 +41,8 @@ export function getActiveConnectorStrokeColor({
   if (rootComponent instanceof EdgelessRootBlockComponent) {
     const props =
       rootComponent.service.editPropsStore.getLastProps('connector');
-    return props.stroke;
+    const color = props.stroke;
+    return ThemeObserver.getColorValue(color);
   }
   return '';
 }

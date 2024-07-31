@@ -1,7 +1,6 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { LastProps } from '../../../surface-block/managers/edit-session.js';
 import type { PieMenuContext } from './base.js';
 
@@ -77,7 +76,7 @@ pie.expandableCommand({
     pie.colorPicker({
       label: 'Pen Color',
       active: getActiveConnectorStrokeColor,
-      onChange: (color: CssVariableName, { rootComponent }: PieMenuContext) => {
+      onChange: (color: string, { rootComponent }: PieMenuContext) => {
         rootComponent.service.editPropsStore.recordLastProps('brush', {
           color: color as LastProps['brush']['color'],
         });
@@ -216,7 +215,7 @@ pie.command({
 pie.colorPicker({
   label: 'Line Color',
   active: getActiveConnectorStrokeColor,
-  onChange: (color: CssVariableName, { rootComponent }: PieMenuContext) => {
+  onChange: (color: string, { rootComponent }: PieMenuContext) => {
     rootComponent.service.editPropsStore.recordLastProps('connector', {
       stroke: color as LastProps['connector']['stroke'],
     });
@@ -310,7 +309,7 @@ pie.command({
 pie.colorPicker({
   label: 'Fill',
   active: getActiveShapeColor('fill'),
-  onChange: (color: CssVariableName, { rootComponent }: PieMenuContext) => {
+  onChange: (color: string, { rootComponent }: PieMenuContext) => {
     rootComponent.service.editPropsStore.recordLastProps('shape', {
       fillColor: color as LastProps['shape']['fillColor'],
     });
@@ -323,7 +322,7 @@ pie.colorPicker({
   label: 'Stroke',
   hollow: true,
   active: getActiveShapeColor('stroke'),
-  onChange: (color: CssVariableName, { rootComponent }: PieMenuContext) => {
+  onChange: (color: string, { rootComponent }: PieMenuContext) => {
     rootComponent.service.editPropsStore.recordLastProps('shape', {
       strokeColor: color as LastProps['shape']['strokeColor'],
     });

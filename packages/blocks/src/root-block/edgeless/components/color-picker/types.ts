@@ -40,7 +40,7 @@ export type NavType = 'colors' | 'custom';
 
 export type NavTab<Type> = { type: Type; name: string };
 
-export type ModeType = `${ColorScheme}`;
+export type ModeType = 'normal' | `${ColorScheme}`;
 
 export type ModeTab<Type> = NavTab<Type> & { hsva: Hsva };
 
@@ -48,7 +48,7 @@ export type ModeRgba = { type: ModeType; rgba: Rgba };
 
 export type PickColorType = 'palette' | ModeType;
 
-export type PickColorDetail = { type: PickColorType; value: string };
+export type PickColorDetail = { [K in PickColorType]?: string };
 
 export type PickColorEvent =
   | { type: 'start' | 'end' }

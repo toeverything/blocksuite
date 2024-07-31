@@ -12,9 +12,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import type { RootBlockComponent } from '../../index.js';
-import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
-import type { AbstractEditor } from '../types.js';
 import type { Rect } from './rect.js';
 
 import {
@@ -174,18 +172,19 @@ export function buildPath(model: BlockModel | null): string[] {
 export function blockComponentGetter(model: BlockModel, view: ViewStore) {
   if (matchFlavours(model, ['affine:image', 'affine:frame'])) {
     let current: BlockModel | null = model;
-    const path: string[] = [];
+    let id: string | null = null;
     while (current) {
       // Top level image render under root block not surface block
       if (!matchFlavours(current, ['affine:surface'])) {
-        path.unshift(current.id);
+        id = current.id;
+        break;
       }
       current = current.doc.getParent(current);
     }
 
-    return view.viewFromPath('block', path);
+    return view.getBlock(id || model.id);
   } else {
-    return view.viewFromPath('block', buildPath(model));
+    return view.getBlock(model.id);
   }
 }
 
@@ -226,13 +225,6 @@ export function getEdgelessRootByElement(element: Element) {
 /** If it's not in the edgeless mode, it will return `null` directly */
 export function getEdgelessRootByEditorHost(editorHost: EditorHost) {
   return editorHost.querySelector('affine-edgeless-root');
-}
-
-/** @deprecated */
-export function getEditorContainer(editorHost: EditorHost): AbstractEditor {
-  const editorContainer = editorHost.closest('affine-editor-container');
-  assertExists(editorContainer);
-  return editorContainer as AbstractEditor;
 }
 
 export function isInsidePageEditor(host: EditorHost) {
@@ -303,43 +295,34 @@ export function getBlockComponentByPath(
  * Get block component by its model and wait for the doc element to finish updating.
  * Note that this function is used for compatibility only, and may be removed in the future.
  *
- * Use `root.view.viewFromPath` instead.
+ * Use `std.view.getBlock` instead.
  * @deprecated
  */
-export async function asyncGetBlockComponentByModel(
+export async function asyncGetBlockComponent(
   editorHost: EditorHost,
-  model: BlockModel
+  id: string
 ): Promise<BlockComponent | null> {
-  assertExists(model.doc.root);
-  const rootComponent = getRootByEditorHost(editorHost);
+  const rootBlockId = editorHost.doc.root?.id;
+  if (!rootBlockId) return null;
+  const rootComponent = editorHost.view.getBlock(rootBlockId);
   if (!rootComponent) return null;
   await rootComponent.updateComplete;
 
-  if (model.id === model.doc.root.id) {
-    return rootComponent;
-  }
-
-  return editorHost.view.getBlock(model.id);
+  return editorHost.view.getBlock(id);
 }
 
 /**
  * @deprecated In most cases, you not need RichText, you can use {@link getInlineEditorByModel} instead.
  */
-export function getRichTextByModel(editorHost: EditorHost, model: BlockModel) {
-  const blockComponent = editorHost.view.viewFromPath(
-    'block',
-    buildPath(model)
-  );
+export function getRichTextByModel(editorHost: EditorHost, id: string) {
+  const blockComponent = editorHost.view.getBlock(id);
   const richText = blockComponent?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
 }
 
-export async function asyncGetRichTextByModel(
-  editorHost: EditorHost,
-  model: BlockModel
-) {
-  const blockComponent = await asyncGetBlockComponentByModel(editorHost, model);
+export async function asyncGetRichText(editorHost: EditorHost, id: string) {
+  const blockComponent = await asyncGetBlockComponent(editorHost, id);
   if (!blockComponent) return null;
   await blockComponent.updateComplete;
   const richText = blockComponent?.querySelector<RichText>('rich-text');
@@ -356,27 +339,13 @@ export function getInlineEditorByModel(
     // Support to enter the editing state through the Enter key in the database.
     return null;
   }
-  const richText = getRichTextByModel(editorHost, model);
-  if (!richText) return null;
-  return richText.inlineEditor;
-}
-
-export async function asyncGetInlineEditorByModel(
-  editorHost: EditorHost,
-  model: BlockModel
-) {
-  if (matchFlavours(model, ['affine:database'])) {
-    // Not support database model since it's may be have multiple inline editor instances.
-    console.error('Cannot get inline editor by database model!');
-    return null;
-  }
-  const richText = await asyncGetRichTextByModel(editorHost, model);
+  const richText = getRichTextByModel(editorHost, model.id);
   if (!richText) return null;
   return richText.inlineEditor;
 }
 
 export function getModelByElement(element: Element): BlockModel {
-  const closestBlock = element.closest(ATTR_SELECTOR);
+  const closestBlock = element.closest<BlockComponent>(ATTR_SELECTOR);
   assertExists(closestBlock, 'Cannot find block element by element');
   return getModelByBlockComponent(closestBlock);
 }
@@ -417,33 +386,14 @@ function hasBlockId(element: Element): element is BlockComponent {
 }
 
 /**
- * Returns `true` if element is doc page.
- */
-function isDocPage({ tagName }: Element) {
-  return tagName === 'AFFINE-PAGE-ROOT';
-}
-
-/**
- * Returns `true` if element is edgeless page.
- *
- * @deprecated Use context instead. The edgeless page may be customized by the user so it's not recommended to use this method. \
- */
-export function isEdgelessPage(
-  element: Element
-): element is EdgelessRootBlockComponent {
-  return element.tagName === 'AFFINE-EDGELESS-ROOT';
-}
-
-/**
  * Returns `true` if element is default/edgeless page or note.
  */
-function isRootOrNoteOrSurface(element: Element) {
-  return (
-    isDocPage(element) ||
-    isEdgelessPage(element) ||
-    isNote(element) ||
-    isSurface(element)
-  );
+function isRootOrNoteOrSurface(element: BlockComponent) {
+  return matchFlavours(element.model, [
+    'affine:page',
+    'affine:note',
+    'affine:surface',
+  ]);
 }
 
 function isBlock(element: BlockComponent) {
@@ -454,24 +404,12 @@ function isImage({ tagName }: Element) {
   return tagName === 'AFFINE-IMAGE';
 }
 
-function isNote({ tagName }: Element) {
-  return tagName === 'AFFINE-NOTE' || tagName === 'AFFINE-EDGELESS-NOTE';
-}
-
-function isSurface({ tagName }: Element) {
-  return tagName === 'AFFINE-SURFACE';
-}
-
 function isDatabase({ tagName }: Element) {
   return tagName === 'AFFINE-DATABASE-TABLE' || tagName === 'AFFINE-DATABASE';
 }
 
 function isEdgelessChildNote({ classList }: Element) {
   return classList.contains('note-background');
-}
-
-function isEdgelessChildImage({ classList }: Element) {
-  return classList.contains('edgeless-block-portal-image');
 }
 
 /**
@@ -620,6 +558,7 @@ export function getClosestBlockComponentByPoint(
  * Find the most close block on the given position
  * @param container container which the blocks can be found inside
  * @param point position
+ * @param selector selector to find the block
  */
 export function findClosestBlockComponent(
   container: BlockComponent,
@@ -747,34 +686,12 @@ function findBlockComponent(elements: Element[], parent?: Element) {
   return null;
 }
 
-export function getThemeMode(): 'light' | 'dark' {
-  const mode = getComputedStyle(document.documentElement).getPropertyValue(
-    '--affine-theme-mode'
-  );
-
-  if (mode.trim() === 'dark') {
-    return 'dark';
-  } else {
-    return 'light';
-  }
-}
-
 /**
  * Get hovering note with given a point in edgeless mode.
  */
 export function getHoveringNote(point: Point) {
   return (
     document.elementsFromPoint(point.x, point.y).find(isEdgelessChildNote) ||
-    null
-  );
-}
-
-/**
- * Get hovering top level image with given a point in edgeless mode.
- */
-export function getHoveringImage(point: Point) {
-  return (
-    document.elementsFromPoint(point.x, point.y).find(isEdgelessChildImage) ||
     null
   );
 }
