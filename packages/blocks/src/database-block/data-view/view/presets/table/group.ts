@@ -1,6 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { SignalWatcher } from '@lit-labs/preact-signals';
-import { css, html, type PropertyValues } from 'lit';
+import { type PropertyValues, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 

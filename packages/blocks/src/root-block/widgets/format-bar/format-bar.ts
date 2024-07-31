@@ -1,13 +1,18 @@
-import type { BaseSelection, BlockComponent, CursorSelection } from '@blocksuite/block-std';
+import type {
+  BaseSelection,
+  BlockComponent,
+  CursorSelection,
+} from '@blocksuite/block-std';
+
 import { WidgetComponent } from '@blocksuite/block-std';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import {
+  type Placement,
+  type ReferenceElement,
   autoUpdate,
   computePosition,
   inline,
   offset,
-  type Placement,
-  type ReferenceElement,
   shift,
 } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
@@ -16,7 +21,10 @@ import { customElement, query, state } from 'lit/decorators.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 import '../../../_common/components/button.js';
-import { HoverController, type RichText } from '../../../_common/components/index.js';
+import {
+  HoverController,
+  type RichText,
+} from '../../../_common/components/index.js';
 import '../../../_common/components/toolbar/toolbar.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { isFormatSupported } from '../../../note-block/commands/utils.js';

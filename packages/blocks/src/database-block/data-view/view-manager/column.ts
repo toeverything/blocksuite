@@ -1,4 +1,4 @@
-import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
+import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
 
 import type { CellRenderer } from '../column/index.js';
 import type { TType } from '../logical/typesystem.js';

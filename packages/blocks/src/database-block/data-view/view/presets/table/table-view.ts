@@ -6,7 +6,6 @@ import { html } from 'lit/static-html.js';
 import type { GroupHelper } from '../../../common/group-by/helper.js';
 import type { InsertToPosition } from '../../../types.js';
 import type { TableSingleView } from './table-view-manager.js';
-import { TableAreaSelection, type TableViewSelectionWithType } from './types.js';
 
 import { popMenu } from '../../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../../_common/icons/index.js';
@@ -22,6 +21,10 @@ import { TableDragController } from './controller/drag.js';
 import { TableHotkeysController } from './controller/hotkeys.js';
 import { TableSelectionController } from './controller/selection.js';
 import './group.js';
+import {
+  TableAreaSelection,
+  type TableViewSelectionWithType,
+} from './types.js';
 
 const styles = css`
   affine-database-table {
