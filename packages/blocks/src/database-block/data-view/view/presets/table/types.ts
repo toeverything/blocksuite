@@ -58,18 +58,44 @@ type WithTableViewType<T> = T extends unknown
       type: 'table';
     } & T
   : never;
+export type RowWithGroup = {
+  id: string;
+  groupKey?: string;
+};
+export const RowWithGroup = {
+  equal(a?: RowWithGroup, b?: RowWithGroup) {
+    if (a == null || b == null) {
+      return false;
+    }
+    return a.id === b.id && a.groupKey === b.groupKey;
+  },
+};
 export type TableRowSelection = {
   selectionType: 'row';
-  rows: string[];
+  rows: RowWithGroup[];
 };
 export const TableRowSelection = {
-  rows: (selection?: TableViewSelection): string[] => {
+  rows: (selection?: TableViewSelection): RowWithGroup[] => {
     if (selection?.selectionType === 'row') {
       return selection.rows;
     }
     return [];
   },
-  create(options: { rows: string[] }): TableRowSelection {
+  rowsIds: (selection?: TableViewSelection): string[] => {
+    return TableRowSelection.rows(selection).map(v => v.id);
+  },
+  includes(
+    selection: TableViewSelection | undefined,
+    row: RowWithGroup
+  ): boolean {
+    if (!selection) {
+      return false;
+    }
+    return TableRowSelection.rows(selection).some(v =>
+      RowWithGroup.equal(v, row)
+    );
+  },
+  create(options: { rows: RowWithGroup[] }): TableRowSelection {
     return {
       selectionType: 'row',
       rows: options.rows,

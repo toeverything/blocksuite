@@ -22,6 +22,7 @@ import {
   commonCalcOps,
   numberColCalcOps,
 } from '../stat-ops.js';
+import { type RowWithGroup, TableRowSelection } from '../types.js';
 
 export const openDetail = (
   dataViewEle: DataViewRenderer,
@@ -42,16 +43,20 @@ export const openDetail = (
 export const popRowMenu = (
   dataViewEle: DataViewRenderer,
   ele: HTMLElement,
-  rowId: string,
-  selection: TableSelectionController
+  row: RowWithGroup,
+  selectionController: TableSelectionController
 ) => {
+  const selection = selectionController.selection;
+  if (TableRowSelection.is(selection) && selection.rows.length > 1) {
+    return;
+  }
   popFilterableSimpleMenu(ele, [
     {
       type: 'action',
       name: 'Expand Row',
       icon: ExpandFullIcon,
       select: () => {
-        openDetail(dataViewEle, rowId, selection);
+        openDetail(dataViewEle, row.id, selectionController);
       },
     },
     // {
@@ -89,7 +94,7 @@ export const popRowMenu = (
             ${MoveLeftIcon}
           </div>`,
           select: () => {
-            selection.insertRowBefore(selection.selection?.groupKey, rowId);
+            selectionController.insertRowBefore(row.groupKey, row.id);
           },
         },
         {
@@ -101,7 +106,7 @@ export const popRowMenu = (
             ${MoveRightIcon}
           </div>`,
           select: () => {
-            selection.insertRowAfter(selection.selection?.groupKey, rowId);
+            selectionController.insertRowAfter(row.groupKey, row.id);
           },
         },
         // {
@@ -109,7 +114,7 @@ export const popRowMenu = (
         //   name: 'Duplicate',
         //   icon: DuplicateIcon,
         //   select: () => {
-        //     selection.duplicateRow(rowId);
+        //     selectionController.duplicateRow(rowId);
         //   },
         // },
       ],
@@ -124,7 +129,7 @@ export const popRowMenu = (
           class: 'delete-item',
           icon: DeleteIcon,
           select: () => {
-            selection.deleteRow(rowId);
+            selectionController.deleteRow(row.id);
           },
         },
       ],

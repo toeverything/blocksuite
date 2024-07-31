@@ -19,7 +19,7 @@ export class TableHotkeysController implements ReactiveController {
             return;
           }
           if (TableRowSelection.is(selection)) {
-            const rows = TableRowSelection.rows(selection);
+            const rows = TableRowSelection.rowsIds(selection);
             this.selectionController.selection = undefined;
             this.host.view.rowDelete(rows);
             return;
@@ -70,7 +70,9 @@ export class TableHotkeysController implements ReactiveController {
             return false;
           }
           if (TableRowSelection.is(selection)) {
-            const result = this.selectionController.rowsToArea(selection.rows);
+            const result = this.selectionController.rowsToArea(
+              selection.rows.map(v => v.id)
+            );
             if (result) {
               this.selectionController.selection = TableAreaSelection.create({
                 groupKey: result.groupKey,
@@ -107,7 +109,9 @@ export class TableHotkeysController implements ReactiveController {
             return false;
           }
           if (TableRowSelection.is(selection)) {
-            const result = this.selectionController.rowsToArea(selection.rows);
+            const result = this.selectionController.rowsToArea(
+              selection.rows.map(v => v.id)
+            );
             if (result) {
               this.selectionController.selection = TableAreaSelection.create({
                 groupKey: result.groupKey,
@@ -322,31 +326,27 @@ export class TableHotkeysController implements ReactiveController {
           }
           if (selection) {
             context.get('keyboardState').raw.preventDefault();
-
-            const start = 0;
-            const end = this.host.view.rows$.value.length - 1;
-            if (
-              selection.rowsSelection?.start === start &&
-              selection.rowsSelection.end === end &&
-              !selection.columnsSelection
-            ) {
-              return false;
-            }
-            this.selectionController.selection = {
-              rowsSelection: {
-                start: start,
-                end: end,
-              },
-              focus: selection.focus,
-              isEditing: false,
-            };
+            this.selectionController.selection = TableRowSelection.create({
+              rows:
+                this.host.view.groupHelper?.groups.flatMap(group =>
+                  group.rows.map(id => ({ groupKey: group.key, id }))
+                ) ??
+                this.host.view.rows$.value.map(id => ({
+                  groupKey: undefined,
+                  id,
+                })),
+            });
             return true;
           }
           return;
         },
         '/': context => {
           const selection = this.selectionController.selection;
-          if (!selection || selection.columnsSelection || selection.isEditing) {
+          if (
+            !selection ||
+            TableRowSelection.is(selection) ||
+            selection.isEditing
+          ) {
             return;
           }
           const cell = this.selectionController.getCellContainer(
@@ -356,10 +356,17 @@ export class TableHotkeysController implements ReactiveController {
           );
           if (cell) {
             context.get('keyboardState').raw.preventDefault();
+            const row = {
+              id: cell.rowId,
+              groupKey: selection.groupKey,
+            };
+            this.selectionController.selection = TableRowSelection.create({
+              rows: [row],
+            });
             popRowMenu(
               this.host.dataViewEle,
               cell,
-              cell.rowId,
+              row,
               this.selectionController
             );
           }

@@ -1,12 +1,21 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { computed, type ReadonlySignal, SignalWatcher } from '@lit-labs/preact-signals';
+import {
+  type ReadonlySignal,
+  SignalWatcher,
+  computed,
+} from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { TableViewSelectionWithType } from '../types.js';
-
-import { checkboxChecked, checkboxUnchecked } from '../../../../../../list-block/utils/icons.js';
+import {
+  checkboxChecked,
+  checkboxUnchecked,
+} from '../../../../../../list-block/utils/icons.js';
+import {
+  TableRowSelection,
+  type TableViewSelectionWithType,
+} from '../types.js';
 
 @customElement('row-select-checkbox')
 export class RowSelectCheckbox extends SignalWatcher(
@@ -41,24 +50,25 @@ export class RowSelectCheckbox extends SignalWatcher(
     if (!selection || selection.selectionType !== 'row') {
       return false;
     }
-    return selection.rows.includes(this.rowId);
+    return TableRowSelection.includes(selection, {
+      id: this.rowId,
+      groupKey: this.groupKey,
+    });
   });
 
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', () => {
-      this.closest(
-        'affine-database-table'
-      )?.selectionController.rowSelectionChange({
-        add: this.isSelected$.value ? [] : [this.rowId],
-        remove: this.isSelected$.value ? [this.rowId] : [],
-      });
+      this.closest('affine-database-table')?.selectionController.toggleRow(
+        this.rowId,
+        this.groupKey
+      );
     });
   }
 
   override render() {
     const classString = classMap({
-      'row-selected-bg':true,
+      'row-selected-bg': true,
       'row-select-checkbox': true,
       selected: this.isSelected$.value,
     });
@@ -68,6 +78,9 @@ export class RowSelectCheckbox extends SignalWatcher(
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor groupKey: string | undefined;
 
   @property({ attribute: false })
   accessor rowId!: string;

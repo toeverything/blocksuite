@@ -26,7 +26,9 @@ const TableViewSelectionSchema = z.union([
     viewId: z.string(),
     type: z.literal('table'),
     selectionType: z.literal('row'),
-    rows: z.array(z.string()),
+    rows: z.array(
+      z.object({ id: z.string(), groupKey: z.string().optional() })
+    ),
   }),
 ]);
 

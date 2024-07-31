@@ -9,9 +9,12 @@ import { html } from 'lit/static-html.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
-import { CenterPeekIcon, MoreHorizontalIcon } from '../../../../common/icons/index.js';
+import {
+  CenterPeekIcon,
+  MoreHorizontalIcon,
+} from '../../../../common/icons/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
-import { TableAreaSelection, TableRowSelection, type TableViewSelection } from '../types.js';
+import { TableRowSelection, type TableViewSelection } from '../types.js';
 import { openDetail, popRowMenu } from './menu.js';
 import './row-select-checkbox.js';
 
@@ -21,7 +24,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     if (this.view.readonly$.value) {
       return;
     }
-    this.selectionController?.toggleRow(this.rowId);
+    this.selectionController?.toggleRow(this.rowId, this.groupKey);
   };
 
   static override styles = css`
@@ -131,25 +134,16 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     e.preventDefault();
     const ele = e.target as HTMLElement;
     const cell = ele.closest('affine-database-cell-container');
-    const columnIndex = cell?.columnIndex ?? 0;
-    selection.selection = TableAreaSelection.create({
-      groupKey: this.groupKey,
-      rowsSelection: {
-        start: this.rowIndex,
-        end: this.rowIndex,
-      },
-      focus: {
-        rowIndex: this.rowIndex,
-        columnIndex: columnIndex,
-      },
-      isEditing: false,
+    const row = { id: this.rowId, groupKey: this.groupKey };
+    selection.selection = TableRowSelection.create({
+      rows: [row],
     });
     const target =
       cell ??
       (e.target as HTMLElement).closest('.database-cell') ?? // for last add btn cell
       (e.target as HTMLElement);
 
-    popRowMenu(this.dataViewEle, target, this.rowId, selection);
+    popRowMenu(this.dataViewEle, target, row, selection);
   };
 
   setSelection = (selection?: TableViewSelection) => {
@@ -186,6 +180,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               <row-select-checkbox
                 .selection="${this.dataViewEle.config.selection$}"
                 .rowId="${this.rowId}"
+                .groupKey="${this.groupKey}"
               ></row-select-checkbox>
             </div>
           </div>`}
@@ -199,7 +194,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
             }
             this.setSelection(
               TableRowSelection.create({
-                rows: [this.rowId],
+                rows: [{ id: this.rowId, groupKey: this.groupKey }],
               })
             );
             openDetail(this.dataViewEle, this.rowId, this.selectionController);
@@ -209,17 +204,13 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               return;
             }
             const ele = e.currentTarget as HTMLElement;
+            const row = { id: this.rowId, groupKey: this.groupKey };
             this.setSelection(
               TableRowSelection.create({
-                rows: [this.rowId],
+                rows: [row],
               })
             );
-            popRowMenu(
-              this.dataViewEle,
-              ele,
-              this.rowId,
-              this.selectionController
-            );
+            popRowMenu(this.dataViewEle, ele, row, this.selectionController);
           };
           return html`
             <div>

@@ -1,12 +1,12 @@
 import type { ReactiveController } from 'lit';
-import { css, html } from 'lit';
 import type { Ref } from 'lit/directives/ref.js';
-import { createRef, ref } from 'lit/directives/ref.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { effect } from '@lit-labs/preact-signals';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { TableRow } from '../components/row.js';
@@ -17,12 +17,16 @@ import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
 import {
   type CellFocus,
   type MultiSelection,
+  RowWithGroup,
   TableAreaSelection,
   TableRowSelection,
   type TableViewSelection,
   type TableViewSelectionWithType,
 } from '../types.js';
-import { DragToFillElement, fillSelectionWithFocusCellData } from './drag-to-fill.js';
+import {
+  DragToFillElement,
+  fillSelectionWithFocusCellData,
+} from './drag-to-fill.js';
 
 export class TableSelectionController implements ReactiveController {
   __dragToFillElement = new DragToFillElement();
@@ -237,7 +241,7 @@ export class TableSelectionController implements ReactiveController {
     })
       .map((_, index) => index + selection.rowsSelection.start)
       .map(row => rows[row]?.rowId);
-    return ids;
+    return ids.map(id => ({ id, groupKey: selection.groupKey }));
   }
 
   cellPosition(groupKey: string | undefined) {
@@ -391,6 +395,16 @@ export class TableSelectionController implements ReactiveController {
       .item(columnIndex);
   }
 
+  getGroup(groupKey: string | undefined) {
+    const container =
+      groupKey != null
+        ? this.tableContainer.querySelector(
+            `affine-data-view-table-group[data-group-key="${groupKey}"]`
+          )
+        : this.tableContainer;
+    return container;
+  }
+
   getRect(
     groupKey: string | undefined,
     top: number,
@@ -413,6 +427,12 @@ export class TableSelectionController implements ReactiveController {
       height: (bottomRow.getBoundingClientRect().bottom - leftRect.top) / scale,
       scale,
     };
+  }
+
+  getRow(groupKey: string | undefined, rowId: string) {
+    return this.getGroup(groupKey)?.querySelector(
+      `data-view-table-row[data-row-id='${rowId}']`
+    );
   }
 
   getSelectionAreaBorder(position: 'left' | 'right' | 'top' | 'bottom') {
@@ -438,14 +458,6 @@ export class TableSelectionController implements ReactiveController {
     this.insertTo(groupKey, rowId, true);
   }
 
-  isRowSelected(rowId: string) {
-    const selection = this.selection;
-    if (!selection || selection.selectionType !== 'row') {
-      return false;
-    }
-    return selection.rows.includes(rowId);
-  }
-
   isRowSelection() {
     return this.selection?.selectionType === 'row';
   }
@@ -467,44 +479,52 @@ export class TableSelectionController implements ReactiveController {
 
   navigateRowSelection(direction: 'up' | 'down', append = false) {
     if (!TableRowSelection.is(this.selection)) return;
-    const lastRow = this.selection.rows[this.selection.rows.length - 1];
+    const rows = this.selection.rows;
+    const lastRow = rows[rows.length - 1];
     const lastRowIndex =
       (
-        this.tableContainer.querySelector(
-          `data-view-table-row[data-row-id='${lastRow}']`
+        this.getGroup(lastRow.groupKey)?.querySelector(
+          `data-view-table-row[data-row-id='${lastRow.id}']`
         ) as TableRow | null
       )?.rowIndex ?? 0;
-    const prevId = (
-      this.tableContainer.querySelector(
-        `data-view-table-row[data-row-index='${lastRowIndex - 1}']`
-      ) as TableRow | null
-    )?.rowId;
-    const nextId = (
-      this.tableContainer.querySelector(
-        `data-view-table-row[data-row-index='${lastRowIndex + 1}']`
-      ) as TableRow | null
-    )?.rowId;
-
+    const getRowByIndex = (index: number) => {
+      const tableRow = this.rows(lastRow.groupKey).item(index);
+      if (!tableRow) {
+        return;
+      }
+      return {
+        id: tableRow.rowId,
+        groupKey: lastRow.groupKey,
+      };
+    };
+    const prevRow = getRowByIndex(lastRowIndex - 1);
+    const nextRow = getRowByIndex(lastRowIndex + 1);
+    const includes = (row: RowWithGroup) => {
+      if (!row) {
+        return false;
+      }
+      return rows.some(r => RowWithGroup.equal(r, row));
+    };
     if (append) {
-      const addList: string[] = [];
-      const removeList: string[] = [];
-      if (direction === 'up' && prevId != null) {
-        if (this.selection.rows.includes(prevId)) {
+      const addList: RowWithGroup[] = [];
+      const removeList: RowWithGroup[] = [];
+      if (direction === 'up' && prevRow != null) {
+        if (includes(prevRow)) {
           removeList.push(lastRow);
         } else {
-          addList.push(prevId);
+          addList.push(prevRow);
         }
       }
-      if (direction === 'down' && nextId != null) {
-        if (this.selection.rows.includes(nextId)) {
+      if (direction === 'down' && nextRow != null) {
+        if (includes(nextRow)) {
           removeList.push(lastRow);
         } else {
-          addList.push(nextId);
+          addList.push(nextRow);
         }
       }
       this.rowSelectionChange({ add: addList, remove: removeList });
     } else {
-      const target = direction === 'up' ? prevId : nextId;
+      const target = direction === 'up' ? prevRow : nextRow;
       if (target != null) {
         this.selection = TableRowSelection.create({
           rows: [target],
@@ -513,12 +533,27 @@ export class TableSelectionController implements ReactiveController {
     }
   }
 
-  rowSelectionChange({ add, remove }: { add: string[]; remove: string[] }) {
-    const rows = new Set(TableRowSelection.rows(this.selection));
-    remove.forEach(id => rows.delete(id));
-    add.forEach(id => rows.add(id));
+  rowSelectionChange({
+    add,
+    remove,
+  }: {
+    add: RowWithGroup[];
+    remove: RowWithGroup[];
+  }) {
+    const key = (r: RowWithGroup) => `${r.id}.${r.groupKey}`;
+    const rows = new Set(
+      TableRowSelection.rows(this.selection).map(r => key(r))
+    );
+    remove.forEach(row => rows.delete(key(row)));
+    add.forEach(row => rows.add(key(row)));
+    const result = [...rows]
+      .map(r => r.split('.'))
+      .map(([id, groupKey]) => ({
+        id,
+        groupKey: groupKey ? groupKey : undefined,
+      }));
     this.selection = TableRowSelection.create({
-      rows: [...rows],
+      rows: result,
     });
   }
 
@@ -791,11 +826,15 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
-  toggleRow(rowId: string) {
-    const isSelected = TableRowSelection.rows(this.selection).includes(rowId);
+  toggleRow(rowId: string, groupKey?: string) {
+    const row = {
+      id: rowId,
+      groupKey,
+    };
+    const isSelected = TableRowSelection.includes(this.selection, row);
     this.rowSelectionChange({
-      add: isSelected ? [] : [rowId],
-      remove: isSelected ? [rowId] : [],
+      add: isSelected ? [] : [row],
+      remove: isSelected ? [row] : [],
     });
   }
 
@@ -857,7 +896,7 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .database-selection {
       position: absolute;
-      z-index: 1;
+      z-index: 2;
       box-sizing: border-box;
       background: var(--affine-primary-color-04);
       pointer-events: none;
@@ -867,7 +906,7 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
     .database-focus {
       position: absolute;
       width: 100%;
-      z-index: 1;
+      z-index: 2;
       box-sizing: border-box;
       border: 1px solid var(--affine-primary-color);
       border-radius: 2px;
@@ -973,7 +1012,9 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
         isEditing,
         showDragToFillHandle
       );
-      this.preTask = requestAnimationFrame(() => this.startUpdate(this.selection$.value));
+      this.preTask = requestAnimationFrame(() =>
+        this.startUpdate(this.selection$.value)
+      );
     } else {
       this.clearFocusStyle();
       this.clearAreaStyle();
