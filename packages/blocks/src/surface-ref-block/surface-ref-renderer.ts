@@ -39,29 +39,24 @@ export class SurfaceRefRenderer {
       enableStackingCanvas: false,
     }
   ) {
-    const themeObserver = new ThemeObserver();
     const viewport = new Viewport();
     const renderer = new Renderer({
       viewport,
       layerManager: this.surfaceService.layer,
       enableStackingCanvas: options.enableStackingCanvas,
       provider: {
-        getColorScheme: () => themeObserver.mode,
-        getVariableColor: (variable: string) =>
-          themeObserver.getVariableValue(variable),
-        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
-          themeObserver.getColorValue(color, fallback, real),
         generateColorProperty: (color: Color, fallback: string) =>
-          themeObserver.generateColorProperty(color, fallback),
+          ThemeObserver.generateColorProperty(color, fallback),
+        getColorScheme: () => ThemeObserver.mode,
+        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+          ThemeObserver.getColorValue(color, fallback, real),
+        getPropertyValue: (property: string) =>
+          ThemeObserver.getPropertyValue(property),
       },
     });
 
-    themeObserver.observe(document.documentElement);
     this._surfaceRenderer = renderer;
     this._viewport = viewport;
-    this.slots.unmounted.once(() => {
-      themeObserver.dispose();
-    });
   }
 
   private _initSurfaceModel() {

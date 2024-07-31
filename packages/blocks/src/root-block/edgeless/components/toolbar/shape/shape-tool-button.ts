@@ -7,7 +7,7 @@ import type { LastProps } from '../../../../../surface-block/managers/edit-sessi
 import type { ShapeName } from './shape-tool-element.js';
 import type { DraggableShape } from './utils.js';
 
-import { isTransparent } from '../../../../../_common/theme/css-variables.js';
+import { ThemeObserver } from '../../../../../_common/theme/theme-observer.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -104,21 +104,27 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
         states,
         updates => {
           this.states = { ...this.states, ...updates };
+          this.updateMenu();
         }
       )
     );
   }
 
   override render() {
-    const { active, states } = this;
-    const { fillColor, strokeColor } = states;
+    const {
+      active,
+      states: { fillColor, strokeColor },
+    } = this;
 
-    const shapeColor = isTransparent(fillColor!)
-      ? cssVar('white60')
-      : `var(${fillColor})`;
-    const shapeStroke = isTransparent(strokeColor!)
-      ? cssVar('black10')
-      : `var(${strokeColor})`;
+    let color = ThemeObserver.generateColorProperty(fillColor!);
+    let stroke = ThemeObserver.generateColorProperty(strokeColor!);
+
+    if (color.endsWith('transparent')) {
+      color = cssVar('white60');
+    }
+    if (stroke.endsWith('transparent')) {
+      stroke = cssVar('black10');
+    }
 
     return html`
       <edgeless-toolbar-button
@@ -131,12 +137,9 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
           .edgeless=${this.edgeless}
           .toolbarContainer=${this.toolbarContainer}
           class="shapes"
-          style=${styleMap({
-            color: shapeColor,
-            stroke: shapeStroke,
-          })}
-          .color=${shapeColor}
-          .stroke=${shapeStroke}
+          style=${styleMap({ color, stroke })}
+          .color=${color}
+          .stroke=${stroke}
           @click=${this._toggleMenu}
           .onShapeClick=${this._handleShapeClick.bind(this)}
         >

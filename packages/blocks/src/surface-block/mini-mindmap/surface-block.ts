@@ -21,8 +21,6 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
 
   private _renderer!: Renderer;
 
-  private _theme = new ThemeObserver();
-
   private _viewport!: Viewport;
 
   private _adjustNodeWidth() {
@@ -86,16 +84,15 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
       enableStackingCanvas: true,
       provider: {
         selectedElements: () => [],
-        getColorScheme: () => this._theme.mode,
-        getVariableColor: (val: string) => this._theme.getVariableValue(val),
+        getColorScheme: () => ThemeObserver.mode,
         getColorValue: (color: Color, fallback?: string, real?: boolean) =>
-          this._theme.getColorValue(color, fallback, real),
+          ThemeObserver.getColorValue(color, fallback, real),
         generateColorProperty: (color: Color, fallback: string) =>
-          this._theme.generateColorProperty(color, fallback),
+          ThemeObserver.generateColorProperty(color, fallback),
+        getPropertyValue: (property: string) =>
+          ThemeObserver.getPropertyValue(property),
       },
     });
-    this._theme.observe(this.ownerDocument.documentElement);
-    this.disposables.add(() => this._theme.dispose());
   }
 
   override firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {

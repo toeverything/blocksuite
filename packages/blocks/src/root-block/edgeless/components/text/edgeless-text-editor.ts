@@ -14,6 +14,7 @@ import type { TextElementModel } from '../../../../surface-block/element-model/t
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import '../../../../_common/components/rich-text/rich-text.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { toRadian } from '../../../../surface-block/index.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
@@ -343,7 +344,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     ];
 
     const isEmpty = !text.length && !this._isComposition;
-    const color = this.edgeless.surface.themeObserver.getColorValue(
+    const color = ThemeObserver.generateColorProperty(
       this.element.color,
       '#000000'
     );
@@ -357,7 +358,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         fontSize: `${fontSize}px`,
         fontWeight,
         fontStyle,
-        color: color.startsWith('--') ? `var(${color})` : color,
+        color,
         textAlign,
         lineHeight: `${lineHeight}px`,
         boxSizing: 'content-box',

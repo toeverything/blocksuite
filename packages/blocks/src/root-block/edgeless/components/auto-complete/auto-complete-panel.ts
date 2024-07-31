@@ -22,6 +22,7 @@ import {
   SmallNoteIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { FontFamilyIcon } from '../../../../_common/icons/text.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import {
   FontFamily,
   FontStyle,
@@ -180,7 +181,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(this.currentSource)) {
-      const tmpColor = this.edgeless.surface.themeObserver.getColorValue(
+      const tmpColor = ThemeObserver.getColorValue(
         this.currentSource.fillColor,
         DEFAULT_SHAPE_FILL_COLOR
       );
@@ -192,7 +193,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         color = tmpColor;
       }
     } else {
-      color = this.edgeless.surface.themeObserver.getColorValue(
+      color = ThemeObserver.getColorValue(
         this.currentSource.background,
         DEFAULT_NOTE_BACKGROUND_COLOR
       );
@@ -480,7 +481,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(this.currentSource)) {
-      const tmpColor = this.edgeless.surface.themeObserver.getColorValue(
+      const tmpColor = ThemeObserver.getColorValue(
         this.currentSource.fillColor,
         DEFAULT_SHAPE_FILL_COLOR
       );
@@ -492,7 +493,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         color = tmpColor;
       }
     } else {
-      color = this.edgeless.surface.themeObserver.getColorValue(
+      color = ThemeObserver.getColorValue(
         this.currentSource.background,
         DEFAULT_NOTE_BACKGROUND_COLOR
       );
@@ -539,12 +540,12 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         ? this.currentSource
         : this.edgeless.service.editPropsStore.getLastProps('shape');
 
-    const stroke = this.edgeless.surface.themeObserver.getColorValue(
+    const stroke = ThemeObserver.getColorValue(
       strokeColor,
       DEFAULT_SHAPE_STROKE_COLOR,
       true
     );
-    const fill = this.edgeless.surface.themeObserver.getColorValue(
+    const fill = ThemeObserver.getColorValue(
       fillColor,
       DEFAULT_SHAPE_FILL_COLOR,
       true

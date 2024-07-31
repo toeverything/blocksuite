@@ -14,7 +14,7 @@ import {
   DarkLoadingIcon,
   LightLoadingIcon,
 } from '../../../../_common/icons/text.js';
-import { getThemeMode } from '../../../../_common/utils/query.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 
 @customElement('generating-placeholder')
 class GeneratingPlaceholder extends WithDisposable(LitElement) {
@@ -91,7 +91,7 @@ class GeneratingPlaceholder extends WithDisposable(LitElement) {
   `;
 
   protected override render() {
-    const theme = getThemeMode();
+    const theme = ThemeObserver.mode;
     const loadingText = this.stages[this.loadingProgress - 1] || '';
 
     return html`<style>

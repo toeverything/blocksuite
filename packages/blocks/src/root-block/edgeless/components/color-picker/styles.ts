@@ -78,7 +78,7 @@ export const COLOR_PICKER_STYLE = css`
 
     ${FONT_XS};
     font-weight: 400;
-    color: var(--affine-text-primary-color);
+    color: #8e8d91;
   }
   .modes .mode.light button {
     background: white;

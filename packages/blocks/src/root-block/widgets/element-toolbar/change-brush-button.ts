@@ -65,13 +65,12 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {
-      const { type, value } = event.detail;
-      this.elements.forEach(ele => {
+      this.elements.forEach(ele =>
         this.service.updateElement(
           ele.id,
-          packColor(type, 'color', value, ele.color)
-        );
-      });
+          packColor('color', { ...event.detail })
+        )
+      );
       return;
     }
 

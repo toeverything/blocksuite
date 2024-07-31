@@ -22,8 +22,8 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { EmbedEdgelessIcon, EmbedPageIcon } from '../_common/icons/text.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { type DocMode, NoteDisplayMode } from '../_common/types.js';
-import { getThemeMode } from '../_common/utils/query.js';
 import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
 import { SpecProvider } from '../specs/utils/spec-provider.js';
 import './components/embed-synced-doc-card.js';
@@ -144,7 +144,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
       });
     }
 
-    const theme = getThemeMode();
+    const theme = ThemeObserver.mode;
     const isSelected = !!this.selected?.is('block');
     const scale = isInSurface ? (this.model.scale ?? 1) : undefined;
 

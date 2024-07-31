@@ -747,18 +747,6 @@ function findBlockComponent(elements: Element[], parent?: Element) {
   return null;
 }
 
-export function getThemeMode(): 'light' | 'dark' {
-  const mode = getComputedStyle(document.documentElement).getPropertyValue(
-    '--affine-theme-mode'
-  );
-
-  if (mode.trim() === 'dark') {
-    return 'dark';
-  } else {
-    return 'light';
-  }
-}
-
 /**
  * Get hovering note with given a point in edgeless mode.
  */

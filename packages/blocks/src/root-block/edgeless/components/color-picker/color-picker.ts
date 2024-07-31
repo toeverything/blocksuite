@@ -32,6 +32,7 @@ import {
   clamp,
   defaultHsva,
   eq,
+  hsvaToHex8,
   hsvaToRgba,
   linearGradientAt,
   parseHexToHsva,
@@ -117,10 +118,15 @@ export class EdgelessColorPicker extends SignalWatcher(
   #pick() {
     const hsva = this.hsva$.peek();
     const type = this.modeType$.peek();
-    const rgba = hsvaToRgba(hsva);
-    const value = rgbaToHex8(rgba);
+    const detail = { [type]: hsvaToHex8(hsva) };
 
-    this.pick?.({ type: 'pick', detail: { type, value } });
+    if (type !== 'normal') {
+      const another = type === 'light' ? 'dark' : 'light';
+      const { hsva } = this[`${another}$`].peek();
+      detail[another] = hsvaToHex8(hsva);
+    }
+
+    this.pick?.({ type: 'pick', detail });
   }
 
   #pickEnd() {
@@ -498,7 +504,7 @@ export class EdgelessColorPicker extends SignalWatcher(
           ({ type, name, hsva }) => html`
             <div
               class="${classMap({ mode: true, [type]: true })}"
-              style=${styleMap({ '--c': rgbaToHex8(hsvaToRgba(hsva)) })}
+              style=${styleMap({ '--c': hsvaToHex8(hsva) })}
             >
               <button
                 ?active=${this.modeType$.value === type}

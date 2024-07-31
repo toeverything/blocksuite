@@ -83,7 +83,7 @@ export function createPopper<T extends keyof HTMLElementTagNameMap>(
 
   const popper: MenuPopper<HTMLElementTagNameMap[T]> = {
     element: menu,
-    dispose: function () {
+    dispose: () => {
       // apply leave transition
       animateLeave(menu);
       menu.addEventListener('transitionend', remove, { once: true });

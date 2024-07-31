@@ -20,12 +20,11 @@ import { modelRenderer } from './element-renderer/index.js';
  * can be used for rendering non-CRDT state indicators.
  */
 export abstract class Overlay {
-  protected _renderer!: Renderer;
+  protected _renderer: Renderer | null = null;
 
   constructor() {}
 
   setRenderer(renderer: Renderer | null) {
-    // @ts-ignore
     this._renderer = renderer;
   }
 
@@ -33,11 +32,11 @@ export abstract class Overlay {
 }
 
 type EnvProvider = {
-  getVariableColor: (val: string) => string;
-  getColorScheme: () => ColorScheme;
-  selectedElements?: () => string[];
-  getColorValue: (color: Color, fallback?: string, real?: boolean) => string;
   generateColorProperty: (color: Color, fallback: string) => string;
+  getColorScheme: () => ColorScheme;
+  getColorValue: (color: Color, fallback?: string, real?: boolean) => string;
+  getPropertyValue: (property: string) => string;
+  selectedElements?: () => string[];
 };
 
 type RendererOptions = {
@@ -351,10 +350,10 @@ export class Renderer {
   }
 
   generateColorProperty(color: Color, fallback: string) {
-    return (this.provider.generateColorProperty?.(color, fallback) ??
-      fallback.startsWith('--'))
-      ? `var(${fallback})`
-      : fallback;
+    return (
+      this.provider.generateColorProperty?.(color, fallback) ??
+      (fallback.startsWith('--') ? `var(${fallback})` : fallback)
+    );
   }
 
   getCanvasByBound(
@@ -397,8 +396,8 @@ export class Renderer {
     );
   }
 
-  getVariableColor(val: string) {
-    return this.provider.getVariableColor?.(val) ?? val;
+  getPropertyValue(property: string) {
+    return this.provider.getPropertyValue?.(property) ?? '';
   }
 
   refresh() {

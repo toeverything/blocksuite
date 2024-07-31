@@ -5,7 +5,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { when } from 'lit/directives/when.js';
 
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
@@ -29,7 +28,7 @@ import {
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
 import { mountFrameTitleEditor } from '../../edgeless/utils/text.js';
 
-const FRAME_BACKGROUND: CssVariableName[] = [
+const FRAME_BACKGROUND: string[] = [
   '--affine-tag-gray',
   '--affine-tag-red',
   '--affine-tag-orange',
@@ -58,13 +57,12 @@ function getMostCommonColor(
 export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {
-      const { type, value } = event.detail;
-      this.frames.forEach(ele => {
+      this.frames.forEach(ele =>
         this.service.updateElement(
           ele.id,
-          packColor(type, 'background', value, ele.background)
-        );
-      });
+          packColor('background', { ...event.detail })
+        )
+      );
       return;
     }
 
@@ -116,7 +114,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     toast(this.edgeless.host, 'Frame has been inserted into doc');
   }
 
-  private _setFrameBackground(color: CssVariableName) {
+  private _setFrameBackground(color: string) {
     this.frames.forEach(frame => {
       this.service.updateElement(frame.id, { background: color });
     });

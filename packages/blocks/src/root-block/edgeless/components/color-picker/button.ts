@@ -25,10 +25,7 @@ type Type = 'normal' | 'custom';
 @customElement('edgeless-color-picker-button')
 export class EdgelessColorPickerButton extends WithDisposable(LitElement) {
   #select = (e: ColorEvent) => {
-    this.#pick({
-      type: 'palette',
-      value: e.detail,
-    });
+    this.#pick({ palette: e.detail });
   };
 
   switchToCustomTab = (e: MouseEvent) => {

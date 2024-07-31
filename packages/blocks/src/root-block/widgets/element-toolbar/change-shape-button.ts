@@ -7,7 +7,6 @@ import { join } from 'lit/directives/join.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
 import type { ShapeProps } from '../../../surface-block/element-model/shape.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
@@ -165,13 +164,12 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   ) {
     return (event: PickColorEvent) => {
       if (event.type === 'pick') {
-        const { type, value } = event.detail;
-        this.elements.forEach(ele => {
+        this.elements.forEach(ele =>
           this.service.updateElement(
             ele.id,
-            packColor(type, key, value, ele[key])
-          );
-        });
+            packColor(key, { ...event.detail })
+          )
+        );
         return;
       }
 
@@ -185,7 +183,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     mountShapeTextEditor(this.elements[0], this.edgeless);
   }
 
-  private _getTextColor(fillColor: CssVariableName) {
+  private _getTextColor(fillColor: string) {
     // When the shape is filled with black color, the text color should be white.
     // When the shape is transparent, the text color should be set according to the theme.
     // Otherwise, the text color should be black.
@@ -198,7 +196,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     return textColor;
   }
 
-  private _setShapeFillColor(fillColor: CssVariableName) {
+  private _setShapeFillColor(fillColor: string) {
     const filled = !isTransparent(fillColor);
     const color = this._getTextColor(fillColor);
     this.elements.forEach(ele =>
@@ -206,7 +204,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     );
   }
 
-  private _setShapeStrokeColor(strokeColor: CssVariableName) {
+  private _setShapeStrokeColor(strokeColor: string) {
     this.elements.forEach(ele =>
       this.service.updateElement(ele.id, { strokeColor })
     );

@@ -1,6 +1,7 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { Color } from '../../../../../surface-block/consts.js';
 import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
@@ -10,7 +11,9 @@ import {
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
 } from '../../../../../_common/icons/index.js';
+import { ThemeObserver } from '../../../../../_common/theme/theme-observer.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
+import { DEFAULT_CONNECTOR_COLOR } from '../../panel/color-panel.js';
 import '../../panel/one-row-color-panel.js';
 import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
@@ -100,6 +103,7 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
       this.mode,
       this.onChange
     );
+    const color = ThemeObserver.getColorValue(stroke, DEFAULT_CONNECTOR_COLOR);
 
     return html`
       <edgeless-slide-menu>
@@ -114,7 +118,7 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
           </edgeless-line-width-panel>
           <div class="submenu-divider"></div>
           <edgeless-one-row-color-panel
-            .value=${stroke}
+            .value=${color}
             @select=${(e: ColorEvent) => this.onChange({ stroke: e.detail })}
           ></edgeless-one-row-color-panel>
         </div>
@@ -129,7 +133,7 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
   accessor onChange!: (props: Record<string, unknown>) => void;
 
   @property({ attribute: false })
-  accessor stroke!: string;
+  accessor stroke!: Color;
 
   @property({ attribute: false })
   accessor strokeWidth!: number;

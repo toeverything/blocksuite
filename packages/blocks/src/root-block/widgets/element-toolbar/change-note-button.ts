@@ -8,7 +8,6 @@ import { type Ref, createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 
 import type { EditorMenuButton } from '../../../_common/components/toolbar/menu-button.js';
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { StrokeStyle } from '../../../surface-block/index.js';
@@ -109,13 +108,13 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {
-      const { type, value } = event.detail;
-      this.notes.forEach(ele => {
-        this.doc.updateBlock(
-          ele,
-          packColor(type, 'background', value, ele.background)
-        );
-      });
+      this.notes.forEach(ele =>
+        this.doc.updateBlock(ele, packColor('background', { ...event.detail }))
+      );
+      this.edgeless.service.editPropsStore.recordLastProps(
+        'affine:note',
+        packColor('background', event.detail)
+      );
       return;
     }
 
@@ -135,7 +134,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.edgeless.slots.toggleNoteSlicer.emit();
   }
 
-  private _setBackground(background: CssVariableName) {
+  private _setBackground(background: string) {
     this.notes.forEach(note => {
       this.doc.updateBlock(note, { background });
     });

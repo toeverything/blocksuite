@@ -331,7 +331,7 @@ export class RootService extends BlockService<RootBlockModel> {
 
   telemetryService: TelemetryService | null = null;
 
-  readonly themeObserver = new ThemeObserver();
+  readonly themeObserver = ThemeObserver.instance;
 
   transformers = {
     markdown: MarkdownTransformer,
