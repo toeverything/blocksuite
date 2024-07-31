@@ -29,6 +29,8 @@ import { LineWidth } from '../../../_common/types.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import { FontFamily } from '../../../surface-block/consts.js';
 import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
   FILL_COLORS,
   STROKE_COLORS,
   ShapeType,
@@ -274,9 +276,10 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const elements = this.elements;
     const selectedShape = getMostCommonShape(elements);
     const selectedFillColor =
-      getMostCommonFillColor(elements, colorScheme) ?? FILL_COLORS[0];
+      getMostCommonFillColor(elements, colorScheme) ?? DEFAULT_SHAPE_FILL_COLOR;
     const selectedStrokeColor =
-      getMostCommonStrokeColor(elements, colorScheme) ?? STROKE_COLORS[0];
+      getMostCommonStrokeColor(elements, colorScheme) ??
+      DEFAULT_SHAPE_STROKE_COLOR;
     const selectedLineSize = getMostCommonLineSize(elements) ?? LineWidth.Four;
     const selectedLineStyle =
       getMostCommonLineStyle(elements) ?? StrokeStyle.Solid;
@@ -365,7 +368,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
                 role="listbox"
                 aria-label="Fill colors"
                 .value=${selectedFillColor}
-                .options=${['--affine-palette-transparent', ...FILL_COLORS]}
+                .options=${FILL_COLORS}
                 @select=${(e: ColorEvent) => this._setShapeFillColor(e.detail)}
               >
               </edgeless-color-panel>

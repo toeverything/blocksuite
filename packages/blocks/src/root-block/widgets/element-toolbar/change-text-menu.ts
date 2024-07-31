@@ -420,7 +420,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
             >
               <edgeless-color-panel
                 .value=${selectedColor}
-                .options=${['--affine-palette-transparent', ...LINE_COLORS]}
                 @select=${this._setTextColor}
               ></edgeless-color-panel>
             </editor-menu-button>

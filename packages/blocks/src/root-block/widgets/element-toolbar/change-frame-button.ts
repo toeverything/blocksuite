@@ -28,7 +28,7 @@ import {
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
 import { mountFrameTitleEditor } from '../../edgeless/utils/text.js';
 
-const FRAME_BACKGROUND: string[] = [
+const FRAME_BACKGROUND = [
   '--affine-tag-gray',
   '--affine-tag-red',
   '--affine-tag-orange',
@@ -197,10 +197,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
             >
               <edgeless-color-panel
                 .value=${background}
-                .options=${[
-                  '--affine-palette-transparent',
-                  ...FRAME_BACKGROUND,
-                ]}
+                .options=${FRAME_BACKGROUND}
                 @select=${(e: ColorEvent) => this._setFrameBackground(e.detail)}
               >
               </edgeless-color-panel>

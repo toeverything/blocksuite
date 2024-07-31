@@ -412,7 +412,6 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               `}
             >
               <stroke-style-panel
-                .options=${['--affine-palette-transparent', ...LINE_COLORS]}
                 .strokeWidth=${selectedLineSize}
                 .strokeStyle=${selectedLineStyle}
                 .strokeColor=${selectedColor}

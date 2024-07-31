@@ -90,6 +90,7 @@ export class EdgelessColorPickerButton extends WithDisposable(LitElement) {
                   .options=${this.palettes}
                   .hollowCircle=${this.hollowCircle}
                   .openColorPicker=${this.switchToCustomTab}
+                  .hasTransparent=${false}
                   @select=${this.#select}
                 >
                   <edgeless-color-custom-button

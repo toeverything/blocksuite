@@ -55,6 +55,9 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(LitElement) {
           <menu-divider .vertical=${true}></menu-divider>
           <edgeless-one-row-color-panel
             .value=${color}
+            .hasTransparent=${!this.edgeless.doc.awarenessStore.getFlag(
+              'enable_color_picker'
+            )}
             @select=${(e: ColorEvent) => this.onChange({ color: e.detail })}
           ></edgeless-one-row-color-panel>
         </div>

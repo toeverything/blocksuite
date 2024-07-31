@@ -139,7 +139,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
             `}
           >
             <edgeless-color-panel
-              .options=${['--affine-palette-transparent', ...LINE_COLORS]}
               .value=${selectedColor}
               @select=${this._setBrushColor}
             >
