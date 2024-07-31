@@ -51,11 +51,19 @@ import {
   normalizeDegAngle,
   normalizeShapeBound,
 } from '../../../../surface-block/index.js';
-import { NOTE_MIN_HEIGHT, NOTE_MIN_WIDTH } from '../../utils/consts.js';
+import {
+  AI_CHAT_BLOCK_MAX_HEIGHT,
+  AI_CHAT_BLOCK_MAX_WIDTH,
+  AI_CHAT_BLOCK_MIN_HEIGHT,
+  AI_CHAT_BLOCK_MIN_WIDTH,
+  NOTE_MIN_HEIGHT,
+  NOTE_MIN_WIDTH,
+} from '../../utils/consts.js';
 import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
   getSelectableBounds,
   getSelectedRect,
+  isAIChatBlock,
   isAttachmentBlock,
   isBookmarkBlock,
   isCanvasElement,
@@ -173,6 +181,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
       if (isEmbedHtmlBlock(element)) {
         this.#adjustEmbedHtml(element, bound, direction);
+        return;
+      }
+
+      if (isAIChatBlock(element)) {
+        this.#adjustAIChat(element, bound, direction);
         return;
       }
 
@@ -807,6 +820,52 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragEnd
     );
     this.addEventListener('pointerdown', stopPropagation);
+  }
+
+  /**
+   * TODO: Remove this function after the edgeless refactor completed
+   * This function is used to adjust the element bound and scale
+   * Should not be used in the future
+   * Related issue: https://linear.app/affine-design/issue/BS-1009/
+   * @deprecated
+   */
+  #adjustAIChat(
+    element: BlockSuite.EdgelessModel,
+    bound: Bound,
+    direction: HandleDirection
+  ) {
+    const curBound = Bound.deserialize(element.xywh);
+
+    let scale = 1;
+    if ('scale' in element) {
+      scale = element.scale as number;
+    }
+    let width = curBound.w / scale;
+    let height = curBound.h / scale;
+    if (this._shiftKey) {
+      scale = bound.w / width;
+      this._scalePercent = `${Math.round(scale * 100)}%`;
+      this._scaleDirection = direction;
+    }
+
+    width = bound.w / scale;
+    width = clamp(width, AI_CHAT_BLOCK_MIN_WIDTH, AI_CHAT_BLOCK_MAX_WIDTH);
+    bound.w = width * scale;
+
+    height = bound.h / scale;
+    height = clamp(height, AI_CHAT_BLOCK_MIN_HEIGHT, AI_CHAT_BLOCK_MAX_HEIGHT);
+    bound.h = height * scale;
+
+    this._isWidthLimit =
+      width === AI_CHAT_BLOCK_MIN_WIDTH || width === AI_CHAT_BLOCK_MAX_WIDTH;
+    this._isHeightLimit =
+      height === AI_CHAT_BLOCK_MIN_HEIGHT ||
+      height === AI_CHAT_BLOCK_MAX_HEIGHT;
+
+    this.edgeless.service.updateElement(element.id, {
+      scale,
+      xywh: bound.serialize(),
+    });
   }
 
   #adjustConnector(
