@@ -1,8 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { Block } from '@blocksuite/store';
-import type { Doc } from '@blocksuite/store';
+import type { Block, Doc } from '@blocksuite/store';
 
-import { type Disposable, Slot, assertExists } from '@blocksuite/global/utils';
+import { Slot, assertExists } from '@blocksuite/global/utils';
 
 import type { Column } from '../database-block/index.js';
 import type { BlockMeta } from './block-meta/base.js';
@@ -10,9 +9,9 @@ import type { DataViewBlockModel } from './data-view-model.js';
 
 import { databaseBlockAllColumnMap } from '../database-block/columns/index.js';
 import {
-  BaseDataSource,
   type ColumnConfig,
   type ColumnMeta,
+  DataSourceBase,
   type DetailSlots,
   type InsertToPosition,
   columnPresets,
@@ -27,7 +26,8 @@ export type BlockQueryDataSourceConfig = {
   type: keyof typeof blockMetaMap;
 };
 
-export class BlockQueryDataSource extends BaseDataSource {
+// @ts-ignore
+export class BlockQueryDataSource extends DataSourceBase {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private columnMetaMap = new Map<string, ColumnMeta<any, any, any>>();
 
@@ -149,20 +149,6 @@ export class BlockQueryDataSource extends BaseDataSource {
     );
   }
 
-  override onCellUpdate(
-    rowId: string,
-    propertyId: string,
-    callback: () => void
-  ): Disposable {
-    const viewColumn = this.getViewColumn(propertyId);
-    if (viewColumn) {
-      return this.block.propsUpdated.on(callback);
-    }
-    const block = this.blockMap.get(rowId);
-    assertExists(block, `block ${rowId} not found`);
-    return this.getProperty(propertyId).updated(block.model, callback);
-  }
-
   propertyAdd(
     insertToPosition: InsertToPosition,
     type: string | undefined
@@ -210,7 +196,7 @@ export class BlockQueryDataSource extends BaseDataSource {
     if (viewColumn) {
       const currentType = viewColumn.type;
       const currentData = viewColumn.data;
-      const rows = this.rows;
+      const rows = this.rows$.value;
       const currentCells = rows.map(rowId =>
         this.cellGetValue(rowId, propertyId)
       );

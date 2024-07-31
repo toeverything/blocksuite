@@ -1,5 +1,6 @@
+import type { Bound } from '@blocksuite/global/utils';
+
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
-import type { Bound } from '../utils/bound.js';
 
 import { SurfaceGroupLikeModel } from '../element-model/base.js';
 
@@ -8,7 +9,7 @@ export const groupSizeMiddleware: SurfaceMiddleware = (
 ) => {
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
-    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType);
+    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModel);
   let pending = false;
   const groupSet = new Set<SurfaceGroupLikeModel>();
   const calculateGroupSize = (group: SurfaceGroupLikeModel) => {

@@ -1,4 +1,8 @@
+import type { XYWH } from '@blocksuite/global/utils';
+
 import { WithDisposable } from '@blocksuite/block-std';
+import { serializeXYWH } from '@blocksuite/global/utils';
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
@@ -12,11 +16,13 @@ import type { Connection } from '../../../../surface-block/element-model/connect
 import type { ShapeStyle } from '../../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
+import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../_common/edgeless/note/consts.js';
 import {
   FrameIcon,
   SmallNoteIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { FontFamilyIcon } from '../../../../_common/icons/text.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import {
   FontFamily,
   FontStyle,
@@ -29,13 +35,13 @@ import {
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
 import {
-  Bound,
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '../../../../surface-block/elements/shape/consts.js';
+import {
   GroupElementModel,
-  Vec,
-  type XYWH,
   clamp,
   normalizeDegAngle,
-  serializeXYWH,
   toDegree,
 } from '../../../../surface-block/index.js';
 import { captureEventTarget } from '../../../widgets/drag-handle/utils.js';
@@ -57,7 +63,6 @@ import {
   AutoCompleteNoteOverlay,
   AutoCompleteShapeOverlay,
   AutoCompleteTextOverlay,
-  DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_OVERLAY_HEIGHT,
   DEFAULT_TEXT_HEIGHT,
   DEFAULT_TEXT_WIDTH,
@@ -176,11 +181,22 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(this.currentSource)) {
-      let tag = this.currentSource.fillColor.split('-').pop();
-      if (!tag || tag === 'gray') tag = 'grey';
-      color = `--affine-note-background-${tag}`;
+      const tmpColor = ThemeObserver.getColorValue(
+        this.currentSource.fillColor,
+        DEFAULT_SHAPE_FILL_COLOR
+      );
+      if (tmpColor.startsWith('--')) {
+        let tag = tmpColor.split('-').pop();
+        if (!tag || tag === 'gray') tag = 'grey';
+        color = `--affine-note-background-${tag}`;
+      } else {
+        color = tmpColor;
+      }
     } else {
-      color = this.currentSource.background;
+      color = ThemeObserver.getColorValue(
+        this.currentSource.background,
+        DEFAULT_NOTE_BACKGROUND_COLOR
+      );
     }
 
     const computedStyle = getComputedStyle(this.edgeless);
@@ -465,12 +481,24 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(this.currentSource)) {
-      let tag = this.currentSource.fillColor.split('-').pop();
-      if (!tag || tag === 'gray') tag = 'grey';
-      color = `--affine-note-background-${tag}`;
+      const tmpColor = ThemeObserver.getColorValue(
+        this.currentSource.fillColor,
+        DEFAULT_SHAPE_FILL_COLOR
+      );
+      if (tmpColor.startsWith('--')) {
+        let tag = tmpColor.split('-').pop();
+        if (!tag || tag === 'gray') tag = 'grey';
+        color = `--affine-note-background-${tag}`;
+      } else {
+        color = tmpColor;
+      }
     } else {
-      color = this.currentSource.background;
+      color = ThemeObserver.getColorValue(
+        this.currentSource.background,
+        DEFAULT_NOTE_BACKGROUND_COLOR
+      );
     }
+
     const computedStyle = getComputedStyle(this.edgeless);
     const background =
       computedStyle.getPropertyValue(color) ||
@@ -512,9 +540,16 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         ? this.currentSource
         : this.edgeless.service.editPropsStore.getLastProps('shape');
 
-    const computedStyle = getComputedStyle(this.edgeless);
-    const stroke = computedStyle.getPropertyValue(strokeColor);
-    const fill = computedStyle.getPropertyValue(fillColor);
+    const stroke = ThemeObserver.getColorValue(
+      strokeColor,
+      DEFAULT_SHAPE_STROKE_COLOR,
+      true
+    );
+    const fill = ThemeObserver.getColorValue(
+      fillColor,
+      DEFAULT_SHAPE_FILL_COLOR,
+      true
+    );
 
     const options = {
       seed: 666,

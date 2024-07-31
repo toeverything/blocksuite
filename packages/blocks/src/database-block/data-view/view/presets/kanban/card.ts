@@ -6,10 +6,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { DataViewRenderer } from '../../../data-view.js';
-import type {
-  DataViewKanbanColumnManager,
-  DataViewKanbanManager,
-} from './kanban-view-manager.js';
+import type { KanbanColumn, KanbanSingleView } from './kanban-view-manager.js';
 
 import {
   CenterPeekIcon,
@@ -173,7 +170,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     return this.closest('affine-data-view-kanban')?.selectionController;
   }
 
-  private renderBody(columns: DataViewKanbanColumnManager[]) {
+  private renderBody(columns: KanbanColumn[]) {
     if (columns.length === 0) {
       return '';
     }
@@ -198,7 +195,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     </div>`;
   }
 
-  private renderHeader(columns: DataViewKanbanColumnManager[]) {
+  private renderHeader(columns: KanbanColumn[]) {
     if (!this.view.hasHeader(this.cardId)) {
       return '';
     }
@@ -217,12 +214,12 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       return;
     }
     return html` <div class="card-header-icon">
-      ${icon.getValue(this.cardId)}
+      ${icon.cellGet(this.cardId).value$.value}
     </div>`;
   }
 
   private renderOps() {
-    if (this.view.readonly) {
+    if (this.view.readonly$.value) {
       return;
     }
     return html`
@@ -254,12 +251,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    if (this.view.readonly) {
+    if (this.view.readonly$.value) {
       return;
     }
     this._disposables.addFromEvent(this, 'contextmenu', e => {
@@ -291,7 +283,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const columns = this.view.columnManagerList.filter(
+    const columns = this.view.columnManagerList$.value.filter(
       v => !this.view.isInHeader(v.id)
     );
     this.style.border = this.isFocus
@@ -316,7 +308,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   accessor isFocus = false;
 
   @property({ attribute: false })
-  accessor view!: DataViewKanbanManager;
+  accessor view!: KanbanSingleView;
 }
 
 declare global {

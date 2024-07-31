@@ -1,5 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
@@ -18,7 +20,7 @@ import {
 } from '../../../../_common/utils/index.js';
 import { clamp } from '../../../../_common/utils/math.js';
 import {
-  type IHitTestOptions,
+  type PointTestOptions,
   SurfaceGroupLikeModel,
 } from '../../../../surface-block/element-model/base.js';
 import { isConnectorWithLabel } from '../../../../surface-block/element-model/connector.js';
@@ -34,7 +36,6 @@ import {
   moveSubtree,
   showMergeIndicator,
 } from '../../../../surface-block/element-model/utils/mindmap/utils.js';
-import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import { intersects } from '../../../../surface-block/utils/math-utils.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
@@ -182,7 +183,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   };
 
-  private _toBeMoved: BlockSuite.EdgelessModelType[] = [];
+  private _toBeMoved: BlockSuite.EdgelessModel[] = [];
 
   private _updateSelectingState = () => {
     const { tools, service } = this._edgeless;
@@ -304,7 +305,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         if (
           isCanvasElement(selected) &&
           isConnectorWithLabel(selected) &&
-          (selected as ConnectorElementModel).labelHitTest(
+          (selected as ConnectorElementModel).labelIncludesPoint(
             this._service.viewport.toModelCoord(x, y)
           )
         ) {
@@ -330,7 +331,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         if (
           isCanvasElement(selected) &&
           isConnectorWithLabel(selected) &&
-          (selected as ConnectorElementModel).labelHitTest(
+          (selected as ConnectorElementModel).labelIncludesPoint(
             this._service.viewport.toModelCoord(x, y)
           )
         ) {
@@ -366,7 +367,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _isDraggable(element: BlockSuite.EdgelessModelType) {
+  private _isDraggable(element: BlockSuite.EdgelessModel) {
     return !(
       element instanceof ConnectorElementModel &&
       !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
@@ -443,8 +444,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         .pickElement(x, y, { all: true, expand: 40 })
         .filter(
           el =>
-            (el.group as BlockSuite.SurfaceElementModelType)?.type ===
-              'mindmap' && el !== current
+            (el.group as BlockSuite.SurfaceElementModel)?.type === 'mindmap' &&
+            el !== current
         )
         .map(el => ({
           element: el as ShapeElementModel,
@@ -519,14 +520,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _pick(x: number, y: number, options?: IHitTestOptions) {
+  private _pick(x: number, y: number, options?: PointTestOptions) {
     const service = this._service;
     const modelPos = service.viewport.toModelCoord(x, y);
     const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
 
     if (group instanceof MindmapElementModel) {
       const picked = service.pickElement(modelPos[0], modelPos[1], {
-        ...((options ?? {}) as IHitTestOptions),
+        ...((options ?? {}) as PointTestOptions),
         all: true,
       });
 
@@ -689,12 +690,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             if (selected.children.length === 0) {
               this._addEmptyParagraphBlock(selected);
             } else {
-              const blockElement = this._edgeless.host.view.viewFromPath(
+              const block = this._edgeless.host.view.viewFromPath(
                 'block',
                 buildPath(selected)
               );
-              if (blockElement) {
-                const rect = blockElement
+              if (block) {
+                const rect = block
                   .querySelector('.affine-block-children-container')!
                   .getBoundingClientRect();
 

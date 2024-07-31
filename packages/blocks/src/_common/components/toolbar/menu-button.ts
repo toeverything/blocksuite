@@ -1,5 +1,11 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, type TemplateResult, css, html } from 'lit';
+import {
+  LitElement,
+  type PropertyValues,
+  type TemplateResult,
+  css,
+  html,
+} from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { EditorIconButton } from './icon-button.js';
@@ -21,24 +27,21 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
     }
   `;
 
-  close() {
-    this._popper?.hide();
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.tabIndex = 0;
-    if (this.contentPadding) {
-      this.style.setProperty('--content-padding', this.contentPadding);
-    }
-  }
-
   override firstUpdated() {
     this._popper = createButtonPopper(
       this._trigger,
       this._content,
       ({ display }) => {
         this._trigger.showTooltip = display === 'hidden';
+
+        this.dispatchEvent(
+          new ToggleEvent('toggle', {
+            newState: display,
+            bubbles: false,
+            cancelable: false,
+            composed: true,
+          })
+        );
       },
       {
         mainAxis: 12,
@@ -60,6 +63,10 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
     this._disposables.add(this._popper);
   }
 
+  hide() {
+    this._popper?.hide();
+  }
+
   override render() {
     return html`
       ${this.button}
@@ -67,6 +74,16 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
         <slot></slot>
       </editor-menu-content>
     `;
+  }
+
+  show(force = false) {
+    this._popper?.show(force);
+  }
+
+  override willUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('contentPadding')) {
+      this.style.setProperty('--content-padding', this.contentPadding ?? '');
+    }
   }
 
   @query('editor-menu-content')
@@ -110,12 +127,12 @@ export class EditorMenuContent extends LitElement {
     }
 
     :host([data-show]) {
-      ${PANEL_BASE}
+      ${PANEL_BASE};
       justify-content: center;
       padding: var(--content-padding, 0 6px);
     }
 
-    ::slotted([slot]) {
+    ::slotted(:not(.custom)) {
       display: flex;
       align-items: center;
       align-self: stretch;
@@ -123,19 +140,19 @@ export class EditorMenuContent extends LitElement {
       min-height: 36px;
     }
 
-    ::slotted([slot][data-size]) {
+    ::slotted([data-size]) {
       min-width: 146px;
     }
 
-    ::slotted([slot][data-size='small']) {
+    ::slotted([data-size='small']) {
       min-width: 164px;
     }
 
-    ::slotted([slot][data-size='large']) {
+    ::slotted([data-size='large']) {
       min-width: 176px;
     }
 
-    ::slotted([slot][data-orientation='vertical']) {
+    ::slotted([data-orientation='vertical']) {
       flex-direction: column;
       align-items: stretch;
       gap: unset;

@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -14,7 +14,7 @@ import { defaultItems, defaultMoreItems } from './config.js';
 
 export const AFFINE_CODE_TOOLBAR_WIDGET = 'affine-code-toolbar-widget';
 @customElement(AFFINE_CODE_TOOLBAR_WIDGET)
-export class AffineCodeToolbarWidget extends WidgetElement<
+export class AffineCodeToolbarWidget extends WidgetComponent<
   CodeBlockModel,
   CodeBlockComponent
 > {
@@ -27,7 +27,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
     this._hoverController = new HoverController(
       this,
       ({ abortController }) => {
-        const codeBlock = this.blockElement;
+        const codeBlock = this.block;
         const selection = this.host.selection;
 
         const textSelection = selection.find('text');
@@ -49,7 +49,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
 
         return {
           template: html`<affine-code-toolbar
-            .blockElement=${codeBlock}
+            .blockComponent=${codeBlock}
             .abortController=${abortController}
             .items=${this.items}
             .moreItems=${this.moreItems}
@@ -60,7 +60,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
               }
             }}
           ></affine-code-toolbar>`,
-          container: this.blockElement,
+          container: this.block,
           // stacking-context(editor-host)
           portalStyles: {
             zIndex: 'var(--affine-z-index-popover)',
@@ -86,7 +86,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
       { allowMultiple: true }
     );
 
-    const codeBlock = this.blockElement;
+    const codeBlock = this.block;
     this._hoverController.setReference(codeBlock);
     this._hoverController.onAbort = () => {
       // If the more menu is opened, don't close it.

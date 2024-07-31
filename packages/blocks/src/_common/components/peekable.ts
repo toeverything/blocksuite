@@ -1,5 +1,5 @@
 import type {
-  BlockElement,
+  BlockComponent,
   BlockStdScope,
   Command,
   DisposableClass,
@@ -57,7 +57,7 @@ export interface PeekViewService {
    * @param template Optional template to render in the peek view modal. If not given, the peek view service will render the content.
    * @returns A promise that resolves when the peek view is closed.
    */
-  peek<Element extends BlockElement>(
+  peek<Element extends BlockComponent>(
     target: Element,
     template?: TemplateResult
   ): Promise<void>;
@@ -189,7 +189,7 @@ export const peekSelectedBlockCommand: Command<'selectedBlocks'> = (
 declare global {
   namespace BlockSuite {
     interface CommandContext {
-      selectedPeekableBlocks?: BlockElement[];
+      selectedPeekableBlocks?: BlockComponent[];
     }
 
     interface Commands {

@@ -3,14 +3,12 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-
 import { TransparentIcon } from '../../../../_common/icons/index.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { createZodUnion } from '../../../../_common/utils/index.js';
-import { getThemeMode } from '../../../../_common/utils/query.js';
 
 export class ColorEvent extends Event {
-  detail: CssVariableName;
+  detail: string;
 
   constructor(
     type: string,
@@ -18,7 +16,7 @@ export class ColorEvent extends Event {
       detail,
       composed,
       bubbles,
-    }: { detail: CssVariableName; composed: boolean; bubbles: boolean }
+    }: { detail: string; composed: boolean; bubbles: boolean }
   ) {
     super(type, { bubbles, composed });
     this.detail = detail;
@@ -26,7 +24,6 @@ export class ColorEvent extends Event {
 }
 
 export const LINE_COLORS = [
-  '--affine-palette-transparent',
   '--affine-palette-line-yellow',
   '--affine-palette-line-orange',
   '--affine-palette-line-red',
@@ -43,18 +40,18 @@ export const LINE_COLORS = [
 export const LineColorsSchema = createZodUnion(LINE_COLORS);
 
 export const GET_DEFAULT_LINE_COLOR = () =>
-  getThemeMode() === 'dark' ? LINE_COLORS[11] : LINE_COLORS[9];
+  ThemeObserver.mode === 'dark' ? LINE_COLORS[10] : LINE_COLORS[8];
 
-export const GET_DEFAULT_TEXT_COLOR = () => LINE_COLORS[6];
+export const GET_DEFAULT_TEXT_COLOR = () => LINE_COLORS[5];
 
-export const DEFAULT_BRUSH_COLOR = '--affine-palette-line-blue';
-export const DEFAULT_CONNECTOR_COLOR = LINE_COLORS[10];
+export const DEFAULT_BRUSH_COLOR = LINE_COLORS[5];
+export const DEFAULT_CONNECTOR_COLOR = LINE_COLORS[9];
 
-export function isTransparent(color: CssVariableName) {
+export function isTransparent(color: string) {
   return color.toLowerCase() === '--affine-palette-transparent';
 }
 
-function isSameColorWithBackground(color: CssVariableName) {
+function isSameColorWithBackground(color: string) {
   return [
     '--affine-note-background-black',
     '--affine-note-background-white',
@@ -91,10 +88,11 @@ function TransparentColor(hollowCircle = false) {
   `;
 }
 
-function BorderedHollowCircle(color: CssVariableName) {
-  const strokeWidth = isSameColorWithBackground(color) ? 1 : 0;
+function BorderedHollowCircle(color: string) {
+  const valid = color.startsWith('--');
+  const strokeWidth = valid && isSameColorWithBackground(color) ? 1 : 0;
   const style = {
-    fill: `var(${color})`,
+    fill: valid ? `var(${color})` : color,
     stroke: 'var(--affine-border-color)',
   };
   return html`
@@ -114,7 +112,7 @@ function BorderedHollowCircle(color: CssVariableName) {
   `;
 }
 
-function AdditionIcon(color: CssVariableName, hollowCircle: boolean) {
+function AdditionIcon(color: string, hollowCircle: boolean) {
   if (isTransparent(color)) {
     return TransparentColor(hollowCircle);
   }
@@ -125,7 +123,7 @@ function AdditionIcon(color: CssVariableName, hollowCircle: boolean) {
 }
 
 export function ColorUnit(
-  color: CssVariableName,
+  color: string,
   {
     hollowCircle,
     letter,
@@ -192,7 +190,7 @@ export class EdgelessColorButton extends LitElement {
     const additionIcon = AdditionIcon(color, !!hollowCircle);
     const style: Record<string, string> = {};
     if (!hollowCircle) {
-      style.background = `var(${color})`;
+      style.background = this.preprocessColor;
       if (isSameColorWithBackground(color)) {
         style.border = '0.5px solid var(--affine-border-color)';
       }
@@ -207,8 +205,13 @@ export class EdgelessColorButton extends LitElement {
     </div>`;
   }
 
+  get preprocessColor() {
+    const color = this.color;
+    return color.startsWith('--') ? `var(${color})` : color;
+  }
+
   @property({ attribute: false })
-  accessor color!: CssVariableName;
+  accessor color!: string;
 
   @property({ attribute: false })
   accessor hollowCircle: boolean | undefined = undefined;
@@ -263,7 +266,7 @@ export class EdgelessColorPanel extends LitElement {
     ${colorContainerStyles}
   `;
 
-  onSelect(value: CssVariableName) {
+  onSelect(value: string) {
     this.dispatchEvent(
       new ColorEvent('select', {
         detail: value,
@@ -275,39 +278,46 @@ export class EdgelessColorPanel extends LitElement {
   }
 
   override render() {
-    return repeat(
-      this.options,
-      color => color,
-      color => {
-        const unit = ColorUnit(color, {
-          hollowCircle: this.hollowCircle,
-          letter: this.showLetterMark,
-        });
+    return html`
+      ${repeat(
+        this.options,
+        color => color,
+        color => {
+          const unit = ColorUnit(color, {
+            hollowCircle: this.hollowCircle,
+            letter: this.showLetterMark,
+          });
 
-        return html`
-          <div
-            class="color-container"
-            ?active=${color === this.value}
-            @click=${() => this.onSelect(color)}
-          >
-            ${unit}
-          </div>
-        `;
-      }
-    );
+          return html`
+            <div
+              class="color-container"
+              ?active=${color === this.value}
+              @click=${() => this.onSelect(color)}
+            >
+              ${unit}
+            </div>
+          `;
+        }
+      )}
+      </div>
+      <slot name="custom"></slot>
+    `;
   }
 
   @property({ attribute: false })
   accessor hollowCircle = false;
 
-  @property({ attribute: false })
-  accessor options = LINE_COLORS;
+  @property()
+  accessor openColorPicker!: (e: MouseEvent) => void;
+
+  @property({ type: Array })
+  accessor options: readonly string[] = LINE_COLORS;
 
   @property({ attribute: false })
   accessor showLetterMark = false;
 
   @property({ attribute: false })
-  accessor value: CssVariableName | null = null;
+  accessor value: string | null = null;
 }
 
 @customElement('edgeless-text-color-icon')
@@ -343,14 +353,19 @@ export class EdgelessTextColorIcon extends LitElement {
           width="13.3333"
           height="2.08333"
           rx="1"
-          fill="var(${this.color})"
+          fill=${this.preprocessColor}
         />
       </svg>
     `;
   }
 
+  get preprocessColor() {
+    const color = this.color;
+    return color.startsWith('--') ? `var(${color})` : color;
+  }
+
   @property({ attribute: false })
-  accessor color!: CssVariableName;
+  accessor color!: string;
 }
 
 declare global {

@@ -1,7 +1,6 @@
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { Slice, Text } from '@blocksuite/store';
 
 import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
@@ -118,7 +117,7 @@ export type SlashMenuItemGenerator = (
 ) => (SlashMenuGroupDivider | SlashMenuActionItem | SlashSubMenu)[];
 
 export type SlashMenuContext = {
-  rootElement: RootBlockComponent;
+  rootComponent: RootBlockComponent;
   model: BlockModel;
 };
 
@@ -150,9 +149,9 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         showWhen: ({ model }) =>
           model.doc.schema.flavourSchemaMap.has(config.flavour) &&
           !insideDatabase(model),
-        action: ({ rootElement }) => {
+        action: ({ rootComponent }) => {
           const { flavour, type } = config;
-          rootElement.host.std.command
+          rootComponent.host.std.command
             .chain()
             .updateBlockType({
               flavour,
@@ -171,9 +170,9 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
                   return false;
                 }
                 const codeModel = newModels[0];
-                onModelTextUpdated(rootElement.host, codeModel, richText => {
+                onModelTextUpdated(rootComponent.host, codeModel, richText => {
                   const inlineEditor = richText.inlineEditor;
-                  assertExists(inlineEditor);
+                  if (!inlineEditor) return;
                   inlineEditor.focusEnd();
                 }).catch(console.error);
               }
@@ -208,20 +207,17 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         name,
         icon,
         tooltip: slashMenuToolTips[name],
-        action: ({ rootElement, model }) => {
+        action: ({ rootComponent, model }) => {
           if (!model.text) {
             return;
           }
           const len = model.text.length;
           if (!len) {
             const inlineEditor = getInlineEditorByModel(
-              rootElement.host,
+              rootComponent.host,
               model
             );
-            assertExists(
-              inlineEditor,
-              "Can't set style mark! Inline editor not found"
-            );
+            if (!inlineEditor) return;
             inlineEditor.setMarks({
               [id]: true,
             });
@@ -241,9 +237,9 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       description: 'Start a new document.',
       icon: NewDocIcon,
       tooltip: slashMenuToolTips['New Doc'],
-      action: ({ rootElement, model }) => {
-        const newDoc = createDefaultDoc(rootElement.doc.collection);
-        insertContent(rootElement.host, model, REFERENCE_NODE, {
+      action: ({ rootComponent, model }) => {
+        const newDoc = createDefaultDoc(rootComponent.doc.collection);
+        insertContent(rootComponent.host, model, REFERENCE_NODE, {
           reference: {
             type: 'LinkedPage',
             pageId: newDoc.id,
@@ -257,11 +253,11 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       icon: LinkedDocIcon,
       tooltip: slashMenuToolTips['Linked Doc'],
       alias: ['dual link'],
-      showWhen: ({ rootElement }) => {
+      showWhen: ({ rootComponent }) => {
         const linkedDocWidgetEle =
-          rootElement.widgetElements['affine-linked-doc-widget'];
+          rootComponent.widgetComponents['affine-linked-doc-widget'];
         if (!linkedDocWidgetEle) return false;
-        if (!('showLinkedDoc' in linkedDocWidgetEle)) {
+        if (!('showLinkedDocPopover' in linkedDocWidgetEle)) {
           console.warn(
             'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
           );
@@ -269,20 +265,23 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         }
         return true;
       },
-      action: ({ model, rootElement }) => {
+      action: ({ model, rootComponent }) => {
         const triggerKey = '@';
-        insertContent(rootElement.host, model, triggerKey);
-        assertExists(model.doc.root);
+        insertContent(rootComponent.host, model, triggerKey);
+        if (!model.doc.root) return;
         const widgetEle =
-          rootElement.widgetElements['affine-linked-doc-widget'];
-        assertExists(widgetEle);
+          rootComponent.widgetComponents['affine-linked-doc-widget'];
+        if (!widgetEle) return;
         // We have checked the existence of showLinkedDoc method in the showWhen
         const linkedDocWidget = widgetEle as AffineLinkedDocWidget;
         // Wait for range to be updated
         setTimeout(() => {
-          const inlineEditor = getInlineEditorByModel(rootElement.host, model);
-          assertExists(inlineEditor);
-          linkedDocWidget.showLinkedDoc(inlineEditor, triggerKey);
+          const inlineEditor = getInlineEditorByModel(
+            rootComponent.host,
+            model
+          );
+          if (!inlineEditor) return;
+          linkedDocWidget.showLinkedDocPopover(inlineEditor, triggerKey);
         });
       },
     },
@@ -297,8 +296,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:image') &&
         !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
-        const parent = rootElement.doc.getParent(model);
+      action: async ({ rootComponent, model }) => {
+        const parent = rootComponent.doc.getParent(model);
         if (!parent) {
           return;
         }
@@ -306,10 +305,15 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const imageFiles = await getImageFilesFromLocal();
         if (!imageFiles.length) return;
 
-        const imageService = rootElement.host.spec.getService('affine:image');
+        const imageService = rootComponent.host.spec.getService('affine:image');
         const maxFileSize = imageService.maxFileSize;
 
-        addSiblingImageBlock(rootElement.host, imageFiles, maxFileSize, model);
+        addSiblingImageBlock(
+          rootComponent.host,
+          imageFiles,
+          maxFileSize,
+          model
+        );
         tryRemoveEmptyLine(model);
       },
     },
@@ -321,14 +325,14 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:bookmark') &&
         !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
-        const parentModel = rootElement.doc.getParent(model);
+      action: async ({ rootComponent, model }) => {
+        const parentModel = rootComponent.doc.getParent(model);
         if (!parentModel) {
           return;
         }
         const index = parentModel.children.indexOf(model) + 1;
         await toggleEmbedCardCreateModal(
-          rootElement.host,
+          rootComponent.host,
           'Links',
           'The added link will be displayed as a card view.',
           { mode: 'page', parentModel, index }
@@ -345,17 +349,17 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:attachment') &&
         !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
+      action: async ({ rootComponent, model }) => {
         const file = await openFileOrFiles();
         if (!file) return;
 
         const attachmentService =
-          rootElement.host.spec.getService('affine:attachment');
-        assertExists(attachmentService);
+          rootComponent.host.spec.getService('affine:attachment');
+        if (!attachmentService) return;
         const maxFileSize = attachmentService.maxFileSize;
 
         await addSiblingAttachmentBlocks(
-          rootElement.host,
+          rootComponent.host,
           [file],
           maxFileSize,
           model
@@ -371,14 +375,14 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:embed-youtube') &&
         !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
-        const parentModel = rootElement.doc.getParent(model);
+      action: async ({ rootComponent, model }) => {
+        const parentModel = rootComponent.doc.getParent(model);
         if (!parentModel) {
           return;
         }
         const index = parentModel.children.indexOf(model) + 1;
         await toggleEmbedCardCreateModal(
-          rootElement.host,
+          rootComponent.host,
           'YouTube',
           'The added YouTube video link will be displayed as an embed view.',
           { mode: 'page', parentModel, index }
@@ -394,14 +398,14 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:embed-github') &&
         !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
-        const parentModel = rootElement.doc.getParent(model);
+      action: async ({ rootComponent, model }) => {
+        const parentModel = rootComponent.doc.getParent(model);
         if (!parentModel) {
           return;
         }
         const index = parentModel.children.indexOf(model) + 1;
         await toggleEmbedCardCreateModal(
-          rootElement.host,
+          rootComponent.host,
           'GitHub',
           'The added GitHub issue or pull request link will be displayed as a card view.',
           { mode: 'page', parentModel, index }
@@ -419,14 +423,14 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:embed-figma') &&
         !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
-        const parentModel = rootElement.doc.getParent(model);
+      action: async ({ rootComponent, model }) => {
+        const parentModel = rootComponent.doc.getParent(model);
         if (!parentModel) {
           return;
         }
         const index = parentModel.children.indexOf(model) + 1;
         await toggleEmbedCardCreateModal(
-          rootElement.host,
+          rootComponent.host,
           'Figma',
           'The added Figma link will be displayed as an embed view.',
           { mode: 'page', parentModel, index }
@@ -441,14 +445,14 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:embed-loom') &&
         !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
-        const parentModel = rootElement.doc.getParent(model);
+      action: async ({ rootComponent, model }) => {
+        const parentModel = rootComponent.doc.getParent(model);
         if (!parentModel) {
           return;
         }
         const index = parentModel.children.indexOf(model) + 1;
         await toggleEmbedCardCreateModal(
-          rootElement.host,
+          rootComponent.host,
           'Loom',
           'The added Loom video link will be displayed as an embed view.',
           { mode: 'page', parentModel, index }
@@ -462,8 +466,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
     // TODO-slash: Group & Frame explorer
 
     // ---------------------------------------------------------
-    ({ model, rootElement }) => {
-      const { doc } = rootElement;
+    ({ model, rootComponent }) => {
+      const { doc } = rootComponent;
 
       const surfaceModel = getSurfaceBlock(doc);
       const noteModel = doc.getParent(model);
@@ -510,7 +514,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         name: 'Group: ' + element.get('title'),
         icon: GroupingIcon,
         action: () => {
-          const { doc } = rootElement;
+          const { doc } = rootComponent;
           const noteModel = doc.getParent(model) as NoteBlockModel;
           const insertIdx = noteModel.children.indexOf(model);
           const surfaceRefProps = {
@@ -563,8 +567,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           icon: TodayIcon,
           tooltip: slashMenuToolTips['Today'],
           description: formatDate(now),
-          action: ({ rootElement, model }) => {
-            insertContent(rootElement.host, model, formatDate(now));
+          action: ({ rootComponent, model }) => {
+            insertContent(rootComponent.host, model, formatDate(now));
           },
         },
         {
@@ -572,10 +576,10 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           icon: TomorrowIcon,
           tooltip: slashMenuToolTips['Tomorrow'],
           description: formatDate(tomorrow),
-          action: ({ rootElement, model }) => {
+          action: ({ rootComponent, model }) => {
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
-            insertContent(rootElement.host, model, formatDate(tomorrow));
+            insertContent(rootComponent.host, model, formatDate(tomorrow));
           },
         },
         {
@@ -583,10 +587,10 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           icon: YesterdayIcon,
           tooltip: slashMenuToolTips['Yesterday'],
           description: formatDate(yesterday),
-          action: ({ rootElement, model }) => {
+          action: ({ rootComponent, model }) => {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
-            insertContent(rootElement.host, model, formatDate(yesterday));
+            insertContent(rootComponent.host, model, formatDate(yesterday));
           },
         },
         {
@@ -594,8 +598,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           icon: NowIcon,
           tooltip: slashMenuToolTips['Now'],
           description: formatTime(now),
-          action: ({ rootElement, model }) => {
-            insertContent(rootElement.host, model, formatTime(now));
+          action: ({ rootComponent, model }) => {
+            insertContent(rootComponent.host, model, formatTime(now));
           },
         },
       ];
@@ -613,14 +617,14 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         model.doc.schema.flavourSchemaMap.has('affine:database') &&
         !insideDatabase(model) &&
         !insideEdgelessText(model),
-      action: ({ rootElement, model }) => {
+      action: ({ rootComponent, model }) => {
         const id = createDatabaseBlockInNextLine(model);
         if (!id) {
           return;
         }
-        const service = rootElement.std.spec.getService('affine:database');
+        const service = rootComponent.std.spec.getService('affine:database');
         service.initDatabaseBlock(
-          rootElement.doc,
+          rootComponent.doc,
           model,
           id,
           viewPresets.tableViewConfig,
@@ -640,24 +644,24 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         !insideEdgelessText(model) &&
         !!model.doc.awarenessStore.getFlag('enable_block_query'),
 
-      action: ({ model, rootElement }) => {
-        const parent = rootElement.doc.getParent(model);
-        assertExists(parent);
+      action: ({ model, rootComponent }) => {
+        const parent = rootComponent.doc.getParent(model);
+        if (!parent) return;
         const index = parent.children.indexOf(model);
-        const id = rootElement.doc.addBlock(
+        const id = rootComponent.doc.addBlock(
           'affine:data-view',
           {},
-          rootElement.doc.getParent(model),
+          rootComponent.doc.getParent(model),
           index + 1
         );
-        const dataViewModel = rootElement.doc.getBlock(id)!;
+        const dataViewModel = rootComponent.doc.getBlock(id)!;
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         Promise.resolve().then(() => {
           const dataView = getBlockComponentByPath(
-            rootElement.host,
+            rootComponent.host,
             dataViewModel.model.id
           ) as DataViewBlockComponent;
-          dataView.viewSource.viewAdd('table');
+          dataView.dataSource.viewDataAdd('table');
         });
         tryRemoveEmptyLine(model);
       },
@@ -672,14 +676,14 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         model.doc.schema.flavourSchemaMap.has('affine:database') &&
         !insideDatabase(model) &&
         !insideEdgelessText(model),
-      action: ({ model, rootElement }) => {
+      action: ({ model, rootComponent }) => {
         const id = createDatabaseBlockInNextLine(model);
         if (!id) {
           return;
         }
-        const service = rootElement.std.spec.getService('affine:database');
+        const service = rootComponent.std.spec.getService('affine:database');
         service.initDatabaseBlock(
-          rootElement.doc,
+          rootComponent.doc,
           model,
           id,
           viewPresets.kanbanViewConfig,
@@ -696,8 +700,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       description: 'Shift this line up.',
       icon: ArrowUpBigIcon,
       tooltip: slashMenuToolTips['Move Up'],
-      action: ({ rootElement, model }) => {
-        const doc = rootElement.doc;
+      action: ({ rootComponent, model }) => {
+        const doc = rootComponent.doc;
         const previousSiblingModel = doc.getPrev(model);
         if (!previousSiblingModel) return;
 
@@ -712,8 +716,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       description: 'Shift this line down.',
       icon: ArrowDownBigIcon,
       tooltip: slashMenuToolTips['Move Down'],
-      action: ({ rootElement, model }) => {
-        const doc = rootElement.doc;
+      action: ({ rootComponent, model }) => {
+        const doc = rootComponent.doc;
         const nextSiblingModel = doc.getNext(model);
         if (!nextSiblingModel) return;
 
@@ -728,13 +732,13 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       description: 'Copy this line to clipboard.',
       icon: PasteIcon,
       tooltip: slashMenuToolTips['Copy'],
-      action: ({ rootElement, model }) => {
-        const slice = Slice.fromModels(rootElement.std.doc, [model]);
+      action: ({ rootComponent, model }) => {
+        const slice = Slice.fromModels(rootComponent.std.doc, [model]);
 
-        rootElement.std.clipboard
+        rootComponent.std.clipboard
           .copy(slice)
           .then(() => {
-            toast(rootElement.host, 'Copied to clipboard');
+            toast(rootComponent.host, 'Copied to clipboard');
           })
           .catch(e => {
             console.error(e);
@@ -746,26 +750,33 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       description: 'Create a duplicate of this line.',
       icon: CopyIcon,
       tooltip: slashMenuToolTips['Copy'],
-      action: ({ rootElement, model }) => {
+      action: ({ rootComponent, model }) => {
         if (!model.text || !(model.text instanceof Text)) {
-          throw new Error("Can't duplicate a block without text");
+          console.error("Can't duplicate a block without text");
+          return;
         }
-        const parent = rootElement.doc.getParent(model);
+        const parent = rootComponent.doc.getParent(model);
         if (!parent) {
-          throw new Error('Failed to duplicate block! Parent not found');
+          console.error(
+            'Failed to duplicate block! Parent not found: ' +
+              model.id +
+              '|' +
+              model.flavour
+          );
+          return;
         }
         const index = parent.children.indexOf(model);
 
         // TODO add clone model util
-        rootElement.doc.addBlock(
+        rootComponent.doc.addBlock(
           model.flavour as never,
           {
             type: (model as ParagraphBlockModel).type,
-            text: rootElement.doc.Text.fromDelta(model.text.toDelta()),
+            text: rootComponent.doc.Text.fromDelta(model.text.toDelta()),
             // @ts-expect-error
             checked: model.checked,
           },
-          rootElement.doc.getParent(model),
+          rootComponent.doc.getParent(model),
           index
         );
       },
@@ -776,8 +787,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       alias: ['remove'],
       icon: DeleteIcon,
       tooltip: slashMenuToolTips['Delete'],
-      action: ({ rootElement, model }) => {
-        rootElement.doc.deleteBlock(model);
+      action: ({ rootComponent, model }) => {
+        rootComponent.doc.deleteBlock(model);
       },
     },
   ],

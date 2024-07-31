@@ -349,6 +349,11 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
       );
     }
 
+    if (!eventSource) {
+      console.error('Mount inline editor without event source ready');
+      return;
+    }
+
     this.editor.disposables.addFromEvent(
       eventSource,
       'beforeinput',

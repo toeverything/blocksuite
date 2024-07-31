@@ -1,6 +1,6 @@
 import type { TType } from '../../logical/typesystem.js';
 import type { InsertToPosition } from '../../types.js';
-import type { DataViewManager } from '../../view/data-view-manager.js';
+import type { SingleView } from '../../view-manager/single-view.js';
 import type { GroupBy, GroupProperty } from '../types.js';
 import type { GroupByConfig } from './matcher.js';
 
@@ -29,7 +29,7 @@ export class GroupHelper {
     private groupBy: GroupBy,
     config: GroupByConfig,
     type: TType,
-    private viewManager: DataViewManager,
+    private viewManager: SingleView,
     private ops: {
       sortGroup: (keys: string[]) => string[];
       sortRow: (groupKey: string, rowIds: string[]) => string[];
@@ -54,7 +54,7 @@ export class GroupHelper {
         },
       ])
     );
-    this.viewManager.rows.forEach(id => {
+    this.viewManager.rows$.value.forEach(id => {
       const value = this.viewManager.cellGetJsonValue(id, groupBy.columnId);
       const keys = config.valuesGroup(value, type);
       keys.forEach(({ key, value }) => {
@@ -168,7 +168,7 @@ export class GroupHelper {
   }
 
   get addGroup() {
-    return this.viewManager.columnGetMeta(this.column.type).model.ops.addGroup;
+    return this.viewManager.columnGetMeta(this.column.type)?.model.ops.addGroup;
   }
 
   get column() {

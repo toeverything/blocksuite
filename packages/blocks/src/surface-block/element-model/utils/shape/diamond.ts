@@ -1,9 +1,13 @@
-import type { IVec } from '../../../utils/vec.js';
-import type { IHitTestOptions } from '../../base.js';
+import type { IBound } from '@blocksuite/global/utils';
+import type { IVec } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
+import { PointLocation } from '@blocksuite/global/utils';
+
+import type { PointTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 
-import { DEFAULT_CENTRAL_AREA_RATIO, type IBound } from '../../../consts.js';
-import { Bound } from '../../../utils/bound.js';
+import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
 import {
   getCenterAreaBounds,
   getPointsFromBoundsWithRotation,
@@ -14,7 +18,6 @@ import {
   polygonNearestPoint,
   rotatePoints,
 } from '../../../utils/math-utils.js';
-import { PointLocation } from '../../../utils/point-location.js';
 
 export const diamond = {
   points({ x, y, w, h }: IBound): IVec[] {
@@ -44,11 +47,11 @@ export const diamond = {
     ctx.restore();
   },
 
-  hitTest(
+  includesPoint(
     this: ShapeElementModel,
     x: number,
     y: number,
-    options: IHitTestOptions
+    options: PointTestOptions
   ) {
     const points = getPointsFromBoundsWithRotation(this, diamond.points);
 
@@ -89,7 +92,7 @@ export const diamond = {
     return hit;
   },
 
-  containedByBounds(bounds: Bound, element: ShapeElementModel) {
+  containsBound(bounds: Bound, element: ShapeElementModel) {
     const points = getPointsFromBoundsWithRotation(element, diamond.points);
     return points.some(point => bounds.containsPoint(point));
   },
@@ -99,7 +102,7 @@ export const diamond = {
     return polygonNearestPoint(points, point);
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElementModel) {
+  getLineIntersections(start: IVec, end: IVec, element: ShapeElementModel) {
     const points = getPointsFromBoundsWithRotation(element, diamond.points);
     return linePolygonIntersects(start, end, points);
   },

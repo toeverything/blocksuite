@@ -1,3 +1,4 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -52,10 +53,13 @@ export class VLine extends LitElement {
     const renderElements = this.elements.flatMap(([template, delta], index) => {
       if (inlineEditor.isEmbed(delta)) {
         if (delta.insert.length !== 1) {
-          throw new Error(`The length of embed node should only be 1.
+          throw new BlockSuiteError(
+            ErrorCode.InlineEditorError,
+            `The length of embed node should only be 1.
             This seems to be an internal issue with inline editor.
             Please go to https://github.com/toeverything/blocksuite/issues
-            to report it.`);
+            to report it.`
+          );
         }
         // we add `EmbedGap` to make cursor can be placed between embed elements
         if (index === 0) {

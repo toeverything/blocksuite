@@ -1,11 +1,10 @@
 import type { Command } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
-  assertFlavours,
   asyncFocusRichText,
   asyncSetInlineRange,
+  matchFlavours,
 } from '../../_common/utils/index.js';
 import { onModelTextUpdated } from '../../root-block/utils/callback.js';
 import {
@@ -24,7 +23,7 @@ export const updateBlockType: Command<
   UpdateBlockConfig
 > = (ctx, next) => {
   const { std, flavour, props } = ctx;
-  const host = std.host as EditorHost;
+  const host = std.host;
   const doc = std.doc;
 
   const getSelectedBlocks = () => {
@@ -59,14 +58,11 @@ export const updateBlockType: Command<
   }
 
   const mergeToCode: Command<never, 'updatedBlocks'> = (_, next) => {
-    if (flavour !== 'affine:code') {
-      return false;
-    }
+    if (flavour !== 'affine:code') return;
     const id = mergeToCodeModel(blockModels);
+    if (!id) return;
     const model = doc.getBlockById(id);
-    if (!model) {
-      throw new Error('Failed to get model after merge code block!');
-    }
+    if (!model) return;
     asyncSetInlineRange(host, model, {
       index: model.text?.length ?? 0,
       length: 0,
@@ -177,11 +173,15 @@ export const updateBlockType: Command<
       chain.inline<'updatedBlocks'>((_, next) => {
         const newModels: BlockModel[] = [];
         blockModels.forEach(model => {
-          assertFlavours(model, [
-            'affine:paragraph',
-            'affine:list',
-            'affine:code',
-          ]);
+          if (
+            !matchFlavours(model, [
+              'affine:paragraph',
+              'affine:list',
+              'affine:code',
+            ])
+          ) {
+            return;
+          }
           if (model.flavour === flavour) {
             doc.updateBlock(model, props ?? {});
             newModels.push(model);

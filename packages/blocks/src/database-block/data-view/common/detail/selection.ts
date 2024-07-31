@@ -36,7 +36,9 @@ export class DetailSelection {
     const cell = container.cell;
 
     if (selection.isEditing) {
-      cell?.onExitEditMode();
+      requestAnimationFrame(() => {
+        cell?.onExitEditMode();
+      });
       if (cell?.blurCell()) {
         container.blur();
       }

@@ -1,10 +1,11 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
+import { Bound } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 
 import type { EdgelessTool } from '../../types.js';
 
-import { Bound, getElementsBound } from '../../../../surface-block/index.js';
+import { getElementsBound } from '../../../../surface-block/index.js';
 import {
   AFFINE_AI_PANEL_WIDGET,
   type AffineAIPanelWidget,
@@ -110,7 +111,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   onPressSpaceBar(): void {}
 
   updateDragPointsWith(
-    selectedElements: BlockSuite.EdgelessModelType[],
+    selectedElements: BlockSuite.EdgelessModel[],
     padding = 0
   ) {
     const bounds = getElementsBound(
@@ -122,7 +123,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   updateSelectionWith(
-    selectedElements: BlockSuite.EdgelessModelType[],
+    selectedElements: BlockSuite.EdgelessModel[],
     padding = 0
   ) {
     const { selection } = this._edgeless.service;

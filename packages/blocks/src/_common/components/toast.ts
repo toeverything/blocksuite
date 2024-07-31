@@ -39,9 +39,9 @@ const createToastContainer = (editorHost: EditorHost) => {
   `;
   const template = html`<div class="toast-container" style="${styles}"></div>`;
   const element = htmlToElement<HTMLDivElement>(template);
-  const rootElement = getRootByEditorHost(editorHost);
-  assertExists(rootElement);
-  const viewportElement = rootElement.viewportElement;
+  const rootComponent = getRootByEditorHost(editorHost);
+  assertExists(rootComponent);
+  const viewportElement = rootComponent.viewportElement;
   viewportElement?.append(element);
   return element;
 };

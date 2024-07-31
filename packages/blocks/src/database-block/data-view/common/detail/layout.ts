@@ -8,7 +8,7 @@ import {
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { DataViewManager } from '../../view/data-view-manager.js';
+import type { SingleView } from '../../view-manager/single-view.js';
 
 import { createModal } from '../../../../_common/components/index.js';
 import { CrossIcon } from '../icons/index.js';
@@ -95,7 +95,7 @@ class SideLayoutModal extends ShadowlessElement {
 
 export const popSideDetail = (ops: {
   target: ReferenceElement;
-  view: DataViewManager;
+  view: SingleView;
   rowId: string;
   onClose?: () => void;
 }) => {
@@ -133,7 +133,7 @@ export const popSideDetail = (ops: {
 };
 
 export const createRecordDetail = (ops: {
-  view: DataViewManager;
+  view: SingleView;
   rowId: string;
 }) => {
   return html`<affine-data-view-record-detail

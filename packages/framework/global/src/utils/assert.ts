@@ -10,6 +10,10 @@ export function isPrimitive(
 
 export function assertType<T>(_: unknown): asserts _ is T {}
 
+/**
+ * @deprecated Avoid using this util as escape hatch of error handling.
+ * For non-framework code, please handle error in application level instead.
+ */
 export function assertExists<T>(
   val: T | null | undefined,
   message: string | Error = 'val does not exist',

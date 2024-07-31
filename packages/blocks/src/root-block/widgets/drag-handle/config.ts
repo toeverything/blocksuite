@@ -1,8 +1,9 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
+import type { Point } from '@blocksuite/global/utils';
 
-import type { Point, Rect } from '../../../_common/utils/index.js';
+import type { Rect } from '../../../_common/utils/index.js';
 import type { DragPreview } from './components/drag-preview.js';
 
 export const DRAG_HANDLE_CONTAINER_HEIGHT = 24;
@@ -35,7 +36,7 @@ export type DropResult = {
 export type OnDragStartProps = {
   state: PointerEventState;
   startDragging: (
-    blockElements: BlockElement[],
+    blocks: BlockComponent[],
     state: PointerEventState,
     dragPreview?: HTMLElement,
     dragPreviewOffset?: Point
@@ -47,7 +48,7 @@ export type OnDragStartProps = {
 
 export type OnDragEndProps = {
   state: PointerEventState;
-  draggingElements: BlockElement[];
+  draggingElements: BlockComponent[];
   dropBlockId: string;
   dropType: DropType | null;
   dragPreview: DragPreview;
@@ -61,7 +62,7 @@ export type DragHandleOption = {
   onDragStart?: (props: OnDragStartProps) => boolean;
   onDragMove?: (
     state: PointerEventState,
-    draggingElements?: BlockElement[]
+    draggingElements?: BlockComponent[]
   ) => boolean;
   onDragEnd?: (props: OnDragEndProps) => boolean;
 };

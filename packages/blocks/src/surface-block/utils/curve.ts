@@ -1,9 +1,11 @@
+import type { IVec } from '@blocksuite/global/utils';
+
+import { Vec } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
+import { PointLocation } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { Bound } from './bound.js';
 import { CURVETIME_EPSILON, isZero } from './math-utils.js';
-import { PointLocation } from './point-location.js';
-import { type IVec, Vec } from './vec.js';
 
 // control coords are not relative to start or end
 export type BezierCurveParameters = [

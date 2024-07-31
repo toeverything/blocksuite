@@ -138,7 +138,7 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
   };
 
   private get readonly() {
-    return this.view.readonly;
+    return this.view.readonly$.value;
   }
 
   override connectedCallback() {

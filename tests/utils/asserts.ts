@@ -2,10 +2,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import type {
-  BlockElement,
+  BlockComponent,
   EditorHost,
 } from '@block-std/view/element/index.js';
-import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
   AffineInlineEditor,
   NoteBlockModel,
@@ -382,12 +381,12 @@ export async function assertRichTextModelType(
       const editorHost =
         document.querySelectorAll('editor-host')[currentEditorIndex];
       const richText = editorHost.querySelectorAll('rich-text')[index];
-      const blockElement = richText.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
+      const block = richText.closest<BlockComponent>(`[${BLOCK_ID_ATTR}]`);
 
-      if (!blockElement) {
-        throw new Error('blockElement is undefined');
+      if (!block) {
+        throw new Error('block component is undefined');
       }
-      return (blockElement.model as BlockModel<{ type: string }>).type;
+      return (block.model as BlockModel<{ type: string }>).type;
     },
     { index, BLOCK_ID_ATTR, currentEditorIndex }
   );
@@ -515,7 +514,7 @@ export async function assertBlockType(
 ) {
   const actual = await page.evaluate(
     ({ id }) => {
-      const element = document.querySelector<BlockElement>(
+      const element = document.querySelector<BlockComponent>(
         `[data-block-id="${id}"]`
       );
 
@@ -539,7 +538,7 @@ export async function assertBlockFlavour(
 ) {
   const actual = await page.evaluate(
     ({ id }) => {
-      const element = document.querySelector<BlockElement>(
+      const element = document.querySelector<BlockComponent>(
         `[data-block-id="${id}"]`
       );
 
@@ -562,7 +561,7 @@ export async function assertBlockTextContent(
 ) {
   const actual = await page.evaluate(
     ({ id }) => {
-      const element = document.querySelector<BlockElement>(
+      const element = document.querySelector<BlockComponent>(
         `[data-block-id="${id}"]`
       );
 
@@ -989,7 +988,7 @@ export async function assertSelectionInNote(
 export async function assertEdgelessNoteBackground(
   page: Page,
   noteId: string,
-  color: CssVariableName
+  color: string
 ) {
   const editor = getEditorLocator(page);
   const backgroundColor = await editor
@@ -1000,7 +999,7 @@ export async function assertEdgelessNoteBackground(
       if (!noteWrapper) {
         throw new Error(`Could not find note: ${noteId}`);
       }
-      return noteWrapper.style.background;
+      return noteWrapper.style.backgroundColor;
     });
 
   expect(backgroundColor).toEqual(`var(${color})`);
@@ -1033,12 +1032,12 @@ function toHex(color: string) {
 
 export async function assertEdgelessColorSameWithHexColor(
   page: Page,
-  edgelessColor: CssVariableName,
+  edgelessColor: string,
   hexColor: `#${string}`
 ) {
   const themeColor = await getCurrentThemeCSSPropertyValue(page, edgelessColor);
   expect(themeColor).toBeTruthy();
-  const edgelessHexColor = toHex(themeColor as string);
+  const edgelessHexColor = toHex(themeColor);
 
   assertSameColor(hexColor, edgelessHexColor as `#${string}`);
 }
@@ -1212,10 +1211,7 @@ export async function assertBlockSelections(page: Page, paths: string[]) {
   expect(actualPaths).toEqual(paths);
 }
 
-export async function assertConnectorStrokeColor(
-  page: Page,
-  color: CssVariableName
-) {
+export async function assertConnectorStrokeColor(page: Page, color: string) {
   const colorButton = page
     .locator('edgeless-change-connector-button')
     .locator('edgeless-color-panel')

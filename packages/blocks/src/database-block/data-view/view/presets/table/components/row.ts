@@ -7,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { DataViewRenderer } from '../../../../data-view.js';
-import type { DataViewTableManager } from '../table-view-manager.js';
+import type { TableSingleView } from '../table-view-manager.js';
 import type { TableViewSelection } from '../types.js';
 
 import {
@@ -20,7 +20,7 @@ import { openDetail, popRowMenu } from './menu.js';
 @customElement('data-view-table-row')
 export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   private _clickDragHandler = () => {
-    if (this.view.readonly) {
+    if (this.view.readonly$.value) {
       return;
     }
     const selectionController = this.selectionController;
@@ -128,7 +128,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   `;
 
   contextMenu = (e: MouseEvent) => {
-    if (this.view.readonly) {
+    if (this.view.readonly$.value) {
       return;
     }
     const selection = this.selectionController;
@@ -175,7 +175,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   protected override render(): unknown {
     const view = this.view;
     return html`
-      ${view.readonly
+      ${view.readonly$.value
         ? nothing
         : html`<div class="data-view-table-left-bar">
             <div
@@ -193,7 +193,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
             </div>
           </div>`}
       ${repeat(
-        view.columnManagerList,
+        view.columnManagerList$.value,
         v => v.id,
         (column, i) => {
           const clickDetail = () => {
@@ -243,7 +243,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               <affine-database-cell-container
                 class="database-cell"
                 style=${styleMap({
-                  width: `${column.width}px`,
+                  width: `${column.width$.value}px`,
                   border: i === 0 ? 'none' : undefined,
                 })}
                 .view="${view}"
@@ -259,13 +259,13 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               >
               </affine-database-cell-container>
             </div>
-            ${!column.readonly &&
-            column.dataViewManager.header.titleColumn === column.id
+            ${!column.readonly$.value &&
+            column.view.header$.value.titleColumn === column.id
               ? html`<div class="row-ops">
                   <div class="row-op" @click="${clickDetail}">
                     ${CenterPeekIcon}
                   </div>
-                  ${!view.readonly
+                  ${!view.readonly$.value
                     ? html`<div class="row-op" @click="${openMenu}">
                         ${MoreHorizontalIcon}
                       </div>`
@@ -297,7 +297,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   accessor rowIndex!: number;
 
   @property({ attribute: false })
-  accessor view!: DataViewTableManager;
+  accessor view!: TableSingleView;
 }
 
 declare global {

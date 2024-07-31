@@ -1,9 +1,22 @@
-import type { IVec, IVec3 } from '../utils/vec.js';
-import type { SerializedXYWH } from '../utils/xywh.js';
+import type {
+  BaseElementProps,
+  PointTestOptions,
+} from '@blocksuite/block-std/gfx';
+import type { IVec, IVec3, SerializedXYWH } from '@blocksuite/global/utils';
+
+import {
+  GfxPrimitiveElementModel,
+  convert,
+  derive,
+  watch,
+  yfield,
+} from '@blocksuite/block-std/gfx';
+import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
+
+import type { Color } from '../consts.js';
 
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
 import {
-  Bound,
   getBoundFromPoints,
   inflateBound,
   transformPointsToNewBound,
@@ -16,61 +29,28 @@ import {
   lineIntersects,
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
-import { PointLocation } from '../utils/point-location.js';
-import { Vec } from '../utils/vec.js';
-import {
-  type IBaseProps,
-  type IHitTestOptions,
-  SurfaceElementModel,
-} from './base.js';
-import { convert, derive, watch, yfield } from './decorators.js';
 
-export type BrushProps = IBaseProps & {
+export type BrushProps = BaseElementProps & {
   /**
    * [[x0,y0,pressure0?],[x1,y1,pressure1?]...]
    * pressure is optional and exsits when pressure sensitivity is supported, otherwise not.
    */
   points: number[][];
-  color: string;
+  color: Color;
   lineWidth: number;
 };
 
-export class BrushElementModel extends SurfaceElementModel<BrushProps> {
+export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   static override propsToY(props: BrushProps) {
     return props;
   }
 
-  override containedByBounds(bounds: Bound) {
+  override containsBound(bounds: Bound) {
     const points = getPointsFromBoundsWithRotation(this);
     return points.some(point => bounds.containsPoint(point));
   }
 
-  override getNearestPoint(point: IVec): IVec {
-    const { x, y } = this;
-
-    return polyLineNearestPoint(
-      this.points.map(p => Vec.add(p, [x, y])),
-      point
-    ) as IVec;
-  }
-
-  override getRelativePointLocation(position: IVec): PointLocation {
-    const point = Bound.deserialize(this.xywh).getRelativePoint(position);
-    return new PointLocation(point);
-  }
-
-  override hitTest(px: number, py: number, options?: IHitTestOptions): boolean {
-    const hit = isPointOnlines(
-      Bound.deserialize(this.xywh),
-      this.points as [number, number][],
-      this.rotate,
-      [px, py],
-      (options?.expand ?? 10) / Math.min(options?.zoom ?? 1, 1)
-    );
-    return hit;
-  }
-
-  override intersectWithLine(start: IVec, end: IVec) {
+  override getLineIntersections(start: IVec, end: IVec) {
     const tl = [this.x, this.y];
     const points = getPointsFromBoundsWithRotation(this, _ =>
       this.points.map(point => Vec.add(point, tl))
@@ -99,6 +79,35 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
     return null;
   }
 
+  override getNearestPoint(point: IVec): IVec {
+    const { x, y } = this;
+
+    return polyLineNearestPoint(
+      this.points.map(p => Vec.add(p, [x, y])),
+      point
+    ) as IVec;
+  }
+
+  override getRelativePointLocation(position: IVec): PointLocation {
+    const point = Bound.deserialize(this.xywh).getRelativePoint(position);
+    return new PointLocation(point);
+  }
+
+  override includesPoint(
+    px: number,
+    py: number,
+    options?: PointTestOptions
+  ): boolean {
+    const hit = isPointOnlines(
+      Bound.deserialize(this.xywh),
+      this.points as [number, number][],
+      this.rotate,
+      [px, py],
+      (options?.expand ?? 10) / Math.min(options?.zoom ?? 1, 1)
+    );
+    return hit;
+  }
+
   /**
    * The SVG path commands for the brush.
    */
@@ -122,7 +131,7 @@ export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   }
 
   @yfield()
-  accessor color: string = '#000000';
+  accessor color: Color = '#000000';
 
   @watch((_, instance: BrushElementModel) => {
     instance['_local'].delete('commands');

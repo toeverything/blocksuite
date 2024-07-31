@@ -1,42 +1,194 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import type { UIEventDispatcher } from '../dispatcher.js';
 
 import { UIEventState, UIEventStateContext } from '../base.js';
+import { MultiPointerEventState } from '../state/index.js';
 import { PointerEventState } from '../state/index.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 import { isFarEnough } from '../utils.js';
 
-export class PointerControl {
+type PointerId = typeof PointerEvent.prototype.pointerId;
+
+function createContext(
+  event: Event,
+  state: PointerEventState | MultiPointerEventState
+) {
+  return UIEventStateContext.from(
+    new UIEventState(event),
+    new EventSourceState({
+      event,
+      sourceType: EventScopeSourceType.Target,
+    }),
+    state
+  );
+}
+
+abstract class PointerControllerBase {
+  constructor(protected _dispatcher: UIEventDispatcher) {}
+
+  protected get _rect() {
+    return this._dispatcher.host.getBoundingClientRect();
+  }
+
+  abstract listen(): void;
+}
+
+class PointerEventForward extends PointerControllerBase {
   private _down = (event: PointerEvent) => {
+    const { pointerId } = event;
+
+    const pointerState = new PointerEventState({
+      event,
+      rect: this._rect,
+      startX: -Infinity,
+      startY: -Infinity,
+      last: null,
+    });
+    this._startStates.set(pointerId, pointerState);
+    this._lastStates.set(pointerId, pointerState);
+    this._dispatcher.run('pointerDown', createContext(event, pointerState));
+  };
+
+  private _lastStates = new Map<PointerId, PointerEventState>();
+
+  private _move = (event: PointerEvent) => {
+    const { pointerId } = event;
+
+    const start = this._startStates.get(pointerId) ?? null;
+    const last = this._lastStates.get(pointerId) ?? null;
+
+    const state = new PointerEventState({
+      event,
+      rect: this._rect,
+      startX: start?.x ?? -Infinity,
+      startY: start?.y ?? -Infinity,
+      last,
+    });
+    this._lastStates.set(pointerId, state);
+
+    this._dispatcher.run('pointerMove', createContext(event, state));
+  };
+
+  private _startStates = new Map<PointerId, PointerEventState>();
+
+  private _upOrOut = (up: boolean) => (event: PointerEvent) => {
+    const { pointerId } = event;
+
+    const start = this._startStates.get(pointerId) ?? null;
+    const last = this._lastStates.get(pointerId) ?? null;
+
+    const state = new PointerEventState({
+      event,
+      rect: this._rect,
+      startX: start?.x ?? -Infinity,
+      startY: start?.y ?? -Infinity,
+      last,
+    });
+
+    this._startStates.delete(pointerId);
+    this._lastStates.delete(pointerId);
+
+    this._dispatcher.run(
+      up ? 'pointerUp' : 'pointerOut',
+      createContext(event, state)
+    );
+  };
+
+  listen() {
+    const { host, disposables } = this._dispatcher;
+    disposables.addFromEvent(host, 'pointerdown', this._down);
+    disposables.addFromEvent(host, 'pointermove', this._move);
+    disposables.addFromEvent(host, 'pointerup', this._upOrOut(true));
+    disposables.addFromEvent(host, 'pointerout', this._upOrOut(false));
+  }
+}
+
+class ClickController extends PointerControllerBase {
+  private _down = (event: PointerEvent) => {
+    // disable for secondary pointer
+    if (event.isPrimary === false) return;
+
     if (
-      this._lastPointerDownEvent &&
-      event.timeStamp - this._lastPointerDownEvent.timeStamp < 500 &&
-      !isFarEnough(event, this._lastPointerDownEvent)
+      this._downPointerState &&
+      event.pointerId === this._downPointerState.raw.pointerId &&
+      event.timeStamp - this._downPointerState.raw.timeStamp < 500 &&
+      !isFarEnough(event, this._downPointerState.raw)
     ) {
       this._pointerDownCount++;
     } else {
       this._pointerDownCount = 1;
     }
 
-    const pointerEventState = new PointerEventState({
+    this._downPointerState = new PointerEventState({
       event,
       rect: this._rect,
-      startX: this._startX,
-      startY: this._startY,
+      startX: -Infinity,
+      startY: -Infinity,
       last: null,
     });
+  };
 
-    this._startX = pointerEventState.point.x;
-    this._startY = pointerEventState.point.y;
-    this._startDragState = pointerEventState;
-    this._lastDragState = pointerEventState;
-    this._lastPointerDownEvent = event;
+  private _downPointerState: PointerEventState | null = null;
 
-    this._dispatcher.run(
-      'pointerDown',
-      this._createContext(event, pointerEventState)
-    );
+  private _pointerDownCount = 0;
+
+  private _up = (event: PointerEvent) => {
+    if (!this._downPointerState) return;
+
+    if (isFarEnough(this._downPointerState.raw, event)) {
+      this._pointerDownCount = 0;
+      this._downPointerState = null;
+      return;
+    }
+
+    const state = new PointerEventState({
+      event,
+      rect: this._rect,
+      startX: -Infinity,
+      startY: -Infinity,
+      last: null,
+    });
+    const context = createContext(event, state);
+
+    const run = () => {
+      this._dispatcher.run('pointerUp', context);
+      this._dispatcher.run('click', context);
+      if (this._pointerDownCount === 2) {
+        this._dispatcher.run('doubleClick', context);
+      }
+      if (this._pointerDownCount === 3) {
+        this._dispatcher.run('tripleClick', context);
+      }
+    };
+
+    run();
+  };
+
+  listen() {
+    const { host, disposables } = this._dispatcher;
+
+    disposables.addFromEvent(host, 'pointerdown', this._down);
+    disposables.addFromEvent(host, 'pointerup', this._up);
+  }
+}
+
+class DragController extends PointerControllerBase {
+  private _down = (event: PointerEvent) => {
+    if (!event.isPrimary) {
+      if (this._dragging && this._lastPointerState) {
+        this._up(this._lastPointerState.raw);
+      }
+      this._reset();
+      return;
+    }
+
+    const pointerState = new PointerEventState({
+      event,
+      rect: this._rect,
+      startX: -Infinity,
+      startY: -Infinity,
+      last: null,
+    });
+    this._startPointerState = pointerState;
 
     this._dispatcher.disposables.addFromEvent(
       document,
@@ -48,49 +200,94 @@ export class PointerControl {
 
   private _dragging = false;
 
-  private _lastDragState: PointerEventState | null = null;
-
-  private _lastPointerDownEvent: PointerEvent | null = null;
+  private _lastPointerState: PointerEventState | null = null;
 
   private _move = (event: PointerEvent) => {
-    const last = this._lastDragState;
+    if (
+      this._startPointerState === null ||
+      this._startPointerState.raw.pointerId !== event.pointerId
+    )
+      return;
+
+    const start = this._startPointerState;
+    const last = this._lastPointerState ?? start;
+
     const state = new PointerEventState({
       event,
       rect: this._rect,
-      startX: this._startX,
-      startY: this._startY,
+      startX: start.x,
+      startY: start.y,
       last,
     });
-    this._lastDragState = state;
 
-    assertExists(this._startDragState);
+    this._lastPointerState = state;
 
-    if (!this._dragging && isFarEnough(this._startDragState.raw, state.raw)) {
+    if (!this._dragging && isFarEnough(event, this._startPointerState.raw)) {
       this._dragging = true;
-      this._dispatcher.run(
-        'dragStart',
-        this._createContext(event, this._startDragState)
-      );
+      this._dispatcher.run('dragStart', createContext(event, start));
     }
 
     if (this._dragging) {
-      this._dispatcher.run('dragMove', this._createContext(event, state));
+      this._dispatcher.run('dragMove', createContext(event, state));
     }
   };
 
-  private _moveOn = (event: PointerEvent) => {
+  private _reset = () => {
+    this._dragging = false;
+    this._startPointerState = null;
+    this._lastPointerState = null;
+
+    document.removeEventListener('pointermove', this._move);
+    document.removeEventListener('pointerup', this._up);
+  };
+
+  private _startPointerState: PointerEventState | null = null;
+
+  private _up = (event: PointerEvent) => {
+    if (
+      !this._startPointerState ||
+      this._startPointerState.raw.pointerId !== event.pointerId
+    )
+      return;
+
+    const start = this._startPointerState;
+    const last = this._lastPointerState;
+
     const state = new PointerEventState({
       event,
       rect: this._rect,
-      startX: this._startX,
-      startY: this._startY,
-      last: this._lastDragState,
+      startX: start.x,
+      startY: start.y,
+      last,
     });
 
-    this._dispatcher.run('pointerMove', this._createContext(event, state));
+    if (this._dragging) {
+      this._dispatcher.run('dragEnd', createContext(event, state));
+    }
+
+    this._reset();
   };
 
-  private _out = (event: PointerEvent) => {
+  listen() {
+    const { host, disposables } = this._dispatcher;
+    disposables.addFromEvent(host, 'pointerdown', this._down);
+  }
+}
+
+class PinchController extends PointerControllerBase {
+  private _down = (event: PointerEvent) => {
+    // Another pointer down
+    if (
+      this._startPointerStates.primary !== null &&
+      this._startPointerStates.secondary !== null
+    ) {
+      this._reset();
+    }
+
+    if (this._startPointerStates.primary === null && !event.isPrimary) {
+      return;
+    }
+
     const state = new PointerEventState({
       event,
       rect: this._rect,
@@ -99,88 +296,133 @@ export class PointerControl {
       last: null,
     });
 
-    this._dispatcher.run('pointerOut', this._createContext(event, state));
+    if (event.isPrimary) {
+      this._startPointerStates.primary = state;
+    } else {
+      this._startPointerStates.secondary = state;
+    }
   };
 
-  private _pointerDownCount = 0;
-
-  private _reset = () => {
-    this._startX = -Infinity;
-    this._startY = -Infinity;
-    this._lastDragState = null;
-    this._dragging = false;
+  private _lastPointerStates: {
+    primary: PointerEventState | null;
+    secondary: PointerEventState | null;
+  } = {
+    primary: null,
+    secondary: null,
   };
 
-  private _startDragState: PointerEventState | null = null;
+  private _move = (event: PointerEvent) => {
+    if (
+      this._startPointerStates.primary === null ||
+      this._startPointerStates.secondary === null
+    ) {
+      return;
+    }
 
-  private _startX = -Infinity;
+    const { pointerId } = event;
 
-  private _startY = -Infinity;
+    const start1 =
+      this._startPointerStates.primary.raw.pointerId === pointerId
+        ? this._startPointerStates.primary
+        : this._startPointerStates.secondary;
 
-  private _up = (event: PointerEvent) => {
-    const pointerEventState = new PointerEventState({
+    const last1 =
+      (this._lastPointerStates.primary?.raw.pointerId === pointerId
+        ? this._lastPointerStates.primary
+        : this._lastPointerStates.secondary) ?? start1;
+
+    if (!isFarEnough(last1.raw, event)) return;
+
+    const state1 = new PointerEventState({
       event,
       rect: this._rect,
-      startX: this._startX,
-      startY: this._startY,
-      last: this._lastDragState,
+      startX: start1.x,
+      startY: start1.y,
+      last: last1,
     });
-    const context = this._createContext(event, pointerEventState);
 
-    const run = () => {
-      if (this._dragging) {
-        this._dispatcher.run('dragEnd', context);
-        return;
-      }
-      this._dispatcher.run('click', context);
-      if (this._pointerDownCount === 2) {
-        this._dispatcher.run('doubleClick', context);
-      }
-      if (this._pointerDownCount === 3) {
-        this._dispatcher.run('tripleClick', context);
-      }
+    const start2 =
+      this._startPointerStates.primary.raw.pointerId !== pointerId
+        ? this._startPointerStates.primary
+        : this._startPointerStates.secondary;
+
+    const last2 =
+      (this._lastPointerStates.primary?.raw.pointerId !== pointerId
+        ? this._lastPointerStates.primary
+        : this._lastPointerStates.secondary) ?? start2;
+
+    const state2 = new PointerEventState({
+      event: last2.raw,
+      rect: this._rect,
+      startX: start2.x,
+      startY: start2.y,
+      last: last2,
+    });
+
+    const multiPointerState = new MultiPointerEventState(event, [
+      state1,
+      state2,
+    ]);
+
+    this._lastPointerStates = {
+      primary: state1.raw.isPrimary ? state1 : state2,
+      secondary: state1.raw.isPrimary ? state2 : state1,
     };
 
-    run();
-    this._dispatcher.run('pointerUp', context);
-
-    this._reset();
-    document.removeEventListener('pointermove', this._move);
-    document.removeEventListener('pointerup', this._up);
+    this._dispatcher.run('pinch', createContext(event, multiPointerState));
   };
 
-  constructor(private _dispatcher: UIEventDispatcher) {}
+  private _reset = () => {
+    this._startPointerStates = {
+      primary: null,
+      secondary: null,
+    };
+    this._lastPointerStates = {
+      primary: null,
+      secondary: null,
+    };
+  };
 
-  private _createContext(event: Event, pointerState: PointerEventState) {
-    return UIEventStateContext.from(
-      new UIEventState(event),
-      new EventSourceState({
-        event,
-        sourceType: EventScopeSourceType.Target,
-      }),
-      pointerState
-    );
+  private _startPointerStates: {
+    primary: PointerEventState | null;
+    secondary: PointerEventState | null;
+  } = {
+    primary: null,
+    secondary: null,
+  };
+
+  private _upOrOut = (event: PointerEvent) => {
+    const { pointerId } = event;
+    if (
+      pointerId === this._startPointerStates.primary?.raw.pointerId ||
+      pointerId === this._startPointerStates.secondary?.raw.pointerId
+    ) {
+      this._reset();
+    }
+  };
+
+  override listen(): void {
+    const { host, disposables } = this._dispatcher;
+    disposables.addFromEvent(host, 'pointerdown', this._down);
+    disposables.addFromEvent(host, 'pointermove', this._move);
+    disposables.addFromEvent(host, 'pointerup', this._upOrOut);
+    disposables.addFromEvent(host, 'pointerout', this._upOrOut);
   }
+}
 
-  private get _rect() {
-    return this._dispatcher.host.getBoundingClientRect();
+export class PointerControl {
+  private controllers: PointerControllerBase[];
+
+  constructor(_dispatcher: UIEventDispatcher) {
+    this.controllers = [
+      new PointerEventForward(_dispatcher),
+      new ClickController(_dispatcher),
+      new DragController(_dispatcher),
+      new PinchController(_dispatcher),
+    ];
   }
 
   listen() {
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'pointerdown',
-      this._down
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'pointermove',
-      this._moveOn
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'pointerout',
-      this._out
-    );
+    this.controllers.forEach(controller => controller.listen());
   }
 }

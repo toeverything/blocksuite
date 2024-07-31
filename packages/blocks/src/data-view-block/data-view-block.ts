@@ -1,5 +1,6 @@
 import { RangeManager } from '@blocksuite/block-std';
-import { Slice, Slot } from '@blocksuite/store';
+import { Slice } from '@blocksuite/store';
+import { computed } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -8,7 +9,10 @@ import type { DataSource } from '../database-block/data-view/common/data-source/
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
-import { BlockComponent, popMenu } from '../_common/components/index.js';
+import {
+  CaptionedBlockComponent,
+  popMenu,
+} from '../_common/components/index.js';
 import {
   CopyIcon,
   DeleteIcon,
@@ -22,7 +26,6 @@ import {
   type DataViewWidget,
   type DataViewWidgetProps,
   DatabaseSelection,
-  type ViewSource,
   defineUniComponent,
   renderUniLit,
   widgetPresets,
@@ -33,10 +36,9 @@ import {
 } from '../root-block/index.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
 import { BlockQueryDataSource } from './data-source.js';
-import { BlockQueryViewSource } from './view-source.js';
 
 @customElement('affine-data-view')
-export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
+export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBlockModel> {
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.host.event.bindHotkey(hotkeys, {
@@ -105,8 +107,6 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
     };
   };
 
-  private _viewSource?: ViewSource;
-
   private dataView = new DataView();
 
   static override styles = css`
@@ -169,7 +169,17 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
     }
   );
 
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
+  selection$ = computed(() => {
+    const databaseSelection = this.selection.value.find(
+      (selection): selection is DatabaseSelection => {
+        if (selection.blockId !== this.blockId) {
+          return false;
+        }
+        return selection instanceof DatabaseSelection;
+      }
+    );
+    return databaseSelection?.viewSelection;
+  });
 
   setSelection = (selection: DataViewSelection | undefined) => {
     this.selection.setGroup(
@@ -214,27 +224,6 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
     super.connectedCallback();
 
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
-
-    this._disposables.add(
-      this.selection.slots.changed.on(selections => {
-        const databaseSelection = selections.find(
-          (selection): selection is DatabaseSelection => {
-            if (selection.blockId !== this.blockId) {
-              return false;
-            }
-            return selection instanceof DatabaseSelection;
-          }
-        );
-        this.selectionUpdated.emit(databaseSelection?.viewSelection);
-      })
-    );
-    this._disposables.add(
-      this.model.propsUpdated.on(data => {
-        if (data.key === 'views') {
-          this.viewSource.checkViewDataUpdate();
-        }
-      })
-    );
   }
 
   override renderBlock() {
@@ -244,17 +233,14 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
         ${this.dataView.render({
           bindHotkey: this._bindHotkey,
           handleEvent: this._handleEvent,
-          getFlag: this.getFlag,
-          selectionUpdated: this.selectionUpdated,
+          selection$: this.selection$,
           setSelection: this.setSelection,
           dataSource: this.dataSource,
-          viewSource: this.viewSource,
           headerWidget: this.headerWidget,
           std: this.std,
           detailPanelConfig: {
             openDetailPanel: peekViewService
-              ? async (target, template) =>
-                  peekViewService.peek(target, template)
+              ? (target, template) => peekViewService.peek(target, template)
               : undefined,
             target: () => this.innerModalWidget.target,
           },
@@ -272,35 +258,22 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
     return this._dataSource;
   }
 
-  get getFlag() {
-    return this.host.doc.awarenessStore.getFlag.bind(
-      this.host.doc.awarenessStore
-    );
-  }
-
   get innerModalWidget() {
-    return this.rootElement?.widgetElements[
+    return this.rootComponent?.widgetComponents[
       AFFINE_INNER_MODAL_WIDGET
     ] as AffineInnerModalWidget;
   }
 
   override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
+    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
       return note;
     }
-    return this.rootElement;
+    return this.rootComponent;
   }
 
   get view() {
     return this.dataView.expose;
-  }
-
-  get viewSource(): ViewSource {
-    if (!this._viewSource) {
-      this._viewSource = new BlockQueryViewSource(this.model);
-    }
-    return this._viewSource;
   }
 }
 

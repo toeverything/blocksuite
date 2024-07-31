@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -20,7 +21,6 @@ import {
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
 import {
-  Bound,
   ConnectorElementModel,
   GroupElementModel,
   MindmapElementModel,
@@ -234,7 +234,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _updateXYWH(ele: BlockSuite.EdgelessModelType, bound: Bound) {
+  private _updateXYWH(ele: BlockSuite.EdgelessModel, bound: Bound) {
     if (ele instanceof ConnectorElementModel) {
       ele.moveTo(bound);
     } else if (ele instanceof GroupElementModel) {
@@ -276,7 +276,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot>
+        <div>
           ${repeat(
             ALIGNMENT_LIST,
             (item, index) => item.name + index,
@@ -310,7 +310,7 @@ declare global {
 
 export function renderAlignButton(
   edgeless: EdgelessRootBlockComponent,
-  elements: BlockSuite.EdgelessModelType[]
+  elements: BlockSuite.EdgelessModel[]
 ) {
   if (elements.length < 2) return nothing;
   if (elements.some(e => e.group instanceof MindmapElementModel))

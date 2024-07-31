@@ -385,15 +385,16 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
                 return next();
               }
 
-              assertExists(ctx.parentBlock);
-
-              toolbar.std.clipboard
-                .duplicateSlice(
-                  Slice.fromModels(ctx.std.doc, ctx.draftedModels),
-                  ctx.std.doc,
-                  ctx.parentBlock?.model.id,
-                  ctx.blockIndex ? ctx.blockIndex + 1 : undefined
-                )
+              ctx.draftedModels
+                .then(models => {
+                  const slice = Slice.fromModels(ctx.std.doc, models);
+                  return toolbar.std.clipboard.duplicateSlice(
+                    slice,
+                    ctx.std.doc,
+                    ctx.parentBlock?.model.id,
+                    ctx.blockIndex ? ctx.blockIndex + 1 : undefined
+                  );
+                })
                 .catch(console.error);
 
               return next();
@@ -446,7 +447,7 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
         </editor-icon-button>
       `}
     >
-      <div slot data-size="large" data-orientation="vertical">
+      <div data-size="large" data-orientation="vertical">
         ${renderActions(actions)}
       </div>
     </editor-menu-button>

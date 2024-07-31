@@ -1,15 +1,17 @@
 import type { BlockService, EditorHost } from '@blocksuite/block-std';
+import type { IBound } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 
-import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
+import type { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../root-block/index.js';
-import type { IBound } from '../../surface-block/consts.js';
 
 import {
-  blockElementGetter,
+  blockComponentGetter,
   getBlockComponentByModel,
   getRootByEditorHost,
   isInsidePageEditor,
@@ -23,7 +25,6 @@ import {
   type Renderer,
   SurfaceElementModel,
 } from '../../surface-block/index.js';
-import { Bound } from '../../surface-block/utils/bound.js';
 import { fetchImage } from '../adapters/utils.js';
 import { CANVAS_EXPORT_IGNORE_TAGS } from '../consts.js';
 import { FileExporter } from './file-exporter.js';
@@ -60,8 +61,9 @@ export class ExportManager {
         undefined,
         this._exportOptions.imageProxyEndpoint
       )
-        .then(response => response.blob())
+        .then(response => response && response.blob())
         .then(async blob => {
+          if (!blob) return;
           // If the file type is SVG, set svg width and height
           if (blob.type === 'image/svg+xml') {
             // Parse the SVG
@@ -109,7 +111,10 @@ export class ExportManager {
       location.pathname !== pathName ||
       isInsidePageEditor(this.editorHost) !== editorMode
     ) {
-      throw new Error('Unable to export content to canvas');
+      throw new BlockSuiteError(
+        ErrorCode.EdgelessExportError,
+        'Unable to export content to canvas'
+      );
     }
   }
 
@@ -127,13 +132,15 @@ export class ExportManager {
           reject(e);
         }
         const rootModel = this.doc.root;
-        const rootElement = this.doc.root
+        const rootComponent = this.doc.root
           ? getBlockComponentByModel(this.editorHost, rootModel)
           : null;
-        const imageCard = rootElement?.querySelector('affine-image-block-card');
+        const imageCard = rootComponent?.querySelector(
+          'affine-image-block-card'
+        );
         const isReady =
           !imageCard || imageCard.getAttribute('imageState') === '0';
-        if (rootElement && isReady) {
+        if (rootComponent && isReady) {
           clearInterval(checkReactRender);
           resolve(true);
         }
@@ -175,15 +182,15 @@ export class ExportManager {
     const pathname = location.pathname;
     const editorMode = isInsidePageEditor(this.editorHost);
 
-    const rootElement = getRootByEditorHost(this.editorHost);
-    assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement;
+    const rootComponent = getRootByEditorHost(this.editorHost);
+    assertExists(rootComponent);
+    const viewportElement = rootComponent.viewportElement;
     assertExists(viewportElement);
     const pageContainer = viewportElement.querySelector(
       '.affine-page-root-block-container'
     );
     const rect = pageContainer?.getBoundingClientRect();
-    const { viewport } = rootElement;
+    const { viewport } = rootComponent;
     assertExists(viewport);
     const pageWidth = rect?.width;
     const pageLeft = rect?.left ?? 0;
@@ -359,7 +366,13 @@ export class ExportManager {
   }
 
   private async _toCanvas(): Promise<HTMLCanvasElement | void> {
-    await this._checkReady();
+    try {
+      await this._checkReady();
+    } catch (e: unknown) {
+      console.error('Failed to export to canvas');
+      console.error(e);
+      return;
+    }
 
     if (isInsidePageEditor(this.editorHost)) {
       return this._docToCanvas();
@@ -376,7 +389,8 @@ export class ExportManager {
       return this.edgelessToCanvas(
         edgeless.surface.renderer,
         bound,
-        (model: BlockModel) => blockElementGetter(model, this.editorHost.view),
+        (model: BlockModel) =>
+          blockComponentGetter(model, this.editorHost.view),
         edgeless
       );
     }
@@ -386,10 +400,10 @@ export class ExportManager {
   async edgelessToCanvas(
     surfaceRenderer: Renderer,
     bound: IBound,
-    blockElementGetter: (model: BlockModel) => Element | null = () => null,
+    blockComponentGetter: (model: BlockModel) => Element | null = () => null,
     edgeless?: EdgelessRootBlockComponent,
-    nodes?: EdgelessBlockModel[],
-    surfaces?: BlockSuite.SurfaceElementModelType[],
+    nodes?: GfxBlockModel[],
+    surfaces?: BlockSuite.SurfaceElementModel[],
     edgelessBackground?: {
       zoom: number;
     }
@@ -399,9 +413,9 @@ export class ExportManager {
 
     const pathname = location.pathname;
     const editorMode = isInsidePageEditor(this.editorHost);
-    const rootElement = getRootByEditorHost(this.editorHost);
-    assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement;
+    const rootComponent = getRootByEditorHost(this.editorHost);
+    assertExists(rootComponent);
+    const viewportElement = rootComponent.viewportElement;
     assertExists(viewportElement);
     const containerComputedStyle = window.getComputedStyle(viewportElement);
 
@@ -409,7 +423,7 @@ export class ExportManager {
       this._html2canvas(element, {
         backgroundColor: containerComputedStyle.backgroundColor,
       });
-    const container = rootElement.querySelector(
+    const container = rootComponent.querySelector(
       '.affine-block-children-container'
     );
 
@@ -457,14 +471,16 @@ export class ExportManager {
           blockBound.h
         );
       }
-      let blockElement = blockElementGetter(block)?.parentElement;
+      let blockComponent = blockComponentGetter(block)?.parentElement;
       if (matchFlavours(block, ['affine:note'])) {
-        blockElement = blockElement?.closest('.edgeless-block-portal-note');
+        blockComponent = blockComponent?.closest('.edgeless-block-portal-note');
       }
 
-      if (blockElement) {
+      if (blockComponent) {
         const blockBound = xywhArrayToObject(block);
-        const canvasData = await this._html2canvas(blockElement as HTMLElement);
+        const canvasData = await this._html2canvas(
+          blockComponent as HTMLElement
+        );
         ctx.drawImage(
           canvasData,
           blockBound.x - bound.x + 50,
@@ -480,7 +496,7 @@ export class ExportManager {
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = blockElementGetter(element);
+          const htmlElement = blockComponentGetter(element);
           const blockBound = xywhArrayToObject(element);
           const canvasData = await html2canvas(htmlElement as HTMLElement);
 
@@ -565,6 +581,6 @@ export class ExportManager {
   }
 
   get editorHost(): EditorHost {
-    return this._blockService.std.host as EditorHost;
+    return this._blockService.std.host;
   }
 }

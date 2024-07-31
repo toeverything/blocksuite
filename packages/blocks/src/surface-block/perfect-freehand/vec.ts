@@ -1,4 +1,4 @@
-import type { IVec } from '../utils/vec.js';
+import type { IVec } from '@blocksuite/global/utils';
 
 /**
  * Negate a vector.

@@ -25,7 +25,7 @@ export class BlockStdScope {
 
   readonly event: UIEventDispatcher;
 
-  readonly host: HTMLElement;
+  readonly host: EditorHost;
 
   readonly selection: SelectionManager;
 

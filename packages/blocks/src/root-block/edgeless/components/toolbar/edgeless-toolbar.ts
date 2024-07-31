@@ -22,9 +22,11 @@ import {
   ArrowRightSmallIcon,
   MoreHorizontalIcon,
 } from '../../../../_common/icons/index.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
+import {
+  ColorScheme,
+  ThemeObserver,
+} from '../../../../_common/theme/theme-observer.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
-import { getThemeMode } from '../../../../_common/utils/query.js';
 import '../buttons/tool-icon-button.js';
 import '../buttons/toolbar-button.js';
 import {
@@ -91,11 +93,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     initialValue: { resize: new Slot() } satisfies EdgelessToolbarSlots,
   });
 
-  private _themeObserver = new ThemeObserver();
-
   private _themeProvider = new ContextProvider(this, {
     context: edgelessToolbarThemeContext,
-    initialValue: getThemeMode(),
+    initialValue: ColorScheme.Light,
   });
 
   private _toolbarProvider = new ContextProvider(this, {
@@ -513,9 +513,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       }
     });
     this._resizeObserver.observe(this);
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => this._themeProvider.setValue(getThemeMode()));
-    this._disposables.add(() => this._themeObserver.dispose());
+    this._disposables.add(
+      ThemeObserver.subscribe(mode => this._themeProvider.setValue(mode))
+    );
     this._disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(tool => {
         this.edgelessTool = tool;

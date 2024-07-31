@@ -17,12 +17,9 @@ export const commonConfig: ImageConfigItem[] = [
     icon: DownloadIcon,
     tooltip: 'Download',
     showWhen: () => true,
-    action: (
-      blockElement: ImageBlockComponent,
-      abortController: AbortController
-    ) => {
+    action: (block: ImageBlockComponent, abortController: AbortController) => {
       abortController.abort();
-      blockElement.download();
+      block.download();
     },
     type: 'common',
   },
@@ -30,13 +27,10 @@ export const commonConfig: ImageConfigItem[] = [
     name: 'caption',
     icon: CaptionIcon,
     tooltip: 'Caption',
-    showWhen: blockElement => !blockElement.doc.readonly,
-    action: (
-      blockElement: ImageBlockComponent,
-      abortController: AbortController
-    ) => {
+    showWhen: block => !block.doc.readonly,
+    action: (block: ImageBlockComponent, abortController: AbortController) => {
       abortController.abort();
-      blockElement.captionEditor.show();
+      block.captionEditor?.show();
     },
     type: 'common',
   },
@@ -47,18 +41,15 @@ export const moreMenuConfig: MoreMenuConfigItem[] = [
     name: 'Turn into card view',
     icon: BookmarkIcon,
     tooltip: 'Turn into Card view',
-    showWhen: blockElement => {
-      const doc = blockElement.doc;
+    showWhen: block => {
+      const doc = block.doc;
       const supportAttachment =
         doc.schema.flavourSchemaMap.has('affine:attachment');
       const readonly = doc.readonly;
-      return supportAttachment && !readonly && !!blockElement.blob;
+      return supportAttachment && !readonly && !!block.blob;
     },
-    action: (
-      blockElement: ImageBlockComponent,
-      abortController: AbortController
-    ) => {
-      blockElement.convertToCardView();
+    action: (block: ImageBlockComponent, abortController: AbortController) => {
+      block.convertToCardView();
       abortController.abort();
     },
     type: 'more',
@@ -68,11 +59,8 @@ export const moreMenuConfig: MoreMenuConfigItem[] = [
     icon: CopyIcon,
     tooltip: 'Copy',
     showWhen: () => true,
-    action: (
-      blockElement: ImageBlockComponent,
-      abortController: AbortController
-    ) => {
-      blockElement.copy();
+    action: (block: ImageBlockComponent, abortController: AbortController) => {
+      block.copy();
       abortController.abort();
     },
     type: 'more',
@@ -81,30 +69,24 @@ export const moreMenuConfig: MoreMenuConfigItem[] = [
     name: 'Duplicate',
     icon: DuplicateIcon,
     tooltip: 'Duplicate',
-    showWhen: blockElement => !blockElement.doc.readonly,
-    action: (
-      blockElement: ImageBlockComponent,
-      abortController: AbortController
-    ) => {
-      duplicate(blockElement, abortController);
+    showWhen: block => !block.doc.readonly,
+    action: (block: ImageBlockComponent, abortController: AbortController) => {
+      duplicate(block, abortController);
     },
     type: 'more',
   },
   {
     type: 'divider',
-    showWhen: blockElement => !blockElement.doc.readonly,
+    showWhen: block => !block.doc.readonly,
   },
   {
     name: 'Delete',
     icon: DeleteIcon,
     tooltip: 'Delete',
-    showWhen: blockElement => !blockElement.doc.readonly,
-    action: (
-      blockElement: ImageBlockComponent,
-      abortController: AbortController
-    ) => {
+    showWhen: block => !block.doc.readonly,
+    action: (block: ImageBlockComponent, abortController: AbortController) => {
       abortController.abort();
-      blockElement.doc.deleteBlock(blockElement.model);
+      block.doc.deleteBlock(block.model);
     },
     type: 'more',
   },

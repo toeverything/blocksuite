@@ -1,5 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 
+import { Bound } from '@blocksuite/global/utils';
 import { noop } from '@blocksuite/global/utils';
 
 import type {
@@ -9,12 +11,13 @@ import type {
 import type { SelectionArea } from '../../services/tools-manager.js';
 import type { EdgelessTool } from '../../types.js';
 
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
 import {
-  Bound,
-  CanvasElementType,
-  type IVec,
-} from '../../../../surface-block/index.js';
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '../../../../surface-block/elements/shape/consts.js';
+import { CanvasElementType } from '../../../../surface-block/index.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   SHAPE_OVERLAY_HEIGHT,
@@ -181,8 +184,16 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const options = SHAPE_OVERLAY_OPTIONS;
     const attributes =
       this._edgeless.service.editPropsStore.getLastProps('shape');
-    options.stroke = attributes.strokeColor;
-    options.fill = attributes.fillColor;
+    options.stroke = ThemeObserver.getColorValue(
+      attributes.strokeColor,
+      DEFAULT_SHAPE_STROKE_COLOR,
+      true
+    );
+    options.fill = ThemeObserver.getColorValue(
+      attributes.fillColor,
+      DEFAULT_SHAPE_FILL_COLOR,
+      true
+    );
 
     switch (attributes.strokeStyle!) {
       case 'dash':
@@ -201,8 +212,8 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     }
     this._shapeOverlay = new ShapeOverlay(this._edgeless, shapeType, options, {
       shapeStyle: attributes.shapeStyle,
-      fillColor: options.fill,
-      strokeColor: options.stroke,
+      fillColor: attributes.fillColor,
+      strokeColor: attributes.strokeColor,
     });
     this._edgeless.surface.renderer.addOverlay(this._shapeOverlay);
   }

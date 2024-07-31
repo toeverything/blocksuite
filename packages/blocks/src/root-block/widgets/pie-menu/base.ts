@@ -1,6 +1,5 @@
 import type { TemplateResult } from 'lit';
 
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { PieMenuId } from '../../types.js';
 import type { AffinePieMenuWidget } from './index.js';
@@ -16,7 +15,7 @@ export interface PieMenuSchema {
 
   trigger: (props: {
     keyEvent: KeyboardEvent;
-    rootElement: EdgelessRootBlockComponent;
+    rootComponent: EdgelessRootBlockComponent;
   }) => boolean;
 }
 
@@ -45,9 +44,9 @@ export interface PieRootNodeModel extends PieBaseNodeModel {
 }
 
 export type PieMenuContext = {
-  rootElement: EdgelessRootBlockComponent;
+  rootComponent: EdgelessRootBlockComponent;
   menu: PieMenu;
-  widgetElement: AffinePieMenuWidget;
+  widgetComponent: AffinePieMenuWidget;
   node: PieNode;
 };
 export type ActionFunction = (ctx: PieMenuContext) => void;
@@ -70,10 +69,10 @@ export interface PieSubmenuNodeModel extends PieBaseNodeModel {
 
 export interface PieColorNodeModel extends PieBaseNodeModel {
   type: 'color';
-  color: CssVariableName;
+  color: string;
   hollowCircle: boolean;
   text?: string;
-  onChange: (color: CssVariableName, ctx: PieMenuContext) => void;
+  onChange: (color: string, ctx: PieMenuContext) => void;
 }
 
 export type IPieNodeWithAction =

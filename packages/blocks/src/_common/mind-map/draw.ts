@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
@@ -9,7 +10,6 @@ import type {
 import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { SHAPE_TEXT_PADDING } from '../../surface-block/element-model/shape.js';
 import {
-  Bound,
   CanvasElementType,
   ConnectorMode,
   type IShape,
@@ -129,8 +129,8 @@ const drawAllNode = (
   const result = layout.right(layoutNode, {
     gapHorizontal: 130,
     gapVertical: 10,
-    x: root ? root.x : options?.x ?? 0,
-    y: root ? root.y : options?.y ?? 0,
+    x: root ? root.x : (options?.x ?? 0),
+    y: root ? root.y : (options?.y ?? 0),
   });
   const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
     const { id, width, height } = node;
@@ -177,8 +177,8 @@ const layoutAllNode = (
   const result = layout.right(layoutNode, {
     gapHorizontal: 130,
     gapVertical: 10,
-    x: root ? root.x : options?.x ?? 0,
-    y: root ? root.y : options?.y ?? 0,
+    x: root ? root.x : (options?.x ?? 0),
+    y: root ? root.y : (options?.y ?? 0),
   });
   const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
     const { id, width, height } = node;

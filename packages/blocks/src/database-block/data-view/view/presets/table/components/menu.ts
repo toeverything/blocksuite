@@ -2,7 +2,7 @@ import { html } from 'lit';
 
 import type { RootBlockComponent } from '../../../../../../root-block/index.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
-import type { DataViewColumnManager } from '../../../data-view-manager.js';
+import type { Column } from '../../../../view-manager/column.js';
 import type { TableSelectionController } from '../controller/selection.js';
 
 import {
@@ -133,9 +133,9 @@ export const popRowMenu = (
 };
 
 export const popColStatOperationMenu = (
-  _rootElement: RootBlockComponent | null,
+  _rootComponent: RootBlockComponent | null,
   elem: HTMLElement,
-  _column: DataViewColumnManager,
+  _column: Column,
   calcType: ColumnDataType,
   onSelect: (formula: StatCalcOp) => void
 ) => {

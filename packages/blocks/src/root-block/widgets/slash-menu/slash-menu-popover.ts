@@ -56,7 +56,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     cleanSpecifiedTail(
       this.host,
       this.context.model,
-      this.triggerKey + this._query
+      this.triggerKey + (this._query || '')
     );
     item.action(this.context)?.catch(console.error);
     this.abortController.abort();
@@ -81,12 +81,16 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
   private _queryState: 'off' | 'on' | 'no_result' = 'off';
 
-  private _startIndex = this.inlineEditor?.getInlineRange()?.index ?? 0;
+  private _startRange = this.inlineEditor.getInlineRange();
 
   private _updateFilteredItems = () => {
+    const query = this._query;
+    if (query === null) {
+      this.abortController.abort();
+      return;
+    }
     this._filteredItems = [];
-
-    const searchStr = this._query.toLowerCase();
+    const searchStr = query.toLowerCase();
     if (searchStr === '' || searchStr.endsWith(' ')) {
       this._queryState = searchStr === '' ? 'off' : 'no_result';
       return;
@@ -147,7 +151,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   }
 
   private get _query() {
-    return getQuery(this.inlineEditor, this._startIndex) || '';
+    return getQuery(this.inlineEditor, this._startRange);
   }
 
   override connectedCallback() {
@@ -167,7 +171,10 @@ export class SlashMenu extends WithDisposable(LitElement) {
     });
 
     const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor, 'RichText InlineEditor not found');
+    if (!inlineEditor || !inlineEditor.eventSource) {
+      console.error('inlineEditor or eventSource is not found');
+      return;
+    }
 
     /**
      * Handle arrow key
@@ -210,8 +217,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
       },
       onInput: () => this._updateFilteredItems(),
       onDelete: () => {
-        const curIndex = inlineEditor.getInlineRange()?.index ?? 0;
-        if (curIndex < this._startIndex) {
+        const curRange = this.inlineEditor.getInlineRange();
+        if (!this._startRange || !curRange) {
+          return;
+        }
+        if (curRange.index < this._startRange.index) {
           this.abortController.abort();
         }
         this._updateFilteredItems();
@@ -249,7 +259,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   }
 
   get host() {
-    return this.context.rootElement.host;
+    return this.context.rootComponent.host;
   }
 
   @state()
@@ -371,7 +381,11 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
     if (isGroupDivider(item)) return this._renderGroupItem(item);
     else if (isActionItem(item)) return this._renderActionItem(item);
     else if (isSubMenuItem(item)) return this._renderSubMenuItem(item);
-    else throw new Error('Unreachable');
+    else {
+      console.error('Unknown item type for slash menu');
+      console.error(item);
+      return nothing;
+    }
   };
 
   private _renderSubMenuItem = (item: SlashSubMenu) => {
@@ -440,10 +454,14 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
     });
 
     const inlineEditor = getInlineEditorByModel(
-      this.context.rootElement.host,
+      this.context.rootComponent.host,
       this.context.model
     );
-    assertExists(inlineEditor, 'RichText InlineEditor not found');
+
+    if (!inlineEditor || !inlineEditor.eventSource) {
+      console.error('inlineEditor or eventSource is not found');
+      return;
+    }
 
     inlineEditor.eventSource.addEventListener(
       'keydown',

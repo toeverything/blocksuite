@@ -1,4 +1,6 @@
-import { type IVec, Vec } from './vec.js';
+import type { IVec } from '@blocksuite/global/utils';
+
+import { Vec } from '@blocksuite/global/utils';
 
 export class Polyline {
   static len(points: IVec[]) {

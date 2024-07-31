@@ -23,6 +23,8 @@ import {
   fillSelectionWithFocusCellData,
 } from './drag-to-fill.js';
 
+type TableViewSelectionSetOptions = Omit<TableViewSelection, 'viewId' | 'type'>;
+
 export class TableSelectionController implements ReactiveController {
   __dragToFillElement = new DragToFillElement();
 
@@ -83,7 +85,7 @@ export class TableSelectionController implements ReactiveController {
   private handleDragEvent() {
     this.host.disposables.add(
       this.host.handleEvent('dragStart', context => {
-        if (this.host.view.readonly) {
+        if (this.host.view.readonly$.value) {
           return;
         }
         const event = context.get('pointerState').raw;
@@ -114,7 +116,7 @@ export class TableSelectionController implements ReactiveController {
 
   private handleSelectionChange() {
     this.host.disposables.add(
-      this.host.selectionUpdated.on(tableSelection => {
+      this.host.selection$.subscribe(tableSelection => {
         if (!this.isValidSelection(tableSelection)) {
           this.selection = undefined;
           return;
@@ -149,7 +151,9 @@ export class TableSelectionController implements ReactiveController {
           if (container) {
             const cell = container.cell;
             if (old.isEditing) {
-              cell?.onExitEditMode();
+              requestAnimationFrame(() => {
+                cell?.onExitEditMode();
+              });
               cell?.blurCell();
               container.isEditing = false;
             }
@@ -192,9 +196,9 @@ export class TableSelectionController implements ReactiveController {
     const rows =
       groupKey != null
         ? this.view.groupHelper?.groupMap[groupKey].rows
-        : this.view.rows;
+        : this.view.rows$.value;
     requestAnimationFrame(() => {
-      const index = this.host.view.columnManagerList.findIndex(
+      const index = this.host.view.columnManagerList$.value.findIndex(
         v => v.type === 'title'
       );
       this.selection = {
@@ -304,6 +308,21 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
+  focusToArea(selection: TableViewSelection) {
+    return {
+      ...selection,
+      rowsSelection: selection.rowsSelection ?? {
+        start: selection.focus.rowIndex,
+        end: selection.focus.rowIndex,
+      },
+      columnsSelection: selection.columnsSelection ?? {
+        start: selection.focus.columnIndex,
+        end: selection.focus.columnIndex,
+      },
+      isEditing: false,
+    } satisfies TableViewSelectionSetOptions;
+  }
+
   focusToCell(position: 'left' | 'right' | 'up' | 'down') {
     if (!this.selection) {
       return;
@@ -391,7 +410,7 @@ export class TableSelectionController implements ReactiveController {
     const leftCell = topCells.item(left);
     const rightCell = topCells.item(right);
     const leftRect = leftCell.getBoundingClientRect();
-    const scale = leftRect.width / leftCell.column.width;
+    const scale = leftRect.width / leftCell.column.width$.value;
     return {
       top: leftRect.top / scale,
       left: leftRect.left / scale,
@@ -399,6 +418,12 @@ export class TableSelectionController implements ReactiveController {
       height: (bottomRow.getBoundingClientRect().bottom - leftRect.top) / scale,
       scale,
     };
+  }
+
+  getSelectionAreaBorder(position: 'left' | 'right' | 'top' | 'bottom') {
+    return this.__selectionElement.selectionRef.value?.querySelector(
+      `.area-border.area-${position}`
+    );
   }
 
   hostConnected() {
@@ -441,11 +466,11 @@ export class TableSelectionController implements ReactiveController {
     if (!selection) {
       return true;
     }
-    if (selection.focus.rowIndex > this.view.rows.length - 1) {
+    if (selection.focus.rowIndex > this.view.rows$.value.length - 1) {
       this.selection = undefined;
       return false;
     }
-    if (selection.focus.columnIndex > this.view.columns.length - 1) {
+    if (selection.focus.columnIndex > this.view.columns$.value.length - 1) {
       this.selection = undefined;
       return false;
     }
@@ -558,6 +583,132 @@ export class TableSelectionController implements ReactiveController {
       },
       isEditing: false,
     };
+  }
+
+  selectionAreaDown() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (newSelection.rowsSelection.start === newSelection.focus.rowIndex) {
+      newSelection.rowsSelection.end = Math.min(
+        this.rows(newSelection.groupKey).length - 1,
+        newSelection.rowsSelection.end + 1
+      );
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('bottom')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    } else {
+      newSelection.rowsSelection.start += 1;
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('top')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    }
+    this.selection = newSelection;
+  }
+
+  selectionAreaLeft() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (newSelection.columnsSelection.end === newSelection.focus.columnIndex) {
+      newSelection.columnsSelection.start = Math.max(
+        0,
+        newSelection.columnsSelection.start - 1
+      );
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('left')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    } else {
+      newSelection.columnsSelection.end -= 1;
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('right')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    }
+    this.selection = newSelection;
+  }
+
+  selectionAreaRight() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (
+      newSelection.columnsSelection.start === newSelection.focus.columnIndex
+    ) {
+      const max =
+        this.rows(newSelection.groupKey)
+          ?.item(0)
+          .querySelectorAll('affine-database-cell-container').length - 1;
+      newSelection.columnsSelection.end = Math.min(
+        max,
+        newSelection.columnsSelection.end + 1
+      );
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('right')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    } else {
+      newSelection.columnsSelection.start += 1;
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('left')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    }
+    this.selection = newSelection;
+  }
+
+  selectionAreaUp() {
+    if (!this.selection) {
+      return;
+    }
+    const newSelection = this.focusToArea(this.selection);
+    if (newSelection.rowsSelection.end === newSelection.focus.rowIndex) {
+      newSelection.rowsSelection.start = Math.max(
+        0,
+        newSelection.rowsSelection.start - 1
+      );
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('top')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    } else {
+      newSelection.rowsSelection.end -= 1;
+      requestAnimationFrame(() => {
+        this.getSelectionAreaBorder('bottom')?.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      });
+    }
+    this.selection = newSelection;
   }
 
   startDrag(
@@ -684,7 +835,7 @@ export class TableSelectionController implements ReactiveController {
     const dragToFill = this.dragToFillDraggable;
 
     if (!div || !dragToFill) return;
-    if (focus && !isRowSelection && !this.host.view.readonly) {
+    if (focus && !isRowSelection && !this.host.view.readonly$.value) {
       // Check if row is removed.
       const rows = this.rows(groupKey) ?? [];
       if (rows.length <= focus.rowIndex) return;
@@ -780,7 +931,7 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const div = this.areaSelectionElement;
     if (!div) return;
-    if ((!rowSelection && !columnSelection) || this.host.view.readonly) {
+    if ((!rowSelection && !columnSelection) || this.host.view.readonly$.value) {
       div.style.display = 'none';
       return;
     }
@@ -789,9 +940,9 @@ export class TableSelectionController implements ReactiveController {
     let { left, top, width, height, scale } = this.getRect(
       groupKey,
       rowSelection?.start ?? 0,
-      rowSelection?.end ?? this.view.rows.length - 1,
+      rowSelection?.end ?? this.view.rows$.value.length - 1,
       columnSelection?.start ?? 0,
-      columnSelection?.end ?? this.view.columnManagerList.length - 1
+      columnSelection?.end ?? this.view.columnManagerList$.value.length - 1
     );
     const isRowSelection = rowSelection && !columnSelection;
     if (isRowSelection) {
@@ -812,7 +963,7 @@ export class TableSelectionController implements ReactiveController {
     return this._tableViewSelection;
   }
 
-  set selection(data: Omit<TableViewSelection, 'viewId' | 'type'> | undefined) {
+  set selection(data: TableViewSelectionSetOptions | undefined) {
     if (!data) {
       this.clearSelection();
       return;
@@ -877,6 +1028,30 @@ class SelectionElement extends ShadowlessElement {
       outline: none;
     }
 
+    .area-border {
+      position: absolute;
+      pointer-events: none;
+    }
+    .area-left {
+      left: 0;
+      height: 100%;
+      width: 1px;
+    }
+    .area-right {
+      right: 0;
+      height: 100%;
+      width: 1px;
+    }
+    .area-top {
+      top: 0;
+      width: 100%;
+      height: 1px;
+    }
+    .area-bottom {
+      bottom: 0;
+      width: 100%;
+      height: 1px;
+    }
     @media print {
       affine-database-selection {
         display: none;
@@ -890,7 +1065,12 @@ class SelectionElement extends ShadowlessElement {
 
   override render() {
     return html`
-      <div ${ref(this.selectionRef)} class="database-selection"></div>
+      <div ${ref(this.selectionRef)} class="database-selection">
+        <div class="area-border area-left"></div>
+        <div class="area-border area-right"></div>
+        <div class="area-border area-top"></div>
+        <div class="area-border area-bottom"></div>
+      </div>
       <div tabindex="0" ${ref(this.focusRef)} class="database-focus"></div>
     `;
   }

@@ -1,12 +1,14 @@
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockModel, Query } from '@blocksuite/store';
 
 import {
   type EditorHost,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, debounce } from '@blocksuite/global/utils';
-import { type Block, BlockViewType, type Doc, nanoid } from '@blocksuite/store';
+import { BlockViewType, type Doc, nanoid } from '@blocksuite/store';
 import { type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -22,12 +24,10 @@ import type { SurfaceRefRenderer } from '../../../../surface-ref-block/surface-r
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { SpecProvider } from '../../../../specs/index.js';
-import { Bound } from '../../../../surface-block/utils/bound.js';
-import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import '../../../../surface-ref-block/surface-ref-portal.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 
-type RefElement = Exclude<BlockSuite.EdgelessModelType, NoteBlockModel>;
+type RefElement = Exclude<BlockSuite.EdgelessModel, NoteBlockModel>;
 
 const DEFAULT_PREVIEW_CONTAINER_WIDTH = 280;
 const DEFAULT_PREVIEW_CONTAINER_HEIGHT = 166;
@@ -109,22 +109,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _frameDisposables: DisposableGroup | null = null;
 
-  private _getSelector = (model: BlockModel) => {
-    return (block: Block, doc: Doc) => {
-      let parent: BlockModel | Block | null = block;
-
-      while (parent) {
-        if (parent.id === model.id) {
-          return BlockViewType.Display;
-        }
-
-        parent = doc.getParent(parent.id);
-      }
-
-      return BlockViewType.Hidden;
-    };
-  };
-
   private _getViewportWH = (referencedModel: RefElement) => {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
 
@@ -151,11 +135,14 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   };
 
   private _renderModel = (model: BlockModel) => {
-    const selector = this._getSelector(model);
+    const query: Query = {
+      mode: 'include',
+      match: [{ id: model.id, viewType: BlockViewType.Display }],
+    };
     this._disposables.add(() => {
-      doc.blockCollection.clearSelector(selector);
+      doc.blockCollection.clearQuery(query);
     });
-    const doc = model.doc.blockCollection.getDoc({ selector });
+    const doc = model.doc.blockCollection.getDoc({ query });
     const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
     return this.host.renderSpecPortal(doc, previewSpec.value);
   };
@@ -220,6 +207,11 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _renderSurfaceContent(referencedModel: FrameBlockModel) {
     const { width, height } = this._getViewportWH(referencedModel);
+    const backgroundColor = this.surfaceRenderer.generateColorProperty(
+      referencedModel.background,
+      '--affine-platte-transparent'
+    );
+
     return html`<div
       class="frame-preview-surface-container"
       style=${styleMap({
@@ -229,9 +221,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     >
       <div
         style=${styleMap({
-          backgroundColor: referencedModel.background
-            ? `var(${referencedModel.background})`
-            : 'var(--affine-platte-transparent)',
+          backgroundColor,
           borderRadius: '4px',
         })}
       >

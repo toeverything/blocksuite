@@ -1,9 +1,22 @@
-import { assertType } from '@blocksuite/global/utils';
+import type {
+  BaseElementProps,
+  SerializedElement,
+  SurfaceBlockModel,
+} from '@blocksuite/block-std/gfx';
+import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
+
+import {
+  GfxGroupLikeElementModel,
+  convert,
+  observe,
+  watch,
+  yfield,
+} from '@blocksuite/block-std/gfx';
+import { assertType, deserializeXYWH } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
 
-import type { SurfaceBlockModel } from '../surface-model.js';
 import type {
   MindmapNode,
   MindmapRoot,
@@ -17,18 +30,7 @@ import type {
 import { keys, last, pick } from '../../_common/utils/iterable.js';
 import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
-import {
-  type SerializedXYWH,
-  type XYWH,
-  deserializeXYWH,
-} from '../utils/xywh.js';
-import {
-  type IBaseProps,
-  type SerializedElement,
-  SurfaceGroupLikeModel,
-} from './base.js';
 import { LocalConnectorElementModel } from './connector.js';
-import { convert, observe, watch, yfield } from './decorators.js';
 import { LayoutType, layout } from './utils/mindmap/layout.js';
 import {
   MindmapStyle,
@@ -62,11 +64,11 @@ export type SerializedMindmapElement = SerializedElement & {
   children: Record<string, NodeDetail>;
 };
 
-type MindmapElementProps = IBaseProps & {
+type MindmapElementProps = BaseElementProps & {
   children: Y.Map<NodeDetail>;
 };
 
-export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementProps> {
+export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElementProps> {
   private _nodeMap = new Map<string, MindmapNode>();
 
   private _queueBuildTree = false;
@@ -82,7 +84,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   pathGenerator: ConnectorPathGenerator = new ConnectorPathGenerator({
     getElementById: (id: string) =>
       this.surface.getElementById(id) ??
-      (this.surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType),
+      (this.surface.doc.getBlockById(id) as BlockSuite.EdgelessModel),
   });
 
   static createFromTree(
@@ -646,7 +648,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
       }
 
       const parent: MindmapNode | null = current.detail.parent
-        ? this._nodeMap.get(current.detail.parent) ?? null
+        ? (this._nodeMap.get(current.detail.parent) ?? null)
         : null;
 
       if (parent === root) {
@@ -670,7 +672,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   getParentNode(id: string) {
     const node = this.children.get(id);
 
-    return node?.parent ? this._nodeMap.get(node.parent) ?? null : null;
+    return node?.parent ? (this._nodeMap.get(node.parent) ?? null) : null;
   }
 
   /**
@@ -805,7 +807,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
             preSibling?.detail.index ?? null,
             sibling?.detail.index ?? null
           )
-        : tree.detail.index ?? undefined;
+        : (tree.detail.index ?? undefined);
 
     this.surface.doc.transact(() => {
       const val: NodeDetail =
@@ -900,7 +902,7 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
     }
 
     const stashed = new Set<
-      BlockSuite.SurfaceElementModelType | LocalConnectorElementModel
+      BlockSuite.SurfaceElementModel | LocalConnectorElementModel
     >();
     const traverse = (node: MindmapNode, parent: MindmapNode | null) => {
       node.element.stash('xywh');

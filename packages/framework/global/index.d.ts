@@ -11,5 +11,6 @@ declare type BlockSuiteFlags = {
   enable_edgeless_text: boolean;
   enable_ai_onboarding: boolean;
   enable_ai_chat_block: boolean;
+  enable_color_picker: boolean;
   readonly: Record<string, boolean>;
 };

@@ -10,7 +10,7 @@ import {
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { type PropertyValues, css, html, nothing } from 'lit';
-import { property, query } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import './frame-card-title.js';
@@ -111,6 +111,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_FRAME_CARD = 'affine-frame-card';
+
+@customElement(AFFINE_FRAME_CARD)
 export class FrameCard extends WithDisposable(ShadowlessElement) {
   private _clearFrameDisposables = () => {
     this._frameDisposables?.dispose();
@@ -228,10 +231,10 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
     >
       ${this.status === 'dragging'
         ? nothing
-        : html`<frame-card-title
+        : html`<affine-frame-card-title
             .cardIndex=${this.cardIndex}
             .frame=${this.frame}
-          ></frame-card-title>`}
+          ></affine-frame-card-title>`}
       <div
         class="frame-card-body"
         @click=${this._dispatchSelectEvent}
@@ -296,6 +299,6 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frame-card': FrameCard;
+    [AFFINE_FRAME_CARD]: FrameCard;
   }
 }

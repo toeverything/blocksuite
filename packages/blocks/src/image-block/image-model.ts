@@ -1,8 +1,9 @@
+import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { SerializedXYWH } from '../surface-block/index.js';
-
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
@@ -38,7 +39,9 @@ export const ImageBlockSchema = defineBlockSchema({
   toModel: () => new ImageBlockModel(),
 });
 
-export class ImageBlockModel extends selectable<ImageBlockProps>(BlockModel) {}
+export class ImageBlockModel
+  extends GfxCompatible<ImageBlockProps>(BlockModel)
+  implements GfxElementGeometry {}
 
 declare global {
   namespace BlockSuite {

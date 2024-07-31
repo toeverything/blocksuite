@@ -6,7 +6,7 @@ import type { EmbedYoutubeStyles } from './embed-youtube-model.js';
 import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
+import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
 import {
@@ -17,7 +17,7 @@ import { YoutubeIcon, styles } from './styles.js';
 import { refreshEmbedYoutubeUrlData } from './utils.js';
 
 @customElement('affine-embed-youtube-block')
-export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
+export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
   EmbedYoutubeModel,
   EmbedYoutubeBlockService
 > {
@@ -105,8 +105,14 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       })
     );
     // this is required to prevent iframe from capturing pointer events
-    this.handleEvent('pointerMove', ctx => {
-      this._isDragging = ctx.get('pointerState').dragging;
+    this.handleEvent('dragStart', () => {
+      this._isDragging = true;
+      this._showOverlay =
+        this._isResizing || this._isDragging || !this._isSelected;
+    });
+
+    this.handleEvent('dragEnd', () => {
+      this._isDragging = false;
       this._showOverlay =
         this._isResizing || this._isDragging || !this._isSelected;
     });

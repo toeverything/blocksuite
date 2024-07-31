@@ -8,6 +8,7 @@ import type {
   FromSliceSnapshotResult,
 } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { isEqual, sha } from '@blocksuite/global/utils';
 import {
   ASTWalker,
@@ -280,6 +281,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 undefined,
                 this.configs.get('imageProxy') as string
               );
+              if (!res) {
+                break;
+              }
               const clonedRes = res.clone();
               const name =
                 getFilenameFromContentDisposition(
@@ -605,6 +609,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 undefined,
                 this.configs.get('imageProxy') as string
               );
+              if (!res) {
+                break;
+              }
               const clonedRes = res.clone();
               const name =
                 getFilenameFromContentDisposition(
@@ -663,7 +670,13 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 }
               });
             } else {
-              const res = await fetch(embededURL);
+              const res = await fetch(embededURL).catch(error => {
+                console.warn('Error fetching embed:', error);
+                return null;
+              });
+              if (!res) {
+                break;
+              }
               const resCloned = res.clone();
               name =
                 getFilenameFromContentDisposition(
@@ -709,7 +722,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           const columnTypeClass = hastQuerySelector(o.node, 'svg')?.properties
             ?.className;
           const columnType = Array.isArray(columnTypeClass)
-            ? ColumnClassMap[columnTypeClass[0]] ?? 'rich-text'
+            ? (ColumnClassMap[columnTypeClass[0]] ?? 'rich-text')
             : 'rich-text';
           context.pushGlobalContextStack<BlocksuiteTableColumn>(
             'hast:table:column',
@@ -853,9 +866,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 const text = hastGetTextContent(child);
                 const number = Number(text);
                 if (Number.isNaN(number)) {
-                  if (columns[index].type !== 'rich-text') {
-                    columns[index].type = 'rich-text';
-                  }
+                  columns[index].type = 'rich-text';
                   row[columns[index].id] = {
                     columnId: columns[index].id,
                     value: createText(text),
@@ -1012,19 +1023,28 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<NotionHtml>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'NotionHtmlAdapter.fromBlockSnapshot is not implemented'
+    );
   }
 
   override fromDocSnapshot(
     _payload: FromDocSnapshotPayload
   ): Promise<FromDocSnapshotResult<NotionHtml>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'NotionHtmlAdapter.fromDocSnapshot is not implemented'
+    );
   }
 
   override fromSliceSnapshot(
     _payload: FromSliceSnapshotPayload
   ): Promise<FromSliceSnapshotResult<NotionHtml>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'NotionHtmlAdapter.fromSliceSnapshot is not implemented'
+    );
   }
 
   override toBlockSnapshot(

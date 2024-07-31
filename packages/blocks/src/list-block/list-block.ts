@@ -1,9 +1,10 @@
 /// <reference types="vite/client" />
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BaseSelection, BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { effect } from '@lit-labs/preact-signals';
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
@@ -11,18 +12,20 @@ import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import type { ListBlockModel } from './list-model.js';
 import type { ListBlockService } from './list-service.js';
 
-import { BlockComponent } from '../_common/components/block-component.js';
+import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
+import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import { correctNumberedListsOrderToPrev } from './commands/utils.js';
 import { listBlockStyles } from './styles.js';
-import { ListIcon } from './utils/get-list-icon.js';
+import { getListIcon } from './utils/get-list-icon.js';
 import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
-export class ListBlockComponent extends BlockComponent<
+export class ListBlockComponent extends CaptionedBlockComponent<
   ListBlockModel,
   ListBlockService
 > {
@@ -56,7 +59,7 @@ export class ListBlockComponent extends BlockComponent<
     const selection = this.host.selection;
     selection.update(selList => {
       return selList
-        .filter(sel => !sel.is('text') && !sel.is('block'))
+        .filter<BaseSelection>(sel => !sel.is('text') && !sel.is('block'))
         .concat(selection.create('block', { blockId: this.blockId }));
     });
   }
@@ -103,6 +106,21 @@ export class ListBlockComponent extends BlockComponent<
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+
+    this.disposables.add(
+      effect(() => {
+        const type = this.model.type$.value;
+        const order = this.model.order$.value;
+        // old numbered list has no order
+        if (type === 'numbered' && !Number.isInteger(order)) {
+          correctNumberedListsOrderToPrev(this.doc, this.model, false);
+        }
+        // if list is not numbered, order should be null
+        if (type !== 'numbered' && order !== null) {
+          this.model.order = null;
+        }
+      })
+    );
   }
 
   override async getUpdateComplete() {
@@ -116,7 +134,7 @@ export class ListBlockComponent extends BlockComponent<
     const collapsed = this.doc.readonly
       ? this._isCollapsedWhenReadOnly
       : !!model.collapsed;
-    const listIcon = ListIcon(model, !collapsed, _onClickIcon);
+    const listIcon = getListIcon(model, !collapsed, _onClickIcon);
 
     const checked =
       this.model.type === 'todo' && this.model.checked
@@ -124,8 +142,10 @@ export class ListBlockComponent extends BlockComponent<
         : '';
 
     const children = html`<div
-      class="affine-block-children-container"
-      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
+      class="affine-block-children-container ${collapsed
+        ? 'affine-list__collapsed'
+        : ''}"
+      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px;"
     >
       ${this.renderChildren(this.model)}
     </div>`;
@@ -151,7 +171,7 @@ export class ListBlockComponent extends BlockComponent<
           ></rich-text>
         </div>
 
-        ${collapsed ? nothing : children}
+        ${children}
       </div>
     `;
   }
@@ -179,17 +199,15 @@ export class ListBlockComponent extends BlockComponent<
   }
 
   override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockElement>(
-        'affine-note, affine-edgeless-note, affine-edgeless-text'
-      );
+    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
+      const el = this.closest<BlockComponent>(NOTE_SELECTOR);
       return el;
     }
-    return this.rootElement;
+    return this.rootComponent;
   }
 
   @state()
-  private accessor _isCollapsedWhenReadOnly = !!this.model?.collapsed;
+  private accessor _isCollapsedWhenReadOnly = false;
 
   @query('rich-text')
   private accessor _richTextElement: RichText | null = null;

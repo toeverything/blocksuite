@@ -10,10 +10,8 @@ import type {
   CellRenderProps,
   DataViewCellLifeCycle,
 } from '../../../column/index.js';
-import type {
-  DataViewKanbanColumnManager,
-  DataViewKanbanManager,
-} from './kanban-view-manager.js';
+import type { Column } from '../../../view-manager/column.js';
+import type { KanbanSingleView } from './kanban-view-manager.js';
 import type { KanbanViewSelection } from './types.js';
 
 import { renderUniLit } from '../../../utils/uni-component/uni-component.js';
@@ -103,7 +101,7 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
       if (e.shiftKey) return;
 
       if (!this.editing) {
-        this.selectCurrentCell(!this.column.readonly);
+        this.selectCurrentCell(!this.column.readonly$.value);
       }
     });
   }
@@ -122,13 +120,13 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const props: CellRenderProps = {
-      view: this.view,
-      column: this.column,
-      rowId: this.cardId,
+      cell: this.column.cellGet(this.cardId),
       isEditing: this.editing,
       selectCurrentCell: this.selectCurrentCell,
     };
-    const { view, edit } = this.column.renderer;
+    const renderer = this.column.renderer$.value;
+    if (!renderer) return;
+    const { view, edit } = renderer;
     this.style.border = this.isFocus
       ? '1px solid var(--affine-primary-color)'
       : '';
@@ -162,7 +160,7 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   accessor cardId!: string;
 
   @property({ attribute: false })
-  accessor column!: DataViewKanbanColumnManager;
+  accessor column!: Column;
 
   @property({ attribute: false })
   accessor contentOnly = false;
@@ -177,7 +175,7 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   accessor isFocus = false;
 
   @property({ attribute: false })
-  accessor view!: DataViewKanbanManager;
+  accessor view!: KanbanSingleView;
 }
 
 declare global {

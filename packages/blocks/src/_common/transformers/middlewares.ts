@@ -3,9 +3,11 @@ import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
+import type { EmbedLinkedDocModel } from '../../embed-linked-doc-block/index.js';
+import type { EmbedSyncedDocModel } from '../../embed-synced-doc-block/index.js';
 import type { ListBlockModel } from '../../list-block/index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
-import type { SurfaceRefBlockModel } from '../../surface-ref-block/surface-ref-model.js';
+import type { SurfaceRefBlockModel } from '../../surface-ref-block/index.js';
 
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 
@@ -70,17 +72,49 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
     ) {
       const model = payload.model as SurfaceRefBlockModel;
       const original = model.reference;
+      // If there exists a replacement, replace the reference with the new id.
+      // Otherwise, keep the original reference as the original block might exist.
       if (idMap.has(original)) {
         model.reference = idMap.get(original)!;
+      }
+    }
+
+    if (
+      payload.type === 'block' &&
+      payload.snapshot.flavour === 'affine:embed-linked-doc'
+    ) {
+      const model = payload.model as EmbedLinkedDocModel;
+      const original = model.pageId;
+      if (idMap.has(original)) {
+        model.pageId = idMap.get(original)!;
       } else {
         const newId = collection.idGenerator();
         idMap.set(original, newId);
-        model.reference = newId;
+        model.pageId = newId;
+      }
+    }
+
+    if (
+      payload.type === 'block' &&
+      payload.snapshot.flavour === 'affine:embed-synced-doc'
+    ) {
+      const model = payload.model as EmbedSyncedDocModel;
+      const original = model.pageId;
+      if (idMap.has(original)) {
+        model.pageId = idMap.get(original)!;
+      } else {
+        const newId = collection.idGenerator();
+        idMap.set(original, newId);
+        model.pageId = newId;
       }
     }
   });
   slots.beforeImport.on(payload => {
     if (payload.type === 'page') {
+      if (idMap.has(payload.snapshot.meta.id)) {
+        payload.snapshot.meta.id = idMap.get(payload.snapshot.meta.id)!;
+        return;
+      }
       const newId = collection.idGenerator();
       idMap.set(payload.snapshot.meta.id, newId);
       payload.snapshot.meta.id = newId;

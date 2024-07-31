@@ -1,8 +1,9 @@
 import type { BlockModel } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
-import type { BlockElement } from '../view/index.js';
+import type { BlockComponent } from '../view/index.js';
 
 import { PathFinder } from '../utils/index.js';
 import {
@@ -40,6 +41,8 @@ const eventNames = [
   'dragStart',
   'dragMove',
   'dragEnd',
+
+  'pinch',
 
   'keyDown',
   'keyUp',
@@ -217,7 +220,7 @@ export class UIEventDispatcher {
 
     // TODO(mirone/#6534): find a better way to get block element from a node
     const el = target instanceof Element ? target : target.parentElement;
-    const block = el?.closest<BlockElement>('[data-block-id]');
+    const block = el?.closest<BlockComponent>('[data-block-id]');
 
     const path = block?.path;
     if (!path) {
@@ -259,7 +262,10 @@ export class UIEventDispatcher {
         break;
       }
       default: {
-        throw new Error(`Unknown event scope source: ${state.sourceType}`);
+        throw new BlockSuiteError(
+          ErrorCode.EventDispatcherError,
+          `Unknown event scope source: ${state.sourceType}`
+        );
       }
     }
 

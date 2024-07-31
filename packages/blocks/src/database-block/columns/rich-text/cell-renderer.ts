@@ -102,7 +102,7 @@ export class RichTextCell extends BaseCellRenderer<Text> {
 
   override render() {
     if (!this.service) return nothing;
-    if (!this.value) {
+    if (!this.value || !(this.value instanceof Text)) {
       return html`<div class="affine-database-rich-text"></div>`;
     }
     return keyed(
@@ -306,7 +306,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
   override render() {
     if (!this.service) return nothing;
-
     return html`<rich-text
       .yText=${this.value}
       .inlineEventSource=${this.topContenteditableElement}

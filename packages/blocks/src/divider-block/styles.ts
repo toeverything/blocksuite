@@ -11,7 +11,7 @@ export const dividerBlockStyles = css`
     padding: 18px 8px;
     margin-top: var(--affine-paragraph-space);
   }
-  hr {
+  .affine-divider-block-container hr {
     border: none;
     border-top: 1px solid var(--affine-divider-color);
     width: 100%;

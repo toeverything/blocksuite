@@ -1,6 +1,10 @@
 /// <reference types="@blocksuite/global" />
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Point } from '@blocksuite/global/utils';
+
 import { mindMap } from './_common/mind-map/index.js';
-import { Point, matchFlavours } from './_common/utils/index.js';
+import { matchFlavours } from './_common/utils/index.js';
 import './code-block/affine-code-line.js';
 import './database-block/index.js';
 import './divider-block/index.js';
@@ -13,7 +17,6 @@ import { splitElements } from './root-block/edgeless/utils/clipboard-utils.js';
 import { isCanvasElement } from './root-block/edgeless/utils/query.js';
 // manual import to avoid being tree-shaken
 import './root-block/index.js';
-import { deserializeXYWH } from './surface-block/index.js';
 import './surface-ref-block/index.js';
 
 export * from './_common/adapters/index.js';
@@ -37,7 +40,7 @@ export {
 } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
-  EmbedBlockElement,
+  EmbedBlockComponent,
   createEmbedBlockSchema,
   defineEmbedModel,
 } from './_common/embed-block-helper/index.js';
@@ -67,10 +70,7 @@ export {
   SizeVariables,
   StyleVariables,
 } from './_common/theme/css-variables.js';
-export {
-  ThemeObserver,
-  extractCssVariables,
-} from './_common/theme/theme-observer.js';
+export { ThemeObserver } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
 export {
   type AbstractEditor,
@@ -86,7 +86,6 @@ export {
 } from './_common/utils/index.js';
 export { createDefaultDoc } from './_common/utils/init.js';
 export {
-  getThemeMode,
   isInsideEdgelessEditor,
   isInsidePageEditor,
 } from './_common/utils/query.js';
@@ -125,7 +124,6 @@ export * from './schemas.js';
 export * from './specs/index.js';
 export {
   AffineCanvasTextFonts,
-  Bound,
   BrushElementModel,
   CanvasElementType,
   CommunityCanvasTextFonts,
@@ -139,7 +137,6 @@ export {
   MindmapStyle,
   MindmapSurfaceBlock,
   type PointStyle,
-  type SerializedXYWH,
   ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
@@ -184,7 +181,8 @@ if (env[importIdentifier] === true) {
 }
 
 if (typeof window === 'undefined') {
-  throw new Error(
+  throw new BlockSuiteError(
+    ErrorCode.NoneSupportedSSRError,
     'Seems like you are importing @blocksuite/blocks in SSR mode. Which is not supported for now.'
   );
 }

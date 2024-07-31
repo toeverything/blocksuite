@@ -1,4 +1,4 @@
-import type { IVec, IVec3 } from '../../../utils/vec.js';
+import type { IVec, IVec3 } from '@blocksuite/global/utils';
 
 import { getStroke } from '../../../perfect-freehand/getStroke.js';
 

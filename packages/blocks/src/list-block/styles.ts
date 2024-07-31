@@ -64,6 +64,10 @@ export const toggleStyles = css`
   .with-drag-handle .affine-block-children-container .toggle-icon {
     opacity: 0;
   }
+
+  .affine-list__collapsed {
+    display: none;
+  }
 `;
 
 export const listBlockStyles = css`

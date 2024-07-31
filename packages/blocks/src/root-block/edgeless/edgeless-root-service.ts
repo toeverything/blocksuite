@@ -1,10 +1,10 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type { IBound } from '@blocksuite/global/utils';
 
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { IBound } from '../../surface-block/consts.js';
 import type {
   CanvasElementType,
   ConnectorElementModel,
@@ -20,7 +20,7 @@ import type { EdgelessTool } from './types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { clamp } from '../../_common/utils/math.js';
 import {
-  type IHitTestOptions,
+  type PointTestOptions,
   SurfaceGroupLikeModel,
 } from '../../surface-block/element-model/base.js';
 import {
@@ -29,9 +29,8 @@ import {
 } from '../../surface-block/index.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
-import { Bound } from '../../surface-block/utils/bound.js';
 import { RootService, type TelemetryEvent } from '../root-service.js';
-import { EdgelessBlockModel } from './edgeless-block-model.js';
+import { GfxBlockModel } from './block-model.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
@@ -64,13 +63,15 @@ export type ElementCreationSource =
   | 'canvas:paste'
   | 'context-menu'
   | 'ai'
-  | 'internal';
+  | 'internal'
+  | 'conversation'
+  | 'manually save';
 
 declare module '@blocksuite/blocks' {
   interface ElementCreationEvent extends TelemetryEvent {
-    segment?: 'toolbar';
+    segment?: 'toolbar' | 'whiteboard' | 'right sidebar';
     page: 'whiteboard editor';
-    module?: 'toolbar';
+    module?: 'toolbar' | 'canvas' | 'ai chat panel';
     control?: ElementCreationSource;
   }
 
@@ -102,7 +103,7 @@ export class EdgelessRootService extends RootService {
     cursorUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
       blocks: BlockSuite.EdgelessBlockModelType[];
-      shapes: BlockSuite.SurfaceModelType[];
+      shapes: BlockSuite.SurfaceModel[];
     }>(),
     readonlyUpdated: new Slot<boolean>(),
     draggingAreaUpdated: new Slot(),
@@ -165,7 +166,7 @@ export class EdgelessRootService extends RootService {
     props['index'] = this.generateIndex(flavour);
 
     this.editPropsStore.applyLastProps(
-      flavour as BlockSuite.EdgelessModelKeyType,
+      flavour as BlockSuite.EdgelessModelKeys,
       props
     );
 
@@ -190,7 +191,7 @@ export class EdgelessRootService extends RootService {
     return this._surface.addElement(props as T & { type: string });
   }
 
-  createGroup(elements: BlockSuite.EdgelessModelType[] | string[]) {
+  createGroup(elements: BlockSuite.EdgelessModel[] | string[]) {
     const groups = this.elements.filter(
       el => el.type === 'group'
     ) as GroupElementModel[];
@@ -292,22 +293,22 @@ export class EdgelessRootService extends RootService {
     return this._layer.generateIndex(type);
   }
 
-  getConnectors(element: BlockSuite.EdgelessModelType | string) {
+  getConnectors(element: BlockSuite.EdgelessModel | string) {
     const id = typeof element === 'string' ? element : element.id;
 
     return this.surface.getConnectors(id) as ConnectorElementModel[];
   }
 
-  getElementById(id: string): BlockSuite.EdgelessModelType | null {
+  getElementById(id: string): BlockSuite.EdgelessModel | null {
     const el =
       this._surface.getElementById(id) ??
       (this.doc.getBlockById(id) as BlockSuite.EdgelessBlockModelType | null);
     return el;
   }
 
-  getElementsByType<
-    K extends Parameters<SurfaceBlockModel['getElementsByType']>[0],
-  >(type: K) {
+  getElementsByType<K extends keyof BlockSuite.SurfaceElementModelMap>(
+    type: K
+  ): BlockSuite.SurfaceElementModelMap[K][] {
     return this.surface.getElementsByType(type);
   }
 
@@ -378,19 +379,19 @@ export class EdgelessRootService extends RootService {
     x: number,
     y: number,
     options: { all: true; expand?: number }
-  ): BlockSuite.EdgelessModelType[];
+  ): BlockSuite.EdgelessModel[];
 
   pickElement(
     x: number,
     y: number,
     options?: { all: false; expand?: number }
-  ): BlockSuite.EdgelessModelType | null;
+  ): BlockSuite.EdgelessModel | null;
 
   pickElement(
     x: number,
     y: number,
-    options: IHitTestOptions = { all: false, expand: 10 }
-  ): BlockSuite.EdgelessModelType[] | BlockSuite.EdgelessModelType | null {
+    options: PointTestOptions = { all: false, expand: 10 }
+  ): BlockSuite.EdgelessModel[] | BlockSuite.EdgelessModel | null {
     options.expand ??= 10;
     options.zoom = this._viewport.zoom;
 
@@ -404,26 +405,27 @@ export class EdgelessRootService extends RootService {
       const candidates = this._layer.canvasGrid.search(hitTestBound);
       const picked = candidates.filter(
         element =>
-          element.hitTest(x, y, options, this.host) ||
+          element.includesPoint(x, y, options, this.host) ||
           element.externalBound?.isPointInBound([x, y])
       );
-      return picked as BlockSuite.EdgelessModelType[];
+
+      return picked as BlockSuite.EdgelessModel[];
     };
     const pickBlock = () => {
       const candidates = this._layer.blocksGrid.search(hitTestBound);
       const picked = candidates.filter(
         element =>
-          element.hitTest(x, y, options, this.host) ||
+          element.includesPoint(x, y, options, this.host) ||
           element.externalBound?.isPointInBound([x, y])
       );
-      return picked as BlockSuite.EdgelessModelType[];
+      return picked as BlockSuite.EdgelessModel[];
     };
     const pickFrames = () => {
       return this._layer.frames.filter(
         frame =>
-          frame.hitTest(x, y, options) ||
+          frame.includesPoint(x, y, options) ||
           frame.externalBound?.isPointInBound([x, y])
-      ) as BlockSuite.EdgelessModelType[];
+      ) as BlockSuite.EdgelessModel[];
     };
 
     const frames = pickFrames();
@@ -436,7 +438,7 @@ export class EdgelessRootService extends RootService {
 
       results = results.concat(frames);
 
-      return options.all ? results : last(results) ?? null;
+      return options.all ? results : (last(results) ?? null);
     } else {
       return last(frames) ?? null;
     }
@@ -450,13 +452,13 @@ export class EdgelessRootService extends RootService {
   pickElementInGroup(
     x: number,
     y: number,
-    options?: IHitTestOptions
-  ): BlockSuite.EdgelessModelType | null {
+    options?: PointTestOptions
+  ): BlockSuite.EdgelessModel | null {
     const selectionManager = this._selection;
     const results = this.pickElement(x, y, {
       ...options,
       all: true,
-    }) as BlockSuite.EdgelessModelType[];
+    }) as BlockSuite.EdgelessModel[];
 
     let picked = last(results) ?? null;
     const { activeGroup } = selectionManager;
@@ -484,7 +486,7 @@ export class EdgelessRootService extends RootService {
       }
     }
 
-    return (picked ?? first) as BlockSuite.EdgelessModelType | null;
+    return (picked ?? first) as BlockSuite.EdgelessModel | null;
   }
 
   /**
@@ -495,43 +497,43 @@ export class EdgelessRootService extends RootService {
   pickElementsByBound(
     bound: IBound | Bound,
     type?: 'all'
-  ): BlockSuite.EdgelessModelType[];
+  ): BlockSuite.EdgelessModel[];
 
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'blocks' | 'frame'
-  ): EdgelessBlockModel[];
+  ): GfxBlockModel[];
 
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'canvas'
-  ): BlockSuite.SurfaceElementModelType[];
+  ): BlockSuite.SurfaceElementModel[];
 
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'frame' | 'blocks' | 'canvas' | 'all' = 'all'
-  ): BlockSuite.EdgelessModelType[] {
+  ): BlockSuite.EdgelessModel[] {
     bound = new Bound(bound.x, bound.y, bound.w, bound.h);
 
     const pickCanvasElement = () => {
       const candidates = this._layer.canvasGrid.search(bound);
       const picked = candidates.filter(element =>
-        element.boxSelect(bound as Bound)
+        element.intersectsBound(bound as Bound)
       );
-      return picked as BlockSuite.EdgelessModelType[];
+      return picked as BlockSuite.EdgelessModel[];
     };
     const pickBlock = () => {
       const candidates = this._layer.blocksGrid.search(bound);
       const picked = candidates.filter(element =>
-        element.boxSelect(bound as Bound)
+        element.intersectsBound(bound as Bound)
       );
-      return picked as BlockSuite.EdgelessModelType[];
+      return picked as BlockSuite.EdgelessModel[];
     };
     const pickFrames = () => {
       const candidates = this._layer.framesGrid.search(bound);
       return candidates.filter(frame =>
-        frame.boxSelect(bound as Bound)
-      ) as BlockSuite.EdgelessModelType[];
+        frame.intersectsBound(bound as Bound)
+      ) as BlockSuite.EdgelessModel[];
     };
 
     switch (type) {
@@ -553,11 +555,11 @@ export class EdgelessRootService extends RootService {
     return this.tool.register(Tool);
   }
 
-  removeElement(id: string | BlockSuite.EdgelessModelType) {
+  removeElement(id: string | BlockSuite.EdgelessModel) {
     id = typeof id === 'string' ? id : id.id;
 
     const el = this.getElementById(id);
-    if (el instanceof EdgelessBlockModel) {
+    if (el instanceof GfxBlockModel) {
       this.doc.deleteBlock(el);
       return;
     }
@@ -569,13 +571,13 @@ export class EdgelessRootService extends RootService {
   }
 
   reorderElement(
-    element: BlockSuite.EdgelessModelType,
+    element: BlockSuite.EdgelessModel,
     direction: ReorderingDirection
   ) {
     const index = this._layer.getReorderedIndex(element, direction);
 
     // block should be updated in transaction
-    if (element instanceof EdgelessBlockModel) {
+    if (element instanceof GfxBlockModel) {
       this.doc.transact(() => {
         element.index = index;
       });
@@ -658,7 +660,7 @@ export class EdgelessRootService extends RootService {
     const element = this._surface.getElementById(id);
     if (element) {
       this.editPropsStore.recordLastProps(
-        element.type as BlockSuite.EdgelessModelKeyType,
+        element.type as BlockSuite.EdgelessModelKeys,
         props
       );
       this._surface.updateElement(id, props);
@@ -668,7 +670,7 @@ export class EdgelessRootService extends RootService {
     const block = this.doc.getBlockById(id);
     if (block) {
       this.editPropsStore.recordLastProps(
-        block.flavour as BlockSuite.EdgelessModelKeyType,
+        block.flavour as BlockSuite.EdgelessModelKeys,
         props
       );
       this.doc.updateBlock(block, props);
@@ -681,7 +683,7 @@ export class EdgelessRootService extends RootService {
   }
 
   get blocks() {
-    return (this.frames as EdgelessBlockModel[]).concat(this._layer.blocks);
+    return (this.frames as GfxBlockModel[]).concat(this._layer.blocks);
   }
 
   /**
@@ -711,7 +713,7 @@ export class EdgelessRootService extends RootService {
   }
 
   override get host() {
-    return this.std.host as EditorHost;
+    return this.std.host;
   }
 
   get layer() {

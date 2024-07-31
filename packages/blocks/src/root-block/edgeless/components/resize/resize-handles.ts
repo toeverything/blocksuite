@@ -1,6 +1,6 @@
-import { html, nothing } from 'lit';
+import type { IVec } from '@blocksuite/global/utils';
 
-import type { IVec } from '../../../../surface-block/index.js';
+import { html, nothing } from 'lit';
 
 export enum HandleDirection {
   Bottom = 'bottom',

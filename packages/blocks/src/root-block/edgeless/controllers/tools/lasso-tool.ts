@@ -1,15 +1,15 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
+import type { IPoint } from '@blocksuite/global/utils';
 
-import { noop } from '@blocksuite/global/utils';
+import { Bound, Vec, noop } from '@blocksuite/global/utils';
 
 import type { EdgelessTool } from '../../types.js';
 
-import { type IPoint, LassoMode } from '../../../../_common/types.js';
-import { Bound } from '../../../../surface-block/index.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
+import { LassoMode } from '../../../../_common/types.js';
 import {
-  type IVec,
   Overlay,
-  Vec,
   getBoundFromPoints,
   getSvgPathFromStroke,
 } from '../../../../surface-block/index.js';
@@ -28,12 +28,12 @@ class LassoOverlay extends Overlay {
 
   render(ctx: CanvasRenderingContext2D): void {
     const path = new Path2D(this.d);
-    const { zoom } = this._renderer.viewport;
+    const zoom = this._renderer?.viewport.zoom ?? 1.0;
     ctx.save();
-    const primaryColor = this._renderer.getVariableColor(
+    const primaryColor = ThemeObserver.getPropertyValue(
       '--affine-primary-color'
     );
-    const strokeColor = this._renderer.getVariableColor(
+    const strokeColor = ThemeObserver.getPropertyValue(
       '--affine-secondary-color'
     );
     if (this.startPoint) {

@@ -1,16 +1,17 @@
+import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
-
 import { NOTE_WIDTH } from '../_common/consts.js';
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
 import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_SHADOW,
 } from '../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../_common/types.js';
-import { StrokeStyle } from '../surface-block/consts.js';
-import { Bound } from '../surface-block/utils/bound.js';
+import { type Color, StrokeStyle } from '../surface-block/consts.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
@@ -54,7 +55,7 @@ export const NoteBlockSchema = defineBlockSchema({
 
 type NoteProps = {
   xywh: SerializedXYWH;
-  background: string;
+  background: Color;
   index: string;
   displayMode: NoteDisplayMode;
   edgeless: NoteEdgelessProps;
@@ -81,26 +82,29 @@ type NoteEdgelessProps = {
   scale?: number;
 };
 
-export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
+export class NoteBlockModel
+  extends GfxCompatible<NoteProps>(BlockModel)
+  implements GfxElementGeometry
+{
   private _isSelectable(): boolean {
     return this.displayMode !== NoteDisplayMode.DocOnly;
   }
 
-  override boxSelect(bound: Bound): boolean {
+  override containsBound(bounds: Bound): boolean {
     if (!this._isSelectable()) return false;
-    return super.boxSelect(bound);
+    return super.containsBound(bounds);
   }
 
-  override containedByBounds(bounds: Bound): boolean {
-    if (!this._isSelectable()) return false;
-    return super.containedByBounds(bounds);
-  }
-
-  override hitTest(x: number, y: number): boolean {
+  override includesPoint(x: number, y: number): boolean {
     if (!this._isSelectable()) return false;
 
     const bound = Bound.deserialize(this.xywh);
     return bound.isPointInBound([x, y], 0);
+  }
+
+  override intersectsBound(bound: Bound): boolean {
+    if (!this._isSelectable()) return false;
+    return super.intersectsBound(bound);
   }
 }
 

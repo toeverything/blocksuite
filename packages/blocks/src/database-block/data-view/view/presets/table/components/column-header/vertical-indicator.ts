@@ -5,7 +5,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { DataViewTableColumnManager } from '../../table-view-manager.js';
+import type { TableColumn } from '../../table-view-manager.js';
 
 import { startDrag } from '../../../../../utils/drag.js';
 import { getResultInRange } from '../../../../../utils/utils.js';
@@ -118,9 +118,9 @@ export const startDragWidthAdjustmentBar = (
   evt: PointerEvent,
   tableContainer: HTMLElement,
   width: number,
-  column: DataViewTableColumnManager
+  column: TableColumn
 ) => {
-  const scale = width / column.width;
+  const scale = width / column.width$.value;
   const tableRect = tableContainer.getBoundingClientRect();
   const left =
     tableContainer
@@ -130,10 +130,10 @@ export const startDragWidthAdjustmentBar = (
       ?.getBoundingClientRect().left ?? 0;
   const rectList = getTableGroupRects(tableContainer);
   const preview = getVerticalIndicator();
-  preview.display(column.width * scale, tableRect.top, rectList, left);
+  preview.display(column.width$.value * scale, tableRect.top, rectList, left);
   tableContainer.style.pointerEvents = 'none';
   startDrag<{ width: number }>(evt, {
-    onDrag: () => ({ width: column.width }),
+    onDrag: () => ({ width: column.width$.value }),
     onMove: ({ x }) => {
       const width = Math.round(
         getResultInRange((x - left) / scale, DEFAULT_COLUMN_MIN_WIDTH, Infinity)

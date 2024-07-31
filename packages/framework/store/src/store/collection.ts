@@ -1,9 +1,5 @@
-import {
-  type Logger,
-  NoopLogger,
-  Slot,
-  assertExists,
-} from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { type Logger, NoopLogger, Slot } from '@blocksuite/global/utils';
 import {
   AwarenessEngine,
   type AwarenessSource,
@@ -20,7 +16,7 @@ import * as Y from 'yjs';
 
 import type { Schema } from '../schema/index.js';
 import type { IdGenerator } from '../utils/id-generator.js';
-import type { BlockSelector, Doc } from './doc/index.js';
+import type { Doc, Query } from './doc/index.js';
 import type { IdGeneratorType } from './id.js';
 
 import {
@@ -65,6 +61,7 @@ const FLAGS_PRESET = {
   enable_edgeless_text: true,
   enable_ai_onboarding: false,
   enable_ai_chat_block: false,
+  enable_color_picker: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 
@@ -190,10 +187,13 @@ export class DocCollection extends DocCollectionAddonType {
    * If the `init` parameter is passed, a `surface`, `note`, and `paragraph` block
    * will be created in the doc simultaneously.
    */
-  createDoc(options: { id?: string; selector?: BlockSelector } = {}) {
-    const { id: docId = this.idGenerator(), selector } = options;
+  createDoc(options: { id?: string; query?: Query } = {}) {
+    const { id: docId = this.idGenerator(), query } = options;
     if (this._hasDoc(docId)) {
-      throw new Error('doc already exists');
+      throw new BlockSuiteError(
+        ErrorCode.DocCollectionError,
+        'doc already exists'
+      );
     }
 
     this.meta.addDocMeta({
@@ -202,7 +202,7 @@ export class DocCollection extends DocCollectionAddonType {
       createDate: Date.now(),
       tags: [],
     });
-    return this.getDoc(docId, { selector }) as Doc;
+    return this.getDoc(docId, { query }) as Doc;
   }
 
   /**
@@ -227,7 +227,12 @@ export class DocCollection extends DocCollectionAddonType {
 
   removeDoc(docId: string) {
     const docMeta = this.meta.getDocMeta(docId);
-    assertExists(docMeta);
+    if (!docMeta) {
+      throw new BlockSuiteError(
+        ErrorCode.DocCollectionError,
+        `doc meta not found: ${docId}`
+      );
+    }
 
     const blockCollection = this.getBlockCollection(docId);
     if (!blockCollection) return;

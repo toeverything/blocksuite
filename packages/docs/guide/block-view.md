@@ -6,11 +6,11 @@ By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/li
 
 ## Web Component Block View
 
-We provide a `BlockElement` class to help building a lit-based block view.
+We provide a `BlockComponent` class to help building a lit-based block view.
 
 ```ts
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
-import { BlockElement } from '@blocksuite/lit';
+import { BlockComponent } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -24,7 +24,7 @@ const myBlockSchema = defineBlockSchema({
 type MyBlockModel = SchemaToModel<typeof myBlockSchema>;
 
 @customElements('my-block')
-class MyBlockView extends BlockElement<MyBlockModel> {
+class MyBlockView extends BlockComponent<MyBlockModel> {
   override render() {
     return html`
       <div>
@@ -41,7 +41,7 @@ A block can have children, and we can render them by using `renderModelChildren`
 
 ```ts
 @customElements('my-block')
-class MyBlockView extends BlockElement<MyBlockModel> {
+class MyBlockView extends BlockComponent<MyBlockModel> {
   override render() {
     return html`
       <div>
@@ -59,7 +59,7 @@ It's easy to get and set props in a block view.
 
 ```ts
 @customElements('my-block')
-class MyBlockView extends BlockElement<MyBlockModel> {
+class MyBlockView extends BlockComponent<MyBlockModel> {
   private _onClick = () => {
     this.doc.updateBlock(this.model, {
       count: this.model.count + 1,
@@ -82,7 +82,7 @@ It's also possible to watch prop changes to create something like `computed prop
 
 ```ts
 @customElements('my-block')
-class MyBlockView extends BlockElement<MyBlockModel> {
+class MyBlockView extends BlockComponent<MyBlockModel> {
   private _yen = '0¥';
 
   override connectedCallback() {

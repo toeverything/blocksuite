@@ -1,16 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IBound, IVec } from '@blocksuite/global/utils';
 
-import { noop } from '@blocksuite/global/utils';
+import { Bound, noop } from '@blocksuite/global/utils';
 
-import type {
-  ConnectorMode,
-  IBound,
-  IVec,
-} from '../../../../surface-block/index.js';
+import type { ConnectorMode } from '../../../../surface-block/index.js';
 import type { EdgelessTool } from '../../types.js';
 
 import {
-  Bound,
   CanvasElementType,
   type Connection,
   type ConnectorElementModel,
@@ -214,7 +210,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     noop();
   }
 
-  quickConnect(point: IVec, element: BlockSuite.EdgelessModelType) {
+  quickConnect(point: IVec, element: BlockSuite.EdgelessModel) {
     this._startPoint = this._service.viewport.toModelCoord(point[0], point[1]);
     this._mode = ConnectorToolMode.Quick;
     this._sourceBounds = Bound.deserialize(element.xywh);

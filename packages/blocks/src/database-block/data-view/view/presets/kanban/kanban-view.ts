@@ -5,7 +5,7 @@ import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
 
 import type { GroupHelper } from '../../../common/group-by/helper.js';
-import type { DataViewKanbanManager } from './kanban-view-manager.js';
+import type { KanbanSingleView } from './kanban-view-manager.js';
 import type { KanbanViewSelectionWithType } from './types.js';
 
 import { popMenu } from '../../../../../_common/components/index.js';
@@ -94,7 +94,7 @@ const styles = css`
 
 @customElement('affine-data-view-kanban')
 export class DataViewKanban extends DataViewBase<
-  DataViewKanbanManager,
+  KanbanSingleView,
   KanbanViewSelectionWithType
 > {
   private dragController = new KanbanDragController(this);
@@ -133,7 +133,7 @@ export class DataViewKanban extends DataViewBase<
             onComplete: text => {
               const column = this.groupHelper?.column;
               if (column) {
-                column.updateData(() => addGroup(text, column.data) as never);
+                column.updateData(() => addGroup(text, column.data$) as never);
               }
             },
           },
@@ -150,18 +150,6 @@ export class DataViewKanban extends DataViewBase<
   };
 
   selectionController = new KanbanSelectionController(this);
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-    if (this.view.readonly) {
-      return;
-    }
-  }
 
   override firstUpdated() {
     const sortable = Sortable.create(this.groups, {
@@ -233,8 +221,6 @@ export class DataViewKanban extends DataViewBase<
       ${renderUniLit(this.headerWidget, {
         view: this.view,
         viewMethods: this,
-        viewSource: this.viewSource,
-        dataSource: this.dataSource,
       })}
       <div class="affine-data-view-kanban-groups" @wheel="${this.onWheel}">
         ${repeat(

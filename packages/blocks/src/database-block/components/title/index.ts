@@ -120,7 +120,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       <rich-text
         .yText=${this.titleText.yText}
         .inlineEventSource=${this.topContenteditableElement}
-        .undoManager=${this.topContenteditableElement?.doc.history}
+        .undoManager=${this.database?.doc.history}
         .enableFormat=${false}
         .readonly=${this.readonly}
         .verticalScrollContainerGetter=${() =>
@@ -137,19 +137,17 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     </div>`;
   }
 
+  get database() {
+    return this.closest<DatabaseBlockComponent>('affine-database');
+  }
+
   get inlineEditor() {
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
   }
 
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
   get topContenteditableElement() {
-    const databaseBlock =
-      this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.topContenteditableElement;
+    return this.database?.topContenteditableElement;
   }
 
   @state()

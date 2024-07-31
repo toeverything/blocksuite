@@ -1,5 +1,6 @@
 import type { Doc } from '@blocksuite/store';
 
+import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -8,8 +9,8 @@ import type { EdgelessRootService } from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 
-import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
-import { EdgelessBlockModel } from './edgeless-block-model.js';
+import { Overlay, type RoughCanvas } from '../../surface-block/index.js';
+import { GfxBlockModel } from './block-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';
 
@@ -31,14 +32,14 @@ export class FrameOverlay extends Overlay {
 
   clear() {
     this.bound = null;
-    this._renderer.refresh();
+    this._renderer?.refresh();
   }
 
   highlight(frame: FrameBlockModel) {
     const bound = Bound.deserialize(frame.xywh);
 
     this.bound = bound;
-    this._renderer.refresh();
+    this._renderer?.refresh();
   }
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {
@@ -110,7 +111,7 @@ export class EdgelessFrameManager {
 
   getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: BlockSuite.EdgelessModelType[] =
+    const elements: BlockSuite.EdgelessModel[] =
       this._rootService.layer.canvasGrid.search(bound, true);
 
     return elements.concat(
@@ -118,7 +119,7 @@ export class EdgelessFrameManager {
     );
   }
 
-  selectFrame(eles: BlockSuite.EdgelessModelType[]) {
+  selectFrame(eles: BlockSuite.EdgelessModel[]) {
     const frames = this._rootService.frames;
     if (frames.length === 0) return null;
 
@@ -172,7 +173,7 @@ export function getBlocksInFrame(
   ).concat(
     surfaceModel[0].children.filter(ele => {
       if (ele.id === model.id) return;
-      if (ele instanceof EdgelessBlockModel) {
+      if (ele instanceof GfxBlockModel) {
         const blockBound = Bound.deserialize(ele.xywh);
         return fullyContained
           ? bound.contains(blockBound)

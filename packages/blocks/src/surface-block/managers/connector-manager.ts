@@ -1,3 +1,9 @@
+import type { IVec, IVec3 } from '@blocksuite/global/utils';
+import type { IBound } from '@blocksuite/global/utils';
+
+import { Vec } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
+import { PointLocation } from '@blocksuite/global/utils';
 import {
   assertEquals,
   assertExists,
@@ -6,13 +12,11 @@ import {
 
 import type { Connectable } from '../../_common/types.js';
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
-import type { IBound } from '../consts.js';
 import type {
   Connection,
   ConnectorElementModel,
   LocalConnectorElementModel,
 } from '../element-model/connector.js';
-import type { IVec, IVec3 } from '../utils/vec.js';
 
 import { last } from '../../_common/utils/iterable.js';
 import { Overlay } from '../canvas-renderer/renderer.js';
@@ -22,7 +26,7 @@ import {
 } from '../element-model/connector.js';
 import { GroupElementModel } from '../element-model/group.js';
 import { AStarRunner } from '../utils/a-star.js';
-import { Bound, getBoundFromPoints } from '../utils/bound.js';
+import { getBoundFromPoints } from '../utils/bound.js';
 import {
   getBezierCurveBoundingBox,
   getBezierParameters,
@@ -39,8 +43,6 @@ import {
   sign,
   toRadian,
 } from '../utils/math-utils.js';
-import { PointLocation } from '../utils/point-location.js';
-import { Vec } from '../utils/vec.js';
 
 export type OrthogonalConnectorInput = {
   startBound: Bound | null;
@@ -96,14 +98,14 @@ export function calculateNearestLocation(
     ) as IVec;
 }
 
-function rBound(ele: BlockSuite.EdgelessModelType, anti = false): IBound {
+function rBound(ele: BlockSuite.EdgelessModel, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);
   return { ...bound, rotate: anti ? -ele.rotate : ele.rotate };
 }
 
 export function isConnectorAndBindingsAllSelected(
   connector: ConnectorElementModel | LocalConnectorElementModel,
-  selected: BlockSuite.EdgelessModelType[]
+  selected: BlockSuite.EdgelessModel[]
 ) {
   const connectorSelected = selected.find(s => s.id === connector.id);
   if (!connectorSelected) {
@@ -127,7 +129,7 @@ export function isConnectorAndBindingsAllSelected(
   return false;
 }
 
-export function getAnchors(ele: BlockSuite.EdgelessModelType) {
+export function getAnchors(ele: BlockSuite.EdgelessModel) {
   const bound = Bound.deserialize(ele.xywh);
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
@@ -143,7 +145,7 @@ export function getAnchors(ele: BlockSuite.EdgelessModelType) {
       getPointFromBoundsWithRotation({ ...bound, rotate }, vec as IVec)
     )
     .forEach(vec => {
-      const rst = ele.intersectWithLine(bound.center as IVec, vec as IVec);
+      const rst = ele.getLineIntersections(bound.center as IVec, vec as IVec);
       assertExists(rst);
       const originPoint = getPointFromBoundsWithRotation(
         { ...bound, rotate: -rotate },
@@ -155,7 +157,7 @@ export function getAnchors(ele: BlockSuite.EdgelessModelType) {
 }
 
 function getConnectableRelativePosition(
-  connectable: BlockSuite.EdgelessModelType,
+  connectable: BlockSuite.EdgelessModel,
   position: IVec
 ) {
   const location = connectable.getRelativePointLocation(position as IVec);
@@ -834,7 +836,7 @@ export class ConnectionOverlay extends Overlay {
   _clearRect() {
     this.points = [];
     this.highlightPoint = null;
-    this._renderer.refresh();
+    this._renderer?.refresh();
   }
 
   private _findConnectablesInViews() {
@@ -959,7 +961,7 @@ export class ConnectionOverlay extends Overlay {
           rBound(connectable, true),
           nearestPoint
         );
-        this._renderer.refresh();
+        this._renderer?.refresh();
         target = connectable;
         result = {
           id: connectable.id,
@@ -973,7 +975,7 @@ export class ConnectionOverlay extends Overlay {
 
       // if not, check if in inside of the element
       if (
-        connectable.hitTest(
+        connectable.includesPoint(
           point[0],
           point[1],
           {
@@ -1002,7 +1004,7 @@ export class ConnectionOverlay extends Overlay {
       };
     }
 
-    this._renderer.refresh();
+    this._renderer?.refresh();
 
     return result;
   }
@@ -1013,7 +1015,7 @@ export class ConnectorPathGenerator {
 
   constructor(
     private options: {
-      getElementById: (id: string) => BlockSuite.EdgelessModelType | null;
+      getElementById: (id: string) => BlockSuite.EdgelessModel | null;
     }
   ) {}
 
@@ -1343,7 +1345,7 @@ export class ConnectorPathGenerator {
       connector.mode === ConnectorMode.Curve
         ? getBezierCurveBoundingBox(getBezierParameters(points))
         : getBoundFromPoints(points);
-    const relativePoints = points.map(p => {
+    const relativePoints = points.map((p: PointLocation) => {
       return p.setVec(Vec.sub(p, [bound.x, bound.y]));
     });
 

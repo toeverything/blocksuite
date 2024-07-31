@@ -14,9 +14,11 @@ export interface BlockView<WidgetNames extends string = string> {
 export interface BlockSpec<
   WidgetNames extends string = string,
   Service extends BlockService = BlockService,
+  BlockConfig = object,
 > {
   schema: BlockSchemaType;
-  service?: BlockServiceConstructor<Service>;
   view: BlockView<WidgetNames>;
+  config?: BlockConfig;
+  service?: BlockServiceConstructor<Service>;
   setup?: (slots: BlockSpecSlots, disposableGroup: DisposableGroup) => void;
 }

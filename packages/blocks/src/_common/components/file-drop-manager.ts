@@ -1,17 +1,17 @@
 import type { BlockService } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { Point } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { IVec } from '../../surface-block/index.js';
 import type { DragIndicator } from './drag-indicator.js';
 
 import {
   type DropResult,
-  Point,
   calcDropTarget,
-  getClosestBlockElementByPoint,
+  getClosestBlockComponentByPoint,
   getModelByBlockComponent,
   isInsidePageEditor,
   matchFlavours,
@@ -87,7 +87,7 @@ export class FileDropManager {
 
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
-    const element = getClosestBlockElementByPoint(point.clone());
+    const element = getClosestBlockComponentByPoint(point.clone());
 
     let result: DropResult | null = null;
     if (element) {
@@ -134,7 +134,7 @@ export class FileDropManager {
   }
 
   get editorHost(): EditorHost {
-    return this._blockService.std.host as EditorHost;
+    return this._blockService.std.host;
   }
 
   get targetModel(): BlockModel | null {

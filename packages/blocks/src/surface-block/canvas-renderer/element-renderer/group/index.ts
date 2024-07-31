@@ -1,7 +1,8 @@
+import { Bound } from '@blocksuite/global/utils';
+
 import type { GroupElementModel } from '../../../element-model/group.js';
 import type { Renderer } from '../../renderer.js';
 
-import { Bound } from '../../../utils/bound.js';
 import { titleRenderParams } from './utils.js';
 
 export function group(
@@ -20,7 +21,7 @@ export function group(
   } else if (model.childElements.some(child => elements.includes(child.id))) {
     const bound = Bound.deserialize(xywh);
     ctx.setLineDash([2, 2]);
-    ctx.strokeStyle = renderer.getVariableColor('--affine-blue');
+    ctx.strokeStyle = renderer.getPropertyValue('--affine-blue');
     ctx.lineWidth = 1;
     ctx.strokeRect(0, 0, bound.w, bound.h);
 

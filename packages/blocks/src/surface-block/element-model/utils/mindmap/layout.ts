@@ -1,7 +1,8 @@
-import type { SerializedXYWH } from '../../../index.js';
-import type { MindmapElementModel } from '../../mindmap.js';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import { Bound } from '../../../utils/bound.js';
+import { Bound } from '@blocksuite/global/utils';
+
+import type { MindmapElementModel } from '../../mindmap.js';
 
 export const NODE_VERTICAL_SPACING = 45;
 export const NODE_HORIZONTAL_SPACING = 110;
@@ -25,7 +26,7 @@ export type MindmapNode = {
   id: string;
   detail: NodeDetail;
 
-  element: BlockSuite.SurfaceElementModelType;
+  element: BlockSuite.SurfaceElementModel;
   children: MindmapNode[];
 
   /**

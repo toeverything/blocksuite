@@ -1,6 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { SignalWatcher } from '@lit-labs/preact-signals';
+import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';
@@ -9,8 +9,8 @@ import type {
   CellRenderProps,
   DataViewCellLifeCycle,
 } from '../../../../column/index.js';
-import type { DataViewManager } from '../../../data-view-manager.js';
-import type { DataViewTableColumnManager } from '../table-view-manager.js';
+import type { SingleView } from '../../../../view-manager/single-view.js';
+import type { TableColumn } from '../table-view-manager.js';
 import type { TableViewSelection } from '../types.js';
 
 import { renderUniLit } from '../../../../utils/uni-component/index.js';
@@ -40,8 +40,12 @@ export class DatabaseCellContainer extends SignalWatcher(
     }
   `;
 
+  cell$ = computed(() => {
+    return this.column.cellGet(this.rowId);
+  });
+
   selectCurrentCell = (editing: boolean) => {
-    if (this.view.readonly) {
+    if (this.view.readonly$.value) {
       return;
     }
     const selectionView = this.selectionView;
@@ -74,7 +78,7 @@ export class DatabaseCellContainer extends SignalWatcher(
   }
 
   private get readonly() {
-    return this.column.readonly;
+    return this.column.readonly$.value;
   }
 
   private get selectionView() {
@@ -85,7 +89,7 @@ export class DatabaseCellContainer extends SignalWatcher(
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', () => {
       if (!this.isEditing) {
-        this.selectCurrentCell(!this.column.readonly);
+        this.selectCurrentCell(!this.column.readonly$.value);
       }
     });
   }
@@ -102,13 +106,14 @@ export class DatabaseCellContainer extends SignalWatcher(
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
-    const { edit, view } = this.column.renderer;
-
+    const renderer = this.column.renderer$.value;
+    if (!renderer) {
+      return;
+    }
+    const { edit, view } = renderer;
     const uni = !this.readonly && this.isEditing && edit != null ? edit : view;
     const props: CellRenderProps = {
-      view: this.view,
-      column: this.column,
-      rowId: this.rowId,
+      cell: this.cell$.value,
       isEditing: this.isEditing,
       selectCurrentCell: this.selectCurrentCell,
     };
@@ -132,7 +137,7 @@ export class DatabaseCellContainer extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor column!: DataViewTableColumnManager;
+  accessor column!: TableColumn;
 
   @property({ attribute: false })
   accessor columnId!: string;
@@ -150,7 +155,7 @@ export class DatabaseCellContainer extends SignalWatcher(
   accessor rowIndex!: number;
 
   @property({ attribute: false })
-  accessor view!: DataViewManager;
+  accessor view!: SingleView;
 }
 
 declare global {

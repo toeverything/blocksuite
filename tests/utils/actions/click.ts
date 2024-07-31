@@ -1,10 +1,10 @@
-import type { IPoint } from '@blocks/_common/types.js';
+import type { IPoint } from '@global/utils/index.js';
 import type { Page } from '@playwright/test';
 
 import { toViewCoord } from './edgeless.js';
 import { waitNextFrame } from './misc.js';
 
-function getDebugMenu(page: Page) {
+export function getDebugMenu(page: Page) {
   const debugMenu = page.locator('debug-menu');
   return {
     debugMenu,

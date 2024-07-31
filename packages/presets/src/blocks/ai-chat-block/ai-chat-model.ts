@@ -1,4 +1,6 @@
-import { type SerializedXYWH, selectable } from '@blocksuite/block-std';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
+import { GfxCompatible } from '@blocksuite/block-std/gfx';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 type AIChatProps = {
@@ -28,4 +30,4 @@ export const AIChatBlockSchema = defineBlockSchema({
   },
 });
 
-export class AIChatBlockModel extends selectable<AIChatProps>(BlockModel) {}
+export class AIChatBlockModel extends GfxCompatible<AIChatProps>(BlockModel) {}

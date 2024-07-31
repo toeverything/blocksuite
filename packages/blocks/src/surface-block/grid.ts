@@ -1,6 +1,9 @@
-import { GRID_SIZE, type IBound } from './consts.js';
+import type { IBound } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
+
+import { GRID_SIZE } from './consts.js';
 import { compare } from './managers/layer-utils.js';
-import { Bound } from './utils/bound.js';
 import {
   getBoundsWithRotation,
   intersects,
@@ -20,7 +23,7 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElement<T extends BlockSuite.EdgelessModelType>(
+function rangeFromElement<T extends BlockSuite.EdgelessModel>(
   ele: T
 ): number[] {
   const bound = ele.elementBound;
@@ -31,7 +34,7 @@ function rangeFromElement<T extends BlockSuite.EdgelessModelType>(
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElementExternal<T extends BlockSuite.EdgelessModelType>(
+function rangeFromElementExternal<T extends BlockSuite.EdgelessModel>(
   ele: T
 ): number[] | null {
   if (!ele.externalXYWH) return null;
@@ -44,7 +47,7 @@ function rangeFromElementExternal<T extends BlockSuite.EdgelessModelType>(
   return [minRow, maxRow, minCol, maxCol];
 }
 
-export class GridManager<T extends BlockSuite.EdgelessModelType> {
+export class GridManager<T extends BlockSuite.EdgelessModel> {
   private _elementToGrids = new Map<T, Set<Set<T>>>();
 
   private _externalElementToGrids = new Map<T, Set<Set<T>>>();

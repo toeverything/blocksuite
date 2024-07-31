@@ -1,11 +1,24 @@
-import { DocCollection, type Y } from '@blocksuite/store';
-
-import type { IBound, SerializedXYWH } from '../index.js';
-import type { Bound } from '../utils/bound.js';
-import type { PointLocation } from '../utils/point-location.js';
-import type { IVec } from '../utils/vec.js';
+import type {
+  BaseElementProps,
+  PointTestOptions,
+} from '@blocksuite/block-std/gfx';
+import type {
+  Bound,
+  IBound,
+  IVec,
+  PointLocation,
+  SerializedXYWH,
+} from '@blocksuite/global/utils';
 
 import {
+  GfxPrimitiveElementModel,
+  local,
+  yfield,
+} from '@blocksuite/block-std/gfx';
+import { DocCollection, type Y } from '@blocksuite/store';
+
+import {
+  type Color,
   DEFAULT_ROUGHNESS,
   FontFamily,
   FontStyle,
@@ -16,12 +29,6 @@ import {
   type TextStyleProps,
   TextVerticalAlign,
 } from '../consts.js';
-import {
-  type IBaseProps,
-  type IHitTestOptions,
-  SurfaceElementModel,
-} from './base.js';
-import { local, yfield } from './decorators.js';
 import { diamond } from './utils/shape/diamond.js';
 import { ellipse } from './utils/shape/ellipse.js';
 import { rect } from './utils/shape/rect.js';
@@ -46,13 +53,13 @@ export enum ShapeTextFontSize {
   XLARGE = 36,
 }
 
-export type ShapeProps = IBaseProps & {
+export type ShapeProps = BaseElementProps & {
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
-  fillColor: string;
+  fillColor: Color;
   strokeWidth: number;
-  strokeColor: string;
+  strokeColor: Color;
   strokeStyle: StrokeStyle;
   shapeStyle: ShapeStyle;
   // https://github.com/rough-stuff/rough/wiki#roughness
@@ -68,7 +75,7 @@ export type ShapeProps = IBaseProps & {
 export const SHAPE_TEXT_PADDING = 20;
 export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
-export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
+export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
   textBound: IBound | null = null;
 
   static override propsToY(props: ShapeProps) {
@@ -79,8 +86,12 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
     return props;
   }
 
-  override containedByBounds(bounds: Bound) {
-    return shapeMethods[this.shapeType].containedByBounds(bounds, this);
+  override containsBound(bounds: Bound) {
+    return shapeMethods[this.shapeType].containsBound(bounds, this);
+  }
+
+  override getLineIntersections(start: IVec, end: IVec) {
+    return shapeMethods[this.shapeType].getLineIntersections(start, end, this);
   }
 
   override getNearestPoint(point: IVec): IVec {
@@ -91,26 +102,22 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
   }
 
-  override hitTest(x: number, y: number, options: IHitTestOptions) {
-    return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
+  override includesPoint(x: number, y: number, options: PointTestOptions) {
+    return shapeMethods[this.shapeType].includesPoint.call(this, x, y, {
       ...options,
       ignoreTransparent: options.ignoreTransparent ?? true,
     });
-  }
-
-  override intersectWithLine(start: IVec, end: IVec) {
-    return shapeMethods[this.shapeType].intersectWithLine(start, end, this);
   }
 
   get type() {
     return 'shape';
   }
 
-  @yfield('#000000')
-  accessor color!: string;
+  @yfield('#000000' as Color)
+  accessor color!: Color;
 
   @yfield()
-  accessor fillColor: string = '--affine-palette-shape-yellow';
+  accessor fillColor: Color = '--affine-palette-shape-yellow';
 
   @yfield()
   accessor filled: boolean = false;
@@ -160,7 +167,7 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   accessor shapeType: ShapeType = 'rect';
 
   @yfield()
-  accessor strokeColor: string = '--affine-palette-line-yellow';
+  accessor strokeColor: Color = '--affine-palette-line-yellow';
 
   @yfield()
   accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;

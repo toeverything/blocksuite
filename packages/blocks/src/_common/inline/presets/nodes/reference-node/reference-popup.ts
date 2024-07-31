@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline';
 
 import { WithDisposable } from '@blocksuite/block-std';
@@ -41,12 +41,12 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   static override styles = styles;
 
   private _convertToCardView() {
-    const blockElement = this.blockElement;
-    const doc = blockElement.host.doc;
-    const parent = doc.getParent(blockElement.model);
+    const block = this.block;
+    const doc = block.host.doc;
+    const parent = doc.getParent(block.model);
     assertExists(parent);
 
-    const index = parent.children.indexOf(blockElement.model);
+    const index = parent.children.indexOf(block.model);
     const docId = this.referenceDocId;
     doc.addBlock(
       'affine:embed-linked-doc',
@@ -58,7 +58,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      doc.deleteBlock(blockElement.model);
+      doc.deleteBlock(block.model);
     } else {
       this.inlineEditor.insertText(this.targetInlineRange, this.docTitle);
     }
@@ -67,12 +67,12 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   private _convertToEmbedView() {
-    const blockElement = this.blockElement;
-    const doc = blockElement.host.doc;
-    const parent = doc.getParent(blockElement.model);
+    const block = this.block;
+    const doc = block.host.doc;
+    const parent = doc.getParent(block.model);
     assertExists(parent);
 
-    const index = parent.children.indexOf(blockElement.model);
+    const index = parent.children.indexOf(block.model);
     const docId = this.referenceDocId;
     doc.addBlock(
       'affine:embed-synced-doc',
@@ -84,7 +84,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      doc.deleteBlock(blockElement.model);
+      doc.deleteBlock(block.model);
     } else {
       this.inlineEditor.insertText(this.targetInlineRange, this.docTitle);
     }
@@ -101,17 +101,17 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
   get _embedViewButtonDisabled() {
     if (
-      this.blockElement.doc.readonly ||
+      this.block.doc.readonly ||
       isInsideBlockByFlavour(
-        this.blockElement.doc,
-        this.blockElement.model,
+        this.block.doc,
+        this.block.model,
         'affine:edgeless-text'
       )
     ) {
       return true;
     }
     return (
-      !!this.blockElement.closest('affine-embed-synced-doc-block') ||
+      !!this.block.closest('affine-embed-synced-doc-block') ||
       this.referenceDocId === this.doc.id
     );
   }
@@ -136,15 +136,15 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
   private _openDoc() {
     const refDocId = this.referenceDocId;
-    const blockElement = this.blockElement;
-    if (refDocId === blockElement.doc.id) return;
+    const block = this.block;
+    if (refDocId === block.doc.id) return;
 
-    const rootElement = this.std.view.viewFromPath('block', [
-      blockElement.doc.root?.id ?? '',
+    const rootComponent = this.std.view.viewFromPath('block', [
+      block.doc.root?.id ?? '',
     ]) as RootBlockComponent | null;
-    assertExists(rootElement);
+    assertExists(rootComponent);
 
-    rootElement.slots.docLinkClicked.emit({ docId: refDocId });
+    rootComponent.slots.docLinkClicked.emit({ docId: refDocId });
   }
 
   private _openMenuButton() {
@@ -186,7 +186,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="large" data-orientation="vertical">
+        <div data-size="large" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.name,
@@ -248,7 +248,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="small" data-orientation="vertical">
+        <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.type,
@@ -273,18 +273,16 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     if (this.targetInlineRange.length === 0) {
-      throw new Error('Cannot toggle reference popup on empty range');
+      return;
     }
 
-    const parent = this.blockElement.host.doc.getParent(
-      this.blockElement.model
-    );
+    const parent = this.block.host.doc.getParent(this.block.model);
     assertExists(parent);
 
     this.disposables.add(
       effect(() => {
         const children = parent.children;
-        if (children.includes(this.blockElement.model)) return;
+        if (children.includes(this.block.model)) return;
         this.abortController.abort();
       })
     );
@@ -305,7 +303,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
             </editor-icon-button>
           `}
         >
-          <div slot data-size="large" data-orientation="vertical">
+          <div data-size="large" data-orientation="vertical">
             ${this._moreActions()}
           </div>
         </editor-menu-button>
@@ -353,16 +351,16 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       .catch(console.error);
   }
 
-  get blockElement() {
-    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
+  get block() {
+    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
       `[${BLOCK_ID_ATTR}]`
     );
-    assertExists(blockElement);
-    return blockElement;
+    assertExists(block);
+    return block;
   }
 
   get doc() {
-    const doc = this.blockElement.doc;
+    const doc = this.block.doc;
     assertExists(doc);
     return doc;
   }
@@ -375,7 +373,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   get std() {
-    const std = this.blockElement.std;
+    const std = this.block.std;
     assertExists(std);
     return std;
   }

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
 import type { SlDropdown } from '@shoelace-style/shoelace';
@@ -12,13 +13,11 @@ import {
   HtmlTransformer,
   MarkdownTransformer,
   NotionHtmlAdapter,
-  type SerializedXYWH,
   SizeVariables,
   StyleVariables,
   type SurfaceBlockComponent,
   ZipTransformer,
   defaultImageProxyMiddleware,
-  extractCssVariables,
   openFileOrFiles,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -36,8 +35,8 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/themes/light.css';
+import '@shoelace-style/shoelace/dist/themes/dark.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -46,6 +45,7 @@ import * as lz from 'lz-string';
 import type { CustomChatPanel } from './custom-chat-panel.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
+import type { CustomOutlineViewer } from './custom-outline-viewer.js';
 import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 import type { SidePanel } from './side-panel.js';
@@ -72,11 +72,6 @@ export function getSurfaceElementFromEditor(editorHost: EditorHost) {
   return surfaceElement;
 }
 
-const cssVariablesMap = extractCssVariables(document.documentElement);
-const plate: Record<string, string> = {};
-ColorVariables.forEach((key: string) => {
-  plate[key] = cssVariablesMap[key];
-});
 const OTHER_CSS_VARIABLES = StyleVariables.filter(
   variable =>
     !SizeVariables.includes(variable) &&
@@ -85,7 +80,10 @@ const OTHER_CSS_VARIABLES = StyleVariables.filter(
 );
 let styleDebugMenuLoaded = false;
 
-function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
+function initStyleDebugMenu(
+  styleMenu: Pane,
+  { writer, reader }: { [K in 'writer' | 'reader']: CSSStyleDeclaration }
+) {
   const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
   const fontFamilyFolder = styleMenu.addFolder({
     title: 'Font Family',
@@ -97,12 +95,11 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
     expanded: false,
   });
   SizeVariables.forEach(name => {
+    const value = reader.getPropertyValue(name);
     sizeFolder
       .addBinding(
         {
-          [name]: isNaN(parseFloat(cssVariablesMap[name]))
-            ? 0
-            : parseFloat(cssVariablesMap[name]),
+          [name]: isNaN(parseFloat(value)) ? 0 : parseFloat(value),
         },
         name,
         {
@@ -111,27 +108,27 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
         }
       )
       .on('change', e => {
-        style.setProperty(name, `${Math.round(e.value)}px`);
+        writer.setProperty(name, `${Math.round(e.value)}px`);
       });
   });
   FontFamilyVariables.forEach(name => {
+    const value = reader.getPropertyValue(name);
     fontFamilyFolder
       .addBinding(
         {
-          [name]: cssVariablesMap[name],
+          [name]: value,
         },
         name
       )
       .on('change', e => {
-        style.setProperty(name, e.value);
+        writer.setProperty(name, e.value);
       });
   });
   OTHER_CSS_VARIABLES.forEach(name => {
-    othersFolder
-      .addBinding({ [name]: cssVariablesMap[name] }, name)
-      .on('change', e => {
-        style.setProperty(name, e.value);
-      });
+    const value = reader.getPropertyValue(name);
+    othersFolder.addBinding({ [name]: value }, name).on('change', e => {
+      writer.setProperty(name, e.value);
+    });
   });
   fontFamilyFolder
     .addBinding(
@@ -142,13 +139,14 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
       '--affine-font-family'
     )
     .on('change', e => {
-      style.setProperty('--affine-font-family', e.value);
+      writer.setProperty('--affine-font-family', e.value);
     });
-  for (const plateKey in plate) {
-    colorFolder.addBinding(plate, plateKey).on('change', e => {
-      style.setProperty(plateKey, e.value);
+  ColorVariables.forEach(name => {
+    const value = reader.getPropertyValue(name);
+    colorFolder.addBinding({ [name]: value }, name).on('change', e => {
+      writer.setProperty(name, e.value);
     });
-  }
+  });
 }
 
 function getDarkModeConfig(): boolean {
@@ -196,6 +194,15 @@ export class DebugMenu extends ShadowlessElement {
     this.doc.addBlock('affine:paragraph', {}, noteId);
   }
 
+  private async _clearSiteData() {
+    await fetch('/Clear-Site-Data');
+    window.location.reload();
+  }
+
+  private _enableOutlineViewer() {
+    this.outlineViewer.toggleDisplay();
+  }
+
   private _exportHtml() {
     HtmlTransformer.exportDoc(this.doc).catch(console.error);
   }
@@ -205,11 +212,11 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.rootService.exportManager.exportPdf().catch(console.error);
+    this.rootService?.exportManager.exportPdf().catch(console.error);
   }
 
   private _exportPng() {
-    this.rootService.exportManager.exportPng().catch(console.error);
+    this.rootService?.exportManager.exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {
@@ -343,6 +350,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
+    if (!this.editor.host) return;
     const { docModeService } = this.editor.host.spec.getService('affine:page');
     this.mode = docModeService.toggleMode();
   }
@@ -387,7 +395,10 @@ export class DebugMenu extends ShadowlessElement {
       this._styleMenu = new Pane({ title: 'Waiting' });
       this._styleMenu.hidden = true;
       this._styleMenu.element.style.width = '650';
-      initStyleDebugMenu(this._styleMenu, document.documentElement.style);
+      initStyleDebugMenu(this._styleMenu, {
+        writer: document.documentElement.style,
+        reader: getComputedStyle(document.documentElement),
+      });
     }
 
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
@@ -564,6 +575,9 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._toggleOutlinePanel}">
                 Toggle Outline Panel
               </sl-menu-item>
+              <sl-menu-item @click="${this._enableOutlineViewer}">
+                Enable Outline Viewer
+              </sl-menu-item>
               <sl-menu-item @click="${this._toggleFramePanel}">
                 Toggle Frame Panel
               </sl-menu-item>
@@ -583,8 +597,14 @@ export class DebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
+          <sl-tooltip content="Clear Site Data" placement="bottom" hoist>
+            <sl-button size="small" @click="${this._clearSiteData}">
+              <sl-icon name="trash"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
           <sl-tooltip
-            content="Toggle ${this._dark ? ' Light' : 'Dark'} Mode"
+            content="Toggle ${this._dark ? 'Light' : 'Dark'} Mode"
             placement="bottom"
             hoist
           >
@@ -630,16 +650,8 @@ export class DebugMenu extends ShadowlessElement {
     super.update(changedProperties);
   }
 
-  get command() {
-    return this.host.command;
-  }
-
   get doc() {
     return this.editor.doc;
-  }
-
-  get host() {
-    return this.editor.host;
   }
 
   get mode() {
@@ -651,7 +663,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   get rootService() {
-    return this.host.spec.getService('affine:page');
+    return this.editor.host?.spec.getService('affine:page');
   }
 
   @state()
@@ -692,6 +704,9 @@ export class DebugMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   accessor outlinePanel!: CustomOutlinePanel;
+
+  @property({ attribute: false })
+  accessor outlineViewer!: CustomOutlineViewer;
 
   @property({ attribute: false })
   accessor readonly = false;

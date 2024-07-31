@@ -16,6 +16,8 @@ export const AIChatBlockStyles = css`
     font-size: var(--affine-font-sm);
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     border-radius: 8px;
+    user-select: none;
+    pointer-events: none;
 
     .ai-chat-messages-container {
       display: block;
@@ -43,7 +45,6 @@ export const AIChatBlockStyles = css`
       align-items: center;
       gap: 8px;
       font-weight: 600;
-      cursor: pointer;
       svg {
         color: var(--affine-icon-color);
       }

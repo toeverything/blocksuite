@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
@@ -10,7 +11,7 @@ import type { EdgelessRootService } from '../root-block/index.js';
 import type { AttachmentBlockService } from './attachment-service.js';
 
 import {
-  BlockComponent,
+  CaptionedBlockComponent,
   HoverController,
   toast,
 } from '../_common/components/index.js';
@@ -23,7 +24,6 @@ import {
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { humanFileSize } from '../_common/utils/math.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import { Bound } from '../surface-block/utils/bound.js';
 import {
   type AttachmentBlockModel,
   AttachmentBlockStyles,
@@ -34,7 +34,7 @@ import { styles } from './styles.js';
 import { checkAttachmentBlob, downloadAttachmentBlob } from './utils.js';
 
 @customElement('affine-attachment')
-export class AttachmentBlockComponent extends BlockComponent<
+export class AttachmentBlockComponent extends CaptionedBlockComponent<
   AttachmentBlockModel,
   AttachmentBlockService
 > {
@@ -45,8 +45,6 @@ export class AttachmentBlockComponent extends BlockComponent<
   private _isResizing = false;
 
   private _isSelected = false;
-
-  private readonly _themeObserver = new ThemeObserver();
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
     const selection = this.host.selection;
@@ -71,7 +69,7 @@ export class AttachmentBlockComponent extends BlockComponent<
       template: AttachmentOptionsTemplate({
         anchor: this,
         model: this.model,
-        showCaption: () => this.captionEditor.show(),
+        showCaption: () => this.captionEditor?.show(),
         copy: this.copy,
         download: this.download,
         refresh: this.refreshData,
@@ -170,9 +168,7 @@ export class AttachmentBlockComponent extends BlockComponent<
     });
 
     // Workaround for https://github.com/toeverything/blocksuite/issues/4724
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => this.requestUpdate());
-    this.disposables.add(() => this._themeObserver.dispose());
+    this.disposables.add(ThemeObserver.subscribe(() => this.requestUpdate()));
 
     // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
@@ -185,8 +181,14 @@ export class AttachmentBlockComponent extends BlockComponent<
       })
     );
     // this is required to prevent iframe from capturing pointer events
-    this.handleEvent('pointerMove', ctx => {
-      this._isDragging = ctx.get('pointerState').dragging;
+    this.handleEvent('dragStart', () => {
+      this._isDragging = true;
+      this._showOverlay =
+        this._isResizing || this._isDragging || !this._isSelected;
+    });
+
+    this.handleEvent('dragEnd', () => {
+      this._isDragging = false;
       this._showOverlay =
         this._isResizing || this._isDragging || !this._isSelected;
     });

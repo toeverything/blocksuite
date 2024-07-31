@@ -110,12 +110,18 @@ export function createButtonPopper(
       .catch(console.error);
   }
 
-  const show = () => {
-    if (display === 'show') return;
-    popperElement.setAttribute(ATTR_SHOW, '');
-    display = 'show';
-    stateUpdated({ display });
+  const show = (force = false) => {
+    const displayed = display === 'show';
 
+    if (displayed && !force) return;
+
+    if (!displayed) {
+      popperElement.setAttribute(ATTR_SHOW, '');
+      display = 'show';
+      stateUpdated({ display });
+    }
+
+    cleanup?.();
     cleanup = autoUpdate(reference, popperElement, compute, {
       animationFrame: true,
     });

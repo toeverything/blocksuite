@@ -109,7 +109,10 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
                         ? html`<ai-panel-divider></ai-panel-divider>`
                         : nothing}
                       <div class="response-list-container">
-                        <ai-item-list .groups=${[group]}></ai-item-list>
+                        <ai-item-list
+                          .host=${this.host}
+                          .groups=${[group]}
+                        ></ai-item-list>
                       </div>
                     `
                   )}
@@ -121,7 +124,10 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
             ${this.config.actions.length > 0
               ? html`
                   <div class="action-list-container">
-                    <ai-item-list .groups=${this.config.actions}></ai-item-list>
+                    <ai-item-list
+                      .host=${this.host}
+                      .groups=${this.config.actions}
+                    ></ai-item-list>
                   </div>
                 `
               : nothing}

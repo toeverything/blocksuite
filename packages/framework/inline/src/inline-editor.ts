@@ -1,3 +1,4 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup, Slot, assertExists } from '@blocksuite/global/utils';
 import { nothing, render } from 'lit';
 import * as Y from 'yjs';
@@ -60,7 +61,8 @@ export class InlineEditor<
 
   private _onYTextChange = (_: Y.YTextEvent, transaction: Y.Transaction) => {
     if (this.yText.toString().includes('\r')) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
         'yText must not contain "\\r" because it will break the range synchronization'
       );
     }
@@ -218,11 +220,15 @@ export class InlineEditor<
     } = {}
   ) {
     if (!yText.doc) {
-      throw new Error('yText must be attached to a Y.Doc');
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
+        'yText must be attached to a Y.Doc'
+      );
     }
 
     if (yText.toString().includes('\r')) {
-      throw new Error(
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
         'yText must not contain "\\r" because it will break the range synchronization'
       );
     }
@@ -294,7 +300,7 @@ export class InlineEditor<
       this.rootElement.contentEditable = value;
     }
 
-    if (this.eventSource.contentEditable !== value) {
+    if (this.eventSource && this.eventSource.contentEditable !== value) {
       this.eventSource.contentEditable = value;
     }
 
@@ -304,7 +310,10 @@ export class InlineEditor<
   transact(fn: () => void): void {
     const doc = this.yText.doc;
     if (!doc) {
-      throw new Error('yText is not attached to a doc');
+      throw new BlockSuiteError(
+        ErrorCode.InlineEditorError,
+        'yText is not attached to a doc'
+      );
     }
 
     doc.transact(fn, doc.clientID);
@@ -343,7 +352,6 @@ export class InlineEditor<
   }
 
   get eventSource() {
-    assertExists(this._eventSource);
     return this._eventSource;
   }
 

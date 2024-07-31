@@ -3,7 +3,7 @@ import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataViewKanbanManager } from './kanban-view-manager.js';
+import type { KanbanSingleView } from './kanban-view-manager.js';
 
 import { popMenu } from '../../../../../_common/components/index.js';
 import './card.js';
@@ -34,8 +34,8 @@ export class KanbanHeader extends WithDisposable(ShadowlessElement) {
         input: {
           search: true,
         },
-        items: this.view.columnManagerList
-          .filter(column => column.id !== this.view.view.groupBy?.columnId)
+        items: this.view.columnManagerList$.value
+          .filter(column => column.id !== this.view.view?.groupBy?.columnId)
           .map(column => {
             return {
               type: 'action',
@@ -61,7 +61,7 @@ export class KanbanHeader extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  accessor view!: DataViewKanbanManager;
+  accessor view!: KanbanSingleView;
 }
 
 declare global {

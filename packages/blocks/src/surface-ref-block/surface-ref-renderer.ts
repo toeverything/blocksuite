@@ -4,6 +4,7 @@ import type { Doc } from '@blocksuite/store';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { NoteBlockModel } from '../note-block/index.js';
+import type { Color } from '../surface-block/consts.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
@@ -38,24 +39,24 @@ export class SurfaceRefRenderer {
       enableStackingCanvas: false,
     }
   ) {
-    const themeObserver = new ThemeObserver();
     const viewport = new Viewport();
     const renderer = new Renderer({
       viewport,
       layerManager: this.surfaceService.layer,
       enableStackingCanvas: options.enableStackingCanvas,
       provider: {
-        getVariableColor: (variable: string) =>
-          themeObserver.getVariableValue(variable),
+        generateColorProperty: (color: Color, fallback: string) =>
+          ThemeObserver.generateColorProperty(color, fallback),
+        getColorScheme: () => ThemeObserver.mode,
+        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+          ThemeObserver.getColorValue(color, fallback, real),
+        getPropertyValue: (property: string) =>
+          ThemeObserver.getPropertyValue(property),
       },
     });
 
-    themeObserver.observe(document.documentElement);
     this._surfaceRenderer = renderer;
     this._viewport = viewport;
-    this.slots.unmounted.once(() => {
-      themeObserver.dispose();
-    });
   }
 
   private _initSurfaceModel() {
@@ -88,7 +89,7 @@ export class SurfaceRefRenderer {
     this.slots.surfaceRendererInit.emit();
   }
 
-  getModel(id: string): BlockSuite.EdgelessModelType | null {
+  getModel(id: string): BlockSuite.EdgelessModel | null {
     return (
       (this.doc.getBlockById(id) as Exclude<
         BlockSuite.EdgelessBlockModelType,

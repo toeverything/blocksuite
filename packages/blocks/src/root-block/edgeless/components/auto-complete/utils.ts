@@ -1,3 +1,6 @@
+import type { XYWH } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -14,11 +17,9 @@ import {
   ShapeElementModel,
 } from '../../../../surface-block/element-model/index.js';
 import {
-  Bound,
   type Options,
   Overlay,
   type RoughCanvas,
-  type XYWH,
   normalizeDegAngle,
 } from '../../../../surface-block/index.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
@@ -45,9 +46,6 @@ export type AUTO_COMPLETE_TARGET_TYPE =
   | 'text'
   | 'note'
   | 'frame';
-
-export const DEFAULT_NOTE_BACKGROUND_COLOR =
-  '--affine-background-secondary-color';
 
 class AutoCompleteTargetOverlay extends Overlay {
   xywh: XYWH;

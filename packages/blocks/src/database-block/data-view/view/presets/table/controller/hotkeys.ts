@@ -35,7 +35,6 @@ export class TableHotkeysController implements ReactiveController {
             this.selectionController.focusToCell('up');
             this.host.view.rowDelete(rows);
           } else if (focus && !isEditing) {
-            const data = this.host.view;
             if (rowsSelection && columnsSelection) {
               // multi cell
               for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
@@ -49,8 +48,7 @@ export class TableHotkeysController implements ReactiveController {
                   const rowId = container?.dataset.rowId;
                   const columnId = container?.dataset.columnId;
                   if (rowId && columnId) {
-                    const value = container?.column.setValueFromString('');
-                    data.cellUpdateValue(rowId, columnId, value);
+                    container?.column.setValueFromString(rowId, '');
                   }
                 }
               }
@@ -64,8 +62,7 @@ export class TableHotkeysController implements ReactiveController {
               const rowId = container?.dataset.rowId;
               const columnId = container?.dataset.columnId;
               if (rowId && columnId) {
-                const value = container?.column.setValueFromString('');
-                data.cellUpdateValue(rowId, columnId, value);
+                container?.column.setValueFromString(rowId, '');
               }
             }
           }
@@ -198,16 +195,15 @@ export class TableHotkeysController implements ReactiveController {
 
         'Shift-ArrowUp': context => {
           const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            selection.isEditing ||
-            !this.selectionController.isSelectedRowOnly()
-          ) {
+          if (!selection || selection.isEditing) {
             return false;
           }
 
-          if (this.selectionController.isSelectedRowOnly())
+          if (this.selectionController.isSelectedRowOnly()) {
             this.selectionController.navigateRowSelection('up', true);
+          } else {
+            this.selectionController.selectionAreaUp();
+          }
 
           context.get('keyboardState').raw.preventDefault();
           return true;
@@ -215,16 +211,47 @@ export class TableHotkeysController implements ReactiveController {
 
         'Shift-ArrowDown': context => {
           const selection = this.selectionController.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+
+          if (this.selectionController.isSelectedRowOnly()) {
+            this.selectionController.navigateRowSelection('down', true);
+          } else {
+            this.selectionController.selectionAreaDown();
+          }
+
+          context.get('keyboardState').raw.preventDefault();
+          return true;
+        },
+
+        'Shift-ArrowLeft': context => {
+          const selection = this.selectionController.selection;
           if (
             !selection ||
             selection.isEditing ||
-            !this.selectionController.isSelectedRowOnly()
+            this.selectionController.isSelectedRowOnly()
           ) {
             return false;
           }
 
-          if (this.selectionController.isSelectedRowOnly())
-            this.selectionController.navigateRowSelection('down', true);
+          this.selectionController.selectionAreaLeft();
+
+          context.get('keyboardState').raw.preventDefault();
+          return true;
+        },
+
+        'Shift-ArrowRight': context => {
+          const selection = this.selectionController.selection;
+          if (
+            !selection ||
+            selection.isEditing ||
+            this.selectionController.isSelectedRowOnly()
+          ) {
+            return false;
+          }
+
+          this.selectionController.selectionAreaRight();
 
           context.get('keyboardState').raw.preventDefault();
           return true;
@@ -239,7 +266,7 @@ export class TableHotkeysController implements ReactiveController {
             context.get('keyboardState').raw.preventDefault();
 
             const start = 0;
-            const end = this.host.view.rows.length - 1;
+            const end = this.host.view.rows$.value.length - 1;
             if (
               selection.rowsSelection?.start === start &&
               selection.rowsSelection.end === end &&

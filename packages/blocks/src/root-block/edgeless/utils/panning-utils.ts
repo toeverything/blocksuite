@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 
-import type { IVec } from '../../../surface-block/index.js';
 import type { Viewport } from './viewport.js';
 
 const PANNING_DISTANCE = 30;

@@ -1,5 +1,6 @@
 import type { AssetsManager } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { sha } from '@blocksuite/global/utils';
 import {
   BaseAdapter,
@@ -33,13 +34,19 @@ export class AttachmentAdapter extends BaseAdapter<Attachment> {
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<Attachment>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'AttachmentAdapter.fromBlockSnapshot is not implemented.'
+    );
   }
 
   override fromDocSnapshot(
     _payload: FromDocSnapshotPayload
   ): Promise<FromDocSnapshotResult<Attachment>> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'AttachmentAdapter.fromDocSnapshot is not implemented.'
+    );
   }
 
   override fromSliceSnapshot(
@@ -66,13 +73,19 @@ export class AttachmentAdapter extends BaseAdapter<Attachment> {
   override toBlockSnapshot(
     _payload: ToBlockSnapshotPayload<Attachment>
   ): Promise<BlockSnapshot> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'AttachmentAdapter.toBlockSnapshot is not implemented.'
+    );
   }
 
   override toDocSnapshot(
     _payload: ToDocSnapshotPayload<Attachment>
   ): Promise<DocSnapshot> {
-    throw new Error('Method not implemented.');
+    throw new BlockSuiteError(
+      ErrorCode.TransformerNotImplementedError,
+      'AttachmentAdapter.toDocSnapshot is not implemented.'
+    );
   }
 
   override async toSliceSnapshot(

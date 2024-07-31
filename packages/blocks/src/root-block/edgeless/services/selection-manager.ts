@@ -235,7 +235,7 @@ export class EdgelessSelectionManager {
   set(selection: EdgelessSelectionState | SurfaceSelection[]) {
     if (Array.isArray(selection)) {
       this.stdSelectionManager.setGroup(
-        'edgeless',
+        'gfx',
         this.cursorSelection ? [...selection, this.cursorSelection] : selection
       );
       return;
@@ -273,7 +273,7 @@ export class EdgelessSelectionManager {
     }
 
     this.stdSelectionManager.setGroup(
-      'edgeless',
+      'gfx',
       this.cursorSelection
         ? instances.concat([this.cursorSelection])
         : instances
@@ -306,7 +306,7 @@ export class EdgelessSelectionManager {
       cursor.y
     );
 
-    this.stdSelectionManager.setGroup('edgeless', [
+    this.stdSelectionManager.setGroup('gfx', [
       ...this.surfaceSelections,
       instance,
     ]);
@@ -357,7 +357,7 @@ export class EdgelessSelectionManager {
   }
 
   get selectedElements() {
-    const elements: BlockSuite.EdgelessModelType[] = [];
+    const elements: BlockSuite.EdgelessModel[] = [];
 
     this.selectedIds.forEach(id => {
       const el = this.service.getElementById(id);

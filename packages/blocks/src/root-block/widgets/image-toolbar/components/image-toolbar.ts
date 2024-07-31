@@ -40,7 +40,7 @@ export class AffineImageToolbar extends LitElement {
 
   get _items() {
     return ConfigRenderer(
-      this.blockElement,
+      this.blockComponent,
       this.abortController,
       this.config,
       this.closeCurrentMenu
@@ -80,16 +80,16 @@ export class AffineImageToolbar extends LitElement {
             '--packed-height': '4px',
           })}
         >
-          <div slot data-size="large" data-orientation="vertical">
+          <div data-size="large" data-orientation="vertical">
             ${MoreMenuRenderer(
-              this.blockElement,
+              this.blockComponent,
               this._popMenuAbortController,
               this.moreMenuConfig
             )}
           </div>
         </editor-menu-content>
       `,
-      container: this.blockElement.host,
+      container: this.blockComponent.host,
       // stacking-context(editor-host)
       portalStyles: {
         zIndex: 'var(--affine-z-index-popover)',
@@ -140,7 +140,7 @@ export class AffineImageToolbar extends LitElement {
   accessor abortController!: AbortController;
 
   @property({ attribute: false })
-  accessor blockElement!: ImageBlockComponent;
+  accessor blockComponent!: ImageBlockComponent;
 
   @property({ attribute: false })
   accessor config!: ImageConfigItem[];

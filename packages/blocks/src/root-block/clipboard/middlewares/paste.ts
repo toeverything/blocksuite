@@ -1,5 +1,5 @@
 import type {
-  BlockElement,
+  BlockComponent,
   EditorHost,
   TextRangePoint,
   TextSelection,
@@ -55,7 +55,7 @@ class PointState {
     return block;
   };
 
-  readonly block: BlockElement;
+  readonly block: BlockComponent;
 
   readonly model: BlockModel;
 
@@ -280,7 +280,7 @@ class PasteTr {
   };
 
   focusPasted = () => {
-    const host = this.std.host as EditorHost;
+    const host = this.std.host;
 
     const cursorBlock =
       this.fromPointState.model.flavour === 'affine:code' || !this.lastSnapshot
@@ -291,7 +291,7 @@ class PasteTr {
 
     host.updateComplete
       .then(() => {
-        const target = this.std.host.querySelector<BlockElement>(
+        const target = this.std.host.querySelector<BlockComponent>(
           `[${host.blockIdAttr}="${cursorModel.id}"]`
         );
         if (!target) {

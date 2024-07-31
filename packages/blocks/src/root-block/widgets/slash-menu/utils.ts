@@ -89,11 +89,13 @@ export function insertContent(
   attributes?: AffineTextAttributes
 ) {
   if (!model.text) {
-    throw new Error("Can't insert text! Text not found");
+    console.error("Can't insert text! Text not found");
+    return;
   }
   const inlineEditor = getInlineEditorByModel(editorHost, model);
   if (!inlineEditor) {
-    throw new Error("Can't insert text! Inline editor not found");
+    console.error("Can't insert text! Inline editor not found");
+    return;
   }
   const inlineRange = inlineEditor.getInlineRange();
   const index = inlineRange ? inlineRange.index : model.text.length;
@@ -162,8 +164,8 @@ export function createConversionItem(
     icon,
     tooltip: slashMenuToolTips[name],
     showWhen: ({ model }) => model.doc.schema.flavourSchemaMap.has(flavour),
-    action: ({ rootElement }) => {
-      rootElement.host.std.command
+    action: ({ rootComponent }) => {
+      rootComponent.host.std.command
         .chain()
         .updateBlockType({
           flavour,

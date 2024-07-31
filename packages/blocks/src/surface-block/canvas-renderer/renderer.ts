@@ -1,10 +1,13 @@
+import type { IBound } from '@blocksuite/global/utils';
+
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import type { IBound } from '../consts.js';
+import type { Color } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 
+import { ColorScheme } from '../../_common/theme/theme-observer.js';
 import { requestConnectedFrame } from '../../_common/utils/event.js';
 import { last } from '../../_common/utils/iterable.js';
 import { RoughCanvas } from '../rough/canvas.js';
@@ -17,12 +20,11 @@ import { modelRenderer } from './element-renderer/index.js';
  * can be used for rendering non-CRDT state indicators.
  */
 export abstract class Overlay {
-  protected _renderer!: Renderer;
+  protected _renderer: Renderer | null = null;
 
   constructor() {}
 
   setRenderer(renderer: Renderer | null) {
-    // @ts-ignore
     this._renderer = renderer;
   }
 
@@ -30,7 +32,10 @@ export abstract class Overlay {
 }
 
 type EnvProvider = {
-  getVariableColor: (val: string) => string;
+  generateColorProperty: (color: Color, fallback: string) => string;
+  getColorScheme: () => ColorScheme;
+  getColorValue: (color: Color, fallback?: string, real?: boolean) => string;
+  getPropertyValue: (property: string) => string;
   selectedElements?: () => string[];
 };
 
@@ -344,6 +349,13 @@ export class Renderer {
     this._disposables.dispose();
   }
 
+  generateColorProperty(color: Color, fallback: string) {
+    return (
+      this.provider.generateColorProperty?.(color, fallback) ??
+      (fallback.startsWith('--') ? `var(${fallback})` : fallback)
+    );
+  }
+
   getCanvasByBound(
     bound: IBound = this.viewport.viewportBounds,
     surfaceElements?: SurfaceElementModel[],
@@ -374,8 +386,18 @@ export class Renderer {
     return canvas;
   }
 
-  getVariableColor(val: string) {
-    return this.provider.getVariableColor?.(val) ?? val;
+  getColorScheme() {
+    return this.provider.getColorScheme?.() ?? ColorScheme.Light;
+  }
+
+  getColorValue(color: Color, fallback?: string, real?: boolean) {
+    return (
+      this.provider.getColorValue?.(color, fallback, real) ?? 'transparent'
+    );
+  }
+
+  getPropertyValue(property: string) {
+    return this.provider.getPropertyValue?.(property) ?? '';
   }
 
   refresh() {

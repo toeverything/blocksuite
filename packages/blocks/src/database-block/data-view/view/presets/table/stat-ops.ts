@@ -1,17 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { GroupData } from '../../../common/group-by/helper.js';
-import type { DataViewTableColumnManager } from './table-view-manager.js';
+import type { TableColumn } from './table-view-manager.js';
 import type { StatCalcOpType } from './types.js';
 
 export interface StatCalcOp {
   type: StatCalcOpType;
   label: string;
   display: string;
-  calculate: (
-    column: DataViewTableColumnManager,
-    group?: GroupData
-  ) => StatOpResult;
+  calculate: (column: TableColumn, group?: GroupData) => StatOpResult;
 }
 
 export type ColumnDataType = 'number' | 'checkbox' | 'other';

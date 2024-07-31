@@ -1,3 +1,5 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
 type SelectionConstructor<T = unknown> = {
   type: string;
   group: string;
@@ -20,7 +22,10 @@ export abstract class BaseSelection {
   }
 
   static fromJSON(_: Record<string, unknown>): BaseSelection {
-    throw new Error('You must override this method');
+    throw new BlockSuiteError(
+      ErrorCode.SelectionError,
+      'You must override this method'
+    );
   }
 
   is<T extends BlockSuite.SelectionType>(

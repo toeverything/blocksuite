@@ -16,7 +16,7 @@ test.describe('frame panel', () => {
   test('should display empty placeholder when no frames', async ({ page }) => {
     await edgelessCommonSetup(page);
     await toggleFramePanel(page);
-    const frameCards = page.locator('frame-card');
+    const frameCards = page.locator('affine-frame-card');
     expect(await frameCards.count()).toBe(0);
 
     const placeholder = page.locator('.no-frame-placeholder');
@@ -46,7 +46,7 @@ test.describe('frame panel', () => {
 
     const frames = page.locator('affine-frame');
     expect(await frames.count()).toBe(2);
-    const frameCards = page.locator('frame-card');
+    const frameCards = page.locator('affine-frame-card');
     expect(await frameCards.count()).toBe(2);
   });
 
@@ -66,7 +66,7 @@ test.describe('frame panel', () => {
 
     const frames = page.locator('affine-frame');
     expect(await frames.count()).toBe(1);
-    const frameCards = page.locator('frame-card');
+    const frameCards = page.locator('affine-frame-card');
     expect(await frameCards.count()).toBe(1);
     const notePortal = page.locator('surface-ref-note-portal');
     expect(await notePortal.count()).toBe(1);
@@ -75,7 +75,7 @@ test.describe('frame panel', () => {
   test('should update panel when frames change', async ({ page }) => {
     await edgelessCommonSetup(page);
     await toggleFramePanel(page);
-    const frameCards = page.locator('frame-card');
+    const frameCards = page.locator('affine-frame-card');
     expect(await frameCards.count()).toBe(0);
 
     await addNote(page, 'hello', 150, 500);

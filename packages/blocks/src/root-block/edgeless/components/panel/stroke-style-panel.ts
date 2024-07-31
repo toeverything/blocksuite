@@ -2,7 +2,6 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import type { ColorEvent } from './color-panel.js';
 
 import '../../../../_common/components/button.js';
@@ -47,7 +46,7 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
       <edgeless-color-panel
         role="listbox"
         aria-label="Border colors"
-        .options=${STROKE_COLORS}
+        .options=${['--affine-palette-transparent', ...STROKE_COLORS]}
         .value=${this.strokeColor}
         .hollowCircle=${this.hollowCircle}
         @select=${(e: ColorEvent) => this.setStrokeColor(e)}
@@ -66,7 +65,7 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
   accessor setStrokeStyle!: (e: LineStyleEvent) => void;
 
   @property({ attribute: false })
-  accessor strokeColor!: CssVariableName;
+  accessor strokeColor!: string;
 
   @property({ attribute: false })
   accessor strokeStyle!: StrokeStyle;

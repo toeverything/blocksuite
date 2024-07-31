@@ -44,6 +44,12 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     return id;
   }
 
+  applyCellsUpdate() {
+    this.doc.updateBlock(this, {
+      cells: this.cells,
+    });
+  }
+
   applyColumnUpdate() {
     this.doc.updateBlock(this, {
       columns: this.columns,
@@ -121,7 +127,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
         value: rowId,
       };
     }
-    const yRow = this.cells[rowId];
+    const yRow = this.cells$.value[rowId];
     const yCell = yRow?.[columnId] ?? null;
     if (!yCell) return null;
 
@@ -181,21 +187,22 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     }
     this.doc.transact(() => {
       const column = this.columns[index];
-      this.columns[index] = { ...column, ...updater(column) };
+      const result = updater(column);
+      this.columns[index] = { ...column, ...result };
     });
     return id;
   }
 
-  updateView(
+  updateView<ViewData extends DataViewDataType>(
     id: string,
-    update: (data: DataViewDataType) => Partial<DataViewDataType>
+    update: (data: ViewData) => Partial<ViewData>
   ) {
     this.doc.transact(() => {
       this.views = this.views.map(v => {
         if (v.id !== id) {
           return v;
         }
-        return { ...v, ...update(v) } as DataViewDataType;
+        return { ...v, ...update(v as ViewData) };
       });
     });
     this.applyViewsUpdate();

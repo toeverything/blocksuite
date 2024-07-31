@@ -79,17 +79,6 @@ const progressColors = {
 export class ProgressCell extends BaseCellRenderer<number> {
   static override styles = styles;
 
-  _bgClick(e: MouseEvent) {
-    if (this.column.readonly) {
-      return;
-    }
-    this.onChange(
-      Math.round(
-        (e.offsetX * 100) / (e.currentTarget as HTMLDivElement).offsetWidth
-      )
-    );
-  }
-
   protected override render() {
     const progress = this.value ?? 0;
     let backgroundColor = progressColors.processing;
@@ -107,11 +96,7 @@ export class ProgressCell extends BaseCellRenderer<number> {
 
     return html` <div class="affine-database-progress">
       <div class="affine-database-progress-bar">
-        <div
-          class="affine-database-progress-bg"
-          @click="${this._bgClick}"
-          style=${bgStyles}
-        >
+        <div class="affine-database-progress-bg" style=${bgStyles}>
           <div class="affine-database-progress-fg" style=${fgStyles}></div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { RangeManager } from '@blocksuite/block-std';
-import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
+import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -10,11 +10,12 @@ import type { DatabaseBlockModel } from './database-model.js';
 import type { DatabaseBlockService } from './database-service.js';
 
 import {
-  BlockComponent,
+  CaptionedBlockComponent,
   DragIndicator,
   popMenu,
   toast,
 } from '../_common/components/index.js';
+import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import {
   CopyIcon,
   DeleteIcon,
@@ -41,16 +42,14 @@ import {
   type DataViewWidget,
   type DataViewWidgetProps,
   DatabaseSelection,
-  type ViewSource,
   defineUniComponent,
   renderUniLit,
   widgetPresets,
 } from './data-view/index.js';
 import { DatabaseBlockSchema } from './database-model.js';
-import { DatabaseBlockViewSource } from './view-source.js';
 
 @customElement('affine-database')
-export class DatabaseBlockComponent extends BlockComponent<
+export class DatabaseBlockComponent extends CaptionedBlockComponent<
   DatabaseBlockModel,
   DatabaseBlockService
 > {
@@ -126,8 +125,6 @@ export class DatabaseBlockComponent extends BlockComponent<
       }),
     };
   };
-
-  private _viewSource?: ViewSource;
 
   private dataView = new DataView();
 
@@ -214,8 +211,8 @@ export class DatabaseBlockComponent extends BlockComponent<
       );
       return () => {
         this.indicator.remove();
-        const model = this.doc.getBlockById(id);
-        const target = this.doc.getBlockById(result.dropBlockId);
+        const model = this.doc.getBlock(id).model;
+        const target = this.doc.getBlock(result.dropBlockId).model;
         let parent = this.doc.getParent(result.dropBlockId);
         const shouldInsertIn = result.dropType === 'in';
         if (shouldInsertIn) {
@@ -238,8 +235,6 @@ export class DatabaseBlockComponent extends BlockComponent<
     this.indicator.remove();
     return () => {};
   };
-
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
 
   setSelection = (selection: DataViewSelection | undefined) => {
     this.selection.setGroup(
@@ -271,6 +266,18 @@ export class DatabaseBlockComponent extends BlockComponent<
     ],
   });
 
+  viewSelection$ = computed(() => {
+    const databaseSelection = this.selection.value.find(
+      (selection): selection is DatabaseSelection => {
+        if (selection.blockId !== this.blockId) {
+          return false;
+        }
+        return selection instanceof DatabaseSelection;
+      }
+    );
+    return databaseSelection?.viewSelection;
+  });
+
   private renderDatabaseOps() {
     if (this.doc.readonly) {
       return nothing;
@@ -284,30 +291,6 @@ export class DatabaseBlockComponent extends BlockComponent<
     super.connectedCallback();
 
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
-
-    this._disposables.add(
-      this.selection.slots.changed.on(selections => {
-        const databaseSelection = selections.find(
-          (selection): selection is DatabaseSelection => {
-            if (selection.blockId !== this.blockId) {
-              return false;
-            }
-            return selection instanceof DatabaseSelection;
-          }
-        );
-        this.selectionUpdated.emit(databaseSelection?.viewSelection);
-      })
-    );
-    this._disposables.add(
-      this.model.propsUpdated.on(data => {
-        if (data.key === 'views') {
-          this.viewSource.checkViewDataUpdate();
-        }
-        if (data.key === 'columns' || data.key === 'cells') {
-          this.dataSource.slots.update.emit();
-        }
-      })
-    );
     let canDrop = false;
     this.disposables.add(
       AffineDragHandleWidget.registerOption({
@@ -363,11 +346,9 @@ export class DatabaseBlockComponent extends BlockComponent<
         ${this.dataView.render({
           bindHotkey: this._bindHotkey,
           handleEvent: this._handleEvent,
-          getFlag: this.getFlag,
-          selectionUpdated: this.selectionUpdated,
+          selection$: this.viewSelection$,
           setSelection: this.setSelection,
           dataSource: this.dataSource,
-          viewSource: this.viewSource,
           headerWidget: this.headerWidget,
           onDrag: this.onDrag,
           std: this.std,
@@ -392,35 +373,22 @@ export class DatabaseBlockComponent extends BlockComponent<
     return this._dataSource;
   }
 
-  get getFlag() {
-    return this.host.doc.awarenessStore.getFlag.bind(
-      this.host.doc.awarenessStore
-    );
-  }
-
   get innerModalWidget() {
-    return this.rootElement!.widgetElements[
+    return this.rootComponent!.widgetComponents[
       AFFINE_INNER_MODAL_WIDGET
     ] as AffineInnerModalWidget;
   }
 
   override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>('affine-note');
+    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
+      const note = this.closest<NoteBlockComponent>(NOTE_SELECTOR);
       return note;
     }
-    return this.rootElement;
+    return this.rootComponent;
   }
 
   get view() {
     return this.dataView.expose;
-  }
-
-  get viewSource(): ViewSource {
-    if (!this._viewSource) {
-      this._viewSource = new DatabaseBlockViewSource(this.model);
-    }
-    return this._viewSource;
   }
 }
 

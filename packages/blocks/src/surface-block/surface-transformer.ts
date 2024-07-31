@@ -1,3 +1,4 @@
+import type { SurfaceBlockProps } from '@blocksuite/block-std/gfx';
 import type {
   FromSnapshotPayload,
   SnapshotReturn,
@@ -6,8 +7,6 @@ import type {
 } from '@blocksuite/store';
 
 import { BaseBlockTransformer, DocCollection } from '@blocksuite/store';
-
-import type { SurfaceBlockProps } from './surface-model.js';
 
 const SURFACE_TEXT_UNIQ_IDENTIFIER = 'affine:surface:text';
 // Used for group children field

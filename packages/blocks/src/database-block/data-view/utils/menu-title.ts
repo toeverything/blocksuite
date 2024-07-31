@@ -15,12 +15,13 @@ export const menuTitleItem = (
 ): Menu => {
   return {
     type: 'custom',
-    render: html`<div
-      style="display:flex;align-items:center;gap: 8px;padding: 7px 12px;min-width: 300px;justify-content: space-between"
-    >
-      ${menuTitle(name, onBack)}
-      <div>${ops?.right}</div>
-    </div>`,
+    render: () =>
+      html`<div
+        style="display:flex;align-items:center;gap: 8px;padding: 7px 12px;min-width: 300px;justify-content: space-between"
+      >
+        ${menuTitle(name, onBack)}
+        <div>${ops?.right}</div>
+      </div>`,
   };
 };
 export const menuTitle = (name: string, onBack: () => void) => {

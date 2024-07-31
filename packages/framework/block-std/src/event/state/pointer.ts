@@ -17,8 +17,6 @@ export class PointerEventState extends UIEventState {
 
   delta: Point;
 
-  dragging: boolean;
-
   keys: {
     shift: boolean;
     cmd: boolean;
@@ -54,7 +52,6 @@ export class PointerEventState extends UIEventState {
       alt: event.altKey,
     };
     this.button = last?.button || event.button;
-    this.dragging = !!last;
     this.pressure = event.pressure;
   }
 
@@ -67,8 +64,20 @@ export class PointerEventState extends UIEventState {
   }
 }
 
+export class MultiPointerEventState extends UIEventState {
+  pointers: PointerEventState[];
+
+  override type = 'multiPointerState';
+
+  constructor(event: PointerEvent, pointers: PointerEventState[]) {
+    super(event);
+    this.pointers = pointers;
+  }
+}
+
 declare global {
   interface BlockSuiteUIEventState {
     pointerState: PointerEventState;
+    multiPointerState: MultiPointerEventState;
   }
 }

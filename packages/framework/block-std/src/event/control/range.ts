@@ -1,4 +1,4 @@
-import type { BlockElement } from '../../view/index.js';
+import type { BlockComponent } from '../../view/index.js';
 import type {
   EventName,
   EventScope,
@@ -63,7 +63,7 @@ export class RangeControl {
   constructor(private _dispatcher: UIEventDispatcher) {}
 
   private _buildEventScopeByNativeRange(name: EventName, range: Range) {
-    const blocks = this._findBlockElementPath(range);
+    const blocks = this._findBlockComponentPath(range);
     const paths = blocks
       .map(blockView => {
         return blockView;
@@ -96,14 +96,14 @@ export class RangeControl {
     );
   }
 
-  private _findBlockElementPath(range: Range): string[][] {
+  private _findBlockComponentPath(range: Range): string[][] {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
     const getBlockView = (node: Node) => {
       const el = node instanceof Element ? node : node.parentElement;
       // TODO(mirone/#6534): find a better way to get block element from a node
-      return el?.closest<BlockElement>('[data-block-id]');
+      return el?.closest<BlockComponent>('[data-block-id]');
     };
     if (ancestor.nodeType === Node.TEXT_NODE) {
       const leaf = getBlockView(ancestor);

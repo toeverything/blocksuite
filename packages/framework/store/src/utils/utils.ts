@@ -6,25 +6,12 @@ import * as Y from 'yjs';
 import type { BlockModel } from '../schema/base.js';
 import type { BlockSchema } from '../schema/base.js';
 import type { YBlock } from '../store/doc/block/index.js';
-import type { BlockProps, YBlocks } from '../store/doc/block-collection.js';
+import type { BlockProps } from '../store/doc/block-collection.js';
 import type { DocCollection } from '../store/index.js';
 
 import { SYS_KEYS } from '../consts.js';
 import { native2Y } from '../reactive/index.js';
 import { internalPrimitives } from '../schema/base.js';
-
-export function assertValidChildren(
-  yBlocks: YBlocks,
-  props: Partial<BlockProps>
-) {
-  if (!Array.isArray(props.children)) return;
-
-  props.children.forEach(child => {
-    if (!yBlocks.has(child.id)) {
-      throw new Error('Invalid child id: ' + child.id);
-    }
-  });
-}
 
 export function syncBlockProps(
   schema: z.infer<typeof BlockSchema>,

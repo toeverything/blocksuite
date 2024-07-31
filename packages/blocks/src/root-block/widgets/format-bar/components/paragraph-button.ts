@@ -15,7 +15,7 @@ import '../../../../_common/components/toolbar/icon-button.js';
 import '../../../../_common/components/toolbar/menu-button.js';
 import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
 import { ArrowDownIcon } from '../../../../_common/icons/index.js';
-import { isRootElement } from '../../../../root-block/utils/guard.js';
+import { isRootComponent } from '../../../../root-block/utils/guard.js';
 
 interface ParagraphPanelProps {
   host: EditorHost;
@@ -50,7 +50,7 @@ const ParagraphPanel = ({
 
   return html`
     <editor-menu-content class="paragraph-panel" data-show ${ref(containerRef)}>
-      <div slot data-orientation="vertical">${renderedConfig}</div>
+      <div data-orientation="vertical">${renderedConfig}</div>
     </editor-menu-content>
   `;
 };
@@ -60,25 +60,25 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
     return null;
   }
 
-  const selectedBlockElements = formatBar.selectedBlockElements;
+  const selectedBlocks = formatBar.selectedBlocks;
   // only support model with text
-  if (selectedBlockElements.some(el => !el.model.text)) {
+  if (selectedBlocks.some(el => !el.model.text)) {
     return null;
   }
 
   const paragraphIcon =
-    selectedBlockElements.length < 1
+    selectedBlocks.length < 1
       ? textConversionConfigs[0].icon
-      : textConversionConfigs.find(
+      : (textConversionConfigs.find(
           ({ flavour, type }) =>
-            selectedBlockElements[0].flavour === flavour &&
-            (selectedBlockElements[0].model as ParagraphBlockModel).type ===
-              type
-        )?.icon ?? textConversionConfigs[0].icon;
+            selectedBlocks[0].flavour === flavour &&
+            (selectedBlocks[0].model as ParagraphBlockModel).type === type
+        )?.icon ?? textConversionConfigs[0].icon);
 
-  const rootElement = formatBar.blockElement;
-  if (!isRootElement(rootElement)) {
-    throw new Error('paragraph button host is not a page component');
+  const rootComponent = formatBar.block;
+  if (!isRootComponent(rootComponent)) {
+    console.error('paragraph button host is not a page component');
+    return null;
   }
 
   const { setFloating, setReference } = whenHover(isHover => {

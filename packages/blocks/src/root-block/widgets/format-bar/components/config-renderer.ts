@@ -74,7 +74,7 @@ export function ConfigRenderer(formatBar: AffineFormatBarWidget) {
         if (index === list.length - 1) {
           return false;
         }
-        if (list[index - 1][1].type === 'divider') {
+        if (list[index + 1][1].type === 'divider') {
           return false;
         }
       }

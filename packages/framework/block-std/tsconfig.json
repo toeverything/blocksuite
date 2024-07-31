@@ -5,7 +5,7 @@
     "outDir": "./dist/",
     "noEmit": false
   },
-  "include": ["./src"],
+  "include": ["./src", "../global/src/utils/point-location.ts"],
   "references": [
     {
       "path": "../global"

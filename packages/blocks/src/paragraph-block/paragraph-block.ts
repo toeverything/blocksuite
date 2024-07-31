@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
 import { getInlineRangeProvider } from '@blocksuite/block-std';
@@ -11,17 +11,18 @@ import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 import type { ParagraphBlockService } from './paragraph-service.js';
 
-import { BlockComponent } from '../_common/components/block-component.js';
+import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
+import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessTextBlockComponent } from '../edgeless-text/edgeless-text-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { paragraphBlockStyles } from './styles.js';
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends BlockComponent<
+export class ParagraphBlockComponent extends CaptionedBlockComponent<
   ParagraphBlockModel,
   ParagraphBlockService
 > {
@@ -150,13 +151,11 @@ export class ParagraphBlockComponent extends BlockComponent<
   }
 
   override get topContenteditableElement() {
-    if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockElement>(
-        'affine-note, affine-edgeless-note, affine-edgeless-text'
-      );
+    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
+      const el = this.closest<BlockComponent>(NOTE_SELECTOR);
       return el;
     }
-    return this.rootElement;
+    return this.rootComponent;
   }
 
   @query('rich-text')

@@ -1,4 +1,5 @@
-import { type Disposable, Slot, assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { type Disposable, Slot } from '@blocksuite/global/utils';
 import { signal } from '@preact/signals-core';
 
 import type { BlockModel, Schema } from '../../schema/index.js';
@@ -8,6 +9,7 @@ import type { DocCRUD } from './crud.js';
 
 import { syncBlockProps } from '../../utils/utils.js';
 import { Block } from './block/index.js';
+import { type Query, runQuery } from './query.js';
 
 export enum BlockViewType {
   Bypass = 'bypass',
@@ -15,14 +17,12 @@ export enum BlockViewType {
   Hidden = 'hidden',
 }
 
-export type BlockSelector = (block: Block, doc: Doc) => BlockViewType;
-
 type DocOptions = {
   schema: Schema;
   blockCollection: BlockCollection;
   crud: DocCRUD;
-  selector: BlockSelector;
   readonly?: boolean;
+  query?: Query;
 };
 
 export class Doc {
@@ -34,11 +34,18 @@ export class Doc {
 
   protected readonly _disposeBlockUpdated: Disposable;
 
+  protected readonly _query: Query = {
+    match: [],
+    mode: 'loose',
+  };
+
   protected readonly _readonly?: boolean;
 
-  protected readonly _schema: Schema;
+  private _runQuery = (block: Block) => {
+    runQuery(this._query, block);
+  };
 
-  protected readonly _selector: BlockSelector;
+  protected readonly _schema: Schema;
 
   readonly slots: BlockCollection['slots'] & {
     /** This is always triggered after `doc.load` is called. */
@@ -74,13 +81,7 @@ export class Doc {
     >;
   };
 
-  constructor({
-    schema,
-    blockCollection,
-    crud,
-    selector,
-    readonly,
-  }: DocOptions) {
+  constructor({ schema, blockCollection, crud, readonly, query }: DocOptions) {
     this._blockCollection = blockCollection;
 
     this.slots = {
@@ -94,8 +95,10 @@ export class Doc {
 
     this._crud = crud;
     this._schema = schema;
-    this._selector = selector;
     this._readonly = readonly;
+    if (query) {
+      this._query = query;
+    }
 
     this._yBlocks.forEach((_, id) => {
       if (id in this._blocks.peek()) {
@@ -162,9 +165,9 @@ export class Doc {
           });
         },
       };
-      const block = new Block(this._schema, yBlock, this, options);
 
-      block.blockViewType = this._selector(block, this);
+      const block = new Block(this._schema, yBlock, this, options);
+      this._runQuery(block);
 
       this._blocks.value = {
         ...this._blocks.value,
@@ -242,7 +245,10 @@ export class Doc {
     parentIndex?: number
   ): string {
     if (this.readonly) {
-      throw new Error('cannot modify data in readonly mode');
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        'cannot modify data in readonly mode'
+      );
     }
 
     const id = blockProps.id ?? this._blockCollection.generateBlockId();
@@ -290,14 +296,14 @@ export class Doc {
   ): string[] {
     if (!props.length) return [];
     const parent = this.getParent(targetModel);
-    assertExists(parent);
+    if (!parent) return [];
 
     const targetIndex =
       parent.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
     const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
 
     if (props.length <= 1) {
-      assertExists(props[0].flavour);
+      if (!props[0]?.flavour) return [];
       const { flavour, ...blockProps } = props[0];
       const id = this.addBlock(
         flavour as never,
@@ -314,7 +320,7 @@ export class Doc {
     }> = [];
     props.forEach(prop => {
       const { flavour, ...blockProps } = prop;
-      assertExists(flavour);
+      if (!flavour) return;
       blocks.push({ flavour, blockProps });
     });
     return this.addBlocks(blocks, parent.id, insertIndex);
@@ -507,11 +513,19 @@ export class Doc {
     }
 
     const yBlock = this._yBlocks.get(model.id);
-    assertExists(yBlock);
+    if (!yBlock) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        `updating block: ${model.id} not found`
+      );
+    }
+
+    const block = this.getBlock(model.id);
 
     this.transact(() => {
       if (isCallback) {
         callBackOrProps();
+        this._runQuery(block);
         return;
       }
 
@@ -523,8 +537,14 @@ export class Doc {
       }
 
       const schema = this.schema.flavourSchemaMap.get(model.flavour);
-      assertExists(schema);
+      if (!schema) {
+        throw new BlockSuiteError(
+          ErrorCode.ModelCRUDError,
+          `schema for flavour: ${model.flavour} not found`
+        );
+      }
       syncBlockProps(schema, model, yBlock, callBackOrProps);
+      this._runQuery(block);
       return;
     });
   }

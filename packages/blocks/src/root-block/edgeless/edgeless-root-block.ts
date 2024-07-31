@@ -1,18 +1,18 @@
 import type { SurfaceSelection } from '@blocksuite/block-std';
+import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { BlockElement } from '@blocksuite/block-std';
+import { BlockComponent } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
-import { assertExists, throttle } from '@blocksuite/global/utils';
+import { serializeXYWH } from '@blocksuite/global/utils';
+import { Point } from '@blocksuite/global/utils';
+import { Bound, Vec, assertExists, throttle } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
-import type {
-  ImageBlockModel,
-  ImageBlockProps,
-} from '../../image-block/image-model.js';
+import type { ImageBlockProps } from '../../image-block/image-model.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
@@ -29,15 +29,12 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../_common/consts.js';
-import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import {
-  type IPoint,
   NoteDisplayMode,
-  Point,
   type Viewport,
   asyncFocusRichText,
   handleNativeRangeAtPoint,
-  isPinchEvent,
+  isTouchPadPinchEvent,
   requestConnectedFrame,
   requestThrottledConnectFrame,
 } from '../../_common/utils/index.js';
@@ -46,14 +43,7 @@ import {
   setAttachmentUploaded,
   setAttachmentUploading,
 } from '../../attachment-block/utils.js';
-import {
-  Bound,
-  type IBound,
-  type IVec,
-  Vec,
-  normalizeWheelDeltaY,
-  serializeXYWH,
-} from '../../surface-block/index.js';
+import { normalizeWheelDeltaY } from '../../surface-block/index.js';
 import '../../surface-block/surface-block.js';
 import './components/note-slicer/index.js';
 import './components/presentation/edgeless-navigator-black-background.js';
@@ -88,19 +78,9 @@ import {
   DEFAULT_NOTE_WIDTH,
 } from './utils/consts.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
-export interface EdgelessViewport {
-  left: number;
-  top: number;
-  scrollLeft: number;
-  scrollTop: number;
-  scrollWidth: number;
-  scrollHeight: number;
-  clientWidth: number;
-  clientHeight: number;
-}
 
 @customElement('affine-edgeless-root')
-export class EdgelessRootBlockComponent extends BlockElement<
+export class EdgelessRootBlockComponent extends BlockComponent<
   RootBlockModel,
   EdgelessRootService,
   EdgelessRootBlockWidgetName
@@ -121,8 +101,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   private _resizeObserver: ResizeObserver | null = null;
 
-  private readonly _themeObserver = new ThemeObserver();
-
   private _viewportElement: HTMLElement | null = null;
 
   static override styles = css`
@@ -131,6 +109,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       user-select: none;
       display: block;
       height: 100%;
+      touch-action: none;
     }
 
     .widgets-container {
@@ -221,6 +200,40 @@ export class EdgelessRootBlockComponent extends BlockElement<
       .catch(console.error);
   }
 
+  private _initPinchEvent() {
+    this.disposables.add(
+      this.dispatcher.add('pinch', ctx => {
+        const { viewport } = this.service;
+        if (viewport.locked) return;
+
+        const multiPointersState = ctx.get('multiPointerState');
+        const [p1, p2] = multiPointersState.pointers;
+
+        const startCenter = new Point(
+          0.5 * (p1.start.x + p2.start.x),
+          0.5 * (p1.start.y + p2.start.y)
+        );
+
+        const lastDistance = Vec.dist(
+          [p1.x - p1.delta.x, p1.y - p1.delta.y],
+          [p2.x - p2.delta.x, p2.y - p2.delta.y]
+        );
+        const currentDistance = Vec.dist([p1.x, p1.y], [p2.x, p2.y]);
+
+        const zoom = (currentDistance / lastDistance) * viewport.zoom;
+
+        const [baseX, baseY] = viewport.toModelCoord(
+          startCenter.x,
+          startCenter.y
+        );
+
+        viewport.setZoom(zoom, new Point(baseX, baseY));
+
+        return false;
+      })
+    );
+  }
+
   private _initPixelRatioChangeEffect() {
     let media: MediaQueryList;
 
@@ -281,9 +294,9 @@ export class EdgelessRootBlockComponent extends BlockElement<
   private _initSlotEffects() {
     const { disposables, slots } = this;
 
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => this.surface.refresh());
-    this.disposables.add(() => this._themeObserver.dispose());
+    this.disposables.add(
+      this.service.themeObserver.mode$.subscribe(() => this.surface.refresh())
+    );
 
     disposables.add(this.service.selection);
     disposables.add(
@@ -382,11 +395,10 @@ export class EdgelessRootBlockComponent extends BlockElement<
         e.preventDefault();
 
         const { viewport, locked } = this.service;
-
         if (locked) return;
 
         // zoom
-        if (isPinchEvent(e)) {
+        if (isTouchPadPinchEvent(e)) {
           const rect = this.getBoundingClientRect();
           // Perform zooming relative to the mouse position
           const [baseX, baseY] = this.service.viewport.toModelCoord(
@@ -497,24 +509,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
     });
 
     return blockIds;
-  }
-
-  addImage(model: Partial<ImageBlockModel>, point: IPoint) {
-    const options = {
-      width: model.width ?? 0,
-      height: model.height ?? 0,
-    };
-    {
-      delete model.width;
-      delete model.height;
-    }
-    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
-    const bound = new Bound(x, y, options.width, options.height);
-    return this.service.addBlock(
-      'affine:image',
-      { ...model, xywh: bound.serialize() },
-      this.surface.model
-    );
   }
 
   async addImages(
@@ -756,6 +750,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
     this._initViewport();
     this._initWheelEvent();
+    this._initPinchEvent();
 
     if (this.doc.readonly) {
       this.tools.setEdgelessTool({ type: 'pan', panning: true });

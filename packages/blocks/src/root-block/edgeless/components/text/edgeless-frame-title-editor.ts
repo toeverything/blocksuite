@@ -3,6 +3,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -14,8 +15,6 @@ import type {
   FrameBlockModel,
 } from '../../../../frame-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-
-import { Bound } from '../../../../surface-block/index.js';
 
 @customElement('edgeless-frame-title-editor')
 export class EdgelessFrameTitleEditor extends WithDisposable(

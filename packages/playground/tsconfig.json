@@ -15,6 +15,6 @@
     "noEmit": true,
     "composite": false
   },
-  "include": ["./apps", "./examples", "./scripts"],
+  "include": ["./apps", "./examples"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -48,7 +48,7 @@ declare global {
 
 export function renderAddGroupButton(
   edgeless: EdgelessRootBlockComponent,
-  elements: BlockSuite.EdgelessModelType[]
+  elements: BlockSuite.EdgelessModel[]
 ) {
   if (elements.length < 2) return nothing;
   if (elements[0] instanceof GroupElementModel) return nothing;

@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import type { IVec, IVec3 } from '@blocksuite/global/utils';
 
-import type { IVec, IVec3 } from '../../surface-block/utils/vec.js';
+import { describe, expect, it } from 'vitest';
 
 import { AStarRunner } from '../../surface-block/utils/a-star.js';
 import { almostEqual } from '../../surface-block/utils/math-utils.js';

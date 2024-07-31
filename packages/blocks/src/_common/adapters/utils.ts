@@ -30,7 +30,7 @@ export const fetchImage = async (
       .catch(() => fetch(url, init));
   } catch (error) {
     console.warn('Error fetching image:', error);
-    throw error;
+    return null;
   }
 };
 

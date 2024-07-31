@@ -2,6 +2,8 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { Vec } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -10,8 +12,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless/edgeless-root-block.js';
 import type { EmbedCardStyle } from '../../../types.js';
 
-import { Bound } from '../../../../surface-block/utils/bound.js';
-import { Vec } from '../../../../surface-block/utils/vec.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
 import { getRootByEditorHost } from '../../../utils/query.js';
 import { isValidUrl } from '../../../utils/url.js';

@@ -1,6 +1,5 @@
+import { Point } from '@blocksuite/global/utils';
 import { describe, expect, it } from 'vitest';
-
-import { Point } from '../../_common/utils/rect.js';
 
 describe('Point', () => {
   it('should return a min point', () => {

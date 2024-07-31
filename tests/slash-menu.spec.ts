@@ -974,6 +974,7 @@ test('delete block by slash menu should remove children', async ({ page }) => {
   <affine:list
     prop:checked={false}
     prop:collapsed={false}
+    prop:order={null}
     prop:text="123"
     prop:type="bulleted"
   />

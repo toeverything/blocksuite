@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { BlockElement, WidgetElement } from '@blocksuite/block-std';
+import { BlockComponent, WidgetComponent } from '@blocksuite/block-std';
 import { assertInstanceOf } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -21,7 +21,7 @@ type Rect = {
 };
 
 type BlockInfo = {
-  element: BlockElement;
+  element: BlockComponent;
   rect: Rect;
 };
 
@@ -29,7 +29,7 @@ export const AFFINE_PAGE_DRAGGING_AREA_WIDGET =
   'affine-page-dragging-area-widget';
 
 @customElement(AFFINE_PAGE_DRAGGING_AREA_WIDGET)
-export class AffinePageDraggingAreaWidget extends WidgetElement<
+export class AffinePageDraggingAreaWidget extends WidgetComponent<
   RootBlockModel,
   PageRootBlockComponent
 > {
@@ -127,11 +127,11 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
     }
     const { scrollLeft, scrollTop } = this._viewport;
 
-    const getAllNodeFromTree = (): BlockElement[] => {
-      const blockElement: BlockElement[] = [];
+    const getAllNodeFromTree = (): BlockComponent[] => {
+      const blocks: BlockComponent[] = [];
       this.host.view.walkThrough(node => {
         const view = node;
-        if (!(view instanceof BlockElement)) {
+        if (!(view instanceof BlockComponent)) {
           return true;
         }
         if (
@@ -140,11 +140,11 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
             view.model.flavour
           )
         ) {
-          blockElement.push(view);
+          blocks.push(view);
         }
         return;
       });
-      return blockElement;
+      return blocks;
     };
 
     const elements = getAllNodeFromTree();
@@ -184,13 +184,13 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
   }
 
   private get _viewport() {
-    const rootElement = this.blockElement;
-    if (!rootElement) return;
-    return rootElement.viewport;
+    const rootComponent = this.block;
+    if (!rootComponent) return;
+    return rootComponent.viewport;
   }
 
   private get scrollContainer() {
-    return getScrollContainer(this.blockElement);
+    return getScrollContainer(this.block);
   }
 
   override connectedCallback() {
@@ -229,8 +229,13 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
         if (!this._dragging) {
           return;
         }
-        ctx.get('defaultState').event.preventDefault();
+
         const state = ctx.get('pointerState');
+        // TODO(@L-Sun) support drag area for touch device
+        if (state.raw.pointerType === 'touch') return;
+
+        ctx.get('defaultState').event.preventDefault();
+
         this._rafID = requestAnimationFrame(() => {
           this._updateDraggingArea(state, true);
         });
@@ -352,7 +357,7 @@ function filterBlockInfosByParent(
   const targetBlock = parentInfos.element;
   let results = [parentInfos];
   if (targetBlock.childElementCount > 0) {
-    const childBlockInfos = targetBlock.childBlockElements
+    const childBlockInfos = targetBlock.childBlocks
       .map(el =>
         filteredBlockInfos.find(
           blockInfo => blockInfo.element.model.id === el.model.id
@@ -433,7 +438,7 @@ function getSelectingBlockPaths(blockInfos: BlockInfo[], userRect: Rect) {
 function isDragArea(e: PointerEventState) {
   const el = e.raw.target;
   assertInstanceOf(el, Element);
-  const block = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
+  const block = el.closest<BlockComponent>(`[${BLOCK_ID_ATTR}]`);
   return block && matchFlavours(block.model, ['affine:page', 'affine:note']);
 }
 

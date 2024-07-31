@@ -1,8 +1,9 @@
+import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
-
-import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
 import {
   FontFamily,
   FontStyle,
@@ -52,6 +53,6 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
   },
 });
 
-export class EdgelessTextBlockModel extends selectable<EdgelessTextProps>(
-  BlockModel
-) {}
+export class EdgelessTextBlockModel
+  extends GfxCompatible<EdgelessTextProps>(BlockModel)
+  implements GfxElementGeometry {}

@@ -2,6 +2,7 @@ import type { BlockService } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { Bound, Point } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -9,7 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
-import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
+import type { GfxCompatibleProps } from '../edgeless/mixin/index.js';
 
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
@@ -20,23 +21,17 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../../root-block/widgets/drag-handle/utils.js';
-import { Bound } from '../../surface-block/index.js';
-import { BlockComponent } from '../components/block-component.js';
+import { CaptionedBlockComponent } from '../components/captioned-block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
-import {
-  type EmbedCardStyle,
-  Point,
-  getThemeMode,
-  matchFlavours,
-} from '../utils/index.js';
+import { ThemeObserver } from '../theme/theme-observer.js';
+import { type EmbedCardStyle, matchFlavours } from '../utils/index.js';
 import { styles } from './styles.js';
 
-export class EmbedBlockElement<
-  Model extends
-    BlockModel<EdgelessSelectableProps> = BlockModel<EdgelessSelectableProps>,
+export class EmbedBlockComponent<
+  Model extends BlockModel<GfxCompatibleProps> = BlockModel<GfxCompatibleProps>,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
-> extends BlockComponent<Model, Service, WidgetName> {
+> extends CaptionedBlockComponent<Model, Service, WidgetName> {
   protected _cardStyle: EmbedCardStyle = 'horizontal';
 
   private _dragHandleOption: DragHandleOption = {
@@ -140,7 +135,7 @@ export class EmbedBlockElement<
   static override styles = styles;
 
   renderEmbed = (children: () => TemplateResult) => {
-    const theme = getThemeMode();
+    const theme = ThemeObserver.mode;
     const isSelected = !!this.selected?.is('block');
 
     if (!this.isInSurface) {

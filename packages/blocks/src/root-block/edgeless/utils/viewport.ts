@@ -1,10 +1,10 @@
+import type { IVec } from '@blocksuite/global/utils';
+import type { IPoint } from '@blocksuite/global/utils';
+
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 
-import type { IPoint } from '../../../_common/types.js';
-
 import { clamp } from '../../../_common/utils/math.js';
-import { Bound } from '../../../surface-block/utils/bound.js';
-import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 
 function cutoff(value: number, ref: number, sign: number) {
   if (sign > 0 && value > ref) return ref;

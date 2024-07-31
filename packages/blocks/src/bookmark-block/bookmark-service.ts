@@ -1,4 +1,5 @@
-import { BlockService, Bound } from '@blocksuite/block-std';
+import { BlockService } from '@blocksuite/block-std';
+import { Bound, Point } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
 import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
@@ -7,7 +8,6 @@ import type { BookmarkBlockComponent } from './bookmark-block.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import { Point } from '../_common/utils/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,

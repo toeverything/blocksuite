@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { cssVar } from '@toeverything/theme';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -15,7 +16,7 @@ import {
   NavigatorFullScreenIcon,
   StopAIIcon,
 } from '../../../../_common/icons/edgeless.js';
-import { Bound, clamp } from '../../../../surface-block/index.js';
+import { clamp } from '../../../../surface-block/index.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
 import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';

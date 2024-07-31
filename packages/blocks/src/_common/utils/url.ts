@@ -14,7 +14,7 @@ import {
   EmbedCardLightVerticalIcon,
   LightLoadingIcon,
 } from '../icons/text.js';
-import { getThemeMode } from './query.js';
+import { ThemeObserver } from '../theme/theme-observer.js';
 
 export const ALLOWED_SCHEMES = [
   'http',
@@ -173,7 +173,7 @@ type EmbedCardIcons = {
 };
 
 export function getEmbedCardIcons(): EmbedCardIcons {
-  const theme = getThemeMode();
+  const theme = ThemeObserver.mode;
   if (theme === 'light') {
     return {
       LoadingIcon: LightLoadingIcon,

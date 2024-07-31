@@ -56,7 +56,6 @@ export const DEFAULT_LINK_PREVIEW_ENDPOINT =
 
 // This constant is used to ignore tags when exporting using html2canvas
 export const CANVAS_EXPORT_IGNORE_TAGS = [
-  'AFFINE-BLOCK-HUB',
   'EDGELESS-TOOLBAR',
   'AFFINE-DRAG-HANDLE-WIDGET',
   'AFFINE-FORMAT-BAR-WIDGET',

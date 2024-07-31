@@ -1,7 +1,10 @@
+import type { IVec, SerializedXYWH } from '@blocksuite/global/utils';
+
+import { yfield } from '@blocksuite/block-std/gfx';
+import { Bound } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import type { SerializedXYWH } from '../index.js';
-import type { IVec } from '../utils/vec.js';
+import type { Color } from '../consts.js';
 
 import {
   FontFamily,
@@ -10,17 +13,15 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '../consts.js';
-import { Bound } from '../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   polygonNearestPoint,
 } from '../utils/math-utils.js';
-import { type IBaseProps, SurfaceElementModel } from './base.js';
-import { yfield } from './decorators.js';
+import { type BaseElementProps, SurfaceElementModel } from './base.js';
 
-export type TextElementProps = IBaseProps & {
+export type TextElementProps = BaseElementProps & {
   text: Y.Text;
   hasMaxWidth?: boolean;
 } & Omit<TextStyleProps, 'fontWeight' | 'fontStyle'> &
@@ -35,9 +36,14 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
     return props;
   }
 
-  override containedByBounds(bounds: Bound): boolean {
+  override containsBound(bounds: Bound): boolean {
     const points = getPointsFromBoundsWithRotation(this);
     return points.some(point => bounds.containsPoint(point));
+  }
+
+  override getLineIntersections(start: IVec, end: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return linePolygonIntersects(start, end, points);
   }
 
   override getNearestPoint(point: IVec): IVec {
@@ -47,14 +53,9 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
     ) as IVec;
   }
 
-  override hitTest(x: number, y: number): boolean {
+  override includesPoint(x: number, y: number): boolean {
     const points = getPointsFromBoundsWithRotation(this);
     return pointInPolygon([x, y], points);
-  }
-
-  override intersectWithLine(start: IVec, end: IVec) {
-    const points = getPointsFromBoundsWithRotation(this);
-    return linePolygonIntersects(start, end, points);
   }
 
   get type() {
@@ -62,7 +63,7 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   }
 
   @yfield()
-  accessor color: string = '#000000';
+  accessor color: Color = '#000000';
 
   @yfield()
   accessor fontFamily: FontFamily = FontFamily.Inter;

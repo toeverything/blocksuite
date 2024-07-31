@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { sleep } from '@blocksuite/global/utils';
 import {
   LitElement,
@@ -13,10 +14,7 @@ import type { ShapeType } from '../../../../../surface-block/elements/shape/cons
 import type { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
-import {
-  Bound,
-  CanvasElementType,
-} from '../../../../../surface-block/index.js';
+import { CanvasElementType } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 
 export type ShapeName = ShapeType | 'roundedRect';

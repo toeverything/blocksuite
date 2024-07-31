@@ -4,7 +4,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { GroupData } from '../../../../common/group-by/helper.js';
-import type { DataViewTableManager } from '../table-view-manager.js';
+import type { TableSingleView } from '../table-view-manager.js';
 
 const styles = css`
   .affine-database-column-stats {
@@ -18,18 +18,8 @@ const styles = css`
 export class DataBaseColumnStats extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    this.disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
   protected override render() {
-    const cols = this.view.columnManagerList;
+    const cols = this.view.columnManagerList$.value;
 
     return html`
       <div class="affine-database-column-stats">
@@ -51,7 +41,7 @@ export class DataBaseColumnStats extends WithDisposable(LitElement) {
   accessor group: GroupData | undefined = undefined;
 
   @property({ attribute: false })
-  accessor view!: DataViewTableManager;
+  accessor view!: TableSingleView;
 }
 
 declare global {

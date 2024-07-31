@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import * as Y from 'yjs';
 
 import type { BlockModel } from '../../schema/index.js';
@@ -37,7 +37,12 @@ export class DocCRUD {
     parentIndex?: number
   ) {
     const schema = this._schema.flavourSchemaMap.get(flavour);
-    assertExists(schema, `Could not find schema for flavour ${flavour}`);
+    if (!schema) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        `schema for flavour: ${flavour} not found`
+      );
+    }
 
     const parentFlavour = parent
       ? this._yBlocks.get(parent)?.get('sys:flavour')
@@ -123,7 +128,12 @@ export class DocCRUD {
     const apply = () => {
       if (bringChildrenTo) {
         const bringChildrenToModel = () => {
-          assertExists(bringChildrenTo);
+          if (!bringChildrenTo) {
+            throw new BlockSuiteError(
+              ErrorCode.ModelCRUDError,
+              'bringChildrenTo is not provided when deleting block'
+            );
+          }
           const model = this._yBlocks.get(bringChildrenTo);
           if (!model) return;
           const bringFlavour = model.get('sys:flavour');
@@ -249,7 +259,8 @@ export class DocCRUD {
 
       const last = children[children.length - 1];
       if (this.getNext(last) !== blockId) {
-        throw new Error(
+        throw new BlockSuiteError(
+          ErrorCode.ModelCRUDError,
           'The blocks to move are not contiguous under their parent'
         );
       }
@@ -290,7 +301,10 @@ export class DocCRUD {
             .toArray()
             .findIndex(id => id === targetSibling);
           if (targetIndex === -1) {
-            throw new Error('Target sibling not found');
+            throw new BlockSuiteError(
+              ErrorCode.ModelCRUDError,
+              'Target sibling not found'
+            );
           }
           insertIndex = shouldInsertBeforeSibling
             ? targetIndex

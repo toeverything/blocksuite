@@ -10,7 +10,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
     surface.hasElementById(id) || surface.doc.hasBlockById(id);
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
-    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType);
+    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModel);
   const pathGenerator = new ConnectorPathGenerator({
     getElementById: getElementById,
   });

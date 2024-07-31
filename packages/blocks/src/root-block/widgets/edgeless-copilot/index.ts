@@ -1,4 +1,5 @@
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   computePosition,
@@ -21,14 +22,14 @@ import {
   MOUSE_BUTTON,
   requestConnectedFrame,
 } from '../../../_common/utils/event.js';
-import { Bound, getElementsBound } from '../../../surface-block/index.js';
+import { getElementsBound } from '../../../surface-block/index.js';
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 
 export const AFFINE_EDGELESS_COPILOT_WIDGET = 'affine-edgeless-copilot-widget';
 
 @customElement(AFFINE_EDGELESS_COPILOT_WIDGET)
-export class EdgelessCopilotWidget extends WidgetElement<
+export class EdgelessCopilotWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
@@ -139,7 +140,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
           return;
         }
 
-        const off = this.blockElement.dispatcher.add('pointerDown', ctx => {
+        const off = this.block.dispatcher.add('pointerDown', ctx => {
           const e = ctx.get('pointerState').raw;
           const aiPanel = this.host.view.getWidget(
             AFFINE_AI_PANEL_WIDGET,
@@ -249,7 +250,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
   }
 
   get edgeless() {
-    return this.blockElement;
+    return this.block;
   }
 
   get selectionModelRect() {

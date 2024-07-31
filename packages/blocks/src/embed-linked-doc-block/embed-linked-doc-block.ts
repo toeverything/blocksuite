@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
@@ -16,11 +17,10 @@ import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
 import { Peekable, isPeekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
+import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
-import { Bound } from '../surface-block/index.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
 
@@ -28,7 +28,7 @@ import { getEmbedLinkedDocIcons } from './utils.js';
 @Peekable({
   enableOn: ({ doc }: EmbedLinkedDocBlockComponent) => !doc.readonly,
 })
-export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
+export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   EmbedLinkedDocModel,
   EmbedLinkedDocBlockService
 > {
@@ -186,12 +186,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const linkedDocId = this.model.pageId;
     if (linkedDocId === this.doc.id) return;
 
-    const rootElement = this.std.view.viewFromPath('block', [
+    const rootComponent = this.std.view.viewFromPath('block', [
       this.doc.root?.id ?? '',
     ]) as RootBlockComponent | null;
-    assertExists(rootElement);
+    assertExists(rootComponent);
 
-    rootElement.slots.docLinkClicked.emit({ docId: linkedDocId });
+    rootComponent.slots.docLinkClicked.emit({ docId: linkedDocId });
   };
 
   refreshData = () => {

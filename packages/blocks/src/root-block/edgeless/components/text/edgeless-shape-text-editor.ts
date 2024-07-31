@@ -3,9 +3,10 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -16,13 +17,13 @@ import {
   getNearestTranslation,
   isElementOutsideViewport,
 } from '../../../../_common/edgeless/mindmap/index.js';
-import { isCssVariable } from '../../../../_common/theme/css-variables.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { TextResizing } from '../../../../surface-block/consts.js';
 import {
   MindmapElementModel,
   type ShapeElementModel,
 } from '../../../../surface-block/element-model/index.js';
-import { Bound, Vec, toRadian } from '../../../../surface-block/index.js';
+import { toRadian } from '../../../../surface-block/index.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 import { getSelectedRect } from '../../utils/query.js';
 
@@ -262,7 +263,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
   override render() {
     if (!this.element.text) {
-      throw new Error('Failed to mount shape editor because of no text.');
+      console.error('Failed to mount shape editor because of no text.');
+      return nothing;
     }
 
     const [verticalPadding, horiPadding] = this.element.padding;
@@ -281,6 +283,10 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       leftTopY
     );
     const autoWidth = textResizing === TextResizing.AUTO_WIDTH;
+    const color = ThemeObserver.generateColorProperty(
+      this.element.color,
+      '#000000'
+    );
 
     const inlineEditorStyle = styleMap({
       position: 'absolute',
@@ -308,9 +314,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       outline: 'none',
       transform: `scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
       transformOrigin: 'top left',
-      color: isCssVariable(this.element.color)
-        ? `var(${this.element.color})`
-        : this.element.color,
+      color,
       padding: `${verticalPadding}px ${horiPadding}px`,
       textAlign: this.element.textAlign,
       display: 'grid',

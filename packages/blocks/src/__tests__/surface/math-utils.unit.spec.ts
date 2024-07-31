@@ -1,7 +1,7 @@
+import type { IVec } from '@blocksuite/global/utils';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { describe, expect, it } from 'vitest';
-
-import type { IVec } from '../../surface-block/index.js';
 
 import {
   almostEqual,

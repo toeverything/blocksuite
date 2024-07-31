@@ -1,13 +1,8 @@
-import type {
-  AffineInlineEditor,
-  FrameBlockModel,
-  RichText,
-} from '@blocksuite/blocks';
+import type { FrameBlockModel, RichText } from '@blocksuite/blocks';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { property, query } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 const styles = css`
@@ -16,6 +11,9 @@ const styles = css`
   }
 `;
 
+export const AFFINE_FRAME_TITLE_EDITOR = 'affine-frame-card-title-editor';
+
+@customElement(AFFINE_FRAME_TITLE_EDITOR)
 export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   private _isComposing = false;
 
@@ -31,6 +29,8 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   override firstUpdated(): void {
     this.updateComplete
       .then(() => {
+        if (this.inlineEditor === null) return;
+
         this.titleContentElement.style.display = 'none';
 
         this.inlineEditor.selectAll();
@@ -39,38 +39,24 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
           this.requestUpdate();
         });
 
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'blur',
-          () => {
+        const inlineEditorContainer = this.inlineEditor.rootElement;
+
+        this.disposables.addFromEvent(inlineEditorContainer, 'blur', () => {
+          this._unmount();
+        });
+        this.disposables.addFromEvent(inlineEditorContainer, 'click', e => {
+          e.stopPropagation();
+        });
+        this.disposables.addFromEvent(inlineEditorContainer, 'dblclick', e => {
+          e.stopPropagation();
+        });
+
+        this.disposables.addFromEvent(inlineEditorContainer, 'keydown', e => {
+          e.stopPropagation();
+          if (e.key === 'Enter' && !this._isComposing) {
             this._unmount();
           }
-        );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'click',
-          e => {
-            e.stopPropagation();
-          }
-        );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'dblclick',
-          e => {
-            e.stopPropagation();
-          }
-        );
-
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'keydown',
-          e => {
-            e.stopPropagation();
-            if (e.key === 'Enter' && !this._isComposing) {
-              this._unmount();
-            }
-          }
-        );
+        });
       })
       .catch(console.error);
   }
@@ -112,13 +98,8 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
     ></rich-text>`;
   }
 
-  get inlineEditor(): AffineInlineEditor {
-    assertExists(this.richText.inlineEditor);
+  get inlineEditor() {
     return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
   }
 
   @property({ attribute: false })
@@ -139,6 +120,6 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frame-card-title-editor': FrameCardTitleEditor;
+    [AFFINE_FRAME_TITLE_EDITOR]: FrameCardTitleEditor;
   }
 }

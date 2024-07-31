@@ -5,7 +5,7 @@ import {
   BlockSelection,
   TextSelection,
 } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing } from 'lit';
@@ -13,7 +13,7 @@ import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { RemoteColorManager } from '../../../root-block/remote-color-manager/remote-color-manager.js';
-import { isRootElement } from '../../../root-block/utils/guard.js';
+import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';
 
 export interface SelectionRect {
@@ -27,7 +27,7 @@ export const AFFINE_DOC_REMOTE_SELECTION_WIDGET =
   'affine-doc-remote-selection-widget';
 
 @customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET)
-export class AffineDocRemoteSelectionWidget extends WidgetElement {
+export class AffineDocRemoteSelectionWidget extends WidgetComponent {
   private _abortController = new AbortController();
 
   private _remoteColorManager: RemoteColorManager | null = null;
@@ -65,8 +65,9 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   }
 
   private _getCursorRect(selections: BaseSelection[]): SelectionRect | null {
-    if (!isRootElement(this.blockElement)) {
-      throw new Error('remote selection widget must be used in page component');
+    if (!isRootComponent(this.block)) {
+      console.error('remote selection widget must be used in page component');
+      return null;
     }
 
     const textSelection = selections.find(
@@ -119,9 +120,9 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     } else if (blockSelections.length > 0) {
       const lastBlockSelection = blockSelections[blockSelections.length - 1];
 
-      const blockElement = this.host.view.getBlock(lastBlockSelection.blockId);
-      if (blockElement) {
-        const rect = blockElement.getBoundingClientRect();
+      const block = this.host.view.getBlock(lastBlockSelection.blockId);
+      if (block) {
+        const rect = block.getBoundingClientRect();
         return {
           width: 2,
           height: rect.height,
@@ -140,8 +141,9 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   }
 
   private _getSelectionRect(selections: BaseSelection[]): SelectionRect[] {
-    if (!isRootElement(this.blockElement)) {
-      throw new Error('remote selection widget must be used in page component');
+    if (!isRootComponent(this.block)) {
+      console.error('remote selection widget must be used in page component');
+      return [];
     }
 
     const textSelection = selections.find(
@@ -179,9 +181,9 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
       }
     } else if (blockSelections.length > 0) {
       return blockSelections.flatMap(blockSelection => {
-        const blockElement = this.host.view.getBlock(blockSelection.blockId);
-        if (blockElement) {
-          const rect = blockElement.getBoundingClientRect();
+        const block = this.host.view.getBlock(blockSelection.blockId);
+        if (block) {
+          const rect = block.getBoundingClientRect();
           return {
             width: rect.width,
             height: rect.height,

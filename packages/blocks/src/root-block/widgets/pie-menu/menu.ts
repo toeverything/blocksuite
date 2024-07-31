@@ -1,4 +1,7 @@
+import type { IVec } from '@blocksuite/global/utils';
+
 import { WithDisposable } from '@blocksuite/block-std';
+import { Vec } from '@blocksuite/global/utils';
 import { Slot, assertEquals, assertExists } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -8,12 +11,7 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 import type { PieMenuSchema, PieNodeModel } from './base.js';
 import type { AffinePieMenuWidget } from './index.js';
 
-import {
-  type IVec,
-  Vec,
-  toDegree,
-  toRadian,
-} from '../../../surface-block/index.js';
+import { toDegree, toRadian } from '../../../surface-block/index.js';
 import { PieNode } from './node.js';
 import { PieManager } from './pie-manager.js';
 import { pieMenuStyles } from './styles.js';
@@ -136,7 +134,7 @@ export class PieMenu extends WithDisposable(LitElement) {
 
   private _setupEvents() {
     this._disposables.addFromEvent(
-      this.widgetElement,
+      this.widgetComponent,
       'pointermove',
       this._handlePointerMove
     );
@@ -285,11 +283,11 @@ export class PieMenu extends WithDisposable(LitElement) {
   accessor position!: IVec;
 
   @property({ attribute: false })
-  accessor rootElement!: EdgelessRootBlockComponent;
+  accessor rootComponent!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
   accessor schema!: PieMenuSchema;
 
   @property({ attribute: false })
-  accessor widgetElement!: AffinePieMenuWidget;
+  accessor widgetComponent!: AffinePieMenuWidget;
 }

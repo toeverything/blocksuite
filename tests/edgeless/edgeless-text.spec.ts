@@ -1,12 +1,13 @@
 import type { EdgelessTextBlockComponent } from '@blocks/edgeless-text/edgeless-text-block.js';
 
-import { Bound } from '@blocks/surface-block/utils/bound.js';
+import { Bound } from '@global/utils/bound.js';
 import { type Page, expect } from '@playwright/test';
 
 import {
   captureHistory,
   dragBetweenIndices,
   enterPlaygroundRoom,
+  getEdgelessSelectedRect,
   initEmptyEdgelessState,
   pressArrowLeft,
   pressArrowRight,
@@ -146,7 +147,7 @@ test.describe('edgeless text block', () => {
     await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 50, 56));
 
     await type(page, 'aaaaaa');
-    await waitNextFrame(page, 1500);
+    await waitNextFrame(page, 200);
     await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 71, 56));
 
     await type(page, '\nbbb');
@@ -248,5 +249,82 @@ test.describe('edgeless text block', () => {
     await pressBackspace(page);
     await type(page, 'b');
     await assertBlockTextContent(page, 5, 'b');
+  });
+
+  test('edgeless text max width', async ({ page }) => {
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 50, 56));
+
+    await type(page, 'aaaaaa');
+    await waitNextFrame(page);
+    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 71, 56));
+    await type(page, 'bbb');
+    await waitNextFrame(page, 200);
+    // height not changed
+    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 98, 56));
+
+    // blur
+    await page.mouse.click(0, 0);
+    // select text element
+    await page.mouse.click(130, 140);
+
+    let selectedRect = await getEdgelessSelectedRect(page);
+
+    // move cursor to the right edge and drag it to resize the width of text
+
+    // from left to right
+    await page.mouse.move(
+      selectedRect.x + selectedRect.width,
+      selectedRect.y + selectedRect.height / 2
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      selectedRect.x + selectedRect.width + 30,
+      selectedRect.y + selectedRect.height / 2,
+      {
+        steps: 10,
+      }
+    );
+    await page.mouse.up();
+    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 128, 56));
+    selectedRect = await getEdgelessSelectedRect(page);
+    let textRect = await page
+      .locator('affine-edgeless-text[data-block-id="4"]')
+      .boundingBox();
+    expect(selectedRect).not.toBeNull();
+    expect(selectedRect.width).toBeCloseTo(textRect!.width);
+    expect(selectedRect.height).toBeCloseTo(textRect!.height);
+    expect(selectedRect.x).toBeCloseTo(textRect!.x);
+    expect(selectedRect.y).toBeCloseTo(textRect!.y);
+
+    // from right to left
+    await page.mouse.move(
+      selectedRect.x + selectedRect.width,
+      selectedRect.y + selectedRect.height / 2
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      selectedRect.x + selectedRect.width - 45,
+      selectedRect.y + selectedRect.height / 2,
+      {
+        steps: 10,
+      }
+    );
+    await page.mouse.up();
+    // height changed
+    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 83, 80));
+    selectedRect = await getEdgelessSelectedRect(page);
+    textRect = await page
+      .locator('affine-edgeless-text[data-block-id="4"]')
+      .boundingBox();
+    expect(selectedRect).not.toBeNull();
+    expect(selectedRect.width).toBeCloseTo(textRect!.width);
+    expect(selectedRect.height).toBeCloseTo(textRect!.height);
+    expect(selectedRect.x).toBeCloseTo(textRect!.x);
+    expect(selectedRect.y).toBeCloseTo(textRect!.y);
   });
 });

@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -24,14 +25,13 @@ import {
 } from '../../../_common/icons/text.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { downloadAttachmentBlob } from '../../../attachment-block/utils.js';
-import { Bound } from '../../../surface-block/index.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 
 @customElement('edgeless-change-attachment-button')
 export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   private _download = () => {
-    if (!this._blockElement) return;
-    downloadAttachmentBlob(this._blockElement);
+    if (!this._block) return;
+    downloadAttachmentBlob(this._block);
   };
 
   private _setCardStyle = (style: EmbedCardStyle) => {
@@ -43,10 +43,10 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   };
 
   private _showCaption = () => {
-    this._blockElement?.captionEditor.show();
+    this._block?.captionEditor?.show();
   };
 
-  private get _blockElement() {
+  private get _block() {
     const blockSelection =
       this.edgeless.service.selection.surfaceSelections.filter(sel =>
         sel.elements.includes(this.model.id)
@@ -55,12 +55,12 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const blockElement = this.std.view.getBlock(
+    const block = this.std.view.getBlock(
       blockSelection[0].blockId
     ) as AttachmentBlockComponent | null;
-    assertExists(blockElement);
+    assertExists(block);
 
-    return blockElement;
+    return block;
   }
 
   private get _doc() {
@@ -98,7 +98,6 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
         `}
       >
         <card-style-panel
-          slot
           .value=${this.model.style}
           .options=${this._getCardStyleOptions}
           .onSelect=${this._setCardStyle}

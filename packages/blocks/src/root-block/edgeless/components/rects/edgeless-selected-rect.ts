@@ -1,11 +1,19 @@
+import type { IVec, PointLocation } from '@blocksuite/global/utils';
+
 import { WithDisposable } from '@blocksuite/block-std';
-import { type Disposable, Slot, assertType } from '@blocksuite/global/utils';
+import { deserializeXYWH } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
+import {
+  type Disposable,
+  type IPoint,
+  Slot,
+  assertType,
+} from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { IPoint } from '../../../../_common/types.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EdgelessTextBlockComponent } from '../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
@@ -36,14 +44,10 @@ import { TextElementModel } from '../../../../surface-block/element-model/text.j
 import {
   CanvasElementType,
   GroupElementModel,
-  type PointLocation,
   ShapeElementModel,
-  deserializeXYWH,
 } from '../../../../surface-block/index.js';
 import {
-  Bound,
   ConnectorElementModel,
-  type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
 } from '../../../../surface-block/index.js';
@@ -955,7 +959,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   #adjustProportional(
-    element: BlockSuite.EdgelessModelType,
+    element: BlockSuite.EdgelessModel,
     bound: Bound,
     direction: HandleDirection
   ) {
@@ -1053,7 +1057,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   #adjustUseFallback(
-    element: BlockSuite.EdgelessModelType,
+    element: BlockSuite.EdgelessModel,
     bound: Bound,
     _direction: HandleDirection
   ) {
@@ -1083,7 +1087,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
   }
 
-  private _isProportionalElement(element: BlockSuite.EdgelessModelType) {
+  private _isProportionalElement(element: BlockSuite.EdgelessModel) {
     return (
       isAttachmentBlock(element) ||
       isImageBlock(element) ||
@@ -1096,7 +1100,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
   }
 
-  private _shouldRenderSelection(elements?: BlockSuite.EdgelessModelType[]) {
+  private _shouldRenderSelection(elements?: BlockSuite.EdgelessModel[]) {
     elements = elements ?? this.selection.selectedElements;
     return elements.length > 0 && !this.selection.editing;
   }
@@ -1350,7 +1354,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllConnectors = false;
         areAllShapes = false;
       } else {
-        assertType<BlockSuite.SurfaceElementModelType>(element);
+        assertType<BlockSuite.SurfaceElementModel>(element);
         if (element.type === CanvasElementType.CONNECTOR) {
           const connector = element as ConnectorElementModel;
           areAllIndependentConnectors &&= !(

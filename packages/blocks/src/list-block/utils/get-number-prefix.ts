@@ -38,8 +38,12 @@ export function number2roman(num: number) {
 }
 
 function getPrefix(depth: number, index: number) {
-  const map = [() => index + 1, number2letter, () => number2roman(index + 1)];
-  return map[depth % map.length](index);
+  const map = [
+    () => index,
+    () => number2letter(index - 1),
+    () => number2roman(index),
+  ];
+  return map[depth % map.length]();
 }
 
 export function getNumberPrefix(index: number, depth: number) {

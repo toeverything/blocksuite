@@ -1,7 +1,6 @@
 import { createZodUnion } from '../../utils/index.js';
 
 export const NOTE_BACKGROUND_COLORS = [
-  '--affine-palette-transparent',
   '--affine-note-background-yellow',
   '--affine-note-background-orange',
   '--affine-note-background-red',
@@ -19,7 +18,7 @@ export const NoteBackgroundColorsSchema = createZodUnion(
   NOTE_BACKGROUND_COLORS
 );
 
-export const DEFAULT_NOTE_BACKGROUND_COLOR = NOTE_BACKGROUND_COLORS[6];
+export const DEFAULT_NOTE_BACKGROUND_COLOR = NOTE_BACKGROUND_COLORS[5];
 
 export const NOTE_SHADOWS = [
   '',
@@ -33,3 +32,6 @@ export const NOTE_SHADOWS = [
 export const NoteShadowsSchema = createZodUnion(NOTE_SHADOWS);
 
 export const DEFAULT_NOTE_SHADOW = NOTE_SHADOWS[2];
+
+export const NOTE_SELECTOR =
+  'affine-note, affine-edgeless-note .edgeless-note-page-content, affine-edgeless-text';

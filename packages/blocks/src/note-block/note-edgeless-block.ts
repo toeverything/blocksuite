@@ -1,14 +1,13 @@
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
-  Bound,
   ShadowlessElement,
   WithDisposable,
-  almostEqual,
-  clamp,
-  toEdgelessBlockElement,
+  toGfxBlockComponent,
 } from '@blocksuite/block-std';
+import { Point } from '@blocksuite/global/utils';
+import { Bound, almostEqual, clamp } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -20,10 +19,10 @@ import type { NoteBlockModel } from './note-model.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../_common/consts.js';
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../_common/edgeless/note/consts.js';
 import { MoreIndicatorIcon } from '../_common/icons/edgeless.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { NoteDisplayMode } from '../_common/types.js';
 import { matchFlavours } from '../_common/utils/model.js';
-import { getClosestBlockElementByPoint } from '../_common/utils/query.js';
-import { Point } from '../_common/utils/rect.js';
+import { getClosestBlockComponentByPoint } from '../_common/utils/query.js';
 import { handleNativeRangeAtPoint } from '../_common/utils/selection.js';
 import { StrokeStyle } from '../surface-block/consts.js';
 import { NoteBlockComponent } from './note-block.js';
@@ -103,7 +102,7 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 const ACTIVE_NOTE_EXTRA_PADDING = 20;
 
 @customElement('affine-edgeless-note')
-export class EdgelessNoteBlockComponent extends toEdgelessBlockElement(
+export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
   NoteBlockComponent
 ) {
   static override styles = css`
@@ -253,9 +252,9 @@ export class EdgelessNoteBlockComponent extends toEdgelessBlockElement(
   }
 
   private _tryAddParagraph(x: number, y: number) {
-    const nearest = getClosestBlockElementByPoint(
+    const nearest = getClosestBlockComponentByPoint(
       new Point(x, y)
-    ) as BlockElement | null;
+    ) as BlockComponent | null;
     if (!nearest) return;
 
     const nearestBBox = nearest.getBoundingClientRect();
@@ -379,13 +378,13 @@ export class EdgelessNoteBlockComponent extends toEdgelessBlockElement(
     };
   }
 
-  override renderEdgelessBlock() {
+  override renderGfxBlock() {
     const { model } = this;
     const { displayMode } = model;
     if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)
       return nothing;
 
-    const { xywh, background, edgeless } = model;
+    const { xywh, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;
     const { collapse, collapsedHeight, scale = 1 } = edgeless;
@@ -407,6 +406,10 @@ export class EdgelessNoteBlockComponent extends toEdgelessBlockElement(
     };
 
     const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
+    const backgroundColor = ThemeObserver.generateColorProperty(
+      model.background,
+      DEFAULT_NOTE_BACKGROUND_COLOR
+    );
 
     const backgroundStyle = {
       position: 'absolute',
@@ -418,7 +421,7 @@ export class EdgelessNoteBlockComponent extends toEdgelessBlockElement(
       transition: this._editing
         ? 'left 0.3s, top 0.3s, width 0.3s, height 0.3s'
         : 'none',
-      background: `var(${background ?? DEFAULT_NOTE_BACKGROUND_COLOR})`,
+      backgroundColor,
       border: `${borderSize}px ${
         borderStyle === StrokeStyle.Dash ? 'dashed' : borderStyle
       } var(--affine-black-10)`,
@@ -446,23 +449,21 @@ export class EdgelessNoteBlockComponent extends toEdgelessBlockElement(
         @mouseleave=${this._leaved}
         @mousemove=${this._hovered}
         data-scale="${scale}"
-        contenteditable="false"
       >
         <div
           class="note-background"
           style=${styleMap(backgroundStyle)}
           @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
           @click=${this._handleClickAtBackground}
-          contenteditable="false"
         ></div>
 
         <div
+          class="edgeless-note-page-content"
           style=${styleMap({
             width: '100%',
             height: '100%',
             'overflow-y': this._isShowCollapsedContent ? 'initial' : 'clip',
           })}
-          contenteditable="false"
         >
           ${this.renderPageContent()}
         </div>

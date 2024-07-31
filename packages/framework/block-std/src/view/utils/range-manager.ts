@@ -1,9 +1,9 @@
 import type { TextSelection } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import type { BlockElement } from '../element/block-element.js';
+import type { BlockComponent } from '../element/block-component.js';
 import type { EditorHost } from '../element/lit-host.js';
 
 import { RangeBinding } from './range-binding.js';
@@ -13,7 +13,7 @@ import { RangeBinding } from './range-binding.js';
  */
 export class RangeManager {
   /**
-   * Used to exclude certain elements when using `getSelectedBlockElementsByRange`.
+   * Used to exclude certain elements when using `getSelectedBlockComponentsByRange`.
    */
   static rangeQueryExcludeAttr = 'data-range-query-exclude';
 
@@ -32,7 +32,7 @@ export class RangeManager {
 
   clear() {
     const selection = document.getSelection();
-    assertExists(selection);
+    if (!selection) return;
     selection.removeAllRanges();
 
     const topContenteditableElement = this.host.querySelector(
@@ -49,7 +49,7 @@ export class RangeManager {
   getClosestBlock(node: Node) {
     const el = node instanceof Element ? node : node.parentElement;
     if (!el) return null;
-    const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
+    const block = el.closest<BlockComponent>(`[${this.host.blockIdAttr}]`);
     if (!block) return null;
     if (this._isRangeSyncExcluded(block)) return null;
     return block;
@@ -80,16 +80,16 @@ export class RangeManager {
    *
    * match function will be evaluated before filtering using mode
    */
-  getSelectedBlockElementsByRange(
+  getSelectedBlockComponentsByRange(
     range: Range,
     options: {
-      match?: (el: BlockElement) => boolean;
+      match?: (el: BlockComponent) => boolean;
       mode?: 'all' | 'flat' | 'highest';
     } = {}
-  ): BlockElement[] {
+  ): BlockComponent[] {
     const { mode = 'all', match = () => true } = options;
 
-    let result = Array.from<BlockElement>(
+    let result = Array.from<BlockComponent>(
       this.host.querySelectorAll(
         `[${this.host.blockIdAttr}]:not([${RangeManager.rangeQueryExcludeAttr}="true"])`
       )
@@ -100,7 +100,12 @@ export class RangeManager {
     }
 
     const firstElement = this.getClosestBlock(range.startContainer);
-    assertExists(firstElement);
+    if (!firstElement) {
+      throw new BlockSuiteError(
+        ErrorCode.SelectionError,
+        'First element not found'
+      );
+    }
 
     if (mode === 'flat') {
       result = result.filter(
@@ -182,7 +187,7 @@ export class RangeManager {
 
   set(range: Range) {
     const selection = document.getSelection();
-    assertExists(selection);
+    if (!selection) return;
     selection.removeAllRanges();
     selection.addRange(range);
   }
@@ -223,37 +228,39 @@ export class RangeManager {
         index: from.index,
         length: from.length,
       });
-    } else {
-      assertExists(to);
-      const toInlineEditor = this.queryInlineEditorByPath(to.blockId);
-      if (!toInlineEditor) return null;
-
-      const fromRange = fromInlineEditor.toDomRange({
-        index: from.index,
-        length: from.length,
-      });
-      const toRange = toInlineEditor.toDomRange({
-        index: to.index,
-        length: to.length,
-      });
-
-      if (!fromRange || !toRange) return null;
-
-      const range = document.createRange();
-      const startContainer = fromRange.startContainer;
-      const startOffset = fromRange.startOffset;
-      const endContainer = toRange.endContainer;
-      const endOffset = toRange.endOffset;
-      range.setStart(startContainer, startOffset);
-      range.setEnd(endContainer, endOffset);
-
-      return range;
     }
+
+    if (!to) return null;
+    const toInlineEditor = this.queryInlineEditorByPath(to.blockId);
+    if (!toInlineEditor) return null;
+
+    const fromRange = fromInlineEditor.toDomRange({
+      index: from.index,
+      length: from.length,
+    });
+    const toRange = toInlineEditor.toDomRange({
+      index: to.index,
+      length: to.length,
+    });
+
+    if (!fromRange || !toRange) return null;
+
+    const range = document.createRange();
+    const startContainer = fromRange.startContainer;
+    const startOffset = fromRange.startOffset;
+    const endContainer = toRange.endContainer;
+    const endOffset = toRange.endOffset;
+    range.setStart(startContainer, startOffset);
+    range.setEnd(endContainer, endOffset);
+
+    return range;
   }
 
   get value() {
     const selection = document.getSelection();
-    assertExists(selection);
+    if (!selection) {
+      return;
+    }
     if (selection.rangeCount === 0) return null;
     return selection.getRangeAt(0);
   }

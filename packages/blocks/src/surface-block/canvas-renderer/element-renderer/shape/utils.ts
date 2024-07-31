@@ -1,6 +1,8 @@
+import type { Bound } from '@blocksuite/global/utils';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
+
 import type { TextAlign, TextVerticalAlign } from '../../../consts.js';
 import type { ShapeElementModel } from '../../../element-model/shape.js';
-import type { Bound, SerializedXYWH } from '../../../index.js';
 import type { Renderer } from '../../renderer.js';
 
 import {
@@ -15,10 +17,18 @@ import {
   wrapTextDeltas,
 } from '../text/utils.js';
 
+export type Colors = {
+  color: string;
+  fillColor: string;
+  strokeColor: string;
+};
+
 export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
   shapeModel: ShapeElementModel,
-  renderer: Renderer
+  renderer: Renderer,
+  fillColor: string,
+  strokeColor: string
 ) {
   const sizeOffset = Math.max(shapeModel.strokeWidth, 0);
   const w = Math.max(shapeModel.w - sizeOffset, 0);
@@ -39,8 +49,8 @@ export function drawGeneralShape(
   }
 
   ctx.lineWidth = shapeModel.strokeWidth;
-  ctx.strokeStyle = renderer.getVariableColor(shapeModel.strokeColor);
-  ctx.fillStyle = renderer.getVariableColor(shapeModel.fillColor);
+  ctx.strokeStyle = strokeColor;
+  ctx.fillStyle = fillColor;
 
   switch (shapeModel.strokeStyle) {
     case 'none':
@@ -48,11 +58,9 @@ export function drawGeneralShape(
       break;
     case 'dash':
       ctx.setLineDash([12, 12]);
-      ctx.strokeStyle = renderer.getVariableColor(shapeModel.strokeStyle);
       break;
-    default:
-      ctx.strokeStyle = renderer.getVariableColor(shapeModel.strokeStyle);
   }
+
   if (shapeModel.shadow) {
     const { blur, offsetX, offsetY, color } = shapeModel.shadow;
     const scale = ctx.getTransform().a;
@@ -60,7 +68,7 @@ export function drawGeneralShape(
     ctx.shadowBlur = blur * scale;
     ctx.shadowOffsetX = offsetX * scale;
     ctx.shadowOffsetY = offsetY * scale;
-    ctx.shadowColor = renderer.getVariableColor(color);
+    ctx.shadowColor = renderer.getPropertyValue(color);
   }
 
   ctx.stroke();

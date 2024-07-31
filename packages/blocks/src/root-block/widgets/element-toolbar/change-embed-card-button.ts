@@ -1,6 +1,5 @@
-import type { EditorHost } from '@blocksuite/block-std';
-
 import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
@@ -63,7 +62,6 @@ import {
 } from '../../../_common/icons/index.js';
 import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
-import { Bound } from '../../../surface-block/index.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 import {
   isBookmarkBlock,
@@ -80,7 +78,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const block = this._blockElement;
+    const block = this._blockComponent;
     if (block && 'convertToCard' in block) {
       block.convertToCard();
       return;
@@ -130,7 +128,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const block = this._blockElement;
+    const block = this._blockComponent;
     if (block && 'convertToEmbed' in block) {
       block.convertToEmbed();
       return;
@@ -180,7 +178,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
 
     navigator.clipboard.writeText(this.model.url).catch(console.error);
-    toast(this.std.host as EditorHost, 'Copied link to clipboard');
+    toast(this.std.host, 'Copied link to clipboard');
     this.edgeless.service.selection.clear();
   };
 
@@ -198,12 +196,12 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   };
 
   private _open = () => {
-    this._blockElement?.open();
+    this._blockComponent?.open();
   };
 
   private _peek = () => {
-    if (!this._blockElement) return;
-    peek(this._blockElement);
+    if (!this._blockComponent) return;
+    peek(this._blockComponent);
   };
 
   static override styles = css`
@@ -240,7 +238,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
   `;
 
-  private get _blockElement() {
+  private get _blockComponent() {
     const blockSelection =
       this.edgeless.service.selection.surfaceSelections.filter(sel =>
         sel.elements.includes(this.model.id)
@@ -249,7 +247,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const blockElement = this.std.view.getBlock(blockSelection[0].blockId) as
+    const blockComponent = this.std.view.getBlock(blockSelection[0].blockId) as
       | BookmarkBlockComponent
       | EmbedGithubBlockComponent
       | EmbedYoutubeBlockComponent
@@ -259,13 +257,13 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       | EmbedLoomBlockComponent
       | null;
 
-    if (!blockElement) return;
+    if (!blockComponent) return;
 
-    return blockElement;
+    return blockComponent;
   }
 
   private get _canConvertToEmbedView() {
-    const block = this._blockElement;
+    const block = this._blockComponent;
 
     // synced doc entry controlled by awareness flag
     if (!!block && isEmbedLinkedDocBlock(block.model)) {
@@ -314,7 +312,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
     return (
       isEmbedLinkedDocBlock(this.model) &&
-      (!!this._blockElement?.closest('affine-embed-synced-doc-block') ||
+      (!!this._blockComponent?.closest('affine-embed-synced-doc-block') ||
         this.model.pageId === this._doc.id)
     );
   }
@@ -398,7 +396,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     // open in new tab
 
-    if (this._blockElement && isPeekable(this._blockElement)) {
+    if (this._blockComponent && isPeekable(this._blockComponent)) {
       buttons.push({
         name: 'Open in center peek',
         icon: CenterPeekIcon,
@@ -425,7 +423,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div slot data-size="small" data-orientation="vertical">
+        <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
             button => button.name,
@@ -477,7 +475,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _showCaption() {
-    this._blockElement?.captionEditor.show();
+    this._blockComponent?.captionEditor?.show();
   }
 
   private _viewMenuButton() {
@@ -517,7 +515,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </editor-icon-button>
           `}
         >
-          <div slot data-size="small" data-orientation="vertical">
+          <div data-size="small" data-orientation="vertical">
             ${repeat(
               buttons,
               button => button.type,
@@ -584,7 +582,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </a>
 
             <editor-icon-button
-              arai-label="Click to copy link"
+              aria-label="Click to copy link"
               .tooltip=${'Click to copy link'}
               class="change-embed-card-button copy"
               ?disabled=${this._doc.readonly}
@@ -594,12 +592,11 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </editor-icon-button>
 
             <editor-icon-button
-              arai-label="Edit"
+              aria-label="Edit"
               .tooltip=${'Edit'}
               class="change-embed-card-button edit"
               ?disabled=${this._doc.readonly}
-              @click=${() =>
-                toggleEmbedCardEditModal(this.std.host as EditorHost, model)}
+              @click=${() => toggleEmbedCardEditModal(this.std.host, model)}
             >
               ${EditIcon}
             </editor-icon-button>
@@ -624,7 +621,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               `}
             >
               <card-style-panel
-                slot
                 .value=${model.style}
                 .options=${this._getCardStyleOptions}
                 .onSelect=${(value: EmbedCardStyle) =>
@@ -638,7 +634,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       'caption' in model
         ? html`
             <editor-icon-button
-              arai-label="Add caption"
+              aria-label="Add caption"
               .tooltip=${'Add caption'}
               class="change-embed-card-button caption"
               ?disabled=${this._doc.readonly}
@@ -704,7 +700,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | EmbedLoomModel;
 
   @property({ attribute: false })
-  accessor quickConnectButton!: TemplateResult<1>;
+  accessor quickConnectButton!: TemplateResult<1> | typeof nothing;
 }
 
 declare global {

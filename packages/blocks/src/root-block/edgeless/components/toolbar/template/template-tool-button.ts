@@ -7,6 +7,8 @@ import {
 } from '@floating-ui/dom';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessTemplatePanel } from './template-panel.js';
@@ -187,17 +189,32 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
   }
 
   override render() {
-    const { theme } = this;
-    const expanded = this._openedPanel !== null;
+    const { cards, _openedPanel } = this;
+    const expanded = _openedPanel !== null;
 
     return html`<edgeless-toolbar-button @click=${this._togglePanel}>
       <div class="template-cards ${expanded ? 'expanded' : ''}">
         <div class="arrow-icon">${ArrowDownSmallIcon}</div>
-        <div class="template-card card1">${TemplateCard1[theme]}</div>
-        <div class="template-card card2">${TemplateCard2[theme]}</div>
-        <div class="template-card card3">${TemplateCard3[theme]}</div>
+        ${repeat(
+          cards,
+          (card, n) => html`
+            <div
+              class=${classMap({
+                'template-card': true,
+                [`card${n + 1}`]: true,
+              })}
+            >
+              ${card}
+            </div>
+          `
+        )}
       </div>
     </edgeless-toolbar-button>`;
+  }
+
+  get cards() {
+    const { theme } = this;
+    return [TemplateCard1[theme], TemplateCard2[theme], TemplateCard3[theme]];
   }
 
   @state()

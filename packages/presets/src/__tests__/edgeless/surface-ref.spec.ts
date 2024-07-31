@@ -103,10 +103,10 @@ describe('basic', () => {
       `affine-surface-ref[data-block-id="${surfaceRefId}"]`
     ) as HTMLElement;
     const refBlocks = Array.from(
-      surfaceRef.querySelectorAll('surface-ref-note-portal')
-    );
+      surfaceRef.querySelectorAll('affine-edgeless-note')
+    ) as HTMLElement[];
     const stackingCanvas = Array.from(
-      surfaceRef.querySelector('.stacking-canvas')!.children
+      surfaceRef.querySelectorAll('.indexable-canvas')!
     ) as HTMLCanvasElement[];
 
     expect(refBlocks.length).toBe(2);
@@ -140,10 +140,10 @@ describe('basic', () => {
       `affine-surface-ref[data-block-id="${surfaceRefId}"]`
     ) as HTMLElement;
     const refBlocks = Array.from(
-      surfaceRef.querySelectorAll('surface-ref-note-portal')
-    );
+      surfaceRef.querySelectorAll('affine-edgeless-note')
+    ) as HTMLElement[];
     const stackingCanvas = Array.from(
-      surfaceRef.querySelector('.stacking-canvas')!.children
+      surfaceRef.querySelectorAll('.indexable-canvas')
     ) as HTMLCanvasElement[];
 
     expect(refBlocks.length).toBe(2);
@@ -178,7 +178,7 @@ describe('basic', () => {
     ) as HTMLElement;
 
     const switchEditor = vi.fn(() => {});
-    const pageService = editor.host.std.spec.getService('affine:page');
+    const pageService = editor.host!.std.spec.getService('affine:page');
     pageService.docModeService.onModeChange(switchEditor);
 
     expect(surfaceRef).instanceOf(Element);

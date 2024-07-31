@@ -1,6 +1,21 @@
+import type {
+  BaseElementProps,
+  PointTestOptions,
+  SerializedElement,
+} from '@blocksuite/block-std/gfx';
+import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
+
+import {
+  GfxLocalElementModel,
+  GfxPrimitiveElementModel,
+  derive,
+  local,
+  yfield,
+} from '@blocksuite/block-std/gfx';
+import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import type { SerializedXYWH, XYWH } from '../utils/xywh.js';
+import type { Color } from '../consts.js';
 
 import {
   DEFAULT_ROUGHNESS,
@@ -11,7 +26,6 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '../consts.js';
-import { Bound } from '../utils/bound.js';
 import {
   getBezierNearestPoint,
   getBezierNearestTime,
@@ -23,17 +37,7 @@ import {
   linePolylineIntersects,
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
-import { PointLocation } from '../utils/point-location.js';
 import { Polyline } from '../utils/polyline.js';
-import { type IVec, Vec } from '../utils/vec.js';
-import {
-  type IBaseProps,
-  type IHitTestOptions,
-  type SerializedElement,
-  SurfaceElementModel,
-  SurfaceLocalModel,
-} from './base.js';
-import { derive, local, yfield } from './decorators.js';
 
 export enum ConnectorEndpoint {
   Front = 'Front',
@@ -105,9 +109,9 @@ export type SerializedConnectorElement = SerializedElement & {
   target: SerializedConnection;
 };
 
-export type ConnectorElementProps = IBaseProps & {
+export type ConnectorElementProps = BaseElementProps & {
   mode: ConnectorMode;
-  stroke: string;
+  stroke: Color;
   strokeWidth: number;
   strokeStyle: StrokeStyle;
   roughness?: number;
@@ -119,7 +123,7 @@ export type ConnectorElementProps = IBaseProps & {
   rearEndpointStyle?: PointStyle;
 } & ConnectorLabelProps;
 
-export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementProps> {
+export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorElementProps> {
   updatingPath = false;
 
   static override propsToY(props: ConnectorElementProps) {
@@ -130,7 +134,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     return props;
   }
 
-  override containedByBounds(bounds: Bound) {
+  override containsBound(bounds: Bound) {
     return (
       this.absolutePath.some(point => bounds.containsPoint(point)) ||
       (this.hasLabel() &&
@@ -138,6 +142,28 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
           bounds.containsPoint(p)
         ))
     );
+  }
+
+  override getLineIntersections(start: IVec, end: IVec) {
+    const { mode, absolutePath: path } = this;
+
+    let intersected = null;
+
+    if (mode === ConnectorMode.Curve && path.length > 1) {
+      intersected = intersects(path, [start, end]);
+    } else {
+      intersected = linePolylineIntersects(start, end, path);
+    }
+
+    if (!intersected && this.hasLabel()) {
+      intersected = linePolylineIntersects(
+        start,
+        end,
+        Bound.fromXYWH(this.labelXYWH!).points
+      );
+    }
+
+    return intersected;
   }
 
   /**
@@ -250,14 +276,14 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     return Boolean(!this.lableEditing && this.labelDisplay && this.labelXYWH);
   }
 
-  override hitTest(
+  override includesPoint(
     x: number,
     y: number,
-    options?: IHitTestOptions | undefined
+    options?: PointTestOptions | undefined
   ): boolean {
     const currentPoint: IVec = [x, y];
 
-    if (this.labelHitTest(currentPoint as IVec)) {
+    if (this.labelIncludesPoint(currentPoint as IVec)) {
       return true;
     }
 
@@ -274,29 +300,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     );
   }
 
-  override intersectWithLine(start: IVec, end: IVec) {
-    const { mode, absolutePath: path } = this;
-
-    let intersected = null;
-
-    if (mode === ConnectorMode.Curve && path.length > 1) {
-      intersected = intersects(path, [start, end]);
-    } else {
-      intersected = linePolylineIntersects(start, end, path);
-    }
-
-    if (!intersected && this.hasLabel()) {
-      intersected = linePolylineIntersects(
-        start,
-        end,
-        Bound.fromXYWH(this.labelXYWH!).points
-      );
-    }
-
-    return intersected;
-  }
-
-  labelHitTest(point: IVec) {
+  labelIncludesPoint(point: IVec) {
     return (
       this.hasLabel() && Bound.fromXYWH(this.labelXYWH!).isPointInBound(point)
     );
@@ -502,7 +506,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   };
 
   @yfield()
-  accessor stroke: string = '#000000';
+  accessor stroke: Color = '#000000';
 
   @yfield()
   accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
@@ -525,7 +529,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
 
-export class LocalConnectorElementModel extends SurfaceLocalModel {
+export class LocalConnectorElementModel extends GfxLocalElementModel {
   private _path: PointLocation[] = [];
 
   absolutePath: PointLocation[] = [];
@@ -550,7 +554,7 @@ export class LocalConnectorElementModel extends SurfaceLocalModel {
     position: [0, 0],
   };
 
-  stroke: string = '#000000';
+  stroke: Color = '#000000';
 
   strokeStyle: StrokeStyle = StrokeStyle.Solid;
 
@@ -581,7 +585,7 @@ export class LocalConnectorElementModel extends SurfaceLocalModel {
 }
 
 export function isConnectorWithLabel(
-  model: BlockSuite.EdgelessModelType | BlockSuite.SurfaceLocalModelType
+  model: BlockSuite.EdgelessModel | BlockSuite.SurfaceLocalModel
 ) {
   return model instanceof ConnectorElementModel && model.hasLabel();
 }

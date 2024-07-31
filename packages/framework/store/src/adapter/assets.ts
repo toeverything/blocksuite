@@ -1,4 +1,5 @@
-import { assertExists, sha } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { sha } from '@blocksuite/global/utils';
 
 /**
  * @internal just for test
@@ -29,7 +30,10 @@ export class MemoryBlobCRUD {
     const value = typeof valueOrKey === 'string' ? _value : valueOrKey;
 
     if (!value) {
-      throw new Error('value is required');
+      throw new BlockSuiteError(
+        ErrorCode.TransformerError,
+        'value is required'
+      );
     }
 
     this._map.set(key, value);
@@ -136,7 +140,12 @@ export function getAssetName(assets: Map<string, Blob>, blobId: string) {
     return exts.at(-1) ?? 'blob';
   };
   const blob = assets.get(blobId);
-  assertExists(blob);
+  if (!blob) {
+    throw new BlockSuiteError(
+      ErrorCode.TransformerError,
+      `blob not found for blobId: ${blobId}`
+    );
+  }
   const name = (blob as File).name ?? undefined;
   const ext =
     name !== undefined && name.includes('.')

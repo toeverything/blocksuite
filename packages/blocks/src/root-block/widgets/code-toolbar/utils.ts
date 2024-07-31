@@ -61,13 +61,13 @@ export function CodeToolbarItemRenderer(
 }
 
 export function MoreMenuRenderer(
-  blockElement: CodeBlockComponent,
+  block: CodeBlockComponent,
   abortController: AbortController,
   config: CodeToolbarMoreItem[]
 ) {
   return config
     .filter(item => {
-      return item.type === 'divider' || item.showWhen(blockElement);
+      return item.type === 'divider' || item.showWhen(block);
     })
     .map(item => {
       let template: TemplateResult | null = null;
@@ -76,11 +76,11 @@ export function MoreMenuRenderer(
           const moreItem = item as MoreItem;
           const name =
             moreItem.name instanceof Function
-              ? moreItem.name(blockElement)
+              ? moreItem.name(block)
               : moreItem.name;
           const icon =
             moreItem.icon instanceof Function
-              ? moreItem.icon(blockElement)
+              ? moreItem.icon(block)
               : moreItem.icon;
           const buttonClass = `menu-item ${name.toLocaleLowerCase().split(' ').join('-')}`;
           template = html`
@@ -88,7 +88,7 @@ export function MoreMenuRenderer(
               class=${buttonClass}
               @click=${(e: MouseEvent) => {
                 e.stopPropagation();
-                moreItem.action(blockElement, abortController);
+                moreItem.action(block, abortController);
               }}
             >
               ${icon} ${name}

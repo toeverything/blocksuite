@@ -1,4 +1,7 @@
+import type { Bound, IVec } from '@blocksuite/global/utils';
+
 import { WithDisposable } from '@blocksuite/block-std';
+import { Vec } from '@blocksuite/global/utils';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -11,12 +14,14 @@ import type { ShapeType } from '../../../../surface-block/element-model/shape.js
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
+import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../_common/edgeless/note/consts.js';
 import {
   AutoCompleteArrowIcon,
   MindMapChildIcon,
   MindMapSiblingIcon,
   NoteAutoCompleteIcon,
 } from '../../../../_common/icons/index.js';
+import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
 import {
   type Connection,
@@ -25,14 +30,12 @@ import {
 import { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
 import { shapeMethods } from '../../../../surface-block/element-model/shape.js';
 import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
+import { DEFAULT_SHAPE_STROKE_COLOR } from '../../../../surface-block/elements/shape/consts.js';
 import { ShapeElementModel } from '../../../../surface-block/index.js';
 import {
-  type Bound,
   CanvasElementType,
-  type IVec,
   Overlay,
   type RoughCanvas,
-  Vec,
 } from '../../../../surface-block/index.js';
 import { ConnectorPathGenerator } from '../../../../surface-block/managers/connector-manager.js';
 import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
@@ -219,12 +222,20 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     let color = '';
     if (isShape(current)) {
-      color = current.strokeColor;
+      color = ThemeObserver.getColorValue(
+        current.strokeColor,
+        DEFAULT_SHAPE_STROKE_COLOR
+      );
     } else {
-      let tag = current.background.split('-').pop();
+      const tmpColor = ThemeObserver.getColorValue(
+        current.background,
+        DEFAULT_NOTE_BACKGROUND_COLOR
+      );
+      let tag = tmpColor.split('-').pop();
       if (!tag || tag === 'gray') tag = 'grey';
       color = `--affine-palette-line-${tag}`;
     }
+
     const stroke = getComputedStyle(edgeless).getPropertyValue(color)
       ? color
       : DEFAULT_CONNECTOR_COLOR;
@@ -249,7 +260,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     const parentNode =
       target === 'sibling'
-        ? mindmap.getParentNode(this.current.id) ?? this.current
+        ? (mindmap.getParentNode(this.current.id) ?? this.current)
         : this.current;
 
     const newNode = mindmap.addNode(
@@ -610,8 +621,11 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const { surface } = this.edgeless;
     surface.renderer.addOverlay(this._autoCompleteOverlay);
 
-    this._autoCompleteOverlay.stroke =
-      this._surface.themeObserver.getVariableValue(current.strokeColor);
+    this._autoCompleteOverlay.stroke = surface.renderer.getColorValue(
+      current.strokeColor,
+      DEFAULT_SHAPE_STROKE_COLOR,
+      true
+    );
     this._autoCompleteOverlay.linePoints = path;
     this._autoCompleteOverlay.renderShape = ctx => {
       shapeMethods[targetType].draw(ctx, { ...bound, rotate: current.rotate });

@@ -1,15 +1,10 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
-import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
-import type {
-  DatabaseBlockModel,
-  ListType,
-  RichText,
-  ThemeObserver,
-} from '@blocks/index.js';
+import type { DatabaseBlockModel, ListType, RichText } from '@blocks/index.js';
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
+import type { CustomOutlineViewer } from '@playground/apps/_common/components/custom-outline-viewer.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { DocsPanel } from '@playground/apps/_common/components/docs-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
@@ -121,13 +116,18 @@ async function initEmptyEditor({
             const outlinePanel: CustomOutlinePanel = document.createElement(
               'custom-outline-panel'
             );
+            const outlineViewer: CustomOutlineViewer = document.createElement(
+              'custom-outline-viewer'
+            );
             docsPanel.editor = editor;
             framePanel.editor = editor;
             outlinePanel.editor = editor;
+            outlineViewer.editor = editor;
             debugMenu.collection = collection;
             debugMenu.editor = editor;
             debugMenu.docsPanel = docsPanel;
             debugMenu.framePanel = framePanel;
+            debugMenu.outlineViewer = outlineViewer;
             debugMenu.outlinePanel = outlinePanel;
             const leftSidePanel = document.createElement('left-side-panel');
             debugMenu.leftSidePanel = leftSidePanel;
@@ -135,6 +135,7 @@ async function initEmptyEditor({
             document.body.append(leftSidePanel);
             document.body.append(framePanel);
             document.body.append(outlinePanel);
+            document.body.append(outlineViewer);
 
             window.debugMenu = debugMenu;
             window.editor = editor;
@@ -191,10 +192,6 @@ export const getEditorLocator = (page: Page) => {
 
 export const getEditorHostLocator = (page: Page) => {
   return page.locator('editor-host').nth(currentEditorIndex);
-};
-
-export const getBlockHub = (page: Page) => {
-  return page.locator('affine-block-hub').nth(currentEditorIndex);
 };
 
 type TaggedConsoleMessage = ConsoleMessage & { __ignore?: boolean };
@@ -1117,25 +1114,6 @@ export async function readClipboardText(
   return text;
 }
 
-export const getCenterPosition: (
-  page: Page,
-  // TODO use `locator` directly
-  selector: string
-) => Promise<{ x: number; y: number }> = async (
-  page: Page,
-  selector: string
-) => {
-  const locator = page.locator(selector);
-  const box = await locator.boundingBox();
-  if (!box) {
-    throw new Error("Failed to getCenterPosition! Can't get bounding box");
-  }
-  return {
-    x: box.x + box.width / 2,
-    y: box.y + box.height / 2,
-  };
-};
-
 export const getCenterPositionByLocator: (
   page: Page,
   locator: Locator
@@ -1350,23 +1328,29 @@ export async function getCurrentEditorTheme(page: Page) {
   const mode = await page
     .locator('affine-editor-container')
     .first()
-    .evaluate(ele => {
-      return (ele as unknown as Element & { themeObserver: ThemeObserver })
-        .themeObserver.cssVariables?.['--affine-theme-mode'];
-    });
+    .evaluate(() =>
+      window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue('--affine-theme-mode')
+        .trim()
+    );
   return mode;
 }
 
 export async function getCurrentThemeCSSPropertyValue(
   page: Page,
-  property: CssVariableName
+  property: string
 ) {
   const value = await page
     .locator('affine-editor-container')
-    .evaluate((ele, property: CssVariableName) => {
-      return (ele as unknown as Element & { themeObserver: ThemeObserver })
-        .themeObserver.cssVariables?.[property];
-    }, property);
+    .evaluate(
+      (_, property) =>
+        window
+          .getComputedStyle(document.documentElement)
+          .getPropertyValue(property)
+          .trim(),
+      property
+    );
   return value;
 }
 

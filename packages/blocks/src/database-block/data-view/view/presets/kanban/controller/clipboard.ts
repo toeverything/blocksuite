@@ -23,7 +23,7 @@ export class KanbanClipboardController implements ReactiveController {
   }
 
   private get readonly() {
-    return this.host.view.readonly;
+    return this.host.view.readonly$.value;
   }
 
   hostConnected() {

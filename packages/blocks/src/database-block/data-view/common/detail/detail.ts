@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { computed } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -6,7 +7,7 @@ import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataViewManager } from '../../view/data-view-manager.js';
+import type { SingleView } from '../../view-manager/single-view.js';
 import type { DetailSlotProps, DetailSlots } from '../data-source/base.js';
 
 import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
@@ -51,13 +52,12 @@ const styles = css`
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 20px 200px;
+    padding: 20px;
     gap: 12px;
     background-color: var(--affine-background-primary-color);
     border-radius: 8px;
-    height: 90%;
-    width: max-content;
-    margin: 3% auto;
+    height: 100%;
+    width: 100%;
   }
 
   .add-property {
@@ -117,9 +117,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
         return {
           type: 'action',
           name: config.name,
-          icon: html` <uni-lit
-            .uni="${this.view.getIcon(config.type)}"
-          ></uni-lit>`,
+          icon: renderUniLit(this.view.getIcon(config.type)),
           select: () => {
             this.view.columnAdd('end', config.type);
           },
@@ -130,16 +128,16 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   static override styles = styles;
 
+  columns$ = computed(() => {
+    return this.view.detailColumns$.value.map(id => this.view.columnGet(id));
+  });
+
   detailSlots?: DetailSlots;
 
   selection = new DetailSelection(this);
 
-  private get columns() {
-    return this.view.detailColumns.map(id => this.view.columnGet(id));
-  }
-
   private get readonly() {
-    return this.view.readonly;
+    return this.view.readonly$.value;
   }
 
   private renderHeader() {
@@ -168,12 +166,6 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-
-    this.disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
 
     this.disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
@@ -211,7 +203,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const columns = this.columns;
+    const columns = this.columns$.value;
     const upClass = classMap({
       'switch-row': true,
       disable: !this.hasPrev(),
@@ -235,12 +227,15 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
           columns,
           v => v.id,
           column => {
-            return html` <affine-data-view-record-field
-              .view="${this.view}"
-              .column="${column}"
-              .rowId="${this.rowId}"
-              data-column-id="${column.id}"
-            ></affine-data-view-record-field>`;
+            return keyed(
+              this.rowId,
+              html` <affine-data-view-record-field
+                .view="${this.view}"
+                .column="${column}"
+                .rowId="${this.rowId}"
+                data-column-id="${column.id}"
+              ></affine-data-view-record-field>`
+            );
           }
         )}
         ${!this.readonly
@@ -262,7 +257,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   accessor rowId!: string;
 
   @property({ attribute: false })
-  accessor view!: DataViewManager;
+  accessor view!: SingleView;
 }
 
 declare global {

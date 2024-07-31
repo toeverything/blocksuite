@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { DataViewColumnManager } from '../../../../data-view-manager.js';
+import type { Column } from '../../../../../view-manager/column.js';
 
 import { formatNumber } from '../../../../../column/presets/number/utils/formatter.js';
 import {
@@ -100,7 +100,7 @@ export class DatabaseNumberFormatBar extends WithDisposable(LitElement) {
             &lpar;&nbsp;${formatNumber(
               1,
               'number',
-              (this.column.data.decimal as number) ?? 0
+              (this.column.data$.value.decimal as number) ?? 0
             )}&nbsp;&rpar;
           </span>
         </div>
@@ -110,7 +110,7 @@ export class DatabaseNumberFormatBar extends WithDisposable(LitElement) {
   }
 
   @property({ attribute: false })
-  accessor column!: DataViewColumnManager;
+  accessor column!: Column;
 }
 
 declare global {

@@ -257,6 +257,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               undefined,
               this.configs.get('imageProxy') as string
             );
+            if (!res) {
+              break;
+            }
             const clonedRes = res.clone();
             const file = new File(
               [await res.blob()],
@@ -583,10 +586,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           await assets.readFromBlob(blobId);
           const blob = assets.getAssets().get(blobId);
           assetsIds.push(blobId);
-          const blobName = getAssetName(assets.getAssets(), blobId);
           if (!blob) {
             break;
           }
+          const blobName = getAssetName(assets.getAssets(), blobId);
           context
             .openNode(
               {

@@ -1,8 +1,6 @@
 import { GroupElementModel } from '../../../surface-block/index.js';
-export function getElementsWithoutGroup(
-  elements: BlockSuite.EdgelessModelType[]
-) {
-  const set = new Set<BlockSuite.EdgelessModelType>();
+export function getElementsWithoutGroup(elements: BlockSuite.EdgelessModel[]) {
+  const set = new Set<BlockSuite.EdgelessModel>();
 
   elements.forEach(element => {
     if (element instanceof GroupElementModel) {

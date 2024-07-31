@@ -3,23 +3,22 @@ import type {
   EventName,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import type { Disposable, Slot } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
+import type { Disposable } from '@blocksuite/global/utils';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { SignalWatcher } from '@lit-labs/preact-signals';
+import { type ReadonlySignal, SignalWatcher } from '@lit-labs/preact-signals';
 import { property } from 'lit/decorators.js';
 
 import type { DataSource } from '../common/data-source/base.js';
-import type { ViewSource } from '../common/index.js';
 import type { DataViewRenderer } from '../data-view.js';
 import type { DataViewSelection, InsertToPosition } from '../types.js';
+import type { SingleView } from '../view-manager/single-view.js';
+import type { ViewManager } from '../view-manager/view-manager.js';
 import type { DataViewWidget } from '../widget/types.js';
 import type { DataViewExpose, DataViewProps } from './data-view.js';
-import type { DataViewManager } from './data-view-manager.js';
 
 export abstract class DataViewBase<
-    T extends DataViewManager = DataViewManager,
+    T extends SingleView = SingleView,
     Selection extends DataViewSelection = DataViewSelection,
   >
   extends SignalWatcher(WithDisposable(ShadowlessElement))
@@ -37,9 +36,6 @@ export abstract class DataViewBase<
   accessor dataViewEle!: DataViewRenderer;
 
   abstract focusFirstCell(): void;
-
-  @property({ attribute: false })
-  accessor getFlag!: Doc['awarenessStore']['getFlag'];
 
   abstract getSelection(): Selection | undefined;
 
@@ -60,7 +56,7 @@ export abstract class DataViewBase<
     undefined;
 
   @property({ attribute: false })
-  accessor selectionUpdated!: Slot<Selection | undefined>;
+  accessor selection$!: ReadonlySignal<Selection | undefined>;
 
   @property({ attribute: false })
   accessor setSelection!: (selection?: Selection) => void;
@@ -72,5 +68,5 @@ export abstract class DataViewBase<
   accessor view!: T;
 
   @property({ attribute: false })
-  accessor viewSource!: ViewSource;
+  accessor viewSource!: ViewManager;
 }

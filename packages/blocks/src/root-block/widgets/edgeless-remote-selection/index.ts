@@ -1,6 +1,6 @@
 import type { UserInfo } from '@blocksuite/store';
 
-import { WidgetElement } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -23,7 +23,7 @@ export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
   'affine-edgeless-remote-selection-widget';
 
 @customElement(AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET)
-export class EdgelessRemoteSelectionWidget extends WidgetElement<
+export class EdgelessRemoteSelectionWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
@@ -55,7 +55,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
   };
 
   private _updateRemoteRects = () => {
-    const { selection, blockElement } = this;
+    const { selection, block } = this;
     const remoteSelectionsMap = selection.remoteSurfaceSelectionsMap;
     const remoteRects: EdgelessRemoteSelectionWidget['_remoteRects'] =
       new Map();
@@ -65,8 +65,8 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
         if (selection.elements.length === 0) return;
 
         const elements = selection.elements
-          .map(id => blockElement.service.getElementById(id))
-          .filter(element => element) as BlockSuite.EdgelessModelType[];
+          .map(id => block.service.getElementById(id))
+          .filter(element => element) as BlockSuite.EdgelessModel[];
         const rect = getSelectedRect(elements);
 
         if (rect.width === 0 || rect.height === 0) return;
@@ -252,7 +252,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
   }
 
   get edgeless() {
-    return this.blockElement;
+    return this.block;
   }
 
   get selection() {

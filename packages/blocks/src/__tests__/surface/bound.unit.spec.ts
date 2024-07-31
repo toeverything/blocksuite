@@ -1,7 +1,7 @@
+import { Bound } from '@blocksuite/global/utils';
 import { describe, expect, it } from 'vitest';
 
 import {
-  Bound,
   getCommonBound,
   inflateBound,
   transformPointsToNewBound,

@@ -1,1 +1,1 @@
-export * from './edgeless-selectable.js';
+export * from './gfx-compatible.js';

@@ -4,6 +4,7 @@ import type { PropertyValues } from 'lit';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Slot, assertExists } from '@blocksuite/global/utils';
+import { computed } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -159,19 +160,17 @@ export class DatabaseBlockModalPreview extends WithDisposable(
     );
   };
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.database.selection.slots.changed.on(selections => {
-      const selection = selections.find(v => {
-        return v.blockId === this.blockId;
-      });
-      if (selection && selection instanceof DatabaseSelection) {
-        this.selectionUpdated.emit(selection.viewSelection);
-      } else {
-        this.selectionUpdated.emit(undefined);
+  viewSelection$ = computed(() => {
+    const databaseSelection = this.database.selection.value.find(
+      (selection): selection is DatabaseSelection => {
+        if (selection.blockId !== this.blockId) {
+          return false;
+        }
+        return selection instanceof DatabaseSelection;
       }
-    });
-  }
+    );
+    return databaseSelection?.viewSelection;
+  });
 
   protected override firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -184,11 +183,9 @@ export class DatabaseBlockModalPreview extends WithDisposable(
     const config: DataViewRendererConfig = {
       bindHotkey: this.bindHotkey,
       handleEvent: this.handleEvent,
-      getFlag: this.database.getFlag,
-      selectionUpdated: this.selectionUpdated,
+      selection$: this.viewSelection$,
       setSelection: this.setSelection,
       dataSource: this.database.dataSource,
-      viewSource: this.database.viewSource,
       headerWidget: this.database.headerWidget,
       std: this.database.std,
     };

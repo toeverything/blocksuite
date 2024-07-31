@@ -1,8 +1,9 @@
+import type { IVec } from '@blocksuite/global/utils';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { IVec } from '../../../surface-block/index.js';
 import type { PieNodeModel } from './base.js';
 import type { PieMenu } from './menu.js';
 
@@ -119,9 +120,9 @@ export class PieNode extends WithDisposable(LitElement) {
     if (isRootNode(schema)) return;
 
     const ctx = {
-      rootElement: this.menu.rootElement,
+      rootComponent: this.menu.rootComponent,
       menu: this.menu,
-      widgetElement: this.menu.widgetElement,
+      widgetComponent: this.menu.widgetComponent,
       node: this,
     };
 
@@ -138,8 +139,13 @@ export class PieNode extends WithDisposable(LitElement) {
     const icon = this.model.icon;
     if (typeof icon === 'function') {
       const { menu } = this;
-      const { rootElement, widgetElement } = menu;
-      return icon({ rootElement, menu, widgetElement, node: this });
+      const { rootComponent, widgetComponent } = menu;
+      return icon({
+        rootComponent,
+        menu,
+        widgetComponent,
+        node: this,
+      });
     }
     return icon;
   }

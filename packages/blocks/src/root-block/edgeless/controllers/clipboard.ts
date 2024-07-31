@@ -4,7 +4,11 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
+import type { IBound } from '@blocksuite/global/utils';
 
+import { Vec } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import {
   DisposableGroup,
   assertExists,
@@ -20,9 +24,8 @@ import {
 } from '@blocksuite/store';
 import DOMPurify from 'dompurify';
 
-import type { EdgelessSelectableProps } from '../../../_common/edgeless/mixin/edgeless-selectable.js';
+import type { GfxCompatibleProps } from '../../../_common/edgeless/mixin/gfx-compatible.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import {
@@ -33,7 +36,7 @@ import {
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  blockElementGetter,
+  blockComponentGetter,
   getRootByEditorHost,
   isInsidePageEditor,
 } from '../../../_common/utils/query.js';
@@ -52,8 +55,7 @@ import {
 } from '../../../surface-block/index.js';
 import { ConnectorElementModel } from '../../../surface-block/index.js';
 import { compare } from '../../../surface-block/managers/layer-utils.js';
-import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
-import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
+import { getCommonBound } from '../../../surface-block/utils/bound.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import {
@@ -255,7 +257,7 @@ export class EdgelessClipboardController extends PageClipboard {
       const flavour = pageId
         ? 'affine:embed-linked-doc'
         : embedOptions
-          ? (embedOptions.flavour as BlockSuite.EdgelessModelKeyType)
+          ? (embedOptions.flavour as BlockSuite.EdgelessModelKeys)
           : 'affine:bookmark';
       const style = pageId
         ? 'vertical'
@@ -457,7 +459,7 @@ export class EdgelessClipboardController extends PageClipboard {
     });
     const element = this.host.service.getElementById(
       id
-    ) as BlockSuite.SurfaceModelType;
+    ) as BlockSuite.SurfaceModel;
     assertExists(element);
     return element;
   }
@@ -811,7 +813,7 @@ export class EdgelessClipboardController extends PageClipboard {
     edgeless: EdgelessRootBlockComponent,
     bound: IBound,
     nodes?: BlockSuite.EdgelessBlockModelType[],
-    canvasElements: BlockSuite.SurfaceModelType[] = [],
+    canvasElements: BlockSuite.SurfaceModel[] = [],
     {
       background,
       padding = IMAGE_PADDING,
@@ -828,10 +830,10 @@ export class EdgelessClipboardController extends PageClipboard {
     const pathname = location.pathname;
     const editorMode = isInsidePageEditor(host);
 
-    const rootElement = getRootByEditorHost(host);
-    assertExists(rootElement);
+    const rootComponent = getRootByEditorHost(host);
+    assertExists(rootComponent);
 
-    const container = rootElement.querySelector(
+    const container = rootComponent.querySelector(
       '.affine-block-children-container'
     );
     if (!container) return;
@@ -892,7 +894,7 @@ export class EdgelessClipboardController extends PageClipboard {
       block: BlockSuite.EdgelessBlockModelType,
       isInFrame = false
     ) => {
-      let blockElement = blockElementGetter(
+      let blockComponent = blockComponentGetter(
         block,
         this.std.view
       )?.parentElement;
@@ -900,14 +902,14 @@ export class EdgelessClipboardController extends PageClipboard {
         'affine:',
         '.edgeless-block-portal-'
       );
-      blockElement = blockElement?.closest(blockPortalSelector);
-      if (!blockElement) {
+      blockComponent = blockComponent?.closest(blockPortalSelector);
+      if (!blockComponent) {
         throw new Error('Could not find edgeless block portal.');
       }
 
       const blockBound = Bound.deserialize(block.xywh);
       const canvasData = await html2canvas(
-        blockElement as HTMLElement,
+        blockComponent as HTMLElement,
         html2canvasOption
       );
       ctx.drawImage(
@@ -938,7 +940,7 @@ export class EdgelessClipboardController extends PageClipboard {
             if (isTopLevelBlock(ele)) {
               blocksInsideFrame.push(ele as BlockSuite.EdgelessBlockModelType);
             } else {
-              canvasElements.push(ele as BlockSuite.SurfaceModelType);
+              canvasElements.push(ele as BlockSuite.SurfaceModel);
             }
           });
 
@@ -1089,20 +1091,17 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _updatePastedElementsIndex(
-    elements: BlockSuite.EdgelessModelType[],
+    elements: BlockSuite.EdgelessModel[],
     originalIndexes: Map<string, string>
   ) {
-    function compare(
-      a: BlockSuite.EdgelessModelType,
-      b: BlockSuite.EdgelessModelType
-    ) {
+    function compare(a: BlockSuite.EdgelessModel, b: BlockSuite.EdgelessModel) {
       if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
         return -1;
       } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
         return 1;
       } else {
-        const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModelType[];
-        const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModelType[];
+        const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModel[];
+        const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModel[];
         const minGroups = Math.min(aGroups.length, bGroups.length);
 
         for (let i = 0; i < minGroups; ++i) {
@@ -1169,7 +1168,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
   async copyAsPng(
     blocks: BlockSuite.EdgelessBlockModelType[],
-    shapes: BlockSuite.SurfaceModelType[]
+    shapes: BlockSuite.SurfaceModel[]
   ) {
     const blocksLen = blocks.length;
     const shapesLen = shapes.length;
@@ -1214,15 +1213,15 @@ export class EdgelessClipboardController extends PageClipboard {
     elementsRawData.forEach(data => {
       const { data: blockSnapshot } = BlockSnapshotSchema.safeParse(data);
       if (blockSnapshot) {
-        const props = blockSnapshot.props as EdgelessSelectableProps;
+        const props = blockSnapshot.props as GfxCompatibleProps;
         originalIndexes.set(blockSnapshot.id, props.index);
 
         blockRawData.push(blockSnapshot);
       } else {
-        const serializedElement = data as SerializedElement;
-        originalIndexes.set(serializedElement.id, serializedElement.index);
+        const element = data as SerializedElement;
+        originalIndexes.set(element.id, element.index);
 
-        surfaceRawData.push(serializedElement);
+        surfaceRawData.push(element);
       }
     });
 
@@ -1379,7 +1378,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
   async toCanvas(
     blocks: BlockSuite.EdgelessBlockModelType[],
-    shapes: BlockSuite.SurfaceModelType[],
+    shapes: BlockSuite.SurfaceModel[],
     options?: CanvasExportOptions
   ) {
     blocks.sort(compare);
@@ -1407,7 +1406,7 @@ export class EdgelessClipboardController extends PageClipboard {
 }
 
 export async function prepareClipboardData(
-  selectedAll: BlockSuite.EdgelessModelType[],
+  selectedAll: BlockSuite.EdgelessModel[],
   std: BlockStdScope
 ) {
   const job = new Job({

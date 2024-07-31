@@ -1,5 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { IVec } from '@blocksuite/global/utils';
 
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -7,16 +9,15 @@ import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { GroupElementModel } from '../../../surface-block/element-model/group.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
+import { ThemeObserver } from '../../../_common/theme/theme-observer.js';
 import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { FontFamily } from '../../../surface-block/consts.js';
 import { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
 import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {
-  Bound,
   CanvasElementType,
   type ConnectorElementModel,
   type IModelCoord,
-  type IVec,
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,
@@ -68,10 +69,13 @@ export function mountShapeTextEditor(
 ) {
   if (!shapeElement.text) {
     const text = new DocCollection.Y.Text();
-    const { fillColor } = shapeElement;
-    const color = isTransparent(fillColor)
+    let color = ThemeObserver.getColorValue(
+      shapeElement.fillColor,
+      GET_DEFAULT_LINE_COLOR()
+    );
+    color = isTransparent(color)
       ? GET_DEFAULT_LINE_COLOR()
-      : fillColor === SHAPE_FILL_COLOR_BLACK
+      : color === SHAPE_FILL_COLOR_BLACK
         ? SHAPE_TEXT_COLOR_PURE_WHITE
         : SHAPE_TEXT_COLOR_PURE_BLACK;
     edgeless.service.updateElement(shapeElement.id, {

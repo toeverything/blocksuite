@@ -23,8 +23,8 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    const { editor } = this;
-    const { docModeService } = editor.host.spec.getService('affine:page');
+    if (!this.editor.host) return;
+    const { docModeService } = this.editor.host.spec.getService('affine:page');
     this.disposables.add(
       docModeService.onModeChange(() => {
         this.editor.updateComplete

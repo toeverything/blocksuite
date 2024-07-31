@@ -1,0 +1,23 @@
+diff --git a/development/lib/signal-watcher.js b/development/lib/signal-watcher.js
+index 31ac5e919eef15ae22a73cfcccb5803bcb033592..f0d9a182338d71be1f4d01e69ec1b9a086f21038 100644
+--- a/development/lib/signal-watcher.js
++++ b/development/lib/signal-watcher.js
+@@ -53,6 +53,7 @@ export function SignalWatcher(Base) {
+         }
+         disconnectedCallback() {
+             var _a;
++            this.performUpdate();
+             super.disconnectedCallback();
+             (_a = this.__dispose) === null || _a === void 0 ? void 0 : _a.call(this);
+         }
+diff --git a/lib/signal-watcher.js b/lib/signal-watcher.js
+index 93e9b4088d7d9fa7434fa69d93e977e57c3cf56c..afd64ab329b811e0ab87274a80987e7209152acb 100644
+--- a/lib/signal-watcher.js
++++ b/lib/signal-watcher.js
+@@ -3,5 +3,5 @@ import{effect as t}from"@preact/signals-core";
+  * @license
+  * Copyright 2023 Google LLC
+  * SPDX-License-Identifier: BSD-3-Clause
+- */function e(e){return class extends e{performUpdate(){var e;if(!1===this.isUpdatePending)return;null===(e=this._$Oo)||void 0===e||e.call(this);let s=!0;this._$Oo=t((()=>{s?(s=!1,super.performUpdate()):this.requestUpdate()}))}connectedCallback(){super.connectedCallback(),this.requestUpdate()}disconnectedCallback(){var t;super.disconnectedCallback(),null===(t=this._$Oo)||void 0===t||t.call(this)}}}export{e as SignalWatcher};
++ */function e(e){return class extends e{performUpdate(){var e;if(!1===this.isUpdatePending)return;null===(e=this._$Oo)||void 0===e||e.call(this);let s=!0;this._$Oo=t((()=>{s?(s=!1,super.performUpdate()):this.requestUpdate()}))}connectedCallback(){super.connectedCallback(),this.requestUpdate()}disconnectedCallback(){var t;this.performUpdate();super.disconnectedCallback(),null===(t=this._$Oo)||void 0===t||t.call(this)}}}export{e as SignalWatcher};
+ //# sourceMappingURL=signal-watcher.js.map

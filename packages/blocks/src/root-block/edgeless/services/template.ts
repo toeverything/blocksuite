@@ -1,5 +1,6 @@
 import type { BlockModel, Y } from '@blocksuite/store';
 
+import { Bound } from '@blocksuite/global/utils';
 import { Slot, assertExists, assertType } from '@blocksuite/global/utils';
 import {
   type BlockSnapshot,
@@ -13,7 +14,7 @@ import type { ConnectorElementModel } from '../../../surface-block/index.js';
 import type { SurfaceBlockModel } from '../../../surface-block/surface-model.js';
 import type { SurfaceBlockTransformer } from '../../../surface-block/surface-transformer.js';
 
-import { Bound, getCommonBound } from '../../../surface-block/index.js';
+import { getCommonBound } from '../../../surface-block/index.js';
 
 /**
  * Those block contains other block's id
@@ -199,7 +200,7 @@ export class TemplateJob {
             ...modelData.props,
             id: modelData.id,
           },
-          parent ? mergeIdMapping.get(parent) ?? parent : undefined,
+          parent ? (mergeIdMapping.get(parent) ?? parent) : undefined,
           index
         );
       }
@@ -258,7 +259,7 @@ export class TemplateJob {
         snapshot.flavour as MergeBlockFlavour
       )
         ? null
-        : (await job.snapshotToModelData(snapshot)) ?? null;
+        : ((await job.snapshotToModelData(snapshot)) ?? null);
 
       modelDataList.push({
         flavour: snapshot.flavour,

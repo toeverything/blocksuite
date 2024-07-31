@@ -1,4 +1,4 @@
-import type { SerializedXYWH } from '@blocksuite/blocks';
+import type { SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
   Boxed,
@@ -27,7 +27,7 @@ export const heavyWhiteboard: InitFn = (
       title: new Text(),
     });
 
-    const surfaceBlockElements: Record<string, unknown> = {};
+    const surfaceBlocks: Record<string, unknown> = {};
 
     let i = 0;
 
@@ -36,7 +36,7 @@ export const heavyWhiteboard: InitFn = (
       const x = Math.random() * count * 2;
       const y = Math.random() * count * 2;
       const id = nanoid();
-      surfaceBlockElements[id] = native2Y(
+      surfaceBlocks[id] = native2Y(
         {
           id,
           index: 'a0',
@@ -61,9 +61,9 @@ export const heavyWhiteboard: InitFn = (
     doc.addBlock(
       'affine:surface',
       {
-        elements: new Boxed(
-          native2Y(surfaceBlockElements, { deep: false })
-        ) as Boxed<Y.Map<Y.Map<unknown>>>,
+        elements: new Boxed(native2Y(surfaceBlocks, { deep: false })) as Boxed<
+          Y.Map<Y.Map<unknown>>
+        >,
       },
       rootId
     );

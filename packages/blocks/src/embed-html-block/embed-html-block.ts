@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -7,13 +8,12 @@ import type { EmbedHtmlModel, EmbedHtmlStyles } from './embed-html-model.js';
 import type { EmbedHtmlBlockService } from './embed-html-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
-import { Bound } from '../surface-block/utils/bound.js';
+import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
 import './components/fullscreen-toolbar.js';
 import { HtmlIcon, styles } from './styles.js';
 
 @customElement('affine-embed-html-block')
-export class EmbedHtmlBlockComponent extends EmbedBlockElement<
+export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
   EmbedHtmlModel,
   EmbedHtmlBlockService
 > {
@@ -69,8 +69,14 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
       })
     );
     // this is required to prevent iframe from capturing pointer events
-    this.handleEvent('pointerMove', ctx => {
-      this._isDragging = ctx.get('pointerState').dragging;
+    this.handleEvent('dragStart', () => {
+      this._isDragging = true;
+      this._showOverlay =
+        this._isResizing || this._isDragging || !this._isSelected;
+    });
+
+    this.handleEvent('dragEnd', () => {
+      this._isDragging = false;
       this._showOverlay =
         this._isResizing || this._isDragging || !this._isSelected;
     });

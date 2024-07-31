@@ -5,10 +5,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
-import type {
-  DataViewColumnManager,
-  DataViewManager,
-} from '../view/data-view-manager.js';
+import type { Column } from '../view-manager/column.js';
+import type { SingleView } from '../view-manager/single-view.js';
 
 import { createPopup } from '../../../_common/components/index.js';
 import { ArrowLeftBigIcon } from '../../../_common/icons/index.js';
@@ -161,14 +159,14 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   `;
 
   clickChangeAll = (allShow: boolean) => {
-    this.view.columnsWithoutFilter.forEach(id => {
+    this.view.columnsWithoutFilter$.value.forEach(id => {
       if (this.view.columnGetType(id) !== 'title') {
         this.view.columnUpdateHide(id, allShow);
       }
     });
   };
 
-  renderColumn = (column: DataViewColumnManager) => {
+  renderColumn = (column: Column) => {
     const isTitle = column.type === 'title';
     const icon = column.hide ? hidden : show;
     const changeVisible = () => {
@@ -189,16 +187,13 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   };
 
   private itemsGroup() {
-    return this.view.columnsWithoutFilter.map(id => this.view.columnGet(id));
+    return this.view.columnsWithoutFilter$.value.map(id =>
+      this.view.columnGet(id)
+    );
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
     this._disposables.addFromEvent(this, 'pointerdown', e => {
       e.stopPropagation();
     });
@@ -209,7 +204,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       animation: 150,
       group: `properties-sort-${this.view.id}`,
       onEnd: evt => {
-        const properties = [...this.view.columnsWithoutFilter];
+        const properties = [...this.view.columnsWithoutFilter$.value];
         const index = evt.oldIndex ?? -1;
         const from = properties[index];
         properties.splice(index, 1);
@@ -263,7 +258,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   accessor onBack: (() => void) | undefined = undefined;
 
   @property({ attribute: false })
-  accessor view!: DataViewManager;
+  accessor view!: SingleView;
 }
 
 declare global {
@@ -275,7 +270,7 @@ declare global {
 export const popPropertiesSetting = (
   target: HTMLElement,
   props: {
-    view: DataViewManager;
+    view: SingleView;
     onClose?: () => void;
     onBack?: () => void;
   }

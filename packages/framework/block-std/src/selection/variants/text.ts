@@ -109,11 +109,11 @@ export class TextSelection extends BaseSelection {
   }
 
   get end(): TextRangePoint {
-    return this.reverse ? this.from : this.to ?? this.from;
+    return this.reverse ? this.from : (this.to ?? this.from);
   }
 
   get start(): TextRangePoint {
-    return this.reverse ? this.to ?? this.from : this.from;
+    return this.reverse ? (this.to ?? this.from) : this.from;
   }
 }
 

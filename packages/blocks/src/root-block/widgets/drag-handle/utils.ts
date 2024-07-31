@@ -1,4 +1,4 @@
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -6,6 +6,8 @@ import {
   PathFinder,
   type PointerEventState,
 } from '@blocksuite/block-std';
+import { Point } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
@@ -14,20 +16,17 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../../_common/consts.js';
 import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
-  type BlockComponent,
   type EmbedCardStyle,
-  Point,
   Rect,
-  findClosestBlockElement,
-  getClosestBlockElementByElement,
-  getClosestBlockElementByPoint,
+  findClosestBlockComponent,
+  getClosestBlockComponentByElement,
+  getClosestBlockComponentByPoint,
   getDropRectByPoint,
   getHoveringNote,
-  getRectByBlockElement,
+  getRectByBlockComponent,
   isInsidePageEditor,
   matchFlavours,
 } from '../../../_common/utils/index.js';
-import { Bound } from '../../../surface-block/index.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
   DRAG_HANDLE_CONTAINER_HEIGHT,
@@ -70,11 +69,11 @@ export const getDragHandleContainerHeight = (model: BlockModel) => {
 
 // To check if the block is a child block of the selected blocks
 export const containChildBlock = (
-  blockElements: BlockElement[],
+  blocks: BlockComponent[],
   childPath: string[]
 ) => {
-  return blockElements.some(blockElement => {
-    const path = blockElement.path;
+  return blocks.some(block => {
+    const path = block.path;
     return PathFinder.includes(childPath, path);
   });
 };
@@ -97,10 +96,10 @@ export const captureEventTarget = (target: EventTarget | null) => {
     : null;
 };
 
-export const getNoteId = (blockElement: BlockElement) => {
-  let element = blockElement;
+export const getNoteId = (block: BlockComponent) => {
+  let element = block;
   while (element && element.flavour !== 'affine:note') {
-    element = element.parentBlockElement;
+    element = element.parentBlock;
   }
 
   return element.model.id;
@@ -156,56 +155,54 @@ export const isOutOfNoteBlock = (
 
 export const getClosestNoteBlock = (
   editorHost: EditorHost,
-  rootElement: BlockComponent,
+  rootComponent: BlockComponent,
   point: Point
 ) => {
   return isInsidePageEditor(editorHost)
-    ? findClosestBlockElement(rootElement, point, 'affine-note')
+    ? findClosestBlockComponent(rootComponent, point, 'affine-note')
     : getHoveringNote(point)?.closest('affine-edgeless-note');
 };
 
 export const getClosestBlockByPoint = (
   editorHost: EditorHost,
-  rootElement: BlockComponent,
+  rootComponent: BlockComponent,
   point: Point
 ) => {
-  const closestNoteBlock = getClosestNoteBlock(editorHost, rootElement, point);
+  const closestNoteBlock = getClosestNoteBlock(
+    editorHost,
+    rootComponent,
+    point
+  );
   if (!closestNoteBlock || closestNoteBlock.closest('.affine-surface-ref')) {
     return null;
   }
 
   const noteRect = Rect.fromDOM(closestNoteBlock);
 
-  const blockElement = getClosestBlockElementByPoint(point, {
+  const block = getClosestBlockComponentByPoint(point, {
     container: closestNoteBlock,
     rect: noteRect,
-  }) as BlockElement | null;
+  }) as BlockComponent | null;
 
   const blockSelector =
     '.affine-note-block-container > .affine-block-children-container > [data-block-id]';
 
-  const closestBlockElement = (
-    blockElement &&
-    PathFinder.includes(
-      blockElement.path,
-      (closestNoteBlock as BlockElement).path
-    )
-      ? blockElement
-      : findClosestBlockElement(
-          closestNoteBlock as BlockElement,
+  const closestBlock = (
+    block &&
+    PathFinder.includes(block.path, (closestNoteBlock as BlockComponent).path)
+      ? block
+      : findClosestBlockComponent(
+          closestNoteBlock as BlockComponent,
           point.clone(),
           blockSelector
         )
-  ) as BlockElement;
+  ) as BlockComponent;
 
-  if (
-    !closestBlockElement ||
-    !!closestBlockElement.closest('.surface-ref-note-portal')
-  ) {
+  if (!closestBlock || !!closestBlock.closest('.surface-ref-note-portal')) {
     return null;
   }
 
-  return closestBlockElement;
+  return closestBlock;
 };
 
 export function calcDropTarget(
@@ -243,7 +240,7 @@ export function calcDropTarget(
       ) {
         type = 'none';
       } else {
-        prevRect = getRectByBlockElement(prev);
+        prevRect = getRectByBlockComponent(prev);
       }
     } else {
       prev = element.parentElement?.previousElementSibling;
@@ -260,7 +257,7 @@ export function calcDropTarget(
     // To drop in, the position must after the target first
     // If drop in target has children, we can use insert before or after of that children
     // to achieve the same effect.
-    const hasChild = (element as BlockComponent).childBlockElements.length;
+    const hasChild = (element as BlockComponent).childBlocks.length;
     if (
       allowSublist &&
       matchFlavours(model, ['affine:list']) &&
@@ -284,13 +281,13 @@ export function calcDropTarget(
         next = null;
       }
     } else {
-      next = getClosestBlockElementByElement(
+      next = getClosestBlockComponentByElement(
         element.parentElement
       )?.nextElementSibling;
     }
 
     if (next) {
-      nextRect = getRectByBlockElement(next);
+      nextRect = getRectByBlockComponent(next);
       offsetY = (nextRect.top - domRect.bottom) / 2;
     }
   }
@@ -322,21 +319,19 @@ export const getDropResult = (
 ): DropResult | null => {
   let dropIndicator = null;
   const point = new Point(event.x, event.y);
-  const closestBlockElement = getClosestBlockElementByPoint(
-    point
-  ) as BlockElement;
-  if (!closestBlockElement) {
+  const closestBlock = getClosestBlockComponentByPoint(point) as BlockComponent;
+  if (!closestBlock) {
     return dropIndicator;
   }
 
-  const model = closestBlockElement.model;
+  const model = closestBlock.model;
 
   const isDatabase = matchFlavours(model, ['affine:database']);
   if (isDatabase) {
     return dropIndicator;
   }
 
-  const result = calcDropTarget(point, model, closestBlockElement, [], scale);
+  const result = calcDropTarget(point, model, closestBlock, [], scale);
   if (result) {
     dropIndicator = result;
   }
@@ -344,11 +339,11 @@ export const getDropResult = (
   return dropIndicator;
 };
 
-export function getDragHandleLeftPadding(blockElements: BlockElement[]) {
-  const hasToggleList = blockElements.some(
-    blockElement =>
-      matchFlavours(blockElement.model, ['affine:list']) &&
-      blockElement.model.children.length > 0
+export function getDragHandleLeftPadding(blocks: BlockComponent[]) {
+  const hasToggleList = blocks.some(
+    block =>
+      matchFlavours(block.model, ['affine:list']) &&
+      block.model.children.length > 0
   );
   const offsetLeft = hasToggleList
     ? DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST
@@ -356,12 +351,12 @@ export function getDragHandleLeftPadding(blockElements: BlockElement[]) {
   return offsetLeft;
 }
 
-let previousEle: BlockElement[] = [];
-export function updateDragHandleClassName(blockElements: BlockElement[] = []) {
+let previousEle: BlockComponent[] = [];
+export function updateDragHandleClassName(blocks: BlockComponent[] = []) {
   const className = 'with-drag-handle';
-  previousEle.forEach(blockElement => blockElement.classList.remove(className));
-  previousEle = blockElements;
-  blockElements.forEach(blockElement => blockElement.classList.add(className));
+  previousEle.forEach(block => block.classList.remove(className));
+  previousEle = blocks;
+  blocks.forEach(block => block.classList.add(className));
 }
 
 export function getDuplicateBlocks(blocks: BlockModel[]) {
@@ -381,7 +376,7 @@ export function convertDragPreviewDocToEdgeless({
   noteScale,
   state,
 }: OnDragEndProps & {
-  blockComponent: BlockElement;
+  blockComponent: BlockComponent;
   cssSelector: string;
   width?: number;
   height?: number;
@@ -469,7 +464,7 @@ export function convertDragPreviewEdgelessToDoc({
   state,
   style,
 }: OnDragEndProps & {
-  blockComponent: BlockElement;
+  blockComponent: BlockComponent;
   style?: EmbedCardStyle;
 }): boolean {
   const doc = blockComponent.doc;
@@ -503,7 +498,7 @@ export function convertDragPreviewEdgelessToDoc({
   const altKey = state.raw.altKey;
   if (!altKey) {
     doc.deleteBlock(blockModel);
-    host.selection.setGroup('edgeless', []);
+    host.selection.setGroup('gfx', []);
   }
 
   return true;

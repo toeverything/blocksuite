@@ -1,9 +1,13 @@
-import type { IVec } from '../../../utils/vec.js';
-import type { IHitTestOptions } from '../../base.js';
+import type { IBound } from '@blocksuite/global/utils';
+import type { IVec } from '@blocksuite/global/utils';
+
+import { Bound } from '@blocksuite/global/utils';
+import { PointLocation } from '@blocksuite/global/utils';
+
+import type { PointTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 
-import { DEFAULT_CENTRAL_AREA_RATIO, type IBound } from '../../../consts.js';
-import { Bound } from '../../../utils/bound.js';
+import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
 import {
   getCenterAreaBounds,
   getPointsFromBoundsWithRotation,
@@ -14,7 +18,6 @@ import {
   polygonNearestPoint,
   rotatePoints,
 } from '../../../utils/math-utils.js';
-import { PointLocation } from '../../../utils/point-location.js';
 
 export const rect = {
   points({ x, y, w, h }: IBound) {
@@ -33,11 +36,11 @@ export const rect = {
     ctx.rect(x, y, w, h);
     ctx.restore();
   },
-  hitTest(
+  includesPoint(
     this: ShapeElementModel,
     x: number,
     y: number,
-    options: IHitTestOptions
+    options: PointTestOptions
   ) {
     const points = getPointsFromBoundsWithRotation(this);
 
@@ -79,7 +82,7 @@ export const rect = {
     return hit;
   },
 
-  containedByBounds(bounds: Bound, element: ShapeElementModel): boolean {
+  containsBound(bounds: Bound, element: ShapeElementModel): boolean {
     const points = getPointsFromBoundsWithRotation(element);
     return points.some(point => bounds.containsPoint(point));
   },
@@ -89,7 +92,7 @@ export const rect = {
     return polygonNearestPoint(points, point);
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElementModel) {
+  getLineIntersections(start: IVec, end: IVec, element: ShapeElementModel) {
     const points = getPointsFromBoundsWithRotation(element);
     return linePolygonIntersects(start, end, points);
   },

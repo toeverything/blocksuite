@@ -306,7 +306,7 @@ export const safeBridge = ({
           break;
         }
         default:
-          throw new Error('Unreachable');
+          return false;
       }
 
       const inside = isInside(point, rectRect, 1);

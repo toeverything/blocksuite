@@ -30,6 +30,7 @@ import {
   clickBlockById,
   copyByKeyboard,
   dragBetweenCoords,
+  dragBetweenIndices,
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
   fillLine,
@@ -1133,4 +1134,23 @@ test('delete first block in edgeless note', async ({ page }) => {
   await pressBackspace(page);
   await assertRichTexts(page, ['bbb']);
   await assertBlockChildrenIds(page, '4', []);
+});
+
+test('select text cross blocks in edgeless note', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await activeNoteInEdgeless(page, noteId);
+  await waitNextFrame(page, 400);
+
+  await type(page, 'aaa');
+  await pressEnter(page);
+  await type(page, 'bbb');
+  await pressEnter(page);
+  await type(page, 'ccc');
+  await assertRichTexts(page, ['aaa', 'bbb', 'ccc']);
+
+  await dragBetweenIndices(page, [0, 1], [2, 2]);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['ac']);
 });

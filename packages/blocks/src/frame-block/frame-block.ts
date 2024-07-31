@@ -1,19 +1,18 @@
 import type { Doc } from '@blocksuite/store';
 
 import {
-  Bound,
-  EdgelessBlockElement,
-  type SerializedXYWH,
+  GfxBlockComponent,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
+import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
 
-import { isCssVariable } from '../_common/theme/css-variables.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { FrameBlockModel } from './frame-model.js';
 
 const NESTED_FRAME_OFFSET = 4;
@@ -242,7 +241,7 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
 }
 
 @customElement('affine-frame')
-export class FrameBlockComponent extends EdgelessBlockElement<
+export class FrameBlockComponent extends GfxBlockComponent<
   EdgelessRootService,
   FrameBlockModel
 > {
@@ -276,8 +275,12 @@ export class FrameBlockComponent extends EdgelessBlockElement<
     });
   }
 
-  override renderEdgelessBlock() {
-    const { model, _isNavigator, doc, rootService } = this;
+  override renderGfxBlock() {
+    const { model, _isNavigator, showBorder, doc, rootService } = this;
+    const backgroundColor = ThemeObserver.generateColorProperty(
+      model.background,
+      '--affine-platte-transparent'
+    );
 
     return html`
       <edgeless-frame-title
@@ -288,13 +291,14 @@ export class FrameBlockComponent extends EdgelessBlockElement<
       <div
         class="affine-frame-container"
         style=${styleMap({
-          backgroundColor: isCssVariable(model.background)
-            ? `var(${model.background})`
-            : '',
+          backgroundColor,
           height: '100%',
           width: '100%',
           borderRadius: '8px',
-          border: _isNavigator ? 'none' : `2px solid var(--affine-black-30)`,
+          border:
+            _isNavigator || !showBorder
+              ? 'none'
+              : `2px solid var(--affine-black-30)`,
         })}
       ></div>
     `;
@@ -302,6 +306,9 @@ export class FrameBlockComponent extends EdgelessBlockElement<
 
   @state()
   private accessor _isNavigator = false;
+
+  @state()
+  accessor showBorder = true;
 }
 
 declare global {

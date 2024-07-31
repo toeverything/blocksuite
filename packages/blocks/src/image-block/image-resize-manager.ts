@@ -1,10 +1,9 @@
-import type { PointerEventState } from '@blocksuite/block-std';
+import type { BlockComponent, PointerEventState } from '@blocksuite/block-std';
 
 import { assertExists } from '@blocksuite/global/utils';
 
 import {
-  type BlockComponent,
-  getClosestBlockElementByElement,
+  getClosestBlockComponentByElement,
   getModelByElement,
   isEdgelessPage,
 } from '../_common/utils/query.js';
@@ -70,13 +69,13 @@ export class ImageResizeManager {
 
   onStart(e: PointerEventState) {
     const eventTarget = e.raw.target as HTMLElement;
-    this._activeComponent = getClosestBlockElementByElement(
+    this._activeComponent = getClosestBlockComponentByElement(
       eventTarget
     ) as BlockComponent;
 
-    const rootElement = getClosestRootBlockComponent(this._activeComponent);
-    if (rootElement && isEdgelessPage(rootElement)) {
-      this._zoom = rootElement.service.viewport.zoom;
+    const rootComponent = getClosestRootBlockComponent(this._activeComponent);
+    if (rootComponent && isEdgelessPage(rootComponent)) {
+      this._zoom = rootComponent.service.viewport.zoom;
     } else {
       this._zoom = 1;
     }
