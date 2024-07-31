@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
-import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
-import type {
-  DatabaseBlockModel,
-  ListType,
-  RichText,
-  ThemeObserver,
-} from '@blocks/index.js';
+import type { DatabaseBlockModel, ListType, RichText } from '@blocks/index.js';
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
@@ -1334,23 +1328,29 @@ export async function getCurrentEditorTheme(page: Page) {
   const mode = await page
     .locator('affine-editor-container')
     .first()
-    .evaluate(ele => {
-      return (ele as unknown as Element & { themeObserver: ThemeObserver })
-        .themeObserver.cssVariables?.['--affine-theme-mode'];
-    });
+    .evaluate(() =>
+      window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue('--affine-theme-mode')
+        .trim()
+    );
   return mode;
 }
 
 export async function getCurrentThemeCSSPropertyValue(
   page: Page,
-  property: CssVariableName
+  property: string
 ) {
   const value = await page
     .locator('affine-editor-container')
-    .evaluate((ele, property: CssVariableName) => {
-      return (ele as unknown as Element & { themeObserver: ThemeObserver })
-        .themeObserver.cssVariables?.[property];
-    }, property);
+    .evaluate(
+      (_, property) =>
+        window
+          .getComputedStyle(document.documentElement)
+          .getPropertyValue(property)
+          .trim(),
+      property
+    );
   return value;
 }
 

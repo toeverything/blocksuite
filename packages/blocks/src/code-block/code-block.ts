@@ -63,8 +63,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
     this._updateLineNumbers();
   });
 
-  private readonly _themeObserver = new ThemeObserver();
-
   static override styles = codeBlockStyles;
 
   readonly attributesSchema = z.object({});
@@ -140,18 +138,18 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
       };
     });
 
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => {
-      if (!this._highlighter) return;
-      const richText = this.querySelector('rich-text');
-      const inlineEditor = richText?.inlineEditor;
-      if (!inlineEditor) return;
-      // update code-line theme
-      setTimeout(() => {
-        inlineEditor.requestUpdate();
-      });
-    });
-    this.disposables.add(() => this._themeObserver.dispose());
+    this.disposables.add(
+      ThemeObserver.subscribe(() => {
+        if (!this._highlighter) return;
+        const richText = this.querySelector('rich-text');
+        const inlineEditor = richText?.inlineEditor;
+        if (!inlineEditor) return;
+        // update code-line theme
+        setTimeout(() => {
+          inlineEditor.requestUpdate();
+        });
+      })
+    );
 
     bindContainerHotkey(this);
 

@@ -1,9 +1,9 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { NoteDisplayMode } from '@blocksuite/blocks';
+import { NoteDisplayMode, scrollbarStyle } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { SignalWatcher, signal } from '@lit-labs/preact-signals';
-import { LitElement, css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -20,16 +20,32 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
   private _activeHeadingId$ = signal<string | null>(null);
 
   static override styles = css`
+    :host {
+      display: flex;
+    }
+
     .outline-viewer-root {
       position: relative;
+      display: flex;
     }
 
     .outline-heading-indicator-container {
-      display: inline-flex;
+      display: flex;
       flex-direction: column;
       align-items: flex-end;
       flex-shrink: 0;
       gap: 16px;
+      min-height: 16px;
+      max-height: 100%;
+      overflow: hidden;
+      position: absolute;
+      right: 0;
+    }
+
+    .outline-heading-indicator-container.hidden {
+      position: relative;
+      position: flex;
+      visibility: hidden;
     }
 
     .outline-heading-indicator {
@@ -39,6 +55,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
 
       border-radius: 1px;
       background: var(--affine-black-10, rgba(0, 0, 0, 0.1));
+      transition: width 0.3s;
     }
 
     .outline-heading-indicator[active] {
@@ -50,15 +67,16 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
     }
 
     .outline-viewer-container {
-      position: absolute;
-      top: 0px;
-      right: 0px;
       width: 0px;
+      padding: 8px 0px;
+      max-height: 100%;
       box-sizing: border-box;
+      display: flex;
       overflow-x: hidden;
       background: var(--affine-background-overlay-panel-color, #fbfbfc);
       box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.14);
       border-radius: var(--8, 8px);
+      z-index: var(--affine-z-index-popover);
 
       transition: width 0.3s;
     }
@@ -72,15 +90,16 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       display: flex;
       box-sizing: border-box;
       width: 200px;
-      padding: 8px;
-      padding-right: 8px;
       flex-direction: column;
       align-items: flex-start;
+      overflow-y: auto;
     }
+
+    ${scrollbarStyle('.outline-viewer-inner-container')}
 
     .outline-viewer-header-container {
       display: flex;
-      padding: 6px;
+      padding: 0px 10px 0px 14px;
       align-items: center;
       gap: 4px;
       align-self: stretch;
@@ -91,6 +110,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       overflow: hidden;
       color: var(--affine-text-secondary-color, #8e8d91);
       text-overflow: ellipsis;
+      text-wrap: nowrap;
 
       font-family: Inter;
       font-size: 12px;
@@ -102,8 +122,6 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
     .outline-viewer-body {
       flex-grow: 1;
       width: 100%;
-
-      overflow-y: scroll;
     }
   `;
 
@@ -115,8 +133,10 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
     );
 
     return html`<div
-      class="outline-heading-indicator-container"
-      ?hidden=${this._showViewer}
+      class=${classMap({
+        'outline-heading-indicator-container': true,
+        hidden: this._showViewer,
+      })}
     >
       ${repeat(
         headingBlocks,
@@ -158,7 +178,8 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
           .edgeless=${null}
           .editorHost=${this.editor.host}
           .mode=${'page'}
-          .activeHeadingId=${this._activeHeadingId$.value}
+          .activeHeadingId=${this._activeHeadingId$}
+          .renderEdgelessOnlyNotes=${false}
           .showPreviewIcon=${false}
           .enableNotesSorting=${false}
           .toggleNotesSorting=${noop}
@@ -172,6 +193,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
 
   private _toggleOutlinePanel() {
     if (this.toggleOutlinePanel) {
+      this._showViewer = false;
       this.toggleOutlinePanel();
     }
   }
@@ -199,6 +221,18 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       ${this._renderIndicators()}${this._renderViewer()}
     </div>`;
   }
+
+  override updated(_changedProperties: PropertyValues<this>) {
+    if (this._activeIndicator) {
+      this._activeIndicator.scrollIntoView({
+        behavior: 'instant',
+        block: 'nearest',
+      });
+    }
+  }
+
+  @query('.outline-heading-indicator[active]')
+  private accessor _activeIndicator: HTMLElement | null = null;
 
   @state()
   private accessor _showViewer: boolean = false;

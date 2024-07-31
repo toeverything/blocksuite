@@ -12,8 +12,6 @@ import { styles } from '../styles.js';
 
 @customElement('bookmark-card')
 export class BookmarkCard extends WithDisposable(ShadowlessElement) {
-  private readonly _themeObserver = new ThemeObserver();
-
   static override styles = styles;
 
   private _handleClick(event: MouseEvent) {
@@ -45,9 +43,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => this.requestUpdate());
-    this.disposables.add(() => this._themeObserver.dispose());
+    this.disposables.add(ThemeObserver.subscribe(() => this.requestUpdate()));
 
     this.disposables.add(
       this.bookmark.selection.slots.changed.on(() => {
@@ -76,7 +72,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       ? 'Loading...'
       : !title
         ? this.error
-          ? domainName ?? 'Link card'
+          ? (domainName ?? 'Link card')
           : ''
         : title;
 
@@ -105,7 +101,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
         ? this.error
           ? 'Failed to retrieve link information.'
           : url
-        : description ?? '';
+        : (description ?? '');
 
     const bannerImage =
       !this.loading && image

@@ -1,4 +1,5 @@
 import type {
+  BaseSelection,
   BlockSelection,
   UIEventHandler,
   UIEventStateContext,
@@ -446,7 +447,9 @@ export class KeymapController implements ReactiveController {
       });
     });
     selection.update(selList => {
-      return selList.filter(sel => !sel.is('block')).concat(blocks);
+      return selList
+        .filter<BaseSelection>(sel => !sel.is('block'))
+        .concat(blocks);
     });
   };
 

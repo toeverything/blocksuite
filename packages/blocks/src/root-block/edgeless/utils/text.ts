@@ -9,6 +9,7 @@ import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { GroupElementModel } from '../../../surface-block/element-model/group.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
+import { ThemeObserver } from '../../../_common/theme/theme-observer.js';
 import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { FontFamily } from '../../../surface-block/consts.js';
 import { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
@@ -68,7 +69,7 @@ export function mountShapeTextEditor(
 ) {
   if (!shapeElement.text) {
     const text = new DocCollection.Y.Text();
-    let color = edgeless.surface.themeObserver.getColorValue(
+    let color = ThemeObserver.getColorValue(
       shapeElement.fillColor,
       GET_DEFAULT_LINE_COLOR()
     );

@@ -2,7 +2,7 @@ import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
-import { type CustomStyle, drawGeneralShape } from './utils.js';
+import { type Colors, drawGeneralShape } from './utils.js';
 
 /**
  * "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf)
@@ -15,7 +15,7 @@ export function rect(
   matrix: DOMMatrix,
   renderer: Renderer,
   rc: RoughCanvas,
-  customStyle: CustomStyle
+  colors: Colors
 ) {
   const {
     filled,
@@ -36,7 +36,7 @@ export function rect(
   const cx = renderWidth / 2;
   const cy = renderHeight / 2;
 
-  const { fillColor, strokeColor } = customStyle;
+  const { fillColor, strokeColor } = colors;
 
   ctx.setTransform(
     matrix

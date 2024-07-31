@@ -257,10 +257,7 @@ export class RootService extends BlockService<RootBlockModel> {
       noteId
     );
 
-    asyncFocusRichText(this.host, id, {
-      index: text.length,
-      length: 0,
-    })?.catch(console.error);
+    asyncFocusRichText(this.host, id, text.length)?.catch(console.error);
   };
 
   docModeService: DocModeService = createDocModeService(this.doc.id);
@@ -331,7 +328,7 @@ export class RootService extends BlockService<RootBlockModel> {
 
   telemetryService: TelemetryService | null = null;
 
-  readonly themeObserver = new ThemeObserver();
+  readonly themeObserver = ThemeObserver.instance;
 
   transformers = {
     markdown: MarkdownTransformer,

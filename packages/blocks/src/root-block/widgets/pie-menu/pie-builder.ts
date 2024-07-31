@@ -1,6 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type {
   ActionFunction,
   PieColorNodeModel,
@@ -17,11 +16,11 @@ import { calcNodeAngles, calcNodeWedges, isNodeWithChildren } from './utils.js';
 
 export interface IPieColorPickerNodeProps {
   label: string;
-  active: (ctx: PieMenuContext) => CssVariableName;
+  active: (ctx: PieMenuContext) => string;
   onChange: PieColorNodeModel['onChange'];
   openOnHover?: PieSubmenuNodeModel['openOnHover'];
   hollow?: boolean;
-  colors: { color: CssVariableName }[];
+  colors: { color: string }[];
 }
 
 type PieBuilderConstructorProps = Omit<

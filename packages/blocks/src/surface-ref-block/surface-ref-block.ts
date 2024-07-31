@@ -1,4 +1,4 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type { BaseSelection, EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
 import { BlockComponent } from '@blocksuite/block-std';
@@ -254,7 +254,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
       requestConnectedFrame(() => {
         selection.update(selList => {
           return selList
-            .filter(sel => !sel.is('block'))
+            .filter<BaseSelection>(sel => !sel.is('block'))
             .concat(
               selection.create('text', {
                 from: {

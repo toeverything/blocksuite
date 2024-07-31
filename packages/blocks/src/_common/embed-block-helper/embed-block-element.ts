@@ -23,11 +23,8 @@ import {
 } from '../../root-block/widgets/drag-handle/utils.js';
 import { CaptionedBlockComponent } from '../components/captioned-block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
-import {
-  type EmbedCardStyle,
-  getThemeMode,
-  matchFlavours,
-} from '../utils/index.js';
+import { ThemeObserver } from '../theme/theme-observer.js';
+import { type EmbedCardStyle, matchFlavours } from '../utils/index.js';
 import { styles } from './styles.js';
 
 export class EmbedBlockComponent<
@@ -138,7 +135,7 @@ export class EmbedBlockComponent<
   static override styles = styles;
 
   renderEmbed = (children: () => TemplateResult) => {
-    const theme = getThemeMode();
+    const theme = ThemeObserver.mode;
     const isSelected = !!this.selected?.is('block');
 
     if (!this.isInSurface) {

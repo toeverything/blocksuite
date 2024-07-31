@@ -7,7 +7,7 @@ import {
   LightLoadingIcon,
   ReloadIcon,
 } from '../_common/icons/text.js';
-import { getThemeMode } from '../_common/utils/query.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import {
   DarkSyncedDocDeletedBanner,
   DarkSyncedDocEmptyBanner,
@@ -33,7 +33,7 @@ type SyncedCardImages = {
 export function getSyncedDocIcons(
   editorMode: 'page' | 'edgeless'
 ): SyncedCardImages {
-  const theme = getThemeMode();
+  const theme = ThemeObserver.mode;
   if (theme === 'light') {
     return {
       LoadingIcon: LightLoadingIcon,

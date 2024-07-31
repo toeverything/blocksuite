@@ -12,6 +12,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
 
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { FrameBlockModel } from './frame-model.js';
 
 const NESTED_FRAME_OFFSET = 4;
@@ -276,19 +277,10 @@ export class FrameBlockComponent extends GfxBlockComponent<
 
   override renderGfxBlock() {
     const { model, _isNavigator, showBorder, doc, rootService } = this;
-    let backgroundColor = '--affine-platte-transparent';
-
-    // The root service may not be initialized when switching page mode
-    if (rootService) {
-      backgroundColor = rootService.themeObserver.generateColorProperty(
-        model.background,
-        backgroundColor
-      );
-    } else if (typeof model.background === 'string') {
-      backgroundColor = model.background.startsWith('--')
-        ? `var(${model.background})`
-        : model.background;
-    }
+    const backgroundColor = ThemeObserver.generateColorProperty(
+      model.background,
+      '--affine-platte-transparent'
+    );
 
     return html`
       <edgeless-frame-title

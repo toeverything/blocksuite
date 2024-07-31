@@ -120,7 +120,7 @@ export class ColumnConfig<
   formatValue(cellData: CellData, colData: T): CellData | undefined {
     return cellData === undefined
       ? undefined
-      : this.ops.formatValue?.(cellData, colData) ?? cellData;
+      : (this.ops.formatValue?.(cellData, colData) ?? cellData);
   }
 
   fromString(cellData: string, colData: T) {

@@ -4,6 +4,7 @@ import type {
   NoteBlockModel,
 } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
+import type { Signal } from '@lit-labs/preact-signals';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
@@ -163,7 +164,7 @@ export class OutlinePanelBody extends SignalWatcher(
                 .doc=${this.doc}
                 .editorMode=${this.mode}
                 .editorHost=${this.editorHost}
-                .activeHeadingId=${this.activeHeadingId}
+                .activeHeadingId=${this.activeHeadingId.value}
                 .status=${selectedNotesSet.has(note.note.id)
                   ? this._dragging
                     ? 'placeholder'
@@ -192,7 +193,7 @@ export class OutlinePanelBody extends SignalWatcher(
                   .number=${idx + 1}
                   .index=${note.index}
                   .doc=${this.doc}
-                  .activeHeadingId=${this.activeHeadingId}
+                  .activeHeadingId=${this.activeHeadingId.value}
                   .invisible=${true}
                   .showPreviewIcon=${this.showPreviewIcon}
                   .enableNotesSorting=${this.enableNotesSorting}
@@ -418,7 +419,7 @@ export class OutlinePanelBody extends SignalWatcher(
         if (!docTitle) return;
 
         docTitle.scrollIntoView({
-          behavior: 'smooth',
+          behavior: 'instant',
           block: 'start',
         });
       }}
@@ -474,7 +475,7 @@ export class OutlinePanelBody extends SignalWatcher(
         display: 'block',
       });
 
-      this.activeHeadingId = block.model.id;
+      this.activeHeadingId.value = block.model.id;
 
       // Clear the previous timeout if it exists
       if (this._highlightTimeoutId !== null) {
@@ -670,9 +671,10 @@ export class OutlinePanelBody extends SignalWatcher(
     const shouldRenderPageVisibleNotes = this._shouldRenderNoteList(
       this._pageVisibleNotes
     );
-    const shouldRenderEdgelessOnlyNotes = this._shouldRenderNoteList(
-      this._edgelessOnlyNotes
-    );
+    const shouldRenderEdgelessOnlyNotes =
+      this.renderEdgelessOnlyNotes &&
+      this._shouldRenderNoteList(this._edgelessOnlyNotes);
+
     const shouldRenderEmptyPanel =
       !shouldRenderPageVisibleNotes && !shouldRenderEdgelessOnlyNotes;
 
@@ -729,7 +731,7 @@ export class OutlinePanelBody extends SignalWatcher(
   accessor OutlinePanelContainer!: HTMLElement;
 
   @property({ attribute: false })
-  accessor activeHeadingId: string | null = null;
+  accessor activeHeadingId!: Signal<string | null>;
 
   @property({ attribute: false })
   accessor doc!: Doc;
@@ -760,6 +762,9 @@ export class OutlinePanelBody extends SignalWatcher(
 
   @query('.panel-list')
   accessor panelListElement!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor renderEdgelessOnlyNotes: boolean = true;
 
   @property({ attribute: false })
   accessor setNoticeVisibility!: (visibility: boolean) => void;

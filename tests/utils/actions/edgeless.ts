@@ -1,4 +1,3 @@
-import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type { NoteDisplayMode } from '@blocks/_common/types.js';
 import type { NoteBlockModel } from '@blocks/note-block/index.js';
 import type { IPoint, IVec } from '@global/utils/index.js';
@@ -581,7 +580,7 @@ export async function rotateElementByHandle(
   );
 }
 
-export async function selectBrushColor(page: Page, color: CssVariableName) {
+export async function selectBrushColor(page: Page, color: string) {
   const colorButton = page.locator(
     `edgeless-brush-menu .color-unit[aria-label="${color.toLowerCase()}"]`
   );
@@ -1272,17 +1271,14 @@ export async function triggerComponentToolbarAction(
   }
 }
 
-export async function changeEdgelessNoteBackground(
-  page: Page,
-  color: CssVariableName
-) {
+export async function changeEdgelessNoteBackground(page: Page, color: string) {
   const colorButton = page
     .locator('edgeless-change-note-button')
     .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
 }
 
-export async function changeShapeFillColor(page: Page, color: CssVariableName) {
+export async function changeShapeFillColor(page: Page, color: string) {
   const colorButton = page
     .locator('edgeless-change-shape-button')
     .getByRole('listbox', { name: 'Fill colors' })
@@ -1290,10 +1286,7 @@ export async function changeShapeFillColor(page: Page, color: CssVariableName) {
   await colorButton.click();
 }
 
-export async function changeShapeStrokeColor(
-  page: Page,
-  color: CssVariableName
-) {
+export async function changeShapeStrokeColor(page: Page, color: string) {
   const colorButton = page
     .locator('edgeless-change-shape-button')
     .getByRole('listbox', { name: 'Border colors' })
@@ -1373,10 +1366,7 @@ export async function changeShapeStyle(
   await button.click();
 }
 
-export async function changeConnectorStrokeColor(
-  page: Page,
-  color: CssVariableName
-) {
+export async function changeConnectorStrokeColor(page: Page, color: string) {
   const colorButton = page
     .locator('edgeless-change-connector-button')
     .locator('edgeless-color-panel')

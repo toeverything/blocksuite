@@ -44,9 +44,8 @@ export function showMergeIndicator(
 
   // the target cannot be the child of source
   const mergeCheck = (sourceTree: MindmapNode): boolean => {
-    if (target === sourceTree) {
-      return false;
-    }
+    if (!target || !sourceTree) return false;
+    if (target === sourceTree) return false;
 
     if (sourceTree.children.length) {
       return sourceTree.children.every(node => mergeCheck(node));
