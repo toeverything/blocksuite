@@ -1,4 +1,7 @@
-import type { SurfaceSelection } from '@blocksuite/block-std';
+import type {
+  GfxBlockComponent,
+  SurfaceSelection,
+} from '@blocksuite/block-std';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -36,7 +39,7 @@ import {
   handleNativeRangeAtPoint,
   isTouchPadPinchEvent,
   requestConnectedFrame,
-  requestThrottledConnectFrame,
+  requestThrottledConnectedFrame,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
 import {
@@ -85,7 +88,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   EdgelessRootService,
   EdgelessRootBlockWidgetName
 > {
-  private _refreshLayerViewport = requestThrottledConnectFrame(() => {
+  private _refreshLayerViewport = requestThrottledConnectedFrame(() => {
     const { zoom, translateX, translateY } = this.service.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
 
@@ -198,6 +201,23 @@ export class EdgelessRootBlockComponent extends BlockComponent<
         this.surface.refresh();
       })
       .catch(console.error);
+  }
+
+  private _initLayerUpdateEffect() {
+    const updateLayers = requestThrottledConnectedFrame(() => {
+      const blocks =
+        this.renderRoot?.querySelectorAll<GfxBlockComponent>(
+          '.edgeless-layer > [data-block-id]'
+        ) ?? [];
+
+      blocks.forEach((block: GfxBlockComponent) => {
+        block.updateZIndex?.();
+      });
+    });
+
+    this._disposables.add(
+      this.service.layer.slots.layerUpdated.on(() => updateLayers())
+    );
   }
 
   private _initPinchEvent() {
@@ -746,7 +766,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     this._initPixelRatioChangeEffect();
     this._initFontLoader();
     this._initRemoteCursor();
-    // this._initSurface();
+    this._initLayerUpdateEffect();
 
     this._initViewport();
     this._initWheelEvent();

@@ -3,6 +3,7 @@ import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EdgelessRootService } from '../root-block/index.js';
 import type { ImageBlockEdgelessComponent } from './components/edgeless-image-block.js';
 import type { AffineImageCard } from './components/image-card.js';
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
@@ -158,6 +159,14 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
     `;
   }
 
+  toZIndex() {
+    return this.rootService?.layer.getZIndex(this.model) ?? 1;
+  }
+
+  updateZIndex() {
+    this.style.zIndex = `${this.toZIndex()}`;
+  }
+
   override updated() {
     this._imageCard?.requestUpdate();
   }
@@ -172,6 +181,16 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
 
   get resizeImg() {
     return this._imageElement?.resizeImg;
+  }
+
+  get rootService() {
+    const service = this.std.spec.getService('affine:page');
+
+    if (!('surface' in service)) {
+      return null;
+    }
+
+    return service as unknown as EdgelessRootService;
   }
 
   @query('affine-edgeless-image')

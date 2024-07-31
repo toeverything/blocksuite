@@ -20,7 +20,7 @@ import {
 import { SmallDocIcon } from '../../../_common/icons/text.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
 import {
-  requestThrottledConnectFrame,
+  requestThrottledConnectedFrame,
   stopPropagation,
 } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
@@ -377,7 +377,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
 
       return this._show;
     };
-    const updateLabels = requestThrottledConnectFrame(() => {
+    const updateLabels = requestThrottledConnectedFrame(() => {
       const pageVisibleBlocks = new Map<AutoConnectElement, number>();
       const notes = service.doc.root?.children.filter(child =>
         matchFlavours(child, ['affine:note'])

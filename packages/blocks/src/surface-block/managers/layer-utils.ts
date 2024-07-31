@@ -3,6 +3,7 @@ import type { Doc } from '@blocksuite/store';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';
 
+import { nToLast } from '../../_common/utils/iterable.js';
 import { SurfaceGroupLikeModel } from '../element-model/base.js';
 
 export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {
@@ -29,14 +30,13 @@ export function updateLayersZIndex(layers: Layer[], startIdx: number) {
 export function getElementIndex(indexable: BlockSuite.EdgelessModel) {
   const groups = indexable.groups as BlockSuite.SurfaceGroupLikeModel[];
 
-  if (groups.length > 1) {
-    return (
-      groups
-        .map(group => group.index)
-        .reverse()
-        .slice(1)
-        .join('-') + `-${indexable.index}`
-    );
+  if (groups.length) {
+    const groupIndexes = groups
+      .map(group => group.index)
+      .reverse()
+      .join('-');
+
+    return `${groupIndexes}-${indexable.index}`;
   }
 
   return indexable.index;
@@ -51,7 +51,10 @@ export function insertToOrderedArray(
   element: BlockSuite.EdgelessModel
 ) {
   let idx = 0;
-  while (idx < array.length && compare(array[idx], element) < 0) {
+  while (
+    idx < array.length &&
+    [SortOrder.BEFORE, SortOrder.SAME].includes(compare(array[idx], element))
+  ) {
     ++idx;
   }
 
@@ -67,6 +70,12 @@ export function removeFromOrderedArray(
   if (idx !== -1) {
     array.splice(idx, 1);
   }
+}
+
+export enum SortOrder {
+  AFTER = 1,
+  BEFORE = -1,
+  SAME = 0,
 }
 
 export function isInRange(
@@ -86,34 +95,40 @@ export function renderableInEdgeless(
   return parent === doc.root || parent === surface;
 }
 
+/**
+ * A comparator function for sorting elements in the surface.
+ * SortOrder.AFTER means a should be rendered after b and so on.
+ * @returns
+ */
 export function compare(
   a: BlockSuite.EdgelessModel,
   b: BlockSuite.EdgelessModel
 ) {
   if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
-    return -1;
+    return SortOrder.BEFORE;
   } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
-    return 1;
+    return SortOrder.AFTER;
   } else {
     const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModel[];
     const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModel[];
-    const minGroups = Math.min(aGroups.length, bGroups.length);
 
-    for (let i = 0; i < minGroups; ++i) {
-      if (aGroups[i] !== bGroups[i]) {
-        const aGroup = aGroups[i] ?? a;
-        const bGroup = bGroups[i] ?? b;
+    let i = 1;
+    let aGroup: BlockSuite.EdgelessModel | undefined = nToLast(aGroups, i);
+    let bGroup: BlockSuite.EdgelessModel | undefined = nToLast(bGroups, i);
 
-        return aGroup.index === bGroup.index
-          ? 0
-          : aGroup.index < bGroup.index
-            ? -1
-            : 1;
-      }
+    while (aGroup === bGroup && aGroup) {
+      ++i;
+      aGroup = nToLast(aGroups, i);
+      bGroup = nToLast(bGroups, i);
     }
 
-    if (a.index < b.index) return -1;
-    else if (a.index > b.index) return 1;
-    return 0;
+    aGroup = aGroup ?? a;
+    bGroup = bGroup ?? b;
+
+    return aGroup.index === bGroup.index
+      ? SortOrder.SAME
+      : aGroup.index < bGroup.index
+        ? SortOrder.BEFORE
+        : SortOrder.AFTER;
   }
 }

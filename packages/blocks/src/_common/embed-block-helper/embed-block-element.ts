@@ -204,12 +204,6 @@ export class EmbedBlockComponent<
 
     if (this.isInSurface) {
       this.style.position = 'absolute';
-      this.rootService &&
-        this._disposables.add(
-          this.rootService.layer.slots.layerUpdated.on(() => {
-            this.requestUpdate();
-          })
-        );
     }
   }
 
@@ -221,6 +215,10 @@ export class EmbedBlockComponent<
   toZIndex() {
     // @ts-ignore
     return this.rootService?.layer.getZIndex(this.model) ?? 1;
+  }
+
+  updateZIndex() {
+    this.style.zIndex = `${this.toZIndex()}`;
   }
 
   get bound(): Bound {

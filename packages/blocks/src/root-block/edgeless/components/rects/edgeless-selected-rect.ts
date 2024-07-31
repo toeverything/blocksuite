@@ -24,7 +24,7 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
 import {
-  requestThrottledConnectFrame,
+  requestThrottledConnectedFrame,
   stopPropagation,
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
@@ -455,7 +455,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _resizeManager.updateBounds(getSelectableBounds(selectedElements));
   };
 
-  private _updateSelectedRect = requestThrottledConnectFrame(() => {
+  private _updateSelectedRect = requestThrottledConnectedFrame(() => {
     const { zoom, selection, edgeless } = this;
 
     const elements = selection.selectedElements;

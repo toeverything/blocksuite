@@ -11,7 +11,7 @@ import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/ed
 import type { RootBlockModel } from '../../root-model.js';
 
 import { RemoteCursor } from '../../../_common/icons/edgeless.js';
-import { requestThrottledConnectFrame } from '../../../_common/utils/event.js';
+import { requestThrottledConnectedFrame } from '../../../_common/utils/event.js';
 import { pickValues } from '../../../_common/utils/iterable.js';
 import {
   getSelectedRect,
@@ -96,7 +96,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetComponent<
     this._remoteRects = remoteRects;
   };
 
-  private _updateTransform = requestThrottledConnectFrame(() => {
+  private _updateTransform = requestThrottledConnectedFrame(() => {
     const { translateX, translateY } = this.edgeless.service.viewport;
 
     this.style.setProperty(

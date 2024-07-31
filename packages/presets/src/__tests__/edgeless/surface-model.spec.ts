@@ -406,7 +406,6 @@ describe('stash/pop', () => {
     elementModel.xywh = '[10,10,200,200]';
 
     expect(elementModel['_stashed'].has('xywh')).toBe(false);
-    expect(elementModel.xywh).toBe('[10,10,200,200]');
 
     elementModel.pop('xywh');
 

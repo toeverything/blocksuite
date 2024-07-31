@@ -340,6 +340,10 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     `;
   }
 
+  override toZIndex() {
+    return `${this.rootService.layer.getZIndex(this.model)}`;
+  }
+
   tryFocusEnd() {
     const paragraphOrLists = Array.from(
       this.querySelectorAll<BlockComponent>('affine-paragraph, affine-list')

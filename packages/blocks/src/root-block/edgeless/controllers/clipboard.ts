@@ -34,7 +34,7 @@ import {
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
 import { matchFlavours } from '../../../_common/utils/index.js';
-import { groupBy } from '../../../_common/utils/iterable.js';
+import { groupBy, nToLast } from '../../../_common/utils/iterable.js';
 import {
   blockComponentGetter,
   getRootByEditorHost,
@@ -54,7 +54,10 @@ import {
   getBoundsWithRotation,
 } from '../../../surface-block/index.js';
 import { ConnectorElementModel } from '../../../surface-block/index.js';
-import { compare } from '../../../surface-block/managers/layer-utils.js';
+import {
+  SortOrder,
+  compare,
+} from '../../../surface-block/managers/layer-utils.js';
 import { getCommonBound } from '../../../surface-block/utils/bound.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
@@ -1096,39 +1099,43 @@ export class EdgelessClipboardController extends PageClipboard {
   ) {
     function compare(a: BlockSuite.EdgelessModel, b: BlockSuite.EdgelessModel) {
       if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
-        return -1;
+        return SortOrder.BEFORE;
       } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
-        return 1;
+        return SortOrder.AFTER;
       } else {
         const aGroups = a.groups as BlockSuite.SurfaceGroupLikeModel[];
         const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModel[];
-        const minGroups = Math.min(aGroups.length, bGroups.length);
 
-        for (let i = 0; i < minGroups; ++i) {
-          if (aGroups[i] !== bGroups[i]) {
-            const aGroup = aGroups[i] ?? a;
-            const bGroup = bGroups[i] ?? b;
+        let i = 1;
+        let aGroup: BlockSuite.EdgelessModel | undefined = nToLast(aGroups, i);
+        let bGroup: BlockSuite.EdgelessModel | undefined = nToLast(bGroups, i);
 
-            return aGroup.index === bGroup.index
-              ? 0
-              : aGroup.index < bGroup.index
-                ? -1
-                : 1;
-          }
+        while (aGroup === bGroup && aGroup) {
+          ++i;
+          aGroup = nToLast(aGroups, i);
+          bGroup = nToLast(bGroups, i);
         }
 
-        if (originalIndexes.get(a.id)! < originalIndexes.get(b.id)!) return -1;
-        else if (originalIndexes.get(a.id)! > originalIndexes.get(b.id)!)
-          return 1;
-        return 0;
+        aGroup = aGroup ?? a;
+        bGroup = bGroup ?? b;
+
+        return originalIndexes.get(aGroup.id) === originalIndexes.get(bGroup.id)
+          ? SortOrder.SAME
+          : originalIndexes.get(aGroup.id)! < originalIndexes.get(bGroup.id)!
+            ? SortOrder.BEFORE
+            : SortOrder.AFTER;
       }
     }
 
     const idxGenerator = this.edgeless.service.layer.createIndexGenerator(true);
     const sortedElements = elements.sort(compare);
     sortedElements.forEach(ele => {
+      const newIndex = idxGenerator(
+        isTopLevelBlock(ele) ? ele.flavour : ele.type
+      );
+
       this.edgeless.service.updateElement(ele.id, {
-        index: idxGenerator(isTopLevelBlock(ele) ? ele.flavour : ele.type),
+        index: newIndex,
       });
     });
   }

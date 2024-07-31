@@ -215,8 +215,7 @@ export class EdgelessRootService extends RootService {
     const groups = this.elements.filter(
       el => el.type === 'group'
     ) as GroupElementModel[];
-    const groupId = this._surface.addElement({
-      type: 'group',
+    const groupId = this.addElement('group', {
       children: elements.reduce(
         (pre, el) => {
           const id = typeof el === 'string' ? el : el.id;

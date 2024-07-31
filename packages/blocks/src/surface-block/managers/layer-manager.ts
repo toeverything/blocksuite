@@ -18,6 +18,7 @@ import {
 } from '../element-model/base.js';
 import { GridManager } from '../grid.js';
 import {
+  SortOrder,
   compare,
   getElementIndex,
   getLayerEndZIndex,
@@ -107,22 +108,15 @@ export class LayerManager {
     }>(),
   };
 
-  constructor(elements?: BlockSuite.EdgelessModel[]) {
-    elements && this._init(elements);
+  constructor(
+    private _doc: Doc,
+    private _surface: SurfaceBlockModel
+  ) {
+    this._reset();
   }
 
   static create(doc: Doc, surface: SurfaceBlockModel) {
-    const layerManager = new LayerManager(
-      (
-        doc
-          .getBlocks()
-          .filter(
-            model =>
-              model instanceof GfxBlockModel &&
-              renderableInEdgeless(doc, surface, model)
-          ) as BlockSuite.EdgelessModel[]
-      ).concat(surface.elementModels)
-    );
+    const layerManager = new LayerManager(doc, surface);
 
     layerManager.listen(doc, surface);
 
@@ -155,26 +149,8 @@ export class LayerManager {
     this.canvasLayers = canvasLayers;
   }
 
-  private _init(elements: BlockSuite.EdgelessModel[]) {
-    elements.forEach(element => {
-      if (element instanceof SurfaceElementModel) {
-        this.canvasElements.push(element);
-        this.canvasGrid.add(element);
-      } else if (matchFlavours(element, ['affine:frame'])) {
-        this.framesGrid.add(element);
-        this.frames.push(element);
-      } else {
-        this.blocksGrid.add(element);
-        this.blocks.push(element);
-      }
-    });
-
-    this.canvasElements.sort(compare);
-    this.frames.sort(compare);
-    this.blocks.sort(compare);
-
-    this._initLayers();
-    this._buildCanvasLayers();
+  private _getModelType(element: BlockSuite.EdgelessModel): 'block' | 'canvas' {
+    return 'flavour' in element ? 'block' : 'canvas';
   }
 
   private _initLayers() {
@@ -372,7 +348,11 @@ export class LayerManager {
       return newLayer as Layer;
     };
 
-    if (compare(target, last(last(this.layers)!.elements)!) > 0) {
+    if (
+      [SortOrder.AFTER, SortOrder.SAME].includes(
+        compare(target, last(last(this.layers)!.elements)!)
+      )
+    ) {
       const layer = last(this.layers);
 
       if (layer?.type === type) {
@@ -501,6 +481,42 @@ export class LayerManager {
     updateLayersZIndex(layers, index);
   }
 
+  private _reset() {
+    const elements = (
+      this._doc
+        .getBlocks()
+        .filter(
+          model =>
+            model instanceof GfxBlockModel &&
+            renderableInEdgeless(this._doc, this._surface, model)
+        ) as BlockSuite.EdgelessModel[]
+    ).concat(this._surface.elementModels);
+
+    this.canvasElements = [];
+    this.blocks = [];
+    this.frames = [];
+
+    elements.forEach(element => {
+      if (element instanceof SurfaceElementModel) {
+        this.canvasElements.push(element);
+        this.canvasGrid.add(element);
+      } else if (matchFlavours(element, ['affine:frame'])) {
+        this.framesGrid.add(element);
+        this.frames.push(element);
+      } else {
+        this.blocksGrid.add(element);
+        this.blocks.push(element);
+      }
+    });
+
+    this.canvasElements.sort(compare);
+    this.frames.sort(compare);
+    this.blocks.sort(compare);
+
+    this._initLayers();
+    this._buildCanvasLayers();
+  }
+
   /**
    * @returns a boolean value to indicate whether the layers have been updated
    */
@@ -513,6 +529,9 @@ export class LayerManager {
 
     const indexChanged = !props || 'index' in props;
     const childIdsChanged = props && 'childIds' in props;
+    const shouldUpdateGroupChildren =
+      (type === 'group' || element instanceof SurfaceGroupLikeModel) &&
+      (indexChanged || childIdsChanged);
     const updateArray = (
       array: BlockSuite.EdgelessModel[],
       element: BlockSuite.EdgelessModel
@@ -522,19 +541,15 @@ export class LayerManager {
       insertToOrderedArray(array, element);
     };
 
+    if (shouldUpdateGroupChildren) {
+      this._reset();
+      return true;
+    }
+
     if (!type.startsWith('affine:')) {
       updateType = 'canvas';
       updateArray(this.canvasElements, element);
       this.canvasGrid.update(element as SurfaceElementModel);
-
-      if (
-        (type === 'group' || element instanceof SurfaceGroupLikeModel) &&
-        (indexChanged || childIdsChanged)
-      ) {
-        (element as GroupElementModel).childElements.forEach(
-          child => child && this._updateLayer(child)
-        );
-      }
     } else if (matchFlavours(element as BlockModel, ['affine:frame'])) {
       updateArray(this.frames, element);
       this.framesGrid.update(element as FrameBlockModel);
@@ -547,7 +562,6 @@ export class LayerManager {
     if (updateType && (indexChanged || childIdsChanged)) {
       this._removeFromLayer(element as BlockSuite.EdgelessModel, updateType);
       this._insertIntoLayer(element as BlockSuite.EdgelessModel, updateType);
-
       return true;
     }
 
@@ -617,17 +631,20 @@ export class LayerManager {
   add(element: BlockSuite.EdgelessModel) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
     const type = 'flavour' in element ? element.flavour : element.type;
+    const isGroup =
+      type === 'group' || element instanceof SurfaceGroupLikeModel;
 
     if (!type.startsWith('affine:')) {
       insertType = 'canvas';
+      if (isGroup) {
+        (element as GroupElementModel).childElements.forEach(child => {
+          if (child && this._getModelType(child) === 'canvas') {
+            removeFromOrderedArray(this.canvasElements, child);
+          }
+        });
+      }
       insertToOrderedArray(this.canvasElements, element);
       this.canvasGrid.add(element as SurfaceElementModel);
-
-      if (type === 'group' || element instanceof SurfaceGroupLikeModel) {
-        (element as GroupElementModel).childElements.forEach(
-          child => child && this._updateLayer(child)
-        );
-      }
     } else if (matchFlavours(element as BlockModel, ['affine:frame'])) {
       insertToOrderedArray(this.frames, element);
       this.framesGrid.add(element as FrameBlockModel);
@@ -639,6 +656,11 @@ export class LayerManager {
 
     if (insertType) {
       this._insertIntoLayer(element as BlockSuite.EdgelessModel, insertType);
+      if (isGroup) {
+        (element as GroupElementModel).childElements.forEach(
+          child => child && this._updateLayer(child)
+        );
+      }
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit({
         type: 'add',
@@ -667,21 +689,7 @@ export class LayerManager {
    * @returns
    */
   createIndexGenerator(ignoreRule: boolean = false) {
-    const manager = new LayerManager();
-
-    manager.frames = [...this.frames];
-    manager.blocks = [...this.blocks];
-    manager.canvasElements = [...this.canvasElements];
-    // @ts-ignore
-    manager.layers = this.layers.map(layer => {
-      return {
-        ...layer,
-        // @ts-ignore
-        set: new Set(layer.set),
-        elements: [...layer.elements],
-      };
-    });
-    manager._buildCanvasLayers();
+    const manager = new LayerManager(this._doc, this._surface);
 
     return (elementType: string) => {
       if (ignoreRule && elementType !== 'affine:frame') {
@@ -702,8 +710,12 @@ export class LayerManager {
         h: 10,
         elementBound: bound,
         xywh: '[0, 0, 10, 10]',
-        group: () => null,
-        groups: () => [],
+        get group() {
+          return null;
+        },
+        get groups() {
+          return [];
+        },
       };
 
       manager.add(mockedFakeElement as unknown as BlockSuite.EdgelessModel);
@@ -714,6 +726,16 @@ export class LayerManager {
 
   delete(element: BlockSuite.EdgelessModel) {
     let deleteType: 'canvas' | 'block' | undefined = undefined;
+    const isGroup = element instanceof SurfaceGroupLikeModel;
+
+    if (isGroup) {
+      this._reset();
+      this.slots.layerUpdated.emit({
+        type: 'delete',
+        initiatingElement: element as BlockSuite.EdgelessModel,
+      });
+      return;
+    }
 
     if (element instanceof SurfaceElementModel) {
       deleteType = 'canvas';
@@ -773,12 +795,13 @@ export class LayerManager {
         const secondLastLayerIndex = secondLastLayer
           ? ungroupIndex(secondLastLayer.indexes[1])
           : null;
+        const lastLayerIndex = ungroupIndex(lastLayer.indexes[0]);
 
         return generateKeyBetween(
           secondLastLayerIndex,
-          secondLastLayerIndex && secondLastLayerIndex >= lastLayer.indexes[0]
+          secondLastLayerIndex && secondLastLayerIndex >= lastLayerIndex
             ? null
-            : lastLayer.indexes[0]
+            : lastLayerIndex
         );
       }
 
@@ -853,7 +876,10 @@ export class LayerManager {
           const pre2 =
             direction === 'backward' ? elements[currentIdx - 2] : null;
 
-          return generateKeyBetween(pre2?.index ?? null, pre.index);
+          return generateKeyBetween(
+            !pre2 || pre2?.index >= pre.index ? null : pre2.index,
+            pre.index
+          );
         }
     }
   }

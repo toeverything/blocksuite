@@ -66,6 +66,10 @@ export abstract class GfxBlockComponent<
     return `${1}`;
   }
 
+  updateZIndex(): void {
+    this.style.zIndex = this.toZIndex();
+  }
+
   get rootService() {
     return this.host.spec.getService(this.rootServiceFlavour) as GfxRootService;
   }
@@ -151,6 +155,10 @@ export function toGfxBlockComponent<
 
     toZIndex(): string {
       return `${1}`;
+    }
+
+    updateZIndex(): void {
+      this.style.zIndex = this.toZIndex();
     }
 
     get rootService() {

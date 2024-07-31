@@ -15,6 +15,7 @@ import {
   randomSeed,
   rotatePoints,
 } from '@blocksuite/global/utils';
+import { createMutex } from 'lib0/mutex';
 
 import type { GfxBlockElementModel, GfxModel } from '../gfx-block-model.js';
 import type { SurfaceBlockModel } from './block-model.js';
@@ -79,7 +80,7 @@ export abstract class GfxPrimitiveElementModel<
 
   protected _id: string;
 
-  private _lastXYWH: SerializedXYWH = '[0,0,0,0]';
+  private _lastXYWH!: SerializedXYWH;
 
   protected _local = new Map<string | symbol, unknown>();
 
@@ -89,6 +90,9 @@ export abstract class GfxPrimitiveElementModel<
     local: boolean;
   }) => void;
 
+  /**
+   * Used to store a copy of data in the yMap.
+   */
   protected _preserved = new Map<string, unknown>();
 
   protected _stashed: Map<keyof Props | string, unknown>;
@@ -252,7 +256,7 @@ export abstract class GfxPrimitiveElementModel<
   }
 
   get deserializedXYWH() {
-    if (this.xywh !== this._lastXYWH) {
+    if (!this._lastXYWH || this.xywh !== this._lastXYWH) {
       const xywh = this.xywh;
       this._local.set('deserializedXYWH', deserializeXYWH(xywh));
       this._lastXYWH = xywh;
@@ -352,7 +356,40 @@ export abstract class GfxPrimitiveElementModel<
 export abstract class GfxGroupLikeElementModel<
   Props extends BaseElementProps = BaseElementProps,
 > extends GfxPrimitiveElementModel<Props> {
+  private _childBoundCacheKey: string = '';
+
   private _childIds: string[] = [];
+
+  private _mutex = createMutex();
+
+  private _updateXYWH() {
+    let bound: Bound | undefined;
+    let cacheKey = '';
+    const oldValue = (this._local.get('xywh') as SerializedXYWH) ?? '[0,0,0,0]';
+
+    this.childElements.forEach(child => {
+      cacheKey += child.xywh ?? '';
+      bound = bound ? bound.unite(child.elementBound) : child.elementBound;
+    });
+
+    if (bound) {
+      this._local.set('xywh', bound.serialize());
+      this._childBoundCacheKey = cacheKey;
+    } else {
+      this._local.delete('xywh');
+      this._childBoundCacheKey = '';
+    }
+
+    this._onChange({
+      props: {
+        xywh: bound?.serialize(),
+      },
+      oldValues: {
+        xywh: oldValue,
+      },
+      local: true,
+    });
+  }
 
   /**
    * Get all descendants of this group
@@ -372,6 +409,10 @@ export abstract class GfxGroupLikeElementModel<
     }, [] as GfxModel[]);
   }
 
+  /**
+   * The actual field that stores the children of the group.
+   * It should be a ymap decorated with `@yfield`.
+   */
   hasChild(element: string | GfxModel) {
     return (
       (typeof element === 'string'
@@ -380,10 +421,6 @@ export abstract class GfxGroupLikeElementModel<
     );
   }
 
-  /**
-   * The actual field that stores the children of the group.
-   * It should be a ymap decorated with `@yfield`.
-   */
   /**
    * Check if the group has the given descendant.
    */
@@ -447,6 +484,24 @@ export abstract class GfxGroupLikeElementModel<
     return this._childIds;
   }
 
+  get xywh() {
+    if (
+      !this._local.has('xywh') ||
+      this.childElements.reduce(
+        (pre, model) => pre + (model.xywh ?? ''),
+        ''
+      ) !== this._childBoundCacheKey
+    ) {
+      this._mutex(() => {
+        this._updateXYWH();
+      });
+    }
+
+    return (this._local.get('xywh') as SerializedXYWH) ?? '[0,0,0,0]';
+  }
+
+  set xywh(_) {}
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract children: Y.Map<any>;
 
@@ -454,9 +509,6 @@ export abstract class GfxGroupLikeElementModel<
    * Remove the child from the group
    */
   abstract removeChild(id: string): void;
-
-  @local<SerializedXYWH, GfxGroupLikeElementModel>()
-  accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
 
 export abstract class GfxLocalElementModel {
@@ -497,8 +549,8 @@ export abstract class GfxLocalElementModel {
   abstract xywh: SerializedXYWH;
 }
 
-export function onElementChange(
-  yMap: Y.Map<unknown>,
+export function syncElementFromY(
+  model: GfxPrimitiveElementModel,
   callback: (payload: {
     props: Record<string, unknown>;
     oldValues: Record<string, unknown>;
@@ -521,7 +573,10 @@ export function onElementChange(
       }
 
       if (type.action === 'update' || type.action === 'add') {
-        props[key] = yMap.get(key);
+        const value = model.yMap.get(key);
+
+        model['_preserved'].set(key, value);
+        props[key] = value;
         oldValues[key] = oldValue;
       }
     });
@@ -533,9 +588,13 @@ export function onElementChange(
     });
   };
 
-  yMap.observe(observer);
+  Array.from(model.yMap.entries()).forEach(([key, value]) => {
+    model['_preserved'].set(key, value);
+  });
+
+  model.yMap.observe(observer);
 
   return () => {
-    yMap.observe(observer);
+    model.yMap.unobserve(observer);
   };
 }

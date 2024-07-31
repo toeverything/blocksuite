@@ -325,11 +325,6 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
         }
       })
     );
-    this._disposables.add(
-      this.rootService.layer.slots.layerUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
   }
 
   override firstUpdated() {
