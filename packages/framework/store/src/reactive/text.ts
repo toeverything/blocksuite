@@ -165,7 +165,7 @@ export class Text {
   }
 
   join(other: Text) {
-    if (!other.toDelta().length) {
+    if (!other || !other.toDelta().length) {
       return;
     }
     this._transact(() => {
