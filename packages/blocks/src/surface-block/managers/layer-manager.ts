@@ -73,15 +73,15 @@ export class LayerManager {
 
   static INITAL_INDEX = 'a0';
 
-  blocks!: GfxBlockModel[];
+  blocks: GfxBlockModel[] = [];
 
   blocksGrid = new GridManager<GfxBlockModel>();
 
-  canvasElements!: SurfaceElementModel[];
+  canvasElements: SurfaceElementModel[] = [];
 
   canvasGrid = new GridManager<SurfaceElementModel>();
 
-  canvasLayers!: {
+  canvasLayers: {
     set: Set<SurfaceElementModel>;
     /**
      * fractional index
@@ -92,13 +92,13 @@ export class LayerManager {
      */
     zIndex: number;
     elements: Array<SurfaceElementModel>;
-  }[];
+  }[] = [];
 
-  frames!: FrameBlockModel[];
+  frames: FrameBlockModel[] = [];
 
   framesGrid = new GridManager<FrameBlockModel>();
 
-  layers!: Layer[];
+  layers: Layer[] = [];
 
   slots = {
     layerUpdated: new Slot<{
@@ -108,9 +108,7 @@ export class LayerManager {
   };
 
   constructor(elements?: BlockSuite.EdgelessModel[]) {
-    if (elements) {
-      this._init(elements);
-    }
+    elements && this._init(elements);
   }
 
   static create(doc: Doc, surface: SurfaceBlockModel) {
@@ -158,10 +156,6 @@ export class LayerManager {
   }
 
   private _init(elements: BlockSuite.EdgelessModel[]) {
-    this.canvasElements = [];
-    this.blocks = [];
-    this.frames = [];
-
     elements.forEach(element => {
       if (element instanceof SurfaceElementModel) {
         this.canvasElements.push(element);

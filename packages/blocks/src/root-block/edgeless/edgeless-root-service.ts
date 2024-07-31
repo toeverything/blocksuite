@@ -1,7 +1,8 @@
+import type { BlockServiceOptions } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
@@ -29,6 +30,7 @@ import {
 } from '../../surface-block/index.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
+import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { RootService, type TelemetryEvent } from '../root-service.js';
 import { GfxBlockModel } from './block-model.js';
 import { EdgelessFrameManager } from './frame-manager.js';
@@ -81,19 +83,19 @@ declare module '@blocksuite/blocks' {
 }
 
 export class EdgelessRootService extends RootService {
-  private _frame!: EdgelessFrameManager;
+  private _frame: EdgelessFrameManager;
 
-  private _layer!: LayerManager;
+  private _layer: LayerManager;
 
-  private _selection!: EdgelessSelectionManager;
+  private _selection: EdgelessSelectionManager;
 
-  private _snap!: EdgelessSnapManager;
+  private _snap: EdgelessSnapManager;
 
-  private _surface!: SurfaceBlockModel;
+  private _surface: SurfaceBlockModel;
 
-  private _tool!: EdgelessToolsManager;
+  private _tool: EdgelessToolsManager;
 
-  private _viewport!: Viewport;
+  private _viewport: Viewport;
 
   TemplateJob = TemplateJob;
 
@@ -126,6 +128,24 @@ export class EdgelessRootService extends RootService {
     tagClicked: new Slot<{ tagId: string }>(),
     toolbarLocked: new Slot<boolean>(),
   };
+
+  constructor(options: BlockServiceOptions) {
+    super(options);
+    const surface = getSurfaceBlock(this.doc);
+    if (!surface) {
+      throw new BlockSuiteError(
+        ErrorCode.NoSurfaceModelError,
+        'This doc is missing surface block in edgeless.'
+      );
+    }
+    this._surface = surface;
+    this._layer = LayerManager.create(this.doc, this._surface);
+    this._frame = new EdgelessFrameManager(this);
+    this._snap = new EdgelessSnapManager(this);
+    this._viewport = new Viewport();
+    this._selection = new EdgelessSelectionManager(this);
+    this._tool = EdgelessToolsManager.create(this, []);
+  }
 
   private _initReadonlyListener() {
     const doc = this.doc;
@@ -337,16 +357,18 @@ export class EdgelessRootService extends RootService {
     if (bounds.length) {
       const { width, height } = viewport;
       const bound = getCommonBound(bounds);
-      assertExists(bound);
+      if (bound) {
+        zoom = Math.min(
+          (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
+          (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
+        );
+        zoom = clamp(zoom, ZOOM_MIN, ZOOM_INITIAL);
 
-      zoom = Math.min(
-        (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
-        (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
-      );
-      zoom = clamp(zoom, ZOOM_MIN, ZOOM_INITIAL);
-
-      centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
-      centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
+        centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
+        centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
+      } else {
+        zoom = ZOOM_INITIAL;
+      }
     } else {
       zoom = ZOOM_INITIAL;
     }
@@ -355,22 +377,6 @@ export class EdgelessRootService extends RootService {
 
   override mounted() {
     super.mounted();
-
-    this._surface = this.doc.getBlockByFlavour(
-      'affine:surface'
-    )[0] as SurfaceBlockModel;
-
-    if (!this._surface) {
-      throw new Error('surface block not found');
-    }
-
-    this._layer = LayerManager.create(this.doc, this._surface);
-    this._frame = new EdgelessFrameManager(this);
-    this._snap = new EdgelessSnapManager(this);
-    this._viewport = new Viewport();
-    this._selection = new EdgelessSelectionManager(this);
-    this._tool = EdgelessToolsManager.create(this, []);
-
     this._initSlotEffects();
     this._initReadonlyListener();
   }
@@ -438,6 +444,7 @@ export class EdgelessRootService extends RootService {
 
       results = results.concat(frames);
 
+      // prettier-ignore
       return options.all ? results : (last(results) ?? null);
     } else {
       return last(frames) ?? null;
