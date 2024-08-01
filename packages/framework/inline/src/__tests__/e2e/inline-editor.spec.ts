@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-import type { InlineEditor } from '../inline-editor.js';
+import type { InlineEditor } from '../../inline-editor.js';
 
-import { ZERO_WIDTH_SPACE } from '../consts.js';
+import { ZERO_WIDTH_SPACE } from '../../consts.js';
 import {
   assertSelection,
   enterInlineEditorPlayground,
@@ -13,7 +13,7 @@ import {
   press,
   setInlineRichTextRange,
   type,
-} from './utils.js';
+} from '../utils.js';
 
 test('basic input', async ({ page }) => {
   await enterInlineEditorPlayground(page);
