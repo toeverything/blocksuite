@@ -130,7 +130,7 @@ export const textConversionConfigs: TextConversionConfig[] = [
     flavour: 'affine:divider',
     type: 'divider',
     name: 'Divider',
-    description: 'Insert a line to separate sections.',
+    description: 'Visually separate content.',
     hotkey: [`Mod-Alt-d`, `Mod-Shift-d`],
     icon: DividerIcon,
   },

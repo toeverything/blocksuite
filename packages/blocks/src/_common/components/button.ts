@@ -95,6 +95,7 @@ export class IconButton extends LitElement {
         var(--textColor-textSecondaryColor, #8e8d91)
       );
       line-height: var(--affine-line-height);
+      white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
       margin-top: -2px;
