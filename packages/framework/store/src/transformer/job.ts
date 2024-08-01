@@ -38,7 +38,11 @@ export class Job {
 
   private readonly _assetsManager: AssetsManager;
 
+  private _batchCounter = 0;
+
   private readonly _collection: DocCollection;
+
+  private readonly _pendingOperations: (() => void)[] = [];
 
   private readonly _slots: JobSlots = {
     beforeImport: new Slot<BeforeImportPayload>(),
@@ -46,6 +50,8 @@ export class Job {
     beforeExport: new Slot<BeforeExportPayload>(),
     afterExport: new Slot<FinalPayload>(),
   };
+
+  private _unblockTimer?: ReturnType<typeof setTimeout>;
 
   blockToSnapshot = async (
     model: DraftModel
@@ -174,7 +180,12 @@ export class Job {
   ): Promise<BlockModel | undefined> => {
     try {
       BlockSnapshotSchema.parse(snapshot);
-      const model = await this._snapshotToBlock(snapshot, doc, parent, index);
+      const model = await this._batchSnapshotToBlock(
+        snapshot,
+        doc,
+        parent,
+        index
+      );
 
       return model;
     } catch (error) {
@@ -251,7 +262,7 @@ export class Job {
       const contentBlocks: BlockModel[] = [];
       for (const [i, block] of content.entries()) {
         contentBlocks.push(
-          await this._snapshotToBlock(block, doc, parent, (index ?? 0) + i)
+          await this._batchSnapshotToBlock(block, doc, parent, (index ?? 0) + i)
         );
       }
       const slice = new Slice({
@@ -303,6 +314,44 @@ export class Job {
         collection: this._collection,
         adapterConfigs: this._adapterConfigs,
       });
+    });
+  }
+
+  private _batchSnapshotToBlock(
+    snapshot: BlockSnapshot,
+    doc: Doc,
+    parent?: string,
+    index?: number
+  ) {
+    return new Promise<BlockModel>(resolve => {
+      if (this._batchCounter < 100) {
+        resolve(this._snapshotToBlock(snapshot, doc, parent, index));
+      } else {
+        // This will block the caller function
+        // so that no further operations can be added to the queue.
+        // Example:
+        // for (const snapshot of snapshots) {
+        //   // Block here as it is waiting for the promise to resolve.
+        //   await job.snapshotToBlock(snapshot, doc, id);
+        // }
+        this._pendingOperations.push(() =>
+          resolve(this._snapshotToBlock(snapshot, doc, parent, index))
+        );
+      }
+      this._batchCounter++;
+      const unblock = () => {
+        // There should only be one operation in the queue
+        // as we should create new jobs for each events.
+        // However, we still need to loop through the list
+        // to avoid potential bugs.
+        while (this._pendingOperations.length > 0) {
+          this._pendingOperations.shift()?.();
+        }
+        this._unblockTimer = undefined;
+        this._batchCounter = 0;
+      };
+      clearTimeout(this._unblockTimer);
+      this._unblockTimer = setTimeout(unblock, 10);
     });
   }
 
@@ -429,7 +478,7 @@ export class Job {
     );
 
     for (const [index, child] of children.entries()) {
-      await this._snapshotToBlock(child, doc, id, index);
+      await this._batchSnapshotToBlock(child, doc, id, index);
     }
 
     const model = doc.getBlockById(id);
