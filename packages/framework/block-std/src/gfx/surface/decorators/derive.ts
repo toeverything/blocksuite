@@ -19,7 +19,7 @@ function getDerivedMeta(
   return getObjectPropMeta(proto, deriveSymbol, prop);
 }
 
-export function getDeriveProperties(
+export function getDerivedProps(
   prop: string | symbol,
   propValue: unknown,
   receiver: GfxPrimitiveElementModel
@@ -49,7 +49,7 @@ export function getDeriveProperties(
     : null;
 }
 
-export function updateDerivedProp(
+export function updateDerivedProps(
   derivedProps: Record<string, unknown> | null,
   receiver: GfxPrimitiveElementModel
 ) {

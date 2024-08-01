@@ -2,7 +2,7 @@ import type { GfxPrimitiveElementModel } from '../element-model.js';
 
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
-import { getDeriveProperties, updateDerivedProp } from './derive.js';
+import { getDerivedProps, updateDerivedProps } from './derive.js';
 
 /**
  * A decorator to mark the property as a local property.
@@ -35,13 +35,13 @@ export function local<V, T extends GfxPrimitiveElementModel>() {
           ? originalValue
           : convertProps(prop, originalValue, this);
 
-        const derivedProps = getDeriveProperties(prop, originalValue, this);
+        const derivedProps = getDerivedProps(prop, originalValue, this);
 
         this._local.set(prop, newVal);
 
         // During creating, no need to invoke an update event and derive another update
         if (!isCreating) {
-          updateDerivedProp(derivedProps, this);
+          updateDerivedProps(derivedProps, this);
 
           this._onChange({
             props: {

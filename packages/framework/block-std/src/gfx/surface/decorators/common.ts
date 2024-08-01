@@ -1,4 +1,4 @@
-import type { SurfaceBlockModel } from '../block-model.js';
+import type { SurfaceBlockModel } from '../surface-model.js';
 
 /**
  * Set metadata for a property

@@ -4,10 +4,7 @@ import { type Constructor, Slot } from '@blocksuite/global/utils';
 import { BlockModel, DocCollection, nanoid } from '@blocksuite/store';
 
 import { createDecoratorState } from './decorators/common.js';
-import {
-  initializeWatchers,
-  initializedObservers,
-} from './decorators/index.js';
+import { initializeObservers, initializeWatchers } from './decorators/index.js';
 import { syncElementFromY } from './element-model.js';
 import {
   type BaseElementProps,
@@ -180,7 +177,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     };
 
     const mount = () => {
-      initializedObservers(Ctor.prototype, elementModel);
+      initializeObservers(Ctor.prototype, elementModel);
       initializeWatchers(Ctor.prototype, elementModel);
       elementModel['_disposable'].add(
         syncElementFromY(elementModel, payload => {

@@ -111,7 +111,7 @@ export function startObserve(
   }
 }
 
-export function initializedObservers(
+export function initializeObservers(
   proto: unknown,
   receiver: GfxPrimitiveElementModel
 ) {
