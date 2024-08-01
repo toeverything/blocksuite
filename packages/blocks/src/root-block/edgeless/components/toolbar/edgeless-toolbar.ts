@@ -240,6 +240,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .senior-nav-button {
       padding: 0;
     }
+    .senior-nav-button svg {
+      width: 20px;
+      height: 20px;
+    }
     [data-dense-senior='true'] .senior-nav-button-wrapper {
       width: ${unsafeCSS(SENIOR_TOOL_NAV_SIZE)}px;
     }
