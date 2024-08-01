@@ -1941,3 +1941,59 @@ test('Use arrow up and down to select two types of block', async ({ page }) => {
   await assertNativeSelectionRangeCount(page, 1);
   await assertRichTextInlineRange(page, 2, 0);
 });
+
+test.describe('should scroll text to view when drag to select at top or bottom edge', () => {
+  test('from top to bottom', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    for (let i = 0; i < 50; i++) {
+      await type(page, `${i}`);
+      await pressEnter(page);
+    }
+
+    const startCoord = await getIndexCoordinate(page, [49, 2]);
+    const endCoord = await getIndexCoordinate(page, [0, 0]);
+
+    // simulate actual drag to select from bottom to top
+    await page.mouse.move(startCoord.x, startCoord.y);
+    await page.mouse.down();
+    await page.mouse.move(endCoord.x, 0); // move to top edge
+    await page.waitForTimeout(5000);
+    await page.mouse.up();
+
+    const firstParagraph = page.locator('[data-block-id="2"]');
+    await expect(firstParagraph).toBeInViewport();
+  });
+
+  // playwright doesn't auto scroll when drag selection to bottom edge
+  test.skip('from bottom to top', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    for (let i = 0; i < 50; i++) {
+      await type(page, `${i}`);
+      await pressEnter(page);
+    }
+
+    const firstParagraph = page.locator('[data-block-id="2"]');
+    await firstParagraph.scrollIntoViewIfNeeded();
+
+    const startCoord = await getIndexCoordinate(page, [0, 0]);
+    const endCoord = await getIndexCoordinate(page, [49, 2]);
+
+    const viewportHeight = await page.evaluate(
+      () => document.documentElement.clientHeight
+    );
+
+    // simulate actual drag to select from top to bottom
+    await page.mouse.move(startCoord.x, startCoord.y);
+    await page.mouse.down();
+    await page.mouse.move(endCoord.x, viewportHeight - 10); // move to bottom edge
+    await page.waitForTimeout(5000);
+    await page.mouse.up();
+
+    const lastParagraph = page.locator('[data-block-id="51"]');
+    await expect(lastParagraph).toBeInViewport();
+  });
+});

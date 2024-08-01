@@ -118,6 +118,7 @@ export const getInlineRangeProvider: (
     return calculateInlineRange(range, textSelection);
   };
 
+  let lastInlineRange: InlineRange | null = null;
   selectionManager.slots.changed.on(() => {
     const textSelection = selectionManager.find('text');
     if (!textSelection) return;
@@ -128,6 +129,15 @@ export const getInlineRangeProvider: (
     // wait for lit updated
     requestAnimationFrame(() => {
       const inlineRange = calculateInlineRange(range, textSelection);
+      if (
+        lastInlineRange &&
+        inlineRange &&
+        lastInlineRange.index === inlineRange.index &&
+        lastInlineRange.length === inlineRange.length
+      )
+        return;
+
+      lastInlineRange = inlineRange;
       inlineRangeUpdatedSlot.emit([inlineRange, false]);
     });
   });
