@@ -183,6 +183,7 @@ export class DataViewRenderer extends SignalWatcher(
     const containerClass = classMap({
       'toolbar-hover-container': true,
       'data-view-root': true,
+      'prevent-reference-popup': true,
     });
     return html`
       <div style="display: contents" class="${containerClass}">

@@ -67,7 +67,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   private _whenHover: HoverController = new HoverController(
     this,
     ({ abortController }) => {
-      if (this.doc.readonly) {
+      if (this.doc.readonly || this.closest('.prevent-reference-popup')) {
         return null;
       }
 
