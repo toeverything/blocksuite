@@ -353,8 +353,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._toBeMoved = this._toBeMoved.filter(ele => {
       if (
         ele instanceof ConnectorElementModel &&
-        ele.source.id &&
-        ele.target.id
+        ele.source?.id &&
+        ele.target?.id
       ) {
         if (
           this._toBeMoved.some(e => e.id === ele.source.id) &&
