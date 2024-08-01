@@ -168,6 +168,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Start CI run
+        run: 'npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"'
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
