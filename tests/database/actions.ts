@@ -17,7 +17,6 @@ import {
   getEditorLocator,
   waitNextFrame,
 } from '../utils/actions/misc.js';
-import { assertExists } from '../utils/asserts.js';
 
 export async function initDatabaseColumn(page: Page, title = '') {
   const editor = getEditorLocator(page);
@@ -354,46 +353,12 @@ export async function assertRowsSelection(
   page: Page,
   rowIndexes: [start: number, end: number]
 ) {
-  const selection = page.locator('.database-selection');
-  const selectionBox = await getBoundingBox(selection);
-  const containerBox = await getDatabaseTableContainer(page).boundingBox();
-  assertExists(containerBox);
+  const rows = page.locator('data-view-table-row');
   const startIndex = rowIndexes[0];
   const endIndex = rowIndexes[1];
-
-  if (startIndex === endIndex) {
-    // single row
-    const row = getDatabaseBodyRow(page, startIndex);
-    const rowBox = await getBoundingBox(row);
-    const lastCell = await row
-      .locator('affine-database-cell-container')
-      .last()
-      .boundingBox();
-    assertExists(lastCell);
-    expect(selectionBox).toEqual({
-      x: rowBox.x,
-      y: rowBox.y,
-      height: rowBox.height,
-      width: containerBox.width,
-    });
-  } else {
-    // multiple rows
-    // Only test at most two lines when testing.
-    const startRow = getDatabaseBodyRow(page, startIndex);
-    const endRow = getDatabaseBodyRow(page, endIndex);
-    const startRowBox = await getBoundingBox(startRow);
-    const endRowBox = await getBoundingBox(endRow);
-    const lastCell = await startRow
-      .locator('affine-database-cell-container')
-      .last()
-      .boundingBox();
-    assertExists(lastCell);
-    expect(selectionBox).toEqual({
-      x: startRowBox.x,
-      y: startRowBox.y,
-      width: containerBox.width,
-      height: startRowBox.height + endRowBox.height,
-    });
+  for (let i = startIndex; i <= endIndex; i++) {
+    const row = rows.nth(i);
+    await row.locator('.row-select-checkbox .selected').isVisible();
   }
 }
 

@@ -69,11 +69,11 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         });
         database.updateView(database.views[0].id, () => {
           return {
-            groupBy: {
-              columnId: database.columns[1].id,
-              type: 'groupBy',
-              name: 'select',
-            },
+            // groupBy: {
+            //   columnId: database.columns[1].id,
+            //   type: 'groupBy',
+            //   name: 'select',
+            // },
           };
         });
         const paragraphTypes: ParagraphType[] = [

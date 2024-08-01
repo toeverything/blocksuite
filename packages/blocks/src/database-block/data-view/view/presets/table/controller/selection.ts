@@ -411,10 +411,21 @@ export class TableSelectionController implements ReactiveController {
     bottom: number,
     left: number,
     right: number
-  ) {
+  ):
+    | undefined
+    | {
+        top: number;
+        left: number;
+        width: number;
+        height: number;
+        scale: number;
+      } {
     const rows = this.rows(groupKey);
     const topRow = rows.item(top);
     const bottomRow = rows.item(bottom);
+    if (!topRow || !bottomRow) {
+      return;
+    }
     const topCells = topRow.querySelectorAll('affine-database-cell-container');
     const leftCell = topCells.item(left);
     const rightCell = topCells.item(right);
@@ -540,7 +551,7 @@ export class TableSelectionController implements ReactiveController {
     add: RowWithGroup[];
     remove: RowWithGroup[];
   }) {
-    const key = (r: RowWithGroup) => `${r.id}.${r.groupKey}`;
+    const key = (r: RowWithGroup) => `${r.id}.${r.groupKey ? r.groupKey : ''}`;
     const rows = new Set(
       TableRowSelection.rows(this.selection).map(r => key(r))
     );
@@ -1030,7 +1041,7 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
     if (!div) return;
     const tableRect = this.controller.tableContainer.getBoundingClientRect();
     // eslint-disable-next-line prefer-const
-    let { left, top, width, height, scale } = this.controller.getRect(
+    const rect = this.controller.getRect(
       groupKey,
       rowSelection?.start ?? 0,
       rowSelection?.end ?? this.controller.view.rows$.value.length - 1,
@@ -1038,6 +1049,11 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
       columnSelection?.end ??
         this.controller.view.columnManagerList$.value.length - 1
     );
+    if (!rect) {
+      this.clearAreaStyle();
+      return;
+    }
+    const { left, top, width, height, scale } = rect;
     div.style.left = `${left - tableRect.left / scale}px`;
     div.style.top = `${top - tableRect.top / scale}px`;
     div.style.width = `${width}px`;
@@ -1058,13 +1074,18 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
     const rows = this.controller.rows(groupKey) ?? [];
     if (rows.length <= focus.rowIndex) return;
 
-    const { left, top, width, height, scale } = this.controller.getRect(
+    const rect = this.controller.getRect(
       groupKey,
       focus.rowIndex,
       focus.rowIndex,
       focus.columnIndex,
       focus.columnIndex
     );
+    if (!rect) {
+      this.clearFocusStyle();
+      return;
+    }
+    const { left, top, width, height, scale } = rect;
     const tableRect = this.controller.tableContainer.getBoundingClientRect();
 
     const x = left - tableRect.left / scale;
