@@ -119,11 +119,11 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
     let color = ThemeObserver.generateColorProperty(fillColor!);
     let stroke = ThemeObserver.generateColorProperty(strokeColor!);
 
-    if (color.endsWith('transparent')) {
-      color = cssVar('white60');
+    if (color.endsWith('transparent)')) {
+      color = cssVar('paletteShapeWhite');
     }
-    if (stroke.endsWith('transparent')) {
-      stroke = cssVar('black10');
+    if (stroke.endsWith('transparent)')) {
+      stroke = cssVar('paletteLineGrey');
     }
 
     return html`

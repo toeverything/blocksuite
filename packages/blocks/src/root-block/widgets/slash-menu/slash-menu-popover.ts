@@ -216,6 +216,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
         next();
       },
       onInput: () => this._updateFilteredItems(),
+      onPaste: () => {
+        setTimeout(() => this._updateFilteredItems(), 20);
+      },
       onDelete: () => {
         const curRange = this.inlineEditor.getInlineRange();
         if (!this._startRange || !curRange) {

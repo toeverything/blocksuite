@@ -119,6 +119,9 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
           <div class="submenu-divider"></div>
           <edgeless-one-row-color-panel
             .value=${color}
+            .hasTransparent=${!this.edgeless.doc.awarenessStore.getFlag(
+              'enable_color_picker'
+            )}
             @select=${(e: ColorEvent) => this.onChange({ stroke: e.detail })}
           ></edgeless-one-row-color-panel>
         </div>

@@ -50,7 +50,11 @@ test.describe('reordering', () => {
       const groupId = await getFirstGroupId(page);
       const currentSortedIds = await getSortedIds(page);
 
-      expect(currentSortedIds).toEqual([groupId, ...sortedIds]);
+      expect(currentSortedIds).toEqual([
+        ...sortedIds.slice(2),
+        groupId,
+        ...sortedIds.slice(0, 2),
+      ]);
     });
 
     test('release from group', async ({ page }) => {
@@ -65,8 +69,9 @@ test.describe('reordering', () => {
       const releasedShapeId = sortedIds[0];
 
       expect(currentSortedIds).toEqual([
+        ...sortedIds.slice(2),
         groupId,
-        ...sortedIds.filter(id => id !== sortedIds[0]),
+        sortedIds[1],
         releasedShapeId,
       ]);
     });

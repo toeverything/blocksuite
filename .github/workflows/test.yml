@@ -18,10 +18,13 @@ on:
       - 'scripts/**'
       - 'packages/docs/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Run linters
-    environment: Style Check
     runs-on: ubuntu-latest
 
     steps:
@@ -73,7 +76,6 @@ jobs:
 
   test-node:
     name: Node.js Environment Compatibility
-    environment: Lightweight Test
     needs: [lint]
     runs-on: ubuntu-latest
     steps:
@@ -108,7 +110,6 @@ jobs:
 
   unit-test:
     name: Unit test
-    environment: Lightweight Test
     needs: [lint]
     runs-on: ubuntu-latest
     steps:
@@ -140,7 +141,6 @@ jobs:
   integration-test:
     name: Integration test
     needs: [unit-test, test-node]
-    environment: Integration Test
     runs-on: ubuntu-latest
 
     steps:
@@ -163,7 +163,6 @@ jobs:
   inline-e2e-test:
     name: Inline Editor E2E test
     needs: [unit-test, test-node]
-    environment: Integration Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -197,7 +196,6 @@ jobs:
     name: Playground E2E test
     runs-on: ubuntu-latest
     needs: [integration-test, inline-e2e-test]
-    environment: Playground E2E Test
     strategy:
       fail-fast: false
       matrix:

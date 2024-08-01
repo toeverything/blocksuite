@@ -8,7 +8,7 @@ import {
   initializeWatchers,
   initializedObservers,
 } from './decorators/index.js';
-import { onElementChange } from './element-model.js';
+import { syncElementFromY } from './element-model.js';
 import {
   type BaseElementProps,
   GfxGroupLikeElementModel,
@@ -183,7 +183,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       initializedObservers(Ctor.prototype, elementModel);
       initializeWatchers(Ctor.prototype, elementModel);
       elementModel['_disposable'].add(
-        onElementChange(yMap, payload => {
+        syncElementFromY(elementModel, payload => {
           mounted &&
             options.onChange({
               id,
@@ -191,7 +191,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
             });
         })
       );
-      elementModel['_preserved'].clear();
       mounted = true;
       elementModel.onCreated();
     };

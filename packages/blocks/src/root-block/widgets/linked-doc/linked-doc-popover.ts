@@ -126,6 +126,12 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
         this._activatedItemIndex = 0;
         void this._updateLinkedDocGroup();
       },
+      onPaste: () => {
+        this._activatedItemIndex = 0;
+        setTimeout(() => {
+          void this._updateLinkedDocGroup();
+        }, 20);
+      },
       onDelete: () => {
         const curRange = this.inlineEditor.getInlineRange();
         if (!this._startRange || !curRange) {

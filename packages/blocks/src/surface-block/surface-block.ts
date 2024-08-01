@@ -210,6 +210,11 @@ export class SurfaceBlockComponent extends BlockComponent<
         }
       })
     );
+    this._disposables.add(
+      service.selection.slots.updated.on(() => {
+        this._renderer.refresh();
+      })
+    );
   }
 
   override connectedCallback() {

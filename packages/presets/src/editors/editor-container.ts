@@ -126,7 +126,6 @@ export class AffineEditorContainer
       position: relative;
       display: flex;
       flex-direction: column;
-      height: 100%;
       overflow-x: hidden;
       overflow-y: auto;
       container-name: viewport;
@@ -143,20 +142,19 @@ export class AffineEditorContainer
       }
     }
 
-    .page-editor-container {
+    .playground-page-editor-container {
       flex-grow: 1;
       font-family: var(--affine-font-family);
       background: var(--affine-background-primary-color);
       display: block;
-      height: 100%;
     }
 
-    .page-editor-container * {
+    .playground-page-editor-container * {
       box-sizing: border-box;
     }
 
     @media print {
-      .page-editor-container {
+      .playground-page-editor-container {
         height: auto;
       }
     }
@@ -253,7 +251,7 @@ export class AffineEditorContainer
           )}
           <div
             class=${mode === 'page'
-              ? 'page-editor page-editor-container'
+              ? 'page-editor playground-page-editor-container'
               : 'edgeless-editor-container'}
           >
             <editor-host

@@ -318,10 +318,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               >
                 <edgeless-color-panel
                   .value=${background}
-                  .options=${[
-                    '--affine-palette-transparent',
-                    ...NOTE_BACKGROUND_COLORS,
-                  ]}
+                  .options=${NOTE_BACKGROUND_COLORS}
                   @select=${(e: ColorEvent) => this._setBackground(e.detail)}
                 >
                 </edgeless-color-panel>

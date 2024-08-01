@@ -168,7 +168,7 @@ export function requestConnectedFrame(
 /**
  * A wrapper around `requestConnectedFrame` that only calls at most once in one frame
  */
-export function requestThrottledConnectFrame<
+export function requestThrottledConnectedFrame<
   T extends (...args: unknown[]) => void,
 >(func: T, element?: HTMLElement): T {
   let raqId: number | undefined = undefined;

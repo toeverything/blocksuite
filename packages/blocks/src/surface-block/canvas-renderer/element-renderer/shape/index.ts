@@ -67,19 +67,12 @@ export function shape(
     DEFAULT_SHAPE_STROKE_COLOR,
     true
   );
-  const customStyle = { color, fillColor, strokeColor };
+  const colors = { color, fillColor, strokeColor };
 
-  shapeRenderers[model.shapeType](
-    model,
-    ctx,
-    matrix,
-    renderer,
-    rc,
-    customStyle
-  );
+  shapeRenderers[model.shapeType](model, ctx, matrix, renderer, rc, colors);
 
   if (model.textDisplay) {
-    renderText(model, ctx, customStyle);
+    renderText(model, ctx, colors);
   }
 }
 

@@ -24,6 +24,10 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
   private _cachedWidth = 0;
 
   static override styles = css`
+    edgeless-frame-title {
+      position: relative;
+    }
+
     .affine-frame-title {
       position: absolute;
       z-index: 1;
@@ -281,16 +285,21 @@ export class FrameBlockComponent extends GfxBlockComponent<
       model.background,
       '--affine-platte-transparent'
     );
+    const frameIndex = rootService.layer.getZIndex(model);
 
     return html`
       <edgeless-frame-title
         .service=${rootService}
         .doc=${doc}
         .model=${model}
+        style=${styleMap({
+          zIndex: 2147483647 - -frameIndex,
+        })}
       ></edgeless-frame-title>
       <div
         class="affine-frame-container"
         style=${styleMap({
+          zIndex: `${frameIndex}`,
           backgroundColor,
           height: '100%',
           width: '100%',
@@ -302,6 +311,10 @@ export class FrameBlockComponent extends GfxBlockComponent<
         })}
       ></div>
     `;
+  }
+
+  override toZIndex(): string {
+    return 'auto';
   }
 
   @state()

@@ -51,6 +51,7 @@ export function yfield<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
             this._preserved.set(prop as string, v);
           }
         }
+
         return v;
       },
       get(this: GfxPrimitiveElementModel) {

@@ -280,7 +280,7 @@ export class EdgelessColorPanel extends LitElement {
   override render() {
     return html`
       ${repeat(
-        this.options,
+        this.palettes,
         color => color,
         color => {
           const unit = ColorUnit(color, {
@@ -303,6 +303,15 @@ export class EdgelessColorPanel extends LitElement {
       <slot name="custom"></slot>
     `;
   }
+
+  get palettes() {
+    return this.hasTransparent
+      ? ['--affine-palette-transparent', ...this.options]
+      : this.options;
+  }
+
+  @property({ attribute: false })
+  accessor hasTransparent: boolean = true;
 
   @property({ attribute: false })
   accessor hollowCircle = false;

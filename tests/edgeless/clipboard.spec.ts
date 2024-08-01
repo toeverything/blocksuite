@@ -188,6 +188,7 @@ test.describe('connector clipboard', () => {
     await page.mouse.click(move[0], move[1]);
     await pasteByKeyboard(page, true);
     await waitNextFrame(page, 500);
+
     const sortedIds = await getAllSortedIds(page);
     expect(sortedIds.length).toBe(6);
     expect(await getTypeById(page, sortedIds[0])).toBe(

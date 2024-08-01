@@ -2,6 +2,7 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { Color } from '../../../../../surface-block/consts.js';
+import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { ShapeName } from './shape-tool-element.js';
 
 import {
@@ -126,12 +127,18 @@ export class EdgelessShapeMenu extends LitElement {
           <edgeless-one-row-color-panel
             .value=${color}
             .options=${FILL_COLORS}
+            .hasTransparent=${!this.edgeless.doc.awarenessStore.getFlag(
+              'enable_color_picker'
+            )}
             @select=${(e: ColorEvent) => this._setStrokeColor(e.detail)}
           ></edgeless-one-row-color-panel>
         </div>
       </edgeless-slide-menu>
     `;
   }
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
   accessor fillColor!: Color;

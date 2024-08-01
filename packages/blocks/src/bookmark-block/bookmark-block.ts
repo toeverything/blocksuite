@@ -65,12 +65,6 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
     );
 
     if (this._isInSurface) {
-      this.rootService &&
-        this._disposables.add(
-          this.rootService.layer.slots.layerUpdated.on(() => {
-            this.requestUpdate();
-          })
-        );
       this.style.position = 'absolute';
     }
   }
@@ -125,6 +119,10 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
 
   toZIndex() {
     return this.rootService?.layer.getZIndex(this.model) ?? 1;
+  }
+
+  updateZIndex() {
+    this.style.zIndex = `${this.toZIndex()}`;
   }
 
   get isInSurface() {

@@ -13,7 +13,7 @@ import type { RootBlockModel } from '../root-model.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
-import { requestThrottledConnectFrame } from '../../_common/utils/index.js';
+import { requestThrottledConnectedFrame } from '../../_common/utils/index.js';
 import '../../surface-block/surface-block.js';
 import './components/note-slicer/index.js';
 import './components/presentation/edgeless-navigator-black-background.js';
@@ -29,7 +29,7 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   EdgelessRootService,
   EdgelessRootBlockWidgetName
 > {
-  private _refreshLayerViewport = requestThrottledConnectFrame(() => {
+  private _refreshLayerViewport = requestThrottledConnectedFrame(() => {
     const { zoom, translateX, translateY } = this.service.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
 

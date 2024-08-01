@@ -14,10 +14,7 @@ import type { ConnectorElementModel } from './element-model/connector.js';
 
 import { elementsCtorMap } from './element-model/index.js';
 import { connectorMiddleware } from './middlewares/connector.js';
-import {
-  groupRelationMiddleware,
-  groupSizeMiddleware,
-} from './middlewares/group.js';
+import { groupRelationMiddleware } from './middlewares/group.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
 export interface ElementUpdatedData {
@@ -187,7 +184,6 @@ export class SurfaceBlockModel extends BaseSurfaceModel {
     [
       connectorMiddleware(this, this.hooks),
       groupRelationMiddleware(this, this.hooks),
-      groupSizeMiddleware(this, this.hooks),
     ].forEach(disposable => this._disposables.add(disposable));
   }
 
