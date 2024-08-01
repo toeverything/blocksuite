@@ -421,6 +421,12 @@ export class Job {
       children,
     });
 
+    const nextTick =
+      typeof window !== 'undefined'
+        ? window.requestAnimationFrame
+        : setImmediate;
+    await new Promise(resolve => nextTick(() => resolve(undefined)));
+
     doc.addBlock(
       modelData.flavour as BlockSuite.Flavour,
       { ...modelData.props, id: modelData.id },
