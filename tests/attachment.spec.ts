@@ -39,7 +39,7 @@ import {
 import { test } from './utils/playwright.js';
 
 const FILE_NAME = 'test-card-1.png';
-const FILE_PATH = `packages/playground/public/${FILE_NAME}`;
+const FILE_PATH = `../packages/playground/public/${FILE_NAME}`;
 const FILE_ID = 'ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA=';
 const FILE_SIZE = 45801;
 
