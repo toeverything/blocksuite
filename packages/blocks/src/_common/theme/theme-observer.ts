@@ -7,6 +7,8 @@ export enum ColorScheme {
   Light = 'light',
 }
 
+const TRANSPARENT = 'transparent';
+
 /**
  * Observer theme changing by `data-theme` property
  */
@@ -48,10 +50,24 @@ export class ThemeObserver {
    * ```
    */
   static generateColorProperty(color: Color, fallback = 'transparent') {
-    fallback = fallback.startsWith('--') ? `var(${fallback})` : fallback;
+    fallback = fallback.startsWith('--')
+      ? fallback.endsWith(TRANSPARENT)
+        ? TRANSPARENT
+        : `var(${fallback})`
+      : fallback;
 
     if (typeof color === 'string') {
-      return (color.startsWith('--') ? `var(${color})` : color) ?? fallback;
+      return (
+        (color.startsWith('--')
+          ? color.endsWith(TRANSPARENT)
+            ? TRANSPARENT
+            : `var(${color})`
+          : color) ?? fallback
+      );
+    }
+
+    if (!color) {
+      return fallback;
     }
 
     if (color.light && color.dark) {
@@ -77,24 +93,39 @@ export class ThemeObserver {
    * `--affine-palette-shape-blue`
    * ```
    */
-  static getColorValue(
-    color: Color,
-    fallback = '--affine-palette-transparent',
-    real?: boolean
-  ) {
-    color =
-      (typeof color === 'string'
-        ? color
-        : (color[ThemeObserver.mode] ?? color.normal)) ??
-      fallback ??
-      'transparent';
-    return real ? ThemeObserver.getPropertyValue(color) : color;
+  static getColorValue(color: Color, fallback = TRANSPARENT, real?: boolean) {
+    if (typeof color === 'object') {
+      color = color[ThemeObserver.mode] ?? color.normal ?? fallback;
+    }
+    if (!color) {
+      color = fallback ?? TRANSPARENT;
+    }
+    if (real && color.startsWith('--')) {
+      color = color.endsWith(TRANSPARENT)
+        ? TRANSPARENT
+        : ThemeObserver.getPropertyValue(color);
+
+      if (!color) {
+        color = fallback.startsWith('--')
+          ? ThemeObserver.getPropertyValue(fallback)
+          : fallback;
+      }
+    }
+
+    return color;
   }
 
   static getPropertyValue(property: string) {
-    return property.startsWith('--')
-      ? ThemeObserver.computedStyle.getPropertyValue(property).trim()
-      : property;
+    if (property.startsWith('--')) {
+      if (property.endsWith(TRANSPARENT)) {
+        return TRANSPARENT;
+      }
+      return (
+        ThemeObserver.computedStyle.getPropertyValue(property).trim() ||
+        property
+      );
+    }
+    return property;
   }
 
   static get instance(): ThemeObserver {

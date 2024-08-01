@@ -48,7 +48,7 @@ export const DEFAULT_BRUSH_COLOR = LINE_COLORS[5];
 export const DEFAULT_CONNECTOR_COLOR = LINE_COLORS[9];
 
 export function isTransparent(color: string) {
-  return color.toLowerCase() === '--affine-palette-transparent';
+  return color.toLowerCase().endsWith('transparent');
 }
 
 function isSameColorWithBackground(color: string) {
@@ -134,7 +134,10 @@ export function ColorUnit(
 ) {
   const additionIcon = AdditionIcon(color, !!hollowCircle);
 
-  const colorStyle = !hollowCircle ? { background: `var(${color})` } : {};
+  const colorStyle =
+    !hollowCircle && !isTransparent(color)
+      ? { background: `var(${color})` }
+      : {};
 
   const borderStyle =
     isSameColorWithBackground(color) && !hollowCircle

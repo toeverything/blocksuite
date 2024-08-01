@@ -39,7 +39,7 @@ export function ellipse(
   );
 
   if (shapeStyle === 'General') {
-    drawGeneralShape(ctx, model, renderer, fillColor, strokeColor);
+    drawGeneralShape(ctx, model, renderer, filled, fillColor, strokeColor);
   } else {
     rc.ellipse(cx, cy, renderWidth, renderHeight, {
       seed,

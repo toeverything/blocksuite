@@ -166,12 +166,14 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   ) {
     return (event: PickColorEvent) => {
       if (event.type === 'pick') {
-        this.elements.forEach(ele =>
-          this.service.updateElement(
-            ele.id,
-            packColor(key, { ...event.detail })
-          )
-        );
+        this.elements.forEach(ele => {
+          const props = packColor(key, { ...event.detail });
+          // If `filled` can be set separately, this logic can be removed
+          if (key === 'fillColor' && !ele.filled) {
+            Object.assign(props, { filled: true });
+          }
+          this.service.updateElement(ele.id, props);
+        });
         return;
       }
 

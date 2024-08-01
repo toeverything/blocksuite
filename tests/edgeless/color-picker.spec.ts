@@ -62,6 +62,9 @@ function getAlphaInput(locator: Locator) {
   return locator.locator('label.alpha input');
 }
 
+// Theme Observer
+test.describe('theme observer', () => {});
+
 // Basic functions
 test.describe('basic functions', () => {
   test('custom color button should be displayed', async ({ page }) => {

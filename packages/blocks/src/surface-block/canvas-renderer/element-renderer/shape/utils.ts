@@ -27,6 +27,7 @@ export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
   shapeModel: ShapeElementModel,
   renderer: Renderer,
+  filled: boolean,
   fillColor: string,
   strokeColor: string
 ) {
@@ -50,7 +51,7 @@ export function drawGeneralShape(
 
   ctx.lineWidth = shapeModel.strokeWidth;
   ctx.strokeStyle = strokeColor;
-  ctx.fillStyle = fillColor;
+  ctx.fillStyle = filled ? fillColor : 'transparent';
 
   switch (shapeModel.strokeStyle) {
     case 'none':

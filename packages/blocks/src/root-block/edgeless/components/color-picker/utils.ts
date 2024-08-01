@@ -212,10 +212,17 @@ export const renderCanvas = (canvas: HTMLCanvasElement, rgb: Rgb) => {
 
 // Drops alpha value
 export const keepColor = (color: string) =>
-  color.length > 7 ? color.substring(0, 7) : color;
+  color.length > 7 && !color.endsWith('transparent')
+    ? color.substring(0, 7)
+    : color;
 
 export const parseStringToRgba = (value: string) => {
   value = value.trim();
+
+  // Compatible old format: `--affine-palette-transparent`
+  if (value.endsWith('transparent')) {
+    return { r: 1, g: 1, b: 1, a: 0 };
+  }
 
   if (value.startsWith('#')) {
     return parseHexToRgba(value);
@@ -240,7 +247,10 @@ export const parseStringToRgba = (value: string) => {
 export const preprocessColor = (style: CSSStyleDeclaration) => {
   return ({ type, value }: { type: ModeType; value: string }) => {
     if (value.startsWith('--')) {
-      value = style.getPropertyValue(value);
+      // Compatible old format: `--affine-palette-transparent`
+      value = value.endsWith('transparent')
+        ? 'transparent'
+        : style.getPropertyValue(value);
     }
 
     const rgba = parseStringToRgba(value);

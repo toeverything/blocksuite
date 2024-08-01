@@ -391,62 +391,6 @@ export class EdgelessColorPicker extends SignalWatcher(
     });
     this.disposables.addFromEvent(this, 'click', stopPropagation);
 
-    this.disposables.add(
-      this.hsva$.subscribe((hsva: Hsva) => {
-        const type = this.modeType$.peek();
-        const mode = this.modes$.value.find(mode => mode.type === type);
-
-        if (mode) {
-          mode.hsva = { ...hsva };
-        }
-      })
-    );
-
-    this.disposables.add(
-      this.huePosX$.subscribe((x: number) => {
-        const { width } = this.#hueRect;
-        const rgb = linearGradientAt(bound01(x, width));
-
-        // Updates palette canvas
-        renderCanvas(this.canvas, rgb);
-
-        this.hue$.value = rgb;
-      })
-    );
-
-    this.disposables.add(
-      this.hue$.subscribe((rgb: Rgb) => {
-        const hsva = this.hsva$.peek();
-
-        hsva.h = rgbToHsv(rgb).h;
-
-        this.hsva$.value = { ...hsva };
-      })
-    );
-
-    this.disposables.add(
-      this.alphaPosX$.subscribe((x: number) => {
-        const hsva = this.hsva$.peek();
-        const { width } = this.#alphaRect;
-
-        hsva.a = bound01(x, width);
-
-        this.hsva$.value = { ...hsva };
-      })
-    );
-
-    this.disposables.add(
-      this.palettePos$.subscribe(({ x, y }: Point) => {
-        const hsva = this.hsva$.peek();
-        const { width, height } = this.#paletteRect;
-
-        hsva.s = bound01(x, width);
-        hsva.v = bound01(height - y, height);
-
-        this.hsva$.value = { ...hsva };
-      })
-    );
-
     const batches: (() => void)[] = [];
     const { type, modes } = this.colors;
 
@@ -479,6 +423,63 @@ export class EdgelessColorPicker extends SignalWatcher(
     this.#setRects();
 
     batch(() => batches.forEach(fn => fn()));
+
+    this.updateComplete
+      .then(() => {
+        this.disposables.add(
+          this.hsva$.subscribe((hsva: Hsva) => {
+            const type = this.modeType$.peek();
+            const mode = this.modes$.value.find(mode => mode.type === type);
+
+            if (mode) {
+              mode.hsva = { ...hsva };
+            }
+          })
+        );
+
+        this.disposables.add(
+          this.huePosX$.subscribe((x: number) => {
+            const { width } = this.#hueRect;
+            const rgb = linearGradientAt(bound01(x, width));
+
+            // Updates palette canvas
+            renderCanvas(this.canvas, rgb);
+
+            this.hue$.value = rgb;
+          })
+        );
+
+        this.disposables.add(
+          this.hue$.subscribe((rgb: Rgb) => {
+            const hsva = this.hsva$.peek();
+            const h = rgbToHsv(rgb).h;
+
+            this.hsva$.value = { ...hsva, h };
+          })
+        );
+
+        this.disposables.add(
+          this.alphaPosX$.subscribe((x: number) => {
+            const hsva = this.hsva$.peek();
+            const { width } = this.#alphaRect;
+            const a = bound01(x, width);
+
+            this.hsva$.value = { ...hsva, a };
+          })
+        );
+
+        this.disposables.add(
+          this.palettePos$.subscribe(({ x, y }: Point) => {
+            const hsva = this.hsva$.peek();
+            const { width, height } = this.#paletteRect;
+            const s = bound01(x, width);
+            const v = bound01(height - y, height);
+
+            this.hsva$.value = { ...hsva, s, v };
+          })
+        );
+      })
+      .catch(console.error);
   }
 
   override render() {
@@ -606,6 +607,7 @@ export class EdgelessColorPicker extends SignalWatcher(
   // #ffffff
   accessor hex6$ = computed(() => this.hex8$.value.substring(0, 7));
 
+  // ffffff
   accessor hex6WithoutHash$ = computed(() => this.hex6$.value.substring(1));
 
   // #ffffffff

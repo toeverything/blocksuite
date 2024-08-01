@@ -26,19 +26,21 @@ import {
 
 @customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends LitElement {
+  private _setFillColor = (fillColor: string) => {
+    const filled = !isTransparent(fillColor);
+    let strokeColor = fillColor.replace(SHAPE_COLOR_PREFIX, LINE_COLOR_PREFIX);
+
+    if (strokeColor.endsWith('transparent')) {
+      strokeColor = '--affine-palette-line-grey';
+    }
+
+    this.onChange({ filled, fillColor, strokeColor });
+  };
+
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
     this.onChange({
       shapeStyle,
     });
-  };
-
-  private _setStrokeColor = (fillColor: string) => {
-    const strokeColor = fillColor.replace(
-      SHAPE_COLOR_PREFIX,
-      LINE_COLOR_PREFIX
-    );
-    const filled = !isTransparent(fillColor);
-    this.onChange({ filled, fillColor, strokeColor });
   };
 
   static override styles = css`
@@ -130,7 +132,7 @@ export class EdgelessShapeMenu extends LitElement {
             .hasTransparent=${!this.edgeless.doc.awarenessStore.getFlag(
               'enable_color_picker'
             )}
-            @select=${(e: ColorEvent) => this._setStrokeColor(e.detail)}
+            @select=${(e: ColorEvent) => this._setFillColor(e.detail)}
           ></edgeless-one-row-color-panel>
         </div>
       </edgeless-slide-menu>

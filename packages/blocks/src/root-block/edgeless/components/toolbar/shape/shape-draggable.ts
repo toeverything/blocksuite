@@ -164,21 +164,10 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
       onDrop: (el, bound) => {
         const xywh = bound.serialize();
         const shape = el.data;
-        const colorProps: Record<string, boolean | string> = {};
-        if (!this.edgeless.doc.awarenessStore.getFlag('enable_color_picker')) {
-          colorProps.filled = true;
-          colorProps.fillColor = this.color
-            .replace('var(', '')
-            .replace(')', '');
-          colorProps.strokeColor = this.stroke
-            .replace('var(', '')
-            .replace(')', '');
-        }
         const id = this.edgeless.service.addElement(CanvasElementType.SHAPE, {
           shapeType: shape.name === 'roundedRect' ? ShapeType.Rect : shape.name,
           xywh,
           radius: shape.name === 'roundedRect' ? 0.1 : 0,
-          ...colorProps,
         });
 
         this.edgeless.service.telemetryService?.track('CanvasElementAdded', {

@@ -1,4 +1,3 @@
-import { cssVar } from '@toeverything/theme';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -116,15 +115,8 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
       states: { fillColor, strokeColor },
     } = this;
 
-    let color = ThemeObserver.generateColorProperty(fillColor!);
-    let stroke = ThemeObserver.generateColorProperty(strokeColor!);
-
-    if (color.endsWith('transparent)')) {
-      color = cssVar('paletteShapeWhite');
-    }
-    if (stroke.endsWith('transparent)')) {
-      stroke = cssVar('paletteLineGrey');
-    }
+    const color = ThemeObserver.generateColorProperty(fillColor!);
+    const stroke = ThemeObserver.generateColorProperty(strokeColor!);
 
     return html`
       <edgeless-toolbar-button
