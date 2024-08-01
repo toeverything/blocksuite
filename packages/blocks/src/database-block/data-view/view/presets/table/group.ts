@@ -18,8 +18,9 @@ import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import { TableAreaSelection } from './types.js';
 
 const styles = css`
-  affine-data-view-table-group .group-header-op {
+  affine-data-view-table-group:hover .group-header-op {
     visibility: visible;
+    opacity: 1;
   }
   .data-view-table-group-add-row {
     display: flex;

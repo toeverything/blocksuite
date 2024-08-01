@@ -1,7 +1,8 @@
-import { tNumber, tString, tTag } from '../../logical/data-type.js';
+import { tBoolean, tNumber, tString, tTag } from '../../logical/data-type.js';
 import { isTArray, tArray } from '../../logical/typesystem.js';
 import { createUniComponentFromWebComponent } from '../../utils/uni-component/uni-component.js';
 import { groupByMatcher } from './matcher.js';
+import { BooleanGroupView } from './renderer/boolean-group.js';
 import { NumberGroupView } from './renderer/number-group.js';
 import { SelectGroupView } from './renderer/select-group.js';
 import { StringGroupView } from './renderer/string-group.js';
@@ -133,4 +134,34 @@ groupByMatcher.register(tNumber.create(), {
   },
   addToGroup: value => (typeof value === 'number' ? value * 10 : undefined),
   view: createUniComponentFromWebComponent(NumberGroupView),
+});
+
+groupByMatcher.register(tBoolean.create(), {
+  name: 'boolean',
+  groupName: (_type, value) => {
+    return `${value?.toString() ?? ''}`;
+  },
+  defaultKeys: _type => {
+    return [
+      { key: 'true', value: true },
+      { key: 'false', value: false },
+    ];
+  },
+  valuesGroup: (value, _type) => {
+    if (typeof value !== 'boolean') {
+      return [
+        {
+          key: 'false',
+          value: false,
+        },
+      ];
+    }
+    return [
+      {
+        key: value.toString(),
+        value: value,
+      },
+    ];
+  },
+  view: createUniComponentFromWebComponent(BooleanGroupView),
 });
