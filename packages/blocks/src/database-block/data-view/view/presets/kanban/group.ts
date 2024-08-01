@@ -56,7 +56,6 @@ const styles = css`
   .add-card {
     display: flex;
     align-items: center;
-    height: 28px;
     padding: 4px;
     border-radius: 4px;
     cursor: pointer;
@@ -74,11 +73,6 @@ const styles = css`
   }
 
   affine-data-view-kanban-group .add-card:hover {
-    background-color: var(--affine-hover-color);
-    color: var(--affine-text-primary-color);
-  }
-
-  affine-data-view-kanban-group:has(.add-card:hover) .add-card {
     background-color: var(--affine-hover-color);
     color: var(--affine-text-primary-color);
   }
