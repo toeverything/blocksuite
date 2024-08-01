@@ -55,6 +55,8 @@
     "@open-wc/dev-server-hmr": "^0.2.0",
     "@playwright/test": "1.45.3",
     "@stylistic/eslint-plugin-ts": "^2.4.0",
+    "@swc-node/register": "^1.10.9",
+    "@swc/core": "^1.7.4",
     "@types/jscodeshift": "^0.11.11",
     "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
@@ -136,6 +138,5 @@
   },
   "stackblitz": {
     "startCommand": "pnpm run dev"
-  },
-  "dependencies": {}
+  }
 }
