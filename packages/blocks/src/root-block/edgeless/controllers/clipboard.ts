@@ -82,13 +82,25 @@ const IMAGE_PNG = 'image/png';
 const { GROUP, MINDMAP } = CanvasElementType;
 const IMAGE_PADDING = 5; // for rotated shapes some padding is needed
 
+type BlockCreationFunction = (
+  snapshots: BlockSnapshot[],
+  oldIdToNewIdMap: Map<string, string>
+) => Promise<string[]> | string[];
+
 interface CanvasExportOptions {
   dpr?: number;
   padding?: number;
   background?: string;
 }
 
+interface BlockConfig {
+  flavour: string;
+  createFunction: BlockCreationFunction;
+}
+
 export class EdgelessClipboardController extends PageClipboard {
+  private _blockConfigs: BlockConfig[] = [];
+
   private _initEdgelessClipboard = () => {
     this.host.handleEvent(
       'copy',
@@ -352,6 +364,26 @@ export class EdgelessClipboardController extends PageClipboard {
 
   constructor(public override host: EdgelessRootBlockComponent) {
     super(host);
+    // Register existing block creation functions
+    this.registerBlock('affine:note', this._createNoteBlocks);
+    this.registerBlock('affine:edgeless-text', this._createEdgelessTextBlocks);
+    this.registerBlock('affine:image', this._createImageBlocks);
+    this.registerBlock('affine:frame', this._createFrameBlocks);
+    this.registerBlock('affine:attachment', this._createAttachmentBlocks);
+    this.registerBlock('affine:bookmark', this._createBookmarkBlocks);
+    this.registerBlock('affine:embed-github', this._createGithubEmbedBlocks);
+    this.registerBlock('affine:embed-youtube', this._createYoutubeEmbedBlocks);
+    this.registerBlock('affine:embed-figma', this._createFigmaEmbedBlocks);
+    this.registerBlock(
+      'affine:embed-linked-doc',
+      this._createLinkedDocEmbedBlocks
+    );
+    this.registerBlock(
+      'affine:embed-synced-doc',
+      this._createSyncedDocEmbedBlocks
+    );
+    this.registerBlock('affine:embed-html', this._createHtmlEmbedBlocks);
+    this.registerBlock('affine:embed-loom', this._createLoomEmbedBlocks);
   }
 
   private _checkCanContinueToCanvas(
@@ -1232,93 +1264,22 @@ export class EdgelessClipboardController extends PageClipboard {
       }
     });
 
-    const noteSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:note'
-    );
-    const edgelessTextSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:edgeless-text'
-    );
-    const imageSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:image'
-    );
-    const frameSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:frame'
-    );
-    const attachmentSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:attachment'
-    );
-    const bookmarkSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:bookmark'
-    );
-    const embedGithubSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:embed-github'
-    );
-    const embedYoutubeSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:embed-youtube'
-    );
-    const embedFigmaSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:embed-figma'
-    );
-    const embedLinkedDocSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:embed-linked-doc'
-    );
-    const embedSyncedDocSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:embed-synced-doc'
-    );
-    const embedHtmlSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:embed-html'
-    );
-    const embedLoomSnapshots = blockRawData.filter(
-      data => data.flavour === 'affine:embed-loom'
-    );
-
     // map old id to new id to rebuild connector's source and target
     const oldIdToNewIdMap = new Map<string, string>();
+    const blockIds: string[] = [];
 
-    const noteIds = this._createNoteBlocks(noteSnapshots, oldIdToNewIdMap);
-    const edgelessTextIds = this._createEdgelessTextBlocks(
-      edgelessTextSnapshots,
-      oldIdToNewIdMap
-    );
-    const imageIds = await this._createImageBlocks(
-      imageSnapshots,
-      oldIdToNewIdMap
-    );
-    const frameIds = this._createFrameBlocks(frameSnapshots);
-    const attachmentIds =
-      await this._createAttachmentBlocks(attachmentSnapshots);
-    const bookmarkIds = this._createBookmarkBlocks(bookmarkSnapshots);
-    const embedGithubIds = this._createGithubEmbedBlocks(embedGithubSnapshots);
-    const embedYoutubeIds = this._createYoutubeEmbedBlocks(
-      embedYoutubeSnapshots
-    );
-    const embedFigmaIds = this._createFigmaEmbedBlocks(embedFigmaSnapshots);
-    const embedLinkedDocIds = this._createLinkedDocEmbedBlocks(
-      embedLinkedDocSnapshots
-    );
-    const embedSyncedDocIds = this._createSyncedDocEmbedBlocks(
-      embedSyncedDocSnapshots
-    );
-    const embedHtmlIds = this._createHtmlEmbedBlocks(embedHtmlSnapshots);
-    const embedLoomIds = this._createLoomEmbedBlocks(embedLoomSnapshots);
+    for (const config of this._blockConfigs) {
+      const snapshots = blockRawData.filter(
+        data => data.flavour === config.flavour
+      );
+      const ids = await config.createFunction(snapshots, oldIdToNewIdMap);
+      blockIds.push(...ids);
+    }
 
-    const blockModels = [
-      ...noteIds,
-      ...edgelessTextIds,
-      ...frameIds,
-      ...imageIds,
-      ...attachmentIds,
-      ...bookmarkIds,
-      ...embedGithubIds,
-      ...embedYoutubeIds,
-      ...embedFigmaIds,
-      ...embedLinkedDocIds,
-      ...embedSyncedDocIds,
-      ...embedHtmlIds,
-      ...embedLoomIds,
-    ].flatMap(
+    const blockModels = blockIds.flatMap(
       id => this.host.doc.getBlock(id)?.model ?? []
     ) as BlockSuite.EdgelessBlockModelType[];
+
     const canvasElements = this._createCanvasElements(
       surfaceRawData,
       oldIdToNewIdMap
@@ -1381,6 +1342,13 @@ export class EdgelessClipboardController extends PageClipboard {
     }
     this._init();
     this._initEdgelessClipboard();
+  }
+
+  registerBlock(flavour: string, createFunction: BlockCreationFunction) {
+    this._blockConfigs.push({
+      flavour,
+      createFunction: createFunction.bind(this),
+    });
   }
 
   async toCanvas(
