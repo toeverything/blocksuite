@@ -15,6 +15,7 @@ import { PlusIcon } from '../../../common/icons/index.js';
 import './components/column-stats.js';
 import './components/column-stats-cell.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
+import { TableAreaSelection } from './types.js';
 
 const styles = css`
   affine-data-view-table-group .group-header-op {
@@ -63,14 +64,14 @@ export class TableGroup extends SignalWatcher(
       const index = this.view.columnManagerList$.value.findIndex(
         v => v.type === 'title'
       );
-      selectionController.selection = {
+      selectionController.selection = TableAreaSelection.create({
         groupKey: this.group?.key,
         focus: {
           rowIndex: this.rows.length - 1,
           columnIndex: index,
         },
         isEditing: true,
-      };
+      });
     });
   };
 
@@ -81,14 +82,14 @@ export class TableGroup extends SignalWatcher(
       const index = this.view.columnManagerList$.value.findIndex(
         v => v.type === 'title'
       );
-      selectionController.selection = {
+      selectionController.selection = TableAreaSelection.create({
         groupKey: this.group?.key,
         focus: {
           rowIndex: 0,
           columnIndex: index,
         },
         isEditing: true,
-      };
+      });
     });
   };
 

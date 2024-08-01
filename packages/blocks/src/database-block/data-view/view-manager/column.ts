@@ -1,4 +1,4 @@
-import { type ReadonlySignal, batch, computed } from '@lit-labs/preact-signals';
+import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
 
 import type { CellRenderer } from '../column/index.js';
 import type { TType } from '../logical/typesystem.js';
@@ -109,12 +109,10 @@ export abstract class ColumnBase<
     if (!data) {
       return;
     }
-    batch(() => {
-      if (data.data) {
-        this.updateData(() => data.data as Data);
-      }
-      this.setValue(rowId, data.value as Value);
-    });
+    if (data.data) {
+      this.updateData(() => data.data as Data);
+    }
+    this.setValue(rowId, data.value as Value);
   }
 
   updateData(updater: ColumnDataUpdater<Data>): void {

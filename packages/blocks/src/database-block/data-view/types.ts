@@ -1,8 +1,8 @@
 import type { KanbanViewSelectionWithType } from './view/presets/kanban/types.js';
-import type { TableViewSelection } from './view/presets/table/types.js';
+import type { TableViewSelectionWithType } from './view/presets/table/types.js';
 
 export type DataViewSelection =
-  | TableViewSelection
+  | TableViewSelectionWithType
   | KanbanViewSelectionWithType;
 export type GetDataViewSelection<
   K extends DataViewSelection['type'],

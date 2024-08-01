@@ -184,7 +184,10 @@ export class AffineFormatBarWidget extends WidgetComponent {
       };
       const viewSelection = databaseSelection.viewSelection;
       // check table selection
-      if (viewSelection.type === 'table' && !viewSelection.isEditing)
+      if (
+        viewSelection.type === 'table' &&
+        (viewSelection.selectionType !== 'area' || !viewSelection.isEditing)
+      )
         return reset();
       // check kanban selection
       if (

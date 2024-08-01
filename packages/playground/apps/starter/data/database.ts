@@ -32,7 +32,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
     const pId = doc.addBlock('affine:paragraph', {}, noteId);
     const model = doc.getBlockById(pId);
     assertExists(model);
-    const addDatabase = (title: string) => {
+    const addDatabase = (title: string, group = true) => {
       const databaseId = doc.addBlock(
         'affine:database',
         {
@@ -70,11 +70,13 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           });
           database.updateView(database.views[0].id, () => {
             return {
-              groupBy: {
-                columnId: database.columns[1].id,
-                type: 'groupBy',
-                name: 'select',
-              },
+              groupBy: group
+                ? {
+                    columnId: database.columns[1].id,
+                    type: 'groupBy',
+                    name: 'select',
+                  }
+                : undefined,
             };
           });
           const paragraphTypes: ParagraphType[] = [
@@ -129,7 +131,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         .catch(console.error);
     };
     // Add database block inside note block
-    addDatabase('Database 1');
+    addDatabase('Database 1', false);
     addDatabase('Database 2');
     addDatabase('Database 3');
     addDatabase('Database 4');

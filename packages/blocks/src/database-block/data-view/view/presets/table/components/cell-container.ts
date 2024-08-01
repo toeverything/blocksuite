@@ -11,9 +11,12 @@ import type {
 } from '../../../../column/index.js';
 import type { SingleView } from '../../../../view-manager/single-view.js';
 import type { TableColumn } from '../table-view-manager.js';
-import type { TableViewSelection } from '../types.js';
 
 import { renderUniLit } from '../../../../utils/uni-component/index.js';
+import {
+  TableAreaSelection,
+  type TableViewSelectionWithType,
+} from '../types.js';
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer extends SignalWatcher(
@@ -52,23 +55,23 @@ export class DatabaseCellContainer extends SignalWatcher(
     if (selectionView) {
       const selection = selectionView.selection;
       if (selection && this.isSelected(selection) && editing) {
-        selectionView.selection = {
+        selectionView.selection = TableAreaSelection.create({
           groupKey: this.groupKey,
           focus: {
             rowIndex: this.rowIndex,
             columnIndex: this.columnIndex,
           },
           isEditing: true,
-        };
+        });
       } else {
-        selectionView.selection = {
+        selectionView.selection = TableAreaSelection.create({
           groupKey: this.groupKey,
           focus: {
             rowIndex: this.rowIndex,
             columnIndex: this.columnIndex,
           },
           isEditing: false,
-        };
+        });
       }
     }
   };
@@ -94,7 +97,10 @@ export class DatabaseCellContainer extends SignalWatcher(
     });
   }
 
-  isSelected(selection: TableViewSelection) {
+  isSelected(selection: TableViewSelectionWithType) {
+    if (selection.selectionType !== 'area') {
+      return false;
+    }
     if (selection.groupKey !== this.groupKey) {
       return;
     }

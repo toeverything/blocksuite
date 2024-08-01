@@ -269,11 +269,6 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'Number');
 
     await initDatabaseDynamicRowWithData(page, '123abc', true);
-    await pressEscape(page);
-    getFirstColumnCell(page, 'Number');
-    await pressEnter(page);
-    await clickDatabaseOutside(page);
-    await waitNextFrame(page, 100);
     await assertDatabaseCellNumber(page, {
       text: '123',
     });

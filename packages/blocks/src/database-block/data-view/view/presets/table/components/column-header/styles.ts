@@ -12,7 +12,7 @@ export const styles = css`
         display: block;
         background-color: var(--affine-background-primary-color);
         position: relative;
-        z-index: 1;
+        z-index: 2;
     }
 
     .affine-database-column-header {

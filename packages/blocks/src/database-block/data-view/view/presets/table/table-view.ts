@@ -6,7 +6,6 @@ import { html } from 'lit/static-html.js';
 import type { GroupHelper } from '../../../common/group-by/helper.js';
 import type { InsertToPosition } from '../../../types.js';
 import type { TableSingleView } from './table-view-manager.js';
-import type { TableViewSelection } from './types.js';
 
 import { popMenu } from '../../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../../_common/icons/index.js';
@@ -22,6 +21,10 @@ import { TableDragController } from './controller/drag.js';
 import { TableHotkeysController } from './controller/hotkeys.js';
 import { TableSelectionController } from './controller/selection.js';
 import './group.js';
+import {
+  TableAreaSelection,
+  type TableViewSelectionWithType,
+} from './types.js';
 
 const styles = css`
   affine-database-table {
@@ -114,10 +117,10 @@ const styles = css`
     display: flex;
     align-items: center;
     position: sticky;
+    z-index: 1;
     left: 0;
     width: ${LEFT_TOOL_BAR_WIDTH}px;
     flex-shrink: 0;
-    background-color: var(--affine-background-primary-color);
   }
   .affine-database-block-rows {
     display: flex;
@@ -130,7 +133,7 @@ const styles = css`
 @customElement('affine-database-table')
 export class DataViewTable extends DataViewBase<
   TableSingleView,
-  TableViewSelection
+  TableViewSelectionWithType
 > {
   private _addRow = (
     tableViewManager: TableSingleView,
@@ -147,13 +150,13 @@ export class DataViewTable extends DataViewBase<
           );
     tableViewManager.rowAdd(position);
     requestAnimationFrame(() => {
-      this.selectionController.selection = {
+      this.selectionController.selection = TableAreaSelection.create({
         focus: {
           rowIndex: index,
           columnIndex: 0,
         },
         isEditing: true,
-      };
+      });
     });
   };
 

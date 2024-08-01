@@ -6,6 +6,7 @@ import { type Cell, CellBase } from './cell.js';
 
 export interface Row {
   cells$: ReadonlySignal<Cell[]>;
+  rowId: string;
 }
 
 export class RowBase implements Row {
