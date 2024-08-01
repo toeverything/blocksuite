@@ -93,6 +93,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       flex-direction: column;
       align-items: flex-start;
       overflow-y: auto;
+      overflow-x: hidden;
     }
 
     ${scrollbarStyle('.outline-viewer-inner-container')}
