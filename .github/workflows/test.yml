@@ -18,6 +18,9 @@ on:
       - 'scripts/**'
       - 'packages/docs/**'
 
+permissions:
+  discussions: write
+
 jobs:
   lint:
     name: Run linters
