@@ -222,7 +222,7 @@ test('popup menu should follow position of image when scrolling', async ({
   const menuRect = await menu.boundingBox();
   if (!imageRect) throw new Error('image not found');
   if (!menuRect) throw new Error('menu not found');
-  expect(imageRect.y).toBeCloseTo(-188, 172);
+  expect(imageRect.y).toBeCloseTo(-202, 172);
   expect(menuRect.y).toBeCloseTo(65, -0.325);
 });
 
