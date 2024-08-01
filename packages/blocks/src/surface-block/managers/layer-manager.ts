@@ -886,12 +886,9 @@ export class LayerManager {
 
   getZIndex(element: BlockSuite.EdgelessModel): number {
     if (element instanceof FrameBlockModel) {
-      const lastLayer = last(this.layers);
       const frameIndex = this.frames.indexOf(element);
 
-      return lastLayer
-        ? lastLayer.zIndex + lastLayer.elements.length + frameIndex
-        : frameIndex;
+      return frameIndex - this.frames.length;
     }
 
     // @ts-ignore

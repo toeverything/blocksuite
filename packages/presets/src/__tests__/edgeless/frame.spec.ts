@@ -4,7 +4,7 @@ import { Text } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
-import { getDocRootBlock } from '../utils/edgeless.js';
+import { addNote, getDocRootBlock } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
 describe('frame', () => {
@@ -62,5 +62,40 @@ describe('frame', () => {
 
     expect(nestedTitleX).toBeGreaterThan(20);
     expect(nestedTitleY).toBeGreaterThan(20);
+  });
+
+  test('frame should always be placed under the bottom of other blocks', async () => {
+    addNote(doc, {
+      xywh: '[0,0,300,300]',
+      index: service.layer.generateIndex('affine:note'),
+    });
+    addNote(doc, {
+      xywh: '[100,100,300,300]',
+      index: service.layer.generateIndex('affine:note'),
+    });
+    service.doc.addBlock(
+      'affine:frame',
+      {
+        xywh: '[0,36,300,300]',
+        title: new Text('Frame 1'),
+      },
+      service.surface.id
+    );
+    service.viewport.setZoom(1);
+    await wait();
+
+    const pointDom1 = document.elementFromPoint(
+      ...service.viewport.toViewCoord(20, 13)
+    ) as HTMLElement;
+    const pointDom2 = document.elementFromPoint(
+      ...service.viewport.toViewCoord(20, 40)
+    ) as HTMLElement;
+
+    expect(pointDom1.className, 'Frame title should be on top').toBe(
+      'affine-frame-title'
+    );
+    expect(pointDom2.className, 'Frame body should be on bottom').toBe(
+      'affine-note-mask'
+    );
   });
 });
