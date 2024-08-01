@@ -182,7 +182,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run inline editor playwright test
-        run: pnpm --filter=@blocksuite/inline test:e2e
+        run: pnpm --filter=@blocksuite/inline test:e2e:ci
 
       - name: Upload test results
         if: ${{ failure() }}
@@ -233,7 +233,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run playwright test
-        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm test:ci
         env:
           COVERAGE: true
 
