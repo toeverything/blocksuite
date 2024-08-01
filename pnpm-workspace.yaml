@@ -1,4 +1,5 @@
 packages:
+  - 'tests'
   - 'packages/framework/block-std'
   - 'packages/framework/global'
   - 'packages/framework/inline'

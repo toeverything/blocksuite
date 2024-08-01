@@ -1,0 +1,13 @@
+{
+  "name": "@blocksuite/e2e",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "nx e2e"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git"
+  }
+}

@@ -14,17 +14,15 @@
     "lint": "eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0",
     "lint:fix": "pnpm lint --fix",
     "lit-lint": "pnpm lit-analyzer --strict=false --rules.no-incompatible-property-type=error --rules.no-incompatible-type-binding=off --rules.no-invalid-css=off --rules.no-invalid-tag-name=off \"packages/**/*.ts\"",
-    "test": "playwright test",
+    "test": "nx e2e @blocksuite/e2e",
     "test:type": "tsc -p tests/tsconfig.json",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
     "circular": "madge --circular ./packages/*/dist/index.js",
-    "test:unit": "pnpm -r test:unit",
-    "test:unit:coverage": "pnpm -r test:unit:coverage",
+    "test:unit": "nx run-many --target=test:unit --all --parallel",
+    "test:unit:coverage": "nx run-many --target=test:unit:coverage --all --parallel",
     "test:update": "playwright test --update-snapshots",
-    "test:headed": "playwright test --debug",
-    "test:store": "pnpm --filter @blocksuite/store test",
     "test:inline": "pnpm --filter @blocksuite/inline test",
-    "test:integration": "pnpm --filter @blocksuite/presets test",
+    "test:it": "nx test @blocksuite/presets",
     "test:node": "node --experimental-specifier-resolution=node --loader ts-node/esm ./scripts/node-import-test.ts",
     "format": "prettier --write --cache packages tests",
     "build": "pnpm build:packages && pnpm build:playground",
@@ -49,6 +47,10 @@
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
+    "@nx/eslint": "19.5.4",
+    "@nx/playwright": "19.5.4",
+    "@nx/vite": "19.5.4",
+    "@nx/web": "19.5.4",
     "@open-wc/dev-server-hmr": "^0.2.0",
     "@playwright/test": "1.45.3",
     "@stylistic/eslint-plugin-ts": "^2.4.0",
@@ -79,6 +81,7 @@
     "madge": "^7.0.0",
     "markdown-table": "^3.0.3",
     "micromatch": "^4.0.7",
+    "nx": "19.5.4",
     "nyc": "^17.0.0",
     "prettier": "^3.3.3",
     "pretty-bytes": "^6.1.1",
@@ -132,5 +135,6 @@
   },
   "stackblitz": {
     "startCommand": "pnpm run dev"
-  }
+  },
+  "dependencies": {}
 }

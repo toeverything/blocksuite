@@ -6,8 +6,8 @@
   "repository": "toeverything/blocksuite",
   "scripts": {
     "build": "tsc --build --verbose",
-    "test": "vitest --browser.headless --run",
-    "test:debug": "vitest"
+    "test": "nx vite:test --browser.headless --run",
+    "test:debug": "nx vite:test"
   },
   "keywords": [],
   "author": "toeverything",

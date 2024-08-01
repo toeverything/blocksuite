@@ -158,7 +158,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run integration test
-        run: pnpm test:integration
+        run: pnpm test:it
 
   inline-e2e-test:
     name: Inline Editor E2E test

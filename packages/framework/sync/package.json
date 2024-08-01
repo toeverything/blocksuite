@@ -6,7 +6,7 @@
   "repository": "toeverything/blocksuite",
   "scripts": {
     "build": "tsc",
-    "test:unit": "vitest --run",
+    "test:unit": "nx vite:test --run",
     "test": "pnpm test:unit"
   },
   "keywords": [],
