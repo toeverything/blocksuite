@@ -245,7 +245,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run playwright test
-        run: pnpm test:ci -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm --filter=@blocksuite/e2e exec playwright --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
           COVERAGE: true
 
