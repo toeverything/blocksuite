@@ -9,19 +9,18 @@ import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { NoteBlockModel } from '../../../../note-block/index.js';
+import type { Color } from '../../../../surface-block/consts.js';
 import type { ConnectorElementModel } from '../../../../surface-block/element-model/connector.js';
 import type { ShapeType } from '../../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../_common/edgeless/note/consts.js';
 import {
   AutoCompleteArrowIcon,
   MindMapChildIcon,
   MindMapSiblingIcon,
   NoteAutoCompleteIcon,
 } from '../../../../_common/icons/index.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
 import {
   type Connection,
@@ -220,25 +219,22 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _addConnector(source: Connection, target: Connection) {
     const { current, edgeless } = this;
 
-    let color = '';
+    let stroke: Color = DEFAULT_CONNECTOR_COLOR;
     if (isShape(current)) {
-      color = ThemeObserver.getColorValue(
-        current.strokeColor,
-        DEFAULT_SHAPE_STROKE_COLOR
-      );
+      if (typeof current.strokeColor === 'object') {
+        stroke = { ...current.strokeColor };
+      } else {
+        stroke = current.strokeColor;
+      }
     } else {
-      const tmpColor = ThemeObserver.getColorValue(
-        current.background,
-        DEFAULT_NOTE_BACKGROUND_COLOR
-      );
-      let tag = tmpColor.split('-').pop();
-      if (!tag || tag === 'gray') tag = 'grey';
-      color = `--affine-palette-line-${tag}`;
+      if (typeof current.background === 'object') {
+        stroke = { ...current.background };
+      } else {
+        let tag = current.background.split('-').pop();
+        if (!tag || tag === 'gray') tag = 'grey';
+        stroke = `--affine-palette-line-${tag}`;
+      }
     }
-
-    const stroke = getComputedStyle(edgeless).getPropertyValue(color)
-      ? color
-      : DEFAULT_CONNECTOR_COLOR;
 
     const id = edgeless.service.addElement(CanvasElementType.CONNECTOR, {
       mode: ConnectorMode.Orthogonal,
