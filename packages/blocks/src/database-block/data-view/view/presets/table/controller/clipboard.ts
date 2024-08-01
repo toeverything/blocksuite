@@ -5,6 +5,7 @@ import type { Cell } from '../../../../view-manager/cell.js';
 import type { Row } from '../../../../view-manager/row.js';
 import type { DataViewTable } from '../table-view.js';
 
+import { toast } from '../../../../../../_common/components/index.js';
 import {
   TableAreaSelection,
   TableRowSelection,
@@ -56,6 +57,20 @@ export class TableClipboardController implements ReactiveController {
           [TEXT]: stringResult,
           [BLOCKSUITE_DATABASE_TABLE]: JSON.stringify(jsonResult),
         };
+      })
+      .then(() => {
+        if (area[0]?.row) {
+          toast(
+            this.host.std.host,
+            `${area.length} row${area.length > 1 ? 's' : ''} copied to clipboard`
+          );
+        } else {
+          const count = area.flatMap(row => row.cells).length;
+          toast(
+            this.host.std.host,
+            `${count} cell${count > 1 ? 's' : ''} copied to clipboard`
+          );
+        }
       })
       .catch(console.error);
 
