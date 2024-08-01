@@ -4,7 +4,9 @@ import {
   StrokeStyle,
 } from '../../../surface-block/consts.js';
 
-export const NOTE_MIN_WIDTH = 364;
+export const BOOKMARK_MIN_WIDTH = 450;
+
+export const NOTE_MIN_WIDTH = BOOKMARK_MIN_WIDTH + 24 * 2;
 export const NOTE_MIN_HEIGHT = 78;
 export const NOTE_INIT_HEIGHT = 91;
 

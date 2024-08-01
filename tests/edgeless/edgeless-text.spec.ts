@@ -8,6 +8,7 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   getEdgelessSelectedRect,
+  getPageSnapshot,
   initEmptyEdgelessState,
   pressArrowLeft,
   pressArrowRight,
@@ -326,5 +327,78 @@ test.describe('edgeless text block', () => {
     expect(selectedRect.height).toBeCloseTo(textRect!.height);
     expect(selectedRect.x).toBeCloseTo(textRect!.x);
     expect(selectedRect.y).toBeCloseTo(textRect!.y);
+  });
+
+  test('min width limit for embed block', async ({ page }, testInfo) => {
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_init.json`
+    );
+
+    await type(page, '@');
+    await pressEnter(page);
+
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_add_linked_doc.json`
+    );
+
+    await page.getByLabel('Switch view').click();
+    await page.getByTestId('link-to-card').click();
+
+    await waitNextFrame(page);
+
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_link_to_card.json`
+    );
+
+    // blur
+    await page.mouse.click(0, 0);
+    // select text element
+    await page.mouse.click(130, 140);
+    const selectedRect = await getEdgelessSelectedRect(page);
+
+    // from right to left
+    await page.mouse.move(
+      selectedRect.x + selectedRect.width,
+      selectedRect.y + selectedRect.height / 2
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      selectedRect.x + selectedRect.width - 45,
+      selectedRect.y + selectedRect.height / 2,
+      {
+        steps: 10,
+      }
+    );
+    await page.mouse.up();
+
+    // not changed
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_link_to_card.json`
+    );
+
+    // from left to right
+    await page.mouse.move(
+      selectedRect.x + selectedRect.width,
+      selectedRect.y + selectedRect.height / 2
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      selectedRect.x + selectedRect.width + 45,
+      selectedRect.y + selectedRect.height / 2,
+      {
+        steps: 10,
+      }
+    );
+    await page.mouse.up();
+
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_drag.json`
+    );
   });
 });

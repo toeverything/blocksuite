@@ -12,6 +12,7 @@ import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-roo
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
 import type { GfxCompatibleProps } from '../edgeless/mixin/index.js';
 
+import { BOOKMARK_MIN_WIDTH } from '../../root-block/edgeless/utils/consts.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -139,6 +140,15 @@ export class EmbedBlockComponent<
     const isSelected = !!this.selected?.is('block');
 
     if (!this.isInSurface) {
+      if (
+        this._cardStyle === 'horizontal' ||
+        this._cardStyle === 'horizontalThin' ||
+        this._cardStyle === 'list'
+      ) {
+        this.style.display = 'block';
+        this.style.minWidth = `${BOOKMARK_MIN_WIDTH}px`;
+      }
+
       return html`
         <div
           class=${classMap({

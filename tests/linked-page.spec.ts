@@ -216,7 +216,7 @@ test.describe('reference node', () => {
     );
   });
 
-  test('should reference node can be seleted', async ({ page }) => {
+  test('should reference node can be selected', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await addNewPage(page);
