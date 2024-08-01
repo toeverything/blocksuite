@@ -250,7 +250,7 @@ jobs:
           COVERAGE: true
 
       - name: Collect code coverage report
-        run: pnpm exec nyc report -t .nyc_output --reporter=lcov
+        run: pnpm exec nyc report -t tests/.nyc_output --reporter=lcov
 
       - name: Upload E2E test coverage results
         uses: codecov/codecov-action@v3
