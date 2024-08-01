@@ -67,6 +67,10 @@ export class AffineImageToolbarWidget extends WidgetComponent<
             }}
           ></affine-image-toolbar>`,
           container: this.block,
+          // stacking-context(editor-host)
+          portalStyles: {
+            zIndex: 'var(--affine-z-index-popover)',
+          },
           computePosition: {
             referenceElement: imageContainer,
             placement: 'right-start',
