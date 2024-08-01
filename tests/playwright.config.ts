@@ -9,7 +9,7 @@ export default defineConfig({
   snapshotDir: 'snapshots',
   snapshotPathTemplate: 'snapshots/{testFilePath}/{arg}{ext}',
   webServer: {
-    command: 'pnpm dev',
+    command: 'pnpm nx dev @blocksuite/playground',
     port: 5173,
     // command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
     // port: process.env.CI ? 4173 : 5173,
