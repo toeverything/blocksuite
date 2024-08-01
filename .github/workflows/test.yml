@@ -258,3 +258,36 @@ jobs:
           name: test-results-main
           path: ./test-results
           if-no-files-found: ignore
+
+  delete_github_deployments:
+    runs-on: ubuntu-latest
+    needs: [root-level-e2e-test]
+    if: ${{ always() }}
+    steps:
+      - name: Delete Previous deployments
+        uses: actions/github-script@v6
+        env:
+          GITHUB_SHA_HEAD: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const { GITHUB_SHA_HEAD } = process.env
+            const deployments = await github.rest.repos.listDeployments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: GITHUB_SHA_HEAD
+            });
+            await Promise.all(
+              deployments.data.map(async (deployment) => {
+                await github.rest.repos.createDeploymentStatus({ 
+                  owner: context.repo.owner, 
+                  repo: context.repo.repo, 
+                  deployment_id: deployment.id, 
+                  state: 'inactive' 
+                });
+                return github.rest.repos.deleteDeployment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: deployment.id
+                });
+              })
+            );
