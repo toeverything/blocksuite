@@ -114,8 +114,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Start CI run
-        run: 'npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"'
+      #      - name: Start CI run
+      #        run: 'npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"'
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v3
         with:
@@ -124,6 +124,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - uses: nrwl/nx-set-shas@v4
 
       - name: Run type test
         run: pnpm test:type
@@ -168,8 +170,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Start CI run
-        run: 'npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"'
+      #      - name: Start CI run
+      #        run: 'npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"'
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
@@ -184,6 +186,8 @@ jobs:
 
       - name: Install playwright browsers
         run: npx playwright install chromium
+
+      - uses: nrwl/nx-set-shas@v4
 
       - name: Run inline editor playwright test
         run: pnpm --filter=@blocksuite/inline test:e2e:ci
@@ -204,8 +208,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Start CI run
-        run: 'npx nx-cloud start-ci-run --distribute-on="10 linux-medium-js"'
+      #      - name: Start CI run
+      #        run: 'npx nx-cloud start-ci-run --distribute-on="10 linux-medium-js"'
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
@@ -227,6 +231,8 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+
+      - uses: nrwl/nx-set-shas@v4
 
       - name: Install dependencies
         run: pnpm install
