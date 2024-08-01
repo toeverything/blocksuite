@@ -52,6 +52,7 @@ interface ObserverParams {
   onMove?: (step: 1 | -1) => void;
   onConfirm?: () => void;
   onAbort?: () => void;
+  onPaste?: () => void;
   interceptor?: (e: KeyboardEvent, next: () => void) => void;
 }
 
@@ -63,6 +64,7 @@ export const createKeydownObserver = ({
   onMove,
   onConfirm,
   onAbort,
+  onPaste,
   interceptor = (_, next) => next(),
 }: ObserverParams) => {
   const keyDownListener = (e: KeyboardEvent) => {
@@ -89,6 +91,7 @@ export const createKeydownObserver = ({
           }
           // Paste command
           case 'v': {
+            onPaste?.();
             return;
           }
         }
