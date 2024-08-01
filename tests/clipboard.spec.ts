@@ -249,7 +249,7 @@ test(scoped`markdown format parse`, async ({ page }) => {
   };
   await waitNextFrame(page);
   await pasteContent(page, clipData);
-  await page.waitForTimeout(50);
+  await page.waitForTimeout(200);
   await assertBlockTypes(page, [
     'h1',
     'h2',
@@ -299,6 +299,7 @@ test(scoped`markdown format parse`, async ({ page }) => {
   };
   await waitNextFrame(page);
   await pasteContent(page, clipData);
+  await page.waitForTimeout(200);
   await assertTextFormats(page, [
     { bold: true, italic: true },
     { bold: true },
