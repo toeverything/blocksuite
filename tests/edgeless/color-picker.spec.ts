@@ -62,9 +62,6 @@ function getAlphaInput(locator: Locator) {
   return locator.locator('label.alpha input');
 }
 
-// Theme Observer
-test.describe('theme observer', () => {});
-
 // Basic functions
 test.describe('basic functions', () => {
   test('custom color button should be displayed', async ({ page }) => {
@@ -340,5 +337,20 @@ test.describe('basic functions', () => {
 
     rgba = parseStringToRgba('rgba(233,233,233, .5)');
     expect(rgba.a).toEqual(0.5);
+
+    rgba = parseStringToRgba('transparent');
+    expect(rgba).toEqual({ r: 1, g: 1, b: 1, a: 0 });
+
+    rgba = parseStringToRgba('--blocksuite-transparent');
+    expect(rgba).toEqual({ r: 1, g: 1, b: 1, a: 0 });
+
+    rgba = parseStringToRgba('--affine-palette-transparent');
+    expect(rgba).toEqual({ r: 1, g: 1, b: 1, a: 0 });
+
+    rgba = parseStringToRgba('#ff0');
+    expect(rgba).toEqual({ r: 1, g: 1, b: 0, a: 1 });
+
+    rgba = parseStringToRgba('#ff09');
+    expect(rgba).toEqual({ r: 1, g: 1, b: 0, a: 0.6 });
   });
 });

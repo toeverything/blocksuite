@@ -12,6 +12,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
+import type { Color } from '../../../../surface-block/consts.js';
 import type { Connection } from '../../../../surface-block/element-model/connector.js';
 import type { ShapeStyle } from '../../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -179,30 +180,22 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     const { xywh, position } = target;
 
-    let color = '';
+    let background: Color = DEFAULT_NOTE_BACKGROUND_COLOR;
     if (isShape(this.currentSource)) {
-      const tmpColor = ThemeObserver.getColorValue(
-        this.currentSource.fillColor,
-        DEFAULT_SHAPE_FILL_COLOR
-      );
-      if (tmpColor.startsWith('--')) {
-        let tag = tmpColor.split('-').pop();
-        if (!tag || tag === 'gray') tag = 'grey';
-        color = `--affine-note-background-${tag}`;
+      if (typeof this.currentSource.fillColor === 'object') {
+        background = { ...this.currentSource.fillColor };
       } else {
-        color = tmpColor;
+        let tag = this.currentSource.fillColor.split('-').pop();
+        if (!tag || tag === 'gray') tag = 'grey';
+        background = `--affine-note-background-${tag}`;
       }
     } else {
-      color = ThemeObserver.getColorValue(
-        this.currentSource.background,
-        DEFAULT_NOTE_BACKGROUND_COLOR
-      );
+      if (typeof this.currentSource.background === 'object') {
+        background = { ...this.currentSource.background };
+      } else {
+        background = this.currentSource.background;
+      }
     }
-
-    const computedStyle = getComputedStyle(this.edgeless);
-    const background = computedStyle.getPropertyValue(color)
-      ? color
-      : DEFAULT_NOTE_BACKGROUND_COLOR;
 
     const id = service!.addBlock(
       'affine:note',
@@ -466,8 +459,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const xywh = this._getTargetXYWH(w, h)?.xywh;
     if (!xywh) return;
 
-    const computedStyle = getComputedStyle(this.edgeless);
-    const strokeColor = computedStyle.getPropertyValue('--affine-black-30');
+    const strokeColor = ThemeObserver.getPropertyValue('--affine-black-30');
     this._overlay = new AutoCompleteFrameOverlay(xywh, strokeColor);
     this.edgeless.surface.renderer.addOverlay(this._overlay);
   }
@@ -479,30 +471,20 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     )?.xywh;
     if (!xywh) return;
 
-    let color = '';
+    let background = '';
     if (isShape(this.currentSource)) {
-      const tmpColor = ThemeObserver.getColorValue(
+      background = ThemeObserver.getColorValue(
         this.currentSource.fillColor,
-        DEFAULT_SHAPE_FILL_COLOR
+        DEFAULT_SHAPE_FILL_COLOR,
+        true
       );
-      if (tmpColor.startsWith('--')) {
-        let tag = tmpColor.split('-').pop();
-        if (!tag || tag === 'gray') tag = 'grey';
-        color = `--affine-note-background-${tag}`;
-      } else {
-        color = tmpColor;
-      }
     } else {
-      color = ThemeObserver.getColorValue(
+      background = ThemeObserver.getColorValue(
         this.currentSource.background,
-        DEFAULT_NOTE_BACKGROUND_COLOR
+        DEFAULT_NOTE_BACKGROUND_COLOR,
+        true
       );
     }
-
-    const computedStyle = getComputedStyle(this.edgeless);
-    const background =
-      computedStyle.getPropertyValue(color) ||
-      computedStyle.getPropertyValue(DEFAULT_NOTE_BACKGROUND_COLOR);
 
     this._overlay = new AutoCompleteNoteOverlay(xywh, background);
     this.edgeless.surface.renderer.addOverlay(this._overlay);
