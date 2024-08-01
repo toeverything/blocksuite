@@ -27,11 +27,7 @@ import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
 import { toast } from '../../_common/components/toast.js';
-import {
-  BLOCK_ID_ATTR,
-  EMBED_CARD_HEIGHT,
-  EMBED_CARD_WIDTH,
-} from '../../_common/consts.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../_common/consts.js';
 import {
   NoteDisplayMode,
   type Viewport,
@@ -92,14 +88,21 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     const { zoom, translateX, translateY } = this.service.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
 
-    this.background.style.setProperty(
-      'background-position',
-      `${translateX}px ${translateY}px`
-    );
-    this.background.style.setProperty('background-size', `${gap}px ${gap}px`);
+    if (this.backgroundElm) {
+      this.backgroundElm.style.setProperty(
+        'background-position',
+        `${translateX}px ${translateY}px`
+      );
+      this.backgroundElm.style.setProperty(
+        'background-size',
+        `${gap}px ${gap}px`
+      );
+    }
 
-    this.layer.style.setProperty('transform', this._getLayerViewport());
-    this.layer.dataset.scale = zoom.toString();
+    if (this.layerElm) {
+      this.layerElm.style.setProperty('transform', this._getLayerViewport());
+      this.layerElm.dataset.scale = zoom.toString();
+    }
   }, this);
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -797,8 +800,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   }
 
   override renderBlock() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
     const widgets = repeat(
       Object.entries(this.widgets),
       ([id]) => id,
@@ -813,6 +814,12 @@ export class EdgelessRootBlockComponent extends BlockComponent<
           )}
         </div>
       </div>
+
+      <!--
+        Used to mount component before widgets
+        Eg., canvas text editor
+      -->
+      <div class="edgeless-mount-point"></div>
 
       <!-- need to be converted to widget -->
       <edgeless-dragging-area-rect
@@ -916,7 +923,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   private accessor _isResizing = false;
 
   @query('.edgeless-background')
-  accessor background!: HTMLDivElement;
+  accessor backgroundElm: HTMLDivElement | null = null;
 
   @state()
   accessor edgelessTool: EdgelessTool = {
@@ -924,7 +931,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   };
 
   @query('.edgeless-layer')
-  accessor layer!: HTMLDivElement;
+  accessor layerElm: HTMLDivElement | null = null;
+
+  @query('.edgeless-mount-point')
+  accessor mountElm: HTMLDivElement | null = null;
 
   @query('edgeless-selected-rect')
   accessor selectedRect!: EdgelessSelectedRect;

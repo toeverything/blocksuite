@@ -1,6 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -39,6 +40,13 @@ export function mountTextElementEditor(
   edgeless: EdgelessRootBlockComponent,
   focusCoord?: IModelCoord
 ) {
+  if (!edgeless.mountElm) {
+    throw new BlockSuiteError(
+      ErrorCode.ValueNotExists,
+      "edgeless block's mount point does not exist"
+    );
+  }
+
   let cursorIndex = textElement.text.length;
   if (focusCoord) {
     cursorIndex = Math.min(
@@ -46,6 +54,7 @@ export function mountTextElementEditor(
       cursorIndex
     );
   }
+
   const textEditor = new EdgelessTextEditor();
   textEditor.edgeless = edgeless;
   textEditor.element = textElement;
@@ -67,6 +76,13 @@ export function mountShapeTextEditor(
   shapeElement: ShapeElementModel,
   edgeless: EdgelessRootBlockComponent
 ) {
+  if (!edgeless.mountElm) {
+    throw new BlockSuiteError(
+      ErrorCode.ValueNotExists,
+      "edgeless block's mount point does not exist"
+    );
+  }
+
   if (!shapeElement.text) {
     const text = new DocCollection.Y.Text();
     let color = ThemeObserver.getColorValue(
@@ -87,15 +103,21 @@ export function mountShapeTextEditor(
           : FontFamily.Kalam,
     });
   }
+
   const updatedElement = edgeless.service.getElementById(shapeElement.id);
-  assertInstanceOf(updatedElement, ShapeElementModel);
+
+  assertInstanceOf(
+    updatedElement,
+    ShapeElementModel,
+    'Cannot mount text editor on a non-shape element'
+  );
 
   const shapeEditor = new EdgelessShapeTextEditor();
   shapeEditor.element = updatedElement;
   shapeEditor.edgeless = edgeless;
   shapeEditor.mountEditor = mountShapeTextEditor;
 
-  edgeless.append(shapeEditor);
+  edgeless.mountElm.append(shapeEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [shapeElement.id],
     editing: true,
@@ -106,11 +128,18 @@ export function mountFrameTitleEditor(
   frame: FrameBlockModel,
   edgeless: EdgelessRootBlockComponent
 ) {
+  if (!edgeless.mountElm) {
+    throw new BlockSuiteError(
+      ErrorCode.ValueNotExists,
+      "edgeless block's mount point does not exist"
+    );
+  }
+
   const frameEditor = new EdgelessFrameTitleEditor();
   frameEditor.frameModel = frame;
   frameEditor.edgeless = edgeless;
 
-  edgeless.append(frameEditor);
+  edgeless.mountElm.append(frameEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [frame.id],
     editing: true,
@@ -121,11 +150,18 @@ export function mountGroupTitleEditor(
   group: GroupElementModel,
   edgeless: EdgelessRootBlockComponent
 ) {
+  if (!edgeless.mountElm) {
+    throw new BlockSuiteError(
+      ErrorCode.ValueNotExists,
+      "edgeless block's mount point does not exist"
+    );
+  }
+
   const groupEditor = new EdgelessGroupTitleEditor();
   groupEditor.group = group;
   groupEditor.edgeless = edgeless;
 
-  edgeless.append(groupEditor);
+  edgeless.mountElm.append(groupEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [group.id],
     editing: true,
@@ -167,6 +203,13 @@ export function mountConnectorLabelEditor(
   edgeless: EdgelessRootBlockComponent,
   point?: IVec
 ) {
+  if (!edgeless.mountElm) {
+    throw new BlockSuiteError(
+      ErrorCode.ValueNotExists,
+      "edgeless block's mount point does not exist"
+    );
+  }
+
   let text = connector.text;
   if (!text) {
     text = new DocCollection.Y.Text();
@@ -188,7 +231,7 @@ export function mountConnectorLabelEditor(
   editor.connector = connector;
   editor.edgeless = edgeless;
 
-  edgeless.append(editor);
+  edgeless.mountElm.append(editor);
   editor.updateComplete
     .then(() => {
       editor.inlineEditor?.focusEnd();
