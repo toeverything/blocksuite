@@ -82,7 +82,7 @@ export class SpecStore {
   }
 
   getConfig<Key extends BlockSuite.ConfigKeys>(
-    flavour: string
+    flavour: Key
   ): BlockSuite.BlockConfigs[Key] | null;
 
   getConfig(flavour: string) {

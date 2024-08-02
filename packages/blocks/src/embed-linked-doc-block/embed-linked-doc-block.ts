@@ -1,3 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
+
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -23,6 +25,11 @@ import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
+
+export interface EmbedLinkedDocBlockConfig {
+  handleClick?: (e: MouseEvent, host: EditorHost) => void;
+  handleDoubleClick?: (e: MouseEvent, host: EditorHost) => void;
+}
 
 @customElement('affine-embed-linked-doc-block')
 @Peekable({
@@ -201,12 +208,22 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     });
   };
 
-  private _handleClick(_event: MouseEvent) {
+  private _handleClick(event: MouseEvent) {
+    if (this.config.handleClick) {
+      this.config.handleClick(event, this.host);
+      return;
+    }
+
     if (this.isInSurface) return;
     this._selectBlock();
   }
 
   private _handleDoubleClick(event: MouseEvent) {
+    if (this.config.handleDoubleClick) {
+      this.config.handleDoubleClick(event, this.host);
+      return;
+    }
+
     if (isPeekable(this)) {
       return;
     }
@@ -463,6 +480,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
         });
       });
     }
+  }
+
+  get config(): EmbedLinkedDocBlockConfig {
+    return this.std.spec.getConfig('affine:embed-linked-doc') || {};
   }
 
   get docTitle() {

@@ -191,7 +191,7 @@ export class AffineLinkedDocWidget extends WidgetComponent {
       ignoreBlockTypes: ['affine:code'],
       convertTriggerKey: true,
       getMenus,
-      ...this.std.spec.getConfig(this.flavour)?.linkedWidget,
+      ...this.std.spec.getConfig('affine:page')?.linkedWidget,
     };
   }
 }
