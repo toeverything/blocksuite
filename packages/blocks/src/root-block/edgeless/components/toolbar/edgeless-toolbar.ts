@@ -126,6 +126,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       padding-bottom: 16px;
       width: fit-content;
       max-width: calc(100% - ${unsafeCSS(SAFE_AREA_WIDTH)}px * 2);
+      min-width: 264px;
     }
     .edgeless-toolbar-toggle-control[data-enable='true'] {
       transition: 0.23s ease;
