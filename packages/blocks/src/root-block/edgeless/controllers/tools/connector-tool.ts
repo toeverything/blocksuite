@@ -178,7 +178,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     if (this._mode === ConnectorToolMode.Dragging) return;
     if (!this._sourceBounds) return;
     if (!this._connector) return;
-    const sourceId = this._connector.source.id;
+    const sourceId = this._connector.source?.id;
     if (!sourceId) return;
 
     const point = this._service.viewport.toModelCoord(e.x, e.y);
