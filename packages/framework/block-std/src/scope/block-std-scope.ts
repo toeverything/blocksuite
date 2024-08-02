@@ -1,13 +1,13 @@
 import type { Doc, DocCollection } from '@blocksuite/store';
 
-import type { EditorHost } from '../view/index.js';
+import type { EditorHost } from '../view/element/index.js';
 
 import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';
 import { UIEventDispatcher } from '../event/index.js';
 import { SelectionManager } from '../selection/index.js';
 import { SpecStore } from '../spec/index.js';
-import { ViewStore } from '../view/index.js';
+import { ViewStore } from '../view/view-store.js';
 
 export interface BlockStdOptions {
   host: EditorHost;

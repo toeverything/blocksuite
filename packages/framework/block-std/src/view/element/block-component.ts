@@ -1,6 +1,5 @@
-import type { Doc } from '@blocksuite/store';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { consume, createContext, provide } from '@lit/context';
 import { SignalWatcher, computed } from '@lit-labs/preact-signals';
@@ -11,10 +10,11 @@ import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
 import type { EventName, UIEventHandler } from '../../event/index.js';
-import type { BlockStdScope } from '../../scope/index.js';
 import type { BlockService } from '../../service/index.js';
 import type { WidgetComponent } from './widget-component.js';
 
+import { BlockStdScope } from '../../scope/index.js';
+import { PropTypes, requiredProperties } from '../decorators/required.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import { docContext, stdContext } from './lit-host.js';
 import { ShadowlessElement } from './shadowless-element.js';
@@ -22,6 +22,11 @@ import { ShadowlessElement } from './shadowless-element.js';
 export const modelContext = createContext<BlockModel>('model');
 export const serviceContext = createContext<BlockService>('service');
 
+@requiredProperties({
+  doc: PropTypes.instanceOf(Doc),
+  std: PropTypes.instanceOf(BlockStdScope),
+  widgets: PropTypes.recordOf(PropTypes.object),
+})
 export class BlockComponent<
   Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
@@ -55,7 +60,7 @@ export class BlockComponent<
     this._disposables.add(this.host.event.add(name, handler, config));
   };
 
-  path!: string[];
+  path: string[] = [];
 
   renderChildren = (model: BlockModel): TemplateResult => {
     return this.host.renderChildren(model);

@@ -1,6 +1,6 @@
-import type { EditorHost } from '@blocksuite/block-std';
-
+import { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
+import { PropTypes, requiredProperties } from '@blocksuite/block-std';
 import { flip, offset } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
@@ -17,6 +17,7 @@ import {
   SUBMENU_OFFSET_MAIN_AXIS,
 } from './const.js';
 
+@requiredProperties({ host: PropTypes.instanceOf(EditorHost) })
 @customElement('ai-item-list')
 export class AIItemList extends WithDisposable(LitElement) {
   private _abortController: AbortController | null = null;
@@ -134,7 +135,7 @@ export class AIItemList extends WithDisposable(LitElement) {
   }
 
   @property({ attribute: false })
-  accessor groups!: AIItemGroupConfig[];
+  accessor groups: AIItemGroupConfig[] = [];
 
   @property({ attribute: false })
   accessor host!: EditorHost;

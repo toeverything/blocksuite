@@ -58,7 +58,7 @@ export class VElement<
   };
 
   @property({ attribute: false })
-  accessor selected!: boolean;
+  accessor selected: boolean = false;
 }
 
 declare global {

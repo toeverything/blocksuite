@@ -6,7 +6,8 @@ import {
   handleError,
 } from '@blocksuite/global/exceptions';
 import { Slot } from '@blocksuite/global/utils';
-import { type BlockModel, BlockViewType, type Doc } from '@blocksuite/store';
+import { Doc } from '@blocksuite/store';
+import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import {
@@ -26,7 +27,8 @@ import type { SelectionManager } from '../../selection/index.js';
 import type { BlockSpec, SpecStore } from '../../spec/index.js';
 import type { ViewStore } from '../view-store.js';
 
-import { BlockStdScope } from '../../scope/index.js';
+import { BlockStdScope } from '../../scope/block-std-scope.js';
+import { PropTypes, requiredProperties } from '../decorators/required.js';
 import { RangeManager } from '../utils/range-manager.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import { ShadowlessElement } from './shadowless-element.js';
@@ -34,6 +36,11 @@ import { ShadowlessElement } from './shadowless-element.js';
 export const docContext = createContext<Doc>('doc');
 export const stdContext = createContext<BlockStdScope>('std');
 
+@requiredProperties({
+  doc: PropTypes.instanceOf(Doc),
+  std: PropTypes.instanceOf(BlockStdScope),
+  specs: PropTypes.arrayOf(PropTypes.object),
+})
 @customElement('editor-host')
 export class EditorHost extends SignalWatcher(
   WithDisposable(ShadowlessElement)

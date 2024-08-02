@@ -1,6 +1,6 @@
-import type { EditorHost } from '@blocksuite/block-std';
-
+import { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
+import { PropTypes, requiredProperties } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -10,6 +10,10 @@ import type { AIItemConfig, AISubItemConfig } from './types.js';
 import { EnterIcon } from '../../icons/ai.js';
 import { menuItemStyles } from './styles.js';
 
+@requiredProperties({
+  host: PropTypes.instanceOf(EditorHost),
+  item: PropTypes.object,
+})
 @customElement('ai-sub-item-list')
 export class AISubItemList extends WithDisposable(LitElement) {
   private _handleClick = (subItem: AISubItemConfig) => {
@@ -67,7 +71,7 @@ export class AISubItemList extends WithDisposable(LitElement) {
   }
 
   @property({ attribute: false })
-  accessor abortController!: AbortController;
+  accessor abortController: AbortController = new AbortController();
 
   @property({ attribute: false })
   accessor host!: EditorHost;
