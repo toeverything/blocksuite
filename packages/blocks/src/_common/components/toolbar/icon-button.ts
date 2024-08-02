@@ -140,7 +140,6 @@ export class EditorIconButton extends LitElement {
         style=${iconContainerStyles}
         ?with-hover=${this.withHover}
         ?disabled=${this.disabled}
-        ?active=${this.active}
       >
         <slot></slot>
         ${cache(
@@ -157,7 +156,7 @@ export class EditorIconButton extends LitElement {
     `;
   }
 
-  @property({ attribute: false })
+  @property({ type: Boolean, reflect: true })
   accessor active = false;
 
   @property({ attribute: false })
