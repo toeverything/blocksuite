@@ -169,6 +169,10 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       elements: [newNoteId],
       editing: false,
     });
+
+    this.edgeless.service.telemetryService?.track('SplitNote', {
+      control: 'NoteSlicer',
+    });
   }
 
   private _updateActiveSlicerIndex(pos: Point) {

@@ -104,6 +104,7 @@ interface DocCreatedEvent extends TelemetryEvent {
 export interface TelemetryEventMap {
   DocCreated: DocCreatedEvent;
   LinkedDocCreated: TelemetryEvent;
+  SplitNote: TelemetryEvent;
 }
 
 export interface TelemetryService {
