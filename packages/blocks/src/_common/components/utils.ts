@@ -47,6 +47,7 @@ export function getQuery(
 interface ObserverParams {
   target: HTMLElement;
   signal: AbortSignal;
+  inlineEditor: InlineEditor;
   onInput?: () => void;
   onDelete?: () => void;
   onMove?: (step: 1 | -1) => void;
@@ -59,6 +60,7 @@ interface ObserverParams {
 export const createKeydownObserver = ({
   target,
   signal,
+  inlineEditor,
   onInput,
   onDelete,
   onMove,
@@ -67,6 +69,12 @@ export const createKeydownObserver = ({
   onPaste,
   interceptor = (_, next) => next(),
 }: ObserverParams) => {
+  // In iOS webkit, using requestAnimationFrame has some timing issues
+  // we need wait inline editor updated before handle the next action
+  const waitForInlineEditorUpdated = (fn: () => void) => {
+    inlineEditor.slots.inlineRangeUpdate.once(fn);
+  };
+
   const keyDownListener = (e: KeyboardEvent) => {
     if (e.defaultPrevented) return;
 
@@ -118,7 +126,7 @@ export const createKeydownObserver = ({
       (!isControlledKeyboardEvent(e) && e.key.length === 1) ||
       e.isComposing
     ) {
-      requestAnimationFrame(() => onInput?.());
+      waitForInlineEditorUpdated(() => onInput?.());
       return;
     }
 
@@ -128,7 +136,7 @@ export const createKeydownObserver = ({
         return;
       }
       case 'Backspace': {
-        requestAnimationFrame(() => onDelete?.());
+        waitForInlineEditorUpdated(() => onDelete?.());
         return;
       }
       case 'Enter': {
@@ -191,14 +199,14 @@ export const createKeydownObserver = ({
   // Fix paste input
   target.addEventListener(
     'paste',
-    () => requestAnimationFrame(() => onInput?.()),
+    () => waitForInlineEditorUpdated(() => onInput?.()),
     { signal }
   );
 
   // Fix composition input
   target.addEventListener(
     'input',
-    () => requestAnimationFrame(() => onInput?.()),
+    () => waitForInlineEditorUpdated(() => onInput?.()),
     { signal }
   );
 };
