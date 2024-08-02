@@ -2,7 +2,7 @@ import { baseTheme } from '@toeverything/theme';
 import { LitElement, type TemplateResult, css, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { ChatMessage } from '../types.js';
+import type { MessageRole, MessageUserInfo } from '../types.js';
 
 import { AffineAIIcon } from '../../_common/icon.js';
 
@@ -96,13 +96,16 @@ declare global {
   }
 }
 
-export function UserInfoTemplate(message: ChatMessage) {
-  const isUser = 'role' in message && message.role === 'user';
+export function UserInfoTemplate(
+  userInfo: MessageUserInfo,
+  messageRole?: MessageRole
+) {
+  const isUser = !!messageRole && messageRole === 'user';
 
   const userInfoTemplate = isUser
     ? html`<user-info
-        .userName=${message.userName ?? 'You'}
-        .avatarUrl=${message.avatarUrl}
+        .userName=${userInfo.userName ?? 'You'}
+        .avatarUrl=${userInfo.avatarUrl}
       ></user-info>`
     : html`<user-info
         .userName=${'AFFiNE AI'}

@@ -16,3 +16,10 @@ export const ChatMessagesSchema = z.array(ChatMessageSchema);
 
 // Derive the TypeScript type from the Zod schema
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;
+
+export type MessageRole = 'user' | 'assistant';
+export type MessageUserInfo = {
+  userId?: string;
+  userName?: string;
+  avatarUrl?: string;
+};

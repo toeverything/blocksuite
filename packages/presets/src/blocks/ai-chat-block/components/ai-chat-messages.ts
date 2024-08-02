@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { ChatMessage } from '../types.js';
+import type { ChatMessage, MessageRole, MessageUserInfo } from '../types.js';
 import type { TextRendererOptions } from './text-renderer.js';
 
 import './chat-images.js';
@@ -41,10 +41,17 @@ export class AIChatMessage extends LitElement {
   `;
 
   override render() {
-    const { host, message, textRendererOptions, state } = this;
-    const isUserMessage = 'role' in message && message.role === 'user';
-    const withAttachments =
-      !!message.attachments && message.attachments.length > 0;
+    const {
+      host,
+      textRendererOptions,
+      state,
+      content,
+      attachments,
+      messageRole,
+      userInfo,
+    } = this;
+    const isUserMessage = !!messageRole && messageRole === 'user';
+    const withAttachments = !!attachments && attachments.length > 0;
 
     const userMessageClasses = classMap({
       'ai-chat-user-message': true,
@@ -53,14 +60,14 @@ export class AIChatMessage extends LitElement {
 
     return html`
       <div class="ai-chat-message">
-        ${UserInfoTemplate(message)}
+        ${UserInfoTemplate(userInfo, messageRole)}
         <div class="ai-chat-content">
-          <chat-images .attachments=${message.attachments}></chat-images>
+          <chat-images .attachments=${attachments}></chat-images>
           ${isUserMessage
-            ? html`<div class=${userMessageClasses}>${message.content}</div>`
+            ? html`<div class=${userMessageClasses}>${content}</div>`
             : html`<text-renderer
                 .host=${host}
-                .answer=${message.content}
+                .answer=${content}
                 .options=${textRendererOptions}
                 .state=${state}
               ></text-renderer>`}
@@ -70,16 +77,25 @@ export class AIChatMessage extends LitElement {
   }
 
   @property({ attribute: false })
+  accessor attachments: string[] | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor content: string = '';
+
+  @property({ attribute: false })
   accessor host!: EditorHost;
 
   @property({ attribute: false })
-  accessor message!: ChatMessage;
+  accessor messageRole: MessageRole | undefined = undefined;
 
   @property({ attribute: false })
   accessor state: AffineAIPanelState = 'finished';
 
   @property({ attribute: false })
   accessor textRendererOptions: TextRendererOptions = {};
+
+  @property({ attribute: false })
+  accessor userInfo: MessageUserInfo = {};
 }
 
 @customElement('ai-chat-messages')
@@ -105,13 +121,24 @@ export class AIChatMessages extends LitElement {
       ${repeat(
         this.messages,
         message => message.id,
-        message => html`
-          <ai-chat-message
-            .host=${this.host}
-            .message=${message}
-            .textRendererOptions=${this.textRendererOptions}
-          ></ai-chat-message>
-        `
+        message => {
+          const { attachments, role, content } = message;
+          const userInfo = {
+            userId: message.userId,
+            userName: message.userName,
+            avatarUrl: message.avatarUrl,
+          };
+          return html`
+            <ai-chat-message
+              .host=${this.host}
+              .textRendererOptions=${this.textRendererOptions}
+              .content=${content}
+              .attachments=${attachments}
+              .messageRole=${role}
+              .userInfo=${userInfo}
+            ></ai-chat-message>
+          `;
+        }
       )}
     </div>`;
   }

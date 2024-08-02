@@ -9,7 +9,7 @@ import {
   SpecProvider,
 } from '@blocksuite/blocks';
 import { BlockViewType, type Doc, type Query } from '@blocksuite/store';
-import { LitElement, type PropertyValues, css, html } from 'lit';
+import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -80,7 +80,20 @@ export class TextRenderer extends WithDisposable(LitElement) {
     }
   };
 
-  private _doc!: Doc;
+  private _doc: Doc | null = null;
+
+  private readonly _query: Query = {
+    mode: 'strict',
+    match: [
+      'affine:page',
+      'affine:note',
+      'affine:surface',
+      'affine:paragraph',
+      'affine:code',
+      'affine:list',
+      'affine:divider',
+    ].map(flavour => ({ flavour, viewType: BlockViewType.Display })),
+  };
 
   private _timer?: ReturnType<typeof setInterval> | null = null;
 
@@ -88,26 +101,14 @@ export class TextRenderer extends WithDisposable(LitElement) {
     if (this._answers.length > 0) {
       const latestAnswer = this._answers.pop();
       this._answers = [];
-      const query: Query = {
-        mode: 'loose',
-        match: [
-          'affine:page',
-          'affine:note',
-          'affine:surface',
-          'affine:paragraph',
-          'affine:code',
-          'affine:list',
-          'affine:divider',
-        ].map(flavour => ({ flavour, viewType: BlockViewType.Display })),
-      };
       if (latestAnswer) {
         markDownToDoc(this.host, latestAnswer)
           .then(doc => {
             this._doc = doc.blockCollection.getDoc({
-              query,
+              query: this._query,
             });
             this.disposables.add(() => {
-              doc.blockCollection.clearQuery(query);
+              doc.blockCollection.clearQuery(this._query);
             });
             this._doc.awarenessStore.setReadonly(
               this._doc.blockCollection,
@@ -217,6 +218,10 @@ export class TextRenderer extends WithDisposable(LitElement) {
   }
 
   override render() {
+    if (!this._doc) {
+      return nothing;
+    }
+
     const { maxHeight, customHeading } = this.options;
     const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
     const classes = classMap({
