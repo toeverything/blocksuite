@@ -1,6 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
-import type { Y } from '@blocksuite/store';
 
 import {
   Bound,
@@ -15,6 +14,7 @@ import {
   randomSeed,
   rotatePoints,
 } from '@blocksuite/global/utils';
+import { DocCollection, type Y } from '@blocksuite/store';
 import { createMutex } from 'lib0/mutex';
 
 import type { GfxBlockElementModel, GfxModel } from '../gfx-block-model.js';
@@ -557,6 +557,7 @@ export function syncElementFromY(
     local: boolean;
   }) => void
 ) {
+  const disposables: Record<string, () => void> = {};
   const observer = (
     event: Y.YMapEvent<unknown>,
     transaction: Y.Transaction
@@ -575,6 +576,11 @@ export function syncElementFromY(
       if (type.action === 'update' || type.action === 'add') {
         const value = model.yMap.get(key);
 
+        if (value instanceof DocCollection.Y.Text) {
+          disposables[key]?.();
+          disposables[key] = watchText(key, value, callback);
+        }
+
         model['_preserved'].set(key, value);
         props[key] = value;
         oldValues[key] = oldValue;
@@ -589,12 +595,45 @@ export function syncElementFromY(
   };
 
   Array.from(model.yMap.entries()).forEach(([key, value]) => {
+    if (value instanceof DocCollection.Y.Text) {
+      disposables[key] = watchText(key, value, callback);
+    }
+
     model['_preserved'].set(key, value);
   });
 
   model.yMap.observe(observer);
+  disposables['ymap'] = () => {
+    model.yMap.unobserve(observer);
+  };
 
   return () => {
-    model.yMap.unobserve(observer);
+    Object.values(disposables).forEach(fn => fn());
+  };
+}
+
+function watchText(
+  key: string,
+  value: Y.Text,
+  callback: (payload: {
+    props: Record<string, unknown>;
+    oldValues: Record<string, unknown>;
+    local: boolean;
+  }) => void
+) {
+  const fn = (_: Y.YTextEvent, transaction: Y.Transaction) => {
+    callback({
+      props: {
+        [key]: value,
+      },
+      oldValues: {},
+      local: transaction.local,
+    });
+  };
+
+  value.observe(fn);
+
+  return () => {
+    value.unobserve(fn);
   };
 }
