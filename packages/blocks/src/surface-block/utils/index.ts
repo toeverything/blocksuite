@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 
-import { ZOOM_STEP } from '../consts.js';
+import { ZOOM_WHEEL_STEP } from '../consts.js';
 
 export { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 
@@ -19,7 +19,7 @@ export function generateElementId() {
 export function normalizeWheelDeltaY(delta: number, zoom = 1) {
   const sign = Math.sign(delta);
   const abs = Math.abs(delta);
-  const maxStep = ZOOM_STEP * 100;
+  const maxStep = ZOOM_WHEEL_STEP * 100;
   if (abs > maxStep) {
     delta = maxStep * sign;
   }
