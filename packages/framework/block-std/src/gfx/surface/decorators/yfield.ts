@@ -2,7 +2,7 @@ import type { GfxPrimitiveElementModel } from '../element-model.js';
 
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
-import { getDeriveProperties, updateDerivedProp } from './derive.js';
+import { getDerivedProps, updateDerivedProps } from './derive.js';
 import { startObserve } from './observer.js';
 
 const yPropsSetSymbol = Symbol('yProps');
@@ -20,7 +20,6 @@ export function getYFieldPropsSet(target: unknown): Set<string | symbol> {
 }
 
 export function yfield<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
-  // return function yDecorator(prototype: unknown, prop: string | symbol) {
   return function yDecorator(
     target: ClassAccessorDecoratorTarget<T, V>,
     context: ClassAccessorDecoratorContext
@@ -68,7 +67,7 @@ export function yfield<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
           return;
         }
 
-        const derivedProps = getDeriveProperties(prop, originalVal, this);
+        const derivedProps = getDerivedProps(prop, originalVal, this);
         const val = isCreating
           ? originalVal
           : convertProps(prop, originalVal, this);
@@ -86,7 +85,7 @@ export function yfield<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
         startObserve(prop as string, this);
 
         if (!isCreating) {
-          updateDerivedProp(derivedProps, this);
+          updateDerivedProps(derivedProps, this);
 
           this.surface['hooks'].update.emit({
             id: this.id,

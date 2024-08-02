@@ -18,14 +18,14 @@ import {
 import { createMutex } from 'lib0/mutex';
 
 import type { GfxBlockElementModel, GfxModel } from '../gfx-block-model.js';
-import type { SurfaceBlockModel } from './block-model.js';
+import type { SurfaceBlockModel } from './surface-model.js';
 
 import {
   convertProps,
-  getDeriveProperties,
+  getDerivedProps,
   getYFieldPropsSet,
   local,
-  updateDerivedProp,
+  updateDerivedProps,
   watch,
   yfield,
 } from './decorators/index.js';
@@ -216,7 +216,7 @@ export abstract class GfxPrimitiveElementModel<
       set: (original: unknown) => {
         const value = convertProps(prop as string, original, this);
         const oldValue = this._stashed.get(prop);
-        const derivedProps = getDeriveProperties(
+        const derivedProps = getDerivedProps(
           prop as string,
           original,
           this as unknown as GfxPrimitiveElementModel
@@ -243,7 +243,7 @@ export abstract class GfxPrimitiveElementModel<
           },
         });
 
-        updateDerivedProp(
+        updateDerivedProps(
           derivedProps,
           this as unknown as GfxPrimitiveElementModel
         );

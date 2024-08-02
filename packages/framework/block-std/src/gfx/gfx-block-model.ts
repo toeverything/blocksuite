@@ -25,7 +25,7 @@ import type {
   PointTestOptions,
 } from './surface/element-model.js';
 
-import { SurfaceBlockModel } from './surface/block-model.js';
+import { SurfaceBlockModel } from './surface/surface-model.js';
 
 export class GfxBlockElementModel<
     Props extends GfxCompatibleProps = GfxCompatibleProps,
