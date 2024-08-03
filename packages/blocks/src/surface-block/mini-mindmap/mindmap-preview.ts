@@ -89,11 +89,11 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     }
   `;
 
-  doc!: Doc;
+  doc?: Doc;
 
-  mindmapId!: string;
+  mindmapId?: string;
 
-  surface!: SurfaceBlockModel;
+  surface?: SurfaceBlockModel;
 
   private _createTemporaryDoc() {
     const schema = new Schema();
@@ -121,17 +121,21 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     };
   }
 
-  get _mindmap() {
-    return this.surface.getElementById(this.mindmapId) as MindmapElementModel;
+  get _mindmap(): MindmapElementModel | null {
+    return (
+      (this.surface?.getElementById(
+        this.mindmapId || ''
+      ) as MindmapElementModel) ?? null
+    );
   }
 
   private _switchStyle(style: MindmapStyle) {
-    if (!this._mindmap) {
+    if (!this._mindmap || !this.doc) {
       return;
     }
 
     this.doc.transact(() => {
-      this._mindmap.style = style;
+      this._mindmap!.style = style;
     });
 
     this.ctx.set({
@@ -163,7 +167,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       style: this.mindmapStyle ?? MindmapStyle.FOUR,
     });
 
-    const centerPosition = this._mindmap.tree.element.xywh;
+    const centerPosition = this._mindmap?.tree.element.xywh;
 
     this.ctx.set({
       node: mindmapNode,
@@ -173,6 +177,8 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
   }
 
   override render() {
+    if (!this.doc || !this.surface || !this._mindmap) return nothing;
+
     const curStyle = this._mindmap.style;
 
     return html` <div>
