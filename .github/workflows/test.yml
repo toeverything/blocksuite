@@ -114,6 +114,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      #      - name: Start CI run
+      #        run: 'npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"'
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v3
         with:
@@ -122,6 +124,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - uses: nrwl/nx-set-shas@v4
 
       - name: Run type test
         run: pnpm test:type
@@ -158,7 +162,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run integration test
-        run: pnpm test:integration
+        run: pnpm test:it
 
   inline-e2e-test:
     name: Inline Editor E2E test
@@ -166,6 +170,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      #      - name: Start CI run
+      #        run: 'npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"'
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
@@ -181,8 +187,10 @@ jobs:
       - name: Install playwright browsers
         run: npx playwright install chromium
 
+      - uses: nrwl/nx-set-shas@v4
+
       - name: Run inline editor playwright test
-        run: pnpm --filter=@blocksuite/inline test:e2e
+        run: pnpm --filter=@blocksuite/inline test:e2e:ci
 
       - name: Upload test results
         if: ${{ failure() }}
@@ -204,6 +212,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      #      - name: Start CI run
+      #        run: 'npx nx-cloud start-ci-run --distribute-on="10 linux-medium-js"'
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
@@ -226,6 +236,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - uses: nrwl/nx-set-shas@v4
+
       - name: Install dependencies
         run: pnpm install
 
@@ -233,12 +245,12 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run playwright test
-        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm --filter=@blocksuite/e2e exec playwright test --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
           COVERAGE: true
 
       - name: Collect code coverage report
-        run: pnpm exec nyc report -t .nyc_output --reporter=lcov
+        run: pnpm exec nyc report -t tests/.nyc_output --reporter=lcov
 
       - name: Upload E2E test coverage results
         uses: codecov/codecov-action@v3

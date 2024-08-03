@@ -6,10 +6,11 @@
   "repository": "toeverything/blocksuite",
   "scripts": {
     "build": "tsc",
-    "test:unit": "vitest --run",
-    "test:unit:coverage": "vitest run --coverage",
-    "test:unit:ui": "vitest --ui",
-    "test:e2e": "playwright test",
+    "test:unit": "nx vite:test --run",
+    "test:unit:coverage": "nx vite:test --run --coverage",
+    "test:unit:ui": "nx vite:test --ui",
+    "test:e2e": "nx e2e",
+    "test:e2e:ci": "nx e2e-ci",
     "test": "pnpm test:unit && pnpm test:e2e"
   },
   "keywords": [],

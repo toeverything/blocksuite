@@ -1,16 +1,15 @@
-/// <reference types="node" />
 import type { PlaywrightWorkerOptions } from '@playwright/test';
 
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: 'tests',
+  testDir: '.',
   timeout: 40000,
   fullyParallel: true,
-  snapshotDir: 'tests/snapshots',
-  snapshotPathTemplate: 'tests/snapshots/{testFilePath}/{arg}{ext}',
+  snapshotDir: 'snapshots',
+  snapshotPathTemplate: 'snapshots/{testFilePath}/{arg}{ext}',
   webServer: {
-    command: 'pnpm dev',
+    command: 'pnpm -w dev',
     port: 5173,
     // command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
     // port: process.env.CI ? 4173 : 5173,
