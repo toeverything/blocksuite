@@ -27,6 +27,19 @@ permissions:
   contents: read
 
 jobs:
+  start-nx-agents:
+    name: Start NX Cloud agents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Start CI run
+        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --stop-agents-after="e2e-ci"
+
   lint:
     name: Run linters
     runs-on: ubuntu-latest
@@ -121,9 +134,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"
-
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
@@ -169,9 +179,6 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-
-      #      - name: Start CI run
-      #        run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -245,9 +252,6 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
 
-      - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --stop-agents-after="e2e-ci"
-
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
@@ -274,8 +278,8 @@ jobs:
 
       - name: Run playwright test
         run: pnpm nx e2e-ci @blocksuite/e2e
-      #        env:
-      #          COVERAGE: true
+        env:
+          COVERAGE: true
 
       - name: Collect code coverage report
         run: pnpm exec nyc report -t tests/.nyc_output --reporter=lcov
