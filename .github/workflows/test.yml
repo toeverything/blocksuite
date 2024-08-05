@@ -22,6 +22,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   lint:
     name: Run linters
@@ -161,12 +165,12 @@ jobs:
       - name: Start CI run
         run: 'npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"'
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - uses: nrwl/nx-set-shas@v4
         with:
           main-branch-name: master
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Install playwright browsers
         run: npx playwright install chromium
@@ -197,7 +201,9 @@ jobs:
       - name: Install playwright browsers
         run: npx playwright install chromium
 
-      - uses: nrwl/nx-set-shas@v4
+      #      - uses: nrwl/nx-set-shas@v4
+      #        with:
+      #          main-branch-name: master
 
       - name: Run inline editor playwright test
         run: pnpm --filter=@blocksuite/inline test:e2e:ci
@@ -246,9 +252,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - uses: nrwl/nx-set-shas@v4
-        with:
-          main-branch-name: master
+      #      - uses: nrwl/nx-set-shas@v4
+      #        with:
+      #          main-branch-name: master
 
       - name: Install dependencies
         run: pnpm install
