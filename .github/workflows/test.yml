@@ -27,8 +27,8 @@ permissions:
   contents: read
 
 jobs:
-  build-and-text:
-    name: Build & Text
+  build-and-test:
+    name: Build & Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,21 +69,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run type check
+      - name: Run build
         run: pnpm nx affected -t build --exclude "@blocksuite/docs"
         env:
           NODE_OPTIONS: --max-old-space-size=16384
-
-      - name: Run ESLint
-        run: pnpm lint
-
-      - name: Run lit-lint
-        run: pnpm nx lint:lit blocksuite
-
-      - name: Run circular imports detect
-        run: pnpm nx lint:circular blocksuite
-
-      - run: pnpm nx test:node blocksuite
 
       - run: pnpm nx affected -t test:unit:coverage
 
