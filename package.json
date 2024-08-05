@@ -6,6 +6,7 @@
   "engines": {
     "node": ">=18.19.0 <21.0.0"
   },
+  "nx": {},
   "packageManager": "pnpm@9.6.0",
   "scripts": {
     "preview": "pnpm --filter @blocksuite/playground preview",
@@ -13,14 +14,13 @@
     "dev:docs": "pnpm --filter @blocksuite/docs dev",
     "lint": "eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0",
     "lint:fix": "pnpm lint --fix",
-    "lit-lint": "pnpm lit-analyzer --strict=false --rules.no-incompatible-property-type=error --rules.no-incompatible-type-binding=off --rules.no-invalid-css=off --rules.no-invalid-tag-name=off \"packages/**/*.ts\"",
+    "lint:lit": "pnpm lit-analyzer --strict=false --rules.no-incompatible-property-type=error --rules.no-incompatible-type-binding=off --rules.no-invalid-css=off --rules.no-invalid-tag-name=off \"packages/**/*.ts\"",
+    "lint:circular": "madge --circular ./packages/*/dist/index.js",
     "test": "nx e2e @blocksuite/e2e",
     "test:ci": "nx e2e-ci @blocksuite/e2e",
     "test:type": "tsc -p tests/tsconfig.json",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
-    "circular": "madge --circular ./packages/*/dist/index.js",
-    "test:unit": "nx run-many --target=test:unit --all --parallel",
-    "test:unit:coverage": "nx run-many --target=test:unit:coverage --all --parallel",
+    "test:unit": "vitest",
     "test:update": "playwright test --update-snapshots",
     "test:inline": "pnpm --filter @blocksuite/inline test",
     "test:it": "nx test @blocksuite/presets",

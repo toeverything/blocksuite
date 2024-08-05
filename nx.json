@@ -17,6 +17,16 @@
     },
     "test:unit:coverage": {
       "cache": true
+    },
+    "lint:lit": {
+      "cache": true
+    },
+    "lint:circular": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "test:node": {
+      "cache": true
     }
   },
   "defaultBase": "master",
