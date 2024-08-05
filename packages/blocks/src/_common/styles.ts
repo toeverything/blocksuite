@@ -26,7 +26,7 @@ export const FONT_XS = unsafeCSS(`
 export const PANEL_BASE_COLORS = unsafeCSS(`
   color: var(--affine-icon-color);
   background: var(--affine-background-overlay-panel-color);
-  box-shadow: var(--affine-shadow-4);
+  box-shadow: var(--affine-overlay-shadow);
 `);
 
 export const PANEL_BASE = unsafeCSS(`
