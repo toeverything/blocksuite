@@ -170,8 +170,8 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
 
-      - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"
+      #      - name: Start CI run
+      #        run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -200,7 +200,7 @@ jobs:
         id: pnpm-install
 
       - name: Use Node.js LTS
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
@@ -229,7 +229,7 @@ jobs:
   root-level-e2e-test:
     name: Playground E2E test
     runs-on: ubuntu-latest
-    needs: [integration-test, inline-e2e-test]
+    needs: [inline-e2e-test]
     steps:
       - uses: actions/checkout@v4
         with:
