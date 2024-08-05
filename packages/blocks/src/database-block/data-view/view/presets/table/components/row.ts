@@ -135,15 +135,17 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     const ele = e.target as HTMLElement;
     const cell = ele.closest('affine-database-cell-container');
     const row = { id: this.rowId, groupKey: this.groupKey };
-    selection.selection = TableRowSelection.create({
-      rows: [row],
-    });
+    if (!TableRowSelection.includes(selection.selection, row)) {
+      selection.selection = TableRowSelection.create({
+        rows: [row],
+      });
+    }
     const target =
       cell ??
       (e.target as HTMLElement).closest('.database-cell') ?? // for last add btn cell
       (e.target as HTMLElement);
 
-    popRowMenu(this.dataViewEle, target, row, selection);
+    popRowMenu(this.dataViewEle, target, selection);
   };
 
   setSelection = (selection?: TableViewSelection) => {
@@ -210,7 +212,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
                 rows: [row],
               })
             );
-            popRowMenu(this.dataViewEle, ele, row, this.selectionController);
+            popRowMenu(this.dataViewEle, ele, this.selectionController);
           };
           return html`
             <div>

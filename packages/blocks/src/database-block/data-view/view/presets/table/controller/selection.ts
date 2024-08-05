@@ -581,7 +581,7 @@ export class TableSelectionController implements ReactiveController {
 
   rowsToArea(
     rows: string[]
-  ): { start: number; end: number; groupKey: string } | undefined {
+  ): { start: number; end: number; groupKey?: string } | undefined {
     let groupKey: string | undefined = undefined;
     let minIndex: number | undefined = undefined;
     let maxIndex: number | undefined = undefined;
@@ -602,7 +602,7 @@ export class TableSelectionController implements ReactiveController {
         return;
       }
     }
-    if (minIndex == null || maxIndex == null || groupKey == null) {
+    if (minIndex == null || maxIndex == null) {
       return;
     }
     return {
