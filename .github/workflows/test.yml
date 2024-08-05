@@ -160,6 +160,8 @@ jobs:
         run: 'npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"'
 
       - uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: master
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -243,6 +245,8 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: master
 
       - name: Install dependencies
         run: pnpm install
