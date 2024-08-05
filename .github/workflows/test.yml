@@ -75,7 +75,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=16384
 
       - name: Run ESLint
-        run: pnpm nx lint blocksuite
+        run: pnpm lint
 
       - name: Run lit-lint
         run: pnpm nx lint:lit blocksuite
