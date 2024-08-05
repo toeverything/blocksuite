@@ -134,7 +134,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     const { id, source, target } = this._connector;
     let focusedId = id;
 
-    if (source.id && !target.id) {
+    if (source?.id && !target?.id) {
       focusedId = source.id;
       this._allowCancel = true;
     }
