@@ -159,6 +159,8 @@ jobs:
       - name: Start CI run
         run: 'npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"'
 
+      - uses: nrwl/nx-set-shas@v4
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
