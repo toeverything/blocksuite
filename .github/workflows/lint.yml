@@ -1,0 +1,85 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.husky'
+      - '.vscode'
+      - '**.md'
+      - 'scripts/**'
+      - 'packages/docs/**'
+  pull_request:
+    paths-ignore:
+      - '.husky'
+      - '.vscode'
+      - '**.md'
+      - 'scripts/**'
+      - 'packages/docs/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        id: pnpm-install
+
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: master
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run type check
+        run: pnpm test:type
+
+      - name: Run build
+        run: pnpm build:packages
+
+      - name: Run eslint
+        run: pnpm lint
+
+      - name: Run lit lint
+        run: pnpm lint:lit
+
+      - name: Run circular imports detect
+        run: pnpm lint:circular
+
+      - name: Node Environment Test
+        run: pnpm test:node
