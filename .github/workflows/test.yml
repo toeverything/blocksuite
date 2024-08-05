@@ -246,7 +246,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --stop-agents-after=e2e-ci
+        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --stop-agents-after="e2e-ci"
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -262,9 +262,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      #      - uses: nrwl/nx-set-shas@v4
-      #        with:
-      #          main-branch-name: master
+      - uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: master
 
       - name: Install dependencies
         run: pnpm install
@@ -274,8 +274,8 @@ jobs:
 
       - name: Run playwright test
         run: pnpm nx e2e-ci @blocksuite/e2e
-        env:
-          COVERAGE: true
+      #        env:
+      #          COVERAGE: true
 
       - name: Collect code coverage report
         run: pnpm exec nyc report -t tests/.nyc_output --reporter=lcov
