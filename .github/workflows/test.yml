@@ -38,7 +38,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --stop-agents-after="e2e-ci"
+        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"
 
   lint:
     name: Run linters
@@ -194,46 +194,6 @@ jobs:
       - name: Run integration test
         run: pnpm nx test @blocksuite/presets
 
-  inline-e2e-test:
-    name: Inline Editor E2E test
-    needs: [unit-test, test-node]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install playwright browsers
-        run: npx playwright install chromium
-
-      - uses: nrwl/nx-set-shas@v4
-        with:
-          main-branch-name: master
-
-      - name: Run inline editor playwright test
-        run: pnpm --filter=@blocksuite/inline test:e2e:ci
-
-      - name: Upload test results
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results-main
-          path: ./test-results
-          if-no-files-found: ignore
-
   root-level-e2e-test:
     name: Playground E2E test
     runs-on: ubuntu-latest
@@ -278,7 +238,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run playwright test
-        run: pnpm nx e2e-ci @blocksuite/e2e
+        run: pnpm nx affected -t e2e-ci
         env:
           COVERAGE: true
 
