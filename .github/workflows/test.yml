@@ -229,7 +229,7 @@ jobs:
   root-level-e2e-test:
     name: Playground E2E test
     runs-on: ubuntu-latest
-    needs: [inline-e2e-test]
+    needs: [unit-test, test-node]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -246,7 +246,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"
+        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --stop-agents-after=e2e-ci
 
       - name: Get pnpm store directory
         id: pnpm-cache
