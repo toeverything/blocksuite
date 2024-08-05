@@ -114,10 +114,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      #      - name: Start CI run
-      #        run: 'npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"'
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v3
+
+      - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
@@ -149,11 +148,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v3
+
+      - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+
+      - name: Start CI run
+        run: 'npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -162,7 +166,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run integration test
-        run: pnpm test:it
+        run: pnpm nx affected -t test @blocksuite/presets
 
   inline-e2e-test:
     name: Inline Editor E2E test
@@ -170,11 +174,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      #      - name: Start CI run
-      #        run: 'npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"'
+
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
+
       - name: Use Node.js LTS
         uses: actions/setup-node@v3
         with:
@@ -204,24 +208,24 @@ jobs:
     name: Playground E2E test
     runs-on: ubuntu-latest
     needs: [integration-test, inline-e2e-test]
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      #      - name: Start CI run
-      #        run: 'npx nx-cloud start-ci-run --distribute-on="10 linux-medium-js"'
+
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
+
       - name: Use Node.js LTS
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+
+      - name: Start CI run
+        run: 'npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"'
+
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
@@ -245,7 +249,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run playwright test
-        run: pnpm --filter=@blocksuite/e2e exec playwright test --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm nx affected -t e2e-ci @blocksuite/e2e
         env:
           COVERAGE: true
 
