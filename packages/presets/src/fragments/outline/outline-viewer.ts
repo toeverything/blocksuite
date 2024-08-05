@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { NoteDisplayMode, scrollbarStyle } from '@blocksuite/blocks';
+import { NoteDisplayMode } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { SignalWatcher, signal } from '@lit-labs/preact-signals';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
@@ -25,104 +25,66 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
     }
 
     .outline-viewer-root {
+      --timing: cubic-bezier(0.6, 0.1, 0.41, 1.2);
       position: relative;
-      display: flex;
-    }
-
-    .outline-heading-indicator-container {
       display: flex;
       flex-direction: column;
+      gap: 20px;
       align-items: flex-end;
+      transition:
+        all 0.4s var(--timing),
+        max-height 0.1s ease 0.3s;
+      padding: 10px 5px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      max-height: 100vh;
+      overflow-y: auto;
+    }
+
+    .outline-viewer-indicator {
       flex-shrink: 0;
-      gap: 16px;
-      min-height: 16px;
-      max-height: 100%;
-      overflow: hidden;
-      position: absolute;
-      right: 0;
-    }
-
-    .outline-heading-indicator-container.hidden {
-      position: relative;
-      position: flex;
-      visibility: hidden;
-    }
-
-    .outline-heading-indicator {
       width: 20px;
       height: 2px;
-      flex-shrink: 0;
-
-      border-radius: 1px;
-      background: var(--affine-black-10, rgba(0, 0, 0, 0.1));
-      transition: width 0.3s;
-    }
-
-    .outline-heading-indicator[active] {
-      width: 24px;
-      height: 2px;
-
-      border-radius: 1px;
-      background: var(--affine-black-80, rgba(0, 0, 0, 0.8));
-    }
-
-    .outline-viewer-container {
-      width: 0px;
-      padding: 8px 0px;
-      max-height: 100%;
-      box-sizing: border-box;
-      display: flex;
-      overflow-x: hidden;
-      background: var(--affine-background-overlay-panel-color, #fbfbfc);
-      box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.14);
-      border-radius: var(--8, 8px);
-      z-index: var(--affine-z-index-popover);
-
-      transition: width 0.3s;
-    }
-
-    .outline-viewer-container.show {
-      width: 200px;
-      border: 0.5px solid var(--affine-border-color, #e3e2e4);
-    }
-
-    .outline-viewer-inner-container {
-      display: flex;
-      box-sizing: border-box;
-      width: 200px;
-      flex-direction: column;
-      align-items: flex-start;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    ${scrollbarStyle('.outline-viewer-inner-container')}
-
-    .outline-viewer-header-container {
-      display: flex;
-      padding: 0px 10px 0px 14px;
-      align-items: center;
-      gap: 4px;
-      align-self: stretch;
-    }
-
-    .outline-viewer-header-label {
-      flex: 1;
       overflow: hidden;
-      color: var(--affine-text-secondary-color, #8e8d91);
-      text-overflow: ellipsis;
-      text-wrap: nowrap;
-
-      font-family: Inter;
-      font-size: 12px;
-      font-style: normal;
-      font-weight: 500;
-      line-height: 20px;
+      background: rgba(100, 100, 100, 0.2);
+      transition:
+        all 0.4s var(--timing),
+        background 0.8s var(--timing);
+      border-radius: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-
-    .outline-viewer-body {
-      flex-grow: 1;
-      width: 100%;
+    .outline-viewer-content {
+      transition: all 0.4s var(--timing);
+      width: 180px;
+      height: 30px;
+      opacity: 0;
+    }
+    .outline-viewer-indicator.active {
+      width: 24px;
+      background: var(--affine-text-primary-color);
+    }
+    .outline-viewer-root:hover {
+      gap: 4px;
+      padding: 10px;
+      background: white;
+      border-color: var(--affine-border-color);
+      max-height: 400px;
+      transition:
+        all 0.4s var(--timing),
+        max-height 0.1s ease;
+    }
+    .outline-viewer-root:hover .outline-viewer-indicator {
+      background: transparent;
+      width: 180px;
+      height: 30px;
+      transition:
+        all 0.4s var(--timing),
+        background 0.2s var(--timing);
+    }
+    .outline-viewer-root:hover .outline-viewer-content {
+      opacity: 1;
     }
   `;
 
@@ -210,16 +172,30 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
   override render() {
     if (!this.editor || this.editor.mode === 'edgeless') return nothing;
 
-    return html`<div
-      class="outline-viewer-root"
-      @mouseenter=${() => {
-        this._showViewer = true;
-      }}
-      @mouseleave=${() => {
-        this._showViewer = false;
-      }}
-    >
-      ${this._renderIndicators()}${this._renderViewer()}
+    const headingBlocks = getHeadingBlocksFromDoc(
+      this.editor.doc,
+      [NoteDisplayMode.DocAndEdgeless, NoteDisplayMode.DocOnly],
+      true
+    );
+
+    return html`<div class="outline-viewer-root">
+      ${repeat(
+        headingBlocks,
+        block => block.id,
+        block => {
+          return html`<div
+            class="outline-viewer-indicator ${this._activeHeadingId$.value ===
+            block.id
+              ? 'active'
+              : ''}"
+          >
+            <div class="outline-viewer-content">
+              <affine-outline-block-preview .block=${block}>
+              </affine-outline-block-preview>
+            </div>
+          </div>`;
+        }
+      )}
     </div>`;
   }
 
