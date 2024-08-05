@@ -10,6 +10,7 @@ import {
   popFilterableSimpleMenu,
 } from '../../../../../../_common/components/index.js';
 import {
+  CopyIcon,
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
@@ -22,7 +23,7 @@ import {
   commonCalcOps,
   numberColCalcOps,
 } from '../stat-ops.js';
-import { type RowWithGroup, TableRowSelection } from '../types.js';
+import { TableRowSelection } from '../types.js';
 
 export const openDetail = (
   dataViewEle: DataViewRenderer,
@@ -43,13 +44,60 @@ export const openDetail = (
 export const popRowMenu = (
   dataViewEle: DataViewRenderer,
   ele: HTMLElement,
-  row: RowWithGroup,
   selectionController: TableSelectionController
 ) => {
   const selection = selectionController.selection;
-  if (TableRowSelection.is(selection) && selection.rows.length > 1) {
+  if (!TableRowSelection.is(selection)) {
     return;
   }
+  if (selection.rows.length > 1) {
+    const rows = TableRowSelection.rowsIds(selection);
+    popFilterableSimpleMenu(ele, [
+      {
+        type: 'group',
+        name: '',
+        children: () => [
+          {
+            type: 'action',
+            name: 'Copy',
+            icon: html` <div
+              style="transform: rotate(90deg);display:flex;align-items:center;"
+            >
+              ${CopyIcon}
+            </div>`,
+            select: () => {
+              selectionController.host.clipboardController.copy();
+            },
+          },
+          // {
+          //   type: 'action',
+          //   name: 'Duplicate',
+          //   icon: DuplicateIcon,
+          //   select: () => {
+          //     selectionController.duplicateRow(rowId);
+          //   },
+          // },
+        ],
+      },
+      {
+        type: 'group',
+        name: '',
+        children: () => [
+          {
+            type: 'action',
+            name: 'Delete Rows',
+            class: 'delete-item',
+            icon: DeleteIcon,
+            select: () => {
+              selectionController.view.rowDelete(rows);
+            },
+          },
+        ],
+      },
+    ]);
+    return;
+  }
+  const row = selection.rows[0];
   popFilterableSimpleMenu(ele, [
     {
       type: 'action',

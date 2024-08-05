@@ -19,7 +19,6 @@ const TEXT = 'text/plain';
 
 export class TableClipboardController implements ReactiveController {
   private _onCopy = (
-    _context: UIEventStateContext,
     tableSelection: TableViewSelectionWithType,
     isCut = false
   ) => {
@@ -77,11 +76,8 @@ export class TableClipboardController implements ReactiveController {
     return true;
   };
 
-  private _onCut = (
-    _context: UIEventStateContext,
-    tableSelection: TableViewSelectionWithType
-  ) => {
-    this._onCopy(_context, tableSelection, true);
+  private _onCut = (tableSelection: TableViewSelectionWithType) => {
+    this._onCopy(tableSelection, true);
   };
 
   private _onPaste = async (_context: UIEventStateContext) => {
@@ -119,23 +115,39 @@ export class TableClipboardController implements ReactiveController {
     return this.host.std;
   }
 
+  copy() {
+    const tableSelection = this.host.selectionController.selection;
+    if (!tableSelection) {
+      return;
+    }
+    this._onCopy(tableSelection);
+  }
+
+  cut() {
+    const tableSelection = this.host.selectionController.selection;
+    if (!tableSelection) {
+      return;
+    }
+    this._onCopy(tableSelection, true);
+  }
+
   hostConnected() {
     this.host.disposables.add(
-      this.host.handleEvent('copy', ctx => {
+      this.host.handleEvent('copy', _ctx => {
         const tableSelection = this.host.selectionController.selection;
         if (!tableSelection) return false;
 
-        this._onCopy(ctx, tableSelection);
+        this._onCopy(tableSelection);
         return true;
       })
     );
 
     this.host.disposables.add(
-      this.host.handleEvent('cut', ctx => {
+      this.host.handleEvent('cut', _ctx => {
         const tableSelection = this.host.selectionController.selection;
         if (!tableSelection) return false;
 
-        this._onCut(ctx, tableSelection);
+        this._onCut(tableSelection);
         return true;
       })
     );

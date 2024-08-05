@@ -342,11 +342,14 @@ export class TableHotkeysController implements ReactiveController {
         },
         '/': context => {
           const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            TableRowSelection.is(selection) ||
-            selection.isEditing
-          ) {
+          if (!selection) {
+            return;
+          }
+          if (TableRowSelection.is(selection)) {
+            // open multi-rows context-menu
+            return;
+          }
+          if (selection.isEditing) {
             return;
           }
           const cell = this.selectionController.getCellContainer(
@@ -363,12 +366,7 @@ export class TableHotkeysController implements ReactiveController {
             this.selectionController.selection = TableRowSelection.create({
               rows: [row],
             });
-            popRowMenu(
-              this.host.dataViewEle,
-              cell,
-              row,
-              this.selectionController
-            );
+            popRowMenu(this.host.dataViewEle, cell, this.selectionController);
           }
         },
       })
