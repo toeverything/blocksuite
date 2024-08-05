@@ -217,19 +217,19 @@ jobs:
         with:
           main-branch-name: master
 
+      - name: Start CI run
+        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --require-explicit-completion
+
       - name: Install dependencies
         run: pnpm install
-
-      - name: Install playwright browsers
-        run: npx playwright install chromium
-
-      - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"
 
       - name: Run playwright test
         run: pnpm nx affected -t e2e-ci
         env:
           COVERAGE: true
+
+      - run: npx nx-cloud complete-ci-run
+        if: always()
 
       - name: Collect code coverage report
         run: pnpm exec nyc report -t tests/.nyc_output --reporter=lcov
