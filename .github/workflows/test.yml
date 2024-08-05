@@ -27,22 +27,8 @@ permissions:
   contents: read
 
 jobs:
-  start-nx-agents:
-    name: Start NX Cloud agents
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-      - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"
-
   lint:
     name: Run linters
-    needs: [start-nx-agents]
     runs-on: ubuntu-latest
 
     steps:
@@ -212,6 +198,9 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+
+      - name: Start CI run
+        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"
 
       - name: Get pnpm store directory
         id: pnpm-cache
