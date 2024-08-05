@@ -125,12 +125,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: master
 
       - name: Run type test
         run: pnpm test:type
 
       - name: Run unit test
-        run: pnpm test:unit:coverage
+        run: pnpm nx run-many --target=test:unit:coverage --all --parallel
 
       - name: Upload unit test coverage results
         uses: codecov/codecov-action@v3
@@ -170,7 +172,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run integration test
-        run: pnpm nx affected -t test @blocksuite/presets
+        run: pnpm nx test @blocksuite/presets
 
   inline-e2e-test:
     name: Inline Editor E2E test
@@ -255,7 +257,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run playwright test
-        run: pnpm nx affected -t e2e-ci @blocksuite/e2e
+        run: pnpm nx e2e-ci @blocksuite/e2e
         env:
           COVERAGE: true
 

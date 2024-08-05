@@ -7,6 +7,7 @@
     "node": ">=18.19.0 <21.0.0"
   },
   "packageManager": "pnpm@9.6.0",
+  "nx": {},
   "scripts": {
     "preview": "pnpm --filter @blocksuite/playground preview",
     "dev": "pnpm --filter @blocksuite/playground dev",
