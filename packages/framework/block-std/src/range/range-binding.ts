@@ -1,8 +1,8 @@
 import { throttle } from '@blocksuite/global/utils';
 
-import type { BaseSelection, TextSelection } from '../../selection/index.js';
+import type { BaseSelection, TextSelection } from '../selection/index.js';
 
-import { BlockComponent } from '../element/block-component.js';
+import { BlockComponent } from '../view/element/block-component.js';
 import { RangeManager } from './range-manager.js';
 
 /**
@@ -318,7 +318,7 @@ export class RangeBinding {
   }
 
   get rangeManager() {
-    return this.host.rangeManager;
+    return this.host.range;
   }
 
   get selectionManager() {

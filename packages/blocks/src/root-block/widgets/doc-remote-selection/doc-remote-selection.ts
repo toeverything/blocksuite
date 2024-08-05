@@ -80,9 +80,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
     const containerRect = this._containerRect;
 
     if (textSelection) {
-      const rangeManager = this.host.rangeManager;
-      assertExists(rangeManager);
-      const range = rangeManager.textSelectionToRange(
+      const range = this.std.range.textSelectionToRange(
         this._selectionManager.create('text', {
           from: {
             blockId: textSelection.to
@@ -156,9 +154,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
     const container = this._container;
     const containerRect = this._containerRect;
     if (textSelection) {
-      const rangeManager = this.host.rangeManager;
-      assertExists(rangeManager);
-      const range = rangeManager.textSelectionToRange(textSelection);
+      const range = this.std.range.textSelectionToRange(textSelection);
 
       if (range) {
         const nativeRects = Array.from(range.getClientRects());

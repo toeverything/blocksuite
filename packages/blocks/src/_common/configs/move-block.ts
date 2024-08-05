@@ -1,8 +1,6 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import type { BlockComponent } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
-
 const getSelection = (blockComponent: BlockComponent) =>
   blockComponent.host.selection;
 
@@ -55,9 +53,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
         );
         block.updateComplete
           .then(() => {
-            const rangeManager = block.host.rangeManager;
-            assertExists(rangeManager);
-            rangeManager.syncTextSelectionToRange(textSelection);
+            block.std.range.syncTextSelectionToRange(textSelection);
           })
           .catch(console.error);
         return true;
@@ -106,10 +102,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
         doc.moveBlocks([currentModel], parentModel, nextSiblingModel, false);
         block.updateComplete
           .then(() => {
-            // `textSelection` will not change so we need wo sync it manually
-            const rangeManager = block.host.rangeManager;
-            assertExists(rangeManager);
-            rangeManager.syncTextSelectionToRange(textSelection);
+            block.std.range.syncTextSelectionToRange(textSelection);
           })
           .catch(console.error);
         return true;

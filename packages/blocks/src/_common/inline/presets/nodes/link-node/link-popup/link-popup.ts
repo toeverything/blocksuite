@@ -353,8 +353,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   private _onConfirm() {
     if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) return;
+    if (!this.linkInput) return;
 
-    assertExists(this.linkInput);
     const linkInputValue = this.linkInput.value;
     if (!linkInputValue || !isValidUrl(linkInputValue)) return;
 
@@ -367,8 +367,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
       });
       this.inlineEditor.setInlineRange(this.targetInlineRange);
       const textSelection = this.host?.selection.find('text');
-      assertExists(textSelection);
-      this.host?.rangeManager?.syncTextSelectionToRange(textSelection);
+      if (!textSelection) return;
+
+      this.std?.range.syncTextSelectionToRange(textSelection);
     } else if (this.type === 'edit') {
       const text = this.textInput?.value ?? link;
       this.inlineEditor.insertText(this.targetInlineRange, text, {
@@ -380,8 +381,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
         length: text.length,
       });
       const textSelection = this.host?.selection.find('text');
-      assertExists(textSelection);
-      this.host?.rangeManager?.syncTextSelectionToRange(textSelection);
+      if (!textSelection) return;
+
+      this.std?.range.syncTextSelectionToRange(textSelection);
     }
 
     this.abortController.abort();

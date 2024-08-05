@@ -1480,7 +1480,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
   }
 
   private get _rangeManager() {
-    return this.host.rangeManager;
+    return this.std.range;
   }
 
   private get dragHandleContainerOffsetParent() {

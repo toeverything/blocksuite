@@ -238,9 +238,9 @@ export class PageRootBlockComponent extends BlockComponent<
         const index = notes.indexOf(prevNote);
         if (index !== 0) return;
 
-        const range = this.host.rangeManager?.value;
+        const range = this.std.range.value;
         requestAnimationFrame(() => {
-          const currentRange = this.host.rangeManager?.value;
+          const currentRange = this.std.range.value;
 
           if (!range || !currentRange) return;
 

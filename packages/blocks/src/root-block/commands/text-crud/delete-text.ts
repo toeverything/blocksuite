@@ -13,12 +13,9 @@ export const deleteTextCommand: Command<
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
   if (!textSelection) return;
 
-  const host = ctx.std.host;
-  if (!host.rangeManager) return;
-
-  const range = host.rangeManager.textSelectionToRange(textSelection);
+  const range = ctx.std.range.textSelectionToRange(textSelection);
   if (!range) return;
-  const selectedElements = host.rangeManager.getSelectedBlockComponentsByRange(
+  const selectedElements = ctx.std.range.getSelectedBlockComponentsByRange(
     range,
     {
       mode: 'flat',

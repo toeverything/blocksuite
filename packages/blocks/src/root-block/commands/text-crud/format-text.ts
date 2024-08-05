@@ -83,7 +83,7 @@ export const formatTextCommand: Command<
 
       Promise.all(selectedBlocks.map(el => el.updateComplete))
         .then(() => {
-          ctx.std.host.rangeManager?.syncTextSelectionToRange(textSelection);
+          ctx.std.range.syncTextSelectionToRange(textSelection);
         })
         .catch(console.error);
 
