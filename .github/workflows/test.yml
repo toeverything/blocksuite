@@ -128,9 +128,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - uses: nrwl/nx-set-shas@v4
-        with:
-          main-branch-name: master
+      #      - uses: nrwl/nx-set-shas@v4
+      #        with:
+      #          main-branch-name: master
 
       - name: Run type test
         run: pnpm test:type
@@ -168,9 +168,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - uses: nrwl/nx-set-shas@v4
-        with:
-          main-branch-name: master
+      #      - uses: nrwl/nx-set-shas@v4
+      #        with:
+      #          main-branch-name: master
 
       - name: Install playwright browsers
         run: npx playwright install chromium
