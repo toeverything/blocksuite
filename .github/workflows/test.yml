@@ -118,6 +118,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Start CI run
+        run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
@@ -128,15 +134,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      #      - uses: nrwl/nx-set-shas@v4
-      #        with:
-      #          main-branch-name: master
+      - uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: master
 
       - name: Run type test
         run: pnpm test:type
 
       - name: Run unit test
-        run: pnpm nx run-many --target=test:unit:coverage --all --parallel
+        run: pnpm nx affected -t test:unit:coverage
 
       - name: Upload unit test coverage results
         uses: codecov/codecov-action@v3
@@ -165,7 +171,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Start CI run
-        run: 'npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"'
+        run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -186,6 +192,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
@@ -203,9 +211,9 @@ jobs:
       - name: Install playwright browsers
         run: npx playwright install chromium
 
-      #      - uses: nrwl/nx-set-shas@v4
-      #        with:
-      #          main-branch-name: master
+      - uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: master
 
       - name: Run inline editor playwright test
         run: pnpm --filter=@blocksuite/inline test:e2e:ci
@@ -238,7 +246,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Start CI run
-        run: 'npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"'
+        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js"
 
       - name: Get pnpm store directory
         id: pnpm-cache
