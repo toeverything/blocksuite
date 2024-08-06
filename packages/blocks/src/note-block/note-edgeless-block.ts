@@ -29,12 +29,6 @@ import { NoteBlockComponent } from './note-block.js';
 
 @customElement('edgeless-note-mask')
 export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
-  static override styles = css`
-    .affine-note-mask:hover {
-      background-color: var(--affine-hover-color);
-    }
-  `;
-
   protected override firstUpdated() {
     const maskDOM = this.renderRoot!.querySelector('.affine-note-mask');
     const observer = new ResizeObserver(entries => {
@@ -132,12 +126,6 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     }
     .edgeless-note-collapse-button.hide {
       display: none;
-    }
-
-    .edgeless-note-container:has(.edgeless-note-collapse-button:hover) {
-      .affine-note-mask {
-        background-color: var(--affine-hover-color);
-      }
     }
 
     .edgeless-note-container:has(.affine-embed-synced-doc-container.editing)
