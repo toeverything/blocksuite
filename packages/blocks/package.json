@@ -19,6 +19,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/icons": "^2.1.62",
     "@dotlottie/player-component": "^2.7.12",
     "@floating-ui/dom": "^1.6.8",
     "@lit-labs/preact-signals": "^1.0.2",
