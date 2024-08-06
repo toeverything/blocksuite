@@ -70,7 +70,7 @@ jobs:
         run: pnpm install
 
       - name: Run build
-        run: pnpm nx affected -t build --exclude @blocksuite/docs,blocksuite
+        run: pnpm nx run-may -t build --all --exclude @blocksuite/docs,blocksuite
 
       - name: Run unit tests
         run: pnpm nx affected -t test:unit --exclude blocksuite
