@@ -64,7 +64,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
   override rootServiceFlavour = 'affine:page';
 
   private _initDragEffect() {
-    const edgelessSelection = this.rootService.selection;
+    const edgelessSelection = this.rootService?.selection;
     const selectedRect = this.parentBlock.selectedRect;
     const disposables = this.disposables;
 
@@ -99,6 +99,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
   }
 
   private _updateH() {
+    if (!this.rootService) return;
     const bound = Bound.deserialize(this.model.xywh);
     const rect = this._textContainer.getBoundingClientRect();
     bound.h = Math.max(
@@ -112,6 +113,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
   }
 
   private _updateW() {
+    if (!this.rootService) return;
     const bound = Bound.deserialize(this.model.xywh);
     const rect = this._textContainer.getBoundingClientRect();
     bound.w = Math.max(
@@ -187,19 +189,24 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     super.firstUpdated(props);
 
     const { disposables, rootService } = this;
-    const edgelessSelection = rootService.selection;
 
     this._initDragEffect();
 
-    disposables.add(
-      edgelessSelection.slots.updated.on(() => {
-        if (edgelessSelection.has(this.model.id) && edgelessSelection.editing) {
-          this._editing = true;
-        } else {
-          this._editing = false;
-        }
-      })
-    );
+    if (rootService) {
+      const edgelessSelection = rootService.selection;
+      disposables.add(
+        edgelessSelection.slots.updated.on(() => {
+          if (
+            edgelessSelection.has(this.model.id) &&
+            edgelessSelection.editing
+          ) {
+            this._editing = true;
+          } else {
+            this._editing = false;
+          }
+        })
+      );
+    }
 
     this._resizeObserver.observe(this._textContainer);
 
@@ -241,7 +248,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
         }
       }
 
-      if (newParagraphId) {
+      if (newParagraphId && this.rootService) {
         this.rootService.selectionManager.setGroup('note', [
           this.rootService.selectionManager.create('text', {
             from: {
@@ -258,7 +265,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     disposables.addFromEvent(this._textContainer, 'focusout', () => {
       if (!this._editing) return;
 
-      this.rootService.selectionManager.clear();
+      this.rootService?.selectionManager.clear();
     });
   }
 
@@ -341,7 +348,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
   }
 
   override toZIndex() {
-    return `${this.rootService.layer.getZIndex(this.model)}`;
+    return `${this.rootService?.layer.getZIndex(this.model) || -1}`;
   }
 
   tryFocusEnd() {
@@ -364,7 +371,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
   }
 
   get dragMoving() {
-    const controller = this.rootService.tool.currentController;
+    const controller = this.rootService?.tool.currentController;
     return (
       controller instanceof DefaultToolController &&
       controller.dragType === DefaultModeDragType.ContentMoving

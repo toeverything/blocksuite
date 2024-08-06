@@ -162,6 +162,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     const rect = this._notePageContent?.getBoundingClientRect();
     if (!rect) return nothing;
 
+    if (!this.rootService) return nothing;
     const zoom = this.rootService.viewport.zoom;
     this._noteFullHeight =
       rect.height / scale / zoom + 2 * EDGELESS_BLOCK_CHILD_PADDING;
@@ -304,47 +305,50 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
   }
 
   get _zoom() {
-    return this.rootService.viewport.zoom;
+    return this.rootService?.viewport.zoom ?? 1;
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
 
-    const selection = this.rootService.selection;
-
-    this._editing = selection.has(this.model.id) && selection.editing;
-    this._disposables.add(
-      selection.slots.updated.on(() => {
-        if (selection.has(this.model.id) && selection.editing) {
-          this._editing = true;
-        } else {
-          this._editing = false;
-        }
-      })
-    );
+    if (this.rootService) {
+      const selection = this.rootService.selection;
+      this._editing = selection.has(this.model.id) && selection.editing;
+      this._disposables.add(
+        selection.slots.updated.on(() => {
+          if (selection.has(this.model.id) && selection.editing) {
+            this._editing = true;
+          } else {
+            this._editing = false;
+          }
+        })
+      );
+    }
   }
 
   override firstUpdated() {
     const { _disposables } = this;
-    const selection = this.rootService.selection;
+    if (this.rootService) {
+      const selection = this.rootService.selection;
 
-    _disposables.add(
-      this.rootService.slots.elementResizeStart.on(() => {
-        if (selection.selectedElements.includes(this.model)) {
-          this._isResizing = true;
-        }
-      })
-    );
+      _disposables.add(
+        this.rootService.slots.elementResizeStart.on(() => {
+          if (selection.selectedElements.includes(this.model)) {
+            this._isResizing = true;
+          }
+        })
+      );
 
-    _disposables.add(
-      this.rootService.slots.elementResizeEnd.on(() => {
-        this._isResizing = false;
-      })
-    );
+      _disposables.add(
+        this.rootService.slots.elementResizeEnd.on(() => {
+          this._isResizing = false;
+        })
+      );
+    }
 
     const observer = new MutationObserver(() => {
       const rect = this._notePageContent?.getBoundingClientRect();
-      if (!rect) return;
+      if (!rect || !this.rootService) return;
       const zoom = this.rootService.viewport.zoom;
       const scale = this.model.edgeless.scale ?? 1;
       this._noteFullHeight =
@@ -499,7 +503,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
   }
 
   override get rootService() {
-    return super.rootService as EdgelessRootService;
+    return super.rootService as EdgelessRootService | undefined;
   }
 
   @state()

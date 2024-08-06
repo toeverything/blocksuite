@@ -255,14 +255,15 @@ export class FrameBlockComponent extends GfxBlockComponent<
     super.connectedCallback();
 
     let lastZoom = 0;
-    this._disposables.add(
-      this.rootService!.viewport.viewportUpdated.on(({ zoom }) => {
-        if (zoom !== lastZoom) {
-          lastZoom = zoom;
-          this.requestUpdate();
-        }
-      })
-    );
+    this.rootService &&
+      this._disposables.add(
+        this.rootService.viewport.viewportUpdated.on(({ zoom }) => {
+          if (zoom !== lastZoom) {
+            lastZoom = zoom;
+            this.requestUpdate();
+          }
+        })
+      );
 
     this._disposables.add(
       this.doc.slots.blockUpdated.on(({ type, id }) => {
@@ -274,13 +275,18 @@ export class FrameBlockComponent extends GfxBlockComponent<
   }
 
   override firstUpdated() {
-    this.rootService.slots.edgelessToolUpdated.on(tool => {
-      this._isNavigator = tool.type === 'frameNavigator';
-    });
+    this.rootService &&
+      this._disposables.add(
+        this.rootService.slots.edgelessToolUpdated.on(tool => {
+          this._isNavigator = tool.type === 'frameNavigator';
+        })
+      );
   }
 
   override renderGfxBlock() {
     const { model, _isNavigator, showBorder, doc, rootService } = this;
+    if (!rootService) return;
+
     const backgroundColor = ThemeObserver.generateColorProperty(
       model.background,
       '--affine-platte-transparent'

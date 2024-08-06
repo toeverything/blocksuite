@@ -71,7 +71,9 @@ export abstract class GfxBlockComponent<
   }
 
   get rootService() {
-    return this.host.spec.getService(this.rootServiceFlavour) as GfxRootService;
+    return this.host.spec.getService(this.rootServiceFlavour) as
+      | GfxRootService
+      | undefined;
   }
 
   abstract rootServiceFlavour: string;
@@ -162,9 +164,9 @@ export function toGfxBlockComponent<
     }
 
     get rootService() {
-      return this.host.spec.getService(
-        this.rootServiceFlavour
-      ) as GfxRootService;
+      return this.host.spec.getService(this.rootServiceFlavour) as
+        | GfxRootService
+        | undefined;
     }
   } as B & {
     new (
