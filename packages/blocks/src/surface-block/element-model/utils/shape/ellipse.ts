@@ -70,13 +70,14 @@ export const ellipse = {
           const centralRx = rx * DEFAULT_CENTRAL_AREA_RATIO;
           const centralRy = ry * DEFAULT_CENTRAL_AREA_RATIO;
           hit = pointInEllipse(point, center, centralRx, centralRy, rad);
-        } else {
-          hit = this.textBound
-            ? pointInPolygon(
-                [x, y],
-                getPointsFromBoundsWithRotation(this.textBound)
-              )
-            : false;
+        } else if (this.textBound) {
+          hit = pointInPolygon(
+            point,
+            getPointsFromBoundsWithRotation(
+              this,
+              () => Bound.from(this.textBound!).points
+            )
+          );
         }
       }
     }

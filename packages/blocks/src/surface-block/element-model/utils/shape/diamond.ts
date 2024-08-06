@@ -53,10 +53,11 @@ export const diamond = {
     y: number,
     options: PointTestOptions
   ) {
+    const point: IVec = [x, y];
     const points = getPointsFromBoundsWithRotation(this, diamond.points);
 
     let hit = pointOnPolygonStoke(
-      [x, y],
+      point,
       points,
       (options?.expand ?? 1) / (options.zoom ?? 1)
     );
@@ -77,14 +78,15 @@ export const diamond = {
             centralBounds,
             diamond.points
           );
-          hit = pointInPolygon([x, y], centralPoints);
-        } else {
-          hit = this.textBound
-            ? pointInPolygon(
-                [x, y],
-                getPointsFromBoundsWithRotation(this.textBound)
-              )
-            : false;
+          hit = pointInPolygon(point, centralPoints);
+        } else if (this.textBound) {
+          hit = pointInPolygon(
+            point,
+            getPointsFromBoundsWithRotation(
+              this,
+              () => Bound.from(this.textBound!).points
+            )
+          );
         }
       }
     }

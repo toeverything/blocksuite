@@ -9,6 +9,7 @@ import type {
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
+import { TextAlign } from '../../../consts.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -155,9 +156,17 @@ function renderText(
     }
   }
 
+  const offsetX =
+    model.textAlign === TextAlign.Center
+      ? (w - maxLineWidth) / 2
+      : model.textAlign === TextAlign.Left
+        ? horOffset
+        : horOffset - maxLineWidth;
+  const offsetY = vertOffset - lineHeight + verticalPadding / 2;
+
   const bound = new Bound(
-    x + (w - maxLineWidth) / 2,
-    y + vertOffset - 2,
+    x + offsetX,
+    y + offsetY,
     maxLineWidth,
     lineHeight * lines.length
   ) as IBound;
