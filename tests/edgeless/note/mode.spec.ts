@@ -52,8 +52,8 @@ test('Note can be changed to display on doc and edgeless mode', async ({
 
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
-  const noteId = await addNote(page, 'note2', 100, 100);
-  await page.mouse.click(200, 50);
+  const noteId = await addNote(page, 'note2', 100, 200);
+  await page.mouse.click(200, 150);
   // assert add note success, there should be 2 notes in edgeless page
   await assertBlockCount(page, 'edgeless-note', 2);
 
