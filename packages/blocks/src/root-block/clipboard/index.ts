@@ -82,22 +82,19 @@ export class PageClipboard {
 
   host: BlockComponent;
 
-  onBlockSnapshotPaste = (
+  onBlockSnapshotPaste = async (
     snapshot: BlockSnapshot,
     doc: Doc,
     parent?: string,
     index?: number
   ) => {
-    this._std.command
-      .chain()
-      .inline((_ctx, next) => {
-        this._std.clipboard
-          .pasteBlockSnapshot(snapshot, doc, parent, index)
-          .catch(console.error);
-
-        return next();
-      })
-      .run();
+    const block = await this._std.clipboard.pasteBlockSnapshot(
+      snapshot,
+      doc,
+      parent,
+      index
+    );
+    return block?.id ?? null;
   };
 
   onPageCopy: UIEventHandler = ctx => {

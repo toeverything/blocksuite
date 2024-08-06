@@ -650,6 +650,22 @@ export async function getAllNoteIds(page: Page) {
   });
 }
 
+export async function getAllEdgelessNoteIds(page: Page) {
+  return page.evaluate(() => {
+    return Array.from(document.querySelectorAll('affine-edgeless-note')).map(
+      note => note.model.id
+    );
+  });
+}
+
+export async function getAllEdgelessTextIds(page: Page) {
+  return page.evaluate(() => {
+    return Array.from(document.querySelectorAll('affine-edgeless-text')).map(
+      text => text.model.id
+    );
+  });
+}
+
 export async function countBlock(page: Page, flavour: string) {
   return page.evaluate(
     ([flavour]) => {
