@@ -556,7 +556,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     const paddingTop = parseInt(computedStyle.paddingTop) * this.scale;
     return (
       (top +
-        paddingTop +
+        paddingTop -
         this.dragHandleContainerOffsetParent.getBoundingClientRect().top) /
       this.cumulativeParentScale
     );

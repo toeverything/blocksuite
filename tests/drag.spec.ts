@@ -19,6 +19,7 @@ import {
   getBoundingClientRect,
   getEditorHostLocator,
   getPageSnapshot,
+  initParagraphsByCount,
 } from './utils/actions/misc.js';
 import { assertBlockChildrenIds, assertRichTexts } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -710,4 +711,45 @@ test('should support moving blocks from multiple notes', async ({ page }) => {
 
   await assertRichTexts(page, ['654', '321', '123', '987', '456', '789']);
   await expect(blockSelections).toHaveCount(2);
+});
+
+test('drag handle should show on right block when scroll viewport', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initParagraphsByCount(page, 30);
+
+  await page.mouse.wheel(0, 200);
+
+  const editorHost = getEditorHostLocator(page);
+  const editors = editorHost.locator('rich-text');
+  const blockRect28 = await editors.nth(28).boundingBox();
+  if (!blockRect28) {
+    throw new Error();
+  }
+
+  await page.mouse.move(blockRect28.x + 10, blockRect28.y + 10);
+  const dragHandle = page.locator('.affine-drag-handle-container');
+  await expect(dragHandle).toBeVisible();
+
+  await page.mouse.move(
+    blockRect28.x - 10,
+    blockRect28.y + blockRect28.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.up();
+
+  const blockSelections = page
+    .locator('affine-block-selection')
+    .locator('visible=true');
+  await expect(blockSelections).toHaveCount(1);
+
+  const selectedBlockRect = await blockSelections.nth(0).boundingBox();
+
+  if (!selectedBlockRect) {
+    throw new Error();
+  }
+
+  expect(blockRect28).toEqual(selectedBlockRect);
 });
