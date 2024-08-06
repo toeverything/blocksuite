@@ -9,10 +9,8 @@ export default defineConfig({
   snapshotDir: 'snapshots',
   snapshotPathTemplate: 'snapshots/{testFilePath}/{arg}{ext}',
   webServer: {
-    command: 'pnpm -w dev',
-    port: 5173,
-    // command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
-    // port: process.env.CI ? 4173 : 5173,
+    command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
+    port: process.env.CI ? 4173 : 5173,
     reuseExistingServer: !process.env.CI,
     env: {
       COVERAGE: process.env.COVERAGE ?? '',
