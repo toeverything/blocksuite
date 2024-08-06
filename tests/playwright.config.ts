@@ -9,7 +9,7 @@ export default defineConfig({
   snapshotDir: 'snapshots',
   snapshotPathTemplate: 'snapshots/{testFilePath}/{arg}{ext}',
   webServer: {
-    command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
+    command: process.env.CI ? 'pnpm -w preview' : 'pnpm -w dev',
     port: process.env.CI ? 4173 : 5173,
     reuseExistingServer: !process.env.CI,
     env: {
