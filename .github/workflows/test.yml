@@ -64,7 +64,7 @@ jobs:
           main-branch-name: master
 
       - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="12 linux-medium-js" --require-explicit-completion
+        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --require-explicit-completion
 
       - name: Install dependencies
         run: pnpm install
@@ -72,9 +72,11 @@ jobs:
       - name: Run build
         run: pnpm nx affected -t build --exclude @blocksuite/docs,blocksuite
 
-      - run: pnpm nx affected -t test:unit:coverage
+      - name: Run unit tests
+        run: pnpm nx affected -t test:unit --exclude blocksuite
 
-      - run: pnpm nx affected -t e2e-ci
+      - name: Run e2e tests
+        run: pnpm nx affected -t e2e-ci
         env:
           COVERAGE: true
 
