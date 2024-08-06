@@ -32,7 +32,7 @@ overrides:
 
 patchedDependencies:
   '@lit-labs/preact-signals@1.0.2':
-    hash: tirlsfb7xqdhpmx3ykt5c3ucrm
+    hash: zsk746dt4hzz7ujosijwqb6oaq
     path: patches/@lit-labs__preact-signals@1.0.2.patch
 
 importers:
@@ -224,7 +224,7 @@ importers:
         version: 1.6.8
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -379,7 +379,7 @@ importers:
         version: link:../global
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -629,7 +629,7 @@ importers:
         version: 1.6.8
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
       '@toeverything/theme':
         specifier: ^1.0.2
         version: 1.0.2
@@ -8421,7 +8421,7 @@ snapshots:
     dependencies:
       '@lezer/common': 1.2.1
 
-  '@lit-labs/preact-signals@1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)':
+  '@lit-labs/preact-signals@1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)':
     dependencies:
       '@preact/signals-core': 1.7.0
       lit: 3.1.4
