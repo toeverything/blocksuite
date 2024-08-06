@@ -7,13 +7,9 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 import type { IBound } from '@blocksuite/global/utils';
 
-import { Vec } from '@blocksuite/global/utils';
+import { Vec, assertExists } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
-import {
-  DisposableGroup,
-  assertExists,
-  assertInstanceOf,
-} from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import {
   type BlockSnapshot,
   BlockSnapshotSchema,
@@ -25,7 +21,6 @@ import {
 import DOMPurify from 'dompurify';
 
 import type { GfxCompatibleProps } from '../../../_common/edgeless/mixin/gfx-compatible.js';
-import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import {
@@ -42,7 +37,6 @@ import {
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
-import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import {
   type SerializedElement,
   SurfaceGroupLikeModel,
@@ -355,10 +349,10 @@ export class EdgelessClipboardController extends PageClipboard {
       if (mayBeSliceDataJson === undefined) return;
       const clipData = JSON.parse(mayBeSliceDataJson);
       const sliceSnapShot = clipData?.snapshot as SliceSnapshot;
-      this._pasteTextContentAsNote(sliceSnapShot.content);
+      await this._pasteTextContentAsNote(sliceSnapShot.content);
     } catch (_) {
       // if it is not parsable
-      this._pasteTextContentAsNote(data.getData('text/plain'));
+      await this._pasteTextContentAsNote(data.getData('text/plain'));
     }
   };
 
@@ -562,29 +556,35 @@ export class EdgelessClipboardController extends PageClipboard {
     ];
   }
 
-  private _createEdgelessTextBlocks(
+  private async _createEdgelessTextBlocks(
     edgelessTexts: BlockSnapshot[],
     oldToNewIdMap: Map<string, string>
   ) {
-    const { host } = this;
-    const edgelessTextIds = edgelessTexts.map(({ id, props, children }) => {
-      delete props.index;
-      assertExists(props.xywh);
-      const textId = host.service.addBlock(
-        'affine:edgeless-text',
-        props,
-        this.edgeless.surface.model.id
-      );
-      const text = host.service.getElementById(textId);
-      oldToNewIdMap.set(id, textId);
-      assertInstanceOf(text, EdgelessTextBlockModel);
+    const edgelessTextIds = await Promise.all(
+      edgelessTexts.map(async text => {
+        const oldId = text.id;
+        delete text.props.index;
+        if (!text.props.xywh) {
+          console.error(
+            `EdgelessText block(id: ${oldId}) does not have xywh property`
+          );
+          return null;
+        }
+        const newId = await this.onBlockSnapshotPaste(
+          text,
+          this.doc,
+          this.edgeless.surface.model.id
+        );
+        if (!newId) {
+          console.error(`Failed to paste EdgelessText block(id: ${oldId})`);
+          return null;
+        }
+        oldToNewIdMap.set(oldId, newId);
 
-      children.forEach((child, index) => {
-        this.onBlockSnapshotPaste(child, this.doc, text.id, index);
-      });
-      return textId;
-    });
-    return edgelessTextIds;
+        return newId;
+      })
+    );
+    return edgelessTextIds.filter(id => id !== null);
   }
 
   private _createFigmaEmbedBlocks(figmaEmbeds: BlockSnapshot[]) {
@@ -762,29 +762,36 @@ export class EdgelessClipboardController extends PageClipboard {
     return embedLoomIds;
   }
 
-  private _createNoteBlocks(
+  private async _createNoteBlocks(
     notes: BlockSnapshot[],
     oldToNewIdMap: Map<string, string>
   ) {
-    const { host } = this;
-    const noteIds = notes.map(({ id, props, children }) => {
-      delete props.index;
-      assertExists(props.xywh);
-      const noteId = host.service.addBlock(
-        'affine:note',
-        props,
-        this.doc.root!.id
-      );
-      const note = host.service.getElementById(noteId) as NoteBlockModel;
-      if (id) oldToNewIdMap.set(id, noteId);
-      assertExists(note);
+    const noteIds = await Promise.all(
+      notes.map(async note => {
+        const oldId = note.id;
 
-      children.forEach((child, index) => {
-        this.onBlockSnapshotPaste(child, this.doc, note.id, index);
-      });
-      return noteId;
-    });
-    return noteIds;
+        delete note.props.index;
+        if (!note.props.xywh) {
+          console.error(`Note block(id: ${oldId}) does not have xywh property`);
+          return null;
+        }
+
+        const newId = await this.onBlockSnapshotPaste(
+          note,
+          this.doc,
+          this.doc.root!.id
+        );
+        if (!newId) {
+          console.error(`Failed to paste note block(id: ${oldId})`);
+          return null;
+        }
+
+        oldToNewIdMap.set(oldId, newId);
+
+        return newId;
+      })
+    );
+    return noteIds.filter(id => id !== null);
   }
 
   private _createSyncedDocEmbedBlocks(syncedDocEmbeds: BlockSnapshot[]) {
@@ -1053,7 +1060,7 @@ export class EdgelessClipboardController extends PageClipboard {
     );
   }
 
-  private _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
+  private async _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
     const edgeless = this.host;
     const { lastMousePos } = this.toolManager;
     const [x, y] = edgeless.service.viewport.toModelCoord(
@@ -1094,9 +1101,14 @@ export class EdgelessClipboardController extends PageClipboard {
         );
       });
     } else {
-      content.forEach((child, idx) => {
-        this.onBlockSnapshotPaste(child, this.doc, noteId, idx);
-      });
+      for (let index = 0; index < content.length; index++) {
+        await this.onBlockSnapshotPaste(
+          content[index],
+          this.doc,
+          noteId,
+          index
+        );
+      }
     }
 
     edgeless.service.selection.set({

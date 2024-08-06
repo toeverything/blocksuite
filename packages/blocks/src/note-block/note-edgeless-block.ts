@@ -532,3 +532,9 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
   @query('.edgeless-note-page-content .affine-note-block-container')
   private accessor _notePageContent: HTMLElement | null = null;
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-edgeless-note': EdgelessNoteBlockComponent;
+  }
+}

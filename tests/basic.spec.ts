@@ -411,16 +411,16 @@ test('when no note block, click editing area auto add a new note block', async (
   await page.locator('affine-edgeless-note').click({ force: true });
   await pressBackspace(page);
   await switchEditorMode(page);
-  let note = await page.evaluate(() => {
+  const edgelessNote = await page.evaluate(() => {
     return document.querySelector('affine-edgeless-note');
   });
-  expect(note).toBeNull();
+  expect(edgelessNote).toBeNull();
   await click(page, { x: 200, y: 280 });
 
-  note = await page.evaluate(() => {
+  const pageNote = await page.evaluate(() => {
     return document.querySelector('affine-note');
   });
-  expect(note).not.toBeNull();
+  expect(pageNote).not.toBeNull();
 });
 
 test(scoped`automatic identify url text`, async ({ page }) => {

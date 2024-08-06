@@ -931,6 +931,31 @@ export async function pasteContent(
   await waitNextFrame(page);
 }
 
+export async function pasteTestImage(page: Page) {
+  await page.evaluate(async () => {
+    const imageBlob = await fetch(`${location.origin}/test-card-1.png`).then(
+      response => response.blob()
+    );
+
+    const imageFile = new File([imageBlob], 'test-card-1.png', {
+      type: 'image/png',
+    });
+
+    const e = new ClipboardEvent('paste', {
+      clipboardData: new DataTransfer(),
+    });
+
+    Object.defineProperty(e, 'target', {
+      writable: false,
+      value: document,
+    });
+
+    e.clipboardData?.items.add(imageFile);
+    document.dispatchEvent(e);
+  });
+  await waitNextFrame(page);
+}
+
 export async function getClipboardHTML(page: Page) {
   const dataInClipboard = await page.evaluate(async () => {
     function format(node: HTMLElement, level: number) {
