@@ -169,19 +169,6 @@ export const getSeniorTools = ({
     ></edgeless-mindmap-tool-button>`,
   });
 
-  // // Text
-  // tools.push({
-  //   content: html`<edgeless-text-tool-button .edgeless=${edgeless}>
-  //   </edgeless-text-tool-button>`,
-  // });
-
-  // // Image
-  // tools.push({
-  //   content: html`<edgeless-image-tool-button
-  //     .edgeless=${edgeless}
-  //   ></edgeless-image-tool-button>`,
-  // });
-
   // Template
   tools.push({
     name: 'Template',

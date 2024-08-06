@@ -207,6 +207,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../framework/global
+      '@blocksuite/icons':
+        specifier: ^2.1.62
+        version: 2.1.62(@types/react@18.3.3)(lit@3.1.4)
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
@@ -1389,6 +1392,19 @@ packages:
   '@babel/types@7.25.2':
     resolution: {integrity: sha512-YTnYtra7W9e6/oAZEHj0bJehPRUlLH9/fbpT5LfB0NhQXyALCRkRs3zH9v07IYhkgpqX6Z78FnuccZr/l4Fs4Q==}
     engines: {node: '>=6.9.0'}
+
+  '@blocksuite/icons@2.1.62':
+    resolution: {integrity: sha512-qqrUa1MeHWPtNW2aBPB2LiSgkJ2c64o2szfzs5TebM3oDw3evLZuRsmG+ivGNZZaV4VtEtYoeTMZ11nFkwnv8A==}
+    engines: {node: '>=18.17.1'}
+    peerDependencies:
+      '@types/react': ^18.0.25
+      lit: ^2.6.1
+      react: ^18.2.0
+    peerDependenciesMeta:
+      lit:
+        optional: true
+      react:
+        optional: true
 
   '@bundled-es-modules/cookie@2.0.0':
     resolution: {integrity: sha512-Or6YHg/kamKHpxULAdSqhGqnWFneIXu1NKvvfBBzKGwpVsYuFIQ5aBPHDnnoR3ghW1nvSkALd+EF9iMtY7Vjxw==}
@@ -7732,6 +7748,12 @@ snapshots:
       '@babel/helper-string-parser': 7.24.8
       '@babel/helper-validator-identifier': 7.24.7
       to-fast-properties: 2.0.0
+
+  '@blocksuite/icons@2.1.62(@types/react@18.3.3)(lit@3.1.4)':
+    dependencies:
+      '@types/react': 18.3.3
+    optionalDependencies:
+      lit: 3.1.4
 
   '@bundled-es-modules/cookie@2.0.0':
     dependencies:
