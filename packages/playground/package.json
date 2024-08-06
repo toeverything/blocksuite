@@ -44,5 +44,17 @@
     "magic-string": "^0.30.11",
     "openai": "^4.53.2",
     "vite-plugin-wasm": "^3.3.0"
+  },
+  "nx": {
+    "targets": {
+      "vite:preview": {
+        "outputs": [
+          "{projectRoot}/dist"
+        ],
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
   }
 }
