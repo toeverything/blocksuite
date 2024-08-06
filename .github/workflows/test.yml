@@ -70,13 +70,13 @@ jobs:
         run: pnpm install
 
       - name: Run build
-        run: pnpm nx affected -t build --exclude "@blocksuite/docs"
-        env:
-          NODE_OPTIONS: --max-old-space-size=16384
+        run: pnpm nx affected -t build --exclude @blocksuite/docs,blocksuite
 
-      - run: pnpm nx affected -t test:unit:coverage
+      - name: Run unit tests
+        run: pnpm nx affected -t test:unit --exclude blocksuite
 
-      - run: pnpm nx affected -t e2e-ci
+      - name: Run e2e tests
+        run: pnpm nx affected -t e2e-ci
         env:
           COVERAGE: true
 

@@ -229,8 +229,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       '@toeverything/theme':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
@@ -628,8 +628,8 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
       '@toeverything/theme':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2
       lit:
         specifier: ^3.1.4
         version: 3.1.4
@@ -2529,8 +2529,8 @@ packages:
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
 
-  '@toeverything/theme@1.0.1':
-    resolution: {integrity: sha512-LZzf4qj945I0gLzB4rx+WxVrKYt+56f8iXzNsFPQVw5PCM2r/f/CcKbDLjRzqCgsa4x5VEA5n3S9CDJ9KkedYw==}
+  '@toeverything/theme@1.0.2':
+    resolution: {integrity: sha512-t14kvV+he/VM9lJMfkiqh+1I/Jo+cAL86x0aOv0Zryn2T9MxIKVg2ChO7EkmfqNhBH+RI8D8KpnWgiBIznDGaA==}
 
   '@toeverything/y-indexeddb@0.10.0-canary.9':
     resolution: {integrity: sha512-3hzktNuOaXut/RgRjKNeqQura1zeYF+tSLSlWDc0rDBOrEpwD/1EOpKVCbgtl8ke7f4oinLfgBNk4HcwqaQUYQ==}
@@ -9109,7 +9109,7 @@ snapshots:
     dependencies:
       '@testing-library/dom': 10.4.0
 
-  '@toeverything/theme@1.0.1': {}
+  '@toeverything/theme@1.0.2': {}
 
   '@toeverything/y-indexeddb@0.10.0-canary.9(yjs@13.6.18)':
     dependencies:
