@@ -4,7 +4,7 @@ import { UIEventState, UIEventStateContext } from '../base.js';
 import { MultiPointerEventState } from '../state/index.js';
 import { PointerEventState } from '../state/index.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
-import { isFarEnough } from '../utils.js';
+import { center, isFarEnough } from '../utils.js';
 
 type PointerId = typeof PointerEvent.prototype.pointerId;
 
@@ -274,7 +274,7 @@ class DragController extends PointerControllerBase {
   }
 }
 
-class PinchController extends PointerControllerBase {
+abstract class DualDragControllerBase extends PointerControllerBase {
   private _down = (event: PointerEvent) => {
     // Another pointer down
     if (
@@ -359,17 +359,19 @@ class PinchController extends PointerControllerBase {
       last: last2,
     });
 
+    if (!isFarEnough(state1.delta, state2.delta)) return;
+
     const multiPointerState = new MultiPointerEventState(event, [
       state1,
       state2,
     ]);
 
+    this._handleMove(event, multiPointerState);
+
     this._lastPointerStates = {
       primary: state1.raw.isPrimary ? state1 : state2,
       secondary: state1.raw.isPrimary ? state2 : state1,
     };
-
-    this._dispatcher.run('pinch', createContext(event, multiPointerState));
   };
 
   private _reset = () => {
@@ -408,6 +410,40 @@ class PinchController extends PointerControllerBase {
     disposables.addFromEvent(host, 'pointerup', this._upOrOut);
     disposables.addFromEvent(host, 'pointerout', this._upOrOut);
   }
+
+  abstract _handleMove(
+    event: PointerEvent,
+    state: MultiPointerEventState
+  ): void;
+}
+
+class PinchController extends DualDragControllerBase {
+  override _handleMove(event: PointerEvent, state: MultiPointerEventState) {
+    if (event.pointerType !== 'touch') return;
+
+    // the changes of distance between two pointers is not far enough
+    if (!isFarEnough(state.pointers[0].delta, state.pointers[1].delta)) return;
+
+    this._dispatcher.run('pinch', createContext(event, state));
+  }
+}
+
+class PanController extends DualDragControllerBase {
+  override _handleMove(event: PointerEvent, state: MultiPointerEventState) {
+    if (event.pointerType !== 'touch') return;
+
+    //  current center,          last center   = center move vector
+    // 0.5 * (a + da + b + db) - 0.5 * (a + b) = 0.5 * (da + db)
+    const centerMoveVec = center(
+      state.pointers[0].delta,
+      state.pointers[1].delta
+    );
+
+    // the center move distance is not far enough
+    if (!isFarEnough({ x: 0, y: 0 }, centerMoveVec)) return;
+
+    this._dispatcher.run('pan', createContext(event, state));
+  }
 }
 
 export class PointerControl {
@@ -418,6 +454,7 @@ export class PointerControl {
       new PointerEventForward(_dispatcher),
       new ClickController(_dispatcher),
       new DragController(_dispatcher),
+      new PanController(_dispatcher),
       new PinchController(_dispatcher),
     ];
   }

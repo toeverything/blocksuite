@@ -43,6 +43,7 @@ const eventNames = [
   'dragEnd',
 
   'pinch',
+  'pan',
 
   'keyDown',
   'keyUp',

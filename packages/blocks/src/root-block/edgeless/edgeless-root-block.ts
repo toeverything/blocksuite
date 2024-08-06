@@ -223,6 +223,26 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     );
   }
 
+  private _initPanEvent() {
+    this.disposables.add(
+      this.dispatcher.add('pan', ctx => {
+        const { viewport } = this.service;
+        if (viewport.locked) return;
+
+        const multiPointersState = ctx.get('multiPointerState');
+        const [p1, p2] = multiPointersState.pointers;
+
+        const dx =
+          (0.5 * (p1.delta.x + p2.delta.x)) / viewport.zoom / viewport.scale;
+        const dy =
+          (0.5 * (p1.delta.y + p2.delta.y)) / viewport.zoom / viewport.scale;
+
+        // direction is opposite
+        viewport.applyDeltaCenter(-dx, -dy);
+      })
+    );
+  }
+
   private _initPinchEvent() {
     this.disposables.add(
       this.dispatcher.add('pinch', ctx => {
@@ -232,9 +252,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
         const multiPointersState = ctx.get('multiPointerState');
         const [p1, p2] = multiPointersState.pointers;
 
-        const startCenter = new Point(
-          0.5 * (p1.start.x + p2.start.x),
-          0.5 * (p1.start.y + p2.start.y)
+        const currentCenter = new Point(
+          0.5 * (p1.x + p2.x),
+          0.5 * (p1.y + p2.y)
         );
 
         const lastDistance = Vec.dist(
@@ -246,8 +266,8 @@ export class EdgelessRootBlockComponent extends BlockComponent<
         const zoom = (currentDistance / lastDistance) * viewport.zoom;
 
         const [baseX, baseY] = viewport.toModelCoord(
-          startCenter.x,
-          startCenter.y
+          currentCenter.x,
+          currentCenter.y
         );
 
         viewport.setZoom(zoom, new Point(baseX, baseY));
@@ -773,6 +793,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
     this._initViewport();
     this._initWheelEvent();
+    this._initPanEvent();
     this._initPinchEvent();
 
     if (this.doc.readonly) {
