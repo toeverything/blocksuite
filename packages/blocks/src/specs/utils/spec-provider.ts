@@ -28,6 +28,15 @@ export class SpecProvider {
     this.specMap.delete(id);
   }
 
+  extendSpec(id: string, newSpec: BlockSpec[]) {
+    const existingSpec = this.specMap.get(id);
+    if (!existingSpec) {
+      console.error(`Spec not found for ${id}`);
+      return;
+    }
+    this.specMap.set(id, [...existingSpec, ...newSpec]);
+  }
+
   getSpec(id: string) {
     const spec = this.specMap.get(id);
     assertExists(spec, `Spec not found for ${id}`);
