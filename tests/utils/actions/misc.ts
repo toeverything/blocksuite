@@ -33,7 +33,9 @@ declare global {
   }
 }
 
-export const defaultPlaygroundURL = new URL(`http://localhost:5173/starter/`);
+export const defaultPlaygroundURL = new URL(
+  `http://localhost:${process.env.CI ? 4173 : 5173}/starter/`
+);
 
 const NEXT_FRAME_TIMEOUT = 50;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
