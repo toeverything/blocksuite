@@ -103,6 +103,8 @@ export class EdgelessRemoteSelectionWidget extends WidgetComponent<
       'transform',
       `translate(${translateX}px, ${translateY}px)`
     );
+
+    this.requestUpdate();
   }, this);
 
   static override styles = css`

@@ -907,6 +907,27 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessRemoteSelectedRect(
+  page: Page,
+  xywh: number[],
+  index = 0
+) {
+  const [x, y, w, h] = xywh;
+  const editor = getEditorLocator(page);
+  const remoteSelectedRect = editor
+    .locator('affine-edgeless-remote-selection-widget')
+    .locator('.remote-rect')
+    .nth(index);
+
+  const box = await remoteSelectedRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless remote selected rect');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
+
 export async function assertEdgelessSelectedRectModel(
   page: Page,
   xywh: number[]

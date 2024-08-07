@@ -9,6 +9,7 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
+  click,
   clickInCenter,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -20,6 +21,7 @@ import {
 } from '../../utils/actions/index.js';
 import {
   assertBlockCount,
+  assertEdgelessRemoteSelectedRect,
   assertEdgelessSelectedRect,
   assertSelectionInNote,
 } from '../../utils/asserts.js';
@@ -70,6 +72,48 @@ test('should update rect of selection when resizing viewport', async ({
   await actions.increaseZoomLevel(page);
   await waitNextFrame(page);
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+});
+
+test('should update react of remote selection when resizing viewport', async ({
+  context,
+  page: pageA,
+}) => {
+  const room = await enterPlaygroundRoom(pageA);
+  await initEmptyEdgelessState(pageA);
+  await actions.switchEditorMode(pageA);
+  await actions.zoomResetByKeyboard(pageA);
+
+  const pageB = await context.newPage();
+  await enterPlaygroundRoom(pageB, {
+    room,
+    noInit: true,
+  });
+  await actions.switchEditorMode(pageB);
+  await actions.zoomResetByKeyboard(pageB);
+
+  await addBasicRectShapeElement(pageA, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await click(pageA, { x: 110, y: 110 });
+  await click(pageB, { x: 110, y: 110 });
+
+  await assertEdgelessSelectedRect(pageB, [100, 100, 100, 100]);
+  await assertEdgelessRemoteSelectedRect(pageB, [100, 100, 100, 100]);
+
+  // to 50%
+  await actions.decreaseZoomLevel(pageB);
+  await waitNextFrame(pageB);
+  await actions.decreaseZoomLevel(pageB);
+  await waitNextFrame(pageB);
+
+  const selectedRectInZoom = await getBoundingRect(
+    pageB,
+    '.affine-edgeless-selected-rect'
+  );
+  await assertEdgelessRemoteSelectedRect(pageB, [
+    selectedRectInZoom.x,
+    selectedRectInZoom.y,
+    50,
+    50,
+  ]);
 });
 
 test('select multiple shapes and translate', async ({ page }) => {
