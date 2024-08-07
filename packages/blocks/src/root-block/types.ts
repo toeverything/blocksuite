@@ -1,6 +1,9 @@
 import type { EdgelessRootBlockComponent } from './edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from './page/page-root-block.js';
-import type { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from './widgets/doc-remote-selection/doc-remote-selection.js';
+import type {
+  AFFINE_DOC_REMOTE_SELECTION_WIDGET,
+  DocRemoteSelectionConfig,
+} from './widgets/doc-remote-selection/index.js';
 import type { AFFINE_DRAG_HANDLE_WIDGET } from './widgets/drag-handle/drag-handle.js';
 import type { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from './widgets/edgeless-remote-selection/index.js';
 import type { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from './widgets/edgeless-zoom-toolbar/index.js';
@@ -56,4 +59,5 @@ export type PieMenuId = typeof AFFINE_PIE_MENU_ID_EDGELESS_TOOLS;
 
 export interface RootBlockConfig {
   linkedWidget?: Partial<LinkedWidgetConfig>;
+  docRemoteSelectionWidget?: Partial<DocRemoteSelectionConfig>;
 }

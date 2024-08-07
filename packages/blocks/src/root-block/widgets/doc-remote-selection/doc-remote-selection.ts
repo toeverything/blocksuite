@@ -12,6 +12,9 @@ import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { DocRemoteSelectionConfig } from './config.js';
+
+import { matchFlavours } from '../../../_common/utils/model.js';
 import { RemoteColorManager } from '../../../root-block/remote-color-manager/remote-color-manager.js';
 import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';
@@ -21,6 +24,7 @@ export interface SelectionRect {
   height: number;
   top: number;
   left: number;
+  transparent?: boolean;
 }
 
 export const AFFINE_DOC_REMOTE_SELECTION_WIDGET =
@@ -55,6 +59,24 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
       pointer-events: none;
     }
   `;
+
+  private get _config(): DocRemoteSelectionConfig {
+    const config =
+      this.std.spec.getConfig('affine:page')?.docRemoteSelectionWidget ?? {};
+
+    return {
+      blockSelectionBackgroundTransparent: block => {
+        return (
+          matchFlavours(block, [
+            'affine:code',
+            'affine:database',
+            'affine:image',
+          ]) || !/affine:embed-*/.test(block.flavour)
+        );
+      },
+      ...config,
+    };
+  }
 
   private get _container() {
     return this.offsetParent;
@@ -121,6 +143,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
       const block = this.host.view.getBlock(lastBlockSelection.blockId);
       if (block) {
         const rect = block.getBoundingClientRect();
+
         return {
           width: 2,
           height: rect.height,
@@ -180,6 +203,11 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
         const block = this.host.view.getBlock(blockSelection.blockId);
         if (block) {
           const rect = block.getBoundingClientRect();
+
+          const transparent = this._config.blockSelectionBackgroundTransparent(
+            block.model
+          );
+
           return {
             width: rect.width,
             height: rect.height,
@@ -191,6 +219,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
               rect.left -
               (containerRect?.left ?? 0) +
               (container?.scrollLeft ?? 0),
+            transparent,
           };
         }
 
