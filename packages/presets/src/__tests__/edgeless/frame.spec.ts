@@ -39,7 +39,7 @@ describe('frame', () => {
     expect(rect!.height).toBeGreaterThan(0);
 
     const [titleX, titleY] = service.viewport.toModelCoord(rect!.x, rect!.y);
-    expect(titleX).toBe(0);
+    expect(titleX).toBeCloseTo(0);
     expect(titleY).toBeLessThan(0);
 
     const nestedFrame = service.doc.addBlock(
@@ -73,22 +73,33 @@ describe('frame', () => {
       xywh: '[100,100,300,300]',
       index: service.layer.generateIndex('affine:note'),
     });
-    service.doc.addBlock(
+    const frameId = service.doc.addBlock(
       'affine:frame',
       {
-        xywh: '[0,36,300,300]',
+        xywh: '[0,60,300,240]',
         title: new Text('Frame 1'),
       },
       service.surface.id
     );
-    service.viewport.setZoom(1);
+    service.zoomToFit();
     await wait();
 
+    const frameTitle = document.querySelector(
+      `[data-block-id="${frameId}"] .affine-frame-title`
+    )!;
+    const titleRect = frameTitle.getBoundingClientRect();
+    const frameBody = document.querySelector(
+      `[data-block-id="${frameId}"] .affine-frame-container`
+    )!;
+    const bodyRect = frameBody.getBoundingClientRect();
+
     const pointDom1 = document.elementFromPoint(
-      ...service.viewport.toViewCoord(20, 13)
+      titleRect.x + titleRect.width / 2,
+      titleRect.y + titleRect.height / 2
     ) as HTMLElement;
     const pointDom2 = document.elementFromPoint(
-      ...service.viewport.toViewCoord(20, 40)
+      bodyRect.x + bodyRect.width / 2,
+      bodyRect.y + bodyRect.height / 2
     ) as HTMLElement;
 
     expect(pointDom1.className, 'Frame title should be on top').toBe(

@@ -490,7 +490,7 @@ export class LayerManager {
             model instanceof GfxBlockModel &&
             renderableInEdgeless(this._doc, this._surface, model)
         ) as BlockSuite.EdgelessModel[]
-    ).concat(this._surface.elementModels);
+    ).concat(this._surface?.elementModels ?? []);
 
     this.canvasElements = [];
     this.blocks = [];

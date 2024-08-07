@@ -62,6 +62,21 @@ export abstract class GfxBlockComponent<
     return nothing;
   }
 
+  override async scheduleUpdate() {
+    const parent = this.parentElement;
+
+    if (this.hasUpdated || !parent || !('scheduleUpdateChildren' in parent)) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      super.scheduleUpdate();
+    } else {
+      await (parent.scheduleUpdateChildren as (id: string) => Promise<void>)(
+        this.model.id
+      );
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      super.scheduleUpdate();
+    }
+  }
+
   toZIndex(): string {
     return `${1}`;
   }
@@ -151,6 +166,21 @@ export function toGfxBlockComponent<
 
     renderPageContent() {
       return super.renderBlock();
+    }
+
+    override async scheduleUpdate() {
+      const parent = this.parentElement;
+
+      if (this.hasUpdated || !parent || !('scheduleUpdateChildren' in parent)) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        super.scheduleUpdate();
+      } else {
+        await (parent.scheduleUpdateChildren as (id: string) => Promise<void>)(
+          this.model.id
+        );
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        super.scheduleUpdate();
+      }
     }
 
     toZIndex(): string {

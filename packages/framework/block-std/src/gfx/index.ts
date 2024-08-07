@@ -28,3 +28,4 @@ export {
   type SurfaceMiddleware,
 } from './surface/surface-model.js';
 export * from './viewport.js';
+export { GfxViewportElement } from './viewport-element.js';

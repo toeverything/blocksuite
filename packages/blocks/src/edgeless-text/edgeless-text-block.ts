@@ -2,7 +2,7 @@ import type { BlockComponent } from '@blocksuite/block-std';
 
 import { GfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
-import { type PropertyValueMap, css, html } from 'lit';
+import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
@@ -183,7 +183,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     this.style.transformOrigin = '0 0';
   }
 
-  override firstUpdated(props: PropertyValueMap<unknown>) {
+  override firstUpdated(props: Map<string, unknown>) {
     super.firstUpdated(props);
 
     const { disposables, rootService } = this;

@@ -254,16 +254,6 @@ export class FrameBlockComponent extends GfxBlockComponent<
   override connectedCallback() {
     super.connectedCallback();
 
-    let lastZoom = 0;
-    this._disposables.add(
-      this.rootService!.viewport.viewportUpdated.on(({ zoom }) => {
-        if (zoom !== lastZoom) {
-          lastZoom = zoom;
-          this.requestUpdate();
-        }
-      })
-    );
-
     this._disposables.add(
       this.doc.slots.blockUpdated.on(({ type, id }) => {
         if (id === this.model.id && type === 'update') {

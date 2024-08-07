@@ -2,6 +2,7 @@ import type {
   GfxBlockComponent,
   SurfaceSelection,
 } from '@blocksuite/block-std';
+import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -98,11 +99,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
         `${gap}px ${gap}px`
       );
     }
-
-    if (this.layerElm) {
-      this.layerElm.style.setProperty('transform', this._getLayerViewport());
-      this.layerElm.dataset.scale = zoom.toString();
-    }
   }, this);
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -136,13 +132,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       );
     }
 
-    .edgeless-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      contain: size layout style;
-    }
-
     @media print {
       .selected {
         background-color: transparent !important;
@@ -172,16 +161,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   mouseRoot!: HTMLElement;
 
-  private _getLayerViewport(negative = false) {
-    const { translateX, translateY, zoom } = this.service.viewport;
-
-    if (negative) {
-      return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
-    }
-
-    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
-  }
-
   private _handleToolbarFlag() {
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
@@ -208,10 +187,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   private _initLayerUpdateEffect() {
     const updateLayers = requestThrottledConnectedFrame(() => {
-      const blocks =
-        this.renderRoot?.querySelectorAll<GfxBlockComponent>(
-          '.edgeless-layer > [data-block-id]'
-        ) ?? [];
+      const blocks = Array.from(
+        this.gfxViewportElm.children as HTMLCollectionOf<GfxBlockComponent>
+      );
 
       blocks.forEach((block: GfxBlockComponent) => {
         block.updateZIndex?.();
@@ -829,11 +807,28 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
     return html`
       <div class="edgeless-background edgeless-container">
-        <div class="edgeless-layer">
+        <gfx-viewport
+          .maxConcurrentRenders=${6}
+          .viewport=${this.service.viewport}
+          .getModelsInViewport=${() => {
+            const blocks = this.service.layer.blocksGrid.search(
+              this.service.viewport.viewportBounds,
+              undefined,
+              true
+            );
+
+            this.service.layer.framesGrid
+              .search(this.service.viewport.viewportBounds, undefined, true)
+              .forEach(frame => blocks.add(frame));
+
+            return blocks;
+          }}
+          .host=${this.host}
+        >
           ${this.renderChildren(this.model)}${this.renderChildren(
             this.surfaceBlockModel
           )}
-        </div>
+        </gfx-viewport>
       </div>
 
       <!--
@@ -951,8 +946,8 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     type: localStorage.defaultTool ?? 'default',
   };
 
-  @query('.edgeless-layer')
-  accessor layerElm: HTMLDivElement | null = null;
+  @query('gfx-viewport')
+  accessor gfxViewportElm!: GfxViewportElement;
 
   @query('.edgeless-mount-point')
   accessor mountElm: HTMLDivElement | null = null;
