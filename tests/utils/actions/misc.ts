@@ -1299,11 +1299,8 @@ export async function waitForInlineEditorStateUpdated(page: Page) {
   });
 }
 
-export async function initImageState(page: Page) {
-  // await initEmptyParagraphState(page);
-  // await focusRichText(page);
-
-  await page.evaluate(async () => {
+export async function initImageState(page: Page, prependParagraph = false) {
+  await page.evaluate(async prepend => {
     const { doc } = window;
     const rootId = doc.addBlock('affine:page', {
       title: new doc.Text(),
@@ -1319,6 +1316,9 @@ export async function initImageState(page: Page) {
     );
     const storage = pageRoot.doc.blobSync;
     const sourceId = await storage.set(imageBlob);
+    if (prepend) {
+      doc.addBlock('affine:paragraph', {}, noteId);
+    }
     const imageId = doc.addBlock(
       'affine:image',
       {
@@ -1330,7 +1330,7 @@ export async function initImageState(page: Page) {
     doc.resetHistory();
 
     return { rootId, noteId, imageId };
-  });
+  }, prependParagraph);
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.
   await page.waitForTimeout(500);
