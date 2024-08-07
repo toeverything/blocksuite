@@ -184,15 +184,43 @@ export class AIPanelError extends WithDisposable(LitElement) {
         ],
       ],
       // default error handler
-      () => html`
-        <div class="error-info">
-          An error occurred. Please try again later. If this issue persists,
-          please let us know at
-          <a href="mailto:support@toeverything.info">
-            support@toeverything.info
-          </a>
-        </div>
-      `
+      () => {
+        const tip = this.config.error?.message;
+        const error = tip
+          ? html`<a class="tip" href="#" data-tip="${tip}"
+              >An error occurred</a
+            >`
+          : 'An error occurred';
+        return html`
+          <style>
+            .tip {
+              position: relative;
+              cursor: pointer;
+            }
+
+            .tip:hover::after {
+              content: attr(data-tip);
+              position: absolute;
+              left: 0;
+              top: 20px;
+              background-color: black;
+              white-space: nowrap;
+              color: white;
+              padding: 5px 10px;
+              border-radius: 5px;
+              z-index: 1000;
+              white-space: pre;
+            }
+          </style>
+          <div class="error-info">
+            ${error}. Please try again later. If this issue persists, please let
+            us know at
+            <a href="mailto:support@toeverything.info">
+              support@toeverything.info
+            </a>
+          </div>
+        `;
+      }
     );
 
     return html`
