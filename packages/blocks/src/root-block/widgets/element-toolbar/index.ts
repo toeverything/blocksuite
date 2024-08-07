@@ -39,7 +39,7 @@ import {
 import {
   type BrushElementModel,
   type ConnectorElementModel,
-  type ShapeElementModel,
+  ShapeElementModel,
   type TextElementModel,
   clamp,
 } from '../../../surface-block/index.js';
@@ -174,7 +174,7 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       return;
     }
 
-    const bound = edgelessElementsBound(selection.selectedElements);
+    const bound = edgelessElementsBound(elements);
 
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
@@ -189,13 +189,35 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       return;
     }
 
-    let offset = 70;
-    if (this.selection.selectedElements.some(ele => isFrameBlock(ele))) {
-      offset += 10;
+    let offset = 37 + 12;
+    // frame, group, shape
+    let hasFrame = false;
+    let hasGroup = false;
+    if (
+      (hasFrame = elements.some(ele => isFrameBlock(ele))) ||
+      (hasGroup = elements.some(ele => ele instanceof GroupElementModel))
+    ) {
+      offset += 16 + 4;
+      if (hasFrame) {
+        offset += 8;
+      }
+    } else if (
+      elements.length === 1 &&
+      elements[0] instanceof ShapeElementModel
+    ) {
+      offset += 22 + 4;
     }
 
     top = y - offset;
-    top < 0 && (top = y + bound.h * viewport.zoom + offset);
+    if (top < 0) {
+      top = y + bound.h * viewport.zoom + offset - 37;
+      if (hasFrame || hasGroup) {
+        top -= 16 + 4;
+        if (hasFrame) {
+          top -= 8;
+        }
+      }
+    }
 
     left = clamp(x, 10, width - 10);
     top = clamp(top, 10, height - 150);

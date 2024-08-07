@@ -32,7 +32,7 @@ overrides:
 
 patchedDependencies:
   '@lit-labs/preact-signals@1.0.2':
-    hash: tirlsfb7xqdhpmx3ykt5c3ucrm
+    hash: zsk746dt4hzz7ujosijwqb6oaq
     path: patches/@lit-labs__preact-signals@1.0.2.patch
 
 importers:
@@ -207,6 +207,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../framework/global
+      '@blocksuite/icons':
+        specifier: ^2.1.62
+        version: 2.1.62(@types/react@18.3.3)(lit@3.1.4)
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
@@ -221,13 +224,13 @@ importers:
         version: 1.6.8
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
       '@toeverything/theme':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
@@ -237,6 +240,9 @@ importers:
       '@types/sortablejs':
         specifier: ^1.15.8
         version: 1.15.8
+      collapse-white-space:
+        specifier: ^2.1.0
+        version: 2.1.0
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
@@ -373,7 +379,7 @@ importers:
         version: link:../global
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -623,10 +629,10 @@ importers:
         version: 1.6.8
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
       '@toeverything/theme':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2
       lit:
         specifier: ^3.1.4
         version: 3.1.4
@@ -660,9 +666,6 @@ packages:
     peerDependencies:
       '@algolia/client-search': '>= 4.9.1 < 6'
       algoliasearch: '>= 4.9.1 < 6'
-    peerDependenciesMeta:
-      '@algolia/client-search':
-        optional: true
 
   '@algolia/cache-browser-local-storage@4.24.0':
     resolution: {integrity: sha512-t63W9BnoXVrGy9iYHBgObNXqYXM3tYXCjDSHeNwnsc324r4o5UiVKUiAB4THQ5z9U5hTj6qUvwg/Ez43ZD85ww==}
@@ -1389,6 +1392,19 @@ packages:
   '@babel/types@7.25.2':
     resolution: {integrity: sha512-YTnYtra7W9e6/oAZEHj0bJehPRUlLH9/fbpT5LfB0NhQXyALCRkRs3zH9v07IYhkgpqX6Z78FnuccZr/l4Fs4Q==}
     engines: {node: '>=6.9.0'}
+
+  '@blocksuite/icons@2.1.62':
+    resolution: {integrity: sha512-qqrUa1MeHWPtNW2aBPB2LiSgkJ2c64o2szfzs5TebM3oDw3evLZuRsmG+ivGNZZaV4VtEtYoeTMZ11nFkwnv8A==}
+    engines: {node: '>=18.17.1'}
+    peerDependencies:
+      '@types/react': ^18.0.25
+      lit: ^2.6.1
+      react: ^18.2.0
+    peerDependenciesMeta:
+      lit:
+        optional: true
+      react:
+        optional: true
 
   '@bundled-es-modules/cookie@2.0.0':
     resolution: {integrity: sha512-Or6YHg/kamKHpxULAdSqhGqnWFneIXu1NKvvfBBzKGwpVsYuFIQ5aBPHDnnoR3ghW1nvSkALd+EF9iMtY7Vjxw==}
@@ -2516,8 +2532,8 @@ packages:
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
 
-  '@toeverything/theme@1.0.1':
-    resolution: {integrity: sha512-LZzf4qj945I0gLzB4rx+WxVrKYt+56f8iXzNsFPQVw5PCM2r/f/CcKbDLjRzqCgsa4x5VEA5n3S9CDJ9KkedYw==}
+  '@toeverything/theme@1.0.2':
+    resolution: {integrity: sha512-t14kvV+he/VM9lJMfkiqh+1I/Jo+cAL86x0aOv0Zryn2T9MxIKVg2ChO7EkmfqNhBH+RI8D8KpnWgiBIznDGaA==}
 
   '@toeverything/y-indexeddb@0.10.0-canary.9':
     resolution: {integrity: sha512-3hzktNuOaXut/RgRjKNeqQura1zeYF+tSLSlWDc0rDBOrEpwD/1EOpKVCbgtl8ke7f4oinLfgBNk4HcwqaQUYQ==}
@@ -3351,6 +3367,9 @@ packages:
   co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
+
+  collapse-white-space@2.1.0:
+    resolution: {integrity: sha512-loKTxY1zCOuG4j9f6EPnuyyYkf58RnhhWTvRoZEokgB+WbdXehfjFviyOVYkqzEWz1Q5kRiZdBYS5SwxbQYwzw==}
 
   color-convert@1.9.3:
     resolution: {integrity: sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==}
@@ -6748,9 +6767,8 @@ snapshots:
 
   '@algolia/autocomplete-shared@1.9.3(@algolia/client-search@4.24.0)(algoliasearch@4.24.0)':
     dependencies:
-      algoliasearch: 4.24.0
-    optionalDependencies:
       '@algolia/client-search': 4.24.0
+      algoliasearch: 4.24.0
 
   '@algolia/cache-browser-local-storage@4.24.0':
     dependencies:
@@ -7731,6 +7749,12 @@ snapshots:
       '@babel/helper-validator-identifier': 7.24.7
       to-fast-properties: 2.0.0
 
+  '@blocksuite/icons@2.1.62(@types/react@18.3.3)(lit@3.1.4)':
+    dependencies:
+      '@types/react': 18.3.3
+    optionalDependencies:
+      lit: 3.1.4
+
   '@bundled-es-modules/cookie@2.0.0':
     dependencies:
       cookie: 0.5.0
@@ -8397,7 +8421,7 @@ snapshots:
     dependencies:
       '@lezer/common': 1.2.1
 
-  '@lit-labs/preact-signals@1.0.2(patch_hash=tirlsfb7xqdhpmx3ykt5c3ucrm)':
+  '@lit-labs/preact-signals@1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)':
     dependencies:
       '@preact/signals-core': 1.7.0
       lit: 3.1.4
@@ -9091,7 +9115,7 @@ snapshots:
     dependencies:
       '@testing-library/dom': 10.4.0
 
-  '@toeverything/theme@1.0.1': {}
+  '@toeverything/theme@1.0.2': {}
 
   '@toeverything/y-indexeddb@0.10.0-canary.9(yjs@13.6.18)':
     dependencies:
@@ -10061,6 +10085,8 @@ snapshots:
   clone@2.1.2: {}
 
   co@4.6.0: {}
+
+  collapse-white-space@2.1.0: {}
 
   color-convert@1.9.3:
     dependencies:

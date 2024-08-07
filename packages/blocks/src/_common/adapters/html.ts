@@ -24,6 +24,7 @@ import {
   nanoid,
 } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
+import { collapseWhiteSpace } from 'collapse-white-space';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';
 import {
@@ -233,8 +234,9 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     ast: HtmlAST,
     option: {
       trim?: boolean;
+      pre?: boolean;
       pageMap?: Map<string, string>;
-    } = { trim: true }
+    } = { trim: true, pre: false }
   ): DeltaInsert<object>[] => {
     return this._hastToDeltaSpreaded(ast, option).reduce((acc, cur) => {
       return mergeDeltas(acc, cur);
@@ -245,21 +247,26 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     ast: HtmlAST,
     option: {
       trim?: boolean;
-    } = { trim: true }
+      pre?: boolean;
+    } = { trim: true, pre: false }
   ): DeltaInsert<object>[] => {
     if (option.trim === undefined) {
       option.trim = true;
     }
     switch (ast.type) {
       case 'text': {
+        if (option.pre) {
+          return [{ insert: ast.value }];
+        }
         if (option.trim) {
-          if (ast.value.trim()) {
-            return [{ insert: ast.value.trim() }];
+          const value = collapseWhiteSpace(ast.value, { trim: option.trim });
+          if (value) {
+            return [{ insert: value }];
           }
           return [];
         }
         if (ast.value) {
-          return [{ insert: ast.value }];
+          return [{ insert: collapseWhiteSpace(ast.value) }];
         }
         return [];
       }
@@ -471,7 +478,10 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                   language: codeLang ?? 'Plain Text',
                   text: {
                     '$blocksuite:internal:text$': true,
-                    delta: this._hastToDelta(codeText, { trim: false }),
+                    delta: this._hastToDelta(codeText, {
+                      trim: false,
+                      pre: true,
+                    }),
                   },
                 },
                 children: [],

@@ -95,17 +95,16 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
             ></textarea>
           </div>
           <div class="embed-card-modal-row">
-            <div
+            <button
               class=${classMap({
                 'embed-card-modal-button': true,
                 save: true,
-                disabled: this._titleInputValue.length === 0,
               })}
-              tabindex="0"
+              ?disabled=${this._titleInputValue.length === 0}
               @click=${() => this._onSave()}
             >
               Save
-            </div>
+            </button>
           </div>
         </div>
       </div>

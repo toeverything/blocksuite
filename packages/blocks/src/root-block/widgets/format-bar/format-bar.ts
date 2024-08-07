@@ -130,8 +130,7 @@ export class AffineFormatBarWidget extends WidgetComponent {
               block.model.role === 'content'
             ) {
               this._displayType = 'text';
-              assertExists(rootComponent.host.rangeManager);
-
+              if (!rootComponent.std.range) return;
               this.host.std.command
                 .chain()
                 .getTextSelection()
@@ -140,8 +139,7 @@ export class AffineFormatBarWidget extends WidgetComponent {
                 })
                 .inline(ctx => {
                   const { selectedBlocks } = ctx;
-                  assertExists(selectedBlocks);
-
+                  if (!selectedBlocks) return;
                   this._selectedBlocks = selectedBlocks;
                 })
                 .run();

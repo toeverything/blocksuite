@@ -31,11 +31,7 @@ export class AIChatMessage extends LitElement {
       font-weight: 400;
     }
 
-    .ai-chat-user-message {
-      white-space: pre-wrap;
-    }
-
-    .ai-chat-user-message.with-attachments {
+    .with-attachments {
       margin-top: 8px;
     }
   `;
@@ -50,11 +46,9 @@ export class AIChatMessage extends LitElement {
       messageRole,
       userInfo,
     } = this;
-    const isUserMessage = !!messageRole && messageRole === 'user';
     const withAttachments = !!attachments && attachments.length > 0;
 
-    const userMessageClasses = classMap({
-      'ai-chat-user-message': true,
+    const messageClasses = classMap({
       'with-attachments': withAttachments,
     });
 
@@ -63,14 +57,14 @@ export class AIChatMessage extends LitElement {
         ${UserInfoTemplate(userInfo, messageRole)}
         <div class="ai-chat-content">
           <chat-images .attachments=${attachments}></chat-images>
-          ${isUserMessage
-            ? html`<div class=${userMessageClasses}>${content}</div>`
-            : html`<text-renderer
-                .host=${host}
-                .answer=${content}
-                .options=${textRendererOptions}
-                .state=${state}
-              ></text-renderer>`}
+          <div class=${messageClasses}>
+            <text-renderer
+              .host=${host}
+              .answer=${content}
+              .options=${textRendererOptions}
+              .state=${state}
+            ></text-renderer>
+          </div>
         </div>
       </div>
     `;

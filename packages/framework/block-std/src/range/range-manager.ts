@@ -3,8 +3,8 @@ import type { TextSelection } from '@blocksuite/block-std';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import type { BlockComponent } from '../element/block-component.js';
-import type { EditorHost } from '../element/lit-host.js';
+import type { BlockComponent } from '../view/element/block-component.js';
+import type { EditorHost } from '../view/element/lit-host.js';
 
 import { RangeBinding } from './range-binding.js';
 
@@ -22,7 +22,7 @@ export class RangeManager {
    */
   static rangeSyncExcludeAttr = 'data-range-sync-exclude';
 
-  readonly binding = new RangeBinding(this);
+  binding: RangeBinding | null = null;
 
   constructor(public host: EditorHost) {}
 
@@ -130,6 +130,10 @@ export class RangeManager {
     }
 
     return result;
+  }
+
+  mount() {
+    this.binding = new RangeBinding(this);
   }
 
   queryInlineEditorByPath(path: string) {

@@ -69,16 +69,15 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
             ></textarea>
           </div>
           <div class="embed-card-modal-row">
-            <div
+            <button
               class=${classMap({
                 'embed-card-modal-button': true,
                 save: true,
               })}
-              tabindex="0"
               @click=${() => this._onSave()}
             >
               Save
-            </div>
+            </button>
           </div>
         </div>
       </div>

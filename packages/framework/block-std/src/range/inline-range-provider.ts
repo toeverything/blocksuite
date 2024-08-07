@@ -7,15 +7,15 @@ import {
   type InlineRangeUpdatedProp,
 } from '@blocksuite/inline';
 
-import type { TextSelection } from '../../selection/index.js';
-import type { BlockComponent } from '../element/block-component.js';
+import type { TextSelection } from '../selection/index.js';
+import type { BlockComponent } from '../view/element/block-component.js';
 
 export const getInlineRangeProvider: (
   element: BlockComponent
 ) => InlineRangeProvider | null = element => {
   const editorHost = element.host;
   const selectionManager = editorHost.selection;
-  const rangeManager = editorHost.rangeManager;
+  const rangeManager = editorHost.range;
   const inlineRangeUpdatedSlot = new Slot<InlineRangeUpdatedProp>();
 
   if (!selectionManager || !rangeManager) {
@@ -81,7 +81,7 @@ export const getInlineRangeProvider: (
   const setInlineRange = (inlineRange: InlineRange | null, sync = true) => {
     // skip `setInlineRange` from `inlineEditor` when composing happens across blocks,
     // selection will be updated in `range-binding`
-    if (rangeManager.binding.isComposing) return;
+    if (rangeManager.binding?.isComposing) return;
 
     if (!inlineRange) {
       selectionManager.clear(['text']);

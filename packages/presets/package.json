@@ -6,7 +6,7 @@
   "repository": "toeverything/blocksuite",
   "scripts": {
     "build": "tsc --build --verbose",
-    "test": "nx vite:test --browser.headless --run",
+    "test:unit": "nx vite:test --browser.headless --run",
     "test:debug": "nx vite:test"
   },
   "keywords": [],
@@ -22,7 +22,7 @@
     "@fal-ai/serverless-client": "^0.13.0",
     "@floating-ui/dom": "^1.6.8",
     "@lit-labs/preact-signals": "^1.0.2",
-    "@toeverything/theme": "^1.0.1",
+    "@toeverything/theme": "^1.0.2",
     "lit": "^3.1.4",
     "openai": "^4.53.2",
     "zod": "^3.23.8"

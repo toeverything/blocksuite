@@ -32,13 +32,11 @@ export const getSelectedBlocksCommand: Command<
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
   if (types.includes('text') && textSelection) {
-    const rangeManager = ctx.std.host.rangeManager;
     try {
-      if (!rangeManager) return;
-      const range = rangeManager.textSelectionToRange(textSelection);
+      const range = ctx.std.range.textSelectionToRange(textSelection);
       if (!range) return;
 
-      const selectedBlocks = rangeManager.getSelectedBlockComponentsByRange(
+      const selectedBlocks = ctx.std.range.getSelectedBlockComponentsByRange(
         range,
         {
           match: (el: BlockComponent) => roles.includes(el.model.role),

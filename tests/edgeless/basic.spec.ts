@@ -12,11 +12,13 @@ import {
   getEdgelessSelectedRect,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
+  multiTouchDown,
+  multiTouchMove,
+  multiTouchUp,
   optionMouseDrag,
   shiftClickView,
   switchEditorMode,
   zoomByMouseWheel,
-  zoomByPinch,
   zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
@@ -130,17 +132,52 @@ test('zoom by pinch', async ({ page }) => {
   const original = [80, 402.5, NOTE_WIDTH, 92];
   await assertEdgelessSelectedRect(page, original);
 
-  await zoomByPinch(
-    page,
+  const from = [
     { x: CENTER_X - 100, y: CENTER_Y },
     { x: CENTER_X + 100, y: CENTER_Y },
+  ];
+  const to = [
     { x: CENTER_X - 50, y: CENTER_Y },
-    { x: CENTER_X + 50, y: CENTER_Y }
-  );
+    { x: CENTER_X + 50, y: CENTER_Y },
+  ];
+  await multiTouchDown(page, from);
+  await multiTouchMove(page, from, to);
+  await multiTouchUp(page, to);
 
   await assertZoomLevel(page, 50);
   const zoomed = [265, 426.25, 0.5 * NOTE_WIDTH, 46];
   await assertEdgelessSelectedRect(page, zoomed);
+});
+
+test('move by pan', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+  await assertZoomLevel(page, 100);
+
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
+
+  await page.mouse.click(CENTER_X, CENTER_Y);
+  const original = [80, 402.5, NOTE_WIDTH, 92];
+  await assertEdgelessSelectedRect(page, original);
+
+  const from = [
+    { x: CENTER_X - 100, y: CENTER_Y },
+    { x: CENTER_X + 100, y: CENTER_Y },
+  ];
+  const to = [
+    { x: CENTER_X - 50, y: CENTER_Y + 50 },
+    { x: CENTER_X + 150, y: CENTER_Y + 50 },
+  ];
+
+  await multiTouchDown(page, from);
+  await multiTouchMove(page, from, to);
+  await multiTouchUp(page, to);
+
+  const moved = [130, 452.5, NOTE_WIDTH, 92];
+  await assertEdgelessSelectedRect(page, moved);
 });
 
 test('option/alt mouse drag duplicate a new element', async ({ page }) => {

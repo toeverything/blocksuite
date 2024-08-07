@@ -176,7 +176,7 @@ export const linkPopupStyle = css`
     border-radius: 4px;
     border-width: 1px;
     border-style: solid;
-    border-color: transparent;
+    border-color: var(--affine-border-color);
     color: var(--affine-text-primary-color);
     ${FONT_XS};
   }
