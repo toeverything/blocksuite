@@ -398,10 +398,11 @@ export class TableSelectionController implements ReactiveController {
   getGroup(groupKey: string | undefined) {
     const container =
       groupKey != null
-        ? this.tableContainer.querySelector(
+        ? this.tableContainer?.querySelector(
             `affine-data-view-table-group[data-group-key="${groupKey}"]`
           )
         : this.tableContainer;
+    assertExists(container);
     return container;
   }
 
@@ -454,8 +455,8 @@ export class TableSelectionController implements ReactiveController {
 
   hostConnected() {
     requestAnimationFrame(() => {
-      this.tableContainer.append(this.__selectionElement);
-      this.tableContainer.append(this.__dragToFillElement);
+      this.tableContainer?.append(this.__selectionElement);
+      this.tableContainer?.append(this.__dragToFillElement);
     });
     this.handleDragEvent();
     this.handleSelectionChange();
@@ -571,7 +572,7 @@ export class TableSelectionController implements ReactiveController {
   rows(groupKey: string | undefined) {
     const container =
       groupKey != null
-        ? this.tableContainer.querySelector(
+        ? this.tableContainer?.querySelector(
             `affine-data-view-table-group[data-group-key="${groupKey}"]`
           )
         : this.tableContainer;
@@ -586,6 +587,7 @@ export class TableSelectionController implements ReactiveController {
     let minIndex: number | undefined = undefined;
     let maxIndex: number | undefined = undefined;
     const set = new Set(rows);
+    if (!this.tableContainer) return;
     for (const row of this.tableContainer
       .querySelectorAll('data-view-table-row')
       .values()) {
@@ -749,8 +751,9 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const groupKey = cell.closest('affine-data-view-table-group')?.group?.key;
     const table = this.tableContainer;
+    if (!table) return;
     const scrollContainer = table.parentElement;
-    assertExists(scrollContainer);
+    if (!scrollContainer) return;
     const tableRect = table.getBoundingClientRect();
     const startOffsetX = evt.x - tableRect.left;
     const startOffsetY = evt.y - tableRect.top;
@@ -795,6 +798,7 @@ export class TableSelectionController implements ReactiveController {
         return undefined;
       },
       onMove: ({ x, y }) => {
+        if (!table) return;
         const tableRect = table.getBoundingClientRect();
         const startX = tableRect.left + startOffsetX;
         const startY = tableRect.top + startOffsetY;
@@ -889,7 +893,6 @@ export class TableSelectionController implements ReactiveController {
     const tableContainer = this.host.querySelector(
       '.affine-database-table-container'
     );
-    assertExists(tableContainer);
     return tableContainer;
   }
 
@@ -1039,8 +1042,9 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
   ) {
     const div = this.selectionRef.value;
     if (!div) return;
-    const tableRect = this.controller.tableContainer.getBoundingClientRect();
-    // eslint-disable-next-line prefer-const
+    const tableContainer = this.controller.tableContainer;
+    if (!tableContainer) return;
+    const tableRect = tableContainer.getBoundingClientRect();
     const rect = this.controller.getRect(
       groupKey,
       rowSelection?.start ?? 0,
@@ -1086,7 +1090,9 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
       return;
     }
     const { left, top, width, height, scale } = rect;
-    const tableRect = this.controller.tableContainer.getBoundingClientRect();
+    const tableContainer = this.controller.tableContainer;
+    if (!tableContainer) return;
+    const tableRect = tableContainer.getBoundingClientRect();
 
     const x = left - tableRect.left / scale;
     const y = top - 1 - tableRect.top / scale;
