@@ -172,7 +172,7 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
 
     let normalizedDeltaIndex = 0;
     // every chunk is a line
-    const lines = chunks.map(chunk => {
+    const lines = chunks.map((chunk, index) => {
       if (chunk.length > 0) {
         const lineDeltas: [DeltaInsert<TextAttributes>, number][] = [];
         chunk.forEach(delta => {
@@ -202,9 +202,9 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
           }
         );
 
-        return html`<v-line .elements=${elements}></v-line>`;
+        return html`<v-line .elements=${elements} .index=${index}></v-line>`;
       } else {
-        return html`<v-line .elements=${[]}></v-line>`;
+        return html`<v-line .elements=${[]} .index=${index}></v-line>`;
       }
     });
 

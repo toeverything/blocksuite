@@ -1,9 +1,12 @@
 import type { PlaywrightWorkerOptions } from '@playwright/test';
 
+import { nxE2EPreset } from '@nx/playwright/preset';
 import { defineConfig } from '@playwright/test';
 
+const __filename = new URL(import.meta.url).pathname;
+
 export default defineConfig({
-  testDir: '.',
+  ...nxE2EPreset(__filename, { testDir: '.' }),
   timeout: 40000,
   fullyParallel: true,
   snapshotDir: 'snapshots',

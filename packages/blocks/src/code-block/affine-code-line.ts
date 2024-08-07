@@ -5,6 +5,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../_common/inline/presets/affine-inline-specs.js';
 import type { HighlightOptionsGetter } from './code-model.js';
@@ -51,9 +52,9 @@ export class AffineCodeLine extends ShadowlessElement {
     const vTexts = tokens.map(token => {
       return html`<v-text
         .str=${token.content}
-        .styles=${{
+        style=${styleMap({
           color: token.color,
-        }}
+        })}
       ></v-text>`;
     });
 

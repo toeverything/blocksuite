@@ -6,7 +6,6 @@ import {
   copyByKeyboard,
   createCodeBlock,
   dragBetweenCoords,
-  dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
   focusRichTextEnd,
@@ -381,7 +380,6 @@ use fern::{
   await expect(locator).toBeHidden();
 });
 
-// FIXEME: wait for paste refactor in code block
 test('drag copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
@@ -389,7 +387,7 @@ test('drag copy paste', async ({ page }) => {
 
   await type(page, 'use');
 
-  await dragBetweenIndices(page, [0, 0], [0, 3]);
+  await setSelection(page, 2, 0, 2, 3);
   await copyByKeyboard(page);
   await pressArrowLeft(page);
   await pasteByKeyboard(page);
@@ -1094,7 +1092,7 @@ test('auto scroll horizontally when typing', async ({ page }) => {
   }
 
   const richTextScrollLeft1 = await page.evaluate(() => {
-    const richText = document.querySelector('affine-code .inline-editor');
+    const richText = document.querySelector('affine-code rich-text');
     if (!richText) {
       throw new Error('Failed to get rich text');
     }
@@ -1107,7 +1105,7 @@ test('auto scroll horizontally when typing', async ({ page }) => {
   await type(page, 'aa');
 
   const richTextScrollLeft2 = await page.evaluate(() => {
-    const richText = document.querySelector('affine-code .inline-editor');
+    const richText = document.querySelector('affine-code rich-text');
     if (!richText) {
       throw new Error('Failed to get rich text');
     }

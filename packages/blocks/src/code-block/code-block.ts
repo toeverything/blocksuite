@@ -1,4 +1,5 @@
 import type { BlockComponent } from '@blocksuite/block-std';
+import type { VLine } from '@blocksuite/inline';
 import type { BundledLanguage, Highlighter } from 'shiki';
 
 import { getInlineRangeProvider } from '@blocksuite/block-std';
@@ -8,11 +9,9 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 import { Slice } from '@blocksuite/store';
-import { type TemplateResult, html, nothing, render } from 'lit';
+import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import { z } from 'zod';
 
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
@@ -58,10 +57,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
    * See {@link updated}
    */
   private _previousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
-
-  private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
-    this._updateLineNumbers();
-  });
 
   static override styles = codeBlockStyles;
 
@@ -110,21 +105,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
     if (range) {
       inlineEditor.setInlineRange(range);
     }
-  }
-
-  private _updateLineNumbers() {
-    const lineNumbersContainer =
-      this.querySelector<HTMLElement>('#line-numbers');
-    if (!lineNumbersContainer) return;
-
-    const next = this.model.wrap
-      ? generateLineNumberRender()
-      : lineNumberRender;
-
-    render(
-      repeat(Array.from(this.querySelectorAll('v-line')), next),
-      lineNumbersContainer
-    );
   }
 
   override connectedCallback() {
@@ -323,7 +303,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.clipboardController.hostDisconnected();
-    this._richTextResizeObserver.disconnect();
   }
 
   override async getUpdateComplete() {
@@ -340,24 +319,28 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
           wrap: this.model.wrap,
         })}
       >
-        <div class="rich-text-container">
-          <div contenteditable="false" id="line-numbers"></div>
-          <rich-text
-            .yText=${this.model.text.yText}
-            .inlineEventSource=${this.topContenteditableElement ?? nothing}
-            .undoManager=${this.doc.history}
-            .attributesSchema=${this.attributesSchema}
-            .attributeRenderer=${this.getAttributeRenderer()}
-            .readonly=${this.doc.readonly}
-            .inlineRangeProvider=${this._inlineRangeProvider}
-            .enableClipboard=${false}
-            .enableUndoRedo=${false}
-            .wrapText=${this.model.wrap}
-            .verticalScrollContainerGetter=${() =>
-              getViewportElement(this.host)}
-          >
-          </rich-text>
-        </div>
+        <rich-text
+          .yText=${this.model.text.yText}
+          .inlineEventSource=${this.topContenteditableElement ?? nothing}
+          .undoManager=${this.doc.history}
+          .attributesSchema=${this.attributesSchema}
+          .attributeRenderer=${this.getAttributeRenderer()}
+          .readonly=${this.doc.readonly}
+          .inlineRangeProvider=${this._inlineRangeProvider}
+          .enableClipboard=${false}
+          .enableUndoRedo=${false}
+          .wrapText=${this.model.wrap}
+          .verticalScrollContainerGetter=${() => getViewportElement(this.host)}
+          .vLineRenderer=${(vLine: VLine) => {
+            return html`
+              <span contenteditable="false" class="line-number"
+                >${vLine.index + 1}</span
+              >
+              ${vLine.renderVElements()}
+            `;
+          }}
+        >
+        </rich-text>
 
         ${this.renderChildren(this.model)} ${Object.values(this.widgets)}
       </div>
@@ -396,10 +379,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
         inlineEditor.requestUpdate();
       }
     }
-
-    if (!this._richTextElement) return;
-    this._richTextResizeObserver.disconnect();
-    this._richTextResizeObserver.observe(this._richTextElement);
   }
 
   get inlineEditor() {
@@ -429,20 +408,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
   };
 
   override accessor useCaptionEditor = true;
-}
-
-function generateLineNumberRender(top = 0) {
-  return function lineNumberRender(e: HTMLElement, index: number) {
-    const style = {
-      '--top': `${top}px`,
-    };
-    top = e.getBoundingClientRect().height;
-    return html`<div style=${styleMap(style)}>${index + 1}</div>`;
-  };
-}
-
-function lineNumberRender(_: HTMLElement, index: number) {
-  return html`<div>${index + 1}</div>`;
 }
 
 declare global {

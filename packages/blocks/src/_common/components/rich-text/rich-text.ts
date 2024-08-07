@@ -1,3 +1,4 @@
+import type { VLine } from '@blocksuite/inline';
 import type { Y } from '@blocksuite/store';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
@@ -12,7 +13,7 @@ import {
   createInlineKeyDownHandler,
 } from '@blocksuite/inline';
 import { DocCollection, Text } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { type TemplateResult, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
@@ -114,6 +115,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       display: block;
       height: 100%;
       width: 100%;
+      overflow-x: auto;
+
+      scroll-margin-top: 50px;
+      scroll-margin-bottom: 30px;
     }
 
     .inline-editor {
@@ -125,15 +130,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
     .inline-editor.readonly {
       cursor: default;
-    }
-
-    rich-text .nowrap-lines {
-      overflow-x: auto;
-    }
-
-    rich-text v-line {
-      scroll-margin-top: 50px;
-      scroll-margin-bottom: 30px;
     }
 
     rich-text .nowrap-lines v-text span,
@@ -160,6 +156,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
         compositionEnd: onVCompositionEnd,
       },
       inlineRangeProvider: this.inlineRangeProvider,
+      vLineRenderer: this.vLineRenderer,
     });
     if (this.attributesSchema) {
       this._inlineEditor.setAttributeSchema(this.attributesSchema);
@@ -217,13 +214,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
               }
             }
 
-            // scroll container is `inlineEditorContainer`
+            // scroll container is this
             if (this.enableAutoScrollHorizontally) {
-              const containerRect =
-                this.inlineEditorContainer.getBoundingClientRect();
+              const containerRect = this.getBoundingClientRect();
               const rangeRect = range.getBoundingClientRect();
 
-              let scrollLeft = this.inlineEditorContainer.scrollLeft;
+              let scrollLeft = this.scrollLeft;
               if (
                 rangeRect.left + rangeRect.width >
                 containerRect.left + containerRect.width
@@ -234,7 +230,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
                   (containerRect.left + containerRect.width) +
                   2;
               }
-              this.inlineEditorContainer.scrollLeft = scrollLeft;
+              this.scrollLeft = scrollLeft;
             }
           })
           .catch(console.error);
@@ -408,6 +404,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   // rich-text will create a undoManager if it is not provided.
   @property({ attribute: false })
   accessor undoManager!: Y.UndoManager;
+
+  @property({ attribute: false })
+  accessor vLineRenderer: ((vLine: VLine) => TemplateResult) | undefined;
 
   @property({ attribute: false })
   accessor verticalScrollContainerGetter:
