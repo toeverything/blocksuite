@@ -138,7 +138,7 @@ export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
     super.connectedCallback();
     this._loadSettingsFromLocalStorage();
     this.disposables.add(
-      observeActiveHeading(() => this.host, this._activeHeadingId$)
+      observeActiveHeading(() => this.editor, this._activeHeadingId$)
     );
   }
 

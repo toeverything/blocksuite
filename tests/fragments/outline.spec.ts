@@ -64,6 +64,8 @@ test.describe('toc-panel', () => {
 
     const noHeadingPlaceholder = panel.locator('.note-placeholder');
 
+    await focusTitle(page);
+    await type(page, 'Title');
     await focusRichTextEnd(page);
     await type(page, 'Hello World');
 
@@ -77,6 +79,8 @@ test.describe('toc-panel', () => {
     await initEmptyParagraphState(page);
     const panel = await toggleTocPanel(page);
 
+    await focusTitle(page);
+    await type(page, 'Title');
     await focusRichTextEnd(page);
 
     // heading 1 to 6
@@ -85,6 +89,9 @@ test.describe('toc-panel', () => {
       await pressEnter(page);
       await expect(getHeading(panel, i)).toBeHidden();
     }
+
+    // Title also should be hidden
+    await expect(getTitle(panel)).toBeHidden();
   });
 
   test('should display title and headings when there are non-empty headings in editor', async ({
@@ -280,6 +287,25 @@ test.describe('toc-viewer', () => {
     }
   });
 
+  test('should be hidden when only empty headings exists', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await toggleTocViewer(page);
+
+    await focusTitle(page);
+    await type(page, 'Title');
+    await focusRichTextEnd(page);
+
+    const indicators = getIndicators(page);
+
+    // heading 1 to 6
+    for (let i = 1; i <= 6; i++) {
+      await type(page, `${'#'.repeat(i)} `);
+      await pressEnter(page);
+      await expect(indicators).toHaveCount(0);
+    }
+  });
+
   test('should display outline viewer when hovering over indicators', async ({
     page,
   }) => {
@@ -372,7 +398,7 @@ test.describe('toc-viewer', () => {
     await expect(indicators).toHaveCount(0);
   });
 
-  test('should hide edgeless only note headings', async ({ page }) => {
+  test('should hide edgeless-only note headings', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await toggleTocViewer(page);

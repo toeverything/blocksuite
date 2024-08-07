@@ -133,12 +133,21 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       true
     );
 
+    const hasNoEmptyTitle =
+      this.editor.doc.meta && this.editor.doc.meta.title !== '';
+
     return html`<div
       class=${classMap({
         'outline-heading-indicator-container': true,
         hidden: this._showViewer,
       })}
     >
+      ${hasNoEmptyTitle && headingBlocks.length !== 0
+        ? html`<div
+            class="outline-heading-indicator"
+            ?active=${this._activeHeadingId$.value === this.editor.doc.root?.id}
+          ></div>`
+        : nothing}
       ${repeat(
         headingBlocks,
         block => block.id,
@@ -202,7 +211,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
     super.connectedCallback();
 
     this.disposables.add(
-      observeActiveHeading(() => this.editor.host, this._activeHeadingId$)
+      observeActiveHeading(() => this.editor, this._activeHeadingId$)
     );
   }
 

@@ -11,6 +11,7 @@ import { Bound, DisposableGroup } from '@blocksuite/global/utils';
 import { SignalWatcher, effect } from '@lit-labs/preact-signals';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { AffineEditorContainer } from '../../../editors/editor-container.js';
@@ -387,6 +388,8 @@ export class OutlinePanelBody extends SignalWatcher(
   }
 
   private _renderDocTitle() {
+    if (!this.doc.root) return nothing;
+
     const hasNotEmptyHeadings =
       getHeadingBlocksFromDoc(
         this.doc,
@@ -395,7 +398,11 @@ export class OutlinePanelBody extends SignalWatcher(
       ).length > 0;
 
     if (!hasNotEmptyHeadings) return nothing;
+
     return html`<affine-outline-block-preview
+      class=${classMap({
+        active: this.doc.root.id === this.activeHeadingId.value,
+      })}
       .block=${this.doc.root}
       .cardNumber=${1}
       .enableNotesSorting=${false}
