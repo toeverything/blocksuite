@@ -260,10 +260,14 @@ test.describe('toc-viewer', () => {
     await page.click('sl-button:text("Test Operations")');
     await page.click('sl-menu-item:text("Enable Outline Viewer")');
     await waitNextFrame(page);
+    const viewer = page.locator('affine-outline-viewer');
+    return viewer;
   }
 
   function getIndicators(page: Page) {
-    return page.locator('affine-outline-viewer .outline-heading-indicator');
+    return page.locator(
+      'affine-outline-viewer .outline-viewer-indicator:not(.header)'
+    );
   }
 
   test('should display highlight indicators when non-empty headings exists', async ({
@@ -306,7 +310,7 @@ test.describe('toc-viewer', () => {
     }
   });
 
-  test('should display outline viewer when hovering over indicators', async ({
+  test('should display outline content when hovering over indicators', async ({
     page,
   }) => {
     await enterPlaygroundRoom(page);
@@ -319,15 +323,12 @@ test.describe('toc-viewer', () => {
     await pressEnter(page);
 
     const indicator = getIndicators(page).first();
-    const indicatorBox = await indicator.boundingBox();
-    // we do not use indicator.hover(), because the locator is inconsistent
-    await page.mouse.move(
-      indicatorBox!.x + indicatorBox!.width / 2,
-      indicatorBox!.y + indicatorBox!.height / 2
-    );
+    await indicator.hover();
 
-    const viewer = page.locator('affine-outline-panel-body');
-    await expect(viewer).toBeVisible();
+    const content = page.locator('.outline-viewer-content');
+    await expect(content).toHaveCount(2);
+    await expect(content.nth(0)).toContainText(['Table of Contents']);
+    await expect(content.nth(1)).toContainText(['Heading 1']);
   });
 
   test('should highlight indicator when scrolling', async ({ page }) => {
@@ -347,7 +348,7 @@ test.describe('toc-viewer', () => {
     for (let i = 0; i < headings.length; i++) {
       const lastHeadingCenter = await getVerticalCenterFromLocator(headings[i]);
       await page.mouse.wheel(0, lastHeadingCenter - viewportCenter + 50);
-      await expect(indicators.nth(i)).toHaveAttribute('active');
+      await expect(indicators.nth(i)).toHaveClass(/active/);
     }
   });
 
@@ -356,20 +357,13 @@ test.describe('toc-viewer', () => {
   }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
-    await toggleTocViewer(page);
+    const viewer = await toggleTocViewer(page);
 
     await focusRichTextEnd(page);
     const headings = await createHeadingsWithGap(page);
 
     const indicators = getIndicators(page);
-    const indicatorBox = await indicators.first().boundingBox();
-    // we do not use indicator.hover(), because the locator is inconsistent
-    await page.mouse.move(
-      indicatorBox!.x + indicatorBox!.width / 2,
-      indicatorBox!.y + indicatorBox!.height / 2
-    );
-
-    const viewer = page.locator('affine-outline-panel-body');
+    await indicators.first().hover();
 
     const headingsInPanel = Array.from({ length: 6 }, (_, i) =>
       viewer.locator(`.h${i + 1} > span`)
@@ -377,7 +371,7 @@ test.describe('toc-viewer', () => {
 
     await headingsInPanel[2].click();
     await expect(headings[2]).toBeVisible();
-    await expect(indicators.nth(2)).toHaveAttribute('active');
+    await expect(indicators.nth(2)).toHaveClass(/active/);
   });
 
   test('should hide in edgeless mode', async ({ page }) => {
@@ -401,7 +395,7 @@ test.describe('toc-viewer', () => {
   test('should hide edgeless-only note headings', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
-    await toggleTocViewer(page);
+    const viewer = await toggleTocViewer(page);
 
     await focusRichTextEnd(page);
 
@@ -420,14 +414,8 @@ test.describe('toc-viewer', () => {
     const indicators = getIndicators(page);
     await expect(indicators).toHaveCount(2);
 
-    const indicatorBox = await indicators.first().boundingBox();
-    // we do not use indicator.hover(), because the locator is inconsistent
-    await page.mouse.move(
-      indicatorBox!.x + indicatorBox!.width / 2,
-      indicatorBox!.y + indicatorBox!.height / 2
-    );
+    await indicators.first().hover();
 
-    const viewer = page.locator('affine-outline-panel-body');
     await expect(viewer).toBeVisible();
     const hiddenTitle = viewer.locator('.hidden-title');
     await expect(hiddenTitle).toBeHidden();

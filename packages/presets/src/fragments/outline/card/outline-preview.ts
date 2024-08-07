@@ -31,6 +31,7 @@ const styles = css`
   :host {
     display: block;
     width: 100%;
+    font-family: var(--affine-font-family);
   }
 
   :host(:hover) {

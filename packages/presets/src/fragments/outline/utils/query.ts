@@ -1,4 +1,3 @@
-import type { EditorHost } from '@blocksuite/block-std';
 import type {
   NoteDisplayMode,
   ParagraphBlockModel,
@@ -7,7 +6,6 @@ import type {
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { BlocksUtils, type NoteBlockModel } from '@blocksuite/blocks';
-import { clamp } from '@blocksuite/global/utils';
 
 import { headingKeys } from '../config.js';
 
@@ -84,27 +82,4 @@ export function getHeadingBlocksFromDoc(
   return notes
     .map(({ note }) => getHeadingBlocksFromNote(note, ignoreEmpty))
     .flat();
-}
-
-export function isHeadingBeforeViewportCenter(
-  heading: BlockModel,
-  editorHost: EditorHost
-) {
-  if (!isHeadingBlock(heading)) return false;
-
-  const headingElement = editorHost.view.getBlock(heading.id);
-  if (!headingElement) return false;
-
-  const editorRect = (
-    editorHost.parentElement ?? editorHost
-  ).getBoundingClientRect();
-  const headingRect = headingElement.getBoundingClientRect();
-
-  const editorCenter =
-    clamp(editorRect.top, 0, document.documentElement.clientHeight) +
-    Math.min(editorRect.height, document.documentElement.clientHeight) / 2;
-
-  const headingCenter = headingRect.top + headingRect.height / 2;
-
-  return headingCenter < editorCenter;
 }

@@ -1,15 +1,13 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import type { Signal } from '@lit-labs/preact-signals';
 
 import { NoteDisplayMode } from '@blocksuite/blocks';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, clamp } from '@blocksuite/global/utils';
 
 import type { AffineEditorContainer } from '../../../editors/editor-container.js';
 
 import { getDocTitleByEditorHost } from '../../doc-title/doc-title.js';
-import {
-  getHeadingBlocksFromDoc,
-  isHeadingBeforeViewportCenter,
-} from './query.js';
+import { getHeadingBlocksFromDoc } from './query.js';
 
 export function scrollToBlock(editor: AffineEditorContainer, blockId: string) {
   const { host, mode } = editor;
@@ -20,19 +18,38 @@ export function scrollToBlock(editor: AffineEditorContainer, blockId: string) {
     if (!docTitle) return;
 
     docTitle.scrollIntoView({
-      behavior: 'instant',
+      behavior: 'smooth',
       block: 'start',
     });
   } else {
     const block = host.view.getBlock(blockId);
     if (!block) return;
-
     block.scrollIntoView({
-      behavior: 'instant',
+      behavior: 'smooth',
       block: 'center',
-      inline: 'center',
     });
   }
+}
+
+export function isBlockBeforeViewportCenter(
+  blockId: string,
+  editorHost: EditorHost
+) {
+  const block = editorHost.view.getBlock(blockId);
+  if (!block) return false;
+
+  const editorRect = (
+    editorHost.parentElement ?? editorHost
+  ).getBoundingClientRect();
+  const blockRect = block.getBoundingClientRect();
+
+  const editorCenter =
+    clamp(editorRect.top, 0, document.documentElement.clientHeight) +
+    Math.min(editorRect.height, document.documentElement.clientHeight) / 2;
+
+  const blockCenter = blockRect.top + blockRect.height / 2;
+
+  return blockCenter < editorCenter + blockRect.height;
 }
 
 export const observeActiveHeading = (
@@ -56,9 +73,9 @@ export const observeActiveHeading = (
         true
       );
 
-      let activeHeadingId = null;
+      let activeHeadingId = host.doc.root?.id ?? null;
       headings.forEach(heading => {
-        if (isHeadingBeforeViewportCenter(heading, host)) {
+        if (isBlockBeforeViewportCenter(heading.id, host)) {
           activeHeadingId = heading.id;
         }
       });
@@ -73,7 +90,7 @@ export const observeActiveHeading = (
 let highlightMask: HTMLDivElement | null = null;
 let highlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
-export function highlightBlock(editor: AffineEditorContainer, blockId: string) {
+function highlightBlock(editor: AffineEditorContainer, blockId: string) {
   const emptyClear = () => {};
 
   const { host } = editor;
@@ -137,4 +154,63 @@ export function highlightBlock(editor: AffineEditorContainer, blockId: string) {
       highlightTimeoutId = null;
     }
   };
+}
+
+// this function is useful when the scroll need smooth animation
+let highlightIntervalId: ReturnType<typeof setInterval> | null = null;
+export async function scrollToBlockWithHighlight(
+  editor: AffineEditorContainer,
+  blockId: string,
+  timeout = 3000
+) {
+  scrollToBlock(editor, blockId);
+
+  let timeCount = 0;
+
+  return new Promise<ReturnType<typeof highlightBlock>>(resolve => {
+    if (highlightIntervalId !== null) {
+      clearInterval(highlightIntervalId);
+    }
+
+    // wait block be scrolled into view
+    highlightIntervalId = setInterval(() => {
+      if (highlightIntervalId === null) {
+        console.error('unreachable code');
+        return;
+      }
+
+      if (timeCount > timeout) {
+        clearInterval(highlightIntervalId);
+        resolve(() => {});
+        return;
+      }
+
+      const { host } = editor;
+      if (!host) {
+        clearInterval(highlightIntervalId);
+        resolve(() => {});
+        return;
+      }
+
+      const block = host.view.getBlock(blockId);
+      if (!block) {
+        clearInterval(highlightIntervalId);
+        resolve(() => {});
+        return;
+      }
+
+      const blockRect = block.getBoundingClientRect();
+      const { top, bottom } = blockRect;
+
+      if (top < 0 || bottom > window.innerHeight) {
+        timeCount += 100;
+        return;
+      }
+
+      clearInterval(highlightIntervalId);
+
+      // highlight block
+      resolve(highlightBlock(editor, blockId));
+    }, 100);
+  });
 }

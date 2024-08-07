@@ -29,7 +29,7 @@ import {
   getNotesFromDoc,
   isHeadingBlock,
 } from '../utils/query.js';
-import { highlightBlock, scrollToBlock } from '../utils/scroll.js';
+import { scrollToBlock, scrollToBlockWithHighlight } from '../utils/scroll.js';
 import './outline-notice.js';
 
 type OutlineNoteItem = {
@@ -115,7 +115,7 @@ export class OutlinePanelBody extends SignalWatcher(
 ) {
   private _changedFlag = false;
 
-  private _clearHighlightMask: (() => void) | null = null;
+  private _clearHighlightMask = () => {};
 
   private _docDisposables: DisposableGroup | null = null;
 
@@ -404,6 +404,9 @@ export class OutlinePanelBody extends SignalWatcher(
         active: this.doc.root.id === this.activeHeadingId.value,
       })}
       .block=${this.doc.root}
+      .className=${this.doc.root?.id === this.activeHeadingId.value
+        ? 'active'
+        : ''}
       .cardNumber=${1}
       .enableNotesSorting=${false}
       .showPreviewIcon=${this.showPreviewIcon}
@@ -415,13 +418,12 @@ export class OutlinePanelBody extends SignalWatcher(
     ></affine-outline-block-preview>`;
   }
 
-  private _scrollToBlock(e: ClickBlockEvent) {
-    scrollToBlock(this.editor, e.detail.blockId);
-
-    requestAnimationFrame(() => {
-      this._clearHighlightMask = highlightBlock(this.editor, e.detail.blockId);
-      this.activeHeadingId.value = e.detail.blockId;
-    });
+  private async _scrollToBlock(e: ClickBlockEvent) {
+    this._clearHighlightMask = await scrollToBlockWithHighlight(
+      this.editor,
+      e.detail.blockId
+    );
+    this.activeHeadingId.value = e.detail.blockId;
   }
 
   private _selectNote(e: SelectEvent) {
@@ -593,7 +595,7 @@ export class OutlinePanelBody extends SignalWatcher(
     }
 
     this._clearDocDisposables();
-    this._clearHighlightMask?.();
+    this._clearHighlightMask();
   }
 
   override firstUpdated(): void {
@@ -631,7 +633,7 @@ export class OutlinePanelBody extends SignalWatcher(
       this.edgeless &&
       this._isEdgelessMode()
     ) {
-      this._clearHighlightMask?.();
+      this._clearHighlightMask();
       if (_changedProperties.get('mode') === undefined) return;
 
       requestAnimationFrame(() => this._zoomToFit());
