@@ -45,6 +45,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     this._disposables.addFromEvent(this, 'keydown', evt => {
       switch (evt.key) {
         case 'Enter': {
+          if (evt.shiftKey || evt.isComposing) return;
+
           evt.preventDefault();
           const edgeless = this.edgeless;
           const element = this.element;
