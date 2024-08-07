@@ -3,3 +3,6 @@ dist
 pnpm-lock.yaml
 tests/snapshots/
 __snapshots__/
+
+/.nx/cache
+/.nx/workspace-data
