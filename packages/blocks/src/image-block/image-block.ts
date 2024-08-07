@@ -133,6 +133,7 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
       this.style.width = `${bound.w}px`;
       this.style.height = `${bound.h}px`;
       this.style.transform = `rotate(${rotate}deg)`;
+      this.style.zIndex = `${this.toZIndex()}`;
     }
 
     return html`
