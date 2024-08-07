@@ -10,8 +10,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
 
 import { TocIcon } from '../_common/icons.js';
-import { observeActiveHeading } from './utils/heading-highlight.js';
 import { getHeadingBlocksFromDoc } from './utils/query.js';
+import { observeActiveHeading } from './utils/scroll.js';
 
 export const AFFINE_OUTLINE_VIEWER = 'affine-outline-viewer';
 
@@ -177,8 +177,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
           .doc=${this.editor.doc}
           .fitPadding=${[0, 0, 0, 0]}
           .edgeless=${null}
-          .editorHost=${this.editor.host}
-          .mode=${'page'}
+          .editor=${this.editor}
           .activeHeadingId=${this._activeHeadingId$}
           .renderEdgelessOnlyNotes=${false}
           .showPreviewIcon=${false}

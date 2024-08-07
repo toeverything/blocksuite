@@ -15,34 +15,10 @@ import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
+import type { SelectEvent } from '../utils/custom-events.js';
+
 import { HiddenIcon, SmallArrowDownIcon } from '../../_common/icons.js';
 import './outline-preview.js';
-
-export type ReorderEvent = CustomEvent<{
-  currentNumber: number;
-  targetNumber: number;
-  realIndex: number;
-}>;
-
-export type SelectEvent = CustomEvent<{
-  id: string;
-  selected: boolean;
-  number: number;
-  multiselect: boolean;
-}>;
-
-export type FitViewEvent = CustomEvent<{
-  block: NoteBlockModel;
-}>;
-
-export type ClickBlockEvent = CustomEvent<{
-  blockPath: string[];
-}>;
-
-export type DisplayModeChangeEvent = CustomEvent<{
-  note: NoteBlockModel;
-  newMode: NoteDisplayMode;
-}>;
 
 const styles = css`
   :host {
@@ -217,15 +193,10 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
 
   static override styles = styles;
 
-  // Need to consider the case that block not a child of a note
-  private _buildBlockPath(block: BlockModel) {
-    return [this.note.id, block.id];
-  }
-
   private _dispatchClickBlockEvent(block: BlockModel) {
     const event = new CustomEvent('clickblock', {
       detail: {
-        blockPath: this._buildBlockPath(block),
+        blockId: block.id,
       },
     });
 
