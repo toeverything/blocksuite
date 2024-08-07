@@ -147,17 +147,16 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
         </div>
 
         <div class="embed-card-modal-row">
-          <div
+          <button
             class=${classMap({
               'embed-card-modal-button': true,
               save: true,
-              disabled: !isValidUrl(this._linkInputValue),
             })}
-            tabindex="0"
+            ?disabled=${!isValidUrl(this._linkInputValue)}
             @click=${this._onConfirm}
           >
             Confirm
-          </div>
+          </button>
         </div>
       </div>
     </div>`;

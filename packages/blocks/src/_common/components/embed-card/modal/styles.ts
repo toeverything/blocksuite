@@ -89,10 +89,11 @@ export const embedCardModalStyles = css`
     background: var(--affine-primary-color);
     color: var(--affine-pure-white);
   }
-  .embed-card-modal-button.disabled {
+  .embed-card-modal-button[disabled] {
     pointer-events: none;
     cursor: not-allowed;
     color: var(--affine-text-disable-color);
+    background: transparent;
   }
 
   .embed-card-modal-title {
