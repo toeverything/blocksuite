@@ -186,10 +186,10 @@ export class RangeBinding {
     // range is in a non-editable element
     // ex. placeholder
     const isRangeOutNotEditable =
-      (range.startContainer instanceof HTMLElement &&
-        range.startContainer.contentEditable === 'false') ||
-      (range.endContainer instanceof HTMLElement &&
-        range.endContainer.contentEditable === 'false');
+      range.startContainer instanceof HTMLElement &&
+      range.startContainer.contentEditable === 'false' &&
+      range.endContainer instanceof HTMLElement &&
+      range.endContainer.contentEditable === 'false';
     if (isRangeOutNotEditable) {
       this._prevTextSelection = null;
       this.selectionManager.clear(['text']);
