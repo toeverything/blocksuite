@@ -1,6 +1,6 @@
 import { baseTheme } from '@toeverything/theme';
 import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
 /**
  * Default size is 32px, you can override it by setting `size` property.
@@ -217,6 +217,9 @@ export class IconButton extends LitElement {
 
   @property()
   accessor text: string | null = null;
+
+  @query('.text-container .text')
+  accessor textElement: HTMLDivElement | null = null;
 
   @property()
   accessor width: string | number | null = null;
