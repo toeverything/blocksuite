@@ -54,10 +54,11 @@ export class EdgelessTextBlockService extends BlockService<EdgelessTextBlockMode
             const abortController = new AbortController();
             edgelessText.addEventListener(
               'focusout',
-              () => {
+              e => {
                 if (
                   !paragraph.model.text ||
-                  paragraph.model.text.length === 0
+                  (paragraph.model.text.length === 0 &&
+                    e.relatedTarget !== null)
                 ) {
                   edgeless.doc.deleteBlock(edgelessText.model);
                 }
