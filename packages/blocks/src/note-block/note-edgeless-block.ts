@@ -21,6 +21,7 @@ import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../_common/edgeless/note/consts.j
 import { MoreIndicatorIcon } from '../_common/icons/edgeless.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { NoteDisplayMode } from '../_common/types.js';
+import { stopPropagation } from '../_common/utils/event.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { getClosestBlockComponentByPoint } from '../_common/utils/query.js';
 import { handleNativeRangeAtPoint } from '../_common/utils/selection.js';
@@ -448,7 +449,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
         <div
           class="note-background"
           style=${styleMap(backgroundStyle)}
-          @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
+          @pointerdown=${stopPropagation}
           @click=${this._handleClickAtBackground}
         ></div>
 
@@ -473,8 +474,8 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
               style=${styleMap({
                 bottom: this._editing ? `${-extra}px` : '0',
               })}
-              @mousedown=${(e: MouseEvent) => e.stopPropagation()}
-              @mouseup=${(e: MouseEvent) => e.stopPropagation()}
+              @mousedown=${stopPropagation}
+              @mouseup=${stopPropagation}
               @click=${this._setCollapse}
             >
               ${MoreIndicatorIcon}
