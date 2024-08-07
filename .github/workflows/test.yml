@@ -64,7 +64,7 @@ jobs:
           main-branch-name: master
 
       - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --require-explicit-completion
+        run: npx nx-cloud start-ci-run --distribute-on="5 linux-medium-js" --require-explicit-completion
 
       - name: Install dependencies
         run: pnpm install
@@ -80,31 +80,24 @@ jobs:
         env:
           COVERAGE: true
 
-      - name: Upload unit test coverage results
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./.coverage/block-std/lcov.info,./.coverage/blocks/lcov.info,./.coverage/global/lcov.info,./.coverage/inline/lcov.info,./.coverage/store/lcov.info,./.coverage//lcov.info
-          flags: unittest
-          name: blocksuite
-          fail_ci_if_error: false
-
-      - name: Upload E2E test coverage results
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./.coverage/lcov.info
-          flags: e2etest
-          name: blocksuite
-          fail_ci_if_error: false
+      # The coverage seems not working now, re-enable it when it's fixed
+      #      - name: Upload unit test coverage results
+      #        uses: codecov/codecov-action@v3
+      #        with:
+      #          token: ${{ secrets.CODECOV_TOKEN }}
+      #          files: ./.coverage/block-std/lcov.info,./.coverage/blocks/lcov.info,./.coverage/global/lcov.info,./.coverage/inline/lcov.info,./.coverage/store/lcov.info,./.coverage//lcov.info
+      #          flags: unittest
+      #          name: blocksuite
+      #          fail_ci_if_error: false
+      #
+      #      - name: Upload E2E test coverage results
+      #        uses: codecov/codecov-action@v3
+      #        with:
+      #          token: ${{ secrets.CODECOV_TOKEN }}
+      #          files: ./.coverage/lcov.info
+      #          flags: e2etest
+      #          name: blocksuite
+      #          fail_ci_if_error: false
 
       - run: npx nx-cloud complete-ci-run
         if: always()
-
-      - name: Upload test results
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results-main
-          path: ./e2e/test-results
-          if-no-files-found: ignore
