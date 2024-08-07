@@ -11,6 +11,7 @@ on:
       - 'scripts/**'
       - 'packages/docs/**'
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
       - '.husky'
       - '.vscode'
@@ -28,6 +29,7 @@ permissions:
 
 jobs:
   build-and-test:
+    if: github.event.pull_request.draft == false
     name: Build & Test
     runs-on: ubuntu-latest
     steps:
