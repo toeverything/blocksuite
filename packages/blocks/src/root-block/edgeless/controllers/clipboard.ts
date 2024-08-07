@@ -444,14 +444,18 @@ export class EdgelessClipboardController extends PageClipboard {
 
   private _createCanvasElement(
     clipboardData: Record<string, unknown>,
-    idMap: Map<string, string>
+    oldToNewIdsMap: Map<string, string>
   ) {
     if (clipboardData.type === GROUP) {
       const yMap = new DocCollection.Y.Map();
       const children = clipboardData.children ?? {};
+
       for (const [key, value] of Object.entries(children)) {
-        const newKey = idMap.get(key);
-        assertExists(newKey);
+        const newKey = oldToNewIdsMap.get(key);
+        assertExists(
+          newKey,
+          'Copy failed: cannot find the copied child in group'
+        );
         yMap.set(newKey, value);
       }
       clipboardData.children = yMap;
@@ -460,17 +464,27 @@ export class EdgelessClipboardController extends PageClipboard {
     if (clipboardData.type === MINDMAP) {
       const yMap = new DocCollection.Y.Map();
       const children = clipboardData.children ?? {};
-      for (const [key, value] of Object.entries(children)) {
-        const newKey = idMap.get(key);
-        assertExists(newKey);
 
-        if (value.parent) {
-          const newParent = idMap.get(value.parent);
-          assertExists(newParent);
-          value.parent = newParent;
+      for (const [oldKey, oldValue] of Object.entries(children)) {
+        const newKey = oldToNewIdsMap.get(oldKey);
+        const newValue = {
+          ...oldValue,
+        };
+        assertExists(
+          newKey,
+          'Copy failed: cannot find the copied node in mind map'
+        );
+
+        if (oldValue.parent) {
+          const newParent = oldToNewIdsMap.get(oldValue.parent);
+          assertExists(
+            newParent,
+            'Copy failed: cannot find the copied node in mind map'
+          );
+          newValue.parent = newParent;
         }
 
-        yMap.set(newKey, value);
+        yMap.set(newKey, newValue);
       }
       clipboardData.children = yMap;
     }
