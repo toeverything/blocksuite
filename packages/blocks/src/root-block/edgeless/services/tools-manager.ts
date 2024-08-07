@@ -72,6 +72,9 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerContextMenu = (e: UIEventState) => {
+    // should display context menu when right-clicking on editing block
+    // e.g. `note` `edgeless-text` and `shape-text`
+    if (this.selection.editing) return;
     e.event.preventDefault();
   };
 
