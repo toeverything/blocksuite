@@ -40,8 +40,11 @@ export interface Column<
   cellGet(rowId: string): Cell<Value>;
 
   getStringValue(rowId: string): string;
+
   getValue(rowId: string): Value | undefined;
+
   setValue(rowId: string, value: Value | undefined): void;
+
   setValueFromString(rowId: string, value: string): void;
 
   updateData(updater: ColumnDataUpdater<Data>): void;
@@ -88,8 +91,8 @@ export abstract class ColumnBase<
     public columnId: string
   ) {}
 
-  cellGet(rowId: string): Cell<Value, Data> {
-    return this.view.cellGet(rowId, this.id) as Cell<Value, Data>;
+  cellGet(rowId: string): Cell<Value> {
+    return this.view.cellGet(rowId, this.id) as Cell<Value>;
   }
 
   getStringValue(rowId: string): string {

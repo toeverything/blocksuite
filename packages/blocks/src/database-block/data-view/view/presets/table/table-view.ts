@@ -12,15 +12,15 @@ import { AddCursorIcon } from '../../../../../_common/icons/index.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
 import { renderUniLit } from '../../../utils/uni-component/index.js';
 import { DataViewBase } from '../../data-view-base.js';
-import './components/cell-container.js';
-import './components/column-header/column-header.js';
-import './components/row.js';
+import './cell.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import { TableClipboardController } from './controller/clipboard.js';
 import { TableDragController } from './controller/drag.js';
 import { TableHotkeysController } from './controller/hotkeys.js';
 import { TableSelectionController } from './controller/selection.js';
 import './group.js';
+import './header/column-header.js';
+import './row/row.js';
 import {
   TableAreaSelection,
   type TableViewSelectionWithType,

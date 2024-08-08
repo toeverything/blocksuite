@@ -8,8 +8,8 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import type { DatabaseCellContainer } from '../components/cell-container.js';
-import type { TableRow } from '../components/row.js';
+import type { DatabaseCellContainer } from '../cell.js';
+import type { TableRow } from '../row/row.js';
 import type { DataViewTable } from '../table-view.js';
 
 import { startDrag } from '../../../../utils/drag.js';

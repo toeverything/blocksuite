@@ -39,6 +39,7 @@ export const richTextColumnModelConfig =
       };
     },
     isEmpty: data => data == null || data.length === 0,
+    values: data => (data?.toString() ? [data.toString()] : []),
   });
 
 richTextColumnModelConfig.addConvert('select', (_column, cells) => {

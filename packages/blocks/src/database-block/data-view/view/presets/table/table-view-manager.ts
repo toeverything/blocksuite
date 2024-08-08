@@ -7,7 +7,6 @@ import type { TableViewData } from './define.js';
 import type { StatCalcOpType } from './types.js';
 
 import { type FilterGroup, emptyFilterGroup } from '../../../common/ast.js';
-import { ColumnDataStats } from '../../../common/data-stats.js';
 import { defaultGroupBy } from '../../../common/group-by.js';
 import {
   GroupHelper,
@@ -30,7 +29,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
         id: column.id,
         hide: column.hide,
         width: column.width$.value,
-        statCalcType: column.statCalcOp,
+        statCalcType: column.statCalcOp$.value,
       };
     });
   });
@@ -123,10 +122,8 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
   }
 
   columnGetStatCalcOp(columnId: string): StatCalcOpType {
-    return (
-      this.viewData$.value?.columns.find(v => v.id === columnId)
-        ?.statCalcType ?? 'none'
-    );
+    return this.viewData$.value?.columns.find(v => v.id === columnId)
+      ?.statCalcType;
   }
 
   columnGetWidth(columnId: string): number {
@@ -169,7 +166,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
   }
 
-  columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void {
+  columnUpdateStatCalcOp(columnId: string, op?: string): void {
     this.viewDataUpdate(() => {
       return {
         columns: this.computedColumns$.value.map(v =>
@@ -357,7 +354,9 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
 }
 
 export class TableColumn extends ColumnBase {
-  readonly stats = new ColumnDataStats(this);
+  statCalcOp$ = computed(() => {
+    return this.tableView.columnGetStatCalcOp(this.id);
+  });
 
   width$: ReadonlySignal<number> = computed(() => {
     return this.tableView.columnGetWidth(this.id);
@@ -370,15 +369,11 @@ export class TableColumn extends ColumnBase {
     super(tableView as SingleView, columnId);
   }
 
-  updateStatCalcOp(type: StatCalcOpType): void {
+  updateStatCalcOp(type?: string): void {
     return this.tableView.columnUpdateStatCalcOp(this.id, type);
   }
 
   updateWidth(width: number): void {
     this.tableView.columnUpdateWidth(this.id, width);
-  }
-
-  get statCalcOp(): StatCalcOpType {
-    return this.tableView.columnGetStatCalcOp(this.id);
   }
 }

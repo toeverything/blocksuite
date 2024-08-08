@@ -6,7 +6,7 @@ import type { InsertToPosition } from '../../../../types.js';
 import type { DataViewTable } from '../table-view.js';
 
 import { startDrag } from '../../../../utils/drag.js';
-import { TableRow } from '../components/row.js';
+import { TableRow } from '../row/row.js';
 
 export class TableDragController implements ReactiveController {
   dragStart = (row: TableRow, evt: PointerEvent) => {

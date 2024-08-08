@@ -8,18 +8,18 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { NumberColumnDataType } from '../../../../../column/presets/number/define.js';
-import type { InsertToPosition } from '../../../../../types.js';
-import type { Column } from '../../../../../view-manager/column.js';
-import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
+import type { NumberColumnDataType } from '../../../../column/presets/number/define.js';
+import type { InsertToPosition } from '../../../../types.js';
+import type { Column } from '../../../../view-manager/column.js';
+import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
 import {
   type Menu,
   type NormalMenu,
   popMenu,
-} from '../../../../../../../_common/components/index.js';
-import { numberFormats } from '../../../../../column/presets/number/utils/formats.js';
-import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
+} from '../../../../../../_common/components/index.js';
+import { numberFormats } from '../../../../column/presets/number/utils/formats.js';
+import { inputConfig, typeConfig } from '../../../../common/column-menu.js';
 import {
   DatabaseDuplicate,
   DatabaseInsertLeft,
@@ -27,14 +27,14 @@ import {
   DatabaseMoveLeft,
   DatabaseMoveRight,
   DeleteIcon,
-} from '../../../../../common/icons/index.js';
-import { startDrag } from '../../../../../utils/drag.js';
-import { autoScrollOnBoundary } from '../../../../../utils/frame-loop.js';
-import { insertPositionToIndex } from '../../../../../utils/insert.js';
-import { renderUniLit } from '../../../../../utils/uni-component/index.js';
-import { getResultInRange } from '../../../../../utils/utils.js';
-import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import { getTableContainer } from '../../types.js';
+} from '../../../../common/icons/index.js';
+import { startDrag } from '../../../../utils/drag.js';
+import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
+import { insertPositionToIndex } from '../../../../utils/insert.js';
+import { renderUniLit } from '../../../../utils/uni-component/index.js';
+import { getResultInRange } from '../../../../utils/utils.js';
+import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../consts.js';
+import { getTableContainer } from '../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 import './number-format-bar.js';
 import {

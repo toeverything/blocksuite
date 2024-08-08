@@ -12,9 +12,9 @@ import type { TableSingleView } from './table-view-manager.js';
 import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import { GroupTitle } from '../../../common/group-by/group-title.js';
 import { PlusIcon } from '../../../common/icons/index.js';
-import './components/column-stats.js';
-import './components/column-stats-cell.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
+import './stats/column-stats-bar.js';
+import './stats/column-stats-column.js';
 import { TableAreaSelection } from './types.js';
 
 const styles = css`

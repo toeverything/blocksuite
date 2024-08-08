@@ -5,8 +5,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { Column } from '../../../../../view-manager/column.js';
-import type { TableSingleView } from '../../table-view-manager.js';
+import type { Column } from '../../../../view-manager/column.js';
+import type { TableSingleView } from '../table-view-manager.js';
 
 @customElement('affine-data-view-column-preview')
 export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {

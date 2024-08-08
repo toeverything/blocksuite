@@ -8,15 +8,15 @@ import { createRef } from 'lit/directives/ref.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
-} from '../../../../column/index.js';
-import type { SingleView } from '../../../../view-manager/single-view.js';
-import type { TableColumn } from '../table-view-manager.js';
+} from '../../../column/index.js';
+import type { SingleView } from '../../../view-manager/single-view.js';
+import type { TableColumn } from './table-view-manager.js';
 
-import { renderUniLit } from '../../../../utils/uni-component/index.js';
+import { renderUniLit } from '../../../utils/uni-component/index.js';
 import {
   TableAreaSelection,
   type TableViewSelectionWithType,
-} from '../types.js';
+} from './types.js';
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer extends SignalWatcher(

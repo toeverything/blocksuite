@@ -2,13 +2,13 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { Column } from '../../../../../view-manager/column.js';
+import type { Column } from '../../../../view-manager/column.js';
 
-import { formatNumber } from '../../../../../column/presets/number/utils/formatter.js';
+import { formatNumber } from '../../../../column/presets/number/utils/formatter.js';
 import {
   DecreaseDecimalPlacesIcon,
   IncreaseDecimalPlacesIcon,
-} from '../../../../../common/icons/index.js';
+} from '../../../../common/icons/index.js';
 
 @customElement('affine-database-number-format-bar')
 export class DatabaseNumberFormatBar extends WithDisposable(LitElement) {

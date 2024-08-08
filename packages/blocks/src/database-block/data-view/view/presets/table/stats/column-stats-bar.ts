@@ -1,21 +1,24 @@
-import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html } from 'lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { GroupData } from '../../../../common/group-by/helper.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
+import { LEFT_TOOL_BAR_WIDTH, STATS_BAR_HEIGHT } from '../consts.js';
+
 const styles = css`
   .affine-database-column-stats {
     width: 100%;
-    margin-left: 8px;
+    margin-left: ${LEFT_TOOL_BAR_WIDTH}px;
+    height: ${STATS_BAR_HEIGHT}px;
     display: flex;
   }
 `;
 
 @customElement('affine-database-column-stats')
-export class DataBaseColumnStats extends WithDisposable(LitElement) {
+export class DataBaseColumnStats extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   protected override render() {
