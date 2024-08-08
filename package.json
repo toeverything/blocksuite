@@ -15,7 +15,7 @@
     "lint": "eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0",
     "lint:fix": "pnpm lint --fix",
     "lint:lit": "pnpm lit-analyzer --strict=false --rules.no-incompatible-property-type=error --rules.no-incompatible-type-binding=off --rules.no-invalid-css=off --rules.no-invalid-tag-name=off \"packages/**/*.ts\"",
-    "lint:circular": "madge --circular ./packages/*/dist/index.js",
+    "lint:circular": "madge --circular ./packages/**/dist/index.js",
     "test": "nx e2e @blocksuite/e2e",
     "test:ci": "nx e2e-ci @blocksuite/e2e",
     "test:type": "tsc -p tests/tsconfig.json",
