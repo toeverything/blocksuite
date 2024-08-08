@@ -7,6 +7,8 @@ export enum ColorScheme {
   Light = 'light',
 }
 
+const COLOR_SCHEMES: string[] = Object.values(ColorScheme);
+
 const TRANSPARENT = 'transparent';
 
 /**
@@ -93,9 +95,15 @@ export class ThemeObserver {
    * `--affine-palette-shape-blue`
    * ```
    */
-  static getColorValue(color: Color, fallback = TRANSPARENT, real?: boolean) {
+  static getColorValue(
+    color: Color,
+    fallback = TRANSPARENT,
+    real?: boolean,
+    mode = ThemeObserver.mode,
+    getPropertyValue = ThemeObserver.getPropertyValue
+  ) {
     if (typeof color === 'object') {
-      color = color[ThemeObserver.mode] ?? color.normal ?? fallback;
+      color = color[mode] ?? color.normal ?? fallback;
     }
     if (!color) {
       color = fallback ?? TRANSPARENT;
@@ -103,11 +111,11 @@ export class ThemeObserver {
     if (real && color.startsWith('--')) {
       color = color.endsWith(TRANSPARENT)
         ? TRANSPARENT
-        : ThemeObserver.getPropertyValue(color);
+        : getPropertyValue(color);
 
       if (!color) {
         color = fallback.startsWith('--')
-          ? ThemeObserver.getPropertyValue(fallback)
+          ? getPropertyValue(fallback)
           : fallback;
       }
     }
@@ -153,7 +161,7 @@ export class ThemeObserver {
   observe(element: HTMLElement) {
     const callback = () => {
       const mode = element.dataset.theme;
-      if (mode && this.mode$.peek() !== mode) {
+      if (mode && COLOR_SCHEMES.includes(mode) && this.mode$.peek() !== mode) {
         this.mode$.value = mode as ColorScheme;
       }
     };

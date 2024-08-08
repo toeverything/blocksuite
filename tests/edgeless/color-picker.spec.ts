@@ -1,3 +1,7 @@
+import type { ColorScheme } from '@blocks/_common/theme/theme-observer.js';
+import type { Color } from '@blocks/surface-block/consts.js';
+
+import { ThemeObserver } from '@blocks/_common/theme/theme-observer.js';
 import { parseStringToRgba } from '@blocks/root-block/edgeless/components/color-picker/utils.js';
 import { type Locator, type Page, expect } from '@playwright/test';
 import { dragBetweenCoords } from 'utils/actions/drag.js';
@@ -13,6 +17,19 @@ import {
 } from 'utils/actions/misc.js';
 
 import { test } from '../utils/playwright.js';
+
+declare global {
+  interface Window {
+    getThemeObserver: () => Promise<CustomThemeObserver>;
+    getThemeMode: () => Promise<string>;
+    setThemeMode: (mode: string) => Promise<void>;
+    getColorValue: (
+      color: Color,
+      fallback?: string,
+      real?: boolean
+    ) => Promise<void>;
+  }
+}
 
 async function setupWithColorPickerFunction(page: Page) {
   await enterPlaygroundRoom(page, { flags: { enable_color_picker: true } });
@@ -61,6 +78,232 @@ function getHexInput(locator: Locator) {
 function getAlphaInput(locator: Locator) {
   return locator.locator('label.alpha input');
 }
+
+async function themeObserverSetup(page: Page) {
+  await setupWithColorPickerFunction(page);
+
+  CustomThemeObserver.instance = new CustomThemeObserver();
+  CustomThemeObserver.computedStyle = await page.evaluate(() =>
+    getComputedStyle(document.documentElement)
+  );
+
+  await page.exposeFunction('setThemeMode', (mode: string) => {
+    CustomThemeObserver.instance.mode$.value = mode as ColorScheme;
+  });
+
+  await page.exposeFunction('getThemeMode', () => CustomThemeObserver.mode);
+
+  await page.exposeFunction('getThemeObserver', () => CustomThemeObserver);
+
+  await page.exposeFunction(
+    'getColorValue',
+    async (color: Color, fallback?: string, real?: boolean) => {
+      return CustomThemeObserver.getColorValue2(
+        color,
+        fallback,
+        real,
+        CustomThemeObserver.mode,
+        async (property: string) => {
+          if (property.startsWith('--')) {
+            if (property.endsWith('transparent')) {
+              return 'transparent';
+            }
+            return (
+              (await page.evaluate(
+                property =>
+                  getComputedStyle(document.documentElement)
+                    .getPropertyValue(property)
+                    .trim(),
+                property
+              )) || property
+            );
+          }
+          return property;
+        }
+      );
+    }
+  );
+
+  await page.evaluate(() => {
+    const callback = () => {
+      const mode = document.documentElement.dataset.theme ?? 'light';
+      window.setThemeMode(mode).catch(console.error);
+    };
+    const observer = new MutationObserver(callback);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    mql.onchange = e => {
+      window.setThemeMode(e.matches ? 'dark' : 'light').catch(console.error);
+    };
+
+    callback();
+  });
+}
+
+function getColorValue(
+  page: Page,
+  color: Color,
+  fallback?: string,
+  real?: boolean
+) {
+  return page.evaluate(
+    ([color, fallback, real]) =>
+      window.getColorValue(
+        color as Color,
+        fallback as string | undefined,
+        real as boolean | undefined
+      ),
+    [color, fallback, real]
+  );
+}
+
+class CustomThemeObserver extends ThemeObserver {
+  static override #computedStyle: CSSStyleDeclaration;
+
+  static override #instance: CustomThemeObserver;
+
+  static override get computedStyle() {
+    return CustomThemeObserver.#computedStyle;
+  }
+
+  static override set computedStyle(style: CSSStyleDeclaration) {
+    CustomThemeObserver.#computedStyle = style;
+  }
+
+  static async getColorValue2(
+    color: Color,
+    fallback = 'transparent',
+    real?: boolean,
+    mode = CustomThemeObserver.mode,
+    getPropertyValue: (property: string) => Promise<string> = (
+      property: string
+    ) => Promise.resolve(property)
+  ) {
+    if (typeof color === 'object') {
+      color = color[mode] ?? color.normal ?? fallback;
+    }
+    if (!color) {
+      color = fallback ?? 'transparent';
+    }
+    if (real && color.startsWith('--')) {
+      color = color.endsWith('transparent')
+        ? 'transparent'
+        : await getPropertyValue(color);
+
+      if (!color) {
+        color = fallback.startsWith('--')
+          ? await getPropertyValue(fallback)
+          : fallback;
+      }
+    }
+
+    return color;
+  }
+
+  static override get instance() {
+    return CustomThemeObserver.#instance;
+  }
+
+  static override set instance(instance: CustomThemeObserver) {
+    CustomThemeObserver.#instance = instance;
+  }
+
+  static override get mode() {
+    return CustomThemeObserver.instance.mode$.peek();
+  }
+}
+
+// Theme Observer
+test.describe('theme observer', () => {
+  test.describe('dark', () => {
+    test.use({ colorScheme: 'dark' });
+
+    test('should update theme mode', async ({ page }) => {
+      await themeObserverSetup(page);
+
+      let isDark = await page.evaluate(
+        () => matchMedia('(prefers-color-scheme: dark)').matches
+      );
+      expect(isDark).toBeTruthy();
+      isDark = await page.evaluate(
+        async () => (await window.getThemeMode()) === 'dark'
+      );
+      expect(isDark).toBeTruthy();
+      expect(CustomThemeObserver.mode).toEqual('dark');
+    });
+
+    test('should return a normal color value', async ({ page }) => {
+      await themeObserverSetup(page);
+
+      let color = await getColorValue(page, { normal: '#f0f' });
+      expect(color).toEqual('#f0f');
+
+      color = await getColorValue(page, {
+        light: '#f00',
+        dark: '#00f',
+      });
+      expect(color).toEqual('#00f');
+    });
+
+    test('should return a real color value', async ({ page }) => {
+      await themeObserverSetup(page);
+
+      let color = await getColorValue(page, 'transparent', undefined, true);
+      expect(color).toEqual('transparent');
+
+      color = await getColorValue(
+        page,
+        '--affine-palette-transparent',
+        undefined,
+        true
+      );
+      expect(color).toEqual('transparent');
+
+      color = await getColorValue(
+        page,
+        '--affine-palette-shape-yellow',
+        undefined,
+        true
+      );
+      expect(color).toEqual('rgb(255, 223, 107)');
+    });
+  });
+
+  test.describe('light', () => {
+    test.use({ colorScheme: 'light' });
+
+    test('should update theme mode', async ({ page }) => {
+      await themeObserverSetup(page);
+
+      let isLight = await page.evaluate(
+        () => matchMedia('(prefers-color-scheme: light)').matches
+      );
+      expect(isLight).toBeTruthy();
+      isLight = await page.evaluate(
+        async () => (await window.getThemeMode()) === 'light'
+      );
+      expect(isLight).toBeTruthy();
+      expect(CustomThemeObserver.mode).toEqual('light');
+    });
+
+    test('should return a normal color value', async ({ page }) => {
+      await themeObserverSetup(page);
+
+      let color = await getColorValue(page, { normal: '#f0f' });
+      expect(color).toEqual('#f0f');
+
+      color = await getColorValue(page, {
+        light: '#f00',
+        dark: '#00f',
+      });
+      expect(color).toEqual('#f00');
+    });
+  });
+});
 
 // Basic functions
 test.describe('basic functions', () => {
@@ -311,6 +554,18 @@ test.describe('basic functions', () => {
     await alphaInput.fill('-1');
     await expect(alphaInput).toHaveValue('1');
 
+    await alphaInput.pressSequentially('--1');
+    await expect(alphaInput).toHaveValue('1');
+
+    await alphaInput.pressSequentially('++1');
+    await expect(alphaInput).toHaveValue('1');
+
+    await alphaInput.pressSequentially('-+1');
+    await expect(alphaInput).toHaveValue('1');
+
+    await alphaInput.pressSequentially('+-1');
+    await expect(alphaInput).toHaveValue('1');
+
     await alphaInput.fill('23');
     await expect(alphaInput).toHaveValue('23');
   });
@@ -352,5 +607,20 @@ test.describe('basic functions', () => {
 
     rgba = parseStringToRgba('#ff09');
     expect(rgba).toEqual({ r: 1, g: 1, b: 0, a: 0.6 });
+  });
+});
+
+// Shapes: `fillColor`, `strokeColor` and `color`
+test.describe('shapes colors', () => {
+  test('should pick a color for `fillColor`', async ({ page }) => {
+    await setupWithColorPickerFunction(page);
+  });
+
+  test('should pick a color for `strokeColor`', async ({ page }) => {
+    await setupWithColorPickerFunction(page);
+  });
+
+  test('should pick a color for `color`', async ({ page }) => {
+    await setupWithColorPickerFunction(page);
   });
 });
