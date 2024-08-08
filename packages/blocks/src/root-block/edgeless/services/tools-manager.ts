@@ -129,9 +129,10 @@ export class EdgelessToolsManager {
     const metaKeyPressed = IS_MAC ? pointEvt.metaKey : pointEvt.ctrlKey;
 
     if (
-      isMiddleButtonPressed(pointEvt) ||
-      isRightButtonPressed(pointEvt) ||
-      metaKeyPressed
+      !this.selection.editing &&
+      (isMiddleButtonPressed(pointEvt) ||
+        isRightButtonPressed(pointEvt) ||
+        metaKeyPressed)
     ) {
       const isRightButton = isRightButtonPressed(pointEvt);
       const targetTool = (
