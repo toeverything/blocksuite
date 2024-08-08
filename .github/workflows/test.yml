@@ -18,6 +18,7 @@ on:
       - '**.md'
       - 'scripts/**'
       - 'packages/docs/**'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
