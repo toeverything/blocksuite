@@ -220,6 +220,9 @@ class PasteTr {
     if (this.snapshot.content.length === 0) {
       return false;
     }
+    if (!this.firstSnapshot!.props.text) {
+      return false;
+    }
     const firstTextSnapshot = this._textFromSnapshot(this.firstSnapshot!);
     const lastTextSnapshot = this._textFromSnapshot(this.lastSnapshot!);
     return (
