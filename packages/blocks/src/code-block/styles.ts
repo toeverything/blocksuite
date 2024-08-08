@@ -27,6 +27,10 @@ export const codeBlockStyles = css`
     grid-template-columns: auto minmax(0, 1fr);
   }
 
+  .affine-code-block-container div:has(> v-line) {
+    display: grid;
+  }
+
   .affine-code-block-container .line-number {
     position: sticky;
     padding: 0 10px;
