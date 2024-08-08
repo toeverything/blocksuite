@@ -5,12 +5,13 @@ import type {
 } from 'shiki';
 import type { BundledTheme } from 'shiki';
 
+import { FALLBACK_LANG } from '@blocksuite/affine-model';
+
 export const DARK_THEME = 'dark-plus' satisfies BundledTheme;
 export const LIGHT_THEME = 'light-plus' satisfies BundledTheme;
 // Since shiki special treatment the `plaintext` language as `PlainTextLanguage`
 // It is better to use the it but now is late to change it.
-// export const FALLBACK_LANG: PlainTextLanguage = 'plaintext';
-export const FALLBACK_LANG = 'Plain Text';
+export { FALLBACK_LANG } from '@blocksuite/affine-model';
 
 /**
  * Note: Use it carefully because it is not a valid language.

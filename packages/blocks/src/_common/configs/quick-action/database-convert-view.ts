@@ -1,5 +1,9 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import {
+  DatabaseKanbanViewIcon,
+  DatabaseTableViewIcon,
+} from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html } from 'lit';
@@ -11,10 +15,6 @@ import type { DatabaseBlockModel } from '../../../database-block/index.js';
 import { DatabaseSearchClose } from '../../../database-block/data-view/common/icons/index.js';
 import { viewPresets } from '../../../database-block/data-view/index.js';
 import { databaseViewInitConvert } from '../../../database-block/utils.js';
-import {
-  DatabaseKanbanViewIcon,
-  DatabaseTableViewIcon,
-} from '../../icons/text.js';
 
 interface DatabaseView {
   meta: ViewMeta;

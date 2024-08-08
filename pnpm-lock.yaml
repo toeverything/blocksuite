@@ -199,8 +199,104 @@ importers:
         specifier: 2.0.4
         version: 2.0.4(@types/node@22.0.0)(@vitest/browser@2.0.4)(@vitest/ui@2.0.4)(happy-dom@14.12.3)(terser@5.31.3)
 
+  packages/affine/components:
+    dependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../../framework/block-std
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../../framework/global
+      '@blocksuite/icons':
+        specifier: ^2.1.62
+        version: 2.1.62(@types/react@18.3.3)(lit@3.1.4)
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../../framework/inline
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../../framework/store
+      lit:
+        specifier: ^3.1.4
+        version: 3.1.4
+
+  packages/affine/model:
+    dependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../../framework/block-std
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../../framework/global
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../../framework/inline
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../../framework/store
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+
+  packages/affine/shared:
+    dependencies:
+      '@blocksuite/affine-model':
+        specifier: workspace:*
+        version: link:../model
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../../framework/block-std
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../../framework/global
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../../framework/inline
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../../framework/store
+      '@dotlottie/player-component':
+        specifier: ^2.7.12
+        version: 2.7.12
+      '@floating-ui/dom':
+        specifier: ^1.6.8
+        version: 1.6.8
+      '@lit-labs/preact-signals':
+        specifier: ^1.0.2
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+      '@lit/context':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@toeverything/theme':
+        specifier: ^1.0.2
+        version: 1.0.2
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
+      '@types/mdast':
+        specifier: ^4.0.4
+        version: 4.0.4
+      '@types/sortablejs':
+        specifier: ^1.15.8
+        version: 1.15.8
+      minimatch:
+        specifier: ^10.0.1
+        version: 10.0.1
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+
   packages/blocks:
     dependencies:
+      '@blocksuite/affine-components':
+        specifier: workspace:*
+        version: link:../affine/components
+      '@blocksuite/affine-model':
+        specifier: workspace:*
+        version: link:../affine/model
+      '@blocksuite/affine-shared':
+        specifier: workspace:*
+        version: link:../affine/shared
       '@blocksuite/block-std':
         specifier: workspace:*
         version: link:../framework/block-std

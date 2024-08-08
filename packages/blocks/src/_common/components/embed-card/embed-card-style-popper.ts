@@ -1,9 +1,10 @@
+import type { BookmarkBlockModel } from '@blocksuite/affine-model';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedCardStyle } from '../../types.js';

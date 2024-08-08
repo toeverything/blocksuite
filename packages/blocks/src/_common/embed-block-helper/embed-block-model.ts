@@ -1,12 +1,12 @@
 import type { Constructor } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import type { EmbedProps } from './types.js';
-
 import {
   GfxCompatible,
   type GfxCompatibleProps,
-} from '../edgeless/mixin/index.js';
+} from '@blocksuite/affine-model';
+
+import type { EmbedProps } from './types.js';
 
 export function defineEmbedModel<
   Props extends object,

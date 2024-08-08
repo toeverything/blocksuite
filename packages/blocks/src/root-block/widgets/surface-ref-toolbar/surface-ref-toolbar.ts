@@ -1,3 +1,17 @@
+import {
+  EdgelessModeIcon,
+  MoreVerticalIcon,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
+import {
+  CaptionIcon,
+  CenterPeekIcon,
+  CopyIcon,
+  DeleteIcon,
+  DownloadIcon,
+  OpenIcon,
+} from '@blocksuite/affine-components/icons';
+import { downloadBlob } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { offset, shift } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
@@ -15,28 +29,14 @@ import { HoverController } from '../../../_common/components/hover/controller.js
 import { isPeekable, peek } from '../../../_common/components/peekable.js';
 import { toast } from '../../../_common/components/toast.js';
 import '../../../_common/components/toolbar/icon-button.js';
+import '../../../_common/components/toolbar/menu-button.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import '../../../_common/components/toolbar/toolbar.js';
-import '../../../_common/components/toolbar/menu-button.js';
 import {
   type Action,
   renderActions,
 } from '../../../_common/components/toolbar/utils.js';
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
-import {
-  EdgelessModeIcon,
-  MoreVerticalIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/edgeless.js';
-import {
-  CaptionIcon,
-  CenterPeekIcon,
-  CopyIcon,
-  DeleteIcon,
-  DownloadIcon,
-  OpenIcon,
-} from '../../../_common/icons/text.js';
-import { downloadBlob } from '../../../_common/utils/filesys.js';
 import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
 
 export const AFFINE_SURFACE_REF_TOOLBAR = 'affine-surface-ref-toolbar';

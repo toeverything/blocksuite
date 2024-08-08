@@ -1,6 +1,6 @@
 import { signal } from '@lit-labs/preact-signals';
 
-import type { Color } from '../../surface-block/consts.js';
+export type Color = string | { [K in ColorScheme | 'normal']?: string };
 
 export enum ColorScheme {
   Dark = 'dark',

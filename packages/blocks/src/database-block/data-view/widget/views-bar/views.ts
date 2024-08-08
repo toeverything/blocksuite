@@ -1,3 +1,10 @@
+import {
+  AddCursorIcon,
+  DuplicateIcon,
+  MoreHorizontalIcon,
+  MoveLeftIcon,
+  MoveRightIcon,
+} from '@blocksuite/affine-components/icons';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -6,13 +13,6 @@ import {
   popFilterableSimpleMenu,
   popMenu,
 } from '../../../../_common/components/index.js';
-import {
-  AddCursorIcon,
-  DuplicateIcon,
-  MoreHorizontalIcon,
-  MoveLeftIcon,
-  MoveRightIcon,
-} from '../../../../_common/icons/index.js';
 import '../../common/component/overflow/overflow.js';
 import { DeleteIcon } from '../../common/icons/index.js';
 import { renderUniLit } from '../../utils/uni-component/index.js';

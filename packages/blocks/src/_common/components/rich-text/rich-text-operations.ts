@@ -1,16 +1,16 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
+import {
+  isInsideBlockByFlavour,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
 
 import type { ListBlockModel } from '../../../list-block/index.js';
 import type { RootBlockModel } from '../../../root-block/index.js';
 import type { ExtendedModel } from '../../types.js';
 
-import {
-  isInsideBlockByFlavour,
-  matchFlavours,
-} from '../../../_common/utils/model.js';
 import {
   getBlockComponentByModel,
   getDocTitleByEditorHost,

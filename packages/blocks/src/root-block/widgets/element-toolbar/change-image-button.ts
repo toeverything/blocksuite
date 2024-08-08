@@ -1,3 +1,4 @@
+import { CaptionIcon, DownloadIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -8,7 +9,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/separator.js';
-import { CaptionIcon, DownloadIcon } from '../../../_common/icons/text.js';
 import { downloadImageBlob } from '../../../image-block/utils.js';
 
 @customElement('edgeless-change-image-button')

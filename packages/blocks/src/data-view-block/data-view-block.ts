@@ -1,3 +1,8 @@
+import {
+  CopyIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/affine-components/icons';
 import { RangeManager } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
@@ -13,11 +18,6 @@ import {
   CaptionedBlockComponent,
   popMenu,
 } from '../_common/components/index.js';
-import {
-  CopyIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-} from '../_common/icons/index.js';
 import { dataViewCommonStyle } from '../database-block/data-view/common/css-variable.js';
 import {
   DataView,

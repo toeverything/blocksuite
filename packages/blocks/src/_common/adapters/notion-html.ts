@@ -8,6 +8,7 @@ import type {
   FromSliceSnapshotResult,
 } from '@blocksuite/store';
 
+import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { isEqual, sha } from '@blocksuite/global/utils';
 import {
@@ -26,7 +27,6 @@ import { unified } from 'unified';
 
 import { getTagColor } from '../../database-block/data-view/utils/tags/colors.js';
 import { NoteDisplayMode } from '../types.js';
-import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
   type HtmlAST,
   hastGetElementChildren,

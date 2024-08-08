@@ -1,6 +1,7 @@
 import type { Doc } from '@blocksuite/store';
 import type { BlockModel } from '@blocksuite/store';
 
+import { last, matchFlavours, nToLast } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
@@ -8,8 +9,6 @@ import { generateKeyBetween } from 'fractional-indexing';
 import type { GroupElementModel } from '../element-model/group.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
-import { last, nToLast } from '../../_common/utils/iterable.js';
-import { matchFlavours } from '../../_common/utils/model.js';
 import { FrameBlockModel } from '../../frame-block/frame-model.js';
 import { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import {

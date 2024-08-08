@@ -1,5 +1,7 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { GfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -13,8 +15,6 @@ import type {
 import type { EdgelessTextBlockModel } from './edgeless-text-model.js';
 import type { EdgelessTextBlockService } from './edgeless-text-service.js';
 
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';
 import {
   DefaultModeDragType,

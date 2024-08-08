@@ -1,3 +1,15 @@
+import type { ColorScheme } from '@blocksuite/affine-shared/theme';
+
+import {
+  ExpandIcon,
+  LineStyleIcon,
+  NoteCornerIcon,
+  NoteShadowIcon,
+  ScissorsIcon,
+  ShrinkIcon,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
+import { countBy, matchFlavours, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
@@ -8,7 +20,6 @@ import { type Ref, createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 
 import type { EditorMenuButton } from '../../../_common/components/toolbar/menu-button.js';
-import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { StrokeStyle } from '../../../surface-block/index.js';
 import type {
@@ -26,18 +37,7 @@ import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   NOTE_BACKGROUND_COLORS,
 } from '../../../_common/edgeless/note/consts.js';
-import {
-  ExpandIcon,
-  LineStyleIcon,
-  NoteCornerIcon,
-  NoteShadowIcon,
-  ScissorsIcon,
-  ShrinkIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
-import { countBy, maxBy } from '../../../_common/utils/iterable.js';
-import { matchFlavours } from '../../../_common/utils/model.js';
 import '../../edgeless/components/color-picker/index.js';
 import {
   packColor,

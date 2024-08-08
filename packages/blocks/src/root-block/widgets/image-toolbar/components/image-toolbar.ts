@@ -1,3 +1,4 @@
+import { MoreVerticalIcon } from '@blocksuite/affine-components/icons';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { LitElement, html } from 'lit';
@@ -12,7 +13,6 @@ import { createLitPortal } from '../../../../_common/components/portal.js';
 import '../../../../_common/components/toolbar/icon-button.js';
 import '../../../../_common/components/toolbar/menu-button.js';
 import '../../../../_common/components/toolbar/toolbar.js';
-import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
 import { styles } from '../styles.js';
 import { ConfigRenderer, MoreMenuRenderer } from '../utils.js';
 

@@ -1,14 +1,14 @@
+import {
+  EdgelessPenDarkIcon,
+  EdgelessPenLightIcon,
+} from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { LastProps } from '../../../../../surface-block/managers/edit-session.js';
 
-import {
-  EdgelessPenDarkIcon,
-  EdgelessPenLightIcon,
-} from '../../../../../_common/icons/edgeless.js';
-import { ThemeObserver } from '../../../../../_common/theme/theme-observer.js';
 import { LineWidth } from '../../../../../_common/utils/index.js';
 import '../../buttons/toolbar-button.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';

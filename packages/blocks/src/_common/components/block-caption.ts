@@ -1,12 +1,12 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Text } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { stopPropagation } from '../utils/event.js';
 import { asyncFocusRichText } from '../utils/selection.js';
 
 export interface BlockCaptionProps {

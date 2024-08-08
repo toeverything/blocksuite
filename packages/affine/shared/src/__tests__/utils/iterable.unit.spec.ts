@@ -5,7 +5,7 @@ import {
   countBy,
   groupBy,
   maxBy,
-} from '../../_common/utils/iterable.js';
+} from '../../utils/iterable.js';
 
 describe('countBy', () => {
   it('basic', () => {

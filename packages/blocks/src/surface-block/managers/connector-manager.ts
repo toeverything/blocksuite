@@ -1,10 +1,10 @@
-import type { IVec, IVec3 } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/global/utils';
+import type { IBound, IVec, IVec3 } from '@blocksuite/global/utils';
 
-import { Vec } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { PointLocation } from '@blocksuite/global/utils';
+import { last } from '@blocksuite/affine-shared/utils';
 import {
+  Bound,
+  PointLocation,
+  Vec,
   assertEquals,
   assertExists,
   assertType,
@@ -18,7 +18,6 @@ import type {
   LocalConnectorElementModel,
 } from '../element-model/connector.js';
 
-import { last } from '../../_common/utils/iterable.js';
 import { Overlay } from '../canvas-renderer/renderer.js';
 import {
   ConnectorMode,

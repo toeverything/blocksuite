@@ -1,9 +1,9 @@
+import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { PANEL_BASE } from '../../styles.js';
-import { stopPropagation } from '../../utils/event.js';
 
 @customElement('editor-toolbar')
 export class EditorToolbar extends WithDisposable(LitElement) {

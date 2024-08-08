@@ -1,4 +1,4 @@
-import { on } from '../../../../../_common/utils/event.js';
+import { on } from '@blocksuite/affine-shared/utils';
 
 export function onClickOutside(target: HTMLElement, fn: () => void) {
   return on(document, 'click', (evt: MouseEvent) => {

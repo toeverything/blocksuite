@@ -3,10 +3,9 @@ import type { SerializedXYWH } from '@blocksuite/global/utils';
 
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { LinkPreviewData } from '../_common/embed-block-helper/index.js';
-import type { EmbedCardStyle } from '../_common/types.js';
+import type { EmbedCardStyle, LinkPreviewData } from '../../utils/index.js';
 
-import { GfxCompatible } from '../_common/edgeless/mixin/index.js';
+import { GfxCompatible } from '../../utils/index.js';
 
 export interface BookmarkBlockEdgelessProps {
   index: string;
@@ -67,6 +66,9 @@ export class BookmarkBlockModel
 declare global {
   namespace BlockSuite {
     interface EdgelessBlockModelMap {
+      'affine:bookmark': BookmarkBlockModel;
+    }
+    interface BlockModels {
       'affine:bookmark': BookmarkBlockModel;
     }
   }

@@ -1,12 +1,11 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
-import { LitElement, css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
-
 import {
   on,
   once,
   requestConnectedFrame,
-} from '../../../../../_common/utils/event.js';
+} from '@blocksuite/affine-shared/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
+import { LitElement, css, html } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
 
 /**
  * A scrollbar that is only visible when the user is interacting with it.

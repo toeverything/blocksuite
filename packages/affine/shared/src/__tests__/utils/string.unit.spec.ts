@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  isFuzzyMatch,
-  substringMatchScore,
-} from '../../_common/utils/string.js';
+import { isFuzzyMatch, substringMatchScore } from '../../utils/string.js';
 
 describe('fuzzyMatch', () => {
   it('basic case', () => {

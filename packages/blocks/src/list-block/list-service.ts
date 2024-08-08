@@ -1,3 +1,4 @@
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 
 import type { ListBlockModel } from './list-model.js';
@@ -9,7 +10,6 @@ import {
 } from '../_common/inline/presets/affine-inline-specs.js';
 import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
 import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import { AffineDragHandleWidget } from '../root-block/widgets/drag-handle/drag-handle.js';
 import { convertToNumberedListCommand } from './commands/convert-to-numbered-list.js';
 import { indentListCommand } from './commands/indent-list.js';

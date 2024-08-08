@@ -1,13 +1,13 @@
+import {
+  ArrowUpIcon,
+  ConnectorIcon,
+} from '@blocksuite/affine-components/icons';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { LastProps } from '../../../../../surface-block/managers/edit-session.js';
 
-import {
-  ArrowUpIcon,
-  ConnectorIcon,
-} from '../../../../../_common/icons/index.js';
 import { LineWidth } from '../../../../../_common/utils/index.js';
 import { getConnectorModeName } from '../../../../../surface-block/element-model/connector.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';

@@ -1,3 +1,4 @@
+import type { AttachmentBlockProps } from '@blocksuite/affine-model';
 import type {
   GfxBlockComponent,
   SurfaceSelection,
@@ -6,6 +7,7 @@ import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import { serializeXYWH } from '@blocksuite/global/utils';
@@ -15,7 +17,6 @@ import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
 import type { ImageBlockProps } from '../../image-block/image-model.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
@@ -38,7 +39,6 @@ import {
   requestConnectedFrame,
   requestThrottledConnectedFrame,
 } from '../../_common/utils/index.js';
-import { humanFileSize } from '../../_common/utils/math.js';
 import {
   setAttachmentUploaded,
   setAttachmentUploading,

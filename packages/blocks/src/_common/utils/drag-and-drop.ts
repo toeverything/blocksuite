@@ -2,11 +2,11 @@ import type { BlockComponent } from '@blocksuite/block-std';
 import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { Rect, matchFlavours } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { EditingState } from '../types.js';
 
-import { matchFlavours } from './model.js';
 import {
   DropFlags,
   getClosestBlockComponentByElement,
@@ -14,7 +14,6 @@ import {
   getModelByBlockComponent,
   getRectByBlockComponent,
 } from './query.js';
-import { Rect } from './rect.js';
 
 /**
  * A dropping type.

@@ -1,10 +1,18 @@
+import type { AttachmentBlockModel } from '@blocksuite/affine-model';
+import type { BookmarkBlockModel } from '@blocksuite/affine-model';
+
+import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  atLeastNMatches,
+  groupBy,
+  pickValues,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import type { AttachmentBlockModel } from '../../../attachment-block/attachment-model.js';
-import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
@@ -25,13 +33,6 @@ import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import '../../../_common/components/toolbar/toolbar.js';
-import { ConnectorCWithArrowIcon } from '../../../_common/icons/edgeless.js';
-import { ThemeObserver } from '../../../_common/theme/theme-observer.js';
-import {
-  atLeastNMatches,
-  groupBy,
-  pickValues,
-} from '../../../_common/utils/iterable.js';
 import {
   ConnectorMode,
   GroupElementModel,

@@ -1,5 +1,6 @@
 import type { Text } from '@blocksuite/store';
 
+import { isValidUrl } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
@@ -10,7 +11,6 @@ import type { RichText } from '../../../_common/components/index.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
 import { getViewportElement } from '../../../_common/utils/query.js';
-import { isValidUrl } from '../../../_common/utils/url.js';
 import { HostContextKey } from '../../context/host-context.js';
 import { BaseCellRenderer } from '../../data-view/column/index.js';
 

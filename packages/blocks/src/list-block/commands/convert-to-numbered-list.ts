@@ -1,8 +1,9 @@
 import type { Command, EditorHost } from '@blocksuite/block-std';
 
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
+
 import type { ListBlockModel } from '../list-model.js';
 
-import { matchFlavours } from '../../_common/utils/model.js';
 import { getNextContinuousNumberedLists } from './utils.js';
 
 export const convertToNumberedListCommand: Command<

@@ -1,9 +1,9 @@
+import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
 import { LineWidth } from '../../../../_common/types.js';
-import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 
 type DragConfig = {
   stepWidth: number;

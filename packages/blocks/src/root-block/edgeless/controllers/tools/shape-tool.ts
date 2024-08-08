@@ -1,6 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound } from '@blocksuite/global/utils';
 import { noop } from '@blocksuite/global/utils';
 
@@ -11,7 +12,6 @@ import type {
 import type { SelectionArea } from '../../services/tools-manager.js';
 import type { EdgelessTool } from '../../types.js';
 
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,

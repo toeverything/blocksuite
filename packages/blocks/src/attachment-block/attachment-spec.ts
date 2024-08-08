@@ -1,8 +1,8 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { AttachmentBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
 
-import { AttachmentBlockSchema } from './attachment-model.js';
 import { AttachmentBlockService } from './attachment-service.js';
 
 export const AttachmentBlockSpec: BlockSpec = {

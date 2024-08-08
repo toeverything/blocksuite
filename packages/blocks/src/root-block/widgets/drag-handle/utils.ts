@@ -1,6 +1,7 @@
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { getBlockProps } from '@blocksuite/affine-shared/utils';
 import {
   type BaseSelection,
   PathFinder,
@@ -14,7 +15,6 @@ import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../../_common/consts.js';
-import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
   type EmbedCardStyle,
   Rect,

@@ -1,11 +1,11 @@
 import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
+import { GfxCompatible } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../_common/consts.js';
-import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
 import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_SHADOW,

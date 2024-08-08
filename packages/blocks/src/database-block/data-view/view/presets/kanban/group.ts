@@ -1,3 +1,4 @@
+import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -9,7 +10,6 @@ import type { DataViewRenderer } from '../../../data-view.js';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 
 import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
-import { AddCursorIcon } from '../../../../../_common/icons/index.js';
 import { GroupTitle } from '../../../common/group-by/group-title.js';
 import './card.js';
 

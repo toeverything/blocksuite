@@ -1,5 +1,10 @@
 import type { UserInfo } from '@blocksuite/store';
 
+import { RemoteCursor } from '@blocksuite/affine-components/icons';
+import {
+  pickValues,
+  requestThrottledConnectedFrame,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -10,9 +15,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../root-model.js';
 
-import { RemoteCursor } from '../../../_common/icons/edgeless.js';
-import { requestThrottledConnectedFrame } from '../../../_common/utils/event.js';
-import { pickValues } from '../../../_common/utils/iterable.js';
 import {
   getSelectedRect,
   isTopLevelBlock,

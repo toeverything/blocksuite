@@ -1,3 +1,4 @@
+import { isAbortError } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
@@ -8,7 +9,6 @@ import type {
   EmbedGithubModel,
 } from './embed-github-model.js';
 
-import { isAbortError } from '../_common/utils/helper.js';
 import {
   GithubIssueClosedFailureIcon,
   GithubIssueClosedSuccessIcon,

@@ -1,5 +1,11 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import {
+  ArrowDownIcon,
+  HighLightDuotoneIcon,
+  TextBackgroundDuotoneIcon,
+  TextForegroundDuotoneIcon,
+} from '@blocksuite/affine-components/icons';
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
@@ -11,12 +17,6 @@ import type { AffineFormatBarWidget } from '../../format-bar.js';
 import { whenHover } from '../../../../../_common/components/hover/index.js';
 import '../../../../../_common/components/toolbar/icon-button.js';
 import '../../../../../_common/components/toolbar/menu-button.js';
-import {
-  ArrowDownIcon,
-  HighLightDuotoneIcon,
-  TextBackgroundDuotoneIcon,
-  TextForegroundDuotoneIcon,
-} from '../../../../../_common/icons/index.js';
 import { backgroundConfig, foregroundConfig } from './consts.js';
 
 enum HighlightType {

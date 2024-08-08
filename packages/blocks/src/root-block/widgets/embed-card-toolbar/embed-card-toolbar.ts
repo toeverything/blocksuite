@@ -1,3 +1,22 @@
+import {
+  CaptionIcon,
+  CenterPeekIcon,
+  CopyIcon,
+  DeleteIcon,
+  DuplicateIcon,
+  EditIcon,
+  ExpandFullSmallIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  PaletteIcon,
+  RefreshIcon,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
+import {
+  type BookmarkBlockModel,
+  BookmarkStyles,
+} from '@blocksuite/affine-model';
+import { getBlockProps, getHostName } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, DocCollection, Slice } from '@blocksuite/store';
@@ -34,26 +53,7 @@ import {
   type Action,
   renderActions,
 } from '../../../_common/components/toolbar/utils.js';
-import {
-  CaptionIcon,
-  CenterPeekIcon,
-  CopyIcon,
-  DeleteIcon,
-  DuplicateIcon,
-  EditIcon,
-  ExpandFullSmallIcon,
-  MoreVerticalIcon,
-  OpenIcon,
-  PaletteIcon,
-  RefreshIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
-import { getBlockProps } from '../../../_common/utils/block-props.js';
-import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
-import {
-  type BookmarkBlockModel,
-  BookmarkStyles,
-} from '../../../bookmark-block/bookmark-model.js';
+import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,

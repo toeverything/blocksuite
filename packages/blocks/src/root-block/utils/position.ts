@@ -1,4 +1,4 @@
-import { clamp } from '../../_common/utils/math.js';
+import { clamp } from '@blocksuite/affine-shared/utils';
 
 type CollisionBox = {
   /**

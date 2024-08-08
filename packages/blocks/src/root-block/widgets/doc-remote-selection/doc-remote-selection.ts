@@ -1,5 +1,6 @@
 import type { UserInfo } from '@blocksuite/store';
 
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import {
   type BaseSelection,
   BlockSelection,
@@ -14,7 +15,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DocRemoteSelectionConfig } from './config.js';
 
-import { matchFlavours } from '../../../_common/utils/model.js';
 import { RemoteColorManager } from '../../../root-block/remote-color-manager/remote-color-manager.js';
 import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';

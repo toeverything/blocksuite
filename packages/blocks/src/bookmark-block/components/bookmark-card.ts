@@ -1,3 +1,6 @@
+import { WebIcon16 } from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { getHostName } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { OpenInNewIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
@@ -6,9 +9,7 @@ import { classMap } from 'lit/directives/class-map.js';
 
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 
-import { WebIcon16 } from '../../_common/icons/text.js';
-import { ThemeObserver } from '../../_common/theme/theme-observer.js';
-import { getEmbedCardIcons, getHostName } from '../../_common/utils/url.js';
+import { getEmbedCardIcons } from '../../_common/utils/url.js';
 import { styles } from '../styles.js';
 
 @customElement('bookmark-card')

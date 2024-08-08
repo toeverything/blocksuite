@@ -1,6 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { BlockModel, Text } from '@blocksuite/store';
 
+import { getScrollContainer } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -20,7 +21,6 @@ import {
   getDocTitleInlineEditor,
   matchFlavours,
 } from '../../_common/utils/index.js';
-import { getScrollContainer } from '../../_common/utils/scroll-container.js';
 import { PageClipboard } from '../clipboard/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 

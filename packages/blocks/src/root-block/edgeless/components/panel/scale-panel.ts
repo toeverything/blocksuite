@@ -1,9 +1,8 @@
+import { clamp, stopPropagation } from '@blocksuite/affine-shared/utils';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { stopPropagation } from '../../../../_common/utils/event.js';
-import { clamp } from '../../../../_common/utils/math.js';
 import '../buttons/tool-icon-button.js';
 
 const MIN_SCALE = 0;

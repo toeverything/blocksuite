@@ -1,3 +1,7 @@
+import type {
+  AttachmentBlockModel,
+  BookmarkBlockModel,
+} from '@blocksuite/affine-model';
 import type { BlockModel } from '@blocksuite/store';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
@@ -7,8 +11,6 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { AttachmentBlockModel } from '../../attachment-block/attachment-model.js';
-import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../embed-github-block/embed-github-model.js';
 import type { EmbedHtmlModel } from '../../embed-html-block/embed-html-model.js';

@@ -1,5 +1,12 @@
+import type { BookmarkBlockModel } from '@blocksuite/affine-model';
 import type { IVec, PointLocation } from '@blocksuite/global/utils';
 
+import {
+  clamp,
+  pickValues,
+  requestThrottledConnectedFrame,
+  stopPropagation,
+} from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
@@ -14,7 +21,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EdgelessTextBlockComponent } from '../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
 import type { EmbedHtmlModel } from '../../../../embed-html-block/embed-html-model.js';
@@ -23,12 +29,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
-import {
-  requestThrottledConnectedFrame,
-  stopPropagation,
-} from '../../../../_common/utils/event.js';
-import { pickValues } from '../../../../_common/utils/iterable.js';
-import { clamp } from '../../../../_common/utils/math.js';
 import { EDGELESS_TEXT_BLOCK_MIN_WIDTH } from '../../../../edgeless-text/edgeless-text-block.js';
 import {
   EMBED_HTML_MIN_HEIGHT,

@@ -1,3 +1,5 @@
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { values } from '@blocksuite/affine-shared/utils';
 import { BlockComponent, RangeManager } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -8,8 +10,6 @@ import type { Color } from './consts.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { values } from '../_common/utils/iterable.js';
 import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
 import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';

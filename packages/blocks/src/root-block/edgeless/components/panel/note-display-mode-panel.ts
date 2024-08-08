@@ -1,11 +1,11 @@
+import { EdgelessIcon, PageIcon } from '@blocksuite/affine-components/icons';
+import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { EdgelessIcon, PageIcon } from '../../../../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../../../../_common/types.js';
-import { stopPropagation } from '../../../../_common/utils/event.js';
 
 @customElement('note-display-mode-panel')
 export class NoteDisplayModePanel extends WithDisposable(LitElement) {

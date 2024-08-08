@@ -1,3 +1,13 @@
+import {
+  AttachmentIcon16,
+  getAttachmentFileIcons,
+} from '@blocksuite/affine-components/icons';
+import {
+  type AttachmentBlockModel,
+  AttachmentBlockStyles,
+} from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
@@ -17,17 +27,7 @@ import {
 } from '../_common/components/index.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import {
-  AttachmentIcon16,
-  getAttachmentFileIcons,
-} from '../_common/icons/index.js';
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { humanFileSize } from '../_common/utils/math.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import {
-  type AttachmentBlockModel,
-  AttachmentBlockStyles,
-} from './attachment-model.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
 import { renderEmbedView } from './embed.js';
 import { styles } from './styles.js';

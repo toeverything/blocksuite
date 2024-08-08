@@ -1,3 +1,8 @@
+import {
+  CopyIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/affine-components/icons';
 import { RangeManager } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
@@ -16,11 +21,6 @@ import {
   toast,
 } from '../_common/components/index.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
-import {
-  CopyIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-} from '../_common/icons/index.js';
 import { Rect } from '../_common/utils/index.js';
 import {
   AffineDragHandleWidget,

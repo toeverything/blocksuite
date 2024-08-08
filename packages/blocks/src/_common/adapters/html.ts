@@ -16,6 +16,7 @@ import type {
 } from '@blocksuite/store';
 import type { ElementContent, Root, Text } from 'hast';
 
+import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
 import { sha } from '@blocksuite/global/utils';
 import {
   type AssetsManager,
@@ -44,7 +45,6 @@ import {
   type highlightCacheKey,
 } from '../../code-block/utils/highlight-cache.js';
 import { NoteDisplayMode } from '../types.js';
-import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
   type HtmlAST,
   hastFlatNodes,

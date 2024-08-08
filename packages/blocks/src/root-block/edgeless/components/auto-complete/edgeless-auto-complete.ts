@@ -1,5 +1,11 @@
 import type { Bound, IVec } from '@blocksuite/global/utils';
 
+import {
+  AutoCompleteArrowIcon,
+  MindMapChildIcon,
+  MindMapSiblingIcon,
+  NoteAutoCompleteIcon,
+} from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Vec } from '@blocksuite/global/utils';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
@@ -15,12 +21,6 @@ import type { ShapeType } from '../../../../surface-block/element-model/shape.js
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
-import {
-  AutoCompleteArrowIcon,
-  MindMapChildIcon,
-  MindMapSiblingIcon,
-  NoteAutoCompleteIcon,
-} from '../../../../_common/icons/index.js';
 import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
 import {
   type Connection,

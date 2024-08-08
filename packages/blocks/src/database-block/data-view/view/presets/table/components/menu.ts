@@ -1,3 +1,9 @@
+import {
+  CopyIcon,
+  ExpandFullIcon,
+  MoveLeftIcon,
+  MoveRightIcon,
+} from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
 
 import type { RootBlockComponent } from '../../../../../../root-block/index.js';
@@ -9,12 +15,6 @@ import {
   type Menu,
   popFilterableSimpleMenu,
 } from '../../../../../../_common/components/index.js';
-import {
-  CopyIcon,
-  ExpandFullIcon,
-  MoveLeftIcon,
-  MoveRightIcon,
-} from '../../../../../../_common/icons/index.js';
 import { DeleteIcon } from '../../../../common/icons/index.js';
 import {
   type ColumnDataType,

@@ -1,9 +1,9 @@
 import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
+import { GfxCompatible } from '@blocksuite/affine-model';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {

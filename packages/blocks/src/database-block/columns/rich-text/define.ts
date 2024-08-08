@@ -1,8 +1,8 @@
+import { clamp } from '@blocksuite/affine-shared/utils';
 import { Text, nanoid } from '@blocksuite/store';
 
 import type { SelectTag } from '../../data-view/utils/tags/multi-tag-select.js';
 
-import { clamp } from '../../../_common/utils/math.js';
 import { columnType } from '../../data-view/column/column-config.js';
 import { tRichText } from '../../data-view/logical/data-type.js';
 import { getTagColor } from '../../data-view/utils/tags/colors.js';

@@ -1,3 +1,17 @@
+import type { BookmarkBlockModel } from '@blocksuite/affine-model';
+
+import {
+  CaptionIcon,
+  CenterPeekIcon,
+  CopyIcon,
+  EditIcon,
+  ExpandFullSmallIcon,
+  OpenIcon,
+  PaletteIcon,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
+import { BookmarkStyles } from '@blocksuite/affine-model';
+import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
@@ -7,10 +21,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { Action } from '../../../_common/components/toolbar/utils.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
-import type {
-  BookmarkBlockComponent,
-  BookmarkBlockModel,
-} from '../../../bookmark-block/index.js';
+import type { BookmarkBlockComponent } from '../../../bookmark-block/index.js';
 import type {
   EmbedFigmaBlockComponent,
   EmbedFigmaModel,
@@ -50,18 +61,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import {
-  CaptionIcon,
-  CenterPeekIcon,
-  CopyIcon,
-  EditIcon,
-  ExpandFullSmallIcon,
-  OpenIcon,
-  PaletteIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
-import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
-import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
+import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 import {
   isBookmarkBlock,
