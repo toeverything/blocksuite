@@ -7,6 +7,7 @@ import {
   atLeastNMatches,
   groupBy,
   pickValues,
+  requestConnectedFrame,
 } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { type TemplateResult, css, html, nothing } from 'lit';
@@ -179,16 +180,9 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
 
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
 
-    let left, top;
-    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
-      left = x;
-      top = y;
-
-      this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-      return;
-    }
+    let left = x;
+    let top = y;
 
     let offset = 37 + 12;
     // frame, group, shape
@@ -220,11 +214,14 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       }
     }
 
-    left = clamp(x, 10, width - 10);
-    top = clamp(top, 10, height - 150);
+    requestConnectedFrame(() => {
+      const rect = this.getBoundingClientRect();
 
-    this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-    this.selectedIds = selection.selectedIds;
+      left = clamp(x, 10, width - rect.width - 10);
+      top = clamp(top, 10, height - rect.height - 150);
+
+      this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+    }, this);
   }
 
   private _renderQuickConnectButton() {
@@ -261,6 +258,7 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
           this.toolbarVisible = false;
         } else {
           this.toolbarVisible = true;
+          this.selectedIds = this.selection.selectedIds;
           this._recalculatePosition();
         }
       })
