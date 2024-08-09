@@ -81,7 +81,7 @@ export class LinkPreviewer {
           title: tweet.author.name,
           icon: tweet.author.avatar_url,
           description: tweet.text,
-          image: tweet.media?.photos[0].url || tweet.author.banner_url,
+          image: tweet.media?.photos?.[0].url || tweet.author.banner_url,
         };
       } catch (e) {
         console.error(`Failed to fetch tweet: ${url}`);
