@@ -1,8 +1,8 @@
 import type { BlockModel } from '@blocksuite/store';
 
 import { BlockComponent, type BlockService } from '@blocksuite/block-std';
-import { html, nothing } from 'lit';
-import { query } from 'lit/decorators.js';
+import { LitElement, html, nothing } from 'lit';
+import { customElements, query } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { BlockCaptionEditor } from './block-caption.js';
@@ -47,6 +47,24 @@ export class CaptionedBlockComponent<
   private accessor _captionEditor!: BlockCaptionEditor | null;
 
   protected accessor blockContainerStyles: StyleInfo | undefined = undefined;
+
+  protected accessor showBlockSelection = true;
+
+  protected accessor useCaptionEditor = false;
+}
+
+@customElements('block-captions')
+export class CaptionsEditor extends LitElement {
+  override render() {
+    return html`
+      ${this.useCaptionEditor
+        ? html`<block-caption-editor .block=${this}></block-caption-editor>`
+        : nothing}
+      ${this.showBlockSelection
+        ? html`<affine-block-selection .block=${this}></affine-block-selection>`
+        : nothing}
+    `;
+  }
 
   protected accessor showBlockSelection = true;
 

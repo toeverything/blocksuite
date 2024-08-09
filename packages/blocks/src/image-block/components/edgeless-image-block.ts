@@ -2,7 +2,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-@customElement('affine-edgeless-image')
+@customElement('image-edgeless-block')
 export class ImageBlockEdgelessComponent extends WithDisposable(
   ShadowlessElement
 ) {
@@ -38,6 +38,6 @@ export class ImageBlockEdgelessComponent extends WithDisposable(
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-edgeless-image': ImageBlockEdgelessComponent;
+    'image-edgeless-block': ImageBlockEdgelessComponent;
   }
 }
