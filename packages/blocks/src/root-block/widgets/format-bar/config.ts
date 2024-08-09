@@ -213,15 +213,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         const autofill = getTitleFromSelectedModels(selectedModels);
         void promptDocTitle(host, autofill).then(title => {
           if (title === null) return;
-          const linkedDoc = convertSelectedBlocksToLinkedDoc(
-            doc,
-            selectedModels,
-            title
-          );
-          const linkedDocService = host.spec.getService(
-            'affine:embed-linked-doc'
-          );
-          linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+          convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
           notifyDocCreated(host, doc);
           host.spec
             .getService('affine:page')

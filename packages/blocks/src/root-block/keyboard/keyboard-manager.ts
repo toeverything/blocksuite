@@ -107,15 +107,7 @@ export class PageKeyboardManager {
     const autofill = getTitleFromSelectedModels(selectedModels);
     void promptDocTitle(rootComponent.host, autofill).then(title => {
       if (title === null) return;
-      const linkedDoc = convertSelectedBlocksToLinkedDoc(
-        doc,
-        selectedModels,
-        title
-      );
-      const linkedDocService = rootComponent.host.spec.getService(
-        'affine:embed-linked-doc'
-      );
-      linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+      convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
       notifyDocCreated(rootComponent.host, doc);
     });
   }
