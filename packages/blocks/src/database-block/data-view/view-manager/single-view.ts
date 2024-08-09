@@ -152,7 +152,7 @@ export abstract class SingleViewBase<
   ViewData extends DataViewDataType = DataViewDataType,
 > implements SingleView<ViewData>
 {
-  private _filterVisible$ = signal(false);
+  private _filterVisible$ = signal<boolean | undefined>(undefined);
 
   private searchString = signal('');
 

@@ -51,7 +51,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
             ...this._filter,
             conditions: [filter],
           };
-          this.view.filterSetVisible(true);
         },
         onClose: () => {
           this.showToolBar(false);
