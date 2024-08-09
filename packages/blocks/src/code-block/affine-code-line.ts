@@ -1,5 +1,6 @@
 import type { ThemedToken } from 'shiki';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
@@ -8,9 +9,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../_common/inline/presets/affine-inline-specs.js';
-import type { HighlightOptionsGetter } from './code-model.js';
+import type { HighlightOptionsGetter } from './utils/types.js';
 
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 import {
   highlightCache,

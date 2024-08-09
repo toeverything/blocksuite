@@ -1,3 +1,4 @@
+import { ArrowUpIcon, NoteIcon } from '@blocksuite/affine-components/icons';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -6,7 +7,6 @@ import type { NoteTool } from '../../../controllers/tools/note-tool.js';
 import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessNoteMenu } from './note-menu.js';
 
-import { ArrowUpIcon, NoteIcon } from '../../../../../_common/icons/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import '../../buttons/tool-icon-button.js';
 import { type MenuPopper, createPopper } from '../common/create-popper.js';

@@ -70,12 +70,23 @@ export class SpecStore {
     });
   }
 
+  private _registerCommands(specs: Map<string, BlockSpec>) {
+    specs.forEach((spec, _flavour) => {
+      const { commands } = spec;
+      if (!commands) return;
+      Object.entries(commands).forEach(([key, command]) => {
+        this.std.command.add(key as keyof BlockSuite.Commands, command);
+      });
+    });
+  }
+
   applySpecs(specs: BlockSpec[]) {
     this.slots.beforeApply.emit();
 
     const oldSpecs = this._specs;
     const newSpecs = this._buildSpecMap(specs);
     this._diffServices(oldSpecs, newSpecs);
+    this._registerCommands(newSpecs);
     this._specs = newSpecs;
 
     this.slots.afterApply.emit();

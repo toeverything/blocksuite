@@ -4,16 +4,6 @@ import type {
   InitCommandCtx,
 } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
-import { Slice } from '@blocksuite/store';
-import { type TemplateResult, html } from 'lit';
-
-import type { AffineFormatBarWidget } from './format-bar.js';
-
-import { toast } from '../../../_common/components/index.js';
-import { createSimplePortal } from '../../../_common/components/portal.js';
-import { renderActions } from '../../../_common/components/toolbar/utils.js';
-import { DATABASE_CONVERT_WHITE_LIST } from '../../../_common/configs/quick-action/database-convert-view.js';
 import {
   BoldIcon,
   BulletedListIcon,
@@ -38,7 +28,17 @@ import {
   StrikethroughIcon,
   TextIcon,
   UnderlineIcon,
-} from '../../../_common/icons/index.js';
+} from '@blocksuite/affine-components/icons';
+import { assertExists } from '@blocksuite/global/utils';
+import { Slice } from '@blocksuite/store';
+import { type TemplateResult, html } from 'lit';
+
+import type { AffineFormatBarWidget } from './format-bar.js';
+
+import { toast } from '../../../_common/components/index.js';
+import { createSimplePortal } from '../../../_common/components/portal.js';
+import { renderActions } from '../../../_common/components/toolbar/utils.js';
+import { DATABASE_CONVERT_WHITE_LIST } from '../../../_common/configs/quick-action/database-convert-view.js';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,
@@ -213,15 +213,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         const autofill = getTitleFromSelectedModels(selectedModels);
         void promptDocTitle(host, autofill).then(title => {
           if (title === null) return;
-          const linkedDoc = convertSelectedBlocksToLinkedDoc(
-            doc,
-            selectedModels,
-            title
-          );
-          const linkedDocService = host.spec.getService(
-            'affine:embed-linked-doc'
-          );
-          linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+          convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
           notifyDocCreated(host, doc);
           host.spec
             .getService('affine:page')

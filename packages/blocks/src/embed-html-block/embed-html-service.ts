@@ -1,5 +1,5 @@
-import { BlockService } from '@blocksuite/block-std';
+import type { EmbedHtmlModel } from '@blocksuite/affine-model';
 
-import type { EmbedHtmlModel } from './embed-html-model.js';
+import { BlockService } from '@blocksuite/block-std';
 
 export class EmbedHtmlBlockService extends BlockService<EmbedHtmlModel> {}

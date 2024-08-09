@@ -1,8 +1,8 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { ImageBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
 
-import { ImageBlockSchema } from './image-model.js';
 import { ImageBlockService } from './image-service.js';
 
 export const ImageBlockSpec: BlockSpec = {

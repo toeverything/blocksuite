@@ -1,3 +1,5 @@
+import { AddCursorIcon } from '@blocksuite/affine-components/icons';
+import { getScrollContainer } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { autoUpdate } from '@floating-ui/dom';
 import { SignalWatcher } from '@lit-labs/preact-signals';
@@ -10,8 +12,6 @@ import { html } from 'lit/static-html.js';
 import type { TableGroup } from '../../group.js';
 import type { TableSingleView } from '../../table-view-manager.js';
 
-import { AddCursorIcon } from '../../../../../../../_common/icons/index.js';
-import { getScrollContainer } from '../../../../../../../_common/utils/scroll-container.js';
 import './database-header-column.js';
 import { styles } from './styles.js';
 

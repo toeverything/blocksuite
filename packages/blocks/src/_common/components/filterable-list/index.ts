@@ -1,3 +1,5 @@
+import { SearchIcon } from '@blocksuite/affine-components/icons';
+import { DoneIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { type Placement, autoPlacement, offset, size } from '@floating-ui/dom';
 import { LitElement, html, nothing } from 'lit';
@@ -7,8 +9,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { FilterableListItem, FilterableListOptions } from './types.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../consts.js';
-import { DoneIcon } from '../../icons/database.js';
-import { SearchIcon } from '../../icons/text.js';
 import { type AdvancedPortalOptions, createLitPortal } from '../portal.js';
 import '../toolbar/separator.js';
 import { filterableListStyles } from './styles.js';

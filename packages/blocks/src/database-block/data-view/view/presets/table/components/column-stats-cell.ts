@@ -1,3 +1,4 @@
+import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -6,7 +7,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { GroupData } from '../../../../common/group-by/helper.js';
 import type { TableColumn } from '../table-view-manager.js';
 
-import { ArrowDownIcon } from '../../../../../../_common/icons/index.js';
 import { getRootByElement } from '../../../../../../_common/utils/index.js';
 import {
   type ColumnDataType,

@@ -1,3 +1,4 @@
+import { SmallScissorsIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { deserializeXYWH, serializeXYWH } from '@blocksuite/global/utils';
 import { Point } from '@blocksuite/global/utils';
@@ -13,7 +14,6 @@ import type {
   NoteBlockModel,
 } from '../../../../index.js';
 
-import { SmallScissorsIcon } from '../../../../_common/icons/edgeless.js';
 import {
   buildPath,
   getRectByBlockComponent,

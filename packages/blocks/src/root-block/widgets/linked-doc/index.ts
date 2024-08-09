@@ -1,5 +1,9 @@
 import type { EditorHost, UIEventStateContext } from '@blocksuite/block-std';
 
+import {
+  isControlledKeyboardEvent,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { DisposableGroup, throttle } from '@blocksuite/global/utils';
 import { InlineEditor } from '@blocksuite/inline';
@@ -7,8 +11,6 @@ import { customElement } from 'lit/decorators.js';
 
 import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 
-import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
-import { matchFlavours } from '../../../_common/utils/index.js';
 import {
   getInlineEditorByModel,
   getViewportElement,

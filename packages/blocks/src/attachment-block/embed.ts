@@ -1,9 +1,11 @@
+import type {
+  AttachmentBlockModel,
+  ImageBlockProps,
+} from '@blocksuite/affine-model';
+
+import { withTempBlobData } from '@blocksuite/affine-shared/utils';
 import { type TemplateResult, html } from 'lit';
 
-import type { ImageBlockProps } from '../image-block/image-model.js';
-import type { AttachmentBlockModel } from './attachment-model.js';
-
-import { withTempBlobData } from '../_common/utils/filesys.js';
 import { transformModel } from '../root-block/utils/operations/model.js';
 
 type EmbedConfig = {

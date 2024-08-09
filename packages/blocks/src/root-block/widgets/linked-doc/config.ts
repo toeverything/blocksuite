@@ -1,18 +1,19 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
-import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
-
-import { toast } from '../../../_common/components/toast.js';
 import {
   ImportIcon,
   LinkedDocIcon,
   LinkedEdgelessIcon,
   NewDocIcon,
-} from '../../../_common/icons/index.js';
+} from '@blocksuite/affine-components/icons';
+import { isFuzzyMatch } from '@blocksuite/affine-shared/utils';
+
+import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
+
+import { toast } from '../../../_common/components/toast.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import { createDefaultDoc } from '../../../_common/utils/init.js';
-import { isFuzzyMatch } from '../../../_common/utils/string.js';
 import { showImportModal } from './import-doc/index.js';
 
 export type LinkedMenuItem = {

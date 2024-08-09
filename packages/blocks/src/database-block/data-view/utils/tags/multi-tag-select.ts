@@ -1,3 +1,4 @@
+import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { nanoid } from '@blocksuite/store';
 import { autoPlacement, flip, offset } from '@floating-ui/dom';
@@ -8,7 +9,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { createPopup, popMenu } from '../../../../_common/components/index.js';
-import { rangeWrap } from '../../../../_common/utils/math.js';
 import {
   DatabaseSearchClose,
   DeleteIcon,

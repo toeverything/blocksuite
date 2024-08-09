@@ -1,12 +1,13 @@
+import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { type RefOrCallback, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
 import type { ParagraphActionConfigItem } from '../config.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
@@ -14,7 +15,6 @@ import { whenHover } from '../../../../_common/components/hover/index.js';
 import '../../../../_common/components/toolbar/icon-button.js';
 import '../../../../_common/components/toolbar/menu-button.js';
 import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
-import { ArrowDownIcon } from '../../../../_common/icons/index.js';
 import { isRootComponent } from '../../../../root-block/utils/guard.js';
 
 interface ParagraphPanelProps {

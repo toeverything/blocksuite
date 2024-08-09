@@ -1,3 +1,5 @@
+import { PenIcon } from '@blocksuite/affine-components/icons';
+import { isValidUrl, normalizeUrl } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
@@ -6,8 +8,6 @@ import { html } from 'lit/static-html.js';
 
 import type { RootBlockComponent } from '../../../../../root-block/index.js';
 
-import { PenIcon } from '../../../../../_common/icons/index.js';
-import { isValidUrl, normalizeUrl } from '../../../../../_common/utils/url.js';
 import { HostContextKey } from '../../../../context/host-context.js';
 import { stopPropagation } from '../../../utils/event.js';
 import { createIcon } from '../../../utils/uni-icon.js';

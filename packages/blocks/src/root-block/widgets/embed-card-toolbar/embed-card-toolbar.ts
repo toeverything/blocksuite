@@ -1,3 +1,24 @@
+import {
+  CaptionIcon,
+  CenterPeekIcon,
+  CopyIcon,
+  DeleteIcon,
+  DuplicateIcon,
+  EditIcon,
+  ExpandFullSmallIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  PaletteIcon,
+  RefreshIcon,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
+import {
+  type BookmarkBlockModel,
+  BookmarkStyles,
+  type EmbedGithubModel,
+  type EmbedLinkedDocModel,
+} from '@blocksuite/affine-model';
+import { getBlockProps, getHostName } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, DocCollection, Slice } from '@blocksuite/store';
@@ -9,8 +30,6 @@ import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EmbedCardStyle } from '../../../_common/types.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { RootBlockModel } from '../../root-model.js';
 import type { EmbedOptions } from '../../root-service.js';
 import type { RootBlockComponent } from '../../types.js';
@@ -34,26 +53,7 @@ import {
   type Action,
   renderActions,
 } from '../../../_common/components/toolbar/utils.js';
-import {
-  CaptionIcon,
-  CenterPeekIcon,
-  CopyIcon,
-  DeleteIcon,
-  DuplicateIcon,
-  EditIcon,
-  ExpandFullSmallIcon,
-  MoreVerticalIcon,
-  OpenIcon,
-  PaletteIcon,
-  RefreshIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
-import { getBlockProps } from '../../../_common/utils/block-props.js';
-import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
-import {
-  type BookmarkBlockModel,
-  BookmarkStyles,
-} from '../../../bookmark-block/bookmark-model.js';
+import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,

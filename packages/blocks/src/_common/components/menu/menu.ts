@@ -6,6 +6,11 @@ import type {
 } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 
+import {
+  ArrowRightSmallIcon,
+  DoneIcon,
+} from '@blocksuite/affine-components/icons';
+import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   autoUpdate,
@@ -26,8 +31,6 @@ import {
   checkboxChecked,
   checkboxUnchecked,
 } from '../../../list-block/utils/icons.js';
-import { ArrowRightSmallIcon, DoneIcon } from '../../icons/index.js';
-import { rangeWrap } from '../../utils/math.js';
 
 type MenuCommon = {
   hide?: () => boolean;

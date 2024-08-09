@@ -1,3 +1,7 @@
+import {
+  MOUSE_BUTTON,
+  requestConnectedFrame,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import {
@@ -18,10 +22,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 import type { RootBlockModel } from '../../root-model.js';
 import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 
-import {
-  MOUSE_BUTTON,
-  requestConnectedFrame,
-} from '../../../_common/utils/event.js';
 import { getElementsBound } from '../../../surface-block/index.js';
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';

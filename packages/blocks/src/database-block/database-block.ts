@@ -1,4 +1,9 @@
-import { RangeManager } from '@blocksuite/block-std';
+import {
+  CopyIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/affine-components/icons';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
@@ -16,11 +21,6 @@ import {
   toast,
 } from '../_common/components/index.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
-import {
-  CopyIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-} from '../_common/icons/index.js';
 import { Rect } from '../_common/utils/index.js';
 import {
   AffineDragHandleWidget,
@@ -290,7 +290,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
     let canDrop = false;
     this.disposables.add(
       AffineDragHandleWidget.registerOption({

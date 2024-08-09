@@ -1,14 +1,20 @@
+import type { ImageBlockModel } from '@blocksuite/affine-model';
+import type {
+  AttachmentBlockProps,
+  ImageBlockProps,
+} from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import {
+  downloadBlob,
+  humanFileSize,
+  withTempBlobData,
+} from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
-import type { AttachmentBlockProps } from '../attachment-block/attachment-model.js';
 import type { ImageBlockComponent } from './image-block.js';
-import type { ImageBlockModel, ImageBlockProps } from './image-model.js';
 
-import { downloadBlob, withTempBlobData } from '../_common/utils/filesys.js';
-import { humanFileSize } from '../_common/utils/math.js';
 import { readImageSize } from '../root-block/edgeless/components/utils.js';
 import { transformModel } from '../root-block/utils/operations/model.js';
 import { toast } from './../_common/components/toast.js';

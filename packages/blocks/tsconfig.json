@@ -18,6 +18,15 @@
     },
     {
       "path": "../framework/inline"
+    },
+    {
+      "path": "../affine/model"
+    },
+    {
+      "path": "../affine/shared"
+    },
+    {
+      "path": "../affine/components"
     }
   ]
 }

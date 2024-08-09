@@ -1,9 +1,8 @@
+import type { CodeBlockModel } from '@blocksuite/affine-model';
+
 import { type TemplateResult, html } from 'lit';
 
-import type {
-  CodeBlockComponent,
-  CodeBlockModel,
-} from '../../../code-block/index.js';
+import type { CodeBlockComponent } from '../../../code-block/index.js';
 import type {
   CodeToolbarItem,
   CodeToolbarMoreItem,

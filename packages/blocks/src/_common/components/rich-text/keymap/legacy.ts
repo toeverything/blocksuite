@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type InlineRange,
@@ -10,7 +11,6 @@ import {
 
 import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 
-import { matchFlavours } from '../../../../_common/utils/model.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,

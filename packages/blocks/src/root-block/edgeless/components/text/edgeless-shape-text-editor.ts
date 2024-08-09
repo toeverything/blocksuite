@@ -1,5 +1,6 @@
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
-  RangeManager,
+  RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
@@ -17,7 +18,6 @@ import {
   getNearestTranslation,
   isElementOutsideViewport,
 } from '../../../../_common/edgeless/mindmap/index.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { TextResizing } from '../../../../surface-block/consts.js';
 import {
   MindmapElementModel,
@@ -187,7 +187,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
   }
 
   override firstUpdated(): void {

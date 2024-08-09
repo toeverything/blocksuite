@@ -1,8 +1,7 @@
+import { isAbortError } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { BookmarkBlockComponent } from './bookmark-block.js';
-
-import { isAbortError } from '../_common/utils/helper.js';
 
 export async function refreshBookmarkUrlData(
   bookmarkElement: BookmarkBlockComponent,

@@ -1,5 +1,9 @@
 import type { TemplateResult } from 'lit';
 
+import {
+  ArrowDownSmallIcon,
+  DuplicateIcon,
+} from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -9,10 +13,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 
 import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
-import {
-  ArrowDownSmallIcon,
-  DuplicateIcon,
-} from '../../../../_common/icons/index.js';
 import { firstFilter } from '../../common/ast.js';
 import {
   ConvertIcon,

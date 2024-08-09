@@ -1,7 +1,7 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
-import { consume, createContext, provide } from '@lit/context';
+import { consume, provide } from '@lit/context';
 import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { type PropertyValues, type TemplateResult, nothing, render } from 'lit';
 import { property, state } from 'lit/decorators.js';
@@ -16,11 +16,13 @@ import type { WidgetComponent } from './widget-component.js';
 import { BlockStdScope } from '../../scope/index.js';
 import { PropTypes, requiredProperties } from '../decorators/required.js';
 import { WithDisposable } from '../utils/with-disposable.js';
+import {
+  blockComponentSymbol,
+  modelContext,
+  serviceContext,
+} from './consts.js';
 import { docContext, stdContext } from './lit-host.js';
 import { ShadowlessElement } from './shadowless-element.js';
-
-export const modelContext = createContext<BlockModel>('model');
-export const serviceContext = createContext<BlockService>('service');
 
 @requiredProperties({
   doc: PropTypes.instanceOf(Doc),
@@ -43,6 +45,8 @@ export class BlockComponent<
 
     return selection;
   });
+
+  [blockComponentSymbol] = true;
 
   handleEvent = (
     name: EventName,
@@ -273,10 +277,10 @@ export class BlockComponent<
     return model;
   }
 
-  get parentBlock(): BlockComponent {
-    const el = this.parentElement;
-    // TODO(mirone/#6534): find a better way to get block element from a node
-    return el?.closest('[data-block-id]') as BlockComponent;
+  get parentComponent(): BlockComponent | null {
+    const parent = this.model.parent;
+    if (!parent) return null;
+    return this.std.view.getBlock(parent.id);
   }
 
   get rootComponent(): BlockComponent | null {

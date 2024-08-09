@@ -4,6 +4,7 @@ import type {
   CursorSelection,
 } from '@blocksuite/block-std';
 
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import {
@@ -26,7 +27,6 @@ import {
   type RichText,
 } from '../../../_common/components/index.js';
 import '../../../_common/components/toolbar/toolbar.js';
-import { matchFlavours } from '../../../_common/utils/model.js';
 import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { ConfigRenderer } from './components/config-renderer.js';

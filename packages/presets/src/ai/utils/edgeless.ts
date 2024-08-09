@@ -1,4 +1,4 @@
-import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import type {
   EdgelessCopilotWidget,
   EdgelessRootService,
@@ -8,7 +8,6 @@ import {
   AFFINE_EDGELESS_COPILOT_WIDGET,
   MindmapElementModel,
   type ShapeElementModel,
-  matchFlavours,
 } from '@blocksuite/blocks';
 
 export function mindMapToMarkdown(mindmap: MindmapElementModel) {
@@ -60,18 +59,4 @@ export function getEdgelessCopilotWidget(
   ) as EdgelessCopilotWidget;
 
   return copilotWidget;
-}
-
-export function findNoteBlockModel(block: BlockComponent) {
-  let curBlock = block;
-  while (curBlock) {
-    if (matchFlavours(curBlock.model, ['affine:note'])) {
-      return curBlock.model;
-    }
-    if (matchFlavours(curBlock.model, ['affine:page', 'affine:surface'])) {
-      return null;
-    }
-    curBlock = curBlock.parentBlock;
-  }
-  return null;
 }

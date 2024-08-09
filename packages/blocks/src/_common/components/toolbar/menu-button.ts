@@ -1,3 +1,4 @@
+import { createButtonPopper } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
   LitElement,
@@ -11,7 +12,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { EditorIconButton } from './icon-button.js';
 
 import { PANEL_BASE } from '../../styles.js';
-import { createButtonPopper } from '../../utils/button-popper.js';
 import './icon-button.js';
 
 @customElement('editor-menu-button')

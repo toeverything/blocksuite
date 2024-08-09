@@ -11,7 +11,7 @@ import type { Query } from './query.js';
 
 import { Text } from '../../reactive/text.js';
 import { DocCRUD } from './crud.js';
-import { Doc } from './index.js';
+import { Doc } from './doc.js';
 
 export type YBlocks = Y.Map<YBlock>;
 

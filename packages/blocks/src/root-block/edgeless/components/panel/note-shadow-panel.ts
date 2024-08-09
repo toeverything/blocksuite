@@ -1,3 +1,8 @@
+import {
+  NoteNoShadowIcon,
+  NoteShadowSampleIcon,
+} from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -5,11 +10,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { NOTE_SHADOWS } from '../../../../_common/edgeless/note/consts.js';
-import {
-  NoteNoShadowIcon,
-  NoteShadowSampleIcon,
-} from '../../../../_common/icons/edgeless.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import '../buttons/tool-icon-button.js';
 
 const TOOLBAR_SHADOWS_LIGHT = [

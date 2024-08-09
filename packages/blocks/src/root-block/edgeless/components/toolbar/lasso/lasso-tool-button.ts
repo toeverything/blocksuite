@@ -1,13 +1,13 @@
+import {
+  ArrowUpIcon,
+  LassoFreeHandIcon,
+  LassoPolygonalIcon,
+} from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  ArrowUpIcon,
-  LassoFreeHandIcon,
-  LassoPolygonalIcon,
-} from '../../../../../_common/icons/edgeless.js';
 import { LassoMode } from '../../../../../_common/types.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';

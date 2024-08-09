@@ -1,3 +1,4 @@
+import type { GfxCompatibleProps } from '@blocksuite/affine-model';
 import type {
   BlockStdScope,
   SurfaceSelection,
@@ -7,6 +8,13 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 import type { IBound } from '@blocksuite/global/utils';
 
+import { BookmarkStyles } from '@blocksuite/affine-model';
+import {
+  groupBy,
+  isUrlInClipboard,
+  matchFlavours,
+  nToLast,
+} from '@blocksuite/affine-shared/utils';
 import { Vec, assertExists } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/global/utils';
@@ -20,7 +28,6 @@ import {
 } from '@blocksuite/store';
 import DOMPurify from 'dompurify';
 
-import type { GfxCompatibleProps } from '../../../_common/edgeless/mixin/gfx-compatible.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import {
@@ -28,15 +35,11 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import { matchFlavours } from '../../../_common/utils/index.js';
-import { groupBy, nToLast } from '../../../_common/utils/iterable.js';
 import {
   blockComponentGetter,
   getRootByEditorHost,
   isInsidePageEditor,
 } from '../../../_common/utils/query.js';
-import { isUrlInClipboard } from '../../../_common/utils/url.js';
-import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import {
   type SerializedElement,
   SurfaceGroupLikeModel,

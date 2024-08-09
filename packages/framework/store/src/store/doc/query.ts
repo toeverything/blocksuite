@@ -3,7 +3,7 @@ import isMatch from 'lodash.ismatch';
 import type { BlockModel } from '../../schema/index.js';
 import type { Block } from './block/index.js';
 
-import { BlockViewType } from './doc.js';
+import { BlockViewType } from './consts.js';
 
 export type QueryMatch = {
   id?: string;

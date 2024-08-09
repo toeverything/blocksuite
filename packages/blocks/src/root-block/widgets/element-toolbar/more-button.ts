@@ -1,6 +1,23 @@
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import {
+  BringForwardIcon,
+  BringToFrontIcon,
+  CenterPeekIcon,
+  FrameIcon,
+  GroupIcon,
+  LinkedDocIcon,
+  MoreCopyIcon,
+  MoreDeleteIcon,
+  MoreDuplicateIcon,
+  MoreHorizontalIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  RefreshIcon,
+  SendBackwardIcon,
+  SendToBackIcon,
+} from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
@@ -25,23 +42,6 @@ import {
   type FatActions,
   renderActions,
 } from '../../../_common/components/toolbar/utils.js';
-import {
-  BringForwardIcon,
-  BringToFrontIcon,
-  CenterPeekIcon,
-  FrameIcon,
-  GroupIcon,
-  LinkedDocIcon,
-  MoreCopyIcon,
-  MoreDeleteIcon,
-  MoreDuplicateIcon,
-  MoreHorizontalIcon,
-  MoreVerticalIcon,
-  OpenIcon,
-  RefreshIcon,
-  SendBackwardIcon,
-  SendToBackIcon,
-} from '../../../_common/icons/index.js';
 import {
   createLinkedDocFromEdgelessElements,
   createLinkedDocFromNote,

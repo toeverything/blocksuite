@@ -1,14 +1,15 @@
-import type { ImageBlockComponent } from '../../../image-block/image-block.js';
-import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
-
-import { BookmarkIcon } from '../../../_common/icons/edgeless.js';
+import { BookmarkIcon } from '@blocksuite/affine-components/icons';
 import {
   CaptionIcon,
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
   DuplicateIcon,
-} from '../../../_common/icons/text.js';
+} from '@blocksuite/affine-components/icons';
+
+import type { ImageBlockComponent } from '../../../image-block/image-block.js';
+import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
+
 import { duplicate } from './utils.js';
 
 export const commonConfig: ImageConfigItem[] = [

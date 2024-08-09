@@ -46,7 +46,6 @@ export type EdgelessRootBlockWidgetName =
 
 export type EdgelessRootBlockSpecType = BlockSpec<
   EdgelessRootBlockWidgetName,
-  BlockService,
   RootBlockConfig
 >;
 

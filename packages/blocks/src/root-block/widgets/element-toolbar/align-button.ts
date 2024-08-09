@@ -1,3 +1,14 @@
+import {
+  AlignBottomIcon,
+  AlignDistributeHorizontallyIcon,
+  AlignDistributeVerticallyIcon,
+  AlignHorizontallyIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
+  AlignTopIcon,
+  AlignVerticallyIcon,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
@@ -9,17 +20,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';
-import {
-  AlignBottomIcon,
-  AlignDistributeHorizontallyIcon,
-  AlignDistributeVerticallyIcon,
-  AlignHorizontallyIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
-  AlignTopIcon,
-  AlignVerticallyIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
 import {
   ConnectorElementModel,
   GroupElementModel,

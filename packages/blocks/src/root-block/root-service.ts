@@ -1,6 +1,9 @@
+import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
@@ -28,15 +31,13 @@ import {
   EMBED_CARD_WIDTH,
 } from '../_common/consts.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import {
   HtmlTransformer,
   MarkdownTransformer,
   ZipTransformer,
 } from '../_common/transformers/index.js';
-import { type EmbedCardStyle, NoteDisplayMode } from '../_common/types.js';
+import { NoteDisplayMode } from '../_common/types.js';
 import { getRootByEditorHost } from '../_common/utils/index.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import { CommunityCanvasTextFonts } from '../surface-block/consts.js';
 import { EditPropsStore } from '../surface-block/managers/edit-session.js';

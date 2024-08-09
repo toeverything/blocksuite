@@ -291,4 +291,8 @@ export class BlockModel<
   set doc(doc: Doc) {
     this.page = doc;
   }
+
+  get parent() {
+    return this.doc.getParent(this);
+  }
 }

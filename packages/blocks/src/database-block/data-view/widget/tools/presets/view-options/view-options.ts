@@ -1,15 +1,15 @@
+import {
+  ArrowRightSmallIcon,
+  DeleteIcon,
+  DuplicateIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/affine-components/icons';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { SingleView } from '../../../../view-manager/single-view.js';
 
 import { popMenu } from '../../../../../../_common/components/index.js';
-import {
-  ArrowRightSmallIcon,
-  DeleteIcon,
-  DuplicateIcon,
-  MoreHorizontalIcon,
-} from '../../../../../../_common/icons/index.js';
 import { emptyFilterGroup } from '../../../../common/ast.js';
 import {
   popGroupSetting,

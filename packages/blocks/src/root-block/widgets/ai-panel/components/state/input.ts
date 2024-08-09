@@ -1,10 +1,9 @@
+import { ArrowUpBigIcon } from '@blocksuite/affine-components/icons';
+import { AIStarIcon } from '@blocksuite/affine-components/icons';
+import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-
-import { AIStarIcon } from '../../../../../_common/icons/ai.js';
-import { ArrowUpBigIcon } from '../../../../../_common/icons/text.js';
-import { stopPropagation } from '../../../../../_common/utils/event.js';
 
 @customElement('ai-panel-input')
 export class AIPanelInput extends WithDisposable(LitElement) {

@@ -1,15 +1,15 @@
+import {
+  ArrowRightBigIcon,
+  ExpandFullIcon,
+  MoveLeftIcon,
+  MoveRightIcon,
+} from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
 
 import type { DataViewRenderer } from '../../../data-view.js';
 import type { KanbanSelectionController } from './controller/selection.js';
 
 import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
-import {
-  ArrowRightBigIcon,
-  ExpandFullIcon,
-  MoveLeftIcon,
-  MoveRightIcon,
-} from '../../../../../_common/icons/index.js';
 import { DeleteIcon } from '../../../common/icons/index.js';
 
 export const openDetail = (

@@ -1,5 +1,7 @@
 import type { IVec } from '@blocksuite/global/utils';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+
 import type { EdgelessTool } from '../../edgeless/types.js';
 import type {
   ActionFunction,
@@ -13,7 +15,6 @@ import type {
   PieSubmenuNodeModel,
 } from './base.js';
 
-import { ThemeObserver } from '../../../_common/theme/theme-observer.js';
 import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 

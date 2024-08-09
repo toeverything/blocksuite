@@ -14,7 +14,7 @@ import {
   NumberedListIcon,
   QuoteIcon,
   TextIcon,
-} from '../icons/index.js';
+} from '@blocksuite/affine-components/icons';
 
 /**
  * Text primitive entries used in slash menu and format bar,

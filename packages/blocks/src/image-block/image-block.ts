@@ -1,3 +1,5 @@
+import type { ImageBlockModel } from '@blocksuite/affine-model';
+
 import { Bound } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -7,7 +9,6 @@ import type { EdgelessRootService } from '../root-block/index.js';
 import type { ImageBlockEdgelessComponent } from './components/edgeless-image-block.js';
 import type { AffineImageCard } from './components/image-card.js';
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
-import type { ImageBlockModel } from './image-model.js';
 import type { ImageBlockService } from './image-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';

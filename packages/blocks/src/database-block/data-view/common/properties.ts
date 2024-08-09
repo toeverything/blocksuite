@@ -1,3 +1,4 @@
+import { ArrowLeftBigIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -9,7 +10,6 @@ import type { Column } from '../view-manager/column.js';
 import type { SingleView } from '../view-manager/single-view.js';
 
 import { createPopup } from '../../../_common/components/index.js';
-import { ArrowLeftBigIcon } from '../../../_common/icons/index.js';
 
 const show = html`<svg
   width="24"

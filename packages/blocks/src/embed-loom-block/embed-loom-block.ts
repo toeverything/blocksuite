@@ -1,15 +1,16 @@
+import type { EmbedLoomModel, EmbedLoomStyles } from '@blocksuite/affine-model';
+
+import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { EmbedLoomStyles } from './embed-loom-model.js';
 import type { EmbedLoomBlockService } from './embed-loom-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
-import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import { type EmbedLoomModel, loomUrlRegex } from './embed-loom-model.js';
+import { loomUrlRegex } from './embed-loom-model.js';
 import { LoomIcon, styles } from './styles.js';
 import { refreshEmbedLoomUrlData } from './utils.js';
 

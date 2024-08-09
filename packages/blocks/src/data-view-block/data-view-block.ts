@@ -1,4 +1,9 @@
-import { RangeManager } from '@blocksuite/block-std';
+import {
+  CopyIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/affine-components/icons';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -13,11 +18,6 @@ import {
   CaptionedBlockComponent,
   popMenu,
 } from '../_common/components/index.js';
-import {
-  CopyIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-} from '../_common/icons/index.js';
 import { dataViewCommonStyle } from '../database-block/data-view/common/css-variable.js';
 import {
   DataView,
@@ -223,7 +223,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   override connectedCallback() {
     super.connectedCallback();
 
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
   }
 
   override renderBlock() {

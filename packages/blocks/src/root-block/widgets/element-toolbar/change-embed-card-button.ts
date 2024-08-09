@@ -1,3 +1,26 @@
+import type {
+  BookmarkBlockModel,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedHtmlModel,
+  EmbedLinkedDocModel,
+  EmbedLoomModel,
+  EmbedSyncedDocModel,
+  EmbedYoutubeModel,
+} from '@blocksuite/affine-model';
+
+import {
+  CaptionIcon,
+  CenterPeekIcon,
+  CopyIcon,
+  EditIcon,
+  ExpandFullSmallIcon,
+  OpenIcon,
+  PaletteIcon,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
+import { BookmarkStyles } from '@blocksuite/affine-model';
+import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
@@ -7,35 +30,13 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { Action } from '../../../_common/components/toolbar/utils.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
-import type {
-  BookmarkBlockComponent,
-  BookmarkBlockModel,
-} from '../../../bookmark-block/index.js';
-import type {
-  EmbedFigmaBlockComponent,
-  EmbedFigmaModel,
-} from '../../../embed-figma-block/index.js';
-import type {
-  EmbedGithubBlockComponent,
-  EmbedGithubModel,
-} from '../../../embed-github-block/index.js';
-import type { EmbedHtmlModel } from '../../../embed-html-block/index.js';
-import type {
-  EmbedLinkedDocBlockComponent,
-  EmbedLinkedDocModel,
-} from '../../../embed-linked-doc-block/index.js';
-import type {
-  EmbedLoomBlockComponent,
-  EmbedLoomModel,
-} from '../../../embed-loom-block/index.js';
-import type {
-  EmbedSyncedDocBlockComponent,
-  EmbedSyncedDocModel,
-} from '../../../embed-synced-doc-block/index.js';
-import type {
-  EmbedYoutubeBlockComponent,
-  EmbedYoutubeModel,
-} from '../../../embed-youtube-block/index.js';
+import type { BookmarkBlockComponent } from '../../../bookmark-block/index.js';
+import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/index.js';
+import type { EmbedGithubBlockComponent } from '../../../embed-github-block/index.js';
+import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/index.js';
+import type { EmbedLoomBlockComponent } from '../../../embed-loom-block/index.js';
+import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/index.js';
+import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EmbedOptions } from '../../root-service.js';
 
@@ -50,18 +51,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import {
-  CaptionIcon,
-  CenterPeekIcon,
-  CopyIcon,
-  EditIcon,
-  ExpandFullSmallIcon,
-  OpenIcon,
-  PaletteIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
-import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
-import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
+import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 import {
   isBookmarkBlock,

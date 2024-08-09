@@ -1,5 +1,8 @@
 import type { XYWH } from '@blocksuite/global/utils';
 
+import { FrameIcon, SmallNoteIcon } from '@blocksuite/affine-components/icons';
+import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
 import { serializeXYWH } from '@blocksuite/global/utils';
 import { Bound, Vec } from '@blocksuite/global/utils';
@@ -18,12 +21,6 @@ import type { ShapeStyle } from '../../../../surface-block/element-model/shape.j
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../_common/edgeless/note/consts.js';
-import {
-  FrameIcon,
-  SmallNoteIcon,
-} from '../../../../_common/icons/edgeless.js';
-import { FontFamilyIcon } from '../../../../_common/icons/text.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import {
   FontFamily,
   FontStyle,

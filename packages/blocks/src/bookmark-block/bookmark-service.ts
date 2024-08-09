@@ -1,3 +1,8 @@
+import {
+  type BookmarkBlockModel,
+  BookmarkBlockSchema,
+} from '@blocksuite/affine-model';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { render } from 'lit';
@@ -8,7 +13,6 @@ import type { BookmarkBlockComponent } from './bookmark-block.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -18,10 +22,6 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
-import {
-  type BookmarkBlockModel,
-  BookmarkBlockSchema,
-} from './bookmark-model.js';
 
 export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
   private _dragHandleOption: DragHandleOption = {

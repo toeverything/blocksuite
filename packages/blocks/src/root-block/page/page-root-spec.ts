@@ -1,4 +1,4 @@
-import type { BlockService, BlockSpec } from '@blocksuite/block-std';
+import type { BlockSpec } from '@blocksuite/block-std';
 
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
@@ -32,7 +32,6 @@ export type PageRootBlockWidgetName =
 
 export type PageRootBlockSpecType = BlockSpec<
   PageRootBlockWidgetName,
-  BlockService,
   RootBlockConfig
 >;
 

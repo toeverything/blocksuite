@@ -4,9 +4,9 @@ import type {
   HookContext,
 } from '@blocksuite/inline';
 
-import type { AffineTextAttributes } from '../../inline/presets/affine-inline-specs.js';
+import { isStrictUrl } from '@blocksuite/affine-shared/utils';
 
-import { isStrictUrl } from '../../utils/url.js';
+import type { AffineTextAttributes } from '../../inline/presets/affine-inline-specs.js';
 
 const EDGE_IGNORED_ATTRIBUTES = ['code', 'link'] as const;
 const GLOBAL_IGNORED_ATTRIBUTES = [] as const;

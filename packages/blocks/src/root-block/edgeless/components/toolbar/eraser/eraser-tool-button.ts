@@ -1,12 +1,12 @@
+import {
+  EdgelessEraserDarkIcon,
+  EdgelessEraserLightIcon,
+} from '@blocksuite/affine-components/icons';
 import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../types.js';
 
-import {
-  EdgelessEraserDarkIcon,
-  EdgelessEraserLightIcon,
-} from '../../../../../_common/icons/index.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 

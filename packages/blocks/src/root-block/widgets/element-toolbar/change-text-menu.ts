@@ -1,3 +1,12 @@
+import type { ColorScheme } from '@blocksuite/affine-shared/theme';
+
+import {
+  SmallArrowDownIcon,
+  TextAlignCenterIcon,
+  TextAlignLeftIcon,
+  TextAlignRightIcon,
+} from '@blocksuite/affine-components/icons';
+import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
@@ -6,7 +15,6 @@ import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { when } from 'lit/directives/when.js';
 
-import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
 import type {
   EdgelessColorPickerButton,
   PickColorEvent,
@@ -17,13 +25,6 @@ import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import {
-  SmallArrowDownIcon,
-  TextAlignCenterIcon,
-  TextAlignLeftIcon,
-  TextAlignRightIcon,
-} from '../../../_common/icons/index.js';
-import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import {
   isFontStyleSupported,

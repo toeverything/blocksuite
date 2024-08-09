@@ -1,3 +1,8 @@
+import {
+  ellipseSvg,
+  roundedSvg,
+  triangleSvg,
+} from '@blocksuite/affine-components/icons';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -7,11 +12,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DraggableShape } from './utils.js';
 
-import {
-  ellipseSvg,
-  roundedSvg,
-  triangleSvg,
-} from '../../../../../_common/icons/edgeless.js';
 import {
   CanvasElementType,
   ShapeType,

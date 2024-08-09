@@ -1,3 +1,8 @@
+import {
+  CaptionIcon,
+  DownloadIcon,
+  PaletteIcon,
+} from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
@@ -18,11 +23,6 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import {
-  CaptionIcon,
-  DownloadIcon,
-  PaletteIcon,
-} from '../../../_common/icons/text.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { downloadAttachmentBlob } from '../../../attachment-block/utils.js';
 import '../../edgeless/components/panel/card-style-panel.js';

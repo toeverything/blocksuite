@@ -1,5 +1,6 @@
 import type { XYWH } from '@blocksuite/global/utils';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, noop } from '@blocksuite/global/utils';
 
@@ -8,7 +9,6 @@ import type { ShapeStyle } from '../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../_common/edgeless/note/consts.js';
-import { ThemeObserver } from '../../../_common/theme/theme-observer.js';
 import { shapeMethods } from '../../../surface-block/element-model/shape.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,

@@ -5,6 +5,7 @@ import type {
 import type { IVec, PointLocation } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
+import { keys } from '@blocksuite/affine-shared/utils';
 import {
   GfxGroupLikeElementModel,
   local,
@@ -14,7 +15,6 @@ import {
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import { keys } from '../../_common/utils/iterable.js';
 import { linePolygonIntersects } from '../utils/math-utils.js';
 
 type GroupElementProps = BaseElementProps & {

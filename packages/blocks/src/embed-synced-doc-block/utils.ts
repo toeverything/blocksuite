@@ -6,8 +6,9 @@ import {
   EmbedPageIcon,
   LightLoadingIcon,
   ReloadIcon,
-} from '../_common/icons/text.js';
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
+} from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+
 import {
   DarkSyncedDocDeletedBanner,
   DarkSyncedDocEmptyBanner,

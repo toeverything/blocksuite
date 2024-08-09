@@ -1,10 +1,10 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { matchFlavours } from '../../_common/utils/model.js';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,
@@ -107,15 +107,7 @@ export class PageKeyboardManager {
     const autofill = getTitleFromSelectedModels(selectedModels);
     void promptDocTitle(rootComponent.host, autofill).then(title => {
       if (title === null) return;
-      const linkedDoc = convertSelectedBlocksToLinkedDoc(
-        doc,
-        selectedModels,
-        title
-      );
-      const linkedDocService = rootComponent.host.spec.getService(
-        'affine:embed-linked-doc'
-      );
-      linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+      convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
       notifyDocCreated(rootComponent.host, doc);
     });
   }

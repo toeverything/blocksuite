@@ -1,6 +1,21 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline/types';
 
+import {
+  ConfirmIcon,
+  CopyIcon,
+  DeleteIcon,
+  EditIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  SmallArrowDownIcon,
+  UnlinkIcon,
+} from '@blocksuite/affine-components/icons';
+import {
+  getHostName,
+  isValidUrl,
+  normalizeUrl,
+} from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
@@ -23,21 +38,6 @@ import '../../../../../components/toolbar/toolbar.js';
 import { renderActions } from '../../../../../components/toolbar/utils.js';
 import '../../../../../components/tooltip/tooltip.js';
 import { BLOCK_ID_ATTR } from '../../../../../consts.js';
-import {
-  ConfirmIcon,
-  CopyIcon,
-  DeleteIcon,
-  EditIcon,
-  MoreVerticalIcon,
-  OpenIcon,
-  SmallArrowDownIcon,
-  UnlinkIcon,
-} from '../../../../../icons/index.js';
-import {
-  getHostName,
-  isValidUrl,
-  normalizeUrl,
-} from '../../../../../utils/url.js';
 import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')

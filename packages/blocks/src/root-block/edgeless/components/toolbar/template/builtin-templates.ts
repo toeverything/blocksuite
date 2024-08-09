@@ -1,10 +1,10 @@
+import { keys } from '@blocksuite/affine-shared/utils';
+
 import type {
   Template,
   TemplateCategory,
   TemplateManager,
 } from './template-type.js';
-
-import { keys } from '../../../../../_common/utils/iterable.js';
 
 export const templates: TemplateCategory[] = [];
 

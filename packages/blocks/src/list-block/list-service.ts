@@ -1,6 +1,8 @@
-import { BlockService } from '@blocksuite/block-std';
+import type { ListBlockModel } from '@blocksuite/affine-model';
 
-import type { ListBlockModel } from './list-model.js';
+import { ListBlockSchema } from '@blocksuite/affine-model';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import { BlockService } from '@blocksuite/block-std';
 
 import { InlineManager } from '../_common/inline/inline-manager.js';
 import {
@@ -9,14 +11,12 @@ import {
 } from '../_common/inline/presets/affine-inline-specs.js';
 import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
 import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import { AffineDragHandleWidget } from '../root-block/widgets/drag-handle/drag-handle.js';
 import { convertToNumberedListCommand } from './commands/convert-to-numbered-list.js';
 import { indentListCommand } from './commands/indent-list.js';
 import { splitListCommand } from './commands/split-list.js';
 import { unindentListCommand } from './commands/unindent-list.js';
 import { correctNumberedListsOrderToPrev } from './commands/utils.js';
-import { ListBlockSchema } from './list-model.js';
 import { listPrefix, toggleStyles } from './styles.js';
 import { getListIcon } from './utils/get-list-icon.js';
 

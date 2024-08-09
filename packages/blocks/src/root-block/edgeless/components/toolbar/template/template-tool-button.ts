@@ -1,3 +1,5 @@
+import { ArrowDownSmallIcon } from '@blocksuite/affine-components/icons';
+import { once } from '@blocksuite/affine-shared/utils';
 import {
   arrow,
   autoUpdate,
@@ -13,8 +15,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessTemplatePanel } from './template-panel.js';
 
-import { ArrowDownSmallIcon } from '../../../../../_common/icons/text.js';
-import { once } from '../../../../../_common/utils/event.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { TemplateCard1, TemplateCard2, TemplateCard3 } from './icon.js';
 import './template-panel.js';

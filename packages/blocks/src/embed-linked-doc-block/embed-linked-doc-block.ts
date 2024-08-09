@@ -1,4 +1,7 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type {
+  EmbedLinkedDocModel,
+  EmbedLinkedDocStyles,
+} from '@blocksuite/affine-model';
 
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
@@ -11,10 +14,7 @@ import type { DocMode } from '../_common/types.js';
 import type { RootBlockComponent } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
-import type {
-  EmbedLinkedDocModel,
-  EmbedLinkedDocStyles,
-} from './embed-linked-doc-model.js';
+import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
 import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
 import { Peekable, isPeekable } from '../_common/components/peekable.js';
@@ -25,11 +25,6 @@ import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
-
-export interface EmbedLinkedDocBlockConfig {
-  handleClick?: (e: MouseEvent, host: EditorHost) => void;
-  handleDoubleClick?: (e: MouseEvent, host: EditorHost) => void;
-}
 
 @customElement('affine-embed-linked-doc-block')
 @Peekable({

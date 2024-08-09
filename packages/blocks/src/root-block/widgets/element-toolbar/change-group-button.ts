@@ -1,3 +1,9 @@
+import {
+  NoteIcon,
+  RenameIcon,
+  UngroupButtonIcon,
+} from '@blocksuite/affine-components/icons';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { deserializeXYWH, serializeXYWH } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
@@ -11,13 +17,7 @@ import { toast } from '../../../_common/components/toast.js';
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import {
-  NoteIcon,
-  RenameIcon,
-  UngroupButtonIcon,
-} from '../../../_common/icons/index.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
-import { matchFlavours } from '../../../_common/utils/model.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
 import { mountGroupTitleEditor } from '../../edgeless/utils/text.js';
 

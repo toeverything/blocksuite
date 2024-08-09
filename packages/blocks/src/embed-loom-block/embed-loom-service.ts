@@ -1,11 +1,10 @@
+import type { EmbedLoomModel } from '@blocksuite/affine-model';
+
+import { EmbedLoomStyles } from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
 
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import {
-  type EmbedLoomModel,
-  EmbedLoomStyles,
-  loomUrlRegex,
-} from './embed-loom-model.js';
+import { loomUrlRegex } from './embed-loom-model.js';
 import { queryEmbedLoomData } from './utils.js';
 
 export class EmbedLoomBlockService extends BlockService<EmbedLoomModel> {
