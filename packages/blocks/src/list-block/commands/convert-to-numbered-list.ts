@@ -1,8 +1,7 @@
+import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { Command, EditorHost } from '@blocksuite/block-std';
 
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
-
-import type { ListBlockModel } from '../list-model.js';
 
 import { getNextContinuousNumberedLists } from './utils.js';
 

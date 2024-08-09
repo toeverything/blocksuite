@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
+import { ListBlockSchema } from '@blocksuite/affine-model';
+import { ParagraphBlockSchema } from '@blocksuite/affine-model';
 import { DocCollection, Schema, type Y } from '@blocksuite/store';
 // normal import
 import { readFile } from 'node:fs/promises';
@@ -9,9 +11,7 @@ import { assert, describe, expect, test } from 'vitest';
 
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
 import { FrameBlockSchema } from '../../frame-block/frame-model.js';
-import { ListBlockSchema } from '../../list-block/list-model.js';
 import { NoteBlockSchema } from '../../note-block/note-model.js';
-import { ParagraphBlockSchema } from '../../paragraph-block/paragraph-model.js';
 import { RootBlockSchema } from '../../root-block/root-model.js';
 import { SurfaceBlockSchema } from '../../surface-block/surface-model.js';
 

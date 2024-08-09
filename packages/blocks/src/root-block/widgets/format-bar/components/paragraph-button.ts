@@ -1,3 +1,4 @@
+import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
@@ -7,7 +8,6 @@ import { html } from 'lit';
 import { type RefOrCallback, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
 import type { ParagraphActionConfigItem } from '../config.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 

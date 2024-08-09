@@ -1,8 +1,7 @@
+import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
-
-import type { ListBlockModel } from '../list-model.js';
 
 /**
  * Pass in a list model, and this function will look forward to find continuous sibling numbered lists,

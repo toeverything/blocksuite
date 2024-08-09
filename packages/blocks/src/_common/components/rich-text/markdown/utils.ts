@@ -1,6 +1,5 @@
+import type { ListType } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
-
-import type { ListType } from '../../../../list-block/index.js';
 
 import {
   asyncFocusRichText,

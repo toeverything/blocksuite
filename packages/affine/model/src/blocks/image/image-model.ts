@@ -1,9 +1,9 @@
 import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import { GfxCompatible } from '@blocksuite/affine-model';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
+import { GfxCompatible } from '../../utils/index.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
@@ -45,6 +45,9 @@ export class ImageBlockModel
 
 declare global {
   namespace BlockSuite {
+    interface BlockModels {
+      'affine:image': ImageBlockModel;
+    }
     interface EdgelessBlockModelMap {
       'affine:image': ImageBlockModel;
     }

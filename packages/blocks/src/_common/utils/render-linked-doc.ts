@@ -1,3 +1,4 @@
+import type { ImageBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
@@ -14,7 +15,6 @@ import { type TemplateResult, css, render } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
-import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
 
 import { GfxBlockModel } from '../../root-block/edgeless/block-model.js';

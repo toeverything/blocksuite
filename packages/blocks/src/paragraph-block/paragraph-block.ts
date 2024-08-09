@@ -1,3 +1,4 @@
+import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
@@ -8,7 +9,6 @@ import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
-import type { ParagraphBlockModel } from './paragraph-model.js';
 import type { ParagraphBlockService } from './paragraph-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';

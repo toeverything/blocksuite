@@ -30,3 +30,11 @@ export const ParagraphBlockSchema = defineBlockSchema({
 });
 
 export type ParagraphBlockModel = SchemaToModel<typeof ParagraphBlockSchema>;
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      'affine:paragraph': ParagraphBlockModel;
+    }
+  }
+}

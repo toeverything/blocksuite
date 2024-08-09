@@ -1,4 +1,7 @@
-import type { AttachmentBlockProps } from '@blocksuite/affine-model';
+import type {
+  AttachmentBlockProps,
+  ImageBlockProps,
+} from '@blocksuite/affine-model';
 import type {
   GfxBlockComponent,
   SurfaceSelection,
@@ -17,7 +20,6 @@ import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { ImageBlockProps } from '../../image-block/image-model.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { FontLoader } from '../font-loader/font-loader.js';

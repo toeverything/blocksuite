@@ -1,8 +1,7 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { DividerBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
-
-import { DividerBlockSchema } from './divider-model.js';
 
 export const DividerBlockSpec: BlockSpec = {
   schema: DividerBlockSchema,

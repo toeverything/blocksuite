@@ -1,9 +1,10 @@
-import type { AttachmentBlockModel } from '@blocksuite/affine-model';
+import type {
+  AttachmentBlockModel,
+  ImageBlockProps,
+} from '@blocksuite/affine-model';
 
 import { withTempBlobData } from '@blocksuite/affine-shared/utils';
 import { type TemplateResult, html } from 'lit';
-
-import type { ImageBlockProps } from '../image-block/image-model.js';
 
 import { transformModel } from '../root-block/utils/operations/model.js';
 

@@ -10,3 +10,11 @@ export const DividerBlockSchema = defineBlockSchema({
 });
 
 export type DividerBlockModel = SchemaToModel<typeof DividerBlockSchema>;
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      'affine:divider': DividerBlockModel;
+    }
+  }
+}

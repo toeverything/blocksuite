@@ -1,4 +1,8 @@
-import type { AttachmentBlockProps } from '@blocksuite/affine-model';
+import type { ImageBlockModel } from '@blocksuite/affine-model';
+import type {
+  AttachmentBlockProps,
+  ImageBlockProps,
+} from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -10,7 +14,6 @@ import {
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 import type { ImageBlockComponent } from './image-block.js';
-import type { ImageBlockModel, ImageBlockProps } from './image-model.js';
 
 import { readImageSize } from '../root-block/edgeless/components/utils.js';
 import { transformModel } from '../root-block/utils/operations/model.js';

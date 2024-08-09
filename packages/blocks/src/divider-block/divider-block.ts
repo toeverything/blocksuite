@@ -1,9 +1,9 @@
 /// <reference types="vite/client" />
 
+import type { DividerBlockModel } from '@blocksuite/affine-model';
+
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-
-import type { DividerBlockModel } from './divider-model.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';

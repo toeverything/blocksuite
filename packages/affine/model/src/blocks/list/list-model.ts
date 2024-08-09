@@ -37,3 +37,11 @@ export const ListBlockSchema = defineBlockSchema({
 });
 
 export type ListBlockModel = SchemaToModel<typeof ListBlockSchema>;
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      'affine:list': ListBlockModel;
+    }
+  }
+}

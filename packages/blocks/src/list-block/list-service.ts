@@ -1,7 +1,8 @@
+import type { ListBlockModel } from '@blocksuite/affine-model';
+
+import { ListBlockSchema } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
-
-import type { ListBlockModel } from './list-model.js';
 
 import { InlineManager } from '../_common/inline/inline-manager.js';
 import {
@@ -16,7 +17,6 @@ import { indentListCommand } from './commands/indent-list.js';
 import { splitListCommand } from './commands/split-list.js';
 import { unindentListCommand } from './commands/unindent-list.js';
 import { correctNumberedListsOrderToPrev } from './commands/utils.js';
-import { ListBlockSchema } from './list-model.js';
 import { listPrefix, toggleStyles } from './styles.js';
 import { getListIcon } from './utils/get-list-icon.js';
 

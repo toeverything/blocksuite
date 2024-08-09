@@ -1,3 +1,4 @@
+import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { assertExists, isEqual } from '@blocksuite/global/utils';
@@ -6,7 +7,6 @@ import {
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
 
-import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
 import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 
 import {

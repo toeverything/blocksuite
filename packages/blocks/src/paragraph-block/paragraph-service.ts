@@ -1,6 +1,6 @@
-import { BlockService } from '@blocksuite/block-std';
+import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 
-import type { ParagraphBlockModel } from './paragraph-model.js';
+import { BlockService } from '@blocksuite/block-std';
 
 import { InlineManager } from '../_common/inline/inline-manager.js';
 import {

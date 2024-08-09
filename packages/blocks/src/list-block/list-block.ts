@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { BaseSelection, BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
@@ -9,7 +10,6 @@ import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
-import type { ListBlockModel } from './list-model.js';
 import type { ListBlockService } from './list-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';

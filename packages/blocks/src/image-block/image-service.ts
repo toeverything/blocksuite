@@ -1,3 +1,7 @@
+import {
+  type ImageBlockModel,
+  ImageBlockSchema,
+} from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound, Point } from '@blocksuite/global/utils';
@@ -24,7 +28,6 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
-import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
 import { addSiblingImageBlock } from './utils.js';
 

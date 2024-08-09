@@ -1,6 +1,6 @@
-import { html } from 'lit';
+import type { ListBlockModel } from '@blocksuite/affine-model';
 
-import type { ListBlockModel } from '../list-model.js';
+import { html } from 'lit';
 
 import { getNumberPrefix } from './get-number-prefix.js';
 import {

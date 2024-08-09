@@ -1,3 +1,4 @@
+import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -11,7 +12,6 @@ import { Point } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../../_common/consts.js';

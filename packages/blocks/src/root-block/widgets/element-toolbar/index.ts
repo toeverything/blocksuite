@@ -1,5 +1,8 @@
+import type {
+  BookmarkBlockModel,
+  ImageBlockModel,
+} from '@blocksuite/affine-model';
 import type { AttachmentBlockModel } from '@blocksuite/affine-model';
-import type { BookmarkBlockModel } from '@blocksuite/affine-model';
 
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
@@ -23,7 +26,6 @@ import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.
 import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
-import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';

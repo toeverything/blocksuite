@@ -1,5 +1,8 @@
-import type { AttachmentBlockModel } from '@blocksuite/affine-model';
-import type { BookmarkBlockModel } from '@blocksuite/affine-model';
+import type {
+  AttachmentBlockModel,
+  BookmarkBlockModel,
+  ImageBlockModel,
+} from '@blocksuite/affine-model';
 import type { PointLocation } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -17,7 +20,6 @@ import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.
 import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
 import type { GfxBlockModel } from '../block-model.js';

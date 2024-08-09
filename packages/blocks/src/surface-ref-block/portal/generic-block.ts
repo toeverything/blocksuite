@@ -1,3 +1,4 @@
+import type { ImageBlockModel } from '@blocksuite/affine-model';
 import type {
   AttachmentBlockModel,
   BookmarkBlockModel,
@@ -18,7 +19,6 @@ import type { EmbedLinkedDocModel } from '../../embed-linked-doc-block/embed-lin
 import type { EmbedLoomModel } from '../../embed-loom-block/embed-loom-model.js';
 import type { EmbedSyncedDocModel } from '../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../embed-youtube-block/embed-youtube-model.js';
-import type { ImageBlockModel } from '../../image-block/image-model.js';
 
 @customElement('surface-ref-generic-block-portal')
 export class SurfaceRefGenericBlockPortal extends WithDisposable(
