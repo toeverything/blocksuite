@@ -1,6 +1,6 @@
-import type { DenseMenuBuilder } from '../common/type.js';
+import { LinkIcon } from '@blocksuite/affine-components/icons';
 
-import { LinkIcon } from '../../../../../_common/icons/text.js';
+import type { DenseMenuBuilder } from '../common/type.js';
 
 export const buildLinkDenseMenu: DenseMenuBuilder = edgeless => ({
   type: 'action',

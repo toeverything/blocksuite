@@ -1,3 +1,4 @@
+import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { noop } from '@blocksuite/global/utils';
 import { LitElement, css, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -10,7 +11,6 @@ import {
   type FilterableListOptions,
   showPopFilterableList,
 } from '../../../../_common/components/filterable-list/index.js';
-import { ArrowDownIcon } from '../../../../_common/icons/text.js';
 import {
   getLanguagePriority,
   getStandardLanguage,

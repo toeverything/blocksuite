@@ -1,18 +1,6 @@
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { Slice, Text } from '@blocksuite/store';
-
-import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
-import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
-import type { RootBlockComponent } from '../../types.js';
-import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
-
-import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
-import { toast } from '../../../_common/components/toast.js';
-import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
-import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,
@@ -32,9 +20,22 @@ import {
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
-} from '../../../_common/icons/index.js';
+} from '@blocksuite/affine-components/icons';
+import { Slice, Text } from '@blocksuite/store';
+
+import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
+import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
+import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
+import type { RootBlockComponent } from '../../types.js';
+import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
+
+import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
+import { toast } from '../../../_common/components/toast.js';
+import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
+import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import {
+  clearMarksOnDiscontinuousInput,
   createDefaultDoc,
   getBlockComponentByPath,
   getImageFilesFromLocal,
@@ -42,7 +43,6 @@ import {
   matchFlavours,
   openFileOrFiles,
 } from '../../../_common/utils/index.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
 import { GroupingIcon } from '../../../database-block/data-view/common/icons/index.js';
 import { viewPresets } from '../../../database-block/data-view/index.js';

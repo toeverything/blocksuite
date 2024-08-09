@@ -1,3 +1,8 @@
+import {
+  BanIcon,
+  DashLineIcon,
+  StraightLineIcon,
+} from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -6,11 +11,6 @@ import type { LineWidth } from '../../../../_common/types.js';
 import type { LineWidthEvent } from './line-width-panel.js';
 
 import '../../../../_common/components/toolbar/separator.js';
-import {
-  BanIcon,
-  DashLineIcon,
-  StraightLineIcon,
-} from '../../../../_common/icons/edgeless.js';
 import { StrokeStyle } from '../../../../surface-block/consts.js';
 
 export type LineStyleEvent =

@@ -1,3 +1,4 @@
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   RangeManager,
   ShadowlessElement,
@@ -14,7 +15,6 @@ import type { TextElementModel } from '../../../../surface-block/element-model/t
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import '../../../../_common/components/rich-text/rich-text.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { toRadian } from '../../../../surface-block/index.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';

@@ -1,3 +1,4 @@
+import { MoreVerticalIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
@@ -13,7 +14,6 @@ import { createLitPortal } from '../../../../_common/components/index.js';
 import '../../../../_common/components/toolbar/icon-button.js';
 import '../../../../_common/components/toolbar/menu-button.js';
 import '../../../../_common/components/toolbar/toolbar.js';
-import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
 import { CodeToolbarItemRenderer, MoreMenuRenderer } from '../utils.js';
 
 @customElement('affine-code-toolbar')

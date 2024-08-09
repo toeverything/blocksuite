@@ -3,6 +3,7 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import {
   INLINE_ROOT_ATTR,
@@ -12,7 +13,6 @@ import {
 
 import type { RootBlockComponent } from '../../../../root-block/types.js';
 
-import { matchFlavours } from '../../../../_common/utils/model.js';
 import { insertLinkedNode } from '../../../../root-block/widgets/linked-doc/config.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { createDefaultDoc } from '../../../utils/init.js';

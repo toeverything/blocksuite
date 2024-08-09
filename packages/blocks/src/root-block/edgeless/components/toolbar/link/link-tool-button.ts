@@ -1,7 +1,7 @@
+import { LinkIcon } from '@blocksuite/affine-components/icons';
 import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { LinkIcon } from '../../../../../_common/icons/text.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 

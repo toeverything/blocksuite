@@ -1,3 +1,9 @@
+import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
+import {
+  isControlledKeyboardEvent,
+  isFuzzyMatch,
+  substringMatchScore,
+} from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { autoPlacement, offset } from '@floating-ui/dom';
@@ -23,15 +29,7 @@ import {
   createKeydownObserver,
   getQuery,
 } from '../../../_common/components/utils.js';
-import { ArrowDownIcon } from '../../../_common/icons/index.js';
-import {
-  getInlineEditorByModel,
-  isControlledKeyboardEvent,
-} from '../../../_common/utils/index.js';
-import {
-  isFuzzyMatch,
-  substringMatchScore,
-} from '../../../_common/utils/string.js';
+import { getInlineEditorByModel } from '../../../_common/utils/index.js';
 import { slashItemToolTipStyle, styles } from './styles.js';
 import {
   getFirstNotDividerItem,

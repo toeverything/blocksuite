@@ -1,7 +1,9 @@
+import type { CodeBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { VLine } from '@blocksuite/inline';
 import type { BundledLanguage, Highlighter } from 'shiki';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import {
   INLINE_ROOT_ATTR,
@@ -15,14 +17,13 @@ import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
 
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
-import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
+import type { HighlightOptionsGetter } from './utils/types.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import '../_common/components/rich-text/rich-text.js';
 import { toast } from '../_common/components/toast.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { CodeClipboardController } from './clipboard/index.js';

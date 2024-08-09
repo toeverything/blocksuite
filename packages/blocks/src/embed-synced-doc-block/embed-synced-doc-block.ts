@@ -1,5 +1,10 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import {
+  EmbedEdgelessIcon,
+  EmbedPageIcon,
+} from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound, assertExists } from '@blocksuite/global/utils';
 import { BlockViewType, DocCollection, type Query } from '@blocksuite/store';
 import { type PropertyValues, html, nothing } from 'lit';
@@ -20,9 +25,7 @@ import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 import { Peekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
-import { EmbedEdgelessIcon, EmbedPageIcon } from '../_common/icons/text.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { type DocMode, NoteDisplayMode } from '../_common/types.js';
 import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
 import { SpecProvider } from '../specs/utils/spec-provider.js';

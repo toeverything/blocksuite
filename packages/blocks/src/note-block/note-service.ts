@@ -1,3 +1,4 @@
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Point } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
@@ -7,7 +8,6 @@ import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-s
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import type { EdgelessNoteBlockComponent } from './note-edgeless-block.js';
 
-import { matchFlavours } from '../_common/utils/model.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,

@@ -1,5 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
 import { PathFinder } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
@@ -27,8 +28,6 @@ import { getCommonBound } from '../../surface-block/utils/bound.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
 import { type DocMode, NoteDisplayMode } from '../types.js';
-import { getBlockProps } from './block-props.js';
-import { matchFlavours } from './model.js';
 
 export const embedNoteContentStyles = css`
   .affine-embed-doc-content-note-blocks affine-divider,

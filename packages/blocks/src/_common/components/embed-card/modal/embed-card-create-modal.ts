@@ -13,8 +13,7 @@ import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless
 import type { EmbedCardStyle } from '../../../types.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
-import { getRootByEditorHost } from '../../../utils/query.js';
-import { isValidUrl } from '../../../utils/url.js';
+import { getRootByEditorHost, isValidUrl } from '../../../utils/index.js';
 import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
 

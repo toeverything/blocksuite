@@ -1,3 +1,4 @@
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { render } from 'lit';
@@ -12,7 +13,6 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { setImageProxyMiddlewareURL } from '../_common/transformers/middlewares.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import { isInsideEdgelessEditor } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import {

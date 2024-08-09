@@ -1,10 +1,10 @@
+import { CheckIcon } from '@blocksuite/affine-components/icons';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { CheckIcon } from '../../../../_common/icons/edgeless.js';
 import {
   FontFamily,
   FontFamilyMap,

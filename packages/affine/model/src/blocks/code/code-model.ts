@@ -1,8 +1,6 @@
-import type { BundledLanguage, Highlighter, PlainTextLanguage } from 'shiki';
-
 import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
 
-import { FALLBACK_LANG } from './utils/consts.js';
+export const FALLBACK_LANG = 'Plain Text';
 
 export const CodeBlockSchema = defineBlockSchema({
   flavour: 'affine:code',
@@ -26,7 +24,11 @@ export const CodeBlockSchema = defineBlockSchema({
 });
 
 export type CodeBlockModel = SchemaToModel<typeof CodeBlockSchema>;
-export type HighlightOptionsGetter = () => {
-  lang: BundledLanguage | PlainTextLanguage;
-  highlighter: Highlighter | null;
-};
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      'affine:code': CodeBlockModel;
+    }
+  }
+}

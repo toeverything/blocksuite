@@ -1,3 +1,5 @@
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { almostEqual } from '@blocksuite/affine-shared/utils';
 import {
   RangeManager,
   ShadowlessElement,
@@ -15,8 +17,6 @@ import type { ConnectorElementModel } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import '../../../../_common/components/rich-text/rich-text.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
-import { almostEqual } from '../../../../_common/utils/math.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 
 const HORIZONTAL_PADDING = 2;

@@ -2,7 +2,7 @@ import type { AttributeRenderer } from '@blocksuite/inline';
 
 import { html } from 'lit';
 
-import type { HighlightOptionsGetter } from '../code-model.js';
+import type { HighlightOptionsGetter } from './types.js';
 
 export const getCodeLineRenderer: (
   highlightOptionsGetter: HighlightOptionsGetter

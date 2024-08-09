@@ -1,3 +1,4 @@
+import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { type TemplateResult, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -6,7 +7,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 
 import { createPopup } from '../../../../_common/components/index.js';
-import { AddCursorIcon } from '../../../../_common/icons/index.js';
 import { CrossIcon, FilterIcon } from '../../common/icons/index.js';
 import { popCreateFilter } from '../../common/ref/ref.js';
 import { renderTemplate } from '../../utils/uni-component/render-template.js';

@@ -1,8 +1,8 @@
+import { clamp } from '@blocksuite/affine-shared/utils';
 import { Text } from '@blocksuite/store';
 
 import type { NumberFormat } from './utils/formatter.js';
 
-import { clamp } from '../../../../../_common/utils/math.js';
 import { tNumber } from '../../../logical/data-type.js';
 import { columnType } from '../../column-config.js';
 

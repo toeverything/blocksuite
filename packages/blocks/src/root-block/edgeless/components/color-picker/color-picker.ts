@@ -1,3 +1,4 @@
+import { on, once, stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
   SignalWatcher,
@@ -24,7 +25,6 @@ import type {
   Rgb,
 } from './types.js';
 
-import { on, once, stopPropagation } from '../../../../_common/utils/event.js';
 import { AREA_CIRCLE_R, MATCHERS, SLIDER_CIRCLE_R } from './consts.js';
 import { COLOR_PICKER_STYLE } from './styles.js';
 import {

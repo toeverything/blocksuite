@@ -3,9 +3,7 @@ import type { SerializedXYWH } from '@blocksuite/global/utils';
 
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { EmbedCardStyle } from '../_common/types.js';
-
-import { GfxCompatible } from '../_common/edgeless/mixin/gfx-compatible.js';
+import { type EmbedCardStyle, GfxCompatible } from '../../utils/index.js';
 import { AttachmentBlockTransformer } from './attachment-transformer.js';
 
 /**
@@ -96,6 +94,9 @@ export class AttachmentBlockModel
 declare global {
   namespace BlockSuite {
     interface EdgelessBlockModelMap {
+      'affine:attachment': AttachmentBlockModel;
+    }
+    interface BlockModels {
       'affine:attachment': AttachmentBlockModel;
     }
   }

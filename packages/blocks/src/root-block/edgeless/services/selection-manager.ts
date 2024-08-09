@@ -1,11 +1,11 @@
 import type { CursorSelection } from '@blocksuite/block-std';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 
+import { groupBy } from '@blocksuite/affine-shared/utils';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 
 import type { EdgelessRootService } from '../edgeless-root-service.js';
 
-import { groupBy } from '../../../_common/utils/iterable.js';
 import { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import {
   GroupElementModel,

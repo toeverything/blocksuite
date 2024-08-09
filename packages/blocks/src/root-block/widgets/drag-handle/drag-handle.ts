@@ -2,6 +2,10 @@ import type { BlockComponent } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
+  getScrollContainer,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
+import {
   PathFinder,
   type PointerEventState,
   type UIEventHandler,
@@ -32,9 +36,7 @@ import {
   getModelByBlockComponent,
   isInsideEdgelessEditor,
   isInsidePageEditor,
-  matchFlavours,
 } from '../../../_common/utils/index.js';
-import { getScrollContainer } from '../../../_common/utils/scroll-container.js';
 import {
   getSelectedRect,
   isTopLevelBlock,

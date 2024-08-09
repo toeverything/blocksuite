@@ -1,6 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
+import { clamp } from '@blocksuite/affine-shared/utils';
 import { Bound, Vec } from '@blocksuite/global/utils';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 
@@ -13,12 +14,9 @@ import type { EdgelessTool } from '../../types.js';
 import {
   asyncFocusRichText,
   buildPath,
-} from '../../../../_common/utils/index.js';
-import {
   handleNativeRangeAtPoint,
   resetNativeSelection,
 } from '../../../../_common/utils/index.js';
-import { clamp } from '../../../../_common/utils/math.js';
 import {
   type PointTestOptions,
   SurfaceGroupLikeModel,

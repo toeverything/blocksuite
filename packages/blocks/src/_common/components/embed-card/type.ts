@@ -1,6 +1,6 @@
+import type { BookmarkBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
-import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.js';

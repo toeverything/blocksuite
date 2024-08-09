@@ -1,14 +1,13 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { CopyIcon } from '@blocksuite/affine-components/icons';
+import { AIDoneIcon } from '@blocksuite/affine-components/icons';
+import { WarningIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { CopyConfig } from '../type.js';
-
-import { AIDoneIcon } from '../../../../_common/icons/ai.js';
-import { WarningIcon } from '../../../../_common/icons/misc.js';
-import { CopyIcon } from '../../../../_common/icons/text.js';
 
 @customElement('ai-finish-tip')
 export class AIFinishTip extends WithDisposable(LitElement) {

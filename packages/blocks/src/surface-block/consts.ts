@@ -1,4 +1,5 @@
-import type { ColorScheme } from '../_common/theme/theme-observer.js';
+import type { ColorScheme } from '@blocksuite/affine-shared/theme';
+
 import type { FontConfig } from '../root-block/font-loader/font-loader.js';
 
 export const ZOOM_MAX = 6.0;

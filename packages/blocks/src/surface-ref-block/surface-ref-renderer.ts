@@ -1,13 +1,13 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { NoteBlockModel } from '../note-block/index.js';
 import type { Color } from '../surface-block/consts.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { Viewport } from '../root-block/edgeless/utils/viewport.js';
 import { Renderer } from '../surface-block/index.js';
 import { getSurfaceBlock } from './utils.js';

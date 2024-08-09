@@ -2,6 +2,10 @@ import type { BlockComponent } from '@blocksuite/block-std';
 import type { Slot } from '@blocksuite/global/utils';
 import type { Doc, DocMeta } from '@blocksuite/store';
 
+import {
+  FontDocIcon,
+  FontLinkedDocIcon,
+} from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -22,7 +26,6 @@ import type { ReferenceNodeConfig } from './reference-config.js';
 import { HoverController } from '../../../../components/hover/controller.js';
 import { Peekable } from '../../../../components/peekable.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
-import { FontDocIcon, FontLinkedDocIcon } from '../../../../icons/text.js';
 import {
   getModelByElement,
   getRootByElement,

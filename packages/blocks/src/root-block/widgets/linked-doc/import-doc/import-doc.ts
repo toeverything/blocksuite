@@ -1,3 +1,11 @@
+import {
+  CloseIcon,
+  ExportToHTMLIcon,
+  ExportToMarkdownIcon,
+  HelpIcon,
+  NewIcon,
+  NotionIcon,
+} from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { sha } from '@blocksuite/global/utils';
 import {
@@ -13,14 +21,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { MarkdownAdapter } from '../../../../_common/adapters/markdown.js';
 import { NotionHtmlAdapter } from '../../../../_common/adapters/notion-html.js';
 import '../../../../_common/components/loader.js';
-import {
-  CloseIcon,
-  ExportToHTMLIcon,
-  ExportToMarkdownIcon,
-  HelpIcon,
-  NewIcon,
-  NotionIcon,
-} from '../../../../_common/icons/index.js';
 import { defaultImageProxyMiddleware } from '../../../../_common/transformers/middlewares.js';
 import { openFileOrFiles } from '../../../../_common/utils/index.js';
 import { styles } from './styles.js';

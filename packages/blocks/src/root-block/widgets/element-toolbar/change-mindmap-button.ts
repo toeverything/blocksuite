@@ -1,3 +1,15 @@
+import {
+  MindmapBalanceLayoutIcon,
+  MindmapLeftLayoutIcon,
+  MindmapRightLayoutIcon,
+  MindmapStyleFour,
+  MindmapStyleIcon,
+  MindmapStyleOne,
+  MindmapStyleThree,
+  MindmapStyleTwo,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
+import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -12,18 +24,6 @@ import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import {
-  MindmapBalanceLayoutIcon,
-  MindmapLeftLayoutIcon,
-  MindmapRightLayoutIcon,
-  MindmapStyleFour,
-  MindmapStyleIcon,
-  MindmapStyleOne,
-  MindmapStyleThree,
-  MindmapStyleTwo,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/edgeless.js';
-import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import { LayoutType } from '../../../surface-block/element-model/utils/mindmap/layout.js';
 import { MindmapStyle } from '../../../surface-block/element-model/utils/mindmap/style.js';
 

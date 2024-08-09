@@ -1,6 +1,12 @@
 import type { BaseSelection, EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
+import {
+  EdgelessModeIcon,
+  FrameIcon,
+  MoreDeleteIcon,
+} from '@blocksuite/affine-components/icons';
+import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import {
@@ -22,12 +28,6 @@ import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
 import { Peekable } from '../_common/components/peekable.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
-import {
-  EdgelessModeIcon,
-  FrameIcon,
-  MoreDeleteIcon,
-} from '../_common/icons/index.js';
-import { requestConnectedFrame } from '../_common/utils/event.js';
 import { SpecProvider } from '../specs/index.js';
 import {
   type SurfaceBlockModel,

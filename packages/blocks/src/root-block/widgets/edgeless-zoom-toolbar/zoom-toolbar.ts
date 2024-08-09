@@ -1,3 +1,9 @@
+import {
+  MinusIcon,
+  PlusIcon,
+  ViewBarIcon,
+} from '@blocksuite/affine-components/icons';
+import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
@@ -6,12 +12,6 @@ import { customElement, property } from 'lit/decorators.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessTool } from '../../edgeless/types.js';
 
-import {
-  MinusIcon,
-  PlusIcon,
-  ViewBarIcon,
-} from '../../../_common/icons/edgeless.js';
-import { stopPropagation } from '../../../_common/utils/event.js';
 import { ZOOM_STEP } from '../../edgeless/utils/viewport.js';
 
 @customElement('edgeless-zoom-toolbar')

@@ -1,7 +1,9 @@
+import type { GfxCompatibleProps } from '@blocksuite/affine-model';
 import type { BlockService } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { query } from 'lit/decorators.js';
@@ -10,7 +12,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
-import type { GfxCompatibleProps } from '../edgeless/mixin/index.js';
 
 import { BOOKMARK_MIN_WIDTH } from '../../root-block/edgeless/utils/consts.js';
 import {
@@ -24,7 +25,6 @@ import {
 } from '../../root-block/widgets/drag-handle/utils.js';
 import { CaptionedBlockComponent } from '../components/captioned-block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
-import { ThemeObserver } from '../theme/theme-observer.js';
 import { type EmbedCardStyle, matchFlavours } from '../utils/index.js';
 import { styles } from './styles.js';
 

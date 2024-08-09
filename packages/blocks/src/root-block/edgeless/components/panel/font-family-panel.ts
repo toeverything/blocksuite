@@ -1,8 +1,8 @@
+import { CheckIcon } from '@blocksuite/affine-components/icons';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { CheckIcon } from '../../../../_common/icons/edgeless.js';
 import {
   FontFamily,
   FontFamilyList,

@@ -3,6 +3,7 @@ import type {
   InternalPrimitives,
 } from '@blocksuite/store';
 
+import { isAbortError } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { defineBlockSchema } from '@blocksuite/store';
 
@@ -14,7 +15,6 @@ import type {
 } from './types.js';
 
 import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
-import { isAbortError } from '../utils/helper.js';
 
 export function createEmbedBlockSchema<
   Props extends object,

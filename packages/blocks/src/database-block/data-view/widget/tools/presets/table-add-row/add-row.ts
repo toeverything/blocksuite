@@ -1,9 +1,9 @@
+import { PlusIcon } from '@blocksuite/affine-components/icons';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import type { InsertToPosition } from '../../../../types.js';
 
-import { PlusIcon } from '../../../../../../_common/icons/index.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { WidgetBase } from '../../../widget-base.js';
 import { NewRecordPreview } from './new-record-preview.js';

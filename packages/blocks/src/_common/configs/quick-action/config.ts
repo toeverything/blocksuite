@@ -1,16 +1,16 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
-import { type TemplateResult, html } from 'lit';
-
-import { matchFlavours } from '../../../_common/utils/model.js';
-import { createSimplePortal } from '../../components/portal.js';
-import { toast } from '../../components/toast.js';
 import {
   CopyIcon,
   DatabaseTableViewIcon20,
   LinkedDocIcon,
-} from '../../icons/index.js';
+} from '@blocksuite/affine-components/icons';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import { assertExists } from '@blocksuite/global/utils';
+import { type TemplateResult, html } from 'lit';
+
+import { createSimplePortal } from '../../components/portal.js';
+import { toast } from '../../components/toast.js';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,

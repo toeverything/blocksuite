@@ -9,6 +9,9 @@ packages=(
   "framework/store"
   "framework/inline"
   "framework/sync"
+  "affine/model"
+  "affine/shared"
+  "affine/components"
   "blocks"
   # "docs" # NOT PUBLISHING
   "presets"

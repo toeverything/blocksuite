@@ -1,3 +1,14 @@
+import {
+  AutoConnectLeftIcon,
+  AutoConnectRightIcon,
+  HiddenIcon,
+} from '@blocksuite/affine-components/icons';
+import { SmallDocIcon } from '@blocksuite/affine-components/icons';
+import {
+  matchFlavours,
+  requestThrottledConnectedFrame,
+  stopPropagation,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { type TemplateResult, css, html, nothing } from 'lit';
@@ -12,18 +23,7 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 import type { EdgelessRootService } from '../../edgeless/edgeless-root-service.js';
 import type { RootBlockModel } from '../../root-model.js';
 
-import {
-  AutoConnectLeftIcon,
-  AutoConnectRightIcon,
-  HiddenIcon,
-} from '../../../_common/icons/edgeless.js';
-import { SmallDocIcon } from '../../../_common/icons/text.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
-import {
-  requestThrottledConnectedFrame,
-  stopPropagation,
-} from '../../../_common/utils/event.js';
-import { matchFlavours } from '../../../_common/utils/model.js';
 import { isNoteBlock } from '../../edgeless/utils/query.js';
 
 const PAGE_VISIBLE_INDEX_LABEL_WIDTH = 44;

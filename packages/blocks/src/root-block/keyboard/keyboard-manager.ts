@@ -1,10 +1,10 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { matchFlavours } from '../../_common/utils/model.js';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,

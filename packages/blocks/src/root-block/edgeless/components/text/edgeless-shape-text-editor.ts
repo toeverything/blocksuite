@@ -1,3 +1,4 @@
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   RangeManager,
   ShadowlessElement,
@@ -17,7 +18,6 @@ import {
   getNearestTranslation,
   isElementOutsideViewport,
 } from '../../../../_common/edgeless/mindmap/index.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { TextResizing } from '../../../../surface-block/consts.js';
 import {
   MindmapElementModel,

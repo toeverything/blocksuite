@@ -1,5 +1,6 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 
+import { groupBy } from '@blocksuite/affine-shared/utils';
 import { type BlockSnapshot, Job } from '@blocksuite/store';
 
 import type { SerializedConnectorElement } from '../../../surface-block/element-model/connector.js';
@@ -8,7 +9,6 @@ import type { SerializedMindmapElement } from '../../../surface-block/element-mo
 import type { NodeDetail } from '../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessFrameManager } from '../frame-manager.js';
 
-import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   type SerializedElement,
   SurfaceGroupLikeModel,

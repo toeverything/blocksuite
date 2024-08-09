@@ -1,6 +1,7 @@
 import type { BlockServiceOptions } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
+import { clamp, last } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
@@ -18,8 +19,6 @@ import type { ReorderingDirection } from '../../surface-block/managers/layer-man
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
-import { last } from '../../_common/utils/iterable.js';
-import { clamp } from '../../_common/utils/math.js';
 import {
   type PointTestOptions,
   SurfaceGroupLikeModel,

@@ -1,3 +1,4 @@
+import { isAbortError } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
@@ -6,8 +7,6 @@ import type {
   EmbedYoutubeBlockUrlData,
   EmbedYoutubeModel,
 } from './embed-youtube-model.js';
-
-import { isAbortError } from '../_common/utils/helper.js';
 
 export async function queryEmbedYoutubeData(
   embedYoutubeModel: EmbedYoutubeModel,

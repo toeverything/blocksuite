@@ -1,3 +1,4 @@
+import type { ColorScheme } from '@blocksuite/affine-shared/theme';
 import type { Constructor } from '@blocksuite/global/utils';
 import type { LitElement } from 'lit';
 
@@ -6,7 +7,6 @@ import { consume } from '@lit/context';
 import { cssVar } from '@toeverything/theme';
 import { property, state } from 'lit/decorators.js';
 
-import type { ColorScheme } from '../../../../../_common/theme/theme-observer.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessToolbar } from '../edgeless-toolbar.js';

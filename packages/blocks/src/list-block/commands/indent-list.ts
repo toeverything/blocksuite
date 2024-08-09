@@ -1,6 +1,7 @@
 import type { Command, EditorHost } from '@blocksuite/block-std';
 
-import { matchFlavours } from '../../_common/utils/model.js';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
+
 import { correctNumberedListsOrderToPrev } from './utils.js';
 
 export const indentListCommand: Command<

@@ -1,9 +1,10 @@
 import type { Doc } from '@blocksuite/store';
 
+import { nToLast } from '@blocksuite/affine-shared/utils';
+
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';
 
-import { nToLast } from '../../_common/utils/iterable.js';
 import { SurfaceGroupLikeModel } from '../element-model/base.js';
 
 export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {

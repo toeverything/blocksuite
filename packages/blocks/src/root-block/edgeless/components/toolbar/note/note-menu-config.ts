@@ -1,7 +1,5 @@
 import type { TemplateResult } from 'lit';
 
-import type { NoteChildrenFlavour } from '../../../../../_common/utils/index.js';
-
 import {
   BulletedListIcon,
   CheckBoxIcon,
@@ -16,7 +14,9 @@ import {
   NumberedListIcon,
   QuoteIcon,
   TextIcon,
-} from '../../../../../_common/icons/text.js';
+} from '@blocksuite/affine-components/icons';
+
+import type { NoteChildrenFlavour } from '../../../../../_common/utils/index.js';
 
 export const BUTTON_GROUP_LENGTH = 10;
 

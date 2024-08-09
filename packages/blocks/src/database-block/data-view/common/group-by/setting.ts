@@ -1,5 +1,6 @@
 import type { PropertyValues } from 'lit';
 
+import { ArrowRightSmallIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -14,7 +15,6 @@ import {
   type MenuOptions,
   popMenu,
 } from '../../../../_common/components/index.js';
-import { ArrowRightSmallIcon } from '../../../../_common/icons/index.js';
 import { menuTitleItem } from '../../utils/menu-title.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { KanbanSingleView } from '../../view/presets/kanban/kanban-view-manager.js';

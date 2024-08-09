@@ -19,6 +19,9 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/affine-model": "workspace:*",
+    "@blocksuite/affine-shared": "workspace:*",
+    "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/icons": "^2.1.62",
     "@dotlottie/player-component": "^2.7.12",
     "@floating-ui/dom": "^1.6.8",
@@ -72,12 +75,12 @@
       "./dist/*": "./dist/*",
       "./src/*": "./dist/*.js",
       ".": {
-        "module": "./dist/index.js",
+        "types": "./dist/index.d.ts",
         "import": "./dist/index.js"
       },
       "./schemas": {
         "types": "./dist/schemas.d.ts",
-        "default": "./dist/schemas.js"
+        "import": "./dist/schemas.js"
       }
     }
   },

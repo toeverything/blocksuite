@@ -1,6 +1,15 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline';
 
+import {
+  CenterPeekIcon,
+  DeleteIcon,
+  ExpandFullSmallIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
+import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
@@ -25,15 +34,6 @@ import {
 } from '../../../../components/toolbar/utils.js';
 import '../../../../components/tooltip/tooltip.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
-import {
-  CenterPeekIcon,
-  DeleteIcon,
-  ExpandFullSmallIcon,
-  MoreVerticalIcon,
-  OpenIcon,
-  SmallArrowDownIcon,
-} from '../../../../icons/index.js';
-import { isInsideBlockByFlavour } from '../../../../utils/model.js';
 import { styles } from './styles.js';
 
 @customElement('reference-popup')

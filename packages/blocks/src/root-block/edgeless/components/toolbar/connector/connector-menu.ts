@@ -1,3 +1,9 @@
+import {
+  ConnectorCWithArrowIcon,
+  ConnectorLWithArrowIcon,
+  ConnectorXWithArrowIcon,
+} from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -6,12 +12,6 @@ import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 
-import {
-  ConnectorCWithArrowIcon,
-  ConnectorLWithArrowIcon,
-  ConnectorXWithArrowIcon,
-} from '../../../../../_common/icons/index.js';
-import { ThemeObserver } from '../../../../../_common/theme/theme-observer.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import { DEFAULT_CONNECTOR_COLOR } from '../../panel/color-panel.js';
 import '../../panel/one-row-color-panel.js';

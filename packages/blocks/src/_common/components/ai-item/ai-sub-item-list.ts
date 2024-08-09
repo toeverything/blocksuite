@@ -1,3 +1,4 @@
+import { EnterIcon } from '@blocksuite/affine-components/icons';
 import { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { PropTypes, requiredProperties } from '@blocksuite/block-std';
@@ -7,7 +8,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { AIItemConfig, AISubItemConfig } from './types.js';
 
-import { EnterIcon } from '../../icons/ai.js';
 import { menuItemStyles } from './styles.js';
 
 @requiredProperties({

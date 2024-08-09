@@ -1,3 +1,7 @@
+import {
+  ArrowDownSmallIcon,
+  DuplicateIcon,
+} from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -8,10 +12,6 @@ import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 import type { FilterGroupView } from './filter-group.js';
 
 import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
-import {
-  ArrowDownSmallIcon,
-  DuplicateIcon,
-} from '../../../../_common/icons/index.js';
 import {
   ConvertIcon,
   DeleteIcon,
