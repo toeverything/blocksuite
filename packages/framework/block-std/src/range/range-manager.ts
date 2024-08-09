@@ -6,28 +6,19 @@ import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import type { BlockComponent } from '../view/element/block-component.js';
 import type { EditorHost } from '../view/element/lit-host.js';
 
+import { RANGE_QUERY_EXCLUDE_ATTR, RANGE_SYNC_EXCLUDE_ATTR } from './consts.js';
 import { RangeBinding } from './range-binding.js';
 
 /**
  * CRUD for Range and TextSelection
  */
 export class RangeManager {
-  /**
-   * Used to exclude certain elements when using `getSelectedBlockComponentsByRange`.
-   */
-  static rangeQueryExcludeAttr = 'data-range-query-exclude';
-
-  /**
-   * Used to mark certain elements so that they are excluded when synchronizing the native range and text selection (such as database block).
-   */
-  static rangeSyncExcludeAttr = 'data-range-sync-exclude';
-
   binding: RangeBinding | null = null;
 
   constructor(public host: EditorHost) {}
 
   private _isRangeSyncExcluded(el: Element) {
-    return !!el.closest(`[${RangeManager.rangeSyncExcludeAttr}="true"]`);
+    return !!el.closest(`[${RANGE_SYNC_EXCLUDE_ATTR}="true"]`);
   }
 
   clear() {
@@ -91,7 +82,7 @@ export class RangeManager {
 
     let result = Array.from<BlockComponent>(
       this.host.querySelectorAll(
-        `[${this.host.blockIdAttr}]:not([${RangeManager.rangeQueryExcludeAttr}="true"])`
+        `[${this.host.blockIdAttr}]:not([${RANGE_QUERY_EXCLUDE_ATTR}="true"])`
       )
     ).filter(el => range.intersectsNode(el) && match(el));
 

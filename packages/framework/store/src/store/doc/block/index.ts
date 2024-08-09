@@ -1,7 +1,8 @@
 import type { Schema } from '../../../schema/index.js';
+import type { Doc } from '../doc.js';
 import type { BlockOptions, YBlock } from './types.js';
 
-import { BlockViewType, type Doc } from '../doc.js';
+import { BlockViewType } from '../consts.js';
 import { SyncController } from './sync-controller.js';
 
 export * from './types.js';

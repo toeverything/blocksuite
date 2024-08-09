@@ -1,7 +1,7 @@
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { almostEqual } from '@blocksuite/affine-shared/utils';
 import {
-  RangeManager,
+  RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
@@ -90,7 +90,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
   override connectedCallback() {
     super.connectedCallback();
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
   }
 
   override disconnectedCallback() {

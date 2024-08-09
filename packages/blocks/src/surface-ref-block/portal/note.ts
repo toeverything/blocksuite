@@ -1,11 +1,10 @@
-import type { EditorHost } from '@blocksuite/block-std';
 import type { Query } from '@blocksuite/store';
 
 import {
-  RangeManager,
-  ShadowlessElement,
-  WithDisposable,
+  type EditorHost,
+  RANGE_QUERY_EXCLUDE_ATTR,
 } from '@blocksuite/block-std';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { css, nothing } from 'lit';
@@ -141,7 +140,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       });
 
       blocks.forEach(element => {
-        element.setAttribute(RangeManager.rangeQueryExcludeAttr, 'true');
+        element.setAttribute(RANGE_QUERY_EXCLUDE_ATTR, 'true');
       });
     }, 500);
   }

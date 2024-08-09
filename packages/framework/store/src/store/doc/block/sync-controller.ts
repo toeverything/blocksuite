@@ -3,6 +3,7 @@ import { effect, signal } from '@preact/signals-core';
 import { createMutex } from 'lib0/mutex.js';
 import * as Y from 'yjs';
 
+import type { Schema } from '../../../schema/schema.js';
 import type { Doc } from '../doc.js';
 import type { YBlock } from './types.js';
 
@@ -13,11 +14,7 @@ import {
   native2Y,
   y2Native,
 } from '../../../reactive/index.js';
-import {
-  BlockModel,
-  type Schema,
-  internalPrimitives,
-} from '../../../schema/index.js';
+import { BlockModel, internalPrimitives } from '../../../schema/base.js';
 
 /**
  * @internal

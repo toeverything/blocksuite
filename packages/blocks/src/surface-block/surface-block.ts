@@ -1,6 +1,6 @@
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { values } from '@blocksuite/affine-shared/utils';
-import { BlockComponent, RangeManager } from '@blocksuite/block-std';
+import { BlockComponent, RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -220,7 +220,7 @@ export class SurfaceBlockComponent extends BlockComponent<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
 
     this._initThemeObserver();
     this._initRenderer();

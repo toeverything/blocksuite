@@ -1,6 +1,6 @@
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
-  RangeManager,
+  RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
@@ -153,7 +153,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
   }
 
   override firstUpdated(): void {

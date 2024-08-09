@@ -3,7 +3,7 @@ import {
   DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
-import { RangeManager } from '@blocksuite/block-std';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
@@ -290,7 +290,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
     let canDrop = false;
     this.disposables.add(
       AffineDragHandleWidget.registerOption({

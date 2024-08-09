@@ -11,12 +11,6 @@ import { syncBlockProps } from '../../utils/utils.js';
 import { Block } from './block/index.js';
 import { type Query, runQuery } from './query.js';
 
-export enum BlockViewType {
-  Bypass = 'bypass',
-  Display = 'display',
-  Hidden = 'hidden',
-}
-
 type DocOptions = {
   schema: Schema;
   blockCollection: BlockCollection;
