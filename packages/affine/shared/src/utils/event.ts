@@ -177,11 +177,11 @@ export function requestThrottledConnectedFrame<
   return ((...args: unknown[]) => {
     latestArgs = args;
 
-    if (raqId === undefined) {
-      raqId = requestConnectedFrame(() => {
-        raqId = undefined;
-        func(...latestArgs);
-      }, element);
-    }
+    raqId && cancelAnimationFrame(raqId);
+
+    raqId = requestConnectedFrame(() => {
+      raqId = undefined;
+      func(...latestArgs);
+    }, element);
   }) as T;
 }
