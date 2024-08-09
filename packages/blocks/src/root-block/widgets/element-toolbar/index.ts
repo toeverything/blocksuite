@@ -1,6 +1,7 @@
 import type {
   AttachmentBlockModel,
   BookmarkBlockModel,
+  EdgelessTextBlockModel,
   EmbedFigmaModel,
   EmbedGithubModel,
   EmbedHtmlModel,
@@ -9,6 +10,7 @@ import type {
   EmbedSyncedDocModel,
   EmbedYoutubeModel,
   ImageBlockModel,
+  NoteBlockModel,
 } from '@blocksuite/affine-model';
 
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
@@ -24,9 +26,7 @@ import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
-import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';

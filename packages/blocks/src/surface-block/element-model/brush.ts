@@ -1,3 +1,4 @@
+import type { Color } from '@blocksuite/affine-model';
 import type {
   BaseElementProps,
   PointTestOptions,
@@ -12,8 +13,6 @@ import {
   yfield,
 } from '@blocksuite/block-std/gfx';
 import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
-
-import type { Color } from '../consts.js';
 
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
 import {

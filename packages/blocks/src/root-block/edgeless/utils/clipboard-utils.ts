@@ -1,13 +1,13 @@
 import type {
+  EdgelessTextBlockModel,
   EmbedSyncedDocModel,
   ImageBlockModel,
+  NoteBlockModel,
 } from '@blocksuite/affine-model';
 
 import { groupBy } from '@blocksuite/affine-shared/utils';
 
-import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import { edgelessElementsBound } from './bound-utils.js';

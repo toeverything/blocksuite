@@ -1,4 +1,3 @@
-import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
@@ -22,6 +21,10 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '@blocksuite/affine-components/icons';
+import {
+  NoteBlockModel,
+  type ParagraphBlockModel,
+} from '@blocksuite/affine-model';
 import { Slice, Text } from '@blocksuite/store';
 
 import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
@@ -51,7 +54,6 @@ import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
-import { NoteBlockModel } from '../../../note-block/note-model.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';

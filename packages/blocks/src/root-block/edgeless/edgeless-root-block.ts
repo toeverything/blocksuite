@@ -1,8 +1,4 @@
 import type {
-  AttachmentBlockProps,
-  ImageBlockProps,
-} from '@blocksuite/affine-model';
-import type {
   GfxBlockComponent,
   SurfaceSelection,
 } from '@blocksuite/block-std';
@@ -10,6 +6,11 @@ import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import {
+  type AttachmentBlockProps,
+  type ImageBlockProps,
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
@@ -33,7 +34,6 @@ import type { EdgelessTool } from './types.js';
 import { toast } from '../../_common/components/toast.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../_common/consts.js';
 import {
-  NoteDisplayMode,
   type Viewport,
   asyncFocusRichText,
   handleNativeRangeAtPoint,

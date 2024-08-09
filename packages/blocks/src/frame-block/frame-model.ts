@@ -2,11 +2,10 @@ import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 
-import { GfxCompatible } from '@blocksuite/affine-model';
+import { type Color, GfxCompatible } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { Color } from '../surface-block/consts.js';
 import type { PointTestOptions } from '../surface-block/element-model/base.js';
 
 type FrameBlockProps = {

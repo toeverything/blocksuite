@@ -1,14 +1,14 @@
-import type { Y } from '@blocksuite/store';
-
 import type {
   FontFamily,
   FontStyle,
   FontWeight,
-  ShapeStyle,
   StrokeStyle,
   TextAlign,
   TextVerticalAlign,
-} from '../../consts.js';
+} from '@blocksuite/affine-model';
+import type { Y } from '@blocksuite/store';
+
+import type { ShapeStyle } from '../../consts.js';
 import type { CanvasElementType } from '../../element-model/index.js';
 import type { ISurfaceElement } from '../surface-element.js';
 import type { SHAPE_TEXT_FONT_SIZE, ShapeType } from './consts.js';

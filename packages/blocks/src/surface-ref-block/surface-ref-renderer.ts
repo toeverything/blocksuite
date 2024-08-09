@@ -1,11 +1,11 @@
+import type { Color } from '@blocksuite/affine-model';
+import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
-import type { NoteBlockModel } from '../note-block/index.js';
-import type { Color } from '../surface-block/consts.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 
 import { Viewport } from '../root-block/edgeless/utils/viewport.js';

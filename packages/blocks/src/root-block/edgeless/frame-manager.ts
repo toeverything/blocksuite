@@ -1,3 +1,4 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
 import { Bound } from '@blocksuite/global/utils';
@@ -6,7 +7,6 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { EdgelessRootService } from '../../index.js';
-import type { NoteBlockModel } from '../../note-block/note-model.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 
 import { Overlay, type RoughCanvas } from '../../surface-block/index.js';

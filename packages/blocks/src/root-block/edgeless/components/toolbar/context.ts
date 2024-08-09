@@ -1,4 +1,4 @@
-import type { ColorScheme } from '@blocksuite/affine-shared/theme';
+import type { ColorScheme } from '@blocksuite/affine-model';
 import type { Slot } from '@blocksuite/store';
 
 import { createContext } from '@lit/context';

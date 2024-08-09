@@ -1,6 +1,6 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { Point } from '@blocksuite/global/utils';
 
-import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import {

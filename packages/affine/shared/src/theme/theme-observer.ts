@@ -1,11 +1,5 @@
+import { type Color, ColorScheme } from '@blocksuite/affine-model';
 import { signal } from '@lit-labs/preact-signals';
-
-export type Color = string | { [K in ColorScheme | 'normal']?: string };
-
-export enum ColorScheme {
-  Dark = 'dark',
-  Light = 'light',
-}
 
 const TRANSPARENT = 'transparent';
 

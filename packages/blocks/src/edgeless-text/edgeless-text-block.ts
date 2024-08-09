@@ -1,3 +1,4 @@
+import type { EdgelessTextBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
@@ -12,7 +13,6 @@ import type {
   EdgelessRootBlockComponent,
   EdgelessRootService,
 } from '../root-block/index.js';
-import type { EdgelessTextBlockModel } from './edgeless-text-model.js';
 import type { EdgelessTextBlockService } from './edgeless-text-service.js';
 
 import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';

@@ -1,10 +1,10 @@
+import { FontFamily, FontWeight, StrokeStyle } from '@blocksuite/affine-model';
 import { last } from '@blocksuite/affine-shared/utils';
 
 import type { ShapeElementModel } from '../../shape.js';
 import type { MindmapNode } from './layout.js';
 
 import { fitContent } from '../../../canvas-renderer/element-renderer/shape/utils.js';
-import { FontFamily, FontWeight, StrokeStyle } from '../../../consts.js';
 import { ConnectorMode } from '../../connector.js';
 
 export type NodeStyle = {

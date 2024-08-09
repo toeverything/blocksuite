@@ -1,4 +1,4 @@
-import type { StrokeStyle } from '../../consts.js';
+import type { StrokeStyle } from '@blocksuite/affine-model';
 
 import { createZodUnion } from '../../../_common/utils/index.js';
 

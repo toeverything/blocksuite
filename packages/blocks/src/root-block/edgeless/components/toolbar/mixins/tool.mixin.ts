@@ -1,4 +1,4 @@
-import type { ColorScheme } from '@blocksuite/affine-shared/theme';
+import type { ColorScheme } from '@blocksuite/affine-model';
 import type { Constructor } from '@blocksuite/global/utils';
 import type { LitElement } from 'lit';
 

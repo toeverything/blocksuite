@@ -1,6 +1,7 @@
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { AssetsManager } from '@blocksuite/store';
 
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
   ASTWalker,
   BaseAdapter,
@@ -18,8 +19,6 @@ import {
   type ToDocSnapshotPayload,
   nanoid,
 } from '@blocksuite/store';
-
-import { NoteDisplayMode } from '../types.js';
 
 export type PlainText = string;
 

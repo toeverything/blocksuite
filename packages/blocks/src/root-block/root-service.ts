@@ -1,14 +1,17 @@
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import {
+  type EmbedCardStyle,
+  type NoteBlockModel,
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { NoteBlockModel } from '../note-block/note-model.js';
 import type { EdgelessRootBlockComponent } from './edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from './root-model.js';
 import type { RootBlockComponent } from './types.js';
@@ -36,7 +39,6 @@ import {
   MarkdownTransformer,
   ZipTransformer,
 } from '../_common/transformers/index.js';
-import { NoteDisplayMode } from '../_common/types.js';
 import { getRootByEditorHost } from '../_common/utils/index.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import { CommunityCanvasTextFonts } from '../surface-block/consts.js';

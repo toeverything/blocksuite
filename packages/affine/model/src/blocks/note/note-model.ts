@@ -1,17 +1,18 @@
 import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import { GfxCompatible } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { NOTE_WIDTH } from '../_common/consts.js';
 import {
+  type Color,
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_SHADOW,
-} from '../_common/edgeless/note/consts.js';
-import { NoteDisplayMode } from '../_common/types.js';
-import { type Color, StrokeStyle } from '../surface-block/consts.js';
+  NOTE_WIDTH,
+  NoteDisplayMode,
+  StrokeStyle,
+} from '../../consts/index.js';
+import { GfxCompatible } from '../../utils/index.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
@@ -110,6 +111,9 @@ export class NoteBlockModel
 
 declare global {
   namespace BlockSuite {
+    interface BlockModels {
+      'affine:note': NoteBlockModel;
+    }
     interface EdgelessBlockModelMap {
       'affine:note': NoteBlockModel;
     }

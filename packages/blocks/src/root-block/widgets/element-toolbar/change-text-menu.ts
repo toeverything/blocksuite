@@ -1,4 +1,4 @@
-import type { ColorScheme } from '@blocksuite/affine-shared/theme';
+import type { ColorScheme } from '@blocksuite/affine-model';
 
 import {
   SmallArrowDownIcon,
@@ -6,6 +6,14 @@ import {
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '@blocksuite/affine-components/icons';
+import {
+  FontFamily,
+  FontStyle,
+  FontWeight,
+  TextAlign,
+  type TextStyleProps,
+} from '@blocksuite/affine-model';
+import { EdgelessTextBlockModel } from '@blocksuite/affine-model';
 import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
@@ -25,19 +33,11 @@ import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import {
   isFontStyleSupported,
   isFontWeightSupported,
 } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { normalizeTextBound } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import {
-  FontFamily,
-  FontStyle,
-  FontWeight,
-  TextAlign,
-  type TextStyleProps,
-} from '../../../surface-block/consts.js';
 import { isConnectorWithLabel } from '../../../surface-block/element-model/connector.js';
 import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {

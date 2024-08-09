@@ -1,7 +1,11 @@
+import type {
+  FontFamily,
+  FontStyle,
+  FontWeight,
+} from '@blocksuite/affine-model';
 import type { Bound } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
-import type { FontFamily, FontStyle, FontWeight } from '../../../consts.js';
 import type { TextElementModel } from '../../../element-model/text.js';
 
 import {

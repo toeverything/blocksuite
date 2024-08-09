@@ -1,5 +1,3 @@
-import type { ColorScheme } from '@blocksuite/affine-shared/theme';
-
 import {
   ExpandIcon,
   LineStyleIcon,
@@ -9,6 +7,14 @@ import {
   ShrinkIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import {
+  type ColorScheme,
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  NOTE_BACKGROUND_COLORS,
+  type NoteBlockModel,
+  NoteDisplayMode,
+  type StrokeStyle,
+} from '@blocksuite/affine-model';
 import { countBy, matchFlavours, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
@@ -20,8 +26,6 @@ import { type Ref, createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 
 import type { EditorMenuButton } from '../../../_common/components/toolbar/menu-button.js';
-import type { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { StrokeStyle } from '../../../surface-block/index.js';
 import type {
   EdgelessColorPickerButton,
   PickColorEvent,
@@ -33,11 +37,6 @@ import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import {
-  DEFAULT_NOTE_BACKGROUND_COLOR,
-  NOTE_BACKGROUND_COLORS,
-} from '../../../_common/edgeless/note/consts.js';
-import { NoteDisplayMode } from '../../../_common/types.js';
 import '../../edgeless/components/color-picker/index.js';
 import {
   packColor,

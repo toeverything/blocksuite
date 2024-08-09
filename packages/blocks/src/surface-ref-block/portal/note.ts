@@ -1,5 +1,10 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { Query } from '@blocksuite/store';
 
+import {
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
 import {
   type EditorHost,
   RANGE_QUERY_EXCLUDE_ATTR,
@@ -12,15 +17,12 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { NoteBlockModel } from '../../note-block/index.js';
 import type { Renderer } from '../../surface-block/canvas-renderer/renderer.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../_common/consts.js';
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../_common/edgeless/note/consts.js';
-import { NoteDisplayMode } from '../../_common/types.js';
 import { SpecProvider } from '../../specs/utils/spec-provider.js';
 
 @customElement('surface-ref-note-portal')

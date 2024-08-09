@@ -1,10 +1,9 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { Bound, assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { Connection } from '../../../../surface-block/element-model/connector.js';
 import type {
   ShapeStyle,

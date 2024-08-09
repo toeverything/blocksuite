@@ -1,5 +1,4 @@
-import type { NoteDisplayMode } from '@blocks/_common/types.js';
-import type { NoteBlockModel } from '@blocks/note-block/index.js';
+import type { NoteBlockModel, NoteDisplayMode } from '@blocks/index.js';
 import type { IPoint, IVec } from '@global/utils/index.js';
 import type { Locator, Page } from '@playwright/test';
 
@@ -1287,15 +1286,34 @@ export async function changeEdgelessNoteBackground(page: Page, color: string) {
 export async function changeShapeFillColor(page: Page, color: string) {
   const colorButton = page
     .locator('edgeless-change-shape-button')
-    .getByRole('listbox', { name: 'Fill colors' })
+    .locator('edgeless-color-picker-button.fill-color')
+    .locator('edgeless-color-panel')
     .locator(`.color-unit[aria-label="${color}"]`);
-  await colorButton.click();
+  await colorButton.click({ force: true });
+}
+
+export async function changeShapeFillColorToTransparent(page: Page) {
+  const colorButton = page
+    .locator('edgeless-change-shape-button')
+    .locator('edgeless-color-picker-button.fill-color')
+    .locator('edgeless-color-panel')
+    .locator('edgeless-color-custom-button');
+  await colorButton.click({ force: true });
+
+  const input = page.locator('edgeless-color-picker').locator('label.alpha');
+  await input.focus();
+  await input.press('ArrowRight');
+  await input.press('ArrowRight');
+  await input.press('ArrowRight');
+  await input.press('Backspace');
+  await input.press('Backspace');
+  await input.press('Backspace');
 }
 
 export async function changeShapeStrokeColor(page: Page, color: string) {
   const colorButton = page
     .locator('edgeless-change-shape-button')
-    .getByRole('listbox', { name: 'Border colors' })
+    .locator('edgeless-color-picker-button.border-style')
     .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
 }

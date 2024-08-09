@@ -1,3 +1,4 @@
+import { StrokeStyle } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -15,7 +16,6 @@ import {
   type IShape,
   ShapeStyle,
   type ShapeType,
-  StrokeStyle,
   getLineWidth,
   normalizeShapeBound,
 } from '../../surface-block/index.js';

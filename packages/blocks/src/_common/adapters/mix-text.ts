@@ -2,6 +2,7 @@ import type { DeltaInsert } from '@blocksuite/inline';
 import type { Job } from '@blocksuite/store';
 import type { AssetsManager } from '@blocksuite/store';
 
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
   ASTWalker,
   BaseAdapter,
@@ -20,7 +21,6 @@ import {
   nanoid,
 } from '@blocksuite/store';
 
-import { NoteDisplayMode } from '../types.js';
 import { MarkdownAdapter } from './markdown.js';
 
 export type MixText = string;

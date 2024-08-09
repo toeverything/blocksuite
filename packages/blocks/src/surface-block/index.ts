@@ -7,7 +7,6 @@ export { Overlay, Renderer } from './canvas-renderer/renderer.js';
 export {
   type IModelCoord,
   ShapeStyle,
-  StrokeStyle,
   ZOOM_MAX,
   ZOOM_MIN,
   ZOOM_STEP,

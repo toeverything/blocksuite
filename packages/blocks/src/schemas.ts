@@ -9,6 +9,7 @@ import {
   BookmarkBlockSchema,
   CodeBlockSchema,
   DividerBlockSchema,
+  EdgelessTextBlockSchema,
   EmbedFigmaBlockSchema,
   EmbedGithubBlockSchema,
   EmbedHtmlBlockSchema,
@@ -18,14 +19,13 @@ import {
   EmbedYoutubeBlockSchema,
   ImageBlockSchema,
   ListBlockSchema,
+  NoteBlockSchema,
   ParagraphBlockSchema,
 } from '@blocksuite/affine-model';
 
 import { DataViewBlockSchema } from './data-view-block/data-view-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
-import { EdgelessTextBlockSchema } from './edgeless-text/edgeless-text-model.js';
 import { FrameBlockSchema } from './frame-block/frame-model.js';
-import { NoteBlockSchema } from './note-block/note-model.js';
 import { RootBlockSchema } from './root-block/root-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 import { SurfaceRefBlockSchema } from './surface-ref-block/surface-ref-model.js';

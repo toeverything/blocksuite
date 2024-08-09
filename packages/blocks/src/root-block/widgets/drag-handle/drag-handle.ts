@@ -1,3 +1,4 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
@@ -11,18 +12,18 @@ import {
   type UIEventHandler,
   WidgetComponent,
 } from '@blocksuite/block-std';
-import { Point } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { DisposableGroup, throttle } from '@blocksuite/global/utils';
+import {
+  Bound,
+  DisposableGroup,
+  Point,
+  throttle,
+} from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Query } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  NoteBlockComponent,
-  NoteBlockModel,
-} from '../../../note-block/index.js';
+import type { NoteBlockComponent } from '../../../note-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../../root-block/root-model.js';
 import type { GfxBlockModel } from '../../edgeless/block-model.js';

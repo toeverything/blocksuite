@@ -1,19 +1,19 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { BlockModel, Text } from '@blocksuite/store';
 
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { getScrollContainer } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { NoteBlockModel } from '../../note-block/index.js';
 import type { PageRootBlockWidgetName } from '../index.js';
 import type { RootBlockModel } from '../root-model.js';
 import type { PageRootService } from './page-root-service.js';
 
 import {
-  NoteDisplayMode,
   type Viewport,
   asyncFocusRichText,
   buildPath,
