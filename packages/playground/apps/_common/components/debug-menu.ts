@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+import type { EdgelessRootService } from '@blocksuite/blocks';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
@@ -19,6 +20,7 @@ import {
   ZipTransformer,
   defaultImageProxyMiddleware,
   openFileOrFiles,
+  toast,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { type DocCollection, Job, Text, Utils } from '@blocksuite/store';
@@ -35,8 +37,8 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '@shoelace-style/shoelace/dist/themes/light.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -309,6 +311,26 @@ export class DebugMenu extends ShadowlessElement {
       $style.remove();
       $html.classList.remove(classKey);
     }, duration);
+  }
+
+  private _present() {
+    if (!this.editor.host) return;
+    const rootService = this.editor.host.spec.getService('affine:page');
+    const { docModeService } = rootService;
+    if (docModeService.getMode() !== 'edgeless') {
+      toast(
+        this.editor.host,
+        'The presentation mode is only available on edgeless mode.',
+        3000
+      );
+      return;
+    }
+
+    const edgelessRootService = rootService as EdgelessRootService;
+    edgelessRootService?.tool.setEdgelessTool({
+      type: 'frameNavigator',
+      mode: 'fit',
+    });
   }
 
   private _setThemeMode(dark: boolean) {
@@ -612,6 +634,16 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon
                 name="${this._dark ? 'moon' : 'brightness-high'}"
               ></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip
+            content="Enter presentation mode"
+            placement="bottom"
+            hoist
+          >
+            <sl-button size="small" @click="${this._present}">
+              <sl-icon name="easel"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
