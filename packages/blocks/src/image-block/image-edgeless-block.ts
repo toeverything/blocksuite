@@ -20,9 +20,9 @@ import {
   turnImageIntoCardView,
 } from './utils.js';
 
-@customElement('affine-image')
+@customElement('affine-edgeless-image')
 @Peekable()
-export class ImageBlockComponent extends CaptionedBlockComponent<
+export class ImageBlockEdgelessComponent extends CaptionedBlockComponent<
   ImageBlockModel,
   ImageBlockService
 > {
@@ -151,6 +151,6 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-image': ImageBlockComponent;
+    'affine-edgeless-image': ImageBlockEdgelessComponent;
   }
 }

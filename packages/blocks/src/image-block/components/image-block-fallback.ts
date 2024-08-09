@@ -3,7 +3,7 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ImageBlockComponent } from '../image-block.js';
+import type { ImageBlockModel } from '../image-model.js';
 
 import { humanFileSize } from '../../_common/utils/math.js';
 import { FailedImageIcon, ImageIcon, LoadingIcon } from '../styles.js';
@@ -13,8 +13,8 @@ export const SURFACE_IMAGE_CARD_HEIGHT = 122;
 export const NOTE_IMAGE_CARD_WIDTH = 752;
 export const NOTE_IMAGE_CARD_HEIGHT = 78;
 
-@customElement('affine-image-block-card')
-export class AffineImageCard extends WithDisposable(ShadowlessElement) {
+@customElement('affine-image-block-fallback')
+export class ImageBlockFallback extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-image-block-card-container {
       width: 100%;
@@ -62,17 +62,17 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
   `;
 
   override render() {
-    const { isInSurface, loading, error, model } = this.block;
+    const { mode, loading, error, model } = this;
 
-    const width = isInSurface
+    const isEdgeless = mode === 'edgeless';
+    const width = isEdgeless
       ? `${SURFACE_IMAGE_CARD_WIDTH}px`
       : `${NOTE_IMAGE_CARD_WIDTH}px`;
-
-    const height = isInSurface
+    const height = isEdgeless
       ? `${SURFACE_IMAGE_CARD_HEIGHT}px`
       : `${NOTE_IMAGE_CARD_HEIGHT}px`;
 
-    const rotate = isInSurface ? model.rotate : 0;
+    const rotate = isEdgeless ? model.rotate : 0;
 
     const cardStyleMap = styleMap({
       transform: `rotate(${rotate}deg)`,
@@ -112,11 +112,20 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  accessor block!: ImageBlockComponent;
+  accessor error!: boolean;
+
+  @property({ attribute: false })
+  accessor loading!: boolean;
+
+  @property({ attribute: false })
+  accessor mode!: 'page' | 'edgeless';
+
+  @property({ attribute: false })
+  accessor model!: ImageBlockModel;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-image-block-card': AffineImageCard;
+    'affine-image-block-fallback': ImageBlockFallback;
   }
 }
