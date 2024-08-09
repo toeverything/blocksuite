@@ -1,15 +1,16 @@
-import type { BookmarkBlockModel } from '@blocksuite/affine-model';
+import type {
+  BookmarkBlockModel,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedLoomModel,
+  EmbedYoutubeModel,
+} from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-
-import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-model.js';
-import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
-import type { EmbedLoomModel } from '../../../../embed-loom-block/embed-loom-model.js';
-import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 
 import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';

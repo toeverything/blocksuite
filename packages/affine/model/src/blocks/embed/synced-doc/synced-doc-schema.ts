@@ -1,9 +1,9 @@
-import { createEmbedBlockSchema } from '../_common/embed-block-helper/helper.js';
+import { createEmbedBlockSchema } from '../../../utils/index.js';
 import {
   type EmbedSyncedDocBlockProps,
   EmbedSyncedDocModel,
   EmbedSyncedDocStyles,
-} from './embed-synced-doc-model.js';
+} from './synced-doc-model.js';
 
 export const defaultEmbedSyncedDocBlockProps: EmbedSyncedDocBlockProps = {
   pageId: '',

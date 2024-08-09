@@ -1,3 +1,4 @@
+import type { EmbedSyncedDocModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import {
@@ -19,7 +20,6 @@ import type {
   RootBlockComponent,
 } from '../root-block/index.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
-import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
 import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 
 import { Peekable } from '../_common/components/peekable.js';

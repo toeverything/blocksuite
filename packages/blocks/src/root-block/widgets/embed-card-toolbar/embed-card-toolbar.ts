@@ -15,6 +15,8 @@ import {
 import {
   type BookmarkBlockModel,
   BookmarkStyles,
+  type EmbedGithubModel,
+  type EmbedLinkedDocModel,
 } from '@blocksuite/affine-model';
 import { getBlockProps, getHostName } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
@@ -28,8 +30,6 @@ import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EmbedCardStyle } from '../../../_common/types.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { RootBlockModel } from '../../root-model.js';
 import type { EmbedOptions } from '../../root-service.js';
 import type { RootBlockComponent } from '../../types.js';

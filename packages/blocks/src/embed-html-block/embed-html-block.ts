@@ -1,10 +1,11 @@
+import type { EmbedHtmlModel, EmbedHtmlStyles } from '@blocksuite/affine-model';
+
 import { Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedHtmlModel, EmbedHtmlStyles } from './embed-html-model.js';
 import type { EmbedHtmlBlockService } from './embed-html-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';

@@ -1,18 +1,19 @@
+import type {
+  EmbedYoutubeModel,
+  EmbedYoutubeStyles,
+} from '@blocksuite/affine-model';
+
 import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { EmbedYoutubeStyles } from './embed-youtube-model.js';
 import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import {
-  type EmbedYoutubeModel,
-  youtubeUrlRegex,
-} from './embed-youtube-model.js';
+import { youtubeUrlRegex } from './embed-youtube-model.js';
 import { YoutubeIcon, styles } from './styles.js';
 import { refreshEmbedYoutubeUrlData } from './utils.js';
 

@@ -1,10 +1,9 @@
+import type { EmbedFigmaModel } from '@blocksuite/affine-model';
+
+import { EmbedFigmaStyles } from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
 
-import {
-  type EmbedFigmaModel,
-  EmbedFigmaStyles,
-  figmaUrlRegex,
-} from './embed-figma-model.js';
+import { figmaUrlRegex } from './embed-figma-model.js';
 
 export class EmbedFigmaBlockService extends BlockService<EmbedFigmaModel> {
   override mounted() {

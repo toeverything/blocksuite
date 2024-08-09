@@ -1,9 +1,9 @@
-import { createEmbedBlockSchema } from '../_common/embed-block-helper/helper.js';
+import { createEmbedBlockSchema } from '../../../utils/index.js';
 import {
   type EmbedFigmaBlockProps,
   EmbedFigmaModel,
   EmbedFigmaStyles,
-} from './embed-figma-model.js';
+} from './figma-model.js';
 
 const defaultEmbedFigmaProps: EmbedFigmaBlockProps = {
   style: EmbedFigmaStyles[0],

@@ -1,9 +1,9 @@
-import { createEmbedBlockSchema } from '../_common/embed-block-helper/helper.js';
+import { createEmbedBlockSchema } from '../../../utils/index.js';
 import {
   type EmbedLoomBlockProps,
   EmbedLoomModel,
   EmbedLoomStyles,
-} from './embed-loom-model.js';
+} from './loom-model.js';
 
 const defaultEmbedLoomProps: EmbedLoomBlockProps = {
   style: EmbedLoomStyles[0],

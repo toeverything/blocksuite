@@ -1,19 +1,18 @@
-import type { BookmarkBlockModel } from '@blocksuite/affine-model';
+import type {
+  BookmarkBlockModel,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedLoomModel,
+  EmbedSyncedDocModel,
+  EmbedYoutubeModel,
+} from '@blocksuite/affine-model';
+import type { EmbedLinkedDocModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
-
-import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.js';
-import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
-import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 
 import { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
 import { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-figma-block.js';
 import { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
-import {
-  EmbedLinkedDocBlockComponent,
-  type EmbedLinkedDocModel,
-} from '../../../embed-linked-doc-block/index.js';
+import { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
 import { EmbedLoomBlockComponent } from '../../../embed-loom-block/embed-loom-block.js';
 import { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 import { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';

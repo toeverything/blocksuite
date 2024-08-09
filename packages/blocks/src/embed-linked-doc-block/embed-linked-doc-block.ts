@@ -1,3 +1,8 @@
+import type {
+  EmbedLinkedDocModel,
+  EmbedLinkedDocStyles,
+} from '@blocksuite/affine-model';
+
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -10,10 +15,6 @@ import type { RootBlockComponent } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
 import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
-import type {
-  EmbedLinkedDocModel,
-  EmbedLinkedDocStyles,
-} from './embed-linked-doc-model.js';
 import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
 import { Peekable, isPeekable } from '../_common/components/peekable.js';

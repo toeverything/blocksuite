@@ -39,11 +39,7 @@ export {
   toast,
 } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
-export {
-  EmbedBlockComponent,
-  createEmbedBlockSchema,
-  defineEmbedModel,
-} from './_common/embed-block-helper/index.js';
+export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
 export * from './_common/inline/inline-manager.js';
 export {
   type AffineInlineEditor,

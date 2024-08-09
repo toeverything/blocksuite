@@ -9,6 +9,13 @@ import {
   BookmarkBlockSchema,
   CodeBlockSchema,
   DividerBlockSchema,
+  EmbedFigmaBlockSchema,
+  EmbedGithubBlockSchema,
+  EmbedHtmlBlockSchema,
+  EmbedLinkedDocBlockSchema,
+  EmbedLoomBlockSchema,
+  EmbedSyncedDocBlockSchema,
+  EmbedYoutubeBlockSchema,
   ImageBlockSchema,
   ListBlockSchema,
   ParagraphBlockSchema,
@@ -17,13 +24,6 @@ import {
 import { DataViewBlockSchema } from './data-view-block/data-view-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
 import { EdgelessTextBlockSchema } from './edgeless-text/edgeless-text-model.js';
-import { EmbedFigmaBlockSchema } from './embed-figma-block/embed-figma-schema.js';
-import { EmbedGithubBlockSchema } from './embed-github-block/embed-github-schema.js';
-import { EmbedHtmlBlockSchema } from './embed-html-block/embed-html-schema.js';
-import { EmbedLinkedDocBlockSchema } from './embed-linked-doc-block/embed-linked-doc-schema.js';
-import { EmbedLoomBlockSchema } from './embed-loom-block/embed-loom-schema.js';
-import { EmbedSyncedDocBlockSchema } from './embed-synced-doc-block/embed-synced-doc-schema.js';
-import { EmbedYoutubeBlockSchema } from './embed-youtube-block/embed-youtube-schema.js';
 import { FrameBlockSchema } from './frame-block/frame-model.js';
 import { NoteBlockSchema } from './note-block/note-model.js';
 import { RootBlockSchema } from './root-block/root-model.js';

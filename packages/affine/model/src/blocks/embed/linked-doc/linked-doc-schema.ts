@@ -1,9 +1,9 @@
-import { createEmbedBlockSchema } from '../_common/embed-block-helper/helper.js';
+import { createEmbedBlockSchema } from '../../../utils/index.js';
 import {
   type EmbedLinkedDocBlockProps,
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
-} from './embed-linked-doc-model.js';
+} from './linked-doc-model.js';
 
 const defaultEmbedLinkedDocBlockProps: EmbedLinkedDocBlockProps = {
   pageId: '',

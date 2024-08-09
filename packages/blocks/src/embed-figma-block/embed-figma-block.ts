@@ -1,10 +1,13 @@
+import type {
+  EmbedFigmaModel,
+  EmbedFigmaStyles,
+} from '@blocksuite/affine-model';
+
 import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { EmbedFigmaStyles } from './embed-figma-model.js';
-import type { EmbedFigmaModel } from './embed-figma-model.js';
 import type { EmbedFigmaBlockService } from './embed-figma-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';

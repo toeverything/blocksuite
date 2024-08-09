@@ -1,9 +1,9 @@
-import { createEmbedBlockSchema } from '../_common/embed-block-helper/helper.js';
+import { createEmbedBlockSchema } from '../../../utils/index.js';
 import {
   type EmbedHtmlBlockProps,
   EmbedHtmlModel,
   EmbedHtmlStyles,
-} from './embed-html-model.js';
+} from './html-model.js';
 
 const defaultEmbedHtmlProps: EmbedHtmlBlockProps = {
   style: EmbedHtmlStyles[0],

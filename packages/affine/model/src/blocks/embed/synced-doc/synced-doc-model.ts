@@ -1,8 +1,8 @@
 import { BlockModel } from '@blocksuite/store';
 
-import type { EmbedCardStyle } from '../_common/types.js';
+import type { EmbedCardStyle } from '../../../utils/index.js';
 
-import { defineEmbedModel } from '../_common/embed-block-helper/embed-block-model.js';
+import { defineEmbedModel } from '../../../utils/index.js';
 
 export const EmbedSyncedDocStyles: EmbedCardStyle[] = ['syncedDoc'];
 
@@ -20,6 +20,9 @@ export class EmbedSyncedDocModel extends defineEmbedModel<EmbedSyncedDocBlockPro
 declare global {
   namespace BlockSuite {
     interface EdgelessBlockModelMap {
+      'affine:embed-synced-doc': EmbedSyncedDocModel;
+    }
+    interface BlockModels {
       'affine:embed-synced-doc': EmbedSyncedDocModel;
     }
   }

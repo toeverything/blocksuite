@@ -1,3 +1,8 @@
+import type {
+  EmbedGithubModel,
+  EmbedGithubStyles,
+} from '@blocksuite/affine-model';
+
 import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -5,13 +10,12 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedGithubStyles } from './embed-github-model.js';
 import type { EmbedGithubBlockService } from './embed-github-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import { type EmbedGithubModel, githubUrlRegex } from './embed-github-model.js';
+import { githubUrlRegex } from './embed-github-model.js';
 import { GithubIcon, styles } from './styles.js';
 import {
   getGithubStatusIcon,

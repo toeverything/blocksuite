@@ -1,4 +1,6 @@
 import type {
+  EmbedLinkedDocModel,
+  EmbedSyncedDocModel,
   ListBlockModel,
   ParagraphBlockModel,
 } from '@blocksuite/affine-model';
@@ -7,8 +9,6 @@ import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
-import type { EmbedLinkedDocModel } from '../../embed-linked-doc-block/index.js';
-import type { EmbedSyncedDocModel } from '../../embed-synced-doc-block/index.js';
 import type { SurfaceRefBlockModel } from '../../surface-ref-block/index.js';
 
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';

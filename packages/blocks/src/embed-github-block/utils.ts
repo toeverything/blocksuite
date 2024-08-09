@@ -1,13 +1,12 @@
+import type { EmbedGithubModel } from '@blocksuite/affine-model';
+import type { EmbedGithubBlockUrlData } from '@blocksuite/affine-model';
+
 import { isAbortError } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
 import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
 import type { EmbedGithubBlockComponent } from './embed-github-block.js';
-import type {
-  EmbedGithubBlockUrlData,
-  EmbedGithubModel,
-} from './embed-github-model.js';
 
 import {
   GithubIssueClosedFailureIcon,

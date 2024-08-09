@@ -1,9 +1,9 @@
-import { createEmbedBlockSchema } from '../_common/embed-block-helper/helper.js';
+import { createEmbedBlockSchema } from '../../../utils/index.js';
 import {
   type EmbedYoutubeBlockProps,
   EmbedYoutubeModel,
   EmbedYoutubeStyles,
-} from './embed-youtube-model.js';
+} from './youtube-model.js';
 
 const defaultEmbedYoutubeProps: EmbedYoutubeBlockProps = {
   style: EmbedYoutubeStyles[0],

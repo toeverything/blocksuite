@@ -1,9 +1,9 @@
-import { createEmbedBlockSchema } from '../_common/embed-block-helper/helper.js';
+import { createEmbedBlockSchema } from '../../../utils/index.js';
 import {
   type EmbedGithubBlockProps,
   EmbedGithubModel,
   EmbedGithubStyles,
-} from './embed-github-model.js';
+} from './github-model.js';
 
 const defaultEmbedGithubProps: EmbedGithubBlockProps = {
   style: EmbedGithubStyles[1],

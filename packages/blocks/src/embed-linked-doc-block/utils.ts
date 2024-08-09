@@ -1,3 +1,4 @@
+import type { EmbedLinkedDocStyles } from '@blocksuite/affine-model';
 import type { TemplateResult } from 'lit';
 
 import {
@@ -8,8 +9,6 @@ import {
   ReloadIcon,
 } from '@blocksuite/affine-components/icons';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-
-import type { EmbedLinkedDocStyles } from './embed-linked-doc-model.js';
 
 import {
   DarkSyncedDocErrorBanner,

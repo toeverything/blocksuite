@@ -1,11 +1,11 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { EmbedLinkedDocBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
 
 import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
 
 import { commands } from './commands/index.js';
-import { EmbedLinkedDocBlockSchema } from './embed-linked-doc-schema.js';
 
 export type EmbedLinkedDocBlockSpecType = BlockSpec<
   string,

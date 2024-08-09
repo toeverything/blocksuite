@@ -1,4 +1,13 @@
-import type { BookmarkBlockModel } from '@blocksuite/affine-model';
+import type {
+  BookmarkBlockModel,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedHtmlModel,
+  EmbedLinkedDocModel,
+  EmbedLoomModel,
+  EmbedSyncedDocModel,
+  EmbedYoutubeModel,
+} from '@blocksuite/affine-model';
 
 import {
   CaptionIcon,
@@ -22,31 +31,12 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Action } from '../../../_common/components/toolbar/utils.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
 import type { BookmarkBlockComponent } from '../../../bookmark-block/index.js';
-import type {
-  EmbedFigmaBlockComponent,
-  EmbedFigmaModel,
-} from '../../../embed-figma-block/index.js';
-import type {
-  EmbedGithubBlockComponent,
-  EmbedGithubModel,
-} from '../../../embed-github-block/index.js';
-import type { EmbedHtmlModel } from '../../../embed-html-block/index.js';
-import type {
-  EmbedLinkedDocBlockComponent,
-  EmbedLinkedDocModel,
-} from '../../../embed-linked-doc-block/index.js';
-import type {
-  EmbedLoomBlockComponent,
-  EmbedLoomModel,
-} from '../../../embed-loom-block/index.js';
-import type {
-  EmbedSyncedDocBlockComponent,
-  EmbedSyncedDocModel,
-} from '../../../embed-synced-doc-block/index.js';
-import type {
-  EmbedYoutubeBlockComponent,
-  EmbedYoutubeModel,
-} from '../../../embed-youtube-block/index.js';
+import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/index.js';
+import type { EmbedGithubBlockComponent } from '../../../embed-github-block/index.js';
+import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/index.js';
+import type { EmbedLoomBlockComponent } from '../../../embed-loom-block/index.js';
+import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/index.js';
+import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EmbedOptions } from '../../root-service.js';
 

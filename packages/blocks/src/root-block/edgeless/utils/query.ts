@@ -1,6 +1,14 @@
 import type {
   AttachmentBlockModel,
   BookmarkBlockModel,
+  EmbedBlockModel,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedHtmlModel,
+  EmbedLinkedDocModel,
+  EmbedLoomModel,
+  EmbedSyncedDocModel,
+  EmbedYoutubeModel,
   ImageBlockModel,
 } from '@blocksuite/affine-model';
 import type { PointLocation } from '@blocksuite/global/utils';
@@ -9,16 +17,8 @@ import type { BlockModel } from '@blocksuite/store';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 
-import type { EmbedBlockModel } from '../../../_common/embed-block-helper/embed-block-model.js';
 import type { Connectable } from '../../../_common/utils/index.js';
 import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
-import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
-import type { EmbedHtmlModel } from '../../../embed-html-block/index.js';
-import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.js';
-import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
-import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';

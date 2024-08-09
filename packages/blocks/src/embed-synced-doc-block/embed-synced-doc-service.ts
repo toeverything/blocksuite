@@ -1,5 +1,5 @@
-import { BlockService } from '@blocksuite/block-std';
+import type { EmbedSyncedDocModel } from '@blocksuite/affine-model';
 
-import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
+import { BlockService } from '@blocksuite/block-std';
 
 export class EmbedSyncedDocBlockService extends BlockService<EmbedSyncedDocModel> {}

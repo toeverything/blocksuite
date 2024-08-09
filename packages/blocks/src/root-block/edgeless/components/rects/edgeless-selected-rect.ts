@@ -1,4 +1,8 @@
-import type { BookmarkBlockModel } from '@blocksuite/affine-model';
+import type {
+  BookmarkBlockModel,
+  EmbedHtmlModel,
+  EmbedSyncedDocModel,
+} from '@blocksuite/affine-model';
 import type { IVec, PointLocation } from '@blocksuite/global/utils';
 
 import {
@@ -23,8 +27,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessTextBlockComponent } from '../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
-import type { EmbedHtmlModel } from '../../../../embed-html-block/embed-html-model.js';
-import type { EmbedSyncedDocModel } from '../../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
