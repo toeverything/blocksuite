@@ -50,7 +50,7 @@ test.describe('frame panel', () => {
     expect(await frameCards.count()).toBe(2);
   });
 
-  test('should render note portal correctly in frame preview', async ({
+  test('should render edgeless note correctly in frame preview', async ({
     page,
   }) => {
     await edgelessCommonSetup(page);
@@ -68,8 +68,8 @@ test.describe('frame panel', () => {
     expect(await frames.count()).toBe(1);
     const frameCards = page.locator('affine-frame-card');
     expect(await frameCards.count()).toBe(1);
-    const notePortal = page.locator('surface-ref-note-portal');
-    expect(await notePortal.count()).toBe(1);
+    const edgelessNote = page.locator('affine-frame-card affine-edgeless-note');
+    expect(await edgelessNote.count()).toBe(1);
   });
 
   test('should update panel when frames change', async ({ page }) => {
