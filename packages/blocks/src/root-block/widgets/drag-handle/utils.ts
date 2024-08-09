@@ -96,15 +96,6 @@ export const captureEventTarget = (target: EventTarget | null) => {
     : null;
 };
 
-export const getNoteId = (block: BlockComponent) => {
-  let element = block;
-  while (element && element.flavour !== 'affine:note') {
-    element = element.parentBlock;
-  }
-
-  return element.model.id;
-};
-
 export const includeTextSelection = (selections: BaseSelection[]) => {
   return selections.some(selection => selection.type === 'text');
 };

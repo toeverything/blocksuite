@@ -502,7 +502,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     return (
       this.isConnected &&
       // prevent surface-ref from render itself in loop
-      !this.parentBlock.closest('affine-surface-ref')
+      !this.parentComponent?.closest('affine-surface-ref')
     );
   }
 

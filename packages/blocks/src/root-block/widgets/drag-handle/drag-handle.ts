@@ -31,6 +31,7 @@ import type { DragHandleOption, DropResult, DropType } from './config.js';
 
 import {
   Rect,
+  findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
   getCurrentNativeRange,
   getModelByBlockComponent,
@@ -70,7 +71,6 @@ import {
   getDragHandleContainerHeight,
   getDragHandleLeftPadding,
   getDuplicateBlocks,
-  getNoteId,
   includeTextSelection,
   insideDatabaseTable,
   isBlockPathEqual,
@@ -799,8 +799,9 @@ export class AffineDragHandleWidget extends WidgetComponent<
         });
         if (!newSelectedBlocks) return;
 
-        const noteId = getNoteId(parentElement);
-        this._setSelectedBlocks(newSelectedBlocks as BlockComponent[], noteId);
+        const note = findNoteBlockModel(parentElement.model);
+        if (!note) return;
+        this._setSelectedBlocks(newSelectedBlocks as BlockComponent[], note.id);
       }
     }, 0);
 
@@ -1079,7 +1080,10 @@ export class AffineDragHandleWidget extends WidgetComponent<
     // When current page is edgeless page
     // We need to remain surface selection and set editing as true
     if (isInsideEdgelessEditor(this.host)) {
-      const surfaceElementId = noteId ? noteId : getNoteId(blocks[0]);
+      const surfaceElementId = noteId
+        ? noteId
+        : findNoteBlockModel(blocks[0].model)?.id;
+      if (!surfaceElementId) return;
       const surfaceSelection = selection.create(
         'surface',
         blocks[0]!.blockId,

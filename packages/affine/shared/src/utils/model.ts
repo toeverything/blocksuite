@@ -28,3 +28,17 @@ export function isInsideBlockByFlavour(
   }
   return isInsideBlockByFlavour(doc, parent, flavour);
 }
+
+export function findAncestorModel(
+  model: BlockModel,
+  match: (m: BlockModel) => boolean
+) {
+  let curModel: BlockModel | null = model;
+  while (curModel) {
+    if (match(curModel)) {
+      return curModel;
+    }
+    curModel = curModel.parent;
+  }
+  return null;
+}

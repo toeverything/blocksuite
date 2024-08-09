@@ -62,6 +62,7 @@ export {
 } from './_common/types.js';
 export {
   createButtonPopper,
+  findNoteBlockModel,
   matchFlavours,
   on,
   once,

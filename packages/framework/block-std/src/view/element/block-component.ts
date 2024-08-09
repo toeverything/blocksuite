@@ -277,10 +277,10 @@ export class BlockComponent<
     return model;
   }
 
-  get parentBlock(): BlockComponent {
-    const el = this.parentElement;
-    // TODO(mirone/#6534): find a better way to get block element from a node
-    return el?.closest('[data-block-id]') as BlockComponent;
+  get parentComponent(): BlockComponent | null {
+    const parent = this.model.parent;
+    if (!parent) return null;
+    return this.std.view.getBlock(parent.id);
   }
 
   get rootComponent(): BlockComponent | null {

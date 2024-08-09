@@ -242,7 +242,7 @@ export class SurfaceBlockComponent extends BlockComponent<
   }
 
   get edgeless() {
-    return this.parentBlock as EdgelessRootBlockComponent;
+    return this.parentComponent as EdgelessRootBlockComponent;
   }
 
   get renderer() {

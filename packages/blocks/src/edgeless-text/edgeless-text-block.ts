@@ -65,7 +65,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
 
   private _initDragEffect() {
     const edgelessSelection = this.rootService.selection;
-    const selectedRect = this.parentBlock.selectedRect;
+    const selectedRect = this.parentComponent.selectedRect;
     const disposables = this.disposables;
 
     if (!edgelessSelection || !selectedRect) {
@@ -371,8 +371,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     );
   }
 
-  override get parentBlock() {
-    return super.parentBlock as EdgelessRootBlockComponent;
+  override get parentComponent() {
+    return super.parentComponent as EdgelessRootBlockComponent;
   }
 
   @state()
