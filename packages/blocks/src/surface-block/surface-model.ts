@@ -17,13 +17,6 @@ import { connectorMiddleware } from './middlewares/connector.js';
 import { groupRelationMiddleware } from './middlewares/group.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
-export interface ElementUpdatedData {
-  id: string;
-  props: Record<string, unknown>;
-  oldValues: Record<string, unknown>;
-  local: boolean;
-}
-
 const migration = {
   toV4: data => {
     const { elements } = data;

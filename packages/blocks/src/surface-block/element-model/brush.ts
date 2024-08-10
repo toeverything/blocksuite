@@ -3,7 +3,6 @@ import type {
   BaseElementProps,
   PointTestOptions,
 } from '@blocksuite/block-std/gfx';
-import type { IVec, IVec3, SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
   GfxPrimitiveElementModel,
@@ -12,7 +11,20 @@ import {
   watch,
   yfield,
 } from '@blocksuite/block-std/gfx';
-import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
+import {
+  Bound,
+  type IVec,
+  type IVec3,
+  PointLocation,
+  type SerializedXYWH,
+  Vec,
+  getPointsFromBoundsWithRotation,
+  getQuadBoundsWithRotation,
+  getSvgPathFromStroke,
+  isPointOnlines,
+  lineIntersects,
+  polyLineNearestPoint,
+} from '@blocksuite/global/utils';
 
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
 import {
@@ -20,14 +32,6 @@ import {
   inflateBound,
   transformPointsToNewBound,
 } from '../utils/bound.js';
-import {
-  getPointsFromBoundsWithRotation,
-  getQuadBoundsWithRotation,
-  getSvgPathFromStroke,
-  isPointOnlines,
-  lineIntersects,
-  polyLineNearestPoint,
-} from '../utils/math-utils.js';
 
 export type BrushProps = BaseElementProps & {
   /**

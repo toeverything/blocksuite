@@ -1,9 +1,9 @@
 import type { IVec, IVec3 } from '@blocksuite/global/utils';
 
+import { almostEqual } from '@blocksuite/global/utils';
 import { describe, expect, it } from 'vitest';
 
 import { AStarRunner } from '../../surface-block/utils/a-star.js';
-import { almostEqual } from '../../surface-block/utils/math-utils.js';
 
 function mergePath(points: IVec3[]) {
   if (points.length === 0) return points;

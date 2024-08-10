@@ -21,7 +21,13 @@ import {
   local,
   yfield,
 } from '@blocksuite/block-std/gfx';
-import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
+import {
+  Bound,
+  PointLocation,
+  Vec,
+  linePolylineIntersects,
+  polyLineNearestPoint,
+} from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import { DEFAULT_ROUGHNESS } from '../consts.js';
@@ -32,10 +38,6 @@ import {
   getBezierPoint,
   intersects,
 } from '../utils/curve.js';
-import {
-  linePolylineIntersects,
-  polyLineNearestPoint,
-} from '../utils/math-utils.js';
 import { Polyline } from '../utils/polyline.js';
 
 export enum ConnectorEndpoint {

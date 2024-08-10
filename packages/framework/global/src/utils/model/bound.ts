@@ -1,13 +1,13 @@
+import type { SerializedXYWH, XYWH } from '../xywh.js';
 import type { IVec } from './vec.js';
-import type { SerializedXYWH, XYWH } from './xywh.js';
 
 import {
   EPSILON,
   getBoundsFromPoints,
   lineIntersects,
   polygonPointDistance,
-} from './math.js';
-import { deserializeXYWH, serializeXYWH } from './xywh.js';
+} from '../math.js';
+import { deserializeXYWH, serializeXYWH } from '../xywh.js';
 
 /**
  * Represents the x, y, width, and height of a block that can be easily accessed.

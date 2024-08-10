@@ -3,11 +3,21 @@ import type { IBound, IVec, IVec3 } from '@blocksuite/global/utils';
 import { last } from '@blocksuite/affine-shared/utils';
 import {
   Bound,
+  PI2,
   PointLocation,
   Vec,
+  almostEqual,
   assertEquals,
   assertExists,
   assertType,
+  clamp,
+  getBoundsWithRotation,
+  getPointFromBoundsWithRotation,
+  isOverlap,
+  isVecZero,
+  lineIntersects,
+  sign,
+  toRadian,
 } from '@blocksuite/global/utils';
 
 import type { Connectable } from '../../_common/types.js';
@@ -30,18 +40,6 @@ import {
   getBezierCurveBoundingBox,
   getBezierParameters,
 } from '../utils/curve.js';
-import {
-  PI2,
-  almostEqual,
-  clamp,
-  getBoundsWithRotation,
-  getPointFromBoundsWithRotation,
-  isOverlap,
-  isVecZero,
-  lineIntersects,
-  sign,
-  toRadian,
-} from '../utils/math-utils.js';
 
 export type OrthogonalConnectorInput = {
   startBound: Bound | null;

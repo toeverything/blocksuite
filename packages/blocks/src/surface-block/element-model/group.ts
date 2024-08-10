@@ -2,7 +2,6 @@ import type {
   BaseElementProps,
   SerializedElement,
 } from '@blocksuite/block-std/gfx';
-import type { IVec, PointLocation } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
 import { keys } from '@blocksuite/affine-shared/utils';
@@ -12,10 +11,13 @@ import {
   observe,
   yfield,
 } from '@blocksuite/block-std/gfx';
+import {
+  type IVec,
+  type PointLocation,
+  linePolygonIntersects,
+} from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
-
-import { linePolygonIntersects } from '../utils/math-utils.js';
 
 type GroupElementProps = BaseElementProps & {
   children: Y.Map<boolean>;

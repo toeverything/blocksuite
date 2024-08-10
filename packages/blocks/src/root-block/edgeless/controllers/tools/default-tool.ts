@@ -6,8 +6,13 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import { clamp } from '@blocksuite/affine-shared/utils';
-import { Bound, Vec } from '@blocksuite/global/utils';
-import { DisposableGroup, noop } from '@blocksuite/global/utils';
+import {
+  Bound,
+  DisposableGroup,
+  Vec,
+  intersects,
+  noop,
+} from '@blocksuite/global/utils';
 
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
@@ -37,7 +42,6 @@ import {
   showMergeIndicator,
 } from '../../../../surface-block/element-model/utils/mindmap/utils.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
-import { intersects } from '../../../../surface-block/utils/math-utils.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { prepareCloneData } from '../../utils/clone-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';

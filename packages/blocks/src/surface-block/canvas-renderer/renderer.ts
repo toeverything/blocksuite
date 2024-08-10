@@ -2,15 +2,18 @@ import type { IBound } from '@blocksuite/global/utils';
 
 import { type Color, ColorScheme } from '@blocksuite/affine-model';
 import { last, requestConnectedFrame } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import {
+  DisposableGroup,
+  Slot,
+  getBoundsWithRotation,
+  intersects,
+} from '@blocksuite/global/utils';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 
 import { RoughCanvas } from '../rough/canvas.js';
-import { intersects } from '../utils/math-utils.js';
-import { getBoundsWithRotation } from '../utils/math-utils.js';
 import { modelRenderer } from './element-renderer/index.js';
 
 /**
