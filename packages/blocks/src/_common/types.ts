@@ -1,7 +1,7 @@
+import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { Slot } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 
-import type { ConnectorElementModel } from '../surface-block/element-model/connector.js';
 import type {
   BrushElementModel,
   GroupElementModel,

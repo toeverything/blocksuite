@@ -1,15 +1,8 @@
-import type { IVec } from '@blocksuite/global/utils';
-
-import {
-  Bound,
-  CURVETIME_EPSILON,
-  PointLocation,
-  Vec,
-  assertExists,
-  isZero,
-} from '@blocksuite/global/utils';
-
 // control coords are not relative to start or end
+import { assertExists } from './assert.js';
+import { CURVETIME_EPSILON, isZero } from './math.js';
+import { Bound, type IVec, PointLocation, Vec } from './model/index.js';
+
 export type BezierCurveParameters = [
   start: IVec,
   control1: IVec,
@@ -390,7 +383,7 @@ function roots(points: BezierCurveParameters, line: IVec[]) {
   }
 }
 
-export function intersects(path: PointLocation[], line: [IVec, IVec]) {
+export function curveIntersects(path: PointLocation[], line: [IVec, IVec]) {
   const { minX, maxX, minY, maxY } = Bound.fromPoints(line);
   const points = getBezierParameters(path);
   const intersectedPoints = roots(points, line)

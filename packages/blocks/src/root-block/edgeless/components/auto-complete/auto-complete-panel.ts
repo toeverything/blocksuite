@@ -1,4 +1,8 @@
-import type { Color, NoteBlockModel } from '@blocksuite/affine-model';
+import type {
+  Color,
+  Connection,
+  NoteBlockModel,
+} from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
 import { FrameIcon, SmallNoteIcon } from '@blocksuite/affine-components/icons';
@@ -21,7 +25,6 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { Connection } from '../../../../surface-block/element-model/connector.js';
 import type { ShapeStyle } from '../../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 

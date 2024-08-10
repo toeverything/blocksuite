@@ -1,5 +1,11 @@
 import type { IBound, IVec, IVec3 } from '@blocksuite/global/utils';
 
+import {
+  type Connection,
+  type ConnectorElementModel,
+  ConnectorMode,
+  type LocalConnectorElementModel,
+} from '@blocksuite/affine-model';
 import { last } from '@blocksuite/affine-shared/utils';
 import {
   Bound,
@@ -11,6 +17,8 @@ import {
   assertExists,
   assertType,
   clamp,
+  getBezierCurveBoundingBox,
+  getBezierParameters,
   getBoundsWithRotation,
   getPointFromBoundsWithRotation,
   isOverlap,
@@ -22,24 +30,12 @@ import {
 
 import type { Connectable } from '../../_common/types.js';
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
-import type {
-  Connection,
-  ConnectorElementModel,
-  LocalConnectorElementModel,
-} from '../element-model/connector.js';
 
 import { Overlay } from '../canvas-renderer/renderer.js';
-import {
-  ConnectorMode,
-  isConnectorWithLabel,
-} from '../element-model/connector.js';
+import { isConnectorWithLabel } from '../element-model/connector.js';
 import { GroupElementModel } from '../element-model/group.js';
 import { AStarRunner } from '../utils/a-star.js';
 import { getBoundFromPoints } from '../utils/bound.js';
-import {
-  getBezierCurveBoundingBox,
-  getBezierParameters,
-} from '../utils/curve.js';
 
 export type OrthogonalConnectorInput = {
   startBound: Bound | null;

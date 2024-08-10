@@ -11,7 +11,6 @@ export const GRID_SIZE = 3000;
 export const GRID_GAP_MIN = 10;
 export const GRID_GAP_MAX = 50;
 
-export const DEFAULT_ROUGHNESS = 1.4;
 // TODO: need to check the default central area ratio
 export const DEFAULT_CENTRAL_AREA_RATIO = 0.3;
 

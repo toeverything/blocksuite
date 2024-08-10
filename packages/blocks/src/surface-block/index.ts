@@ -19,15 +19,6 @@ export {
 } from './consts.js';
 export { SurfaceElementModel } from './element-model/base.js';
 export { BrushElementModel } from './element-model/brush.js';
-export {
-  type Connection,
-  ConnectorElementModel,
-  ConnectorEndpoint,
-  ConnectorMode,
-  DEFAULT_FRONT_END_POINT_STYLE,
-  DEFAULT_REAR_END_POINT_STYLE,
-  type PointStyle,
-} from './element-model/connector.js';
 export { GroupElementModel } from './element-model/group.js';
 export { CanvasElementType } from './element-model/index.js';
 export {
@@ -52,6 +43,15 @@ export { SurfaceBlockModel as SurfaceBlockModel } from './surface-model.js';
 export { AStarRunner } from './utils/a-star.js';
 export * from './utils/bound.js';
 export * from './utils/index.js';
+export {
+  type Connection,
+  ConnectorElementModel,
+  ConnectorEndpoint,
+  ConnectorMode,
+  DEFAULT_FRONT_END_POINT_STYLE,
+  DEFAULT_REAR_END_POINT_STYLE,
+  type PointStyle,
+} from '@blocksuite/affine-model';
 export {
   almostEqual,
   clamp,

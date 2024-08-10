@@ -1,3 +1,8 @@
+import type {
+  ConnectorElementProps,
+  ConnectorLabelProps,
+} from '@blocksuite/affine-model';
+
 import {
   AddTextIcon,
   ConnectorCWithArrowIcon,
@@ -28,10 +33,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type {
-  ConnectorElementProps,
-  ConnectorLabelProps,
-} from '../../../surface-block/element-model/connector.js';
 import type { PointStyle } from '../../../surface-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';

@@ -1,8 +1,11 @@
 import type { BlockService } from '@blocksuite/block-std';
 
 import {
+  ConnectorMode,
+  DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_SHADOW,
+  DEFAULT_REAR_END_POINT_STYLE,
   FontFamily,
   FontStyle,
   FontWeight,
@@ -27,11 +30,6 @@ import {
   LineColorsSchema,
 } from '../../root-block/edgeless/components/panel/color-panel.js';
 import { ShapeStyle } from '../consts.js';
-import {
-  ConnectorMode,
-  DEFAULT_FRONT_END_POINT_STYLE,
-  DEFAULT_REAR_END_POINT_STYLE,
-} from '../element-model/connector.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,

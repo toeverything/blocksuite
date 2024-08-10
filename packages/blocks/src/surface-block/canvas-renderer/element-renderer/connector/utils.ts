@@ -1,19 +1,21 @@
-import type { IVec, PointLocation } from '@blocksuite/global/utils';
-
-import { Vec } from '@blocksuite/global/utils';
-
 import type {
-  ConnectorElementModel,
-  LocalConnectorElementModel,
-} from '../../../element-model/connector.js';
-import type { RoughCanvas } from '../../../rough/canvas.js';
+  BezierCurveParameters,
+  IVec,
+  PointLocation,
+} from '@blocksuite/global/utils';
 
-import { ConnectorMode } from '../../../element-model/connector.js';
 import {
-  type BezierCurveParameters,
+  type ConnectorElementModel,
+  ConnectorMode,
+  type LocalConnectorElementModel,
+} from '@blocksuite/affine-model';
+import {
+  Vec,
   getBezierParameters,
   getBezierTangent,
-} from '../../../utils/curve.js';
+} from '@blocksuite/global/utils';
+
+import type { RoughCanvas } from '../../../rough/canvas.js';
 
 type ConnectorEnd = 'Front' | 'Rear';
 
