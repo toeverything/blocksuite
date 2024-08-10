@@ -9,15 +9,15 @@ import {
   type TextStyleProps,
 } from '@blocksuite/affine-model';
 import { yfield } from '@blocksuite/block-std/gfx';
-import { Bound } from '@blocksuite/global/utils';
-import { DocCollection, type Y } from '@blocksuite/store';
-
 import {
+  Bound,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   polygonNearestPoint,
-} from '../utils/math-utils.js';
+} from '@blocksuite/global/utils';
+import { DocCollection, type Y } from '@blocksuite/store';
+
 import { type BaseElementProps, SurfaceElementModel } from './base.js';
 
 export type TextElementProps = BaseElementProps & {

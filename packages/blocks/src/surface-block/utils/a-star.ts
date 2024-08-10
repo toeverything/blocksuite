@@ -1,10 +1,9 @@
 import type { IVec3 } from '@blocksuite/global/utils';
 import type { Bound } from '@blocksuite/global/utils';
 
-import { assertExists } from '@blocksuite/global/utils';
+import { almostEqual, assertExists } from '@blocksuite/global/utils';
 
 import { Graph } from './graph.js';
-import { almostEqual } from './math-utils.js';
 import { PriorityQueue } from './priority-queue.js';
 
 function cost(point: IVec3, point2: IVec3) {

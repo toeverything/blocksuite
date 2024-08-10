@@ -7,6 +7,7 @@
     "test": "nx e2e"
   },
   "dependencies": {
+    "@blocksuite/global": "workspace:*",
     "@blocksuite/affine-model": "workspace:*"
   },
   "repository": {

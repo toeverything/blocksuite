@@ -1,14 +1,8 @@
-import type { IBound } from '@blocksuite/global/utils';
-import type { IVec } from '@blocksuite/global/utils';
+import type { IBound, IVec } from '@blocksuite/global/utils';
 
-import { Bound } from '@blocksuite/global/utils';
-import { PointLocation } from '@blocksuite/global/utils';
-
-import type { PointTestOptions } from '../../base.js';
-import type { ShapeElementModel } from '../../shape.js';
-
-import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
 import {
+  Bound,
+  PointLocation,
   getCenterAreaBounds,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
@@ -17,7 +11,12 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
-} from '../../../utils/math-utils.js';
+} from '@blocksuite/global/utils';
+
+import type { PointTestOptions } from '../../base.js';
+import type { ShapeElementModel } from '../../shape.js';
+
+import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
 
 export const rect = {
   points({ x, y, w, h }: IBound) {

@@ -6,16 +6,17 @@ import type {
 import type { Bound } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
+import {
+  getPointsFromBoundsWithRotation,
+  rotatePoints,
+} from '@blocksuite/global/utils';
+
 import type { TextElementModel } from '../../../element-model/text.js';
 
 import {
   getFontFacesByFontFamily,
   wrapFontFamily,
 } from '../../../utils/font.js';
-import {
-  getPointsFromBoundsWithRotation,
-  rotatePoints,
-} from '../../../utils/math-utils.js';
 
 export type TextDelta = {
   insert: string;

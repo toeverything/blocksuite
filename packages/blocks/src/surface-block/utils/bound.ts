@@ -1,9 +1,10 @@
-import type { IVec } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/global/utils';
-
-import { Bound } from '@blocksuite/global/utils';
-
-import { getBoundsFromPoints, getBoundsWithRotation } from './math-utils.js';
+import {
+  Bound,
+  type IBound,
+  type IVec,
+  getBoundsFromPoints,
+  getBoundsWithRotation,
+} from '@blocksuite/global/utils';
 
 function getExpandedBound(a: IBound, b: IBound): IBound {
   const minX = Math.min(a.x, b.x);

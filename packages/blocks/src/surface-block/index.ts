@@ -74,7 +74,7 @@ export {
   sign,
   toDegree,
   toRadian,
-} from './utils/math-utils.js';
+} from '@blocksuite/global/utils';
 
 declare global {
   namespace BlockSuite {

@@ -744,6 +744,9 @@ importers:
       '@blocksuite/affine-model':
         specifier: workspace:*
         version: link:../packages/affine/model
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../packages/framework/global
 
 packages:
 

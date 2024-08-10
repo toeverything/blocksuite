@@ -1,6 +1,15 @@
-import type { IVec } from '@blocksuite/global/utils';
 import type { IBound } from '@blocksuite/global/utils';
 
+import {
+  type IVec,
+  clamp,
+  getPointsFromBoundsWithRotation,
+  lineEllipseIntersects,
+  pointInEllipse,
+  pointInPolygon,
+  rotatePoints,
+  toRadian,
+} from '@blocksuite/global/utils';
 import { Vec } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { PointLocation } from '@blocksuite/global/utils';
@@ -9,15 +18,6 @@ import type { PointTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 
 import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
-import {
-  clamp,
-  getPointsFromBoundsWithRotation,
-  lineEllipseIntersects,
-  pointInEllipse,
-  pointInPolygon,
-  rotatePoints,
-  toRadian,
-} from '../../../utils/math-utils.js';
 
 export const ellipse = {
   points({ x, y, w, h }: IBound): IVec[] {
