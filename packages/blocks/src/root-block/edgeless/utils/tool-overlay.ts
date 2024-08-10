@@ -1,14 +1,16 @@
 import type { XYWH } from '@blocksuite/global/utils';
 
+import {
+  type Color,
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+} from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, noop } from '@blocksuite/global/utils';
 
-import type { Color } from '../../../surface-block/consts.js';
 import type { ShapeStyle } from '../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../_common/edgeless/note/consts.js';
 import { shapeMethods } from '../../../surface-block/element-model/shape.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,

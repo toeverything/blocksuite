@@ -1,4 +1,4 @@
-import type { ColorScheme } from '@blocksuite/affine-shared/theme';
+import type { ColorScheme } from '@blocksuite/affine-model';
 
 import {
   AddTextIcon,
@@ -7,6 +7,7 @@ import {
   ScribbledStyleIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import { FontFamily, StrokeStyle } from '@blocksuite/affine-model';
 import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
@@ -28,7 +29,6 @@ import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import { LineWidth } from '../../../_common/types.js';
-import { FontFamily } from '../../../surface-block/consts.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -39,7 +39,6 @@ import {
 import {
   type ShapeElementModel,
   ShapeStyle,
-  StrokeStyle,
 } from '../../../surface-block/index.js';
 import '../../edgeless/components/color-picker/index.js';
 import {

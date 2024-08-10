@@ -38,12 +38,6 @@ export type NoteChildrenFlavour =
   | 'affine:attachment'
   | 'affine:surface-ref';
 
-export enum NoteDisplayMode {
-  DocAndEdgeless = 'both',
-  DocOnly = 'doc',
-  EdgelessOnly = 'edgeless',
-}
-
 export interface Viewport {
   left: number;
   top: number;

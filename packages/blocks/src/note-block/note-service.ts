@@ -1,3 +1,6 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
+
+import { NoteBlockSchema } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Point } from '@blocksuite/global/utils';
@@ -24,7 +27,6 @@ import {
   selectBlocksBetween,
   updateBlockType,
 } from './commands/index.js';
-import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
 
 export class NoteBlockService extends BlockService<NoteBlockModel> {
   private _dragHandleOption: DragHandleOption = {

@@ -3,7 +3,8 @@ import {
   ArrowRightSmallIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
-import { ColorScheme, ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ColorScheme } from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { debounce } from '@blocksuite/global/utils';

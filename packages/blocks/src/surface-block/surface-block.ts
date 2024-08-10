@@ -1,3 +1,5 @@
+import type { Color } from '@blocksuite/affine-model';
+
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { values } from '@blocksuite/affine-shared/utils';
 import { BlockComponent, RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
@@ -6,7 +8,6 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import type { Color } from './consts.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 

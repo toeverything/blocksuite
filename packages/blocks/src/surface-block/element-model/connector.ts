@@ -6,6 +6,15 @@ import type {
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
+  type Color,
+  FontFamily,
+  FontStyle,
+  FontWeight,
+  StrokeStyle,
+  TextAlign,
+  type TextStyleProps,
+} from '@blocksuite/affine-model';
+import {
   GfxLocalElementModel,
   GfxPrimitiveElementModel,
   derive,
@@ -15,17 +24,7 @@ import {
 import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import type { Color } from '../consts.js';
-
-import {
-  DEFAULT_ROUGHNESS,
-  FontFamily,
-  FontStyle,
-  FontWeight,
-  StrokeStyle,
-  TextAlign,
-  type TextStyleProps,
-} from '../consts.js';
+import { DEFAULT_ROUGHNESS } from '../consts.js';
 import {
   getBezierNearestPoint,
   getBezierNearestTime,

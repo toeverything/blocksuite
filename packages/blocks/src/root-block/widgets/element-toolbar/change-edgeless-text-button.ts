@@ -1,6 +1,7 @@
+import type { EdgelessTextBlockModel } from '@blocksuite/affine-model';
+
 import { html, nothing } from 'lit';
 
-import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import './change-text-menu.js';

@@ -1,3 +1,5 @@
+import type { Color } from '@blocksuite/affine-model';
+
 import {
   GeneralStyleIcon,
   ScribbledStyleIcon,
@@ -6,7 +8,6 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { Color } from '../../../../../surface-block/consts.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { ShapeName } from './shape-tool-element.js';
 

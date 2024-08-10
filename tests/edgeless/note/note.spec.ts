@@ -1,4 +1,4 @@
-import { NoteDisplayMode } from '@blocks/_common/types.js';
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports

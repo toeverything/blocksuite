@@ -1,11 +1,10 @@
 import type { IBound } from '@blocksuite/global/utils';
 
-import { ColorScheme } from '@blocksuite/affine-shared/theme';
+import { type Color, ColorScheme } from '@blocksuite/affine-model';
 import { last, requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import type { Color } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 

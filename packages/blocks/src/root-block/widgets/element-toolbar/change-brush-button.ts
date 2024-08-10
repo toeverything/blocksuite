@@ -1,4 +1,4 @@
-import type { ColorScheme } from '@blocksuite/affine-shared/theme';
+import type { ColorScheme } from '@blocksuite/affine-model';
 
 import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';

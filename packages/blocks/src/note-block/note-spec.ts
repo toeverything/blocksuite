@@ -1,8 +1,8 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { NoteBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
 
-import { NoteBlockSchema } from './note-model.js';
 import { NoteBlockService } from './note-service.js';
 
 export const NoteBlockSpec: BlockSpec = {

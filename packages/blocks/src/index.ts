@@ -51,11 +51,7 @@ export { AffineReference } from './_common/inline/presets/nodes/reference-node/r
 export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export * from './_common/transformers/index.js';
-export {
-  type AbstractEditor,
-  type DocMode,
-  NoteDisplayMode,
-} from './_common/types.js';
+export { type AbstractEditor, type DocMode } from './_common/types.js';
 export {
   createButtonPopper,
   findNoteBlockModel,
@@ -119,7 +115,6 @@ export {
   type PointStyle,
   ShapeElementModel,
   ShapeStyle,
-  StrokeStyle,
   SurfaceBlockModel,
   TextElementModel,
   fitContent,

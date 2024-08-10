@@ -1,7 +1,13 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { MoreIndicatorIcon } from '@blocksuite/affine-components/icons';
+import {
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  NoteDisplayMode,
+  StrokeStyle,
+} from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   matchFlavours,
@@ -19,14 +25,10 @@ import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
-import type { NoteBlockModel } from './note-model.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../_common/consts.js';
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../_common/edgeless/note/consts.js';
-import { NoteDisplayMode } from '../_common/types.js';
 import { getClosestBlockComponentByPoint } from '../_common/utils/query.js';
 import { handleNativeRangeAtPoint } from '../_common/utils/selection.js';
-import { StrokeStyle } from '../surface-block/consts.js';
 import { NoteBlockComponent } from './note-block.js';
 
 @customElement('edgeless-note-mask')

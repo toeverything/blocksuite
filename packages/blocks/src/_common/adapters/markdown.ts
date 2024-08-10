@@ -11,6 +11,7 @@ import type {
 } from '@blocksuite/store';
 import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
 
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
 import { assertExists, sha } from '@blocksuite/global/utils';
 import {
@@ -33,7 +34,6 @@ import type { SerializedCells } from '../../database-block/database-model.js';
 import type { Column } from '../../database-block/types.js';
 import type { AffineTextAttributes } from '../inline/presets/affine-inline-specs.js';
 
-import { NoteDisplayMode } from '../types.js';
 import { remarkGfm } from './gfm.js';
 import { createText, fetchImage, fetchable, isNullish } from './utils.js';
 

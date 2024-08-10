@@ -1,10 +1,12 @@
-import type {
-  BookmarkBlockModel,
-  EmbedHtmlModel,
-  EmbedSyncedDocModel,
-} from '@blocksuite/affine-model';
 import type { IVec, PointLocation } from '@blocksuite/global/utils';
 
+import {
+  type BookmarkBlockModel,
+  type EdgelessTextBlockModel,
+  type EmbedHtmlModel,
+  type EmbedSyncedDocModel,
+  NoteBlockModel,
+} from '@blocksuite/affine-model';
 import {
   clamp,
   pickValues,
@@ -26,7 +28,6 @@ import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessTextBlockComponent } from '../../../../edgeless-text/edgeless-text-block.js';
-import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
@@ -40,7 +41,6 @@ import {
   SYNCED_MIN_HEIGHT,
   SYNCED_MIN_WIDTH,
 } from '../../../../embed-synced-doc-block/styles.js';
-import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import {

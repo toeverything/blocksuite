@@ -1,31 +1,32 @@
 import type { BlockService } from '@blocksuite/block-std';
 
+import {
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  DEFAULT_NOTE_SHADOW,
+  FontFamily,
+  FontStyle,
+  FontWeight,
+  NoteDisplayMode,
+  StrokeStyle,
+  TextAlign,
+  TextVerticalAlign,
+} from '@blocksuite/affine-model';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { isPlainObject, merge } from 'merge';
 import { z } from 'zod';
 
 import {
-  DEFAULT_NOTE_BACKGROUND_COLOR,
-  DEFAULT_NOTE_SHADOW,
   NoteBackgroundColorsSchema,
   NoteShadowsSchema,
 } from '../../_common/edgeless/note/consts.js';
-import { LineWidth, NoteDisplayMode } from '../../_common/types.js';
+import { LineWidth } from '../../_common/types.js';
 import {
   DEFAULT_CONNECTOR_COLOR,
   GET_DEFAULT_LINE_COLOR,
   GET_DEFAULT_TEXT_COLOR,
   LineColorsSchema,
 } from '../../root-block/edgeless/components/panel/color-panel.js';
-import {
-  FontFamily,
-  FontStyle,
-  FontWeight,
-  ShapeStyle,
-  StrokeStyle,
-  TextAlign,
-  TextVerticalAlign,
-} from '../consts.js';
+import { ShapeStyle } from '../consts.js';
 import {
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,

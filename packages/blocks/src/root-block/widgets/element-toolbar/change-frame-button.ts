@@ -1,6 +1,5 @@
-import type { ColorScheme } from '@blocksuite/affine-shared/theme';
-
 import { NoteIcon, RenameIcon } from '@blocksuite/affine-components/icons';
+import { type ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
 import { countBy, matchFlavours, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { deserializeXYWH, serializeXYWH } from '@blocksuite/global/utils';
@@ -20,7 +19,6 @@ import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import '../../../_common/components/toolbar/separator.js';
 import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import { NoteDisplayMode } from '../../../_common/types.js';
 import {
   packColor,
   packColorsWithColorScheme,

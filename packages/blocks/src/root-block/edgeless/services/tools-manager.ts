@@ -7,6 +7,7 @@ import type {
 } from '@blocksuite/block-std';
 import type { Bound } from '@blocksuite/global/utils';
 
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { IS_MAC } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
@@ -17,7 +18,6 @@ import type { EdgelessTool } from '../types.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 import {
-  NoteDisplayMode,
   isMiddleButtonPressed,
   isRightButtonPressed,
 } from '../../../_common/utils/index.js';

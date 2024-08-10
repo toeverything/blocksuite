@@ -3,13 +3,13 @@ import {
   LinkIcon,
   TextIcon,
 } from '@blocksuite/affine-components/icons';
+import { DEFAULT_NOTE_BACKGROUND_COLOR } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import type { NoteTool } from '../../../controllers/tools/note-tool.js';
 
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { toShapeNotToAdapt } from './icon.js';

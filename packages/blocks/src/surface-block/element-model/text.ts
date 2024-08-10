@@ -1,18 +1,17 @@
 import type { IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
-import { yfield } from '@blocksuite/block-std/gfx';
-import { Bound } from '@blocksuite/global/utils';
-import { DocCollection, type Y } from '@blocksuite/store';
-
-import type { Color } from '../consts.js';
-
 import {
+  type Color,
   FontFamily,
   FontStyle,
   FontWeight,
   TextAlign,
   type TextStyleProps,
-} from '../consts.js';
+} from '@blocksuite/affine-model';
+import { yfield } from '@blocksuite/block-std/gfx';
+import { Bound } from '@blocksuite/global/utils';
+import { DocCollection, type Y } from '@blocksuite/store';
+
 import {
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,

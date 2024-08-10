@@ -1,3 +1,7 @@
+import type {
+  EdgelessTextBlockModel,
+  NoteBlockModel,
+} from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
@@ -5,9 +9,7 @@ import { clamp } from '@blocksuite/affine-shared/utils';
 import { Bound, Vec } from '@blocksuite/global/utils';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 
-import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessTool } from '../../types.js';
 

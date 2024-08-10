@@ -11,24 +11,23 @@ import type {
 } from '@blocksuite/global/utils';
 
 import {
+  type Color,
+  FontFamily,
+  FontStyle,
+  FontWeight,
+  StrokeStyle,
+  TextAlign,
+  type TextStyleProps,
+  TextVerticalAlign,
+} from '@blocksuite/affine-model';
+import {
   GfxPrimitiveElementModel,
   local,
   yfield,
 } from '@blocksuite/block-std/gfx';
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import {
-  type Color,
-  DEFAULT_ROUGHNESS,
-  FontFamily,
-  FontStyle,
-  FontWeight,
-  StrokeStyle,
-  TextAlign,
-  TextResizing,
-  type TextStyleProps,
-  TextVerticalAlign,
-} from '../consts.js';
+import { DEFAULT_ROUGHNESS, TextResizing } from '../consts.js';
 import { diamond } from './utils/shape/diamond.js';
 import { ellipse } from './utils/shape/ellipse.js';
 import { rect } from './utils/shape/rect.js';

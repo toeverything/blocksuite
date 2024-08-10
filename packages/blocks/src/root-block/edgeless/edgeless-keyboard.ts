@@ -1,3 +1,4 @@
+import { EdgelessTextBlockModel } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
@@ -13,7 +14,6 @@ import {
 } from '../../_common/edgeless/mindmap/index.js';
 import { LassoMode } from '../../_common/types.js';
 import { EdgelessTextBlockComponent } from '../../edgeless-text/edgeless-text-block.js';
-import { EdgelessTextBlockModel } from '../../edgeless-text/edgeless-text-model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
 import {

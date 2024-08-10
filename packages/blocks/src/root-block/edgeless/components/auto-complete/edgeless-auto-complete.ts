@@ -1,3 +1,4 @@
+import type { Color, NoteBlockModel } from '@blocksuite/affine-model';
 import type { Bound, IVec } from '@blocksuite/global/utils';
 
 import {
@@ -14,8 +15,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { NoteBlockModel } from '../../../../note-block/index.js';
-import type { Color } from '../../../../surface-block/consts.js';
 import type { ConnectorElementModel } from '../../../../surface-block/element-model/connector.js';
 import type { ShapeType } from '../../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';

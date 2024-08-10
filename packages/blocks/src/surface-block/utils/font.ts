@@ -1,6 +1,6 @@
-import { IS_FIREFOX } from '@blocksuite/global/env';
+import type { FontFamily } from '@blocksuite/affine-model';
 
-import type { FontFamily } from '../consts.js';
+import { IS_FIREFOX } from '@blocksuite/global/env';
 
 export function wrapFontFamily(fontFamily: FontFamily | string): string {
   return `"${fontFamily}"`;

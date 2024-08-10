@@ -1,4 +1,4 @@
-import type { ColorScheme } from '@blocksuite/affine-shared/theme';
+import { FontFamily, FontStyle, FontWeight } from '@blocksuite/affine-model';
 
 import type { FontConfig } from '../root-block/font-loader/font-loader.js';
 
@@ -15,17 +15,9 @@ export const DEFAULT_ROUGHNESS = 1.4;
 // TODO: need to check the default central area ratio
 export const DEFAULT_CENTRAL_AREA_RATIO = 0.3;
 
-export type Color = string | { [K in ColorScheme | 'normal']?: string };
-
 export enum ShapeStyle {
   General = 'General',
   Scribbled = 'Scribbled',
-}
-
-export enum StrokeStyle {
-  Dash = 'dash',
-  None = 'none',
-  Solid = 'solid',
 }
 
 export interface IModelCoord {
@@ -33,68 +25,10 @@ export interface IModelCoord {
   y: number;
 }
 
-export enum TextAlign {
-  Center = 'center',
-  Left = 'left',
-  Right = 'right',
-}
-
-export enum TextVerticalAlign {
-  Bottom = 'bottom',
-  Center = 'center',
-  Top = 'top',
-}
-
 export enum TextResizing {
   AUTO_WIDTH,
   AUTO_HEIGHT,
 }
-
-export type TextStyleProps = {
-  color: Color;
-  fontFamily: FontFamily;
-  fontSize: number;
-  fontStyle: FontStyle;
-  fontWeight: FontWeight;
-  textAlign: TextAlign;
-};
-
-export enum FontWeight {
-  Bold = '700',
-  Light = '300',
-  Medium = '500',
-  Regular = '400',
-  SemiBold = '600',
-}
-
-export enum FontStyle {
-  Italic = 'italic',
-  Normal = 'normal',
-}
-
-export enum FontFamily {
-  BebasNeue = 'blocksuite:surface:BebasNeue',
-  Inter = 'blocksuite:surface:Inter',
-  Kalam = 'blocksuite:surface:Kalam',
-  Lora = 'blocksuite:surface:Lora',
-  OrelegaOne = 'blocksuite:surface:OrelegaOne',
-  Poppins = 'blocksuite:surface:Poppins',
-  Satoshi = 'blocksuite:surface:Satoshi',
-}
-
-export const FontFamilyMap = {
-  [FontFamily.Inter]: 'Inter',
-  [FontFamily.Kalam]: 'Kalam',
-  [FontFamily.Satoshi]: 'Satoshi',
-  [FontFamily.Poppins]: 'Poppins',
-  [FontFamily.Lora]: 'Lora',
-  [FontFamily.BebasNeue]: 'Bebas Neue',
-  [FontFamily.OrelegaOne]: 'Orelega One',
-} as const satisfies Record<FontFamily, string>;
-
-export const FontFamilyList = Object.entries(FontFamilyMap) as {
-  [K in FontFamily]: [K, (typeof FontFamilyMap)[K]];
-}[FontFamily][];
 
 export const AffineCanvasTextFonts: FontConfig[] = [
   // Inter, https://fonts.cdnfonts.com/css/inter?styles=29139,29134,29135,29136,29140,29141

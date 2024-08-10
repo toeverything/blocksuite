@@ -1,7 +1,14 @@
+import type { Color, NoteBlockModel } from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
 import { FrameIcon, SmallNoteIcon } from '@blocksuite/affine-components/icons';
 import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
+import {
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  FontFamily,
+  FontStyle,
+  FontWeight,
+} from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
 import { serializeXYWH } from '@blocksuite/global/utils';
@@ -14,18 +21,10 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import type { Color } from '../../../../surface-block/consts.js';
 import type { Connection } from '../../../../surface-block/element-model/connector.js';
 import type { ShapeStyle } from '../../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../_common/edgeless/note/consts.js';
-import {
-  FontFamily,
-  FontStyle,
-  FontWeight,
-} from '../../../../surface-block/consts.js';
 import {
   CanvasElementType,
   type ConnectorElementModel,

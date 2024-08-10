@@ -1,12 +1,9 @@
 import { CheckIcon } from '@blocksuite/affine-components/icons';
+import { FontFamily, FontFamilyList } from '@blocksuite/affine-model';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import {
-  FontFamily,
-  FontFamilyList,
-} from '../../../../surface-block/consts.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 
 @customElement('edgeless-font-family-panel')

@@ -1,8 +1,9 @@
+import type { Color } from '@blocksuite/affine-model';
+
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { Color } from '../../../../../surface-block/consts.js';
 import type { EdgelessTool } from '../../../types.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 

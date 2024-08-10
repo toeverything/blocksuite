@@ -739,7 +739,11 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
 
-  tests: {}
+  tests:
+    dependencies:
+      '@blocksuite/affine-model':
+        specifier: workspace:*
+        version: link:../packages/affine/model
 
 packages:
 

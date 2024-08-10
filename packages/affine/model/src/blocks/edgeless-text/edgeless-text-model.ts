@@ -1,7 +1,6 @@
 import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import { GfxCompatible } from '@blocksuite/affine-model';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import {
@@ -10,7 +9,8 @@ import {
   FontWeight,
   TextAlign,
   type TextStyleProps,
-} from '../surface-block/consts.js';
+} from '../../consts/index.js';
+import { GfxCompatible } from '../../utils/index.js';
 
 type EdgelessTextProps = {
   xywh: SerializedXYWH;
@@ -56,3 +56,19 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
 export class EdgelessTextBlockModel
   extends GfxCompatible<EdgelessTextProps>(BlockModel)
   implements GfxElementGeometry {}
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      'affine:edgeless-text': EdgelessTextBlockModel;
+    }
+
+    interface EdgelessBlockModelMap {
+      'affine:edgeless-text': EdgelessTextBlockModel;
+    }
+
+    interface EdgelessTextModelMap {
+      'edgeless-text': EdgelessTextBlockModel;
+    }
+  }
+}

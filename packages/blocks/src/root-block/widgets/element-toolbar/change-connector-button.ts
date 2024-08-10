@@ -1,5 +1,3 @@
-import type { ColorScheme } from '@blocksuite/affine-shared/theme';
-
 import {
   AddTextIcon,
   ConnectorCWithArrowIcon,
@@ -19,6 +17,7 @@ import {
   ScribbledStyleIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import { type ColorScheme, StrokeStyle } from '@blocksuite/affine-model';
 import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';
@@ -49,7 +48,6 @@ import {
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
-  StrokeStyle,
 } from '../../../surface-block/index.js';
 import {
   packColor,
