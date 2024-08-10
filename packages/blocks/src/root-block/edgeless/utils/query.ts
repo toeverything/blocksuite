@@ -1,21 +1,22 @@
-import type {
-  AttachmentBlockModel,
-  BookmarkBlockModel,
-  EdgelessTextBlockModel,
-  EmbedBlockModel,
-  EmbedFigmaModel,
-  EmbedGithubModel,
-  EmbedHtmlModel,
-  EmbedLinkedDocModel,
-  EmbedLoomModel,
-  EmbedSyncedDocModel,
-  EmbedYoutubeModel,
-  ImageBlockModel,
-  NoteBlockModel,
-} from '@blocksuite/affine-model';
 import type { PointLocation } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import {
+  type AttachmentBlockModel,
+  type BookmarkBlockModel,
+  ConnectorElementModel,
+  type EdgelessTextBlockModel,
+  type EmbedBlockModel,
+  type EmbedFigmaModel,
+  type EmbedGithubModel,
+  type EmbedHtmlModel,
+  type EmbedLinkedDocModel,
+  type EmbedLoomModel,
+  type EmbedSyncedDocModel,
+  type EmbedYoutubeModel,
+  type ImageBlockModel,
+  type NoteBlockModel,
+} from '@blocksuite/affine-model';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 
@@ -27,7 +28,6 @@ import type { EdgelessTool } from '../types.js';
 
 import {
   type CanvasElementWithText,
-  ConnectorElementModel,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
   MindmapElementModel,

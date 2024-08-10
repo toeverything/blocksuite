@@ -23,6 +23,7 @@ import {
   TriangleIcon,
   ViewBarIcon,
 } from '@blocksuite/affine-components/icons';
+import { ConnectorMode } from '@blocksuite/affine-model';
 import { isControlledKeyboardEvent } from '@blocksuite/affine-shared/utils';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -30,7 +31,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { LastProps } from '../../../surface-block/managers/edit-session.js';
 import type { PieMenuContext } from './base.js';
 
-import { ConnectorMode } from '../../../surface-block/element-model/connector.js';
 import {
   FILL_COLORS,
   STROKE_COLORS,

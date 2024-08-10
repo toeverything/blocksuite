@@ -5,6 +5,7 @@ import type {
 } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
+import { LocalConnectorElementModel } from '@blocksuite/affine-model';
 import { keys, last, pick } from '@blocksuite/affine-shared/utils';
 import {
   GfxGroupLikeElementModel,
@@ -30,7 +31,6 @@ import type {
 
 import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
-import { LocalConnectorElementModel } from './connector.js';
 import { LayoutType, layout } from './utils/mindmap/layout.js';
 import {
   MindmapStyle,

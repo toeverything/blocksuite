@@ -12,6 +12,7 @@ import type {
 
 import {
   type Color,
+  DEFAULT_ROUGHNESS,
   FontFamily,
   FontStyle,
   FontWeight,
@@ -27,7 +28,7 @@ import {
 } from '@blocksuite/block-std/gfx';
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import { DEFAULT_ROUGHNESS, TextResizing } from '../consts.js';
+import { TextResizing } from '../consts.js';
 import { diamond } from './utils/shape/diamond.js';
 import { ellipse } from './utils/shape/ellipse.js';
 import { rect } from './utils/shape/rect.js';

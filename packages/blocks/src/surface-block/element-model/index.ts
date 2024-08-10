@@ -1,6 +1,7 @@
+import { ConnectorElementModel } from '@blocksuite/affine-model';
+
 import { SurfaceElementModel } from './base.js';
 import { BrushElementModel } from './brush.js';
-import { ConnectorElementModel } from './connector.js';
 import { GroupElementModel } from './group.js';
 import { MindmapElementModel } from './mindmap.js';
 import { ShapeElementModel } from './shape.js';

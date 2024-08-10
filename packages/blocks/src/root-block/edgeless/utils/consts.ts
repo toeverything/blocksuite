@@ -1,7 +1,6 @@
-import { StrokeStyle } from '@blocksuite/affine-model';
+import { DEFAULT_ROUGHNESS, StrokeStyle } from '@blocksuite/affine-model';
 
 import { LineWidth } from '../../../_common/types.js';
-import { DEFAULT_ROUGHNESS } from '../../../surface-block/consts.js';
 
 export const BOOKMARK_MIN_WIDTH = 450;
 
