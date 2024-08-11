@@ -1,3 +1,5 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
+
 import { NoteIcon, RenameIcon } from '@blocksuite/affine-components/icons';
 import { type ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
@@ -13,7 +15,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { when } from 'lit/directives/when.js';
 
-import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';

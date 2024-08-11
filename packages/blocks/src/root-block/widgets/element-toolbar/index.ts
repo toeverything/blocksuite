@@ -9,6 +9,7 @@ import type {
   EmbedLoomModel,
   EmbedSyncedDocModel,
   EmbedYoutubeModel,
+  FrameBlockModel,
   ImageBlockModel,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
@@ -22,7 +23,6 @@ import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';

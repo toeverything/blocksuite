@@ -1,4 +1,5 @@
 import {
+  FrameBlockSchema,
   ListBlockSchema,
   NoteBlockSchema,
   ParagraphBlockSchema,
@@ -11,7 +12,6 @@ import { fileURLToPath } from 'node:url';
 import { assert, describe, expect, test } from 'vitest';
 
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
-import { FrameBlockSchema } from '../../frame-block/frame-model.js';
 import { RootBlockSchema } from '../../root-block/root-model.js';
 import { SurfaceBlockSchema } from '../../surface-block/surface-model.js';
 

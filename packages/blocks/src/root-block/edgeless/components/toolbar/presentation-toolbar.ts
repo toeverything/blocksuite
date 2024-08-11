@@ -1,3 +1,5 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
+
 import {
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
@@ -11,7 +13,6 @@ import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
-import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../types.js';
 

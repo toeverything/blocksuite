@@ -1,10 +1,11 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
+
 import { NavigatorSettingsIcon } from '@blocksuite/affine-components/icons';
 import { createButtonPopper } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { FrameBlockModel } from '../../../../../frame-block/frame-model.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
 import '../../../../../_common/components/toggle-switch.js';

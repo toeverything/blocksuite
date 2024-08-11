@@ -1,3 +1,4 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
@@ -8,7 +9,6 @@ import { Bound } from '@blocksuite/global/utils';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { GroupElementModel } from '../../../surface-block/element-model/group.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 

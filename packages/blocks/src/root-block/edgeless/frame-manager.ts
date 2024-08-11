@@ -1,11 +1,9 @@
-import type { NoteBlockModel } from '@blocksuite/affine-model';
+import type { FrameBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
-import { Bound } from '@blocksuite/global/utils';
-import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
+import { Bound, DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { EdgelessRootService } from '../../index.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 

@@ -1,3 +1,4 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { BlockServiceOptions } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
@@ -6,7 +7,6 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
-import type { FrameBlockModel } from '../../frame-block/index.js';
 import type {
   CanvasElementType,
   ConnectorElementModel,

@@ -1,3 +1,5 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
+
 import {
   type EditorHost,
   ShadowlessElement,
@@ -10,7 +12,6 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessRootPreviewBlockComponent } from '../../edgeless-root-preview-block.js';
 import type { EdgelessRootService } from '../../edgeless-root-service.js';

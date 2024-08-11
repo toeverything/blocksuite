@@ -17,6 +17,7 @@ import {
   EmbedLoomBlockSchema,
   EmbedSyncedDocBlockSchema,
   EmbedYoutubeBlockSchema,
+  FrameBlockSchema,
   ImageBlockSchema,
   ListBlockSchema,
   NoteBlockSchema,
@@ -25,7 +26,6 @@ import {
 
 import { DataViewBlockSchema } from './data-view-block/data-view-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
-import { FrameBlockSchema } from './frame-block/frame-model.js';
 import { RootBlockSchema } from './root-block/root-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 import { SurfaceRefBlockSchema } from './surface-ref-block/surface-ref-model.js';

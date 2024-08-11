@@ -1,9 +1,10 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 @customElement('edgeless-navigator-black-background')

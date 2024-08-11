@@ -1,3 +1,7 @@
+import type {
+  FrameBlockModel,
+  ParagraphBlockModel,
+} from '@blocksuite/affine-model';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
@@ -21,14 +25,10 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '@blocksuite/affine-components/icons';
-import {
-  NoteBlockModel,
-  type ParagraphBlockModel,
-} from '@blocksuite/affine-model';
+import { NoteBlockModel } from '@blocksuite/affine-model';
 import { Slice, Text } from '@blocksuite/store';
 
 import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { RootBlockComponent } from '../../types.js';
 import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 
