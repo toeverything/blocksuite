@@ -1,4 +1,4 @@
-import { keys } from '@blocksuite/affine-shared/utils';
+import { keys } from '@blocksuite/global/utils';
 
 import type {
   Template,

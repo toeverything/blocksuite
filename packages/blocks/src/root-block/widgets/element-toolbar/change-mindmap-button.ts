@@ -9,8 +9,8 @@ import {
   MindmapStyleTwo,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
-import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
+import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';

@@ -6,7 +6,6 @@ import type {
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import { LocalConnectorElementModel } from '@blocksuite/affine-model';
-import { keys, last, pick } from '@blocksuite/affine-shared/utils';
 import {
   GfxGroupLikeElementModel,
   convert,
@@ -14,7 +13,13 @@ import {
   watch,
   yfield,
 } from '@blocksuite/block-std/gfx';
-import { assertType, deserializeXYWH } from '@blocksuite/global/utils';
+import {
+  assertType,
+  deserializeXYWH,
+  keys,
+  last,
+  pick,
+} from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';

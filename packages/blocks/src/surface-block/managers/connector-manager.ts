@@ -6,7 +6,6 @@ import {
   ConnectorMode,
   type LocalConnectorElementModel,
 } from '@blocksuite/affine-model';
-import { last } from '@blocksuite/affine-shared/utils';
 import {
   Bound,
   PI2,
@@ -23,6 +22,7 @@ import {
   getPointFromBoundsWithRotation,
   isOverlap,
   isVecZero,
+  last,
   lineIntersects,
   sign,
   toRadian,

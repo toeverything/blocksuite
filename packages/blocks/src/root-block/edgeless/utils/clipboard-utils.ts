@@ -5,7 +5,7 @@ import type {
   NoteBlockModel,
 } from '@blocksuite/affine-model';
 
-import { groupBy } from '@blocksuite/affine-shared/utils';
+import { groupBy } from '@blocksuite/global/utils';
 
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';

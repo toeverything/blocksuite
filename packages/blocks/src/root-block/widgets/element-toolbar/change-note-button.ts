@@ -15,10 +15,9 @@ import {
   NoteDisplayMode,
   type StrokeStyle,
 } from '@blocksuite/affine-model';
-import { countBy, matchFlavours, maxBy } from '@blocksuite/affine-shared/utils';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { Bound, assertExists, countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';

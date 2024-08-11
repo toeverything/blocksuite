@@ -6,7 +6,6 @@ export * from './filesys.js';
 export * from './header-value-parser.js';
 export * from './helper.js';
 export * from './inline-editor.js';
-export * from './iterable.js';
 export * from './math.js';
 export * from './model.js';
 export * from './rect.js';

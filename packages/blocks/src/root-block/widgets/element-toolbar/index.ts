@@ -15,13 +15,9 @@ import type {
 
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import {
-  atLeastNMatches,
-  groupBy,
-  pickValues,
-  requestConnectedFrame,
-} from '@blocksuite/affine-shared/utils';
+import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
+import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
 import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';

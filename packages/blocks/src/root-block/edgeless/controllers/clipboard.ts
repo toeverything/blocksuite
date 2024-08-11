@@ -5,19 +5,21 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
-import type { IVec } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/global/utils';
+import type { IBound, IVec } from '@blocksuite/global/utils';
 
 import { BookmarkStyles } from '@blocksuite/affine-model';
 import {
-  groupBy,
   isUrlInClipboard,
   matchFlavours,
-  nToLast,
 } from '@blocksuite/affine-shared/utils';
-import { Vec, assertExists } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import {
+  Bound,
+  DisposableGroup,
+  Vec,
+  assertExists,
+  groupBy,
+  nToLast,
+} from '@blocksuite/global/utils';
 import {
   type BlockSnapshot,
   BlockSnapshotSchema,

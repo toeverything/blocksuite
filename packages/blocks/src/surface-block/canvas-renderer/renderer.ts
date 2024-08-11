@@ -1,12 +1,13 @@
 import type { IBound } from '@blocksuite/global/utils';
 
 import { type Color, ColorScheme } from '@blocksuite/affine-model';
-import { last, requestConnectedFrame } from '@blocksuite/affine-shared/utils';
+import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import {
   DisposableGroup,
   Slot,
   getBoundsWithRotation,
   intersects,
+  last,
 } from '@blocksuite/global/utils';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';

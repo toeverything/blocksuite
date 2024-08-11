@@ -1,12 +1,9 @@
 import type { UserInfo } from '@blocksuite/store';
 
 import { RemoteCursor } from '@blocksuite/affine-components/icons';
-import {
-  pickValues,
-  requestThrottledConnectedFrame,
-} from '@blocksuite/affine-shared/utils';
+import { requestThrottledConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, pickValues } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
