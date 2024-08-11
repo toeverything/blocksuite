@@ -1,4 +1,4 @@
-import type { NoteBlockModel } from '@blocksuite/affine-model';
+import type { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
@@ -25,7 +25,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { NoteBlockComponent } from '../../../note-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../../root-block/root-model.js';
 import type { GfxBlockModel } from '../../edgeless/block-model.js';
 import type { EdgelessTool } from '../../edgeless/types.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';

@@ -3,6 +3,7 @@ import type { BlockModel, Doc } from '@blocksuite/store';
 import {
   NoteBlockSchema,
   ParagraphBlockSchema,
+  RootBlockSchema,
 } from '@blocksuite/affine-model';
 import { DocCollection, IdGeneratorType, Schema } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
@@ -17,7 +18,6 @@ import {
   columnPresets,
   richTextColumnConfig,
 } from '../../database-block/index.js';
-import { RootBlockSchema } from '../../root-block/root-model.js';
 
 const AffineSchemas = [
   RootBlockSchema,

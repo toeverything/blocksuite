@@ -1,4 +1,4 @@
-import type { NoteBlockModel } from '@blocksuite/affine-model';
+import type { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { BlockModel, Text } from '@blocksuite/store';
 
@@ -10,7 +10,6 @@ import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { PageRootBlockWidgetName } from '../index.js';
-import type { RootBlockModel } from '../root-model.js';
 import type { PageRootService } from './page-root-service.js';
 
 import {

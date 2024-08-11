@@ -1,3 +1,4 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -13,7 +14,6 @@ import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from './edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from './root-model.js';
 import type { RootBlockComponent } from './types.js';
 
 import {

@@ -1,8 +1,8 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { SurfaceRefBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
 
-import { SurfaceRefBlockSchema } from './surface-ref-model.js';
 import { SurfaceRefBlockService } from './surface-ref-service.js';
 
 export const PageSurfaceRefBlockSpec: BlockSpec = {

@@ -12,6 +12,7 @@ import type {
   FrameBlockModel,
   ImageBlockModel,
   NoteBlockModel,
+  RootBlockModel,
 } from '@blocksuite/affine-model';
 
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
@@ -26,7 +27,6 @@ import { join } from 'lit/directives/join.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../root-model.js';
 
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';

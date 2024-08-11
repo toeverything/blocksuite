@@ -1,3 +1,4 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { BlockService, EditorHost } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
@@ -8,7 +9,6 @@ import { Bound } from '@blocksuite/global/utils';
 
 import type { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../root-block/index.js';
 
 import {
   blockComponentGetter,

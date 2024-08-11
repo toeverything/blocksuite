@@ -1,3 +1,4 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 
 import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
@@ -11,7 +12,7 @@ import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { PageRootBlockComponent, RootBlockModel } from '../../index.js';
+import type { PageRootBlockComponent } from '../../index.js';
 
 import { autoScroll } from '../../text-selection/utils.js';
 

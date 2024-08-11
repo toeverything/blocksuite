@@ -1,9 +1,9 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { RootBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
 
 import { PageRootService } from '../../root-block/page/page-root-service.js';
-import { RootBlockSchema } from '../../root-block/root-model.js';
 import { PageSurfaceBlockSpec } from '../../surface-block/surface-spec.js';
 import { PageSurfaceRefBlockSpec } from '../../surface-ref-block/surface-ref-spec.js';
 import { CommonFirstPartyBlockSpecs } from '../common.js';

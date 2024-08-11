@@ -1,3 +1,5 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
+
 import {
   CaptionIcon,
   CenterPeekIcon,
@@ -30,7 +32,6 @@ import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EmbedCardStyle } from '../../../_common/types.js';
-import type { RootBlockModel } from '../../root-model.js';
 import type { EmbedOptions } from '../../root-service.js';
 import type { RootBlockComponent } from '../../types.js';
 

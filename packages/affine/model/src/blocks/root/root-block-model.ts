@@ -36,3 +36,11 @@ export const RootBlockSchema = defineBlockSchema({
   },
   toModel: () => new RootBlockModel(),
 });
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      'affine:page': RootBlockModel;
+    }
+  }
+}
