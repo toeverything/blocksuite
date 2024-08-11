@@ -1,8 +1,12 @@
 import type { CursorSelection } from '@blocksuite/block-std';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 
-import { groupBy } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
+import {
+  DisposableGroup,
+  Slot,
+  assertType,
+  groupBy,
+} from '@blocksuite/global/utils';
 
 import type { EdgelessRootService } from '../edgeless-root-service.js';
 

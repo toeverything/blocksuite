@@ -8,8 +8,8 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { FontFamily, StrokeStyle } from '@blocksuite/affine-model';
-import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
+import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';

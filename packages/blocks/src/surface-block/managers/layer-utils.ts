@@ -1,6 +1,6 @@
 import type { Doc } from '@blocksuite/store';
 
-import { nToLast } from '@blocksuite/affine-shared/utils';
+import { nToLast } from '@blocksuite/global/utils';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';

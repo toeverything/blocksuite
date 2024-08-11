@@ -1,4 +1,5 @@
 import type {
+  ColorScheme,
   ConnectorElementProps,
   ConnectorLabelProps,
 } from '@blocksuite/affine-model';
@@ -22,9 +23,9 @@ import {
   ScribbledStyleIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
-import { type ColorScheme, StrokeStyle } from '@blocksuite/affine-model';
-import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
+import { StrokeStyle } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
+import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';

@@ -1,11 +1,10 @@
-import { describe, expect, it } from 'vitest';
-
 import {
   atLeastNMatches,
   countBy,
   groupBy,
   maxBy,
-} from '../../utils/iterable.js';
+} from '@blocksuite/global/utils';
+import { describe, expect, it } from 'vitest';
 
 describe('countBy', () => {
   it('basic', () => {

@@ -1,9 +1,8 @@
 import type { Color } from '@blocksuite/affine-model';
 
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { values } from '@blocksuite/affine-shared/utils';
 import { BlockComponent, RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, values } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 

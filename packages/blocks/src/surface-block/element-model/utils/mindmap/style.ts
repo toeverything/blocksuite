@@ -4,7 +4,7 @@ import {
   FontWeight,
   StrokeStyle,
 } from '@blocksuite/affine-model';
-import { last } from '@blocksuite/affine-shared/utils';
+import { last } from '@blocksuite/global/utils';
 
 import type { ShapeElementModel } from '../../shape.js';
 import type { MindmapNode } from './layout.js';

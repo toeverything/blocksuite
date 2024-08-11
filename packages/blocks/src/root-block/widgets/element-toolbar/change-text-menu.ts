@@ -14,9 +14,8 @@ import {
   type TextStyleProps,
 } from '@blocksuite/affine-model';
 import { EdgelessTextBlockModel } from '@blocksuite/affine-model';
-import { countBy, maxBy } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';

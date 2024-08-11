@@ -1,9 +1,9 @@
 import type { BlockServiceOptions } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
-import { clamp, last } from '@blocksuite/affine-shared/utils';
+import { clamp } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';

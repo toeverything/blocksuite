@@ -1,8 +1,8 @@
 import type { Doc } from '@blocksuite/store';
 import type { BlockModel } from '@blocksuite/store';
 
-import { last, matchFlavours, nToLast } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/utils';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import { Bound, last, nToLast } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 

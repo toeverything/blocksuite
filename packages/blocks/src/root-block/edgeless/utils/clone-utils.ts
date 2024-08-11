@@ -1,7 +1,7 @@
 import type { SerializedConnectorElement } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 
-import { groupBy } from '@blocksuite/affine-shared/utils';
+import { groupBy } from '@blocksuite/global/utils';
 import { type BlockSnapshot, Job } from '@blocksuite/store';
 
 import type { SerializedGroupElement } from '../../../surface-block/element-model/group.js';

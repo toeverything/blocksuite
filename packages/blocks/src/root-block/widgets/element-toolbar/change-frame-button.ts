@@ -1,8 +1,13 @@
 import { NoteIcon, RenameIcon } from '@blocksuite/affine-components/icons';
 import { type ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
-import { countBy, matchFlavours, maxBy } from '@blocksuite/affine-shared/utils';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { deserializeXYWH, serializeXYWH } from '@blocksuite/global/utils';
+import {
+  countBy,
+  deserializeXYWH,
+  maxBy,
+  serializeXYWH,
+} from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';

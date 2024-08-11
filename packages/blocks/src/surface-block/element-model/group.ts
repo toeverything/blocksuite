@@ -4,7 +4,6 @@ import type {
 } from '@blocksuite/block-std/gfx';
 import type { Y } from '@blocksuite/store';
 
-import { keys } from '@blocksuite/affine-shared/utils';
 import {
   GfxGroupLikeElementModel,
   local,
@@ -12,11 +11,12 @@ import {
   yfield,
 } from '@blocksuite/block-std/gfx';
 import {
+  Bound,
   type IVec,
   type PointLocation,
+  keys,
   linePolygonIntersects,
 } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 type GroupElementProps = BaseElementProps & {

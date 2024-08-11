@@ -1,4 +1,9 @@
-import type { IVec, PointLocation } from '@blocksuite/global/utils';
+import type {
+  Disposable,
+  IPoint,
+  IVec,
+  PointLocation,
+} from '@blocksuite/global/utils';
 
 import {
   type BookmarkBlockModel,
@@ -9,18 +14,16 @@ import {
 } from '@blocksuite/affine-model';
 import {
   clamp,
-  pickValues,
   requestThrottledConnectedFrame,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { deserializeXYWH } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
 import {
-  type Disposable,
-  type IPoint,
+  Bound,
   Slot,
   assertType,
+  deserializeXYWH,
+  pickValues,
 } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
