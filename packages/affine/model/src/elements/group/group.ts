@@ -95,12 +95,15 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
     return 'group';
   }
 
-  @observe((_, instance: GroupElementModel, transaction) => {
-    instance.setChildIds(
-      Array.from(instance.children.keys()),
-      transaction?.local ?? false
-    );
-  })
+  @observe(
+    // use `GroupElementModel` type in decorator will cause playwright error
+    (_, instance: GfxGroupLikeElementModel<GroupElementProps>, transaction) => {
+      instance.setChildIds(
+        Array.from(instance.children.keys()),
+        transaction?.local ?? false
+      );
+    }
+  )
   @yfield()
   accessor children: Y.Map<boolean> = new DocCollection.Y.Map<boolean>();
 

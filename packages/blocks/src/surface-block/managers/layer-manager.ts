@@ -1,3 +1,4 @@
+import type { GroupElementModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -8,7 +9,6 @@ import { Bound, last, nToLast } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
-import type { GroupElementModel } from '../element-model/group.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
 import {

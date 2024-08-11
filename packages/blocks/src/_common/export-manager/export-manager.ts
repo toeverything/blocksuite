@@ -1,8 +1,11 @@
-import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { BlockService, EditorHost } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
+import {
+  GroupElementModel,
+  type RootBlockModel,
+} from '@blocksuite/affine-model';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
@@ -21,7 +24,6 @@ import { getBlocksInFrame } from '../../root-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
 import {
-  GroupElementModel,
   type Renderer,
   SurfaceElementModel,
 } from '../../surface-block/index.js';
