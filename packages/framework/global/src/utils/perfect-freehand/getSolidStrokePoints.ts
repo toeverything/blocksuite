@@ -1,6 +1,6 @@
-import type { IVec, IVec3 } from '@blocksuite/global/utils';
+import type { IVec, IVec3 } from '../model/index.js';
 
-import { getStroke } from '../../../perfect-freehand/getStroke.js';
+import { getStroke } from './getStroke.js';
 
 export function getSolidStrokePoints(
   points: (IVec | IVec3)[],
