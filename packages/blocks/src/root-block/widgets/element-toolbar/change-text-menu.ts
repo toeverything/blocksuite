@@ -16,6 +16,7 @@ import {
 import {
   ConnectorElementModel,
   EdgelessTextBlockModel,
+  TextElementModel,
 } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound, countBy, maxBy } from '@blocksuite/global/utils';
@@ -40,7 +41,6 @@ import {
   isFontWeightSupported,
 } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { normalizeTextBound } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import { isConnectorWithLabel } from '../../../surface-block/element-model/utils/connector.js';
 import { ShapeElementModel } from '../../../surface-block/index.js';
 import { normalizeShapeBound } from '../../../surface-block/index.js';

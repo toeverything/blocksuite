@@ -1,4 +1,4 @@
-import type { Color } from '@blocksuite/affine-model';
+import type { Color, ShapeElementModel } from '@blocksuite/affine-model';
 import type { Bound } from '@blocksuite/global/utils';
 
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
@@ -6,7 +6,6 @@ import { BlockComponent } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import type { ShapeElementModel } from '../element-model/shape.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { MindmapService } from './service.js';
 

@@ -1,3 +1,4 @@
+import type { BaseElementProps } from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
@@ -8,7 +9,7 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '@blocksuite/affine-model';
-import { yfield } from '@blocksuite/block-std/gfx';
+import { GfxPrimitiveElementModel, yfield } from '@blocksuite/block-std/gfx';
 import {
   Bound,
   getPointsFromBoundsWithRotation,
@@ -18,15 +19,13 @@ import {
 } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import { type BaseElementProps, SurfaceElementModel } from './base.js';
-
 export type TextElementProps = BaseElementProps & {
   text: Y.Text;
   hasMaxWidth?: boolean;
 } & Omit<TextStyleProps, 'fontWeight' | 'fontStyle'> &
   Partial<Pick<TextStyleProps, 'fontWeight' | 'fontStyle'>>;
 
-export class TextElementModel extends SurfaceElementModel<TextElementProps> {
+export class TextElementModel extends GfxPrimitiveElementModel<TextElementProps> {
   static override propsToY(props: Record<string, unknown>) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text as string);
@@ -70,10 +69,10 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   @yfield()
   accessor fontSize: number = 16;
 
-  @yfield<FontStyle, TextElementModel>(FontStyle.Normal)
+  @yfield(FontStyle.Normal as FontStyle)
   accessor fontStyle: FontStyle = FontStyle.Normal;
 
-  @yfield<FontWeight, TextElementModel>(FontWeight.Regular)
+  @yfield(FontWeight.Regular as FontWeight)
   accessor fontWeight: FontWeight = FontWeight.Regular;
 
   @yfield(false)

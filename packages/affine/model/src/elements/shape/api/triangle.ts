@@ -1,8 +1,8 @@
-import type { IBound } from '@blocksuite/global/utils';
-import type { IVec } from '@blocksuite/global/utils';
+import type { PointTestOptions } from '@blocksuite/block-std/gfx';
+import type { IBound, IVec } from '@blocksuite/global/utils';
 
-import { Bound } from '@blocksuite/global/utils';
 import {
+  Bound,
   PointLocation,
   getCenterAreaBounds,
   getPointsFromBoundsWithRotation,
@@ -14,18 +14,16 @@ import {
   rotatePoints,
 } from '@blocksuite/global/utils';
 
-import type { PointTestOptions } from '../../base.js';
-import type { ShapeElementModel } from '../../shape.js';
+import type { ShapeElementModel } from '../shape.js';
 
-import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
+import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts/index.js';
 
-export const diamond = {
+export const triangle = {
   points({ x, y, w, h }: IBound): IVec[] {
     return [
-      [x, y + h / 2],
+      [x, y + h],
       [x + w / 2, y],
-      [x + w, y + h / 2],
-      [x + w / 2, y + h],
+      [x + w, y + h],
     ];
   },
   draw(ctx: CanvasRenderingContext2D, { x, y, w, h, rotate = 0 }: IBound) {
@@ -38,15 +36,13 @@ export const diamond = {
     ctx.translate(-cx, -cy);
 
     ctx.beginPath();
-    ctx.moveTo(x, y + h / 2);
+    ctx.moveTo(x, y + h);
     ctx.lineTo(x + w / 2, y);
-    ctx.lineTo(x + w, y + h / 2);
-    ctx.lineTo(x + w / 2, y + h);
+    ctx.lineTo(x + w, y + h);
     ctx.closePath();
 
     ctx.restore();
   },
-
   includesPoint(
     this: ShapeElementModel,
     x: number,
@@ -54,12 +50,12 @@ export const diamond = {
     options: PointTestOptions
   ) {
     const point: IVec = [x, y];
-    const points = getPointsFromBoundsWithRotation(this, diamond.points);
+    const points = getPointsFromBoundsWithRotation(this, triangle.points);
 
     let hit = pointOnPolygonStoke(
       point,
       points,
-      (options?.expand ?? 1) / (options.zoom ?? 1)
+      (options?.expand ?? 1) / (options?.zoom ?? 1)
     );
 
     if (!hit) {
@@ -76,9 +72,9 @@ export const diamond = {
           );
           const centralPoints = getPointsFromBoundsWithRotation(
             centralBounds,
-            diamond.points
+            triangle.points
           );
-          hit = pointInPolygon(point, centralPoints);
+          hit = pointInPolygon([x, y], centralPoints);
         } else if (this.textBound) {
           hit = pointInPolygon(
             point,
@@ -93,26 +89,25 @@ export const diamond = {
 
     return hit;
   },
-
-  containsBound(bounds: Bound, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, diamond.points);
+  containsBound(bounds: Bound, element: ShapeElementModel): boolean {
+    const points = getPointsFromBoundsWithRotation(element, triangle.points);
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, diamond.points);
+    const points = getPointsFromBoundsWithRotation(element, triangle.points);
     return polygonNearestPoint(points, point);
   },
 
   getLineIntersections(start: IVec, end: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, diamond.points);
+    const points = getPointsFromBoundsWithRotation(element, triangle.points);
     return linePolygonIntersects(start, end, points);
   },
 
   getRelativePointLocation(position: IVec, element: ShapeElementModel) {
     const bound = Bound.deserialize(element.xywh);
     const point = bound.getRelativePoint(position);
-    let points = diamond.points(bound);
+    let points = triangle.points(bound);
     points.push(point);
 
     points = rotatePoints(points, bound.center, element.rotate);

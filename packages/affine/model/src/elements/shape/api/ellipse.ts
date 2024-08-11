@@ -1,3 +1,4 @@
+import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
 import {
@@ -14,10 +15,9 @@ import { Vec } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { PointLocation } from '@blocksuite/global/utils';
 
-import type { PointTestOptions } from '../../base.js';
-import type { ShapeElementModel } from '../../shape.js';
+import type { ShapeElementModel } from '../shape.js';
 
-import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
+import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts/index.js';
 
 export const ellipse = {
   points({ x, y, w, h }: IBound): IVec[] {

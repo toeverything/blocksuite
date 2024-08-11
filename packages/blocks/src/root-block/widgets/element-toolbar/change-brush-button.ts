@@ -1,4 +1,4 @@
-import type { ColorScheme } from '@blocksuite/affine-model';
+import type { BrushProps, ColorScheme } from '@blocksuite/affine-model';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
@@ -6,7 +6,6 @@ import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
-import type { BrushProps } from '../../../surface-block/element-model/brush.js';
 import type { BrushElementModel } from '../../../surface-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';

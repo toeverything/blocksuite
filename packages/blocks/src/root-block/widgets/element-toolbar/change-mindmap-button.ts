@@ -1,3 +1,5 @@
+import type { ShapeElementModel } from '@blocksuite/affine-model';
+
 import {
   MindmapBalanceLayoutIcon,
   MindmapLeftLayoutIcon,
@@ -17,7 +19,6 @@ import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
-import type { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import '../../../_common/components/toolbar/icon-button.js';

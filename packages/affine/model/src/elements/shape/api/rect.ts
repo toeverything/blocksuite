@@ -1,3 +1,4 @@
+import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec } from '@blocksuite/global/utils';
 
 import {
@@ -13,34 +14,25 @@ import {
   rotatePoints,
 } from '@blocksuite/global/utils';
 
-import type { PointTestOptions } from '../../base.js';
-import type { ShapeElementModel } from '../../shape.js';
+import type { ShapeElementModel } from '../shape.js';
 
-import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts.js';
+import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts/index.js';
 
-export const triangle = {
-  points({ x, y, w, h }: IBound): IVec[] {
+export const rect = {
+  points({ x, y, w, h }: IBound) {
     return [
-      [x, y + h],
-      [x + w / 2, y],
+      [x, y],
+      [x + w, y],
       [x + w, y + h],
+      [x, y + h],
     ];
   },
   draw(ctx: CanvasRenderingContext2D, { x, y, w, h, rotate = 0 }: IBound) {
-    const cx = x + w / 2;
-    const cy = y + h / 2;
-
     ctx.save();
-    ctx.translate(cx, cy);
+    ctx.translate(x + w / 2, y + h / 2);
     ctx.rotate((rotate * Math.PI) / 180);
-    ctx.translate(-cx, -cy);
-
-    ctx.beginPath();
-    ctx.moveTo(x, y + h);
-    ctx.lineTo(x + w / 2, y);
-    ctx.lineTo(x + w, y + h);
-    ctx.closePath();
-
+    ctx.translate(-x - w / 2, -y - h / 2);
+    ctx.rect(x, y, w, h);
     ctx.restore();
   },
   includesPoint(
@@ -50,30 +42,31 @@ export const triangle = {
     options: PointTestOptions
   ) {
     const point: IVec = [x, y];
-    const points = getPointsFromBoundsWithRotation(this, triangle.points);
+    const points = getPointsFromBoundsWithRotation(this);
 
     let hit = pointOnPolygonStoke(
       point,
       points,
-      (options?.expand ?? 1) / (options?.zoom ?? 1)
+      (options?.expand ?? 1) / (options.zoom ?? 1)
     );
 
     if (!hit) {
+      // If the point is not on the stroke, check if it is in the shape
+      // When the shape is filled and transparent is not ignored
       if (!options.ignoreTransparent || this.filled) {
         hit = pointInPolygon([x, y], points);
       } else {
         // If shape is not filled or transparent
+        // Check if hit the text area
         const text = this.text;
         if (!text || !text.length) {
-          // Check the center area of the shape
+          // if not, check the default center area of the shape
           const centralBounds = getCenterAreaBounds(
             this,
             DEFAULT_CENTRAL_AREA_RATIO
           );
-          const centralPoints = getPointsFromBoundsWithRotation(
-            centralBounds,
-            triangle.points
-          );
+          const centralPoints = getPointsFromBoundsWithRotation(centralBounds);
+          // Check if the point is in the center area
           hit = pointInPolygon([x, y], centralPoints);
         } else if (this.textBound) {
           hit = pointInPolygon(
@@ -89,29 +82,35 @@ export const triangle = {
 
     return hit;
   },
+
   containsBound(bounds: Bound, element: ShapeElementModel): boolean {
-    const points = getPointsFromBoundsWithRotation(element, triangle.points);
+    const points = getPointsFromBoundsWithRotation(element);
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, triangle.points);
+    const points = getPointsFromBoundsWithRotation(element);
     return polygonNearestPoint(points, point);
   },
 
   getLineIntersections(start: IVec, end: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, triangle.points);
+    const points = getPointsFromBoundsWithRotation(element);
     return linePolygonIntersects(start, end, points);
   },
 
-  getRelativePointLocation(position: IVec, element: ShapeElementModel) {
+  getRelativePointLocation(relativePoint: IVec, element: ShapeElementModel) {
     const bound = Bound.deserialize(element.xywh);
-    const point = bound.getRelativePoint(position);
-    let points = triangle.points(bound);
-    points.push(point);
-
-    points = rotatePoints(points, bound.center, element.rotate);
-    const rotatePoint = points.pop() as IVec;
+    const point = bound.getRelativePoint(relativePoint);
+    const rotatePoint = rotatePoints(
+      [point],
+      bound.center,
+      element.rotate ?? 0
+    )[0];
+    const points = rotatePoints(
+      bound.points,
+      bound.center,
+      element.rotate ?? 0
+    );
     const tangent = polygonGetPointTangent(points, rotatePoint);
     return new PointLocation(rotatePoint, tangent);
   },

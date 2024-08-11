@@ -1,12 +1,9 @@
+import type { ShapeElementModel, ShapeType } from '@blocksuite/affine-model';
 import type { IBound } from '@blocksuite/global/utils';
 
 import { TextAlign } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 
-import type {
-  ShapeElementModel,
-  ShapeType,
-} from '../../../element-model/shape.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 

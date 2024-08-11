@@ -62,3 +62,8 @@ export const FontFamilyMap = {
 export const FontFamilyList = Object.entries(FontFamilyMap) as {
   [K in FontFamily]: [K, (typeof FontFamilyMap)[K]];
 }[FontFamily][];
+
+export enum TextResizing {
+  AUTO_WIDTH,
+  AUTO_HEIGHT,
+}
