@@ -2,6 +2,7 @@ import type {
   EdgelessTextBlockModel,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
+import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
@@ -14,7 +15,6 @@ import {
   noop,
 } from '@blocksuite/global/utils';
 
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessTool } from '../../types.js';
 

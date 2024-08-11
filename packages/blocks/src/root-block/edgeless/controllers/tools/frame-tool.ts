@@ -1,12 +1,9 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { IVec } from '@blocksuite/global/utils';
-import type { IPoint } from '@blocksuite/global/utils';
+import type { IPoint, IVec } from '@blocksuite/global/utils';
 
-import { Bound, Vec } from '@blocksuite/global/utils';
-import { assertExists, noop } from '@blocksuite/global/utils';
+import { Bound, Vec, assertExists, noop } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
-
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
 
 import { EdgelessToolController } from './edgeless-tool.js';
 

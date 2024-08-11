@@ -1,3 +1,5 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
+
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
@@ -10,10 +12,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import type {
-  FrameBlockComponent,
-  FrameBlockModel,
-} from '../../../../frame-block/index.js';
+import type { FrameBlockComponent } from '../../../../frame-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 @customElement('edgeless-frame-title-editor')

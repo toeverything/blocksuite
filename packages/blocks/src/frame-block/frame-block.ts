@@ -1,5 +1,6 @@
 import type { Doc } from '@blocksuite/store';
 
+import { FrameBlockModel } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   GfxBlockComponent,
@@ -12,8 +13,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
-
-import { FrameBlockModel } from './frame-model.js';
 
 const NESTED_FRAME_OFFSET = 4;
 

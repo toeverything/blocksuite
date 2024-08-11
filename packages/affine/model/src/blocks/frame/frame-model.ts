@@ -1,12 +1,14 @@
-import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
-import type { Text } from '@blocksuite/store';
+import type {
+  GfxElementGeometry,
+  PointTestOptions,
+} from '@blocksuite/block-std/gfx';
 
-import { type Color, GfxCompatible } from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/utils';
-import { BlockModel, defineBlockSchema } from '@blocksuite/store';
+import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
+import { BlockModel, type Text, defineBlockSchema } from '@blocksuite/store';
 
-import type { PointTestOptions } from '../surface-block/element-model/base.js';
+import type { Color } from '../../consts/index.js';
+
+import { GfxCompatible } from '../../utils/index.js';
 
 type FrameBlockProps = {
   title: Text;
@@ -58,6 +60,9 @@ export class FrameBlockModel
 declare global {
   namespace BlockSuite {
     interface EdgelessBlockModelMap {
+      'affine:frame': FrameBlockModel;
+    }
+    interface BlockModels {
       'affine:frame': FrameBlockModel;
     }
   }
