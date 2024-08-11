@@ -6,12 +6,8 @@ import type {
 import type { EdgelessRootService, ImageSelection } from '@blocksuite/blocks';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import {
-  BlocksUtils,
-  NoteDisplayMode,
-  getElementsBound,
-} from '@blocksuite/blocks';
-import { Bound } from '@blocksuite/global/utils';
+import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
+import { Bound, getElementsBound } from '@blocksuite/global/utils';
 
 import {
   CreateIcon,

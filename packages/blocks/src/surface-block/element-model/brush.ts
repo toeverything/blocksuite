@@ -18,20 +18,18 @@ import {
   PointLocation,
   type SerializedXYWH,
   Vec,
+  getBoundFromPoints,
   getPointsFromBoundsWithRotation,
   getQuadBoundsWithRotation,
   getSvgPathFromStroke,
+  inflateBound,
   isPointOnlines,
   lineIntersects,
   polyLineNearestPoint,
+  transformPointsToNewBound,
 } from '@blocksuite/global/utils';
 
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
-import {
-  getBoundFromPoints,
-  inflateBound,
-  transformPointsToNewBound,
-} from '../utils/bound.js';
 
 export type BrushProps = BaseElementProps & {
   /**

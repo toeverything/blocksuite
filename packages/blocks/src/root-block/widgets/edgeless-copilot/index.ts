@@ -5,7 +5,7 @@ import {
   requestConnectedFrame,
 } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, getElementsBound } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   computePosition,
@@ -23,7 +23,6 @@ import type { CopilotSelectionController } from '../../edgeless/controllers/tool
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 
-import { getElementsBound } from '../../../surface-block/index.js';
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 
