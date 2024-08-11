@@ -1,11 +1,10 @@
-import { Bound } from '@blocksuite/global/utils';
-import { describe, expect, it } from 'vitest';
-
 import {
+  Bound,
   getCommonBound,
   inflateBound,
   transformPointsToNewBound,
-} from '../../surface-block/utils/bound.js';
+} from '@blocksuite/global/utils';
+import { describe, expect, it } from 'vitest';
 
 describe('bound utils', () => {
   it('Bound basic', () => {

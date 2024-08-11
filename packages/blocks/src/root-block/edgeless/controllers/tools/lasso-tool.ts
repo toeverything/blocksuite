@@ -6,6 +6,7 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   Bound,
   Vec,
+  getBoundFromPoints,
   getPolygonPathFromPoints,
   linePolygonIntersects,
   noop,
@@ -18,7 +19,6 @@ import type { EdgelessTool } from '../../types.js';
 import { LassoMode } from '../../../../_common/types.js';
 import {
   Overlay,
-  getBoundFromPoints,
   getSvgPathFromStroke,
 } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './edgeless-tool.js';

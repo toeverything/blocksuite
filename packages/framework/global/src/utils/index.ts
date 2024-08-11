@@ -1,4 +1,5 @@
 export * from './assert.js';
+export * from './bound.js';
 export * from './crypto.js';
 export * from './curve.js';
 export * from './disposable.js';

@@ -19,6 +19,7 @@ import {
   clamp,
   getBezierCurveBoundingBox,
   getBezierParameters,
+  getBoundFromPoints,
   getBoundsWithRotation,
   getPointFromBoundsWithRotation,
   isOverlap,
@@ -35,7 +36,6 @@ import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-roo
 import { Overlay } from '../canvas-renderer/renderer.js';
 import { isConnectorWithLabel } from '../element-model/utils/connector.js';
 import { AStarRunner } from '../utils/a-star.js';
-import { getBoundFromPoints } from '../utils/bound.js';
 
 export type OrthogonalConnectorInput = {
   startBound: Bound | null;

@@ -40,7 +40,6 @@ export { RoughCanvas } from './rough/canvas.js';
 export type { Options } from './rough/core.js';
 export { SurfaceBlockModel as SurfaceBlockModel } from './surface-model.js';
 export { AStarRunner } from './utils/a-star.js';
-export * from './utils/bound.js';
 export * from './utils/index.js';
 export {
   type Connection,

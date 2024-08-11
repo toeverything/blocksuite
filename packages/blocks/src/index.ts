@@ -119,7 +119,6 @@ export {
   TextElementModel,
   fitContent,
   generateKeyBetween,
-  getElementsBound,
   markdownToMindmap,
 } from './surface-block/index.js';
 export { MiniMindmapPreview } from './surface-block/mini-mindmap/mindmap-preview.js';

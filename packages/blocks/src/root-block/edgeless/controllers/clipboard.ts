@@ -17,6 +17,7 @@ import {
   DisposableGroup,
   Vec,
   assertExists,
+  getCommonBound,
   groupBy,
   nToLast,
 } from '@blocksuite/global/utils';
@@ -57,7 +58,6 @@ import {
   SortOrder,
   compare,
 } from '../../../surface-block/managers/layer-utils.js';
-import { getCommonBound } from '../../../surface-block/utils/bound.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import {

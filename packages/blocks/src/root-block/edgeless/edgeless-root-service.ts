@@ -7,7 +7,7 @@ import type { IBound } from '@blocksuite/global/utils';
 
 import { clamp } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound, last } from '@blocksuite/global/utils';
+import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
 import type {
@@ -23,10 +23,7 @@ import {
   type PointTestOptions,
   SurfaceGroupLikeModel,
 } from '../../surface-block/element-model/base.js';
-import {
-  MindmapElementModel,
-  getCommonBound,
-} from '../../surface-block/index.js';
+import { MindmapElementModel } from '../../surface-block/index.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
