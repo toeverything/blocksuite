@@ -35,7 +35,6 @@ export {
   MindmapSurfaceBlock,
   markdownToMindmap,
 } from './mini-mindmap/index.js';
-export { getStroke } from './perfect-freehand/getStroke.js';
 export { RoughCanvas } from './rough/canvas.js';
 export type { Options } from './rough/core.js';
 export { SurfaceBlockModel as SurfaceBlockModel } from './surface-model.js';
@@ -58,6 +57,7 @@ export {
   getPointFromBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   getQuadBoundsWithRotation,
+  getStroke,
   getSvgPathFromStroke,
   intersects,
   isOverlap,

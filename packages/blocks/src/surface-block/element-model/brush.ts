@@ -21,6 +21,7 @@ import {
   getBoundFromPoints,
   getPointsFromBoundsWithRotation,
   getQuadBoundsWithRotation,
+  getSolidStrokePoints,
   getSvgPathFromStroke,
   inflateBound,
   isPointOnlines,
@@ -28,8 +29,6 @@ import {
   polyLineNearestPoint,
   transformPointsToNewBound,
 } from '@blocksuite/global/utils';
-
-import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
 
 export type BrushProps = BaseElementProps & {
   /**
