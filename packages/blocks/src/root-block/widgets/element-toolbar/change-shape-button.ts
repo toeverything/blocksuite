@@ -1,4 +1,4 @@
-import type { ColorScheme } from '@blocksuite/affine-model';
+import type { ColorScheme, ShapeProps } from '@blocksuite/affine-model';
 
 import {
   AddTextIcon,
@@ -18,7 +18,6 @@ import { join } from 'lit/directives/join.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { ShapeProps } from '../../../surface-block/element-model/shape.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';

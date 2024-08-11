@@ -1,11 +1,12 @@
-import type {
-  FrameBlockModel,
-  GroupElementModel,
-} from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
-import { FontFamily } from '@blocksuite/affine-model';
+import {
+  type FrameBlockModel,
+  type GroupElementModel,
+  ShapeElementModel,
+} from '@blocksuite/affine-model';
+import { FontFamily, TextElementModel } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
@@ -18,8 +19,6 @@ import { DocCollection } from '@blocksuite/store';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
-import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {
   CanvasElementType,
   type ConnectorElementModel,

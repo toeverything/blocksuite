@@ -28,30 +28,10 @@ import {
 } from '@blocksuite/block-std/gfx';
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import { TextResizing } from '../consts.js';
-import { diamond } from './utils/shape/diamond.js';
-import { ellipse } from './utils/shape/ellipse.js';
-import { rect } from './utils/shape/rect.js';
-import { triangle } from './utils/shape/triangle.js';
+import type { ShapeStyle, ShapeType } from '../../utils/index.js';
 
-export const shapeMethods: {
-  [key in ShapeType]: typeof rect;
-} = {
-  rect,
-  triangle,
-  ellipse,
-  diamond,
-};
-
-export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
-export type ShapeStyle = 'General' | 'Scribbled';
-
-export enum ShapeTextFontSize {
-  LARGE = 28,
-  MEDIUM = 20,
-  SMALL = 12,
-  XLARGE = 36,
-}
+import { ShapeTextFontSize, TextResizing } from '../../consts/index.js';
+import { shapeMethods } from './api/index.js';
 
 export type ShapeProps = BaseElementProps & {
   shapeType: ShapeType;

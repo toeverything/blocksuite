@@ -1,4 +1,3 @@
-import type { Color } from '@blocksuite/affine-model';
 import type {
   BaseElementProps,
   PointTestOptions,
@@ -29,6 +28,8 @@ import {
   polyLineNearestPoint,
   transformPointsToNewBound,
 } from '@blocksuite/global/utils';
+
+import type { Color } from '../../consts/index.js';
 
 export type BrushProps = BaseElementProps & {
   /**
@@ -133,10 +134,10 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   @yfield()
   accessor color: Color = '#000000';
 
-  @watch((_, instance: BrushElementModel) => {
+  @watch((_, instance) => {
     instance['_local'].delete('commands');
   })
-  @derive((lineWidth: number, instance: BrushElementModel) => {
+  @derive((lineWidth: number, instance: Instance) => {
     if (lineWidth === instance.lineWidth) return {};
 
     const bound = instance.elementBound;
@@ -161,10 +162,10 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   @yfield()
   accessor lineWidth: number = 4;
 
-  @watch((_, instance: BrushElementModel) => {
+  @watch((_, instance) => {
     instance['_local'].delete('commands');
   })
-  @derive((points: IVec[], instance: BrushElementModel) => {
+  @derive((points: IVec[], instance: Instance) => {
     const lineWidth = instance.lineWidth;
     const bound = getBoundFromPoints(points);
     const boundWidthLineWidth = inflateBound(bound, lineWidth);
@@ -173,7 +174,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
       xywh: boundWidthLineWidth.serialize(),
     };
   })
-  @convert((points: (IVec | IVec3)[], instance: BrushElementModel) => {
+  @convert((points: (IVec | IVec3)[], instance) => {
     const lineWidth = instance.lineWidth;
     const bound = getBoundFromPoints(points as IVec[]);
     const boundWidthLineWidth = inflateBound(bound, lineWidth);
@@ -191,7 +192,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   @yfield(0)
   accessor rotate: number = 0;
 
-  @derive((xywh: SerializedXYWH, instance: BrushElementModel) => {
+  @derive((xywh: SerializedXYWH, instance: Instance) => {
     const bound = Bound.deserialize(xywh);
     if (bound.w === instance.w && bound.h === instance.h) return {};
 
@@ -216,6 +217,8 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   @yfield()
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
+
+type Instance = GfxPrimitiveElementModel<BrushProps> & BrushProps;
 
 declare global {
   namespace BlockSuite {

@@ -1,13 +1,14 @@
-import type { Connection, NoteBlockModel } from '@blocksuite/affine-model';
+import type {
+  Connection,
+  NoteBlockModel,
+  ShapeStyle,
+  ShapeType,
+} from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
 import { Bound, assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import type {
-  ShapeStyle,
-  ShapeType,
-} from '../../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import {

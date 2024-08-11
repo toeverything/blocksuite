@@ -1,17 +1,17 @@
+import type { TextElementModel } from '@blocksuite/affine-model';
+
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { Bound, Vec } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { Bound, Vec, assertExists } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import type { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import '../../../../_common/components/rich-text/rich-text.js';

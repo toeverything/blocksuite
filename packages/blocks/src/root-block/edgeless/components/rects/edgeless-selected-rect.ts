@@ -11,6 +11,7 @@ import {
   type EmbedHtmlModel,
   type EmbedSyncedDocModel,
   NoteBlockModel,
+  TextElementModel,
 } from '@blocksuite/affine-model';
 import {
   clamp,
@@ -45,7 +46,6 @@ import {
   SYNCED_MIN_WIDTH,
 } from '../../../../embed-synced-doc-block/styles.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import {
   CanvasElementType,
   GroupElementModel,

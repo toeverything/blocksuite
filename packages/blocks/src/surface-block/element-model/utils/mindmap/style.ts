@@ -1,3 +1,5 @@
+import type { ShapeElementModel } from '@blocksuite/affine-model';
+
 import {
   ConnectorMode,
   FontFamily,
@@ -6,7 +8,6 @@ import {
 } from '@blocksuite/affine-model';
 import { last } from '@blocksuite/global/utils';
 
-import type { ShapeElementModel } from '../../shape.js';
 import type { MindmapNode } from './layout.js';
 
 import { fitContent } from '../../../canvas-renderer/element-renderer/shape/utils.js';

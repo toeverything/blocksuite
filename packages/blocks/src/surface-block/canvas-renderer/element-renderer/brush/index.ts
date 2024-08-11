@@ -1,4 +1,5 @@
-import type { BrushElementModel } from '../../../element-model/brush.js';
+import type { BrushElementModel } from '@blocksuite/affine-model';
+
 import type { Renderer } from '../../renderer.js';
 
 export function brush(

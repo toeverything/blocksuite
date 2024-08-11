@@ -1,4 +1,4 @@
-import { StrokeStyle } from '@blocksuite/affine-model';
+import { SHAPE_TEXT_PADDING, StrokeStyle } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -9,7 +9,6 @@ import type {
 } from '../../surface-block/index.js';
 
 import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { SHAPE_TEXT_PADDING } from '../../surface-block/element-model/shape.js';
 import {
   CanvasElementType,
   ConnectorMode,
