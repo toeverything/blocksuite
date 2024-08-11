@@ -1,3 +1,4 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
@@ -9,7 +10,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
-import type { RootBlockModel } from '../root-model.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 

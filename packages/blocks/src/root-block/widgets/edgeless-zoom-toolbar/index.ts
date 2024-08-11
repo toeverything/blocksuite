@@ -1,9 +1,10 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
+
 import { WidgetComponent } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../root-model.js';
 
 import './zoom-bar-toggle-button.js';
 import './zoom-toolbar.js';

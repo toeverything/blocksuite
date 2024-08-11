@@ -1,11 +1,16 @@
-import type { FrameBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
+import type {
+  FrameBlockModel,
+  NoteBlockModel,
+  RootBlockModel,
+  SurfaceRefBlockModel,
+} from '@blocksuite/affine-model';
 
 import {
   AutoConnectLeftIcon,
   AutoConnectRightIcon,
   HiddenIcon,
+  SmallDocIcon,
 } from '@blocksuite/affine-components/icons';
-import { SmallDocIcon } from '@blocksuite/affine-components/icons';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
   matchFlavours,
@@ -19,10 +24,8 @@ import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { SurfaceRefBlockModel } from '../../../surface-ref-block/surface-ref-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessRootService } from '../../edgeless/edgeless-root-service.js';
-import type { RootBlockModel } from '../../root-model.js';
 
 import { isNoteBlock } from '../../edgeless/utils/query.js';
 

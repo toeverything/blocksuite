@@ -3,13 +3,13 @@ import type {
   EmbedSyncedDocModel,
   ListBlockModel,
   ParagraphBlockModel,
+  SurfaceRefBlockModel,
 } from '@blocksuite/affine-model';
 import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
 
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
-import type { SurfaceRefBlockModel } from '../../surface-ref-block/index.js';
 
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 

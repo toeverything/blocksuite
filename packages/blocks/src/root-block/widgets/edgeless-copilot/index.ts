@@ -1,3 +1,5 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
+
 import {
   MOUSE_BUTTON,
   requestConnectedFrame,
@@ -19,7 +21,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../root-model.js';
 import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 
 import { getElementsBound } from '../../../surface-block/index.js';

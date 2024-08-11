@@ -1,3 +1,4 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { UserInfo } from '@blocksuite/store';
 
 import { RemoteCursor } from '@blocksuite/affine-components/icons';
@@ -10,7 +11,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../root-model.js';
 
 import {
   getSelectedRect,

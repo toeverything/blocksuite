@@ -3,6 +3,7 @@ import {
   ListBlockSchema,
   NoteBlockSchema,
   ParagraphBlockSchema,
+  RootBlockSchema,
 } from '@blocksuite/affine-model';
 import { DocCollection, Schema, type Y } from '@blocksuite/store';
 // normal import
@@ -12,7 +13,6 @@ import { fileURLToPath } from 'node:url';
 import { assert, describe, expect, test } from 'vitest';
 
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
-import { RootBlockSchema } from '../../root-block/root-model.js';
 import { SurfaceBlockSchema } from '../../surface-block/surface-model.js';
 
 async function loadBinary(name: string) {

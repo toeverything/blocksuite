@@ -1,15 +1,15 @@
-import {
-  EdgelessModeIcon,
-  MoreVerticalIcon,
-  SmallArrowDownIcon,
-} from '@blocksuite/affine-components/icons';
+import type { SurfaceRefBlockModel } from '@blocksuite/affine-model';
+
 import {
   CaptionIcon,
   CenterPeekIcon,
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
+  EdgelessModeIcon,
+  MoreVerticalIcon,
   OpenIcon,
+  SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { downloadBlob } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
@@ -19,10 +19,7 @@ import { customElement } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type {
-  SurfaceRefBlockComponent,
-  SurfaceRefBlockModel,
-} from '../../../surface-ref-block/index.js';
+import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/index.js';
 import type { EdgelessRootPreviewBlockComponent } from '../../edgeless/edgeless-root-preview-block.js';
 
 import { HoverController } from '../../../_common/components/hover/controller.js';
