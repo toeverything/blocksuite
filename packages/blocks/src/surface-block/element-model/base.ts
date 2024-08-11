@@ -13,12 +13,6 @@ export type ModelToProps<
 
 export type { PointTestOptions } from '@blocksuite/block-std/gfx';
 
-import type {
-  GfxPrimitiveElementModel as ElementModel,
-  GfxGroupLikeElementModel as GroupLikeModel,
-  GfxLocalElementModel as LocalModel,
-} from '@blocksuite/block-std/gfx';
-
 export type {
   BaseElementProps,
   SerializedElement,
@@ -29,31 +23,3 @@ export {
   GfxLocalElementModel as SurfaceLocalModel,
   GfxPrimitiveElementModel as SurfaceElementModel,
 } from '@blocksuite/block-std/gfx';
-
-declare global {
-  namespace BlockSuite {
-    interface SurfaceElementModelMap {}
-    type SurfaceElementModelKeys = keyof SurfaceElementModelMap;
-    type SurfaceElementModel =
-      | SurfaceElementModelMap[SurfaceElementModelKeys]
-      | ElementModel;
-
-    interface SurfaceGroupLikeModelMap {}
-    type SurfaceGroupLikeModelKeys = keyof SurfaceGroupLikeModelMap;
-    type SurfaceGroupLikeModel =
-      | SurfaceGroupLikeModelMap[SurfaceGroupLikeModelKeys]
-      | GroupLikeModel;
-
-    interface SurfaceLocalModelMap {}
-    type SurfaceLocalModelKeys = keyof SurfaceLocalModelMap;
-    type SurfaceLocalModel =
-      | SurfaceLocalModelMap[SurfaceLocalModelKeys]
-      | LocalModel;
-
-    // not include local model
-    type SurfaceModel = SurfaceElementModel | SurfaceGroupLikeModel;
-    type SurfaceModelKeyType =
-      | SurfaceElementModelKeys
-      | SurfaceGroupLikeModelKeys;
-  }
-}

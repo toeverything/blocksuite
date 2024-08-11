@@ -1,11 +1,11 @@
-import type { ConnectorElementModel } from '@blocksuite/affine-model';
+import type {
+  ConnectorElementModel,
+  GroupElementModel,
+} from '@blocksuite/affine-model';
 import type { Slot } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 
-import type {
-  BrushElementModel,
-  GroupElementModel,
-} from '../surface-block/index.js';
+import type { BrushElementModel } from '../surface-block/index.js';
 import type { RefNodeSlots } from './inline/presets/nodes/reference-node/reference-node.js';
 
 /** Common context interface definition for block models. */

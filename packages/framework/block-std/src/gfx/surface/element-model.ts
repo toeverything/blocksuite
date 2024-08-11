@@ -437,7 +437,7 @@ export abstract class GfxGroupLikeElementModel<
    * @param value the new value of the childIds
    * @param fromLocal if true, the change is happened in the local
    */
-  protected setChildIds(value: string[], fromLocal: boolean) {
+  setChildIds(value: string[], fromLocal: boolean) {
     const oldChildIds = this.childIds;
     this._childIds = value;
 

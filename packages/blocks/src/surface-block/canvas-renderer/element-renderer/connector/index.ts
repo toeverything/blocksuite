@@ -12,7 +12,7 @@ import {
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
-import { isConnectorWithLabel } from '../../../element-model/connector.js';
+import { isConnectorWithLabel } from '../../../element-model/utils/connector.js';
 import {
   type TextDelta,
   deltaInsertsToChunks,

@@ -1,4 +1,7 @@
-import type { FrameBlockModel } from '@blocksuite/affine-model';
+import type {
+  FrameBlockModel,
+  GroupElementModel,
+} from '@blocksuite/affine-model';
 import type { BlockServiceOptions } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
@@ -11,10 +14,7 @@ import type {
   CanvasElementType,
   ConnectorElementModel,
 } from '../../surface-block/element-model/index.js';
-import type {
-  GroupElementModel,
-  SurfaceBlockModel,
-} from '../../surface-block/index.js';
+import type { SurfaceBlockModel } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';

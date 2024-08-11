@@ -1,11 +1,15 @@
 import type {
   EdgelessTextBlockModel,
+  FrameBlockModel,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
+import {
+  ConnectorElementModel,
+  GroupElementModel,
+} from '@blocksuite/affine-model';
 import { clamp } from '@blocksuite/affine-shared/utils';
 import {
   Bound,
@@ -28,14 +32,12 @@ import {
   type PointTestOptions,
   SurfaceGroupLikeModel,
 } from '../../../../surface-block/element-model/base.js';
-import { isConnectorWithLabel } from '../../../../surface-block/element-model/connector.js';
 import {
-  ConnectorElementModel,
-  GroupElementModel,
   MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
+import { isConnectorWithLabel } from '../../../../surface-block/element-model/utils/connector.js';
 import {
   hideTargetConnector,
   moveSubtree,

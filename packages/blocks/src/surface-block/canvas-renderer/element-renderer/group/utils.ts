@@ -1,7 +1,7 @@
+import type { GroupElementModel } from '@blocksuite/affine-model';
+
 import { FontFamily, FontWeight } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
-
-import type { GroupElementModel } from '../../../element-model/group.js';
 
 import {
   getFontString,

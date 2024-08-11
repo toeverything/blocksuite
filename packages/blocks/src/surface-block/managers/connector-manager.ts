@@ -4,6 +4,7 @@ import {
   type Connection,
   type ConnectorElementModel,
   ConnectorMode,
+  GroupElementModel,
   type LocalConnectorElementModel,
 } from '@blocksuite/affine-model';
 import {
@@ -32,8 +33,7 @@ import type { Connectable } from '../../_common/types.js';
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 
 import { Overlay } from '../canvas-renderer/renderer.js';
-import { isConnectorWithLabel } from '../element-model/connector.js';
-import { GroupElementModel } from '../element-model/group.js';
+import { isConnectorWithLabel } from '../element-model/utils/connector.js';
 import { AStarRunner } from '../utils/a-star.js';
 import { getBoundFromPoints } from '../utils/bound.js';
 

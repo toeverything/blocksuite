@@ -1,6 +1,9 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import type { FrameBlockModel } from '@blocksuite/affine-model';
+import type {
+  FrameBlockModel,
+  GroupElementModel,
+} from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
@@ -13,7 +16,6 @@ import { literal, html as staticHtml, unsafeStatic } from 'lit/static-html.js';
 
 import type { GfxBlockModel } from '../root-block/edgeless/block-model.js';
 import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
-import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
 
 import './portal/generic-block.js';

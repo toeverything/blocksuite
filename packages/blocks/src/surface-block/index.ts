@@ -19,7 +19,6 @@ export {
 } from './consts.js';
 export { SurfaceElementModel } from './element-model/base.js';
 export { BrushElementModel } from './element-model/brush.js';
-export { GroupElementModel } from './element-model/group.js';
 export { CanvasElementType } from './element-model/index.js';
 export {
   LayoutType,
@@ -50,6 +49,7 @@ export {
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
+  GroupElementModel,
   type PointStyle,
 } from '@blocksuite/affine-model';
 export {

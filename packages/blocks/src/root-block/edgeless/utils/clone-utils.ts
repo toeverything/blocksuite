@@ -1,10 +1,16 @@
-import type { SerializedConnectorElement } from '@blocksuite/affine-model';
+import type {
+  SerializedConnectorElement,
+  SerializedGroupElement,
+} from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 
+import {
+  ConnectorElementModel,
+  GroupElementModel,
+} from '@blocksuite/affine-model';
 import { groupBy } from '@blocksuite/global/utils';
 import { type BlockSnapshot, Job } from '@blocksuite/store';
 
-import type { SerializedGroupElement } from '../../../surface-block/element-model/group.js';
 import type { SerializedMindmapElement } from '../../../surface-block/element-model/mindmap.js';
 import type { NodeDetail } from '../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessFrameManager } from '../frame-manager.js';
@@ -13,11 +19,7 @@ import {
   type SerializedElement,
   SurfaceGroupLikeModel,
 } from '../../../surface-block/element-model/base.js';
-import {
-  ConnectorElementModel,
-  GroupElementModel,
-  MindmapElementModel,
-} from '../../../surface-block/index.js';
+import { MindmapElementModel } from '../../../surface-block/index.js';
 import { GfxBlockModel } from '../block-model.js';
 import { isFrameBlock } from '../utils/query.js';
 
