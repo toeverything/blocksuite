@@ -1,16 +1,14 @@
 import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
 import type { EditorHost, UIEventStateContext } from '@blocksuite/block-std';
 
+import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { DisposableGroup, throttle } from '@blocksuite/global/utils';
 import { InlineEditor } from '@blocksuite/inline';
 import { customElement } from 'lit/decorators.js';
 
-import {
-  getInlineEditorByModel,
-  getViewportElement,
-} from '../../../_common/utils/query.js';
+import { getViewportElement } from '../../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../../_common/utils/selection.js';
 import { getPopperPosition } from '../../../root-block/utils/position.js';
 import { type LinkedMenuGroup, getMenus } from './config.js';

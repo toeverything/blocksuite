@@ -3,6 +3,7 @@ import type { BlockComponent } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
+  getBlockComponentsExcludeSubtrees,
   getScrollContainer,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
@@ -32,9 +33,7 @@ import type { DragHandleOption, DropResult, DropType } from './config.js';
 import {
   Rect,
   findNoteBlockModel,
-  getBlockComponentsExcludeSubtrees,
   getCurrentNativeRange,
-  getModelByBlockComponent,
   isInsideEdgelessEditor,
   isInsidePageEditor,
 } from '../../../_common/utils/index.js';
@@ -678,7 +677,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
       if (!isTargetEdgelessContainer) return false;
 
       const selectedBlocks = getBlockComponentsExcludeSubtrees(draggingElements)
-        .map(element => getModelByBlockComponent(element))
+        .map(element => element.model)
         .filter((x): x is BlockModel => !!x);
       if (selectedBlocks.length === 0) return false;
 
@@ -740,7 +739,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     }
 
     const selectedBlocks = getBlockComponentsExcludeSubtrees(draggingElements)
-      .map(element => getModelByBlockComponent(element))
+      .map(element => element.model)
       .filter((x): x is BlockModel => !!x);
     if (!selectedBlocks.length) {
       return false;

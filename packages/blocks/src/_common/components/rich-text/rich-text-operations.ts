@@ -2,6 +2,7 @@ import type { ListBlockModel, RootBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
+import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
 import {
   isInsideBlockByFlavour,
   matchFlavours,
@@ -13,7 +14,6 @@ import type { ExtendedModel } from '../../types.js';
 import {
   getBlockComponentByModel,
   getDocTitleByEditorHost,
-  getInlineEditorByModel,
   getNextBlock,
   getPreviousBlock,
 } from '../../../_common/utils/query.js';

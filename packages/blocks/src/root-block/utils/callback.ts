@@ -2,9 +2,7 @@ import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
-import { assertExists } from '@blocksuite/global/utils';
-
-import { asyncGetRichText, buildPath } from '../../_common/utils/query.js';
+import { asyncGetRichText } from '@blocksuite/affine-components/rich-text';
 
 export async function onModelTextUpdated(
   editorHost: EditorHost,
@@ -12,10 +10,16 @@ export async function onModelTextUpdated(
   callback?: (text: RichText) => void
 ) {
   const richText = await asyncGetRichText(editorHost, model.id);
-  assertExists(richText, 'RichText is not ready yet.');
+  if (!richText) {
+    console.error('RichText is not ready yet.');
+    return;
+  }
   await richText.updateComplete;
   const inlineEditor = richText.inlineEditor;
-  assertExists(inlineEditor, 'Inline editor is not ready yet.');
+  if (!inlineEditor) {
+    console.error('Inline editor is not ready yet.');
+    return;
+  }
   inlineEditor.slots.renderComplete.once(() => {
     if (callback) {
       callback(richText);
@@ -34,12 +38,12 @@ export async function onModelElementUpdated(
   callback: (block: BlockComponent) => void
 ) {
   const page = model.doc;
-  assertExists(page.root);
+  if (!page.root) return;
 
-  const rootComponent = editorHost.view.viewFromPath('block', [page.root.id]);
+  const rootComponent = editorHost.view.getBlock(page.root.id);
   if (!rootComponent) return;
   await rootComponent.updateComplete;
 
-  const element = editorHost.view.viewFromPath('block', buildPath(model));
+  const element = editorHost.view.getBlock(model.id);
   if (element) callback(element);
 }

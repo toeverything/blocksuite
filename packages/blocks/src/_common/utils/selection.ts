@@ -2,18 +2,18 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { InlineRange, VLine } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 
-import { Rect, matchFlavours } from '@blocksuite/affine-shared/utils';
+import { asyncGetRichText } from '@blocksuite/affine-components/rich-text';
+import {
+  Rect,
+  getPageRootByElement,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { SelectionPosition } from '../types.js';
 
-import {
-  asyncGetRichText,
-  buildPath,
-  getDocTitleInlineEditor,
-  getPageRootByElement,
-} from './query.js';
+import { buildPath, getDocTitleInlineEditor } from './query.js';
 
 declare global {
   interface Document {

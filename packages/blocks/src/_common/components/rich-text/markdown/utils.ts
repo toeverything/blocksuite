@@ -1,9 +1,10 @@
 import type { ListType } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
+
 import {
   asyncFocusRichText,
-  getInlineEditorByModel,
   matchFlavours,
 } from '../../../../_common/utils/index.js';
 

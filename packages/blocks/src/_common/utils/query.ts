@@ -1,5 +1,4 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
-import type { Rect } from '@blocksuite/affine-shared/utils';
 import type {
   BlockComponent,
   EditorHost,
@@ -10,31 +9,17 @@ import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
-  clamp,
   findAncestorModel,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { Loader } from '../../_common/components/loader.js';
 import type { NoteBlockModel, RootBlockComponent } from '../../index.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 
-import {
-  BLOCK_ID_ATTR as ATTR,
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
-} from '../consts.js';
+import { BLOCK_ID_ATTR } from '../consts.js';
 
-const ATTR_SELECTOR = `[${ATTR}]`;
-
-// margin-top: calc(var(--affine-paragraph-space) + 24px);
-// h1.margin-top = 8px + 24px = 32px;
-const MAX_SPACE = 32;
-const STEPS = MAX_SPACE / 2 / 2;
-
-interface ContainerBlock {
-  model?: BlockModel;
-}
+const ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 
 /**
  *
@@ -191,16 +176,6 @@ export function blockComponentGetter(model: BlockModel, view: ViewStore) {
   }
 }
 
-export function getRootByElement(element: Element): RootBlockComponent | null {
-  const pageRoot = getPageRootByElement(element);
-  if (pageRoot) return pageRoot;
-
-  const edgelessRoot = getEdgelessRootByElement(element);
-  if (edgelessRoot) return edgelessRoot;
-
-  return null;
-}
-
 export function getRootByEditorHost(
   editorHost: EditorHost
 ): RootBlockComponent | null {
@@ -211,18 +186,8 @@ export function getRootByEditorHost(
 }
 
 /** If it's not in the page mode, it will return `null` directly */
-export function getPageRootByElement(element: Element) {
-  return element.closest('affine-page-root');
-}
-
-/** If it's not in the page mode, it will return `null` directly */
 export function getPageRootByEditorHost(editorHost: EditorHost) {
   return editorHost.querySelector('affine-page-root');
-}
-
-/** If it's not in the edgeless mode, it will return `null` directly */
-export function getEdgelessRootByElement(element: Element) {
-  return element.closest('affine-edgeless-root');
 }
 
 /** If it's not in the edgeless mode, it will return `null` directly */
@@ -294,65 +259,6 @@ export function getBlockComponentByPath(
   return editorHost.view.getBlock(blockId);
 }
 
-/**
- * Get block component by its model and wait for the doc element to finish updating.
- * Note that this function is used for compatibility only, and may be removed in the future.
- *
- * Use `std.view.getBlock` instead.
- * @deprecated
- */
-export async function asyncGetBlockComponent(
-  editorHost: EditorHost,
-  id: string
-): Promise<BlockComponent | null> {
-  const rootBlockId = editorHost.doc.root?.id;
-  if (!rootBlockId) return null;
-  const rootComponent = editorHost.view.getBlock(rootBlockId);
-  if (!rootComponent) return null;
-  await rootComponent.updateComplete;
-
-  return editorHost.view.getBlock(id);
-}
-
-/**
- * @deprecated In most cases, you not need RichText, you can use {@link getInlineEditorByModel} instead.
- */
-export function getRichTextByModel(editorHost: EditorHost, id: string) {
-  const blockComponent = editorHost.view.getBlock(id);
-  const richText = blockComponent?.querySelector<RichText>('rich-text');
-  if (!richText) return null;
-  return richText;
-}
-
-export async function asyncGetRichText(editorHost: EditorHost, id: string) {
-  const blockComponent = await asyncGetBlockComponent(editorHost, id);
-  if (!blockComponent) return null;
-  await blockComponent.updateComplete;
-  const richText = blockComponent?.querySelector<RichText>('rich-text');
-  if (!richText) return null;
-  return richText;
-}
-
-export function getInlineEditorByModel(
-  editorHost: EditorHost,
-  model: BlockModel
-) {
-  if (matchFlavours(model, ['affine:database'])) {
-    // Not support database model since it's may be have multiple inline editor instances.
-    // Support to enter the editing state through the Enter key in the database.
-    return null;
-  }
-  const richText = getRichTextByModel(editorHost, model.id);
-  if (!richText) return null;
-  return richText.inlineEditor;
-}
-
-export function getModelByElement(element: Element): BlockModel {
-  const closestBlock = element.closest<BlockComponent>(ATTR_SELECTOR);
-  assertExists(closestBlock, 'Cannot find block element by element');
-  return getModelByBlockComponent(closestBlock);
-}
-
 export function getDocTitleByEditorHost(
   editorHost: EditorHost
 ): HTMLElement | null {
@@ -371,265 +277,12 @@ export function getDocTitleInlineEditor(
   return titleRichText.inlineEditor;
 }
 
-/**
- * Returns `16` if node is contained in the parent.
- * Otherwise return `0`.
- */
-function contains(parent: Element, node: Element) {
-  return (
-    parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
-  );
-}
-
-/**
- * Returns `true` if element has `data-block-id` attribute.
- */
-function hasBlockId(element: Element): element is BlockComponent {
-  return element.hasAttribute(ATTR);
-}
-
-/**
- * Returns `true` if element is default/edgeless page or note.
- */
-function isRootOrNoteOrSurface(element: BlockComponent) {
-  return matchFlavours(element.model, [
-    'affine:page',
-    'affine:note',
-    'affine:surface',
-  ]);
-}
-
-function isBlock(element: BlockComponent) {
-  return !isRootOrNoteOrSurface(element);
-}
-
-function isImage({ tagName }: Element) {
-  return tagName === 'AFFINE-IMAGE';
-}
-
 function isDatabase({ tagName }: Element) {
   return tagName === 'AFFINE-DATABASE-TABLE' || tagName === 'AFFINE-DATABASE';
 }
 
 function isEdgelessChildNote({ classList }: Element) {
   return classList.contains('note-background');
-}
-
-/**
- * Returns the closest block element by a point in the rect.
- *
- * ```
- * ############### block
- * ||############# block
- * ||||########### block
- * ||||    ...
- * ||||  y - 2 * n
- * ||||    ...
- * ||||----------- cursor
- * ||||    ...
- * ||||  y + 2 * n
- * ||||    ...
- * ||||########### block
- * ||############# block
- * ############### block
- * ```
- */
-export function getClosestBlockComponentByPoint(
-  point: Point,
-  state: {
-    rect?: Rect;
-    container?: Element;
-    snapToEdge?: {
-      x: boolean;
-      y: boolean;
-    };
-  } | null = null,
-  scale = 1
-): Element | null {
-  const { y } = point;
-
-  let container;
-  let element = null;
-  let bounds = null;
-  let childBounds = null;
-  let diff = 0;
-  let n = 1;
-
-  if (state) {
-    const {
-      snapToEdge = {
-        x: true,
-        y: false,
-      },
-    } = state;
-    container = state.container;
-    const rect = state.rect || container?.getBoundingClientRect();
-    if (rect) {
-      if (snapToEdge.x) {
-        point.x = Math.min(
-          Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
-          rect.right - PADDING_LEFT * scale - 1
-        );
-      }
-      if (snapToEdge.y) {
-        // TODO handle scale
-        if (scale !== 1) {
-          console.warn('scale is not supported yet');
-        }
-        point.y = clamp(point.y, rect.top + 1, rect.bottom - 1);
-      }
-    }
-  }
-
-  // find block element
-  element = findBlockComponent(
-    document.elementsFromPoint(point.x, point.y),
-    container
-  );
-
-  // Horizontal direction: for nested structures
-  if (element) {
-    // Database
-    if (isDatabase(element)) {
-      bounds = element.getBoundingClientRect();
-      const rows = getDatabaseBlockRowsElement(element);
-      if (rows) {
-        childBounds = rows.getBoundingClientRect();
-
-        if (childBounds.height) {
-          if (point.y < childBounds.top || point.y > childBounds.bottom) {
-            return element;
-          }
-          childBounds = null;
-        } else {
-          return element;
-        }
-      }
-    } else {
-      // Indented paragraphs or list
-      bounds = getRectByBlockComponent(element);
-      childBounds = element
-        .querySelector('.affine-block-children-container')
-        ?.firstElementChild?.getBoundingClientRect();
-
-      if (childBounds && childBounds.height) {
-        if (bounds.x < point.x && point.x <= childBounds.x) {
-          return element;
-        }
-        childBounds = null;
-      } else {
-        return element;
-      }
-    }
-
-    bounds = null;
-    element = null;
-  }
-
-  // Vertical direction
-  do {
-    point.y = y - n * 2;
-
-    if (n < 0) n--;
-    n *= -1;
-
-    // find block element
-    element = findBlockComponent(
-      document.elementsFromPoint(point.x, point.y),
-      container
-    );
-
-    if (element) {
-      bounds = getRectByBlockComponent(element);
-      diff = bounds.bottom - point.y;
-      if (diff >= 0 && diff <= STEPS * 2) {
-        return element;
-      }
-      diff = point.y - bounds.top;
-      if (diff >= 0 && diff <= STEPS * 2) {
-        return element;
-      }
-      bounds = null;
-      element = null;
-    }
-  } while (n <= STEPS);
-
-  return element;
-}
-
-/**
- * Find the most close block on the given position
- * @param container container which the blocks can be found inside
- * @param point position
- * @param selector selector to find the block
- */
-export function findClosestBlockComponent(
-  container: BlockComponent,
-  point: Point,
-  selector: string
-): BlockComponent | null {
-  const children = (
-    Array.from(container.querySelectorAll(selector)) as BlockComponent[]
-  )
-    .filter(child => child.host === container.host)
-    .filter(child => child !== container);
-
-  let lastDistance = Number.POSITIVE_INFINITY;
-  let lastChild = null;
-
-  if (!children.length) return null;
-
-  for (const child of children) {
-    const rect = child.getBoundingClientRect();
-    if (rect.height === 0 || point.y > rect.bottom || point.y < rect.top)
-      continue;
-    const distance =
-      Math.pow(point.y - (rect.y + rect.height / 2), 2) +
-      Math.pow(point.x - rect.x, 2);
-
-    if (distance <= lastDistance) {
-      lastDistance = distance;
-      lastChild = child;
-    } else {
-      return lastChild;
-    }
-  }
-
-  return lastChild;
-}
-
-/**
- * Returns the closest block element by element that does not contain the page element and note element.
- */
-export function getClosestBlockComponentByElement(
-  element: Element | null
-): BlockComponent | null {
-  if (!element) return null;
-  if (hasBlockId(element) && isBlock(element)) {
-    return element;
-  }
-  const blockComponent = element.closest<BlockComponent>(ATTR_SELECTOR);
-  if (blockComponent && isBlock(blockComponent)) {
-    return blockComponent;
-  }
-  return null;
-}
-
-/**
- * Returns the model of the block element.
- */
-export function getModelByBlockComponent(component: Element) {
-  const containerBlock = component as ContainerBlock;
-  // In extreme cases, the block may be loading, and the model is not yet available.
-  // For example
-  // // `<loader-element data-block-id="586080495:15" data-service-loading="true"></loader-element>`
-  if ('hostModel' in containerBlock) {
-    const loader = containerBlock as Loader;
-    assertExists(loader.hostModel);
-    return loader.hostModel;
-  }
-  assertExists(containerBlock.model);
-  return containerBlock.model;
 }
 
 /**
@@ -642,51 +295,6 @@ export function getModelByBlockComponent(component: Element) {
 export function getRectByBlockComponent(element: Element | BlockComponent) {
   if (isDatabase(element)) return element.getBoundingClientRect();
   return (element.firstElementChild ?? element).getBoundingClientRect();
-}
-
-/**
- * Returns block elements excluding their subtrees.
- * Only keep block elements of same level.
- */
-export function getBlockComponentsExcludeSubtrees(
-  elements: Element[] | BlockComponent[]
-) {
-  if (elements.length <= 1) return elements;
-  let parent = elements[0];
-  return elements.filter((node, index) => {
-    if (index === 0) return true;
-    if (contains(parent, node)) {
-      return false;
-    } else {
-      parent = node;
-      return true;
-    }
-  });
-}
-
-/**
- * Find block element from an `Element[]`.
- * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
- */
-function findBlockComponent(elements: Element[], parent?: Element) {
-  const len = elements.length;
-  let element = null;
-  let i = 0;
-  while (i < len) {
-    element = elements[i];
-    i++;
-    // if parent does not contain element, it's ignored
-    if (parent && !contains(parent, element)) continue;
-    if (hasBlockId(element) && isBlock(element)) return element;
-    if (isImage(element)) {
-      const element = elements[i];
-      if (i < len && hasBlockId(element) && isBlock(element)) {
-        return elements[i];
-      }
-      return getClosestBlockComponentByElement(element);
-    }
-  }
-  return null;
 }
 
 /**
