@@ -41,6 +41,8 @@ export interface LinkedWidgetConfig {
 
 @customElement(AFFINE_LINKED_DOC_WIDGET)
 export class AffineLinkedDocWidget extends WidgetComponent {
+  private _abortController: AbortController | null = null;
+
   private _onCompositionEnd = (ctx: UIEventStateContext) => {
     const event = ctx.get('defaultState').event as CompositionEvent;
 
@@ -117,9 +119,10 @@ export class AffineLinkedDocWidget extends WidgetComponent {
     const curRange = getCurrentNativeRange();
     if (!curRange) return;
 
-    const abortController = new AbortController();
+    this._abortController?.abort();
+    this._abortController = new AbortController();
     const disposables = new DisposableGroup();
-    abortController.signal.addEventListener('abort', () =>
+    this._abortController.signal.addEventListener('abort', () =>
       disposables.dispose()
     );
 
@@ -128,7 +131,7 @@ export class AffineLinkedDocWidget extends WidgetComponent {
       this.config.getMenus,
       this.host,
       inlineEditor,
-      abortController
+      this._abortController
     );
 
     // Mount
@@ -156,7 +159,7 @@ export class AffineLinkedDocWidget extends WidgetComponent {
 
     disposables.addFromEvent(window, 'mousedown', (e: Event) => {
       if (e.target === linkedDoc) return;
-      abortController.abort();
+      this._abortController?.abort();
     });
 
     return linkedDoc;
