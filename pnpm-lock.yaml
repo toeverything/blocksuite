@@ -222,9 +222,21 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.6.8
         version: 1.6.8
+      '@lit-labs/preact-signals':
+        specifier: ^1.0.2
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+      '@lit/context':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@toeverything/theme':
+        specifier: ^1.0.2
+        version: 1.0.2
       lit:
         specifier: ^3.1.4
         version: 3.1.4
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
 
   packages/affine/model:
     dependencies:

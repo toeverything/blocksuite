@@ -6,6 +6,7 @@ import type {
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { toast } from '@blocksuite/affine-components/toast';
 import {
   downloadBlob,
   humanFileSize,
@@ -17,7 +18,6 @@ import type { ImageBlockComponent } from './image-block.js';
 
 import { readImageSize } from '../root-block/edgeless/components/utils.js';
 import { transformModel } from '../root-block/utils/operations/model.js';
-import { toast } from './../_common/components/toast.js';
 
 const MAX_RETRY_COUNT = 3;
 const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';

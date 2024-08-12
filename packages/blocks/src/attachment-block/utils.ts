@@ -5,12 +5,12 @@ import type {
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { toast } from '@blocksuite/affine-components/toast';
 import { defaultAttachmentProps } from '@blocksuite/affine-model';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 
 import type { AttachmentBlockComponent } from './attachment-block.js';
 
-import { toast } from '../_common/components/toast.js';
 import { allowEmbed } from './embed.js';
 
 export function cloneAttachmentProperties(model: AttachmentBlockModel) {

@@ -25,6 +25,7 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '@blocksuite/affine-components/icons';
+import { toast } from '@blocksuite/affine-components/toast';
 import { NoteBlockModel } from '@blocksuite/affine-model';
 import { Slice, Text } from '@blocksuite/store';
 
@@ -33,7 +34,6 @@ import type { RootBlockComponent } from '../../types.js';
 import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
-import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';

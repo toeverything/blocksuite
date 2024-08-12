@@ -1,6 +1,7 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 
 import { NoteIcon, RenameIcon } from '@blocksuite/affine-components/icons';
+import { toast } from '@blocksuite/affine-components/toast';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import { type ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
@@ -21,7 +22,6 @@ import type { PickColorEvent } from '../../edgeless/components/color-picker/type
 import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import { toast } from '../../../_common/components/toast.js';
 import {
   packColor,
   packColorsWithColorScheme,

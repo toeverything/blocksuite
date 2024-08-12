@@ -2,10 +2,10 @@ import type { AttachmentBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { ConfirmIcon } from '@blocksuite/affine-components/icons';
+import { toast } from '@blocksuite/affine-components/toast';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import { toast } from '../../_common/components/toast.js';
 import { renameStyles } from './styles.js';
 
 export const RenameModal = ({

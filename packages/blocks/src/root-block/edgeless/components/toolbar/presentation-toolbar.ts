@@ -7,6 +7,7 @@ import {
   NavigatorFullScreenIcon,
   StopAIIcon,
 } from '@blocksuite/affine-components/icons';
+import { toast } from '@blocksuite/affine-components/toast';
 import { Bound } from '@blocksuite/global/utils';
 import { cssVar } from '@toeverything/theme';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
@@ -16,7 +17,6 @@ import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../types.js';
 
-import { toast } from '../../../../_common/components/toast.js';
 import { clamp } from '../../../../surface-block/index.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';

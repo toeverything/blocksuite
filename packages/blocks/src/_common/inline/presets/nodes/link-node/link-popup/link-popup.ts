@@ -12,10 +12,12 @@ import {
   SmallArrowDownIcon,
   UnlinkIcon,
 } from '@blocksuite/affine-components/icons';
+import { toast } from '@blocksuite/affine-components/toast';
 import {
   renderActions,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
+import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import {
   getHostName,
   isValidUrl,
@@ -33,8 +35,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { EmbedOptions } from '../../../../../../root-block/root-service.js';
 import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
 
-import { toast } from '../../../../../components/toast.js';
-import { BLOCK_ID_ATTR } from '../../../../../consts.js';
 import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')

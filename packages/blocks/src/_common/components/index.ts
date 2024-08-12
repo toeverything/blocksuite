@@ -9,6 +9,5 @@ export * from './menu/index.js';
 export * from './menu-divider.js';
 export * from './notification-service.js';
 export * from './rich-text/rich-text.js';
-export * from './toast.js';
 
 export { scrollbarStyle } from './utils.js';
