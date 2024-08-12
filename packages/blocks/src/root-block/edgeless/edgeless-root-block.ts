@@ -392,11 +392,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       }
     };
 
-    if (this.surface.isUpdatePending) {
-      this.surface.updateComplete.then(run).catch(console.error);
-    } else {
-      run();
-    }
+    run();
 
     this._disposables.add(() => {
       service.editPropsStore.setStorage('viewport', {
