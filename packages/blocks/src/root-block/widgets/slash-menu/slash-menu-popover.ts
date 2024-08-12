@@ -2,6 +2,7 @@ import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text
 
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
+import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
 import {
   isControlledKeyboardEvent,
   isFuzzyMatch,
@@ -30,7 +31,6 @@ import {
   createKeydownObserver,
   getQuery,
 } from '../../../_common/components/utils.js';
-import { getInlineEditorByModel } from '../../../_common/utils/index.js';
 import { slashItemToolTipStyle, styles } from './styles.js';
 import {
   getFirstNotDividerItem,

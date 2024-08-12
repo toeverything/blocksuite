@@ -1,5 +1,7 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 
+import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import {
   DisposableGroup,
@@ -9,11 +11,7 @@ import {
 } from '@blocksuite/global/utils';
 import { customElement } from 'lit/decorators.js';
 
-import {
-  getCurrentNativeRange,
-  getInlineEditorByModel,
-  matchFlavours,
-} from '../../../_common/utils/index.js';
+import { getCurrentNativeRange } from '../../../_common/utils/index.js';
 import { isRootComponent } from '../../utils/guard.js';
 import { getPopperPosition } from '../../utils/position.js';
 import {

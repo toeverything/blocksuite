@@ -1,13 +1,14 @@
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
+import { getRootByElement } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { RootBlockComponent } from '../../../../../../root-block/index.js';
 import type { GroupData } from '../../../../common/group-by/helper.js';
 import type { TableColumn } from '../table-view-manager.js';
 
-import { getRootByElement } from '../../../../../../_common/utils/index.js';
 import {
   type ColumnDataType,
   type StatCalcOp,
@@ -68,7 +69,8 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   };
 
   openMenu = (ev: MouseEvent) => {
-    const rootComponent = getRootByElement(this);
+    const rootComponent = getRootByElement(this) as RootBlockComponent;
+    if (!rootComponent) return;
     popColStatOperationMenu(
       rootComponent,
       ev.target as HTMLElement,

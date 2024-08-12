@@ -1,6 +1,9 @@
 import type { BaseSelection } from '@blocksuite/block-std';
 
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
+import {
+  getPageRootByElement,
+  stopPropagation,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -21,7 +24,6 @@ import type { AIError } from '../../../_common/components/index.js';
 import type { AIPanelGenerating } from './components/index.js';
 import type { AffineAIPanelState, AffineAIPanelWidgetConfig } from './type.js';
 
-import { getPageRootByElement } from '../../../_common/utils/query.js';
 import { PageRootService } from '../../page/page-root-service.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../format-bar/format-bar.js';
 import {

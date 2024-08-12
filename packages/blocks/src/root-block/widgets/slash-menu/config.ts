@@ -27,6 +27,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import {
   REFERENCE_NODE,
+  getInlineEditorByModel,
   textFormatConfigs,
 } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
@@ -44,7 +45,6 @@ import {
   createDefaultDoc,
   getBlockComponentByPath,
   getImageFilesFromLocal,
-  getInlineEditorByModel,
   matchFlavours,
   openFileOrFiles,
 } from '../../../_common/utils/index.js';

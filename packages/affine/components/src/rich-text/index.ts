@@ -3,6 +3,11 @@ import './rich-text.js';
 import './format/index.js';
 
 export {
+  asyncGetRichText,
+  getInlineEditorByModel,
+  getRichTextByModel,
+} from './dom.js';
+export {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,

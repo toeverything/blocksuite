@@ -8,11 +8,13 @@ import {
   NoteDisplayMode,
   StrokeStyle,
 } from '@blocksuite/affine-model';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   matchFlavours,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
+import { getClosestBlockComponentByPoint } from '@blocksuite/affine-shared/utils';
 import {
   ShadowlessElement,
   WithDisposable,
@@ -26,8 +28,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
 
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../_common/consts.js';
-import { getClosestBlockComponentByPoint } from '../_common/utils/query.js';
 import { handleNativeRangeAtPoint } from '../_common/utils/selection.js';
 import { NoteBlockComponent } from './note-block.js';
 

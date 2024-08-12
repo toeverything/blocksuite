@@ -2,7 +2,13 @@ import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
-import { getBlockProps } from '@blocksuite/affine-shared/utils';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
+import {
+  findClosestBlockComponent,
+  getBlockProps,
+  getClosestBlockComponentByElement,
+  getClosestBlockComponentByPoint,
+} from '@blocksuite/affine-shared/utils';
 import {
   type BaseSelection,
   PathFinder,
@@ -14,13 +20,9 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../../_common/consts.js';
 import {
   type EmbedCardStyle,
   Rect,
-  findClosestBlockComponent,
-  getClosestBlockComponentByElement,
-  getClosestBlockComponentByPoint,
   getDropRectByPoint,
   getHoveringNote,
   getRectByBlockComponent,

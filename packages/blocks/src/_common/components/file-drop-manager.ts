@@ -3,6 +3,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { getClosestBlockComponentByPoint } from '@blocksuite/affine-shared/utils';
 import { Point } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
@@ -11,8 +12,6 @@ import type { DragIndicator } from './drag-indicator.js';
 import {
   type DropResult,
   calcDropTarget,
-  getClosestBlockComponentByPoint,
-  getModelByBlockComponent,
   isInsidePageEditor,
   matchFlavours,
 } from '../../_common/utils/index.js';
@@ -91,7 +90,7 @@ export class FileDropManager {
 
     let result: DropResult | null = null;
     if (element) {
-      const model = getModelByBlockComponent(element);
+      const model = element.model;
       const parent = this.doc.getParent(model);
       if (!matchFlavours(parent, ['affine:surface'])) {
         result = calcDropTarget(point, model, element);

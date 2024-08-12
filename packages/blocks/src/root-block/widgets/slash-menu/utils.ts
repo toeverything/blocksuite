@@ -2,6 +2,7 @@ import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-te
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
 import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
 import { assertType } from '@blocksuite/global/utils';
 
@@ -16,7 +17,6 @@ import type {
   SlashSubMenu,
 } from './config.js';
 
-import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import { slashMenuToolTips } from './tooltips/index.js';
 
 export function isGroupDivider(
