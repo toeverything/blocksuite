@@ -1,5 +1,6 @@
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 
+import { HoverController } from '@blocksuite/affine-components/hover';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
@@ -8,7 +9,6 @@ import { customElement } from 'lit/decorators.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
 
-import { HoverController } from '../../../_common/components/hover/controller.js';
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import './components/image-toolbar.js';
 import { commonConfig, moreMenuConfig } from './config.js';

@@ -28,7 +28,6 @@ export type {
   NotificationService,
 } from './_common/components/index.js';
 export {
-  HoverController,
   RichText,
   Tooltip,
   scrollbarStyle,
@@ -122,6 +121,10 @@ export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
+export {
+  HoverController,
+  whenHover,
+} from '@blocksuite/affine-components/hover';
 export {
   ArrowDownSmallIcon,
   CloseIcon,

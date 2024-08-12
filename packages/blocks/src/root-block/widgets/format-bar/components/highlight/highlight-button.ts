@@ -1,5 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { whenHover } from '@blocksuite/affine-components/hover';
 import {
   ArrowDownIcon,
   HighLightDuotoneIcon,
@@ -14,7 +15,6 @@ import { type RefOrCallback, ref } from 'lit/directives/ref.js';
 import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
 
-import { whenHover } from '../../../../../_common/components/hover/index.js';
 import '../../../../../_common/components/toolbar/icon-button.js';
 import '../../../../../_common/components/toolbar/menu-button.js';
 import { backgroundConfig, foregroundConfig } from './consts.js';

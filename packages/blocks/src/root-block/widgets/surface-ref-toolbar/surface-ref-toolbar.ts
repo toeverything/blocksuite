@@ -1,5 +1,6 @@
 import type { SurfaceRefBlockModel } from '@blocksuite/affine-model';
 
+import { HoverController } from '@blocksuite/affine-components/hover';
 import {
   CaptionIcon,
   CenterPeekIcon,
@@ -23,7 +24,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/index.js';
 import type { EdgelessRootPreviewBlockComponent } from '../../edgeless/edgeless-root-preview-block.js';
 
-import { HoverController } from '../../../_common/components/hover/controller.js';
 import { toast } from '../../../_common/components/toast.js';
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';

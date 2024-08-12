@@ -1,5 +1,4 @@
 import type { ReactiveController, ReactiveElement } from 'lit';
-import type { StyleInfo } from 'lit/directives/style-map.js';
 
 import {
   type AdvancedPortalOptions,
@@ -7,7 +6,9 @@ import {
 } from '@blocksuite/affine-components/portal';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
-import { type WhenHoverOptions, whenHover } from './when-hover.js';
+import type { HoverOptions } from './types.js';
+
+import { whenHover } from './when-hover.js';
 
 type OptionsParams = Omit<
   ReturnType<typeof whenHover>,
@@ -16,38 +17,6 @@ type OptionsParams = Omit<
   abortController: AbortController;
 };
 type HoverPortalOptions = Omit<AdvancedPortalOptions, 'abortController'>;
-
-export type HoverOptions = {
-  /**
-   * Transition style when the portal is shown or hidden.
-   */
-  transition: {
-    /**
-     * Specifies the length of the transition in ms.
-     *
-     * You only need to specify the transition end duration actually.
-     *
-     * ---
-     *
-     * Why is the duration required?
-     *
-     * The transition event is not reliable, and it may not be triggered in some cases.
-     *
-     * See also https://github.com/w3c/csswg-drafts/issues/3043 https://github.com/toeverything/blocksuite/pull/7248/files#r1631375330
-     *
-     * Take a look at solutions from other projects: https://floating-ui.com/docs/useTransition#duration
-     */
-    duration: number;
-    in: StyleInfo;
-    out: StyleInfo;
-  } | null;
-  /**
-   * Set the portal as hover element automatically.
-   * @default true
-   */
-  setPortalAsFloating: boolean;
-  allowMultiple?: boolean;
-} & WhenHoverOptions;
 
 const DEFAULT_HOVER_OPTIONS: HoverOptions = {
   transition: {
