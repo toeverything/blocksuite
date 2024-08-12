@@ -32,7 +32,7 @@ do
     pnpm publish
   fi
 
-  if [[ $package == framework/* ]]; then
+  if [[ $package == framework/* || $package == affine/* ]]; then 
     cd ../../../
   else
     cd ../../
