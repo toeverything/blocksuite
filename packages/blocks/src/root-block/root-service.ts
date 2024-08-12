@@ -46,12 +46,6 @@ import { getRootByEditorHost } from '../_common/utils/index.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import { CommunityCanvasTextFonts } from '../surface-block/consts.js';
 import { EditPropsStore } from '../surface-block/managers/edit-session.js';
-import {
-  deleteTextCommand,
-  formatBlockCommand,
-  formatNativeCommand,
-  formatTextCommand,
-} from './commands/index.js';
 import { FontLoader } from './font-loader/font-loader.js';
 
 export type EmbedOptions = {
@@ -356,10 +350,6 @@ export class RootService extends BlockService<RootBlockModel> {
 
     registerCommands(this.std);
     this.std.command
-      .add('deleteText', deleteTextCommand)
-      .add('formatBlock', formatBlockCommand)
-      .add('formatNative', formatNativeCommand)
-      .add('formatText', formatTextCommand)
       .add('peekSelectedBlock', peekSelectedBlockCommand)
       .add('getSelectedPeekableBlocks', getSelectedPeekableBlocksCommand);
 

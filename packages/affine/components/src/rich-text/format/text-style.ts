@@ -1,8 +1,9 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { Command } from '@blocksuite/block-std';
 
 import { toggleLinkPopup } from '@blocksuite/affine-components/rich-text';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
+
+import type { AffineTextAttributes } from '../inline/index.js';
 
 import { generateTextStyleCommand, getCombinedTextStyle } from './utils.js';
 
@@ -80,34 +81,3 @@ export const isTextStyleActive: Command<
 
   return next();
 };
-
-export const registerTextStyleCommands = (std: BlockSuite.Std) => {
-  std.command
-    .add('toggleBold', toggleBold)
-    .add('toggleItalic', toggleItalic)
-    .add('toggleUnderline', toggleUnderline)
-    .add('toggleStrike', toggleStrike)
-    .add('toggleCode', toggleCode)
-    .add('toggleLink', toggleLink)
-    .add('getTextStyle', getTextStyle)
-    .add('isTextStyleActive', isTextStyleActive);
-};
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      textStyle?: AffineTextAttributes;
-    }
-
-    interface Commands {
-      toggleBold: typeof toggleBold;
-      toggleItalic: typeof toggleItalic;
-      toggleUnderline: typeof toggleUnderline;
-      toggleStrike: typeof toggleStrike;
-      toggleCode: typeof toggleCode;
-      toggleLink: typeof toggleLink;
-      getTextStyle: typeof getTextStyle;
-      isTextStyleActive: typeof isTextStyleActive;
-    }
-  }
-}

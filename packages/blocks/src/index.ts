@@ -1,5 +1,6 @@
 /// <reference types="@blocksuite/global" />
 import '@blocksuite/affine-components/toolbar';
+import '@blocksuite/affine-components/rich-text';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Point } from '@blocksuite/global/utils';

@@ -25,7 +25,10 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '@blocksuite/affine-components/icons';
-import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
+import {
+  REFERENCE_NODE,
+  textFormatConfigs,
+} from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteBlockModel } from '@blocksuite/affine-model';
 import { Slice, Text } from '@blocksuite/store';
@@ -36,7 +39,6 @@ import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
-import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
 import {
   clearMarksOnDiscontinuousInput,
   createDefaultDoc,

@@ -1,7 +1,7 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 import type { Text } from '@blocksuite/store';
 
-import { matchFlavours } from '../../../_common/utils/index.js';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
 export const deleteTextCommand: Command<
   'currentTextSelection',
@@ -79,11 +79,3 @@ export const deleteTextCommand: Command<
 
   next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      deleteText: typeof deleteTextCommand;
-    }
-  }
-}

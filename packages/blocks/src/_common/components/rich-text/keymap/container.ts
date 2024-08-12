@@ -3,6 +3,10 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 
+import {
+  insertLinkedNode,
+  textFormatConfigs,
+} from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import {
@@ -13,8 +17,6 @@ import {
 
 import type { RootBlockComponent } from '../../../../root-block/types.js';
 
-import { insertLinkedNode } from '../../../../root-block/widgets/linked-doc/config.js';
-import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { createDefaultDoc } from '../../../utils/init.js';
 import { buildPath } from '../../../utils/query.js';
 import { tryConvertBlock } from '../markdown/block.js';
