@@ -27,7 +27,8 @@
     ".": "./src/index.ts",
     "./icons": "./src/icons/index.ts",
     "./peek": "./src/peek/index.ts",
-    "./portal": "./src/portal/index.ts"
+    "./portal": "./src/portal/index.ts",
+    "./hover": "./src/hover/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -49,6 +50,10 @@
       "./portal": {
         "types": "./dist/portal/index.d.ts",
         "import": "./dist/portal/index.js"
+      },
+      "./hover": {
+        "types": "./dist/hover/index.d.ts",
+        "import": "./dist/hover/index.js"
       }
     }
   },

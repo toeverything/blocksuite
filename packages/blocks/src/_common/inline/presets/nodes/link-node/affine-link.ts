@@ -1,5 +1,6 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { HoverController } from '@blocksuite/affine-components/hover';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -15,7 +16,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 
-import { HoverController } from '../../../../components/hover/index.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import { affineTextStyles } from '../affine-text.js';
 import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';

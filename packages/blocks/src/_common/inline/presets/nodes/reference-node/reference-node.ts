@@ -2,6 +2,7 @@ import type { BlockComponent } from '@blocksuite/block-std';
 import type { Slot } from '@blocksuite/global/utils';
 import type { Doc, DocMeta } from '@blocksuite/store';
 
+import { HoverController } from '@blocksuite/affine-components/hover';
 import {
   FontDocIcon,
   FontLinkedDocIcon,
@@ -24,7 +25,6 @@ import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import type { ReferenceNodeConfig } from './reference-config.js';
 
-import { HoverController } from '../../../../components/hover/controller.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import {
   getModelByElement,

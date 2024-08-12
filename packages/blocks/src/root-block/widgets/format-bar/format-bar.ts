@@ -4,6 +4,7 @@ import type {
   CursorSelection,
 } from '@blocksuite/block-std';
 
+import { HoverController } from '@blocksuite/affine-components/hover';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
@@ -19,13 +20,10 @@ import {
 import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
+import type { RichText } from '../../../_common/components/index.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 import '../../../_common/components/button.js';
-import {
-  HoverController,
-  type RichText,
-} from '../../../_common/components/index.js';
 import '../../../_common/components/toolbar/toolbar.js';
 import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootComponent } from '../../../root-block/utils/guard.js';

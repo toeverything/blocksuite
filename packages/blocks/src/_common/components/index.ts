@@ -5,7 +5,6 @@ export * from './captioned-block-component.js';
 export * from './doc-mode-service.js';
 export * from './drag-indicator.js';
 export * from './file-drop-manager.js';
-export * from './hover/index.js';
 export * from './menu/index.js';
 export * from './menu-divider.js';
 export * from './notification-service.js';
