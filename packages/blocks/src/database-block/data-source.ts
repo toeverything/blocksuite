@@ -163,12 +163,14 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   propertyAdd(insertToPosition: InsertToPosition, type?: string): string {
     this.doc.captureSync();
-    return this._model.addColumn(
+    const result = this._model.addColumn(
       insertToPosition,
       databaseBlockAllColumnMap[
         type ?? columnPresets.multiSelectColumnConfig.type
       ].model.create(this.newColumnName())
     );
+    this._model.applyColumnUpdate();
+    return result;
   }
 
   propertyChangeData(propertyId: string, data: Record<string, unknown>): void {
