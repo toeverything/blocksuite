@@ -27,17 +27,9 @@ export type {
   DocModeService,
   NotificationService,
 } from './_common/components/index.js';
-export { RichText, scrollbarStyle } from './_common/components/index.js';
+export { scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
-export * from './_common/inline/inline-manager.js';
-export {
-  type AffineInlineEditor,
-  type AffineTextAttributes,
-  getAffineInlineSpecsWithReference,
-} from './_common/inline/presets/affine-inline-specs.js';
-export { ReferenceNodeConfig } from './_common/inline/presets/nodes/reference-node/reference-config.js';
-export { AffineReference } from './_common/inline/presets/nodes/reference-node/reference-node.js';
 export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export * from './_common/transformers/index.js';
@@ -141,6 +133,17 @@ export {
   createLitPortal,
   createSimplePortal,
 } from '@blocksuite/affine-components/portal';
+export {
+  type AffineInlineEditor,
+  AffineReference,
+  type AffineTextAttributes,
+  InlineManager,
+  type InlineMarkdownMatch,
+  type InlineSpecs,
+  ReferenceNodeConfig,
+  RichText,
+  getAffineInlineSpecsWithReference,
+} from '@blocksuite/affine-components/rich-text';
 export { toast } from '@blocksuite/affine-components/toast';
 export {
   type Action,

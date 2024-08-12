@@ -1,18 +1,18 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
+import {
+  type AffineTextAttributes,
+  InlineManager,
+  ReferenceNodeConfig,
+  affineInlineMarkdownMatches,
+  getAffineInlineSpecsWithReference,
+} from '@blocksuite/affine-components/rich-text';
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { ViewMeta } from './data-view/view/data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
 
-import { InlineManager } from '../_common/inline/inline-manager.js';
-import {
-  type AffineTextAttributes,
-  getAffineInlineSpecsWithReference,
-} from '../_common/inline/presets/affine-inline-specs.js';
-import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
-import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
 import { DatabaseSelection } from './data-view/common/selection.js';
 import { viewPresets } from './data-view/index.js';
 import { databaseViewInitEmpty, databaseViewInitTemplate } from './utils.js';

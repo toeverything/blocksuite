@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type {
   FromBlockSnapshotPayload,
@@ -32,7 +33,6 @@ import { unified } from 'unified';
 
 import type { SerializedCells } from '../../database-block/database-model.js';
 import type { Column } from '../../database-block/types.js';
-import type { AffineTextAttributes } from '../inline/presets/affine-inline-specs.js';
 
 import { remarkGfm } from './gfm.js';
 import { createText, fetchImage, fetchable, isNullish } from './utils.js';

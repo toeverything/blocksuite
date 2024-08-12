@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { ThemedToken } from 'shiki';
 
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
@@ -8,7 +9,6 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { AffineTextAttributes } from '../_common/inline/presets/affine-inline-specs.js';
 import type { HighlightOptionsGetter } from './utils/types.js';
 
 import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';

@@ -1,8 +1,10 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { CodeBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { VLine } from '@blocksuite/inline';
 import type { BundledLanguage, Highlighter } from 'shiki';
 
+import '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
@@ -17,12 +19,10 @@ import { customElement, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
 
-import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import type { HighlightOptionsGetter } from './utils/types.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
-import '../_common/components/rich-text/rich-text.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';

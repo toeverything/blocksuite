@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { whenHover } from '@blocksuite/affine-components/hover';
@@ -12,7 +13,6 @@ import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { type RefOrCallback, ref } from 'lit/directives/ref.js';
 
-import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
 
 import { backgroundConfig, foregroundConfig } from './consts.js';

@@ -1,9 +1,8 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { assertExists } from '@blocksuite/global/utils';
-
-import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 
 import { asyncGetRichText, buildPath } from '../../_common/utils/query.js';
 

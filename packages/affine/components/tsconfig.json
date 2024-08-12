@@ -21,6 +21,9 @@
     },
     {
       "path": "../shared"
+    },
+    {
+      "path": "../model"
     }
   ]
 }

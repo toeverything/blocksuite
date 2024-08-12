@@ -1,16 +1,16 @@
 import type { ListBlockModel } from '@blocksuite/affine-model';
 
+import {
+  type AffineTextAttributes,
+  InlineManager,
+  ReferenceNodeConfig,
+  affineInlineMarkdownMatches,
+  getAffineInlineSpecsWithReference,
+} from '@blocksuite/affine-components/rich-text';
 import { ListBlockSchema } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 
-import { InlineManager } from '../_common/inline/inline-manager.js';
-import {
-  type AffineTextAttributes,
-  getAffineInlineSpecsWithReference,
-} from '../_common/inline/presets/affine-inline-specs.js';
-import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
-import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
 import { AffineDragHandleWidget } from '../root-block/widgets/drag-handle/drag-handle.js';
 import { convertToNumberedListCommand } from './commands/convert-to-numbered-list.js';
 import { indentListCommand } from './commands/indent-list.js';

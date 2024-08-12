@@ -1,3 +1,9 @@
+import type {
+  AffineInlineEditor,
+  AffineTextAttributes,
+  RichText,
+} from '@blocksuite/affine-components/rich-text';
+
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
@@ -6,11 +12,6 @@ import { customElement, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { html } from 'lit/static-html.js';
 
-import type { RichText } from '../../../_common/components/index.js';
-import type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-} from '../../../_common/inline/presets/affine-inline-specs.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
 import { getViewportElement } from '../../../_common/utils/query.js';

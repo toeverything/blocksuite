@@ -1,13 +1,12 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
-import type { Slot } from '@blocksuite/global/utils';
 import type { Doc, DocMeta } from '@blocksuite/store';
 
-import { HoverController } from '@blocksuite/affine-components/hover';
+import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import {
-  FontDocIcon,
-  FontLinkedDocIcon,
-} from '@blocksuite/affine-components/icons';
-import { Peekable } from '@blocksuite/affine-components/peek';
+  getModelByElement,
+  getRootByElement,
+} from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -21,29 +20,16 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
-import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import type { ReferenceNodeConfig } from './reference-config.js';
+import type { RefNodeSlots } from './types.js';
 
-import { BLOCK_ID_ATTR } from '../../../../consts.js';
-import {
-  getModelByElement,
-  getRootByElement,
-} from '../../../../utils/query.js';
+import { HoverController } from '../../../../../hover/index.js';
+import { FontDocIcon, FontLinkedDocIcon } from '../../../../../icons/index.js';
+import { Peekable } from '../../../../../peek/index.js';
 import { affineTextStyles } from '../affine-text.js';
 import { DEFAULT_DOC_NAME, REFERENCE_NODE } from '../consts.js';
 import { toggleReferencePopup } from './reference-popup.js';
-
-export type RefNodeSlots = {
-  docLinkClicked: Slot<{ docId: string; blockId?: string }>;
-  tagClicked: Slot<{ tagId: string }>;
-};
-
-declare module '@blocksuite/blocks' {
-  interface PeekViewService {
-    peek(target: AffineReference): void;
-  }
-}
 
 @customElement('affine-reference')
 @Peekable({ action: false })
@@ -141,15 +127,14 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       console.warn('The doc is deleted', this._refAttribute.pageId);
       return;
     }
-    if (refMeta.id === model.doc.id) {
+    if (!model || refMeta.id === model.doc.id) {
       // the doc is the current doc.
       return;
     }
     const targetDocId = refMeta.id;
-    const rootModel = model.doc.root;
-    assertExists(rootModel);
-    const rootComponent = getRootByElement(this) as RootBlockComponent;
-    assertExists(rootComponent);
+    const rootComponent = getRootByElement(
+      this
+    ) as BlockComponent<RootBlockModel> & { slots: RefNodeSlots };
     rootComponent.slots.docLinkClicked.emit({ docId: targetDocId });
   }
 

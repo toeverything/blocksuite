@@ -1,3 +1,4 @@
+import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -8,8 +9,6 @@ import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
-
-import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 
 import {
   handleBlockEndEnter,

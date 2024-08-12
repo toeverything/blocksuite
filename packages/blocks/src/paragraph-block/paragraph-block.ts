@@ -1,19 +1,19 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
+import '@blocksuite/affine-components/rich-text';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { effect, signal } from '@lit-labs/preact-signals';
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import type { ParagraphBlockService } from './paragraph-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
-import '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';

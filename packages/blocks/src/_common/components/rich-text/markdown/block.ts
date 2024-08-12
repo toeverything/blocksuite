@@ -1,3 +1,4 @@
+import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
@@ -6,8 +7,6 @@ import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
-
-import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 
 import {
   asyncSetInlineRange,

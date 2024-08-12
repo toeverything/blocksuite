@@ -14,6 +14,11 @@ import type { BlockModel } from '@blocksuite/store';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
+import {
+  isTouchPadPinchEvent,
+  requestConnectedFrame,
+  requestThrottledConnectedFrame,
+} from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import { serializeXYWH } from '@blocksuite/global/utils';
@@ -37,9 +42,6 @@ import {
   type Viewport,
   asyncFocusRichText,
   handleNativeRangeAtPoint,
-  isTouchPadPinchEvent,
-  requestConnectedFrame,
-  requestThrottledConnectedFrame,
 } from '../../_common/utils/index.js';
 import {
   setAttachmentUploaded,

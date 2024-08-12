@@ -6,8 +6,6 @@ import { z } from 'zod';
 import type { InlineSpecs } from '../inline-manager.js';
 import type { ReferenceNodeConfig } from './nodes/reference-node/reference-config.js';
 
-import './nodes/index.js';
-
 export type AffineInlineEditor = InlineEditor<AffineTextAttributes>;
 export type AffineInlineRootElement = InlineRootElement<AffineTextAttributes>;
 

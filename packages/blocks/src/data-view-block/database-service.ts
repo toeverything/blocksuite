@@ -1,14 +1,14 @@
+import {
+  type AffineTextAttributes,
+  InlineManager,
+  ReferenceNodeConfig,
+  affineInlineMarkdownMatches,
+  getAffineInlineSpecsWithReference,
+} from '@blocksuite/affine-components/rich-text';
 import { BlockService } from '@blocksuite/block-std';
 
 import type { DataViewBlockModel } from './data-view-model.js';
 
-import { InlineManager } from '../_common/inline/inline-manager.js';
-import {
-  type AffineTextAttributes,
-  getAffineInlineSpecsWithReference,
-} from '../_common/inline/presets/affine-inline-specs.js';
-import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
-import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
 import { DatabaseSelection } from '../database-block/data-view/index.js';
 
 export class DataViewBlockService<

@@ -1,20 +1,7 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline';
 
-import {
-  CenterPeekIcon,
-  DeleteIcon,
-  ExpandFullSmallIcon,
-  MoreVerticalIcon,
-  OpenIcon,
-  SmallArrowDownIcon,
-} from '@blocksuite/affine-components/icons';
-import { isPeekable, peek } from '@blocksuite/affine-components/peek';
-import {
-  type Action,
-  renderActions,
-  renderToolbarSeparator,
-} from '@blocksuite/affine-components/toolbar';
+import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -25,10 +12,23 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
+import type { RefNodeSlots } from './types.js';
 
-import { BLOCK_ID_ATTR } from '../../../../consts.js';
+import {
+  CenterPeekIcon,
+  DeleteIcon,
+  ExpandFullSmallIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  SmallArrowDownIcon,
+} from '../../../../../icons/index.js';
+import { isPeekable, peek } from '../../../../../peek/index.js';
+import {
+  type Action,
+  renderActions,
+  renderToolbarSeparator,
+} from '../../../../../toolbar/index.js';
 import { styles } from './styles.js';
 
 @customElement('reference-popup')
@@ -133,11 +133,13 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const refDocId = this.referenceDocId;
     const block = this.block;
     if (refDocId === block.doc.id) return;
+    const rootId = block.doc.root?.id;
+    if (!rootId) return;
 
-    const rootComponent = this.std.view.viewFromPath('block', [
-      block.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
-    assertExists(rootComponent);
+    const rootComponent = this.std.view.getBlock(rootId) as BlockComponent & {
+      slots: RefNodeSlots;
+    };
+    if (!rootComponent) return;
 
     rootComponent.slots.docLinkClicked.emit({ docId: refDocId });
   }

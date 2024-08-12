@@ -21,7 +21,7 @@ import { z } from 'zod';
 import type {
   AffineInlineEditor,
   AffineTextAttributes,
-} from '../../inline/presets/affine-inline-specs.js';
+} from './inline/index.js';
 
 import { onVBeforeinput, onVCompositionEnd } from './hooks.js';
 
