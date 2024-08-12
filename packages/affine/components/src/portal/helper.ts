@@ -1,116 +1,12 @@
 import { Slot, assertExists } from '@blocksuite/global/utils';
 import {
-  type AutoUpdateOptions,
-  type ComputePositionConfig,
   type ComputePositionReturn,
-  type ReferenceElement,
   autoUpdate,
   computePosition,
 } from '@floating-ui/dom';
-import {
-  LitElement,
-  type RenderOptions,
-  type TemplateResult,
-  html,
-  render,
-} from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { render } from 'lit';
 
-/**
- * Renders a template into a portal. Defaults to `document.body`.
- *
- * Note that every time the parent component re-renders, the portal will be re-called.
- *
- * See https://lit.dev/docs/components/rendering/#writing-a-good-render()-method
- *
- * @example
- * ```ts
- * render() {
- *   return html`${showPortal
- *     ? html`<blocksuite-portal .template=${portalTemplate}></blocksuite-portal>`
- *     : null}`;
- * };
- * ```
- */
-@customElement('blocksuite-portal')
-export class Portal extends LitElement {
-  private _portalRoot: HTMLElement | null = null;
-
-  override createRenderRoot() {
-    const portalRoot = document.createElement('div');
-    const renderRoot = this.shadowDom
-      ? portalRoot.attachShadow({
-          mode: 'open',
-          ...(typeof this.shadowDom !== 'boolean' ? this.shadowDom : {}),
-        })
-      : portalRoot;
-    portalRoot.classList.add('blocksuite-portal');
-    this.container.append(portalRoot);
-    this._portalRoot = portalRoot;
-    return renderRoot;
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._portalRoot?.remove();
-  }
-
-  override render() {
-    return this.template;
-  }
-
-  @property({ attribute: false })
-  accessor container = document.body;
-
-  @property({ attribute: false })
-  accessor shadowDom: boolean | ShadowRootInit = true;
-
-  @property({ attribute: false })
-  accessor template = html``;
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'blocksuite-portal': Portal;
-  }
-}
-
-/**
- * See https://lit.dev/docs/templates/expressions/#child-expressions
- */
-type Renderable =
-  | TemplateResult<1>
-  // Any DOM node can be passed to a child expression.
-  | HTMLElement
-  // Numbers values like 5 will render the string '5'. Bigints are treated similarly.
-  | number
-  // A boolean value true will render 'true', and false will render 'false', but rendering a boolean like this is uncommon.
-  | boolean
-  // The empty string '', null, and undefined are specially treated and render nothing.
-  | string
-  | null
-  | undefined;
-
-type PortalOptions = {
-  template: Renderable | ((ctx: { updatePortal: () => void }) => Renderable);
-  container?: Element;
-  /**
-   * The portal is removed when the AbortSignal is aborted.
-   */
-  signal?: AbortSignal;
-  /**
-   * Defaults to `true`.
-   */
-  shadowDom?: boolean | ShadowRootInit;
-  renderOptions?: RenderOptions;
-  /**
-   * Defaults to `true`.
-   * If true, the portalRoot will be added a class `blocksuite-portal`. It's useful for finding the portalRoot.
-   */
-  identifyWrapper?: boolean;
-
-  portalStyles?: Record<string, string | number | undefined | null>;
-};
+import type { AdvancedPortalOptions, PortalOptions } from './types.js';
 
 /**
  * Similar to `<blocksuite-portal>`, but only renders once when called.
@@ -167,42 +63,6 @@ export function createSimplePortal({
 
   return portalRoot;
 }
-
-type ComputePositionOptions = {
-  referenceElement: ReferenceElement;
-  /**
-   * Default `false`.
-   */
-  autoUpdate?: true | AutoUpdateOptions;
-  /**
-   * Default `true`. Only work when `referenceElement` is an `Element`. Check when position update (`autoUpdate` is `true` or first tick)
-   */
-  abortWhenRefRemoved?: boolean;
-} & Partial<ComputePositionConfig>;
-
-export type AdvancedPortalOptions = Omit<
-  PortalOptions,
-  'template' | 'signal'
-> & {
-  abortController: AbortController;
-  template:
-    | Renderable
-    | ((context: {
-        positionSlot: Slot<ComputePositionReturn>;
-        updatePortal: () => void;
-      }) => Renderable);
-  /**
-   * See https://floating-ui.com/docs/computePosition
-   */
-  computePosition?:
-    | ComputePositionOptions
-    | ((portalRoot: Element) => ComputePositionOptions);
-  /**
-   * Whether to close the portal when click away(click outside).
-   * @default false
-   */
-  closeOnClickAway?: boolean;
-};
 
 /**
  * Where el is the DOM element you'd like to test for visibility

@@ -5,11 +5,11 @@ import {
   DatabaseTableViewIcon20,
   LinkedDocIcon,
 } from '@blocksuite/affine-components/icons';
+import { createSimplePortal } from '@blocksuite/affine-components/portal';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { type TemplateResult, html } from 'lit';
 
-import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
 import {
   convertSelectedBlocksToLinkedDoc,

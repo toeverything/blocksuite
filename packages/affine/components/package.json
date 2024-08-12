@@ -20,12 +20,14 @@
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
-    "lit": "^3.1.4"
+    "lit": "^3.1.4",
+    "@floating-ui/dom": "^1.6.8"
   },
   "exports": {
     ".": "./src/index.ts",
     "./icons": "./src/icons/index.ts",
-    "./peek": "./src/peek/index.ts"
+    "./peek": "./src/peek/index.ts",
+    "./portal": "./src/portal/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -43,6 +45,10 @@
       "./peek": {
         "types": "./dist/peek/index.d.ts",
         "import": "./dist/peek/index.js"
+      },
+      "./portal": {
+        "types": "./dist/portal/index.d.ts",
+        "import": "./dist/portal/index.js"
       }
     }
   },

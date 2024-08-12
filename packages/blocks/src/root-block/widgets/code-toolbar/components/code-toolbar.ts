@@ -1,4 +1,5 @@
 import { MoreVerticalIcon } from '@blocksuite/affine-components/icons';
+import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
@@ -10,7 +11,6 @@ import type { EditorIconButton } from '../../../../_common/components/toolbar/ic
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
 import type { CodeToolbarItem, CodeToolbarMoreItem } from '../types.js';
 
-import { createLitPortal } from '../../../../_common/components/index.js';
 import '../../../../_common/components/toolbar/icon-button.js';
 import '../../../../_common/components/toolbar/menu-button.js';
 import '../../../../_common/components/toolbar/toolbar.js';
