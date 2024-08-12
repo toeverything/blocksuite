@@ -1,10 +1,11 @@
+import type { EditorMenuButton } from '@blocksuite/affine-components/toolbar';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EditorMenuButton } from '../../../../_common/components/toolbar/menu-button.js';
 import type { ColorEvent } from '../panel/color-panel.js';
 import type {
   ModeType,
@@ -13,8 +14,6 @@ import type {
   PickColorType,
 } from './types.js';
 
-import '../../../../_common/components/toolbar/icon-button.js';
-import '../../../../_common/components/toolbar/menu-button.js';
 import '../panel/color-panel.js';
 import './color-picker.js';
 import './custom-button.js';

@@ -1,6 +1,5 @@
 /// <reference types="@blocksuite/global" />
-
-export * from './_common/adapters/index.js';
+import '@blocksuite/affine-components/toolbar';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Point } from '@blocksuite/global/utils';
@@ -21,18 +20,14 @@ import { isCanvasElement } from './root-block/edgeless/utils/query.js';
 import './root-block/index.js';
 import './surface-ref-block/index.js';
 
+export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
 export * from './_common/components/doc-mode-service.js';
 export type {
   DocModeService,
   NotificationService,
 } from './_common/components/index.js';
-export {
-  RichText,
-  Tooltip,
-  scrollbarStyle,
-  toast,
-} from './_common/components/index.js';
+export { RichText, scrollbarStyle, toast } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
 export * from './_common/inline/inline-manager.js';
@@ -146,6 +141,13 @@ export {
   createLitPortal,
   createSimplePortal,
 } from '@blocksuite/affine-components/portal';
+export {
+  type Action,
+  type FatActions,
+  Tooltip,
+  renderActions,
+  renderToolbarSeparator,
+} from '@blocksuite/affine-components/toolbar';
 export * from '@blocksuite/affine-model';
 // To provide the type for commands
 export { registerCommands } from '@blocksuite/affine-shared/commands';

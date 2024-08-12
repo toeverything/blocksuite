@@ -8,8 +8,6 @@ import { customElement, property } from 'lit/decorators.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/separator.js';
 import { downloadImageBlob } from '../../../image-block/utils.js';
 
 @customElement('edgeless-change-image-button')

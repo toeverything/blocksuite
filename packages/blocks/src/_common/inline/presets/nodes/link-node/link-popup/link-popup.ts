@@ -1,3 +1,4 @@
+import type { EditorIconButton } from '@blocksuite/affine-components/toolbar';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline/types';
 
@@ -11,6 +12,10 @@ import {
   SmallArrowDownIcon,
   UnlinkIcon,
 } from '@blocksuite/affine-components/icons';
+import {
+  renderActions,
+  renderToolbarSeparator,
+} from '@blocksuite/affine-components/toolbar';
 import {
   getHostName,
   isValidUrl,
@@ -26,17 +31,9 @@ import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EmbedOptions } from '../../../../../../root-block/root-service.js';
-import type { EditorIconButton } from '../../../../../components/toolbar/icon-button.js';
 import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
 
 import { toast } from '../../../../../components/toast.js';
-import '../../../../../components/toolbar/icon-button.js';
-import '../../../../../components/toolbar/menu-button.js';
-import '../../../../../components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../../../components/toolbar/separator.js';
-import '../../../../../components/toolbar/toolbar.js';
-import { renderActions } from '../../../../../components/toolbar/utils.js';
-import '../../../../../components/tooltip/tooltip.js';
 import { BLOCK_ID_ATTR } from '../../../../../consts.js';
 import { linkPopupStyle } from './styles.js';
 

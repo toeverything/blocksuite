@@ -6,6 +6,7 @@ import {
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '@blocksuite/affine-components/icons';
+import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import {
   FontFamily,
   FontStyle,
@@ -32,10 +33,6 @@ import type {
 } from '../../edgeless/components/color-picker/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   isFontStyleSupported,
   isFontWeightSupported,

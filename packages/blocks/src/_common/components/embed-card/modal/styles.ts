@@ -1,6 +1,5 @@
+import { FONT_XS, PANEL_BASE } from '@blocksuite/affine-shared/styles';
 import { css } from 'lit';
-
-import { FONT_XS, PANEL_BASE } from '../../../styles.js';
 
 export const embedCardModalStyles = css`
   .embed-card-modal-mask {

@@ -13,6 +13,11 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import {
+  type Action,
+  renderActions,
+  renderToolbarSeparator,
+} from '@blocksuite/affine-components/toolbar';
 import { downloadBlob } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { offset, shift } from '@floating-ui/dom';
@@ -25,14 +30,6 @@ import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/index.
 import type { EdgelessRootPreviewBlockComponent } from '../../edgeless/edgeless-root-preview-block.js';
 
 import { toast } from '../../../_common/components/toast.js';
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import '../../../_common/components/toolbar/toolbar.js';
-import {
-  type Action,
-  renderActions,
-} from '../../../_common/components/toolbar/utils.js';
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
 

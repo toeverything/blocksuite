@@ -6,7 +6,6 @@ import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import { toast } from '../../_common/components/toast.js';
-import '../../_common/components/toolbar/icon-button.js';
 import { renameStyles } from './styles.js';
 
 export const RenameModal = ({

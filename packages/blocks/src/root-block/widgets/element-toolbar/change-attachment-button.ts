@@ -16,9 +16,6 @@ import type {
   EdgelessRootBlockComponent,
 } from '../../../index.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,

@@ -1,6 +1,5 @@
+import { FONT_SM, FONT_XS } from '@blocksuite/affine-shared/styles';
 import { css } from 'lit';
-
-import { FONT_SM, FONT_XS } from '../../../../_common/styles.js';
 
 export const COLOR_PICKER_STYLE = css`
   :host {

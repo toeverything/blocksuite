@@ -13,9 +13,6 @@ import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js'
 import type { LineWidthEvent } from '../../edgeless/components/panel/line-width-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
 import { LineWidth } from '../../../_common/types.js';
 import {
   packColor,

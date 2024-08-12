@@ -7,7 +7,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 
 import '../../../../_common/components/button.js';
-import '../../../../_common/components/tooltip/tooltip.js';
 
 @customElement('card-style-panel')
 export class CardStylePanel extends WithDisposable(LitElement) {

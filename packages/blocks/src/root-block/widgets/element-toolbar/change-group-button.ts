@@ -3,6 +3,7 @@ import {
   RenameIcon,
   UngroupButtonIcon,
 } from '@blocksuite/affine-components/icons';
+import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -15,9 +16,6 @@ import type { GroupElementModel } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { toast } from '../../../_common/components/toast.js';
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
 import { mountGroupTitleEditor } from '../../edgeless/utils/text.js';
 

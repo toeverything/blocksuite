@@ -10,6 +10,11 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import {
+  type Action,
+  renderActions,
+  renderToolbarSeparator,
+} from '@blocksuite/affine-components/toolbar';
 import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -23,16 +28,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 
-import '../../../../components/toolbar/icon-button.js';
-import '../../../../components/toolbar/menu-button.js';
-import '../../../../components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../../components/toolbar/separator.js';
-import '../../../../components/toolbar/toolbar.js';
-import {
-  type Action,
-  renderActions,
-} from '../../../../components/toolbar/utils.js';
-import '../../../../components/tooltip/tooltip.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import { styles } from './styles.js';
 

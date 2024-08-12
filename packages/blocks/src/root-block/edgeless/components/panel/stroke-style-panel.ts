@@ -5,9 +5,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { ColorEvent } from './color-panel.js';
 
-import '../../../../_common/components/button.js';
-import '../../../../_common/components/toolbar/separator.js';
-import '../../../../_common/components/tooltip/tooltip.js';
 import { STROKE_COLORS } from '../../../../surface-block/elements/shape/consts.js';
 import './color-panel.js';
 import { type LineStyleEvent, LineStylesPanel } from './line-styles-panel.js';

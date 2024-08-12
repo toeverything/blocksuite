@@ -11,8 +11,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { LineWidth } from '../../../../_common/types.js';
 import type { LineWidthEvent } from './line-width-panel.js';
 
-import '../../../../_common/components/toolbar/separator.js';
-
 export type LineStyleEvent =
   | {
       type: 'size';
