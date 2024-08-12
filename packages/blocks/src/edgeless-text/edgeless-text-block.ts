@@ -38,16 +38,12 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
       return;
     }
 
-    const rect = this._textContainer.getBoundingClientRect();
-    const bound = Bound.deserialize(this.model.xywh);
     if (!this.rootService) {
       console.error('rootService is not ready in edgeless-text-block');
       return;
     }
-    if (
-      (this._editing && !this.model.hasMaxWidth) ||
-      rect.width > bound.w * this.rootService.zoom
-    ) {
+
+    if (this._editing && !this.model.hasMaxWidth) {
       this._updateW();
     }
 
