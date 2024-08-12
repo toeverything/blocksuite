@@ -1,5 +1,6 @@
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 
+import { registerTextStyleCommands } from '@blocksuite/affine-components/rich-text';
 import { NoteBlockSchema } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
@@ -22,7 +23,6 @@ import {
 import { focusBlockEnd } from './commands/focus-block-end.js';
 import { focusBlockStart } from './commands/focus-block-start.js';
 import {
-  registerTextStyleCommands,
   selectBlock,
   selectBlocksBetween,
   updateBlockType,

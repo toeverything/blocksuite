@@ -1,4 +1,3 @@
-import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
@@ -8,7 +7,10 @@ import {
   LinkedEdgelessIcon,
   NewDocIcon,
 } from '@blocksuite/affine-components/icons';
-import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
+import {
+  type AffineInlineEditor,
+  insertLinkedNode,
+} from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { isFuzzyMatch } from '@blocksuite/affine-shared/utils';
 
@@ -36,25 +38,6 @@ export type LinkedMenuGroup = {
 
 const DEFAULT_DOC_NAME = 'Untitled';
 const DISPLAY_NAME_LENGTH = 8;
-
-export function insertLinkedNode({
-  inlineEditor,
-  docId,
-}: {
-  inlineEditor: AffineInlineEditor;
-  docId: string;
-}) {
-  if (!inlineEditor) return;
-  const inlineRange = inlineEditor.getInlineRange();
-  if (!inlineRange) return;
-  inlineEditor.insertText(inlineRange, REFERENCE_NODE, {
-    reference: { type: 'LinkedPage', pageId: docId },
-  });
-  inlineEditor.setInlineRange({
-    index: inlineRange.index + 1,
-    length: 0,
-  });
-}
 
 export function createLinkedDocMenuGroup(
   query: string,

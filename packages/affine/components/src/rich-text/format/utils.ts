@@ -1,8 +1,4 @@
 import type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-} from '@blocksuite/affine-components/rich-text';
-import type {
   Chain,
   Command,
   CommandKeyToData,
@@ -10,6 +6,7 @@ import type {
 } from '@blocksuite/block-std';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -18,12 +15,16 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 
+import type {
+  AffineInlineEditor,
+  AffineTextAttributes,
+} from '../inline/index.js';
+
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
-} from '../../_common/configs/text-format/consts.js';
-import { BLOCK_ID_ATTR } from '../../_common/consts.js';
+} from './consts.js';
 
 function isActive(std: BlockSuite.Std, key: keyof AffineTextAttributes) {
   const [result] = std.command.chain().isTextStyleActive({ key }).run();
@@ -134,10 +135,7 @@ function handleCurrentSelection<
       .getTextSelection()
       .getSelectedBlocks({
         types: ['text'],
-        filter: el =>
-          FORMAT_TEXT_SUPPORT_FLAVOURS.includes(
-            el.model.flavour as BlockSuite.Flavour
-          ),
+        filter: el => FORMAT_TEXT_SUPPORT_FLAVOURS.includes(el.model.flavour),
       })
       .inline<InlineOut>((ctx, next) => {
         const { selectedBlocks, currentTextSelection } = ctx;
@@ -167,10 +165,7 @@ function handleCurrentSelection<
       .getBlockSelections()
       .getSelectedBlocks({
         types: ['block'],
-        filter: el =>
-          FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(
-            el.model.flavour as BlockSuite.Flavour
-          ),
+        filter: el => FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(el.model.flavour),
       })
       .inline<InlineOut>((ctx, next) => {
         const { selectedBlocks } = ctx;
@@ -206,9 +201,7 @@ function handleCurrentSelection<
         .filter(el => {
           const block = el.closest<BlockComponent>(`[${BLOCK_ID_ATTR}]`);
           if (block) {
-            return FORMAT_NATIVE_SUPPORT_FLAVOURS.includes(
-              block.model.flavour as BlockSuite.Flavour
-            );
+            return FORMAT_NATIVE_SUPPORT_FLAVOURS.includes(block.model.flavour);
           }
           return false;
         })

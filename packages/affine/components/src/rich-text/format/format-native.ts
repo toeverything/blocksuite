@@ -1,11 +1,12 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { Command } from '@blocksuite/block-std';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
-import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
+import type { AffineTextAttributes } from '../inline/index.js';
+
+import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from './consts.js';
 
 // for native range
 export const formatNativeCommand: Command<
@@ -53,11 +54,3 @@ export const formatNativeCommand: Command<
 
   next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      formatNative: typeof formatNativeCommand;
-    }
-  }
-}

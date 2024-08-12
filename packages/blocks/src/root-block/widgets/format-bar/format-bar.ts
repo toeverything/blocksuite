@@ -9,6 +9,7 @@ import type {
 } from '@blocksuite/block-std';
 
 import { HoverController } from '@blocksuite/affine-components/hover';
+import { isFormatSupported } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
@@ -25,7 +26,6 @@ import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import '../../../_common/components/button.js';
-import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { ConfigRenderer } from './components/config-renderer.js';
 import {

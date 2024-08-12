@@ -1,10 +1,11 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { Command, TextSelection } from '@blocksuite/block-std';
 
 import { clearMarksOnDiscontinuousInput } from '@blocksuite/affine-shared/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
+import type { AffineTextAttributes } from '../inline/index.js';
+
+import { FORMAT_TEXT_SUPPORT_FLAVOURS } from './consts.js';
 
 // for text selection
 export const formatTextCommand: Command<
@@ -92,11 +93,3 @@ export const formatTextCommand: Command<
 
   if (success) next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      formatText: typeof formatTextCommand;
-    }
-  }
-}
