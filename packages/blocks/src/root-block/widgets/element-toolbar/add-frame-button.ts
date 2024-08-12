@@ -6,7 +6,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
 import { MindmapElementModel } from '../../../surface-block/index.js';
 
 @customElement('edgeless-add-frame-button')

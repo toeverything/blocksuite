@@ -15,8 +15,6 @@ import { type RefOrCallback, ref } from 'lit/directives/ref.js';
 import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
 
-import '../../../../../_common/components/toolbar/icon-button.js';
-import '../../../../../_common/components/toolbar/menu-button.js';
 import { backgroundConfig, foregroundConfig } from './consts.js';
 
 enum HighlightType {

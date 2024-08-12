@@ -24,7 +24,6 @@ import type { RichText } from '../../../_common/components/index.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 import '../../../_common/components/button.js';
-import '../../../_common/components/toolbar/toolbar.js';
 import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { ConfigRenderer } from './components/config-renderer.js';

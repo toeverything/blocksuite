@@ -1,7 +1,5 @@
-import type { HoverOptions } from '@blocksuite/affine-components/hover';
 import type { CSSResult } from 'lit';
 
-import { HoverController } from '@blocksuite/affine-components/hover';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type ComputePositionReturn,
@@ -13,6 +11,8 @@ import {
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
+
+import { HoverController, type HoverOptions } from '../hover/index.js';
 
 const styles = css`
   .affine-tooltip {

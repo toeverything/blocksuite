@@ -12,8 +12,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { ParagraphActionConfigItem } from '../config.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
-import '../../../../_common/components/toolbar/icon-button.js';
-import '../../../../_common/components/toolbar/menu-button.js';
 import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
 import { isRootComponent } from '../../../../root-block/utils/guard.js';
 

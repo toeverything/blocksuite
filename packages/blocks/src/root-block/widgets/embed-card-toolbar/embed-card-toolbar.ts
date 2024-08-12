@@ -16,6 +16,11 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import {
+  type Action,
+  renderActions,
+  renderToolbarSeparator,
+} from '@blocksuite/affine-components/toolbar';
+import {
   type BookmarkBlockModel,
   BookmarkStyles,
   type EmbedGithubModel,
@@ -45,15 +50,6 @@ import {
   isEmbedCardBlockComponent,
 } from '../../../_common/components/embed-card/type.js';
 import { toast } from '../../../_common/components/toast.js';
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import '../../../_common/components/toolbar/toolbar.js';
-import {
-  type Action,
-  renderActions,
-} from '../../../_common/components/toolbar/utils.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import {
   isAttachmentBlock,

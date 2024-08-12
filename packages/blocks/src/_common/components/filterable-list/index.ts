@@ -13,7 +13,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { FilterableListItem, FilterableListOptions } from './types.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../consts.js';
-import '../toolbar/separator.js';
 import { filterableListStyles } from './styles.js';
 
 export * from './types.js';

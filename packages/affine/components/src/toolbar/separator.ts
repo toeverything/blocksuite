@@ -1,4 +1,4 @@
-import { LitElement, css, html } from 'lit';
+import { LitElement, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElement('editor-toolbar-separator')
@@ -32,10 +32,6 @@ export class EditorToolbarSeparator extends LitElement {
       width: 100%;
     }
   `;
-}
-
-export function renderToolbarSeparator() {
-  return html`<editor-toolbar-separator></editor-toolbar-separator>`;
 }
 
 declare global {

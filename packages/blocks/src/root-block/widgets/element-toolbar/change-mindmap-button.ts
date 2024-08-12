@@ -11,6 +11,7 @@ import {
   MindmapStyleTwo,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
@@ -21,10 +22,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import { LayoutType } from '../../../surface-block/element-model/utils/mindmap/layout.js';
 import { MindmapStyle } from '../../../surface-block/element-model/utils/mindmap/style.js';
 

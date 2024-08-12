@@ -16,6 +16,7 @@ import type {
 } from '@blocksuite/affine-model';
 
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
+import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
@@ -28,10 +29,6 @@ import type { MindmapElementModel } from '../../../surface-block/element-model/m
 import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import '../../../_common/components/toolbar/toolbar.js';
 import {
   ConnectorMode,
   GroupElementModel,

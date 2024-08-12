@@ -27,6 +27,7 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/sortablejs": "^1.15.8",
+    "lit": "^3.1.4",
     "minimatch": "^10.0.1",
     "zod": "^3.23.8"
   },
@@ -38,7 +39,8 @@
     "./types": "./src/types/index.ts",
     "./commands": "./src/commands/index.ts",
     "./mixins": "./src/mixins/index.ts",
-    "./theme": "./src/theme/index.ts"
+    "./theme": "./src/theme/index.ts",
+    "./styles": "./src/styles/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -76,6 +78,10 @@
       "./theme": {
         "types": "./dist/theme/index.d.ts",
         "import": "./dist/theme/index.js"
+      },
+      "./styles": {
+        "types": "./dist/styles/index.d.ts",
+        "import": "./dist/styles/index.js"
       }
     }
   },

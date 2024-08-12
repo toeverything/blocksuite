@@ -1,6 +1,7 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 
 import { NoteIcon, RenameIcon } from '@blocksuite/affine-components/icons';
+import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import { type ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -21,10 +22,6 @@ import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js'
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { toast } from '../../../_common/components/toast.js';
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   packColor,
   packColorsWithColorScheme,

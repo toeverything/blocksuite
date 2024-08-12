@@ -19,6 +19,11 @@ import {
   SendToBackIcon,
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import {
+  type Action,
+  type FatActions,
+  renderActions,
+} from '@blocksuite/affine-components/toolbar';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
@@ -35,13 +40,6 @@ import type {
 } from '../../../index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import {
-  type Action,
-  type FatActions,
-  renderActions,
-} from '../../../_common/components/toolbar/utils.js';
 import {
   createLinkedDocFromEdgelessElements,
   createLinkedDocFromNote,
