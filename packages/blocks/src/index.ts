@@ -27,7 +27,7 @@ export type {
   DocModeService,
   NotificationService,
 } from './_common/components/index.js';
-export { RichText, scrollbarStyle, toast } from './_common/components/index.js';
+export { RichText, scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
 export * from './_common/inline/inline-manager.js';
@@ -141,6 +141,7 @@ export {
   createLitPortal,
   createSimplePortal,
 } from '@blocksuite/affine-components/portal';
+export { toast } from '@blocksuite/affine-components/toast';
 export {
   type Action,
   type FatActions,

@@ -7,12 +7,12 @@ import type {
 } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { toast } from '@blocksuite/affine-components/toast';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
 
 type EmbedCardModel =

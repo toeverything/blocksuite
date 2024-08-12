@@ -7,11 +7,11 @@ import {
   LinkedEdgelessIcon,
   NewDocIcon,
 } from '@blocksuite/affine-components/icons';
+import { toast } from '@blocksuite/affine-components/toast';
 import { isFuzzyMatch } from '@blocksuite/affine-shared/utils';
 
 import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 
-import { toast } from '../../../_common/components/toast.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import { createDefaultDoc } from '../../../_common/utils/init.js';
 import { showImportModal } from './import-doc/index.js';

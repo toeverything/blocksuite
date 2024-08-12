@@ -15,6 +15,7 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import { toast } from '@blocksuite/affine-components/toast';
 import {
   type Action,
   renderActions,
@@ -49,7 +50,6 @@ import {
   type EmbedToolbarModel,
   isEmbedCardBlockComponent,
 } from '../../../_common/components/embed-card/type.js';
-import { toast } from '../../../_common/components/toast.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import {
   isAttachmentBlock,

@@ -3,6 +3,7 @@ import {
   DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
+import { toast } from '@blocksuite/affine-components/toast';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
@@ -18,7 +19,6 @@ import {
   CaptionedBlockComponent,
   DragIndicator,
   popMenu,
-  toast,
 } from '../_common/components/index.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { Rect } from '../_common/utils/index.js';

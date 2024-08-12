@@ -6,11 +6,11 @@ import {
   LinkedDocIcon,
 } from '@blocksuite/affine-components/icons';
 import { createSimplePortal } from '@blocksuite/affine-components/portal';
+import { toast } from '@blocksuite/affine-components/toast';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { type TemplateResult, html } from 'lit';
 
-import { toast } from '../../components/toast.js';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,

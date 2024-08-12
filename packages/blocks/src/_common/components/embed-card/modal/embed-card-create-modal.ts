@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { toast } from '@blocksuite/affine-components/toast';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Vec } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
@@ -14,7 +15,6 @@ import type { EmbedCardStyle } from '../../../types.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
 import { getRootByEditorHost, isValidUrl } from '../../../utils/index.js';
-import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
 
 @customElement('embed-card-create-modal')

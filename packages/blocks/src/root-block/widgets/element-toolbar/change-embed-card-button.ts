@@ -20,6 +20,7 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import { toast } from '@blocksuite/affine-components/toast';
 import {
   type Action,
   renderToolbarSeparator,
@@ -45,7 +46,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 import type { EmbedOptions } from '../../root-service.js';
 
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
-import { toast } from '../../../_common/components/toast.js';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,

@@ -13,6 +13,7 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import { toast } from '@blocksuite/affine-components/toast';
 import {
   type Action,
   renderActions,
@@ -29,7 +30,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/index.js';
 import type { EdgelessRootPreviewBlockComponent } from '../../edgeless/edgeless-root-preview-block.js';
 
-import { toast } from '../../../_common/components/toast.js';
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
 

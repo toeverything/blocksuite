@@ -20,8 +20,12 @@
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
+    "@floating-ui/dom": "^1.6.8",
+    "@lit-labs/preact-signals": "^1.0.2",
+    "@lit/context": "^1.1.2",
+    "@toeverything/theme": "^1.0.2",
     "lit": "^3.1.4",
-    "@floating-ui/dom": "^1.6.8"
+    "zod": "^3.23.8"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -29,7 +33,8 @@
     "./peek": "./src/peek/index.ts",
     "./portal": "./src/portal/index.ts",
     "./hover": "./src/hover/index.ts",
-    "./toolbar": "./src/toolbar/index.ts"
+    "./toolbar": "./src/toolbar/index.ts",
+    "./toast": "./src/toast/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -59,6 +64,10 @@
       "./toolbar": {
         "types": "./dist/toolbar/index.d.ts",
         "import": "./dist/toolbar/index.js"
+      },
+      "./toast": {
+        "types": "./dist/toast/index.d.ts",
+        "import": "./dist/toast/index.js"
       }
     }
   },

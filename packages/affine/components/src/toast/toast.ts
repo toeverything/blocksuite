@@ -1,50 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { type TemplateResult, html } from 'lit';
+import { html } from 'lit';
 
-import { getRootByEditorHost } from '../utils/query.js';
+import { createToastContainer } from './create.js';
+import { htmlToElement } from './html-to-element.js';
 
 let ToastContainer: HTMLDivElement | null = null;
-
-/**
- * DO NOT USE FOR USER INPUT
- * See https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
- */
-const htmlToElement = <T extends ChildNode>(html: string | TemplateResult) => {
-  const template = document.createElement('template');
-  if (typeof html === 'string') {
-    html = html.trim(); // Never return a text node of whitespace as the result
-    template.innerHTML = html;
-  } else {
-    const htmlString = String.raw(html.strings, ...html.values);
-    template.innerHTML = htmlString;
-  }
-  return template.content.firstChild as T;
-};
-
-const createToastContainer = (editorHost: EditorHost) => {
-  const styles = `
-    position: fixed;
-    z-index: 9999;
-    top: 16px;
-    left: 16px;
-    right: 16px;
-    bottom: 78px;
-    pointer-events: none;
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: center;
-  `;
-  const template = html`<div class="toast-container" style="${styles}"></div>`;
-  const element = htmlToElement<HTMLDivElement>(template);
-  const rootComponent = getRootByEditorHost(editorHost);
-  assertExists(rootComponent);
-  const viewportElement = rootComponent.viewportElement;
-  viewportElement?.append(element);
-  return element;
-};
 
 /**
  * @example
@@ -80,7 +42,7 @@ export const toast = (
   const element = htmlToElement<HTMLDivElement>(template);
   // message is not trusted
   element.textContent = message;
-  ToastContainer.append(element);
+  ToastContainer?.append(element);
 
   const fadeIn = [
     {
