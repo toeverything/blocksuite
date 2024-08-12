@@ -1,6 +1,7 @@
 // Compat with SSR
 export * from './block-props.js';
 export * from './button-popper.js';
+export * from './dom.js';
 export * from './event.js';
 export * from './filesys.js';
 export * from './header-value-parser.js';

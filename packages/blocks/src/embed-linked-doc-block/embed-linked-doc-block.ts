@@ -4,6 +4,7 @@ import type {
 } from '@blocksuite/affine-model';
 
 import { Peekable, isPeekable } from '@blocksuite/affine-components/peek';
+import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -20,7 +21,6 @@ import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
-import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import { styles } from './styles.js';

@@ -1,22 +1,9 @@
-import type { EditorIconButton } from '@blocksuite/affine-components/toolbar';
+import type { RootBlockModel } from '@blocksuite/affine-model';
+import type { EmbedOptions } from '@blocksuite/affine-shared/types';
+import type { BlockService } from '@blocksuite/block-std';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline/types';
 
-import {
-  ConfirmIcon,
-  CopyIcon,
-  DeleteIcon,
-  EditIcon,
-  MoreVerticalIcon,
-  OpenIcon,
-  SmallArrowDownIcon,
-  UnlinkIcon,
-} from '@blocksuite/affine-components/icons';
-import { toast } from '@blocksuite/affine-components/toast';
-import {
-  renderActions,
-  renderToolbarSeparator,
-} from '@blocksuite/affine-components/toolbar';
 import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import {
   getHostName,
@@ -32,9 +19,24 @@ import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { EmbedOptions } from '../../../../../../root-block/root-service.js';
+import type { EditorIconButton } from '../../../../../../toolbar/index.js';
 import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
 
+import {
+  ConfirmIcon,
+  CopyIcon,
+  DeleteIcon,
+  EditIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  SmallArrowDownIcon,
+  UnlinkIcon,
+} from '../../../../../../icons/index.js';
+import { toast } from '../../../../../../toast/index.js';
+import {
+  renderActions,
+  renderToolbarSeparator,
+} from '../../../../../../toolbar/index.js';
 import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')
@@ -79,9 +81,15 @@ export class LinkPopup extends WithDisposable(LitElement) {
   private _editTemplate = () => {
     this.updateComplete
       .then(() => {
-        assertExists(this.textInput);
+        if (
+          !this.textInput ||
+          !this.linkInput ||
+          !this.currentText ||
+          !this.currentLink
+        )
+          return;
+
         this.textInput.value = this.currentText;
-        assertExists(this.linkInput);
         this.linkInput.value = this.currentLink;
 
         this.textInput.select();
@@ -122,6 +130,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   private _openLink = () => {
     let link = this.currentLink;
+    if (!link) return;
     if (!link.match(/^[a-zA-Z]+:\/\//)) {
       link = 'https://' + link;
     }
@@ -142,6 +151,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
     if (!this._rootService) {
       return nothing;
     }
+
+    if (!this.currentLink) return;
 
     this._embedOptions = this._rootService.getEmbedBlockOptions(
       this.currentLink
@@ -289,6 +300,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _copyUrl() {
+    if (!this.currentLink) return;
     navigator.clipboard.writeText(this.currentLink).catch(console.error);
     if (!this.host) return;
     toast(this.host, 'Copied link to clipboard');
@@ -395,7 +407,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private get _rootService() {
-    return this.std?.spec.getService('affine:page');
+    return this.std?.spec.getService('affine:page') as
+      | null
+      | (BlockService<RootBlockModel> & {
+          getEmbedBlockOptions(link: string): EmbedOptions;
+        });
   }
 
   private _updateConfirmBtn() {
@@ -574,9 +590,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   get currentLink() {
-    const link = this.inlineEditor.getFormat(this.targetInlineRange).link;
-    assertExists(link);
-    return link;
+    return this.inlineEditor.getFormat(this.targetInlineRange).link;
   }
 
   get currentText() {

@@ -1,9 +1,8 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { Command } from '@blocksuite/block-std';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
-
-import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';

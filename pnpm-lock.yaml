@@ -201,6 +201,9 @@ importers:
 
   packages/affine/components:
     dependencies:
+      '@blocksuite/affine-model':
+        specifier: workspace:*
+        version: link:../model
       '@blocksuite/affine-shared':
         specifier: workspace:*
         version: link:../shared

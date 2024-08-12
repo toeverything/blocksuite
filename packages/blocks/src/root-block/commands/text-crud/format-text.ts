@@ -1,9 +1,8 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { Command, TextSelection } from '@blocksuite/block-std';
 
 import { clearMarksOnDiscontinuousInput } from '@blocksuite/affine-shared/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
-
-import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 

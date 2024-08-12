@@ -1,4 +1,8 @@
 import type {
+  AffineInlineEditor,
+  AffineTextAttributes,
+} from '@blocksuite/affine-components/rich-text';
+import type {
   Chain,
   Command,
   CommandKeyToData,
@@ -13,11 +17,6 @@ import {
   type InlineRange,
   type InlineRootElement,
 } from '@blocksuite/inline';
-
-import type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-} from '../../_common/inline/presets/affine-inline-specs.js';
 
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,

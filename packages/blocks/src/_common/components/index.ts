@@ -8,6 +8,5 @@ export * from './file-drop-manager.js';
 export * from './menu/index.js';
 export * from './menu-divider.js';
 export * from './notification-service.js';
-export * from './rich-text/rich-text.js';
 
 export { scrollbarStyle } from './utils.js';

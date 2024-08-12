@@ -1,3 +1,4 @@
+import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
@@ -7,12 +8,10 @@ import {
   LinkedEdgelessIcon,
   NewDocIcon,
 } from '@blocksuite/affine-components/icons';
+import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { isFuzzyMatch } from '@blocksuite/affine-shared/utils';
 
-import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
-
-import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import { createDefaultDoc } from '../../../_common/utils/init.js';
 import { showImportModal } from './import-doc/index.js';
 

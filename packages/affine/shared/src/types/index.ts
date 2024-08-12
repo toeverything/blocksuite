@@ -1,3 +1,4 @@
+import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
@@ -51,3 +52,10 @@ export interface Viewport {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExtendedModel = BlockModel & Record<string, any>;
+
+export type EmbedOptions = {
+  flavour: string;
+  urlRegex: RegExp;
+  styles: EmbedCardStyle[];
+  viewType: 'card' | 'embed';
+};

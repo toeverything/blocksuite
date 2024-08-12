@@ -1,3 +1,4 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { Text } from '@blocksuite/store';
 
 import { isValidUrl } from '@blocksuite/affine-shared/utils';
@@ -7,7 +8,6 @@ import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { RichText } from '../../../_common/components/index.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
 import { getViewportElement } from '../../../_common/utils/query.js';

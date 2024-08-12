@@ -1,3 +1,4 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { GroupElementModel } from '@blocksuite/affine-model';
 
 import {
@@ -11,7 +12,6 @@ import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 @customElement('edgeless-group-title-editor')

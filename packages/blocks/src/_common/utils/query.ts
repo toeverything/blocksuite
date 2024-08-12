@@ -1,3 +1,4 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { Rect } from '@blocksuite/affine-shared/utils';
 import type {
   BlockComponent,
@@ -16,7 +17,6 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { Loader } from '../../_common/components/loader.js';
-import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import type { NoteBlockModel, RootBlockComponent } from '../../index.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 

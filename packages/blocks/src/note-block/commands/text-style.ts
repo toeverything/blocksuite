@@ -1,10 +1,9 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { Command } from '@blocksuite/block-std';
 
+import { toggleLinkPopup } from '@blocksuite/affine-components/rich-text';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import type { AffineTextAttributes } from '../../_common/inline/presets/affine-inline-specs.js';
-
-import { toggleLinkPopup } from '../../_common/inline/presets/nodes/link-node/link-popup/toggle-link-popup.js';
 import { generateTextStyleCommand, getCombinedTextStyle } from './utils.js';
 
 export const toggleBold: Command = generateTextStyleCommand('bold');

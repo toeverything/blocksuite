@@ -1,4 +1,8 @@
 import type {
+  AffineTextAttributes,
+  RichText,
+} from '@blocksuite/affine-components/rich-text';
+import type {
   BaseSelection,
   BlockComponent,
   CursorSelection,
@@ -19,9 +23,6 @@ import {
 } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-
-import type { RichText } from '../../../_common/components/index.js';
-import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 
 import '../../../_common/components/button.js';
 import { isFormatSupported } from '../../../note-block/commands/utils.js';

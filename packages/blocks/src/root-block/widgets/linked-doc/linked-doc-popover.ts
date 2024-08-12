@@ -1,3 +1,4 @@
+import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { MoreHorizontalIcon } from '@blocksuite/affine-components/icons';
@@ -7,7 +8,6 @@ import { customElement, query, queryAll, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { IconButton } from '../../../_common/components/button.js';
-import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import type { LinkedMenuGroup } from './config.js';
 
 import '../../../_common/components/button.js';

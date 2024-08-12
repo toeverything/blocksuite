@@ -4,4 +4,19 @@ export * from './drag-and-drop.js';
 export * from './init.js';
 export * from './query.js';
 export * from './selection.js';
-export * from '@blocksuite/affine-shared/utils';
+export {
+  Rect,
+  clearMarksOnDiscontinuousInput,
+  createButtonPopper,
+  createZodUnion,
+  getBlockProps,
+  getImageFilesFromLocal,
+  isMiddleButtonPressed,
+  isRightButtonPressed,
+  isValidUrl,
+  matchFlavours,
+  on,
+  once,
+  openFileOrFiles,
+  requestThrottledConnectedFrame,
+} from '@blocksuite/affine-shared/utils';

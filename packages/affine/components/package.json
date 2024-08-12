@@ -19,6 +19,7 @@
     "@blocksuite/icons": "^2.1.62",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
     "@floating-ui/dom": "^1.6.8",
     "@lit-labs/preact-signals": "^1.0.2",
@@ -34,7 +35,8 @@
     "./portal": "./src/portal/index.ts",
     "./hover": "./src/hover/index.ts",
     "./toolbar": "./src/toolbar/index.ts",
-    "./toast": "./src/toast/index.ts"
+    "./toast": "./src/toast/index.ts",
+    "./rich-text": "./src/rich-text/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -68,6 +70,10 @@
       "./toast": {
         "types": "./dist/toast/index.d.ts",
         "import": "./dist/toast/index.js"
+      },
+      "./rich-text": {
+        "types": "./dist/rich-text/index.d.ts",
+        "import": "./dist/rich-text/index.js"
       }
     }
   },

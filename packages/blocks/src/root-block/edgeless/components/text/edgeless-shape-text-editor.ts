@@ -1,3 +1,5 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
+
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
@@ -11,7 +13,6 @@ import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import {

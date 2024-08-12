@@ -1,14 +1,13 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 
-import { BlockService } from '@blocksuite/block-std';
-
-import { InlineManager } from '../_common/inline/inline-manager.js';
 import {
   type AffineTextAttributes,
+  InlineManager,
+  ReferenceNodeConfig,
+  affineInlineMarkdownMatches,
   getAffineInlineSpecsWithReference,
-} from '../_common/inline/presets/affine-inline-specs.js';
-import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
-import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
+} from '@blocksuite/affine-components/rich-text';
+import { BlockService } from '@blocksuite/block-std';
 
 export class ParagraphBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
