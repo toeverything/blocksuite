@@ -11,6 +11,7 @@ import {
   RefreshIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { join } from 'lit/directives/join.js';
@@ -18,7 +19,6 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { AttachmentBlockComponent } from '../attachment-block.js';
 
-import { createLitPortal } from '../../_common/components/portal.js';
 import '../../_common/components/toolbar/icon-button.js';
 import '../../_common/components/toolbar/menu-button.js';
 import '../../_common/components/toolbar/separator.js';

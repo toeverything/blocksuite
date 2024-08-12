@@ -1,4 +1,5 @@
 import { MoreVerticalIcon } from '@blocksuite/affine-components/icons';
+import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { LitElement, html } from 'lit';
@@ -9,7 +10,6 @@ import type { EditorIconButton } from '../../../../_common/components/toolbar/ic
 import type { ImageBlockComponent } from '../../../../image-block/image-block.js';
 import type { ImageConfigItem, MoreMenuConfigItem } from '../type.js';
 
-import { createLitPortal } from '../../../../_common/components/portal.js';
 import '../../../../_common/components/toolbar/icon-button.js';
 import '../../../../_common/components/toolbar/menu-button.js';
 import '../../../../_common/components/toolbar/toolbar.js';

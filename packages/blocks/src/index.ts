@@ -31,7 +31,6 @@ export {
   HoverController,
   RichText,
   Tooltip,
-  createLitPortal,
   scrollbarStyle,
   toast,
 } from './_common/components/index.js';
@@ -137,8 +136,13 @@ export {
   type PeekViewService,
   Peekable,
   PeekableController,
+  isPeekable,
   peek,
 } from '@blocksuite/affine-components/peek';
+export {
+  createLitPortal,
+  createSimplePortal,
+} from '@blocksuite/affine-components/portal';
 export * from '@blocksuite/affine-model';
 // To provide the type for commands
 export { registerCommands } from '@blocksuite/affine-shared/commands';
