@@ -201,6 +201,9 @@ importers:
 
   packages/affine/components:
     dependencies:
+      '@blocksuite/affine-shared':
+        specifier: workspace:*
+        version: link:../shared
       '@blocksuite/block-std':
         specifier: workspace:*
         version: link:../../framework/block-std

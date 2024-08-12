@@ -9,6 +9,7 @@ import {
   OpenIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -22,7 +23,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 
-import { isPeekable, peek } from '../../../../components/index.js';
 import '../../../../components/toolbar/icon-button.js';
 import '../../../../components/toolbar/menu-button.js';
 import '../../../../components/toolbar/separator.js';

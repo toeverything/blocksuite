@@ -6,6 +6,7 @@ import {
   OpenIcon,
   RefreshIcon,
 } from '@blocksuite/affine-components/icons';
+import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { LitElement, css, html, nothing } from 'lit';
@@ -18,7 +19,6 @@ import {
   isEmbedSyncedDocBlock,
 } from '../../../root-block/edgeless/utils/query.js';
 import { getBlockProps } from '../../utils/index.js';
-import { isPeekable, peek } from '../peekable.js';
 import { toast } from '../toast.js';
 import './../button.js';
 

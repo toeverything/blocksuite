@@ -7,6 +7,7 @@ import {
   FrameIcon,
   MoreDeleteIcon,
 } from '@blocksuite/affine-components/icons';
+import { Peekable } from '@blocksuite/affine-components/peek';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
@@ -26,7 +27,6 @@ import type { EdgelessRootPreviewBlockComponent } from '../root-block/edgeless/e
 import type { EdgelessRootService } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
-import { Peekable } from '../_common/components/peekable.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import { SpecProvider } from '../specs/index.js';
 import {

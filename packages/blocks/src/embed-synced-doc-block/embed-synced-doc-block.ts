@@ -4,6 +4,7 @@ import {
   EmbedEdgelessIcon,
   EmbedPageIcon,
 } from '@blocksuite/affine-components/icons';
+import { Peekable } from '@blocksuite/affine-components/peek';
 import {
   type EmbedSyncedDocModel,
   NoteDisplayMode,
@@ -26,7 +27,6 @@ import type {
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
 import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 
-import { Peekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';

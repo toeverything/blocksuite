@@ -1,5 +1,6 @@
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 
+import { Peekable } from '@blocksuite/affine-components/peek';
 import { Bound } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -12,7 +13,6 @@ import type { ImageBlockPageComponent } from './components/page-image-block.js';
 import type { ImageBlockService } from './image-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
-import { Peekable } from '../_common/components/index.js';
 import './components/edgeless-image-block.js';
 import './components/image-card.js';
 import './components/page-image-block.js';

@@ -1,3 +1,4 @@
+import type { ImageSelection } from '@blocksuite/affine-shared/selection';
 import type {
   BlockSelection,
   Command,
@@ -6,8 +7,6 @@ import type {
 import type { RoleType } from '@blocksuite/store';
 
 import { BlockComponent } from '@blocksuite/block-std';
-
-import type { ImageSelection } from '../../../image-block/image-selection.js';
 
 export const getSelectedBlocksCommand: Command<
   'currentTextSelection' | 'currentBlockSelections' | 'currentImageSelections',

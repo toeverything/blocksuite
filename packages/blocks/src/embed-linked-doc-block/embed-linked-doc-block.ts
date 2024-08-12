@@ -3,6 +3,7 @@ import type {
   EmbedLinkedDocStyles,
 } from '@blocksuite/affine-model';
 
+import { Peekable, isPeekable } from '@blocksuite/affine-components/peek';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -17,7 +18,6 @@ import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-render
 import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
 import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
-import { Peekable, isPeekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';

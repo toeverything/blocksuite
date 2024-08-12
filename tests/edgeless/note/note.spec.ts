@@ -1,8 +1,7 @@
-import { NoteDisplayMode } from '@blocksuite/affine-model';
+import { NOTE_WIDTH, NoteDisplayMode } from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { NOTE_WIDTH } from '../../../packages/blocks/src/_common/consts.js';
 import {
   activeNoteInEdgeless,
   addNote,

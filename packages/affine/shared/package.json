@@ -32,9 +32,11 @@
   },
   "exports": {
     ".": "./src/index.ts",
+    "./selection": "./src/selection/index.ts",
     "./utils": "./src/utils/index.ts",
     "./consts": "./src/consts/index.ts",
     "./types": "./src/types/index.ts",
+    "./commands": "./src/commands/index.ts",
     "./mixins": "./src/mixins/index.ts",
     "./theme": "./src/theme/index.ts"
   },
@@ -47,6 +49,10 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts"
       },
+      "./selection": {
+        "types": "./dist/selection/index.d.ts",
+        "import": "./dist/selection/index.js"
+      },
       "./utils": {
         "types": "./dist/utils/index.d.ts",
         "import": "./dist/utils/index.js"
@@ -58,6 +64,10 @@
       "./types": {
         "types": "./dist/types/index.d.ts",
         "import": "./dist/types/index.js"
+      },
+      "./commands": {
+        "types": "./dist/commands/index.d.ts",
+        "import": "./dist/commands/index.js"
       },
       "./mixins": {
         "types": "./dist/mixins/index.d.ts",
