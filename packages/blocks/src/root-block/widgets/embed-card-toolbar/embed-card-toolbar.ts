@@ -14,6 +14,7 @@ import {
   RefreshIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import {
   type BookmarkBlockModel,
   BookmarkStyles,
@@ -43,7 +44,6 @@ import {
   type EmbedToolbarModel,
   isEmbedCardBlockComponent,
 } from '../../../_common/components/embed-card/type.js';
-import { isPeekable, peek } from '../../../_common/components/index.js';
 import { toast } from '../../../_common/components/toast.js';
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';

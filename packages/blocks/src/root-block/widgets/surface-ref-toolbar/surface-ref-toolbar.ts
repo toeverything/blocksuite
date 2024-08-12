@@ -11,6 +11,7 @@ import {
   OpenIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { downloadBlob } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { offset, shift } from '@floating-ui/dom';
@@ -23,7 +24,6 @@ import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/index.
 import type { EdgelessRootPreviewBlockComponent } from '../../edgeless/edgeless-root-preview-block.js';
 
 import { HoverController } from '../../../_common/components/hover/controller.js';
-import { isPeekable, peek } from '../../../_common/components/peekable.js';
 import { toast } from '../../../_common/components/toast.js';
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';

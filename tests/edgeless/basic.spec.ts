@@ -1,4 +1,4 @@
-import { NOTE_WIDTH } from '@blocks/_common/consts.js';
+import { NOTE_WIDTH } from '@blocksuite/affine-model';
 import { assertExists } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 

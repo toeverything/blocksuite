@@ -2,7 +2,6 @@ import type { EmbedCardStyle } from '@blocksuite/affine-model';
 
 export const BLOCK_ID_ATTR = 'data-block-id';
 
-export const NOTE_WIDTH = 800;
 export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 24;
 export const EDGELESS_BLOCK_CHILD_PADDING = 24;
 export const EDGELESS_BLOCK_CHILD_BORDER_WIDTH = 2;

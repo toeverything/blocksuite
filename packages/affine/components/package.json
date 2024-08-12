@@ -19,11 +19,13 @@
     "@blocksuite/icons": "^2.1.62",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/affine-shared": "workspace:*",
     "lit": "^3.1.4"
   },
   "exports": {
     ".": "./src/index.ts",
-    "./icons": "./src/icons/index.ts"
+    "./icons": "./src/icons/index.ts",
+    "./peek": "./src/peek/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -37,6 +39,10 @@
       "./icons": {
         "types": "./dist/icons/index.d.ts",
         "import": "./dist/icons/index.js"
+      },
+      "./peek": {
+        "types": "./dist/peek/index.d.ts",
+        "import": "./dist/peek/index.js"
       }
     }
   },

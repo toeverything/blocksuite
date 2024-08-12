@@ -18,6 +18,7 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '@blocksuite/affine-components/icons';
+import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
@@ -34,7 +35,6 @@ import type {
 } from '../../../index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import { isPeekable, peek } from '../../../_common/components/peekable.js';
 import '../../../_common/components/toolbar/icon-button.js';
 import '../../../_common/components/toolbar/menu-button.js';
 import {

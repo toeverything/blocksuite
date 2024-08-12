@@ -18,6 +18,9 @@
     },
     {
       "path": "../../framework/inline"
+    },
+    {
+      "path": "../shared"
     }
   ]
 }

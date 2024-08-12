@@ -1,4 +1,6 @@
 /// <reference types="@blocksuite/global" />
+
+export * from './_common/adapters/index.js';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Point } from '@blocksuite/global/utils';
@@ -19,22 +21,17 @@ import { isCanvasElement } from './root-block/edgeless/utils/query.js';
 import './root-block/index.js';
 import './surface-ref-block/index.js';
 
-export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
 export * from './_common/components/doc-mode-service.js';
 export type {
   DocModeService,
   NotificationService,
-  PeekViewService,
 } from './_common/components/index.js';
 export {
   HoverController,
-  Peekable,
-  PeekableController,
   RichText,
   Tooltip,
   createLitPortal,
-  peek,
   scrollbarStyle,
   toast,
 } from './_common/components/index.js';
@@ -136,7 +133,15 @@ export {
   TagsIcon,
 } from '@blocksuite/affine-components/icons';
 export * from '@blocksuite/affine-components/icons';
+export {
+  type PeekViewService,
+  Peekable,
+  PeekableController,
+  peek,
+} from '@blocksuite/affine-components/peek';
 export * from '@blocksuite/affine-model';
+// To provide the type for commands
+export { registerCommands } from '@blocksuite/affine-shared/commands';
 export {
   ColorVariables,
   FontFamilyVariables,

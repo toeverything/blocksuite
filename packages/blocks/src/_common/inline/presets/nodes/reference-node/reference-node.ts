@@ -6,6 +6,7 @@ import {
   FontDocIcon,
   FontLinkedDocIcon,
 } from '@blocksuite/affine-components/icons';
+import { Peekable } from '@blocksuite/affine-components/peek';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -24,7 +25,6 @@ import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import type { ReferenceNodeConfig } from './reference-config.js';
 
 import { HoverController } from '../../../../components/hover/controller.js';
-import { Peekable } from '../../../../components/peekable.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import {
   getModelByElement,
