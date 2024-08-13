@@ -28,7 +28,6 @@ import { keyed } from 'lit/directives/keyed.js';
 import { type Ref, createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 
-import '../fragments/doc-meta-tags/doc-meta-tags.js';
 import '../fragments/doc-title/doc-title.js';
 
 noop(EditorHost);

@@ -248,10 +248,13 @@ test.describe('Embed synced doc', () => {
         }
         model.applyColumnUpdate();
       });
-      const backLineButton = page.locator('backlink-button');
-      await backLineButton.click();
-      const backLinkPageButton = page.locator('.backlinks .link');
-      await backLinkPageButton.click();
+
+      // go back to previous doc
+      await page.evaluate(() => {
+        const { collection, editor } = window;
+        editor.doc = collection.getDoc('doc:home')!;
+      });
+
       const databaseFirstCell = page.locator(
         '.affine-database-column-header.database-row'
       );

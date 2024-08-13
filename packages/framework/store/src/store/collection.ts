@@ -24,7 +24,7 @@ import {
   BlockSuiteDoc,
   type RawAwarenessState,
 } from '../yjs/index.js';
-import { DocCollectionAddonType, indexer, test } from './addon/index.js';
+import { DocCollectionAddonType, test } from './addon/index.js';
 import { BlockCollection, type GetDocOptions } from './doc/block-collection.js';
 import { pickIdGenerator } from './id.js';
 import { DocCollectionMeta, type DocMeta } from './meta.js';
@@ -44,8 +44,6 @@ export type DocCollectionOptions = {
     shadows?: BlobSource[];
   };
   awarenessSources?: AwarenessSource[];
-  disableSearchIndex?: boolean;
-  disableBacklinkIndex?: boolean;
 };
 
 const FLAGS_PRESET = {
@@ -69,7 +67,6 @@ export interface StackItem {
   meta: Map<'cursor-location' | 'selection-state', unknown>;
 }
 
-@indexer
 @test
 export class DocCollection extends DocCollectionAddonType {
   protected readonly _schema: Schema;

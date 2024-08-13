@@ -934,34 +934,6 @@ describe('collection.exportJSX works', () => {
   });
 });
 
-describe('collection search', () => {
-  it('search doc meta title', () => {
-    const options = createTestOptions();
-    const collection = new DocCollection(options);
-    collection.meta.initialize();
-    const doc = collection.createDoc({ id: 'doc:home' });
-    doc.load(() => {
-      const rootId = doc.addBlock('affine:page', {
-        title: new doc.Text('test123'),
-      });
-      const noteId = doc.addBlock('affine:note', {}, rootId);
-      doc.addBlock('affine:paragraph', {}, noteId);
-    });
-
-    requestIdleCallback(() => {
-      const result = collection.search('test');
-      expect(result).toMatchInlineSnapshot(`
-      Map {
-        "0" => {
-          "content": "test123",
-          "space": "doc:home",
-        },
-      }
-    `);
-    });
-  });
-});
-
 describe('flags', () => {
   it('update flags', () => {
     const options = createTestOptions();

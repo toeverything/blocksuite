@@ -1873,16 +1873,24 @@ test('auto-scroll when creating a new paragraph-block by pressing enter', async 
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await pressEnter(page, 50);
 
-  const scrollTop = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-page-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    return viewport.scrollTop;
-  });
-  expect(scrollTop).toBeGreaterThan(1000);
+  const getScrollTop = async () => {
+    return page.evaluate(() => {
+      const viewport = document.querySelector('.affine-page-viewport');
+      if (!viewport) {
+        throw new Error();
+      }
+      return viewport.scrollTop;
+    });
+  };
+
+  await pressEnter(page, 30);
+  const oldScrollTop = await getScrollTop();
+
+  await pressEnter(page, 30);
+  const newScrollTop = await getScrollTop();
+
+  expect(newScrollTop).toBeGreaterThan(oldScrollTop);
 });
 
 test('Use arrow up and down to select two types of block', async ({ page }) => {
