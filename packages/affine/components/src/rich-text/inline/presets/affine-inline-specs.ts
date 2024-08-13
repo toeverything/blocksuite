@@ -16,10 +16,18 @@ export interface AffineTextAttributes {
   strike?: true | null;
   code?: true | null;
   link?: string | null;
-  reference?: {
-    type: 'Subpage' | 'LinkedPage';
-    pageId: string;
-  } | null;
+  reference?:
+    | {
+        type: 'Subpage' | 'LinkedPage';
+        pageId: string;
+      }
+    | {
+        type: 'LinkedBlock';
+        mode: 'page' | 'edgeless';
+        pageId: string;
+        blockId: string;
+      }
+    | null;
   background?: string | null;
   color?: string | null;
 }
@@ -106,14 +114,22 @@ export function getAffineInlineSpecsWithReference(
     {
       name: 'reference',
       schema: z
-        .object({
-          type: z.enum([
-            // @deprecated Subpage is deprecated, use LinkedPage instead
-            'Subpage',
-            'LinkedPage',
-          ]),
-          pageId: z.string(),
-        })
+        .union([
+          z.object({
+            type: z.enum([
+              // @deprecated Subpage is deprecated, use LinkedPage instead
+              'Subpage',
+              'LinkedPage',
+            ]),
+            pageId: z.string(),
+          }),
+          z.object({
+            type: z.literal('LinkedBlock'),
+            mode: z.enum(['page', 'edgeless']),
+            pageId: z.string(),
+            blockId: z.string(),
+          }),
+        ])
         .optional()
         .nullable()
         .catch(undefined),

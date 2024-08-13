@@ -16,8 +16,9 @@ import {
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
 import { ref } from 'lit/directives/ref.js';
 
 import type { AffineTextAttributes } from '../../affine-inline-specs.js';
@@ -181,11 +182,16 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         : refMeta.title.length > 0
           ? refMeta.title
           : DEFAULT_DOC_NAME;
-    const icon = this.customIcon
-      ? this.customIcon(this)
-      : type === 'LinkedPage'
-        ? FontLinkedDocIcon
-        : FontDocIcon;
+
+    const icon = choose(
+      type,
+      [
+        ['LinkedPage', () => FontLinkedDocIcon],
+        ['LinkedBlock', () => FontLinkedDocIcon],
+        ['Subpage', () => FontDocIcon],
+      ],
+      () => this.customIcon?.(this) ?? nothing
+    );
 
     const style = affineTextStyles(
       attributes,
