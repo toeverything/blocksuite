@@ -3,11 +3,12 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { InlineEditor, InlineRange } from '@blocksuite/inline';
 
 import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
-import { isControlledKeyboardEvent } from '@blocksuite/affine-shared/utils';
+import {
+  getCurrentNativeRange,
+  isControlledKeyboardEvent,
+} from '@blocksuite/affine-shared/utils';
 import { BlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
-
-import { getCurrentNativeRange } from '../../_common/utils/selection.js';
 
 export function getQuery(
   inlineEditor: InlineEditor,

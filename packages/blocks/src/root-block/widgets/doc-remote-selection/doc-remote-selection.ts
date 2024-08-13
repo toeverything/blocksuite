@@ -16,7 +16,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { DocRemoteSelectionConfig } from './config.js';
 
 import { RemoteColorManager } from '../../../root-block/remote-color-manager/remote-color-manager.js';
-import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';
 
 export interface SelectionRect {
@@ -87,7 +86,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
   }
 
   private _getCursorRect(selections: BaseSelection[]): SelectionRect | null {
-    if (!isRootComponent(this.block)) {
+    if (this.block.model.flavour !== 'affine:page') {
       console.error('remote selection widget must be used in page component');
       return null;
     }
@@ -162,7 +161,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
   }
 
   private _getSelectionRect(selections: BaseSelection[]): SelectionRect[] {
-    if (!isRootComponent(this.block)) {
+    if (this.block.model.flavour !== 'affine:page') {
       console.error('remote selection widget must be used in page component');
       return [];
     }

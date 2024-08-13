@@ -14,9 +14,9 @@ import {
   NoteAutoCompleteIcon,
 } from '@blocksuite/affine-components/icons';
 import { ConnectorMode, shapeMethods } from '@blocksuite/affine-model';
+import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { Vec } from '@blocksuite/global/utils';
-import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
+import { DisposableGroup, Vec, assertExists } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -25,7 +25,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
-import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
 import { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
 import { DEFAULT_SHAPE_STROKE_COLOR } from '../../../../surface-block/elements/shape/consts.js';

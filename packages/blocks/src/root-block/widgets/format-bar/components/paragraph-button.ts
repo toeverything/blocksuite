@@ -13,7 +13,6 @@ import type { ParagraphActionConfigItem } from '../config.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
-import { isRootComponent } from '../../../../root-block/utils/guard.js';
 
 interface ParagraphPanelProps {
   host: EditorHost;
@@ -74,7 +73,7 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
         )?.icon ?? textConversionConfigs[0].icon);
 
   const rootComponent = formatBar.block;
-  if (!isRootComponent(rootComponent)) {
+  if (rootComponent.model.flavour !== 'affine:page') {
     console.error('paragraph button host is not a page component');
     return null;
   }

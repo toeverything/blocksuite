@@ -1,12 +1,8 @@
-import type { NoteBlockModel } from '@blocksuite/affine-model';
+import type { ImageBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
-import {
-  type ImageBlockModel,
-  NoteDisplayMode,
-} from '@blocksuite/affine-model';
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
-import { PathFinder } from '@blocksuite/block-std';
 import { Bound, getCommonBound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -360,7 +356,7 @@ function renderSurfaceRef(
   );
 
   card.surfaceRefRenderer = card.surfaceRefService.getRenderer(
-    PathFinder.id(card.path),
+    card.model.id,
     linkedDoc
   );
 
