@@ -272,13 +272,13 @@ test('shift click multi select and de-select', async ({ page }) => {
   await clickView(page, [50, 0]);
   await assertEdgelessSelectedRectModel(page, [0, 0, 100, 100]);
 
-  await shiftClickView(page, [150, 0]);
+  await shiftClickView(page, [150, 50]);
   await assertEdgelessSelectedRectModel(page, [0, 0, 200, 100]);
 
   // we will try to write text on a shape element when we dbclick it
 
   await waitNextFrame(page, 500);
-  await shiftClickView(page, [150, 95]);
+  await shiftClickView(page, [150, 50]);
   await assertEdgelessSelectedRectModel(page, [0, 0, 100, 100]);
 });
 

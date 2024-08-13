@@ -486,7 +486,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       top,
       rotate,
       borderStyle: 'solid',
-      borderWidth: selection.editing ? 2 : 1,
+      borderWidth: 2,
     };
   }, this);
 
@@ -514,7 +514,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       box-sizing: border-box;
       z-index: 1;
       border-color: var(--affine-blue);
-      border-width: var(--affine-border-width);
+      border-width: 2px;
       border-style: solid;
       transform: translate(0, 0) rotate(0);
     }
