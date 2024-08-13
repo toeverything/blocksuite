@@ -4,8 +4,9 @@ import type { BlockModel } from '@blocksuite/store';
 import {
   asyncFocusRichText,
   asyncSetInlineRange,
-  matchFlavours,
-} from '../../_common/utils/index.js';
+} from '@blocksuite/affine-components/rich-text';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
+
 import { onModelTextUpdated } from '../../root-block/utils/callback.js';
 import {
   mergeToCodeModel,

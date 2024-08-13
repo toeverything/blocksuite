@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { InlineRange } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -40,4 +41,37 @@ export function getInlineEditorByModel(
   const richText = getRichTextByModel(editorHost, model.id);
   if (!richText) return null;
   return richText.inlineEditor;
+}
+
+export async function asyncSetInlineRange(
+  editorHost: EditorHost,
+  model: BlockModel,
+  inlineRange: InlineRange
+) {
+  const richText = await asyncGetRichText(editorHost, model.id);
+  if (!richText) {
+    return;
+  }
+
+  await richText.updateComplete;
+  const inlineEditor = richText.inlineEditor;
+  if (!inlineEditor) {
+    return;
+  }
+  inlineEditor.setInlineRange(inlineRange);
+}
+
+export async function asyncFocusRichText(
+  editorHost: EditorHost,
+  id: string,
+  offset: number = 0
+) {
+  const selection = editorHost.std.selection;
+  selection.setGroup('note', [
+    selection.create('text', {
+      from: { blockId: id, index: offset, length: 0 },
+      to: null,
+    }),
+  ]);
+  await editorHost.updateComplete;
 }

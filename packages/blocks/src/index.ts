@@ -37,7 +37,6 @@ export * from './_common/transformers/index.js';
 export { type AbstractEditor, type DocMode } from './_common/types.js';
 export {
   createButtonPopper,
-  findNoteBlockModel,
   matchFlavours,
   on,
   once,
@@ -169,6 +168,7 @@ export const BlocksUtils = {
   isCanvasElement,
   Point,
 };
+export { findNoteBlockModel } from '@blocksuite/affine-shared/utils';
 
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'

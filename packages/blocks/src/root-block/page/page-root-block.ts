@@ -1,9 +1,14 @@
 import type { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
+import type { Viewport } from '@blocksuite/affine-shared/types';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { BlockModel, Text } from '@blocksuite/store';
 
+import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
-import { getScrollContainer } from '@blocksuite/affine-shared/utils';
+import {
+  getScrollContainer,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -13,12 +18,9 @@ import type { PageRootBlockWidgetName } from '../index.js';
 import type { PageRootService } from './page-root-service.js';
 
 import {
-  type Viewport,
-  asyncFocusRichText,
   buildPath,
   focusTitle,
   getDocTitleInlineEditor,
-  matchFlavours,
 } from '../../_common/utils/index.js';
 import { PageClipboard } from '../clipboard/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';

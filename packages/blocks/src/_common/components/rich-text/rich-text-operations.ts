@@ -2,7 +2,11 @@ import type { ListBlockModel, RootBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
-import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
+import {
+  asyncFocusRichText,
+  asyncSetInlineRange,
+  getInlineEditorByModel,
+} from '@blocksuite/affine-components/rich-text';
 import {
   isInsideBlockByFlavour,
   matchFlavours,
@@ -17,12 +21,7 @@ import {
   getNextBlock,
   getPreviousBlock,
 } from '../../../_common/utils/query.js';
-import {
-  asyncFocusRichText,
-  asyncSetInlineRange,
-  focusBlockByModel,
-  focusTitle,
-} from '../../../_common/utils/selection.js';
+import { focusTitle } from '../../../_common/utils/selection.js';
 import { EMBED_BLOCK_FLAVOUR_LIST } from '../../consts.js';
 
 /**
@@ -429,15 +428,12 @@ export function handleRemoveAllIndentForMultiBlocks(
 // When deleting at line end of a code block,
 // do nothing
 function handleCodeBlockForwardDelete(model: ExtendedModel) {
-  if (!matchFlavours(model, ['affine:code'])) return false;
-  return true;
+  return matchFlavours(model, ['affine:code']);
 }
 
 function handleDatabaseBlockForwardDelete(model: ExtendedModel) {
   const doc = model.doc;
-  if (!isInsideBlockByFlavour(doc, model, 'affine:database')) return false;
-
-  return true;
+  return isInsideBlockByFlavour(doc, model, 'affine:database');
 }
 
 // When deleting at line start of a list block,
@@ -589,7 +585,11 @@ function handleEmbedDividerCodeSibling(
   )
     return false;
 
-  focusBlockByModel(editorHost, previousSibling);
+  asyncFocusRichText(
+    editorHost,
+    previousSibling.id,
+    previousSibling.text?.yText.length
+  ).catch(console.error);
   if (!model.text?.length) {
     doc.captureSync();
     doc.deleteBlock(model, {
@@ -708,7 +708,11 @@ function handleParagraphDeleteActions(
   // TODO handle in block service
   if (matchFlavours(parent, ['affine:database'])) {
     doc.deleteBlock(model);
-    focusBlockByModel(editorHost, previousSibling);
+    asyncFocusRichText(
+      editorHost,
+      previousSibling.id,
+      previousSibling.text?.yText.length
+    ).catch(console.error);
     return true;
   } else if (matchFlavours(parent, ['affine:note'])) {
     return (
@@ -862,7 +866,11 @@ function handleParagraphBlockForwardDelete(
         ])
       )
         return false;
-      focusBlockByModel(editorHost, firstChild);
+      asyncFocusRichText(
+        editorHost,
+        firstChild.id,
+        firstChild.text?.yText.length
+      ).catch(console.error);
       return true;
     }
     function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
@@ -885,7 +893,11 @@ function handleParagraphBlockForwardDelete(
         !matchFlavours(nextSibling, ['affine:image', 'affine:code'])
       )
         return false;
-      focusBlockByModel(editorHost, nextSibling);
+      asyncFocusRichText(
+        editorHost,
+        nextSibling.id,
+        nextSibling.text?.yText.length
+      ).catch(console.error);
       return true;
     }
     return (

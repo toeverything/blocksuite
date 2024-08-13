@@ -4,6 +4,7 @@ import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
 import {
   type EmbedCardStyle,
   type NoteBlockModel,
@@ -39,7 +40,6 @@ import {
   ZipTransformer,
 } from '../_common/transformers/index.js';
 import { getRootByEditorHost } from '../_common/utils/index.js';
-import { asyncFocusRichText } from '../_common/utils/selection.js';
 import { CommunityCanvasTextFonts } from '../surface-block/consts.js';
 import { EditPropsStore } from '../surface-block/managers/edit-session.js';
 import { FontLoader } from './font-loader/font-loader.js';

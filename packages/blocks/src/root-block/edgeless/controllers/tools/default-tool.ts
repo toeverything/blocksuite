@@ -6,6 +6,7 @@ import type {
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
+import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
 import {
   ConnectorElementModel,
   GroupElementModel,
@@ -23,7 +24,6 @@ import type { MindmapNode } from '../../../../surface-block/element-model/utils/
 import type { EdgelessTool } from '../../types.js';
 
 import {
-  asyncFocusRichText,
   buildPath,
   handleNativeRangeAtPoint,
   resetNativeSelection,

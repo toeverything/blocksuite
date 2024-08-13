@@ -1,17 +1,17 @@
-import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import {
+  type AffineInlineEditor,
+  asyncSetInlineRange,
+} from '@blocksuite/affine-components/rich-text';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { assertExists, isEqual } from '@blocksuite/global/utils';
 import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
 
-import {
-  asyncSetInlineRange,
-  matchFlavours,
-} from '../../../../_common/utils/index.js';
 import { getStandardLanguage } from '../../../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../../../code-block/utils/consts.js';
 import {
@@ -87,10 +87,12 @@ export function tryConvertBlock(
     });
 
     const codeBlock = doc.getBlockById(codeId);
-    assertExists(codeBlock);
-    asyncSetInlineRange(element.host, codeBlock, { index: 0, length: 0 }).catch(
-      console.error
-    );
+    if (codeBlock) {
+      asyncSetInlineRange(element.host, codeBlock, {
+        index: 0,
+        length: 0,
+      }).catch(console.error);
+    }
 
     return KEYBOARD_PREVENT_DEFAULT;
   }
