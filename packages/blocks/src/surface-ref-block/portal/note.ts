@@ -5,6 +5,7 @@ import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   type EditorHost,
   RANGE_QUERY_EXCLUDE_ATTR,
@@ -69,16 +70,14 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { model, index } = this;
-    const { displayMode, edgeless, doc } = model;
+    const { displayMode, edgeless } = model;
     if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)
       return nothing;
 
-    let background = `${DEFAULT_NOTE_BACKGROUND_COLOR}`;
-    if (doc.awarenessStore.getFlag('enable_color_picker')) {
-      background = this.renderer.getColorValue(model.background, background);
-    } else if (typeof model.background === 'string') {
-      background = model.background;
-    }
+    const backgroundColor = ThemeObserver.generateColorProperty(
+      model.background,
+      DEFAULT_NOTE_BACKGROUND_COLOR
+    );
 
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(model.xywh);
     const style = {
@@ -91,9 +90,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       transform: `translate(${modelX}px, ${modelY}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px none var(--affine-black-10)`,
-      background: background.startsWith('--')
-        ? `var(${background})`
-        : background,
+      backgroundColor,
       boxShadow: 'var(--affine-note-shadow-sticker)',
       position: 'absolute',
       borderRadius: '0px',
