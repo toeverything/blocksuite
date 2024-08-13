@@ -11,6 +11,7 @@ import {
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
+  handleNativeRangeAtPoint,
   matchFlavours,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
@@ -28,7 +29,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
 
-import { handleNativeRangeAtPoint } from '../_common/utils/selection.js';
 import { NoteBlockComponent } from './note-block.js';
 
 @customElement('edgeless-note-mask')

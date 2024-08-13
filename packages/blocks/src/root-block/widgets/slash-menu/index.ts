@@ -1,7 +1,10 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 
 import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  getCurrentNativeRange,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import {
   DisposableGroup,
@@ -11,8 +14,8 @@ import {
 } from '@blocksuite/global/utils';
 import { customElement } from 'lit/decorators.js';
 
-import { getCurrentNativeRange } from '../../../_common/utils/index.js';
-import { isRootComponent } from '../../utils/guard.js';
+import type { RootBlockComponent } from '../../types.js';
+
 import { getPopperPosition } from '../../utils/position.js';
 import {
   type SlashMenuActionItem,
@@ -125,7 +128,7 @@ export class AffineSlashMenuWidget extends WidgetComponent {
 
     inlineEditor.slots.inlineRangeApply.once(() => {
       const rootComponent = this.block;
-      if (!isRootComponent(rootComponent)) {
+      if (rootComponent.model.flavour !== 'affine:page') {
         console.error('SlashMenuWidget should be used in RootBlock');
         return;
       }
@@ -134,7 +137,7 @@ export class AffineSlashMenuWidget extends WidgetComponent {
         ...this.config,
         items: filterEnabledSlashMenuItems(this.config.items, {
           model,
-          rootComponent: rootComponent,
+          rootComponent: rootComponent as RootBlockComponent,
         }),
       };
 
@@ -145,7 +148,10 @@ export class AffineSlashMenuWidget extends WidgetComponent {
 
         closeSlashMenu();
         showSlashMenu({
-          context: { model, rootComponent: rootComponent },
+          context: {
+            model,
+            rootComponent: rootComponent as RootBlockComponent,
+          },
           range: curRange,
           triggerKey,
           config,

@@ -26,7 +26,6 @@ import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import '../../../_common/components/button.js';
-import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { ConfigRenderer } from './components/config-renderer.js';
 import {
   type FormatBarConfigItem,
@@ -490,7 +489,7 @@ export class AffineFormatBarWidget extends WidgetComponent {
     }
 
     // check if format bar widget support the host
-    if (!isRootComponent(rootComponent)) {
+    if (rootComponent.model.flavour !== 'affine:page') {
       console.error(
         `format bar not support rootComponent: ${rootComponent.constructor.name} but its widgets has format bar`
       );

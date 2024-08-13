@@ -8,6 +8,7 @@ import {
   getScrollContainer,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
+import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
 import {
   PathFinder,
   type PointerEventState,
@@ -33,7 +34,6 @@ import type { DragHandleOption, DropResult, DropType } from './config.js';
 
 import {
   Rect,
-  getCurrentNativeRange,
   isInsideEdgelessEditor,
   isInsidePageEditor,
 } from '../../../_common/utils/index.js';
