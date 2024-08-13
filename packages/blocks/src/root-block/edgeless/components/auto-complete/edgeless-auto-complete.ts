@@ -234,6 +234,19 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
     }
 
+    // needs to drop `alpha` value
+    if (typeof stroke === 'object') {
+      if (stroke.normal?.endsWith('00')) {
+        stroke.normal = stroke.normal.substring(0, 7);
+      }
+      if (stroke.light?.endsWith('00')) {
+        stroke.light = stroke.light.substring(0, 7);
+      }
+      if (stroke.dark?.endsWith('00')) {
+        stroke.dark = stroke.dark.substring(0, 7);
+      }
+    }
+
     const id = edgeless.service.addElement(CanvasElementType.CONNECTOR, {
       mode: ConnectorMode.Orthogonal,
       strokeWidth: 2,
