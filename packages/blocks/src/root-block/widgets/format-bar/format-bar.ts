@@ -489,7 +489,7 @@ export class AffineFormatBarWidget extends WidgetComponent {
     }
 
     // check if format bar widget support the host
-    if (rootComponent.model.flavour !== 'affine:root') {
+    if (rootComponent.model.flavour !== 'affine:page') {
       console.error(
         `format bar not support rootComponent: ${rootComponent.constructor.name} but its widgets has format bar`
       );
