@@ -43,6 +43,8 @@ export class DividerBlockComponent extends CaptionedBlockComponent<DividerBlockM
       </div>
     `;
   }
+
+  override accessor useZeroWidthBlock = true;
 }
 
 declare global {

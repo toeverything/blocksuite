@@ -398,6 +398,8 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   get view() {
     return this.dataView.expose;
   }
+
+  override accessor useZeroWidthBlock = true;
 }
 
 declare global {
