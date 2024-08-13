@@ -15,9 +15,10 @@ import type {
   DocSnapshot,
   SliceSnapshot,
 } from '@blocksuite/store';
-import type { ElementContent, Root, Text } from 'hast';
+import type { Root } from 'hast';
 
-import { NoteDisplayMode } from '@blocksuite/affine-model';
+import { ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
 import { sha } from '@blocksuite/global/utils';
 import {
@@ -30,20 +31,9 @@ import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { collapseWhiteSpace } from 'collapse-white-space';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';
-import {
-  type BundledLanguage,
-  type ThemedToken,
-  bundledLanguagesInfo,
-} from 'shiki';
+import { bundledLanguagesInfo, codeToHast } from 'shiki';
 import { unified } from 'unified';
 
-import { isPlaintext } from '../../code-block/utils/code-languages.js';
-import { DARK_THEME, LIGHT_THEME } from '../../code-block/utils/consts.js';
-import { getHighLighter } from '../../code-block/utils/high-lighter.js';
-import {
-  highlightCache,
-  type highlightCacheKey,
-} from '../../code-block/utils/highlight-cache.js';
 import {
   type HtmlAST,
   hastFlatNodes,
@@ -142,90 +132,6 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         }
       }
       return hast;
-    });
-  };
-
-  private _deltaToHighlightHasts = async (
-    deltas: DeltaInsert[],
-    rawLang: unknown
-  ) => {
-    deltas = deltas.reduce((acc, cur) => {
-      return mergeDeltas(acc, cur, { force: true });
-    }, [] as DeltaInsert<object>[]);
-    if (!deltas.length) {
-      return [
-        {
-          type: 'element',
-          tagName: 'span',
-          children: [
-            {
-              type: 'text',
-              value: '',
-            },
-          ],
-        },
-      ] as ElementContent[];
-    }
-
-    const delta = deltas[0];
-    if (typeof rawLang == 'string') {
-      rawLang = rawLang.toLowerCase();
-    }
-    if (
-      !rawLang ||
-      typeof rawLang !== 'string' ||
-      isPlaintext(rawLang) ||
-      // The rawLang should not be 'Text' here
-      rawLang === 'Text' ||
-      !bundledLanguagesInfo.map(({ id }) => id).includes(rawLang as string)
-    ) {
-      return [
-        {
-          type: 'text',
-          value: delta.insert,
-        } as Text,
-      ];
-    }
-    const lang = rawLang as BundledLanguage;
-
-    const highlighter = await getHighLighter({
-      langs: [lang],
-      themes: [LIGHT_THEME, DARK_THEME],
-    });
-    const cacheKey: highlightCacheKey = `${delta.insert}-${rawLang}-light`;
-    const cache = highlightCache.get(cacheKey);
-
-    let tokens: Omit<ThemedToken, 'offset'>[];
-    if (cache) {
-      tokens = cache;
-    } else {
-      tokens = highlighter.codeToTokensBase(delta.insert, { lang }).reduce(
-        (acc, cur, index) => {
-          if (index === 0) {
-            return cur;
-          }
-
-          return [...acc, { content: '\n', color: 'inherit' }, ...cur];
-        },
-        [] as Omit<ThemedToken, 'offset'>[]
-      );
-      highlightCache.set(cacheKey, tokens);
-    }
-
-    return tokens.map(token => {
-      return {
-        type: 'element',
-        tagName: 'span',
-        properties: {
-          style: `word-wrap: break-word; color: ${token.color};`,
-        },
-        children: [
-          {
-            type: 'text',
-            value: token.content,
-          },
-        ],
-      } as ElementContent;
     });
   };
 
@@ -884,35 +790,29 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           break;
         }
         case 'affine:code': {
-          if (typeof o.node.props.language == 'string') {
-            o.node.props.language = o.node.props.language.toLowerCase();
-          }
-          context
-            .openNode(
-              {
-                type: 'element',
-                tagName: 'pre',
-                properties: {},
-                children: [],
-              },
-              'children'
-            )
-            .openNode(
-              {
-                type: 'element',
-                tagName: 'code',
-                properties: {
-                  className: [`code-${o.node.props.language}`],
-                },
-                children: await this._deltaToHighlightHasts(
-                  text.delta,
-                  o.node.props.language
-                ),
-              },
-              'children'
-            )
-            .closeNode()
-            .closeNode();
+          const rawLang = o.node.props.language as string | null;
+          const matchedLang = rawLang
+            ? (bundledLanguagesInfo.find(
+                info =>
+                  info.id === rawLang ||
+                  info.name === rawLang ||
+                  info.aliases?.includes(rawLang)
+              )?.id ?? 'text')
+            : 'text';
+
+          // @ts-ignore
+          const text = o.node.props.text.delta as DeltaInsert[];
+          const code = text.map(delta => delta.insert).join('');
+          const hast = await codeToHast(code, {
+            lang: matchedLang,
+            theme:
+              ThemeObserver.mode === ColorScheme.Dark
+                ? 'dark-plus'
+                : 'light-plus',
+          });
+
+          // @ts-ignore
+          context.openNode(hast, 'children').closeNode();
           break;
         }
         case 'affine:paragraph': {

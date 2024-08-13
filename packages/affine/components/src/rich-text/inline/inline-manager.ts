@@ -61,14 +61,14 @@ export class InlineManager<
   getRenderer = (): AttributeRenderer<TextAttributes> => {
     const defaultRenderer = getDefaultAttributeRenderer<TextAttributes>();
 
-    const renderer: AttributeRenderer<TextAttributes> = (delta, selected) => {
+    const renderer: AttributeRenderer<TextAttributes> = props => {
       // Priority increases from front to back
       for (const spec of this._specs.toReversed()) {
-        if (spec.match(delta)) {
-          return spec.renderer(delta, selected);
+        if (spec.match(props.delta)) {
+          return spec.renderer(props);
         }
       }
-      return defaultRenderer(delta, selected);
+      return defaultRenderer(props);
     };
     return renderer;
   };

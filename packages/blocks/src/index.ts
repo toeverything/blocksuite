@@ -7,7 +7,7 @@ import { Point } from '@blocksuite/global/utils';
 
 import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours } from './_common/utils/index.js';
-import './code-block/affine-code-line.js';
+import './code-block/highlight/affine-code-unit.js';
 import './database-block/index.js';
 import './divider-block/index.js';
 import './frame-block/index.js';

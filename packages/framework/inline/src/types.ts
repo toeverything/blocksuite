@@ -11,10 +11,13 @@ export type DeltaInsert<
 
 export type AttributeRenderer<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
-> = (
-  delta: DeltaInsert<TextAttributes>,
-  selected: boolean
-) => TemplateResult<1>;
+> = (props: {
+  delta: DeltaInsert<TextAttributes>;
+  selected: boolean;
+  startOffset: number;
+  endOffset: number;
+  lineIndex: number;
+}) => TemplateResult<1>;
 
 export interface InlineRange {
   index: number;

@@ -1,15 +1,23 @@
+import type { Text } from '@blocksuite/store';
+
 import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
 
-export const FALLBACK_LANG = 'Plain Text';
+interface CodeBlockProps {
+  text: Text;
+  language: string | null;
+  wrap: boolean;
+  caption: string;
+}
 
 export const CodeBlockSchema = defineBlockSchema({
   flavour: 'affine:code',
-  props: internal => ({
-    text: internal.Text(),
-    language: FALLBACK_LANG,
-    wrap: false,
-    caption: '',
-  }),
+  props: internal =>
+    ({
+      text: internal.Text(),
+      language: null,
+      wrap: false,
+      caption: '',
+    }) as CodeBlockProps,
   metadata: {
     version: 1,
     role: 'content',

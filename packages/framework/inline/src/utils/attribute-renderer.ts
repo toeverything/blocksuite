@@ -39,7 +39,7 @@ function inlineTextStyles(
 
 export const getDefaultAttributeRenderer =
   <T extends BaseTextAttributes>(): AttributeRenderer<T> =>
-  delta => {
+  ({ delta }) => {
     const style = delta.attributes
       ? inlineTextStyles(delta.attributes)
       : styleMap({});

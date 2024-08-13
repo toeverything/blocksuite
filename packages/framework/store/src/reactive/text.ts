@@ -17,6 +17,8 @@ export type DeltaOperation = {
 export type OnTextChange = (data: Y.Text) => void;
 
 export class Text {
+  private _deltas$: Signal<DeltaOperation[]>;
+
   private _length$: Signal<number>;
 
   private _onChange?: OnTextChange;
@@ -50,9 +52,11 @@ export class Text {
       this._yText = new Y.Text();
     }
 
-    this._length$ = signal<number>(length);
+    this._length$ = signal(length);
+    this._deltas$ = signal([]);
     this._yText.observe(() => {
       this._length$.value = this._yText.length;
+      this._deltas$.value = this._yText.toDelta();
       this._onChange?.(this._yText);
     });
   }
@@ -325,6 +329,10 @@ export class Text {
 
   toString() {
     return this._yText?.toString() || '';
+  }
+
+  get deltas$() {
+    return this._deltas$;
   }
 
   get length() {

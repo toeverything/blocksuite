@@ -1071,7 +1071,7 @@ test('should format quick bar show after convert to code block', async ({
 >
   <affine:code
     prop:caption=""
-    prop:language="Plain Text"
+    prop:language={null}
     prop:text="123\n456\n789"
     prop:wrap={false}
   />

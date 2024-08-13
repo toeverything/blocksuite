@@ -165,8 +165,6 @@ export class InlineEditor<
 
   isLastLine = this.rangeService.isLastLine;
 
-  isNormalizedDeltaSelected = this.deltaService.isNormalizedDeltaSelected;
-
   isValidInlineRange = this.rangeService.isValidInlineRange;
 
   mapDeltasInInlineRange = this.deltaService.mapDeltasInInlineRange;

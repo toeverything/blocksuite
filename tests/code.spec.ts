@@ -195,7 +195,7 @@ test('use markdown syntax can create code block', async ({ page }) => {
 >
   <affine:code
     prop:caption=""
-    prop:language="Plain Text"
+    prop:language={null}
     prop:wrap={false}
   />
   <affine:paragraph
@@ -326,7 +326,7 @@ test('change code language can work', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:caption=""
-  prop:language="Plain Text"
+  prop:language={null}
   prop:wrap={false}
 />`,
     codeBlockId
@@ -334,7 +334,7 @@ test('change code language can work', async ({ page }) => {
 
   // Can switch to another language
   await codeBlockController.clickLanguageButton();
-  await type(page, 'ts');
+  await type(page, 'ty');
   await pressEnter(page);
   await expect(locator).toBeHidden();
   await expect(codeBlockController.languageButton).toHaveText('TypeScript');
@@ -904,7 +904,7 @@ test('add caption works', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:caption="BlockSuite"
-  prop:language="Plain Text"
+  prop:language={null}
   prop:wrap={false}
 />`,
     codeBlockId
@@ -921,7 +921,7 @@ test('toggle code block wrap can work', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:caption=""
-  prop:language="Plain Text"
+  prop:language={null}
   prop:wrap={false}
 />`,
     codeBlockId
@@ -935,7 +935,7 @@ test('toggle code block wrap can work', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:caption=""
-  prop:language="Plain Text"
+  prop:language={null}
   prop:wrap={true}
 />`,
     codeBlockId
@@ -949,7 +949,7 @@ test('toggle code block wrap can work', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:caption=""
-  prop:language="Plain Text"
+  prop:language={null}
   prop:wrap={false}
 />`,
     codeBlockId
@@ -967,7 +967,7 @@ test('undo code block wrap can work', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:caption=""
-  prop:language="Plain Text"
+  prop:language={null}
   prop:wrap={false}
 />`,
     codeBlockId
@@ -980,7 +980,7 @@ test('undo code block wrap can work', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:caption=""
-  prop:language="Plain Text"
+  prop:language={null}
   prop:wrap={true}
 />`,
     codeBlockId
@@ -993,7 +993,7 @@ test('undo code block wrap can work', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:caption=""
-  prop:language="Plain Text"
+  prop:language={null}
   prop:wrap={false}
 />`,
     codeBlockId

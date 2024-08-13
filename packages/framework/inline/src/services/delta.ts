@@ -9,9 +9,9 @@ import type { BaseTextAttributes } from '../utils/index.js';
 
 import {
   deltaInsertsToChunks,
-  renderElement,
   transformDeltasToEmbedDeltas,
 } from '../utils/index.js';
+import { isInlineRangeIntersect } from '../utils/inline-range.js';
 
 export class DeltaService<TextAttributes extends BaseTextAttributes> {
   /**
@@ -127,12 +127,9 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
       delta: DeltaInsert<TextAttributes>,
       rangeIndex: number,
       deltaIndex: number
-    ) => Result,
-    normalize = false
+    ) => Result
   ) => {
-    const deltas = normalize
-      ? transformDeltasToEmbedDeltas(this.editor, this.deltas)
-      : this.deltas;
+    const deltas = this.deltas;
     const result: Result[] = [];
 
     deltas.reduce((rangeIndex, delta, deltaIndex) => {
@@ -163,48 +160,52 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
     this.editor.slots.render.emit();
 
     const rootElement = this.editor.rootElement;
+    const chunks = deltaInsertsToChunks(this.deltas);
 
-    const normalizedDeltas = transformDeltasToEmbedDeltas(
-      this.editor,
-      this.deltas
-    );
-    const chunks = deltaInsertsToChunks(normalizedDeltas);
-
-    let normalizedDeltaIndex = 0;
+    let deltaIndex = 0;
     // every chunk is a line
-    const lines = chunks.map((chunk, index) => {
+    const lines = chunks.map((chunk, lineIndex) => {
+      if (lineIndex > 0) {
+        deltaIndex += 1; // for '\n'
+      }
+
       if (chunk.length > 0) {
-        const lineDeltas: [DeltaInsert<TextAttributes>, number][] = [];
-        chunk.forEach(delta => {
-          lineDeltas.push([delta, normalizedDeltaIndex]);
-          normalizedDeltaIndex++;
+        const elements: VLine['elements'] = chunk.map(delta => {
+          const startOffset = deltaIndex;
+          deltaIndex += delta.insert.length;
+          const endOffset = deltaIndex;
+
+          const inlineRange = this.editor.getInlineRange();
+          const selected =
+            !!inlineRange &&
+            isInlineRangeIntersect(inlineRange, {
+              index: startOffset,
+              length: endOffset - startOffset,
+            });
+
+          return [
+            html`<v-element
+              .selected=${selected}
+              .delta=${{
+                insert: delta.insert,
+                attributes: this.editor.attributeService.normalizeAttributes(
+                  delta.attributes
+                ),
+              }}
+              .startOffset=${startOffset}
+              .endOffset=${endOffset}
+              .lineIndex=${lineIndex}
+            ></v-element>`,
+            delta,
+          ];
         });
 
-        const elements: VLine['elements'] = lineDeltas.map(
-          ([delta, normalizedDeltaIndex]) => {
-            let selected = false;
-            const inlineRange = this.editor.getInlineRange();
-            if (inlineRange) {
-              selected = this.isNormalizedDeltaSelected(
-                normalizedDeltaIndex,
-                inlineRange
-              );
-            }
-
-            return [
-              renderElement(
-                delta,
-                this.editor.attributeService.normalizeAttributes,
-                selected
-              ),
-              delta,
-            ];
-          }
-        );
-
-        return html`<v-line .elements=${elements} .index=${index}></v-line>`;
+        return html`<v-line
+          .elements=${elements}
+          .index=${lineIndex}
+        ></v-line>`;
       } else {
-        return html`<v-line .elements=${[]} .index=${index}></v-line>`;
+        return html`<v-line .elements=${[]} .index=${lineIndex}></v-line>`;
       }
     });
 
@@ -236,31 +237,7 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
 
   constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
-  isNormalizedDeltaSelected(
-    normalizedDeltaIndex: number,
-    inlineRange: InlineRange
-  ): boolean {
-    let result = false;
-    if (inlineRange.length >= 1) {
-      this.editor.mapDeltasInInlineRange(
-        inlineRange,
-        (_, rangeIndex, deltaIndex) => {
-          if (
-            deltaIndex === normalizedDeltaIndex &&
-            rangeIndex >= inlineRange.index
-          ) {
-            result = true;
-          }
-        },
-        // we need to normalize the delta here,
-        true
-      );
-    }
-
-    return result;
-  }
-
   get deltas() {
-    return this.editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
+    return transformDeltasToEmbedDeltas(this.editor, this.editor.yTextDeltas);
   }
 }

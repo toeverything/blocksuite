@@ -12,8 +12,6 @@ import {
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
 
-import { getStandardLanguage } from '../../../../code-block/utils/code-languages.js';
-import { FALLBACK_LANG } from '../../../../code-block/utils/consts.js';
 import {
   convertToDivider,
   convertToList,
@@ -71,8 +69,7 @@ export function tryConvertBlock(
     const codeId = doc.addBlock(
       'affine:code',
       {
-        language:
-          getStandardLanguage(codeMatch[0].slice(3))?.id ?? FALLBACK_LANG,
+        language: codeMatch[0].slice(3) ?? null,
       },
       parent,
       index
