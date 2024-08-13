@@ -11,7 +11,11 @@ import {
   ConnectorElementModel,
   GroupElementModel,
 } from '@blocksuite/affine-model';
-import { clamp } from '@blocksuite/affine-shared/utils';
+import {
+  clamp,
+  handleNativeRangeAtPoint,
+  resetNativeSelection,
+} from '@blocksuite/affine-shared/utils';
 import {
   Bound,
   DisposableGroup,
@@ -23,11 +27,7 @@ import {
 import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessTool } from '../../types.js';
 
-import {
-  buildPath,
-  handleNativeRangeAtPoint,
-  resetNativeSelection,
-} from '../../../../_common/utils/index.js';
+import { buildPath } from '../../../../_common/utils/index.js';
 import {
   type PointTestOptions,
   SurfaceGroupLikeModel,

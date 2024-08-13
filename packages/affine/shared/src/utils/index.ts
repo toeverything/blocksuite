@@ -10,6 +10,7 @@ export * from './is-abort-error.js';
 export * from './math.js';
 export * from './model.js';
 export * from './point-to-block.js';
+export * from './point-to-range.js';
 export * from './rect.js';
 export * from './reordering.js';
 export * from './scroll-container.js';
