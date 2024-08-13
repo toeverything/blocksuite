@@ -4,7 +4,7 @@ import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
-import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   type EmbedCardStyle,
   type NoteBlockModel,
@@ -240,7 +240,7 @@ export abstract class RootService extends BlockService<RootBlockModel> {
       noteId
     );
 
-    asyncFocusRichText(this.host, id, text.length)?.catch(console.error);
+    focusTextModel(this.host.std, id, text.length);
   };
 
   docModeService: DocModeService = createDocModeService(this.doc.id);

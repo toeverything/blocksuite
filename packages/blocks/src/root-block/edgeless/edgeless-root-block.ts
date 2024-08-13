@@ -11,7 +11,7 @@ import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
@@ -879,7 +879,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       this.updateComplete
         .then(() => {
           if (blockId) {
-            asyncFocusRichText(this.host, blockId)?.catch(console.error);
+            focusTextModel(this.std, blockId);
           } else if (point) {
             // Cannot reuse `handleNativeRangeClick` directly here,
             // since `retargetClick` will re-target to pervious editor

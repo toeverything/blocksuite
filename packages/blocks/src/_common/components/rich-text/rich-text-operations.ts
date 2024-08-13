@@ -3,8 +3,8 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
 import {
-  asyncFocusRichText,
   asyncSetInlineRange,
+  focusTextModel,
   getInlineEditorByModel,
 } from '@blocksuite/affine-components/rich-text';
 import {
@@ -89,11 +89,7 @@ export function handleBlockEndEnter(
 
       const nextModel = doc.getNext(newParent);
       if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
-        asyncFocusRichText(
-          editorHost,
-          nextModel.id,
-          nextModel.text.length
-        )?.catch(console.error);
+        focusTextModel(editorHost.std, nextModel.id, nextModel.text.length);
         return;
       }
 
@@ -107,7 +103,7 @@ export function handleBlockEndEnter(
     }
 
     const id = doc.addBlock(flavour, blockProps, newParent, newBlockIndex);
-    asyncFocusRichText(editorHost, id)?.catch(console.error);
+    focusTextModel(editorHost.std, id);
     return;
   }
   const index = parent.children.indexOf(model);
@@ -152,7 +148,7 @@ export function handleBlockEndEnter(
     }
   }
 
-  asyncFocusRichText(editorHost, id)?.catch(console.error);
+  focusTextModel(editorHost.std, id);
 }
 
 export function handleBlockSplit(
@@ -190,7 +186,7 @@ export function handleBlockSplit(
       model,
       0
     );
-    return asyncFocusRichText(editorHost, id);
+    return focusTextModel(editorHost.std, id);
   } else {
     const id = doc.addBlock(
       model.flavour as BlockSuite.Flavour,
@@ -203,7 +199,7 @@ export function handleBlockSplit(
     );
     const newModel = doc.getBlock(id).model;
     doc.moveBlocks(model.children, newModel);
-    return asyncFocusRichText(editorHost, id);
+    return focusTextModel(editorHost.std, id);
   }
 }
 
@@ -467,7 +463,7 @@ function handleListBlockBackspace(
     .forEach(sibling => doc.updateBlock(sibling, {}));
 
   const id = doc.addBlock('affine:paragraph', blockProps, parent, index);
-  asyncFocusRichText(editorHost, id)?.catch(console.error);
+  focusTextModel(editorHost.std, id);
   return true;
 }
 
@@ -585,11 +581,11 @@ function handleEmbedDividerCodeSibling(
   )
     return false;
 
-  asyncFocusRichText(
-    editorHost,
+  focusTextModel(
+    editorHost.std,
     previousSibling.id,
     previousSibling.text?.yText.length
-  ).catch(console.error);
+  );
   if (!model.text?.length) {
     doc.captureSync();
     doc.deleteBlock(model, {
@@ -708,11 +704,11 @@ function handleParagraphDeleteActions(
   // TODO handle in block service
   if (matchFlavours(parent, ['affine:database'])) {
     doc.deleteBlock(model);
-    asyncFocusRichText(
-      editorHost,
+    focusTextModel(
+      editorHost.std,
       previousSibling.id,
       previousSibling.text?.yText.length
-    ).catch(console.error);
+    );
     return true;
   } else if (matchFlavours(parent, ['affine:note'])) {
     return (
@@ -866,11 +862,11 @@ function handleParagraphBlockForwardDelete(
         ])
       )
         return false;
-      asyncFocusRichText(
-        editorHost,
+      focusTextModel(
+        editorHost.std,
         firstChild.id,
         firstChild.text?.yText.length
-      ).catch(console.error);
+      );
       return true;
     }
     function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
@@ -893,11 +889,11 @@ function handleParagraphBlockForwardDelete(
         !matchFlavours(nextSibling, ['affine:image', 'affine:code'])
       )
         return false;
-      asyncFocusRichText(
-        editorHost,
+      focusTextModel(
+        editorHost.std,
         nextSibling.id,
         nextSibling.text?.yText.length
-      ).catch(console.error);
+      );
       return true;
     }
     return (

@@ -246,14 +246,7 @@ export function getBlockComponentByModel(
   model: BlockModel | null
 ) {
   if (!model) return null;
-  return getBlockComponentByPath(editorHost, model.id);
-}
-
-export function getBlockComponentByPath(
-  editorHost: EditorHost,
-  blockId: string
-) {
-  return editorHost.view.getBlock(blockId);
+  return editorHost.view.getBlock(model.id);
 }
 
 export function getDocTitleByEditorHost(

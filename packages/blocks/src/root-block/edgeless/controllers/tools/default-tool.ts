@@ -6,7 +6,7 @@ import type {
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
-import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   ConnectorElementModel,
   GroupElementModel,
@@ -262,7 +262,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       block.id
     );
     if (blockId) {
-      asyncFocusRichText(this._edgeless.host, blockId)?.catch(console.error);
+      focusTextModel(this._edgeless.std, blockId);
     }
   }
 

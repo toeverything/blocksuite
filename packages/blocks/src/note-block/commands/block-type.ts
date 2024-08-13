@@ -2,8 +2,8 @@ import type { Command } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
-  asyncFocusRichText,
   asyncSetInlineRange,
+  focusTextModel,
 } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
@@ -89,7 +89,7 @@ export const updateBlockType: Command<
     if (!nextSibling) {
       nextSiblingId = doc.addBlock('affine:paragraph', {}, parent);
     }
-    asyncFocusRichText(host, nextSiblingId)?.catch(console.error);
+    focusTextModel(host.std, nextSiblingId);
     const newModel = doc.getBlockById(id);
     if (!newModel) {
       return next({ updatedBlocks: [] });

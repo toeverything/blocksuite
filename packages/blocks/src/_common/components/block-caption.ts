@@ -1,7 +1,7 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
-import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Text } from '@blocksuite/store';
@@ -76,7 +76,7 @@ export class BlockCaptionEditor<
         index + 1
       );
 
-      asyncFocusRichText(this.block.host, id)?.catch(console.error);
+      focusTextModel(this.block.std, id);
     }
   }
 

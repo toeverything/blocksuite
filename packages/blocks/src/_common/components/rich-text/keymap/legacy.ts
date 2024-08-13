@@ -137,9 +137,7 @@ export function hardEnter(
     onSoftEnter(range, inlineEditor);
     return KEYBOARD_PREVENT_DEFAULT;
   }
-  handleBlockSplit(editorHost, model, range.index, range.length)?.catch(
-    console.error
-  );
+  handleBlockSplit(editorHost, model, range.index, range.length);
   return KEYBOARD_PREVENT_DEFAULT;
 }
 

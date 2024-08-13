@@ -1,6 +1,6 @@
 import type { EdgelessTextBlockModel } from '@blocksuite/affine-model';
 
-import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 
@@ -46,8 +46,9 @@ export class EdgelessTextBlockService extends BlockService<EdgelessTextBlockMode
           elements: [textId],
           editing: true,
         });
-        asyncFocusRichText(edgeless.host, blockId)
-          ?.then(() => {
+        focusTextModel(edgeless.std, blockId);
+        edgeless.host.updateComplete
+          .then(() => {
             const edgelessText = edgeless.host.view.getBlock(textId);
             const paragraph = edgeless.host.view.getBlock(blockId);
             if (!edgelessText || !paragraph) return;
