@@ -26,6 +26,7 @@ import {
 } from '@blocksuite/affine-components/toolbar';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
+import { LinkIcon } from '@blocksuite/icons/lit';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -91,11 +92,6 @@ const REORDER_ACTIONS: Action[] = [
   { icon: BringForwardIcon, name: 'Bring Forward', type: 'forward' },
   { icon: SendBackwardIcon, name: 'Send Backward', type: 'backward' },
   { icon: SendToBackIcon, name: 'Send to Back', type: 'back' },
-] as const;
-
-const COPY_ACTIONS: Action[] = [
-  { icon: MoreCopyIcon, name: 'Copy', type: 'copy' },
-  { icon: MoreDuplicateIcon, name: 'Duplicate', type: 'duplicate' },
 ] as const;
 
 const DELETE_ACTION: Action = {
@@ -345,7 +341,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       [FRAME_ACTION, GROUP_ACTION],
       REORDER_ACTIONS,
       this.getOpenActions(),
-      [...COPY_ACTIONS, this.getRefreshAction()],
+      [...this.getCopyActions(), this.getRefreshAction()],
       [this.getLinkedDocAction()],
       [DELETE_ACTION],
     ];
@@ -354,7 +350,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   get _FrameActions(): FatActions {
     return [
       [FRAME_ACTION],
-      COPY_ACTIONS,
+      this.getCopyActions(),
       [this.getLinkedDocAction()],
       [DELETE_ACTION],
     ];
@@ -382,6 +378,29 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       isAttachmentBlock(ele) ||
       isEmbeddedLinkBlock(ele)
     );
+  }
+
+  private getCopyActions(): Action[] {
+    const isSingleSelect = this.selection.selectedElements.length === 1;
+    const result: Action[] = [];
+
+    result.push({ icon: MoreCopyIcon, name: 'Copy', type: 'copy' });
+
+    if (isSingleSelect) {
+      result.push({
+        icon: LinkIcon({ width: '20', height: '20' }),
+        name: 'Copy link to block',
+        type: 'copyLinkToBlock',
+      });
+    }
+
+    result.push({
+      icon: MoreDuplicateIcon,
+      name: 'Duplicate',
+      type: 'duplicate',
+    });
+
+    return result;
   }
 
   private getLinkedDocAction() {
