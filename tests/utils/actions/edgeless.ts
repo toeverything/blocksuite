@@ -125,6 +125,11 @@ export async function switchEditorEmbedMode(page: Page) {
   await page.click('sl-menu-item:text("Switch Offset Mode")');
 }
 
+export async function enterPresentationMode(page: Page) {
+  await page.click('sl-tooltip[content="Enter presentation mode"]');
+  await waitNextFrame(page);
+}
+
 type EdgelessTool =
   | 'default'
   | 'pan'
@@ -139,6 +144,8 @@ type EdgelessTool =
   | 'lasso';
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
+
+type PresentationToolType = 'previous' | 'next';
 
 const locatorEdgelessToolButtonSenior = async (
   page: Page,
@@ -260,6 +267,23 @@ export function locatorEdgelessComponentToolButton(
     });
 
   return innerContainer ? button.locator('.icon-container') : button;
+}
+
+export function locatorPresentationToolbarButton(
+  page: Page,
+  type: PresentationToolType
+) {
+  const text = {
+    previous: 'Previous',
+    next: 'Next',
+  }[type];
+  const button = page
+    .locator('presentation-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: text,
+    });
+
+  return button;
 }
 
 export async function setEdgelessTool(

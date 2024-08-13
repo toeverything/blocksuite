@@ -57,8 +57,8 @@ export class GfxViewportElement extends LitElement {
 
             if (this._lastVisibleSet!.has(model)) {
               this._lastVisibleSet!.delete(model);
-              view.style.display = '';
             }
+            view.style.display = '';
           }
         });
 
