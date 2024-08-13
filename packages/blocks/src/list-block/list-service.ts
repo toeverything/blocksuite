@@ -12,10 +12,6 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 
 import { AffineDragHandleWidget } from '../root-block/widgets/drag-handle/drag-handle.js';
-import { convertToNumberedListCommand } from './commands/convert-to-numbered-list.js';
-import { indentListCommand } from './commands/indent-list.js';
-import { splitListCommand } from './commands/split-list.js';
-import { unindentListCommand } from './commands/unindent-list.js';
 import { correctNumberedListsOrderToPrev } from './commands/utils.js';
 import { listPrefix, toggleStyles } from './styles.js';
 import { getListIcon } from './utils/get-list-icon.js';
@@ -35,11 +31,6 @@ export class ListBlockService<
 
   override mounted(): void {
     super.mounted();
-
-    this.std.command.add('convertToNumberedList', convertToNumberedListCommand);
-    this.std.command.add('splitList', splitListCommand);
-    this.std.command.add('unindentList', unindentListCommand);
-    this.std.command.add('indentList', indentListCommand);
 
     this.referenceNodeConfig.setDoc(this.doc);
 
@@ -75,5 +66,13 @@ export class ListBlockService<
         },
       })
     );
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface BlockServices {
+      'affine:list': ListBlockService;
+    }
   }
 }

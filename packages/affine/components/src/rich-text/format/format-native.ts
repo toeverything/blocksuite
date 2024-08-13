@@ -54,3 +54,11 @@ export const formatNativeCommand: Command<
 
   next();
 };
+
+declare global {
+  namespace BlockSuite {
+    interface Commands {
+      formatNative: typeof formatNativeCommand;
+    }
+  }
+}

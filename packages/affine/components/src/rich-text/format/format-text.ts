@@ -93,3 +93,11 @@ export const formatTextCommand: Command<
 
   if (success) next();
 };
+
+declare global {
+  namespace BlockSuite {
+    interface Commands {
+      formatText: typeof formatTextCommand;
+    }
+  }
+}

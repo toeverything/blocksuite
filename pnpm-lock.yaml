@@ -723,6 +723,9 @@ importers:
 
   packages/presets:
     dependencies:
+      '@blocksuite/affine-shared':
+        specifier: workspace:*
+        version: link:../affine/shared
       '@blocksuite/block-std':
         specifier: workspace:*
         version: link:../framework/block-std

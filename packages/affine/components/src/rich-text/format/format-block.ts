@@ -70,3 +70,11 @@ export const formatBlockCommand: Command<
 
   if (success) next();
 };
+
+declare global {
+  namespace BlockSuite {
+    interface Commands {
+      formatBlock: typeof formatBlockCommand;
+    }
+  }
+}

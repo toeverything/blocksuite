@@ -81,3 +81,22 @@ export const isTextStyleActive: Command<
 
   return next();
 };
+
+declare global {
+  namespace BlockSuite {
+    interface CommandContext {
+      textStyle?: AffineTextAttributes;
+    }
+
+    interface Commands {
+      toggleBold: typeof toggleBold;
+      toggleItalic: typeof toggleItalic;
+      toggleUnderline: typeof toggleUnderline;
+      toggleStrike: typeof toggleStrike;
+      toggleCode: typeof toggleCode;
+      toggleLink: typeof toggleLink;
+      getTextStyle: typeof getTextStyle;
+      isTextStyleActive: typeof isTextStyleActive;
+    }
+  }
+}

@@ -3,8 +3,9 @@ import type { BlockSpec } from '@blocksuite/block-std';
 import { RootBlockSchema } from '@blocksuite/affine-model';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-import type { RootBlockConfig } from '../index.js';
+import type { RootBlockConfig } from '../root-config.js';
 
+import { commands } from '../commands/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../widgets/drag-handle/drag-handle.js';
 import { AFFINE_EMBED_CARD_TOOLBAR_WIDGET } from '../widgets/embed-card-toolbar/embed-card-toolbar.js';
@@ -68,4 +69,5 @@ export const PageRootBlockSpec: PageRootBlockSpecType = {
       )}`,
     },
   },
+  commands,
 };

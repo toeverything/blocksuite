@@ -2,7 +2,6 @@ import { BlockService } from '@blocksuite/block-std';
 
 import type { SurfaceBlockModel } from './surface-model.js';
 
-import { reassociateConnectorsCommand } from './commands/reassociate-connectors.js';
 import { LayerManager } from './managers/layer-manager.js';
 
 export class SurfaceBlockService extends BlockService<SurfaceBlockModel> {
@@ -12,8 +11,6 @@ export class SurfaceBlockService extends BlockService<SurfaceBlockModel> {
 
   override mounted(): void {
     super.mounted();
-
-    this.std.command.add('reassociateConnectors', reassociateConnectorsCommand);
 
     this.surface = this.doc.getBlockByFlavour(
       'affine:surface'

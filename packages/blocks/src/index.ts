@@ -154,8 +154,6 @@ export {
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 export * from '@blocksuite/affine-model';
-// To provide the type for commands
-export { registerCommands } from '@blocksuite/affine-shared/commands';
 export {
   ColorVariables,
   FontFamilyVariables,

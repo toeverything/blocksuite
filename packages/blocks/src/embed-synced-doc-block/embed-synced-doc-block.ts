@@ -21,10 +21,8 @@ import { guard } from 'lit/directives/guard.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DocMode } from '../_common/types.js';
-import type {
-  EdgelessRootService,
-  RootBlockComponent,
-} from '../root-block/index.js';
+import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
+import type { RootBlockComponent } from '../root-block/types.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
 import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 
@@ -452,16 +450,18 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
       })
     );
 
-    this._syncedDocMode = this._rootService.docModeService.getMode(
-      this.model.pageId
-    );
-    this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this._syncedDocMode);
-    this.disposables.add(
-      this._rootService.docModeService.onModeChange(mode => {
-        this._syncedDocMode = mode;
-        this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, mode);
-      }, this.model.pageId)
-    );
+    if (this._rootService) {
+      this._syncedDocMode = this._rootService.docModeService.getMode(
+        this.model.pageId
+      );
+      this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this._syncedDocMode);
+      this.disposables.add(
+        this._rootService.docModeService.onModeChange(mode => {
+          this._syncedDocMode = mode;
+          this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, mode);
+        }, this.model.pageId)
+      );
+    }
 
     this.syncedDoc &&
       this.disposables.add(
@@ -486,13 +486,12 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     // Forward docLinkClicked event from the synced doc
     const syncedDocRootService =
       this.syncedDocEditorHost?.std.spec.getService('affine:page');
-    if (syncedDocRootService) {
+    syncedDocRootService &&
       this.disposables.add(
         syncedDocRootService.slots.docLinkClicked.on(({ docId }) => {
-          this._rootService.slots.docLinkClicked.emit({ docId });
+          this._rootService?.slots.docLinkClicked.emit({ docId });
         })
       );
-    }
 
     this._initEdgelessFitEffect();
   }

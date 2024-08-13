@@ -1,18 +1,14 @@
+import type { PeekViewService } from '@blocksuite/affine-components/peek';
+import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
-  type PeekViewService,
-  getSelectedPeekableBlocksCommand,
-  peekSelectedBlockCommand,
-} from '@blocksuite/affine-components/peek';
-import {
   type EmbedCardStyle,
   type NoteBlockModel,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
-import { registerCommands } from '@blocksuite/affine-shared/commands';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
@@ -103,7 +99,7 @@ export interface TelemetryService {
   ): void;
 }
 
-export class RootService extends BlockService<RootBlockModel> {
+export abstract class RootService extends BlockService<RootBlockModel> {
   private _embedBlockRegistry = new Set<EmbedOptions>();
 
   private _exportOptions = {
@@ -348,11 +344,6 @@ export class RootService extends BlockService<RootBlockModel> {
   override mounted() {
     super.mounted();
 
-    registerCommands(this.std);
-    this.std.command
-      .add('peekSelectedBlock', peekSelectedBlockCommand)
-      .add('getSelectedPeekableBlocks', getSelectedPeekableBlocksCommand);
-
     this.loadFonts();
 
     this.disposables.addFromEvent(
@@ -410,5 +401,15 @@ export class RootService extends BlockService<RootBlockModel> {
     const viewportElement = rootComponent.viewportElement as HTMLElement | null;
     assertExists(viewportElement);
     return viewportElement;
+  }
+
+  abstract slots: RefNodeSlots;
+}
+
+declare global {
+  namespace BlockSuite {
+    interface BlockServices {
+      'affine:page': RootService;
+    }
   }
 }

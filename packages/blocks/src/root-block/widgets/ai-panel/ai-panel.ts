@@ -21,6 +21,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
+import type { EdgelessRootService } from '../../edgeless/edgeless-root-service.js';
 import type { AIPanelGenerating } from './components/index.js';
 import type { AffineAIPanelState, AffineAIPanelWidgetConfig } from './type.js';
 
@@ -329,7 +330,8 @@ export class AffineAIPanelWidget extends WidgetComponent {
       if (rootService instanceof PageRootService) {
         rootBoundary = undefined;
       } else {
-        const viewport = rootService.viewport;
+        // TODO circular dependency: instanceof EdgelessRootService
+        const viewport = (rootService as EdgelessRootService).viewport;
         rootBoundary = {
           x: viewport.left,
           y: viewport.top,

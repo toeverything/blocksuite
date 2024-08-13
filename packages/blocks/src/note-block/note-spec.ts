@@ -3,6 +3,7 @@ import type { BlockSpec } from '@blocksuite/block-std';
 import { NoteBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
 
+import { commands } from './commands/index.js';
 import { NoteBlockService } from './note-service.js';
 
 export const NoteBlockSpec: BlockSpec = {
@@ -11,6 +12,7 @@ export const NoteBlockSpec: BlockSpec = {
   view: {
     component: literal`affine-note`,
   },
+  commands,
 };
 
 export const EdgelessNoteBlockSpec: BlockSpec = {
@@ -19,4 +21,5 @@ export const EdgelessNoteBlockSpec: BlockSpec = {
   view: {
     component: literal`affine-edgeless-note`,
   },
+  commands,
 };

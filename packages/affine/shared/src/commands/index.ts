@@ -1,23 +1,3 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
-
-import {
-  getBlockIndexCommand,
-  getNextBlockCommand,
-  getPrevBlockCommand,
-  getSelectedBlocksCommand,
-} from './block-crud/index.js';
-import {
-  copySelectedModelsCommand,
-  deleteSelectedModelsCommand,
-  draftSelectedModelsCommand,
-  getSelectedModelsCommand,
-} from './model-crud/index.js';
-import {
-  getBlockSelectionsCommand,
-  getImageSelectionsCommand,
-  getTextSelectionCommand,
-} from './selection/index.js';
-
 export {
   getBlockIndexCommand,
   getNextBlockCommand,
@@ -45,18 +25,3 @@ declare global {
     }
   }
 }
-
-export const registerCommands = (std: BlockStdScope) => {
-  std.command
-    .add('getBlockIndex', getBlockIndexCommand)
-    .add('getNextBlock', getNextBlockCommand)
-    .add('getPrevBlock', getPrevBlockCommand)
-    .add('getSelectedBlocks', getSelectedBlocksCommand)
-    .add('copySelectedModels', copySelectedModelsCommand)
-    .add('deleteSelectedModels', deleteSelectedModelsCommand)
-    .add('draftSelectedModels', draftSelectedModelsCommand)
-    .add('getSelectedModels', getSelectedModelsCommand)
-    .add('getBlockSelections', getBlockSelectionsCommand)
-    .add('getImageSelections', getImageSelectionsCommand)
-    .add('getTextSelection', getTextSelectionCommand);
-};

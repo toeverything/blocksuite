@@ -18,6 +18,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/affine-shared": "workspace:*",
     "@dotlottie/player-component": "^2.7.12",
     "@fal-ai/serverless-client": "^0.13.0",
     "@floating-ui/dom": "^1.6.8",

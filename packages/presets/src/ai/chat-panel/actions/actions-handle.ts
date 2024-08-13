@@ -6,7 +6,11 @@ import type {
 import type { EdgelessRootService, ImageSelection } from '@blocksuite/blocks';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
+import {
+  BlocksUtils,
+  NoteDisplayMode,
+  PageRootService,
+} from '@blocksuite/blocks';
 import { Bound, getElementsBound } from '@blocksuite/global/utils';
 
 import {
@@ -105,7 +109,9 @@ export const PageEditorActions = [
       newDoc.addBlock('affine:surface', {}, rootId);
       const noteId = newDoc.addBlock('affine:note', {}, rootId);
 
-      host.spec.getService('affine:page').slots.docLinkClicked.emit({
+      const rootService = host.spec.getService('affine:page');
+      if (!(rootService instanceof PageRootService)) return;
+      rootService.slots.docLinkClicked.emit({
         docId: newDoc.id,
       });
       let complete = false;

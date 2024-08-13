@@ -12,7 +12,7 @@ export {
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
   isFormatSupported,
-  registerTextStyleCommands,
+  textCommands,
   textFormatConfigs,
 } from './format/index.js';
 export {

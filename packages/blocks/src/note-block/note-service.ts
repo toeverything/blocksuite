@@ -1,6 +1,5 @@
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 
-import { registerTextStyleCommands } from '@blocksuite/affine-components/rich-text';
 import { NoteBlockSchema } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
@@ -20,13 +19,6 @@ import {
   captureEventTarget,
   getDuplicateBlocks,
 } from '../root-block/widgets/drag-handle/utils.js';
-import { focusBlockEnd } from './commands/focus-block-end.js';
-import { focusBlockStart } from './commands/focus-block-start.js';
-import {
-  selectBlock,
-  selectBlocksBetween,
-  updateBlockType,
-} from './commands/index.js';
 
 export class NoteBlockService extends BlockService<NoteBlockModel> {
   private _dragHandleOption: DragHandleOption = {
@@ -122,17 +114,16 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
   override mounted() {
     super.mounted();
 
-    this.std.command
-      .add('selectBlocksBetween', selectBlocksBetween)
-      .add('selectBlock', selectBlock)
-      .add('focusBlockStart', focusBlockStart)
-      .add('focusBlockEnd', focusBlockEnd)
-      .add('updateBlockType', updateBlockType);
-
-    registerTextStyleCommands(this.std);
-
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface BlockServices {
+      'affine:note': NoteBlockService;
+    }
   }
 }
