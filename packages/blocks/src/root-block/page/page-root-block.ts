@@ -3,7 +3,7 @@ import type { Viewport } from '@blocksuite/affine-shared/types';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { BlockModel, Text } from '@blocksuite/store';
 
-import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
   getScrollContainer,
@@ -119,7 +119,7 @@ export class PageRootBlockComponent extends BlockComponent<
       matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
     );
     if (firstText) {
-      asyncFocusRichText(this.host, firstText.id)?.catch(console.error);
+      focusTextModel(this.std, firstText.id);
     } else {
       const newFirstParagraphId = this.doc.addBlock(
         'affine:paragraph',
@@ -127,7 +127,7 @@ export class PageRootBlockComponent extends BlockComponent<
         defaultNote,
         0
       );
-      asyncFocusRichText(this.host, newFirstParagraphId)?.catch(console.error);
+      focusTextModel(this.std, newFirstParagraphId);
     }
   };
 
@@ -140,7 +140,7 @@ export class PageRootBlockComponent extends BlockComponent<
       this._getDefaultNoteBlock(),
       0
     );
-    asyncFocusRichText(this.host, newFirstParagraphId)?.catch(console.error);
+    focusTextModel(this.std, newFirstParagraphId);
   };
 
   private _createDefaultNoteBlock() {

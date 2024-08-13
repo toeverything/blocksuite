@@ -3,9 +3,9 @@ import './rich-text.js';
 import './format/index.js';
 
 export {
-  asyncFocusRichText,
   asyncGetRichText,
   asyncSetInlineRange,
+  focusTextModel,
   getInlineEditorByModel,
   getRichTextByModel,
 } from './dom.js';

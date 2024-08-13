@@ -43,7 +43,6 @@ import { textConversionConfigs } from '../../../_common/configs/text-conversion.
 import {
   clearMarksOnDiscontinuousInput,
   createDefaultDoc,
-  getBlockComponentByPath,
   getImageFilesFromLocal,
   matchFlavours,
   openFileOrFiles,
@@ -673,11 +672,10 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const dataViewModel = rootComponent.doc.getBlock(id)!;
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         Promise.resolve().then(() => {
-          const dataView = getBlockComponentByPath(
-            rootComponent.host,
-            dataViewModel.model.id
-          ) as DataViewBlockComponent;
-          dataView.dataSource.viewDataAdd('table');
+          const dataView = rootComponent.std.view.getBlock(
+            dataViewModel.id
+          ) as DataViewBlockComponent | null;
+          dataView?.dataSource.viewDataAdd('table');
         });
         tryRemoveEmptyLine(model);
       },

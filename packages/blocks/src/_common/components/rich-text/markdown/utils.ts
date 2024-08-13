@@ -2,7 +2,7 @@ import type { ListType } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import {
-  asyncFocusRichText,
+  focusTextModel,
   getInlineEditorByModel,
 } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
@@ -70,7 +70,7 @@ export function convertToList(
       });
 
       const id = doc.addBlock('affine:list', blockProps, parent, index);
-      asyncFocusRichText(element.host, id)?.catch(console.error);
+      focusTextModel(element.std, id);
     }
   }
   return true;
@@ -104,7 +104,7 @@ export function convertToParagraph(
     });
 
     const id = doc.addBlock('affine:paragraph', blockProps, parent, index);
-    asyncFocusRichText(element.host, id)?.catch(console.error);
+    focusTextModel(element.std, id);
   } else if (
     matchFlavours(model, ['affine:paragraph']) &&
     model['type'] !== type
@@ -152,10 +152,10 @@ export function convertToDivider(
 
     const nextBlock = parent.children[index + 1];
     if (nextBlock) {
-      asyncFocusRichText(element.host, nextBlock.id)?.catch(console.error);
+      focusTextModel(element.std, nextBlock.id);
     } else {
       const nextId = doc.addBlock('affine:paragraph', {}, parent);
-      asyncFocusRichText(element.host, nextId)?.catch(console.error);
+      focusTextModel(element.std, nextId);
     }
   }
   return true;

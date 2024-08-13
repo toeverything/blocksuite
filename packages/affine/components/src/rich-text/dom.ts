@@ -1,3 +1,4 @@
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
@@ -61,17 +62,16 @@ export async function asyncSetInlineRange(
   inlineEditor.setInlineRange(inlineRange);
 }
 
-export async function asyncFocusRichText(
-  editorHost: EditorHost,
+export function focusTextModel(
+  std: BlockStdScope,
   id: string,
   offset: number = 0
 ) {
-  const selection = editorHost.std.selection;
+  const { selection } = std;
   selection.setGroup('note', [
     selection.create('text', {
       from: { blockId: id, index: offset, length: 0 },
       to: null,
     }),
   ]);
-  await editorHost.updateComplete;
 }

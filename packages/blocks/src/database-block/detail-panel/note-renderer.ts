@@ -1,6 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -47,7 +47,7 @@ export class NoteRenderer
             ])
           );
         if (this.subHost && block) {
-          asyncFocusRichText(this.subHost, block.id)?.catch(console.error);
+          focusTextModel(this.subHost.std, block.id);
         }
       });
     }

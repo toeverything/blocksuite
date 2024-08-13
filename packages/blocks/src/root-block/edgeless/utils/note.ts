@@ -1,7 +1,7 @@
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { Point } from '@blocksuite/global/utils';
 
-import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
@@ -66,7 +66,7 @@ export function addNote(
       edgeless.updateComplete
         .then(() => {
           if (blockId) {
-            asyncFocusRichText(edgeless.host, blockId)?.catch(console.error);
+            focusTextModel(edgeless.std, blockId);
           } else {
             // Cannot reuse `handleNativeRangeClick` directly here,
             // since `retargetClick` will re-target to pervious editor
