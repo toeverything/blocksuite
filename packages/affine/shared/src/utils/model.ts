@@ -1,3 +1,4 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
@@ -46,10 +47,7 @@ export function findAncestorModel(
 
 /**
  * Get block component by its model and wait for the doc element to finish updating.
- * Note that this function is used for compatibility only, and may be removed in the future.
  *
- * Use `std.view.getBlock` instead.
- * @deprecated
  */
 export async function asyncGetBlockComponent(
   editorHost: EditorHost,
@@ -62,4 +60,10 @@ export async function asyncGetBlockComponent(
   await rootComponent.updateComplete;
 
   return editorHost.view.getBlock(id);
+}
+
+export function findNoteBlockModel(model: BlockModel) {
+  return findAncestorModel(model, m =>
+    matchFlavours(m, ['affine:note'])
+  ) as NoteBlockModel | null;
 }

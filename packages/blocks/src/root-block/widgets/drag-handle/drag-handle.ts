@@ -3,6 +3,7 @@ import type { BlockComponent } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
+  findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
   getScrollContainer,
   matchFlavours,
@@ -32,7 +33,6 @@ import type { DragHandleOption, DropResult, DropType } from './config.js';
 
 import {
   Rect,
-  findNoteBlockModel,
   getCurrentNativeRange,
   isInsideEdgelessEditor,
   isInsidePageEditor,

@@ -1,11 +1,12 @@
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { Point } from '@blocksuite/global/utils';
 
+import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
+
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import {
   type NoteChildrenFlavour,
-  asyncFocusRichText,
   handleNativeRangeAtPoint,
 } from '../../../_common/utils/index.js';
 import {

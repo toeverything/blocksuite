@@ -8,13 +8,10 @@ import type { Point } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 
-import {
-  findAncestorModel,
-  matchFlavours,
-} from '@blocksuite/affine-shared/utils';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { NoteBlockModel, RootBlockComponent } from '../../index.js';
+import type { RootBlockComponent } from '../../index.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 
 import { BLOCK_ID_ATTR } from '../consts.js';
@@ -442,10 +439,4 @@ function getCellRect(element: Element, bounds?: DOMRect) {
  */
 export function hasClassNameInList(element: Element, classList: string[]) {
   return classList.some(className => element.classList.contains(className));
-}
-
-export function findNoteBlockModel(model: BlockModel) {
-  return findAncestorModel(model, m =>
-    matchFlavours(m, ['affine:note'])
-  ) as NoteBlockModel | null;
 }

@@ -11,6 +11,7 @@ import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { asyncFocusRichText } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
@@ -40,7 +41,6 @@ import type { EdgelessTool } from './types.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../_common/consts.js';
 import {
   type Viewport,
-  asyncFocusRichText,
   handleNativeRangeAtPoint,
 } from '../../_common/utils/index.js';
 import {

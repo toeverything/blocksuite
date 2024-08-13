@@ -1,12 +1,11 @@
 import type { ListType } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
-import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
-
 import {
   asyncFocusRichText,
-  matchFlavours,
-} from '../../../../_common/utils/index.js';
+  getInlineEditorByModel,
+} from '@blocksuite/affine-components/rich-text';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
 function addSpace(element: BlockComponent, index: number) {
   element.model.text?.insert(' ', index);
