@@ -393,8 +393,8 @@ export class Renderer {
     if (this._refreshRafId !== null) return;
 
     this._refreshRafId = requestConnectedFrame(() => {
-      this._render();
       this._refreshRafId = null;
+      this._render();
     }, this._container);
   }
 
