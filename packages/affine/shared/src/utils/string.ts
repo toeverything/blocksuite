@@ -73,3 +73,13 @@ export function substringMatchScore(name: string, query: string) {
   // normalize
   return 0.5 * score;
 }
+
+/**
+ * Checks if the prefix is a markdown prefix.
+ * Ex. 1. 2. 3. - * [] [ ] [x] # ## ### #### ##### ###### --- *** > ```
+ */
+export function isMarkdownPrefix(prefix: string) {
+  return !!prefix.match(
+    /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>|```([a-zA-Z0-9]*))$/
+  );
+}

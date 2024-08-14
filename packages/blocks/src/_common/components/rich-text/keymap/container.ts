@@ -4,21 +4,17 @@ import type {
 } from '@blocksuite/block-std';
 
 import {
+  focusTextModel,
   insertLinkedNode,
   textFormatConfigs,
 } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
-import {
-  INLINE_ROOT_ATTR,
-  type InlineEditor,
-  type InlineRootElement,
-} from '@blocksuite/inline';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { RootBlockComponent } from '../../../../root-block/types.js';
 
 import { createDefaultDoc } from '../../../utils/init.js';
-import { buildPath } from '../../../utils/query.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,
@@ -51,25 +47,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     return true;
   };
 
-  const _selectText = (start: boolean) => {
-    selection.update(selList => {
-      return selList.map(sel => {
-        if (sel.blockId === block.blockId) {
-          return selection.create('text', {
-            from: {
-              blockId: block.blockId,
-              index: start ? 0 : (block.model.text?.length ?? 0),
-              length: 0,
-            },
-            to: null,
-          });
-        }
-        return sel;
-      });
-    });
-    return true;
-  };
-
   const _getInlineEditor = () => {
     const inlineRoot = block.querySelector<InlineRootElement>(
       `[${INLINE_ROOT_ATTR}]`
@@ -78,21 +55,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       return null;
     }
     return inlineRoot.inlineEditor;
-  };
-
-  const _getPrefixText = (inlineEditor: InlineEditor) => {
-    const inlineRange = inlineEditor.getInlineRange();
-    if (!inlineRange) return '';
-    const firstLineEnd = inlineEditor.yTextString.search(/\n/);
-    if (firstLineEnd !== -1 && inlineRange.index > firstLineEnd) {
-      return '';
-    }
-    const textPoint = inlineEditor.getTextPoint(inlineRange.index);
-    if (!textPoint) return '';
-    const [leafStart, offsetStart] = textPoint;
-    return leafStart.textContent
-      ? leafStart.textContent.slice(0, offsetStart)
-      : '';
   };
 
   const _preventDefault = (ctx: UIEventStateContext) => {
@@ -144,7 +106,13 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     },
     Enter: ctx => {
       _preventDefault(ctx);
-      if (block.selected?.is('block')) return _selectText(false);
+      if (block.selected?.is('block')) {
+        return focusTextModel(
+          std,
+          block.blockId,
+          block.model.text?.length ?? 0
+        );
+      }
       const target = ctx.get('defaultState').event.target as Node;
       if (!block.host.contains(target)) return;
       if (!block.selected?.is('text')) return;
@@ -164,16 +132,11 @@ export const bindContainerHotkey = (block: BlockComponent) => {
 
       block.doc.captureSync();
 
-      if (
-        !tryConvertBlock(
-          block,
-          inlineEditor,
-          _getPrefixText(inlineEditor),
-          inlineRange
-        )
-      ) {
+      if (tryConvertBlock(block, inlineEditor)) {
+        _preventDefault(ctx);
         return true;
       }
+
       const state = ctx.get('keyboardState');
       hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw);
 
@@ -182,7 +145,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     'Mod-Enter': ctx => {
       if (!block.selected?.is('text')) return;
 
-      const state = ctx.get('keyboardState');
       const inlineEditor = _getInlineEditor();
       if (!inlineEditor) return;
       const inlineRange = inlineEditor.getInlineRange();
@@ -198,6 +160,7 @@ export const bindContainerHotkey = (block: BlockComponent) => {
         return true;
       }
 
+      const state = ctx.get('keyboardState');
       hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw, true);
 
       return true;
@@ -416,9 +379,7 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;
 
-    const prefixText = _getPrefixText(inlineEditor);
-
-    if (!tryConvertBlock(block, inlineEditor, prefixText, inlineRange)) {
+    if (tryConvertBlock(block, inlineEditor)) {
       _preventDefault(ctx);
       return true;
     }
@@ -439,11 +400,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
   function tryConvertToLinkedDoc() {
     const root = model.doc.root;
     if (!root) return false;
-    const docBlock = block.host.view.viewFromPath(
-      'block',
-      buildPath(model.doc.root)
-    );
-    if (!docBlock) return false;
     const linkedDocWidgetEle = block.host.view.getWidget(
       'affine-linked-doc-widget',
       root.id

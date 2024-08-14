@@ -15,7 +15,6 @@ import {
   handleBlockSplit,
   handleLineEndForwardDelete,
   handleLineStartBackspace,
-  handleUnindent,
 } from '../rich-text-operations.js';
 
 function isCollapsedAtBlockStart(inlineEditor: AffineInlineEditor) {
@@ -54,44 +53,8 @@ export function hardEnter(
   e: KeyboardEvent,
   shortKey = false
 ) {
-  const doc = model.doc;
   e.stopPropagation();
-  const parent = doc.getParent(model);
-  const isLastChild = parent?.lastChild() === model;
-  const isEmptyList =
-    matchFlavours(model, ['affine:list']) && model.text.length === 0;
-
   assertExists(model.text, 'Failed to hardEnter! model.text not exists!');
-  if (
-    isEmptyList &&
-    parent &&
-    matchFlavours(parent, ['affine:note', 'affine:database']) &&
-    model.children.length === 0
-  ) {
-    // TODO use `handleLineStartBackspace` directly is not concise enough,
-    // we should extract a function to handle this case
-    //
-    // Before
-    // - list
-    // - | <-- press Enter
-    //
-    // After
-    // - list
-    // |   <-- will replace with a new text block
-    handleLineStartBackspace(editorHost, model);
-    return KEYBOARD_PREVENT_DEFAULT;
-  }
-  if (isEmptyList && isLastChild) {
-    // Before
-    // - line1
-    //   - ↩ <-- press Enter
-    //
-    // After
-    // - line1
-    // - | <-- will unindent the block
-    handleUnindent(editorHost, model, range.index);
-    return KEYBOARD_PREVENT_DEFAULT;
-  }
   const isEnd = model.text.length === range.index;
   const softEnterable = isSoftEnterable(model);
   if (isEnd && softEnterable) {

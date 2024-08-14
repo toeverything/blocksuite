@@ -27,7 +27,7 @@ export const convertToNumberedListCommand: Command<
   const prevSibling = doc.getPrev(model);
   let realOrder = order;
 
-  // if there is an numbered list before, the order continues from the previous list
+  // if there is a numbered list before, the order continues from the previous list
   if (
     prevSibling &&
     matchFlavours(prevSibling, ['affine:list']) &&
@@ -60,7 +60,7 @@ export const convertToNumberedListCommand: Command<
     bringChildrenTo: newList,
   });
 
-  // if there is an numbered list following, correct their order to keep them continuous
+  // if there is a numbered list following, correct their order to keep them continuous
   const nextContinuousNumberedLists = getNextContinuousNumberedLists(
     doc,
     newList
