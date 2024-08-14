@@ -119,12 +119,11 @@ export const textRender: DraggableTool['render'] = (
   const flag = edgeless.doc.awarenessStore.getFlag('enable_edgeless_text');
   let id: string;
   if (flag) {
-    const textService = edgeless.host.spec.getService('affine:edgeless-text');
-    id = textService.initEdgelessTextBlock({
-      edgeless,
+    const { textId } = edgeless.std.command.exec('addEdgelessTextBlock', {
       x: bound.x,
       y: vCenter - h / 2,
     });
+    id = textId!;
   } else {
     id = service.addElement(CanvasElementType.TEXT, {
       xywh: new Bound(bound.x, vCenter - h / 2, w, h).serialize(),
