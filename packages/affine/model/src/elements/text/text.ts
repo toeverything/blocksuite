@@ -9,7 +9,7 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '@blocksuite/affine-model';
-import { GfxPrimitiveElementModel, yfield } from '@blocksuite/block-std/gfx';
+import { GfxPrimitiveElementModel, field } from '@blocksuite/block-std/gfx';
 import {
   Bound,
   getPointsFromBoundsWithRotation,
@@ -60,34 +60,34 @@ export class TextElementModel extends GfxPrimitiveElementModel<TextElementProps>
     return 'text';
   }
 
-  @yfield()
+  @field()
   accessor color: Color = '#000000';
 
-  @yfield()
+  @field()
   accessor fontFamily: FontFamily = FontFamily.Inter;
 
-  @yfield()
+  @field()
   accessor fontSize: number = 16;
 
-  @yfield(FontStyle.Normal as FontStyle)
+  @field(FontStyle.Normal as FontStyle)
   accessor fontStyle: FontStyle = FontStyle.Normal;
 
-  @yfield(FontWeight.Regular as FontWeight)
+  @field(FontWeight.Regular as FontWeight)
   accessor fontWeight: FontWeight = FontWeight.Regular;
 
-  @yfield(false)
+  @field(false)
   accessor hasMaxWidth: boolean = false;
 
-  @yfield(0)
+  @field(0)
   accessor rotate: number = 0;
 
-  @yfield()
+  @field()
   accessor text: Y.Text = new DocCollection.Y.Text();
 
-  @yfield()
+  @field()
   accessor textAlign: TextAlign = TextAlign.Center;
 
-  @yfield()
+  @field()
   accessor xywh: SerializedXYWH = '[0,0,16,16]';
 }
 

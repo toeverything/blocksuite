@@ -152,7 +152,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     const state = this._decoratorState;
 
     state.creating = true;
-    state.skipYfield = options.skipFieldInit ?? false;
+    state.skipField = options.skipFieldInit ?? false;
 
     let mounted = false;
     // @ts-ignore
@@ -169,7 +169,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     // @ts-ignore
     delete Ctor['_decoratorState'];
     state.creating = false;
-    state.skipYfield = false;
+    state.skipField = false;
 
     const unmount = () => {
       mounted = false;

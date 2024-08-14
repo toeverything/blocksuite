@@ -9,9 +9,9 @@ import { LocalConnectorElementModel } from '@blocksuite/affine-model';
 import {
   GfxGroupLikeElementModel,
   convert,
+  field,
   observe,
   watch,
-  yfield,
 } from '@blocksuite/block-std/gfx';
 import {
   assertType,
@@ -1037,7 +1037,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       instance.connectors.clear();
     }
   )
-  @yfield()
+  @field()
   accessor children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
 
   @watch((_, instance: MindmapElementModel, local) => {
@@ -1060,7 +1060,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
     instance.buildTree();
   })
-  @yfield()
+  @field()
   accessor layoutType: LayoutType = LayoutType.RIGHT;
 
   @watch((_, instance: MindmapElementModel, local) => {
@@ -1068,7 +1068,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       instance.layout();
     }
   })
-  @yfield()
+  @field()
   accessor style: MindmapStyle = MindmapStyle.ONE;
 }
 

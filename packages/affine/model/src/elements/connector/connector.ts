@@ -8,8 +8,8 @@ import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 import {
   GfxPrimitiveElementModel,
   derive,
+  field,
   local,
-  yfield,
 } from '@blocksuite/block-std/gfx';
 import {
   Bound,
@@ -420,13 +420,13 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   @local()
   accessor absolutePath: PointLocation[] = [];
 
-  @yfield('None' as PointStyle)
+  @field('None' as PointStyle)
   accessor frontEndpointStyle!: PointStyle;
 
   /**
    * Defines the size constraints of the label.
    */
-  @yfield({
+  @field({
     hasMaxWidth: true,
     maxWidth: CONNECTOR_LABEL_MAX_WIDTH,
   } as ConnectorLabelConstraintsProps)
@@ -435,13 +435,13 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   /**
    * Control display and hide.
    */
-  @yfield(true)
+  @field(true)
   accessor labelDisplay!: boolean;
 
   /**
    * The offset property specifies the label along the connector path.
    */
-  @yfield({
+  @field({
     distance: 0.5,
     anchor: ConnectorLabelOffsetAnchor.Center,
   } as ConnectorLabelOffsetProps)
@@ -450,7 +450,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   /**
    * Defines the style of the label.
    */
-  @yfield({
+  @field({
     color: '#000000',
     fontFamily: FontFamily.Inter,
     fontSize: 16,
@@ -464,7 +464,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
    * Returns a `XYWH` array providing information about the size of a label
    * and its position relative to the viewport.
    */
-  @yfield()
+  @field()
   accessor labelXYWH: XYWH | undefined = undefined;
 
   /**
@@ -473,7 +473,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   @local()
   accessor lableEditing: boolean = false;
 
-  @yfield()
+  @field()
   accessor mode: ConnectorMode = ConnectorMode.Orthogonal;
 
   @derive((path: PointLocation[], instance) => {
@@ -486,33 +486,33 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   @local()
   accessor path: PointLocation[] = [];
 
-  @yfield('Arrow' as PointStyle)
+  @field('Arrow' as PointStyle)
   accessor rearEndpointStyle!: PointStyle;
 
   @local()
   accessor rotate: number = 0;
 
-  @yfield()
+  @field()
   accessor rough: boolean | undefined = undefined;
 
-  @yfield()
+  @field()
   accessor roughness: number = DEFAULT_ROUGHNESS;
 
-  @yfield()
+  @field()
   accessor source: Connection = {
     position: [0, 0],
   };
 
-  @yfield()
+  @field()
   accessor stroke: Color = '#000000';
 
-  @yfield()
+  @field()
   accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
 
-  @yfield()
+  @field()
   accessor strokeWidth: number = 4;
 
-  @yfield()
+  @field()
   accessor target: Connection = {
     position: [0, 0],
   };
@@ -520,7 +520,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   /**
    * The content of the label.
    */
-  @yfield()
+  @field()
   accessor text: Y.Text | undefined = undefined;
 
   @local()

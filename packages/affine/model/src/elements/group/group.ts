@@ -6,9 +6,9 @@ import type { Y } from '@blocksuite/store';
 
 import {
   GfxGroupLikeElementModel,
+  field,
   local,
   observe,
-  yfield,
 } from '@blocksuite/block-std/gfx';
 import {
   Bound,
@@ -104,13 +104,13 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
       );
     }
   )
-  @yfield()
+  @field()
   accessor children: Y.Map<boolean> = new DocCollection.Y.Map<boolean>();
 
   @local()
   accessor showTitle: boolean = true;
 
-  @yfield()
+  @field()
   accessor title: Y.Text = new DocCollection.Y.Text();
 }
 
