@@ -46,7 +46,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       rxjs:
         specifier: ~7.8.1
         version: 7.8.1
@@ -91,6 +91,31 @@ importers:
         specifier: ~5.4.5
         version: 5.4.5
 
+  custom-store:
+    dependencies:
+      '@blocksuite/blocks':
+        specifier: 0.15.0-canary-202406291027-8aed732
+        version: 0.15.0-canary-202406291027-8aed732(yjs@13.6.15)
+      '@blocksuite/presets':
+        specifier: 0.15.0-canary-202406291027-8aed732
+        version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
+      '@blocksuite/store':
+        specifier: 0.15.0-canary-202406291027-8aed732
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
+      lit:
+        specifier: ^3.2.0
+        version: 3.2.0
+      y-indexeddb:
+        specifier: ^9.0.12
+        version: 9.0.12(yjs@13.6.15)
+    devDependencies:
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+      vite:
+        specifier: ^5.2.11
+        version: 5.2.11(@types/node@20.14.9)(less@4.2.0)(sass@1.77.1)(terser@5.31.0)
+
   preact-basic:
     dependencies:
       '@blocksuite/blocks':
@@ -101,7 +126,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       preact:
         specifier: ^10.21.0
         version: 10.21.0
@@ -126,7 +151,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -178,7 +203,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       next:
         specifier: 14.2.3
         version: 14.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.77.1)
@@ -218,7 +243,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       '@blocksuite/sync':
         specifier: 0.15.0-canary-202406291027-8aed732
         version: 0.15.0-canary-202406291027-8aed732(yjs@13.6.15)
@@ -273,7 +298,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       '@blocksuite/sync':
         specifier: 0.15.0-canary-202406291027-8aed732
         version: 0.15.0-canary-202406291027-8aed732(yjs@13.6.15)
@@ -331,7 +356,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -410,7 +435,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       solid-js:
         specifier: ^1.8.17
         version: 1.8.17
@@ -435,7 +460,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^3.1.0
@@ -469,7 +494,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       y-indexeddb:
         specifier: ^9.0.12
         version: 9.0.12(yjs@13.6.15)
@@ -491,7 +516,7 @@ importers:
         version: 0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)
       '@blocksuite/store':
         specifier: 0.15.0-canary-202406291027-8aed732
-        version: 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+        version: 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       vue:
         specifier: ^3.4.27
         version: 3.4.27(typescript@5.4.5)
@@ -4600,20 +4625,20 @@ packages:
   lit-element@3.3.3:
     resolution: {integrity: sha512-XbeRxmTHubXENkV4h8RIPyr8lXc+Ff28rkcQzw3G6up2xg5E8Zu1IgOWIwBLEQsu3cOVFqdYwiVi0hv0SlpqUA==}
 
-  lit-element@4.0.6:
-    resolution: {integrity: sha512-U4sdJ3CSQip7sLGZ/uJskO5hGiqtlpxndsLr6mt3IQIjheg93UKYeGQjWMRql1s/cXNOaRrCzC2FQwjIwSUqkg==}
+  lit-element@4.1.0:
+    resolution: {integrity: sha512-gSejRUQJuMQjV2Z59KAS/D4iElUhwKpIyJvZ9w+DIagIQjfJnhR20h2Q5ddpzXGS+fF0tMZ/xEYGMnKmaI/iww==}
 
   lit-html@2.8.0:
     resolution: {integrity: sha512-o9t+MQM3P4y7M7yNzqAyjp7z+mQGa4NS4CxiyLqFPyFWyc4O+nodLrkrxSaCTrla6M5YOLaT3RpbbqjszB5g3Q==}
 
-  lit-html@3.1.4:
-    resolution: {integrity: sha512-yKKO2uVv7zYFHlWMfZmqc+4hkmSbFp8jgjdZY9vvR9jr4J8fH6FUMXhr+ljfELgmjpvlF7Z1SJ5n5/Jeqtc9YA==}
+  lit-html@3.2.0:
+    resolution: {integrity: sha512-pwT/HwoxqI9FggTrYVarkBKFN9MlTUpLrDHubTmW4SrkL3kkqW5gxwbxMMUnbbRHBC0WTZnYHcjDSCM559VyfA==}
 
   lit@2.8.0:
     resolution: {integrity: sha512-4Sc3OFX9QHOJaHbmTMk28SYgVxLN3ePDjg7hofEft2zWlehFL3LiAuapWc4U/kYwMYJSh2hTCPZ6/LIC7ii0MA==}
 
-  lit@3.1.4:
-    resolution: {integrity: sha512-q6qKnKXHy2g1kjBaNfcoLlgbI3+aSOZ9Q4tiGa9bGYXq5RBXxkVTqTIVmP2VWMp29L4GyvCFm8ZQ2o56eUAMyA==}
+  lit@3.2.0:
+    resolution: {integrity: sha512-s6tI33Lf6VpDu7u4YqsSX78D28bYQulM+VAzsGch4fx2H0eLZnJsUBsPWmGYSGoKDNbjtRv02rio1o+UdPVwvw==}
 
   loader-runner@4.3.0:
     resolution: {integrity: sha512-3R/1M+yS3j5ou80Me59j7F9IMs4PXs3VqRrm0TU3AbKPxlmpoY1TNscJV/oGJXo8qCatFGTfDbY6W6ipGOYXfg==}
@@ -6761,7 +6786,7 @@ snapshots:
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@angular-devkit/architect': 0.1703.7(chokidar@3.6.0)
-      '@angular-devkit/build-webpack': 0.1703.7(chokidar@3.6.0)(webpack-dev-server@4.15.1(webpack@5.90.3))(webpack@5.90.3(esbuild@0.20.1))
+      '@angular-devkit/build-webpack': 0.1703.7(chokidar@3.6.0)(webpack-dev-server@4.15.1(webpack@5.90.3))(webpack@5.90.3)
       '@angular-devkit/core': 17.3.7(chokidar@3.6.0)
       '@angular/compiler-cli': 17.3.8(@angular/compiler@17.3.8(@angular/core@17.3.8(rxjs@7.8.1)(zone.js@0.14.5)))(typescript@5.4.5)
       '@babel/core': 7.24.0
@@ -6774,16 +6799,16 @@ snapshots:
       '@babel/preset-env': 7.24.0(@babel/core@7.24.0)
       '@babel/runtime': 7.24.0
       '@discoveryjs/json-ext': 0.5.7
-      '@ngtools/webpack': 17.3.7(@angular/compiler-cli@17.3.8(@angular/compiler@17.3.8(@angular/core@17.3.8(rxjs@7.8.1)(zone.js@0.14.5)))(typescript@5.4.5))(typescript@5.4.5)(webpack@5.90.3(esbuild@0.20.1))
+      '@ngtools/webpack': 17.3.7(@angular/compiler-cli@17.3.8(@angular/compiler@17.3.8(@angular/core@17.3.8(rxjs@7.8.1)(zone.js@0.14.5)))(typescript@5.4.5))(typescript@5.4.5)(webpack@5.90.3)
       '@vitejs/plugin-basic-ssl': 1.1.0(vite@5.1.7(@types/node@20.14.9)(less@4.2.0)(sass@1.71.1)(terser@5.29.1))
       ansi-colors: 4.1.3
       autoprefixer: 10.4.18(postcss@8.4.35)
-      babel-loader: 9.1.3(@babel/core@7.24.0)(webpack@5.90.3(esbuild@0.20.1))
+      babel-loader: 9.1.3(@babel/core@7.24.0)(webpack@5.90.3)
       babel-plugin-istanbul: 6.1.1
       browserslist: 4.23.0
-      copy-webpack-plugin: 11.0.0(webpack@5.90.3(esbuild@0.20.1))
+      copy-webpack-plugin: 11.0.0(webpack@5.90.3)
       critters: 0.0.22
-      css-loader: 6.10.0(webpack@5.90.3(esbuild@0.20.1))
+      css-loader: 6.10.0(webpack@5.90.3)
       esbuild-wasm: 0.20.1
       fast-glob: 3.3.2
       http-proxy-middleware: 2.0.6(@types/express@4.17.21)
@@ -6792,11 +6817,11 @@ snapshots:
       jsonc-parser: 3.2.1
       karma-source-map-support: 1.4.0
       less: 4.2.0
-      less-loader: 11.1.0(less@4.2.0)(webpack@5.90.3(esbuild@0.20.1))
-      license-webpack-plugin: 4.0.2(webpack@5.90.3(esbuild@0.20.1))
+      less-loader: 11.1.0(less@4.2.0)(webpack@5.90.3)
+      license-webpack-plugin: 4.0.2(webpack@5.90.3)
       loader-utils: 3.2.1
       magic-string: 0.30.8
-      mini-css-extract-plugin: 2.8.1(webpack@5.90.3(esbuild@0.20.1))
+      mini-css-extract-plugin: 2.8.1(webpack@5.90.3)
       mrmime: 2.0.0
       open: 8.4.2
       ora: 5.4.1
@@ -6804,13 +6829,13 @@ snapshots:
       picomatch: 4.0.1
       piscina: 4.4.0
       postcss: 8.4.35
-      postcss-loader: 8.1.1(postcss@8.4.35)(typescript@5.4.5)(webpack@5.90.3(esbuild@0.20.1))
+      postcss-loader: 8.1.1(postcss@8.4.35)(typescript@5.4.5)(webpack@5.90.3)
       resolve-url-loader: 5.0.0
       rxjs: 7.8.1
       sass: 1.71.1
-      sass-loader: 14.1.1(sass@1.71.1)(webpack@5.90.3(esbuild@0.20.1))
+      sass-loader: 14.1.1(sass@1.71.1)(webpack@5.90.3)
       semver: 7.6.0
-      source-map-loader: 5.0.0(webpack@5.90.3(esbuild@0.20.1))
+      source-map-loader: 5.0.0(webpack@5.90.3)
       source-map-support: 0.5.21
       terser: 5.29.1
       tree-kill: 1.2.2
@@ -6820,10 +6845,10 @@ snapshots:
       vite: 5.1.7(@types/node@20.14.9)(less@4.2.0)(sass@1.71.1)(terser@5.29.1)
       watchpack: 2.4.0
       webpack: 5.90.3(esbuild@0.20.1)
-      webpack-dev-middleware: 6.1.2(webpack@5.90.3(esbuild@0.20.1))
+      webpack-dev-middleware: 6.1.2(webpack@5.90.3)
       webpack-dev-server: 4.15.1(webpack@5.90.3)
       webpack-merge: 5.10.0
-      webpack-subresource-integrity: 5.1.0(webpack@5.90.3(esbuild@0.20.1))
+      webpack-subresource-integrity: 5.1.0(webpack@5.90.3)
     optionalDependencies:
       esbuild: 0.20.1
       karma: 6.4.3
@@ -6846,7 +6871,7 @@ snapshots:
       - utf-8-validate
       - webpack-cli
 
-  '@angular-devkit/build-webpack@0.1703.7(chokidar@3.6.0)(webpack-dev-server@4.15.1(webpack@5.90.3))(webpack@5.90.3(esbuild@0.20.1))':
+  '@angular-devkit/build-webpack@0.1703.7(chokidar@3.6.0)(webpack-dev-server@4.15.1(webpack@5.90.3))(webpack@5.90.3)':
     dependencies:
       '@angular-devkit/architect': 0.1703.7(chokidar@3.6.0)
       rxjs: 7.8.1
@@ -7802,22 +7827,22 @@ snapshots:
       '@babel/helper-validator-identifier': 7.24.5
       to-fast-properties: 2.0.0
 
-  '@blocksuite/block-std@0.15.0-canary-202406291027-8aed732(@blocksuite/inline@0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15))(@blocksuite/store@0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15))':
+  '@blocksuite/block-std@0.15.0-canary-202406291027-8aed732(@blocksuite/inline@0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15))(@blocksuite/store@0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15))':
     dependencies:
       '@blocksuite/global': 0.15.0-canary-202406291027-8aed732
-      '@blocksuite/inline': 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
-      '@blocksuite/store': 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
-      lit: 3.1.4
+      '@blocksuite/inline': 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
+      '@blocksuite/store': 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
+      lit: 3.2.0
       lz-string: 1.5.0
       w3c-keyname: 2.2.8
       zod: 3.23.8
 
   '@blocksuite/blocks@0.15.0-canary-202406291027-8aed732(yjs@13.6.15)':
     dependencies:
-      '@blocksuite/block-std': 0.15.0-canary-202406291027-8aed732(@blocksuite/inline@0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15))(@blocksuite/store@0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15))
+      '@blocksuite/block-std': 0.15.0-canary-202406291027-8aed732(@blocksuite/inline@0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15))(@blocksuite/store@0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15))
       '@blocksuite/global': 0.15.0-canary-202406291027-8aed732
-      '@blocksuite/inline': 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
-      '@blocksuite/store': 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+      '@blocksuite/inline': 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
+      '@blocksuite/store': 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       '@dotlottie/player-component': 2.7.12
       '@floating-ui/dom': 1.6.7
       '@lit/context': 1.1.2
@@ -7832,7 +7857,7 @@ snapshots:
       fractional-indexing: 3.2.0
       html2canvas: 1.4.1
       jszip: 3.10.1
-      lit: 3.1.4
+      lit: 3.2.0
       mdast-util-gfm-autolink-literal: 2.0.0
       mdast-util-gfm-strikethrough: 2.0.0
       mdast-util-gfm-table: 2.0.0
@@ -7863,35 +7888,35 @@ snapshots:
       lib0: 0.2.94
       zod: 3.23.8
 
-  '@blocksuite/inline@0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)':
+  '@blocksuite/inline@0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)':
     dependencies:
       '@blocksuite/global': 0.15.0-canary-202406291027-8aed732
-      lit: 3.1.4
+      lit: 3.2.0
       yjs: 13.6.15
       zod: 3.23.8
 
   '@blocksuite/presets@0.15.0-canary-202406291027-8aed732(encoding@0.1.13)(yjs@13.6.15)':
     dependencies:
-      '@blocksuite/block-std': 0.15.0-canary-202406291027-8aed732(@blocksuite/inline@0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15))(@blocksuite/store@0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15))
+      '@blocksuite/block-std': 0.15.0-canary-202406291027-8aed732(@blocksuite/inline@0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15))(@blocksuite/store@0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15))
       '@blocksuite/blocks': 0.15.0-canary-202406291027-8aed732(yjs@13.6.15)
       '@blocksuite/global': 0.15.0-canary-202406291027-8aed732
-      '@blocksuite/inline': 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
-      '@blocksuite/store': 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+      '@blocksuite/inline': 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
+      '@blocksuite/store': 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       '@dotlottie/player-component': 2.7.12
       '@fal-ai/serverless-client': 0.10.4
       '@floating-ui/dom': 1.6.7
       '@toeverything/theme': 0.7.35
-      lit: 3.1.4
+      lit: 3.2.0
       openai: 4.52.2(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
       - supports-color
       - yjs
 
-  '@blocksuite/store@0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)':
+  '@blocksuite/store@0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)':
     dependencies:
       '@blocksuite/global': 0.15.0-canary-202406291027-8aed732
-      '@blocksuite/inline': 0.15.0-canary-202406291027-8aed732(lit@3.1.4)(yjs@13.6.15)
+      '@blocksuite/inline': 0.15.0-canary-202406291027-8aed732(lit@3.2.0)(yjs@13.6.15)
       '@blocksuite/sync': 0.15.0-canary-202406291027-8aed732(yjs@13.6.15)
       '@types/flexsearch': 0.7.6
       flexsearch: 0.7.43
@@ -8374,7 +8399,7 @@ snapshots:
   '@next/swc-win32-x64-msvc@14.2.3':
     optional: true
 
-  '@ngtools/webpack@17.3.7(@angular/compiler-cli@17.3.8(@angular/compiler@17.3.8(@angular/core@17.3.8(rxjs@7.8.1)(zone.js@0.14.5)))(typescript@5.4.5))(typescript@5.4.5)(webpack@5.90.3(esbuild@0.20.1))':
+  '@ngtools/webpack@17.3.7(@angular/compiler-cli@17.3.8(@angular/compiler@17.3.8(@angular/core@17.3.8(rxjs@7.8.1)(zone.js@0.14.5)))(typescript@5.4.5))(typescript@5.4.5)(webpack@5.90.3)':
     dependencies:
       '@angular/compiler-cli': 17.3.8(@angular/compiler@17.3.8(@angular/core@17.3.8(rxjs@7.8.1)(zone.js@0.14.5)))(typescript@5.4.5)
       typescript: 5.4.5
@@ -8778,7 +8803,7 @@ snapshots:
 
   '@types/node-fetch@2.6.11':
     dependencies:
-      '@types/node': 18.19.39
+      '@types/node': 20.14.9
       form-data: 4.0.0
 
   '@types/node-forge@1.3.11':
@@ -9408,7 +9433,7 @@ snapshots:
     dependencies:
       dequal: 2.0.3
 
-  babel-loader@9.1.3(@babel/core@7.24.0)(webpack@5.90.3(esbuild@0.20.1)):
+  babel-loader@9.1.3(@babel/core@7.24.0)(webpack@5.90.3):
     dependencies:
       '@babel/core': 7.24.0
       find-cache-dir: 4.0.0
@@ -9761,7 +9786,7 @@ snapshots:
     dependencies:
       is-what: 3.14.1
 
-  copy-webpack-plugin@11.0.0(webpack@5.90.3(esbuild@0.20.1)):
+  copy-webpack-plugin@11.0.0(webpack@5.90.3):
     dependencies:
       fast-glob: 3.3.2
       glob-parent: 6.0.2
@@ -9811,7 +9836,7 @@ snapshots:
     dependencies:
       utrie: 1.0.2
 
-  css-loader@6.10.0(webpack@5.90.3(esbuild@0.20.1)):
+  css-loader@6.10.0(webpack@5.90.3):
     dependencies:
       icss-utils: 5.1.0(postcss@8.4.35)
       postcss: 8.4.35
@@ -11425,7 +11450,7 @@ snapshots:
       picocolors: 1.0.1
       shell-quote: 1.8.1
 
-  less-loader@11.1.0(less@4.2.0)(webpack@5.90.3(esbuild@0.20.1)):
+  less-loader@11.1.0(less@4.2.0)(webpack@5.90.3):
     dependencies:
       klona: 2.0.6
       less: 4.2.0
@@ -11520,7 +11545,7 @@ snapshots:
     dependencies:
       isomorphic.js: 0.2.5
 
-  license-webpack-plugin@4.0.2(webpack@5.90.3(esbuild@0.20.1)):
+  license-webpack-plugin@4.0.2(webpack@5.90.3):
     dependencies:
       webpack-sources: 3.2.3
     optionalDependencies:
@@ -11538,17 +11563,17 @@ snapshots:
       '@lit/reactive-element': 1.6.3
       lit-html: 2.8.0
 
-  lit-element@4.0.6:
+  lit-element@4.1.0:
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.2.0
       '@lit/reactive-element': 2.0.4
-      lit-html: 3.1.4
+      lit-html: 3.2.0
 
   lit-html@2.8.0:
     dependencies:
       '@types/trusted-types': 2.0.7
 
-  lit-html@3.1.4:
+  lit-html@3.2.0:
     dependencies:
       '@types/trusted-types': 2.0.7
 
@@ -11558,11 +11583,11 @@ snapshots:
       lit-element: 3.3.3
       lit-html: 2.8.0
 
-  lit@3.1.4:
+  lit@3.2.0:
     dependencies:
       '@lit/reactive-element': 2.0.4
-      lit-element: 4.0.6
-      lit-html: 3.1.4
+      lit-element: 4.1.0
+      lit-html: 3.2.0
 
   loader-runner@4.3.0: {}
 
@@ -11970,7 +11995,7 @@ snapshots:
 
   min-indent@1.0.1: {}
 
-  mini-css-extract-plugin@2.8.1(webpack@5.90.3(esbuild@0.20.1)):
+  mini-css-extract-plugin@2.8.1(webpack@5.90.3):
     dependencies:
       schema-utils: 4.2.0
       tapable: 2.2.1
@@ -12487,7 +12512,7 @@ snapshots:
 
   possible-typed-array-names@1.0.0: {}
 
-  postcss-loader@8.1.1(postcss@8.4.35)(typescript@5.4.5)(webpack@5.90.3(esbuild@0.20.1)):
+  postcss-loader@8.1.1(postcss@8.4.35)(typescript@5.4.5)(webpack@5.90.3):
     dependencies:
       cosmiconfig: 9.0.0(typescript@5.4.5)
       jiti: 1.21.0
@@ -12840,7 +12865,7 @@ snapshots:
       mkdirp: 0.5.6
       rimraf: 2.7.1
 
-  sass-loader@14.1.1(sass@1.71.1)(webpack@5.90.3(esbuild@0.20.1)):
+  sass-loader@14.1.1(sass@1.71.1)(webpack@5.90.3):
     dependencies:
       neo-async: 2.6.2
     optionalDependencies:
@@ -13124,7 +13149,7 @@ snapshots:
 
   source-map-js@1.2.0: {}
 
-  source-map-loader@5.0.0(webpack@5.90.3(esbuild@0.20.1)):
+  source-map-loader@5.0.0(webpack@5.90.3):
     dependencies:
       iconv-lite: 0.6.3
       source-map-js: 1.2.0
@@ -13777,7 +13802,7 @@ snapshots:
       schema-utils: 4.2.0
       webpack: 5.90.3(esbuild@0.20.1)
 
-  webpack-dev-middleware@6.1.2(webpack@5.90.3(esbuild@0.20.1)):
+  webpack-dev-middleware@6.1.2(webpack@5.90.3):
     dependencies:
       colorette: 2.0.20
       memfs: 3.5.3
@@ -13835,7 +13860,7 @@ snapshots:
 
   webpack-sources@3.2.3: {}
 
-  webpack-subresource-integrity@5.1.0(webpack@5.90.3(esbuild@0.20.1)):
+  webpack-subresource-integrity@5.1.0(webpack@5.90.3):
     dependencies:
       typed-assert: 1.0.9
       webpack: 5.90.3(esbuild@0.20.1)
