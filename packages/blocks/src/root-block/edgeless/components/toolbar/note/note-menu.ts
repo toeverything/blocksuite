@@ -76,14 +76,14 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
             control: 'toolbar:general',
             page: 'whiteboard editor',
             module: 'toolbar',
-            type: type.flavour.split(':')[1],
+            type: type.flavour?.split(':')[1],
           });
           if (type.isNewDoc) {
             this.edgeless.service.telemetryService?.track('DocCreated', {
               control: 'toolbar:general',
               page: 'whiteboard editor',
               module: 'edgeless toolbar',
-              type: type.flavour.split(':')[1],
+              type: type.flavour?.split(':')[1],
             });
           }
         }

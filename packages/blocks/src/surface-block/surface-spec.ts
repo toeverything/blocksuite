@@ -12,6 +12,7 @@ export const PageSurfaceBlockSpec: BlockSpec = {
   view: {
     component: literal`affine-surface-void`,
   },
+  commands,
   service: SurfaceBlockService,
 };
 

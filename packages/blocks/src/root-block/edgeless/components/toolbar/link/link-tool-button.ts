@@ -18,16 +18,18 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
   override type = 'default' as const;
 
   private _onClick() {
-    this.edgeless.service
-      .insertLinkByQuickSearch()
-      .then(type => {
+    const { insertedLinkType } = this.edgeless.std.command.exec(
+      'insertLinkByQuickSearch'
+    );
+    insertedLinkType
+      ?.then(type => {
         if (type) {
           this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
             control: 'toolbar:general',
             page: 'whiteboard editor',
             module: 'toolbar',
             segment: 'toolbar',
-            type: type.flavour.split(':')[1],
+            type: type.flavour?.split(':')[1],
           });
 
           if (type.isNewDoc) {
@@ -36,14 +38,14 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
               page: 'whiteboard editor',
               module: 'edgeless toolbar',
               segment: 'whiteboard',
-              type: type.flavour.split(':')[1],
+              type: type.flavour?.split(':')[1],
             });
             this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
               control: 'links',
               page: 'whiteboard editor',
               module: 'edgeless toolbar',
               segment: 'whiteboard',
-              type: type.flavour.split(':')[1],
+              type: type.flavour?.split(':')[1],
               other: 'new doc',
             });
           } else {
@@ -52,7 +54,7 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
               page: 'whiteboard editor',
               module: 'edgeless toolbar',
               segment: 'whiteboard',
-              type: type.flavour.split(':')[1],
+              type: type.flavour?.split(':')[1],
               other: 'existing doc',
             });
           }

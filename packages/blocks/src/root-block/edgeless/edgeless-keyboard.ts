@@ -196,7 +196,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                     page: 'whiteboard editor',
                     module: 'toolbar',
                     segment: 'toolbar',
-                    type: type.flavour.split(':')[1],
+                    type: type.flavour?.split(':')[1],
                   }
                 );
                 if (type.isNewDoc) {
@@ -204,7 +204,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                     control: 'shortcut',
                     page: 'whiteboard editor',
                     segment: 'whiteboard',
-                    type: type.flavour.split(':')[1],
+                    type: type.flavour?.split(':')[1],
                   });
                 }
               }

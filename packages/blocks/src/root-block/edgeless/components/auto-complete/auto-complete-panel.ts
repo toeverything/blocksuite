@@ -260,13 +260,10 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       'enable_edgeless_text'
     );
     if (textFlag) {
-      const { textId } = this.edgeless.std.command.exec(
-        'addEdgelessTextBlock',
-        {
-          x: bound.x,
-          y: bound.y,
-        }
-      );
+      const { textId } = this.edgeless.std.command.exec('insertEdgelessText', {
+        x: bound.x,
+        y: bound.y,
+      });
       if (!textId) return;
       edgelessService.updateElement(this.connector.id, {
         target: { id: textId, position },

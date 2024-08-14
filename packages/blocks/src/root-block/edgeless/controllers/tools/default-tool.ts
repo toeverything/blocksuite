@@ -775,7 +775,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
       if (textFlag) {
         const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
-        this._edgeless.std.command.exec('addEdgelessTextBlock', { x, y });
+        this._edgeless.std.command.exec('insertEdgelessText', { x, y });
       } else {
         addText(this._edgeless, e);
       }

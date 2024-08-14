@@ -10,7 +10,7 @@ import {
   EDGELESS_TEXT_BLOCK_MIN_WIDTH,
 } from '../edgeless-text-block.js';
 
-export const addEdgelessTextBlockCommand: Command<
+export const insertEdgelessTextCommand: Command<
   never,
   'textId',
   {
@@ -23,8 +23,10 @@ export const addEdgelessTextBlockCommand: Command<
   const doc = host.doc;
   const edgelessService = std.spec.getService('affine:page');
   const surface = getSurfaceBlock(doc);
-  if (!(edgelessService instanceof EdgelessRootService)) return;
-  if (!surface) return;
+  if (!(edgelessService instanceof EdgelessRootService) || !surface) {
+    next();
+    return;
+  }
 
   const zoom = edgelessService.zoom;
   const textId = edgelessService.addBlock(
@@ -88,7 +90,7 @@ declare global {
     }
 
     interface Commands {
-      addEdgelessTextBlock: typeof addEdgelessTextBlockCommand;
+      insertEdgelessText: typeof insertEdgelessTextCommand;
     }
   }
 }

@@ -119,7 +119,7 @@ export const textRender: DraggableTool['render'] = (
   const flag = edgeless.doc.awarenessStore.getFlag('enable_edgeless_text');
   let id: string;
   if (flag) {
-    const { textId } = edgeless.std.command.exec('addEdgelessTextBlock', {
+    const { textId } = edgeless.std.command.exec('insertEdgelessText', {
       x: bound.x,
       y: vCenter - h / 2,
     });
