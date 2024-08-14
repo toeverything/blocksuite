@@ -3,7 +3,7 @@ import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { GroupHelper } from '../../../common/group-by/helper.js';
+import type { GroupManager } from '../../../common/group-by/helper.js';
 import type { InsertToPosition } from '../../../types.js';
 import type { TableSingleView } from './table-view-manager.js';
 
@@ -185,7 +185,7 @@ export class DataViewTable extends DataViewBase<
     }
   };
 
-  renderAddGroup = (groupHelper: GroupHelper) => {
+  renderAddGroup = (groupHelper: GroupManager) => {
     const addGroup = groupHelper.addGroup;
     if (!addGroup) {
       return;
@@ -196,7 +196,7 @@ export class DataViewTable extends DataViewBase<
         options: {
           input: {
             onComplete: text => {
-              const column = groupHelper.column;
+              const column = groupHelper.column$.value;
               if (column) {
                 column.updateData(() => addGroup(text, column.data$) as never);
               }
@@ -225,11 +225,11 @@ export class DataViewTable extends DataViewBase<
   }
 
   private renderTable() {
-    const groupHelper = this.view.groupHelper;
-    if (groupHelper) {
+    const groups = this.view.groupManager.groupsDataList$.value;
+    if (groups) {
       return html`
         <div style="display:flex;flex-direction: column;gap: 16px;">
-          ${groupHelper.groups.map(group => {
+          ${groups.map(group => {
             return html`<affine-data-view-table-group
               data-group-key="${group.key}"
               .dataViewEle="${this.dataViewEle}"
@@ -238,7 +238,7 @@ export class DataViewTable extends DataViewBase<
               .group="${group}"
             ></affine-data-view-table-group>`;
           })}
-          ${this.renderAddGroup(groupHelper)}
+          ${this.renderAddGroup(this.view.groupManager)}
         </div>
       `;
     }

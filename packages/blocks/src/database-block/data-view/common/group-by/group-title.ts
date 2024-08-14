@@ -23,7 +23,7 @@ export function GroupTitle(
     clickOps: (evt: MouseEvent) => void;
   }
 ) {
-  const data = groupData.helper.groupConfig();
+  const data = groupData.manager.config$.value;
   if (!data) return nothing;
 
   const icon =
@@ -31,13 +31,13 @@ export function GroupTitle(
       ? ''
       : html` <uni-lit
           class="group-header-icon"
-          .uni="${groupData.helper.column.icon}"
+          .uni="${groupData.manager.column$.value?.icon}"
         ></uni-lit>`;
   const props: GroupRenderProps = {
     value: groupData.value,
-    data: groupData.helper.data,
-    updateData: groupData.helper.updateData,
-    updateValue: value => groupData.helper.updateValue(groupData.rows, value),
+    data: groupData.column.data$.value,
+    updateData: groupData.manager.updateData,
+    updateValue: value => groupData.manager.updateValue(groupData.rows, value),
     readonly: ops.readonly,
   };
 

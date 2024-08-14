@@ -55,12 +55,12 @@ export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const groupHelper = this.tableViewManager.groupHelper;
-    if (!groupHelper) {
+    const groups = this.tableViewManager.groupManager.groupsDataList$.value;
+    if (!groups) {
       const rows = this.tableViewManager.rows$.value;
       return this.renderGroup(rows);
     }
-    return groupHelper.groups.map(group => {
+    return groups.map(group => {
       return html`
         <div style="height: 44px;"></div>
         ${this.renderGroup(group.rows)}

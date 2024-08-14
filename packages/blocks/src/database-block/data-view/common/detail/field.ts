@@ -51,7 +51,8 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
             type: 'action',
             name: 'Duplicate Column',
             icon: DatabaseDuplicate,
-            hide: () => !this.column.duplicate || this.column.type === 'title',
+            hide: () =>
+              !this.column.duplicate || this.column.type$.value === 'title',
             select: () => {
               this.column.duplicate?.();
             },
@@ -108,7 +109,8 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
                 type: 'action',
                 name: 'Delete Column',
                 icon: DeleteIcon,
-                hide: () => !this.column.delete || this.column.type === 'title',
+                hide: () =>
+                  !this.column.delete || this.column.type$.value === 'title',
                 select: () => {
                   this.column.delete?.();
                 },
@@ -242,7 +244,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           <div class="icon">
             <uni-lit .uni="${this.column.icon}"></uni-lit>
           </div>
-          <div class="filed-name">${column.name}</div>
+          <div class="filed-name">${column.name$.value}</div>
         </div>
       </div>
       <div @click="${this._click}" class="${contentClass}">

@@ -180,10 +180,10 @@ export abstract class SingleViewBase<
   vars$ = computed(() => {
     return this.columnsWithoutFilter$.value.map(id => {
       const v = this.columnGet(id);
-      const propertyMeta = this.dataSource.getPropertyMeta(v.type);
+      const propertyMeta = this.dataSource.getPropertyMeta(v.type$.value);
       return {
         id: v.id,
-        name: v.name,
+        name: v.name$.value,
         type: propertyMeta.model.dataType(v.data$.value),
         icon: v.icon,
       };

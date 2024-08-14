@@ -167,11 +167,11 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   };
 
   renderColumn = (column: Column) => {
-    const isTitle = column.type === 'title';
-    const icon = column.hide ? hidden : show;
+    const isTitle = column.type$.value === 'title';
+    const icon = column.hide$.value ? hidden : show;
     const changeVisible = () => {
-      if (column.type !== 'title') {
-        column.updateHide(!column.hide);
+      if (column.type$.value !== 'title') {
+        column.updateHide(!column.hide$.value);
       }
     };
     const classList = classMap({
@@ -181,7 +181,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     return html` <div class="property-item">
       <div class="property-item-drag-bar"></div>
       <uni-lit class="property-item-icon" .uni="${column.icon}"></uni-lit>
-      <div class="property-item-name">${column.name}</div>
+      <div class="property-item-name">${column.name$.value}</div>
       <div class="${classList}" @click="${changeVisible}">${icon}</div>
     </div>`;
   };
@@ -227,7 +227,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
 
   override render() {
     const items = this.itemsGroup();
-    const isAllShowed = items.every(v => !v.hide);
+    const isAllShowed = items.every(v => !v.hide$.value);
     const clickChangeAll = () => this.clickChangeAll(isAllShowed);
     return html`
       <div class="properties-group-header">

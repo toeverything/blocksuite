@@ -5,7 +5,8 @@ import { tUnknown } from '../../logical/typesystem.js';
 export const anyTypeStatsFunctions: StatsFunction[] = [
   {
     group: 'Count',
-    name: 'Count All',
+    menuName: 'Count All',
+    displayName: 'All',
     type: 'count-all',
     dataType: tUnknown.create(),
     impl: (data: unknown[]) => {
@@ -14,7 +15,8 @@ export const anyTypeStatsFunctions: StatsFunction[] = [
   },
   {
     group: 'Count',
-    name: 'Count Values',
+    menuName: 'Count Values',
+    displayName: 'Values',
     type: 'count-values',
     dataType: tUnknown.create(),
     impl: (data: unknown[], { meta }) => {
@@ -31,7 +33,8 @@ export const anyTypeStatsFunctions: StatsFunction[] = [
   },
   {
     group: 'Count',
-    name: 'Count Unique Values',
+    menuName: 'Count Unique Values',
+    displayName: 'Unique Values',
     type: 'count-unique-values',
     dataType: tUnknown.create(),
     impl: (data: unknown[], { meta }) => {
@@ -48,7 +51,8 @@ export const anyTypeStatsFunctions: StatsFunction[] = [
   },
   {
     group: 'Count',
-    name: 'Count Empty',
+    menuName: 'Count Empty',
+    displayName: 'Empty',
     type: 'count-empty',
     dataType: tUnknown.create(),
     impl: (data, { meta }) => {
@@ -58,7 +62,8 @@ export const anyTypeStatsFunctions: StatsFunction[] = [
   },
   {
     group: 'Count',
-    name: 'Count Not Empty',
+    menuName: 'Count Not Empty',
+    displayName: 'Not Empty',
     type: 'count-not-empty',
     dataType: tUnknown.create(),
     impl: (data: unknown[], { meta }) => {
@@ -68,22 +73,24 @@ export const anyTypeStatsFunctions: StatsFunction[] = [
   },
   {
     group: 'Percent',
-    name: 'Percent Empty',
+    menuName: 'Percent Empty',
+    displayName: 'Empty',
     type: 'percent-empty',
     dataType: tUnknown.create(),
-    impl: (data, { meta }) => {
+    impl: (data: unknown[], { meta }) => {
       const emptyList = data.filter(value => meta.model.ops.isEmpty(value));
-      return (emptyList.length / data.length).toFixed(2);
+      return ((emptyList.length / data.length) * 100).toFixed(2) + '%';
     },
   },
   {
     group: 'Percent',
-    name: 'Percent Not Empty',
+    menuName: 'Percent Not Empty',
+    displayName: 'Not Empty',
     type: 'percent-not-empty',
     dataType: tUnknown.create(),
     impl: (data: unknown[], { meta }) => {
       const notEmptyList = data.filter(value => !meta.model.ops.isEmpty(value));
-      return (notEmptyList.length / data.length).toFixed(2);
+      return ((notEmptyList.length / data.length) * 100).toFixed(2) + '%';
     },
   },
 ];

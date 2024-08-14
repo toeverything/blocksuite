@@ -63,7 +63,7 @@ export class TableGroup extends SignalWatcher(
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
       const index = this.view.columnManagerList$.value.findIndex(
-        v => v.type === 'title'
+        v => v.type$.value === 'title'
       );
       selectionController.selection = TableAreaSelection.create({
         groupKey: this.group?.key,
@@ -81,7 +81,7 @@ export class TableGroup extends SignalWatcher(
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
       const index = this.view.columnManagerList$.value.findIndex(
-        v => v.type === 'title'
+        v => v.type$.value === 'title'
       );
       selectionController.selection = TableAreaSelection.create({
         groupKey: this.group?.key,
@@ -107,7 +107,7 @@ export class TableGroup extends SignalWatcher(
         hide: () => group.value == null,
         select: () => {
           group.rows.forEach(id => {
-            group.helper.removeFromGroup(id, group.key);
+            group.manager.removeFromGroup(id, group.key);
           });
         },
       },

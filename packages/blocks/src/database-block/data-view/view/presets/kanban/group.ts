@@ -132,7 +132,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
         hide: () => this.group.value == null,
         select: () => {
           this.group.rows.forEach(id => {
-            this.group.helper.removeFromGroup(id, this.group.key);
+            this.group.manager.removeFromGroup(id, this.group.key);
           });
         },
       },

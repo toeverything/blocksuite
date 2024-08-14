@@ -1,5 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { Text } from '@blocksuite/store';
+import { SignalWatcher, computed, signal } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -68,20 +69,20 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  columnValues$ = computed(() => {
-    return this.column.view.rows$.value.map(rowId =>
-      this.column.view.viewManager.dataSource.cellGetValue(
-        rowId,
-        this.column.id
-      )
-    );
+  cellValues$ = computed(() => {
+    if (this.group) {
+      return this.group.rows.map(id => {
+        return this.column.getValue(id);
+      });
+    }
+    return this.column.cells$.value.map(cell => cell.value$.value);
   });
 
   openMenu = (ev: MouseEvent) => {
     const groups: Record<string, StatsFunction[]> = {};
 
     statsFunctions.forEach(func => {
-      if (!typesystem.isSubtype(func.dataType, this.column.dataType)) {
+      if (!typesystem.isSubtype(func.dataType, this.column.dataType$.value)) {
         return;
       }
       if (!groups[func.group]) {
@@ -99,7 +100,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
             return {
               type: 'action',
               isSelected: func.type === this.column.statCalcOp$.value,
-              name: func.name,
+              name: func.menuName,
               select: () => {
                 this.column.updateStatCalcOp(func.type);
               },
@@ -128,7 +129,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   });
 
   statsResult$ = computed(() => {
-    const meta = this.column.view.columnGetMeta(this.column.type);
+    const meta = this.column.view.columnGetMeta(this.column.type$.value);
     if (!meta) {
       return null;
     }
@@ -137,14 +138,50 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
       return null;
     }
     return {
-      name: func.name,
-      value: func.impl(this.columnValues$.value, { meta }),
+      name: func.displayName,
+      value: func.impl(this.values$.value, { meta }),
     };
   });
+
+  subscriptionMap = new Map<unknown, () => void>();
+
+  values$ = signal<unknown[]>([]);
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', this.openMenu);
+    this.disposables.add(
+      this.cellValues$.subscribe(values => {
+        const map = new Map<unknown, () => void>();
+        values.forEach(value => {
+          if (value instanceof Text) {
+            const unsub = this.subscriptionMap.get(value);
+            if (unsub) {
+              map.set(value, unsub);
+              this.subscriptionMap.delete(value);
+            } else {
+              const f = () => {
+                this.values$.value = [...this.cellValues$.value];
+              };
+              value.yText.observe(f);
+              map.set(value, () => {
+                value.yText.unobserve(f);
+              });
+            }
+          }
+        });
+        this.subscriptionMap.forEach(unsub => {
+          unsub();
+        });
+        this.subscriptionMap = map;
+        this.values$.value = this.cellValues$.value;
+      })
+    );
+    this.disposables.add(() => {
+      this.subscriptionMap.forEach(unsub => {
+        unsub();
+      });
+    });
   }
 
   protected override render() {

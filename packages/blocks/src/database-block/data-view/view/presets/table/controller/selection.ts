@@ -181,18 +181,18 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const id = this.view.rowAdd({ before, id: rowId });
     if (groupKey != null) {
-      this.view.groupHelper?.moveCardTo(id, undefined, groupKey, {
+      this.view.groupManager.moveCardTo(id, undefined, groupKey, {
         before,
         id: rowId,
       });
     }
     const rows =
       groupKey != null
-        ? this.view.groupHelper?.groupMap[groupKey].rows
+        ? this.view.groupManager.groupDataMap$.value?.[groupKey].rows
         : this.view.rows$.value;
     requestAnimationFrame(() => {
       const index = this.host.view.columnManagerList$.value.findIndex(
-        v => v.type === 'title'
+        v => v.type$.value === 'title'
       );
       this.selection = TableAreaSelection.create({
         groupKey: groupKey,
@@ -235,7 +235,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   areaToRows(selection: TableAreaSelection) {
-    const rows = this.rows(selection.groupKey);
+    const rows = this.rows(selection.groupKey) ?? [];
     const ids = Array.from({
       length: selection.rowsSelection.end - selection.rowsSelection.start + 1,
     })
@@ -398,7 +398,7 @@ export class TableSelectionController implements ReactiveController {
   getGroup(groupKey: string | undefined) {
     const container =
       groupKey != null
-        ? this.tableContainer.querySelector(
+        ? this.tableContainer?.querySelector(
             `affine-data-view-table-group[data-group-key="${groupKey}"]`
           )
         : this.tableContainer;
@@ -421,8 +421,8 @@ export class TableSelectionController implements ReactiveController {
         scale: number;
       } {
     const rows = this.rows(groupKey);
-    const topRow = rows.item(top);
-    const bottomRow = rows.item(bottom);
+    const topRow = rows?.item(top);
+    const bottomRow = rows?.item(bottom);
     if (!topRow || !bottomRow) {
       return;
     }
@@ -454,8 +454,8 @@ export class TableSelectionController implements ReactiveController {
 
   hostConnected() {
     requestAnimationFrame(() => {
-      this.tableContainer.append(this.__selectionElement);
-      this.tableContainer.append(this.__dragToFillElement);
+      this.tableContainer?.append(this.__selectionElement);
+      this.tableContainer?.append(this.__dragToFillElement);
     });
     this.handleDragEvent();
     this.handleSelectionChange();
@@ -499,7 +499,7 @@ export class TableSelectionController implements ReactiveController {
         ) as TableRow | null
       )?.rowIndex ?? 0;
     const getRowByIndex = (index: number) => {
-      const tableRow = this.rows(lastRow.groupKey).item(index);
+      const tableRow = this.rows(lastRow.groupKey)?.item(index);
       if (!tableRow) {
         return;
       }
@@ -571,12 +571,11 @@ export class TableSelectionController implements ReactiveController {
   rows(groupKey: string | undefined) {
     const container =
       groupKey != null
-        ? this.tableContainer.querySelector(
+        ? this.tableContainer?.querySelector(
             `affine-data-view-table-group[data-group-key="${groupKey}"]`
           )
         : this.tableContainer;
-    assertExists(container);
-    return container.querySelectorAll('data-view-table-row');
+    return container?.querySelectorAll('data-view-table-row');
   }
 
   rowsToArea(
@@ -587,8 +586,8 @@ export class TableSelectionController implements ReactiveController {
     let maxIndex: number | undefined = undefined;
     const set = new Set(rows);
     for (const row of this.tableContainer
-      .querySelectorAll('data-view-table-row')
-      .values()) {
+      ?.querySelectorAll('data-view-table-row')
+      .values() ?? []) {
       if (!set.has(row.rowId)) {
         continue;
       }
@@ -620,7 +619,7 @@ export class TableSelectionController implements ReactiveController {
     const newSelection = this.focusToArea(selection);
     if (newSelection.rowsSelection.start === newSelection.focus.rowIndex) {
       newSelection.rowsSelection.end = Math.min(
-        this.rows(newSelection.groupKey).length - 1,
+        (this.rows(newSelection.groupKey)?.length ?? 0) - 1,
         newSelection.rowsSelection.end + 1
       );
       requestAnimationFrame(() => {
@@ -684,9 +683,9 @@ export class TableSelectionController implements ReactiveController {
       newSelection.columnsSelection.start === newSelection.focus.columnIndex
     ) {
       const max =
-        this.rows(newSelection.groupKey)
+        (this.rows(newSelection.groupKey)
           ?.item(0)
-          .querySelectorAll('affine-database-cell-container').length - 1;
+          .querySelectorAll('affine-database-cell-container').length ?? 0) - 1;
       newSelection.columnsSelection.end = Math.min(
         max,
         newSelection.columnsSelection.end + 1
@@ -749,8 +748,10 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const groupKey = cell.closest('affine-data-view-table-group')?.group?.key;
     const table = this.tableContainer;
-    const scrollContainer = table.parentElement;
-    assertExists(scrollContainer);
+    const scrollContainer = table?.parentElement;
+    if (!table || !scrollContainer) {
+      return;
+    }
     const tableRect = table.getBoundingClientRect();
     const startOffsetX = evt.x - tableRect.left;
     const startOffsetY = evt.y - tableRect.top;
@@ -886,11 +887,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   get tableContainer() {
-    const tableContainer = this.host.querySelector(
-      '.affine-database-table-container'
-    );
-    assertExists(tableContainer);
-    return tableContainer;
+    return this.host.querySelector('.affine-database-table-container');
   }
 
   get view() {
@@ -1039,7 +1036,8 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
   ) {
     const div = this.selectionRef.value;
     if (!div) return;
-    const tableRect = this.controller.tableContainer.getBoundingClientRect();
+    const tableRect = this.controller.tableContainer?.getBoundingClientRect();
+    if (!tableRect) return;
     // eslint-disable-next-line prefer-const
     const rect = this.controller.getRect(
       groupKey,
@@ -1086,7 +1084,11 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
       return;
     }
     const { left, top, width, height, scale } = rect;
-    const tableRect = this.controller.tableContainer.getBoundingClientRect();
+    const tableRect = this.controller.tableContainer?.getBoundingClientRect();
+    if (!tableRect) {
+      this.clearFocusStyle();
+      return;
+    }
 
     const x = left - tableRect.left / scale;
     const y = top - 1 - tableRect.top / scale;

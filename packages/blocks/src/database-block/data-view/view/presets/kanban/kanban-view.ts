@@ -4,7 +4,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
 
-import type { GroupHelper } from '../../../common/group-by/helper.js';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 import type { KanbanViewSelectionWithType } from './types.js';
 
@@ -103,8 +102,6 @@ export class DataViewKanban extends DataViewBase<
 
   clipboardController = new KanbanClipboardController(this);
 
-  groupHelper?: GroupHelper;
-
   hotkeysController = new KanbanHotkeysController(this);
 
   onWheel = (event: WheelEvent) => {
@@ -121,7 +118,7 @@ export class DataViewKanban extends DataViewBase<
   };
 
   renderAddGroup = () => {
-    const addGroup = this.groupHelper?.addGroup;
+    const addGroup = this.groupManager.addGroup;
     if (!addGroup) {
       return;
     }
@@ -131,9 +128,11 @@ export class DataViewKanban extends DataViewBase<
         options: {
           input: {
             onComplete: text => {
-              const column = this.groupHelper?.column;
+              const column = this.groupManager.column$.value;
               if (column) {
-                column.updateData(() => addGroup(text, column.data$) as never);
+                column.updateData(
+                  () => addGroup(text, column.data$.value) as never
+                );
               }
             },
           },
@@ -167,7 +166,7 @@ export class DataViewKanban extends DataViewBase<
             evt.newIndex != null
               ? groups[evt.newIndex - 1]?.group.key
               : undefined;
-          this.groupHelper?.moveGroupTo(
+          this.groupManager?.moveGroupTo(
             evt.item.group.key,
             key
               ? {
@@ -201,7 +200,7 @@ export class DataViewKanban extends DataViewBase<
   moveTo(id: string, evt: MouseEvent): void {
     const position = this.dragController.getInsertPosition(evt);
     if (position) {
-      position.group.group.helper.moveCardTo(
+      position.group.group.manager.moveCardTo(
         id,
         '',
         position.group.group.key,
@@ -211,8 +210,7 @@ export class DataViewKanban extends DataViewBase<
   }
 
   override render() {
-    this.groupHelper = this.view.groupHelper;
-    const groups = this.groupHelper?.groups;
+    const groups = this.groupManager.groupsDataList$.value;
     if (!groups) {
       return html``;
     }
@@ -242,6 +240,10 @@ export class DataViewKanban extends DataViewBase<
 
   showIndicator(evt: MouseEvent): boolean {
     return this.dragController.shooIndicator(evt, undefined) != null;
+  }
+
+  get groupManager() {
+    return this.view.groupManager;
   }
 
   @query('.affine-data-view-kanban-groups')

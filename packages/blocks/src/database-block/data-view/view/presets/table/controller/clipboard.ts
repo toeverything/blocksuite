@@ -193,7 +193,7 @@ function getSelectedArea(
   const { rowsSelection, columnsSelection, groupKey } = selection;
   const data: SelectedArea = [];
   const rows = groupKey
-    ? view.groupHelper?.groupMap[groupKey].rows
+    ? view.groupManager.groupDataMap$.value?.[groupKey].rows
     : view.rows$.value;
   const columns = view.columns$.value;
   if (!rows) {

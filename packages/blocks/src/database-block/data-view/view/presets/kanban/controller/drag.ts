@@ -1,7 +1,6 @@
 import type { ReactiveController } from 'lit';
 
-import { Point } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { Point, assertExists } from '@blocksuite/global/utils';
 
 import type { InsertToPosition } from '../../../../types.js';
 import type { DataViewKanban } from '../kanban-view.js';
@@ -75,7 +74,7 @@ export class KanbanDragController implements ReactiveController {
           return;
         }
         if (result && currentGroup) {
-          currentGroup.group.helper.moveCardTo(
+          currentGroup.group.manager.moveCardTo(
             ele.cardId,
             currentGroup.group.key,
             result.key,

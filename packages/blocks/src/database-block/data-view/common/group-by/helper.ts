@@ -1,34 +1,129 @@
+import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+
 import type { TType } from '../../logical/typesystem.js';
 import type { InsertToPosition } from '../../types.js';
+import type { Column } from '../../view-manager/column.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 import type { GroupBy, GroupProperty } from '../types.js';
-import type { GroupByConfig } from './matcher.js';
 
 import { insertPositionToIndex } from '../../utils/insert.js';
 import { groupByMatcher } from './matcher.js';
 
 export type GroupData = {
+  manager: GroupManager;
+  column: Column;
   key: string;
   name: string;
-  helper: GroupHelper;
   type: TType;
   value: unknown;
   rows: string[];
 };
 
-export class GroupHelper {
-  readonly groupMap: Record<string, GroupData>;
+export class GroupManager {
+  column$ = computed(() => {
+    const groupBy = this.groupBy$.value;
+    if (!groupBy) {
+      return;
+    }
+    return this.viewManager.columnGet(groupBy.columnId);
+  });
 
-  readonly groups: GroupData[];
+  config$ = computed(() => {
+    const groupBy = this.groupBy$.value;
+    if (!groupBy) {
+      return;
+    }
+    const result = groupByMatcher.find(v => v.data.name === groupBy.name);
+    if (!result) {
+      return;
+    }
+    return result.data;
+  });
+
+  groupDataMap$ = computed<Record<string, GroupData> | undefined>(() => {
+    const staticGroupMap = this.staticGroupDataMap$.value;
+    const config = this.config$.value;
+    const groupBy = this.groupBy$.value;
+    const column = this.column$.value;
+    const tType = column?.dataType$.value;
+    if (!staticGroupMap || !config || !groupBy || !tType || !column) {
+      return;
+    }
+    const groupMap: Record<string, GroupData> = {};
+    this.viewManager.rows$.value.forEach(id => {
+      const value = this.viewManager.cellGetJsonValue(id, groupBy.columnId);
+      const keys = config.valuesGroup(value, tType);
+      keys.forEach(({ key, value }) => {
+        if (!groupMap[key]) {
+          if (!staticGroupMap[key]) {
+            groupMap[key] = {
+              key,
+              column,
+              name: config.groupName(tType, value),
+              manager: this,
+              value,
+              rows: [],
+              type: tType,
+            };
+          } else {
+            groupMap[key] = {
+              ...staticGroupMap[key],
+              rows: [],
+            };
+          }
+        }
+        groupMap[key].rows.push(id);
+      });
+    });
+    return groupMap;
+  });
+
+  groupsDataList$ = computed(() => {
+    const groupMap = this.groupDataMap$.value;
+    if (!groupMap) {
+      return;
+    }
+    const sortedGroup = this.ops.sortGroup(Object.keys(groupMap));
+    sortedGroup.forEach(key => {
+      groupMap[key].rows = this.ops.sortRow(key, groupMap[key].rows);
+    });
+    return sortedGroup.map(key => groupMap[key]);
+  });
+
+  staticGroupDataMap$ = computed<
+    Record<string, Omit<GroupData, 'rows'>> | undefined
+  >(() => {
+    const config = this.config$.value;
+    const column = this.column$.value;
+    const tType = column?.dataType$.value;
+    if (!config || !tType || !column) {
+      return;
+    }
+    return Object.fromEntries(
+      config.defaultKeys(tType).map(({ key, value }) => [
+        key,
+        {
+          key,
+          column,
+          name: config.groupName(tType, value),
+          manager: this,
+          type: tType,
+          value,
+        },
+      ])
+    );
+  });
 
   updateData = (data: NonNullable<unknown>) => {
-    this.viewManager.columnUpdateData(this.columnId, data);
+    const columnId = this.columnId;
+    if (!columnId) {
+      return;
+    }
+    this.viewManager.columnUpdateData(columnId, data);
   };
 
   constructor(
-    private groupBy: GroupBy,
-    config: GroupByConfig,
-    type: TType,
+    private groupBy$: ReadonlySignal<GroupBy | undefined>,
     private viewManager: SingleView,
     private ops: {
       sortGroup: (keys: string[]) => string[];
@@ -40,57 +135,29 @@ export class GroupHelper {
         keys: string[]
       ) => void;
     }
-  ) {
-    this.groupMap = Object.fromEntries(
-      config.defaultKeys(type).map(({ key, value }) => [
-        key,
-        {
-          key,
-          name: config.groupName(type, value),
-          helper: this,
-          type,
-          value,
-          rows: [],
-        },
-      ])
-    );
-    this.viewManager.rows$.value.forEach(id => {
-      const value = this.viewManager.cellGetJsonValue(id, groupBy.columnId);
-      const keys = config.valuesGroup(value, type);
-      keys.forEach(({ key, value }) => {
-        if (!this.groupMap[key]) {
-          this.groupMap[key] = {
-            key,
-            name: config.groupName(type, value),
-            helper: this,
-            value,
-            rows: [],
-            type,
-          };
-        }
-        this.groupMap[key].rows.push(id);
-      });
-    });
-    const sortedGroup = ops.sortGroup(Object.keys(this.groupMap));
-    sortedGroup.forEach(key => {
-      this.groupMap[key].rows = ops.sortRow(key, this.groupMap[key].rows);
-    });
-    this.groups = sortedGroup.map(key => this.groupMap[key]);
-  }
+  ) {}
 
   addToGroup(rowId: string, key: string) {
+    const groupMap = this.groupDataMap$.value;
     const columnId = this.columnId;
-    const addTo = this.groupConfig()?.addToGroup ?? (value => value);
+    if (!groupMap || !columnId) {
+      return;
+    }
+    const addTo = this.config$.value?.addToGroup ?? (value => value);
     const newValue = addTo(
-      this.groupMap[key].value,
+      groupMap[key].value,
       this.viewManager.cellGetJsonValue(rowId, columnId)
     );
     this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }
 
   changeCardSort(groupKey: string, cardIds: string[]) {
+    const groups = this.groupsDataList$.value;
+    if (!groups) {
+      return;
+    }
     this.ops.changeRowSort(
-      this.groups.map(v => v.key),
+      groups.map(v => v.key),
       groupKey,
       cardIds
     );
@@ -108,21 +175,23 @@ export class GroupHelper {
     };
   }
 
-  groupConfig() {
-    return groupByMatcher.findData(v => v.name === this.groupBy.name);
-  }
-
   moveCardTo(
     rowId: string,
     fromGroupKey: string | undefined,
     toGroupKey: string,
     position: InsertToPosition
   ) {
+    const groupMap = this.groupDataMap$.value;
+    if (!groupMap) {
+      return;
+    }
     if (fromGroupKey !== toGroupKey) {
       const columnId = this.columnId;
-      const remove = this.groupConfig()?.removeFromGroup ?? (() => undefined);
-      const group =
-        fromGroupKey != null ? this.groupMap[fromGroupKey] : undefined;
+      if (!columnId) {
+        return;
+      }
+      const remove = this.config$.value?.removeFromGroup ?? (() => undefined);
+      const group = fromGroupKey != null ? groupMap[fromGroupKey] : undefined;
       let newValue: unknown = undefined;
       if (group) {
         newValue = remove(
@@ -130,18 +199,22 @@ export class GroupHelper {
           this.viewManager.cellGetJsonValue(rowId, columnId)
         );
       }
-      const addTo = this.groupConfig()?.addToGroup ?? (value => value);
-      newValue = addTo(this.groupMap[toGroupKey].value, newValue);
+      const addTo = this.config$.value?.addToGroup ?? (value => value);
+      newValue = addTo(groupMap[toGroupKey].value, newValue);
       this.viewManager.cellUpdateValue(rowId, columnId, newValue);
     }
-    const rows = this.groupMap[toGroupKey].rows.filter(id => id !== rowId);
+    const rows = groupMap[toGroupKey].rows.filter(id => id !== rowId);
     const index = insertPositionToIndex(position, rows, id => id);
     rows.splice(index, 0, rowId);
     this.changeCardSort(toGroupKey, rows);
   }
 
   moveGroupTo(groupKey: string, position: InsertToPosition) {
-    const keys = this.groups.map(v => v.key);
+    const groups = this.groupsDataList$.value;
+    if (!groups) {
+      return;
+    }
+    const keys = groups.map(v => v.key);
     keys.splice(
       keys.findIndex(key => key === groupKey),
       1
@@ -152,45 +225,45 @@ export class GroupHelper {
   }
 
   removeFromGroup(rowId: string, key: string) {
+    const groupMap = this.groupDataMap$.value;
+    if (!groupMap) {
+      return;
+    }
     const columnId = this.columnId;
-    const remove = this.groupConfig()?.removeFromGroup ?? (() => undefined);
+    if (!columnId) {
+      return;
+    }
+    const remove = this.config$.value?.removeFromGroup ?? (() => undefined);
     const newValue = remove(
-      this.groupMap[key].value,
+      groupMap[key].value,
       this.viewManager.cellGetJsonValue(rowId, columnId)
     );
     this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }
 
   updateValue(rows: string[], value: unknown) {
+    const columnId = this.columnId;
+    if (!columnId) {
+      return;
+    }
     rows.forEach(id => {
-      this.viewManager.cellUpdateValue(id, this.columnId, value);
+      this.viewManager.cellUpdateValue(id, columnId, value);
     });
   }
 
   get addGroup() {
-    return this.viewManager.columnGetMeta(this.column.type)?.model.ops.addGroup;
-  }
-
-  get column() {
-    return this.viewManager.columnGet(this.groupBy.columnId);
+    const type = this.column$.value?.type$.value;
+    if (!type) {
+      return;
+    }
+    return this.viewManager.columnGetMeta(type)?.model.ops.addGroup;
   }
 
   get columnId() {
-    return this.groupBy.columnId;
-  }
-
-  get data() {
-    return this.viewManager.columnGetData(this.columnId);
-  }
-
-  get dataType() {
-    return this.viewManager.columnGetDataType(this.groupBy.columnId);
-  }
-
-  get type() {
-    return this.viewManager.columnGetType(this.columnId);
+    return this.groupBy$.value?.columnId;
   }
 }
+
 export const sortByManually = <T>(
   arr: T[],
   getId: (v: T) => string,
