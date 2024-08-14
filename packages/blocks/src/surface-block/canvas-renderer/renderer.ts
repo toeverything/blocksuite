@@ -54,7 +54,7 @@ export class Renderer {
 
   private _overlays = new Set<Overlay>();
 
-  private _shouldUpdate = false;
+  private _refreshRafId: number | null = null;
 
   private _stackingCanvas: HTMLCanvasElement[] = [];
 
@@ -195,7 +195,7 @@ export class Renderer {
 
     this._disposables.add(
       this.viewport.viewportUpdated.on(() => {
-        this._shouldUpdate = true;
+        this.refresh();
       })
     );
 
@@ -206,20 +206,10 @@ export class Renderer {
           sizeUpdatedRafId = null;
           this._resetSize();
           this._render();
-          this._shouldUpdate = false;
+          this.refresh();
         }, this._container);
       })
     );
-  }
-
-  private _loop() {
-    requestConnectedFrame(() => {
-      if (this._shouldUpdate) {
-        this._shouldUpdate = false;
-        this._render();
-      }
-      this._loop();
-    }, this._container);
   }
 
   private _render() {
@@ -323,14 +313,13 @@ export class Renderer {
     sizeUpdater.update(this.canvas);
 
     this._stackingCanvas.forEach(sizeUpdater.update);
-
-    this._shouldUpdate = true;
+    this.refresh();
   }
 
   addOverlay(overlay: Overlay) {
     overlay.setRenderer(this);
     this._overlays.add(overlay);
-    this._shouldUpdate = true;
+    this.refresh();
   }
 
   /**
@@ -342,7 +331,7 @@ export class Renderer {
     container.append(this.canvas);
 
     this._resetSize();
-    this._loop();
+    this.refresh();
   }
 
   dispose(): void {
@@ -401,7 +390,12 @@ export class Renderer {
   }
 
   refresh() {
-    this._shouldUpdate = true;
+    if (this._refreshRafId !== null) return;
+
+    this._refreshRafId = requestConnectedFrame(() => {
+      this._render();
+      this._refreshRafId = null;
+    }, this._container);
   }
 
   removeOverlay(overlay: Overlay) {
@@ -411,7 +405,7 @@ export class Renderer {
 
     overlay.setRenderer(null);
     this._overlays.delete(overlay);
-    this._shouldUpdate = true;
+    this.refresh();
   }
 
   get stackingCanvas() {
