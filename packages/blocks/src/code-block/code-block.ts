@@ -1,11 +1,15 @@
-import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { CodeBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { VLine } from '@blocksuite/inline';
 
+import {
+  type RichText,
+  focusTextModel,
+} from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
 import { noop } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -164,6 +168,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
       }
       return indexArr;
     };
+
     this.bindHotKey({
       Backspace: ctx => {
         const state = ctx.get('keyboardState');
@@ -288,6 +293,33 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
         }
 
         return;
+      },
+      'Control-d': () => {
+        if (!IS_MAC) return;
+        return true;
+      },
+      Delete: () => {
+        return true;
+      },
+      Enter: () => {
+        this.doc.captureSync();
+        return true;
+      },
+      'Mod-Enter': () => {
+        const { model, std } = this;
+        if (!model || !std) return;
+        const inlineEditor = this.inlineEditor;
+        const inlineRange = inlineEditor?.getInlineRange();
+        if (!inlineRange || !inlineEditor) return;
+        const isEnd = model.text.length === inlineRange.index;
+        if (!isEnd) return;
+        const parent = this.doc.getParent(model);
+        if (!parent) return;
+        const index = parent.children.indexOf(model);
+        if (index === -1) return;
+        const id = this.doc.addBlock('affine:paragraph', {}, parent, index + 1);
+        focusTextModel(std, id);
+        return true;
       },
     });
 
