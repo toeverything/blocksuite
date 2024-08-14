@@ -58,8 +58,8 @@ const styles = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     box-sizing: border-box;
     padding: 4px;
     background: var(--affine-background-secondary-color);
@@ -78,8 +78,8 @@ const styles = css`
     flex: 1;
 
     font-size: var(--affine-font-sm);
-    line-height: 24px;
-    height: 24px;
+    line-height: 22px;
+    height: 22px;
   }
 
   .text.general,

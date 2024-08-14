@@ -3,12 +3,11 @@ import type {
   NoteBlockModel,
 } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
-import type { Signal } from '@lit-labs/preact-signals';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
-import { SignalWatcher, effect } from '@lit-labs/preact-signals';
+import { SignalWatcher, effect, signal } from '@lit-labs/preact-signals';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -29,7 +28,10 @@ import {
   getNotesFromDoc,
   isHeadingBlock,
 } from '../utils/query.js';
-import { scrollToBlock, scrollToBlockWithHighlight } from '../utils/scroll.js';
+import {
+  observeActiveHeadingDuringScroll,
+  scrollToBlockWithHighlight,
+} from '../utils/scroll.js';
 import './outline-notice.js';
 
 type OutlineNoteItem = {
@@ -113,6 +115,8 @@ export const AFFINE_OUTLINE_PANEL_BODY = 'affine-outline-panel-body';
 export class OutlinePanelBody extends SignalWatcher(
   WithDisposable(LitElement)
 ) {
+  private _activeHeadingId$ = signal<string | null>(null);
+
   private _changedFlag = false;
 
   private _clearHighlightMask = () => {};
@@ -120,6 +124,8 @@ export class OutlinePanelBody extends SignalWatcher(
   private _docDisposables: DisposableGroup | null = null;
 
   private _indicatorTranslateY = 0;
+
+  private _lockActiveHeadingId = false;
 
   private _oldViewport?: {
     zoom: number;
@@ -162,7 +168,7 @@ export class OutlinePanelBody extends SignalWatcher(
                 .index=${note.index}
                 .doc=${this.doc}
                 .editorMode=${this.editor.mode}
-                .activeHeadingId=${this.activeHeadingId.value}
+                .activeHeadingId=${this._activeHeadingId$.value}
                 .status=${selectedNotesSet.has(note.note.id)
                   ? this._dragging
                     ? 'placeholder'
@@ -173,7 +179,9 @@ export class OutlinePanelBody extends SignalWatcher(
                 @select=${this._selectNote}
                 @drag=${this._drag}
                 @fitview=${this._fitToElement}
-                @clickblock=${this._scrollToBlock}
+                @clickblock=${(e: ClickBlockEvent) => {
+                  this._scrollToBlock(e.detail.blockId).catch(console.error);
+                }}
                 @displaymodechange=${this._handleDisplayModeChange}
               ></affine-outline-note-card>
             `
@@ -191,7 +199,7 @@ export class OutlinePanelBody extends SignalWatcher(
                   .number=${idx + 1}
                   .index=${note.index}
                   .doc=${this.doc}
-                  .activeHeadingId=${this.activeHeadingId.value}
+                  .activeHeadingId=${this._activeHeadingId$.value}
                   .invisible=${true}
                   .showPreviewIcon=${this.showPreviewIcon}
                   .enableNotesSorting=${this.enableNotesSorting}
@@ -401,10 +409,10 @@ export class OutlinePanelBody extends SignalWatcher(
 
     return html`<affine-outline-block-preview
       class=${classMap({
-        active: this.doc.root.id === this.activeHeadingId.value,
+        active: this.doc.root.id === this._activeHeadingId$.value,
       })}
       .block=${this.doc.root}
-      .className=${this.doc.root?.id === this.activeHeadingId.value
+      .className=${this.doc.root?.id === this._activeHeadingId$.value
         ? 'active'
         : ''}
       .cardNumber=${1}
@@ -412,18 +420,19 @@ export class OutlinePanelBody extends SignalWatcher(
       .showPreviewIcon=${this.showPreviewIcon}
       @click=${() => {
         if (!this.doc.root) return;
-        scrollToBlock(this.editor, this.doc.root.id);
-        this.activeHeadingId.value = this.doc.root.id;
+        this._scrollToBlock(this.doc.root.id).catch(console.error);
       }}
     ></affine-outline-block-preview>`;
   }
 
-  private async _scrollToBlock(e: ClickBlockEvent) {
+  private async _scrollToBlock(blockId: string) {
+    this._lockActiveHeadingId = true;
+    this._activeHeadingId$.value = blockId;
     this._clearHighlightMask = await scrollToBlockWithHighlight(
       this.editor,
-      e.detail.blockId
+      blockId
     );
-    this.activeHeadingId.value = e.detail.blockId;
+    this._lockActiveHeadingId = false;
   }
 
   private _selectNote(e: SelectEvent) {
@@ -577,6 +586,15 @@ export class OutlinePanelBody extends SignalWatcher(
 
   override connectedCallback(): void {
     super.connectedCallback();
+    this.disposables.add(
+      observeActiveHeadingDuringScroll(
+        () => this.editor,
+        newHeadingId => {
+          if (this._lockActiveHeadingId) return;
+          this._activeHeadingId$.value = newHeadingId;
+        }
+      )
+    );
   }
 
   override disconnectedCallback(): void {
@@ -665,9 +683,6 @@ export class OutlinePanelBody extends SignalWatcher(
 
   @query('.outline-panel-body-container')
   accessor OutlinePanelContainer!: HTMLElement;
-
-  @property({ attribute: false })
-  accessor activeHeadingId!: Signal<string | null>;
 
   @property({ attribute: false })
   accessor doc!: Doc;

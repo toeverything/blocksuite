@@ -1,5 +1,4 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { Signal } from '@lit-labs/preact-signals';
 
 import { NoteDisplayMode } from '@blocksuite/blocks';
 import { DisposableGroup, clamp } from '@blocksuite/global/utils';
@@ -52,12 +51,12 @@ export function isBlockBeforeViewportCenter(
   return blockCenter < editorCenter + blockRect.height;
 }
 
-export const observeActiveHeading = (
+export const observeActiveHeadingDuringScroll = (
   getEditor: () => AffineEditorContainer, // workaround for editor changed
-  activeHeadingId$: Signal<string | null>
+  update: (activeHeading: string | null) => void
 ) => {
   const editor = getEditor();
-  activeHeadingId$.value = editor.doc.root?.id ?? null;
+  update(editor.doc.root?.id ?? null);
 
   const disposables = new DisposableGroup();
   disposables.addFromEvent(
@@ -79,7 +78,7 @@ export const observeActiveHeading = (
           activeHeadingId = heading.id;
         }
       });
-      activeHeadingId$.value = activeHeadingId;
+      update(activeHeadingId);
     },
     true
   );
@@ -95,6 +94,8 @@ function highlightBlock(editor: AffineEditorContainer, blockId: string) {
 
   const { host } = editor;
   if (!host) return emptyClear;
+
+  if (editor.doc.root?.id === blockId) return emptyClear;
 
   const rootComponent = host.querySelector('affine-page-root');
   if (!rootComponent) return emptyClear;
@@ -173,37 +174,28 @@ export async function scrollToBlockWithHighlight(
     }
 
     // wait block be scrolled into view
+    let lastTop = -1;
     highlightIntervalId = setInterval(() => {
       if (highlightIntervalId === null) {
         console.error('unreachable code');
         return;
       }
 
-      if (timeCount > timeout) {
-        clearInterval(highlightIntervalId);
-        resolve(() => {});
-        return;
-      }
-
       const { host } = editor;
-      if (!host) {
-        clearInterval(highlightIntervalId);
-        resolve(() => {});
-        return;
-      }
+      const block = host?.view.getBlock(blockId);
 
-      const block = host.view.getBlock(blockId);
-      if (!block) {
+      if (!host || !block || timeCount > timeout) {
         clearInterval(highlightIntervalId);
         resolve(() => {});
         return;
       }
 
       const blockRect = block.getBoundingClientRect();
-      const { top, bottom } = blockRect;
+      const { top } = blockRect;
 
-      if (top < 0 || bottom > window.innerHeight) {
+      if (top !== lastTop) {
         timeCount += 100;
+        lastTop = top;
         return;
       }
 

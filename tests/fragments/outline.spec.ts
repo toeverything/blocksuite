@@ -265,9 +265,7 @@ test.describe('toc-viewer', () => {
   }
 
   function getIndicators(page: Page) {
-    return page.locator(
-      'affine-outline-viewer .outline-viewer-indicator:not(.header)'
-    );
+    return page.locator('affine-outline-viewer .outline-viewer-indicator');
   }
 
   test('should display highlight indicators when non-empty headings exists', async ({
@@ -323,12 +321,12 @@ test.describe('toc-viewer', () => {
     await pressEnter(page);
 
     const indicator = getIndicators(page).first();
-    await indicator.hover();
+    await indicator.hover({ force: true });
 
-    const content = page.locator('.outline-viewer-content');
-    await expect(content).toHaveCount(2);
-    await expect(content.nth(0)).toContainText(['Table of Contents']);
-    await expect(content.nth(1)).toContainText(['Heading 1']);
+    const items = page.locator('.outline-viewer-item');
+    await expect(items).toHaveCount(2);
+    await expect(items.nth(0)).toContainText(['Table of Contents']);
+    await expect(items.nth(1)).toContainText(['Heading 1']);
   });
 
   test('should highlight indicator when scrolling', async ({ page }) => {
@@ -363,7 +361,7 @@ test.describe('toc-viewer', () => {
     const headings = await createHeadingsWithGap(page);
 
     const indicators = getIndicators(page);
-    await indicators.first().hover();
+    await indicators.first().hover({ force: true });
 
     const headingsInPanel = Array.from({ length: 6 }, (_, i) =>
       viewer.locator(`.h${i + 1} > span`)
@@ -414,7 +412,7 @@ test.describe('toc-viewer', () => {
     const indicators = getIndicators(page);
     await expect(indicators).toHaveCount(2);
 
-    await indicators.first().hover();
+    await indicators.first().hover({ force: true });
 
     await expect(viewer).toBeVisible();
     const hiddenTitle = viewer.locator('.hidden-title');
