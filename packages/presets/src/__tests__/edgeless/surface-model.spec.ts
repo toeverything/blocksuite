@@ -396,7 +396,7 @@ describe('stash/pop', () => {
     expect(elementModel.h).toBe(180 + elementModel.lineWidth);
   });
 
-  test('non-yfield property should not allow stash/pop, and should failed silently ', () => {
+  test('non-field property should not allow stash/pop, and should failed silently ', () => {
     const id = model.addElement({
       type: 'group',
     });

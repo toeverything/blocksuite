@@ -7,7 +7,7 @@ import { startObserve } from './observer.js';
 
 const yPropsSetSymbol = Symbol('yProps');
 
-export function getYFieldPropsSet(target: unknown): Set<string | symbol> {
+export function getFieldPropsSet(target: unknown): Set<string | symbol> {
   const proto = Object.getPrototypeOf(target);
   // @ts-ignore
   if (!Object.hasOwn(proto, yPropsSetSymbol)) {
@@ -19,7 +19,7 @@ export function getYFieldPropsSet(target: unknown): Set<string | symbol> {
   return proto[yPropsSetSymbol] as Set<string | symbol>;
 }
 
-export function yfield<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
+export function field<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
   return function yDecorator(
     target: ClassAccessorDecoratorTarget<T, V>,
     context: ClassAccessorDecoratorContext
@@ -28,14 +28,14 @@ export function yfield<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
 
     return {
       init(this: GfxPrimitiveElementModel, v: V) {
-        const yProps = getYFieldPropsSet(this);
+        const yProps = getFieldPropsSet(this);
 
         yProps.add(prop);
 
         if (
           getDecoratorState(
             this.surface ?? Object.getPrototypeOf(this).constructor
-          )?.skipYfield
+          )?.skipField
         ) {
           return;
         }
@@ -63,7 +63,7 @@ export function yfield<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
       set(this: T, originalVal: V) {
         const isCreating = getDecoratorState(this.surface)?.creating;
 
-        if (getDecoratorState(this.surface)?.skipYfield) {
+        if (getDecoratorState(this.surface)?.skipField) {
           return;
         }
 

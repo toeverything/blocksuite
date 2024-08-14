@@ -23,8 +23,8 @@ import {
 } from '@blocksuite/affine-model';
 import {
   GfxPrimitiveElementModel,
+  field,
   local,
-  yfield,
 } from '@blocksuite/block-std/gfx';
 import { DocCollection, type Y } from '@blocksuite/store';
 
@@ -93,46 +93,46 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     return 'shape';
   }
 
-  @yfield('#000000' as Color)
+  @field('#000000' as Color)
   accessor color!: Color;
 
-  @yfield()
+  @field()
   accessor fillColor: Color = '--affine-palette-shape-yellow';
 
-  @yfield()
+  @field()
   accessor filled: boolean = false;
 
-  @yfield(FontFamily.Inter as string)
+  @field(FontFamily.Inter as string)
   accessor fontFamily!: string;
 
-  @yfield(ShapeTextFontSize.MEDIUM)
+  @field(ShapeTextFontSize.MEDIUM)
   accessor fontSize!: number;
 
-  @yfield(FontStyle.Normal as FontStyle)
+  @field(FontStyle.Normal as FontStyle)
   accessor fontStyle!: FontStyle;
 
-  @yfield(FontWeight.Regular as FontWeight)
+  @field(FontWeight.Regular as FontWeight)
   accessor fontWeight!: FontWeight;
 
-  @yfield(false as false | number)
+  @field(false as false | number)
   accessor maxWidth: false | number = false;
 
-  @yfield([SHAPE_TEXT_VERTICAL_PADDING, SHAPE_TEXT_PADDING])
+  @field([SHAPE_TEXT_VERTICAL_PADDING, SHAPE_TEXT_PADDING])
   accessor padding: [number, number] = [
     SHAPE_TEXT_VERTICAL_PADDING,
     SHAPE_TEXT_PADDING,
   ];
 
-  @yfield()
+  @field()
   accessor radius: number = 0;
 
-  @yfield(0)
+  @field(0)
   accessor rotate: number = 0;
 
-  @yfield(DEFAULT_ROUGHNESS)
+  @field(DEFAULT_ROUGHNESS)
   accessor roughness: number = DEFAULT_ROUGHNESS;
 
-  @yfield()
+  @field()
   accessor shadow: {
     blur: number;
     offsetX: number;
@@ -140,40 +140,40 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     color: string;
   } | null = null;
 
-  @yfield('General' as ShapeStyle)
+  @field('General' as ShapeStyle)
   accessor shapeStyle: ShapeStyle = 'General';
 
-  @yfield()
+  @field()
   accessor shapeType: ShapeType = 'rect';
 
-  @yfield()
+  @field()
   accessor strokeColor: Color = '--affine-palette-line-yellow';
 
-  @yfield()
+  @field()
   accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
 
-  @yfield()
+  @field()
   accessor strokeWidth: number = 4;
 
-  @yfield()
+  @field()
   accessor text: Y.Text | undefined = undefined;
 
-  @yfield(TextAlign.Center as TextAlign)
+  @field(TextAlign.Center as TextAlign)
   accessor textAlign!: TextAlign;
 
   @local()
   accessor textDisplay: boolean = true;
 
-  @yfield(TextAlign.Center as TextAlign)
+  @field(TextAlign.Center as TextAlign)
   accessor textHorizontalAlign!: TextAlign;
 
-  @yfield(TextResizing.AUTO_HEIGHT as TextResizing)
+  @field(TextResizing.AUTO_HEIGHT as TextResizing)
   accessor textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
 
-  @yfield(TextVerticalAlign.Center as TextVerticalAlign)
+  @field(TextVerticalAlign.Center as TextVerticalAlign)
   accessor textVerticalAlign!: TextVerticalAlign;
 
-  @yfield()
+  @field()
   accessor xywh: SerializedXYWH = '[0,0,100,100]';
 }
 

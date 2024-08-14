@@ -7,8 +7,8 @@ import {
   GfxPrimitiveElementModel,
   convert,
   derive,
+  field,
   watch,
-  yfield,
 } from '@blocksuite/block-std/gfx';
 import {
   Bound,
@@ -131,7 +131,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
     return 'brush';
   }
 
-  @yfield()
+  @field()
   accessor color: Color = '#000000';
 
   @watch((_, instance) => {
@@ -159,7 +159,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
       xywh: transformed.bound.serialize(),
     };
   })
-  @yfield()
+  @field()
   accessor lineWidth: number = 4;
 
   @watch((_, instance) => {
@@ -186,10 +186,10 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
 
     return relativePoints;
   })
-  @yfield()
+  @field()
   accessor points: (IVec | IVec3)[] = [];
 
-  @yfield(0)
+  @field(0)
   accessor rotate: number = 0;
 
   @derive((xywh: SerializedXYWH, instance: Instance) => {
@@ -214,7 +214,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
       ]),
     };
   })
-  @yfield()
+  @field()
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 }
 
