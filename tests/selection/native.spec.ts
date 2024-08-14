@@ -411,8 +411,7 @@ test('native range selection backwards by forwardDelete', async ({ page }) => {
 
   await waitNextFrame(page);
   await undoByKeyboard(page);
-  // FIXME
-  // await assertRichTexts(page, ['123', '456', '789']);
+  await assertRichTexts(page, ['123', '456', '789']);
 
   await redoByKeyboard(page);
   await assertRichTexts(page, ['']);

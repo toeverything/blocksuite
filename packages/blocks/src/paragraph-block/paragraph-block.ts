@@ -1,11 +1,13 @@
-import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
+import {
+  type RichText,
+  focusTextModel,
+} from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { effect, signal } from '@lit-labs/preact-signals';
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -48,6 +50,64 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
   override connectedCallback() {
     super.connectedCallback();
     bindContainerHotkey(this);
+    this.bindHotKey({
+      'Mod-Enter': ctx => {
+        const { model, inlineEditor, doc } = this;
+        if (model.type !== 'quote') return;
+        const inlineRange = this.inlineEditor?.getInlineRange();
+        if (!inlineRange || !inlineEditor) return;
+        const raw = ctx.get('keyboardState').raw;
+        raw.preventDefault();
+        doc.captureSync();
+        inlineEditor.insertText(inlineRange, '\n');
+        inlineEditor.setInlineRange({
+          index: inlineRange.index + 1,
+          length: 0,
+        });
+        return true;
+      },
+      Enter: ctx => {
+        const { model, std, doc } = this;
+        if (model.type !== 'quote') return;
+        const range = this.inlineEditor?.getInlineRange();
+        if (!range) return;
+        const isEnd = model.text.length === range.index;
+        const textStr = model.text.toString();
+        const raw = ctx.get('keyboardState').raw;
+
+        doc.captureSync();
+        /**
+         * If quote block ends with two blank lines, split the block
+         * ---
+         * before:
+         * > \n
+         * > \n|
+         *
+         * after:
+         * > \n
+         * |
+         * ---
+         */
+        const endWithTwoBlankLines = textStr === '\n' || textStr.endsWith('\n');
+        if (isEnd && endWithTwoBlankLines) {
+          model.text.delete(range.index - 1, 1);
+          const parent = this.doc.getParent(model);
+          if (!parent) return;
+          const index = parent.children.indexOf(model);
+          if (index === -1) return;
+          raw.preventDefault();
+          const id = this.doc.addBlock(
+            'affine:paragraph',
+            {},
+            parent,
+            index + 1
+          );
+          focusTextModel(std, id);
+        }
+
+        return true;
+      },
+    });
     this.handleEvent(
       'compositionStart',
       () => {
@@ -169,9 +229,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
   }
 
   get inlineManager() {
-    const inlineManager = this.service?.inlineManager;
-    assertExists(inlineManager);
-    return inlineManager;
+    return this.service?.inlineManager;
   }
 
   get markdownShortcutHandler() {
