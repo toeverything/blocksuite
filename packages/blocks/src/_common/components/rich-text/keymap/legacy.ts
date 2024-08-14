@@ -58,18 +58,6 @@ export function hardEnter(
   const isEnd = model.text.length === range.index;
   const softEnterable = isSoftEnterable(model);
   if (isEnd && softEnterable) {
-    if (matchFlavours(model, ['affine:code'])) {
-      if (shortKey) {
-        // shortKey+Enter to exit the block
-        handleBlockEndEnter(editorHost, model);
-        return KEYBOARD_PREVENT_DEFAULT;
-      }
-
-      // add a new line to the block when press Enter solely
-      onSoftEnter(range, inlineEditor);
-      return KEYBOARD_PREVENT_DEFAULT;
-    }
-
     const textStr = model.text.toString();
     const endWithTwoBlankLines = textStr === '\n' || textStr.endsWith('\n');
     const shouldSoftEnter = softEnterable && !endWithTwoBlankLines;
@@ -123,9 +111,6 @@ export function onBackspace(
   inlineEditor: AffineInlineEditor
 ) {
   if (isCollapsedAtBlockStart(inlineEditor)) {
-    if (model.flavour === 'affine:code') {
-      return KEYBOARD_ALLOW_DEFAULT;
-    }
     e.stopPropagation();
     handleLineStartBackspace(editorHost, model);
     return KEYBOARD_PREVENT_DEFAULT;

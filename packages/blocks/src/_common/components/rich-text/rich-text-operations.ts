@@ -369,12 +369,6 @@ export function handleRemoveAllIndentForMultiBlocks(
   }
 }
 
-// When deleting at line end of a code block,
-// do nothing
-function handleCodeBlockForwardDelete(model: ExtendedModel) {
-  return matchFlavours(model, ['affine:code']);
-}
-
 function handleDatabaseBlockForwardDelete(model: ExtendedModel) {
   const doc = model.doc;
   return isInsideBlockByFlavour(doc, model, 'affine:database');
@@ -869,7 +863,6 @@ export function handleLineEndForwardDelete(
   model: ExtendedModel
 ) {
   if (
-    handleCodeBlockForwardDelete(model) ||
     handleListBlockForwardDelete(editorHost, model) ||
     handleParagraphBlockForwardDelete(editorHost, model)
   ) {
