@@ -1,4 +1,8 @@
-import type { ListBlockModel, RootBlockModel } from '@blocksuite/affine-model';
+import type {
+  ListBlockModel,
+  ParagraphBlockModel,
+  RootBlockModel,
+} from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
@@ -28,14 +32,7 @@ import { EMBED_BLOCK_FLAVOUR_LIST } from '../../consts.js';
  * Whether the block supports rendering its children.
  */
 function supportsChildren(model: BlockModel): boolean {
-  if (
-    matchFlavours(model, [
-      // 'affine:database',
-      'affine:image',
-      'affine:divider',
-      'affine:code',
-    ])
-  ) {
+  if (matchFlavours(model, ['affine:image', 'affine:divider', 'affine:code'])) {
     return false;
   }
   if (
@@ -59,14 +56,8 @@ export function handleBlockEndEnter(
   }
 
   const getProps = ():
-    | [
-        'affine:list',
-        BlockSuite.ModelProps<BlockSuite.BlockModels['affine:list']>,
-      ]
-    | [
-        'affine:paragraph',
-        BlockSuite.ModelProps<BlockSuite.BlockModels['affine:paragraph']>,
-      ] => {
+    | ['affine:list', BlockSuite.ModelProps<ListBlockModel>]
+    | ['affine:paragraph', BlockSuite.ModelProps<ParagraphBlockModel>] => {
     const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
     if (shouldInheritFlavour) {
       return [model.flavour, { type: model.type }];
@@ -432,41 +423,6 @@ function handleDatabaseBlockForwardDelete(model: ExtendedModel) {
   return isInsideBlockByFlavour(doc, model, 'affine:database');
 }
 
-// When deleting at line start of a list block,
-// switch it to normal paragraph block.
-function handleListBlockBackspace(
-  editorHost: EditorHost,
-  model: ExtendedModel
-) {
-  const doc = model.doc;
-  if (!matchFlavours(model, ['affine:list'])) return false;
-
-  const parent = doc.getParent(model);
-  if (!parent) return false;
-
-  const nextSiblings = doc.getNexts(model);
-  const index = parent.children.indexOf(model);
-  const blockProps = {
-    type: 'text' as const,
-    text: model.text?.clone(),
-    children: model.children,
-  };
-  doc.captureSync();
-  doc.deleteBlock(model, {
-    deleteChildren: false,
-  });
-  nextSiblings
-    .filter(
-      sibling =>
-        matchFlavours(sibling, ['affine:list']) && sibling.type === 'numbered'
-    )
-    .forEach(sibling => doc.updateBlock(sibling, {}));
-
-  const id = doc.addBlock('affine:paragraph', blockProps, parent, index);
-  focusTextModel(editorHost.std, id);
-  return true;
-}
-
 // When deleting at line end of a list block,
 // check current block's children and siblings
 /**
@@ -726,7 +682,7 @@ function handleParagraphDeleteActions(
 
 function handleParagraphBlockBackspace(
   editorHost: EditorHost,
-  model: ExtendedModel
+  model: BlockModel
 ) {
   const doc = model.doc;
   if (!matchFlavours(model, ['affine:paragraph'])) return false;
@@ -939,12 +895,16 @@ export function handleLineStartBackspace(
   editorHost: EditorHost,
   model: ExtendedModel
 ) {
-  if (
-    handleListBlockBackspace(editorHost, model) ||
-    handleParagraphBlockBackspace(editorHost, model)
-  ) {
-    return;
-  }
+  editorHost.command
+    .chain()
+    .try(chain => [
+      chain.listToParagraph({ id: model.id }),
+      chain.inline((_, next) => {
+        const result = handleParagraphBlockBackspace(editorHost, model);
+        if (result) return next();
+      }),
+    ])
+    .run();
 }
 
 export function handleLineEndForwardDelete(

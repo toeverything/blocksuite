@@ -44,11 +44,16 @@ export function convertToList(
     if (listType === 'numbered') {
       let order = parseInt(prefix.slice(0, -1));
       if (!Number.isInteger(order)) order = 1;
-      const { list } = element.std.command.exec('convertToNumberedList', {
-        id: model.id,
-        order,
-        stopCapturing: false,
-      });
+      const { listConvertedId } = element.std.command.exec(
+        'convertToNumberedList',
+        {
+          id: model.id,
+          order,
+          stopCapturing: false,
+        }
+      );
+      if (!listConvertedId) return false;
+      const list = doc.getBlock(listConvertedId);
       if (!list) return false;
       element.host.updateComplete
         .then(() => {

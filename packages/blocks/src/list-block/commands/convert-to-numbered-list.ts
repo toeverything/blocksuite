@@ -1,4 +1,3 @@
-import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { Command, EditorHost } from '@blocksuite/block-std';
 
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
@@ -7,7 +6,7 @@ import { getNextContinuousNumberedLists } from './utils.js';
 
 export const convertToNumberedListCommand: Command<
   never,
-  'list',
+  'listConvertedId',
   {
     id: string;
     order: number; // This parameter may not correspond to the final order.
@@ -51,7 +50,7 @@ export const convertToNumberedListCommand: Command<
     parent,
     index
   );
-  const newList = doc.getBlock(newListId).model as ListBlockModel;
+  const newList = doc.getBlock(newListId).model;
   doc.deleteBlock(model, {
     deleteChildren: false,
     bringChildrenTo: newList,
@@ -70,15 +69,11 @@ export const convertToNumberedListCommand: Command<
     base += 1;
   });
 
-  next({ list: newList });
+  return next({ listConvertedId: newList.id });
 };
 
 declare global {
   namespace BlockSuite {
-    interface CommandContext {
-      list?: ListBlockModel;
-    }
-
     interface Commands {
       convertToNumberedList: typeof convertToNumberedListCommand;
     }
