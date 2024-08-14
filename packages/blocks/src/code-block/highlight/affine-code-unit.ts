@@ -40,28 +40,45 @@ export class AffineCodeUnit extends ShadowlessElement {
     });
     if (includedTokens.length === 0) return plainContent;
 
-    // trim off the excess part at the beginning
-    includedTokens[0].content = includedTokens[0].content.slice(
-      startOffset - includedTokens[0].offset
-    );
-    // trim off the excess part at the end
-    includedTokens[includedTokens.length - 1].content = includedTokens[
-      includedTokens.length - 1
-    ].content.slice(
-      0,
-      endOffset - includedTokens[includedTokens.length - 1].offset
-    );
+    if (includedTokens.length === 1) {
+      const token = includedTokens[0];
+      const content = token.content.slice(
+        startOffset - token.offset,
+        endOffset - token.offset
+      );
 
-    const vTexts = includedTokens.map(token => {
       return html`<v-text
-        .str=${token.content}
+        .str=${content}
         style=${styleMap({
           color: token.color,
         })}
       ></v-text>`;
-    });
+    } else {
+      const firstToken = includedTokens[0];
+      const lastToken = includedTokens[includedTokens.length - 1];
 
-    return html`<span>${vTexts}</span>`;
+      const firstContent = firstToken.content.slice(
+        startOffset - firstToken.offset,
+        firstToken.content.length
+      );
+      const lastContent = lastToken.content.slice(
+        0,
+        endOffset - lastToken.offset
+      );
+      firstToken.content = firstContent;
+      lastToken.content = lastContent;
+
+      const vTexts = includedTokens.map(token => {
+        return html`<v-text
+          .str=${token.content}
+          style=${styleMap({
+            color: token.color,
+          })}
+        ></v-text>`;
+      });
+
+      return html`<span>${vTexts}</span>`;
+    }
   }
 
   get codeBlock() {

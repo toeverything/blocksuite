@@ -1,7 +1,7 @@
 import {
   type AffineTextAttributes,
   type InlineSpecs,
-  affineInlineSpecsWithoutReference,
+  basicAffineInlineSpecs,
 } from '@blocksuite/affine-components/rich-text';
 import { html } from 'lit';
 import { z } from 'zod';
@@ -15,5 +15,15 @@ export const codeBlockInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
       return html`<affine-code-unit .delta=${delta}></affine-code-unit>`;
     },
   },
-  ...affineInlineSpecsWithoutReference,
+  ...basicAffineInlineSpecs,
+  {
+    name: 'link',
+    schema: z.string().optional().nullable().catch(undefined),
+    match: delta => {
+      return !!delta.attributes?.link;
+    },
+    renderer: ({ delta }) => {
+      return html`<affine-link .delta=${delta}></affine-link>`;
+    },
+  },
 ];

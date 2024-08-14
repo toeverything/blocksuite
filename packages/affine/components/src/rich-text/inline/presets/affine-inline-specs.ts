@@ -24,85 +24,84 @@ export interface AffineTextAttributes {
   color?: string | null;
 }
 
-export const affineInlineSpecsWithoutReference: InlineSpecs<AffineTextAttributes>[] =
-  [
-    {
-      name: 'bold',
-      schema: z.literal(true).optional().nullable().catch(undefined),
-      match: delta => {
-        return !!delta.attributes?.bold;
-      },
-      renderer: ({ delta }) => {
-        return html`<affine-text .delta=${delta}></affine-text>`;
-      },
+export const basicAffineInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
+  {
+    name: 'bold',
+    schema: z.literal(true).optional().nullable().catch(undefined),
+    match: delta => {
+      return !!delta.attributes?.bold;
     },
-    {
-      name: 'italic',
-      schema: z.literal(true).optional().nullable().catch(undefined),
-      match: delta => {
-        return !!delta.attributes?.italic;
-      },
-      renderer: ({ delta }) => {
-        return html`<affine-text .delta=${delta}></affine-text>`;
-      },
+    renderer: ({ delta }) => {
+      return html`<affine-text .delta=${delta}></affine-text>`;
     },
-    {
-      name: 'underline',
-      schema: z.literal(true).optional().nullable().catch(undefined),
-      match: delta => {
-        return !!delta.attributes?.underline;
-      },
-      renderer: ({ delta }) => {
-        return html`<affine-text .delta=${delta}></affine-text>`;
-      },
+  },
+  {
+    name: 'italic',
+    schema: z.literal(true).optional().nullable().catch(undefined),
+    match: delta => {
+      return !!delta.attributes?.italic;
     },
-    {
-      name: 'strike',
-      schema: z.literal(true).optional().nullable().catch(undefined),
-      match: delta => {
-        return !!delta.attributes?.strike;
-      },
-      renderer: ({ delta }) => {
-        return html`<affine-text .delta=${delta}></affine-text>`;
-      },
+    renderer: ({ delta }) => {
+      return html`<affine-text .delta=${delta}></affine-text>`;
     },
-    {
-      name: 'code',
-      schema: z.literal(true).optional().nullable().catch(undefined),
-      match: delta => {
-        return !!delta.attributes?.code;
-      },
-      renderer: ({ delta }) => {
-        return html`<affine-text .delta=${delta}></affine-text>`;
-      },
+  },
+  {
+    name: 'underline',
+    schema: z.literal(true).optional().nullable().catch(undefined),
+    match: delta => {
+      return !!delta.attributes?.underline;
     },
-    {
-      name: 'background',
-      schema: z.string().optional().nullable().catch(undefined),
-      match: delta => {
-        return !!delta.attributes?.background;
-      },
-      renderer: ({ delta }) => {
-        return html`<affine-text .delta=${delta}></affine-text>`;
-      },
+    renderer: ({ delta }) => {
+      return html`<affine-text .delta=${delta}></affine-text>`;
     },
-    {
-      name: 'color',
-      schema: z.string().optional().nullable().catch(undefined),
-      match: delta => {
-        return !!delta.attributes?.color;
-      },
-      renderer: ({ delta }) => {
-        return html`<affine-text .delta=${delta}></affine-text>`;
-      },
+  },
+  {
+    name: 'strike',
+    schema: z.literal(true).optional().nullable().catch(undefined),
+    match: delta => {
+      return !!delta.attributes?.strike;
     },
-  ];
+    renderer: ({ delta }) => {
+      return html`<affine-text .delta=${delta}></affine-text>`;
+    },
+  },
+  {
+    name: 'code',
+    schema: z.literal(true).optional().nullable().catch(undefined),
+    match: delta => {
+      return !!delta.attributes?.code;
+    },
+    renderer: ({ delta }) => {
+      return html`<affine-text .delta=${delta}></affine-text>`;
+    },
+  },
+  {
+    name: 'background',
+    schema: z.string().optional().nullable().catch(undefined),
+    match: delta => {
+      return !!delta.attributes?.background;
+    },
+    renderer: ({ delta }) => {
+      return html`<affine-text .delta=${delta}></affine-text>`;
+    },
+  },
+  {
+    name: 'color',
+    schema: z.string().optional().nullable().catch(undefined),
+    match: delta => {
+      return !!delta.attributes?.color;
+    },
+    renderer: ({ delta }) => {
+      return html`<affine-text .delta=${delta}></affine-text>`;
+    },
+  },
+];
 
 export function getAffineInlineSpecsWithReference(
   referenceNodeConfig: ReferenceNodeConfig
 ): InlineSpecs<AffineTextAttributes>[] {
   return [
-    ...affineInlineSpecsWithoutReference,
+    ...basicAffineInlineSpecs,
     {
       name: 'reference',
       schema: z

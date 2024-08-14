@@ -32,7 +32,7 @@ export {
   type RefNodeSlots,
   ReferenceNodeConfig,
   affineInlineMarkdownMatches,
-  affineInlineSpecsWithoutReference,
+  basicAffineInlineSpecs,
   getAffineInlineSpecsWithReference,
   toggleLinkPopup,
 } from './inline/index.js';

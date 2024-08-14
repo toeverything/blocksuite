@@ -8,7 +8,7 @@ export {
   type AffineInlineEditor,
   type AffineInlineRootElement,
   type AffineTextAttributes,
-  affineInlineSpecsWithoutReference,
+  basicAffineInlineSpecs,
   getAffineInlineSpecsWithReference,
 } from './presets/affine-inline-specs.js';
 export { affineInlineMarkdownMatches } from './presets/markdown.js';
