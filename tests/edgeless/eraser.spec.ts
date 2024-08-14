@@ -17,7 +17,7 @@ import {
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('earse shape', async ({ page }) => {
+test('erase shape', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
@@ -32,7 +32,7 @@ test('earse shape', async ({ page }) => {
   await assertEdgelessNonSelectedRect(page);
 });
 
-test('earse note', async ({ page }) => {
+test('erase note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
