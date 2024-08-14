@@ -19,8 +19,8 @@ export const splitListCommand: Command<
   const host = std.host as EditorHost;
   const doc = host.doc;
 
-  const model = doc.getBlock(blockId).model;
-  if (!matchFlavours(model, ['affine:list'])) {
+  const model = doc.getBlock(blockId)?.model;
+  if (!model || !matchFlavours(model, ['affine:list'])) {
     console.error(`block ${blockId} is not a list block`);
     return;
   }

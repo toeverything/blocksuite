@@ -222,8 +222,8 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
       );
       return () => {
         this.indicator.remove();
-        const model = this.doc.getBlock(id).model;
-        const target = this.doc.getBlock(result.dropBlockId).model;
+        const model = this.doc.getBlock(id)?.model;
+        const target = this.doc.getBlock(result.dropBlockId)?.model ?? null;
         let parent = this.doc.getParent(result.dropBlockId);
         const shouldInsertIn = result.dropType === 'in';
         if (shouldInsertIn) {

@@ -467,7 +467,10 @@ export async function assertParentBlockId(
 ) {
   const actual = await page.evaluate(
     ({ blockId }) => {
-      const model = window.doc?.getBlock(blockId).model;
+      const model = window.doc?.getBlock(blockId)?.model;
+      if (!model) {
+        throw new Error(`Block with id ${blockId} not found`);
+      }
       return model.doc.getParent(model)?.id;
     },
     { blockId }
@@ -482,7 +485,10 @@ export async function assertParentBlockFlavour(
 ) {
   const actual = await page.evaluate(
     ({ blockId }) => {
-      const model = window.doc?.getBlock(blockId).model;
+      const model = window.doc?.getBlock(blockId)?.model;
+      if (!model) {
+        throw new Error(`Block with id ${blockId} not found`);
+      }
       return model.doc.getParent(model)?.flavour;
     },
     { blockId }

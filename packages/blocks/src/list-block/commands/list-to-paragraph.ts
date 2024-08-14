@@ -16,7 +16,7 @@ export const listToParagraphCommand: Command<
   const doc = std.doc;
   const model = doc.getBlock(id)?.model;
 
-  if (!matchFlavours(model, ['affine:list'])) return false;
+  if (!model || !matchFlavours(model, ['affine:list'])) return false;
 
   const parent = doc.getParent(model);
   if (!parent) return false;

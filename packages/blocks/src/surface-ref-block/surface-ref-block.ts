@@ -301,7 +301,8 @@ export class SurfaceRefBlockComponent extends BlockComponent<
 
       if (this.doc.getBlock(this.model.reference)) {
         return [
-          this.doc.getBlock(this.model.reference).model as GfxBlockElementModel,
+          this.doc.getBlock(this.model.reference)
+            ?.model as GfxBlockElementModel,
           this.doc.id,
         ];
       }
@@ -331,7 +332,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
 
       if (doc && doc.getBlock(this.model.reference)) {
         return [
-          doc.getBlock(this.model.reference).model as GfxBlockElementModel,
+          doc.getBlock(this.model.reference)?.model as GfxBlockElementModel,
           doc.id,
         ];
       }

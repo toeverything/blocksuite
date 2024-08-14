@@ -50,7 +50,6 @@ export function handleBlockEndEnter(
 ) {
   const doc = model.doc;
   const parent = doc.getParent(model);
-  const nextSibling = doc.getNext(model);
   if (!parent) {
     return;
   }
@@ -126,20 +125,9 @@ export function handleBlockEndEnter(
     id = doc.addBlock(flavour, blockProps, parent, index + 1);
   }
 
-  // 4. If the target block is a numbered list, update the prefix of next siblings
-  if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
-    let next = nextSibling;
-    while (
-      next &&
-      matchFlavours(next, ['affine:list']) &&
-      model.type === 'numbered'
-    ) {
-      doc.updateBlock(next, {});
-      next = doc.getNext(next);
-    }
+  if (model.text) {
+    focusTextModel(editorHost.std, id);
   }
-
-  focusTextModel(editorHost.std, id);
 }
 
 export function handleBlockSplit(
@@ -188,7 +176,10 @@ export function handleBlockSplit(
       parent,
       modelIndex + 1
     );
-    const newModel = doc.getBlock(id).model;
+    const newModel = doc.getBlock(id)?.model;
+    if (!newModel) {
+      return;
+    }
     doc.moveBlocks(model.children, newModel);
     return focusTextModel(editorHost.std, id);
   }
@@ -221,23 +212,8 @@ export function handleIndent(
     // Bottom, can not indent, do nothing
     return;
   }
-  const nextSiblings = doc.getNexts(model);
-
   doc.captureSync();
   doc.moveBlocks([model], previousSibling);
-
-  // update list prefix
-  if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
-    doc.updateBlock(model, {});
-  }
-  nextSiblings
-    .filter(
-      sibling =>
-        matchFlavours(sibling, ['affine:list']) && sibling.type === 'numbered'
-    )
-    .forEach(sibling => {
-      doc.updateBlock(sibling, {});
-    });
 
   // update collapsed state
   if (
@@ -249,9 +225,9 @@ export function handleIndent(
     } as Partial<ListBlockModel>);
   }
 
-  asyncSetInlineRange(editorHost, model, { index: offset, length: 0 }).catch(
-    console.error
-  );
+  if (model.text) {
+    focusTextModel(editorHost.std, model.id, offset);
+  }
 }
 
 export function handleMultiBlockIndent(
@@ -324,31 +300,12 @@ export function handleUnindent(
   doc.captureSync();
 
   const nextSiblings = doc.getNexts(model);
-  const parentNextSiblings = doc.getNexts(parent);
   doc.moveBlocks(nextSiblings, model);
   doc.moveBlocks([model], grandParent, parent, false);
 
-  // update list prefix
-  if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
-    doc.updateBlock(model, {});
+  if (model.text) {
+    focusTextModel(editorHost.std, model.id, offset);
   }
-  model.children.forEach(child => {
-    if (matchFlavours(child, ['affine:list']) && child.type === 'numbered') {
-      doc.updateBlock(child, {});
-    }
-  });
-  parentNextSiblings
-    .filter(
-      sibling =>
-        matchFlavours(sibling, ['affine:list']) && sibling.type === 'numbered'
-    )
-    .forEach(sibling => {
-      doc.updateBlock(sibling, {});
-    });
-
-  asyncSetInlineRange(editorHost, model, { index: offset, length: 0 }).catch(
-    console.error
-  );
 }
 
 export function handleMultiBlockOutdent(

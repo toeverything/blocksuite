@@ -12,7 +12,8 @@ export function getNextContinuousNumberedLists(
   modelOrId: BlockModel | string
 ): ListBlockModel[] {
   const model =
-    typeof modelOrId === 'string' ? doc.getBlock(modelOrId).model : modelOrId;
+    typeof modelOrId === 'string' ? doc.getBlock(modelOrId)?.model : modelOrId;
+  if (!model) return [];
   const parent = doc.getParent(model);
   if (!parent) return [];
   const modelIndex = parent.children.indexOf(model);
@@ -50,7 +51,9 @@ export function correctNumberedListsOrderToPrev(
   transact = true
 ) {
   const model =
-    typeof modelOrId === 'string' ? doc.getBlock(modelOrId).model : modelOrId;
+    typeof modelOrId === 'string' ? doc.getBlock(modelOrId)?.model : modelOrId;
+
+  if (!model) return;
 
   if (
     !matchFlavours(model, ['affine:list']) ||

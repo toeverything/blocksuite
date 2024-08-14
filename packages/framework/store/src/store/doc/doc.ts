@@ -359,11 +359,11 @@ export class Doc {
     this.slots.rootDeleted.dispose();
   }
 
-  getBlock(id: string) {
+  getBlock(id: string): Block | undefined {
     return this._blocks.peek()[id];
   }
 
-  getBlock$(id: string) {
+  getBlock$(id: string): Block | undefined {
     return this._blocks.value[id];
   }
 
@@ -515,6 +515,7 @@ export class Doc {
     }
 
     const block = this.getBlock(model.id);
+    if (!block) return;
 
     this.transact(() => {
       if (isCallback) {

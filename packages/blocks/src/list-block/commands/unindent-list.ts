@@ -37,8 +37,8 @@ export const unindentListCommand: Command<
   /**
    * ccc
    */
-  const model = doc.getBlock(blockId).model;
-  if (!matchFlavours(model, ['affine:list'])) {
+  const model = doc.getBlock(blockId)?.model;
+  if (!model || !matchFlavours(model, ['affine:list'])) {
     console.error(`block ${blockId} is not a list block`);
     return;
   }

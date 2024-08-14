@@ -19,8 +19,8 @@ export const convertToNumberedListCommand: Command<
 
   if (stopCapturing) host.doc.captureSync();
 
-  const model = doc.getBlock(id).model;
-  if (!model.text) return;
+  const model = doc.getBlock(id)?.model;
+  if (!model || !model.text) return;
   const parent = doc.getParent(model);
   if (!parent) return;
   const index = parent.children.indexOf(model);
@@ -50,7 +50,11 @@ export const convertToNumberedListCommand: Command<
     parent,
     index
   );
-  const newList = doc.getBlock(newListId).model;
+  const newList = doc.getBlock(newListId)?.model;
+  if (!newList) {
+    return;
+  }
+
   doc.deleteBlock(model, {
     deleteChildren: false,
     bringChildrenTo: newList,
