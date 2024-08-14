@@ -24,7 +24,7 @@ import {
   toast,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { type DocCollection, Job, Text, Utils } from '@blocksuite/store';
+import { type DocCollection, Job, Text } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
@@ -369,13 +369,6 @@ export class DebugMenu extends ShadowlessElement {
     window.history.pushState({}, '', url);
   }
 
-  private _shareUrl() {
-    const base64 = Utils.encodeCollectionAsYjsUpdateV2(this.collection);
-    const url = new URL(window.location.toString());
-    url.searchParams.set('init', base64);
-    window.history.pushState({}, '', url);
-  }
-
   private _switchEditorMode() {
     if (!this.editor.host) return;
     const { docModeService } = this.editor.host.spec.getService('affine:page');
@@ -584,9 +577,6 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click="${this._importNotionHTML}">
                 Import Notion HTML
-              </sl-menu-item>
-              <sl-menu-item @click="${this._shareUrl}">
-                Share URL
               </sl-menu-item>
               <sl-menu-item @click="${this._toggleStyleDebugMenu}">
                 Toggle CSS Debug Menu

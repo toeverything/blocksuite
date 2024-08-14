@@ -1,13 +1,9 @@
 import type { z } from 'zod';
 
-import { toBase64 } from 'lib0/buffer.js';
-import * as Y from 'yjs';
-
 import type { BlockModel } from '../schema/base.js';
 import type { BlockSchema } from '../schema/base.js';
 import type { YBlock } from '../store/doc/block/index.js';
 import type { BlockProps } from '../store/doc/block-collection.js';
-import type { DocCollection } from '../store/index.js';
 
 import { SYS_KEYS } from '../consts.js';
 import { native2Y } from '../reactive/index.js';
@@ -40,12 +36,6 @@ export function syncBlockProps(
     // @ts-ignore
     model[key] = native2Y(value);
   });
-}
-
-export function encodeCollectionAsYjsUpdateV2(
-  collection: DocCollection
-): string {
-  return toBase64(Y.encodeStateAsUpdateV2(collection.doc));
 }
 
 export const hash = (str: string) => {
