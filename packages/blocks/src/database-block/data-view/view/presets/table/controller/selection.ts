@@ -954,7 +954,7 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
       height: 1px;
     }
     @media print {
-      affine-database-selection {
+      data-view-table-selection {
         display: none;
       }
     }

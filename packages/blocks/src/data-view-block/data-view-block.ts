@@ -141,6 +141,16 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     .database-ops:hover {
       background-color: var(--affine-hover-color);
     }
+
+    @media print {
+      .database-ops {
+        display: none;
+      }
+
+      .database-header-bar {
+        display: none !important;
+      }
+    }
   `;
 
   getRootService = () => {
@@ -157,6 +167,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
           </div>
           <div
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
+            class="database-header-bar"
           >
             <div style="flex:1">
               ${renderUniLit(widgetPresets.viewBar, props)}

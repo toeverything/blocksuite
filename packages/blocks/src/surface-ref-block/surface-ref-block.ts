@@ -74,6 +74,13 @@ export class SurfaceRefBlockComponent extends BlockComponent<
       position: relative;
       user-select: none;
       margin: 10px 0;
+      break-inside: avoid;
+    }
+
+    @media print {
+      .affine-surface-ref {
+        outline: none !important;
+      }
     }
 
     .ref-placeholder {
@@ -170,6 +177,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
       top: 0;
       width: 100%;
       height: 100%;
+      break-inside: avoid;
     }
 
     .surface-ref-mask:hover {

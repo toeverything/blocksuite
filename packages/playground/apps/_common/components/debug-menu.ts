@@ -20,6 +20,7 @@ import {
   ZipTransformer,
   defaultImageProxyMiddleware,
   openFileOrFiles,
+  printToPdf,
   toast,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -333,6 +334,10 @@ export class DebugMenu extends ShadowlessElement {
     });
   }
 
+  private _print() {
+    printToPdf().catch(console.error);
+  }
+
   private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
 
@@ -558,6 +563,7 @@ export class DebugMenu extends ShadowlessElement {
               Test Operations
             </sl-button>
             <sl-menu>
+              <sl-menu-item @click="${this._print}">Print</sl-menu-item>
               <sl-menu-item @click="${this._exportMarkDown}">
                 Export Markdown
               </sl-menu-item>

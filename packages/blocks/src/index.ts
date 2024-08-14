@@ -168,7 +168,10 @@ export const BlocksUtils = {
   isCanvasElement,
   Point,
 };
-export { findNoteBlockModel } from '@blocksuite/affine-shared/utils';
+export {
+  findNoteBlockModel,
+  printToPdf,
+} from '@blocksuite/affine-shared/utils';
 
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'

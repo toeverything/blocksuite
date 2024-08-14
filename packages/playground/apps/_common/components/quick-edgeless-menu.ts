@@ -5,7 +5,7 @@ import type { DeltaInsert } from '@blocksuite/inline';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { EdgelessRootService } from '@blocksuite/blocks';
+import { EdgelessRootService, printToPdf } from '@blocksuite/blocks';
 import { type DocCollection, Text, Utils } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -218,6 +218,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     }, duration);
   }
 
+  private _print() {
+    printToPdf().catch(console.error);
+  }
+
   private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
 
@@ -378,6 +382,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   ></sl-icon>
                   <span>Test operations</span>
                   <sl-menu slot="submenu">
+                    <sl-menu-item @click="${this._print}"> Print </sl-menu-item>
                     <sl-menu-item @click=${this._addNote}>
                       Add Note</sl-menu-item
                     >

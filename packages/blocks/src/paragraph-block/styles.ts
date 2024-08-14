@@ -132,6 +132,11 @@ export const paragraphBlockStyles = css`
     color: var(--affine-black-30);
     fill: var(--affine-black-30);
   }
+  @media print {
+    .affine-paragraph-placeholder {
+      display: none !important;
+    }
+  }
   .affine-paragraph-placeholder.visible {
     display: block;
   }
