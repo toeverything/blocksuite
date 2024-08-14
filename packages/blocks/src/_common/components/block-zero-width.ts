@@ -1,10 +1,9 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { ZERO_WIDTH_SPACE } from '@blocksuite/inline/consts';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-
-import { asyncFocusRichText } from '../utils/selection.js';
 
 @customElement('affine-block-zero-width')
 export class BlockZeroWidth extends LitElement {
@@ -29,7 +28,7 @@ export class BlockZeroWidth extends LitElement {
       const [paragraphId] = this.block.doc.addSiblingBlocks(this.block.model, [
         { flavour: 'affine:paragraph' },
       ]);
-      void asyncFocusRichText(this.block.host, paragraphId);
+      focusTextModel(this.block.host.std, paragraphId);
     }
   }
 
