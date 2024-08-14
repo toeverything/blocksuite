@@ -665,9 +665,6 @@ importers:
       browser-fs-access:
         specifier: ^0.35.0
         version: 0.35.0
-      intl-segmenter-polyfill-rs:
-        specifier: ^0.1.7
-        version: 0.1.7
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
@@ -4509,9 +4506,6 @@ packages:
   inquirer@10.1.5:
     resolution: {integrity: sha512-ksPK04lcs0GcgkvfmZ5Sjxdm74Nf3Ksy37NTQDrdMZlB0IJgH6TB8cTCJpvGAvt6edsgHa07flRcvXwkr+tPqQ==}
     engines: {node: '>=18'}
-
-  intl-segmenter-polyfill-rs@0.1.7:
-    resolution: {integrity: sha512-vHXaILHOdbHrcPlbA0WJeMGYjodHa5mLF142k1Q8FQeJ5H+tFV6zT/saPXjDW5Lc+GDyaD+uSDJgcHmw2ri3Vg==}
 
   is-arrayish@0.2.1:
     resolution: {integrity: sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg==}
@@ -11287,8 +11281,6 @@ snapshots:
       mute-stream: 1.0.0
       run-async: 3.0.0
       rxjs: 7.8.1
-
-  intl-segmenter-polyfill-rs@0.1.7: {}
 
   is-arrayish@0.2.1: {}
 
