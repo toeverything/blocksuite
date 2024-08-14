@@ -23,7 +23,6 @@
     "@toeverything/y-indexeddb": "0.10.0-canary.9",
     "@types/katex": "^0.16.7",
     "browser-fs-access": "^0.35.0",
-    "intl-segmenter-polyfill-rs": "^0.1.7",
     "jszip": "^3.10.1",
     "katex": "^0.16.11",
     "lit": "^3.1.4",
