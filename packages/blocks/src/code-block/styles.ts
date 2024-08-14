@@ -33,7 +33,11 @@ export const codeBlockStyles = css`
 
   .affine-code-block-container .line-number {
     position: sticky;
-    padding: 0 10px;
+    text-align: right;
+    padding-right: 10px;
+    width: 46px;
+    word-break: break-word;
+    white-space: nowrap;
     left: -0.5px;
     z-index: 1;
     background: var(--affine-background-code-block);
