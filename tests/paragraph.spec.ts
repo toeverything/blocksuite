@@ -253,9 +253,7 @@ test('split paragraph block by enter', async ({ page }) => {
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 3);
   await page.waitForTimeout(300);
   await assertRichTextInlineRange(page, 0, 2, 0);
 
