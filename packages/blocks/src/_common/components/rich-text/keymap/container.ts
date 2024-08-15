@@ -9,7 +9,6 @@ import {
   textFormatConfigs,
 } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
-import { IS_MAC } from '@blocksuite/global/env';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { RootBlockComponent } from '../../../../root-block/types.js';
@@ -25,7 +24,7 @@ import {
   handleUnindent,
 } from '../rich-text-operations.js';
 import { bracketPairs } from './bracket-pairs.js';
-import { hardEnter, onForwardDelete } from './legacy.js';
+import { hardEnter } from './legacy.js';
 
 // FIXME: use selection manager to set selection
 export const bindContainerHotkey = (block: BlockComponent) => {
@@ -310,10 +309,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       }
       return true;
     },
-    Delete: ctx => handleDelete(ctx),
-    'Control-d': ctx => {
-      if (IS_MAC) handleDelete(ctx);
-    },
   });
 
   textFormatConfigs.forEach(config => {
@@ -347,17 +342,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       return true;
     }
     return;
-  }
-
-  function handleDelete(ctx: UIEventStateContext) {
-    if (!block.selected?.is('text')) return;
-    const state = ctx.get('keyboardState');
-    const inlineEditor = _getInlineEditor();
-    if (!inlineEditor) return;
-    if (!onForwardDelete(editorHost, model, state.raw, inlineEditor)) {
-      _preventDefault(ctx);
-    }
-    return true;
   }
 
   function tryConvertToLinkedDoc() {

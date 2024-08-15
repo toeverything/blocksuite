@@ -1,3 +1,5 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
+import type { ExtendedModel } from '@blocksuite/affine-shared/types';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import type { Text } from '@blocksuite/store';
@@ -8,11 +10,11 @@ import {
 } from '@blocksuite/affine-components/rich-text';
 import { EMBED_BLOCK_FLAVOUR_LIST } from '@blocksuite/affine-shared/consts';
 import {
+  focusTitle,
+  getDocTitleInlineEditor,
   getPrevContentBlock,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
-
-import { handleNoPreviousSibling } from '../../_common/components/rich-text/rich-text-operations.js';
 
 /**
  * Merge the paragraph with prev block
@@ -92,4 +94,48 @@ export function mergeWithPrev(editorHost: EditorHost, model: BlockModel) {
   }
 
   return false;
+}
+
+function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
+  const doc = model.doc;
+  const text = model.text;
+  const parent = doc.getParent(model);
+  if (!parent) return false;
+  const titleEditor = getDocTitleInlineEditor(editorHost);
+  // Probably no title, e.g. in edgeless mode
+  if (!titleEditor) {
+    if (
+      matchFlavours(parent, ['affine:edgeless-text']) ||
+      model.children.length > 0
+    ) {
+      doc.deleteBlock(model, {
+        bringChildrenTo: parent,
+      });
+      return true;
+    }
+    return false;
+  }
+
+  const rootModel = model.doc.root as RootBlockModel;
+  const title = rootModel.title;
+
+  doc.captureSync();
+  let textLength = 0;
+  if (text) {
+    textLength = text.length;
+    title.join(text);
+  }
+
+  // Preserve at least one block to be able to focus on container click
+  if (doc.getNext(model) || model.children.length > 0) {
+    const parent = doc.getParent(model);
+    if (!parent) return false;
+    doc.deleteBlock(model, {
+      bringChildrenTo: parent,
+    });
+  } else {
+    text?.clear();
+  }
+  focusTitle(editorHost, title.length - textLength);
+  return true;
 }

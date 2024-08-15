@@ -6,6 +6,8 @@ import type { BlockModel, Text } from '@blocksuite/store';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
+  focusTitle,
+  getDocTitleInlineEditor,
   getScrollContainer,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
@@ -17,11 +19,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { PageRootBlockWidgetName } from '../index.js';
 import type { PageRootService } from './page-root-service.js';
 
-import {
-  buildPath,
-  focusTitle,
-  getDocTitleInlineEditor,
-} from '../../_common/utils/index.js';
+import { buildPath } from '../../_common/utils/index.js';
 import { PageClipboard } from '../clipboard/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 
