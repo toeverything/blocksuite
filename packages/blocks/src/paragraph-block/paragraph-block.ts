@@ -8,6 +8,7 @@ import {
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
 import { effect, signal } from '@lit-labs/preact-signals';
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -23,6 +24,7 @@ import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessTextBlockComponent } from '../edgeless-text/edgeless-text-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { paragraphBlockStyles } from './styles.js';
+import { forwardDelete } from './utils/forward-delete.js';
 import { mergeWithPrev } from './utils/merge-with-prev.js';
 
 @customElement('affine-paragraph')
@@ -135,6 +137,25 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
           focusTextModel(std, id);
         }
 
+        return true;
+      },
+      Delete: ctx => {
+        const deleted = forwardDelete(this.std);
+        if (!deleted) {
+          return;
+        }
+        const event = ctx.get('keyboardState').raw;
+        event.preventDefault();
+        return true;
+      },
+      'Control-d': ctx => {
+        if (!IS_MAC) return;
+        const deleted = forwardDelete(this.std);
+        if (!deleted) {
+          return;
+        }
+        const event = ctx.get('keyboardState').raw;
+        event.preventDefault();
         return true;
       },
     });

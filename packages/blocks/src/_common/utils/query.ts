@@ -1,11 +1,9 @@
-import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type {
   BlockComponent,
   EditorHost,
   ViewStore,
 } from '@blocksuite/block-std';
 import type { Point } from '@blocksuite/global/utils';
-import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
@@ -126,24 +124,6 @@ export function getBlockComponentByModel(
 ) {
   if (!model) return null;
   return editorHost.view.getBlock(model.id);
-}
-
-export function getDocTitleByEditorHost(
-  editorHost: EditorHost
-): HTMLElement | null {
-  const docViewport = editorHost.closest('.affine-page-viewport');
-  if (!docViewport) return null;
-  return docViewport.querySelector('doc-title');
-}
-
-export function getDocTitleInlineEditor(
-  editorHost: EditorHost
-): InlineEditor | null {
-  const docTitle = getDocTitleByEditorHost(editorHost);
-  if (!docTitle) return null;
-  const titleRichText = docTitle.querySelector<RichText>('rich-text');
-  assertExists(titleRichText);
-  return titleRichText.inlineEditor;
 }
 
 function isDatabase({ tagName }: Element) {

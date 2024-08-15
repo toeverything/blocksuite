@@ -3,7 +3,6 @@ export * from '../types.js';
 export * from './drag-and-drop.js';
 export * from './init.js';
 export * from './query.js';
-export * from './selection.js';
 export {
   Rect,
   clearMarksOnDiscontinuousInput,
