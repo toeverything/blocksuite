@@ -244,13 +244,17 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             break;
           }
           if (!fetchable(o.node.url)) {
-            const imageURL = o.node.url;
-            assets.getAssets().forEach((_value, key) => {
-              const imageName = getAssetName(assets.getAssets(), key);
-              if (decodeURIComponent(imageURL).includes(imageName)) {
+            const imageURLSplit = o.node.url.split('/');
+            while (imageURLSplit.length > 0) {
+              const key = assets
+                .getPathBlobIdMap()
+                .get(decodeURIComponent(imageURLSplit.join('/')));
+              if (key) {
                 blobId = key;
+                break;
               }
-            });
+              imageURLSplit.shift();
+            }
           } else {
             const res = await fetchImage(
               o.node.url,

@@ -101,6 +101,7 @@ export async function importNotion(collection: DocCollection, file: File) {
     const files = Object.keys(zipFile.files);
     const promises: Promise<void>[] = [];
     const pendingAssets = new Map<string, Blob>();
+    const pendingPathBlobIdMap = new Map<string, string>();
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.startsWith('__MACOSX/')) continue;
@@ -146,10 +147,13 @@ export async function importNotion(collection: DocCollection, file: File) {
       const blob = await zipFile.files[file].async('blob');
       const ext = file.split('.').at(-1) ?? '';
       const mime = extMimeMap.get(ext) ?? '';
-      pendingAssets.set(
-        await sha(await blob.arrayBuffer()),
-        new File([blob], fileName, { type: mime })
-      );
+      const key = await sha(await blob.arrayBuffer());
+      const filePathSplit = file.split('/');
+      while (filePathSplit.length > 1) {
+        pendingPathBlobIdMap.set(filePathSplit.join('/'), key);
+        filePathSplit.shift();
+      }
+      pendingAssets.set(key, new File([blob], fileName, { type: mime }));
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
       const job = new Job({
@@ -158,9 +162,15 @@ export async function importNotion(collection: DocCollection, file: File) {
       });
       const htmlAdapter = new NotionHtmlAdapter(job);
       const assets = job.assetsManager.getAssets();
+      const pathBlobIdMap = job.assetsManager.getPathBlobIdMap();
       for (const [key, value] of pendingAssets.entries()) {
         if (!assets.has(key)) {
           assets.set(key, value);
+        }
+      }
+      for (const [key, value] of pendingPathBlobIdMap.entries()) {
+        if (!pathBlobIdMap.has(key)) {
+          pathBlobIdMap.set(key, value);
         }
       }
       const page = await htmlAdapter.toDoc({

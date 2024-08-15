@@ -1180,6 +1180,9 @@ describe('notion html to snapshot', () => {
     const blobCRUD = new MemoryBlobCRUD();
     const key = await blobCRUD.set(new File([], 'README.pdf'));
     const assestsManager = new AssetsManager({ blob: blobCRUD });
+    assestsManager
+      .getPathBlobIdMap()
+      .set('Untitled 3d2ae962f5433a90499ddbd1c81ac507/README.pdf', key);
     await assestsManager.readFromBlob(key);
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,

@@ -276,12 +276,17 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           if (imageURL) {
             let blobId = '';
             if (!fetchable(imageURL)) {
-              assets.getAssets().forEach((_value, key) => {
-                const attachmentName = getAssetName(assets.getAssets(), key);
-                if (decodeURIComponent(imageURL).includes(attachmentName)) {
+              const imageURLSplit = imageURL.split('/');
+              while (imageURLSplit.length > 0) {
+                const key = assets
+                  .getPathBlobIdMap()
+                  .get(decodeURIComponent(imageURLSplit.join('/')));
+                if (key) {
                   blobId = key;
+                  break;
                 }
-              });
+                imageURLSplit.shift();
+              }
             } else {
               const res = await fetchImage(
                 imageURL,
@@ -607,12 +612,17 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           if (imageURL) {
             let blobId = '';
             if (!fetchable(imageURL)) {
-              assets.getAssets().forEach((_value, key) => {
-                const attachmentName = getAssetName(assets.getAssets(), key);
-                if (decodeURIComponent(imageURL).includes(attachmentName)) {
+              const imageURLSplit = imageURL.split('/');
+              while (imageURLSplit.length > 0) {
+                const key = assets
+                  .getPathBlobIdMap()
+                  .get(decodeURIComponent(imageURLSplit.join('/')));
+                if (key) {
                   blobId = key;
+                  break;
                 }
-              });
+                imageURLSplit.shift();
+              }
             } else {
               const res = await fetchImage(
                 imageURL,
@@ -670,15 +680,23 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             let type = '';
             let size = 0;
             if (!fetchable(embededURL)) {
-              assets.getAssets().forEach((value, key) => {
-                const embededName = getAssetName(assets.getAssets(), key);
-                if (decodeURIComponent(embededURL).includes(embededName)) {
+              const embededURLSplit = embededURL.split('/');
+              while (embededURLSplit.length > 0) {
+                const key = assets
+                  .getPathBlobIdMap()
+                  .get(decodeURIComponent(embededURLSplit.join('/')));
+                if (key) {
                   blobId = key;
-                  name = embededName;
-                  size = value.size;
-                  type = value.type;
+                  break;
                 }
-              });
+                embededURLSplit.shift();
+              }
+              const value = assets.getAssets().get(blobId);
+              if (value) {
+                name = getAssetName(assets.getAssets(), blobId);
+                size = value.size;
+                type = value.type;
+              }
             } else {
               const res = await fetch(embededURL).catch(error => {
                 console.warn('Error fetching embed:', error);

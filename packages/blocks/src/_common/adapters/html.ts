@@ -300,12 +300,17 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           if (imageURL) {
             let blobId = '';
             if (!fetchable(imageURL)) {
-              assets.getAssets().forEach((_value, key) => {
-                const attachmentName = getAssetName(assets.getAssets(), key);
-                if (decodeURIComponent(imageURL).includes(attachmentName)) {
+              const imageURLSplit = imageURL.split('/');
+              while (imageURLSplit.length > 0) {
+                const key = assets
+                  .getPathBlobIdMap()
+                  .get(decodeURIComponent(imageURLSplit.join('/')));
+                if (key) {
                   blobId = key;
+                  break;
                 }
-              });
+                imageURLSplit.shift();
+              }
             } else {
               try {
                 const res = await fetchImage(

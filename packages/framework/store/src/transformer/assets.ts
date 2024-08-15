@@ -16,6 +16,8 @@ export class AssetsManager {
 
   private readonly _blob: BlobCRUD;
 
+  private readonly _pathBlobIdMap = new Map<string, string>();
+
   constructor(options: AssetsManagerConfig) {
     this._blob = options.blob;
   }
@@ -26,6 +28,10 @@ export class AssetsManager {
 
   getAssets() {
     return this._assetsMap;
+  }
+
+  getPathBlobIdMap() {
+    return this._pathBlobIdMap;
   }
 
   isEmpty() {
