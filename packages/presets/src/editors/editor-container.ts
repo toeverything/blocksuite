@@ -144,7 +144,6 @@ export class AffineEditorContainer
     .playground-page-editor-container {
       flex-grow: 1;
       font-family: var(--affine-font-family);
-      background: var(--affine-background-primary-color);
       display: block;
     }
 
