@@ -1,11 +1,8 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
-import {
-  type RichText,
-  focusTextModel,
-} from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
@@ -17,6 +14,7 @@ import type { ParagraphBlockService } from './paragraph-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
+import { tryConvertBlock } from '../_common/components/rich-text/markdown/block.js';
 import { handleUnindent } from '../_common/components/rich-text/rich-text-operations.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
@@ -85,58 +83,70 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
       },
       'Mod-Enter': ctx => {
         const { model, inlineEditor, doc } = this;
-        if (model.type !== 'quote') return;
         const inlineRange = this.inlineEditor?.getInlineRange();
         if (!inlineRange || !inlineEditor) return;
         const raw = ctx.get('keyboardState').raw;
         raw.preventDefault();
-        doc.captureSync();
-        inlineEditor.insertText(inlineRange, '\n');
-        inlineEditor.setInlineRange({
-          index: inlineRange.index + 1,
-          length: 0,
-        });
+        if (model.type === 'quote') {
+          doc.captureSync();
+          inlineEditor.insertText(inlineRange, '\n');
+          inlineEditor.setInlineRange({
+            index: inlineRange.index + 1,
+            length: 0,
+          });
+          return true;
+        }
+
+        this.std.command.exec('addParagraph');
         return true;
       },
       Enter: ctx => {
-        const { model, std, doc } = this;
-        if (model.type !== 'quote') return;
-        const range = this.inlineEditor?.getInlineRange();
-        if (!range) return;
-        const isEnd = model.text.length === range.index;
-        const textStr = model.text.toString();
+        const { model, doc, std } = this;
         const raw = ctx.get('keyboardState').raw;
+        const inlineEditor = this.inlineEditor;
+        const range = inlineEditor?.getInlineRange();
+        if (!range || !inlineEditor) return;
+        const isEnd = model.text.length === range.index;
 
-        doc.captureSync();
-        /**
-         * If quote block ends with two blank lines, split the block
-         * ---
-         * before:
-         * > \n
-         * > \n|
-         *
-         * after:
-         * > \n
-         * |
-         * ---
-         */
-        const endWithTwoBlankLines = textStr === '\n' || textStr.endsWith('\n');
-        if (isEnd && endWithTwoBlankLines) {
-          model.text.delete(range.index - 1, 1);
-          const parent = this.doc.getParent(model);
-          if (!parent) return;
-          const index = parent.children.indexOf(model);
-          if (index === -1) return;
-          raw.preventDefault();
-          const id = this.doc.addBlock(
-            'affine:paragraph',
-            {},
-            parent,
-            index + 1
-          );
-          focusTextModel(std, id);
+        if (model.type === 'quote') {
+          const textStr = model.text.toString();
+
+          /**
+           * If quote block ends with two blank lines, split the block
+           * ---
+           * before:
+           * > \n
+           * > \n|
+           *
+           * after:
+           * > \n
+           * |
+           * ---
+           */
+          const endWithTwoBlankLines =
+            textStr === '\n' || textStr.endsWith('\n');
+          if (isEnd && endWithTwoBlankLines) {
+            raw.preventDefault();
+            doc.captureSync();
+            model.text.delete(range.index - 1, 1);
+            std.command.exec('addParagraph');
+            return true;
+          }
+          return true;
         }
 
+        raw.preventDefault();
+
+        if (tryConvertBlock(this, inlineEditor)) {
+          return true;
+        }
+
+        if (isEnd) {
+          std.command.exec('addParagraph');
+          return true;
+        }
+
+        std.command.exec('splitParagraph');
         return true;
       },
       Delete: ctx => {

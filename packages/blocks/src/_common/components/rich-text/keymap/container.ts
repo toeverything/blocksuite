@@ -24,7 +24,6 @@ import {
   handleUnindent,
 } from '../rich-text-operations.js';
 import { bracketPairs } from './bracket-pairs.js';
-import { hardEnter } from './legacy.js';
 
 // FIXME: use selection manager to set selection
 export const bindContainerHotkey = (block: BlockComponent) => {
@@ -123,15 +122,13 @@ export const bindContainerHotkey = (block: BlockComponent) => {
 
       block.doc.captureSync();
 
+      _preventDefault(ctx);
+
       if (tryConvertBlock(block, inlineEditor)) {
-        _preventDefault(ctx);
         return true;
       }
 
-      const state = ctx.get('keyboardState');
-      hardEnter(editorHost, model, inlineRange, state.raw);
-
-      return true;
+      return false;
     },
     'Mod-Enter': ctx => {
       if (!block.selected?.is('text')) return;
@@ -142,8 +139,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       if (!inlineRange) return;
 
       _preventDefault(ctx);
-      const state = ctx.get('keyboardState');
-      hardEnter(editorHost, model, inlineRange, state.raw, true);
 
       return true;
     },

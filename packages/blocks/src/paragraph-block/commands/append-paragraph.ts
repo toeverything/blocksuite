@@ -4,6 +4,9 @@ import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 
 import { getLastNoteBlock } from '../../_common/edgeless/note/get-last-note.js';
 
+/**
+ * Append a paragraph block at the end of the whole page.
+ */
 export const appendParagraphCommand: Command<
   never,
   never,

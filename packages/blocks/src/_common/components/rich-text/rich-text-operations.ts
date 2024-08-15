@@ -1,12 +1,9 @@
-import type {
-  ListBlockModel,
-  ParagraphBlockModel,
-} from '@blocksuite/affine-model';
+import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
-import { type BlockModel, Text } from '@blocksuite/store';
 
 import type { ExtendedModel } from '../../types.js';
 
@@ -24,113 +21,6 @@ function supportsChildren(model: BlockModel): boolean {
     return false;
   }
   return true;
-}
-
-export function handleBlockEndEnter(
-  editorHost: EditorHost,
-  model: ExtendedModel
-) {
-  const doc = model.doc;
-  const parent = doc.getParent(model);
-  if (!parent) {
-    return;
-  }
-
-  const getProps = (): [
-    'affine:paragraph',
-    BlockSuite.ModelProps<ParagraphBlockModel>,
-  ] => {
-    return ['affine:paragraph', { type: 'text' }];
-  };
-  const [flavour, blockProps] = getProps();
-
-  const index = parent.children.indexOf(model);
-  if (index === -1) {
-    return;
-  }
-  // make adding text block by enter a standalone operation
-  doc.captureSync();
-
-  let id: string;
-
-  if (model.children.length > 0) {
-    // before:
-    // aaa|
-    //   bbb
-    //
-    // after:
-    // aaa
-    //   |
-    //   bbb
-    id = doc.addBlock(flavour, blockProps, model, 0);
-  } else {
-    // before:
-    // aaa|
-    //
-    // after:
-    // aaa
-    // |
-    id = doc.addBlock(flavour, blockProps, parent, index + 1);
-  }
-
-  if (model.text) {
-    focusTextModel(editorHost.std, id);
-  }
-}
-
-export function handleBlockSplit(
-  editorHost: EditorHost,
-  model: ExtendedModel,
-  splitIndex: number,
-  splitLength: number
-) {
-  if (!(model.text instanceof Text)) return;
-
-  // On press enter, it may convert symbols from yjs ContentString
-  // to yjs ContentFormat. Once it happens, the converted symbol will
-  // be deleted and not counted as model.text.yText.length.
-  // Example: "`a`[enter]" -> yText[<ContentFormat: Code>, "a", <ContentFormat: Code>]
-  // In this case, we should not split the block.
-  if (model.text.yText.length < splitIndex + splitLength) return;
-
-  const doc = model.doc;
-
-  const parent = doc.getParent(model);
-  if (!parent) return;
-  const modelIndex = parent.children.indexOf(model);
-  if (modelIndex === -1) return;
-
-  doc.captureSync();
-  const right = model.text.split(splitIndex, splitLength);
-
-  if (model.children.length > 0 && splitIndex > 0) {
-    const id = doc.addBlock(
-      model.flavour as BlockSuite.Flavour,
-      {
-        text: right,
-        type: model.type,
-      },
-      model,
-      0
-    );
-    return focusTextModel(editorHost.std, id);
-  } else {
-    const id = doc.addBlock(
-      model.flavour as BlockSuite.Flavour,
-      {
-        text: right,
-        type: model.type,
-      },
-      parent,
-      modelIndex + 1
-    );
-    const newModel = doc.getBlock(id)?.model;
-    if (!newModel) {
-      return;
-    }
-    doc.moveBlocks(model.children, newModel);
-    return focusTextModel(editorHost.std, id);
-  }
 }
 
 /**
