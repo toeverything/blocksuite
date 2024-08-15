@@ -207,11 +207,6 @@ export default ({ mode }) => {
             'examples/multiple-editors/edgeless-edgeless/index.html'
           ),
           'examples/inline': resolve(__dirname, 'examples/inline/index.html'),
-          'examples/store': resolve(__dirname, 'examples/store/index.html'),
-          'examples/provider': resolve(
-            __dirname,
-            'examples/provider/index.html'
-          ),
         },
         output: {
           sourcemapIgnoreList: relativeSourcePath => {
