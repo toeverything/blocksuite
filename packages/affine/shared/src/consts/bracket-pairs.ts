@@ -4,7 +4,7 @@ interface BracketPair {
   right: string;
 }
 
-export const bracketPairs: BracketPair[] = [
+export const BRACKET_PAIRS: BracketPair[] = [
   {
     name: 'parenthesis',
     left: '(',

@@ -8,10 +8,9 @@ import {
   insertLinkedNode,
   textFormatConfigs,
 } from '@blocksuite/affine-components/rich-text';
+import { BRACKET_PAIRS } from '@blocksuite/affine-shared/consts';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
-
-import type { RootBlockComponent } from '../../../../root-block/types.js';
 
 import { createDefaultDoc } from '../../../utils/init.js';
 import { tryConvertBlock } from '../markdown/block.js';
@@ -23,7 +22,6 @@ import {
   handleRemoveAllIndentForMultiBlocks,
   handleUnindent,
 } from '../rich-text-operations.js';
-import { bracketPairs } from './bracket-pairs.js';
 
 // FIXME: use selection manager to set selection
 export const bindContainerHotkey = (block: BlockComponent) => {
@@ -31,7 +29,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
   const model = block.model;
   const editorHost = block.host;
   const std = editorHost.std;
-  const leftBrackets = bracketPairs.map(pair => pair.left);
 
   const _selectBlock = () => {
     selection.update(selList => {
@@ -111,36 +108,8 @@ export const bindContainerHotkey = (block: BlockComponent) => {
           block.model.text?.length ?? 0
         );
       }
-      const target = ctx.get('defaultState').event.target as Node;
-      if (!block.host.contains(target)) return;
-      if (!block.selected?.is('text')) return;
-
-      const inlineEditor = _getInlineEditor();
-      if (!inlineEditor) return;
-      const inlineRange = inlineEditor.getInlineRange();
-      if (!inlineRange) return;
-
-      block.doc.captureSync();
-
-      _preventDefault(ctx);
-
-      if (tryConvertBlock(block, inlineEditor)) {
-        return true;
-      }
 
       return false;
-    },
-    'Mod-Enter': ctx => {
-      if (!block.selected?.is('text')) return;
-
-      const inlineEditor = _getInlineEditor();
-      if (!inlineEditor) return;
-      const inlineRange = inlineEditor.getInlineRange();
-      if (!inlineRange) return;
-
-      _preventDefault(ctx);
-
-      return true;
     },
     Space: ctx => handleMarkdown(ctx),
     'Shift-Space': ctx => handleMarkdown(ctx),
@@ -199,11 +168,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     'Mod-Backspace': ctx => {
       if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
 
-      const rootComponent = block.closest<RootBlockComponent>(
-        'affine-page-root,affine-edgeless-root'
-      );
-      if (!rootComponent) return;
-
       {
         const [_, context] = std.command
           .chain()
@@ -240,11 +204,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     'Shift-Tab': ctx => {
       if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
 
-      const rootComponent = block.closest<RootBlockComponent>(
-        'affine-page-root,affine-edgeless-root'
-      );
-      if (!rootComponent) return;
-
       _preventDefault(ctx);
 
       {
@@ -276,32 +235,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       const models = context.selectedModels;
       if (!models) return;
       handleMultiBlockOutdent(block.host, models);
-      return true;
-    },
-    Backspace: ctx => {
-      if (!block.selected?.is('text')) return;
-      const inlineEditor = _getInlineEditor();
-      if (!inlineEditor) return;
-
-      // Auto delete bracket right
-      if (matchFlavours(block.model, ['affine:code'])) {
-        const inlineRange = inlineEditor.getInlineRange();
-        if (!inlineRange) return;
-        const left = inlineEditor.yText.toString()[inlineRange.index - 1];
-        const right = inlineEditor.yText.toString()[inlineRange.index];
-        if (bracketPairs[leftBrackets.indexOf(left)]?.right === right) {
-          const index = inlineRange.index - 1;
-          inlineEditor.deleteText({
-            index: index,
-            length: 2,
-          });
-          inlineEditor.setInlineRange({
-            index: index,
-            length: 0,
-          });
-          _preventDefault(ctx);
-        }
-      }
       return true;
     },
   });
@@ -379,19 +312,16 @@ export const bindContainerHotkey = (block: BlockComponent) => {
   }
 
   // Bracket auto complete
-  bracketPairs.forEach(pair => {
+  BRACKET_PAIRS.forEach(pair => {
     block.bindHotKey({
       [pair.left]: ctx => {
         if (block.doc.readonly) return;
 
         const textSelection = block.selection.find('text');
         if (!textSelection) return;
+        const isCodeBlock = matchFlavours(block.model, ['affine:code']);
         // When selection is collapsed, only trigger auto complete in code block
-        if (
-          textSelection.isCollapsed() &&
-          !matchFlavours(block.model, ['affine:code'])
-        )
-          return;
+        if (textSelection.isCollapsed() && !isCodeBlock) return;
         if (!textSelection.isInSameBlock()) return;
 
         _preventDefault(ctx);
@@ -403,7 +333,7 @@ export const bindContainerHotkey = (block: BlockComponent) => {
         const selectedText = inlineEditor.yText
           .toString()
           .slice(inlineRange.index, inlineRange.index + inlineRange.length);
-        if (pair.name === 'square bracket') {
+        if (!isCodeBlock && pair.name === 'square bracket') {
           // [[Selected text]] should automatically be converted to a Linked doc with the title "Selected text".
           // See https://github.com/toeverything/blocksuite/issues/2730
           const success = tryConvertToLinkedDoc();
@@ -425,7 +355,7 @@ export const bindContainerHotkey = (block: BlockComponent) => {
   });
 
   // Skip redundant right bracket
-  bracketPairs.forEach(pair => {
+  BRACKET_PAIRS.forEach(pair => {
     block.bindHotKey({
       [pair.right]: ctx => {
         if (!matchFlavours(block.model, ['affine:code'])) return;
