@@ -66,14 +66,18 @@ test('image loading but failed', async ({ page }) => {
   await initMockImage(page);
 
   const loadingContent = await page
-    .locator('.affine-image-block-card .affine-image-block-card-title-text')
+    .locator(
+      '.affine-image-fallback-card .affine-image-fallback-card-title-text'
+    )
     .innerText();
   expect(loadingContent).toBe('Loading image...');
 
   await page.waitForTimeout(3 * timeout);
 
   await expect(
-    page.locator('.affine-image-block-card .affine-image-block-card-title-text')
+    page.locator(
+      '.affine-image-fallback-card .affine-image-fallback-card-title-text'
+    )
   ).toContainText('Image loading failed.');
 });
 
@@ -124,7 +128,9 @@ test('image loading but success', async ({ page }) => {
   await initMockImage(page);
 
   const loadingContent = await page
-    .locator('.affine-image-block-card .affine-image-block-card-title-text')
+    .locator(
+      '.affine-image-fallback-card .affine-image-fallback-card-title-text'
+    )
     .innerText();
   expect(loadingContent).toBe('Loading image...');
 

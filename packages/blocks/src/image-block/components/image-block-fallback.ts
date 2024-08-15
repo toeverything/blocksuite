@@ -1,10 +1,15 @@
+import type { ImageBlockModel } from '@blocksuite/affine-model';
+
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  modelContext,
+} from '@blocksuite/block-std';
+import { consume } from '@lit/context';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import type { ImageBlockComponent } from '../image-block.js';
 
 import { FailedImageIcon, ImageIcon, LoadingIcon } from '../styles.js';
 
@@ -13,10 +18,10 @@ export const SURFACE_IMAGE_CARD_HEIGHT = 122;
 export const NOTE_IMAGE_CARD_WIDTH = 752;
 export const NOTE_IMAGE_CARD_HEIGHT = 78;
 
-@customElement('affine-image-block-card')
-export class AffineImageCard extends WithDisposable(ShadowlessElement) {
+@customElement('affine-image-fallback-card')
+export class ImageBlockFallbackCard extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .affine-image-block-card-container {
+    .affine-image-fallback-card-container {
       width: 100%;
       height: 100%;
       display: flex;
@@ -24,7 +29,7 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
       justify-content: center;
     }
 
-    .affine-image-block-card {
+    .affine-image-fallback-card {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -34,7 +39,7 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
       padding: 12px;
     }
 
-    .affine-image-block-card-content {
+    .affine-image-fallback-card-content {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -62,17 +67,17 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
   `;
 
   override render() {
-    const { isInSurface, loading, error, model } = this.block;
+    const { mode, loading, error, model } = this;
 
-    const width = isInSurface
+    const isEdgeless = mode === 'edgeless';
+    const width = isEdgeless
       ? `${SURFACE_IMAGE_CARD_WIDTH}px`
       : `${NOTE_IMAGE_CARD_WIDTH}px`;
-
-    const height = isInSurface
+    const height = isEdgeless
       ? `${SURFACE_IMAGE_CARD_HEIGHT}px`
       : `${NOTE_IMAGE_CARD_HEIGHT}px`;
 
-    const rotate = isInSurface ? model.rotate : 0;
+    const rotate = isEdgeless ? model.rotate : 0;
 
     const cardStyleMap = styleMap({
       transform: `rotate(${rotate}deg)`,
@@ -99,11 +104,16 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
         : null;
 
     return html`
-      <div class="affine-image-block-card-container">
-        <div class="affine-image-block-card drag-target" style=${cardStyleMap}>
-          <div class="affine-image-block-card-content">
+      <div class="affine-image-fallback-card-container">
+        <div
+          class="affine-image-fallback-card drag-target"
+          style=${cardStyleMap}
+        >
+          <div class="affine-image-fallback-card-content">
             ${titleIcon}
-            <span class="affine-image-block-card-title-text">${titleText}</span>
+            <span class="affine-image-fallback-card-title-text"
+              >${titleText}</span
+            >
           </div>
           <div class="affine-image-card-size">${size}</div>
         </div>
@@ -112,11 +122,20 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  accessor block!: ImageBlockComponent;
+  accessor error!: boolean;
+
+  @property({ attribute: false })
+  accessor loading!: boolean;
+
+  @property({ attribute: false })
+  accessor mode!: 'page' | 'edgeless';
+
+  @consume({ context: modelContext })
+  accessor model!: ImageBlockModel;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-image-block-card': AffineImageCard;
+    'affine-image-fallback-card': ImageBlockFallbackCard;
   }
 }

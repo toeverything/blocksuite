@@ -29,6 +29,7 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
+import { ImageEdgelessBlockComponent } from './image-edgeless-block.js';
 import { addSiblingImageBlock } from './utils.js';
 
 export class ImageBlockService extends BlockService<ImageBlockModel> {
@@ -47,13 +48,15 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
       )
         return false;
 
-      const blockComponent = anchorComponent as ImageBlockComponent;
+      const blockComponent = anchorComponent as
+        | ImageBlockComponent
+        | ImageEdgelessBlockComponent;
 
       const isDraggingByDragHandle = !!element?.closest(
         AFFINE_DRAG_HANDLE_WIDGET
       );
       const isDraggingByComponent = blockComponent.contains(element);
-      const isInSurface = blockComponent.isInSurface;
+      const isInSurface = blockComponent instanceof ImageEdgelessBlockComponent;
 
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.std.selection.setGroup('note', [
@@ -98,7 +101,7 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
         return false;
 
       const blockComponent = draggingElements[0] as ImageBlockComponent;
-      const isInSurface = blockComponent.isInSurface;
+      const isInSurface = blockComponent instanceof ImageEdgelessBlockComponent;
       const target = captureEventTarget(state.raw.target);
       const isTargetEdgelessContainer =
         target?.classList.contains('edgeless-container');

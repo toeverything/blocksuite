@@ -138,7 +138,7 @@ export class ExportManager {
           ? getBlockComponentByModel(this.editorHost, rootModel)
           : null;
         const imageCard = rootComponent?.querySelector(
-          'affine-image-block-card'
+          'affine-image-fallback-card'
         );
         const isReady =
           !imageCard || imageCard.getAttribute('imageState') === '0';

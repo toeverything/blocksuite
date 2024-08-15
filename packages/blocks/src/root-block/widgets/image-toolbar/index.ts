@@ -49,7 +49,8 @@ export class AffineImageToolbarWidget extends WidgetComponent<
           return null;
         }
 
-        const imageContainer = imageBlock.resizeImg ?? imageBlock.imageCard;
+        const imageContainer =
+          imageBlock.resizableImg ?? imageBlock.fallbackCard;
         if (!imageContainer) {
           return null;
         }
@@ -141,9 +142,14 @@ export class AffineImageToolbarWidget extends WidgetComponent<
   moreMenuConfig: MoreMenuConfigItem[] = [];
 
   override firstUpdated() {
+    if (this.doc.getParent(this.model.id)?.flavour === 'affine:surface') {
+      return;
+    }
+
     if (!this.config.length || !this.moreMenuConfig.length) {
       this.buildDefaultConfig();
     }
+
     this._setHoverController();
   }
 }

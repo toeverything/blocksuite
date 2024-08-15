@@ -1,31 +1,42 @@
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 
 import { Peekable } from '@blocksuite/affine-components/peek';
-import { html } from 'lit';
+import { GfxBlockComponent } from '@blocksuite/block-std';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
+import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
+import type { EdgelessRootService } from '../root-block/index.js';
 import type { ImageBlockFallbackCard } from './components/image-block-fallback.js';
-import type { ImageBlockPageComponent } from './components/page-image-block.js';
 import type { ImageBlockService } from './image-service.js';
 
-import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
+import '../_common/components/block-caption.js';
 import './components/image-block-fallback.js';
-import './components/page-image-block.js';
 import {
   copyImageBlob,
   downloadImageBlob,
   fetchImageBlob,
+  resetImageSize,
   turnImageIntoCardView,
 } from './utils.js';
 
-@customElement('affine-image')
+@customElement('affine-edgeless-image')
 @Peekable()
-export class ImageBlockComponent extends CaptionedBlockComponent<
+export class ImageEdgelessBlockComponent extends GfxBlockComponent<
+  EdgelessRootService,
   ImageBlockModel,
   ImageBlockService
 > {
+  static override styles = css`
+    affine-edgeless-image .resizable-img,
+    affine-edgeless-image .resizable-img img {
+      width: 100%;
+      height: 100%;
+    }
+  `;
+
   convertToCardView = () => {
     turnImageIntoCardView(this).catch(console.error);
   };
@@ -40,19 +51,22 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
 
   refreshData = () => {
     this.retryCount = 0;
-    fetchImageBlob(this).catch(console.error);
+    fetchImageBlob(this)
+      .then(() => {
+        const { width, height } = this.model;
+        if (!width || !height) {
+          return resetImageSize(this);
+        }
+
+        return;
+      })
+      .catch(console.error);
   };
 
-  private _handleClick(event: MouseEvent) {
-    // the peek view need handle shift + click
-    if (event.shiftKey) return;
+  override rootServiceFlavour: string = 'affine:page';
 
-    event.stopPropagation();
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      blockId: this.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
+  private _handleError(error: Error) {
+    this.dispatchEvent(new CustomEvent('error', { detail: error }));
   }
 
   override connectedCallback() {
@@ -74,40 +88,46 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
     super.disconnectedCallback();
   }
 
-  override renderBlock() {
+  override renderGfxBlock() {
     const containerStyleMap = styleMap({
       position: 'relative',
       width: '100%',
     });
 
     return html`
-      <div
-        class="affine-image-container"
-        style=${containerStyleMap}
-        @click=${this._handleClick}
-      >
+      <div class="affine-image-container" style=${containerStyleMap}>
         ${when(
-          this.loading || this.error,
+          this.loading || this.error || !this.blobUrl,
           () =>
             html`<affine-image-fallback-card
               .error=${this.error}
               .loading=${this.loading}
               .mode=${'page'}
             ></affine-image-fallback-card>`,
-          () => html`<affine-page-image .block=${this}></affine-page-image>`
+          () =>
+            html`<div class="resizable-img">
+              <img
+                class="drag-target"
+                src=${this.blobUrl ?? ''}
+                draggable="false"
+                @error=${this._handleError}
+              />
+            </div>`
         )}
+        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
+      <block-caption-editor></block-caption-editor>
 
       ${Object.values(this.widgets)}
     `;
   }
 
-  override updated() {
-    this.fallbackCard?.requestUpdate();
+  override toZIndex() {
+    return `${this.rootService.layer.getZIndex(this.model)}`;
   }
 
-  get resizableImg() {
-    return this.pageImage?.resizeImg;
+  override updated() {
+    this.fallbackCard?.requestUpdate();
   }
 
   @property({ attribute: false })
@@ -116,7 +136,8 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
   @property({ attribute: false })
   accessor blobUrl: string | undefined = undefined;
 
-  override accessor blockContainerStyles = { margin: '18px 0' };
+  @query('block-caption-editor')
+  accessor captionEditor!: BlockCaptionEditor | null;
 
   @property({ attribute: false })
   accessor downloading = false;
@@ -133,17 +154,15 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
   @property({ attribute: false })
   accessor loading = false;
 
-  @query('affine-page-image')
-  private accessor pageImage: ImageBlockPageComponent | null = null;
+  @query('.resizable-img')
+  accessor resizableImg!: HTMLDivElement;
 
   @property({ attribute: false })
   accessor retryCount = 0;
-
-  override accessor useCaptionEditor = true;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-image': ImageBlockComponent;
+    'affine-edgeless-image': ImageEdgelessBlockComponent;
   }
 }

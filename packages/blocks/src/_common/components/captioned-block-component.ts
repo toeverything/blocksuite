@@ -26,7 +26,7 @@ export class CaptionedBlockComponent<
     return html`<div style=${style} class="affine-block-component">
       ${content}
       ${this.useCaptionEditor
-        ? html`<block-caption-editor .block=${this}></block-caption-editor>`
+        ? html`<block-caption-editor></block-caption-editor>`
         : nothing}
       ${this.showBlockSelection
         ? html`<affine-block-selection .block=${this}></affine-block-selection>`

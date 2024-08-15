@@ -15,6 +15,7 @@ import {
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 import type { ImageBlockComponent } from './image-block.js';
+import type { ImageEdgelessBlockComponent } from './image-edgeless-block.js';
 
 import { readImageSize } from '../root-block/edgeless/components/utils.js';
 import { transformModel } from '../root-block/utils/operations/model.js';
@@ -103,7 +104,9 @@ async function getImageBlob(model: ImageBlockModel) {
   return blob;
 }
 
-export async function fetchImageBlob(block: ImageBlockComponent) {
+export async function fetchImageBlob(
+  block: ImageBlockComponent | ImageEdgelessBlockComponent
+) {
   try {
     if (block.model.sourceId !== block.lastSourceId || !block.blobUrl) {
       block.loading = true;
@@ -154,7 +157,9 @@ export async function fetchImageBlob(block: ImageBlockComponent) {
   }
 }
 
-export async function downloadImageBlob(block: ImageBlockComponent) {
+export async function downloadImageBlob(
+  block: ImageBlockComponent | ImageEdgelessBlockComponent
+) {
   const { host, downloading } = block;
   if (downloading) {
     toast(host, 'Download in progress...');
@@ -176,7 +181,9 @@ export async function downloadImageBlob(block: ImageBlockComponent) {
   block.downloading = false;
 }
 
-export async function resetImageSize(block: ImageBlockComponent) {
+export async function resetImageSize(
+  block: ImageBlockComponent | ImageEdgelessBlockComponent
+) {
   const { blob, model } = block;
   if (!blob) {
     return;
@@ -221,7 +228,9 @@ function convertToPng(blob: Blob): Promise<Blob | null> {
   });
 }
 
-export async function copyImageBlob(block: ImageBlockComponent) {
+export async function copyImageBlob(
+  block: ImageBlockComponent | ImageEdgelessBlockComponent
+) {
   const { host, model } = block;
   let blob = await getImageBlob(model);
   if (!blob) {
@@ -361,7 +370,9 @@ export function addImageBlocks(
 /**
  * Turn the image block into a attachment block.
  */
-export async function turnImageIntoCardView(block: ImageBlockComponent) {
+export async function turnImageIntoCardView(
+  block: ImageBlockComponent | ImageEdgelessBlockComponent
+) {
   const doc = block.doc;
   if (!doc.schema.flavourSchemaMap.has('affine:attachment')) {
     console.error('The attachment flavour is not supported!');

@@ -555,7 +555,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
         ${content}
       </div>
 
-      <block-caption-editor .block=${this}></block-caption-editor>
+      <block-caption-editor></block-caption-editor>
 
       ${Object.values(this.widgets)}
     `;

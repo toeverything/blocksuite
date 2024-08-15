@@ -1,12 +1,19 @@
-import type { BlockComponent } from '@blocksuite/block-std';
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  docContext,
+  modelContext,
+  stdContext,
+} from '@blocksuite/block-std';
 import { Text } from '@blocksuite/store';
+import { consume } from '@lit/context';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 
 export interface BlockCaptionProps {
   caption: string | null | undefined;
@@ -44,20 +51,20 @@ export class BlockCaptionEditor<
   private _onCaptionKeydown(event: KeyboardEvent) {
     event.stopPropagation();
 
-    if (this.block.isInSurface || event.isComposing) {
+    if (this.mode === 'edgeless' || event.isComposing) {
       return;
     }
 
     if (event.key === 'Enter') {
       event.preventDefault();
-      const doc = this.block.doc;
+      const doc = this.doc;
       const target = event.target as HTMLInputElement;
       const start = target.selectionStart;
       if (start === null) {
         return;
       }
 
-      const model = this.block.model;
+      const model = this.model;
       const parent = doc.getParent(model);
       if (!parent) {
         return;
@@ -76,7 +83,7 @@ export class BlockCaptionEditor<
         index + 1
       );
 
-      focusTextModel(this.block.std, id);
+      focusTextModel(this.std, id);
     }
   }
 
@@ -88,7 +95,7 @@ export class BlockCaptionEditor<
   private _onInputChange(e: InputEvent) {
     const target = e.target as HTMLInputElement;
     this.caption = target.value;
-    this.block.doc.updateBlock(this.block.model, {
+    this.doc.updateBlock(this.model, {
       caption: this.caption,
     });
   }
@@ -100,12 +107,12 @@ export class BlockCaptionEditor<
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this.caption = this.block.model.caption;
+    this.caption = this.model.caption;
 
     this.disposables.add(
-      this.block.model.propsUpdated.on(({ key }) => {
+      this.model.propsUpdated.on(({ key }) => {
         if (key === 'caption') {
-          this.caption = this.block.model.caption;
+          this.caption = this.model.caption;
           if (!this._focus) {
             this.display = !!this.caption?.length;
           }
@@ -120,7 +127,7 @@ export class BlockCaptionEditor<
     }
 
     return html`<textarea
-      .disabled=${this.block.doc.readonly}
+      .disabled=${this.doc.readonly}
       placeholder="Write a caption"
       class="block-caption-editor"
       .value=${this.caption ?? ''}
@@ -138,8 +145,11 @@ export class BlockCaptionEditor<
     ></textarea>`;
   }
 
-  @property({ attribute: false })
-  accessor block!: BlockComponent<Model> & { isInSurface?: boolean };
+  get mode() {
+    return this.doc.getParent(this.model)?.flavour === 'affine:surface'
+      ? 'edgeless'
+      : 'page';
+  }
 
   @state()
   accessor caption: string | null | undefined = undefined;
@@ -147,8 +157,17 @@ export class BlockCaptionEditor<
   @state()
   accessor display = false;
 
+  @consume({ context: docContext })
+  accessor doc!: Doc;
+
   @query('.block-caption-editor')
   accessor input!: HTMLInputElement;
+
+  @consume({ context: modelContext })
+  accessor model!: Model;
+
+  @consume({ context: stdContext })
+  accessor std!: BlockStdScope;
 }
 
 declare global {
