@@ -1,9 +1,10 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Text } from '@blocksuite/store';
 
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
-
-import { getNextBlock } from '../../_common/utils/index.js';
+import {
+  getNextContentBlock,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 
 // When deleting at line end of a list block,
 // check current block's children and siblings
@@ -59,7 +60,7 @@ export function forwardDelete(std: BlockStdScope): true | undefined {
   }
 
   // Has next text block in other note block
-  const nextBlock = getNextBlock(std.host, model);
+  const nextBlock = getNextContentBlock(std.host, model);
   const nextBlockText = nextBlock?.text;
   if (nextBlock && nextBlockText) {
     model.text.join(nextBlock.text as Text);
