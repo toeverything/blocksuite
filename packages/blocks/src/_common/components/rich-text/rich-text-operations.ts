@@ -374,73 +374,6 @@ function handleDatabaseBlockForwardDelete(model: ExtendedModel) {
   return isInsideBlockByFlavour(doc, model, 'affine:database');
 }
 
-// When deleting at line end of a list block,
-// check current block's children and siblings
-/**
- * Example:
-- Line1  <-(cursor here)
-    - Line2
-        - Line3
-        - Line4
-    - Line5
-        - Line6
-- Line7
-    - Line8
-- Line9
- */
-function handleListBlockForwardDelete(
-  editorHost: EditorHost,
-  model: ExtendedModel
-) {
-  if (!matchFlavours(model, ['affine:list'])) return false;
-  const doc = model.doc;
-  const firstChild = model.firstChild();
-  if (firstChild) {
-    model.text?.join(firstChild.text as Text);
-    const grandChildren = firstChild.children;
-    if (grandChildren) {
-      doc.moveBlocks(grandChildren, model);
-      doc.deleteBlock(firstChild);
-      return true;
-    } else {
-      doc.deleteBlock(firstChild);
-      return true;
-    }
-  } else {
-    const nextSibling = doc.getNext(model);
-    if (nextSibling) {
-      model.text?.join(nextSibling.text as Text);
-      if (nextSibling.children) {
-        const parent = doc.getParent(nextSibling);
-        if (!parent) return false;
-        doc.moveBlocks(nextSibling.children, parent, model, false);
-        doc.deleteBlock(nextSibling);
-        return true;
-      } else {
-        doc.deleteBlock(nextSibling);
-        return true;
-      }
-    } else {
-      const nextBlock = getNextBlock(editorHost, model);
-      if (!nextBlock) {
-        // do nothing
-        return true;
-      }
-      model.text?.join(nextBlock.text as Text);
-      if (nextBlock.children) {
-        const parent = doc.getParent(nextBlock);
-        if (!parent) return false;
-        doc.moveBlocks(nextBlock.children, parent, doc.getParent(model), false);
-        doc.deleteBlock(nextBlock);
-        return true;
-      } else {
-        doc.deleteBlock(nextBlock);
-        return true;
-      }
-    }
-  }
-}
-
 function handleParagraphOrListSibling(
   editorHost: EditorHost,
   model: ExtendedModel,
@@ -448,8 +381,7 @@ function handleParagraphOrListSibling(
   parent: ExtendedModel
 ) {
   const doc = model.doc;
-  if (!matchFlavours(previousSibling, ['affine:paragraph', 'affine:list']))
-    return false;
+  if (!matchFlavours(previousSibling, ['affine:paragraph'])) return false;
 
   doc.captureSync();
   const preTextLength = previousSibling.text?.length || 0;
@@ -689,10 +621,7 @@ function handleParagraphBlockForwardDelete(
       model: ExtendedModel,
       nextSibling: ExtendedModel | null
     ) {
-      if (
-        nextSibling &&
-        matchFlavours(nextSibling, ['affine:paragraph', 'affine:list'])
-      ) {
+      if (nextSibling && matchFlavours(nextSibling, ['affine:paragraph'])) {
         model.text?.join(nextSibling.text as Text);
         if (nextSibling.children) {
           const parent = doc.getParent(nextSibling);
@@ -706,10 +635,7 @@ function handleParagraphBlockForwardDelete(
         }
       } else {
         const nextBlock = getNextBlock(editorHost, model);
-        if (
-          !nextBlock ||
-          !matchFlavours(nextBlock, ['affine:paragraph', 'affine:list'])
-        )
+        if (!nextBlock || !matchFlavours(nextBlock, ['affine:paragraph']))
           return false;
         model.text?.join(nextBlock.text as Text);
         if (nextBlock.children) {
@@ -734,10 +660,7 @@ function handleParagraphBlockForwardDelete(
       model: ExtendedModel,
       firstChild: ExtendedModel | null
     ) {
-      if (
-        !firstChild ||
-        !matchFlavours(firstChild, ['affine:paragraph', 'affine:list'])
-      ) {
+      if (!firstChild || !matchFlavours(firstChild, ['affine:paragraph'])) {
         return false;
       }
       const grandChildren = firstChild.children;
@@ -848,13 +771,10 @@ export function handleLineStartBackspace(
 ) {
   editorHost.command
     .chain()
-    .try(chain => [
-      chain.listToParagraph({ id: model.id }),
-      chain.inline((_, next) => {
-        const result = handleParagraphBlockBackspace(editorHost, model);
-        if (result) return next();
-      }),
-    ])
+    .inline((_, next) => {
+      const result = handleParagraphBlockBackspace(editorHost, model);
+      if (result) return next();
+    })
     .run();
 }
 
@@ -862,10 +782,7 @@ export function handleLineEndForwardDelete(
   editorHost: EditorHost,
   model: ExtendedModel
 ) {
-  if (
-    handleListBlockForwardDelete(editorHost, model) ||
-    handleParagraphBlockForwardDelete(editorHost, model)
-  ) {
+  if (handleParagraphBlockForwardDelete(editorHost, model)) {
     handleDatabaseBlockForwardDelete(model);
     return;
   }

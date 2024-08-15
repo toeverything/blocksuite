@@ -6,6 +6,7 @@ import type { InlineRange, InlineRangeProvider } from '@blocksuite/inline';
 
 import '@blocksuite/affine-components/rich-text';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { effect } from '@lit-labs/preact-signals';
 import { type TemplateResult, html, nothing } from 'lit';
@@ -21,6 +22,7 @@ import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { correctNumberedListsOrderToPrev } from './commands/utils.js';
 import { listBlockStyles } from './styles.js';
+import { forwardDelete } from './utils/forward-delete.js';
 import { getListIcon } from './utils/get-list-icon.js';
 import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 
@@ -171,6 +173,30 @@ export class ListBlockComponent extends CaptionedBlockComponent<
           blockId: this.model.id,
           inlineIndex: inlineRange.index,
         });
+        return true;
+      },
+      Backspace: ctx => {
+        const text = this.std.selection.find('text');
+        if (!text) return;
+        const isCollapsed = text.isCollapsed();
+        const isStart = isCollapsed && text.from.index === 0;
+        if (!isStart) return;
+
+        ctx.get('keyboardState').raw.preventDefault();
+        this.std.command.exec('listToParagraph', { id: text.from.blockId });
+        return true;
+      },
+      'Control-d': ctx => {
+        if (!IS_MAC) return;
+        const deleted = forwardDelete(this.std);
+        if (!deleted) return;
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+      Delete: ctx => {
+        const deleted = forwardDelete(this.std);
+        if (!deleted) return;
+        ctx.get('keyboardState').raw.preventDefault();
         return true;
       },
     });
