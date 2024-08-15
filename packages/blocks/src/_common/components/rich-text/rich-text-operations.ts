@@ -12,6 +12,8 @@ import {
   getInlineEditorByModel,
 } from '@blocksuite/affine-components/rich-text';
 import {
+  getNextContentBlock,
+  getPrevContentBlock,
   isInsideBlockByFlavour,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
@@ -22,8 +24,6 @@ import type { ExtendedModel } from '../../types.js';
 import {
   getBlockComponentByModel,
   getDocTitleByEditorHost,
-  getNextBlock,
-  getPreviousBlock,
 } from '../../../_common/utils/query.js';
 import { focusTitle } from '../../../_common/utils/selection.js';
 import { EMBED_BLOCK_FLAVOUR_LIST } from '../../consts.js';
@@ -54,13 +54,10 @@ export function handleBlockEndEnter(
     return;
   }
 
-  const getProps = ():
-    | ['affine:list', BlockSuite.ModelProps<ListBlockModel>]
-    | ['affine:paragraph', BlockSuite.ModelProps<ParagraphBlockModel>] => {
-    const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
-    if (shouldInheritFlavour) {
-      return [model.flavour, { type: model.type }];
-    }
+  const getProps = (): [
+    'affine:paragraph',
+    BlockSuite.ModelProps<ParagraphBlockModel>,
+  ] => {
     return ['affine:paragraph', { type: 'text' }];
   };
   const [flavour, blockProps] = getProps();
@@ -96,6 +93,7 @@ export function handleBlockEndEnter(
     focusTextModel(editorHost.std, id);
     return;
   }
+
   const index = parent.children.indexOf(model);
   if (index === -1) {
     return;
@@ -487,7 +485,7 @@ function handleParagraphDeleteActions(
   const doc = model.doc;
   const parent = doc.getParent(model);
   if (!parent) return false;
-  const previousSibling = getPreviousBlock(editorHost, model);
+  const previousSibling = getPrevContentBlock(editorHost, model);
   if (!previousSibling) {
     return handleNoPreviousSibling(editorHost, model);
   } else if (
@@ -634,7 +632,7 @@ function handleParagraphBlockForwardDelete(
           return true;
         }
       } else {
-        const nextBlock = getNextBlock(editorHost, model);
+        const nextBlock = getNextContentBlock(editorHost, model);
         if (!nextBlock || !matchFlavours(nextBlock, ['affine:paragraph']))
           return false;
         model.text?.join(nextBlock.text as Text);
@@ -671,7 +669,7 @@ function handleParagraphBlockForwardDelete(
       doc.deleteBlock(firstChild);
       return true;
     }
-    const nextBlock = getNextBlock(editorHost, model);
+    const nextBlock = getNextContentBlock(editorHost, model);
     if (!firstChild && !nextBlock) return true;
     return (
       handleParagraphOrListChild(doc, model, firstChild) ||

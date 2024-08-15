@@ -4,6 +4,7 @@ export * from './button-popper.js';
 export * from './dom.js';
 export * from './event.js';
 export * from './filesys.js';
+export * from './get-content-block.js';
 export * from './header-value-parser.js';
 export * from './inline-editor.js';
 export * from './is-abort-error.js';
