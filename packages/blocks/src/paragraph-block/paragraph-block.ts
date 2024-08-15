@@ -16,12 +16,14 @@ import type { ParagraphBlockService } from './paragraph-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
+import { handleUnindent } from '../_common/components/rich-text/rich-text-operations.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessTextBlockComponent } from '../edgeless-text/edgeless-text-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { paragraphBlockStyles } from './styles.js';
+import { mergeWithPrev } from './utils/merge-with-prev.js';
 
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends CaptionedBlockComponent<
@@ -51,6 +53,34 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
     super.connectedCallback();
     bindContainerHotkey(this);
     this.bindHotKey({
+      Backspace: ctx => {
+        const text = this.std.selection.find('text');
+        if (!text) return;
+        const isCollapsed = text.isCollapsed();
+        const isStart = isCollapsed && text.from.index === 0;
+        if (!isStart) return;
+
+        const { model, doc, std } = this;
+        const event = ctx.get('keyboardState').raw;
+        event.preventDefault();
+
+        // When deleting at line start of a paragraph block,
+        // firstly switch it to normal text, then delete this empty block.
+        if (model.type !== 'text') {
+          // Try to switch to normal text
+          doc.captureSync();
+          doc.updateBlock(model, { type: 'text' });
+          return true;
+        }
+
+        const merged = mergeWithPrev(std.host, model);
+        if (merged) {
+          return true;
+        }
+
+        handleUnindent(std.host, model);
+        return true;
+      },
       'Mod-Enter': ctx => {
         const { model, inlineEditor, doc } = this;
         if (model.type !== 'quote') return;

@@ -6,14 +6,9 @@ import type {
 import type { EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
-import {
-  asyncSetInlineRange,
-  focusTextModel,
-  getInlineEditorByModel,
-} from '@blocksuite/affine-components/rich-text';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   getNextContentBlock,
-  getPrevContentBlock,
   isInsideBlockByFlavour,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
@@ -61,38 +56,6 @@ export function handleBlockEndEnter(
     return ['affine:paragraph', { type: 'text' }];
   };
   const [flavour, blockProps] = getProps();
-
-  if (isInsideBlockByFlavour(doc, model, 'affine:database')) {
-    doc.captureSync();
-    const index = parent.children.findIndex(child => child.id === model.id);
-    let newParent: BlockModel = parent;
-    let newBlockIndex = index + 1;
-    const childrenLength = parent.children.length;
-
-    if (index === childrenLength - 1 && model.text?.yText.length === 0) {
-      if (childrenLength !== 1) {
-        doc.deleteBlock(model);
-      }
-
-      const nextModel = doc.getNext(newParent);
-      if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
-        focusTextModel(editorHost.std, nextModel.id, nextModel.text.length);
-        return;
-      }
-
-      const prevParent = doc.getParent(parent);
-      if (!prevParent) return;
-      const prevIndex = prevParent.children.findIndex(
-        child => child.id === parent.id
-      );
-      newParent = prevParent;
-      newBlockIndex = prevIndex + 1;
-    }
-
-    const id = doc.addBlock(flavour, blockProps, newParent, newBlockIndex);
-    focusTextModel(editorHost.std, id);
-    return;
-  }
 
   const index = parent.children.indexOf(model);
   if (index === -1) {
@@ -372,67 +335,10 @@ function handleDatabaseBlockForwardDelete(model: ExtendedModel) {
   return isInsideBlockByFlavour(doc, model, 'affine:database');
 }
 
-function handleParagraphOrListSibling(
+export function handleNoPreviousSibling(
   editorHost: EditorHost,
-  model: ExtendedModel,
-  previousSibling: ExtendedModel,
-  parent: ExtendedModel
+  model: ExtendedModel
 ) {
-  const doc = model.doc;
-  if (!matchFlavours(previousSibling, ['affine:paragraph'])) return false;
-
-  doc.captureSync();
-  const preTextLength = previousSibling.text?.length || 0;
-  model.text?.length && previousSibling.text?.join(model.text as Text);
-  doc.deleteBlock(model, {
-    bringChildrenTo: parent,
-  });
-  const inlineEditor = getInlineEditorByModel(editorHost, previousSibling);
-  inlineEditor?.setInlineRange({
-    index: preTextLength,
-    length: 0,
-  });
-  return true;
-}
-
-function handleEmbedDividerCodeSibling(
-  editorHost: EditorHost,
-  model: ExtendedModel,
-  previousSibling: ExtendedModel,
-  parent: ExtendedModel
-) {
-  const doc = model.doc;
-  if (matchFlavours(previousSibling, ['affine:divider'])) {
-    doc.deleteBlock(previousSibling);
-    return true;
-  }
-
-  if (
-    !matchFlavours(previousSibling, [
-      'affine:image',
-      'affine:code',
-      'affine:bookmark',
-      'affine:attachment',
-      'affine:surface-ref',
-    ])
-  )
-    return false;
-
-  focusTextModel(
-    editorHost.std,
-    previousSibling.id,
-    previousSibling.text?.yText.length
-  );
-  if (!model.text?.length) {
-    doc.captureSync();
-    doc.deleteBlock(model, {
-      bringChildrenTo: parent,
-    });
-  }
-  return true;
-}
-
-function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
   const doc = model.doc;
   const text = model.text;
   const parent = doc.getParent(model);
@@ -475,131 +381,6 @@ function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
     text?.clear();
   }
   focusTitle(editorHost, title.length - textLength);
-  return true;
-}
-
-function handleParagraphDeleteActions(
-  editorHost: EditorHost,
-  model: ExtendedModel
-) {
-  const doc = model.doc;
-  const parent = doc.getParent(model);
-  if (!parent) return false;
-  const previousSibling = getPrevContentBlock(editorHost, model);
-  if (!previousSibling) {
-    return handleNoPreviousSibling(editorHost, model);
-  } else if (
-    matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
-  ) {
-    const modelIndex = parent.children.indexOf(model);
-    if (
-      (modelIndex === -1 || modelIndex === parent.children.length - 1) &&
-      parent.role === 'content'
-    )
-      return false;
-    const lengthBeforeJoin = previousSibling.text?.length ?? 0;
-    previousSibling.text?.join(model.text as Text);
-    doc.deleteBlock(model, {
-      bringChildrenTo: parent,
-    });
-    asyncSetInlineRange(editorHost, previousSibling, {
-      index: lengthBeforeJoin,
-      length: 0,
-    }).catch(console.error);
-    return true;
-  } else if (
-    matchFlavours(previousSibling, [
-      'affine:attachment',
-      'affine:bookmark',
-      'affine:code',
-      'affine:image',
-      'affine:divider',
-      ...EMBED_BLOCK_FLAVOUR_LIST,
-    ])
-  ) {
-    const previousSiblingElement = getBlockComponentByModel(
-      editorHost,
-      previousSibling
-    );
-    if (!previousSiblingElement) return false;
-    const selection = editorHost.selection.create('block', {
-      blockId: previousSiblingElement.blockId,
-    });
-    editorHost.selection.setGroup('note', [selection]);
-
-    if (model.text?.length === 0) {
-      doc.deleteBlock(model, {
-        bringChildrenTo: parent,
-      });
-    }
-
-    return true;
-  } else if (matchFlavours(previousSibling, ['affine:edgeless-text'])) {
-    return true;
-  }
-
-  // TODO handle in block service
-  if (matchFlavours(parent, ['affine:database'])) {
-    doc.deleteBlock(model);
-    focusTextModel(
-      editorHost.std,
-      previousSibling.id,
-      previousSibling.text?.yText.length
-    );
-    return true;
-  } else if (matchFlavours(parent, ['affine:note'])) {
-    return (
-      handleParagraphOrListSibling(
-        editorHost,
-        model,
-        previousSibling,
-        parent
-      ) ||
-      handleEmbedDividerCodeSibling(editorHost, model, previousSibling, parent)
-    );
-  }
-  return false;
-}
-
-function handleParagraphBlockBackspace(
-  editorHost: EditorHost,
-  model: BlockModel
-) {
-  const doc = model.doc;
-  if (!matchFlavours(model, ['affine:paragraph'])) return false;
-
-  // When deleting at line start of a paragraph block,
-  // firstly switch it to normal text, then delete this empty block.
-  if (model.type !== 'text') {
-    // Try to switch to normal text
-    doc.captureSync();
-    doc.updateBlock(model, { type: 'text' });
-    return true;
-  }
-
-  // Before press backspace
-  // - line1
-  //   - line2
-  //   - |aaa
-  //   - line3
-  //
-  // After press backspace
-  // - line1
-  //   - line2|aaa
-  //   - line3
-  const isHandled = handleParagraphDeleteActions(editorHost, model);
-  if (isHandled) return true;
-
-  // Before press backspace
-  // - line1
-  //   - line2
-  //   - |aaa
-  //
-  // After press backspace
-  // - line1
-  //   - line2
-  // - |aaa
-  handleUnindent(editorHost, model);
   return true;
 }
 
@@ -761,19 +542,6 @@ function handleParagraphBlockForwardDelete(
       handleEmbedDividerCode(nextSibling, firstChild)
     );
   }
-}
-
-export function handleLineStartBackspace(
-  editorHost: EditorHost,
-  model: ExtendedModel
-) {
-  editorHost.command
-    .chain()
-    .inline((_, next) => {
-      const result = handleParagraphBlockBackspace(editorHost, model);
-      if (result) return next();
-    })
-    .run();
 }
 
 export function handleLineEndForwardDelete(

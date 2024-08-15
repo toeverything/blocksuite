@@ -25,7 +25,7 @@ import {
   handleUnindent,
 } from '../rich-text-operations.js';
 import { bracketPairs } from './bracket-pairs.js';
-import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
+import { hardEnter, onForwardDelete } from './legacy.js';
 
 // FIXME: use selection manager to set selection
 export const bindContainerHotkey = (block: BlockComponent) => {
@@ -286,12 +286,8 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     },
     Backspace: ctx => {
       if (!block.selected?.is('text')) return;
-      const state = ctx.get('keyboardState');
       const inlineEditor = _getInlineEditor();
       if (!inlineEditor) return;
-      if (!onBackspace(editorHost, model, state.raw, inlineEditor)) {
-        _preventDefault(ctx);
-      }
 
       // Auto delete bracket right
       if (matchFlavours(block.model, ['affine:code'])) {
