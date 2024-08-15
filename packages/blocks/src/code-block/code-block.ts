@@ -169,6 +169,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
       return indexArr;
     };
 
+    // TODO: move to service for better performance
     this.bindHotKey({
       Backspace: ctx => {
         const state = ctx.get('keyboardState');
