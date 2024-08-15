@@ -8,6 +8,7 @@ import {
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
+import { BRACKET_PAIRS } from '@blocksuite/affine-shared/consts';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { noop } from '@blocksuite/global/utils';
@@ -186,6 +187,26 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
           selectionManager.setGroup('note', [
             selectionManager.create('block', { blockId: this.blockId }),
           ]);
+          return true;
+        }
+
+        const inlineEditor = this.inlineEditor;
+        const inlineRange = inlineEditor?.getInlineRange();
+        if (!inlineRange || !inlineEditor) return;
+        const left = inlineEditor.yText.toString()[inlineRange.index - 1];
+        const right = inlineEditor.yText.toString()[inlineRange.index];
+        const leftBrackets = BRACKET_PAIRS.map(pair => pair.left);
+        if (BRACKET_PAIRS[leftBrackets.indexOf(left)]?.right === right) {
+          const index = inlineRange.index - 1;
+          inlineEditor.deleteText({
+            index: index,
+            length: 2,
+          });
+          inlineEditor.setInlineRange({
+            index: index,
+            length: 0,
+          });
+          state.raw.preventDefault();
           return true;
         }
 

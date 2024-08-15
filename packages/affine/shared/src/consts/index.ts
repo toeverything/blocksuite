@@ -60,3 +60,5 @@ export const CANVAS_EXPORT_IGNORE_TAGS = [
   'AFFINE-FORMAT-BAR-WIDGET',
   'AFFINE-BLOCK-SELECTION',
 ];
+
+export * from './bracket-pairs.js';
