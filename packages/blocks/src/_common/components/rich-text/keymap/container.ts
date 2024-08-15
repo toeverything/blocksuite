@@ -122,14 +122,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       const inlineRange = inlineEditor.getInlineRange();
       if (!inlineRange) return;
 
-      if (matchFlavours(block.model, ['affine:list'])) {
-        std.command.exec('splitList', {
-          blockId: block.blockId,
-          inlineIndex: inlineRange.index,
-        });
-        return true;
-      }
-
       block.doc.captureSync();
 
       if (tryConvertBlock(block, inlineEditor)) {
@@ -138,7 +130,7 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       }
 
       const state = ctx.get('keyboardState');
-      hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw);
+      hardEnter(editorHost, model, inlineRange, state.raw);
 
       return true;
     },
@@ -151,17 +143,8 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       if (!inlineRange) return;
 
       _preventDefault(ctx);
-
-      if (matchFlavours(block.model, ['affine:list'])) {
-        std.command.exec('splitList', {
-          blockId: block.blockId,
-          inlineIndex: inlineRange.index,
-        });
-        return true;
-      }
-
       const state = ctx.get('keyboardState');
-      hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw, true);
+      hardEnter(editorHost, model, inlineRange, state.raw, true);
 
       return true;
     },
@@ -201,14 +184,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
           if (!inlineEditor) return;
           const inlineRange = inlineEditor.getInlineRange();
           if (!inlineRange) return;
-
-          if (matchFlavours(model, ['affine:list'])) {
-            std.command.exec('indentList', {
-              blockId: model.id,
-              inlineIndex: inlineRange.index,
-            });
-            return true;
-          }
 
           handleIndent(block.host, model, inlineRange.index);
 
@@ -291,14 +266,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
           if (!inlineEditor) return;
           const inlineRange = inlineEditor.getInlineRange();
           if (!inlineRange) return;
-
-          if (matchFlavours(model, ['affine:list'])) {
-            std.command.exec('unindentList', {
-              blockId: model.id,
-              inlineIndex: inlineRange.index,
-            });
-            return true;
-          }
 
           handleUnindent(block.host, model, inlineRange.index);
 

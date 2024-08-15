@@ -2,7 +2,7 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { BaseSelection, BlockComponent } from '@blocksuite/block-std';
-import type { InlineRangeProvider } from '@blocksuite/inline';
+import type { InlineRange, InlineRangeProvider } from '@blocksuite/inline';
 
 import '@blocksuite/affine-components/rich-text';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
@@ -29,6 +29,13 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   ListBlockModel,
   ListBlockService
 > {
+  private _getInlineRange = (): InlineRange | null => {
+    const richText = this._richTextElement;
+    const inlineEditor = richText?.inlineEditor;
+    const inlineRange = inlineEditor?.getInlineRange();
+    return inlineRange ?? null;
+  };
+
   private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   private _onClickIcon = (e: MouseEvent) => {
@@ -45,12 +52,23 @@ export class ListBlockComponent extends CaptionedBlockComponent<
       this.doc.updateBlock(this.model, checkedPropObj);
       if (this.model.checked) {
         const checkEl = this.querySelector('.affine-list-block__todo-prefix');
-        assertExists(checkEl);
-        playCheckAnimation(checkEl).catch(console.error);
+        if (checkEl) {
+          playCheckAnimation(checkEl).catch(console.error);
+        }
       }
       return;
     }
     this._select();
+  };
+
+  private _splitList = () => {
+    const inlineRange = this._getInlineRange();
+    if (!inlineRange) return;
+    this.std.command.exec('splitList', {
+      blockId: this.model.id,
+      inlineIndex: inlineRange.index,
+    });
+    return true;
   };
 
   static override styles = listBlockStyles;
@@ -104,6 +122,58 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     super.connectedCallback();
 
     bindContainerHotkey(this);
+
+    // TODO: move to service for better performance
+    this.bindHotKey({
+      Enter: ctx => {
+        const split = this._splitList();
+        if (split) {
+          ctx.get('keyboardState').raw.preventDefault();
+        }
+        return split;
+      },
+      'Mod-Enter': ctx => {
+        const split = this._splitList();
+        if (split) {
+          ctx.get('keyboardState').raw.preventDefault();
+        }
+        return split;
+      },
+      Tab: ctx => {
+        const { selectedModels } = this.std.command.exec('getSelectedModels', {
+          types: ['text'],
+        });
+        if (selectedModels?.length !== 1) {
+          return;
+        }
+        const inlineRange = this._getInlineRange();
+        if (!inlineRange) return;
+
+        ctx.get('keyboardState').raw.preventDefault();
+        this.std.command.exec('indentList', {
+          blockId: this.model.id,
+          inlineIndex: inlineRange.index,
+        });
+        return true;
+      },
+      'Shift-Tab': ctx => {
+        const { selectedModels } = this.std.command.exec('getSelectedModels', {
+          types: ['text'],
+        });
+        if (selectedModels?.length !== 1) {
+          return;
+        }
+        const inlineRange = this._getInlineRange();
+        if (!inlineRange) return;
+
+        ctx.get('keyboardState').raw.preventDefault();
+        this.std.command.exec('unindentList', {
+          blockId: this.model.id,
+          inlineIndex: inlineRange.index,
+        });
+        return true;
+      },
+    });
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
 

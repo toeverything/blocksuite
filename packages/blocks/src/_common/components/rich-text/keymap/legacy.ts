@@ -33,10 +33,6 @@ export function hardEnter(
   editorHost: EditorHost,
   model: BlockModel,
   range: InlineRange,
-  /**
-   * @deprecated
-   */
-  _inlineEditor: AffineInlineEditor,
   e: KeyboardEvent,
   shortKey = false
 ) {
