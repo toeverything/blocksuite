@@ -29,6 +29,7 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
+import { AttachmentEdgelessBlockComponent } from './attachment-edgeless-block.js';
 import { addSiblingAttachmentBlocks } from './utils.js';
 
 export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
@@ -46,14 +47,17 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
       )
         return false;
 
-      const blockComponent = anchorComponent as AttachmentBlockComponent;
+      const blockComponent = anchorComponent as
+        | AttachmentBlockComponent
+        | AttachmentEdgelessBlockComponent;
       const element = captureEventTarget(state.raw.target);
 
       const isDraggingByDragHandle = !!element?.closest(
         AFFINE_DRAG_HANDLE_WIDGET
       );
       const isDraggingByComponent = blockComponent.contains(element);
-      const isInSurface = blockComponent.isInSurface;
+      const isInSurface =
+        blockComponent instanceof AttachmentEdgelessBlockComponent;
 
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.selection.setGroup('note', [
@@ -91,8 +95,11 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
       )
         return false;
 
-      const blockComponent = draggingElements[0] as AttachmentBlockComponent;
-      const isInSurface = blockComponent.isInSurface;
+      const blockComponent = draggingElements[0] as
+        | AttachmentBlockComponent
+        | AttachmentEdgelessBlockComponent;
+      const isInSurface =
+        blockComponent instanceof AttachmentEdgelessBlockComponent;
       const target = captureEventTarget(state.raw.target);
       const isTargetEdgelessContainer =
         target?.classList.contains('edgeless-container');
