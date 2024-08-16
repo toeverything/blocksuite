@@ -63,10 +63,7 @@ export const indentParagraphCommand: Command<
     } as Partial<ListBlockModel>);
   }
 
-  if (model.text) {
-    console.log(inlineIndex);
-    focusTextModel(std, model.id, inlineIndex);
-  }
+  focusTextModel(std, model.id, inlineIndex);
 
   return next();
 };

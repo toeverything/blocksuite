@@ -53,9 +53,8 @@ export const dedentParagraphCommand: Command<
   doc.moveBlocks(nextSiblings, model);
   doc.moveBlocks([model], grandParent, parent, false);
 
-  if (model.text) {
-    focusTextModel(std, model.id, inlineIndex);
-  }
+  focusTextModel(std, model.id, inlineIndex);
+
   return next();
 };
 
