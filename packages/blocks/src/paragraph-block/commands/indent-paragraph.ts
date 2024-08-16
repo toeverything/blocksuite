@@ -1,11 +1,10 @@
+import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { Command } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
-import { correctNumberedListsOrderToPrev } from './utils.js';
-
-export const indentListCommand: Command<
+export const indentParagraphCommand: Command<
   never,
   never,
   {
@@ -16,6 +15,8 @@ export const indentListCommand: Command<
   let { blockId, inlineIndex } = ctx;
   const { std } = ctx;
   const { selection, doc } = std;
+  const { schema } = doc;
+
   if (!blockId) {
     const text = selection.find('text');
     /**
@@ -34,55 +35,37 @@ export const indentListCommand: Command<
     return;
   }
 
-  /**
-   * initial state:
-   * - aaa
-   *   - bbb
-   * - ccc <- indent
-   *   - ddd
-   * - eee
-   *
-   * final state:
-   * - aaa
-   *   - bbb
-   *   - ccc
-   *     - ddd
-   * - eee
-   */
-
-  /**
-   * ccc
-   */
-  const model = doc.getBlock(blockId)?.model;
-  if (!model || !matchFlavours(model, ['affine:list'])) {
-    console.error(`block ${blockId} is not a list block`);
+  const model = std.doc.getBlock(blockId)?.model;
+  if (!model || !matchFlavours(model, ['affine:paragraph'])) {
+    console.error(`block ${blockId} is not a paragraph block`);
     return;
   }
-  const schema = std.doc.schema;
-  /**
-   * aaa
-   */
+
   const previousSibling = doc.getPrev(model);
   if (
     doc.readonly ||
     !previousSibling ||
     !schema.isValid(model.flavour, previousSibling.flavour)
   ) {
-    // cannot indent, do nothing
+    // Bottom, can not indent, do nothing
     return;
   }
-  /**
-   * eee
-   */
-  const nextSibling = doc.getNext(model);
-
   doc.captureSync();
-
   doc.moveBlocks([model], previousSibling);
-  correctNumberedListsOrderToPrev(doc, model);
-  if (nextSibling) correctNumberedListsOrderToPrev(doc, nextSibling);
 
-  focusTextModel(std, model.id, inlineIndex);
+  // update collapsed state
+  if (
+    matchFlavours(previousSibling, ['affine:list']) &&
+    previousSibling.collapsed
+  ) {
+    doc.updateBlock(previousSibling, {
+      collapsed: false,
+    } as Partial<ListBlockModel>);
+  }
+
+  if (model.text) {
+    focusTextModel(std, model.id, inlineIndex);
+  }
 
   return next();
 };
@@ -90,7 +73,7 @@ export const indentListCommand: Command<
 declare global {
   namespace BlockSuite {
     interface Commands {
-      indentList: typeof indentListCommand;
+      indentParagraph: typeof indentParagraphCommand;
     }
   }
 }

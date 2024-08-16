@@ -14,12 +14,10 @@ import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import { createDefaultDoc } from '../../../utils/init.js';
 import {
-  handleIndent,
   handleMultiBlockIndent,
   handleMultiBlockOutdent,
   handleRemoveAllIndent,
   handleRemoveAllIndentForMultiBlocks,
-  handleUnindent,
 } from '../rich-text-operations.js';
 
 // FIXME: use selection manager to set selection
@@ -132,25 +130,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
 
       _preventDefault(ctx);
 
-      {
-        const { selectedModels: textModels } = std.command.exec(
-          'getSelectedModels',
-          {
-            types: ['text'],
-          }
-        );
-        if (textModels && textModels.length === 1) {
-          const inlineEditor = _getInlineEditor();
-          if (!inlineEditor) return;
-          const inlineRange = inlineEditor.getInlineRange();
-          if (!inlineRange) return;
-
-          handleIndent(block.host, model, inlineRange.index);
-
-          return true;
-        }
-      }
-
       const [_, context] = std.command
         .chain()
         .getSelectedModels({
@@ -202,26 +181,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
 
       _preventDefault(ctx);
-
-      {
-        const { selectedModels: textModels } = std.command.exec(
-          'getSelectedModels',
-          {
-            types: ['text'],
-          }
-        );
-
-        if (textModels && textModels.length === 1) {
-          const inlineEditor = _getInlineEditor();
-          if (!inlineEditor) return;
-          const inlineRange = inlineEditor.getInlineRange();
-          if (!inlineRange) return;
-
-          handleUnindent(block.host, model, inlineRange.index);
-
-          return true;
-        }
-      }
 
       const [_, context] = std.command
         .chain()

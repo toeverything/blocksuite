@@ -184,6 +184,22 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
         ctx.get('keyboardState').raw.preventDefault();
         return true;
       },
+      Tab: ctx => {
+        const { success } = this.std.command.exec('indentParagraph');
+        if (!success) {
+          return;
+        }
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+      'Shift-Tab': ctx => {
+        const { success } = this.std.command.exec('dedentParagraph');
+        if (!success) {
+          return;
+        }
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
     });
     this.handleEvent(
       'compositionStart',

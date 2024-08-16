@@ -171,7 +171,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
         if (!inlineRange) return;
 
         ctx.get('keyboardState').raw.preventDefault();
-        this.std.command.exec('unindentList', {
+        this.std.command.exec('dedentList', {
           blockId: this.model.id,
           inlineIndex: inlineRange.index,
         });

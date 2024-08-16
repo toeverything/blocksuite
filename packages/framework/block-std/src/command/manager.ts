@@ -179,7 +179,7 @@ export class CommandManager {
         >,
       ]
     >
-  ): ExecCommandResult<K> {
+  ): ExecCommandResult<K> & { success: boolean } {
     const cmdFunc = this._commands.get(command);
 
     if (!cmdFunc) {
@@ -195,11 +195,13 @@ export class CommandManager {
       ...inData,
     };
 
-    let execResult: ExecCommandResult<K> = {} as ExecCommandResult<K>;
+    let execResult = {
+      success: false,
+    } as ExecCommandResult<K> & { success: boolean };
 
     cmdFunc(ctx, result => {
       // @ts-ignore
-      execResult = result ?? {};
+      execResult = { ...result, success: true };
     });
 
     return execResult;

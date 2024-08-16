@@ -100,7 +100,7 @@ export const splitListCommand: Command<
      *   - ccc
      */
     if (parent.role === 'content') {
-      host.command.exec('unindentList', {
+      host.command.exec('dedentList', {
         blockId,
         inlineIndex: 0,
       });
