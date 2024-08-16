@@ -1,11 +1,11 @@
 import type { Command, EditorHost } from '@blocksuite/block-std';
 
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
-
 import {
-  correctNumberedListsOrderToPrev,
   getNextContinuousNumberedLists,
-} from './utils.js';
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
+
+import { correctNumberedListsOrderToPrev } from './utils.js';
 
 export const splitListCommand: Command<
   never,

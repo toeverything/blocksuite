@@ -8,6 +8,7 @@ export * from './get-content-block.js';
 export * from './header-value-parser.js';
 export * from './inline-editor.js';
 export * from './is-abort-error.js';
+export * from './list.js';
 export * from './math.js';
 export * from './model.js';
 export * from './point-to-block.js';

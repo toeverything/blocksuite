@@ -1,8 +1,11 @@
-import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
+import {
+  type RichText,
+  markdownInput,
+} from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
@@ -14,7 +17,6 @@ import type { ParagraphBlockService } from './paragraph-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
-import { tryConvertBlock } from '../_common/components/rich-text/markdown/block.js';
 import { handleUnindent } from '../_common/components/rich-text/rich-text-operations.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
@@ -137,7 +139,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
 
         raw.preventDefault();
 
-        if (tryConvertBlock(this, inlineEditor)) {
+        if (markdownInput(std, model.id)) {
           return true;
         }
 
@@ -166,6 +168,20 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
         }
         const event = ctx.get('keyboardState').raw;
         event.preventDefault();
+        return true;
+      },
+      Space: ctx => {
+        if (!markdownInput(this.std)) {
+          return;
+        }
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+      'Shift-Space': ctx => {
+        if (!markdownInput(this.std)) {
+          return;
+        }
+        ctx.get('keyboardState').raw.preventDefault();
         return true;
       },
     });

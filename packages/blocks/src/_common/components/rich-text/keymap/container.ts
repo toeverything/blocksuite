@@ -13,7 +13,6 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import { createDefaultDoc } from '../../../utils/init.js';
-import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,
   handleMultiBlockIndent,
@@ -111,8 +110,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
 
       return false;
     },
-    Space: ctx => handleMarkdown(ctx),
-    'Shift-Space': ctx => handleMarkdown(ctx),
     'Mod-a': ctx => {
       _preventDefault(ctx);
       if (!block.selected?.is('text')) return;
@@ -256,21 +253,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       },
     });
   });
-
-  function handleMarkdown(ctx: UIEventStateContext) {
-    if (!block.selected?.is('text')) return;
-
-    const inlineEditor = _getInlineEditor();
-    if (!inlineEditor) return;
-    const inlineRange = inlineEditor.getInlineRange();
-    if (!inlineRange) return;
-
-    if (tryConvertBlock(block, inlineEditor)) {
-      _preventDefault(ctx);
-      return true;
-    }
-    return;
-  }
 
   function tryConvertToLinkedDoc() {
     const root = model.doc.root;
