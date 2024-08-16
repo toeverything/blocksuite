@@ -22,7 +22,7 @@ export const dedentParagraphCommand: Command<
      * - is not a text selection
      * - or spans multiple blocks
      */
-    if (!text || text.from.blockId !== text.to?.blockId) {
+    if (!text || (text.to && text.from.blockId !== text.to.blockId)) {
       return;
     }
 
