@@ -217,10 +217,10 @@ describe('CommandManager', () => {
     expect(command1).toHaveBeenCalled();
     expect(command2).toHaveBeenCalled();
     expect(command3).toHaveBeenCalled();
-    expect(result1).toEqual({ commandData1: '123' });
-    expect(result2).toEqual({ commandData1: 'test123' });
-    expect(result3).toEqual({ commandData2: 'cmd2' });
-    expect(result4).toEqual({});
+    expect(result1).toEqual({ commandData1: '123', success: true });
+    expect(result2).toEqual({ commandData1: 'test123', success: true });
+    expect(result3).toEqual({ commandData2: 'cmd2', success: true });
+    expect(result4).toEqual({ success: true });
   });
 
   test('should not continue with the rest of the chain if all commands in `try` fail', () => {
