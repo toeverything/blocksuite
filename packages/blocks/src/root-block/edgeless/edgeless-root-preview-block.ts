@@ -2,6 +2,7 @@ import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
+import { type FontService, TYPES } from '@blocksuite/affine-services';
 import { BlockComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -9,7 +10,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import type { FontLoader } from '../font-loader/font-loader.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
@@ -87,8 +87,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     }
   `;
 
-  fontLoader!: FontLoader;
-
   mouseRoot!: HTMLElement;
 
   private _getLayerViewport(negative = false) {
@@ -102,10 +100,8 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   }
 
   private _initFontLoader() {
-    const fontLoader = this.service?.fontLoader;
-    assertExists(fontLoader);
-
-    fontLoader.ready
+    const fontService = this.std.services.get<FontService>(TYPES.Font);
+    fontService.ready
       .then(() => {
         this.surface.refresh();
       })

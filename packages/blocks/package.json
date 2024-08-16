@@ -22,6 +22,7 @@
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/affine-services": "workspace:*",
     "@blocksuite/icons": "^2.1.62",
     "@dotlottie/player-component": "^2.7.12",
     "@floating-ui/dom": "^1.6.8",

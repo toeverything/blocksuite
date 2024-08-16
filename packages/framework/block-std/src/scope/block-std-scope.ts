@@ -1,5 +1,7 @@
 import type { Doc, DocCollection } from '@blocksuite/store';
 
+import { Container } from 'inversify';
+
 import type { EditorHost } from '../view/element/index.js';
 
 import { Clipboard } from '../clipboard/index.js';
@@ -14,6 +16,8 @@ export interface BlockStdOptions {
   host: EditorHost;
   doc: Doc;
 }
+
+export const services = new Container();
 
 export class BlockStdScope {
   readonly clipboard: Clipboard;
@@ -31,6 +35,8 @@ export class BlockStdScope {
   readonly range: RangeManager;
 
   readonly selection: SelectionManager;
+
+  readonly services: Container = services;
 
   readonly spec: SpecStore;
 

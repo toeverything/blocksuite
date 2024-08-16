@@ -259,6 +259,30 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
 
+  packages/affine/services:
+    dependencies:
+      '@blocksuite/affine-model':
+        specifier: workspace:*
+        version: link:../model
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../../framework/block-std
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../../framework/global
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../../framework/store
+      inversify:
+        specifier: ^6.0.2
+        version: 6.0.2
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+
   packages/affine/shared:
     dependencies:
       '@blocksuite/affine-model':
@@ -318,6 +342,9 @@ importers:
       '@blocksuite/affine-model':
         specifier: workspace:*
         version: link:../affine/model
+      '@blocksuite/affine-services':
+        specifier: workspace:*
+        version: link:../affine/services
       '@blocksuite/affine-shared':
         specifier: workspace:*
         version: link:../affine/shared
@@ -506,6 +533,9 @@ importers:
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
+      inversify:
+        specifier: ^6.0.2
+        version: 6.0.2
       lib0:
         specifier: ^0.2.95
         version: 0.2.95
@@ -515,6 +545,9 @@ importers:
       lz-string:
         specifier: ^1.5.0
         version: 1.5.0
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
       rehype-parse:
         specifier: ^9.0.0
         version: 9.0.0
@@ -3561,7 +3594,7 @@ packages:
     resolution: {integrity: sha512-vMlvu1RuNegVE0YsCDSV/X4X10j56mq7PCIyOKK74FxkXzGLwhOUmdkJLSdOBOMwWycobGUMgft2lp+YgTe8hw==}
 
   concat-map@0.0.1:
-    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
+    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
   content-disposition@0.5.4:
     resolution: {integrity: sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==}
@@ -3823,7 +3856,7 @@ packages:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
   ee-first@1.1.1:
-    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
+    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
   ejs@3.1.10:
     resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
@@ -4507,6 +4540,9 @@ packages:
     resolution: {integrity: sha512-ksPK04lcs0GcgkvfmZ5Sjxdm74Nf3Ksy37NTQDrdMZlB0IJgH6TB8cTCJpvGAvt6edsgHa07flRcvXwkr+tPqQ==}
     engines: {node: '>=18'}
 
+  inversify@6.0.2:
+    resolution: {integrity: sha512-i9m8j/7YIv4mDuYXUAcrpKPSaju/CIly9AHK5jvCBeoiM/2KEsuCQTTP+rzSWWpLYWRukdXFSl6ZTk2/uumbiA==}
+
   is-arrayish@0.2.1:
     resolution: {integrity: sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg==}
 
@@ -5043,7 +5079,7 @@ packages:
     resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
 
   media-typer@0.3.0:
-    resolution: {integrity: sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=}
+    resolution: {integrity: sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==}
     engines: {node: '>= 0.6'}
 
   meow@12.1.1:
@@ -5714,6 +5750,9 @@ packages:
   recast@0.23.9:
     resolution: {integrity: sha512-Hx/BGIbwj+Des3+xy5uAtAbdCyqK9y9wbBcDFDYanLS9JnMqf7OeF87HQwUimE87OEc72mr6tkKUKMBBL+hF9Q==}
     engines: {node: '>= 4'}
+
+  reflect-metadata@0.2.2:
+    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
 
   regenerate-unicode-properties@10.1.1:
     resolution: {integrity: sha512-X007RyZLsCJVVrjgEFVpLUTZwyOZk3oiL75ZcuYjlIWd6rNJtOjkBwQc5AsRrpbKVkxN6sklw/k/9m2jJYOf8Q==}
@@ -11282,6 +11321,8 @@ snapshots:
       run-async: 3.0.0
       rxjs: 7.8.1
 
+  inversify@6.0.2: {}
+
   is-arrayish@0.2.1: {}
 
   is-arrayish@0.3.2: {}
@@ -12744,6 +12785,8 @@ snapshots:
       source-map: 0.6.1
       tiny-invariant: 1.3.3
       tslib: 2.6.3
+
+  reflect-metadata@0.2.2: {}
 
   regenerate-unicode-properties@10.1.1:
     dependencies:

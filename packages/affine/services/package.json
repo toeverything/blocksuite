@@ -1,0 +1,45 @@
+{
+  "name": "@blocksuite/affine-services",
+  "version": "0.16.0",
+  "description": "BlockSuite services for AFFiNE.",
+  "type": "module",
+  "repository": "toeverything/blocksuite",
+  "scripts": {
+    "build": "tsc",
+    "test:unit": "nx vite:test --run --passWithNoTests",
+    "test:unit:coverage": "nx vite:test --run --coverage",
+    "test:e2e": "playwright test"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@blocksuite/block-std": "workspace:*",
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/store": "workspace:*",
+    "@blocksuite/affine-model": "workspace:*",
+    "inversify": "^6.0.2",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^3.23.8"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
+  ]
+}

@@ -25,9 +25,7 @@ import {
   MarkdownTransformer,
   ZipTransformer,
 } from '../_common/transformers/index.js';
-import { CommunityCanvasTextFonts } from '../surface-block/consts.js';
 import { EditPropsStore } from '../surface-block/managers/edit-session.js';
-import { FontLoader } from './font-loader/font-loader.js';
 
 export type EmbedOptions = {
   flavour: string;
@@ -103,8 +101,6 @@ export abstract class RootService extends BlockService<RootBlockModel> {
 
   readonly fileDropManager = new FileDropManager(this, this._fileDropOptions);
 
-  readonly fontLoader = new FontLoader();
-
   getEmbedBlockOptions = (url: string): EmbedOptions | null => {
     const entries = this._embedBlockRegistry.entries();
     for (const [options] of entries) {
@@ -135,14 +131,8 @@ export abstract class RootService extends BlockService<RootBlockModel> {
     zip: ZipTransformer,
   };
 
-  loadFonts() {
-    this.fontLoader.load(CommunityCanvasTextFonts);
-  }
-
   override mounted() {
     super.mounted();
-
-    this.loadFonts();
 
     this.disposables.addFromEvent(
       this.host,
@@ -166,7 +156,6 @@ export abstract class RootService extends BlockService<RootBlockModel> {
 
   override unmounted() {
     this.editPropsStore.dispose();
-    this.fontLoader.clear();
   }
 
   get selectedBlocks() {

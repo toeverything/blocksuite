@@ -14,6 +14,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
+import { type FontService, TYPES } from '@blocksuite/affine-services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import {
   handleNativeRangeAtPoint,
@@ -38,7 +39,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Viewport } from '../../_common/utils/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import type { FontLoader } from '../font-loader/font-loader.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessSelectedRect } from './components/rects/edgeless-selected-rect.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
@@ -162,8 +162,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
    */
   disableComponents = false;
 
-  fontLoader!: FontLoader;
-
   keyboardManager: EdgelessPageKeyboardManager | null = null;
 
   mouseRoot!: HTMLElement;
@@ -182,10 +180,8 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   }
 
   private _initFontLoader() {
-    const fontLoader = this.service?.fontLoader;
-    assertExists(fontLoader);
-
-    fontLoader.ready
+    const fontService = this.std.services.get<FontService>(TYPES.Font);
+    fontService.ready
       .then(() => {
         this.surface.refresh();
       })

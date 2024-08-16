@@ -1,12 +1,7 @@
 import { PageEditorBlockSpecs, PageRootService } from '@blocksuite/blocks';
 import { literal } from 'lit/static-html.js';
 
-/**
- * Custom PageRootService that does not load fonts
- */
-class CustomPageRootService extends PageRootService {
-  override loadFonts() {}
-}
+class CustomPageRootService extends PageRootService {}
 
 export const CustomPageEditorBlockSpecs = PageEditorBlockSpecs.map(spec => {
   if (spec.schema.model.flavour === 'affine:page') {

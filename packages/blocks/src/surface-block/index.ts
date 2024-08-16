@@ -11,12 +11,7 @@ export {
   ZOOM_MIN,
   ZOOM_STEP,
 } from './consts.js';
-export {
-  AffineCanvasTextFonts,
-  CommunityCanvasTextFonts,
-  GRID_GAP_MAX,
-  GRID_GAP_MIN,
-} from './consts.js';
+export { GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export { SurfaceElementModel } from './element-model/base.js';
 export { CanvasElementType } from './element-model/index.js';
 export {

@@ -81,10 +81,8 @@ export * from './root-block/index.js';
 export * from './schemas.js';
 export * from './specs/index.js';
 export {
-  AffineCanvasTextFonts,
   BrushElementModel,
   CanvasElementType,
-  CommunityCanvasTextFonts,
   ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,
