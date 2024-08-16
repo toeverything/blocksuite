@@ -1,13 +1,15 @@
 /// <reference types="vite/client" />
-import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { BaseSelection, BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange, InlineRangeProvider } from '@blocksuite/inline';
 
+import {
+  type RichText,
+  markdownInput,
+} from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
-import { assertExists } from '@blocksuite/global/utils';
 import { effect } from '@lit-labs/preact-signals';
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -169,7 +171,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
         if (!inlineRange) return;
 
         ctx.get('keyboardState').raw.preventDefault();
-        this.std.command.exec('unindentList', {
+        this.std.command.exec('dedentList', {
           blockId: this.model.id,
           inlineIndex: inlineRange.index,
         });
@@ -196,6 +198,20 @@ export class ListBlockComponent extends CaptionedBlockComponent<
       Delete: ctx => {
         const deleted = forwardDelete(this.std);
         if (!deleted) return;
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+      Space: ctx => {
+        if (!markdownInput(this.std)) {
+          return;
+        }
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+      'Shift-Space': ctx => {
+        if (!markdownInput(this.std)) {
+          return;
+        }
         ctx.get('keyboardState').raw.preventDefault();
         return true;
       },
@@ -285,9 +301,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   }
 
   get inlineManager() {
-    const inlineManager = this.service?.inlineManager;
-    assertExists(inlineManager);
-    return inlineManager;
+    return this.service?.inlineManager;
   }
 
   get markdownShortcutHandler() {

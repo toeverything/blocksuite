@@ -13,14 +13,11 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import { createDefaultDoc } from '../../../utils/init.js';
-import { tryConvertBlock } from '../markdown/block.js';
 import {
-  handleIndent,
   handleMultiBlockIndent,
   handleMultiBlockOutdent,
   handleRemoveAllIndent,
   handleRemoveAllIndentForMultiBlocks,
-  handleUnindent,
 } from '../rich-text-operations.js';
 
 // FIXME: use selection manager to set selection
@@ -101,7 +98,7 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     },
     Enter: ctx => {
       _preventDefault(ctx);
-      if (block.selected?.is('block')) {
+      if (block.selected?.is('block') && block.model.text) {
         return focusTextModel(
           std,
           block.blockId,
@@ -111,8 +108,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
 
       return false;
     },
-    Space: ctx => handleMarkdown(ctx),
-    'Shift-Space': ctx => handleMarkdown(ctx),
     'Mod-a': ctx => {
       _preventDefault(ctx);
       if (!block.selected?.is('text')) return;
@@ -134,25 +129,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
 
       _preventDefault(ctx);
-
-      {
-        const { selectedModels: textModels } = std.command.exec(
-          'getSelectedModels',
-          {
-            types: ['text'],
-          }
-        );
-        if (textModels && textModels.length === 1) {
-          const inlineEditor = _getInlineEditor();
-          if (!inlineEditor) return;
-          const inlineRange = inlineEditor.getInlineRange();
-          if (!inlineRange) return;
-
-          handleIndent(block.host, model, inlineRange.index);
-
-          return true;
-        }
-      }
 
       const [_, context] = std.command
         .chain()
@@ -206,26 +182,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
 
       _preventDefault(ctx);
 
-      {
-        const { selectedModels: textModels } = std.command.exec(
-          'getSelectedModels',
-          {
-            types: ['text'],
-          }
-        );
-
-        if (textModels && textModels.length === 1) {
-          const inlineEditor = _getInlineEditor();
-          if (!inlineEditor) return;
-          const inlineRange = inlineEditor.getInlineRange();
-          if (!inlineRange) return;
-
-          handleUnindent(block.host, model, inlineRange.index);
-
-          return true;
-        }
-      }
-
       const [_, context] = std.command
         .chain()
         .getSelectedModels({
@@ -256,21 +212,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       },
     });
   });
-
-  function handleMarkdown(ctx: UIEventStateContext) {
-    if (!block.selected?.is('text')) return;
-
-    const inlineEditor = _getInlineEditor();
-    if (!inlineEditor) return;
-    const inlineRange = inlineEditor.getInlineRange();
-    if (!inlineRange) return;
-
-    if (tryConvertBlock(block, inlineEditor)) {
-      _preventDefault(ctx);
-      return true;
-    }
-    return;
-  }
 
   function tryConvertToLinkedDoc() {
     const root = model.doc.root;

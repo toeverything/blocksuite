@@ -1,20 +1,38 @@
-import type { Command, EditorHost } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/block-std';
 
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
 import { correctNumberedListsOrderToPrev } from './utils.js';
 
-export const unindentListCommand: Command<
+export const dedentListCommand: Command<
   never,
   never,
   {
-    blockId: string;
-    inlineIndex: number;
+    blockId?: string;
+    inlineIndex?: number;
   }
 > = (ctx, next) => {
-  const { blockId, inlineIndex, std } = ctx;
-  const host = std.host as EditorHost;
-  const doc = host.doc;
+  let { blockId, inlineIndex } = ctx;
+  const { std } = ctx;
+  const { selection, doc } = std;
+  if (!blockId) {
+    const text = selection.find('text');
+    /**
+     * Do nothing if the selection:
+     * - is not a text selection
+     * - or spans multiple blocks
+     */
+    if (!text || (text.to && text.from.blockId !== text.to.blockId)) {
+      return;
+    }
+
+    blockId = text.from.blockId;
+    inlineIndex = text.from.index;
+  }
+  if (blockId == null || inlineIndex == null) {
+    return;
+  }
 
   /**
    * initial state:
@@ -50,7 +68,7 @@ export const unindentListCommand: Command<
     console.error(`block ${blockId} has no parent`);
     return;
   }
-  if (parent.role !== 'content') {
+  if (doc.readonly || parent.role !== 'content') {
     // Top most list cannot be unindent
     return;
   }
@@ -102,28 +120,15 @@ export const unindentListCommand: Command<
   doc.moveBlocks([model], grandParent, parent, false);
   correctNumberedListsOrderToPrev(doc, model);
 
-  host.updateComplete
-    .then(() => {
-      host.selection.setGroup('note', [
-        host.selection.create('text', {
-          from: {
-            blockId,
-            index: inlineIndex,
-            length: 0,
-          },
-          to: null,
-        }),
-      ]);
-    })
-    .catch(console.error);
+  focusTextModel(std, model.id, inlineIndex);
 
-  next();
+  return next();
 };
 
 declare global {
   namespace BlockSuite {
     interface Commands {
-      unindentList: typeof unindentListCommand;
+      dedentList: typeof dedentListCommand;
     }
   }
 }

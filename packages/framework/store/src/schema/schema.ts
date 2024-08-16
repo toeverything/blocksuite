@@ -211,6 +211,20 @@ export class Schema {
     }
   }
 
+  isValid(child: string, parent: string) {
+    const childSchema = this.flavourSchemaMap.get(child);
+    const parentSchema = this.flavourSchemaMap.get(parent);
+    if (!childSchema || !parentSchema) {
+      return false;
+    }
+    try {
+      this.validateSchema(childSchema, parentSchema);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   register(blockSchema: BlockSchemaType[]) {
     blockSchema.forEach(schema => {
       BlockSchema.parse(schema);

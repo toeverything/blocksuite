@@ -1,43 +1,10 @@
 import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
-
-/**
- * Pass in a list model, and this function will look forward to find continuous sibling numbered lists,
- * typically used for updating list numbers. The result not contains the list passed in.
- */
-export function getNextContinuousNumberedLists(
-  doc: Doc,
-  modelOrId: BlockModel | string
-): ListBlockModel[] {
-  const model =
-    typeof modelOrId === 'string' ? doc.getBlock(modelOrId)?.model : modelOrId;
-  if (!model) return [];
-  const parent = doc.getParent(model);
-  if (!parent) return [];
-  const modelIndex = parent.children.indexOf(model);
-  if (modelIndex === -1) return [];
-
-  const firstNotNumberedListIndex = parent.children.findIndex(
-    (model, i) =>
-      i > modelIndex &&
-      (!matchFlavours(model, ['affine:list']) || model.type !== 'numbered')
-  );
-  const newContinuousLists = parent.children.slice(
-    modelIndex + 1,
-    firstNotNumberedListIndex === -1 ? undefined : firstNotNumberedListIndex
-  );
-  if (
-    !newContinuousLists.every(
-      model =>
-        matchFlavours(model, ['affine:list']) && model.type === 'numbered'
-    )
-  )
-    return [];
-
-  return newContinuousLists as ListBlockModel[];
-}
+import {
+  getNextContinuousNumberedLists,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 
 /**
  * correct target is a numbered list, which is divided into two steps:
