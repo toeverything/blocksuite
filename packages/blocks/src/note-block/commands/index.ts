@@ -9,8 +9,12 @@ import {
 } from '@blocksuite/affine-shared/commands';
 
 import { updateBlockType } from './block-type.js';
+import { dedentBlock } from './dedent-block.js';
+import { dedentBlocks } from './dendent-blocks.js';
 import { focusBlockEnd } from './focus-block-end.js';
 import { focusBlockStart } from './focus-block-start.js';
+import { indentBlock } from './indent-block.js';
+import { indentBlocks } from './indent-blocks.js';
 import { selectBlock } from './select-block.js';
 import { selectBlocksBetween } from './select-blocks-between.js';
 
@@ -26,13 +30,16 @@ export const commands: BlockCommands = {
   focusBlockStart: focusBlockStart,
   focusBlockEnd: focusBlockEnd,
   updateBlockType: updateBlockType,
+  indentBlock,
+  dedentBlock,
+  indentBlocks,
+  dedentBlocks,
 };
 
 declare global {
   namespace BlockSuite {
     interface CommandContext {
       focusBlock?: BlockComponent | null;
-
       anchorBlock?: BlockComponent | null;
     }
   }

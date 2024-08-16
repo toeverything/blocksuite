@@ -117,6 +117,25 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
+
+    this.bindHotKey({
+      Tab: ctx => {
+        const { success } = this.std.command.exec('indentBlocks');
+
+        if (!success) return;
+
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+      'Shift-Tab': ctx => {
+        const { success } = this.std.command.exec('dedentBlocks');
+
+        if (!success) return;
+
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+    });
   }
 }
 
