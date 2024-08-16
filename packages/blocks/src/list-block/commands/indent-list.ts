@@ -40,11 +40,15 @@ export const indentListCommand: Command<
     console.error(`block ${blockId} is not a list block`);
     return;
   }
+  const schema = std.doc.schema;
   /**
    * aaa
    */
   const previousSibling = doc.getPrev(model);
-  if (!previousSibling) {
+  if (
+    !previousSibling ||
+    !schema.isValid(model.flavour, previousSibling.flavour)
+  ) {
     // cannot indent, do nothing
     return;
   }

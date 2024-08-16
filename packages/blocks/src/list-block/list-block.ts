@@ -10,7 +10,6 @@ import {
 import '@blocksuite/affine-components/rich-text';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
-import { assertExists } from '@blocksuite/global/utils';
 import { effect } from '@lit-labs/preact-signals';
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -302,9 +301,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   }
 
   get inlineManager() {
-    const inlineManager = this.service?.inlineManager;
-    assertExists(inlineManager);
-    return inlineManager;
+    return this.service?.inlineManager;
   }
 
   get markdownShortcutHandler() {
