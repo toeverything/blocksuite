@@ -10,7 +10,8 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { AffineEditorContainer } from '../../editors/editor-container.js';
+import type { AffineEditorContainer } from '../../editors/editor-container.js';
+
 import { TocIcon } from '../_common/icons.js';
 import { getHeadingBlocksFromDoc } from './utils/query.js';
 import {
@@ -21,7 +22,7 @@ import {
 export const AFFINE_OUTLINE_VIEWER = 'affine-outline-viewer';
 
 @requiredProperties({
-  editor: PropTypes.instanceOf(AffineEditorContainer),
+  editor: PropTypes.object,
 })
 @customElement(AFFINE_OUTLINE_VIEWER)
 export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
