@@ -14,8 +14,6 @@ import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import { createDefaultDoc } from '../../../utils/init.js';
 import {
-  handleMultiBlockIndent,
-  handleMultiBlockOutdent,
   handleRemoveAllIndent,
   handleRemoveAllIndentForMultiBlocks,
 } from '../rich-text-operations.js';
@@ -125,22 +123,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
 
       return _selectAllText();
     },
-    Tab: ctx => {
-      if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
-
-      _preventDefault(ctx);
-
-      const [_, context] = std.command
-        .chain()
-        .getSelectedModels({
-          types: ['text', 'block'],
-        })
-        .run();
-      const models = context.selectedModels;
-      if (!models) return;
-      handleMultiBlockIndent(block.host, models);
-      return true;
-    },
     'Mod-Backspace': ctx => {
       if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
 
@@ -158,7 +140,7 @@ export const bindContainerHotkey = (block: BlockComponent) => {
           const inlineRange = inlineEditor.getInlineRange();
           if (!inlineRange) return;
           if (inlineRange.index === 0) {
-            handleRemoveAllIndent(block.host, model, inlineRange.index);
+            handleRemoveAllIndent(editorHost, model);
             _preventDefault(ctx);
           }
 
@@ -175,22 +157,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       const models = context.selectedModels;
       if (!models) return;
       handleRemoveAllIndentForMultiBlocks(block.host, models);
-      return true;
-    },
-    'Shift-Tab': ctx => {
-      if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
-
-      _preventDefault(ctx);
-
-      const [_, context] = std.command
-        .chain()
-        .getSelectedModels({
-          types: ['text', 'block'],
-        })
-        .run();
-      const models = context.selectedModels;
-      if (!models) return;
-      handleMultiBlockOutdent(block.host, models);
       return true;
     },
   });
