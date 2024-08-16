@@ -135,6 +135,14 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
         ctx.get('keyboardState').raw.preventDefault();
         return true;
       },
+      'Mod-Backspace': ctx => {
+        const { success } = this.std.command.exec('dedentBlocksToRoot');
+
+        if (!success) return;
+
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
     });
   }
 }

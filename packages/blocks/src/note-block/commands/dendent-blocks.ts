@@ -12,7 +12,7 @@ export const dedentBlocks: Command<
   }
 > = (ctx, next) => {
   let { blockIds } = ctx;
-  const { std, stopCapture } = ctx;
+  const { std, stopCapture = true } = ctx;
   const { doc } = std;
   if (!blockIds || !blockIds.length) {
     const text = std.selection.find('text');

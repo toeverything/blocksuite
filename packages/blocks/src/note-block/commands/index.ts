@@ -10,6 +10,8 @@ import {
 
 import { updateBlockType } from './block-type.js';
 import { dedentBlock } from './dedent-block.js';
+import { dedentBlockToRoot } from './dedent-block-to-root.js';
+import { dedentBlocksToRoot } from './dedent-blocks-to-root.js';
 import { dedentBlocks } from './dendent-blocks.js';
 import { focusBlockEnd } from './focus-block-end.js';
 import { focusBlockStart } from './focus-block-start.js';
@@ -34,6 +36,8 @@ export const commands: BlockCommands = {
   dedentBlock,
   indentBlocks,
   dedentBlocks,
+  dedentBlockToRoot,
+  dedentBlocksToRoot,
 };
 
 declare global {

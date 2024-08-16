@@ -13,10 +13,6 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import { createDefaultDoc } from '../../../utils/init.js';
-import {
-  handleRemoveAllIndent,
-  handleRemoveAllIndentForMultiBlocks,
-} from '../rich-text-operations.js';
 
 // FIXME: use selection manager to set selection
 export const bindContainerHotkey = (block: BlockComponent) => {
@@ -122,42 +118,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
       }
 
       return _selectAllText();
-    },
-    'Mod-Backspace': ctx => {
-      if (!(block.selected?.is('block') || block.selected?.is('text'))) return;
-
-      {
-        const [_, context] = std.command
-          .chain()
-          .getSelectedModels({
-            types: ['text'],
-          })
-          .run();
-        const textModels = context.selectedModels;
-        if (textModels && textModels.length === 1) {
-          const inlineEditor = _getInlineEditor();
-          if (!inlineEditor) return;
-          const inlineRange = inlineEditor.getInlineRange();
-          if (!inlineRange) return;
-          if (inlineRange.index === 0) {
-            handleRemoveAllIndent(editorHost, model);
-            _preventDefault(ctx);
-          }
-
-          return true;
-        }
-      }
-
-      const [_, context] = std.command
-        .chain()
-        .getSelectedModels({
-          types: ['text', 'block'],
-        })
-        .run();
-      const models = context.selectedModels;
-      if (!models) return;
-      handleRemoveAllIndentForMultiBlocks(block.host, models);
-      return true;
     },
   });
 
