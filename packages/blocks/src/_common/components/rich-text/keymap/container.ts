@@ -76,6 +76,22 @@ export const bindContainerHotkey = (block: BlockComponent) => {
   };
 
   block.bindHotKey({
+    ArrowUp: () => {
+      if (!block.selected?.is('text')) return false;
+
+      const inlineEditor = _getInlineEditor();
+      if (!inlineEditor) return;
+      const inlineRange = inlineEditor.getInlineRange();
+      return !inlineEditor.isFirstLine(inlineRange);
+    },
+    ArrowDown: () => {
+      if (!block.selected?.is('text')) return false;
+
+      const inlineEditor = _getInlineEditor();
+      if (!inlineEditor) return;
+      const inlineRange = inlineEditor.getInlineRange();
+      return !inlineEditor.isLastLine(inlineRange);
+    },
     Escape: () => {
       if (block.selected?.is('text')) {
         return _selectBlock();
