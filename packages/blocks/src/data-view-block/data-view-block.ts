@@ -42,7 +42,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.host.event.bindHotkey(hotkeys, {
-        path: this.topContenteditableElement?.path ?? this.path,
+        blockId: this.topContenteditableElement?.blockId ?? this.blockId,
       }),
     };
   };
@@ -102,7 +102,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
       dispose: this.host.event.add(name, handler, {
-        path: this.path,
+        blockId: this.blockId,
       }),
     };
   };

@@ -430,12 +430,12 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onSelectAll: UIEventHandler = ctx => {
-    ctx.get('defaultState').event.preventDefault();
     const selection = this._std.selection;
     // eslint-disable-next-line unicorn/prefer-array-some
     if (!selection.find('block')) {
       return;
     }
+    ctx.get('defaultState').event.preventDefault();
     const children = this.host.model.children;
     const blocks: BlockSelection[] = children.map(child => {
       return selection.create('block', {

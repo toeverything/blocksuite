@@ -126,9 +126,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable =
     hotkeys => {
       return {
-        dispose: this.database.host.event.bindHotkey(hotkeys, {
-          path: [],
-        }),
+        dispose: this.database.host.event.bindHotkey(hotkeys),
       };
     };
 
@@ -139,9 +137,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
     handler
   ) => {
     return {
-      dispose: this.database.host.event.add(name, handler, {
-        path: [],
-      }),
+      dispose: this.database.host.event.add(name, handler),
     };
   };
 

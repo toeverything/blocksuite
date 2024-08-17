@@ -8,6 +8,7 @@ export {
   focusTextModel,
   getInlineEditorByModel,
   getRichTextByModel,
+  selectTextModel,
 } from './dom.js';
 export {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,

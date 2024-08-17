@@ -53,15 +53,16 @@ export class BlockComponent<
     handler: UIEventHandler,
     options?: { global?: boolean; flavour?: boolean }
   ) => {
-    const config = {
-      flavour: options?.global
-        ? undefined
-        : options?.flavour
-          ? this.model?.flavour
-          : undefined,
-      path: options?.global || options?.flavour ? undefined : this.path,
-    };
-    this._disposables.add(this.host.event.add(name, handler, config));
+    this._disposables.add(
+      this.host.event.add(name, handler, {
+        flavour: options?.global
+          ? undefined
+          : options?.flavour
+            ? this.model?.flavour
+            : undefined,
+        blockId: options?.global || options?.flavour ? undefined : this.blockId,
+      })
+    );
   };
 
   path: string[] = [];
@@ -105,15 +106,14 @@ export class BlockComponent<
     keymap: Record<string, UIEventHandler>,
     options?: { global?: boolean; flavour?: boolean }
   ) {
-    const config = {
+    const dispose = this.host.event.bindHotkey(keymap, {
       flavour: options?.global
         ? undefined
         : options?.flavour
           ? this.model.flavour
           : undefined,
-      path: options?.global || options?.flavour ? undefined : this.path,
-    };
-    const dispose = this.host.event.bindHotkey(keymap, config);
+      blockId: options?.global || options?.flavour ? undefined : this.blockId,
+    });
     this._disposables.add(dispose);
     return dispose;
   }

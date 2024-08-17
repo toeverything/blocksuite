@@ -1,11 +1,15 @@
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type {
   BlockComponent,
+  UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
 
 import {
   focusTextModel,
+  getInlineEditorByModel,
   insertLinkedNode,
+  selectTextModel,
   textFormatConfigs,
 } from '@blocksuite/affine-components/rich-text';
 import { BRACKET_PAIRS } from '@blocksuite/affine-shared/consts';
@@ -14,24 +18,75 @@ import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import { createDefaultDoc } from '../../../utils/init.js';
 
+function selectBlock(std: BlockStdScope, blockId: string) {
+  std.selection.setGroup('note', [std.selection.create('block', { blockId })]);
+}
+
+export const textModelCommonHotkey = (
+  std: BlockStdScope
+): Record<string, UIEventHandler> => {
+  return {
+    ArrowUp: () => {
+      const text = std.selection.find('text');
+      if (!text) return;
+      const inline = getInlineEditorByModel(std.host, text.from.blockId);
+      if (!inline) return;
+      return !inline.isFirstLine(inline.getInlineRange());
+    },
+    ArrowDown: () => {
+      const text = std.selection.find('text');
+      if (!text) return;
+      const inline = getInlineEditorByModel(std.host, text.from.blockId);
+      if (!inline) return;
+      return !inline.isLastLine(inline.getInlineRange());
+    },
+    Escape: ctx => {
+      const text = std.selection.find('text');
+      if (!text) return;
+
+      selectBlock(std, text.from.blockId);
+      ctx.get('keyboardState').raw.stopPropagation();
+      return true;
+    },
+    'Mod-a': ctx => {
+      const text = std.selection.find('text');
+      if (!text) return;
+
+      const model = std.doc.getBlock(text.from.blockId)?.model;
+      if (!model || !model.text) return;
+
+      ctx.get('keyboardState').raw.preventDefault();
+
+      if (
+        text.from.index === 0 &&
+        text.from.length === model.text.yText.length
+      ) {
+        selectBlock(std, text.from.blockId);
+        return true;
+      }
+
+      selectTextModel(std, text.from.blockId, 0, model.text.yText.length);
+      return true;
+    },
+    Enter: ctx => {
+      const blocks = std.selection.filter('block');
+      const blockId = blocks.at(-1)?.blockId;
+
+      if (!blockId) return;
+      const model = std.doc.getBlock(blockId)?.model;
+      if (!model || !model.text) return;
+
+      ctx.get('keyboardState').raw.preventDefault();
+      focusTextModel(std, blockId, model.text.yText.length);
+      return true;
+    },
+  };
+};
+
 // FIXME: use selection manager to set selection
 export const bindContainerHotkey = (block: BlockComponent) => {
-  const selection = block.host.selection;
   const model = block.model;
   const editorHost = block.host;
-  const std = editorHost.std;
-
-  const _selectBlock = () => {
-    selection.update(selList => {
-      return selList.map(sel => {
-        if (sel.blockId === block.blockId) {
-          return selection.create('block', { blockId: block.blockId });
-        }
-        return sel;
-      });
-    });
-    return true;
-  };
 
   const _getInlineEditor = () => {
     const inlineRoot = block.querySelector<InlineRootElement>(
@@ -47,79 +102,6 @@ export const bindContainerHotkey = (block: BlockComponent) => {
     const state = ctx.get('defaultState');
     state.event.preventDefault();
   };
-
-  const _selectAllText = () => {
-    selection.update(selList => {
-      return selList.map(sel => {
-        if (sel.blockId !== block.blockId) {
-          return sel;
-        }
-        return selection.create('text', {
-          from: {
-            blockId: block.blockId,
-            index: 0,
-            length: block.model.text?.length ?? 0,
-          },
-          to: null,
-        });
-      });
-    });
-    return true;
-  };
-
-  block.bindHotKey({
-    ArrowUp: () => {
-      if (!block.selected?.is('text')) return false;
-
-      const inlineEditor = _getInlineEditor();
-      if (!inlineEditor) return;
-      const inlineRange = inlineEditor.getInlineRange();
-      return !inlineEditor.isFirstLine(inlineRange);
-    },
-    ArrowDown: () => {
-      if (!block.selected?.is('text')) return false;
-
-      const inlineEditor = _getInlineEditor();
-      if (!inlineEditor) return;
-      const inlineRange = inlineEditor.getInlineRange();
-      return !inlineEditor.isLastLine(inlineRange);
-    },
-    Escape: () => {
-      if (block.selected?.is('text')) {
-        return _selectBlock();
-      }
-      return;
-    },
-    Enter: ctx => {
-      _preventDefault(ctx);
-      if (block.selected?.is('block') && block.model.text) {
-        return focusTextModel(
-          std,
-          block.blockId,
-          block.model.text?.length ?? 0
-        );
-      }
-
-      return false;
-    },
-    'Mod-a': ctx => {
-      _preventDefault(ctx);
-      if (!block.selected?.is('text')) return;
-
-      const text = block.selected;
-      const inlineRoot = block.querySelector<InlineRootElement>(
-        `[${INLINE_ROOT_ATTR}]`
-      );
-      if (
-        text.from.index === 0 &&
-        text.from.length === inlineRoot?.inlineEditor.yText.length
-      ) {
-        return _selectBlock();
-      }
-
-      return _selectAllText();
-    },
-  });
 
   textFormatConfigs.forEach(config => {
     if (!config.hotkey) return;
