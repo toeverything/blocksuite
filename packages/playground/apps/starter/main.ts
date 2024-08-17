@@ -16,7 +16,6 @@ import { mountDefaultDocEditor } from './utils/editor.js';
 async function main() {
   if (window.collection) return;
 
-  // test
   setupEdgelessTemplate();
 
   const params = new URLSearchParams(location.search);
