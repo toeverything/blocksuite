@@ -174,9 +174,6 @@ export class UIEventDispatcher {
 
     const selections = this._currentSelections;
     const ids = selections.map(selection => selection.blockId);
-    if (ids.length === 0) {
-      return;
-    }
 
     return this.buildEventScope(name, ids);
   }

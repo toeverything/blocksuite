@@ -11,7 +11,7 @@ import { click, drag } from '../utils/common.js';
 import { addNote, getDocRootBlock, getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
-describe.skip('default tool', () => {
+describe('default tool', () => {
   let surface!: SurfaceBlockComponent;
   let edgeless!: EdgelessRootBlockComponent;
   let service!: EdgelessRootBlockComponent['service'];
