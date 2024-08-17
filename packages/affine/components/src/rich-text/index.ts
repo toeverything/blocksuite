@@ -37,6 +37,7 @@ export {
   getAffineInlineSpecsWithReference,
   toggleLinkPopup,
 } from './inline/index.js';
+export { textKeymap } from './keymap/index.js';
 export { insertLinkedNode } from './linked-node.js';
 export { markdownInput } from './markdown/index.js';
 export { RichText } from './rich-text.js';

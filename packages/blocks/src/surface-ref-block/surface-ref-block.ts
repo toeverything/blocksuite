@@ -27,7 +27,6 @@ import type { EdgelessRootPreviewBlockComponent } from '../root-block/edgeless/e
 import type { EdgelessRootService } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
-import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import { SpecProvider } from '../specs/index.js';
 import {
   type SurfaceBlockModel,
@@ -517,8 +516,6 @@ export class SurfaceRefBlockComponent extends BlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
-
-    bindContainerHotkey(this);
 
     this.contentEditable = 'false';
 

@@ -6,12 +6,12 @@ import {
   ReferenceNodeConfig,
   affineInlineMarkdownMatches,
   getAffineInlineSpecsWithReference,
+  textKeymap,
 } from '@blocksuite/affine-components/rich-text';
 import { ListBlockSchema } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 
-import { textModelCommonHotkey } from '../_common/components/rich-text/keymap/index.js';
 import { AffineDragHandleWidget } from '../root-block/widgets/drag-handle/drag-handle.js';
 import { correctNumberedListsOrderToPrev } from './commands/utils.js';
 import { listPrefix, toggleStyles } from './styles.js';
@@ -41,7 +41,7 @@ export class ListBlockService<
     this.inlineManager.registerSpecs(inlineSpecs);
     this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
 
-    this.bindHotKey(textModelCommonHotkey(this.std));
+    this.bindHotKey(textKeymap(this.std));
 
     this.disposables.add(
       AffineDragHandleWidget.registerOption({

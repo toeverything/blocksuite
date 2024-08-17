@@ -1,6 +1,7 @@
 import {
   type AffineTextAttributes,
   InlineManager,
+  textKeymap,
 } from '@blocksuite/affine-components/rich-text';
 import { type CodeBlockModel, ColorScheme } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
@@ -13,7 +14,6 @@ import {
 } from 'shiki';
 import getWasm from 'shiki/wasm';
 
-import { textModelCommonHotkey } from '../_common/components/rich-text/keymap/index.js';
 import { codeBlockInlineSpecs } from './highlight/code-block-inline-specs.js';
 import {
   CODE_BLOCK_DEFAULT_DARK_THEME,
@@ -34,7 +34,7 @@ export class CodeBlockService<
   override mounted(): void {
     super.mounted();
 
-    this.bindHotKey(textModelCommonHotkey(this.std));
+    this.bindHotKey(textKeymap(this.std));
     this.inlineManager.registerSpecs(codeBlockInlineSpecs);
 
     createHighlighterCore({

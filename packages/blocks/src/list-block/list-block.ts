@@ -17,7 +17,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import type { ListBlockService } from './list-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
-import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
@@ -124,8 +123,6 @@ export class ListBlockComponent extends CaptionedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
-
-    bindContainerHotkey(this);
 
     // TODO: move to service for better performance
     this.bindHotKey({
