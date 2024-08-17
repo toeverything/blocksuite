@@ -2,10 +2,10 @@
 
 import type { DividerBlockModel } from '@blocksuite/affine-model';
 
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { dividerBlockStyles } from './styles.js';
 

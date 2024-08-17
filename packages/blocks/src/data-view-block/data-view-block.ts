@@ -1,3 +1,4 @@
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
   CopyIcon,
   DeleteIcon,
@@ -14,10 +15,7 @@ import type { DataSource } from '../database-block/data-view/common/data-source/
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
-import {
-  CaptionedBlockComponent,
-  popMenu,
-} from '../_common/components/index.js';
+import { popMenu } from '../_common/components/index.js';
 import { dataViewCommonStyle } from '../database-block/data-view/common/css-variable.js';
 import {
   DataView,

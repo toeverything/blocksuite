@@ -1,5 +1,6 @@
 import type { BookmarkBlockModel } from '@blocksuite/affine-model';
 
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -8,7 +9,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootService } from '../root-block/index.js';
 import type { BookmarkBlockService } from './bookmark-service.js';
 
-import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { BOOKMARK_MIN_WIDTH } from '../root-block/edgeless/utils/consts.js';
 import './components/bookmark-card.js';

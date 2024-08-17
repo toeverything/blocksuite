@@ -2,6 +2,7 @@ import type { CodeBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { VLine } from '@blocksuite/inline';
 
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
   type RichText,
   focusTextModel,
@@ -35,7 +36,6 @@ import {
 
 import type { CodeBlockService } from './code-block-service.js';
 
-import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';

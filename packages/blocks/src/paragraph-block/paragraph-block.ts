@@ -2,6 +2,7 @@ import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
   type RichText,
   markdownInput,
@@ -15,7 +16,6 @@ import { customElement, query } from 'lit/decorators.js';
 
 import type { ParagraphBlockService } from './paragraph-service.js';
 
-import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
