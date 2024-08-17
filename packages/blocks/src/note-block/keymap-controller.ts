@@ -447,7 +447,6 @@ export class KeymapController implements ReactiveController {
         .filter<BaseSelection>(sel => !sel.is('block'))
         .concat(blocks);
     });
-    return true;
   };
 
   private _onShiftArrowDown = () => {
