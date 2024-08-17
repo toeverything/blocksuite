@@ -1,6 +1,6 @@
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
-import type { BlockModel, Doc } from '@blocksuite/store';
+import type { BlockModel, Doc, DocCollection } from '@blocksuite/store';
 
 import { minimatch } from 'minimatch';
 
@@ -66,4 +66,30 @@ export function findNoteBlockModel(model: BlockModel) {
   return findAncestorModel(model, m =>
     matchFlavours(m, ['affine:note'])
   ) as NoteBlockModel | null;
+}
+
+export function createDefaultDoc(
+  collection: DocCollection,
+  options: { id?: string; title?: string } = {}
+) {
+  const doc = collection.createDoc({ id: options.id });
+
+  doc.load();
+  const title = options.title ?? '';
+  const rootId = doc.addBlock('affine:page', {
+    title: new doc.Text(title),
+  });
+  collection.setDocMeta(doc.id, {
+    title,
+  });
+
+  // @ts-ignore FIXME: will be fixed when surface model migrated to affine-model
+  doc.addBlock('affine:surface', {}, rootId);
+  const noteId = doc.addBlock('affine:note', {}, rootId);
+  doc.addBlock('affine:paragraph', {}, noteId);
+  // To make sure the content of new doc would not be clear
+  // By undo operation for the first time
+  doc.resetHistory();
+
+  return doc;
 }

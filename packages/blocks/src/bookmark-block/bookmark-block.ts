@@ -9,7 +9,6 @@ import type { EdgelessRootService } from '../root-block/index.js';
 import type { BookmarkBlockService } from './bookmark-service.js';
 
 import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
-import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { BOOKMARK_MIN_WIDTH } from '../root-block/edgeless/utils/consts.js';
 import './components/bookmark-card.js';
@@ -40,8 +39,6 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
-
-    bindContainerHotkey(this);
 
     this._fetchAbortController = new AbortController();
 
