@@ -70,9 +70,9 @@ export const textModelCommonHotkey = (
     },
     Enter: ctx => {
       const blocks = std.selection.filter('block');
-      if (blocks.length > 1 || blocks.length === 0) return;
+      const blockId = blocks.at(-1)?.blockId;
 
-      const blockId = blocks[0].blockId;
+      if (!blockId) return;
       const model = std.doc.getBlock(blockId)?.model;
       if (!model || !model.text) return;
 
