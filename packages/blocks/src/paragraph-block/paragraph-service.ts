@@ -9,6 +9,8 @@ import {
 } from '@blocksuite/affine-components/rich-text';
 import { BlockService } from '@blocksuite/block-std';
 
+import { textModelCommonHotkey } from '../_common/components/rich-text/keymap/index.js';
+
 export class ParagraphBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
 > extends BlockService<ParagraphBlockModel> {
@@ -36,6 +38,7 @@ export class ParagraphBlockService<
   override mounted(): void {
     super.mounted();
 
+    this.bindHotKey(textModelCommonHotkey(this.std));
     this.referenceNodeConfig.setDoc(this.doc);
 
     const inlineSpecs = getAffineInlineSpecsWithReference(

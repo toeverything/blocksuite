@@ -13,6 +13,7 @@ import {
 } from 'shiki';
 import getWasm from 'shiki/wasm';
 
+import { textModelCommonHotkey } from '../_common/components/rich-text/keymap/index.js';
 import { codeBlockInlineSpecs } from './highlight/code-block-inline-specs.js';
 import {
   CODE_BLOCK_DEFAULT_DARK_THEME,
@@ -33,6 +34,7 @@ export class CodeBlockService<
   override mounted(): void {
     super.mounted();
 
+    this.bindHotKey(textModelCommonHotkey(this.std));
     this.inlineManager.registerSpecs(codeBlockInlineSpecs);
 
     createHighlighterCore({

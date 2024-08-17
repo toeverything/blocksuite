@@ -111,7 +111,7 @@ export class BlockComponent<
         : options?.flavour
           ? this.model.flavour
           : undefined,
-      path: options?.global || options?.flavour ? undefined : this.path,
+      blockId: options?.global || options?.flavour ? undefined : this.blockId,
     };
     const dispose = this.host.event.bindHotkey(keymap, config);
     this._disposables.add(dispose);

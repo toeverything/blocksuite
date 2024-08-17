@@ -31,15 +31,19 @@ export async function asyncGetRichText(editorHost: EditorHost, id: string) {
 
 export function getInlineEditorByModel(
   editorHost: EditorHost,
-  model: BlockModel
+  model: BlockModel | string
 ) {
+  const blockModel =
+    typeof model === 'string'
+      ? editorHost.std.doc.getBlock(model)?.model
+      : model;
   // @ts-ignore TODO: migrate database model to `@blocksuite/affine-model`
-  if (matchFlavours(model, ['affine:database'])) {
+  if (!blockModel || matchFlavours(blockModel, ['affine:database'])) {
     // Not support database model since it's may be have multiple inline editor instances.
     // Support to enter the editing state through the Enter key in the database.
     return null;
   }
-  const richText = getRichTextByModel(editorHost, model.id);
+  const richText = getRichTextByModel(editorHost, blockModel.id);
   if (!richText) return null;
   return richText.inlineEditor;
 }
@@ -67,10 +71,19 @@ export function focusTextModel(
   id: string,
   offset: number = 0
 ) {
+  selectTextModel(std, id, offset);
+}
+
+export function selectTextModel(
+  std: BlockStdScope,
+  id: string,
+  index: number = 0,
+  length: number = 0
+) {
   const { selection } = std;
   selection.setGroup('note', [
     selection.create('text', {
-      from: { blockId: id, index: offset, length: 0 },
+      from: { blockId: id, index, length },
       to: null,
     }),
   ]);
