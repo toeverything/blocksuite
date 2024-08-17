@@ -771,6 +771,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../packages/framework/global
+      '@blocksuite/playground':
+        specifier: workspace:*
+        version: link:../packages/playground
 
 packages:
 

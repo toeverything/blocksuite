@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*",
+    "@blocksuite/playground": "workspace:*"
   },
   "repository": {
     "type": "git",
