@@ -3,18 +3,17 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { getClosestBlockComponentByPoint } from '@blocksuite/affine-shared/utils';
+import {
+  getClosestBlockComponentByPoint,
+  isInsidePageEditor,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { Point } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { DragIndicator } from './drag-indicator.js';
 
-import {
-  type DropResult,
-  calcDropTarget,
-  isInsidePageEditor,
-  matchFlavours,
-} from '../../_common/utils/index.js';
+import { type DropResult, calcDropTarget } from '../../_common/utils/index.js';
 
 export type onDropProps = {
   files: File[];

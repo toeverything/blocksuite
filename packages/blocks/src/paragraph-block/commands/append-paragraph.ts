@@ -1,8 +1,7 @@
 import type { Command } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
-
-import { getLastNoteBlock } from '../../_common/edgeless/note/get-last-note.js';
+import { getLastNoteBlock } from '@blocksuite/affine-shared/utils';
 
 /**
  * Append a paragraph block at the end of the whole page.

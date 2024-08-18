@@ -2,7 +2,7 @@ import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import { matchFlavours } from './model.js';
+import { matchFlavours } from './checker.js';
 
 /**
  * Pass in a list model, and this function will look forward to find continuous sibling numbered lists,

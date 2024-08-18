@@ -14,6 +14,7 @@ export {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
+  clearMarksOnDiscontinuousInput,
   isFormatSupported,
   textCommands,
   textFormatConfigs,

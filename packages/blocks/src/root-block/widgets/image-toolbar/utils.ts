@@ -1,4 +1,7 @@
-import { getBlockProps } from '@blocksuite/affine-shared/utils';
+import {
+  getBlockProps,
+  isInsidePageEditor,
+} from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { type TemplateResult, html } from 'lit';
 
@@ -10,8 +13,6 @@ import type {
   MoreItem,
   MoreMenuConfigItem,
 } from './type.js';
-
-import { isInsidePageEditor } from '../../../_common/utils/query.js';
 
 export function ConfigRenderer(
   block: ImageBlockComponent,

@@ -3,6 +3,7 @@ import type {
   SerializedGroupElement,
 } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
+import type { SerializedElement } from '@blocksuite/block-std/gfx';
 
 import {
   ConnectorElementModel,
@@ -15,10 +16,7 @@ import type { SerializedMindmapElement } from '../../../surface-block/element-mo
 import type { NodeDetail } from '../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessFrameManager } from '../frame-manager.js';
 
-import {
-  type SerializedElement,
-  SurfaceGroupLikeModel,
-} from '../../../surface-block/element-model/base.js';
+import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { MindmapElementModel } from '../../../surface-block/index.js';
 import { GfxBlockModel } from '../block-model.js';
 import { isFrameBlock } from '../utils/query.js';

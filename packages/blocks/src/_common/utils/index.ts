@@ -1,11 +1,8 @@
 // Compat with SSR
 export * from '../types.js';
 export * from './drag-and-drop.js';
-export * from './init.js';
 export * from './query.js';
 export {
-  Rect,
-  clearMarksOnDiscontinuousInput,
   createButtonPopper,
   createZodUnion,
   getBlockProps,

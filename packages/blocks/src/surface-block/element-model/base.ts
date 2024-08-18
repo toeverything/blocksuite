@@ -11,15 +11,7 @@ export type ModelToProps<
   K | 'yMap' | 'surface' | 'display' | 'opacity' | 'externalXYWH'
 >;
 
-export type { PointTestOptions } from '@blocksuite/block-std/gfx';
-
-export type {
-  BaseElementProps,
-  SerializedElement,
-} from '@blocksuite/block-std/gfx';
-
 export {
   GfxGroupLikeElementModel as SurfaceGroupLikeModel,
-  GfxLocalElementModel as SurfaceLocalModel,
   GfxPrimitiveElementModel as SurfaceElementModel,
 } from '@blocksuite/block-std/gfx';

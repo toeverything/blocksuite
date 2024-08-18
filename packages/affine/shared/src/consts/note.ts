@@ -1,6 +1,6 @@
 import { NOTE_BACKGROUND_COLORS, NOTE_SHADOWS } from '@blocksuite/affine-model';
 
-import { createZodUnion } from '../../utils/index.js';
+import { createZodUnion } from '../utils/zod.js';
 
 export const NoteBackgroundColorsSchema = createZodUnion(
   NOTE_BACKGROUND_COLORS

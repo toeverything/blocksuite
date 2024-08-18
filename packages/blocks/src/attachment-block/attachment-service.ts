@@ -2,7 +2,10 @@ import {
   type AttachmentBlockModel,
   AttachmentBlockSchema,
 } from '@blocksuite/affine-model';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  isInsideEdgelessEditor,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
@@ -18,7 +21,6 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { isInsideEdgelessEditor } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,

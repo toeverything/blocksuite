@@ -3,6 +3,7 @@ import type {
   GroupElementModel,
 } from '@blocksuite/affine-model';
 import type { BlockServiceOptions } from '@blocksuite/block-std';
+import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
 import { clamp } from '@blocksuite/affine-shared/utils';
@@ -19,10 +20,7 @@ import type { ReorderingDirection } from '../../surface-block/managers/layer-man
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
-import {
-  type PointTestOptions,
-  SurfaceGroupLikeModel,
-} from '../../surface-block/element-model/base.js';
+import { SurfaceGroupLikeModel } from '../../surface-block/element-model/base.js';
 import { MindmapElementModel } from '../../surface-block/index.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';

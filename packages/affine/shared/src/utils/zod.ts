@@ -12,14 +12,6 @@ function createManyUnion<
   );
 }
 
-export function createZodUnion<T extends readonly []>(values: T): z.ZodNever;
-export function createZodUnion<T extends readonly [z.Primitive]>(
-  values: T
-): z.ZodLiteral<T[0]>;
-export function createZodUnion<
-  T extends readonly [z.Primitive, z.Primitive, ...z.Primitive[]],
->(values: T): z.ZodUnion<MappedZodLiterals<T>>;
-
 /**
  * Creating Zod literal union from array
  * @example
@@ -29,6 +21,13 @@ export function createZodUnion<
  * const arr = ['a', 'b', 'c'] as const;
  * createUnionSchemaFromArray(arr); // z.ZodUnion<readonly [z.ZodLiteral<"a">, z.ZodLiteral<"b">, z.ZodLiteral<"c">]>
  */
+export function createZodUnion<T extends readonly []>(values: T): z.ZodNever;
+export function createZodUnion<T extends readonly [z.Primitive]>(
+  values: T
+): z.ZodLiteral<T[0]>;
+export function createZodUnion<
+  T extends readonly [z.Primitive, z.Primitive, ...z.Primitive[]],
+>(values: T): z.ZodUnion<MappedZodLiterals<T>>;
 export function createZodUnion<T extends readonly z.Primitive[]>(values: T) {
   if (values.length > 1) {
     return createManyUnion(

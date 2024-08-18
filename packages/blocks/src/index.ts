@@ -35,18 +35,6 @@ export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export * from './_common/transformers/index.js';
 export { type AbstractEditor, type DocMode } from './_common/types.js';
-export {
-  createButtonPopper,
-  matchFlavours,
-  on,
-  once,
-  openFileOrFiles,
-} from './_common/utils/index.js';
-export { createDefaultDoc } from './_common/utils/init.js';
-export {
-  isInsideEdgelessEditor,
-  isInsidePageEditor,
-} from './_common/utils/query.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
@@ -160,6 +148,19 @@ export {
   StyleVariables,
   ThemeObserver,
 } from '@blocksuite/affine-shared/theme';
+export {
+  createButtonPopper,
+  createDefaultDoc,
+  findNoteBlockModel,
+  isInsideEdgelessEditor,
+  isInsidePageEditor,
+  matchFlavours,
+  on,
+  once,
+  openFileOrFiles,
+  printToPdf,
+} from '@blocksuite/affine-shared/utils';
+
 export const BlocksUtils = {
   splitElements,
   matchFlavours,
@@ -168,10 +169,6 @@ export const BlocksUtils = {
   isCanvasElement,
   Point,
 };
-export {
-  findNoteBlockModel,
-  printToPdf,
-} from '@blocksuite/affine-shared/utils';
 
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'

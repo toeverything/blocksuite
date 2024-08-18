@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
-import { matchFlavours } from './model.js';
+import { matchFlavours } from './checker.js';
 
 /**
  *

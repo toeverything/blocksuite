@@ -1,4 +1,5 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
+import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -8,26 +9,22 @@ import {
   getBlockProps,
   getClosestBlockComponentByElement,
   getClosestBlockComponentByPoint,
+  isInsidePageEditor,
+  matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import {
   type BaseSelection,
   PathFinder,
   type PointerEventState,
 } from '@blocksuite/block-std';
-import { Point } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { Bound, Point, Rect, assertExists } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import {
-  type EmbedCardStyle,
-  Rect,
   getDropRectByPoint,
   getHoveringNote,
   getRectByBlockComponent,
-  isInsidePageEditor,
-  matchFlavours,
 } from '../../../_common/utils/index.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {

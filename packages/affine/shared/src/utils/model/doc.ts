@@ -14,6 +14,8 @@ export function createDefaultDoc(
   collection.setDocMeta(doc.id, {
     title,
   });
+
+  // @ts-ignore FIXME: will be fixed when surface model migrated to affine-model
   doc.addBlock('affine:surface', {}, rootId);
   const noteId = doc.addBlock('affine:note', {}, rootId);
   doc.addBlock('affine:paragraph', {}, noteId);

@@ -5,6 +5,7 @@ import type {
 } from '@blocksuite/affine-components/rich-text';
 import type { Y } from '@blocksuite/store';
 
+import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection, Text } from '@blocksuite/store';
@@ -14,7 +15,6 @@ import { html } from 'lit/static-html.js';
 
 import type { DatabaseBlockComponent } from '../../../database-block/index.js';
 
-import { getViewportElement } from '../../../_common/utils/query.js';
 import { BaseCellRenderer } from '../../../database-block/data-view/column/index.js';
 import { createFromBaseCellRenderer } from '../../../database-block/data-view/column/renderer.js';
 import { createIcon } from '../../../database-block/data-view/utils/uni-icon.js';
