@@ -6,10 +6,10 @@ import {
   DuplicateIcon,
   WrapIcon,
 } from '@blocksuite/affine-components/icons';
+import { isInsidePageEditor } from '@blocksuite/affine-shared/utils';
 
 import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
 
-import { isInsidePageEditor } from '../../../_common/utils/query.js';
 import { duplicateCodeBlock } from './utils.js';
 
 export const defaultItems: CodeToolbarItem[] = [

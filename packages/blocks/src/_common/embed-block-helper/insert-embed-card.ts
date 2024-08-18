@@ -6,12 +6,12 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
+import { getLastNoteBlock } from '@blocksuite/affine-shared/utils';
 import { Bound, Vec } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/index.js';
 import type { DocMode } from '../types.js';
 
-import { getLastNoteBlock } from '../edgeless/note/get-last-note.js';
 import { getRootByEditorHost } from '../utils/query.js';
 
 function getParentModelBySelection(

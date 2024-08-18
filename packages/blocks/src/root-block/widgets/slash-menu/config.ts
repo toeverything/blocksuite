@@ -27,11 +27,18 @@ import {
 } from '@blocksuite/affine-components/icons';
 import {
   REFERENCE_NODE,
+  clearMarksOnDiscontinuousInput,
   getInlineEditorByModel,
   textFormatConfigs,
 } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteBlockModel } from '@blocksuite/affine-model';
+import {
+  createDefaultDoc,
+  getImageFilesFromLocal,
+  matchFlavours,
+  openFileOrFiles,
+} from '@blocksuite/affine-shared/utils';
 import { Slice, Text } from '@blocksuite/store';
 
 import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
@@ -40,13 +47,6 @@ import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
-import {
-  clearMarksOnDiscontinuousInput,
-  createDefaultDoc,
-  getImageFilesFromLocal,
-  matchFlavours,
-  openFileOrFiles,
-} from '../../../_common/utils/index.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
 import { GroupingIcon } from '../../../database-block/data-view/common/icons/index.js';
 import { viewPresets } from '../../../database-block/data-view/index.js';

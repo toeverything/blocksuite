@@ -8,6 +8,9 @@ import {
   markdownInput,
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
+import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { effect, signal } from '@lit-labs/preact-signals';
@@ -16,9 +19,6 @@ import { customElement, query } from 'lit/decorators.js';
 
 import type { ParagraphBlockService } from './paragraph-service.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
-import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
-import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessTextBlockComponent } from '../edgeless-text/edgeless-text-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { paragraphBlockStyles } from './styles.js';

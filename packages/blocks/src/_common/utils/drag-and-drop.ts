@@ -1,12 +1,11 @@
 import type { BlockComponent } from '@blocksuite/block-std';
-import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
-  Rect,
   getClosestBlockComponentByElement,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
+import { type Point, Rect } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { EditingState } from '../types.js';

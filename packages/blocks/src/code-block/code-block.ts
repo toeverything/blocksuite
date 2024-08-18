@@ -9,7 +9,8 @@ import {
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
-import { BRACKET_PAIRS } from '@blocksuite/affine-shared/consts';
+import { BRACKET_PAIRS, NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { noop } from '@blocksuite/global/utils';
@@ -36,8 +37,6 @@ import {
 
 import type { CodeBlockService } from './code-block-service.js';
 
-import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
-import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { CodeClipboardController } from './clipboard/index.js';
 import './highlight/affine-code-unit.js';

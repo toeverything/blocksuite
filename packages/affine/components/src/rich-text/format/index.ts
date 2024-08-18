@@ -27,7 +27,7 @@ import {
   toggleUnderline,
 } from './text-style.js';
 import './text-style.js';
-export { isFormatSupported } from './utils.js';
+export { clearMarksOnDiscontinuousInput, isFormatSupported } from './utils.js';
 
 export const textCommands: BlockCommands = {
   deleteText: deleteTextCommand,

@@ -5,10 +5,12 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
+import type { SerializedElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec } from '@blocksuite/global/utils';
 
 import { BookmarkStyles } from '@blocksuite/affine-model';
 import {
+  isInsidePageEditor,
   isUrlInClipboard,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
@@ -41,12 +43,8 @@ import {
 import {
   blockComponentGetter,
   getRootByEditorHost,
-  isInsidePageEditor,
 } from '../../../_common/utils/query.js';
-import {
-  type SerializedElement,
-  SurfaceGroupLikeModel,
-} from '../../../surface-block/element-model/base.js';
+import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
 import {

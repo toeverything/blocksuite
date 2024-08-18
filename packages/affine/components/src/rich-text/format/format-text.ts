@@ -1,11 +1,11 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 
-import { clearMarksOnDiscontinuousInput } from '@blocksuite/affine-shared/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { AffineTextAttributes } from '../inline/index.js';
 
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from './consts.js';
+import { clearMarksOnDiscontinuousInput } from './utils.js';
 
 // for text selection
 export const formatTextCommand: Command<

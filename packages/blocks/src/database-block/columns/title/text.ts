@@ -1,7 +1,10 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { Text } from '@blocksuite/store';
 
-import { isValidUrl } from '@blocksuite/affine-shared/utils';
+import {
+  getViewportElement,
+  isValidUrl,
+} from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
@@ -10,7 +13,6 @@ import { html } from 'lit/static-html.js';
 
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
-import { getViewportElement } from '../../../_common/utils/query.js';
 import { HostContextKey } from '../../context/host-context.js';
 import { BaseCellRenderer } from '../../data-view/column/index.js';
 

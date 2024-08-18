@@ -6,6 +6,8 @@ import {
   findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
   getScrollContainer,
+  isInsideEdgelessEditor,
+  isInsidePageEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
@@ -19,6 +21,7 @@ import {
   Bound,
   DisposableGroup,
   Point,
+  Rect,
   throttle,
 } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Query } from '@blocksuite/store';
@@ -32,11 +35,6 @@ import type { GfxBlockModel } from '../../edgeless/block-model.js';
 import type { EdgelessTool } from '../../edgeless/types.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';
 
-import {
-  Rect,
-  isInsideEdgelessEditor,
-  isInsidePageEditor,
-} from '../../../_common/utils/index.js';
 import {
   getSelectedRect,
   isTopLevelBlock,

@@ -62,3 +62,4 @@ export const CANVAS_EXPORT_IGNORE_TAGS = [
 ];
 
 export * from './bracket-pairs.js';
+export * from './note.js';

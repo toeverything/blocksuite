@@ -2,6 +2,7 @@ import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { InlineRange } from '@blocksuite/inline';
 import type { Text } from '@blocksuite/store';
 
+import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -9,8 +10,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { DatabaseBlockComponent } from '../../database-block.js';
-
-import { getViewportElement } from '../../../_common/utils/query.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {

@@ -10,7 +10,6 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { RootBlockComponent } from '../../index.js';
-import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 
 import { BLOCK_ID_ATTR } from '../consts.js';
 
@@ -67,48 +66,6 @@ export function getPageRootByEditorHost(editorHost: EditorHost) {
 /** If it's not in the edgeless mode, it will return `null` directly */
 export function getEdgelessRootByEditorHost(editorHost: EditorHost) {
   return editorHost.querySelector('affine-edgeless-root');
-}
-
-export function isInsidePageEditor(host: EditorHost) {
-  return Array.from(host.children).some(
-    v => v.tagName.toLowerCase() === 'affine-page-root'
-  );
-}
-
-export function isInsideEdgelessEditor(host: EditorHost) {
-  return Array.from(host.children).some(
-    v => v.tagName.toLowerCase() === 'affine-edgeless-root'
-  );
-}
-
-/**
- * Get editor viewport element.
- * @example
- * ```ts
- * const viewportElement = getViewportElement(this.model.doc);
- * if (!viewportElement) return;
- * this._disposables.addFromEvent(viewportElement, 'scroll', () => {
- *   updatePosition();
- * });
- * ```
- */
-export function getViewportElement(editorHost: EditorHost) {
-  if (!isInsidePageEditor(editorHost)) return null;
-  const doc = editorHost.doc;
-  if (!doc.root) {
-    console.error('Failed to get root doc');
-    return null;
-  }
-  const rootComponent = editorHost.view.viewFromPath('block', [doc.root.id]);
-
-  if (
-    !rootComponent ||
-    rootComponent.closest('affine-page-root') !== rootComponent
-  ) {
-    console.error('Failed to get viewport element!');
-    return null;
-  }
-  return (rootComponent as PageRootBlockComponent).viewportElement;
 }
 
 /**

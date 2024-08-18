@@ -12,9 +12,11 @@ import {
   insertLinkedNode,
 } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
-import { isFuzzyMatch } from '@blocksuite/affine-shared/utils';
+import {
+  createDefaultDoc,
+  isFuzzyMatch,
+} from '@blocksuite/affine-shared/utils';
 
-import { createDefaultDoc } from '../../../_common/utils/init.js';
 import { showImportModal } from './import-doc/index.js';
 
 export type LinkedMenuItem = {

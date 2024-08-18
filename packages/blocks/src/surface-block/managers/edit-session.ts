@@ -14,15 +14,15 @@ import {
   TextAlign,
   TextVerticalAlign,
 } from '@blocksuite/affine-model';
+import {
+  NoteBackgroundColorsSchema,
+  NoteShadowsSchema,
+} from '@blocksuite/affine-shared/consts';
+import { LineWidth } from '@blocksuite/affine-shared/types';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { isPlainObject, merge } from 'merge';
 import { z } from 'zod';
 
-import {
-  NoteBackgroundColorsSchema,
-  NoteShadowsSchema,
-} from '../../_common/edgeless/note/consts.js';
-import { LineWidth } from '../../_common/types.js';
 import {
   DEFAULT_CONNECTOR_COLOR,
   GET_DEFAULT_LINE_COLOR,

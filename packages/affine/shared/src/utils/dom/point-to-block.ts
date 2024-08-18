@@ -1,14 +1,13 @@
 import type { BlockComponent } from '@blocksuite/block-std';
+import type { Rect } from '@blocksuite/global/utils';
 import type { Point } from '@blocksuite/global/utils';
-
-import type { Rect } from './rect.js';
 
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_ID_ATTR,
-} from '../consts/index.js';
-import { clamp } from './math.js';
-import { matchFlavours } from './model.js';
+} from '../../consts/index.js';
+import { clamp } from '../math.js';
+import { matchFlavours } from '../model/checker.js';
 
 const ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 

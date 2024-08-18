@@ -5,7 +5,9 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
+import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
+import { Rect } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
@@ -17,8 +19,6 @@ import type { DatabaseBlockModel } from './database-model.js';
 import type { DatabaseBlockService } from './database-service.js';
 
 import { DragIndicator, popMenu } from '../_common/components/index.js';
-import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
-import { Rect } from '../_common/utils/index.js';
 import {
   AffineDragHandleWidget,
   EdgelessRootBlockComponent,
