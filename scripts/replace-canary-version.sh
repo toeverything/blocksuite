@@ -33,7 +33,14 @@ replace() {
 
 for package in "${packages[@]}"
 do
-  unprefixed_package="${package//framework\//}"
+  unprefixed_package="$package"
+
+  if [[ $unprefixed_package == affine/* ]]; then
+    unprefixed_package="${unprefixed_package/#affine\//affine-}"
+  elif [[ $unprefixed_package == framework/* ]]; then
+    unprefixed_package="${unprefixed_package/#framework\//}"
+  fi
+
   cd "packages/$package"
   jq ".name = \"@blocksuite/${unprefixed_package}\"" package.json > package-modified.json
   replace
