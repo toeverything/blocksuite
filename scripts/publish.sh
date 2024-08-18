@@ -12,6 +12,7 @@ packages=(
   "affine/model"
   "affine/shared"
   "affine/components"
+  "affine/block-paragraph"
   "blocks"
   # "docs" # NOT PUBLISHING
   "presets"

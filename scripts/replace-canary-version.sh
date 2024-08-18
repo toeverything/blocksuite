@@ -12,6 +12,7 @@ packages=(
   "affine/model"
   "affine/shared"
   "affine/components"
+  "affine/block-paragraph"
   "blocks"
   # "docs" # NOT PUBLISHING
   "presets"
@@ -37,7 +38,7 @@ do
   jq ".name = \"@blocksuite/${unprefixed_package}\"" package.json > package-modified.json
   replace
 
-  if [[ $package == framework/* ]]; then
+  if [[ $package == framework/* || $package == affine/* ]]; then
     cd ../../../
   else
     cd ../../
