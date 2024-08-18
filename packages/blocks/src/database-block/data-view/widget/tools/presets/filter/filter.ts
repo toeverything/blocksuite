@@ -42,24 +42,20 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
   }
 
   private addFilter(event: MouseEvent) {
-    if (!this._filter.conditions.length && !this.view.filterVisible$.value) {
-      this.showToolBar(true);
-      popCreateFilter(event.target as HTMLElement, {
-        vars: this.view.vars$.value,
-        onSelect: filter => {
-          this._filter = {
-            ...this._filter,
-            conditions: [filter],
-          };
-          this.view.filterSetVisible(true);
-        },
-        onClose: () => {
-          this.showToolBar(false);
-        },
-      });
-      return;
-    }
-    this.view.filterSetVisible(!this.view.filterVisible$.value);
+    this.showToolBar(true);
+    popCreateFilter(event.target as HTMLElement, {
+      vars: this.view.vars$.value,
+      onSelect: filter => {
+        this._filter = {
+          ...this._filter,
+          conditions: [filter],
+        };
+      },
+      onClose: () => {
+        this.showToolBar(false);
+      },
+    });
+    return;
   }
 
   private get readonly() {
