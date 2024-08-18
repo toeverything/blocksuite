@@ -1,5 +1,6 @@
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -10,7 +11,6 @@ import type { ImageBlockFallbackCard } from './components/image-block-fallback.j
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
 import type { ImageBlockService } from './image-service.js';
 
-import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
 import './components/image-block-fallback.js';
 import './components/page-image-block.js';
 import {

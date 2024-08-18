@@ -1,3 +1,4 @@
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
   CopyIcon,
   DeleteIcon,
@@ -15,11 +16,7 @@ import type { AffineInnerModalWidget } from '../root-block/index.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { DatabaseBlockService } from './database-service.js';
 
-import {
-  CaptionedBlockComponent,
-  DragIndicator,
-  popMenu,
-} from '../_common/components/index.js';
+import { DragIndicator, popMenu } from '../_common/components/index.js';
 import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
 import { Rect } from '../_common/utils/index.js';
 import {

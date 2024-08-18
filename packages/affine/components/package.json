@@ -36,7 +36,8 @@
     "./hover": "./src/hover/index.ts",
     "./toolbar": "./src/toolbar/index.ts",
     "./toast": "./src/toast/index.ts",
-    "./rich-text": "./src/rich-text/index.ts"
+    "./rich-text": "./src/rich-text/index.ts",
+    "./caption": "./src/caption/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -74,6 +75,10 @@
       "./rich-text": {
         "types": "./dist/rich-text/index.d.ts",
         "import": "./dist/rich-text/index.js"
+      },
+      "./caption": {
+        "types": "./dist/caption/index.d.ts",
+        "import": "./dist/caption/index.js"
       }
     }
   },

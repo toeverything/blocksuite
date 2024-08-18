@@ -1,5 +1,7 @@
+import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 
+import '@blocksuite/affine-components/caption';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { GfxBlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
@@ -7,12 +9,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import type { EdgelessRootService } from '../root-block/index.js';
 import type { ImageBlockFallbackCard } from './components/image-block-fallback.js';
 import type { ImageBlockService } from './image-service.js';
 
-import '../_common/components/block-caption.js';
 import './components/image-block-fallback.js';
 import {
   copyImageBlob,

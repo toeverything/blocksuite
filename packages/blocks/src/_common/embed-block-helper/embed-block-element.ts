@@ -3,6 +3,7 @@ import type { BlockService } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
@@ -23,7 +24,6 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../../root-block/widgets/drag-handle/utils.js';
-import { CaptionedBlockComponent } from '../components/captioned-block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
 import { type EmbedCardStyle, matchFlavours } from '../utils/index.js';
 import { styles } from './styles.js';

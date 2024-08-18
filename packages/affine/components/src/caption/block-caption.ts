@@ -1,7 +1,6 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import {
   ShadowlessElement,
@@ -14,6 +13,8 @@ import { Text } from '@blocksuite/store';
 import { consume } from '@lit/context';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+
+import { focusTextModel } from '../rich-text/index.js';
 
 export interface BlockCaptionProps {
   caption: string | null | undefined;

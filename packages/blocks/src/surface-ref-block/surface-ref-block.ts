@@ -1,3 +1,4 @@
+import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
 import type { SurfaceRefBlockModel } from '@blocksuite/affine-model';
 import type { BaseSelection, EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
@@ -21,7 +22,6 @@ import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import type { FrameBlockComponent } from '../frame-block/frame-block.js';
 import type { EdgelessRootPreviewBlockComponent } from '../root-block/edgeless/edgeless-root-preview-block.js';
 import type { EdgelessRootService } from '../root-block/index.js';
