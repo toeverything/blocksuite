@@ -51,8 +51,6 @@ export interface SingleView<
   filter$: ReadonlySignal<FilterGroup>;
   filterVisible$: ReadonlySignal<boolean>;
 
-  filterSetVisible(visible: boolean): void;
-
   updateFilter(filter: FilterGroup): void;
 
   vars$: ReadonlySignal<Variable[]>;
@@ -152,8 +150,6 @@ export abstract class SingleViewBase<
   ViewData extends DataViewDataType = DataViewDataType,
 > implements SingleView<ViewData>
 {
-  private _filterVisible$ = signal<boolean | undefined>(undefined);
-
   private searchString = signal('');
 
   columnManagerList$ = computed(() => {
@@ -163,10 +159,7 @@ export abstract class SingleViewBase<
   });
 
   filterVisible$ = computed(() => {
-    return (
-      this._filterVisible$.value ??
-      (this.filter$.value?.conditions.length ?? 0) > 0
-    );
+    return (this.filter$.value?.conditions.length ?? 0) > 0;
   });
 
   name$: ReadonlySignal<string> = computed(() => {
@@ -366,10 +359,6 @@ export abstract class SingleViewBase<
 
   duplicate(): void {
     this.viewManager.viewDuplicate(this.id);
-  }
-
-  filterSetVisible(visible: boolean): void {
-    this._filterVisible$.value = visible;
   }
 
   getContext<T>(key: DataViewContextKey<T>): T | undefined {
