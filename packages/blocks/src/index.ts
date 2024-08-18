@@ -1,6 +1,7 @@
 /// <reference types="@blocksuite/global" />
-import '@blocksuite/affine-components/toolbar';
+import '@blocksuite/affine-block-paragraph';
 import '@blocksuite/affine-components/rich-text';
+import '@blocksuite/affine-components/toolbar';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Point } from '@blocksuite/global/utils';
@@ -14,7 +15,6 @@ import './frame-block/index.js';
 import './image-block/index.js';
 import './list-block/index.js';
 import './note-block/index.js';
-import './paragraph-block/index.js';
 import { splitElements } from './root-block/edgeless/utils/clipboard-utils.js';
 import { isCanvasElement } from './root-block/edgeless/utils/query.js';
 // manual import to avoid being tree-shaken
@@ -57,7 +57,6 @@ export * from './frame-block/index.js';
 export * from './image-block/index.js';
 export * from './list-block/index.js';
 export * from './note-block/index.js';
-export * from './paragraph-block/index.js';
 export { EdgelessTemplatePanel } from './root-block/edgeless/components/toolbar/template/template-panel.js';
 export type {
   Template,
@@ -96,6 +95,7 @@ export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
+export * from '@blocksuite/affine-block-paragraph';
 export {
   HoverController,
   whenHover,

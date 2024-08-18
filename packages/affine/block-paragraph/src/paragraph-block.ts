@@ -19,8 +19,6 @@ import { customElement, query } from 'lit/decorators.js';
 
 import type { ParagraphBlockService } from './paragraph-service.js';
 
-import { EdgelessTextBlockComponent } from '../edgeless-text/edgeless-text-block.js';
-import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { paragraphBlockStyles } from './styles.js';
 import { forwardDelete } from './utils/forward-delete.js';
 import { mergeWithPrev } from './utils/merge-with-prev.js';
@@ -311,7 +309,10 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
   }
 
   get inEdgelessText() {
-    return this.topContenteditableElement instanceof EdgelessTextBlockComponent;
+    return (
+      this.topContenteditableElement?.tagName.toLowerCase() ===
+      'affine-edgeless-text'
+    );
   }
 
   get inlineEditor() {
@@ -327,9 +328,8 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
   }
 
   override get topContenteditableElement() {
-    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockComponent>(NOTE_SELECTOR);
-      return el;
+    if (this.rootComponent?.tagName.toLowerCase() === 'affine-edgeless-root') {
+      return this.closest<BlockComponent>(NOTE_SELECTOR);
     }
     return this.rootComponent;
   }

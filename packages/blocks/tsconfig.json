@@ -5,7 +5,7 @@
     "outDir": "./dist/",
     "noEmit": false
   },
-  "include": ["./src", "../affine/shared/src/utils/print-manager"],
+  "include": ["./src"],
   "references": [
     {
       "path": "../framework/global"
@@ -27,6 +27,9 @@
     },
     {
       "path": "../affine/components"
+    },
+    {
+      "path": "../affine/block-paragraph"
     }
   ]
 }

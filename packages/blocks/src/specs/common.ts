@@ -1,5 +1,7 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { ParagraphBlockSpec } from '@blocksuite/affine-block-paragraph';
+
 import { AttachmentBlockSpec } from '../attachment-block/attachment-spec.js';
 import { BookmarkBlockSpec } from '../bookmark-block/bookmark-spec.js';
 import { CodeBlockSpec } from '../code-block/code-block-spec.js';
@@ -19,7 +21,6 @@ import {
   EdgelessNoteBlockSpec,
   NoteBlockSpec,
 } from '../note-block/note-spec.js';
-import { ParagraphBlockSpec } from '../paragraph-block/paragraph-spec.js';
 
 export const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   ListBlockSpec,
