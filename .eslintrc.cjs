@@ -9,6 +9,7 @@ const allPackages = [
   'affine/model',
   'affine/shared',
   'affine/components',
+  'affine/block-paragraph',
   'blocks',
   'docs',
   'playground',
