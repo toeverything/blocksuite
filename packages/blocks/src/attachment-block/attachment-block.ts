@@ -283,8 +283,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
   accessor loading = false;
 
   override accessor useCaptionEditor = true;
-
-  override accessor useZeroWidthBlock = true;
 }
 
 declare global {
