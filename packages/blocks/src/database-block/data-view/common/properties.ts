@@ -1,5 +1,6 @@
 import { ArrowLeftBigIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -40,8 +41,8 @@ const hidden = html`<svg
 </svg> `;
 
 @customElement('data-view-properties-setting')
-export class DataViewPropertiesSettingView extends WithDisposable(
-  ShadowlessElement
+export class DataViewPropertiesSettingView extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
 ) {
   static override styles = css`
     data-view-properties-setting {
