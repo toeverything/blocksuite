@@ -721,6 +721,10 @@ export function locatorNoteDisplayModeButton(
     .locator(`.item.${mode}`);
 }
 
+export function locatorScalePanelButton(page: Page, scale: number) {
+  return page.locator('edgeless-scale-panel').locator(`.scale-${scale}`);
+}
+
 export async function changeNoteDisplayMode(page: Page, mode: NoteDisplayMode) {
   const button = locatorNoteDisplayModeButton(page, mode);
   await button.click();
@@ -1001,6 +1005,7 @@ type Action =
   | 'autoSize'
   | 'changeNoteDisplayMode'
   | 'changeNoteSlicerSetting'
+  | 'changeNoteScale'
   | 'addText'
   | 'quickConnect'
   | 'turnIntoLinkedDoc'
@@ -1219,6 +1224,13 @@ export async function triggerComponentToolbarAction(
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-note-button')
         .getByRole('button', { name: 'Slicer' });
+      await button.click();
+      break;
+    }
+    case 'changeNoteScale': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-note-button')
+        .getByRole('button', { name: 'Scale' });
       await button.click();
       break;
     }

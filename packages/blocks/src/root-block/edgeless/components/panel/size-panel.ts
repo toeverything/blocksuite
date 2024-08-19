@@ -127,6 +127,9 @@ export class EdgelessSizePanel extends LitElement {
         @input=${stopPropagation}
         @click=${stopPropagation}
         @pointerdown=${stopPropagation}
+        @cut=${stopPropagation}
+        @copy=${stopPropagation}
+        @paste=${stopPropagation}
       />
     `;
   }

@@ -81,15 +81,18 @@ export class EdgelessScalePanel extends LitElement {
       ${repeat(
         this.scaleList,
         scale => scale,
-        scale =>
-          html`<edgeless-tool-icon-button
+        scale => {
+          const classes = `scale-${scale}`;
+          return html`<edgeless-tool-icon-button
+            class=${classes}
             .iconContainerPadding=${[4, 8]}
             .activeMode=${'background'}
             .active=${this.scale === scale}
             @click=${() => this._onSelect(scale)}
           >
             ${format(scale)}
-          </edgeless-tool-icon-button>`
+          </edgeless-tool-icon-button>`;
+        }
       )}
 
       <input
@@ -103,6 +106,9 @@ export class EdgelessScalePanel extends LitElement {
         @input=${stopPropagation}
         @click=${stopPropagation}
         @pointerdown=${stopPropagation}
+        @cut=${stopPropagation}
+        @copy=${stopPropagation}
+        @paste=${stopPropagation}
       />
     `;
   }
