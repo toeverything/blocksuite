@@ -60,6 +60,10 @@ export class CodeBlockService<
       .catch(console.error);
   }
 
+  get langs() {
+    return this.std.spec.getConfig('affine:code')?.langs ?? [];
+  }
+
   get themeKey() {
     return ThemeObserver.instance.mode$.value === ColorScheme.Dark
       ? this._darkThemeKey

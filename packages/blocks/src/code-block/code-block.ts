@@ -1,6 +1,7 @@
 import type { CodeBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { VLine } from '@blocksuite/inline';
+import type { ThemedToken } from 'shiki';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
@@ -29,11 +30,6 @@ import {
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import {
-  type LanguageInput,
-  type ThemedToken,
-  bundledLanguagesInfo,
-} from 'shiki';
 
 import type { CodeBlockService } from './code-block-service.js';
 
@@ -41,10 +37,6 @@ import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root
 import { CodeClipboardController } from './clipboard/index.js';
 import './highlight/affine-code-unit.js';
 import { codeBlockStyles } from './styles.js';
-
-const languageModules = import.meta.glob(
-  '../../node_modules/shiki/dist/langs/*.mjs'
-);
 
 @customElement('affine-code')
 export class CodeBlockComponent extends CaptionedBlockComponent<
@@ -65,7 +57,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
       return 'Plain Text';
     }
 
-    const matchedInfo = bundledLanguagesInfo.find(info => info.id === lang);
+    const matchedInfo = this.service.langs.find(info => info.id === lang);
     return matchedInfo ? matchedInfo.name : 'Plain Text';
   });
 
@@ -76,7 +68,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
       return;
     }
 
-    const matchedInfo = bundledLanguagesInfo.find(
+    const matchedInfo = this.service.langs.find(
       info =>
         info.id === modelLang ||
         info.name === modelLang ||
@@ -85,6 +77,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
 
     if (matchedInfo) {
       this.model.language$.value = matchedInfo.id;
+      const langImport = matchedInfo.import;
       const lang = matchedInfo.id;
 
       const highlighter = this.service.highlighter$.value;
@@ -100,11 +93,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
       const loadedLanguages = highlighter.getLoadedLanguages();
       if (!loadedLanguages.includes(lang)) {
         highlighter
-          .loadLanguage(
-            languageModules[
-              `../../node_modules/shiki/dist/langs/${lang}.mjs`
-            ] as LanguageInput
-          )
+          .loadLanguage(langImport)
           .then(() => {
             this.highlightTokens$.value = highlighter.codeToTokensBase(code, {
               lang,
