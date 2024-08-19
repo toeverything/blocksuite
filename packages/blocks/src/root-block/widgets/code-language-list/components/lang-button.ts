@@ -1,10 +1,10 @@
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
+import { WithDisposable } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, css, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-import { bundledLanguagesInfo } from 'shiki';
 
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
 
@@ -14,16 +14,10 @@ import {
   showPopFilterableList,
 } from '../../../../_common/components/filterable-list/index.js';
 
-const sortedBundledLanguages: FilterableListItem[] = bundledLanguagesInfo.map(
-  lang => ({
-    label: lang.name,
-    name: lang.id,
-    aliases: lang.aliases,
-  })
-);
-
 @customElement('language-list-button')
-export class LanguageListButton extends SignalWatcher(LitElement) {
+export class LanguageListButton extends WithDisposable(
+  SignalWatcher(LitElement)
+) {
   private _abortController?: AbortController;
 
   private _clickLangBtn = () => {
@@ -43,6 +37,7 @@ export class LanguageListButton extends SignalWatcher(LitElement) {
     const options: FilterableListOptions = {
       placeholder: 'Search for a language',
       onSelect: item => {
+        const sortedBundledLanguages = this._sortedBundledLanguages;
         const index = sortedBundledLanguages.indexOf(item);
         if (index !== -1) {
           sortedBundledLanguages.splice(index, 1);
@@ -53,7 +48,7 @@ export class LanguageListButton extends SignalWatcher(LitElement) {
         });
       },
       active: item => item.name === this.blockComponent.model.language,
-      items: sortedBundledLanguages,
+      items: this._sortedBundledLanguages,
     };
 
     showPopFilterableList({
@@ -67,6 +62,8 @@ export class LanguageListButton extends SignalWatcher(LitElement) {
       },
     });
   };
+
+  private _sortedBundledLanguages: FilterableListItem[] = [];
 
   static override styles = css`
     :host {
@@ -92,6 +89,30 @@ export class LanguageListButton extends SignalWatcher(LitElement) {
       background: var(--affine-hover-color-filled);
     }
   `;
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    const langList = localStorage.getItem('blocksuite:code-block:lang-list');
+    if (langList) {
+      this._sortedBundledLanguages = JSON.parse(langList);
+    } else {
+      this._sortedBundledLanguages = this.blockComponent.service.langs.map(
+        lang => ({
+          label: lang.name,
+          name: lang.id,
+          aliases: lang.aliases,
+        })
+      );
+    }
+
+    this.disposables.add(() => {
+      localStorage.setItem(
+        'blocksuite:code-block:lang-list',
+        JSON.stringify(this._sortedBundledLanguages)
+      );
+    });
+  }
 
   override render() {
     return html`<icon-button

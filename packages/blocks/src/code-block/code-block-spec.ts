@@ -2,6 +2,7 @@ import type { BlockSpec } from '@blocksuite/block-std';
 
 import { CodeBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
+import { bundledLanguagesInfo } from 'shiki';
 
 import type { CodeBlockConfig } from './code-block-config.js';
 
@@ -30,5 +31,6 @@ export const CodeBlockSpec: BlockSpec<
       dark: CODE_BLOCK_DEFAULT_DARK_THEME,
       light: CODE_BLOCK_DEFAULT_LIGHT_THEME,
     },
+    langs: bundledLanguagesInfo,
   },
 };
