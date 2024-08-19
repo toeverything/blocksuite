@@ -22,6 +22,7 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
+import { BookmarkEdgelessBlockComponent } from './bookmark-edgeless-block.js';
 
 export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
   private _dragHandleOption: DragHandleOption = {
@@ -38,14 +39,17 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
       )
         return false;
 
-      const blockComponent = anchorComponent as BookmarkBlockComponent;
+      const blockComponent = anchorComponent as
+        | BookmarkBlockComponent
+        | BookmarkEdgelessBlockComponent;
       const element = captureEventTarget(state.raw.target);
 
       const isDraggingByDragHandle = !!element?.closest(
         AFFINE_DRAG_HANDLE_WIDGET
       );
       const isDraggingByComponent = blockComponent.contains(element);
-      const isInSurface = blockComponent.isInSurface;
+      const isInSurface =
+        blockComponent instanceof BookmarkEdgelessBlockComponent;
 
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.selection.setGroup('note', [
@@ -83,8 +87,11 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
       )
         return false;
 
-      const blockComponent = draggingElements[0] as BookmarkBlockComponent;
-      const isInSurface = blockComponent.isInSurface;
+      const blockComponent = draggingElements[0] as
+        | BookmarkBlockComponent
+        | BookmarkEdgelessBlockComponent;
+      const isInSurface =
+        blockComponent instanceof BookmarkEdgelessBlockComponent;
       const target = captureEventTarget(state.raw.target);
       const isTargetEdgelessContainer =
         target?.classList.contains('edgeless-container');

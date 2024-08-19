@@ -18,7 +18,9 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
   private _handleClick(event: MouseEvent) {
     event.stopPropagation();
-    if (!this.bookmark.isInSurface) {
+    const model = this.bookmark.model;
+
+    if (model.parent?.flavour !== 'affine:surface') {
       this._selectBlock();
     }
   }
