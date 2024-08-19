@@ -241,11 +241,7 @@ export class AffineEditorContainer
         >
           ${when(
             mode === 'page',
-            () => html`
-              <doc-title .doc=${this.doc}></doc-title>
-
-              <doc-meta-tags .doc=${this.doc}></doc-meta-tags>
-            `
+            () => html` <doc-title .doc=${this.doc}></doc-title> `
           )}
           <div
             class=${mode === 'page'
