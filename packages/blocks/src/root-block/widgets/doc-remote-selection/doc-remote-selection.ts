@@ -70,7 +70,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
             'affine:code',
             'affine:database',
             'affine:image',
-          ]) || !/affine:embed-*/.test(block.flavour)
+          ]) || /affine:embed-*/.test(block.flavour)
         );
       },
       ...config,
