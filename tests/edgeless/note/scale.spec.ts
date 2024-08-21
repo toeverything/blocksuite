@@ -17,6 +17,7 @@ import {
   initEmptyEdgelessState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
+import { assertRectExist } from 'utils/asserts.js';
 import { test } from 'utils/playwright.js';
 
 async function setupAndAddNote(page: Page) {
@@ -41,14 +42,36 @@ async function openScalePanel(page: Page, noteId: string) {
 async function checkNoteScale(
   page: Page,
   noteId: string,
-  expectedScale: number
+  expectedScale: number,
+  expectedType: 'equal' | 'greater' | 'less' = 'equal'
 ) {
   const edgelessNote = page.locator(
     `affine-edgeless-note[data-block-id="${noteId}"]`
   );
   const noteContainer = edgelessNote.locator('.edgeless-note-container');
   const style = await noteContainer.getAttribute('style');
-  expect(style).toContain(`transform: scale(${expectedScale})`);
+
+  if (!style) {
+    throw new Error('Style attribute not found');
+  }
+
+  const scaleMatch = style.match(/transform:\s*scale\(([\d.]+)\)/);
+  if (!scaleMatch) {
+    throw new Error('Scale transform not found in style');
+  }
+
+  const actualScale = parseFloat(scaleMatch[1]);
+
+  switch (expectedType) {
+    case 'equal':
+      expect(actualScale).toBeCloseTo(expectedScale, 2);
+      break;
+    case 'greater':
+      expect(actualScale).toBeGreaterThan(expectedScale);
+      break;
+    case 'less':
+      expect(actualScale).toBeLessThan(expectedScale);
+  }
 }
 
 test.describe('note scale', () => {
@@ -94,5 +117,30 @@ test.describe('note scale', () => {
     await page.keyboard.press('Enter');
 
     await checkNoteScale(page, noteId, 0.5);
+  });
+
+  test('Note scale can be changed by shift drag', async ({ page }) => {
+    const noteId = await setupAndAddNote(page);
+    await selectNoteInEdgeless(page, noteId);
+
+    const edgelessNote = page.locator(
+      `affine-edgeless-note[data-block-id="${noteId}"]`
+    );
+    const noteRect = await edgelessNote.boundingBox();
+    assertRectExist(noteRect);
+    await page.mouse.move(
+      noteRect.x + noteRect.width,
+      noteRect.y + noteRect.height
+    );
+    await page.keyboard.down('Shift');
+    await page.mouse.down();
+    await page.mouse.move(
+      noteRect.x + noteRect.width * 2,
+      noteRect.y + noteRect.height * 2
+    );
+    await page.mouse.up();
+
+    // expect style scale to be greater than 1
+    await checkNoteScale(page, noteId, 1, 'greater');
   });
 });
