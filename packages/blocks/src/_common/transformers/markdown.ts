@@ -1,5 +1,6 @@
 import type { Doc } from '@blocksuite/store';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 import { Job } from '@blocksuite/store';
 
@@ -26,11 +27,14 @@ async function exportDoc(doc: Doc) {
   let name: string;
   const contentBlob = new Blob([markdownResult.file], { type: 'plain/text' });
   if (markdownResult.assetsIds.length > 0) {
-    const zip = createAssetsArchive(job.assets, markdownResult.assetsIds);
+    if (!job.assets) {
+      throw new BlockSuiteError(ErrorCode.ValueNotExists, 'No assets found');
+    }
+    const zip = await createAssetsArchive(job.assets, markdownResult.assetsIds);
 
-    zip.file('index.md', contentBlob);
+    await zip.file('index.md', contentBlob);
 
-    downloadBlob = await zip.generateAsync({ type: 'blob' });
+    downloadBlob = await zip.generate();
     name = `${docTitle}.zip`;
   } else {
     downloadBlob = contentBlob;

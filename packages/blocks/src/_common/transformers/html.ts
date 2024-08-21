@@ -22,11 +22,11 @@ async function exportDoc(doc: Doc) {
   let name: string;
   const contentBlob = new Blob([htmlResult.file], { type: 'plain/text' });
   if (htmlResult.assetsIds.length > 0) {
-    const zip = createAssetsArchive(job.assets, htmlResult.assetsIds);
+    const zip = await createAssetsArchive(job.assets, htmlResult.assetsIds);
 
-    zip.file('index.html', contentBlob);
+    await zip.file('index.html', contentBlob);
 
-    downloadBlob = await zip.generateAsync({ type: 'blob' });
+    downloadBlob = await zip.generate();
     name = `${docTitle}.zip`;
   } else {
     downloadBlob = contentBlob;
