@@ -1,15 +1,15 @@
 import type { ListBlockModel } from '@blocksuite/affine-model';
 
-import { html } from 'lit';
-
-import { getNumberPrefix } from './get-number-prefix.js';
 import {
   BulletIcons,
   checkboxChecked,
   checkboxUnchecked,
   toggleDown,
   toggleRight,
-} from './icons.js';
+} from '@blocksuite/affine-components/icons';
+import { html } from 'lit';
+
+import { getNumberPrefix } from './get-number-prefix.js';
 
 const getListDeep = (model: ListBlockModel): number => {
   let deep = 0;

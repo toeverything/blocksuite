@@ -199,6 +199,51 @@ importers:
         specifier: 2.0.4
         version: 2.0.4(@types/node@22.0.0)(@vitest/browser@2.0.4)(@vitest/ui@2.0.4)(happy-dom@14.12.3)(terser@5.31.3)
 
+  packages/affine/block-list:
+    dependencies:
+      '@blocksuite/affine-components':
+        specifier: workspace:*
+        version: link:../components
+      '@blocksuite/affine-model':
+        specifier: workspace:*
+        version: link:../model
+      '@blocksuite/affine-shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../../framework/block-std
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../../framework/global
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../../framework/inline
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../../framework/store
+      '@floating-ui/dom':
+        specifier: ^1.6.8
+        version: 1.6.8
+      '@lit-labs/preact-signals':
+        specifier: ^1.0.2
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+      '@lit/context':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@toeverything/theme':
+        specifier: ^1.0.2
+        version: 1.0.2
+      lit:
+        specifier: ^3.1.4
+        version: 3.1.4
+      minimatch:
+        specifier: ^10.0.1
+        version: 10.0.1
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+
   packages/affine/block-paragraph:
     dependencies:
       '@blocksuite/affine-components':
@@ -345,6 +390,9 @@ importers:
 
   packages/blocks:
     dependencies:
+      '@blocksuite/affine-block-list':
+        specifier: workspace:*
+        version: link:../affine/block-list
       '@blocksuite/affine-block-paragraph':
         specifier: workspace:*
         version: link:../affine/block-paragraph
@@ -832,9 +880,6 @@ packages:
     peerDependencies:
       '@algolia/client-search': '>= 4.9.1 < 6'
       algoliasearch: '>= 4.9.1 < 6'
-    peerDependenciesMeta:
-      '@algolia/client-search':
-        optional: true
 
   '@algolia/cache-browser-local-storage@4.24.0':
     resolution: {integrity: sha512-t63W9BnoXVrGy9iYHBgObNXqYXM3tYXCjDSHeNwnsc324r4o5UiVKUiAB4THQ5z9U5hTj6qUvwg/Ez43ZD85ww==}
@@ -6933,9 +6978,8 @@ snapshots:
 
   '@algolia/autocomplete-shared@1.9.3(@algolia/client-search@4.24.0)(algoliasearch@4.24.0)':
     dependencies:
-      algoliasearch: 4.24.0
-    optionalDependencies:
       '@algolia/client-search': 4.24.0
+      algoliasearch: 4.24.0
 
   '@algolia/cache-browser-local-storage@4.24.0':
     dependencies:

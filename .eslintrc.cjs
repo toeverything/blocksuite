@@ -10,6 +10,7 @@ const allPackages = [
   'affine/shared',
   'affine/components',
   'affine/block-paragraph',
+  'affine/block-list',
   'blocks',
   'docs',
   'playground',

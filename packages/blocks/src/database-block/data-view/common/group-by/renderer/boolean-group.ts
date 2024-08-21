@@ -1,10 +1,10 @@
-import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
-
 import {
   checkboxChecked,
   checkboxUnchecked,
-} from '../../../../../list-block/utils/icons.js';
+} from '@blocksuite/affine-components/icons';
+import { css, html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+
 import { BaseGroup } from './base.js';
 
 @customElement('data-view-group-title-boolean-view')

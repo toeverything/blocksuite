@@ -30,6 +30,9 @@
     },
     {
       "path": "../affine/block-paragraph"
+    },
+    {
+      "path": "../affine/block-list"
     }
   ]
 }
