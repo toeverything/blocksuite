@@ -1,5 +1,6 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { ListBlockSpec } from '@blocksuite/affine-block-list';
 import { ParagraphBlockSpec } from '@blocksuite/affine-block-paragraph';
 
 import { AttachmentBlockSpec } from '../attachment-block/attachment-spec.js';
@@ -16,7 +17,6 @@ import { EmbedLoomBlockSpec } from '../embed-loom-block/embed-loom-spec.js';
 import { EmbedSyncedDocBlockSpec } from '../embed-synced-doc-block/embed-synced-doc-spec.js';
 import { EmbedYoutubeBlockSpec } from '../embed-youtube-block/embed-youtube-spec.js';
 import { ImageBlockSpec } from '../image-block/image-spec.js';
-import { ListBlockSpec } from '../list-block/list-spec.js';
 import {
   EdgelessNoteBlockSpec,
   NoteBlockSpec,

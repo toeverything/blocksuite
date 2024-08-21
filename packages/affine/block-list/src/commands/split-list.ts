@@ -1,5 +1,6 @@
 import type { Command, EditorHost } from '@blocksuite/block-std';
 
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   getNextContinuousNumberedLists,
   matchFlavours,
@@ -74,9 +75,7 @@ export const splitListCommand: Command<
 
       host.updateComplete
         .then(() => {
-          host.command.exec('focusBlockStart', {
-            focusBlock: host.view.getBlock(id),
-          });
+          focusTextModel(std, id);
         })
         .catch(console.error);
 
@@ -194,9 +193,7 @@ export const splitListCommand: Command<
   if (newListId) {
     host.updateComplete
       .then(() => {
-        host.command.exec('focusBlockStart', {
-          focusBlock: host.view.getBlock(newListId),
-        });
+        focusTextModel(std, newListId);
       })
       .catch(console.error);
 

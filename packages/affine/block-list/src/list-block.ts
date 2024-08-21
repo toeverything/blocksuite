@@ -5,10 +5,16 @@ import type { InlineRange, InlineRangeProvider } from '@blocksuite/inline';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
+  playCheckAnimation,
+  toggleDown,
+  toggleRight,
+} from '@blocksuite/affine-components/icons';
+import {
   type RichText,
   markdownInput,
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
+import '@blocksuite/affine-shared/commands';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
@@ -20,12 +26,10 @@ import { customElement, query, state } from 'lit/decorators.js';
 
 import type { ListBlockService } from './list-service.js';
 
-import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { correctNumberedListsOrderToPrev } from './commands/utils.js';
 import { listBlockStyles } from './styles.js';
 import { forwardDelete } from './utils/forward-delete.js';
 import { getListIcon } from './utils/get-list-icon.js';
-import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
 export class ListBlockComponent extends CaptionedBlockComponent<
@@ -306,9 +310,8 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   }
 
   override get topContenteditableElement() {
-    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockComponent>(NOTE_SELECTOR);
-      return el;
+    if (this.rootComponent?.tagName.toLowerCase() === 'affine-edgeless-root') {
+      return this.closest<BlockComponent>(NOTE_SELECTOR);
     }
     return this.rootComponent;
   }

@@ -13,6 +13,7 @@ packages=(
   "affine/shared"
   "affine/components"
   "affine/block-paragraph"
+  "affine/block-list"
   "blocks"
   # "docs" # NOT PUBLISHING
   "presets"
@@ -33,7 +34,7 @@ do
     pnpm publish
   fi
 
-  if [[ $package == framework/* || $package == affine/* ]]; then 
+  if [[ $package == framework/* || $package == affine/* ]]; then
     cd ../../../
   else
     cd ../../

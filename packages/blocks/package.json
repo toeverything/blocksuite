@@ -19,6 +19,7 @@
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/affine-block-paragraph": "workspace:*",
+    "@blocksuite/affine-block-list": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/icons": "^2.1.62",

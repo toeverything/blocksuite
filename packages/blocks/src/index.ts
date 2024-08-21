@@ -1,5 +1,6 @@
 /// <reference types="@blocksuite/global" />
 import '@blocksuite/affine-block-paragraph';
+import '@blocksuite/affine-block-list';
 import '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/toolbar';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
@@ -13,7 +14,6 @@ import './database-block/index.js';
 import './divider-block/index.js';
 import './frame-block/index.js';
 import './image-block/index.js';
-import './list-block/index.js';
 import './note-block/index.js';
 import { splitElements } from './root-block/edgeless/utils/clipboard-utils.js';
 import { isCanvasElement } from './root-block/edgeless/utils/query.js';
@@ -55,7 +55,6 @@ export * from './embed-synced-doc-block/index.js';
 export * from './embed-youtube-block/index.js';
 export * from './frame-block/index.js';
 export * from './image-block/index.js';
-export * from './list-block/index.js';
 export * from './note-block/index.js';
 export { EdgelessTemplatePanel } from './root-block/edgeless/components/toolbar/template/template-panel.js';
 export type {
@@ -95,6 +94,7 @@ export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
+export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
 export {
   HoverController,
