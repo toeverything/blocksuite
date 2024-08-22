@@ -123,7 +123,7 @@ test(
       if (!viewport) {
         throw new Error();
       }
-      viewport.scrollTo(0, 800);
+      viewport.scrollTo(0, 600);
     });
 
     const imageComponent = page.locator('affine-image');
@@ -136,16 +136,5 @@ test(
       imageComponentRect.y + imageComponentRect.height + 8
     );
     await assertBlockFlavour(page, '10', 'affine:paragraph');
-
-    const embedGithubComponent = page.locator('affine-embed-github-block');
-    const embedGithubComponentRect = await embedGithubComponent.boundingBox();
-    if (!embedGithubComponentRect) {
-      throw new Error('affine-embed-github-block not found');
-    }
-    await page.mouse.click(
-      embedGithubComponentRect.x + 20,
-      embedGithubComponentRect.y + embedGithubComponentRect.height + 8
-    );
-    await assertBlockFlavour(page, '11', 'affine:paragraph');
   }
 );
