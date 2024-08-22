@@ -156,6 +156,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       return;
     }
 
+    let splitDir: LayoutType | undefined = undefined;
     const tree = this._tree;
     const splitPoint = tree.children.findIndex((child, index) => {
       if (
@@ -163,13 +164,17 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         (child.detail.preferredDir === LayoutType.RIGHT &&
           child.children[index + 1]?.detail.preferredDir !== LayoutType.RIGHT)
       ) {
+        splitDir = child.detail.preferredDir;
         return true;
       }
 
       return false;
     });
 
-    if (splitPoint === -1) {
+    if (
+      splitPoint === -1 ||
+      (splitDir === LayoutType.LEFT && splitPoint >= tree.children.length / 2)
+    ) {
       const mid = Math.ceil(tree.children.length / 2);
 
       tree.right.push(...tree.children.slice(0, mid));
