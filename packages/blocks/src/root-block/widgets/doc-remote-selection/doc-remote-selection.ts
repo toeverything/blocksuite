@@ -123,8 +123,11 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
       const container = this._container;
       const containerRect = this._containerRect;
       const rangeRects = Array.from(range.getClientRects());
-      if (rangeRects.length === 1) {
-        const rect = rangeRects[0];
+      if (rangeRects.length > 0) {
+        const rect =
+          rangeRects.length === 1
+            ? rangeRects[0]
+            : rangeRects[rangeRects.length - 1];
         return {
           width: 2,
           height: rect.height,
