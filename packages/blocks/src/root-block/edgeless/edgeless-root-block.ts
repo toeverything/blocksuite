@@ -2,10 +2,12 @@ import type {
   AttachmentBlockProps,
   ImageBlockProps,
   RootBlockModel,
+  ShapeElementModel,
 } from '@blocksuite/affine-model';
 import type {
   GfxBlockComponent,
   SurfaceSelection,
+  UIEventHandler,
 } from '@blocksuite/block-std';
 import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
@@ -46,6 +48,7 @@ import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../_common/consts.js';
+import { isSelectSingleMindMap } from '../../_common/edgeless/mindmap/index.js';
 import {
   setAttachmentUploaded,
   setAttachmentUploading,
@@ -85,6 +88,7 @@ import {
   DEFAULT_NOTE_WIDTH,
 } from './utils/consts.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
+import { mountShapeTextEditor } from './utils/text.js';
 
 @customElement('affine-edgeless-root')
 export class EdgelessRootBlockComponent extends BlockComponent<
@@ -716,6 +720,41 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     });
 
     return blockId;
+  }
+
+  override bindHotKey(
+    keymap: Record<string, UIEventHandler>,
+    options?: { global?: boolean; flavour?: boolean }
+  ): () => void {
+    const { service } = this;
+    const selection = service.selection;
+
+    Object.keys(keymap).forEach(key => {
+      if (key.length === 1 && key >= 'A' && key <= 'z') {
+        const handler = keymap[key];
+
+        keymap[key] = ctx => {
+          const elements = selection.selectedElements;
+
+          if (isSelectSingleMindMap(elements) && !selection.editing) {
+            const target = service.getElementById(
+              elements[0].id
+            ) as ShapeElementModel;
+            if (target.text) {
+              this.doc.transact(() => {
+                target.text!.delete(0, target.text!.length);
+                target.text!.insert(0, key);
+              });
+            }
+            mountShapeTextEditor(target, this);
+          } else {
+            handler(ctx);
+          }
+        };
+      }
+    });
+
+    return super.bindHotKey(keymap, options);
   }
 
   override connectedCallback() {
