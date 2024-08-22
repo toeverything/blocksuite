@@ -426,6 +426,9 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
             type="text"
             placeholder="Search file or anything..."
             @input=${this._updateSearchKeyword}
+            @cut=${stopPropagation}
+            @copy=${stopPropagation}
+            @paste=${stopPropagation}
           />
         </div>
         <div class="template-categories">

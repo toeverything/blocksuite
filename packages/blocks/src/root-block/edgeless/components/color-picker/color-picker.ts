@@ -557,6 +557,9 @@ export class EdgelessColorPicker extends SignalWatcher(
             maxlength="6"
             .value=${live(this.hex6WithoutHash$.value)}
             @keydown=${this.#editHex}
+            @cut=${stopPropagation}
+            @copy=${stopPropagation}
+            @paste=${stopPropagation}
           />
         </label>
         <label class="field alpha">
@@ -566,6 +569,9 @@ export class EdgelessColorPicker extends SignalWatcher(
             max="100"
             .value=${live(this.alpha100$.value)}
             @input=${this.#editAlpha}
+            @cut=${stopPropagation}
+            @copy=${stopPropagation}
+            @paste=${stopPropagation}
           />
           <span>%</span>
         </label>
