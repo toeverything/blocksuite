@@ -2,7 +2,6 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { EditorHost } from '../view/index.js';
-import type { GfxBlockComponent } from '../view/index.js';
 import type { GfxBlockElementModel } from './gfx-block-model.js';
 import type { Viewport } from './viewport.js';
 
@@ -34,48 +33,34 @@ export function requestThrottledConnectedFrame<
 export class GfxViewportElement extends LitElement {
   private _hideOutsideBlock = requestThrottledConnectedFrame(() => {
     if (this.getModelsInViewport && this.host) {
+      const host = this.host;
       const modelsInViewport = this.getModelsInViewport();
 
-      if (!this._lastVisibleSet) {
-        Array.from(
-          this.children as HTMLCollectionOf<GfxBlockComponent>
-        ).forEach(block => {
-          if (block.model && (block.model as GfxBlockElementModel).xywh) {
-            if (!modelsInViewport.has(block.model as GfxBlockElementModel)) {
-              block.style.display = 'none';
-            }
-          }
-        });
+      modelsInViewport.forEach(model => {
+        const view = host.std.view.getBlock(model.id);
 
-        this._lastVisibleSet = modelsInViewport;
-      } else {
-        const modelsInViewport = this.getModelsInViewport();
+        if (view) {
+          view.style.display = '';
+        }
 
-        modelsInViewport.forEach(model => {
-          if (this.host?.std.view.getBlock(model.id)) {
-            const view = this.host!.std.view.getBlock(model.id)!;
+        if (this._lastVisibleModels?.has(model)) {
+          this._lastVisibleModels!.delete(model);
+        }
+      });
 
-            if (this._lastVisibleSet!.has(model)) {
-              this._lastVisibleSet!.delete(model);
-            }
-            view.style.display = '';
-          }
-        });
+      this._lastVisibleModels?.forEach(model => {
+        const view = host.std.view.getBlock(model.id);
 
-        this._lastVisibleSet.forEach(model => {
-          if (this.host?.std.view.getBlock(model.id)) {
-            const view = this.host!.std.view.getBlock(model.id)!;
+        if (view) {
+          view.style.display = 'none';
+        }
+      });
 
-            view.style.display = 'none';
-          }
-        });
-
-        this._lastVisibleSet = modelsInViewport;
-      }
+      this._lastVisibleModels = modelsInViewport;
     }
   }, this);
 
-  private _lastVisibleSet?: Set<GfxBlockElementModel>;
+  private _lastVisibleModels?: Set<GfxBlockElementModel>;
 
   private _pendingChildrenUpdates: {
     id: string;
