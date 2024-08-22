@@ -24,7 +24,7 @@
     "@floating-ui/dom": "^1.6.8",
     "@lit-labs/preact-signals": "^1.0.2",
     "@lit/context": "^1.1.2",
-    "@toeverything/theme": "^1.0.2",
+    "@toeverything/theme": "^1.0.7",
     "lit": "^3.1.4",
     "zod": "^3.23.8"
   },

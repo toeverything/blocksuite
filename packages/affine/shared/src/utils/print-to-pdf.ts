@@ -1,7 +1,18 @@
 export async function printToPdf(
   rootElement: HTMLElement | null = document.querySelector(
     '.affine-page-viewport'
-  )
+  ),
+  options: {
+    /**
+     * Callback that is called when ready to print.
+     */
+    beforeprint?: (iframe: HTMLIFrameElement) => Promise<void> | void;
+    /**
+     * Callback that is called after the print dialog is closed.
+     * Notice: in some browser this may be triggered immediately.
+     */
+    afterprint?: () => Promise<void> | void;
+  } = {}
 ) {
   return new Promise<void>((resolve, reject) => {
     const iframe = document.createElement('iframe');
@@ -102,8 +113,18 @@ export async function printToPdf(
 
       // append to iframe and print
       iframe.contentWindow.document.body.append(importedRoot);
+
+      await options.beforeprint?.(iframe);
+
+      // browser may take some time to load font
+      await new Promise<void>(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, 1000);
+      });
+
       iframe.contentWindow.print();
-      iframe.contentWindow.onafterprint = () => {
+      iframe.contentWindow.onafterprint = async () => {
         iframe.remove();
 
         // clean up
@@ -113,6 +134,8 @@ export async function printToPdf(
         for (const [_, url] of canvasImgObjectUrlMap) {
           URL.revokeObjectURL(url);
         }
+
+        await options.afterprint?.();
 
         resolve();
       };
