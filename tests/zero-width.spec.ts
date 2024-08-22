@@ -6,6 +6,8 @@ import { assertBlockChildrenIds, assertBlockFlavour } from './utils/asserts.js';
 import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 
+const bookMarkUrl = 'http://localhost';
+
 test.beforeEach(async ({ page }) => {
   await page.route(
     'https://affine-worker.toeverything.workers.dev/api/worker/link-preview',
@@ -63,18 +65,26 @@ test(
   scoped`create a paragraph-block while clicking between two non-paragraph-block`,
   async ({ page }) => {
     await enterPlaygroundRoom(page);
-    await page.evaluate(() => {
-      const { doc } = window;
-      const rootId = doc.addBlock('affine:page', {
-        title: new doc.Text(),
-      });
-      const note = doc.addBlock('affine:note', {}, rootId);
-      doc.addBlock('affine:code', {}, note);
-      doc.addBlock('affine:divider', {}, note);
-      doc.addBlock('affine:bookmark', {}, note);
-      doc.addBlock('affine:image', {}, note);
-      doc.addBlock('affine:embed-github', {}, note);
-    });
+    await page.evaluate(
+      async ({ bookMarkUrl }) => {
+        const { doc } = window;
+        const rootId = doc.addBlock('affine:page', {
+          title: new doc.Text(),
+        });
+        const note = doc.addBlock('affine:note', {}, rootId);
+        doc.addBlock('affine:code', {}, note);
+        doc.addBlock('affine:divider', {}, note);
+        doc.addBlock('affine:bookmark', { url: bookMarkUrl }, note);
+        const imageBlob = await fetch(
+          `${location.origin}/test-card-1.png`
+        ).then(response => response.blob());
+        const storage = doc.blobSync;
+        const sourceId = await storage.set(imageBlob);
+        doc.addBlock('affine:image', { sourceId }, note);
+        doc.addBlock('affine:embed-github', {}, note);
+      },
+      { bookMarkUrl }
+    );
     const codeComponent = page.locator('affine-code');
     const codeComponentrect = await codeComponent.boundingBox();
     if (!codeComponentrect) {
@@ -113,7 +123,7 @@ test(
       if (!viewport) {
         throw new Error();
       }
-      viewport.scrollTo(0, 600);
+      viewport.scrollTo(0, 800);
     });
 
     const imageComponent = page.locator('affine-image');
