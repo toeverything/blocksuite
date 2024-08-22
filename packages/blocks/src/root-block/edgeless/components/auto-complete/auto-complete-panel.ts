@@ -2,7 +2,6 @@ import type {
   Color,
   Connection,
   NoteBlockModel,
-  ShapeStyle,
 } from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
@@ -10,9 +9,14 @@ import { FrameIcon, SmallNoteIcon } from '@blocksuite/affine-components/icons';
 import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
 import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+  DEFAULT_TEXT_COLOR,
   FontFamily,
   FontStyle,
   FontWeight,
+  ShapeStyle,
+  ShapeType,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -35,10 +39,6 @@ import {
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
 import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '../../../../surface-block/elements/shape/consts.js';
-import {
   GroupElementModel,
   clamp,
   normalizeDegAngle,
@@ -55,7 +55,6 @@ import {
   mountTextElementEditor,
 } from '../../utils/text.js';
 import '../buttons/tool-icon-button.js';
-import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 import {
   type AUTO_COMPLETE_TARGET_TYPE,
@@ -284,7 +283,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         textAlign: 'left',
         fontSize: 24,
         fontFamily: FontFamily.Inter,
-        color: GET_DEFAULT_TEXT_COLOR(),
+        color: DEFAULT_TEXT_COLOR,
         fontWeight: FontWeight.Regular,
         fontStyle: FontStyle.Normal,
       });
@@ -384,11 +383,12 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       const { shapeType, shapeStyle, radius } = currentSource;
       return {
         style: shapeStyle,
-        type: shapeType === 'rect' && radius ? 'roundedRect' : shapeType,
+        type:
+          shapeType === ShapeType.Rect && radius ? 'roundedRect' : shapeType,
       };
     }
     return {
-      style: 'General',
+      style: ShapeStyle.General,
       type: 'note',
     };
   }

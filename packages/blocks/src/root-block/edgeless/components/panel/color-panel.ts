@@ -1,11 +1,15 @@
 import { TransparentIcon } from '@blocksuite/affine-components/icons';
+import {
+  LINE_COLORS,
+  LineColor,
+  NoteBackgroundColor,
+  ShapeFillColor,
+} from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import { createZodUnion } from '../../../../_common/utils/index.js';
 
 export class ColorEvent extends Event {
   detail: string;
@@ -23,43 +27,23 @@ export class ColorEvent extends Event {
   }
 }
 
-export const LINE_COLORS = [
-  '--affine-palette-line-yellow',
-  '--affine-palette-line-orange',
-  '--affine-palette-line-red',
-  '--affine-palette-line-magenta',
-  '--affine-palette-line-purple',
-  '--affine-palette-line-blue',
-  '--affine-palette-line-teal',
-  '--affine-palette-line-green',
-  '--affine-palette-line-black',
-  '--affine-palette-line-grey',
-  '--affine-palette-line-white',
-] as const;
-
-export const LineColorsSchema = createZodUnion(LINE_COLORS);
-
 export const GET_DEFAULT_LINE_COLOR = () =>
-  ThemeObserver.mode === 'dark' ? LINE_COLORS[10] : LINE_COLORS[8];
-
-export const GET_DEFAULT_TEXT_COLOR = () => LINE_COLORS[5];
-
-export const DEFAULT_BRUSH_COLOR = LINE_COLORS[5];
-export const DEFAULT_CONNECTOR_COLOR = LINE_COLORS[9];
+  ThemeObserver.mode === 'dark' ? LineColor.White : LineColor.Black;
 
 export function isTransparent(color: string) {
   return color.toLowerCase().endsWith('transparent');
 }
 
 function isSameColorWithBackground(color: string) {
-  return [
-    '--affine-note-background-black',
-    '--affine-note-background-white',
-    '--affine-palette-line-black',
-    '--affine-palette-line-white',
-    '--affine-palette-shape-black',
-    '--affine-palette-shape-white',
-  ].includes(color.toLowerCase());
+  const colors: string[] = [
+    LineColor.Black,
+    LineColor.White,
+    NoteBackgroundColor.Black,
+    NoteBackgroundColor.White,
+    ShapeFillColor.Black,
+    ShapeFillColor.White,
+  ];
+  return colors.includes(color.toLowerCase());
 }
 
 function TransparentColor(hollowCircle = false) {

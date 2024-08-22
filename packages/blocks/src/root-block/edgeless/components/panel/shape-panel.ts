@@ -1,3 +1,4 @@
+import { ShapeStyle } from '@blocksuite/affine-model';
 import { Slot } from '@blocksuite/global/utils';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -5,7 +6,6 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { ShapeTool } from '../../controllers/tools/shape-tool.js';
 
-import { ShapeStyle } from '../../../../surface-block/index.js';
 import '../buttons/tool-icon-button.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 

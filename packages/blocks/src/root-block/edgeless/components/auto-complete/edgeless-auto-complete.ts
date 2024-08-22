@@ -13,7 +13,12 @@ import {
   MindMapSiblingIcon,
   NoteAutoCompleteIcon,
 } from '@blocksuite/affine-components/icons';
-import { ConnectorMode, shapeMethods } from '@blocksuite/affine-model';
+import {
+  ConnectorMode,
+  DEFAULT_CONNECTOR_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+  shapeMethods,
+} from '@blocksuite/affine-model';
 import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup, Vec, assertExists } from '@blocksuite/global/utils';
@@ -27,7 +32,6 @@ import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
 import { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
-import { DEFAULT_SHAPE_STROKE_COLOR } from '../../../../surface-block/elements/shape/consts.js';
 import { ShapeElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
@@ -38,7 +42,6 @@ import { ConnectorPathGenerator } from '../../../../surface-block/managers/conne
 import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
-import { DEFAULT_CONNECTOR_COLOR } from '../panel/color-panel.js';
 import './auto-complete-panel.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
 import {

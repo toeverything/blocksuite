@@ -1,31 +1,62 @@
+import { createZodUnion } from '../utils/zod.js';
+
 export const NOTE_WIDTH = 800;
 
+export enum NoteBackgroundColor {
+  Black = '--affine-note-background-black',
+  Blue = '--affine-note-background-blue',
+  Green = '--affine-note-background-green',
+  Grey = '--affine-note-background-grey',
+  Magenta = '--affine-note-background-magenta',
+  Orange = '--affine-note-background-orange',
+  Purple = '--affine-note-background-purple',
+  Red = '--affine-note-background-red',
+  Teal = '--affine-note-background-teal',
+  White = '--affine-note-background-white',
+  Yellow = '--affine-note-background-yellow',
+}
+
 export const NOTE_BACKGROUND_COLORS = [
-  '--affine-note-background-yellow',
-  '--affine-note-background-orange',
-  '--affine-note-background-red',
-  '--affine-note-background-magenta',
-  '--affine-note-background-purple',
-  '--affine-note-background-blue',
-  '--affine-note-background-teal',
-  '--affine-note-background-green',
-  '--affine-note-background-black',
-  '--affine-note-background-grey',
-  '--affine-note-background-white',
+  NoteBackgroundColor.Yellow,
+  NoteBackgroundColor.Orange,
+  NoteBackgroundColor.Red,
+  NoteBackgroundColor.Magenta,
+  NoteBackgroundColor.Purple,
+  NoteBackgroundColor.Blue,
+  NoteBackgroundColor.Teal,
+  NoteBackgroundColor.Green,
+  NoteBackgroundColor.Black,
+  NoteBackgroundColor.Grey,
+  NoteBackgroundColor.White,
 ] as const;
 
-export const DEFAULT_NOTE_BACKGROUND_COLOR = NOTE_BACKGROUND_COLORS[5];
+export const DEFAULT_NOTE_BACKGROUND_COLOR = NoteBackgroundColor.Blue;
+
+export const NoteBackgroundColorsSchema = createZodUnion(
+  NOTE_BACKGROUND_COLORS
+);
+
+export enum NoteShadow {
+  Box = '--affine-note-shadow-box',
+  Film = '--affine-note-shadow-film',
+  Float = '--affine-note-shadow-float',
+  None = '',
+  Paper = '--affine-note-shadow-paper',
+  Sticker = '--affine-note-shadow-sticker',
+}
 
 export const NOTE_SHADOWS = [
-  '',
-  '--affine-note-shadow-box',
-  '--affine-note-shadow-sticker',
-  '--affine-note-shadow-paper',
-  '--affine-note-shadow-float',
-  `--affine-note-shadow-film`,
+  NoteShadow.None,
+  NoteShadow.Box,
+  NoteShadow.Sticker,
+  NoteShadow.Paper,
+  NoteShadow.Float,
+  NoteShadow.Film,
 ] as const;
 
-export const DEFAULT_NOTE_SHADOW = NOTE_SHADOWS[2];
+export const DEFAULT_NOTE_SHADOW = NoteShadow.Sticker;
+
+export const NoteShadowsSchema = createZodUnion(NOTE_SHADOWS);
 
 export enum NoteDisplayMode {
   DocAndEdgeless = 'both',

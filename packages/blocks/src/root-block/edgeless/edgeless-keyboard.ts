@@ -1,4 +1,4 @@
-import { EdgelessTextBlockModel } from '@blocksuite/affine-model';
+import { EdgelessTextBlockModel, ShapeType } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
@@ -20,7 +20,6 @@ import {
   ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,
-  ShapeType,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import { GfxBlockModel } from './block-model.js';

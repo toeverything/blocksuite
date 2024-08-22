@@ -1,3 +1,5 @@
+import type { ShapeStyle, ShapeType } from '@blocksuite/affine-model';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { sleep } from '@blocksuite/global/utils';
@@ -10,8 +12,6 @@ import {
 } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { ShapeType } from '../../../../../surface-block/elements/shape/consts.js';
-import type { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
 import { CanvasElementType } from '../../../../../surface-block/index.js';

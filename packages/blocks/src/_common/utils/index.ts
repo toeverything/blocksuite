@@ -4,7 +4,6 @@ export * from './drag-and-drop.js';
 export * from './query.js';
 export {
   createButtonPopper,
-  createZodUnion,
   getBlockProps,
   getImageFilesFromLocal,
   isMiddleButtonPressed,

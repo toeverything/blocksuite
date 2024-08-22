@@ -4,13 +4,7 @@ import type { SurfaceBlockService } from './surface-service.js';
 export { normalizeShapeBound } from './canvas-renderer/element-renderer/index.js';
 export { fitContent } from './canvas-renderer/element-renderer/shape/utils.js';
 export { Overlay, Renderer } from './canvas-renderer/renderer.js';
-export {
-  type IModelCoord,
-  ShapeStyle,
-  ZOOM_MAX,
-  ZOOM_MIN,
-  ZOOM_STEP,
-} from './consts.js';
+export { type IModelCoord, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export {
   AffineCanvasTextFonts,
   CommunityCanvasTextFonts,
@@ -25,7 +19,6 @@ export {
   MindmapStyle,
 } from './element-model/mindmap.js';
 export * from './elements/index.js';
-export { ShapeType } from './elements/shape/consts.js';
 export {
   MindmapRootBlock,
   MindmapService,

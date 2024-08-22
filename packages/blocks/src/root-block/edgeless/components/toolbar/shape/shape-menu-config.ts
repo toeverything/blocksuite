@@ -12,10 +12,9 @@ import {
   SquareIcon,
   TriangleIcon,
 } from '@blocksuite/affine-components/icons';
+import { ShapeType } from '@blocksuite/affine-model';
 
 import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
-
-import { ShapeType } from '../../../../../surface-block/index.js';
 
 const { Rect, Ellipse, Triangle, Diamond } = ShapeType;
 

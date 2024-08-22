@@ -1,5 +1,8 @@
-import type { BrushProps, ColorScheme } from '@blocksuite/affine-model';
-
+import {
+  type BrushProps,
+  type ColorScheme,
+  LINE_COLORS,
+} from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
@@ -19,10 +22,7 @@ import {
   packColorsWithColorScheme,
 } from '../../edgeless/components/color-picker/utils.js';
 import '../../edgeless/components/panel/color-panel.js';
-import {
-  GET_DEFAULT_LINE_COLOR,
-  LINE_COLORS,
-} from '../../edgeless/components/panel/color-panel.js';
+import { GET_DEFAULT_LINE_COLOR } from '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/line-width-panel.js';
 
 function getMostCommonColor(

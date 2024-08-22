@@ -14,11 +14,6 @@ export const GRID_GAP_MAX = 50;
 // TODO: need to check the default central area ratio
 export const DEFAULT_CENTRAL_AREA_RATIO = 0.3;
 
-export enum ShapeStyle {
-  General = 'General',
-  Scribbled = 'Scribbled',
-}
-
 export interface IModelCoord {
   x: number;
   y: number;

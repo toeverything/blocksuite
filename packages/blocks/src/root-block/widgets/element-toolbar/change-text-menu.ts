@@ -17,6 +17,7 @@ import {
 import {
   ConnectorElementModel,
   EdgelessTextBlockModel,
+  LINE_COLORS,
   TextElementModel,
 } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -54,7 +55,6 @@ import '../../edgeless/components/panel/align-panel.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
-  LINE_COLORS,
 } from '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/font-family-panel.js';
 import '../../edgeless/components/panel/font-weight-and-style-panel.js';

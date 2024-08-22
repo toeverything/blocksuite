@@ -1,5 +1,7 @@
 /* CSS variables. You need to handle all places where `CSS variables` are marked. */
 
+import { LINE_COLORS, SHAPE_FILL_COLORS } from '@blocksuite/affine-model';
+
 export const ColorVariables = [
   '--affine-brand-color',
   '--affine-primary-color',
@@ -56,32 +58,8 @@ export const ColorVariables = [
   '--affine-tag-yellow',
   '--affine-tag-orange',
   '--affine-tag-gray',
-  '--affine-palette-line-yellow',
-  '--affine-palette-line-orange',
-  '--affine-palette-line-tangerine',
-  '--affine-palette-line-red',
-  '--affine-palette-line-magenta',
-  '--affine-palette-line-purple',
-  '--affine-palette-line-navy',
-  '--affine-palette-line-blue',
-  '--affine-palette-line-teal',
-  '--affine-palette-line-green',
-  '--affine-palette-line-black',
-  '--affine-palette-line-grey',
-  '--affine-palette-line-white',
-  '--affine-palette-shape-yellow',
-  '--affine-palette-shape-orange',
-  '--affine-palette-shape-tangerine',
-  '--affine-palette-shape-red',
-  '--affine-palette-shape-magenta',
-  '--affine-palette-shape-purple',
-  '--affine-palette-shape-navy',
-  '--affine-palette-shape-blue',
-  '--affine-palette-shape-teal',
-  '--affine-palette-shape-green',
-  '--affine-palette-shape-black',
-  '--affine-palette-shape-grey',
-  '--affine-palette-shape-white',
+  ...LINE_COLORS,
+  ...SHAPE_FILL_COLORS,
   '--affine-tooltip',
   '--affine-blue',
 ];

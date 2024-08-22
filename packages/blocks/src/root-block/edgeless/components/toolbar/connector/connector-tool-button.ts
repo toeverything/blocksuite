@@ -2,7 +2,10 @@ import {
   ArrowUpIcon,
   ConnectorIcon,
 } from '@blocksuite/affine-components/icons';
-import { getConnectorModeName } from '@blocksuite/affine-model';
+import {
+  DEFAULT_CONNECTOR_COLOR,
+  getConnectorModeName,
+} from '@blocksuite/affine-model';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -12,7 +15,6 @@ import type { LastProps } from '../../../../../surface-block/managers/edit-sessi
 import { LineWidth } from '../../../../../_common/utils/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import '../../buttons/toolbar-button.js';
-import { DEFAULT_CONNECTOR_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import {
   applyLastProps,

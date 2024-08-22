@@ -4,6 +4,8 @@ import {
   ConnectorMode,
   FontFamily,
   FontWeight,
+  LineColor,
+  ShapeFillColor,
   StrokeStyle,
 } from '@blocksuite/affine-model';
 import { last } from '@blocksuite/global/utils';
@@ -58,11 +60,11 @@ export abstract class MindmapStyleGetter {
 
 export class StyleOne extends MindmapStyleGetter {
   private _colorOrders = [
-    '--affine-palette-line-purple',
-    '--affine-palette-line-magenta',
-    '--affine-palette-line-orange',
-    '--affine-palette-line-yellow',
-    '--affine-palette-line-green',
+    LineColor.Purple,
+    LineColor.Magenta,
+    LineColor.Orange,
+    LineColor.Yellow,
+    LineColor.Green,
     '#7ae2d5',
   ];
 
@@ -138,9 +140,9 @@ export const styleOne = new StyleOne();
 
 export class StyleTwo extends MindmapStyleGetter {
   private _colorOrders = [
-    '--affine-palette-shape-blue',
+    ShapeFillColor.Blue,
     '#7ae2d5',
-    '--affine-palette-shape-yellow',
+    ShapeFillColor.Yellow,
   ];
 
   readonly root = {
@@ -152,10 +154,10 @@ export class StyleTwo extends MindmapStyleGetter {
     fontFamily: FontFamily.Poppins,
     fontSize: 18,
     fontWeight: FontWeight.SemiBold,
-    color: '--affine-palette-shape-black',
+    color: ShapeFillColor.Black,
 
     filled: true,
-    fillColor: '--affine-palette-shape-orange',
+    fillColor: ShapeFillColor.Orange,
 
     padding: [11, 22] as [number, number],
 
@@ -196,7 +198,7 @@ export class StyleTwo extends MindmapStyleGetter {
         fontFamily: FontFamily.Poppins,
         fontSize: 16,
         fontWeight: FontWeight.SemiBold,
-        color: '--affine-palette-shape-black',
+        color: ShapeFillColor.Black,
 
         filled: true,
         fillColor: color,
@@ -216,11 +218,7 @@ export class StyleTwo extends MindmapStyleGetter {
 export const styleTwo = new StyleTwo();
 
 export class StyleThree extends MindmapStyleGetter {
-  private _strokeColor = [
-    '--affine-palette-line-yellow',
-    '--affine-palette-line-green',
-    '--affine-palette-line-teal',
-  ];
+  private _strokeColor = [LineColor.Yellow, LineColor.Green, LineColor.Teal];
 
   readonly root = {
     radius: 10,
@@ -231,10 +229,10 @@ export class StyleThree extends MindmapStyleGetter {
     fontFamily: FontFamily.Poppins,
     fontSize: 16,
     fontWeight: FontWeight.Medium,
-    color: '--affine-palette-shape-black',
+    color: ShapeFillColor.Black,
 
     filled: true,
-    fillColor: '--affine-palette-shape-yellow',
+    fillColor: ShapeFillColor.Yellow,
 
     padding: [10, 22] as [number, number],
 
@@ -266,10 +264,10 @@ export class StyleThree extends MindmapStyleGetter {
         fontFamily: FontFamily.Poppins,
         fontSize: 16,
         fontWeight: FontWeight.Medium,
-        color: '--affine-palette-shape-black',
+        color: ShapeFillColor.Black,
 
         filled: true,
-        fillColor: '--affine-palette-shape-white',
+        fillColor: ShapeFillColor.White,
 
         padding: [6, 22] as [number, number],
 
@@ -294,12 +292,12 @@ export const styleThree = new StyleThree();
 
 export class StyleFour extends MindmapStyleGetter {
   private _colors = [
-    '--affine-palette-shape-purple',
-    '--affine-palette-shape-magenta',
-    '--affine-palette-shape-orange',
-    '--affine-palette-shape-yellow',
-    '--affine-palette-shape-green',
-    '--affine-palette-shape-blue',
+    ShapeFillColor.Purple,
+    ShapeFillColor.Magenta,
+    ShapeFillColor.Orange,
+    ShapeFillColor.Yellow,
+    ShapeFillColor.Green,
+    ShapeFillColor.Blue,
   ];
 
   readonly root = {

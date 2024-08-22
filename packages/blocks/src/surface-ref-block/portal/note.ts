@@ -4,6 +4,7 @@ import type { Query } from '@blocksuite/store';
 import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   NoteDisplayMode,
+  NoteShadow,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
@@ -91,7 +92,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px none var(--affine-black-10)`,
       backgroundColor,
-      boxShadow: 'var(--affine-note-shadow-sticker)',
+      boxShadow: `var(${NoteShadow.Sticker})`,
       position: 'absolute',
       borderRadius: '0px',
       boxSizing: 'border-box',

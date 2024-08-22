@@ -24,7 +24,7 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
-import { StrokeStyle } from '@blocksuite/affine-model';
+import { LINE_COLORS, StrokeStyle } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';
@@ -56,7 +56,6 @@ import '../../edgeless/components/panel/color-panel.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
-  LINE_COLORS,
 } from '../../edgeless/components/panel/color-panel.js';
 import {
   type LineStyleEvent,

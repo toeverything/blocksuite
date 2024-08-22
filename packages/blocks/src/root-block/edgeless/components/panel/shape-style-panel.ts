@@ -2,11 +2,10 @@ import {
   GeneralStyleIcon,
   ScribbledStyleIcon,
 } from '@blocksuite/affine-components/icons';
+import { ShapeStyle } from '@blocksuite/affine-model';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-
-import { ShapeStyle } from '../../../../surface-block/index.js';
 
 const SHAPE_STYLE_LIST = [
   {

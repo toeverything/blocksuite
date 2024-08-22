@@ -2,16 +2,16 @@ import type { ShapeElementModel, ShapeType } from '@blocksuite/affine-model';
 import type { IBound } from '@blocksuite/global/utils';
 
 import { TextAlign } from '@blocksuite/affine-model';
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+  DEFAULT_SHAPE_TEXT_COLOR,
+} from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-  DEFAULT_SHAPE_TEXT_COLOR,
-} from '../../../elements/shape/consts.js';
 import {
   deltaInsertsToChunks,
   getFontMetrics,

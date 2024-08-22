@@ -16,6 +16,3 @@ export type LinkPreviewData = {
   image: string | null;
   title: string | null;
 };
-
-export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
-export type ShapeStyle = 'General' | 'Scribbled';

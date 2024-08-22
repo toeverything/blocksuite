@@ -3,6 +3,8 @@ import type { XYWH } from '@blocksuite/global/utils';
 import {
   type Color,
   DEFAULT_NOTE_BACKGROUND_COLOR,
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
   type ShapeStyle,
   shapeMethods,
 } from '@blocksuite/affine-model';
@@ -12,10 +14,6 @@ import { DisposableGroup, Slot, noop } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '../../../surface-block/elements/shape/consts.js';
 import {
   type Options,
   Overlay,

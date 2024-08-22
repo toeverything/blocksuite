@@ -28,9 +28,14 @@ import {
 } from '@blocksuite/block-std/gfx';
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import type { ShapeStyle, ShapeType } from '../../utils/index.js';
-
-import { ShapeTextFontSize, TextResizing } from '../../consts/index.js';
+import {
+  LineColor,
+  ShapeFillColor,
+  ShapeStyle,
+  ShapeTextFontSize,
+  ShapeType,
+  TextResizing,
+} from '../../consts/index.js';
 import { shapeMethods } from './api/index.js';
 
 export type ShapeProps = BaseElementProps & {
@@ -97,7 +102,7 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
   accessor color!: Color;
 
   @field()
-  accessor fillColor: Color = '--affine-palette-shape-yellow';
+  accessor fillColor: Color = ShapeFillColor.Yellow;
 
   @field()
   accessor filled: boolean = false;
@@ -140,14 +145,14 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     color: string;
   } | null = null;
 
-  @field('General' as ShapeStyle)
-  accessor shapeStyle: ShapeStyle = 'General';
+  @field()
+  accessor shapeStyle: ShapeStyle = ShapeStyle.General;
 
   @field()
-  accessor shapeType: ShapeType = 'rect';
+  accessor shapeType: ShapeType = ShapeType.Rect;
 
   @field()
-  accessor strokeColor: Color = '--affine-palette-line-yellow';
+  accessor strokeColor: Color = LineColor.Yellow;
 
   @field()
   accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;

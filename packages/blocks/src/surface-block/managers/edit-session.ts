@@ -2,43 +2,37 @@ import type { BlockService } from '@blocksuite/block-std';
 
 import {
   ConnectorMode,
+  DEFAULT_CONNECTOR_COLOR,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_SHADOW,
   DEFAULT_REAR_END_POINT_STYLE,
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+  DEFAULT_SHAPE_TEXT_COLOR,
+  DEFAULT_TEXT_COLOR,
+  FillColorsSchema,
   FontFamily,
   FontStyle,
   FontWeight,
+  LineColorsSchema,
+  NoteBackgroundColorsSchema,
   NoteDisplayMode,
+  NoteShadowsSchema,
+  ShapeStyle,
+  ShapeTextFontSize,
+  ShapeType,
+  StrokeColorsSchema,
   StrokeStyle,
   TextAlign,
   TextVerticalAlign,
 } from '@blocksuite/affine-model';
-import {
-  NoteBackgroundColorsSchema,
-  NoteShadowsSchema,
-} from '@blocksuite/affine-shared/consts';
 import { LineWidth } from '@blocksuite/affine-shared/types';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { isPlainObject, merge } from 'merge';
 import { z } from 'zod';
 
-import {
-  DEFAULT_CONNECTOR_COLOR,
-  GET_DEFAULT_LINE_COLOR,
-  GET_DEFAULT_TEXT_COLOR,
-  LineColorsSchema,
-} from '../../root-block/edgeless/components/panel/color-panel.js';
-import { ShapeStyle } from '../consts.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-  DEFAULT_SHAPE_TEXT_COLOR,
-  FillColorsSchema,
-  SHAPE_TEXT_FONT_SIZE,
-  ShapeType,
-  StrokeColorsSchema,
-} from '../elements/shape/consts.js';
+import { GET_DEFAULT_LINE_COLOR } from '../../root-block/edgeless/components/panel/color-panel.js';
 
 const ConnectorEndpointSchema = z.enum([
   'None',
@@ -50,7 +44,7 @@ const ConnectorEndpointSchema = z.enum([
 const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
 const LineWidthSchema = z.nativeEnum(LineWidth);
 const ShapeStyleSchema = z.nativeEnum(ShapeStyle);
-const ShapeTextFontSizeSchema = z.nativeEnum(SHAPE_TEXT_FONT_SIZE);
+const ShapeTextFontSizeSchema = z.nativeEnum(ShapeTextFontSize);
 const FontFamilySchema = z.nativeEnum(FontFamily);
 const FontWeightSchema = z.nativeEnum(FontWeight);
 const FontStyleSchema = z.nativeEnum(FontStyle);
@@ -217,7 +211,7 @@ export class EditPropsStore {
       radius: 0,
     },
     text: {
-      color: GET_DEFAULT_TEXT_COLOR(),
+      color: DEFAULT_TEXT_COLOR,
       fontFamily: FontFamily.Inter,
       textAlign: TextAlign.Left,
       fontWeight: FontWeight.Regular,
@@ -225,7 +219,7 @@ export class EditPropsStore {
       fontSize: 24,
     },
     'affine:edgeless-text': {
-      color: GET_DEFAULT_TEXT_COLOR(),
+      color: DEFAULT_TEXT_COLOR,
       fontFamily: FontFamily.Inter,
       textAlign: TextAlign.Left,
       fontWeight: FontWeight.Regular,

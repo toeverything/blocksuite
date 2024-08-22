@@ -1,4 +1,4 @@
-import type { ShapeType } from '../../../utils/index.js';
+import type { ShapeType } from '../../../consts/shape.js';
 
 import { diamond } from './diamond.js';
 import { ellipse } from './ellipse.js';

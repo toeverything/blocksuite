@@ -1,4 +1,9 @@
-import { DEFAULT_ROUGHNESS, StrokeStyle } from '@blocksuite/affine-model';
+import {
+  DEFAULT_ROUGHNESS,
+  LineColor,
+  ShapeFillColor,
+  StrokeStyle,
+} from '@blocksuite/affine-model';
 
 import { LineWidth } from '../../../_common/types.js';
 
@@ -54,9 +59,9 @@ export const SurfaceColor = '#6046FE';
 export const NoteColor = '#1E96EB';
 export const BlendColor = '#7D91FF';
 
-export const SHAPE_TEXT_COLOR_PURE_WHITE = '--affine-palette-line-white';
-export const SHAPE_TEXT_COLOR_PURE_BLACK = '--affine-palette-line-black';
-export const SHAPE_FILL_COLOR_BLACK = '--affine-palette-shape-black';
+export const SHAPE_TEXT_COLOR_PURE_WHITE = LineColor.White;
+export const SHAPE_TEXT_COLOR_PURE_BLACK = LineColor.Black;
+export const SHAPE_FILL_COLOR_BLACK = ShapeFillColor.Black;
 
 export const AI_CHAT_BLOCK_MIN_WIDTH = 260;
 export const AI_CHAT_BLOCK_MIN_HEIGHT = 160;

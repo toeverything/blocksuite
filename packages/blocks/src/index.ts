@@ -82,7 +82,6 @@ export {
   MindmapSurfaceBlock,
   type PointStyle,
   ShapeElementModel,
-  ShapeStyle,
   SurfaceBlockModel,
   TextElementModel,
   fitContent,

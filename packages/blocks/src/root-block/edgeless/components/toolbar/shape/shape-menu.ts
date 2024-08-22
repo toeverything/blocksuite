@@ -1,9 +1,14 @@
-import type { Color } from '@blocksuite/affine-model';
-
 import {
   GeneralStyleIcon,
   ScribbledStyleIcon,
 } from '@blocksuite/affine-components/icons';
+import {
+  type Color,
+  DEFAULT_SHAPE_FILL_COLOR,
+  LineColor,
+  SHAPE_FILL_COLORS,
+  ShapeStyle,
+} from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -11,11 +16,6 @@ import { customElement, property } from 'lit/decorators.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { ShapeName } from './shape-tool-element.js';
 
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  FILL_COLORS,
-} from '../../../../../surface-block/elements/shape/consts.js';
-import { ShapeStyle } from '../../../../../surface-block/index.js';
 import '../../buttons/tool-icon-button.js';
 import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
 import '../../panel/one-row-color-panel.js';
@@ -32,7 +32,7 @@ export class EdgelessShapeMenu extends LitElement {
     let strokeColor = fillColor.replace(SHAPE_COLOR_PREFIX, LINE_COLOR_PREFIX);
 
     if (strokeColor.endsWith('transparent')) {
-      strokeColor = '--affine-palette-line-grey';
+      strokeColor = LineColor.Grey;
     }
 
     this.onChange({ filled, fillColor, strokeColor });
@@ -129,7 +129,7 @@ export class EdgelessShapeMenu extends LitElement {
           <menu-divider .vertical=${true}></menu-divider>
           <edgeless-one-row-color-panel
             .value=${color}
-            .options=${FILL_COLORS}
+            .options=${SHAPE_FILL_COLORS}
             .hasTransparent=${!this.edgeless.doc.awarenessStore.getFlag(
               'enable_color_picker'
             )}

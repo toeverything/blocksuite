@@ -23,7 +23,14 @@ import {
   TriangleIcon,
   ViewBarIcon,
 } from '@blocksuite/affine-components/icons';
-import { ConnectorMode } from '@blocksuite/affine-model';
+import {
+  ConnectorMode,
+  LINE_COLORS,
+  SHAPE_FILL_COLORS,
+  SHAPE_STROKE_COLORS,
+  ShapeStyle,
+  ShapeType,
+} from '@blocksuite/affine-model';
 import { isControlledKeyboardEvent } from '@blocksuite/affine-shared/utils';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -31,12 +38,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { LastProps } from '../../../surface-block/managers/edit-session.js';
 import type { PieMenuContext } from './base.js';
 
-import {
-  FILL_COLORS,
-  STROKE_COLORS,
-} from '../../../surface-block/elements/shape/consts.js';
-import { ShapeStyle, ShapeType } from '../../../surface-block/index.js';
-import { LINE_COLORS } from '../../edgeless/components/panel/color-panel.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
@@ -315,7 +316,7 @@ pie.colorPicker({
     });
     updateShapeOverlay(rootComponent);
   },
-  colors: FILL_COLORS.map(color => ({ color })),
+  colors: SHAPE_FILL_COLORS.map(color => ({ color })),
 });
 
 pie.colorPicker({
@@ -328,7 +329,7 @@ pie.colorPicker({
     });
     updateShapeOverlay(rootComponent);
   },
-  colors: STROKE_COLORS.map(color => ({ color, name: 'Color' })),
+  colors: SHAPE_STROKE_COLORS.map(color => ({ color, name: 'Color' })),
 });
 
 pie.endSubmenu();
