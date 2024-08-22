@@ -399,7 +399,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     return this.dataView.expose;
   }
 
-  override accessor useZeroWidthBlock = true;
+  override accessor useZeroWidth = true;
 }
 
 declare global {

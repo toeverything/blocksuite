@@ -1,14 +1,15 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
+import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { ZERO_WIDTH_SPACE } from '@blocksuite/inline/consts';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('affine-block-zero-width')
+@customElement('block-zero-width')
 export class BlockZeroWidth extends LitElement {
   static override styles = css`
-    .affine-block-zero-width {
+    .block-zero-width {
       position: absolute;
       bottom: -10px;
       width: 100%;
@@ -21,10 +22,11 @@ export class BlockZeroWidth extends LitElement {
     super.connectedCallback();
   }
 
-  handleClick() {
+  handleClick(e: MouseEvent) {
+    stopPropagation(e);
     if (this.block.doc.readonly) return;
     const nextBlock = this.block.model.doc.getNext(this.block.model);
-    if (nextBlock && nextBlock.flavour !== 'affine:paragraph') {
+    if (nextBlock?.flavour !== 'affine:paragraph') {
       const [paragraphId] = this.block.doc.addSiblingBlocks(this.block.model, [
         { flavour: 'affine:paragraph' },
       ]);
@@ -33,7 +35,7 @@ export class BlockZeroWidth extends LitElement {
   }
 
   override render() {
-    return html`<div class="affine-block-zero-width" @click=${this.handleClick}>
+    return html`<div class="block-zero-width" @click=${this.handleClick}>
       <span>${ZERO_WIDTH_SPACE}</span>
     </div>`;
   }
@@ -44,6 +46,6 @@ export class BlockZeroWidth extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-block-zero-width': BlockZeroWidth;
+    'block-zero-width': BlockZeroWidth;
   }
 }

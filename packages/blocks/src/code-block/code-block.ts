@@ -426,7 +426,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
 
   override accessor useCaptionEditor = true;
 
-  override accessor useZeroWidthBlock = true;
+  override accessor useZeroWidth = true;
 }
 
 declare global {
