@@ -288,21 +288,6 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
     }
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    const observer = new MutationObserver(() => this.requestUpdate());
-
-    observer.observe(this.ownerDocument.documentElement, {
-      subtree: false,
-      childList: false,
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
-
-    this._disposables.add(() => observer.disconnect());
-  }
-
   override firstUpdated() {
     this._displayModePopper = createButtonPopper(
       this._displayModeButtonGroup,
