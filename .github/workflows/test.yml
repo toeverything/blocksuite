@@ -67,7 +67,7 @@ jobs:
           main-branch-name: master
 
       - name: Start CI run
-        run: npx nx-cloud start-ci-run --distribute-on="5 linux-medium-js" --require-explicit-completion
+        run: npx nx-cloud start-ci-run --distribute-on="5 linux-medium-plus-js" --require-explicit-completion
 
       - name: Install dependencies
         run: pnpm install

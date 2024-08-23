@@ -5,6 +5,8 @@
     "packages/framework/inline",
     "packages/blocks",
     "packages/presets",
+    "packages/affine/block-list",
+    "packages/affine/block-paragraph",
     "packages/affine/components",
     "packages/affine/model",
     "packages/affine/shared"
