@@ -1,8 +1,4 @@
-import type {
-  BlockComponent,
-  EditorHost,
-  ViewStore,
-} from '@blocksuite/block-std';
+import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -28,25 +24,6 @@ export function buildPath(model: BlockModel | null): string[] {
     current = current.doc.getParent(current);
   }
   return path;
-}
-
-export function blockComponentGetter(model: BlockModel, view: ViewStore) {
-  if (matchFlavours(model, ['affine:image', 'affine:frame'])) {
-    let current: BlockModel | null = model;
-    let id: string | null = null;
-    while (current) {
-      // Top level image render under root block not surface block
-      if (!matchFlavours(current, ['affine:surface'])) {
-        id = current.id;
-        break;
-      }
-      current = current.doc.getParent(current);
-    }
-
-    return view.getBlock(id || model.id);
-  } else {
-    return view.getBlock(model.id);
-  }
 }
 
 export function getRootByEditorHost(
