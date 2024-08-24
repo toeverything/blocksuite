@@ -27,26 +27,19 @@ import {
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
+  CONNECTOR_LABEL_MAX_WIDTH,
   type Color,
+  ConnectorLabelOffsetAnchor,
+  ConnectorMode,
   DEFAULT_ROUGHNESS,
   FontFamily,
   FontStyle,
   FontWeight,
+  type PointStyle,
   StrokeStyle,
   TextAlign,
   type TextStyleProps,
 } from '../../consts/index.js';
-
-export enum ConnectorEndpoint {
-  Front = 'Front',
-  Rear = 'Rear',
-}
-
-export type PointStyle = 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond';
-
-export const DEFAULT_FRONT_END_POINT_STYLE = 'None' as const;
-export const DEFAULT_REAR_END_POINT_STYLE = 'Arrow' as const;
-export const CONNECTOR_LABEL_MAX_WIDTH = 280;
 
 export type SerializedConnection = {
   id?: string;
@@ -60,11 +53,6 @@ export type Connection = {
   position?: [number, number];
 };
 
-export enum ConnectorMode {
-  Straight,
-  Orthogonal,
-  Curve,
-}
 export const getConnectorModeName = (mode: ConnectorMode) => {
   return {
     [ConnectorMode.Straight]: 'Straight',
@@ -72,12 +60,6 @@ export const getConnectorModeName = (mode: ConnectorMode) => {
     [ConnectorMode.Curve]: 'Curve',
   }[mode];
 };
-
-export enum ConnectorLabelOffsetAnchor {
-  Bottom = 'bottom',
-  Center = 'center',
-  Top = 'top',
-}
 
 export type ConnectorLabelOffsetProps = {
   // [0, 1], `0.5` by default

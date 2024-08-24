@@ -1,11 +1,10 @@
 import {
   DEFAULT_ROUGHNESS,
   LineColor,
+  LineWidth,
   ShapeFillColor,
   StrokeStyle,
 } from '@blocksuite/affine-model';
-
-import { LineWidth } from '../../../_common/types.js';
 
 export const BOOKMARK_MIN_WIDTH = 450;
 
