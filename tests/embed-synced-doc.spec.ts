@@ -127,7 +127,9 @@ test.describe('Embed synced doc', () => {
     await page.mouse.up();
 
     // Check the height of the embed synced doc portal, it should be the same as the embed synced doc in note
-    const EmbedSyncedDocBlock = page.locator('affine-embed-synced-doc-block');
+    const EmbedSyncedDocBlock = page.locator(
+      'affine-embed-edgeless-synced-doc-block'
+    );
     const EmbedSyncedDocBlockBox = await EmbedSyncedDocBlock.boundingBox();
     const border = 1;
     assertExists(EmbedSyncedDocBlockBox);

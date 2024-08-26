@@ -1,10 +1,9 @@
 import type { EmbedHtmlModel, EmbedHtmlStyles } from '@blocksuite/affine-model';
 
-import { Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedHtmlBlockService } from './embed-html-service.js';
 
@@ -20,9 +19,9 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
 > {
   override _cardStyle: (typeof EmbedHtmlStyles)[number] = 'html';
 
-  private _isDragging = false;
+  protected _isDragging = false;
 
-  private _isResizing = false;
+  protected _isResizing = false;
 
   static override styles = styles;
 
@@ -30,17 +29,17 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
     document.exitFullscreen().catch(console.error);
   };
 
+  protected embedHtmlStyle: StyleInfo = {};
+
   open = () => {
     this.iframeWrapper?.requestFullscreen().catch(console.error);
   };
 
   refreshData = () => {};
 
-  private _handleClick(event: MouseEvent) {
+  protected _handleClick(event: MouseEvent) {
     event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
+    this._selectBlock();
   }
 
   private _handleDoubleClick(event: MouseEvent) {
@@ -81,35 +80,18 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
       this._showOverlay =
         this._isResizing || this._isDragging || !this._isSelected;
     });
-
-    if (this.isInSurface) {
-      this.disposables.add(
-        this.model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-
-      this.rootService?.slots.elementResizeStart.on(() => {
-        this._isResizing = true;
-        this._showOverlay = true;
-      });
-
-      this.rootService?.slots.elementResizeEnd.on(() => {
-        this._isResizing = false;
-        this._showOverlay =
-          this._isResizing || this._isDragging || !this._isSelected;
-      });
-    }
   }
 
   override renderBlock(): unknown {
-    const { style, xywh } = this.model;
+    const { style } = this.model;
 
     this._cardStyle = style;
-
-    const bound = Bound.deserialize(xywh);
-    this._width = this.isInSurface ? bound.w : EMBED_CARD_WIDTH[style];
-    this._height = this.isInSurface ? bound.h : EMBED_CARD_HEIGHT[style];
+    this._width = EMBED_CARD_WIDTH[style];
+    this._height = EMBED_CARD_HEIGHT[style];
+    this.embedHtmlStyle = {
+      width: '100%',
+      height: `${this._height}px`,
+    };
 
     const titleText = 'Basic HTML Page Structure';
 
@@ -132,10 +114,7 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
             'affine-embed-html-block': true,
             selected: this._isSelected,
           })}
-          style=${styleMap({
-            width: this.isInSurface ? `${this._width}px` : '100%',
-            height: `${this._height}px`,
-          })}
+          style=${styleMap(this.embedHtmlStyle)}
           @click=${this._handleClick}
           @dblclick=${this._handleDoubleClick}
         >
@@ -173,10 +152,10 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
   }
 
   @state()
-  private accessor _isSelected = false;
+  protected accessor _isSelected = false;
 
   @state()
-  private accessor _showOverlay = true;
+  protected accessor _showOverlay = true;
 
   @query('.embed-html-block-iframe-wrapper')
   accessor iframeWrapper!: HTMLDivElement;
