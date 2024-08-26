@@ -7,6 +7,7 @@ import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 
 const bookMarkUrl = 'http://localhost';
+const embedUrl = 'https://github.com/toeverything/blocksuite/pull/7217';
 
 test.beforeEach(async ({ page }) => {
   await page.route(
@@ -66,7 +67,7 @@ test(
   async ({ page }) => {
     await enterPlaygroundRoom(page);
     await page.evaluate(
-      async ({ bookMarkUrl }) => {
+      async ({ bookMarkUrl, embedUrl }) => {
         const { doc } = window;
         const rootId = doc.addBlock('affine:page', {
           title: new doc.Text(),
@@ -75,15 +76,18 @@ test(
         doc.addBlock('affine:code', {}, note);
         doc.addBlock('affine:divider', {}, note);
         doc.addBlock('affine:bookmark', { url: bookMarkUrl }, note);
+        await new Promise(res => setTimeout(res, 200));
+        const pageRoot = document.querySelector('affine-page-root');
+        if (!pageRoot) throw new Error('Cannot find doc page');
         const imageBlob = await fetch(
           `${location.origin}/test-card-1.png`
         ).then(response => response.blob());
         const storage = doc.blobSync;
         const sourceId = await storage.set(imageBlob);
         doc.addBlock('affine:image', { sourceId }, note);
-        doc.addBlock('affine:embed-github', {}, note);
+        doc.addBlock('affine:embed-github', { url: embedUrl }, note);
       },
-      { bookMarkUrl }
+      { bookMarkUrl, embedUrl }
     );
     const codeComponent = page.locator('affine-code');
     const codeComponentrect = await codeComponent.boundingBox();
