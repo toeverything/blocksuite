@@ -179,7 +179,9 @@ test.describe('pasting URLs', () => {
       'text/plain': 'https://github.com/toeverything/blocksuite/pull/7217',
     });
 
-    await expect(page.locator('affine-embed-github-block')).toBeVisible();
+    await expect(
+      page.locator('affine-embed-edgeless-github-block')
+    ).toBeVisible();
   });
 
   test('pasting internal link', async ({ page }) => {
@@ -202,7 +204,9 @@ test.describe('pasting URLs', () => {
       'text/plain': 'http://workspace/doc-id',
     });
 
-    await expect(page.locator('affine-embed-linked-doc-block')).toBeVisible();
+    await expect(
+      page.locator('affine-embed-edgeless-linked-doc-block')
+    ).toBeVisible();
 
     await expect(
       page.locator('.affine-embed-linked-doc-content-title')

@@ -2,6 +2,7 @@ import {
   type BrushProps,
   type ColorScheme,
   LINE_COLORS,
+  LineWidth,
 } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
@@ -16,7 +17,6 @@ import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js'
 import type { LineWidthEvent } from '../../edgeless/components/panel/line-width-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import { LineWidth } from '../../../_common/types.js';
 import {
   packColor,
   packColorsWithColorScheme,

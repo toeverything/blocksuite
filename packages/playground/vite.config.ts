@@ -94,7 +94,7 @@ const chunkGroups = {
   datefns: [path.dirname(require.resolve('date-fns'))],
   dompurify: [path.dirname(require.resolve('dompurify'))],
   shiki: [path.dirname(require.resolve('@shikijs/core'))],
-  dotLottie: [path.dirname(require.resolve('@dotlottie/player-component'))],
+  dotLottie: [path.dirname(require.resolve('@lottiefiles/dotlottie-wc'))],
   unified: [
     path.dirname(require.resolve('unified')),
     path.dirname(require.resolve('rehype-parse')),

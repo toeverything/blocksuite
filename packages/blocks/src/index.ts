@@ -80,7 +80,6 @@ export {
   MindmapService,
   MindmapStyle,
   MindmapSurfaceBlock,
-  type PointStyle,
   ShapeElementModel,
   SurfaceBlockModel,
   TextElementModel,

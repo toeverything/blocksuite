@@ -105,7 +105,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   };
 
   convertToEmbed = () => {
-    const { id, doc, pageId, caption, xywh } = this.model;
+    const { doc, pageId, caption } = this.model;
 
     // synced doc entry controlled by awareness flag
     const isSyncedDocEnabled = doc.awarenessStore.getFlag(
@@ -115,47 +115,13 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
       return;
     }
 
-    if (this.isInSurface) {
-      const style = 'syncedDoc';
-      const bound = Bound.deserialize(xywh);
-      bound.w = EMBED_CARD_WIDTH[style];
-      bound.h = EMBED_CARD_HEIGHT[style];
+    const parent = doc.getParent(this.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(this.model);
 
-      const edgelessService = this.rootService;
+    doc.addBlock('affine:embed-synced-doc', { pageId, caption }, parent, index);
 
-      if (!edgelessService) {
-        return;
-      }
-
-      const newId = edgelessService.addBlock(
-        'affine:embed-synced-doc',
-        { pageId, xywh: bound.serialize(), caption },
-        edgelessService.surface
-      );
-
-      this.std.command.exec('reassociateConnectors', {
-        oldId: id,
-        newId,
-      });
-
-      edgelessService.selection.set({
-        editing: false,
-        elements: [newId],
-      });
-    } else {
-      const parent = doc.getParent(this.model);
-      assertExists(parent);
-      const index = parent.children.indexOf(this.model);
-
-      doc.addBlock(
-        'affine:embed-synced-doc',
-        { pageId, caption },
-        parent,
-        index
-      );
-
-      this.std.selection.setGroup('note', []);
-    }
+    this.std.selection.setGroup('note', []);
     doc.deleteBlock(this.model);
   };
 
@@ -203,13 +169,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     });
   };
 
-  private _handleClick(event: MouseEvent) {
+  protected _handleClick(event: MouseEvent) {
     if (this.config.handleClick) {
       this.config.handleClick(event, this.host);
       return;
     }
 
-    if (this.isInSurface) return;
     this._selectBlock();
   }
 
@@ -300,14 +265,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
         });
       }
     });
-
-    if (this.isInSurface) {
-      this.disposables.add(
-        this.model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-    }
   }
 
   override disconnectedCallback() {

@@ -1,15 +1,23 @@
 import type { GfxCompatibleProps } from '@blocksuite/affine-model';
-import type { BlockService } from '@blocksuite/block-std';
+import type { GfxBlockComponent } from '@blocksuite/block-std';
+import type { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  type BlockService,
+  GfxElementSymbol,
+  blockComponentSymbol,
+  isGfxBlockComponent,
+  toGfxBlockComponent,
+} from '@blocksuite/block-std';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
@@ -49,14 +57,14 @@ export class EmbedBlockComponent<
       )
         return false;
 
-      const blockComponent = anchorComponent as this;
+      const blockComponent = anchorComponent as EmbedBlockComponent;
       const element = captureEventTarget(state.raw.target);
 
       const isDraggingByDragHandle = !!element?.closest(
         AFFINE_DRAG_HANDLE_WIDGET
       );
       const isDraggingByComponent = blockComponent.contains(element);
-      const isInSurface = blockComponent.isInSurface;
+      const isInSurface = isGfxBlockComponent(blockComponent);
 
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.selection.setGroup('note', [
@@ -94,8 +102,8 @@ export class EmbedBlockComponent<
       )
         return false;
 
-      const blockComponent = draggingElements[0] as this;
-      const isInSurface = blockComponent.isInSurface;
+      const blockComponent = draggingElements[0] as EmbedBlockComponent;
+      const isInSurface = isGfxBlockComponent(blockComponent);
       const target = captureEventTarget(state.raw.target);
       const isTargetEdgelessContainer =
         target?.classList.contains('edgeless-container');
@@ -129,66 +137,38 @@ export class EmbedBlockComponent<
 
   protected _height = EMBED_CARD_HEIGHT.horizontal;
 
-  private _isInSurface = false;
-
   protected _width = EMBED_CARD_WIDTH.horizontal;
 
   static override styles = styles;
 
-  renderEmbed = (children: () => TemplateResult) => {
+  protected embedContainerStyle: StyleInfo = {
+    position: 'relative',
+    width: '100%',
+  };
+
+  renderEmbed = (content: () => TemplateResult) => {
     const theme = ThemeObserver.mode;
     const isSelected = !!this.selected?.is('block');
 
-    if (!this.isInSurface) {
-      if (
-        this._cardStyle === 'horizontal' ||
-        this._cardStyle === 'horizontalThin' ||
-        this._cardStyle === 'list'
-      ) {
-        this.style.display = 'block';
-        this.style.minWidth = `${BOOKMARK_MIN_WIDTH}px`;
-      }
-
-      return html`
-        <div
-          class=${classMap({
-            'embed-block-container': true,
-            [theme]: true,
-            selected: isSelected,
-          })}
-          style=${styleMap({
-            position: 'relative',
-            width: '100%',
-          })}
-        >
-          ${children()}
-        </div>
-      `;
+    if (
+      this._cardStyle === 'horizontal' ||
+      this._cardStyle === 'horizontalThin' ||
+      this._cardStyle === 'list'
+    ) {
+      this.style.display = 'block';
+      this.style.minWidth = `${BOOKMARK_MIN_WIDTH}px`;
     }
-
-    const width = this._width;
-    const height = this._height;
-    const bound = Bound.deserialize(this.model.xywh);
-    const scaleX = bound.w / width;
-    const scaleY = bound.h / height;
-
-    this.style.left = `${bound.x}px`;
-    this.style.top = `${bound.y}px`;
-    this.style.width = `${width}px`;
-    this.style.height = `${height}px`;
-    this.style.zIndex = `${this.toZIndex()}`;
 
     return html`
       <div
-        class="embed-block-container"
-        style=${styleMap({
-          width: `100%`,
-          height: `100%`,
-          transform: `scale(${scaleX}, ${scaleY})`,
-          transformOrigin: '0 0',
+        class=${classMap({
+          'embed-block-container': true,
+          [theme]: true,
+          selected: isSelected,
         })}
+        style=${styleMap(this.embedContainerStyle)}
       >
-        ${children()}
+        ${content()}
       </div>
     `;
   };
@@ -200,21 +180,9 @@ export class EmbedBlockComponent<
       this._fetchAbortController = new AbortController();
 
     this.contentEditable = 'false';
-
-    const parent = this.host.doc.getParent(this.model);
-    this._isInSurface = parent?.flavour === 'affine:surface';
-
-    this.blockContainerStyles = this.isInSurface
-      ? undefined
-      : { margin: '18px 0' };
-
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
-
-    if (this.isInSurface) {
-      this.style.position = 'absolute';
-    }
   }
 
   override disconnectedCallback(): void {
@@ -222,38 +190,13 @@ export class EmbedBlockComponent<
     this._fetchAbortController.abort();
   }
 
-  toZIndex() {
-    // @ts-ignore
-    return this.rootService?.layer.getZIndex(this.model) ?? 1;
-  }
-
-  updateZIndex() {
-    this.style.zIndex = `${this.toZIndex()}`;
-  }
-
-  get bound(): Bound {
-    return Bound.deserialize(this.model.xywh);
-  }
-
   get fetchAbortController() {
     return this._fetchAbortController;
   }
 
-  get isInSurface() {
-    return this._isInSurface;
-  }
-
-  get rootService() {
-    const service = this.host.spec.getService(
-      'affine:page'
-    ) as EdgelessRootService;
-
-    if (!service?.surface) {
-      return null;
-    }
-
-    return service;
-  }
+  protected override accessor blockContainerStyles: StyleInfo | undefined = {
+    margin: '18px 0',
+  };
 
   @query('.embed-block-container')
   protected accessor embedBlock!: HTMLDivElement;
@@ -263,4 +206,92 @@ export class EmbedBlockComponent<
   override accessor useCaptionEditor = true;
 
   override accessor useZeroWidth = true;
+}
+
+// @ts-ignore
+export function toEdgelessEmbedBlock<
+  Model extends GfxBlockElementModel<GfxCompatibleProps>,
+  Service extends BlockService,
+  WidgetName extends string,
+  B extends typeof EmbedBlockComponent<Model, Service, WidgetName>,
+>(block: B) {
+  // @ts-ignore
+  return class extends toGfxBlockComponent(block) {
+    _isDragging = false;
+
+    _isResizing = false;
+
+    _isSelected = false;
+
+    _showOverlay = false;
+
+    [GfxElementSymbol] = true;
+
+    [blockComponentSymbol] = true;
+
+    protected override embedContainerStyle: StyleInfo = {
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+      transformOrigin: '0 0',
+    };
+
+    override rootServiceFlavour: string = 'affine:page';
+
+    _handleClick(_: MouseEvent): void {
+      return;
+    }
+
+    override connectedCallback(): void {
+      super.connectedCallback();
+      const rootService = this.rootService;
+
+      this._disposables.add(
+        rootService.slots.elementResizeStart.on(() => {
+          this._isResizing = true;
+          this._showOverlay = true;
+        })
+      );
+
+      this._disposables.add(
+        rootService.slots.elementResizeEnd.on(() => {
+          this._isResizing = false;
+          this._showOverlay =
+            this._isResizing || this._isDragging || !this._isSelected;
+        })
+      );
+    }
+
+    override renderGfxBlock() {
+      const width = this._width;
+      const height = this._height;
+      const bound = Bound.deserialize(this.model.xywh);
+      const scaleX = bound.w / width;
+      const scaleY = bound.h / height;
+
+      this.embedContainerStyle.transform = `scale(${scaleX}, ${scaleY})`;
+
+      return this.renderPageContent();
+    }
+
+    override toZIndex() {
+      return `${this.rootService.layer.getZIndex(this.model)}`;
+    }
+
+    get bound(): Bound {
+      return Bound.deserialize(this.model.xywh);
+    }
+
+    override get rootService() {
+      return super.rootService as EdgelessRootService;
+    }
+
+    protected override accessor blockContainerStyles: StyleInfo | undefined =
+      undefined;
+  } as B & {
+    new (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...args: any[]
+    ): GfxBlockComponent<EdgelessRootService>;
+  };
 }

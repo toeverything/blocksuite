@@ -1,9 +1,3 @@
-import type {
-  ColorScheme,
-  ConnectorElementProps,
-  ConnectorLabelProps,
-} from '@blocksuite/affine-model';
-
 import {
   AddTextIcon,
   ConnectorCWithArrowIcon,
@@ -24,7 +18,13 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
-import { LINE_COLORS, StrokeStyle } from '@blocksuite/affine-model';
+import {
+  type ColorScheme,
+  type ConnectorElementProps,
+  type ConnectorLabelProps,
+  PointStyle,
+} from '@blocksuite/affine-model';
+import { LINE_COLORS, LineWidth, StrokeStyle } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';
@@ -35,12 +35,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { PointStyle } from '../../../surface-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import { LineWidth } from '../../../_common/types.js';
 import {
   type ConnectorElementModel,
   ConnectorEndpoint,
@@ -160,46 +158,46 @@ const STYLE_CHOOSE: [boolean, () => TemplateResult<1>][] = [
 
 const FRONT_ENDPOINT_STYLE_LIST: EndpointStyle[] = [
   {
-    value: 'None',
+    value: PointStyle.None,
     icon: ConnectorEndpointNoneIcon,
   },
   {
-    value: 'Arrow',
+    value: PointStyle.Arrow,
     icon: FrontEndpointArrowIcon,
   },
   {
-    value: 'Triangle',
+    value: PointStyle.Triangle,
     icon: FrontEndpointTriangleIcon,
   },
   {
-    value: 'Circle',
+    value: PointStyle.Circle,
     icon: FrontEndpointCircleIcon,
   },
   {
-    value: 'Diamond',
+    value: PointStyle.Diamond,
     icon: FrontEndpointDiamondIcon,
   },
 ] as const;
 
 const REAR_ENDPOINT_STYLE_LIST: EndpointStyle[] = [
   {
-    value: 'Diamond',
+    value: PointStyle.Diamond,
     icon: RearEndpointDiamondIcon,
   },
   {
-    value: 'Circle',
+    value: PointStyle.Circle,
     icon: RearEndpointCircleIcon,
   },
   {
-    value: 'Triangle',
+    value: PointStyle.Triangle,
     icon: RearEndpointTriangleIcon,
   },
   {
-    value: 'Arrow',
+    value: PointStyle.Arrow,
     icon: RearEndpointArrowIcon,
   },
   {
-    value: 'None',
+    value: PointStyle.None,
     icon: ConnectorEndpointNoneIcon,
   },
 ] as const;

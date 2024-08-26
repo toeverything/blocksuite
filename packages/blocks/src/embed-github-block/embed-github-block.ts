@@ -57,11 +57,9 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
     window.open(link, '_blank');
   }
 
-  private _handleClick(event: MouseEvent) {
+  protected _handleClick(event: MouseEvent) {
     event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
+    this._selectBlock();
   }
 
   private _handleDoubleClick(event: MouseEvent) {
@@ -118,14 +116,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
           !!this.selected?.is('block') || !!this.selected?.is('surface');
       })
     );
-
-    if (this.isInSurface) {
-      this.disposables.add(
-        this.model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-    }
   }
 
   override renderBlock() {

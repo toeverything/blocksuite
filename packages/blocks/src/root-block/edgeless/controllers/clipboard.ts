@@ -14,6 +14,7 @@ import {
   isUrlInClipboard,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   Bound,
   DisposableGroup,
@@ -40,10 +41,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import {
-  blockComponentGetter,
-  getRootByEditorHost,
-} from '../../../_common/utils/query.js';
+import { getRootByEditorHost } from '../../../_common/utils/query.js';
 import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
@@ -953,17 +951,12 @@ export class EdgelessClipboardController extends PageClipboard {
       block: BlockSuite.EdgelessBlockModelType,
       isInFrame = false
     ) => {
-      let blockComponent = blockComponentGetter(
-        block,
-        this.std.view
-      )?.parentElement;
-      const blockPortalSelector = block.flavour.replace(
-        'affine:',
-        '.edgeless-block-portal-'
-      );
-      blockComponent = blockComponent?.closest(blockPortalSelector);
+      const blockComponent = this.std.view.getBlock(block.id);
       if (!blockComponent) {
-        throw new Error('Could not find edgeless block portal.');
+        throw new BlockSuiteError(
+          ErrorCode.EdgelessExportError,
+          'Could not find edgeless block component.'
+        );
       }
 
       const blockBound = Bound.deserialize(block.xywh);

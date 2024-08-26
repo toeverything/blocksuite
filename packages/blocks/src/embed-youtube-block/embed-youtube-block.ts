@@ -24,9 +24,9 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
 > {
   override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
 
-  private _isDragging = false;
+  protected _isDragging = false;
 
-  private _isResizing = false;
+  protected _isResizing = false;
 
   static override styles = styles;
 
@@ -44,11 +44,9 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
     );
   };
 
-  private _handleClick(event: MouseEvent) {
+  protected _handleClick(event: MouseEvent) {
     event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
+    this._selectBlock();
   }
 
   private _handleDoubleClick(event: MouseEvent) {
@@ -121,25 +119,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
     matchMedia('print').addEventListener('change', () => {
       this._showImage = matchMedia('print').matches;
     });
-
-    if (this.isInSurface) {
-      this.disposables.add(
-        this.model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-
-      this.rootService?.slots.elementResizeStart.on(() => {
-        this._isResizing = true;
-        this._showOverlay = true;
-      });
-
-      this.rootService?.slots.elementResizeEnd.on(() => {
-        this._isResizing = false;
-        this._showOverlay =
-          this._isResizing || this._isDragging || !this._isSelected;
-      });
-    }
   }
 
   override renderBlock() {
@@ -259,13 +238,13 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
   }
 
   @state()
-  private accessor _isSelected = false;
+  protected accessor _isSelected = false;
 
   @state()
   private accessor _showImage = false;
 
   @state()
-  private accessor _showOverlay = true;
+  protected accessor _showOverlay = true;
 
   @property({ attribute: false })
   accessor loading = false;

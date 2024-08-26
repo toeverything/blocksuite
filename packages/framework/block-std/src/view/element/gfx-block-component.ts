@@ -8,6 +8,12 @@ import type { BlockService } from '../../service/index.js';
 
 import { BlockComponent } from './block-component.js';
 
+export function isGfxBlockComponent(
+  element: unknown
+): element is GfxBlockComponent {
+  return (element as GfxBlockComponent)?.[GfxElementSymbol] === true;
+}
+
 export const GfxElementSymbol = Symbol('GfxElement');
 
 export abstract class GfxBlockComponent<

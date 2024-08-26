@@ -483,9 +483,30 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       'keyDown',
       ctx => {
         const event = ctx.get('keyboardState').raw;
+        const service = this.rootComponent.service;
+        const selection = service.selection;
         if (event.code === 'Space' && !event.repeat) {
           this._space(event);
+        } else if (!selection.editing && event.key.length === 1) {
+          const elements = selection.selectedElements;
+          const doc = this.rootComponent.doc;
+
+          if (isSelectSingleMindMap(elements)) {
+            const target = service.getElementById(
+              elements[0].id
+            ) as ShapeElementModel;
+            if (target.text) {
+              doc.transact(() => {
+                target.text!.delete(0, target.text!.length);
+                target.text!.insert(0, event.key);
+              });
+            }
+            mountShapeTextEditor(target, this.rootComponent);
+            return true;
+          }
         }
+
+        return false;
       },
       { global: true }
     );
@@ -509,15 +530,28 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    deleteElements(
-      edgeless.surface,
-      edgeless.service.selection.selectedElements
-    );
+    const selectedElements = edgeless.service.selection.selectedElements;
 
-    edgeless.service.selection.clear();
-    edgeless.service.selection.set(
-      edgeless.service.selection.surfaceSelections
-    );
+    if (isSelectSingleMindMap(selectedElements)) {
+      const node = selectedElements[0];
+      const mindmap = node.group as MindmapElementModel;
+      const focusNode =
+        mindmap.getSiblingNode(node.id, 'prev') ??
+        mindmap.getSiblingNode(node.id, 'next') ??
+        mindmap.getParentNode(node.id);
+
+      if (focusNode) {
+        edgeless.service.selection.set({
+          elements: [focusNode.element.id],
+          editing: false,
+        });
+      }
+
+      deleteElements(edgeless.surface, selectedElements);
+    } else {
+      deleteElements(edgeless.surface, selectedElements);
+      edgeless.service.selection.clear();
+    }
   }
 
   private _move(key: string, shift = false) {

@@ -1,5 +1,6 @@
 import {
   LineColor,
+  PointStyle,
   SHAPE_TEXT_PADDING,
   ShapeFillColor,
   ShapeStyle,
@@ -45,8 +46,8 @@ export const DEFAULT_CONNECTOR_PROPS: Partial<ConnectorElementModel> = {
   mode: ConnectorMode.Orthogonal,
   strokeWidth: 2,
   strokeStyle: StrokeStyle.Solid,
-  frontEndpointStyle: 'None',
-  rearEndpointStyle: 'None',
+  frontEndpointStyle: PointStyle.None,
+  rearEndpointStyle: PointStyle.None,
 };
 export type TreeNode = {
   // element id in edgeless if it already exists

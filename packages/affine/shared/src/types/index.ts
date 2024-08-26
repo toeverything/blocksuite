@@ -11,17 +11,6 @@ export interface EditingState {
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
-export enum LineWidth {
-  Eight = 8,
-  // Thin
-  Four = 4,
-  Six = 6,
-  // Thick
-  Ten = 10,
-  Twelve = 12,
-  Two = 2,
-}
-
 export enum LassoMode {
   FreeHand,
   Polygonal,

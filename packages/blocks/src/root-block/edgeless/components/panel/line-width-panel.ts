@@ -1,9 +1,8 @@
+import { LineWidth } from '@blocksuite/affine-model';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-
-import { LineWidth } from '../../../../_common/types.js';
 
 type DragConfig = {
   stepWidth: number;

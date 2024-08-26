@@ -12,6 +12,7 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
   FontFamily,
+  LineWidth,
   SHAPE_FILL_COLORS,
   SHAPE_STROKE_COLORS,
   ShapeStyle,
@@ -35,7 +36,6 @@ import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-p
 import type { ShapeTool } from '../../edgeless/controllers/tools/shape-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import { LineWidth } from '../../../_common/types.js';
 import '../../edgeless/components/color-picker/index.js';
 import {
   packColor,

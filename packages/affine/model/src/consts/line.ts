@@ -1,5 +1,16 @@
 import { createZodUnion } from '../utils/zod.js';
 
+export enum LineWidth {
+  Eight = 8,
+  // Thin
+  Four = 4,
+  Six = 6,
+  // Thick
+  Ten = 10,
+  Twelve = 12,
+  Two = 2,
+}
+
 export enum LineColor {
   Black = '--affine-palette-line-black',
   Blue = '--affine-palette-line-blue',

@@ -68,6 +68,7 @@ export class EdgelessToolsManager {
   private _mounted = false;
 
   private _onContainerClick = (e: PointerEventState) => {
+    this._updateLastMousePos(e);
     return this.currentController.onContainerClick(e);
   };
 
